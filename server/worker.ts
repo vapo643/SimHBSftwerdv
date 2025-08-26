@@ -1,7 +1,7 @@
 /**
  * BullMQ Worker Process
  * Processes asynchronous jobs from various queues
- * 
+ *
  * This runs as a separate Node.js process to avoid blocking the main API
  */
 
@@ -38,26 +38,26 @@ const pdfWorker = new Worker(
       switch (job.data.type) {
         case 'GENERATE_CARNE':
           console.log(`[WORKER:PDF] 📚 Generating carnê for proposal ${job.data.propostaId}`);
-          
+
           // Update job progress
           await job.updateProgress(10);
-          
+
           // Generate the carnê
           const pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
-          
+
           await job.updateProgress(70);
-          
+
           // Save to storage
           const signedUrl = await pdfMergeService.salvarCarneNoStorage(
             job.data.propostaId,
             pdfBuffer
           );
-          
+
           await job.updateProgress(100);
-          
+
           const pdfDuration = Date.now() - startTime;
           console.log(`[WORKER:PDF] ✅ Carnê generated successfully in ${pdfDuration}ms`);
-          
+
           return {
             success: true,
             propostaId: job.data.propostaId,
@@ -95,19 +95,21 @@ const boletoWorker = new Worker(
       switch (job.data.type) {
         case 'SYNC_BOLETOS':
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
-          
+
           await job.updateProgress(10);
-          
+
           // Sync boletos from Banco Inter to Storage
           const result = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
-          
+
           await job.updateProgress(100);
-          
+
           const syncDuration = Date.now() - startTime;
-          console.log(`[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`);
-          
+          console.log(
+            `[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`
+          );
+
           return {
             success: result.success,
             propostaId: result.propostaId,
@@ -119,26 +121,26 @@ const boletoWorker = new Worker(
           };
 
         case 'GENERATE_AND_SYNC_CARNE':
-          console.log(`[WORKER:BOLETO] 📚 Full carnê generation for proposal ${job.data.propostaId}`);
-          
+          console.log(
+            `[WORKER:BOLETO] 📚 Full carnê generation for proposal ${job.data.propostaId}`
+          );
+
           // Step 1: Sync boletos
           await job.updateProgress(10);
           const syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
-          
+
           await job.updateProgress(50);
-          
+
           // Step 2: Generate carnê from synced boletos
-          const carneResult = await boletoStorageService.gerarCarneDoStorage(
-            job.data.propostaId
-          );
-          
+          const carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
+
           await job.updateProgress(100);
-          
+
           const fullDuration = Date.now() - startTime;
           console.log(`[WORKER:BOLETO] ✅ Full carnê process completed in ${fullDuration}ms`);
-          
+
           return {
             success: carneResult.success,
             propostaId: job.data.propostaId,
@@ -152,7 +154,10 @@ const boletoWorker = new Worker(
       }
     } catch (error) {
       const boletoErrorDuration = Date.now() - startTime;
-      console.error(`[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`, error);
+      console.error(
+        `[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`,
+        error
+      );
       throw error;
     }
   },

@@ -5,18 +5,18 @@
  * contínua de vulnerabilidades em dependências.
  */
 
-import { exec } from "child_process";
-import { promisify } from "util";
-import * as fs from "fs/promises";
-import * as path from "path";
-import { EventEmitter } from "events";
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { EventEmitter } from 'events';
 
 const execAsync = promisify(exec);
 
 export interface DependencyVulnerability {
   dependency: string;
   version: string;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   cve: string;
   description: string;
   recommendation: string;
@@ -45,7 +45,7 @@ export class DependencyScanner extends EventEmitter {
    * Iniciar monitoramento contínuo de dependências
    */
   async start() {
-    console.log("🔍 [DEPENDENCY-CHECK] Iniciando scanner de dependências...");
+    console.log('🔍 [DEPENDENCY-CHECK] Iniciando scanner de dependências...');
 
     // Verificar se Dependency-Check está instalado
     const isInstalled = await this.checkInstallation();
@@ -73,7 +73,7 @@ export class DependencyScanner extends EventEmitter {
    */
   private async checkInstallation(): Promise<boolean> {
     try {
-      await execAsync("dependency-check --version");
+      await execAsync('dependency-check --version');
       return true;
     } catch {
       return false;
@@ -84,7 +84,7 @@ export class DependencyScanner extends EventEmitter {
    * Instalar OWASP Dependency-Check
    */
   private async installDependencyCheck() {
-    console.log("📦 [DEPENDENCY-CHECK] Instalando OWASP Dependency-Check...");
+    console.log('📦 [DEPENDENCY-CHECK] Instalando OWASP Dependency-Check...');
 
     try {
       // Download e instalação via script
@@ -98,14 +98,14 @@ export class DependencyScanner extends EventEmitter {
         ln -sf $(pwd)/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
       `;
 
-      await fs.writeFile("install-dependency-check.sh", installScript);
-      await execAsync("chmod +x install-dependency-check.sh && ./install-dependency-check.sh");
-      await fs.unlink("install-dependency-check.sh");
+      await fs.writeFile('install-dependency-check.sh', installScript);
+      await execAsync('chmod +x install-dependency-check.sh && ./install-dependency-check.sh');
+      await fs.unlink('install-dependency-check.sh');
 
-      console.log("✅ [DEPENDENCY-CHECK] Instalação concluída");
+      console.log('✅ [DEPENDENCY-CHECK] Instalação concluída');
     } catch (error) {
-      console.error("❌ [DEPENDENCY-CHECK] Erro na instalação:", error);
-      this.emit("error", { type: "installation", error });
+      console.error('❌ [DEPENDENCY-CHECK] Erro na instalação:', error);
+      this.emit('error', { type: 'installation', error });
     }
   }
 
@@ -114,16 +114,16 @@ export class DependencyScanner extends EventEmitter {
    */
   async runScan(): Promise<DependencyScanResult | null> {
     if (this.isScanning) {
-      console.log("⏳ [DEPENDENCY-CHECK] Scan já em andamento...");
+      console.log('⏳ [DEPENDENCY-CHECK] Scan já em andamento...');
       return null;
     }
 
     this.isScanning = true;
-    console.log("🔍 [DEPENDENCY-CHECK] Iniciando scan de dependências...");
+    console.log('🔍 [DEPENDENCY-CHECK] Iniciando scan de dependências...');
 
     try {
       const timestamp = new Date();
-      const reportDir = path.join(process.cwd(), "security-reports");
+      const reportDir = path.join(process.cwd(), 'security-reports');
       await fs.mkdir(reportDir, { recursive: true });
 
       // Executar Dependency-Check
@@ -142,8 +142,8 @@ export class DependencyScanner extends EventEmitter {
 
       // Processar resultados
       const jsonReport = await fs.readFile(
-        path.join(reportDir, "dependency-check-report.json"),
-        "utf-8"
+        path.join(reportDir, 'dependency-check-report.json'),
+        'utf-8'
       );
 
       const report = JSON.parse(jsonReport);
@@ -154,19 +154,19 @@ export class DependencyScanner extends EventEmitter {
         totalDependencies: report.dependencies?.length || 0,
         vulnerableDependencies: vulnerabilities.length,
         vulnerabilities,
-        reportPath: path.join(reportDir, "dependency-check-report.html"),
+        reportPath: path.join(reportDir, 'dependency-check-report.html'),
       };
 
       this.lastScanResult = result;
 
       // Emitir eventos
       if (vulnerabilities.length > 0) {
-        this.emit("vulnerabilities-found", result);
+        this.emit('vulnerabilities-found', result);
 
         // Alertar sobre vulnerabilidades críticas
-        const critical = vulnerabilities.filter(v => v.severity === "CRITICAL");
+        const critical = vulnerabilities.filter((v) => v.severity === 'CRITICAL');
         if (critical.length > 0) {
-          this.emit("critical-vulnerabilities", critical);
+          this.emit('critical-vulnerabilities', critical);
         }
       }
 
@@ -176,8 +176,8 @@ export class DependencyScanner extends EventEmitter {
 
       return result;
     } catch (error) {
-      console.error("❌ [DEPENDENCY-CHECK] Erro no scan:", error);
-      this.emit("error", { type: "scan", error });
+      console.error('❌ [DEPENDENCY-CHECK] Erro no scan:', error);
+      this.emit('error', { type: 'scan', error });
       return null;
     } finally {
       this.isScanning = false;
@@ -197,7 +197,7 @@ export class DependencyScanner extends EventEmitter {
         dep.vulnerabilities.forEach((vuln: any) => {
           vulnerabilities.push({
             dependency: dep.fileName || dep.description,
-            version: dep.version || "unknown",
+            version: dep.version || 'unknown',
             severity: this.mapSeverity(vuln.severity),
             cve: vuln.name,
             description: vuln.description,
@@ -219,22 +219,22 @@ export class DependencyScanner extends EventEmitter {
   /**
    * Mapear severidade
    */
-  private mapSeverity(severity: string): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
+  private mapSeverity(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     const normalized = severity.toUpperCase();
-    if (["CRITICAL", "HIGH", "MEDIUM", "LOW"].includes(normalized)) {
+    if (['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(normalized)) {
       return normalized as any;
     }
 
     // Mapear por score CVSS
     const score = parseFloat(severity);
     if (!isNaN(score)) {
-      if (score >= 9.0) return "CRITICAL";
-      if (score >= 7.0) return "HIGH";
-      if (score >= 4.0) return "MEDIUM";
-      return "LOW";
+      if (score >= 9.0) return 'CRITICAL';
+      if (score >= 7.0) return 'HIGH';
+      if (score >= 4.0) return 'MEDIUM';
+      return 'LOW';
     }
 
-    return "MEDIUM"; // Default
+    return 'MEDIUM'; // Default
   }
 
   /**
@@ -243,32 +243,32 @@ export class DependencyScanner extends EventEmitter {
   private generateRecommendation(vuln: any): string {
     const recommendations = [];
 
-    if (vuln.name.includes("CVE")) {
+    if (vuln.name.includes('CVE')) {
       recommendations.push(
         `Verificar detalhes em https://cve.mitre.org/cgi-bin/cvename.cgi?name=${vuln.name}`
       );
     }
 
-    if (vuln.severity === "CRITICAL" || vuln.cvssv3?.baseScore >= 9.0) {
-      recommendations.push("AÇÃO IMEDIATA NECESSÁRIA: Atualizar ou remover dependência");
-    } else if (vuln.severity === "HIGH" || vuln.cvssv3?.baseScore >= 7.0) {
-      recommendations.push("Atualizar dependência o mais rápido possível");
+    if (vuln.severity === 'CRITICAL' || vuln.cvssv3?.baseScore >= 9.0) {
+      recommendations.push('AÇÃO IMEDIATA NECESSÁRIA: Atualizar ou remover dependência');
+    } else if (vuln.severity === 'HIGH' || vuln.cvssv3?.baseScore >= 7.0) {
+      recommendations.push('Atualizar dependência o mais rápido possível');
     } else {
-      recommendations.push("Avaliar necessidade de atualização baseado no contexto de uso");
+      recommendations.push('Avaliar necessidade de atualização baseado no contexto de uso');
     }
 
-    return recommendations.join(". ");
+    return recommendations.join('. ');
   }
 
   /**
    * Monitorar mudanças no package.json
    */
   private watchPackageChanges() {
-    const packagePath = path.join(process.cwd(), "package.json");
+    const packagePath = path.join(process.cwd(), 'package.json');
 
-    fs.watch(packagePath, async eventType => {
-      if (eventType === "change") {
-        console.log("📦 [DEPENDENCY-CHECK] package.json modificado, executando novo scan...");
+    fs.watch(packagePath, async (eventType) => {
+      if (eventType === 'change') {
+        console.log('📦 [DEPENDENCY-CHECK] package.json modificado, executando novo scan...');
         await this.runScan();
       }
     });
@@ -283,7 +283,7 @@ export class DependencyScanner extends EventEmitter {
     }
 
     return (
-      this.lastScanResult?.vulnerabilities.filter(v =>
+      this.lastScanResult?.vulnerabilities.filter((v) =>
         v.dependency.toLowerCase().includes(packageName.toLowerCase())
       ) || []
     );
@@ -306,7 +306,7 @@ export class DependencyScanner extends EventEmitter {
       LOW: 0,
     };
 
-    vulnerabilities.forEach(v => {
+    vulnerabilities.forEach((v) => {
       bySeverity[v.severity]++;
     });
 
@@ -326,17 +326,17 @@ export class DependencyScanner extends EventEmitter {
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 ${suppressions
   .map(
-    s => `
+    (s) => `
   <suppress>
     <cve>${s.cve}</cve>
     <notes>${s.reason}</notes>
   </suppress>
 `
   )
-  .join("")}
+  .join('')}
 </suppressions>`;
 
-    await fs.writeFile("dependency-check-suppression.xml", xml);
+    await fs.writeFile('dependency-check-suppression.xml', xml);
   }
 
   /**

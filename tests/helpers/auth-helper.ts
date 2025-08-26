@@ -1,17 +1,17 @@
 /**
  * Authentication Helper for Integration Tests
  * PAM V1.1 - Helper reutilizável para autenticação em testes
- * 
+ *
  * Encapsula a complexidade de login e gerenciamento de token JWT,
  * fornecendo instâncias autenticadas do supertest para testes de API.
- * 
+ *
  * @file tests/helpers/auth-helper.ts
  * @created 2025-08-20 - PAM V1.1 Testes Integração Autenticados
  */
 
-import request from "supertest";
-import type { Express } from "express";
-import { createServerSupabaseAdminClient } from "../../server/lib/supabase";
+import request from 'supertest';
+import type { Express } from 'express';
+import { createServerSupabaseAdminClient } from '../../server/lib/supabase';
 
 export interface TestUser {
   id: string;
@@ -41,11 +41,11 @@ export interface AuthenticatedTestClient {
 export async function createTestUser(overrides: Partial<TestUser> = {}): Promise<TestUser> {
   const timestamp = Date.now();
   const defaultUser: TestUser = {
-    id: "",
+    id: '',
     email: `test-user-${timestamp}@example.com`,
-    password: "TestPassword123!", 
-    name: "Integration Test User",
-    role: "ATENDENTE",
+    password: 'TestPassword123!',
+    name: 'Integration Test User',
+    role: 'ATENDENTE',
     ...overrides,
   };
 
@@ -54,7 +54,7 @@ export async function createTestUser(overrides: Partial<TestUser> = {}): Promise
   try {
     // Use Supabase Admin Client to create user in auth.users
     const supabaseAdmin = createServerSupabaseAdminClient();
-    
+
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: defaultUser.email,
       password: defaultUser.password,
@@ -84,16 +84,15 @@ export async function createTestUser(overrides: Partial<TestUser> = {}): Promise
     }
 
     console.log(`[AUTH HELPER] ✅ Test user created: ${data.user.id}`);
-    
+
     return {
       ...defaultUser,
       id: data.user.id,
     };
-    
   } catch (error) {
     console.error(`[AUTH HELPER] ❌ Failed to create test user:`, error);
     console.log(`[AUTH HELPER] 🔄 Using fallback approach for tests...`);
-    
+
     // Fallback: return user data for testing even if creation fails
     return {
       ...defaultUser,
@@ -106,19 +105,14 @@ export async function createTestUser(overrides: Partial<TestUser> = {}): Promise
  * Performs login via HTTP API and returns access token
  * Includes fallback for test environment
  */
-export async function loginTestUser(
-  app: Express, 
-  user: TestUser
-): Promise<string> {
+export async function loginTestUser(app: Express, user: TestUser): Promise<string> {
   console.log(`[AUTH HELPER] 🔐 Logging in test user: ${user.email}`);
 
   try {
-    const response = await request(app)
-      .post("/api/auth/login")
-      .send({
-        email: user.email,
-        password: user.password,
-      });
+    const response = await request(app).post('/api/auth/login').send({
+      email: user.email,
+      password: user.password,
+    });
 
     console.log(`[AUTH HELPER] 📡 Login response status: ${response.status}`);
 
@@ -129,16 +123,16 @@ export async function loginTestUser(
     }
 
     // If login fails, try to create and login the user
-    console.log(`[AUTH HELPER] ⚠️ Login failed (${response.status}), attempting to create user first...`);
-    
+    console.log(
+      `[AUTH HELPER] ⚠️ Login failed (${response.status}), attempting to create user first...`
+    );
+
     // Try to create user via signup endpoint
-    const signupResponse = await request(app)
-      .post("/api/auth/register")
-      .send({
-        email: user.email,
-        password: user.password,
-        name: user.name,
-      });
+    const signupResponse = await request(app).post('/api/auth/register').send({
+      email: user.email,
+      password: user.password,
+      name: user.name,
+    });
 
     console.log(`[AUTH HELPER] 📝 Signup response status: ${signupResponse.status}`);
 
@@ -149,8 +143,9 @@ export async function loginTestUser(
     }
 
     // If all else fails, throw error - tests must use real auth
-    throw new Error(`Authentication failed - Status: ${response.status}, Body: ${JSON.stringify(response.body)}`);
-    
+    throw new Error(
+      `Authentication failed - Status: ${response.status}, Body: ${JSON.stringify(response.body)}`
+    );
   } catch (error) {
     console.error(`[AUTH HELPER] ❌ Auth process failed:`, error);
     throw error;
@@ -169,14 +164,13 @@ export async function createAuthenticatedTestClient(
 
   // Create test user in Supabase
   const user = await createTestUser(userOverrides);
-  
+
   // Login and get access token
   const accessToken = await loginTestUser(app, user);
-  
+
   // Create helper methods for authenticated requests
   const createAuthenticatedRequest = (method: string) => (url: string) => {
-    return (request(app) as any)[method](url)
-      .set("Authorization", `Bearer ${accessToken}`);
+    return (request(app) as any)[method](url).set('Authorization', `Bearer ${accessToken}`);
   };
 
   const client: AuthenticatedTestClient = {
@@ -184,15 +178,15 @@ export async function createAuthenticatedTestClient(
     app,
     user,
     accessToken,
-    get: createAuthenticatedRequest("get"),
-    post: createAuthenticatedRequest("post"),
-    put: createAuthenticatedRequest("put"),
-    patch: createAuthenticatedRequest("patch"),
-    delete: createAuthenticatedRequest("delete"),
+    get: createAuthenticatedRequest('get'),
+    post: createAuthenticatedRequest('post'),
+    put: createAuthenticatedRequest('put'),
+    patch: createAuthenticatedRequest('patch'),
+    delete: createAuthenticatedRequest('delete'),
   };
 
   console.log(`[AUTH HELPER] ✅ Authenticated client ready for user: ${user.email}`);
-  
+
   return client;
 }
 
@@ -203,17 +197,16 @@ export async function createAuthenticatedTestClient(
 export async function deleteTestUser(userId: string): Promise<void> {
   try {
     console.log(`[AUTH HELPER] 🗑️ Cleaning up test user: ${userId}`);
-    
+
     const supabaseAdmin = createServerSupabaseAdminClient();
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    
+
     if (error) {
       console.warn(`[AUTH HELPER] ⚠️ Could not delete test user: ${error.message}`);
       // Don't throw error - cleanup is best effort
     } else {
       console.log(`[AUTH HELPER] ✅ Test user deleted: ${userId}`);
     }
-    
   } catch (error) {
     console.warn(`[AUTH HELPER] ⚠️ Error during test user cleanup:`, error);
     // Don't throw - cleanup should not fail tests
@@ -232,21 +225,20 @@ export async function authenticatedRequest(
   userOverrides: Partial<TestUser> = {}
 ): Promise<request.Response> {
   const client = await createAuthenticatedTestClient(app, userOverrides);
-  
+
   try {
     let req = client[method](url);
-    
+
     if (data && ['post', 'put', 'patch'].includes(method)) {
       req = req.send(data);
     }
-    
+
     const response = await req;
-    
+
     // Cleanup
     await deleteTestUser(client.user.id);
-    
+
     return response;
-    
   } catch (error) {
     // Cleanup even on error
     await deleteTestUser(client.user.id);

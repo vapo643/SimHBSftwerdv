@@ -4,9 +4,9 @@
  * PAM V1.0 - Clean architecture implementation
  */
 
-import { Router, Request, Response } from "express";
-import { proposalService } from "../services/proposalService.js";
-import { AuthenticatedRequest } from "../../shared/types/express";
+import { Router, Request, Response } from 'express';
+import { proposalService } from '../services/proposalService.js';
+import { AuthenticatedRequest } from '../../shared/types/express';
 
 const router = Router();
 
@@ -14,15 +14,15 @@ const router = Router();
  * POST /api/formalizacao/execute
  * Execute formalization
  */
-router.post("/execute", async (req: AuthenticatedRequest, res: Response) => {
+router.post('/execute', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const result = await proposalService.executeOperation("formalization", req.body);
+    const result = await proposalService.executeOperation('formalization', req.body);
     res.json(result);
   } catch (error: any) {
-    console.error("[FORMALIZACAO] Error:", error);
+    console.error('[FORMALIZACAO] Error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || "Formalization failed",
+      error: error.message || 'Formalization failed',
     });
   }
 });
@@ -31,14 +31,14 @@ router.post("/execute", async (req: AuthenticatedRequest, res: Response) => {
  * GET /api/formalizacao/status/:id
  * Get formalization status
  */
-router.get("/status/:id", async (req: AuthenticatedRequest, res: Response) => {
+router.get('/status/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const result = await proposalService.executeOperation("get_status", { id: req.params.id });
+    const result = await proposalService.executeOperation('get_status', { id: req.params.id });
     res.json(result);
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message || "Status check failed",
+      error: error.message || 'Status check failed',
     });
   }
 });

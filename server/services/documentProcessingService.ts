@@ -3,15 +3,15 @@
  * Usado tanto por webhooks quanto por polling
  */
 
-import { db, supabase } from "../lib/supabase";
-import { sql } from "drizzle-orm";
-import { clickSignService } from "./clickSignService";
-import { z } from "zod";
+import { db, supabase } from '../lib/supabase';
+import { sql } from 'drizzle-orm';
+import { clickSignService } from './clickSignService';
+import { z } from 'zod';
 
 export enum ProcessingSource {
-  WEBHOOK = "WEBHOOK",
-  POLLING = "POLLING_FALLBACK",
-  MANUAL = "MANUAL_TRIGGER",
+  WEBHOOK = 'WEBHOOK',
+  POLLING = 'POLLING_FALLBACK',
+  MANUAL = 'MANUAL_TRIGGER',
 }
 
 export class DocumentProcessingService {
@@ -50,7 +50,7 @@ export class DocumentProcessingService {
         console.warn(`⚠️ [DOCUMENT PROCESSING] Proposal ${proposalId} not found`);
         return {
           success: false,
-          message: "Proposta não encontrada",
+          message: 'Proposta não encontrada',
         };
       }
 
@@ -64,7 +64,7 @@ export class DocumentProcessingService {
         );
         return {
           success: false,
-          message: "ID do documento ClickSign não encontrado",
+          message: 'ID do documento ClickSign não encontrado',
         };
       }
 
@@ -73,10 +73,10 @@ export class DocumentProcessingService {
         // Verificar se o arquivo existe no Storage
         const storagePath = proposal.caminho_ccb_assinado as string;
         const { data: fileExists } = await supabase.storage
-          .from("documents")
-          .list(storagePath.substring(0, storagePath.lastIndexOf("/")), {
+          .from('documents')
+          .list(storagePath.substring(0, storagePath.lastIndexOf('/')), {
             limit: 1,
-            search: storagePath.split("/").pop(),
+            search: storagePath.split('/').pop(),
           });
 
         if (fileExists && fileExists.length > 0) {
@@ -85,18 +85,20 @@ export class DocumentProcessingService {
           );
           return {
             success: true,
-            message: "Documento já processado anteriormente",
-            details: { storagePath, source: "CACHE" },
+            message: 'Documento já processado anteriormente',
+            details: { storagePath, source: 'CACHE' },
           };
         }
       }
 
       // 3. Baixar documento do ClickSign
       console.log(`📥 [DOCUMENT PROCESSING] Downloading document ${clickSignDocId} from ClickSign`);
-      const pdfBuffer = await this.clickSignService.downloadSignedDocument(clickSignDocId as string);
+      const pdfBuffer = await this.clickSignService.downloadSignedDocument(
+        clickSignDocId as string
+      );
 
       if (!pdfBuffer) {
-        throw new Error("Failed to download document from ClickSign");
+        throw new Error('Failed to download document from ClickSign');
       }
 
       // 4. Salvar no Supabase Storage - PAM V1.0: Organizar CCBs assinadas em pasta dedicada
@@ -105,9 +107,9 @@ export class DocumentProcessingService {
 
       console.log(`💾 [DOCUMENT PROCESSING] Saving to Storage: ${storagePath}`);
       const { error: uploadError } = await supabase.storage
-        .from("documents")
+        .from('documents')
         .upload(storagePath, pdfBuffer, {
-          contentType: "application/pdf",
+          contentType: 'application/pdf',
           upsert: true,
         });
 
@@ -135,7 +137,7 @@ export class DocumentProcessingService {
           criado_em
         ) VALUES (
           ${proposalId},
-          ${"CCB_ASSINADA_PROCESSADA"},
+          ${'CCB_ASSINADA_PROCESSADA'},
           ${JSON.stringify({
             source,
             documentKey: clickSignDocId,
@@ -165,7 +167,7 @@ export class DocumentProcessingService {
 
       return {
         success: true,
-        message: "Documento processado com sucesso",
+        message: 'Documento processado com sucesso',
         details: {
           proposalId,
           storagePath,
@@ -190,10 +192,10 @@ export class DocumentProcessingService {
             criado_em
           ) VALUES (
             ${proposalId},
-            ${"ERRO_PROCESSAR_CCB"},
+            ${'ERRO_PROCESSAR_CCB'},
             ${JSON.stringify({
               source,
-              error: error instanceof Error ? error.message : "Unknown error",
+              error: error instanceof Error ? error.message : 'Unknown error',
               timestamp: new Date().toISOString(),
             })},
             ${null},
@@ -201,14 +203,14 @@ export class DocumentProcessingService {
           )
         `);
       } catch (logError) {
-        console.error("Failed to log error:", logError);
+        console.error('Failed to log error:', logError);
       }
 
       return {
         success: false,
-        message: "Erro ao processar documento",
+        message: 'Erro ao processar documento',
         details: {
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
       };
     }
@@ -226,13 +228,13 @@ export class DocumentProcessingService {
     );
 
     const results = await Promise.allSettled(
-      proposals.map(p => this.processSignedDocument(p.id, source, p.documentKey))
+      proposals.map((p) => this.processSignedDocument(p.id, source, p.documentKey))
     );
 
     return results.map((result, index) => ({
       proposalId: proposals[index].id,
-      success: result.status === "fulfilled" ? result.value.success : false,
-      message: result.status === "fulfilled" ? result.value.message : "Processing failed",
+      success: result.status === 'fulfilled' ? result.value.success : false,
+      message: result.status === 'fulfilled' ? result.value.message : 'Processing failed',
     }));
   }
 }

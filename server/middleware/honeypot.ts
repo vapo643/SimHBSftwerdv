@@ -5,9 +5,9 @@
  * These endpoints should never be accessed by legitimate users.
  */
 
-import { Request, Response, NextFunction } from "express";
-import { securityLogger, SecurityEventType, getClientIP } from "../lib/security-logger";
-import { createHash } from "crypto";
+import { Request, Response, NextFunction } from 'express';
+import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
+import { createHash } from 'crypto';
 
 // Track suspicious IPs (use Redis in production)
 const suspiciousIPs = new Map<
@@ -22,37 +22,37 @@ const suspiciousIPs = new Map<
 
 // Honeypot endpoints that should never be accessed
 const HONEYPOT_ENDPOINTS = [
-  "/api/admin/debug",
-  "/api/v1/admin",
-  "/api/test/backdoor",
-  "/api/config",
-  "/api/.env",
-  "/api/wp-admin",
-  "/api/phpmyadmin",
-  "/api/shell",
-  "/api/cmd",
-  "/api/exec",
-  "/api/system",
-  "/api/eval",
-  "/api/console",
-  "/api/terminal",
-  "/api/ssh",
-  "/api/ftp",
-  "/api/database/dump",
-  "/api/backup",
-  "/api/db.sql",
-  "/api/users/all",
-  "/api/export/users",
+  '/api/admin/debug',
+  '/api/v1/admin',
+  '/api/test/backdoor',
+  '/api/config',
+  '/api/.env',
+  '/api/wp-admin',
+  '/api/phpmyadmin',
+  '/api/shell',
+  '/api/cmd',
+  '/api/exec',
+  '/api/system',
+  '/api/eval',
+  '/api/console',
+  '/api/terminal',
+  '/api/ssh',
+  '/api/ftp',
+  '/api/database/dump',
+  '/api/backup',
+  '/api/db.sql',
+  '/api/users/all',
+  '/api/export/users',
 ];
 
 // Hidden form fields that should never be filled
 const HONEYPOT_FIELDS = [
-  "email_confirm",
-  "username_verify",
-  "hidden_field",
-  "trap_field",
-  "bot_check",
-  "security_check",
+  'email_confirm',
+  'username_verify',
+  'hidden_field',
+  'trap_field',
+  'bot_check',
+  'security_check',
 ];
 
 /**
@@ -75,7 +75,7 @@ function getSuspiciousIP(ip: string) {
  */
 export function honeypotHandler(req: Request, res: Response) {
   const ip = getClientIP(req);
-  const userAgent = req.headers["user-agent"] || "unknown";
+  const userAgent = req.headers['user-agent'] || 'unknown';
   const endpoint = req.originalUrl;
 
   // Track suspicious activity
@@ -87,7 +87,7 @@ export function honeypotHandler(req: Request, res: Response) {
   // Log security event
   securityLogger.logEvent({
     type: SecurityEventType.SUSPICIOUS_ACTIVITY,
-    severity: "HIGH",
+    severity: 'HIGH',
     ipAddress: ip,
     userAgent,
     endpoint,
@@ -104,10 +104,10 @@ export function honeypotHandler(req: Request, res: Response) {
 
   // Respond with realistic but fake error
   const fakeResponses = [
-    { status: 404, message: "Endpoint não encontrado" },
-    { status: 403, message: "Acesso negado" },
-    { status: 401, message: "Não autorizado" },
-    { status: 500, message: "Erro interno do servidor" },
+    { status: 404, message: 'Endpoint não encontrado' },
+    { status: 403, message: 'Acesso negado' },
+    { status: 401, message: 'Não autorizado' },
+    { status: 500, message: 'Erro interno do servidor' },
   ];
 
   const response = fakeResponses[Math.floor(Math.random() * fakeResponses.length)];
@@ -132,12 +132,12 @@ export function formHoneypotMiddleware(req: Request, res: Response, next: NextFu
 
   // Check for honeypot fields
   const filledHoneypotFields = HONEYPOT_FIELDS.filter(
-    field => req.body[field] && req.body[field].toString().trim().length > 0
+    (field) => req.body[field] && req.body[field].toString().trim().length > 0
   );
 
   if (filledHoneypotFields.length > 0) {
     const ip = getClientIP(req);
-    const userAgent = req.headers["user-agent"] || "unknown";
+    const userAgent = req.headers['user-agent'] || 'unknown';
 
     // Track suspicious activity
     const suspiciousRecord = getSuspiciousIP(ip);
@@ -147,14 +147,14 @@ export function formHoneypotMiddleware(req: Request, res: Response, next: NextFu
     // Log security event
     securityLogger.logEvent({
       type: SecurityEventType.AUTOMATED_ATTACK,
-      severity: "HIGH",
+      severity: 'HIGH',
       ipAddress: ip,
       userAgent,
       endpoint: req.originalUrl,
       success: false,
       details: {
         honeypotFields: filledHoneypotFields,
-        method: "form_honeypot",
+        method: 'form_honeypot',
         accessCount: suspiciousRecord.count,
       },
     });
@@ -162,7 +162,7 @@ export function formHoneypotMiddleware(req: Request, res: Response, next: NextFu
     // Respond as if successful to waste attacker's time
     return res.json({
       success: true,
-      message: "Operação realizada com sucesso",
+      message: 'Operação realizada com sucesso',
     });
   }
 
@@ -174,7 +174,7 @@ export function formHoneypotMiddleware(req: Request, res: Response, next: NextFu
  */
 export function registerHoneypots(app: any) {
   // Register all honeypot endpoints
-  HONEYPOT_ENDPOINTS.forEach(endpoint => {
+  HONEYPOT_ENDPOINTS.forEach((endpoint) => {
     app.all(endpoint, honeypotHandler);
   });
 
@@ -209,7 +209,7 @@ export function getSuspiciousIPReport() {
         firstSeen: record.firstSeen,
         lastSeen: record.lastSeen,
         endpoints: Array.from(record.endpoints),
-        riskLevel: record.count >= 10 ? "CRITICAL" : record.count >= 5 ? "HIGH" : "MEDIUM",
+        riskLevel: record.count >= 10 ? 'CRITICAL' : record.count >= 5 ? 'HIGH' : 'MEDIUM',
       });
     }
   }

@@ -1,1 +1,12 @@
-import { Router } from "express"; import { webhookService } from "../services/webhookService.js"; const router = Router(); router.post("/inter", async (req, res) => { try { const result = await webhookService.processWebhook("inter", req.body); res.json({ success: true }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { webhookService } from '../services/webhookService.js';
+const router = Router();
+router.post('/inter', async (req, res) => {
+  try {
+    const result = await webhookService.processWebhook('inter', req.body);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

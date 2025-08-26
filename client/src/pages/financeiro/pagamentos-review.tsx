@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import {
   Dialog,
   DialogContent,
@@ -9,13 +9,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import {
   AlertTriangle,
   CheckCircle,
@@ -26,9 +26,9 @@ import {
   ExternalLink,
   Key,
   Loader2,
-} from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface PaymentReviewModalProps {
   isOpen: boolean;
@@ -45,104 +45,104 @@ export default function PaymentReviewModal({
 }: PaymentReviewModalProps) {
   const { toast } = useToast();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [observacoes, setObservacoes] = useState("");
+  const [observacoes, setObservacoes] = useState('');
   const [pixKeyVisible, setPixKeyVisible] = useState(false);
-  
+
   // NOVO: Estados para o fluxo multi-etapas de pagamento
   const [veracidadeConfirmada, setVeracidadeConfirmada] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [comprovante, setComprovante] = useState<File | null>(null);
-  const [paymentObservation, setPaymentObservation] = useState("");
+  const [paymentObservation, setPaymentObservation] = useState('');
 
   // Confirmar veracidade
   const confirmarVeracidadeMutation = useMutation({
     mutationFn: async () => {
       const propostaId = proposta?.id;
-      console.log("[REVIEW MODAL] Confirmando veracidade para proposta:", propostaId);
+      console.log('[REVIEW MODAL] Confirmando veracidade para proposta:', propostaId);
       return await apiRequest(`/api/pagamentos/${propostaId}/confirmar-veracidade`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ observacoes }),
       });
     },
-    onSuccess: data => {
-      console.log("✅ [REVIEW MODAL] Veracidade confirmada com sucesso:", data);
-      
+    onSuccess: (data) => {
+      console.log('✅ [REVIEW MODAL] Veracidade confirmada com sucesso:', data);
+
       // Verificar se foi uma resposta idempotente
       if ((data as any).idempotent) {
         toast({
-          title: "Pagamento já autorizado",
-          description: "Este pagamento já foi autorizado anteriormente.",
-          className: "bg-blue-50 border-blue-200",
+          title: 'Pagamento já autorizado',
+          description: 'Este pagamento já foi autorizado anteriormente.',
+          className: 'bg-blue-50 border-blue-200',
         });
         setVeracidadeConfirmada(true);
       } else {
         toast({
-          title: "✅ Veracidade Confirmada",
-          description: "Pagamento autorizado. Agora você pode proceder com o pagamento.",
-          className: "bg-green-50 border-green-200",
+          title: '✅ Veracidade Confirmada',
+          description: 'Pagamento autorizado. Agora você pode proceder com o pagamento.',
+          className: 'bg-green-50 border-green-200',
         });
       }
-      
+
       setPixKeyVisible(true);
       setVeracidadeConfirmada(true); // NOVO: Marcar veracidade como confirmada
       setShowConfirmDialog(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
     onError: (error: any) => {
-      console.error("❌ [REVIEW MODAL] Erro ao confirmar veracidade:", error);
+      console.error('❌ [REVIEW MODAL] Erro ao confirmar veracidade:', error);
       toast({
-        title: "Erro ao confirmar veracidade",
-        description: error.message || "Não foi possível confirmar a veracidade.",
-        variant: "destructive",
+        title: 'Erro ao confirmar veracidade',
+        description: error.message || 'Não foi possível confirmar a veracidade.',
+        variant: 'destructive',
       });
     },
   });
-  
+
   // NOVO: Mutation para marcar como pago
   const marcarPagoMutation = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
-      formData.append("observacoes", paymentObservation);
-      
+      formData.append('observacoes', paymentObservation);
+
       if (comprovante) {
-        formData.append("comprovante", comprovante);
+        formData.append('comprovante', comprovante);
       }
-      
-      console.log("[MARCAR PAGO] Iniciando requisição para:", `${proposta?.id}`);
-      
+
+      console.log('[MARCAR PAGO] Iniciando requisição para:', `${proposta?.id}`);
+
       // Usar apiRequest para garantir token válido
       const response = await apiRequest(`/api/pagamentos/${proposta?.id}/marcar-pago`, {
-        method: "POST",
+        method: 'POST',
         body: formData,
-        isFormData: true
+        isFormData: true,
       });
-      
+
       return response;
     },
     onSuccess: () => {
       toast({
-        title: "✅ Pagamento Confirmado",
-        description: "A proposta foi marcada como paga com sucesso.",
-        className: "bg-green-50 border-green-200",
+        title: '✅ Pagamento Confirmado',
+        description: 'A proposta foi marcada como paga com sucesso.',
+        className: 'bg-green-50 border-green-200',
       });
-      
+
       // Resetar todos os estados
       setShowPaymentModal(false);
       setPaymentConfirmed(false);
       setComprovante(null);
-      setPaymentObservation("");
-      
+      setPaymentObservation('');
+
       // Invalidar caches e fechar modal principal
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
       onConfirm();
       onClose();
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao marcar como pago",
-        description: error.message || "Não foi possível marcar a proposta como paga.",
-        variant: "destructive",
+        title: 'Erro ao marcar como pago',
+        description: error.message || 'Não foi possível marcar a proposta como paga.',
+        variant: 'destructive',
       });
     },
   });
@@ -151,59 +151,58 @@ export default function PaymentReviewModal({
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copiado!",
-      description: "Chave PIX copiada para a área de transferência.",
+      title: 'Copiado!',
+      description: 'Chave PIX copiada para a área de transferência.',
     });
   };
 
   // Função para visualizar CCB em nova aba com JWT
   const handleViewCCB = async () => {
     try {
-      console.log("🔍 [CCB VIEW] Iniciando visualização da CCB para proposta:", proposta.id);
-      
+      console.log('🔍 [CCB VIEW] Iniciando visualização da CCB para proposta:', proposta.id);
+
       // Usar o endpoint correto implementado
-      const response = await apiRequest(
-        `/api/propostas/${proposta.id}/ccb`,
-        { method: "GET" }
-      ) as { url: string; nome: string; status: string; fonte: string };
-      
-      console.log("✅ [CCB VIEW] Resposta recebida:", response);
-      
+      const response = (await apiRequest(`/api/propostas/${proposta.id}/ccb`, {
+        method: 'GET',
+      })) as { url: string; nome: string; status: string; fonte: string };
+
+      console.log('✅ [CCB VIEW] Resposta recebida:', response);
+
       if (response.url) {
         // Abrir URL assinada em nova aba
-        window.open(response.url, "_blank");
+        window.open(response.url, '_blank');
         toast({
-          title: "CCB aberta",
+          title: 'CCB aberta',
           description: `Documento ${response.nome} aberto em nova aba.`,
         });
       } else {
         toast({
-          title: "CCB não disponível",
-          description: "URL do documento não foi encontrada.",
-          variant: "destructive",
+          title: 'CCB não disponível',
+          description: 'URL do documento não foi encontrada.',
+          variant: 'destructive',
         });
       }
     } catch (error: any) {
-      console.error("❌ [CCB VIEW] Erro:", error);
+      console.error('❌ [CCB VIEW] Erro:', error);
       toast({
-        title: "Erro ao abrir CCB",
-        description: error.message || "Não foi possível abrir o documento.",
-        variant: "destructive",
+        title: 'Erro ao abrir CCB',
+        description: error.message || 'Não foi possível abrir o documento.',
+        variant: 'destructive',
       });
     }
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(value);
   };
 
   const formatCPF = (cpf: string) => {
-    if (!cpf) return "";
-    const cleaned = cpf.replace(/\D/g, "");
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    if (!cpf) return '';
+    const cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   if (!proposta) {
@@ -246,7 +245,9 @@ export default function PaymentReviewModal({
                   </div>
                   <div>
                     <Label>CPF</Label>
-                    <p className="font-medium">{formatCPF(proposta.cliente_cpf || proposta.clienteCpf)}</p>
+                    <p className="font-medium">
+                      {formatCPF(proposta.cliente_cpf || proposta.clienteCpf)}
+                    </p>
                   </div>
                 </div>
 
@@ -257,20 +258,26 @@ export default function PaymentReviewModal({
                   <Label>Dados Bancários para Pagamento</Label>
                   <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-1">
                     <p className="text-sm">
-                      <span className="font-medium">Banco:</span>{" "}
-                      {proposta.dados_pagamento_banco || proposta.dadosPagamentoBanco || "Não informado"}
+                      <span className="font-medium">Banco:</span>{' '}
+                      {proposta.dados_pagamento_banco ||
+                        proposta.dadosPagamentoBanco ||
+                        'Não informado'}
                     </p>
                     <p className="text-sm">
-                      <span className="font-medium">Agência:</span>{" "}
-                      {proposta.dados_pagamento_agencia || proposta.dadosPagamentoAgencia || "Não informado"}
+                      <span className="font-medium">Agência:</span>{' '}
+                      {proposta.dados_pagamento_agencia ||
+                        proposta.dadosPagamentoAgencia ||
+                        'Não informado'}
                     </p>
                     <p className="text-sm">
-                      <span className="font-medium">Conta:</span>{" "}
-                      {proposta.dados_pagamento_conta || proposta.dadosPagamentoConta || "Não informado"}
+                      <span className="font-medium">Conta:</span>{' '}
+                      {proposta.dados_pagamento_conta ||
+                        proposta.dadosPagamentoConta ||
+                        'Não informado'}
                     </p>
                     {(proposta.dados_pagamento_pix || proposta.dadosPagamentoPix) && (
                       <p className="text-sm">
-                        <span className="font-medium">PIX:</span>{" "}
+                        <span className="font-medium">PIX:</span>{' '}
                         {proposta.dados_pagamento_pix || proposta.dadosPagamentoPix}
                       </p>
                     )}
@@ -286,17 +293,15 @@ export default function PaymentReviewModal({
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-blue-600" />
                       <span className="text-sm">
-                        {proposta.assinatura_eletronica_concluida || proposta.assinaturaEletronicaConcluida
-                          ? "CCB Assinada Eletronicamente"
-                          : "CCB Pendente de Assinatura"}
+                        {proposta.assinatura_eletronica_concluida ||
+                        proposta.assinaturaEletronicaConcluida
+                          ? 'CCB Assinada Eletronicamente'
+                          : 'CCB Pendente de Assinatura'}
                       </span>
                     </div>
-                    {(proposta.assinatura_eletronica_concluida || proposta.assinaturaEletronicaConcluida) && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleViewCCB}
-                      >
+                    {(proposta.assinatura_eletronica_concluida ||
+                      proposta.assinaturaEletronicaConcluida) && (
+                      <Button size="sm" variant="outline" onClick={handleViewCCB}>
                         <ExternalLink className="mr-2 h-4 w-4" />
                         Ver CCB
                       </Button>
@@ -305,14 +310,15 @@ export default function PaymentReviewModal({
                 </div>
 
                 {/* Verificação de Segurança */}
-                {(!proposta.assinatura_eletronica_concluida && !proposta.assinaturaEletronicaConcluida) && (
-                  <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      A CCB deve estar assinada antes de autorizar o pagamento.
-                    </AlertDescription>
-                  </Alert>
-                )}
+                {!proposta.assinatura_eletronica_concluida &&
+                  !proposta.assinaturaEletronicaConcluida && (
+                    <Alert variant="destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        A CCB deve estar assinada antes de autorizar o pagamento.
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
                 {/* Área de PIX após confirmação */}
                 {pixKeyVisible && (
@@ -323,12 +329,22 @@ export default function PaymentReviewModal({
                         <p>Pagamento autorizado! Chave PIX liberada:</p>
                         <div className="flex items-center gap-2">
                           <code className="font-mono text-lg font-bold">
-                            {proposta.dados_pagamento_pix || proposta.dadosPagamentoPix || proposta.cliente_cpf || proposta.clienteCpf}
+                            {proposta.dados_pagamento_pix ||
+                              proposta.dadosPagamentoPix ||
+                              proposta.cliente_cpf ||
+                              proposta.clienteCpf}
                           </code>
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => copyToClipboard(proposta.dados_pagamento_pix || proposta.dadosPagamentoPix || proposta.cliente_cpf || proposta.clienteCpf)}
+                            onClick={() =>
+                              copyToClipboard(
+                                proposta.dados_pagamento_pix ||
+                                  proposta.dadosPagamentoPix ||
+                                  proposta.cliente_cpf ||
+                                  proposta.clienteCpf
+                              )
+                            }
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
@@ -339,31 +355,37 @@ export default function PaymentReviewModal({
                 )}
 
                 {/* Observações (opcional) */}
-                {!pixKeyVisible && (proposta.status === "pronto_pagamento" || proposta.status === "em_processamento") && (
-                  <div>
-                    <Label>Observações (opcional)</Label>
-                    <Textarea
-                      placeholder="Adicione observações sobre a verificação..."
-                      value={observacoes}
-                      onChange={e => setObservacoes(e.target.value)}
-                      className="mt-2"
-                      rows={3}
-                    />
-                  </div>
-                )}
+                {!pixKeyVisible &&
+                  (proposta.status === 'pronto_pagamento' ||
+                    proposta.status === 'em_processamento') && (
+                    <div>
+                      <Label>Observações (opcional)</Label>
+                      <Textarea
+                        placeholder="Adicione observações sobre a verificação..."
+                        value={observacoes}
+                        onChange={(e) => setObservacoes(e.target.value)}
+                        className="mt-2"
+                        rows={3}
+                      />
+                    </div>
+                  )}
               </CardContent>
             </Card>
           </div>
 
           <DialogFooter>
-            {!veracidadeConfirmada && (proposta.status === "pronto_pagamento" || proposta.status === "em_processamento") ? (
+            {!veracidadeConfirmada &&
+            (proposta.status === 'pronto_pagamento' || proposta.status === 'em_processamento') ? (
               <>
                 <Button variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
                 <Button
                   onClick={() => setShowConfirmDialog(true)}
-                  disabled={!proposta.assinatura_eletronica_concluida && !proposta.assinaturaEletronicaConcluida}
+                  disabled={
+                    !proposta.assinatura_eletronica_concluida &&
+                    !proposta.assinaturaEletronicaConcluida
+                  }
                 >
                   <Shield className="mr-2 h-4 w-4" />
                   Confirmar Veracidade
@@ -399,15 +421,14 @@ export default function PaymentReviewModal({
               <AlertTriangle className="h-5 w-5 text-orange-600" />
               Confirmação Final
             </DialogTitle>
-            <DialogDescription>
-              Esta ação autorizará o pagamento. Tem certeza?
-            </DialogDescription>
+            <DialogDescription>Esta ação autorizará o pagamento. Tem certeza?</DialogDescription>
           </DialogHeader>
 
           <Alert>
             <Key className="h-4 w-4" />
             <AlertDescription>
-              Ao confirmar, você atesta que todos os documentos foram verificados e o pagamento está autorizado.
+              Ao confirmar, você atesta que todos os documentos foram verificados e o pagamento está
+              autorizado.
             </AlertDescription>
           </Alert>
 
@@ -422,7 +443,7 @@ export default function PaymentReviewModal({
               disabled={confirmarVeracidadeMutation.isPending}
             >
               {confirmarVeracidadeMutation.isPending ? (
-                "Confirmando..."
+                'Confirmando...'
               ) : (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
@@ -433,7 +454,7 @@ export default function PaymentReviewModal({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* NOVO: Modal de Pagamento */}
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
         <DialogContent className="max-w-lg">
@@ -446,18 +467,22 @@ export default function PaymentReviewModal({
               Confirme o pagamento e anexe o comprovante (opcional)
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 mt-4">
             {/* Informações do Pagamento */}
             <Card>
               <CardContent className="pt-6 space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Cliente:</span>
-                  <span className="font-medium">{proposta.cliente_nome || proposta.clienteNome}</span>
+                  <span className="font-medium">
+                    {proposta.cliente_nome || proposta.clienteNome}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">CPF:</span>
-                  <span className="font-medium">{formatCPF(proposta.cliente_cpf || proposta.clienteCpf)}</span>
+                  <span className="font-medium">
+                    {formatCPF(proposta.cliente_cpf || proposta.clienteCpf)}
+                  </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between">
@@ -467,7 +492,7 @@ export default function PaymentReviewModal({
                   </span>
                 </div>
                 <Separator />
-                
+
                 {/* Dados para Pagamento */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Dados para Pagamento:</Label>
@@ -475,12 +500,17 @@ export default function PaymentReviewModal({
                     {proposta.dados_pagamento_pix || proposta.dadosPagamentoPix ? (
                       <div className="flex items-center justify-between">
                         <span className="text-sm">
-                          <strong>PIX:</strong> {proposta.dados_pagamento_pix || proposta.dadosPagamentoPix}
+                          <strong>PIX:</strong>{' '}
+                          {proposta.dados_pagamento_pix || proposta.dadosPagamentoPix}
                         </span>
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => copyToClipboard(proposta.dados_pagamento_pix || proposta.dadosPagamentoPix)}
+                          onClick={() =>
+                            copyToClipboard(
+                              proposta.dados_pagamento_pix || proposta.dadosPagamentoPix
+                            )
+                          }
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -488,13 +518,16 @@ export default function PaymentReviewModal({
                     ) : (
                       <>
                         <p className="text-sm">
-                          <strong>Banco:</strong> {proposta.dados_pagamento_banco || proposta.dadosPagamentoBanco}
+                          <strong>Banco:</strong>{' '}
+                          {proposta.dados_pagamento_banco || proposta.dadosPagamentoBanco}
                         </p>
                         <p className="text-sm">
-                          <strong>Agência:</strong> {proposta.dados_pagamento_agencia || proposta.dadosPagamentoAgencia}
+                          <strong>Agência:</strong>{' '}
+                          {proposta.dados_pagamento_agencia || proposta.dadosPagamentoAgencia}
                         </p>
                         <p className="text-sm">
-                          <strong>Conta:</strong> {proposta.dados_pagamento_conta || proposta.dadosPagamentoConta}
+                          <strong>Conta:</strong>{' '}
+                          {proposta.dados_pagamento_conta || proposta.dadosPagamentoConta}
                         </p>
                       </>
                     )}
@@ -502,7 +535,7 @@ export default function PaymentReviewModal({
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Botão de Confirmar Pagamento */}
             {!paymentConfirmed ? (
               <Button
@@ -510,8 +543,8 @@ export default function PaymentReviewModal({
                 onClick={() => {
                   setPaymentConfirmed(true);
                   toast({
-                    title: "Pagamento Confirmado",
-                    description: "Agora você pode anexar o comprovante (opcional).",
+                    title: 'Pagamento Confirmado',
+                    description: 'Agora você pode anexar o comprovante (opcional).',
                   });
                 }}
               >
@@ -532,7 +565,7 @@ export default function PaymentReviewModal({
                         if (file) {
                           setComprovante(file);
                           toast({
-                            title: "Arquivo selecionado",
+                            title: 'Arquivo selecionado',
                             description: file.name,
                           });
                         }
@@ -540,13 +573,11 @@ export default function PaymentReviewModal({
                       className="w-full"
                     />
                     {comprovante && (
-                      <p className="text-sm text-green-600 mt-2">
-                        ✓ {comprovante.name}
-                      </p>
+                      <p className="text-sm text-green-600 mt-2">✓ {comprovante.name}</p>
                     )}
                   </div>
                 </div>
-                
+
                 {/* Observações */}
                 <div className="space-y-2">
                   <Label>Observações (Opcional)</Label>
@@ -557,7 +588,7 @@ export default function PaymentReviewModal({
                     rows={3}
                   />
                 </div>
-                
+
                 {/* Botão ESTÁ PAGO */}
                 <Alert className="border-orange-200 bg-orange-50">
                   <AlertTriangle className="h-4 w-4 text-orange-600" />
@@ -565,14 +596,14 @@ export default function PaymentReviewModal({
                     Ao clicar em "ESTÁ PAGO", a proposta será marcada como paga definitivamente.
                   </AlertDescription>
                 </Alert>
-                
+
                 <Button
                   className="w-full bg-green-600 hover:bg-green-700"
                   onClick={() => marcarPagoMutation.mutate()}
                   disabled={marcarPagoMutation.isPending}
                 >
                   {marcarPagoMutation.isPending ? (
-                    "Processando..."
+                    'Processando...'
                   ) : (
                     <>
                       <CheckCircle className="mr-2 h-4 w-4" />
@@ -583,15 +614,15 @@ export default function PaymentReviewModal({
               </>
             )}
           </div>
-          
+
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setShowPaymentModal(false);
                 setPaymentConfirmed(false);
                 setComprovante(null);
-                setPaymentObservation("");
+                setPaymentObservation('');
               }}
             >
               Cancelar

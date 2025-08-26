@@ -16,13 +16,13 @@ const router = Router();
 router.post('/retry', async (req: Request, res: Response) => {
   try {
     console.log('[TEST RETRY] 🧪 Iniciando teste de retry mechanism');
-    
+
     const isDevelopment = process.env.NODE_ENV === 'development';
-    
+
     if (isDevelopment) {
       // Usar mock queue em desenvolvimento
       const { queues } = await import('../lib/mock-queue');
-      
+
       // Criar uma fila de teste se não existir
       if (!queues.testRetry) {
         console.log('[TEST RETRY] 📦 Criando fila test-retry');
@@ -30,20 +30,20 @@ router.post('/retry', async (req: Request, res: Response) => {
         // @ts-ignore
         queues.testRetry = new MockQueue('test-retry');
       }
-      
+
       const queue = queues.testRetry;
-      
+
       const testData = {
         type: 'TEST_RETRY_FAILURE',
         timestamp: new Date().toISOString(),
         message: 'Este job sempre falha para testar retry',
-        testId: Date.now()
+        testId: Date.now(),
       };
-      
+
       const job = await queue.add('test-retry-job', testData);
-      
+
       console.log(`[TEST RETRY] ✅ Job ${job.id} adicionado à fila test-retry`);
-      
+
       return res.json({
         success: true,
         message: 'Job de teste (que sempre falha) adicionado à fila',
@@ -51,13 +51,13 @@ router.post('/retry', async (req: Request, res: Response) => {
         queue: 'test-retry',
         mode: 'development (mock queue)',
         data: testData,
-        hint: 'Observe os logs do worker para ver as tentativas de retry'
+        hint: 'Observe os logs do worker para ver as tentativas de retry',
       });
     } else {
       // Usar queue real em produção
       const { Queue } = await import('bullmq');
       const { Redis } = await import('ioredis');
-      
+
       const connection = new Redis({
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -65,7 +65,7 @@ router.post('/retry', async (req: Request, res: Response) => {
         maxRetriesPerRequest: null,
         enableReadyCheck: false,
       });
-      
+
       const testRetryQueue = new Queue('test-retry', {
         connection,
         defaultJobOptions: {
@@ -76,20 +76,22 @@ router.post('/retry', async (req: Request, res: Response) => {
           },
           removeOnComplete: true,
           removeOnFail: false,
-        }
+        },
       });
-      
+
       const testData = {
         type: 'TEST_RETRY_FAILURE',
         timestamp: new Date().toISOString(),
         message: 'Este job sempre falha para testar retry',
-        testId: Date.now()
+        testId: Date.now(),
       };
-      
+
       const job = await testRetryQueue.add('test-retry-job', testData);
-      
-      console.log(`[TEST RETRY] ✅ Job ${job.id} adicionado à fila test-retry com retry configurado`);
-      
+
+      console.log(
+        `[TEST RETRY] ✅ Job ${job.id} adicionado à fila test-retry com retry configurado`
+      );
+
       return res.json({
         success: true,
         message: 'Job de teste (que sempre falha) adicionado à fila',
@@ -99,19 +101,19 @@ router.post('/retry', async (req: Request, res: Response) => {
         retryConfig: {
           attempts: 5,
           backoff: 'exponential',
-          initialDelay: 2000
+          initialDelay: 2000,
         },
         data: testData,
-        hint: 'Observe os logs do worker para ver as tentativas de retry com backoff exponencial'
+        hint: 'Observe os logs do worker para ver as tentativas de retry com backoff exponencial',
       });
     }
   } catch (error: any) {
     console.error('[TEST RETRY] ❌ Erro ao adicionar job de teste:', error);
-    
+
     return res.status(500).json({
       success: false,
       error: 'Erro ao adicionar job de teste',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -123,20 +125,20 @@ router.post('/retry', async (req: Request, res: Response) => {
 router.get('/retry/status', async (req: Request, res: Response) => {
   try {
     const isDevelopment = process.env.NODE_ENV === 'development';
-    
+
     return res.json({
       success: true,
       queue: 'test-retry',
       mode: isDevelopment ? 'development (mock queue)' : 'production (Redis)',
       status: 'operational',
       message: 'Fila de teste de retry operacional',
-      retryInfo: 'Jobs nesta fila sempre falham para demonstrar o mecanismo de retry'
+      retryInfo: 'Jobs nesta fila sempre falham para demonstrar o mecanismo de retry',
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
       error: 'Erro ao verificar status',
-      message: error.message
+      message: error.message,
     });
   }
 });

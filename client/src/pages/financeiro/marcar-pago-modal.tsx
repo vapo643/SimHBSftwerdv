@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 import {
   Dialog,
   DialogContent,
@@ -9,14 +9,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import {
   CheckCircle,
   Upload,
@@ -27,7 +27,7 @@ import {
   FileText,
   Image as ImageIcon,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface MarcarPagoModalProps {
   isOpen: boolean;
@@ -43,7 +43,7 @@ export default function MarcarPagoModal({
   onConfirm,
 }: MarcarPagoModalProps) {
   const { toast } = useToast();
-  const [observacoes, setObservacoes] = useState("");
+  const [observacoes, setObservacoes] = useState('');
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
@@ -53,55 +53,58 @@ export default function MarcarPagoModal({
       // BUG CORRIGIDO: Usar endpoint e parâmetros corretos do backend
       // Backend espera: PATCH /api/cobrancas/parcelas/:codigoSolicitacao/marcar-pago
       // Buscar codigoSolicitacao da primeira parcela não paga
-      const parcelaNaoPaga = proposta.parcelas?.find((p: any) => p.status !== "pago");
-      
+      const parcelaNaoPaga = proposta.parcelas?.find((p: any) => p.status !== 'pago');
+
       if (!parcelaNaoPaga?.codigoSolicitacao) {
-        throw new Error("Nenhuma parcela elegível encontrada para marcação como paga");
+        throw new Error('Nenhuma parcela elegível encontrada para marcação como paga');
       }
 
       const formData = new FormData();
-      formData.append("observacoes", observacoes);
+      formData.append('observacoes', observacoes);
 
       if (arquivo) {
-        formData.append("comprovante", arquivo);
+        formData.append('comprovante', arquivo);
       }
 
-      const response = await fetch(`/api/cobrancas/parcelas/${parcelaNaoPaga.codigoSolicitacao}/marcar-pago`, {
-        method: "PATCH",
-        credentials: "include",
-        body: formData,
-      });
+      const response = await fetch(
+        `/api/cobrancas/parcelas/${parcelaNaoPaga.codigoSolicitacao}/marcar-pago`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Erro ao marcar como pago");
+        throw new Error(errorData.error || 'Erro ao marcar como pago');
       }
 
       return response.json();
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       toast({
-        title: "✅ Pagamento Confirmado",
-        description: "A proposta foi marcada como paga com sucesso.",
-        className: "bg-green-50 border-green-200",
+        title: '✅ Pagamento Confirmado',
+        description: 'A proposta foi marcada como paga com sucesso.',
+        className: 'bg-green-50 border-green-200',
       });
 
       // Resetar formulário
-      setObservacoes("");
+      setObservacoes('');
       setArquivo(null);
       setShowConfirmDialog(false);
 
       // PAM V1.0 FASE 2: Blindagem total - invalidar todos os caches relevantes
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/kpis"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
       onConfirm();
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao marcar como pago",
-        description: error.message || "Não foi possível marcar a proposta como paga.",
-        variant: "destructive",
+        title: 'Erro ao marcar como pago',
+        description: error.message || 'Não foi possível marcar a proposta como paga.',
+        variant: 'destructive',
       });
     },
   });
@@ -110,12 +113,12 @@ export default function MarcarPagoModal({
     const file = event.target.files?.[0];
     if (file) {
       // Validar tipo de arquivo
-      const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
       if (!allowedTypes.includes(file.type)) {
         toast({
-          title: "Tipo de arquivo inválido",
-          description: "Por favor, selecione um arquivo PDF, JPG ou PNG.",
-          variant: "destructive",
+          title: 'Tipo de arquivo inválido',
+          description: 'Por favor, selecione um arquivo PDF, JPG ou PNG.',
+          variant: 'destructive',
         });
         return;
       }
@@ -124,9 +127,9 @@ export default function MarcarPagoModal({
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
         toast({
-          title: "Arquivo muito grande",
-          description: "O arquivo deve ter no máximo 5MB.",
-          variant: "destructive",
+          title: 'Arquivo muito grande',
+          description: 'O arquivo deve ter no máximo 5MB.',
+          variant: 'destructive',
         });
         return;
       }
@@ -138,26 +141,26 @@ export default function MarcarPagoModal({
   const removeFile = () => {
     setArquivo(null);
     // Reset input
-    const input = document.getElementById("comprovante-input") as HTMLInputElement;
-    if (input) input.value = "";
+    const input = document.getElementById('comprovante-input') as HTMLInputElement;
+    if (input) input.value = '';
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(value);
   };
 
   const formatCPF = (cpf: string) => {
-    if (!cpf) return "";
-    const cleaned = cpf.replace(/\D/g, "");
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    if (!cpf) return '';
+    const cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   const getFileIcon = (type: string) => {
-    if (type === "application/pdf") return <FileText className="h-6 w-6 text-red-500" />;
-    if (type.startsWith("image/")) return <ImageIcon className="h-6 w-6 text-blue-500" />;
+    if (type === 'application/pdf') return <FileText className="h-6 w-6 text-red-500" />;
+    if (type.startsWith('image/')) return <ImageIcon className="h-6 w-6 text-blue-500" />;
     return <File className="h-6 w-6 text-gray-500" />;
   };
 
@@ -255,7 +258,7 @@ export default function MarcarPagoModal({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => document.getElementById("comprovante-input")?.click()}
+                      onClick={() => document.getElementById('comprovante-input')?.click()}
                     >
                       Selecionar Arquivo
                     </Button>
@@ -288,7 +291,7 @@ export default function MarcarPagoModal({
                 id="observacoes"
                 placeholder="Adicione observações sobre o pagamento realizado..."
                 value={observacoes}
-                onChange={e => setObservacoes(e.target.value)}
+                onChange={(e) => setObservacoes(e.target.value)}
                 className="mt-2"
                 rows={3}
               />
@@ -326,12 +329,12 @@ export default function MarcarPagoModal({
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Você confirma que o pagamento de{" "}
+              Você confirma que o pagamento de{' '}
               <strong>
                 {formatCurrency(
                   Number(proposta.valor) - Number(proposta.valorTac) - Number(proposta.valorIof)
                 )}
-              </strong>{" "}
+              </strong>{' '}
               foi realizado via PIX para <strong>{proposta.clienteNome}</strong>? Esta ação é
               irreversível e será registrada com seu nome e horário.
             </AlertDescription>

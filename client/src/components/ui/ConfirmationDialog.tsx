@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,8 +8,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { AlertTriangle } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmationDialogProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ interface ConfirmationDialogProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: "destructive" | "default";
+  variant?: 'destructive' | 'default';
   isLoading?: boolean;
 }
 
@@ -29,9 +29,9 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   onConfirm,
   title,
   description,
-  confirmText = "Confirmar",
-  cancelText = "Cancelar",
-  variant = "default",
+  confirmText = 'Confirmar',
+  cancelText = 'Cancelar',
+  variant = 'default',
   isLoading = false,
 }) => {
   return (
@@ -39,7 +39,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            {variant === "destructive" && <AlertTriangle className="h-5 w-5 text-red-500" />}
+            {variant === 'destructive' && <AlertTriangle className="h-5 w-5 text-red-500" />}
             {title}
           </AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
@@ -50,10 +50,10 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
             onClick={onConfirm}
             disabled={isLoading}
             className={
-              variant === "destructive" ? "bg-red-600 hover:bg-red-700 focus:ring-red-600" : ""
+              variant === 'destructive' ? 'bg-red-600 hover:bg-red-700 focus:ring-red-600' : ''
             }
           >
-            {isLoading ? "Processando..." : confirmText}
+            {isLoading ? 'Processando...' : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -12,7 +12,7 @@ export interface FieldCoordinate {
   fontSize: number;
   bold?: boolean;
   maxWidth?: number; // Essencial para campos multi-linha (endereços, descrições)
-  align?: "left" | "center" | "right"; // Alinhamento do texto
+  align?: 'left' | 'center' | 'right'; // Alinhamento do texto
 }
 
 // Padrões de Fonte
@@ -27,13 +27,13 @@ const FG = 16; // Fonte Grande (destaque)
 export const CCB_FIELD_COORDINATES: Record<string, Record<string, FieldCoordinate>> = {
   // PÁGINA 1 - CAPA E IDENTIFICAÇÃO
   page1: {
-    numeroCCB: { x: 450, y: 750, fontSize: FL, bold: true, align: "right" },
-    dataEmissao: { x: 450, y: 730, fontSize: FN, align: "right" },
-    nomeCliente: { x: 297, y: 400, fontSize: FT, bold: true, align: "center" },
-    cpfCliente: { x: 297, y: 380, fontSize: FL, align: "center" },
-    valorTotalFinanciado: { x: 297, y: 350, fontSize: FG, bold: true, align: "center" },
-    quantidadeParcelas: { x: 297, y: 330, fontSize: FL, align: "center" },
-    valorParcela: { x: 297, y: 310, fontSize: FL, align: "center" },
+    numeroCCB: { x: 450, y: 750, fontSize: FL, bold: true, align: 'right' },
+    dataEmissao: { x: 450, y: 730, fontSize: FN, align: 'right' },
+    nomeCliente: { x: 297, y: 400, fontSize: FT, bold: true, align: 'center' },
+    cpfCliente: { x: 297, y: 380, fontSize: FL, align: 'center' },
+    valorTotalFinanciado: { x: 297, y: 350, fontSize: FG, bold: true, align: 'center' },
+    quantidadeParcelas: { x: 297, y: 330, fontSize: FL, align: 'center' },
+    valorParcela: { x: 297, y: 310, fontSize: FL, align: 'center' },
   },
 
   // PÁGINA 2 - QUALIFICAÇÃO DO EMITENTE
@@ -166,8 +166,8 @@ export const CCB_FIELD_COORDINATES: Record<string, Record<string, FieldCoordinat
 
     // Credor (Simpix)
     linhaAssinaturaCredor: { x: 225, y: 360, fontSize: 1 },
-    razaoSocialCredor: { x: 225, y: 340, fontSize: FN, align: "center" },
-    cnpjCredor: { x: 225, y: 325, fontSize: 9, align: "center" },
+    razaoSocialCredor: { x: 225, y: 340, fontSize: FN, align: 'center' },
+    cnpjCredor: { x: 225, y: 325, fontSize: 9, align: 'center' },
 
     // Código de verificação e protocolo (assinatura eletrônica)
     codigoVerificacao: { x: 100, y: 250, fontSize: 9 },
@@ -209,25 +209,25 @@ export const A4_CONFIG = {
  */
 export const DATA_TO_FIELD_MAPPING = {
   // Página 1
-  numero_ccb: "numeroCCB",
-  data_emissao: "dataEmissao",
-  "cliente_data.nome_completo": "nomeCliente",
-  "cliente_data.cpf": "cpfCliente",
-  "condicoes_data.valor_financiado_formatado": "valorTotalFinanciado",
-  "condicoes_data.prazo_meses": "quantidadeParcelas",
-  "condicoes_data.valor_parcela_formatado": "valorParcela",
+  numero_ccb: 'numeroCCB',
+  data_emissao: 'dataEmissao',
+  'cliente_data.nome_completo': 'nomeCliente',
+  'cliente_data.cpf': 'cpfCliente',
+  'condicoes_data.valor_financiado_formatado': 'valorTotalFinanciado',
+  'condicoes_data.prazo_meses': 'quantidadeParcelas',
+  'condicoes_data.valor_parcela_formatado': 'valorParcela',
 
   // Página 2
-  "cliente_data.rg": "rg_orgao",
-  "cliente_data.data_nascimento": "dataNascimento",
-  "cliente_data.estado_civil": "estadoCivil",
-  "cliente_data.nome_conjuge": "nomeConjuge",
-  "cliente_data.cpf_conjuge": "cpfConjuge",
-  "cliente_data.profissao": "profissao",
-  "calculados.endereco_completo_cliente": "enderecoResidencial",
-  "cliente_data.cep": "cep",
-  "cliente_data.telefone_celular": "telefoneCelular",
-  "cliente_data.email": "email",
+  'cliente_data.rg': 'rg_orgao',
+  'cliente_data.data_nascimento': 'dataNascimento',
+  'cliente_data.estado_civil': 'estadoCivil',
+  'cliente_data.nome_conjuge': 'nomeConjuge',
+  'cliente_data.cpf_conjuge': 'cpfConjuge',
+  'cliente_data.profissao': 'profissao',
+  'calculados.endereco_completo_cliente': 'enderecoResidencial',
+  'cliente_data.cep': 'cep',
+  'cliente_data.telefone_celular': 'telefoneCelular',
+  'cliente_data.email': 'email',
 
   // ... mapear todos os outros campos
 };

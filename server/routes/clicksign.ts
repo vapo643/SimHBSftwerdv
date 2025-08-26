@@ -3,21 +3,21 @@
  * Handles electronic signature workflow
  */
 
-import express from "express";
-import { clickSignService } from "../services/clickSignService.js";
-import { clickSignWebhookService } from "../services/clickSignWebhookService.js";
-import { clickSignSecurityService } from "../services/clickSignSecurityService.js";
-import { interBankService } from "../services/interBankService.js";
-import { storage } from "../storage.js";
-import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
-import { getBrasiliaTimestamp } from "../lib/timezone.js";
-import { AuthenticatedRequest } from "../../shared/types/express";
+import express from 'express';
+import { clickSignService } from '../services/clickSignService.js';
+import { clickSignWebhookService } from '../services/clickSignWebhookService.js';
+import { clickSignSecurityService } from '../services/clickSignSecurityService.js';
+import { interBankService } from '../services/interBankService.js';
+import { storage } from '../storage.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { getBrasiliaTimestamp } from '../lib/timezone.js';
+import { AuthenticatedRequest } from '../../shared/types/express';
 // STATUS V2.0: Import do serviço de auditoria
-import { logStatusTransition } from "../services/auditService.js";
+import { logStatusTransition } from '../services/auditService.js';
 // PAM V1.0: Import para status contextual
-import { db } from "../lib/supabase.js";
-import { statusContextuais } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { db } from '../lib/supabase.js';
+import { statusContextuais } from '@shared/schema';
+import { eq, and } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ const router = express.Router();
  * Send CCB to ClickSign for electronic signature
  * POST /api/clicksign/send-ccb/:propostaId
  */
-router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { propostaId } = req.params;
 
@@ -34,24 +34,24 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
     // 1. Get proposal data
     const proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // Validate proposal is approved and CCB is generated
-    if (proposta.status !== "aprovado") {
+    if (proposta.status !== 'aprovado') {
       return res
         .status(400)
-        .json({ error: "Proposta deve estar aprovada para envio ao ClickSign" });
+        .json({ error: 'Proposta deve estar aprovada para envio ao ClickSign' });
     }
 
     if (!proposta.ccbGerado) {
-      return res.status(400).json({ error: "CCB deve estar gerado antes do envio ao ClickSign" });
+      return res.status(400).json({ error: 'CCB deve estar gerado antes do envio ao ClickSign' });
     }
 
     // Check if already sent to ClickSign
     if (proposta.clicksignDocumentKey) {
       return res.status(400).json({
-        error: "CCB já foi enviado ao ClickSign",
+        error: 'CCB já foi enviado ao ClickSign',
         clicksignStatus: proposta.clicksignStatus,
         clicksignSignUrl: proposta.clicksignSignUrl,
       });
@@ -60,7 +60,7 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
     // 2. Get CCB file from Supabase Storage
     const ccbUrl = await storage.getCcbUrl(propostaId);
     if (!ccbUrl) {
-      return res.status(404).json({ error: "CCB não encontrado no storage" });
+      return res.status(404).json({ error: 'CCB não encontrado no storage' });
     }
 
     // Download CCB as buffer
@@ -71,7 +71,7 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
     const ccbBuffer = Buffer.from(await ccbResponse.arrayBuffer());
 
     // 3. Prepare and validate client data with security
-    const clienteData = JSON.parse(proposta.clienteData || "{}");
+    const clienteData = JSON.parse(proposta.clienteData || '{}');
     const rawClientData = {
       name: clienteData.nomeCompleto || proposta.clienteNome,
       email: clienteData.email || proposta.clienteEmail,
@@ -84,9 +84,9 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
     try {
       clientData = clickSignSecurityService.validateClientData(rawClientData);
     } catch (error) {
-      console.error("[CLICKSIGN SECURITY] Client data validation failed:", error);
+      console.error('[CLICKSIGN SECURITY] Client data validation failed:', error);
       return res.status(400).json({
-        error: "Dados do cliente inválidos",
+        error: 'Dados do cliente inválidos',
         details: (error as Error).message,
       });
     }
@@ -98,20 +98,20 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
     try {
       clickSignSecurityService.validatePDF(ccbBuffer, filename);
     } catch (error) {
-      console.error("[CLICKSIGN SECURITY] PDF validation failed:", error);
+      console.error('[CLICKSIGN SECURITY] PDF validation failed:', error);
       return res.status(400).json({
-        error: "Arquivo PDF inválido",
+        error: 'Arquivo PDF inválido',
         details: (error as Error).message,
       });
     }
 
     // Create audit log
     const auditLog = clickSignSecurityService.createAuditLog(
-      "CLICKSIGN_SEND_CCB",
+      'CLICKSIGN_SEND_CCB',
       { proposalId: propostaId, clientEmail: clientData.email },
       req.user?.id
     );
-    console.log("[CLICKSIGN AUDIT]", auditLog);
+    console.log('[CLICKSIGN AUDIT]', auditLog);
 
     // 4. Send to ClickSign
     const clickSignResult = await clickSignService.sendCCBForSignature(
@@ -125,26 +125,26 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
       clicksignDocumentKey: clickSignResult.documentKey,
       clicksignSignerKey: clickSignResult.signerKey,
       clicksignListKey: clickSignResult.listKey,
-      clicksignStatus: "pending",
+      clicksignStatus: 'pending',
       clicksignSignUrl: clickSignResult.signUrl,
       clicksignSentAt: new Date(getBrasiliaTimestamp()),
-      status: "AGUARDANDO_ASSINATURA",
+      status: 'AGUARDANDO_ASSINATURA',
     });
 
     // STATUS V2.0: Registrar transição de status
     await logStatusTransition({
       propostaId: propostaId,
-      fromStatus: proposta.status || "CCB_GERADA",
-      toStatus: "AGUARDANDO_ASSINATURA",
-      triggeredBy: "api",
+      fromStatus: proposta.status || 'CCB_GERADA',
+      toStatus: 'AGUARDANDO_ASSINATURA',
+      triggeredBy: 'api',
       userId: req.user?.id,
       metadata: {
-        service: "clickSignService",
-        action: "sendCCBForSignature",
+        service: 'clickSignService',
+        action: 'sendCCBForSignature',
         documentKey: clickSignResult.documentKey,
         signUrl: clickSignResult.signUrl,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
 
     console.log(`[CLICKSIGN] ✅ CCB sent successfully for proposal: ${propostaId}`);
@@ -152,17 +152,17 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
 
     res.json({
       success: true,
-      message: "CCB enviado ao ClickSign com sucesso",
+      message: 'CCB enviado ao ClickSign com sucesso',
       clickSignData: {
         documentKey: clickSignResult.documentKey,
-        status: "pending",
+        status: 'pending',
         signUrl: clickSignResult.signUrl,
       },
     });
   } catch (error) {
     console.error(`[CLICKSIGN] ❌ Error sending CCB:`, error);
     res.status(500).json({
-      error: "Erro ao enviar CCB para ClickSign",
+      error: 'Erro ao enviar CCB para ClickSign',
       details: (error as Error).message,
     });
   }
@@ -172,19 +172,19 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
  * Get ClickSign status for a proposal
  * GET /api/clicksign/status/:propostaId
  */
-router.get("/status/:propostaId", jwtAuthMiddleware, async (req, res) => {
+router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
 
     const proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     if (!proposta.clicksignDocumentKey) {
       return res.json({
-        status: "not_sent",
-        message: "CCB não foi enviado ao ClickSign ainda",
+        status: 'not_sent',
+        message: 'CCB não foi enviado ao ClickSign ainda',
       });
     }
 
@@ -212,8 +212,8 @@ router.get("/status/:propostaId", jwtAuthMiddleware, async (req, res) => {
   } catch (error) {
     console.error(`[CLICKSIGN] Error getting status:`, error);
     res.status(500).json({
-      error: "Erro ao consultar status ClickSign",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: 'Erro ao consultar status ClickSign',
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -227,19 +227,19 @@ router.get("/status/:propostaId", jwtAuthMiddleware, async (req, res) => {
  * - Timestamp validation
  * - Event deduplication
  */
-router.post("/webhook", async (req, res) => {
+router.post('/webhook', async (req, res) => {
   try {
     // Security: IP validation and rate limiting
-    const clientIP = req.ip || req.connection.remoteAddress || "";
+    const clientIP = req.ip || req.connection.remoteAddress || '';
 
     if (!clickSignSecurityService.validateWebhookIP(clientIP)) {
-      console.error("[CLICKSIGN WEBHOOK] Blocked request from unauthorized IP:", clientIP);
-      return res.status(403).json({ error: "Forbidden" });
+      console.error('[CLICKSIGN WEBHOOK] Blocked request from unauthorized IP:', clientIP);
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     if (!clickSignSecurityService.checkWebhookRateLimit(clientIP)) {
-      console.error("[CLICKSIGN WEBHOOK] Rate limit exceeded for IP:", clientIP);
-      return res.status(429).json({ error: "Too many requests" });
+      console.error('[CLICKSIGN WEBHOOK] Rate limit exceeded for IP:', clientIP);
+      return res.status(429).json({ error: 'Too many requests' });
     }
 
     // Security: Validate event structure
@@ -247,29 +247,29 @@ router.post("/webhook", async (req, res) => {
     try {
       validatedEvent = clickSignSecurityService.validateWebhookEvent(req.body);
     } catch (error) {
-      console.error("[CLICKSIGN WEBHOOK] Invalid event structure:", error);
-      return res.status(400).json({ error: "Invalid webhook format" });
+      console.error('[CLICKSIGN WEBHOOK] Invalid event structure:', error);
+      return res.status(400).json({ error: 'Invalid webhook format' });
     }
 
     // Security: Log sanitized event
     const auditLog = clickSignSecurityService.createAuditLog(
-      "CLICKSIGN_WEBHOOK_RECEIVED",
+      'CLICKSIGN_WEBHOOK_RECEIVED',
       validatedEvent,
-      "webhook"
+      'webhook'
     );
-    console.log("[CLICKSIGN WEBHOOK AUDIT]", auditLog);
+    console.log('[CLICKSIGN WEBHOOK AUDIT]', auditLog);
 
     // Validate signature if secret is configured
-    const signature = req.headers["x-clicksign-signature"] as string;
-    const timestamp = req.headers["x-clicksign-timestamp"] as string;
+    const signature = req.headers['x-clicksign-signature'] as string;
+    const timestamp = req.headers['x-clicksign-timestamp'] as string;
 
     if (signature && timestamp) {
       const payload = JSON.stringify(req.body);
       const isValid = clickSignWebhookService.validateSignature(payload, signature, timestamp);
 
       if (!isValid) {
-        console.error("[CLICKSIGN WEBHOOK] ❌ Invalid signature or expired timestamp");
-        return res.status(401).json({ error: "Invalid webhook signature" });
+        console.error('[CLICKSIGN WEBHOOK] ❌ Invalid signature or expired timestamp');
+        return res.status(401).json({ error: 'Invalid webhook signature' });
       }
     }
 
@@ -277,14 +277,14 @@ router.post("/webhook", async (req, res) => {
     const eventData = validatedEvent;
 
     if (!eventData.event || !eventData.data) {
-      return res.status(400).json({ error: "Invalid webhook payload" });
+      return res.status(400).json({ error: 'Invalid webhook payload' });
     }
 
     // Check for duplicate events
-    const eventId = `${eventData.event}_${eventData.data.document?.key || eventData.data.list?.key || ""}_${eventData.occurred_at || Date.now()}`;
+    const eventId = `${eventData.event}_${eventData.data.document?.key || eventData.data.list?.key || ''}_${eventData.occurred_at || Date.now()}`;
     if (clickSignWebhookService.isDuplicateEvent(eventId)) {
-      console.log("[CLICKSIGN WEBHOOK] Duplicate event detected, skipping");
-      return res.json({ success: true, message: "Duplicate event skipped" });
+      console.log('[CLICKSIGN WEBHOOK] Duplicate event detected, skipping');
+      return res.json({ success: true, message: 'Duplicate event skipped' });
     }
 
     // Process event using webhook service
@@ -296,12 +296,12 @@ router.post("/webhook", async (req, res) => {
     }
 
     console.log(`[CLICKSIGN WEBHOOK] ✅ Event ${eventData.event} processed successfully:`, result);
-    res.json({ success: true, message: "Webhook processed successfully", result });
+    res.json({ success: true, message: 'Webhook processed successfully', result });
   } catch (error) {
     console.error(`[CLICKSIGN WEBHOOK] ❌ Error processing webhook:`, error);
     res.status(500).json({
-      error: "Erro ao processar webhook ClickSign",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: 'Erro ao processar webhook ClickSign',
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -310,9 +310,9 @@ router.post("/webhook", async (req, res) => {
  * Test webhook endpoint (dev only)
  * POST /api/clicksign/webhook-test
  */
-router.post("/webhook-test", async (req, res) => {
-  if (process.env.NODE_ENV === "production") {
-    return res.status(404).json({ error: "Not found" });
+router.post('/webhook-test', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
   }
 
   try {
@@ -327,12 +327,12 @@ router.post("/webhook-test", async (req, res) => {
     }
 
     console.log(`[CLICKSIGN WEBHOOK TEST] ✅ Event processed successfully:`, result);
-    res.json({ success: true, message: "Webhook processed successfully", result });
+    res.json({ success: true, message: 'Webhook processed successfully', result });
   } catch (error) {
     console.error(`[CLICKSIGN WEBHOOK TEST] ❌ Error:`, error);
     res.status(500).json({
-      error: "Erro ao processar webhook teste",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: 'Erro ao processar webhook teste',
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -341,20 +341,20 @@ router.post("/webhook-test", async (req, res) => {
  * Test ClickSign connection
  * GET /api/clicksign/test
  */
-router.get("/test", jwtAuthMiddleware, async (req, res) => {
+router.get('/test', jwtAuthMiddleware, async (req, res) => {
   try {
     const isConnected = await clickSignService.testConnection();
 
     res.json({
       connected: isConnected,
-      environment: process.env.NODE_ENV === "production" ? "production" : "sandbox",
-      message: isConnected ? "ClickSign conectado com sucesso" : "Falha na conexão com ClickSign",
+      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+      message: isConnected ? 'ClickSign conectado com sucesso' : 'Falha na conexão com ClickSign',
     });
   } catch (error) {
     console.error(`[CLICKSIGN] Connection test error:`, error);
     res.status(500).json({
-      error: "Erro ao testar conexão ClickSign",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: 'Erro ao testar conexão ClickSign',
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });

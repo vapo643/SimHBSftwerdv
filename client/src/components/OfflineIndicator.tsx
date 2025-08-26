@@ -3,18 +3,18 @@
  * Indicador de Status de Conexão
  */
 
-import { useState, useEffect } from "react";
-import { AlertTriangle, Wifi, WifiOff } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from 'react';
+import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface OfflineIndicatorProps {
   className?: string;
-  variant?: "banner" | "compact" | "icon-only";
+  variant?: 'banner' | 'compact' | 'icon-only';
 }
 
 export default function OfflineIndicator({
-  className = "",
-  variant = "banner",
+  className = '',
+  variant = 'banner',
 }: OfflineIndicatorProps) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [wasOffline, setWasOffline] = useState(false);
@@ -34,13 +34,13 @@ export default function OfflineIndicator({
     };
 
     // Adiciona listeners para mudanças no status da conexão
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     // Cleanup
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, [wasOffline]);
 
@@ -50,9 +50,9 @@ export default function OfflineIndicator({
   }
 
   // Variant: icon-only - apenas ícone pequeno
-  if (variant === "icon-only") {
+  if (variant === 'icon-only') {
     return (
-      <div className={`flex items-center ${className}`} title={isOnline ? "Online" : "Offline"}>
+      <div className={`flex items-center ${className}`} title={isOnline ? 'Online' : 'Offline'}>
         {isOnline ? (
           <Wifi className="h-4 w-4 text-green-500" />
         ) : (
@@ -63,13 +63,13 @@ export default function OfflineIndicator({
   }
 
   // Variant: compact - indicador pequeno no canto
-  if (variant === "compact") {
+  if (variant === 'compact') {
     return (
       <div
         className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm shadow-lg transition-all duration-300 ${
           isOnline
-            ? "border border-green-200 bg-green-100 text-green-800"
-            : "border border-red-200 bg-red-100 text-red-800"
+            ? 'border border-green-200 bg-green-100 text-green-800'
+            : 'border border-red-200 bg-red-100 text-red-800'
         } ${className}`}
       >
         {isOnline ? (
@@ -129,12 +129,12 @@ export function useOnlineStatus() {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 

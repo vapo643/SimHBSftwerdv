@@ -82,6 +82,6 @@ export interface AuthProvider {
  * Configuração do provedor de autenticação
  */
 export interface AuthConfig {
-  provider: "supabase" | "firebase" | "auth0" | "custom";
+  provider: 'supabase' | 'firebase' | 'auth0' | 'custom';
   options?: Record<string, unknown>;
 }

@@ -10,9 +10,9 @@ export interface FieldPosition {
   x: number; // Posição horizontal
   y: number; // Posição vertical (origem no bottom-left do PDF)
   fontSize: number; // Tamanho da fonte
-  fontWeight?: "normal" | "bold"; // Peso da fonte
+  fontWeight?: 'normal' | 'bold'; // Peso da fonte
   maxWidth?: number; // Largura máxima para quebra de linha
-  alignment?: "left" | "center" | "right"; // Alinhamento do texto
+  alignment?: 'left' | 'center' | 'right'; // Alinhamento do texto
   color?: [number, number, number]; // Cor RGB (0-1)
   multiline?: boolean; // Permite múltiplas linhas
 }
@@ -29,15 +29,15 @@ export const CCB_COMPLETE_MAPPING = {
     x: 450,
     y: 750,
     fontSize: 12,
-    fontWeight: "bold" as const,
-    alignment: "right" as const,
+    fontWeight: 'bold' as const,
+    alignment: 'right' as const,
   },
 
   dataEmissao: {
     x: 450,
     y: 720,
     fontSize: 11,
-    alignment: "right" as const,
+    alignment: 'right' as const,
   },
 
   // =====================================================
@@ -50,7 +50,7 @@ export const CCB_COMPLETE_MAPPING = {
     y: 680,
     fontSize: 11,
     maxWidth: 400,
-    fontWeight: "normal" as const,
+    fontWeight: 'normal' as const,
   },
 
   devedorCpf: {
@@ -152,7 +152,7 @@ export const CCB_COMPLETE_MAPPING = {
     y: 680,
     fontSize: 11,
     maxWidth: 400,
-    fontWeight: "normal" as const,
+    fontWeight: 'normal' as const,
   },
 
   devedorCnpj: {
@@ -175,8 +175,8 @@ export const CCB_COMPLETE_MAPPING = {
     x: 200,
     y: 480,
     fontSize: 12,
-    fontWeight: "bold" as const,
-    alignment: "right" as const,
+    fontWeight: 'bold' as const,
+    alignment: 'right' as const,
   },
 
   valorPrincipalExtenso: {
@@ -197,7 +197,7 @@ export const CCB_COMPLETE_MAPPING = {
     x: 200,
     y: 430,
     fontSize: 11,
-    alignment: "right" as const,
+    alignment: 'right' as const,
   },
 
   jurosAoAno: {
@@ -240,8 +240,8 @@ export const CCB_COMPLETE_MAPPING = {
     x: 200,
     y: 355,
     fontSize: 12,
-    fontWeight: "bold" as const,
-    alignment: "right" as const,
+    fontWeight: 'bold' as const,
+    alignment: 'right' as const,
   },
 
   numeroParcelas: {
@@ -254,7 +254,7 @@ export const CCB_COMPLETE_MAPPING = {
     x: 450,
     y: 355,
     fontSize: 11,
-    alignment: "right" as const,
+    alignment: 'right' as const,
   },
 
   formaPagamento: {
@@ -317,7 +317,7 @@ export const CCB_COMPLETE_MAPPING = {
     x: 120,
     y: 200,
     fontSize: 11,
-    fontWeight: "bold" as const,
+    fontWeight: 'bold' as const,
     maxWidth: 300,
   },
 
@@ -431,9 +431,9 @@ export function offsetCoordinates(
  * Formatação inteligente de valores monetários para CCB
  */
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -444,30 +444,30 @@ export function formatCurrency(value: number): string {
  */
 export function numberToWords(value: number): string {
   // Implementação básica - pode ser expandida com biblioteca específica
-  const unidades = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
+  const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
   const dezenas = [
-    "",
-    "",
-    "vinte",
-    "trinta",
-    "quarenta",
-    "cinquenta",
-    "sessenta",
-    "setenta",
-    "oitenta",
-    "noventa",
+    '',
+    '',
+    'vinte',
+    'trinta',
+    'quarenta',
+    'cinquenta',
+    'sessenta',
+    'setenta',
+    'oitenta',
+    'noventa',
   ];
   const centenas = [
-    "",
-    "cem",
-    "duzentos",
-    "trezentos",
-    "quatrocentos",
-    "quinhentos",
-    "seiscentos",
-    "setecentos",
-    "oitocentos",
-    "novecentos",
+    '',
+    'cem',
+    'duzentos',
+    'trezentos',
+    'quatrocentos',
+    'quinhentos',
+    'seiscentos',
+    'setecentos',
+    'oitocentos',
+    'novecentos',
   ];
 
   // Implementação simplificada - retorna apenas o valor formatado

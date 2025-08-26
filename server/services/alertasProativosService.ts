@@ -4,22 +4,18 @@
  * Data: 15/08/2025
  */
 
-import { db } from "../lib/supabase";
-import { 
-  notificacoes, 
-  regrasAlertas, 
+import { db } from '../lib/supabase';
+import {
+  notificacoes,
+  regrasAlertas,
   historicoExecucoesAlertas,
   propostas,
   parcelas,
-  users
-} from "@shared/schema";
-import type { 
-  InsertNotificacao, 
-  RegraAlerta,
-  InsertHistoricoExecucaoAlerta 
-} from "@shared/schema";
-import { and, eq, gte, lte, ne, sql, inArray } from "drizzle-orm";
-import { format } from "date-fns";
+  users,
+} from '@shared/schema';
+import type { InsertNotificacao, RegraAlerta, InsertHistoricoExecucaoAlerta } from '@shared/schema';
+import { and, eq, gte, lte, ne, sql, inArray } from 'drizzle-orm';
+import { format } from 'date-fns';
 
 interface EventoTrigger {
   tipo: string;
@@ -52,8 +48,8 @@ export class AlertasProativosService {
    */
   private inicializarRegras() {
     // Regra A: Alto Valor + Vencimento Próximo
-    this.regras.set("alto_valor_vencimento_proximo", {
-      nome: "alto_valor_vencimento_proximo",
+    this.regras.set('alto_valor_vencimento_proximo', {
+      nome: 'alto_valor_vencimento_proximo',
       processar: async () => {
         const resultado = await db
           .select({
@@ -62,40 +58,40 @@ export class AlertasProativosService {
             valorTotal: propostas.valorTotalFinanciado,
             dataVencimento: parcelas.dataVencimento,
             numeroParcela: parcelas.numeroParcela,
-            valorParcela: parcelas.valorParcela
+            valorParcela: parcelas.valorParcela,
           })
           .from(propostas)
           .innerJoin(parcelas, eq(parcelas.propostaId, propostas.id))
           .where(
             and(
               sql`${propostas.valorTotalFinanciado}::numeric >= 500`, // Valor mínimo R$ 500 (ajustado para dados reais)
-              ne(parcelas.status, "pago"),
+              ne(parcelas.status, 'pago'),
               sql`${parcelas.dataVencimento} BETWEEN CURRENT_DATE + INTERVAL '15 days' AND CURRENT_DATE + INTERVAL '30 days'`,
-              inArray(propostas.status, ["BOLETOS_EMITIDOS", "PAGAMENTO_PENDENTE"])
+              inArray(propostas.status, ['BOLETOS_EMITIDOS', 'PAGAMENTO_PENDENTE'])
             )
           );
 
         return resultado.map((r: any) => ({
-          tipo: "alto_valor_vencimento_proximo",
-          titulo: "Proposta de Alto Valor Vencendo",
-          mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - Valor Total: R$ ${parseFloat(r.valorTotal || 0).toFixed(2)} - Parcela ${r.numeroParcela} vence em ${format(new Date(r.dataVencimento), "dd/MM/yyyy")}`,
-          prioridade: "ALTA",
-          categoria: "vencimento",
+          tipo: 'alto_valor_vencimento_proximo',
+          titulo: 'Proposta de Alto Valor Vencendo',
+          mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - Valor Total: R$ ${parseFloat(r.valorTotal || 0).toFixed(2)} - Parcela ${r.numeroParcela} vence em ${format(new Date(r.dataVencimento), 'dd/MM/yyyy')}`,
+          prioridade: 'ALTA',
+          categoria: 'vencimento',
           propostaId: r.propostaId,
           linkRelacionado: `/financeiro/cobrancas?propostaId=${r.propostaId}`,
           dadosAdicionais: {
             valorTotal: r.valorTotal,
             valorParcela: r.valorParcela,
             numeroParcela: r.numeroParcela,
-            dataVencimento: r.dataVencimento
-          }
+            dataVencimento: r.dataVencimento,
+          },
         }));
-      }
+      },
     });
 
     // Regra B: Atraso Superior a 30 Dias
-    this.regras.set("atraso_longo_30_dias", {
-      nome: "atraso_longo_30_dias",
+    this.regras.set('atraso_longo_30_dias', {
+      nome: 'atraso_longo_30_dias',
       processar: async () => {
         const resultado = await db
           .select({
@@ -104,44 +100,44 @@ export class AlertasProativosService {
             clienteTelefone: propostas.clienteTelefone,
             parcelasVencidas: sql<number>`COUNT(${parcelas.id})`,
             valorTotalVencido: sql<number>`SUM(${parcelas.valorParcela})`,
-            diasAtrasoMaximo: sql<number>`MAX(CURRENT_DATE - ${parcelas.dataVencimento})`
+            diasAtrasoMaximo: sql<number>`MAX(CURRENT_DATE - ${parcelas.dataVencimento})`,
           })
           .from(propostas)
           .innerJoin(parcelas, eq(parcelas.propostaId, propostas.id))
           .where(
             and(
-              ne(parcelas.status, "pago"),
+              ne(parcelas.status, 'pago'),
               sql`${parcelas.dataVencimento} < CURRENT_DATE - INTERVAL '30 days'`
             )
           )
           .groupBy(propostas.id);
 
         return resultado.map((r: any) => ({
-          tipo: "atraso_longo_30_dias",
-          titulo: "Atraso Superior a 30 Dias",
+          tipo: 'atraso_longo_30_dias',
+          titulo: 'Atraso Superior a 30 Dias',
           mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - ${r.parcelasVencidas} parcelas vencidas há mais de 30 dias - Total: R$ ${r.valorTotalVencido.toFixed(2)}`,
-          prioridade: "CRITICA",
-          categoria: "atraso",
+          prioridade: 'CRITICA',
+          categoria: 'atraso',
           propostaId: r.propostaId,
           linkRelacionado: `/financeiro/cobrancas?propostaId=${r.propostaId}`,
           dadosAdicionais: {
             parcelasVencidas: r.parcelasVencidas,
             valorTotalVencido: r.valorTotalVencido,
             diasAtrasoMaximo: r.diasAtrasoMaximo,
-            telefone: r.clienteTelefone
-          }
+            telefone: r.clienteTelefone,
+          },
         }));
-      }
+      },
     });
 
     // Regra C: Boleto Visualizado + Não Pago (será implementada via webhook)
-    this.regras.set("boleto_visualizado_nao_pago", {
-      nome: "boleto_visualizado_nao_pago",
+    this.regras.set('boleto_visualizado_nao_pago', {
+      nome: 'boleto_visualizado_nao_pago',
       processar: async () => {
         // Esta regra será acionada via webhook da ClickSign
         // Por enquanto retorna vazio
         return [];
-      }
+      },
     });
   }
 
@@ -159,17 +155,13 @@ export class AlertasProativosService {
     const regrasAtivas = await db
       .select()
       .from(regrasAlertas)
-      .where(
-        and(
-          eq(regrasAlertas.ativa, true),
-          eq(regrasAlertas.trigger, "cron")
-        )
-      );
+      .where(and(eq(regrasAlertas.ativa, true), eq(regrasAlertas.trigger, 'cron')));
 
     // Se não houver regras cadastradas no banco, usar as regras padrão
-    const regrasParaProcessar = regrasAtivas.length > 0 
-      ? regrasAtivas.map(r => r.nome) 
-      : ["alto_valor_vencimento_proximo", "atraso_longo_30_dias"];
+    const regrasParaProcessar =
+      regrasAtivas.length > 0
+        ? regrasAtivas.map((r) => r.nome)
+        : ['alto_valor_vencimento_proximo', 'atraso_longo_30_dias'];
 
     for (const nomeRegra of regrasParaProcessar) {
       const processador = this.regras.get(nomeRegra);
@@ -180,9 +172,11 @@ export class AlertasProativosService {
 
       try {
         console.log(`[ALERTAS PROATIVOS] Processando regra: ${nomeRegra}`);
-        
+
         const resultados = await processador.processar();
-        console.log(`[ALERTAS PROATIVOS] Regra ${nomeRegra} encontrou ${resultados.length} registros`);
+        console.log(
+          `[ALERTAS PROATIVOS] Regra ${nomeRegra} encontrou ${resultados.length} registros`
+        );
         totalRegistrosProcessados += resultados.length;
 
         // Buscar usuários com roles apropriadas
@@ -192,7 +186,9 @@ export class AlertasProativosService {
           .select()
           .from(users)
           .where(inArray(users.role, rolesDestino));
-        console.log(`[ALERTAS PROATIVOS] Encontrados ${usuariosDestino.length} usuários para notificar`);
+        console.log(
+          `[ALERTAS PROATIVOS] Encontrados ${usuariosDestino.length} usuários para notificar`
+        );
 
         // Criar notificações para cada resultado e cada usuário
         for (const resultado of resultados) {
@@ -208,7 +204,7 @@ export class AlertasProativosService {
               userId: usuario.id.toString(),
               userRole: usuario.role,
               dadosAdicionais: resultado.dadosAdicionais,
-              origem: "sistema"
+              origem: 'sistema',
             };
 
             await db.insert(notificacoes).values(notificacao);
@@ -218,22 +214,21 @@ export class AlertasProativosService {
 
         // Registrar execução no histórico
         await this.registrarExecucao(
-          nomeRegra, 
-          "sucesso", 
-          resultados.length, 
+          nomeRegra,
+          'sucesso',
+          resultados.length,
           totalNotificacoesCriadas,
           Date.now() - inicioExecucao
         );
-
       } catch (error) {
         console.error(`[ALERTAS PROATIVOS] Erro ao processar regra ${nomeRegra}:`, error);
         await this.registrarExecucao(
-          nomeRegra, 
-          "erro", 
-          0, 
+          nomeRegra,
+          'erro',
+          0,
           0,
           Date.now() - inicioExecucao,
-          error instanceof Error ? error.message : "Erro desconhecido"
+          error instanceof Error ? error.message : 'Erro desconhecido'
         );
       }
     }
@@ -249,15 +244,18 @@ export class AlertasProativosService {
    */
   async processarEvento(evento: EventoTrigger): Promise<void> {
     console.log(`[ALERTAS PROATIVOS] Processando evento: ${evento.tipo}`);
-    
+
     // Implementação futura para processar eventos de webhook
     // Por exemplo: quando ClickSign enviar evento de documento visualizado
-    
-    if (evento.tipo === "documento_visualizado") {
+
+    if (evento.tipo === 'documento_visualizado') {
       // Agendar verificação após 24h
-      setTimeout(async () => {
-        await this.verificarPagamentoAposVisualizacao(evento.dados);
-      }, 24 * 60 * 60 * 1000); // 24 horas
+      setTimeout(
+        async () => {
+          await this.verificarPagamentoAposVisualizacao(evento.dados);
+        },
+        24 * 60 * 60 * 1000
+      ); // 24 horas
     }
   }
 
@@ -274,14 +272,14 @@ export class AlertasProativosService {
    */
   private obterRolesDestino(nomeRegra: string): string[] {
     switch (nomeRegra) {
-      case "alto_valor_vencimento_proximo":
-        return ["ADMINISTRADOR", "COBRANCA", "SUPERVISOR_COBRANCA", "FINANCEIRO"];
-      case "atraso_longo_30_dias":
-        return ["ADMINISTRADOR", "SUPERVISOR_COBRANCA", "FINANCEIRO"];
-      case "boleto_visualizado_nao_pago":
-        return ["ADMINISTRADOR", "COBRANCA"];
+      case 'alto_valor_vencimento_proximo':
+        return ['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
+      case 'atraso_longo_30_dias':
+        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
+      case 'boleto_visualizado_nao_pago':
+        return ['ADMINISTRADOR', 'COBRANCA'];
       default:
-        return ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"];
+        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'];
     }
   }
 
@@ -312,11 +310,11 @@ export class AlertasProativosService {
           registrosProcessados,
           notificacoesCriadas,
           erroDetalhes,
-          triggerOrigem: "cron",
+          triggerOrigem: 'cron',
           dadosContexto: {
             timestamp: new Date().toISOString(),
-            nomeRegra
-          }
+            nomeRegra,
+          },
         };
 
         await db.insert(historicoExecucoesAlertas).values(historico);
@@ -332,21 +330,18 @@ export class AlertasProativosService {
   async testarServico(): Promise<{ sucesso: boolean; mensagem: string }> {
     try {
       console.log(`[ALERTAS PROATIVOS] Executando teste do serviço...`);
-      
+
       // Verificar se as tabelas existem
-      const testeNotificacao = await db
-        .select()
-        .from(notificacoes)
-        .limit(1);
+      const testeNotificacao = await db.select().from(notificacoes).limit(1);
 
       return {
         sucesso: true,
-        mensagem: "Serviço de Alertas Proativos está funcionando corretamente"
+        mensagem: 'Serviço de Alertas Proativos está funcionando corretamente',
       };
     } catch (error) {
       return {
         sucesso: false,
-        mensagem: `Erro ao testar serviço: ${error instanceof Error ? error.message : "Erro desconhecido"}`
+        mensagem: `Erro ao testar serviço: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
       };
     }
   }

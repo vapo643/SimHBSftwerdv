@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,15 +13,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import PartnerForm from "@/components/parceiros/PartnerForm";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Link } from "wouter";
-import { api } from "@/lib/apiClient";
-import { queryClient } from "@/lib/queryClient";
-import { queryKeys } from "@/hooks/queries/queryKeys";
-import { useToast } from "@/hooks/use-toast";
-import { Parceiro, InsertParceiro } from "@shared/schema";
+} from '@/components/ui/alert-dialog';
+import PartnerForm from '@/components/parceiros/PartnerForm';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Link } from 'wouter';
+import { api } from '@/lib/apiClient';
+import { queryClient } from '@/lib/queryClient';
+import { queryKeys } from '@/hooks/queries/queryKeys';
+import { useToast } from '@/hooks/use-toast';
+import { Parceiro, InsertParceiro } from '@shared/schema';
 import {
   Edit,
   Trash2,
@@ -33,7 +33,7 @@ import {
   Activity,
   Settings,
   TrendingUp,
-} from "lucide-react";
+} from 'lucide-react';
 
 const PartnersPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,7 +50,7 @@ const PartnersPage: React.FC = () => {
   } = useQuery<Parceiro[]>({
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
-      const response = await api.get<Parceiro[]>("/api/parceiros");
+      const response = await api.get<Parceiro[]>('/api/parceiros');
       return response.data;
     },
   });
@@ -58,7 +58,7 @@ const PartnersPage: React.FC = () => {
   // Create partner mutation using new apiClient
   const createMutation = useMutation({
     mutationFn: async (data: InsertParceiro) => {
-      const response = await api.post<Parceiro>("/api/admin/parceiros", data);
+      const response = await api.post<Parceiro>('/api/admin/parceiros', data);
       return response.data;
     },
     onSuccess: () => {
@@ -66,15 +66,15 @@ const PartnersPage: React.FC = () => {
       setIsModalOpen(false);
       setSelectedPartner(null);
       toast({
-        title: "Sucesso!",
-        description: "Parceiro criado com sucesso!",
+        title: 'Sucesso!',
+        description: 'Parceiro criado com sucesso!',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro!",
+        title: 'Erro!',
         description: `Erro ao criar parceiro: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -90,15 +90,15 @@ const PartnersPage: React.FC = () => {
       setIsModalOpen(false);
       setSelectedPartner(null);
       toast({
-        title: "Sucesso!",
-        description: "Parceiro atualizado com sucesso!",
+        title: 'Sucesso!',
+        description: 'Parceiro atualizado com sucesso!',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro!",
+        title: 'Erro!',
         description: `Erro ao atualizar parceiro: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -114,17 +114,17 @@ const PartnersPage: React.FC = () => {
       setDeleteDialogOpen(false);
       setPartnerToDelete(null);
       toast({
-        title: "Sucesso!",
-        description: "Parceiro excluído com sucesso!",
+        title: 'Sucesso!',
+        description: 'Parceiro excluído com sucesso!',
       });
     },
     onError: (error: Error) => {
       setDeleteDialogOpen(false);
       setPartnerToDelete(null);
       toast({
-        title: "Erro!",
+        title: 'Erro!',
         description: `Erro ao excluir parceiro: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -183,12 +183,12 @@ const PartnersPage: React.FC = () => {
   // Calcular estatísticas dos parceiros
   const partnerStats = {
     total: partners.length,
-    ativos: partners.filter(p => !p.deletedAt).length,
-    inativos: partners.filter(p => p.deletedAt).length,
+    ativos: partners.filter((p) => !p.deletedAt).length,
+    inativos: partners.filter((p) => p.deletedAt).length,
     percentualAtivos:
       partners.length > 0
-        ? ((partners.filter(p => !p.deletedAt).length / partners.length) * 100).toFixed(1)
-        : "0",
+        ? ((partners.filter((p) => !p.deletedAt).length / partners.length) * 100).toFixed(1)
+        : '0',
   };
 
   if (isLoading) {
@@ -295,7 +295,7 @@ const PartnersPage: React.FC = () => {
             size="lg"
           >
             <Plus className="mr-2 h-5 w-5" />
-            {createMutation.isPending ? "Criando..." : "Novo Parceiro"}
+            {createMutation.isPending ? 'Criando...' : 'Novo Parceiro'}
           </Button>
         </div>
 
@@ -394,7 +394,7 @@ const PartnersPage: React.FC = () => {
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {partners.map(partner => (
+                {partners.map((partner) => (
                   <Card
                     key={partner.id}
                     className="border border-gray-200 transition-all duration-200 hover:border-cyan-300 hover:shadow-lg dark:border-gray-700 dark:hover:border-cyan-600"
@@ -464,11 +464,11 @@ const PartnersPage: React.FC = () => {
                         <Badge
                           className={
                             !partner.deletedAt
-                              ? "border-green-200 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                              : "border-red-200 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                              ? 'border-green-200 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'border-red-200 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                           }
                         >
-                          {!partner.deletedAt ? "Ativo" : "Inativo"}
+                          {!partner.deletedAt ? 'Ativo' : 'Inativo'}
                         </Badge>
                       </div>
                       <div className="border-t border-gray-100 pt-2 dark:border-gray-700">
@@ -488,7 +488,7 @@ const PartnersPage: React.FC = () => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedPartner ? "Editar Parceiro" : "Novo Parceiro"}</DialogTitle>
+            <DialogTitle>{selectedPartner ? 'Editar Parceiro' : 'Novo Parceiro'}</DialogTitle>
           </DialogHeader>
           <PartnerForm
             initialData={selectedPartner}
@@ -508,7 +508,7 @@ const PartnersPage: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o parceiro{" "}
+              Tem certeza que deseja excluir o parceiro{' '}
               <strong>{partnerToDelete?.razaoSocial}</strong>?
               <br />
               <br />
@@ -540,7 +540,7 @@ const PartnersPage: React.FC = () => {
               disabled={deleteMutation.isPending}
               className="bg-red-600 text-white hover:bg-red-700"
             >
-              {deleteMutation.isPending ? "Excluindo..." : "Excluir Parceiro"}
+              {deleteMutation.isPending ? 'Excluindo...' : 'Excluir Parceiro'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

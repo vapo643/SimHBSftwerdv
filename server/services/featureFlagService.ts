@@ -1,4 +1,9 @@
-import { initialize, isEnabled as unleashIsEnabled, startUnleash, getVariant } from 'unleash-client';
+import {
+  initialize,
+  isEnabled as unleashIsEnabled,
+  startUnleash,
+  getVariant,
+} from 'unleash-client';
 import winston from 'winston';
 
 // Logger configurado para o serviço
@@ -64,17 +69,17 @@ class FeatureFlagService {
     // Flags de sistema
     this.fallbackFlags.set('maintenance-mode', false);
     this.fallbackFlags.set('read-only-mode', false);
-    
+
     // Flags de feature
     this.fallbackFlags.set('nova-api-experimental', false);
     this.fallbackFlags.set('novo-dashboard', false);
     this.fallbackFlags.set('pagamento-pix-instant', false);
     this.fallbackFlags.set('relatorios-avancados', false);
-    
+
     // Flags de experimento
     this.fallbackFlags.set('ab-test-onboarding', false);
     this.fallbackFlags.set('canary-release-api-v2', false);
-    
+
     // Flags de circuit breaker
     this.fallbackFlags.set('circuit-breaker-payments', false);
     this.fallbackFlags.set('circuit-breaker-clicksign', false);
@@ -138,7 +143,6 @@ class FeatureFlagService {
 
       this.initialized = true;
       logger.info(`Feature flag service initialized for ${this.config.environment}`);
-      
     } catch (error) {
       logger.error('Failed to initialize feature flags:', error);
       this.initialized = true; // Marca como inicializado para usar fallback
@@ -185,7 +189,6 @@ class FeatureFlagService {
       const enabled = unleashIsEnabled(flagName, sanitizedContext);
       logger.debug(`Flag ${flagName}: ${enabled}`, { context: sanitizedContext });
       return enabled;
-      
     } catch (error) {
       logger.error(`Error checking flag ${flagName}:`, error);
       // Em caso de erro, usa fallback
@@ -196,16 +199,19 @@ class FeatureFlagService {
   /**
    * Verifica múltiplas flags de uma vez
    */
-  async checkMultiple(flagNames: string[], context?: FeatureFlagContext): Promise<Record<string, boolean>> {
+  async checkMultiple(
+    flagNames: string[],
+    context?: FeatureFlagContext
+  ): Promise<Record<string, boolean>> {
     const results: Record<string, boolean> = {};
-    
+
     // Executa verificações em paralelo
     await Promise.all(
       flagNames.map(async (flagName) => {
         results[flagName] = await this.isEnabled(flagName, context);
       })
     );
-    
+
     return results;
   }
 
@@ -237,7 +243,6 @@ class FeatureFlagService {
       const variant = getVariant(flagName, sanitizedContext);
       logger.debug(`Variant for ${flagName}:`, variant);
       return variant;
-      
     } catch (error) {
       logger.error(`Error getting variant for ${flagName}:`, error);
       return { name: 'disabled', enabled: false };
@@ -276,7 +281,7 @@ class FeatureFlagService {
 export const featureFlagService = new FeatureFlagService();
 
 // Export helper functions para uso direto
-export const isEnabled = (flagName: string, context?: FeatureFlagContext) => 
+export const isEnabled = (flagName: string, context?: FeatureFlagContext) =>
   featureFlagService.isEnabled(flagName, context);
 
 export const checkMultipleFlags = (flagNames: string[], context?: FeatureFlagContext) =>

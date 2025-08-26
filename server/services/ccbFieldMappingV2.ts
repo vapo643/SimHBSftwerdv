@@ -3,7 +3,7 @@
  * Coordenadas precisas fornecidas pelo usuário + detecção inteligente
  */
 
-import { PDFDocument, PDFPage, PDFFont, rgb } from "pdf-lib";
+import { PDFDocument, PDFPage, PDFFont, rgb } from 'pdf-lib';
 
 interface FieldCoordinate {
   x: number;
@@ -31,7 +31,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 110,
     y: 750,
     size: 11,
-    label: "Cédula Nº",
+    label: 'Cédula Nº',
   },
 
   dataEmissao: {
@@ -39,7 +39,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 315,
     y: 750,
     size: 11,
-    label: "Data de Emissão",
+    label: 'Data de Emissão',
   },
 
   finalidadeOperacao: {
@@ -47,7 +47,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 485,
     y: 750,
     size: 10,
-    label: "Finalidade da Operação",
+    label: 'Finalidade da Operação',
     maxWidth: 100,
   },
 
@@ -56,7 +56,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 475,
     y: 700,
     size: 11,
-    label: "CPF/CNPJ",
+    label: 'CPF/CNPJ',
   },
 
   nomeRazaoSocial: {
@@ -64,7 +64,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 160,
     y: 650,
     size: 11,
-    label: "Nome/Razão Social",
+    label: 'Nome/Razão Social',
     maxWidth: 200,
   },
 
@@ -73,7 +73,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 270,
     y: 650,
     size: 11,
-    label: "RG",
+    label: 'RG',
   },
 
   enderecoEmitente: {
@@ -81,7 +81,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 105,
     y: 600,
     size: 10,
-    label: "Endereço",
+    label: 'Endereço',
     maxWidth: 400,
   },
 
@@ -90,7 +90,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 115,
     y: 500,
     size: 11,
-    label: "Razão Social",
+    label: 'Razão Social',
     maxWidth: 350,
   },
 
@@ -99,7 +99,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 105,
     y: 450,
     size: 10,
-    label: "Endereço",
+    label: 'Endereço',
     maxWidth: 400,
   },
 
@@ -108,7 +108,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 155,
     y: 400,
     size: 12,
-    label: "1. Valor de Principal",
+    label: '1. Valor de Principal',
   },
 
   custoEfetivoTotal: {
@@ -116,7 +116,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 455,
     y: 200,
     size: 11,
-    label: "16.Custo Efetivo Total - CET",
+    label: '16.Custo Efetivo Total - CET',
   },
 
   // ========== PÁGINA 2 ==========
@@ -125,7 +125,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 160,
     y: 690,
     size: 11,
-    label: "N° Banco",
+    label: 'N° Banco',
   },
 
   contaNumeroEmitente: {
@@ -133,7 +133,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 430,
     y: 690,
     size: 11,
-    label: "Conta N°",
+    label: 'Conta N°',
   },
 
   nomeInstituicaoFavorecida: {
@@ -141,7 +141,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 55,
     y: 550,
     size: 10,
-    label: "Nome da Instituição favorecida",
+    label: 'Nome da Instituição favorecida',
     maxWidth: 180,
   },
 
@@ -150,7 +150,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 255,
     y: 550,
     size: 10,
-    label: "Nº contrato",
+    label: 'Nº contrato',
   },
 
   linhaDigitavelBoleto: {
@@ -158,7 +158,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 405,
     y: 550,
     size: 9,
-    label: "Linha digitavel do boleto",
+    label: 'Linha digitavel do boleto',
     maxWidth: 180,
   },
 
@@ -169,7 +169,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 55,
     y: 700,
     size: 10,
-    label: "Data Pagamento",
+    label: 'Data Pagamento',
   },
 
   valorPagamento1: {
@@ -177,7 +177,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 155,
     y: 700,
     size: 10,
-    label: "Valor R$",
+    label: 'Valor R$',
   },
 
   linhaDigitavel1: {
@@ -185,7 +185,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 255,
     y: 700,
     size: 9,
-    label: "Número do Cheque/Linha Digitável",
+    label: 'Número do Cheque/Linha Digitável',
     maxWidth: 280,
   },
 
@@ -195,7 +195,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 55,
     y: 650,
     size: 10,
-    label: "Data Pagamento",
+    label: 'Data Pagamento',
   },
 
   valorPagamento2: {
@@ -203,7 +203,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 155,
     y: 650,
     size: 10,
-    label: "Valor R$",
+    label: 'Valor R$',
   },
 
   linhaDigitavel2: {
@@ -211,7 +211,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 255,
     y: 650,
     size: 9,
-    label: "Número do Cheque/Linha Digitável",
+    label: 'Número do Cheque/Linha Digitável',
     maxWidth: 280,
   },
 
@@ -221,7 +221,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 55,
     y: 600,
     size: 10,
-    label: "Data Pagamento",
+    label: 'Data Pagamento',
   },
 
   valorPagamento3: {
@@ -229,7 +229,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 155,
     y: 600,
     size: 10,
-    label: "Valor R$",
+    label: 'Valor R$',
   },
 
   linhaDigitavel3: {
@@ -237,7 +237,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 255,
     y: 600,
     size: 9,
-    label: "Número do Cheque/Linha Digitável",
+    label: 'Número do Cheque/Linha Digitável',
     maxWidth: 280,
   },
 
@@ -247,7 +247,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 55,
     y: 550,
     size: 10,
-    label: "Data Pagamento",
+    label: 'Data Pagamento',
   },
 
   valorPagamento4: {
@@ -255,7 +255,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 155,
     y: 550,
     size: 10,
-    label: "Valor R$",
+    label: 'Valor R$',
   },
 
   linhaDigitavel4: {
@@ -263,7 +263,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 255,
     y: 550,
     size: 9,
-    label: "Número do Cheque/Linha Digitável",
+    label: 'Número do Cheque/Linha Digitável',
     maxWidth: 280,
   },
 
@@ -273,7 +273,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 55,
     y: 500,
     size: 10,
-    label: "Data Pagamento",
+    label: 'Data Pagamento',
   },
 
   valorPagamento5: {
@@ -281,7 +281,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 155,
     y: 500,
     size: 10,
-    label: "Valor R$",
+    label: 'Valor R$',
   },
 
   linhaDigitavel5: {
@@ -289,7 +289,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 255,
     y: 500,
     size: 9,
-    label: "Número do Cheque/Linha Digitável",
+    label: 'Número do Cheque/Linha Digitável',
     maxWidth: 280,
   },
 
@@ -299,7 +299,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 55,
     y: 450,
     size: 10,
-    label: "Data Pagamento",
+    label: 'Data Pagamento',
   },
 
   valorPagamento6: {
@@ -307,7 +307,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 155,
     y: 450,
     size: 10,
-    label: "Valor R$",
+    label: 'Valor R$',
   },
 
   linhaDigitavel6: {
@@ -315,7 +315,7 @@ export const CCB_FIELD_MAPPING_V2: PageFieldMapping = {
     x: 255,
     y: 450,
     size: 9,
-    label: "Número do Cheque/Linha Digitável",
+    label: 'Número do Cheque/Linha Digitável',
     maxWidth: 280,
   },
 };
@@ -366,13 +366,13 @@ export class CoordinateAdjuster {
     const adjusted = { ...coord };
 
     // Ajustes específicos por tipo de campo
-    if (fieldName.includes("data")) {
+    if (fieldName.includes('data')) {
       // Datas geralmente precisam de um pequeno ajuste
       adjusted.x += 2;
-    } else if (fieldName.includes("valor")) {
+    } else if (fieldName.includes('valor')) {
       // Valores monetários podem precisar de alinhamento à direita
       adjusted.x += 5;
-    } else if (fieldName.includes("linha")) {
+    } else if (fieldName.includes('linha')) {
       // Linhas digitáveis são longas, ajustar para caber
       adjusted.size = Math.min(adjusted.size || 10, 9);
     }
@@ -474,9 +474,9 @@ export class FieldDetector {
    * Quebra texto em múltiplas linhas
    */
   private wrapText(text: string, maxWidth: number, font: PDFFont, size: number): string[] {
-    const words = text.split(" ");
+    const words = text.split(' ');
     const lines: string[] = [];
-    let currentLine = "";
+    let currentLine = '';
 
     for (const word of words) {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
@@ -500,14 +500,14 @@ export class FieldDetector {
   private async getFieldValue(fieldName: string, data: any): Promise<string> {
     // Buscar configuração da empresa (vamos simular por enquanto)
     const configEmpresa = {
-      razaoSocial: "SIMPIX LTDA",
-      cnpj: "00.000.000/0001-00",
-      endereco: "Av. Paulista, 1000",
-      complemento: "10º andar",
-      bairro: "Bela Vista",
-      cep: "01310-100",
-      cidade: "São Paulo",
-      uf: "SP",
+      razaoSocial: 'SIMPIX LTDA',
+      cnpj: '00.000.000/0001-00',
+      endereco: 'Av. Paulista, 1000',
+      complemento: '10º andar',
+      bairro: 'Bela Vista',
+      cep: '01310-100',
+      cidade: 'São Paulo',
+      uf: 'SP',
     };
 
     // Formatar endereço completo do cliente
@@ -517,45 +517,45 @@ export class FieldDetector {
     const enderecoCredorCompleto = `${configEmpresa.endereco}, ${configEmpresa.complemento} - ${configEmpresa.bairro} - ${configEmpresa.cidade}/${configEmpresa.uf} - CEP ${configEmpresa.cep}`;
 
     // Determinar se é PF ou PJ
-    const isPJ = data.tipoPessoa === "PJ";
+    const isPJ = data.tipoPessoa === 'PJ';
     const nomeOuRazao = isPJ ? data.clienteRazaoSocial || data.clienteNome : data.clienteNome;
     const documentoIdentificacao = isPJ ? data.clienteCnpj || data.clienteCpf : data.clienteCpf;
 
     // Mapeamento completo com TODOS os campos novos
     const fieldMap: { [key: string]: string } = {
       // PÁGINA 1 - IDENTIFICAÇÃO E VALORES
-      numeroCedula: data.id ? `CCB-${data.id.slice(0, 8).toUpperCase()}` : "",
+      numeroCedula: data.id ? `CCB-${data.id.slice(0, 8).toUpperCase()}` : '',
       dataEmissao: data.dataLiberacao
-        ? new Date(data.dataLiberacao).toLocaleDateString("pt-BR")
+        ? new Date(data.dataLiberacao).toLocaleDateString('pt-BR')
         : data.dataAprovacao
-          ? new Date(data.dataAprovacao).toLocaleDateString("pt-BR")
+          ? new Date(data.dataAprovacao).toLocaleDateString('pt-BR')
           : data.createdAt
-            ? new Date(data.createdAt).toLocaleDateString("pt-BR")
-            : new Date().toLocaleDateString("pt-BR"),
-      finalidadeOperacao: data.finalidade || "Capital de Giro",
+            ? new Date(data.createdAt).toLocaleDateString('pt-BR')
+            : new Date().toLocaleDateString('pt-BR'),
+      finalidadeOperacao: data.finalidade || 'Capital de Giro',
 
       // Dados do cliente COMPLETOS
-      cpfCnpj: documentoIdentificacao || "",
-      nomeRazaoSocial: nomeOuRazao || "",
-      rg: data.clienteRg || "",
-      rgOrgaoExpedidor: data.clienteOrgaoEmissor || data.clienteOrgaoExpedidor || "",
-      rgUf: data.clienteRgUf || "",
-      rgDataEmissao: data.clienteRgDataEmissao || "",
+      cpfCnpj: documentoIdentificacao || '',
+      nomeRazaoSocial: nomeOuRazao || '',
+      rg: data.clienteRg || '',
+      rgOrgaoExpedidor: data.clienteOrgaoEmissor || data.clienteOrgaoExpedidor || '',
+      rgUf: data.clienteRgUf || '',
+      rgDataEmissao: data.clienteRgDataEmissao || '',
       enderecoEmitente: enderecoClienteCompleto,
-      cidadeEmitente: data.clienteCidade || "",
-      ufEmitente: data.clienteUf || "",
-      cepEmitente: data.clienteCep || "",
-      nacionalidade: data.clienteNacionalidade || "Brasileira",
-      estadoCivil: data.clienteEstadoCivil || "",
-      localNascimento: data.clienteLocalNascimento || "",
+      cidadeEmitente: data.clienteCidade || '',
+      ufEmitente: data.clienteUf || '',
+      cepEmitente: data.clienteCep || '',
+      nacionalidade: data.clienteNacionalidade || 'Brasileira',
+      estadoCivil: data.clienteEstadoCivil || '',
+      localNascimento: data.clienteLocalNascimento || '',
 
       // Dados do credor (empresa) - SEMPRE SIMPIX (REGRA DE NEGÓCIO)
-      razaoSocialCredor: "SIMPIX SOLUCOES E INTERMEDIACOES LTDA",
-      cnpjCredor: "42.162.929/0001-67",
-      enderecoCredor: "AV PAULO PEREIRA GOMES, 1156",
-      cidadeCredor: "SERRA",
-      ufCredor: "ES",
-      cepCredor: "29.166-828",
+      razaoSocialCredor: 'SIMPIX SOLUCOES E INTERMEDIACOES LTDA',
+      cnpjCredor: '42.162.929/0001-67',
+      enderecoCredor: 'AV PAULO PEREIRA GOMES, 1156',
+      cidadeCredor: 'SERRA',
+      ufCredor: 'ES',
+      cepCredor: '29.166-828',
 
       // Valores e taxas COMPLETOS
       valorPrincipal: this.formatCurrency(data.valor),
@@ -569,8 +569,8 @@ export class FieldDetector {
       ),
 
       // Juros e modalidades
-      jurosModalidade: data.jurosModalidade || data.modalidadeJuros || "Pré-Fixados",
-      periodicidadeCapitalizacao: data.periodicidadeCapitalizacao || "Mensal",
+      jurosModalidade: data.jurosModalidade || data.modalidadeJuros || 'Pré-Fixados',
+      periodicidadeCapitalizacao: data.periodicidadeCapitalizacao || 'Mensal',
       taxaJurosMensal: this.formatPercentual(data.taxaJuros || 2.5),
       taxaJurosAnual: this.formatPercentual(
         data.taxaJurosAnual || this.calcularTaxaAnual(data.taxaJuros)
@@ -585,12 +585,12 @@ export class FieldDetector {
         data.prazo || 1
       ),
       dataLiberacaoRecurso: data.dataLiberacao
-        ? new Date(data.dataLiberacao).toLocaleDateString("pt-BR")
-        : "",
+        ? new Date(data.dataLiberacao).toLocaleDateString('pt-BR')
+        : '',
 
       // Formas de pagamento
-      formaPagamento: data.formaPagamento || "Boleto Bancário",
-      formaLiberacao: data.formaLiberacao || "Depósito em Conta",
+      formaPagamento: data.formaPagamento || 'Boleto Bancário',
+      formaLiberacao: data.formaLiberacao || 'Depósito em Conta',
       pracaPagamento: data.pracaPagamento || configEmpresa.cidade,
       anoBase: `${data.anoBase || 365} dias`,
 
@@ -601,12 +601,12 @@ export class FieldDetector {
       // PÁGINA 2 - DADOS BANCÁRIOS COMPLETOS
       // Detectar se é PIX ou conta bancária
       numeroBancoEmitente:
-        data.metodoPagamento === "pix"
+        data.metodoPagamento === 'pix'
           ? this.extractBankCode(data.dadosPagamentoPixBanco)
           : data.dadosPagamentoCodigoBanco || this.extractBankCode(data.dadosPagamentoBanco),
 
       contaNumeroEmitente:
-        data.metodoPagamento === "pix"
+        data.metodoPagamento === 'pix'
           ? `PIX: ${data.dadosPagamentoPix}`
           : this.formatAccountNumber(
               data.dadosPagamentoAgencia,
@@ -615,29 +615,29 @@ export class FieldDetector {
             ),
 
       nomeInstituicaoFavorecida:
-        data.metodoPagamento === "pix"
+        data.metodoPagamento === 'pix'
           ? data.dadosPagamentoPixBanco
-          : data.dadosPagamentoBanco || "",
+          : data.dadosPagamentoBanco || '',
 
-      tipoContaEmitente: data.dadosPagamentoTipo || "Conta Corrente",
+      tipoContaEmitente: data.dadosPagamentoTipo || 'Conta Corrente',
       nomeTitularConta:
-        data.metodoPagamento === "pix"
+        data.metodoPagamento === 'pix'
           ? data.dadosPagamentoPixNomeTitular
-          : data.dadosPagamentoNomeTitular || "",
+          : data.dadosPagamentoNomeTitular || '',
 
       cpfTitularConta:
-        data.metodoPagamento === "pix"
+        data.metodoPagamento === 'pix'
           ? data.dadosPagamentoPixCpfTitular
-          : data.dadosPagamentoCpfTitular || "",
+          : data.dadosPagamentoCpfTitular || '',
 
-      numeroContrato: data.id || "",
-      linhaDigitavelBoleto: (await this.buscarLinhaDigitavel(data.id)) || "",
+      numeroContrato: data.id || '',
+      linhaDigitavelBoleto: (await this.buscarLinhaDigitavel(data.id)) || '',
 
       // PÁGINA 8 - PAGAMENTOS
       ...this.generatePaymentFields(data),
     };
 
-    return await Promise.resolve(fieldMap[fieldName] || "");
+    return await Promise.resolve(fieldMap[fieldName] || '');
   }
 
   /**
@@ -655,14 +655,14 @@ export class FieldDetector {
       );
       fields[`dataPagamento${i}`] = vencimento;
       fields[`valorPagamento${i}`] = this.formatCurrency(valorParcela);
-      fields[`linhaDigitavel${i}`] = ""; // Será preenchido quando boletos forem gerados
+      fields[`linhaDigitavel${i}`] = ''; // Será preenchido quando boletos forem gerados
     }
 
     // Preencher campos vazios restantes
     for (let i = numParcelas + 1; i <= 6; i++) {
-      fields[`dataPagamento${i}`] = "";
-      fields[`valorPagamento${i}`] = "";
-      fields[`linhaDigitavel${i}`] = "";
+      fields[`dataPagamento${i}`] = '';
+      fields[`valorPagamento${i}`] = '';
+      fields[`linhaDigitavel${i}`] = '';
     }
 
     return fields;
@@ -672,9 +672,9 @@ export class FieldDetector {
    * Formata valor monetário
    */
   private formatCurrency(value: number | string): string {
-    if (!value) return "R$ 0,00";
-    const num = typeof value === "string" ? parseFloat(value) : value;
-    return `R$ ${num.toFixed(2).replace(".", ",")}`;
+    if (!value) return 'R$ 0,00';
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return `R$ ${num.toFixed(2).replace('.', ',')}`;
   }
 
   /**
@@ -685,10 +685,10 @@ export class FieldDetector {
 
     if (!dataBase) {
       data = new Date();
-    } else if (typeof dataBase === "string") {
+    } else if (typeof dataBase === 'string') {
       // Verifica se é formato ISO ou BR
-      if (dataBase.includes("/")) {
-        const [dia, mes, ano] = dataBase.split("/").map(Number);
+      if (dataBase.includes('/')) {
+        const [dia, mes, ano] = dataBase.split('/').map(Number);
         data = new Date(ano, mes - 1, dia);
       } else {
         data = new Date(dataBase);
@@ -699,31 +699,31 @@ export class FieldDetector {
 
     // Adiciona meses para calcular vencimento
     data.setMonth(data.getMonth() + mesesAdicionais);
-    return data.toLocaleDateString("pt-BR");
+    return data.toLocaleDateString('pt-BR');
   }
 
   /**
    * Extrai código do banco do nome
    */
   private extractBankCode(bankName: string): string {
-    if (!bankName) return "";
+    if (!bankName) return '';
 
     const bankCodes: { [key: string]: string } = {
-      "banco do brasil": "001",
-      bb: "001",
-      bradesco: "237",
-      itaú: "341",
-      itau: "341",
-      santander: "033",
-      caixa: "104",
-      "caixa economica": "104",
-      cef: "104",
-      inter: "077",
-      "banco inter": "077",
-      nubank: "260",
-      sicoob: "756",
-      sicredi: "748",
-      banrisul: "041",
+      'banco do brasil': '001',
+      bb: '001',
+      bradesco: '237',
+      itaú: '341',
+      itau: '341',
+      santander: '033',
+      caixa: '104',
+      'caixa economica': '104',
+      cef: '104',
+      inter: '077',
+      'banco inter': '077',
+      nubank: '260',
+      sicoob: '756',
+      sicredi: '748',
+      banrisul: '041',
     };
 
     const normalizedBank = bankName.toLowerCase().trim();
@@ -740,17 +740,17 @@ export class FieldDetector {
       }
     }
 
-    return "";
+    return '';
   }
 
   /**
    * Formata número da conta com agência e dígito
    */
   private formatAccountNumber(agencia: string, conta: string, digito?: string): string {
-    if (!agencia && !conta) return "";
+    if (!agencia && !conta) return '';
 
-    const agenciaFormatted = agencia || "";
-    const contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : "";
+    const agenciaFormatted = agencia || '';
+    const contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : '';
 
     if (agenciaFormatted && contaFormatted) {
       return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`;
@@ -760,7 +760,7 @@ export class FieldDetector {
       return `C/C: ${contaFormatted}`;
     }
 
-    return "";
+    return '';
   }
 
   /**
@@ -771,18 +771,18 @@ export class FieldDetector {
     if (data.clienteLogradouro) {
       const partes = [
         data.clienteLogradouro,
-        data.clienteNumero ? `nº ${data.clienteNumero}` : "",
+        data.clienteNumero ? `nº ${data.clienteNumero}` : '',
         data.clienteComplemento,
         data.clienteBairro,
-        data.clienteCidade ? `${data.clienteCidade}/${data.clienteUf || ""}` : "",
-        data.clienteCep ? `CEP ${data.clienteCep}` : "",
+        data.clienteCidade ? `${data.clienteCidade}/${data.clienteUf || ''}` : '',
+        data.clienteCep ? `CEP ${data.clienteCep}` : '',
       ].filter(Boolean);
 
-      return partes.join(", ");
+      return partes.join(', ');
     }
 
     // Senão, usar campo legado
-    return data.clienteEndereco || "";
+    return data.clienteEndereco || '';
   }
 
   /**
@@ -835,8 +835,8 @@ export class FieldDetector {
    * Formata percentual
    */
   private formatPercentual(valor: number): string {
-    if (!valor) return "0,00%";
-    return `${valor.toFixed(2).replace(".", ",")}%`;
+    if (!valor) return '0,00%';
+    return `${valor.toFixed(2).replace('.', ',')}%`;
   }
 
   /**
@@ -845,7 +845,7 @@ export class FieldDetector {
   private async buscarLinhaDigitavel(propostaId: string): Promise<string> {
     // TODO: Implementar busca real na tabela inter_collections
     // Por enquanto retorna vazio
-    return "";
+    return '';
   }
 
   /**
@@ -853,9 +853,9 @@ export class FieldDetector {
    */
   private calculateCET(taxaJuros: number | string, prazo: number): string {
     // Converte taxa para número se necessário
-    const taxa = typeof taxaJuros === "string" ? parseFloat(taxaJuros) : taxaJuros;
+    const taxa = typeof taxaJuros === 'string' ? parseFloat(taxaJuros) : taxaJuros;
 
-    if (!taxa || !prazo) return "2,5% a.m."; // Valor padrão
+    if (!taxa || !prazo) return '2,5% a.m.'; // Valor padrão
 
     // CET simplificado: taxa + IOF + TAC/prazo
     const iofPercentual = 0.38; // IOF de 0,38%
@@ -880,8 +880,8 @@ export class FieldDetector {
     prazo: number
   ): number {
     // Converte valores para número
-    const principal = typeof valor === "string" ? parseFloat(valor) : valor;
-    const taxa = typeof taxaJuros === "string" ? parseFloat(taxaJuros) : taxaJuros;
+    const principal = typeof valor === 'string' ? parseFloat(valor) : valor;
+    const taxa = typeof taxaJuros === 'string' ? parseFloat(taxaJuros) : taxaJuros;
 
     if (!principal || !prazo) return 0;
 

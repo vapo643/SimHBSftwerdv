@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchWithToken } from "@/lib/apiClient";
+import { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchWithToken } from '@/lib/apiClient';
 
 interface SystemMetadata {
   totalLojas: number;
@@ -17,17 +17,17 @@ interface UseLojaFilteringResult {
   filteredLojas: Loja[];
   isLoading: boolean;
   error: Error | null;
-  filteringMode: "client-side" | "server-side";
+  filteringMode: 'client-side' | 'server-side';
 }
 
 const LOJA_THRESHOLD = 1000; // Threshold for switching between client-side and server-side filtering
 
 export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaFilteringResult {
-  const [filteringMode, setFilteringMode] = useState<"client-side" | "server-side">("client-side");
+  const [filteringMode, setFilteringMode] = useState<'client-side' | 'server-side'>('client-side');
 
   // Convert selectedParceiroId to number for consistency
   const parceiroId =
-    typeof selectedParceiroId === "string" ? parseInt(selectedParceiroId) : selectedParceiroId;
+    typeof selectedParceiroId === 'string' ? parseInt(selectedParceiroId) : selectedParceiroId;
 
   // Query system metadata to determine filtering strategy
   const {
@@ -35,10 +35,10 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
     isLoading: metadataLoading,
     error: metadataError,
   } = useQuery<SystemMetadata>({
-    queryKey: ["/api/admin/system/metadata"],
+    queryKey: ['/api/admin/system/metadata'],
     queryFn: async () => {
-      const response = await fetchWithToken("/api/admin/system/metadata");
-      if (!response.ok) throw new Error("Failed to fetch metadata");
+      const response = await fetchWithToken('/api/admin/system/metadata');
+      if (!response.ok) throw new Error('Failed to fetch metadata');
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -47,7 +47,7 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
   // Determine filtering mode based on total lojas count
   useEffect(() => {
     if (metadata) {
-      const mode = metadata.totalLojas <= LOJA_THRESHOLD ? "client-side" : "server-side";
+      const mode = metadata.totalLojas <= LOJA_THRESHOLD ? 'client-side' : 'server-side';
       setFilteringMode(mode);
     }
   }, [metadata]);
@@ -58,13 +58,13 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
     isLoading: allLojasLoading,
     error: allLojasError,
   } = useQuery<Loja[]>({
-    queryKey: ["/api/lojas"],
+    queryKey: ['/api/lojas'],
     queryFn: async () => {
-      const response = await fetchWithToken("/api/lojas");
-      if (!response.ok) throw new Error("Failed to fetch lojas");
+      const response = await fetchWithToken('/api/lojas');
+      if (!response.ok) throw new Error('Failed to fetch lojas');
       return response.json();
     },
-    enabled: filteringMode === "client-side",
+    enabled: filteringMode === 'client-side',
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
@@ -74,26 +74,26 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
     isLoading: parceiroLojasLoading,
     error: parceiroLojasError,
   } = useQuery<Loja[]>({
-    queryKey: ["/api/admin/parceiros", parceiroId, "lojas"],
+    queryKey: ['/api/admin/parceiros', parceiroId, 'lojas'],
     queryFn: async () => {
       const response = await fetchWithToken(`/api/admin/parceiros/${parceiroId}/lojas`);
-      if (!response.ok) throw new Error("Failed to fetch parceiro lojas");
+      if (!response.ok) throw new Error('Failed to fetch parceiro lojas');
       return response.json();
     },
-    enabled: filteringMode === "server-side" && !!parceiroId,
+    enabled: filteringMode === 'server-side' && !!parceiroId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Filter lojas based on the selected strategy
   const filteredLojas = useMemo(() => {
-    if (filteringMode === "client-side") {
+    if (filteringMode === 'client-side') {
       if (!allLojas) return [];
 
       // If no parceiro is selected, return all lojas
       if (!parceiroId) return allLojas;
 
       // Filter lojas by parceiro ID in memory
-      return allLojas.filter(loja => loja.parceiroId === parceiroId);
+      return allLojas.filter((loja) => loja.parceiroId === parceiroId);
     } else {
       // Server-side mode: return data from API or empty array
       return parceiroLojas || [];
@@ -104,7 +104,7 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
   const isLoading = useMemo(() => {
     if (metadataLoading) return true;
 
-    if (filteringMode === "client-side") {
+    if (filteringMode === 'client-side') {
       return allLojasLoading;
     } else {
       return parceiroId ? parceiroLojasLoading : false;

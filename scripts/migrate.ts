@@ -2,7 +2,7 @@
 /**
  * Script de Migração Segura para Zero Downtime
  * Implementa padrão Expand/Contract para mudanças de schema
- * 
+ *
  * Uso: tsx scripts/migrate.ts
  */
 
@@ -17,23 +17,17 @@ import * as path from 'path';
 // Logger configurado para migração
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   defaultMeta: { service: 'schema-migration' },
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
     }),
-    new winston.transports.File({ 
+    new winston.transports.File({
       filename: 'logs/migrations.log',
-      level: 'info'
-    })
-  ]
+      level: 'info',
+    }),
+  ],
 });
 
 /**
@@ -41,29 +35,29 @@ const logger = winston.createLogger({
  */
 async function checkPreconditions(sql: postgres.Sql) {
   logger.info('🔍 Verificando pré-condições...');
-  
+
   try {
     // Verificar conectividade
     const dbCheck = await sql`SELECT NOW() as current_time`;
     logger.info(`✅ Banco de dados acessível: ${dbCheck[0].current_time}`);
-    
+
     // Verificar espaço em disco
     const diskSpace = await sql`
       SELECT pg_size_pretty(pg_database_size(current_database())) as db_size
     `;
     logger.info(`📊 Tamanho do banco: ${diskSpace[0].db_size}`);
-    
+
     // Verificar locks ativos
     const locks = await sql`
       SELECT COUNT(*) as lock_count 
       FROM pg_locks 
       WHERE NOT granted
     `;
-    
+
     if (parseInt(locks[0].lock_count) > 0) {
       logger.warn(`⚠️ ${locks[0].lock_count} locks pendentes detectados`);
     }
-    
+
     // Criar tabela de tracking se não existir
     await sql`
       CREATE TABLE IF NOT EXISTS __drizzle_migrations (
@@ -77,7 +71,7 @@ async function checkPreconditions(sql: postgres.Sql) {
       )
     `;
     logger.info('✅ Tabela de tracking de migrações verificada');
-    
+
     return true;
   } catch (error) {
     logger.error('❌ Falha nas pré-condições:', error);
@@ -91,16 +85,16 @@ async function checkPreconditions(sql: postgres.Sql) {
 async function createBackupPoint(sql: postgres.Sql) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupName = `pre_migration_${timestamp}`;
-  
+
   logger.info(`💾 Criando ponto de backup: ${backupName}`);
-  
+
   // Em produção, usar pg_dump ou snapshot do provedor cloud
   // Aqui apenas registramos o ponto
   await sql`
     INSERT INTO __drizzle_migrations (hash, created_at, success, error_message)
     VALUES (${backupName}, NOW(), true, 'BACKUP_POINT')
   `;
-  
+
   return backupName;
 }
 
@@ -111,68 +105,68 @@ async function runMigration() {
   const startTime = Date.now();
   logger.info('🚀 Iniciando migração segura...');
   logger.info('📋 Ambiente: ' + (process.env.NODE_ENV || 'development'));
-  
+
   // Configuração de conexão com pool limitado e SSL
-  const sql = postgres(process.env.DATABASE_URL!, { 
+  const sql = postgres(process.env.DATABASE_URL!, {
     max: 1, // Single connection para evitar conflicts
     idle_timeout: 0,
     connect_timeout: 30,
     ssl: 'require', // SSL obrigatório para Supabase
     onnotice: (notice) => {
       logger.info(`📢 PostgreSQL Notice: ${notice.message}`);
-    }
+    },
   });
-  
+
   const db = drizzle(sql, { schema });
-  
+
   try {
     // Passo 1: Verificar pré-condições
     const preCheckOk = await checkPreconditions(sql);
     if (!preCheckOk) {
       throw new Error('Pré-condições não atendidas');
     }
-    
+
     // Passo 2: Criar backup point
     const backupPoint = await createBackupPoint(sql);
     logger.info(`✅ Backup point criado: ${backupPoint}`);
-    
+
     // Passo 3: Executar migração (EXPAND phase)
     logger.info('🔄 Executando fase EXPAND...');
-    
-    await migrate(db, { 
+
+    await migrate(db, {
       migrationsFolder: './migrations',
     });
-    
+
     // Passo 4: Verificar integridade pós-migração
     logger.info('🔍 Verificando integridade...');
-    
+
     const tables = await sql`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public' 
       ORDER BY table_name
     `;
-    
+
     logger.info(`📊 Total de tabelas: ${tables.length}`);
-    
+
     // Verificar constraints
     const constraints = await sql`
       SELECT COUNT(*) as count 
       FROM information_schema.table_constraints 
       WHERE constraint_schema = 'public'
     `;
-    
+
     logger.info(`🔒 Total de constraints: ${constraints[0].count}`);
-    
+
     // Registrar sucesso
     const executionTime = Date.now() - startTime;
     await sql`
       INSERT INTO __drizzle_migrations (hash, created_at, success, execution_time_ms)
       VALUES (${'migration_' + Date.now()}, NOW(), true, ${executionTime})
     `;
-    
+
     logger.info(`✅ Migração EXPAND concluída com sucesso em ${executionTime}ms`);
-    
+
     // Passo 5: Instruções para CONTRACT phase
     logger.info('');
     logger.info('📝 PRÓXIMOS PASSOS:');
@@ -180,13 +174,12 @@ async function runMigration() {
     logger.info('2. Verificar logs de erro');
     logger.info('3. Executar CONTRACT phase quando estável');
     logger.info('');
-    
+
     return true;
-    
   } catch (error: any) {
     const executionTime = Date.now() - startTime;
     logger.error('❌ Erro na migração:', error);
-    
+
     // Registrar falha
     try {
       await sql`
@@ -196,14 +189,14 @@ async function runMigration() {
     } catch (logError) {
       logger.error('Erro ao registrar falha:', logError);
     }
-    
+
     logger.error('');
     logger.error('🔴 AÇÃO REQUERIDA:');
     logger.error('1. Verificar logs detalhados');
     logger.error('2. Considerar rollback com: tsx scripts/rollback.ts');
     logger.error('3. Contatar equipe de infraestrutura se necessário');
     logger.error('');
-    
+
     process.exit(1);
   } finally {
     await sql.end();
@@ -226,12 +219,14 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Executar migração
-runMigration().then(success => {
-  if (success) {
-    logger.info('🎉 Processo de migração concluído com sucesso!');
-    process.exit(0);
-  }
-}).catch(error => {
-  logger.error('💥 Erro fatal no processo de migração:', error);
-  process.exit(1);
-});
+runMigration()
+  .then((success) => {
+    if (success) {
+      logger.info('🎉 Processo de migração concluído com sucesso!');
+      process.exit(0);
+    }
+  })
+  .catch((error) => {
+    logger.error('💥 Erro fatal no processo de migração:', error);
+    process.exit(1);
+  });

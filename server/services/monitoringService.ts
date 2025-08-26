@@ -4,7 +4,7 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { monitoringRepository } from "../repositories/monitoring.repository.js";
+import { monitoringRepository } from '../repositories/monitoring.repository.js';
 
 export class MonitoringService {
   /**
@@ -13,7 +13,7 @@ export class MonitoringService {
   async getDatabaseStats(): Promise<any> {
     try {
       const stats = await monitoringRepository.getDatabaseStats();
-      
+
       return {
         databaseSize: this.formatBytes(stats.database_size),
         activeConnections: parseInt(stats.active_connections),
@@ -22,8 +22,8 @@ export class MonitoringService {
         timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
-      console.error("[MONITORING_SERVICE] Error fetching database stats:", error);
-      throw new Error("Failed to fetch database statistics");
+      console.error('[MONITORING_SERVICE] Error fetching database stats:', error);
+      throw new Error('Failed to fetch database statistics');
     }
   }
 
@@ -33,8 +33,8 @@ export class MonitoringService {
   async getTableStats(): Promise<any[]> {
     try {
       const tables = await monitoringRepository.getTableStats();
-      
-      return tables.map(table => ({
+
+      return tables.map((table) => ({
         schema: table.schemaname,
         table: table.tablename,
         rowCount: parseInt(table.row_count || 0),
@@ -45,8 +45,8 @@ export class MonitoringService {
         needsVacuum: parseInt(table.dead_rows || 0) > parseInt(table.row_count || 0) * 0.1,
       }));
     } catch (error: any) {
-      console.error("[MONITORING_SERVICE] Error fetching table stats:", error);
-      throw new Error("Failed to fetch table statistics");
+      console.error('[MONITORING_SERVICE] Error fetching table stats:', error);
+      throw new Error('Failed to fetch table statistics');
     }
   }
 
@@ -56,8 +56,8 @@ export class MonitoringService {
   async getIndexUsage(): Promise<any[]> {
     try {
       const indexes = await monitoringRepository.getIndexUsage();
-      
-      return indexes.map(index => ({
+
+      return indexes.map((index) => ({
         schema: index.schemaname,
         table: index.tablename,
         index: index.indexname,
@@ -68,8 +68,8 @@ export class MonitoringService {
         efficiency: this.calculateIndexEfficiency(index),
       }));
     } catch (error: any) {
-      console.error("[MONITORING_SERVICE] Error fetching index usage:", error);
-      throw new Error("Failed to fetch index usage");
+      console.error('[MONITORING_SERVICE] Error fetching index usage:', error);
+      throw new Error('Failed to fetch index usage');
     }
   }
 
@@ -84,7 +84,7 @@ export class MonitoringService {
   }> {
     try {
       const connections = await monitoringRepository.getActiveConnections();
-      
+
       // Categorize by state
       const byState = connections.reduce((acc, conn) => {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
@@ -93,14 +93,14 @@ export class MonitoringService {
 
       // Categorize by application
       const byApplication = connections.reduce((acc, conn) => {
-        const app = conn.application_name || "unknown";
+        const app = conn.application_name || 'unknown';
         acc[app] = (acc[app] || 0) + 1;
         return acc;
       }, {} as any);
 
       return {
         total: connections.length,
-        connections: connections.map(conn => ({
+        connections: connections.map((conn) => ({
           pid: conn.pid,
           user: conn.usename,
           application: conn.application_name,
@@ -114,8 +114,8 @@ export class MonitoringService {
         byApplication,
       };
     } catch (error: any) {
-      console.error("[MONITORING_SERVICE] Error fetching connections:", error);
-      throw new Error("Failed to fetch active connections");
+      console.error('[MONITORING_SERVICE] Error fetching connections:', error);
+      throw new Error('Failed to fetch active connections');
     }
   }
 
@@ -123,31 +123,31 @@ export class MonitoringService {
    * Perform comprehensive health check
    */
   async checkHealth(): Promise<{
-    status: "healthy" | "degraded" | "unhealthy";
+    status: 'healthy' | 'degraded' | 'unhealthy';
     checks: any;
     recommendations: string[];
   }> {
     try {
       const health = await monitoringRepository.checkDatabaseHealth();
       const stats = await monitoringRepository.getDatabaseStats();
-      
+
       const recommendations: string[] = [];
-      let status: "healthy" | "degraded" | "unhealthy" = "healthy";
+      let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 
       // Check connection count
       if (parseInt(stats.active_connections) > 50) {
-        status = "degraded";
-        recommendations.push("High number of active connections detected");
+        status = 'degraded';
+        recommendations.push('High number of active connections detected');
       }
 
       // Check database size (warn if > 1GB)
       if (parseInt(stats.database_size) > 1073741824) {
-        recommendations.push("Database size exceeds 1GB, consider cleanup");
+        recommendations.push('Database size exceeds 1GB, consider cleanup');
       }
 
       if (!health.isHealthy) {
-        status = "unhealthy";
-        recommendations.push("Database health check failed");
+        status = 'unhealthy';
+        recommendations.push('Database health check failed');
       }
 
       return {
@@ -156,11 +156,11 @@ export class MonitoringService {
         recommendations,
       };
     } catch (error: any) {
-      console.error("[MONITORING_SERVICE] Health check failed:", error);
+      console.error('[MONITORING_SERVICE] Health check failed:', error);
       return {
-        status: "unhealthy",
+        status: 'unhealthy',
         checks: { error: error.message },
-        recommendations: ["Database connection failed"],
+        recommendations: ['Database connection failed'],
       };
     }
   }
@@ -171,7 +171,7 @@ export class MonitoringService {
   async generateReport(): Promise<any> {
     try {
       const report = await monitoringRepository.generateReport();
-      
+
       // Add analysis and recommendations
       const analysis = {
         databaseSize: this.formatBytes(report.database.database_size),
@@ -184,8 +184,8 @@ export class MonitoringService {
         analysis,
       };
     } catch (error: any) {
-      console.error("[MONITORING_SERVICE] Error generating report:", error);
-      throw new Error("Failed to generate monitoring report");
+      console.error('[MONITORING_SERVICE] Error generating report:', error);
+      throw new Error('Failed to generate monitoring report');
     }
   }
 
@@ -193,8 +193,8 @@ export class MonitoringService {
    * Helper: Format bytes to human readable
    */
   private formatBytes(bytes: string | number): string {
-    const size = typeof bytes === "string" ? parseInt(bytes) : bytes;
-    const units = ["B", "KB", "MB", "GB", "TB"];
+    const size = typeof bytes === 'string' ? parseInt(bytes) : bytes;
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let index = 0;
     let value = size;
 
@@ -212,15 +212,15 @@ export class MonitoringService {
   private calculateIndexEfficiency(index: any): string {
     const scans = parseInt(index.index_scans || 0);
     const reads = parseInt(index.tuples_read || 0);
-    
-    if (scans === 0) return "unused";
-    if (reads === 0) return "efficient";
-    
+
+    if (scans === 0) return 'unused';
+    if (reads === 0) return 'efficient';
+
     const ratio = reads / scans;
-    if (ratio < 10) return "very efficient";
-    if (ratio < 100) return "efficient";
-    if (ratio < 1000) return "moderate";
-    return "inefficient";
+    if (ratio < 10) return 'very efficient';
+    if (ratio < 100) return 'efficient';
+    if (ratio < 1000) return 'moderate';
+    return 'inefficient';
   }
 
   /**
@@ -228,10 +228,10 @@ export class MonitoringService {
    */
   private analyzePerformance(report: any): string {
     const connections = report.activeConnections;
-    
-    if (connections > 50) return "high load";
-    if (connections > 20) return "moderate load";
-    return "normal";
+
+    if (connections > 50) return 'high load';
+    if (connections > 20) return 'moderate load';
+    return 'normal';
   }
 
   /**
@@ -239,12 +239,10 @@ export class MonitoringService {
    */
   private generateRecommendations(report: any): string[] {
     const recommendations: string[] = [];
-    
+
     // Check for unused indexes
-    const unusedIndexes = report.indexes.filter((idx: any) => 
-      parseInt(idx.index_scans || 0) === 0
-    );
-    
+    const unusedIndexes = report.indexes.filter((idx: any) => parseInt(idx.index_scans || 0) === 0);
+
     if (unusedIndexes.length > 0) {
       recommendations.push(`${unusedIndexes.length} unused indexes detected`);
     }

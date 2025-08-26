@@ -1,7 +1,7 @@
 /**
  * Job Status API
  * Endpoint para consultar o status de jobs na fila
- * 
+ *
  * GET /api/jobs/:jobId/status
  */
 
@@ -23,19 +23,19 @@ router.get(
   async (req: AuthenticatedRequest, res) => {
     try {
       const { jobId } = req.params;
-      
+
       console.log(`[JOB STATUS API] 🔍 Consultando status do job: ${jobId}`);
-      
+
       if (!jobId) {
         return res.status(400).json({
-          error: 'Job ID é obrigatório'
+          error: 'Job ID é obrigatório',
         });
       }
-      
+
       // Tentar encontrar o job em todas as filas
       let job = null;
       let queueName = null;
-      
+
       // Buscar job real das filas (desenvolvimento usa mock-queue)
       // Verificar em qual fila o job está baseado no prefixo do ID
       if (jobId.startsWith('pdf-processing')) {
@@ -51,18 +51,18 @@ router.get(
         queueName = 'notifications';
         job = await queues.notification.getJob(jobId);
       }
-      
+
       if (job) {
         // Job encontrado - retornar dados reais
         const state = await job.getState();
         const progress = job.progress;
         const returnvalue = job.returnvalue;
-        
+
         console.log(`[JOB STATUS API] 📊 Job ${jobId} - Status: ${state}, Progress: ${progress}%`);
-        
+
         // Formatar a resposta baseada no estado real do job
         let responseData = null;
-        
+
         if (state === 'completed' && returnvalue) {
           // Para jobs de carnê, incluir a URL do carnê se disponível
           responseData = {
@@ -72,16 +72,16 @@ router.get(
             message: returnvalue.message || 'Processamento concluído',
             processingTime: returnvalue.processingTime,
             size: returnvalue.size,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           };
         } else if (state === 'failed') {
           responseData = {
             success: false,
             error: job.failedReason || 'Erro desconhecido no processamento',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           };
         }
-        
+
         return res.json({
           success: true,
           jobId,
@@ -92,25 +92,24 @@ router.get(
           timestamps: {
             created: job.timestamp ? new Date(job.timestamp).toISOString() : null,
             processed: job.processedOn ? new Date(job.processedOn).toISOString() : null,
-            completed: job.finishedOn ? new Date(job.finishedOn).toISOString() : null
-          }
+            completed: job.finishedOn ? new Date(job.finishedOn).toISOString() : null,
+          },
         });
       }
-      
+
       // Job não encontrado
       console.log(`[JOB STATUS API] ⚠️ Job ${jobId} não encontrado`);
-      
+
       return res.status(404).json({
         error: 'Job não encontrado',
         jobId,
-        hint: 'O job pode ter expirado ou o ID está incorreto'
+        hint: 'O job pode ter expirado ou o ID está incorreto',
       });
-      
     } catch (error: any) {
       console.error(`[JOB STATUS API] ❌ Erro ao consultar status:`, error);
       return res.status(500).json({
         error: 'Erro ao consultar status do job',
-        message: error.message || 'Erro desconhecido'
+        message: error.message || 'Erro desconhecido',
       });
     }
   }

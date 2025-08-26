@@ -4,11 +4,11 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { GenericService } from "./genericService.js";
+import { GenericService } from './genericService.js';
 
 export class TestService extends GenericService {
   constructor() {
-    super("TEST_SERVICE");
+    super('TEST_SERVICE');
   }
 
   /**
@@ -29,6 +29,6 @@ export class TestService extends GenericService {
 }
 
 export const testService = new TestService();
-export const testQueueService = new GenericService("TEST_QUEUE");
-export const testRetryService = new GenericService("TEST_RETRY");
-export const testAuditService = new GenericService("TEST_AUDIT");
+export const testQueueService = new GenericService('TEST_QUEUE');
+export const testRetryService = new GenericService('TEST_RETRY');
+export const testAuditService = new GenericService('TEST_AUDIT');

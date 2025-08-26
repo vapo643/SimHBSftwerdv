@@ -1,5 +1,5 @@
-import React from "react";
-import { Input } from "./input";
+import React from 'react';
+import { Input } from './input';
 
 interface CurrencyInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   value: string;
@@ -9,15 +9,15 @@ interface CurrencyInputProps extends React.InputHTMLAttributes<HTMLInputElement>
 const CurrencyInput: React.FC<CurrencyInputProps> = ({ value, onChange, ...props }) => {
   const formatCurrency = (inputValue: string) => {
     // Remove all non-digit characters
-    const digits = inputValue.replace(/\D/g, "");
+    const digits = inputValue.replace(/\D/g, '');
 
     // Convert to number and divide by 100 to get decimal value
     const amount = parseInt(digits, 10) / 100;
 
     // Format as Brazilian currency
-    if (isNaN(amount)) return "";
+    if (isNaN(amount)) return '';
 
-    return amount.toLocaleString("pt-BR", {
+    return amount.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -45,7 +45,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({ value, onChange, ...props
         {...props}
         value={value}
         onChange={handleChange}
-        className={`pl-10 ${props.className || ""}`}
+        className={`pl-10 ${props.className || ''}`}
         placeholder="0,00"
       />
     </div>

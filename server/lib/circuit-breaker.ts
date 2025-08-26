@@ -1,7 +1,7 @@
 /**
  * Circuit Breaker Configuration
  * Pattern implementation to prevent cascading failures from external services
- * 
+ *
  * States:
  * - CLOSED: Normal operation, requests pass through
  * - OPEN: Circuit tripped, requests fail immediately
@@ -69,7 +69,9 @@ export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>
   });
 
   breaker.on('close', () => {
-    console.log(`[CIRCUIT_BREAKER] 🟢 ${name} CLOSED - Service recovered, normal operation resumed`);
+    console.log(
+      `[CIRCUIT_BREAKER] 🟢 ${name} CLOSED - Service recovered, normal operation resumed`
+    );
   });
 
   breaker.on('failure', (error) => {
@@ -95,10 +97,11 @@ export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>
  * Check if error is from circuit breaker being open
  */
 export function isCircuitBreakerOpen(error: any): boolean {
-  return error && (
-    error.code === 'EOPENBREAKER' ||
-    error.message?.includes('Breaker is open') ||
-    error.message?.includes('Circuit breaker is OPEN')
+  return (
+    error &&
+    (error.code === 'EOPENBREAKER' ||
+      error.message?.includes('Breaker is open') ||
+      error.message?.includes('Circuit breaker is OPEN'))
   );
 }
 
@@ -127,7 +130,7 @@ export function getCircuitBreakerStats(breaker: CircuitBreaker): {
   const stats = breaker.stats;
   const totalRequests = stats.fires;
   const errorPercentage = totalRequests > 0 ? (stats.failures / totalRequests) * 100 : 0;
-  
+
   return {
     state: breaker.opened ? 'OPEN' : breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
     stats,

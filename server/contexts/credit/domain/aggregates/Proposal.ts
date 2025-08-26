@@ -11,7 +11,7 @@ export enum ProposalStatus {
   REJECTED = 'rejeitado',
   PENDING = 'pendenciado',
   PAID = 'pago',
-  FORMALIZED = 'formalizado'
+  FORMALIZED = 'formalizado',
 }
 
 export interface CustomerData {
@@ -72,7 +72,7 @@ export class Proposal {
     this.productId = productId;
     this.createdAt = new Date();
     this.updatedAt = new Date();
-    
+
     this.validateInvariants();
   }
 
@@ -81,7 +81,7 @@ export class Proposal {
     if (this.status !== ProposalStatus.DRAFT) {
       throw new Error('Only draft proposals can be submitted for analysis');
     }
-    
+
     this.validateForSubmission();
     this.status = ProposalStatus.WAITING_ANALYSIS;
     this.updatedAt = new Date();
@@ -91,7 +91,7 @@ export class Proposal {
     if (this.status !== ProposalStatus.WAITING_ANALYSIS) {
       throw new Error('Only waiting proposals can start analysis');
     }
-    
+
     this.status = ProposalStatus.IN_ANALYSIS;
     this.updatedAt = new Date();
   }
@@ -100,7 +100,7 @@ export class Proposal {
     if (this.status !== ProposalStatus.IN_ANALYSIS) {
       throw new Error('Only proposals in analysis can be approved');
     }
-    
+
     this.status = ProposalStatus.APPROVED;
     this.updatedAt = new Date();
   }
@@ -109,7 +109,7 @@ export class Proposal {
     if (this.status !== ProposalStatus.IN_ANALYSIS) {
       throw new Error('Only proposals in analysis can be rejected');
     }
-    
+
     this.status = ProposalStatus.REJECTED;
     this.observations = reason;
     this.updatedAt = new Date();
@@ -119,7 +119,7 @@ export class Proposal {
     if (this.status !== ProposalStatus.IN_ANALYSIS) {
       throw new Error('Only proposals in analysis can be set as pending');
     }
-    
+
     this.status = ProposalStatus.PENDING;
     this.pendingReason = reason;
     this.updatedAt = new Date();
@@ -129,7 +129,7 @@ export class Proposal {
     if (this.status !== ProposalStatus.APPROVED) {
       throw new Error('Only approved proposals can be formalized');
     }
-    
+
     this.status = ProposalStatus.FORMALIZED;
     this.updatedAt = new Date();
   }
@@ -138,7 +138,7 @@ export class Proposal {
     if (this.status !== ProposalStatus.FORMALIZED) {
       throw new Error('Only formalized proposals can be marked as paid');
     }
-    
+
     this.status = ProposalStatus.PAID;
     this.updatedAt = new Date();
   }
@@ -175,12 +175,12 @@ export class Proposal {
   private isValidCPF(cpf: string): boolean {
     // Remove non-digits
     cpf = cpf.replace(/\D/g, '');
-    
+
     if (cpf.length !== 11) return false;
-    
+
     // Check for known invalid patterns
     if (/^(\d)\1{10}$/.test(cpf)) return false;
-    
+
     // Validate check digits
     let sum = 0;
     for (let i = 0; i < 9; i++) {
@@ -189,7 +189,7 @@ export class Proposal {
     let checkDigit = 11 - (sum % 11);
     if (checkDigit === 10 || checkDigit === 11) checkDigit = 0;
     if (checkDigit !== parseInt(cpf.charAt(9))) return false;
-    
+
     sum = 0;
     for (let i = 0; i < 10; i++) {
       sum += parseInt(cpf.charAt(i)) * (11 - i);
@@ -197,49 +197,71 @@ export class Proposal {
     checkDigit = 11 - (sum % 11);
     if (checkDigit === 10 || checkDigit === 11) checkDigit = 0;
     if (checkDigit !== parseInt(cpf.charAt(10))) return false;
-    
+
     return true;
   }
 
   // Financial Calculations
   public calculateMonthlyPayment(): number | null {
     const { requestedAmount, term, interestRate } = this.loanConditions;
-    
+
     // Se não tiver taxa de juros definida, retorna null
     if (!interestRate || interestRate <= 0) {
       return null;
     }
-    
+
     // Cálculo de parcela usando fórmula de juros compostos
     const monthlyRate = interestRate / 100 / 12;
     const numerator = requestedAmount * monthlyRate * Math.pow(1 + monthlyRate, term);
     const denominator = Math.pow(1 + monthlyRate, term) - 1;
-    
+
     return numerator / denominator;
   }
 
   public calculateTotalAmount(): number | null {
     const monthlyPayment = this.calculateMonthlyPayment();
-    
+
     if (!monthlyPayment) {
       return null;
     }
-    
+
     return monthlyPayment * this.loanConditions.term;
   }
 
   // Getters
-  public getId(): string { return this.id; }
-  public getStatus(): ProposalStatus { return this.status; }
-  public getCustomerData(): CustomerData { return { ...this.customerData }; }
-  public getLoanConditions(): LoanConditions { return { ...this.loanConditions }; }
-  public getPartnerId(): string | undefined { return this.partnerId; }
-  public getStoreId(): string | undefined { return this.storeId; }
-  public getProductId(): string | undefined { return this.productId; }
-  public getCreatedAt(): Date { return this.createdAt; }
-  public getUpdatedAt(): Date { return this.updatedAt; }
-  public getPendingReason(): string | undefined { return this.pendingReason; }
-  public getObservations(): string | undefined { return this.observations; }
+  public getId(): string {
+    return this.id;
+  }
+  public getStatus(): ProposalStatus {
+    return this.status;
+  }
+  public getCustomerData(): CustomerData {
+    return { ...this.customerData };
+  }
+  public getLoanConditions(): LoanConditions {
+    return { ...this.loanConditions };
+  }
+  public getPartnerId(): string | undefined {
+    return this.partnerId;
+  }
+  public getStoreId(): string | undefined {
+    return this.storeId;
+  }
+  public getProductId(): string | undefined {
+    return this.productId;
+  }
+  public getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  public getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
+  public getPendingReason(): string | undefined {
+    return this.pendingReason;
+  }
+  public getObservations(): string | undefined {
+    return this.observations;
+  }
 
   // Factory method to reconstruct from persistence
   public static fromPersistence(data: any): Proposal {
@@ -255,7 +277,7 @@ export class Proposal {
       createdAt: new Date(data.createdAt),
       updatedAt: new Date(data.updatedAt),
       pendingReason: data.pendingReason,
-      observations: data.observations
+      observations: data.observations,
     });
     return proposal;
   }

@@ -2,50 +2,60 @@
  * Database Test Helper
  * PAM V1.0 - Robust Database Cleanup for Integration Tests
  * Date: 19/08/2025
- * 
+ *
  * This module provides utilities for managing test database state,
  * ensuring proper cleanup between test runs while respecting foreign key constraints.
  */
 
-import { db } from "../../server/lib/supabase";
-import { sql } from "drizzle-orm";
-import postgres from "postgres";
-import { v4 as uuidv4 } from "uuid";
+import { db } from '../../server/lib/supabase';
+import { sql } from 'drizzle-orm';
+import postgres from 'postgres';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Cleans the test database by truncating all tables with CASCADE
  * This ensures all foreign key constraints are respected
- * 
+ *
  * SAFETY: This function should ONLY be used in test environments
  */
 export async function cleanTestDatabase(): Promise<void> {
   // TRIPLA PROTEÇÃO CONTRA EXECUÇÃO EM PRODUÇÃO - PAM V1.0 FORENSE
-  
+
   // Proteção 1: NODE_ENV DEVE ser explicitamente 'test' (não apenas "não-production")
   if (process.env.NODE_ENV !== 'test') {
-    console.error(`🔴 CRITICAL SECURITY ALERT: NODE_ENV='${process.env.NODE_ENV}' - deve ser 'test'`);
-    throw new Error(`FATAL: NODE_ENV='${process.env.NODE_ENV}' - Esta função só pode executar com NODE_ENV='test'. Operação abortada para proteger dados.`);
+    console.error(
+      `🔴 CRITICAL SECURITY ALERT: NODE_ENV='${process.env.NODE_ENV}' - deve ser 'test'`
+    );
+    throw new Error(
+      `FATAL: NODE_ENV='${process.env.NODE_ENV}' - Esta função só pode executar com NODE_ENV='test'. Operação abortada para proteger dados.`
+    );
   }
-  
+
   // Proteção 2: TEST_DATABASE_URL deve estar configurado
   if (!process.env.TEST_DATABASE_URL) {
     console.error('🔴 CRITICAL SECURITY ALERT: TEST_DATABASE_URL não está configurado');
-    throw new Error('FATAL: TEST_DATABASE_URL não configurado. Use um banco de dados de teste dedicado. Operação abortada.');
+    throw new Error(
+      'FATAL: TEST_DATABASE_URL não configurado. Use um banco de dados de teste dedicado. Operação abortada.'
+    );
   }
-  
+
   // Proteção 3: Rejeitar URLs de produção conhecidas (defesa em profundidade)
   const prodPatterns = ['prod', 'production', 'azure', 'live', 'main'];
   const dbUrl = process.env.DATABASE_URL?.toLowerCase() || '';
-  const detectedProdPattern = prodPatterns.find(pattern => dbUrl.includes(pattern));
-  
+  const detectedProdPattern = prodPatterns.find((pattern) => dbUrl.includes(pattern));
+
   if (detectedProdPattern) {
-    console.error(`🔴 CRITICAL SECURITY ALERT: DATABASE_URL contém padrão de produção: '${detectedProdPattern}'`);
-    throw new Error(`FATAL: DATABASE_URL parece ser de produção (contém '${detectedProdPattern}'). Operação abortada.`);
+    console.error(
+      `🔴 CRITICAL SECURITY ALERT: DATABASE_URL contém padrão de produção: '${detectedProdPattern}'`
+    );
+    throw new Error(
+      `FATAL: DATABASE_URL parece ser de produção (contém '${detectedProdPattern}'). Operação abortada.`
+    );
   }
-  
+
   const startTime = Date.now();
-  console.log("[TEST DB] 🧹 Starting comprehensive database cleanup...");
-  
+  console.log('[TEST DB] 🧹 Starting comprehensive database cleanup...');
+
   try {
     // List of all tables to truncate
     // Order matters less with CASCADE, but we list them logically
@@ -63,10 +73,10 @@ export async function cleanTestDatabase(): Promise<void> {
       'proposta_logs',
       'referencia_pessoal',
       'comunicacao_logs',
-      
+
       // Core tables
       'propostas',
-      
+
       // Reference tables (less likely to have test data but included for completeness)
       'produto_tabela_comercial',
       'tabelas_comerciais',
@@ -75,29 +85,26 @@ export async function cleanTestDatabase(): Promise<void> {
       'lojas',
       'parceiros',
       'users',
-      
+
       // Security tables
-      'security_logs'
+      'security_logs',
     ];
-    
+
     // Build the TRUNCATE command
-    const tableList = tables.map(t => `"${t}"`).join(', ');
-    
+    const tableList = tables.map((t) => `"${t}"`).join(', ');
+
     // Execute TRUNCATE with CASCADE to handle all foreign key dependencies
     // RESTART IDENTITY resets all sequences (auto-increment counters)
-    await db.execute(
-      sql.raw(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`)
-    );
-    
+    await db.execute(sql.raw(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`));
+
     const duration = Date.now() - startTime;
     console.log(`[TEST DB] ✅ Database cleaned successfully in ${duration}ms`);
-    
   } catch (error) {
-    console.error("[TEST DB] ❌ Error during database cleanup:", error);
-    
+    console.error('[TEST DB] ❌ Error during database cleanup:', error);
+
     // Fallback: Try to clean tables individually in reverse dependency order
-    console.log("[TEST DB] 🔄 Attempting fallback cleanup strategy...");
-    
+    console.log('[TEST DB] 🔄 Attempting fallback cleanup strategy...');
+
     try {
       // Tables with foreign keys to propostas (delete first)
       const dependentTables = [
@@ -112,9 +119,9 @@ export async function cleanTestDatabase(): Promise<void> {
         'status_contextuais',
         'proposta_logs',
         'referencia_pessoal',
-        'comunicacao_logs'
+        'comunicacao_logs',
       ];
-      
+
       // Clean dependent tables first
       for (const table of dependentTables) {
         try {
@@ -124,11 +131,11 @@ export async function cleanTestDatabase(): Promise<void> {
           console.warn(`[TEST DB] ⚠️ Could not clean table ${table}:`, e);
         }
       }
-      
+
       // Then clean core tables
       await db.execute(sql.raw(`DELETE FROM "propostas"`));
-      console.log("[TEST DB] ✓ Cleaned table: propostas");
-      
+      console.log('[TEST DB] ✓ Cleaned table: propostas');
+
       // Clean other reference tables if needed
       const referenceTables = [
         'produto_tabela_comercial',
@@ -138,9 +145,9 @@ export async function cleanTestDatabase(): Promise<void> {
         'lojas',
         'parceiros',
         'users',
-        'security_logs'
+        'security_logs',
       ];
-      
+
       for (const table of referenceTables) {
         try {
           await db.execute(sql.raw(`DELETE FROM "${table}"`));
@@ -151,11 +158,10 @@ export async function cleanTestDatabase(): Promise<void> {
           console.debug(`[TEST DB] Skipped table ${table}`);
         }
       }
-      
-      console.log("[TEST DB] ✅ Fallback cleanup completed");
-      
+
+      console.log('[TEST DB] ✅ Fallback cleanup completed');
     } catch (fallbackError) {
-      console.error("[TEST DB] ❌ Fallback cleanup also failed:", fallbackError);
+      console.error('[TEST DB] ❌ Fallback cleanup also failed:', fallbackError);
       throw fallbackError;
     }
   }
@@ -164,7 +170,7 @@ export async function cleanTestDatabase(): Promise<void> {
 /**
  * Creates a clean test environment with all necessary reference data
  * Uses direct postgres connection to bypass ALL Supabase restrictions
- * 
+ *
  * @returns Object containing all created test entities
  */
 export async function setupTestEnvironment(): Promise<{
@@ -175,70 +181,72 @@ export async function setupTestEnvironment(): Promise<{
   testCommercialTableId: number;
 }> {
   const startTime = Date.now();
-  console.log("[TEST DB] 🔧 Setting up test environment with direct postgres connection...");
-  
+  console.log('[TEST DB] 🔧 Setting up test environment with direct postgres connection...');
+
   let directDb: postgres.Sql;
-  
+
   try {
     // Create direct postgres connection - bypasses ALL application layer restrictions
     // CRITICAL: Uses TEST_DATABASE_URL from .env.test when available (mapped to DATABASE_URL in setup.ts)
     const databaseUrl = process.env.DATABASE_URL;
     if (!databaseUrl) {
-      throw new Error("DATABASE_URL not found in environment variables");
+      throw new Error('DATABASE_URL not found in environment variables');
     }
-    
+
     // Safety check: Warn if database doesn't appear to be a test database
     if (!databaseUrl.includes('test')) {
-      console.warn("[TEST DB] ⚠️ WARNING: Database URL doesn't contain 'test' - ensure you're using a test database!");
+      console.warn(
+        "[TEST DB] ⚠️ WARNING: Database URL doesn't contain 'test' - ensure you're using a test database!"
+      );
     }
-    
+
     // Connect with the same configuration as server/lib/supabase.ts
     let correctedUrl = databaseUrl;
-    if (!correctedUrl.includes("sslmode=")) {
-      correctedUrl += correctedUrl.includes("?") ? "&sslmode=require" : "?sslmode=require";
+    if (!correctedUrl.includes('sslmode=')) {
+      correctedUrl += correctedUrl.includes('?') ? '&sslmode=require' : '?sslmode=require';
     }
-    if (correctedUrl.includes(":5432")) {
-      correctedUrl = correctedUrl.replace(":5432", ":6543");
+    if (correctedUrl.includes(':5432')) {
+      correctedUrl = correctedUrl.replace(':5432', ':6543');
     }
-    
+
     directDb = postgres(correctedUrl, {
-      ssl: "require",
+      ssl: 'require',
       max: 1, // Single connection for tests
-      transform: postgres.camel
+      transform: postgres.camel,
     });
-    
-    console.log("[TEST DB] 🔌 Direct postgres connection established");
-    
+
+    console.log('[TEST DB] 🔌 Direct postgres connection established');
+
     // Create test user using Supabase Admin for proper authentication
-    console.log("[TEST DB] 🔐 Creating Supabase auth user...");
+    console.log('[TEST DB] 🔐 Creating Supabase auth user...');
     const timestamp = Date.now();
     const testEmail = `test-${timestamp}@simpix.com`; // Unique email for each test run
-    const testPassword = "TestPassword123!";
-    
+    const testPassword = 'TestPassword123!';
+
     // Import and use Supabase Admin Client
-    const { createServerSupabaseAdminClient } = await import("../../server/lib/supabase");
+    const { createServerSupabaseAdminClient } = await import('../../server/lib/supabase');
     const supabaseAdmin = createServerSupabaseAdminClient();
-    
+
     // Create new auth user with unique email (no deletion needed)
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: testEmail,
       password: testPassword,
       email_confirm: true,
       user_metadata: {
-        name: "Integration Test User",
-        role: "ATENDENTE"
-      }
+        name: 'Integration Test User',
+        role: 'ATENDENTE',
+      },
     });
-    
+
     if (authError || !authUser.user) {
       throw new Error(`Failed to create Supabase auth user: ${authError?.message}`);
     }
-    
+
     const testUserId = authUser.user.id;
     console.log(`[TEST DB] ✅ Supabase auth user created: ${testUserId}`);
-    
+
     // 2. Create test user in public.users table using same email
-    console.log("[TEST DB] 👤 Creating public.users entry...");
+    console.log('[TEST DB] 👤 Creating public.users entry...');
     const userResult = await directDb`
       INSERT INTO users (name, email, password, role)
       VALUES (
@@ -253,9 +261,9 @@ export async function setupTestEnvironment(): Promise<{
       RETURNING id
     `;
     const dbUserId = userResult[0].id;
-    
+
     // 3. Create test partner using raw SQL (with timestamp for uniqueness)
-    console.log("[TEST DB] 🏢 Creating test partner...");
+    console.log('[TEST DB] 🏢 Creating test partner...');
     const partnerResult = await directDb`
       INSERT INTO parceiros (razao_social, cnpj)
       VALUES (
@@ -267,9 +275,9 @@ export async function setupTestEnvironment(): Promise<{
       RETURNING id
     `;
     const testPartnerId = partnerResult[0].id;
-    
+
     // 3. Create test store using raw SQL
-    console.log("[TEST DB] 🏪 Creating test store...");
+    console.log('[TEST DB] 🏪 Creating test store...');
     const storeResult = await directDb`
       INSERT INTO lojas (nome_loja, parceiro_id, endereco)
       VALUES (
@@ -280,9 +288,9 @@ export async function setupTestEnvironment(): Promise<{
       RETURNING id
     `;
     const testStoreId = storeResult[0].id;
-    
+
     // 5. Create test product using raw SQL (with timestamp for uniqueness)
-    console.log("[TEST DB] 📦 Creating test product...");
+    console.log('[TEST DB] 📦 Creating test product...');
     const productResult = await directDb`
       INSERT INTO produtos (nome_produto, is_active)
       VALUES (
@@ -292,9 +300,9 @@ export async function setupTestEnvironment(): Promise<{
       RETURNING id
     `;
     const testProductId = productResult[0].id;
-    
+
     // 6. Create test commercial table using raw SQL (with timestamp for uniqueness)
-    console.log("[TEST DB] 📊 Creating test commercial table...");
+    console.log('[TEST DB] 📊 Creating test commercial table...');
     const commercialTableResult = await directDb`
       INSERT INTO tabelas_comerciais (nome_tabela, taxa_juros, prazos, comissao)
       VALUES (
@@ -306,10 +314,10 @@ export async function setupTestEnvironment(): Promise<{
       RETURNING id
     `;
     const testCommercialTableId = commercialTableResult[0].id;
-    
+
     // 6. Create profile linking auth.users to store with proper RBAC role
     console.log(`[TEST DB] 👤 Creating user profile for testUserId: ${testUserId}...`);
-    
+
     const profileInsertResult = await directDb`
       INSERT INTO profiles (id, role, loja_id, full_name)
       VALUES (
@@ -324,21 +332,21 @@ export async function setupTestEnvironment(): Promise<{
         full_name = 'Integration Test User'
       RETURNING id, role, loja_id, full_name
     `;
-    
+
     console.log(`[TEST DB] ✅ Profile insertion result:`, profileInsertResult[0]);
-    
+
     // Verify the profile was created by querying it back
     const verifyProfile = await directDb`
       SELECT id, role, loja_id, full_name 
       FROM profiles 
       WHERE id = ${testUserId}
     `;
-    
+
     console.log(`[TEST DB] 🔍 Profile verification query result:`, verifyProfile[0]);
     console.log(`[TEST DB] ✅ Profile created with ATENDENTE role for RBAC permissions`);
-    
+
     // 7. Create gerente_lojas association for RLS
-    console.log("[TEST DB] 🔗 Creating store manager association...");
+    console.log('[TEST DB] 🔗 Creating store manager association...');
     await directDb`
       INSERT INTO gerente_lojas (gerente_id, loja_id)
       VALUES (
@@ -347,10 +355,10 @@ export async function setupTestEnvironment(): Promise<{
       )
       ON CONFLICT (gerente_id, loja_id) DO NOTHING
     `;
-    
+
     const duration = Date.now() - startTime;
     console.log(`[TEST DB] ✅ Test environment setup complete in ${duration}ms`);
-    
+
     return {
       testUserId,
       testEmail,
@@ -358,17 +366,16 @@ export async function setupTestEnvironment(): Promise<{
       testPartnerId,
       testStoreId,
       testProductId,
-      testCommercialTableId
+      testCommercialTableId,
     };
-    
   } catch (error) {
-    console.error("[TEST DB] ❌ Error setting up test environment:", error);
+    console.error('[TEST DB] ❌ Error setting up test environment:', error);
     throw error;
   } finally {
     // Always close the direct connection
     if (directDb!) {
       await directDb.end();
-      console.log("[TEST DB] 🔌 Direct postgres connection closed");
+      console.log('[TEST DB] 🔌 Direct postgres connection closed');
     }
   }
 }
@@ -382,19 +389,19 @@ export async function verifyCleanDatabase(): Promise<boolean> {
     const result = await db.execute(sql`
       SELECT COUNT(*) as count FROM propostas
     `);
-    
+
     // Access the result array directly
     const rows = result as any;
     const count = rows[0]?.count || 0;
     const isClean = count === 0 || count === '0';
-    
+
     if (!isClean) {
       console.warn(`[TEST DB] ⚠️ Database not clean: ${count} propostas found`);
     }
-    
+
     return isClean;
   } catch (error) {
-    console.error("[TEST DB] ❌ Error verifying database state:", error);
+    console.error('[TEST DB] ❌ Error verifying database state:', error);
     return false;
   }
 }

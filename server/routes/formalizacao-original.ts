@@ -3,13 +3,13 @@
  * Gerencia geração de CCB, assinatura eletrônica e boletos
  */
 
-import express from "express";
-import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware";
-import { ccbGenerationService } from "../services/ccbGenerationService";
-import { supabase } from "../lib/supabase";
-import { db } from "../lib/supabase";
-import { sql } from "drizzle-orm";
-import { z } from "zod";
+import express from 'express';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { ccbGenerationService } from '../services/ccbGenerationService';
+import { supabase } from '../lib/supabase';
+import { db } from '../lib/supabase';
+import { sql } from 'drizzle-orm';
+import { z } from 'zod';
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ const generateCCBSchema = z.object({
  * GET /api/formalizacao/:proposalId/status
  * Retorna status completo da formalização
  */
-router.get("/:proposalId/status", jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -46,7 +46,7 @@ router.get("/:proposalId/status", jwtAuthMiddleware, async (req, res) => {
 
     if (!result || result.length === 0) {
       return res.status(404).json({
-        error: "Proposta não encontrada",
+        error: 'Proposta não encontrada',
       });
     }
 
@@ -72,9 +72,9 @@ router.get("/:proposalId/status", jwtAuthMiddleware, async (req, res) => {
       timeline: logsResult || [],
     });
   } catch (error) {
-    console.error("❌ [FORMALIZACAO] Erro ao buscar status:", error);
+    console.error('❌ [FORMALIZACAO] Erro ao buscar status:', error);
     res.status(500).json({
-      error: "Erro ao buscar status da formalização",
+      error: 'Erro ao buscar status da formalização',
     });
   }
 });
@@ -83,13 +83,13 @@ router.get("/:proposalId/status", jwtAuthMiddleware, async (req, res) => {
  * POST /api/formalizacao/generate-ccb
  * Gera CCB usando template PDF
  */
-router.post("/generate-ccb", jwtAuthMiddleware, async (req, res) => {
+router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
   try {
     const validation = generateCCBSchema.safeParse(req.body);
 
     if (!validation.success) {
       return res.status(400).json({
-        error: "Dados inválidos",
+        error: 'Dados inválidos',
         details: validation.error.errors,
       });
     }
@@ -100,7 +100,7 @@ router.post("/generate-ccb", jwtAuthMiddleware, async (req, res) => {
     const alreadyGenerated = await ccbGenerationService.isCCBGenerated(proposalId);
     if (alreadyGenerated) {
       return res.status(400).json({
-        error: "CCB já foi gerado para esta proposta",
+        error: 'CCB já foi gerado para esta proposta',
       });
     }
 
@@ -109,7 +109,7 @@ router.post("/generate-ccb", jwtAuthMiddleware, async (req, res) => {
 
     if (!result.success) {
       return res.status(500).json({
-        error: result.error || "Erro ao gerar CCB",
+        error: result.error || 'Erro ao gerar CCB',
       });
     }
 
@@ -118,14 +118,14 @@ router.post("/generate-ccb", jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      message: "CCB gerado com sucesso",
+      message: 'CCB gerado com sucesso',
       pdfPath: result.pdfPath,
       publicUrl,
     });
   } catch (error) {
-    console.error("❌ [FORMALIZACAO] Erro ao gerar CCB:", error);
+    console.error('❌ [FORMALIZACAO] Erro ao gerar CCB:', error);
     res.status(500).json({
-      error: "Erro interno ao gerar CCB",
+      error: 'Erro interno ao gerar CCB',
     });
   }
 });
@@ -134,7 +134,7 @@ router.post("/generate-ccb", jwtAuthMiddleware, async (req, res) => {
  * GET /api/formalizacao/:proposalId/ccb
  * Retorna URL do CCB ORIGINAL para visualização
  */
-router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -149,7 +149,7 @@ router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
 
     if (!result || result.length === 0) {
       return res.status(404).json({
-        error: "Proposta não encontrada",
+        error: 'Proposta não encontrada',
       });
     }
 
@@ -158,25 +158,25 @@ router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
     if (!proposal.ccb_gerado || !proposal.caminho_ccb) {
       return res.status(200).json({
         ccb_gerado: false,
-        message: "CCB ainda não foi gerado para esta proposta",
-        status: "pendente",
+        message: 'CCB ainda não foi gerado para esta proposta',
+        status: 'pendente',
       });
     }
 
     // ✅ CORREÇÃO: Usar admin client para gerar URLs assinadas (conforme error_docs/storage_errors.md)
-    const { createServerSupabaseAdminClient } = await import("../lib/supabase");
+    const { createServerSupabaseAdminClient } = await import('../lib/supabase');
     const adminSupabase = createServerSupabaseAdminClient();
 
     const { data: signedUrl, error } = await adminSupabase.storage
-      .from("documents")
+      .from('documents')
       .createSignedUrl(proposal.caminho_ccb as string, 3600);
 
     if (error) {
-      console.error("❌ [FORMALIZACAO] Erro ao gerar URL assinada:", error);
+      console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada:', error);
 
       // 🔄 FALLBACK: Se arquivo não existe, tentar regenerar CCB automaticamente
-      if ((error as any)?.status === 400 || error.message?.includes("Object not found")) {
-        console.log("🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...");
+      if ((error as any)?.status === 400 || error.message?.includes('Object not found')) {
+        console.log('🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...');
         try {
           const newCcb = await ccbGenerationService.generateCCB(proposalId);
           if (newCcb.success) {
@@ -189,12 +189,12 @@ router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
             });
           }
         } catch (regenError) {
-          console.error("❌ [FORMALIZACAO] Erro na regeneração:", regenError);
+          console.error('❌ [FORMALIZACAO] Erro na regeneração:', regenError);
         }
       }
 
       return res.status(500).json({
-        error: "Erro ao gerar URL de acesso",
+        error: 'Erro ao gerar URL de acesso',
         details: error.message,
       });
     }
@@ -206,9 +206,9 @@ router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
       generatedAt: proposal.ccb_gerado_em,
     });
   } catch (error) {
-    console.error("❌ [FORMALIZACAO] Erro ao buscar CCB:", error);
+    console.error('❌ [FORMALIZACAO] Erro ao buscar CCB:', error);
     res.status(500).json({
-      error: "Erro ao buscar CCB",
+      error: 'Erro ao buscar CCB',
     });
   }
 });
@@ -217,7 +217,7 @@ router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
  * POST /api/formalizacao/:proposalId/regenerate-ccb
  * Regenera CCB (substitui o anterior)
  */
-router.post("/:proposalId/regenerate-ccb", jwtAuthMiddleware, async (req, res) => {
+router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -236,7 +236,7 @@ router.post("/:proposalId/regenerate-ccb", jwtAuthMiddleware, async (req, res) =
 
     if (!result.success) {
       return res.status(500).json({
-        error: result.error || "Erro ao regenerar CCB",
+        error: result.error || 'Erro ao regenerar CCB',
       });
     }
 
@@ -245,14 +245,14 @@ router.post("/:proposalId/regenerate-ccb", jwtAuthMiddleware, async (req, res) =
 
     res.json({
       success: true,
-      message: "CCB regenerado com sucesso",
+      message: 'CCB regenerado com sucesso',
       pdfPath: result.pdfPath,
       publicUrl,
     });
   } catch (error) {
-    console.error("❌ [FORMALIZACAO] Erro ao regenerar CCB:", error);
+    console.error('❌ [FORMALIZACAO] Erro ao regenerar CCB:', error);
     res.status(500).json({
-      error: "Erro ao regenerar CCB",
+      error: 'Erro ao regenerar CCB',
     });
   }
 });
@@ -261,7 +261,7 @@ router.post("/:proposalId/regenerate-ccb", jwtAuthMiddleware, async (req, res) =
  * GET /api/formalizacao/:proposalId/timeline
  * Retorna timeline de eventos da formalização
  */
-router.get("/:proposalId/timeline", jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -283,9 +283,9 @@ router.get("/:proposalId/timeline", jwtAuthMiddleware, async (req, res) => {
       timeline: result || [],
     });
   } catch (error) {
-    console.error("❌ [FORMALIZACAO] Erro ao buscar timeline:", error);
+    console.error('❌ [FORMALIZACAO] Erro ao buscar timeline:', error);
     res.status(500).json({
-      error: "Erro ao buscar timeline",
+      error: 'Erro ao buscar timeline',
     });
   }
 });
@@ -296,22 +296,25 @@ router.get("/:proposalId/timeline", jwtAuthMiddleware, async (req, res) => {
  * PAM V1.0 - Todos os roles autorizados podem VISUALIZAR
  * Restrição de DOWNLOAD é feita no frontend
  */
-router.get("/:proposalId/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-  try {
-    const { proposalId } = req.params;
-    
-    // PAM V1.0 CORREÇÃO: Todos os roles autorizados podem VER CCB assinada
-    // Roles permitidos: ATENDENTE, FINANCEIRO, GERENTE, DIRETOR, ADMINISTRADOR
-    const allowedRoles = ["ATENDENTE", "FINANCEIRO", "GERENTE", "DIRETOR", "ADMINISTRADOR"];
-    
-    if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        error: "Acesso negado",
-        message: "Você não tem permissão para visualizar este documento"
-      });
-    }
+router.get(
+  '/:proposalId/ccb-assinada',
+  jwtAuthMiddleware,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { proposalId } = req.params;
 
-    const result = await db.execute(sql`
+      // PAM V1.0 CORREÇÃO: Todos os roles autorizados podem VER CCB assinada
+      // Roles permitidos: ATENDENTE, FINANCEIRO, GERENTE, DIRETOR, ADMINISTRADOR
+      const allowedRoles = ['ATENDENTE', 'FINANCEIRO', 'GERENTE', 'DIRETOR', 'ADMINISTRADOR'];
+
+      if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({
+          error: 'Acesso negado',
+          message: 'Você não tem permissão para visualizar este documento',
+        });
+      }
+
+      const result = await db.execute(sql`
       SELECT 
         caminho_ccb_assinado,
         data_assinatura,
@@ -320,53 +323,56 @@ router.get("/:proposalId/ccb-assinada", jwtAuthMiddleware, async (req: Authentic
       WHERE id = ${proposalId}
     `);
 
-    if (!result || result.length === 0) {
-      return res.status(404).json({
-        error: "Proposta não encontrada",
+      if (!result || result.length === 0) {
+        return res.status(404).json({
+          error: 'Proposta não encontrada',
+        });
+      }
+
+      const proposal = result[0];
+
+      if (!proposal.caminho_ccb_assinado) {
+        return res.status(200).json({
+          ccb_assinado: false,
+          message: 'CCB assinada ainda não está disponível para esta proposta',
+          status: 'pendente',
+        });
+      }
+
+      // Usar admin client para gerar URL assinada
+      const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+      const adminSupabase = createServerSupabaseAdminClient();
+
+      const { data: signedUrl, error } = await adminSupabase.storage
+        .from('documents')
+        .createSignedUrl(proposal.caminho_ccb_assinado as string, 3600);
+
+      if (error) {
+        console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada para CCB assinada:', error);
+        return res.status(500).json({
+          error: 'Erro ao gerar URL de acesso para CCB assinada',
+          details: error.message,
+        });
+      }
+
+      console.log(
+        `✅ [FORMALIZACAO] CCB assinada acessada por ${req.user?.role} para proposta ${proposalId}`
+      );
+
+      res.json({
+        success: true,
+        ccbAssinadoPath: proposal.caminho_ccb_assinado,
+        publicUrl: signedUrl?.signedUrl,
+        dataAssinatura: proposal.data_assinatura,
+        status: 'assinado',
+      });
+    } catch (error) {
+      console.error('❌ [FORMALIZACAO] Erro ao buscar CCB assinada:', error);
+      res.status(500).json({
+        error: 'Erro interno ao buscar CCB assinada',
       });
     }
-
-    const proposal = result[0];
-
-    if (!proposal.caminho_ccb_assinado) {
-      return res.status(200).json({
-        ccb_assinado: false,
-        message: "CCB assinada ainda não está disponível para esta proposta",
-        status: "pendente",
-      });
-    }
-
-    // Usar admin client para gerar URL assinada
-    const { createServerSupabaseAdminClient } = await import("../lib/supabase");
-    const adminSupabase = createServerSupabaseAdminClient();
-
-    const { data: signedUrl, error } = await adminSupabase.storage
-      .from("documents")
-      .createSignedUrl(proposal.caminho_ccb_assinado as string, 3600);
-
-    if (error) {
-      console.error("❌ [FORMALIZACAO] Erro ao gerar URL assinada para CCB assinada:", error);
-      return res.status(500).json({
-        error: "Erro ao gerar URL de acesso para CCB assinada",
-        details: error.message,
-      });
-    }
-
-    console.log(`✅ [FORMALIZACAO] CCB assinada acessada por ${req.user?.role} para proposta ${proposalId}`);
-
-    res.json({
-      success: true,
-      ccbAssinadoPath: proposal.caminho_ccb_assinado,
-      publicUrl: signedUrl?.signedUrl,
-      dataAssinatura: proposal.data_assinatura,
-      status: "assinado"
-    });
-  } catch (error) {
-    console.error("❌ [FORMALIZACAO] Erro ao buscar CCB assinada:", error);
-    res.status(500).json({
-      error: "Erro interno ao buscar CCB assinada"
-    });
   }
-});
+);
 
 export default router;

@@ -4,7 +4,7 @@
  * Desacoplada de implementações específicas (Supabase, Firebase, etc.)
  */
 
-import { getAuthProvider } from "./auth-config";
+import { getAuthProvider } from './auth-config';
 import {
   User,
   Session,
@@ -13,7 +13,7 @@ import {
   AuthStateChangeCallback,
   AuthSubscription,
   AuthProvider,
-} from "./auth-types";
+} from './auth-types';
 
 /**
  * Serviço principal de autenticação
@@ -125,4 +125,4 @@ export function onAuthStateChange(callback: (user: User | null) => void) {
 }
 
 // Re-exports das interfaces para compatibilidade
-export type { AuthState, User, Session } from "./auth-types";
+export type { AuthState, User, Session } from './auth-types';

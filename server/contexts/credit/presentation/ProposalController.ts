@@ -24,7 +24,7 @@ const createProposalSchema = z.object({
     nationality: z.string().optional(),
     zipCode: z.string().optional(),
     address: z.string().optional(),
-    occupation: z.string().optional()
+    occupation: z.string().optional(),
   }),
   loanConditions: z.object({
     requestedAmount: z.number().positive(),
@@ -35,11 +35,11 @@ const createProposalSchema = z.object({
     iofValue: z.number().optional(),
     totalFinancedAmount: z.number().optional(),
     monthlyPayment: z.number().optional(),
-    interestRate: z.number().optional()
+    interestRate: z.number().optional(),
   }),
   partnerId: z.string().uuid().optional(),
   storeId: z.string().optional(),
-  productId: z.string().optional()
+  productId: z.string().optional(),
 });
 
 export class ProposalController {
@@ -49,10 +49,7 @@ export class ProposalController {
     // Initialize dependencies
     const repository = new ProposalRepositoryImpl();
     const creditAnalysisService = new CreditAnalysisService();
-    this.applicationService = new ProposalApplicationService(
-      repository,
-      creditAnalysisService
-    );
+    this.applicationService = new ProposalApplicationService(repository, creditAnalysisService);
   }
 
   /**
@@ -63,37 +60,39 @@ export class ProposalController {
     try {
       // Validate input
       const validatedData = createProposalSchema.parse(req.body);
-      
+
       // Transform dates if needed
       if (validatedData.customerData.birthDate) {
-        validatedData.customerData.birthDate = new Date(validatedData.customerData.birthDate) as any;
+        validatedData.customerData.birthDate = new Date(
+          validatedData.customerData.birthDate
+        ) as any;
       }
-      
+
       // Create proposal through application service
       const proposal = await this.applicationService.createProposal(validatedData);
-      
+
       // Return created proposal
       res.status(201).json({
         success: true,
         data: proposal,
-        message: 'Proposal created successfully'
+        message: 'Proposal created successfully',
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({
           success: false,
           error: 'Validation error',
-          details: error.errors
+          details: error.errors,
         });
       } else if (error instanceof Error) {
         res.status(500).json({
           success: false,
-          error: error.message
+          error: error.message,
         });
       } else {
         res.status(500).json({
           success: false,
-          error: 'Internal server error'
+          error: 'Internal server error',
         });
       }
     }
@@ -106,25 +105,25 @@ export class ProposalController {
   async getById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const proposal = await this.applicationService.getProposal(id);
-      
+
       if (!proposal) {
         res.status(404).json({
           success: false,
-          error: 'Proposal not found'
+          error: 'Proposal not found',
         });
         return;
       }
-      
+
       res.json({
         success: true,
-        data: proposal
+        data: proposal,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -136,16 +135,16 @@ export class ProposalController {
   async getAll(req: Request, res: Response): Promise<void> {
     try {
       const proposals = await this.applicationService.getAllProposals();
-      
+
       res.json({
         success: true,
         data: proposals,
-        total: proposals.length
+        total: proposals.length,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -157,18 +156,18 @@ export class ProposalController {
   async submitForAnalysis(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const proposal = await this.applicationService.submitForAnalysis(id);
-      
+
       res.json({
         success: true,
         data: proposal,
-        message: 'Proposal submitted for analysis'
+        message: 'Proposal submitted for analysis',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -180,18 +179,18 @@ export class ProposalController {
   async analyze(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const proposal = await this.applicationService.analyzeProposal(id);
-      
+
       res.json({
         success: true,
         data: proposal,
-        message: 'Proposal analyzed successfully'
+        message: 'Proposal analyzed successfully',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -203,18 +202,18 @@ export class ProposalController {
   async approve(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const proposal = await this.applicationService.approveProposal(id);
-      
+
       res.json({
         success: true,
         data: proposal,
-        message: 'Proposal approved'
+        message: 'Proposal approved',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -227,26 +226,26 @@ export class ProposalController {
     try {
       const { id } = req.params;
       const { reason } = req.body;
-      
+
       if (!reason) {
         res.status(400).json({
           success: false,
-          error: 'Rejection reason is required'
+          error: 'Rejection reason is required',
         });
         return;
       }
-      
+
       const proposal = await this.applicationService.rejectProposal(id, reason);
-      
+
       res.json({
         success: true,
         data: proposal,
-        message: 'Proposal rejected'
+        message: 'Proposal rejected',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -259,26 +258,26 @@ export class ProposalController {
     try {
       const { id } = req.params;
       const { reason } = req.body;
-      
+
       if (!reason) {
         res.status(400).json({
           success: false,
-          error: 'Pending reason is required'
+          error: 'Pending reason is required',
         });
         return;
       }
-      
+
       const proposal = await this.applicationService.setPendingProposal(id, reason);
-      
+
       res.json({
         success: true,
         data: proposal,
-        message: 'Proposal set as pending'
+        message: 'Proposal set as pending',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -290,18 +289,18 @@ export class ProposalController {
   async formalize(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const proposal = await this.applicationService.formalizeProposal(id);
-      
+
       res.json({
         success: true,
         data: proposal,
-        message: 'Proposal formalized'
+        message: 'Proposal formalized',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -313,18 +312,18 @@ export class ProposalController {
   async markAsPaid(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const proposal = await this.applicationService.markProposalAsPaid(id);
-      
+
       res.json({
         success: true,
         data: proposal,
-        message: 'Proposal marked as paid'
+        message: 'Proposal marked as paid',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -336,18 +335,18 @@ export class ProposalController {
   async getByStore(req: Request, res: Response): Promise<void> {
     try {
       const { storeId } = req.params;
-      
+
       const proposals = await this.applicationService.getProposalsByStore(storeId);
-      
+
       res.json({
         success: true,
         data: proposals,
-        total: proposals.length
+        total: proposals.length,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -359,18 +358,18 @@ export class ProposalController {
   async getByCpf(req: Request, res: Response): Promise<void> {
     try {
       const { cpf } = req.params;
-      
+
       const proposals = await this.applicationService.getProposalsByCpf(cpf);
-      
+
       res.json({
         success: true,
         data: proposals,
-        total: proposals.length
+        total: proposals.length,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }
@@ -382,16 +381,16 @@ export class ProposalController {
   async getPendingAnalysis(req: Request, res: Response): Promise<void> {
     try {
       const proposals = await this.applicationService.getPendingAnalysisProposals();
-      
+
       res.json({
         success: true,
         data: proposals,
-        total: proposals.length
+        total: proposals.length,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error'
+        error: error instanceof Error ? error.message : 'Internal server error',
       });
     }
   }

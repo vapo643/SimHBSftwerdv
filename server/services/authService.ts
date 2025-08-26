@@ -4,51 +4,51 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { authRepository } from "../repositories/auth.repository.js";
-import { createServerSupabaseClient, createServerSupabaseAdminClient } from "../lib/supabase.js";
-import { validatePassword } from "../lib/password-validator.js";
-import { securityLogger, SecurityEventType, getClientIP } from "../lib/security-logger.js";
-import { invalidateAllUserTokens, trackUserToken } from "../lib/jwt-auth-middleware.js";
-import type { Request } from "express";
-import type { User, Session } from "@shared/schema";
+import { authRepository } from '../repositories/auth.repository.js';
+import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { validatePassword } from '../lib/password-validator.js';
+import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger.js';
+import { invalidateAllUserTokens, trackUserToken } from '../lib/jwt-auth-middleware.js';
+import type { Request } from 'express';
+import type { User, Session } from '@shared/schema';
 
 export class AuthService {
   /**
    * Parse user agent for better display
    */
   private parseUserAgent(userAgent: string): string {
-    if (!userAgent) return "Dispositivo desconhecido";
+    if (!userAgent) return 'Dispositivo desconhecido';
 
     // Check for mobile devices first
     if (/mobile/i.test(userAgent)) {
-      if (/android/i.test(userAgent)) return "Android Device";
-      if (/iphone/i.test(userAgent)) return "iPhone";
-      if (/ipad/i.test(userAgent)) return "iPad";
-      return "Mobile Device";
+      if (/android/i.test(userAgent)) return 'Android Device';
+      if (/iphone/i.test(userAgent)) return 'iPhone';
+      if (/ipad/i.test(userAgent)) return 'iPad';
+      return 'Mobile Device';
     }
 
     // Check for desktop browsers
     if (/windows/i.test(userAgent)) {
-      if (/edge/i.test(userAgent)) return "Windows - Edge";
-      if (/chrome/i.test(userAgent)) return "Windows - Chrome";
-      if (/firefox/i.test(userAgent)) return "Windows - Firefox";
-      return "Windows PC";
+      if (/edge/i.test(userAgent)) return 'Windows - Edge';
+      if (/chrome/i.test(userAgent)) return 'Windows - Chrome';
+      if (/firefox/i.test(userAgent)) return 'Windows - Firefox';
+      return 'Windows PC';
     }
 
     if (/macintosh/i.test(userAgent)) {
-      if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return "Mac - Safari";
-      if (/chrome/i.test(userAgent)) return "Mac - Chrome";
-      if (/firefox/i.test(userAgent)) return "Mac - Firefox";
-      return "Mac";
+      if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari';
+      if (/chrome/i.test(userAgent)) return 'Mac - Chrome';
+      if (/firefox/i.test(userAgent)) return 'Mac - Firefox';
+      return 'Mac';
     }
 
     if (/linux/i.test(userAgent)) {
-      if (/chrome/i.test(userAgent)) return "Linux - Chrome";
-      if (/firefox/i.test(userAgent)) return "Linux - Firefox";
-      return "Linux";
+      if (/chrome/i.test(userAgent)) return 'Linux - Chrome';
+      if (/firefox/i.test(userAgent)) return 'Linux - Firefox';
+      return 'Linux';
     }
 
-    return "Dispositivo desconhecido";
+    return 'Dispositivo desconhecido';
   }
 
   /**
@@ -63,7 +63,9 @@ export class AuthService {
       const supabase = createServerSupabaseClient();
 
       // Check if user already has active sessions
-      const { data: { user: existingUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: existingUser },
+      } = await supabase.auth.getUser();
 
       // Attempt login
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -74,10 +76,10 @@ export class AuthService {
       if (error) {
         await securityLogger.logEvent({
           type: SecurityEventType.LOGIN_FAILURE,
-          severity: "MEDIUM",
+          severity: 'MEDIUM',
           userEmail: email,
           ipAddress: getClientIP(req),
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,
           success: false,
           details: { reason: error.message },
@@ -102,22 +104,22 @@ export class AuthService {
           userId: data.user.id,
           token: data.session.access_token,
           ipAddress: getClientIP(req),
-          userAgent: req.headers["user-agent"] || "Unknown",
+          userAgent: req.headers['user-agent'] || 'Unknown',
           expiresAt,
         });
 
         await securityLogger.logEvent({
           type: SecurityEventType.LOGIN_SUCCESS,
-          severity: "LOW",
+          severity: 'LOW',
           userId: data.user.id,
           userEmail: email,
           ipAddress: getClientIP(req),
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,
           success: true,
           details: {
             tokenRotated: true,
-            message: "Previous tokens invalidated",
+            message: 'Previous tokens invalidated',
           },
         });
 
@@ -130,10 +132,10 @@ export class AuthService {
         };
       }
 
-      return { success: false, error: "Login failed" };
+      return { success: false, error: 'Login failed' };
     } catch (error) {
-      console.error("[AUTH_SERVICE] Login error:", error);
-      return { success: false, error: "Login failed" };
+      console.error('[AUTH_SERVICE] Login error:', error);
+      return { success: false, error: 'Login failed' };
     }
   }
 
@@ -147,7 +149,7 @@ export class AuthService {
   ): Promise<{ success: boolean; data?: any; error?: string; suggestions?: string[] }> {
     try {
       // Validate password
-      const passwordValidation = validatePassword(password, [email, name || ""]);
+      const passwordValidation = validatePassword(password, [email, name || '']);
       if (!passwordValidation.isValid) {
         return {
           success: false,
@@ -177,8 +179,8 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error("[AUTH_SERVICE] Register error:", error);
-      return { success: false, error: "Registration failed" };
+      console.error('[AUTH_SERVICE] Register error:', error);
+      return { success: false, error: 'Registration failed' };
     }
   }
 
@@ -196,8 +198,8 @@ export class AuthService {
 
       return { success: true };
     } catch (error) {
-      console.error("[AUTH_SERVICE] Logout error:", error);
-      return { success: false, error: "Logout failed" };
+      console.error('[AUTH_SERVICE] Logout error:', error);
+      return { success: false, error: 'Logout failed' };
     }
   }
 
@@ -210,7 +212,12 @@ export class AuthService {
     currentPassword: string,
     newPassword: string,
     req: Request
-  ): Promise<{ success: boolean; error?: string; suggestions?: string[]; requiresRelogin?: boolean }> {
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    suggestions?: string[];
+    requiresRelogin?: boolean;
+  }> {
     try {
       // Validate new password
       const passwordValidation = validatePassword(newPassword, [userEmail]);
@@ -232,16 +239,16 @@ export class AuthService {
       if (signInError) {
         await securityLogger.logEvent({
           type: SecurityEventType.PASSWORD_CHANGE_FAILED,
-          severity: "HIGH",
+          severity: 'HIGH',
           userId: userId,
           userEmail: userEmail,
           ipAddress: getClientIP(req),
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,
           success: false,
-          details: { reason: "Invalid current password" },
+          details: { reason: 'Invalid current password' },
         });
-        return { success: false, error: "Senha atual incorreta" };
+        return { success: false, error: 'Senha atual incorreta' };
       }
 
       // Update password
@@ -251,8 +258,8 @@ export class AuthService {
       });
 
       if (updateError) {
-        console.error("[AUTH_SERVICE] Password update error:", updateError);
-        return { success: false, error: "Erro ao atualizar senha. Tente novamente." };
+        console.error('[AUTH_SERVICE] Password update error:', updateError);
+        return { success: false, error: 'Erro ao atualizar senha. Tente novamente.' };
       }
 
       // Invalidate all existing tokens
@@ -260,15 +267,15 @@ export class AuthService {
 
       await securityLogger.logEvent({
         type: SecurityEventType.PASSWORD_CHANGED,
-        severity: "HIGH",
+        severity: 'HIGH',
         userId: userId,
         userEmail: userEmail,
         ipAddress: getClientIP(req),
-        userAgent: req.headers["user-agent"],
+        userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: true,
         details: {
-          message: "Password changed successfully, all sessions invalidated",
+          message: 'Password changed successfully, all sessions invalidated',
         },
       });
 
@@ -277,8 +284,8 @@ export class AuthService {
         requiresRelogin: true,
       };
     } catch (error) {
-      console.error("[AUTH_SERVICE] Change password error:", error);
-      return { success: false, error: "Erro ao alterar senha" };
+      console.error('[AUTH_SERVICE] Change password error:', error);
+      return { success: false, error: 'Erro ao alterar senha' };
     }
   }
 
@@ -291,36 +298,37 @@ export class AuthService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       const supabase = createServerSupabaseClient();
-      
+
       // Always return the same message to prevent user enumeration
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${process.env.VITE_APP_URL || "http://localhost:5000"}/reset-password`,
+        redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:5000'}/reset-password`,
       });
 
       // Log the attempt
       await securityLogger.logEvent({
         type: SecurityEventType.PASSWORD_RESET_REQUEST,
-        severity: "MEDIUM",
+        severity: 'MEDIUM',
         userEmail: email,
         ipAddress: getClientIP(req),
-        userAgent: req.headers["user-agent"],
+        userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: !error,
         details: {
-          message: error ? "Password reset failed" : "Password reset email sent if account exists",
+          message: error ? 'Password reset failed' : 'Password reset email sent if account exists',
         },
       });
 
       // Always return the same message (ASVS 6.3.1)
       return {
         success: true,
-        message: "Se o email existe em nosso sistema, você receberá instruções para redefinir sua senha.",
+        message:
+          'Se o email existe em nosso sistema, você receberá instruções para redefinir sua senha.',
       };
     } catch (error) {
-      console.error("[AUTH_SERVICE] Password reset error:", error);
+      console.error('[AUTH_SERVICE] Password reset error:', error);
       return {
         success: false,
-        message: "Erro ao processar solicitação",
+        message: 'Erro ao processar solicitação',
       };
     }
   }
@@ -328,30 +336,27 @@ export class AuthService {
   /**
    * Get user sessions
    */
-  async getUserSessions(
-    userId: string,
-    currentToken?: string
-  ): Promise<{ sessions: any[] }> {
+  async getUserSessions(userId: string, currentToken?: string): Promise<{ sessions: any[] }> {
     try {
       const sessions = await authRepository.getUserSessions(userId);
 
       // Format sessions for frontend display
-      const formattedSessions = sessions.map(session => ({
+      const formattedSessions = sessions.map((session) => ({
         id: session.id,
-        ipAddress: session.ipAddress || "Desconhecido",
-        userAgent: session.userAgent || "Desconhecido",
+        ipAddress: session.ipAddress || 'Desconhecido',
+        userAgent: session.userAgent || 'Desconhecido',
         createdAt: session.createdAt,
         lastActivityAt: session.lastActivityAt,
         expiresAt: session.expiresAt,
         isActive: session.isActive,
-        device: this.parseUserAgent(session.userAgent || ""),
+        device: this.parseUserAgent(session.userAgent || ''),
         isCurrent: session.id === currentToken,
       }));
 
       return { sessions: formattedSessions };
     } catch (error) {
-      console.error("[AUTH_SERVICE] Error fetching sessions:", error);
-      throw new Error("Erro ao buscar sessões");
+      console.error('[AUTH_SERVICE] Error fetching sessions:', error);
+      throw new Error('Erro ao buscar sessões');
     }
   }
 
@@ -366,10 +371,10 @@ export class AuthService {
     try {
       // Verify the session belongs to the user
       const sessions = await authRepository.getUserSessions(userId);
-      const sessionToDelete = sessions.find(s => s.id === sessionId);
+      const sessionToDelete = sessions.find((s) => s.id === sessionId);
 
       if (!sessionToDelete) {
-        return { success: false, error: "Sessão não encontrada" };
+        return { success: false, error: 'Sessão não encontrada' };
       }
 
       // Delete the session
@@ -378,11 +383,11 @@ export class AuthService {
       if (deleted) {
         await securityLogger.logEvent({
           type: SecurityEventType.SESSION_TERMINATED,
-          severity: "MEDIUM",
+          severity: 'MEDIUM',
           userId: userId,
-          userEmail: req.user?.email || "",
+          userEmail: req.user?.email || '',
           ipAddress: getClientIP(req),
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,
           success: true,
           details: {
@@ -394,8 +399,8 @@ export class AuthService {
 
       return { success: deleted };
     } catch (error) {
-      console.error("[AUTH_SERVICE] Error deleting session:", error);
-      return { success: false, error: "Erro ao encerrar sessão" };
+      console.error('[AUTH_SERVICE] Error deleting session:', error);
+      return { success: false, error: 'Erro ao encerrar sessão' };
     }
   }
 
@@ -406,8 +411,8 @@ export class AuthService {
     try {
       return await authRepository.getUserProfile(userId);
     } catch (error) {
-      console.error("[AUTH_SERVICE] Error getting user profile:", error);
-      throw new Error("Erro ao buscar perfil do usuário");
+      console.error('[AUTH_SERVICE] Error getting user profile:', error);
+      throw new Error('Erro ao buscar perfil do usuário');
     }
   }
 
@@ -418,7 +423,7 @@ export class AuthService {
     try {
       return await authRepository.cleanupExpiredSessions();
     } catch (error) {
-      console.error("[AUTH_SERVICE] Error cleaning up sessions:", error);
+      console.error('[AUTH_SERVICE] Error cleaning up sessions:', error);
       return 0;
     }
   }

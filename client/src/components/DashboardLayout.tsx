@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import { signOut } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import OfflineIndicator from "./OfflineIndicator";
-import { ThemeSelector } from "./ThemeSelector";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'wouter';
+import { signOut } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import OfflineIndicator from './OfflineIndicator';
+import { ThemeSelector } from './ThemeSelector';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import {
   LayoutDashboard,
   PlusCircle,
@@ -23,7 +23,7 @@ import {
   Shield, // Adicionando o ícone para segurança OWASP
   Receipt, // Adicionando o ícone para cobranças
   Menu, // Ícone do menu hamburger
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +31,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -48,13 +48,13 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   // Fechar menu com Escape e ao navegar
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setSidebarOpen(false);
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
   // Fechar menu ao navegar (mobile)
@@ -70,15 +70,15 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     try {
       await signOut();
       toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado do sistema.",
+        title: 'Logout realizado com sucesso',
+        description: 'Você foi desconectado do sistema.',
       });
       // A lógica de redirecionamento será tratada pelo listener de auth
     } catch {
       toast({
-        title: "Erro ao fazer logout",
-        description: "Tente novamente em alguns instantes.",
-        variant: "destructive",
+        title: 'Erro ao fazer logout',
+        description: 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
       });
     }
   };
@@ -93,7 +93,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
         <div
           className="bg-background/80 fixed inset-0 z-50 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
-          onKeyDown={e => e.key === "Escape" && setSidebarOpen(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
           role="button"
           tabIndex={0}
           aria-label="Close sidebar"
@@ -102,7 +102,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
 
       {/* Sidebar */}
       <div
-        className={`lg:w-280 fixed inset-y-0 left-0 z-50 w-72 transform border-r bg-card text-card-foreground transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:block`}
+        className={`lg:w-280 fixed inset-y-0 left-0 z-50 w-72 transform border-r bg-card text-card-foreground transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:block`}
       >
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center justify-between border-b px-6">
@@ -126,50 +126,50 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                 </div>
                 {[
                   {
-                    name: "📊 Dashboard",
-                    href: "/dashboard",
+                    name: '📊 Dashboard',
+                    href: '/dashboard',
                     icon: LayoutDashboard,
-                    gradient: "from-blue-500 to-purple-600",
+                    gradient: 'from-blue-500 to-purple-600',
                   },
                   {
-                    name: "➕ Nova Proposta",
-                    href: "/propostas/nova",
+                    name: '➕ Nova Proposta',
+                    href: '/propostas/nova',
                     icon: PlusCircle,
-                    gradient: "from-green-500 to-emerald-600",
+                    gradient: 'from-green-500 to-emerald-600',
                   },
                   {
-                    name: "📋 Fila de Análise",
-                    href: "/credito/fila",
+                    name: '📋 Fila de Análise',
+                    href: '/credito/fila',
                     icon: List,
-                    gradient: "from-orange-500 to-red-600",
+                    gradient: 'from-orange-500 to-red-600',
                   },
                   {
-                    name: "📄 Formalização",
-                    href: "/formalizacao",
+                    name: '📄 Formalização',
+                    href: '/formalizacao',
                     icon: FileText,
-                    gradient: "from-indigo-500 to-blue-600",
+                    gradient: 'from-indigo-500 to-blue-600',
                   },
                 ]
-                  .filter(item => {
+                  .filter((item) => {
                     // 🔒 FILTRO RÍGIDO POR ROLE
                     switch (user?.role) {
-                      case "ATENDENTE":
+                      case 'ATENDENTE':
                         // ATENDENTE: Dashboard, Nova Proposta e Formalização
-                        return ["📊 Dashboard", "➕ Nova Proposta", "📄 Formalização"].includes(
+                        return ['📊 Dashboard', '➕ Nova Proposta', '📄 Formalização'].includes(
                           item.name
                         );
 
-                      case "ANALISTA":
+                      case 'ANALISTA':
                         // ANALISTA: APENAS Fila de Análise
-                        return ["📋 Fila de Análise"].includes(item.name);
+                        return ['📋 Fila de Análise'].includes(item.name);
 
-                      case "FINANCEIRO":
+                      case 'FINANCEIRO':
                         // FINANCEIRO: Sem acesso ao workflow principal
                         return false;
 
-                      case "GERENTE":
-                      case "ADMINISTRADOR":
-                      case "DIRETOR":
+                      case 'GERENTE':
+                      case 'ADMINISTRADOR':
+                      case 'DIRETOR':
                         // Gestores: Acesso completo
                         return true;
 
@@ -177,7 +177,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                         return false;
                     }
                   })
-                  .map(item => {
+                  .map((item) => {
                     const Icon = item.icon;
                     const isActive = location === item.href;
                     return (
@@ -188,15 +188,15 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                         className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                           isActive
                             ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                            : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
+                            : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         <div
-                          className={`rounded-lg p-2 ${isActive ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
+                          className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                         >
                           <Icon className="h-4 w-4" />
                         </div>
-                        <span className={`font-medium ${isActive ? "text-white" : ""}`}>
+                        <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
                           {item.name}
                         </span>
                       </Link>
@@ -205,9 +205,9 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               </div>
 
               {/* Área Financeira */}
-              {(user?.role === "FINANCEIRO" ||
-                user?.role === "ADMINISTRADOR" ||
-                user?.role === "DIRETOR") && (
+              {(user?.role === 'FINANCEIRO' ||
+                user?.role === 'ADMINISTRADOR' ||
+                user?.role === 'DIRETOR') && (
                 <div className="space-y-2">
                   <div className="px-3 pb-2">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -218,18 +218,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     href="/financeiro/pagamentos"
                     onClick={handleNavClick}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                      location === "/financeiro/pagamentos"
-                        ? "scale-105 transform bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg"
-                        : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
+                      location === '/financeiro/pagamentos'
+                        ? 'scale-105 transform bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
+                        : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <div
-                      className={`rounded-lg p-2 ${location === "/financeiro/pagamentos" ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
+                      className={`rounded-lg p-2 ${location === '/financeiro/pagamentos' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                     >
                       <CreditCard className="h-4 w-4" />
                     </div>
                     <span
-                      className={`font-medium ${location === "/financeiro/pagamentos" ? "text-white" : ""}`}
+                      className={`font-medium ${location === '/financeiro/pagamentos' ? 'text-white' : ''}`}
                     >
                       💳 Pagamentos
                     </span>
@@ -238,18 +238,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     href="/financeiro/cobrancas"
                     onClick={handleNavClick}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                      location === "/financeiro/cobrancas"
-                        ? "scale-105 transform bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg"
-                        : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
+                      location === '/financeiro/cobrancas'
+                        ? 'scale-105 transform bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                        : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <div
-                      className={`rounded-lg p-2 ${location === "/financeiro/cobrancas" ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
+                      className={`rounded-lg p-2 ${location === '/financeiro/cobrancas' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                     >
                       <Receipt className="h-4 w-4" />
                     </div>
                     <span
-                      className={`font-medium ${location === "/financeiro/cobrancas" ? "text-white" : ""}`}
+                      className={`font-medium ${location === '/financeiro/cobrancas' ? 'text-white' : ''}`}
                     >
                       📑 Cobranças
                     </span>
@@ -258,7 +258,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               )}
 
               {/* Gestão Administrativa */}
-              {(user?.role === "ADMINISTRADOR" || user?.role === "DIRETOR") && (
+              {(user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR') && (
                 <>
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
@@ -270,18 +270,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                       href="/admin/usuarios"
                       onClick={handleNavClick}
                       className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                        location === "/admin/usuarios"
-                          ? "scale-105 transform bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg"
-                          : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
+                        location === '/admin/usuarios'
+                          ? 'scale-105 transform bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
+                          : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <div
-                        className={`rounded-lg p-2 ${location === "/admin/usuarios" ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
+                        className={`rounded-lg p-2 ${location === '/admin/usuarios' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                       >
                         <Users className="h-4 w-4" />
                       </div>
                       <span
-                        className={`font-medium ${location === "/admin/usuarios" ? "text-white" : ""}`}
+                        className={`font-medium ${location === '/admin/usuarios' ? 'text-white' : ''}`}
                       >
                         👤 Usuários & Perfis
                       </span>
@@ -296,18 +296,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     </div>
                     {[
                       {
-                        name: "🔧 Tabelas Comerciais",
-                        href: "/configuracoes/tabelas",
+                        name: '🔧 Tabelas Comerciais',
+                        href: '/configuracoes/tabelas',
                         icon: Settings,
-                        gradient: "from-slate-500 to-gray-600",
+                        gradient: 'from-slate-500 to-gray-600',
                       },
                       {
-                        name: "📦 Produtos de Crédito",
-                        href: "/configuracoes/produtos",
+                        name: '📦 Produtos de Crédito',
+                        href: '/configuracoes/produtos',
                         icon: Package,
-                        gradient: "from-cyan-500 to-blue-600",
+                        gradient: 'from-cyan-500 to-blue-600',
                       },
-                    ].map(item => {
+                    ].map((item) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
                       return (
@@ -317,15 +317,15 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                           className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                             isActive
                               ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                              : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
+                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                           }`}
                         >
                           <div
-                            className={`rounded-lg p-2 ${isActive ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
+                            className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                           >
                             <Icon className="h-4 w-4" />
                           </div>
-                          <span className={`font-medium ${isActive ? "text-white" : ""}`}>
+                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
                             {item.name}
                           </span>
                         </Link>
@@ -341,24 +341,24 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     </div>
                     {[
                       {
-                        name: "🏢 Parceiros",
-                        href: "/parceiros",
+                        name: '🏢 Parceiros',
+                        href: '/parceiros',
                         icon: Building2,
-                        gradient: "from-amber-500 to-orange-600",
+                        gradient: 'from-amber-500 to-orange-600',
                       },
                       {
-                        name: "🏪 Lojas & Filiais",
-                        href: "/admin/lojas",
+                        name: '🏪 Lojas & Filiais',
+                        href: '/admin/lojas',
                         icon: Store,
-                        gradient: "from-pink-500 to-rose-600",
+                        gradient: 'from-pink-500 to-rose-600',
                       },
                       {
-                        name: "📑 Gestão de Contratos",
-                        href: "/gestao/contratos",
+                        name: '📑 Gestão de Contratos',
+                        href: '/gestao/contratos',
                         icon: FileText,
-                        gradient: "from-teal-500 to-cyan-600",
+                        gradient: 'from-teal-500 to-cyan-600',
                       },
-                    ].map(item => {
+                    ].map((item) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
                       return (
@@ -368,15 +368,15 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                           className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                             isActive
                               ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                              : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
+                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                           }`}
                         >
                           <div
-                            className={`rounded-lg p-2 ${isActive ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
+                            className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                           >
                             <Icon className="h-4 w-4" />
                           </div>
-                          <span className={`font-medium ${isActive ? "text-white" : ""}`}>
+                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
                             {item.name}
                           </span>
                         </Link>
@@ -392,18 +392,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     </div>
                     {[
                       {
-                        name: "🔐 Dashboard OWASP",
-                        href: "/admin/security/owasp",
+                        name: '🔐 Dashboard OWASP',
+                        href: '/admin/security/owasp',
                         icon: Shield,
-                        gradient: "from-red-500 to-pink-600",
+                        gradient: 'from-red-500 to-pink-600',
                       },
                       {
-                        name: "🔒 Monitoramento Avançado",
-                        href: "/admin/security/dashboard",
+                        name: '🔒 Monitoramento Avançado',
+                        href: '/admin/security/dashboard',
                         icon: Shield,
-                        gradient: "from-purple-500 to-indigo-600",
+                        gradient: 'from-purple-500 to-indigo-600',
                       },
-                    ].map(item => {
+                    ].map((item) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
                       return (
@@ -413,15 +413,15 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                           className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                             isActive
                               ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                              : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
+                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                           }`}
                         >
                           <div
-                            className={`rounded-lg p-2 ${isActive ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
+                            className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                           >
                             <Icon className="h-4 w-4" />
                           </div>
-                          <span className={`font-medium ${isActive ? "text-white" : ""}`}>
+                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
                             {item.name}
                           </span>
                         </Link>

@@ -5,20 +5,20 @@
  * novas vulnerabilidades sem necessidade de configuração prévia.
  */
 
-import { Request, Response, Application } from "express";
-import { db } from "./supabase";
-import { security_logs } from "../../shared/schema";
-import { securityLogger, SecurityEventType } from "./security-logger";
-import { getClientIP } from "./security-logger";
-import { createHash } from "crypto";
-import * as fs from "fs/promises";
-import * as path from "path";
-import { sql } from "drizzle-orm";
+import { Request, Response, Application } from 'express';
+import { db } from './supabase';
+import { security_logs } from '../../shared/schema';
+import { securityLogger, SecurityEventType } from './security-logger';
+import { getClientIP } from './security-logger';
+import { createHash } from 'crypto';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { sql } from 'drizzle-orm';
 
 export interface VulnerabilityReport {
   id: string;
   type: string;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   endpoint?: string;
   description: string;
   evidence: any;
@@ -63,7 +63,7 @@ export class AutonomousSecurityScanner {
    * Iniciar monitoramento autônomo
    */
   async start() {
-    console.log("🤖 [AUTONOMOUS SECURITY] Iniciando sistema autônomo de segurança...");
+    console.log('🤖 [AUTONOMOUS SECURITY] Iniciando sistema autônomo de segurança...');
 
     // 1. Descobrir todos os endpoints automaticamente
     await this.discoverEndpoints();
@@ -80,7 +80,7 @@ export class AutonomousSecurityScanner {
     // 5. Iniciar scanner de vulnerabilidades
     this.startVulnerabilityScanning();
 
-    console.log("✅ [AUTONOMOUS SECURITY] Sistema iniciado com sucesso");
+    console.log('✅ [AUTONOMOUS SECURITY] Sistema iniciado com sucesso');
   }
 
   /**
@@ -94,19 +94,19 @@ export class AutonomousSecurityScanner {
       if (middleware.route) {
         // Rota direta
         const methods = Object.keys(middleware.route.methods);
-        methods.forEach(method => {
+        methods.forEach((method) => {
           routes.push({
             path: middleware.route.path,
             method: method.toUpperCase(),
             middleware: [],
           });
         });
-      } else if (middleware.name === "router") {
+      } else if (middleware.name === 'router') {
         // Sub-router
         middleware.handle.stack.forEach((handler: any) => {
           if (handler.route) {
             const methods = Object.keys(handler.route.methods);
-            methods.forEach(method => {
+            methods.forEach((method) => {
               routes.push({
                 path: handler.route.path,
                 method: method.toUpperCase(),
@@ -119,7 +119,7 @@ export class AutonomousSecurityScanner {
     });
 
     // Criar perfil para cada endpoint
-    routes.forEach(route => {
+    routes.forEach((route) => {
       const key = `${route.method}:${route.path}`;
       this.endpoints.set(key, {
         method: route.method,
@@ -144,7 +144,7 @@ export class AutonomousSecurityScanner {
    * Estabelecer baseline de comportamento normal
    */
   private async establishBaseline() {
-    console.log("📊 [AUTONOMOUS SECURITY] Estabelecendo baseline...");
+    console.log('📊 [AUTONOMOUS SECURITY] Estabelecendo baseline...');
 
     // Analisar logs históricos
     const logs = await db
@@ -206,10 +206,10 @@ export class AutonomousSecurityScanner {
       body: req.body,
       ip: getClientIP(req),
       timestamp: new Date(),
-      userAgent: req.headers["user-agent"],
-      referer: req.headers["referer"],
-      contentType: req.headers["content-type"],
-      contentLength: req.headers["content-length"],
+      userAgent: req.headers['user-agent'],
+      referer: req.headers['referer'],
+      contentType: req.headers['content-type'],
+      contentLength: req.headers['content-length'],
     };
   }
 
@@ -266,24 +266,24 @@ export class AutonomousSecurityScanner {
       const deviation = Math.abs(data.responseTime - normal.avgResponseTime);
       if (deviation > normal.avgResponseTime * 3) {
         // 3x desvio
-        anomalies.push("response_time_anomaly");
+        anomalies.push('response_time_anomaly');
       }
     }
 
     // Tamanho de resposta anormal
     if (data.responseSize > 10 * 1024 * 1024) {
       // >10MB
-      anomalies.push("large_response_size");
+      anomalies.push('large_response_size');
     }
 
     // Headers suspeitos
     const suspiciousHeaders = [
-      "x-forwarded-host",
-      "x-original-url",
-      "x-rewrite-url",
-      "x-originating-ip",
-      "x-forwarded-server",
-      "x-http-method-override",
+      'x-forwarded-host',
+      'x-original-url',
+      'x-rewrite-url',
+      'x-originating-ip',
+      'x-forwarded-server',
+      'x-http-method-override',
     ];
 
     for (const header of suspiciousHeaders) {
@@ -295,11 +295,11 @@ export class AutonomousSecurityScanner {
     // Parâmetros não esperados
     const paramKeys = Object.keys(data.params);
     const unexpectedParams = paramKeys.filter(
-      key => !normal.commonParams.has(key) && !this.learningMode
+      (key) => !normal.commonParams.has(key) && !this.learningMode
     );
 
     if (unexpectedParams.length > 5) {
-      anomalies.push("unexpected_parameters");
+      anomalies.push('unexpected_parameters');
     }
 
     return anomalies;
@@ -331,10 +331,10 @@ export class AutonomousSecurityScanner {
     for (const pattern of sqlPatterns) {
       if (pattern.test(dataString)) {
         detectedAttacks.push({
-          type: "SQL_INJECTION",
+          type: 'SQL_INJECTION',
           pattern: pattern.toString(),
           confidence: 0.9,
-          severity: "CRITICAL",
+          severity: 'CRITICAL',
         });
         break;
       }
@@ -354,10 +354,10 @@ export class AutonomousSecurityScanner {
     for (const pattern of xssPatterns) {
       if (pattern.test(dataString)) {
         detectedAttacks.push({
-          type: "XSS",
+          type: 'XSS',
           pattern: pattern.toString(),
           confidence: 0.85,
-          severity: "HIGH",
+          severity: 'HIGH',
         });
         break;
       }
@@ -372,10 +372,10 @@ export class AutonomousSecurityScanner {
     for (const pattern of cmdPatterns) {
       if (pattern.test(dataString)) {
         detectedAttacks.push({
-          type: "COMMAND_INJECTION",
+          type: 'COMMAND_INJECTION',
           pattern: pattern.toString(),
           confidence: 0.9,
-          severity: "CRITICAL",
+          severity: 'CRITICAL',
         });
         break;
       }
@@ -387,10 +387,10 @@ export class AutonomousSecurityScanner {
     for (const pattern of pathPatterns) {
       if (pattern.test(dataString)) {
         detectedAttacks.push({
-          type: "PATH_TRAVERSAL",
+          type: 'PATH_TRAVERSAL',
           pattern: pattern.toString(),
           confidence: 0.95,
-          severity: "HIGH",
+          severity: 'HIGH',
         });
         break;
       }
@@ -400,7 +400,7 @@ export class AutonomousSecurityScanner {
     const ldapPatterns = [/[()&|*]/, /\b(objectClass|cn|sn|uid|mail)\s*=/i];
 
     // 6. XML/XXE Injection
-    if (reqData.contentType?.includes("xml")) {
+    if (reqData.contentType?.includes('xml')) {
       const xxePatterns = [
         /<!ENTITY/i,
         /SYSTEM\s+["'](file:|http:|https:|ftp:|php:|zlib:|data:|glob:|phar:|ssh2:|rar:|ogg:|expect:)/i,
@@ -409,10 +409,10 @@ export class AutonomousSecurityScanner {
       for (const pattern of xxePatterns) {
         if (pattern.test(dataString)) {
           detectedAttacks.push({
-            type: "XXE_INJECTION",
+            type: 'XXE_INJECTION',
             pattern: pattern.toString(),
             confidence: 0.9,
-            severity: "HIGH",
+            severity: 'HIGH',
           });
           break;
         }
@@ -487,15 +487,15 @@ export class AutonomousSecurityScanner {
     if (statusCode === 500 && reqData.body?.stack) {
       vulnerabilities.push({
         id: this.generateVulnId(),
-        type: "INFORMATION_DISCLOSURE",
-        severity: "MEDIUM",
+        type: 'INFORMATION_DISCLOSURE',
+        severity: 'MEDIUM',
         endpoint: `${reqData.method}:${reqData.path}`,
-        description: "Stack trace exposto em erro 500",
+        description: 'Stack trace exposto em erro 500',
         evidence: { stack: reqData.body.stack },
-        recommendation: "Remover stack traces em produção",
+        recommendation: 'Remover stack traces em produção',
         detectedAt: new Date(),
-        cweId: "CWE-209",
-        owaspCategory: "A01",
+        cweId: 'CWE-209',
+        owaspCategory: 'A01',
         falsePositiveScore: 0.1,
       });
     }
@@ -508,15 +508,15 @@ export class AutonomousSecurityScanner {
       if (!hasAuthHeader) {
         vulnerabilities.push({
           id: this.generateVulnId(),
-          type: "IDOR",
-          severity: "HIGH",
+          type: 'IDOR',
+          severity: 'HIGH',
           endpoint: `${reqData.method}:${reqData.path}`,
-          description: "Possível IDOR - acesso direto a objetos sem autenticação",
+          description: 'Possível IDOR - acesso direto a objetos sem autenticação',
           evidence: { path: reqData.path },
-          recommendation: "Implementar verificação de autorização",
+          recommendation: 'Implementar verificação de autorização',
           detectedAt: new Date(),
-          cweId: "CWE-639",
-          owaspCategory: "A01",
+          cweId: 'CWE-639',
+          owaspCategory: 'A01',
           falsePositiveScore: 0.3,
         });
       }
@@ -524,45 +524,45 @@ export class AutonomousSecurityScanner {
 
     // 3. Missing Security Headers
     const securityHeaders = [
-      "x-frame-options",
-      "x-content-type-options",
-      "strict-transport-security",
-      "content-security-policy",
-      "x-xss-protection",
+      'x-frame-options',
+      'x-content-type-options',
+      'strict-transport-security',
+      'content-security-policy',
+      'x-xss-protection',
     ];
 
-    const missingHeaders = securityHeaders.filter(h => !reqData.headers[h]);
+    const missingHeaders = securityHeaders.filter((h) => !reqData.headers[h]);
     if (missingHeaders.length > 0) {
       vulnerabilities.push({
         id: this.generateVulnId(),
-        type: "MISSING_SECURITY_HEADERS",
-        severity: "LOW",
+        type: 'MISSING_SECURITY_HEADERS',
+        severity: 'LOW',
         endpoint: `${reqData.method}:${reqData.path}`,
-        description: `Headers de segurança ausentes: ${missingHeaders.join(", ")}`,
+        description: `Headers de segurança ausentes: ${missingHeaders.join(', ')}`,
         evidence: { missingHeaders },
-        recommendation: "Adicionar headers de segurança",
+        recommendation: 'Adicionar headers de segurança',
         detectedAt: new Date(),
-        cweId: "CWE-693",
-        owaspCategory: "A05",
+        cweId: 'CWE-693',
+        owaspCategory: 'A05',
         falsePositiveScore: 0.05,
       });
     }
 
     // 4. Weak Authentication
-    if (reqData.path.includes("/login") || reqData.path.includes("/auth")) {
+    if (reqData.path.includes('/login') || reqData.path.includes('/auth')) {
       // Verificar força da senha se disponível
       if (reqData.body?.password && reqData.body.password.length < 8) {
         vulnerabilities.push({
           id: this.generateVulnId(),
-          type: "WEAK_PASSWORD_POLICY",
-          severity: "MEDIUM",
+          type: 'WEAK_PASSWORD_POLICY',
+          severity: 'MEDIUM',
           endpoint: `${reqData.method}:${reqData.path}`,
-          description: "Senha muito curta aceita",
+          description: 'Senha muito curta aceita',
           evidence: { passwordLength: reqData.body.password.length },
-          recommendation: "Implementar política de senha mais forte",
+          recommendation: 'Implementar política de senha mais forte',
           detectedAt: new Date(),
-          cweId: "CWE-521",
-          owaspCategory: "A07",
+          cweId: 'CWE-521',
+          owaspCategory: 'A07',
           falsePositiveScore: 0.1,
         });
       }
@@ -620,7 +620,7 @@ export class AutonomousSecurityScanner {
    */
   private startVulnerabilityScanning() {
     setInterval(async () => {
-      console.log("🔍 [SCANNER] Executando scan completo...");
+      console.log('🔍 [SCANNER] Executando scan completo...');
 
       // 1. Verificar configurações inseguras
       await this.scanSecurityConfiguration();
@@ -647,12 +647,12 @@ export class AutonomousSecurityScanner {
       timestamp: new Date(),
       summary: {
         totalVulnerabilities: this.vulnerabilities.size,
-        critical: Array.from(this.vulnerabilities.values()).filter(v => v.severity === "CRITICAL")
+        critical: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'CRITICAL')
           .length,
-        high: Array.from(this.vulnerabilities.values()).filter(v => v.severity === "HIGH").length,
-        medium: Array.from(this.vulnerabilities.values()).filter(v => v.severity === "MEDIUM")
+        high: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'HIGH').length,
+        medium: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'MEDIUM')
           .length,
-        low: Array.from(this.vulnerabilities.values()).filter(v => v.severity === "LOW").length,
+        low: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'LOW').length,
       },
       topVulnerabilities: Array.from(this.vulnerabilities.values())
         .sort((a, b) => this.getSeverityScore(b.severity) - this.getSeverityScore(a.severity))
@@ -667,7 +667,7 @@ export class AutonomousSecurityScanner {
       JSON.stringify(report, null, 2)
     );
 
-    console.log("📊 [REPORT] Relatório de segurança gerado");
+    console.log('📊 [REPORT] Relatório de segurança gerado');
   }
 
   // Métodos auxiliares
@@ -699,16 +699,16 @@ export class AutonomousSecurityScanner {
     // Baseado nas vulnerabilidades encontradas
     const vulns = Array.from(this.vulnerabilities.values());
 
-    if (vulns.some(v => v.type === "SQL_INJECTION")) {
-      recommendations.push("Implementar prepared statements em todas as queries");
+    if (vulns.some((v) => v.type === 'SQL_INJECTION')) {
+      recommendations.push('Implementar prepared statements em todas as queries');
     }
 
-    if (vulns.some(v => v.type === "XSS")) {
-      recommendations.push("Implementar Content Security Policy (CSP) restritiva");
+    if (vulns.some((v) => v.type === 'XSS')) {
+      recommendations.push('Implementar Content Security Policy (CSP) restritiva');
     }
 
-    if (vulns.some(v => v.type === "WEAK_PASSWORD_POLICY")) {
-      recommendations.push("Aumentar requisitos mínimos de senha");
+    if (vulns.some((v) => v.type === 'WEAK_PASSWORD_POLICY')) {
+      recommendations.push('Aumentar requisitos mínimos de senha');
     }
 
     return recommendations;

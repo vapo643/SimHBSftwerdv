@@ -1,10 +1,18 @@
-import { Router } from "express";
-import { jwtAuthMiddleware, type AuthenticatedRequest } from "../../lib/jwt-auth-middleware.js";
-import { db, supabase } from "../../lib/supabase.js";
-import { propostas, users, profiles, lojas, produtos, interCollections, statusContextuais } from "@shared/schema";
-import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
-import { z } from "zod";
-import { transitionTo, InvalidTransitionError } from "../../services/statusFsmService";
+import { Router } from 'express';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
+import { db, supabase } from '../../lib/supabase.js';
+import {
+  propostas,
+  users,
+  profiles,
+  lojas,
+  produtos,
+  interCollections,
+  statusContextuais,
+} from '@shared/schema';
+import { eq, and, or, desc, sql, gte, lte, inArray } from 'drizzle-orm';
+import { z } from 'zod';
+import { transitionTo, InvalidTransitionError } from '../../services/statusFsmService';
 import {
   isToday,
   isThisWeek,
@@ -15,8 +23,8 @@ import {
   endOfWeek,
   startOfMonth,
   endOfMonth,
-} from "date-fns";
-import multer from "multer";
+} from 'date-fns';
+import multer from 'multer';
 
 // Configuração do multer para upload de arquivos
 const upload = multer({
@@ -59,21 +67,21 @@ const pagamentoSchema = z.object({
     tipoConta: z.string(),
     titular: z.string(),
   }),
-  formaPagamento: z.enum(["ted", "pix", "doc"]),
+  formaPagamento: z.enum(['ted', 'pix', 'doc']),
   loja: z.string(),
   produto: z.string(),
   observacoes: z.string().optional(),
 });
 
 // Buscar pagamentos
-router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, periodo, incluir_pagos } = req.query;
     const userId = req.user?.id;
     const userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     // Primeiro, vamos debugar para ver quantas propostas existem com cada condição
@@ -85,7 +93,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     const propostasAprovadas = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
-      .where(and(eq(propostas.status, "aprovado"), sql`${propostas.deletedAt} IS NULL`));
+      .where(and(eq(propostas.status, 'aprovado'), sql`${propostas.deletedAt} IS NULL`));
 
     const propostasComCCB = await db
       .select({ count: sql<number>`count(*)` })
@@ -145,7 +153,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          inArray(propostas.status, ["pronto_pagamento", "aprovado", "pago"])
+          inArray(propostas.status, ['pronto_pagamento', 'aprovado', 'pago'])
         )
       );
 
@@ -155,7 +163,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     if (propostasComStatusPronto.length > 0) {
       console.log(
         `[PAGAMENTOS DEBUG] IDs:`,
-        propostasComStatusPronto.map(p => p.id)
+        propostasComStatusPronto.map((p) => p.id)
       );
     }
 
@@ -186,13 +194,13 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     console.log(`[PAGAMENTOS DEBUG] Encontradas ${boletosDetalhados.length} propostas com boletos`);
 
     if (boletosDetalhados.length === 0) {
-      console.log("[PAGAMENTOS DEBUG] Nenhuma proposta com boletos encontrada");
+      console.log('[PAGAMENTOS DEBUG] Nenhuma proposta com boletos encontrada');
       console.log(`[PAGAMENTOS DEBUG] ========================================`);
     } else {
       // Extrair e validar os IDs das propostas
       const propostaIds = boletosDetalhados
-        .map(item => item.propostaId)
-        .filter(id => {
+        .map((item) => item.propostaId)
+        .filter((id) => {
           // Validação extra para garantir que são UUIDs válidos
           const uuidRegex =
             /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -240,7 +248,9 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     // 1. CCB foi gerado e assinado (ccb_gerado = true)
     // 2. Boletos foram gerados no Inter Bank
     // 3. Status V2.0: BOLETOS_EMITIDOS, PAGAMENTO_PENDENTE ou QUITADO (para histórico)
-    console.log(`[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos - Status System V2.0`);
+    console.log(
+      `[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos - Status System V2.0`
+    );
 
     // Query mais simples: buscar propostas elegíveis e verificar boletos depois
     const propostasElegiveis = await db
@@ -273,12 +283,12 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           eq(propostas.ccbGerado, true),
           // Status V2.0: BOLETOS_EMITIDOS + PAGOS (incluir histórico para auditoria)
           inArray(propostas.status, [
-            "BOLETOS_EMITIDOS", 
-            "PAGAMENTO_PENDENTE", 
-            "QUITADO", 
-            "pago", 
-            "pagamento_autorizado",
-            "pronto_pagamento"
+            'BOLETOS_EMITIDOS',
+            'PAGAMENTO_PENDENTE',
+            'QUITADO',
+            'pago',
+            'pagamento_autorizado',
+            'pronto_pagamento',
           ])
         )
       )
@@ -293,11 +303,11 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       .where(sql`${interCollections.propostaId} IS NOT NULL`);
 
     const propostasComBoletosSet = new Set(
-      boletosInfo.map(b => b.propostaId).filter(id => id !== null)
+      boletosInfo.map((b) => b.propostaId).filter((id) => id !== null)
     );
 
     // Filtrar apenas as propostas que têm boletos
-    const result = propostasElegiveis.filter(p => propostasComBoletosSet.has(p.proposta.id));
+    const result = propostasElegiveis.filter((p) => propostasComBoletosSet.has(p.proposta.id));
 
     console.log(`[PAGAMENTOS DEBUG] Total propostas encontradas: ${result.length}`);
 
@@ -324,7 +334,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     // Processar os resultados para o formato esperado pelo frontend
     const pagamentosFormatados = result.map((row: any) => {
       const { proposta, statusContextual, loja, produto } = row;
-      
+
       // PAM V1.0 - Usar status contextual com fallback para status legado
       const statusAtual = statusContextual || proposta.status;
 
@@ -346,39 +356,39 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       const valorLiquido = valorFinanciado - valorIof - valorTac;
 
       // Mapear status para o formato esperado pelo frontend - Sistema V2.0 + Legado
-      let statusFrontend = "aguardando_aprovacao";
-      
+      let statusFrontend = 'aguardando_aprovacao';
+
       // PAM V1.0 - Usar status contextual para mapeamento
       // Status System V2.0 (prioritário)
-      if (statusAtual === "BOLETOS_EMITIDOS") {
-        statusFrontend = "em_processamento"; // CORRIGIDO: BOLETOS_EMITIDOS é elegível para pagamento
-      } else if (statusAtual === "PAGAMENTO_PENDENTE") {
-        statusFrontend = "aguardando_pagamento";
-      } else if (statusAtual === "QUITADO") {
-        statusFrontend = "pago";
-      } else if (statusAtual === "PAGAMENTO_CONFIRMADO") {
-        statusFrontend = "pago";
+      if (statusAtual === 'BOLETOS_EMITIDOS') {
+        statusFrontend = 'em_processamento'; // CORRIGIDO: BOLETOS_EMITIDOS é elegível para pagamento
+      } else if (statusAtual === 'PAGAMENTO_PENDENTE') {
+        statusFrontend = 'aguardando_pagamento';
+      } else if (statusAtual === 'QUITADO') {
+        statusFrontend = 'pago';
+      } else if (statusAtual === 'PAGAMENTO_CONFIRMADO') {
+        statusFrontend = 'pago';
       }
       // Status legados V1.0 (compatibilidade)
-      else if (statusAtual === "pago") {
-        statusFrontend = "pago";
-      } else if (statusAtual === "aprovado") {
-        statusFrontend = "aprovado";
-      } else if (statusAtual === "pronto_pagamento") {
-        statusFrontend = "em_processamento";
-      } else if (statusAtual === "rejeitado") {
-        statusFrontend = "rejeitado";
-      } else if (statusAtual === "cancelado") {
-        statusFrontend = "cancelado";
+      else if (statusAtual === 'pago') {
+        statusFrontend = 'pago';
+      } else if (statusAtual === 'aprovado') {
+        statusFrontend = 'aprovado';
+      } else if (statusAtual === 'pronto_pagamento') {
+        statusFrontend = 'em_processamento';
+      } else if (statusAtual === 'rejeitado') {
+        statusFrontend = 'rejeitado';
+      } else if (statusAtual === 'cancelado') {
+        statusFrontend = 'cancelado';
       }
 
       // Dados bancários da proposta ou N/A quando não disponível
       const contaBancaria = {
-        banco: proposta.dadosPagamentoBanco || "N/A",
-        agencia: proposta.dadosPagamentoAgencia || "N/A",
-        conta: proposta.dadosPagamentoConta || "N/A",
-        tipoConta: proposta.dadosPagamentoTipo || "N/A",
-        titular: proposta.dadosPagamentoNomeTitular || proposta.clienteNome || "N/A",
+        banco: proposta.dadosPagamentoBanco || 'N/A',
+        agencia: proposta.dadosPagamentoAgencia || 'N/A',
+        conta: proposta.dadosPagamentoConta || 'N/A',
+        tipoConta: proposta.dadosPagamentoTipo || 'N/A',
+        titular: proposta.dadosPagamentoNomeTitular || proposta.clienteNome || 'N/A',
       };
 
       const pagamentoFormatado = {
@@ -386,16 +396,16 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         propostaId: proposta.id,
         numeroContrato: `CONT-${proposta.id.slice(0, 8).toUpperCase()}`,
         // CORREÇÃO PAM V1.0: Nomes de campos alinhados com frontend
-        clienteNome: proposta.clienteNome || "Cliente não informado", // CORRIGIDO: nomeCliente → clienteNome
-        clienteCpf: proposta.clienteCpf || "CPF não informado", // CORRIGIDO: cpfCliente → clienteCpf
+        clienteNome: proposta.clienteNome || 'Cliente não informado', // CORRIGIDO: nomeCliente → clienteNome
+        clienteCpf: proposta.clienteCpf || 'CPF não informado', // CORRIGIDO: cpfCliente → clienteCpf
         valorFinanciado: valorFinanciado,
         valorLiquido: valorLiquido,
         valorIOF: valorIof,
         valorTAC: valorTac,
         // CORREÇÃO PAM V1.0: Dados bancários achatados para compatibilidade com modal
-        dadosPagamentoBanco: proposta.dadosPagamentoBanco || "N/A", // CORRIGIDO: contaBancaria.banco → dadosPagamentoBanco
-        dadosPagamentoAgencia: proposta.dadosPagamentoAgencia || "N/A", // CORRIGIDO: contaBancaria.agencia → dadosPagamentoAgencia
-        dadosPagamentoConta: proposta.dadosPagamentoConta || "N/A", // CORRIGIDO: contaBancaria.conta → dadosPagamentoConta
+        dadosPagamentoBanco: proposta.dadosPagamentoBanco || 'N/A', // CORRIGIDO: contaBancaria.banco → dadosPagamentoBanco
+        dadosPagamentoAgencia: proposta.dadosPagamentoAgencia || 'N/A', // CORRIGIDO: contaBancaria.agencia → dadosPagamentoAgencia
+        dadosPagamentoConta: proposta.dadosPagamentoConta || 'N/A', // CORRIGIDO: contaBancaria.conta → dadosPagamentoConta
         dadosPagamentoPix: proposta.dadosPagamentoPix, // ADICIONADO: Suporte PIX direto
         contaBancaria: contaBancaria, // MANTIDO: Para compatibilidade com outras partes
         status: statusFrontend,
@@ -403,24 +413,24 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         dataAprovacao: proposta.dataAprovacao,
         dataPagamento: proposta.dataPagamento,
         requisitadoPor: {
-          id: proposta.userId || "",
-          nome: "Atendente",
-          papel: "ATENDENTE",
-          loja: loja?.nomeLoja || "Loja não informada",
+          id: proposta.userId || '',
+          nome: 'Atendente',
+          papel: 'ATENDENTE',
+          loja: loja?.nomeLoja || 'Loja não informada',
         },
         aprovadoPor: proposta.analistaId
           ? {
               id: proposta.analistaId,
-              nome: "Analista de Crédito",
-              papel: "ANALISTA",
+              nome: 'Analista de Crédito',
+              papel: 'ANALISTA',
             }
           : undefined,
-        motivoRejeicao: "",
+        motivoRejeicao: '',
         observacoes: proposta.observacoes,
-        comprovante: "",
-        formaPagamento: proposta.dadosPagamentoPix ? ("pix" as const) : ("ted" as const),
-        loja: loja?.nomeLoja || "Loja não informada",
-        produto: produto?.nomeProduto || "Produto não informado",
+        comprovante: '',
+        formaPagamento: proposta.dadosPagamentoPix ? ('pix' as const) : ('ted' as const),
+        loja: loja?.nomeLoja || 'Loja não informada',
+        produto: produto?.nomeProduto || 'Produto não informado',
         // ADICIONADOS: Campos para compatibilidade total com modal
         assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida,
         ccbGerado: proposta.ccbGerado,
@@ -446,14 +456,16 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     let pagamentosFiltrados = pagamentosFormatados;
 
     console.log(`[PAGAMENTOS DEBUG] Pagamentos antes dos filtros: ${pagamentosFormatados.length}`);
-    console.log(`[PAGAMENTOS DEBUG] Filtros recebidos - status: ${status}, periodo: ${periodo}, incluir_pagos: ${incluir_pagos}`);
+    console.log(
+      `[PAGAMENTOS DEBUG] Filtros recebidos - status: ${status}, periodo: ${periodo}, incluir_pagos: ${incluir_pagos}`
+    );
 
     // 🔒 AUDITORIA: Por padrão, ocultar pagamentos já processados (mas manter para consulta)
-    if (incluir_pagos !== "true") {
+    if (incluir_pagos !== 'true') {
       console.log(`[PAGAMENTOS DEBUG] Ocultando propostas pagas (auditoria preservada)`);
       const antesPagos = pagamentosFiltrados.length;
-      pagamentosFiltrados = pagamentosFiltrados.filter(p => 
-        !["pago", "QUITADO", "PAGAMENTO_CONFIRMADO"].includes(p.status)
+      pagamentosFiltrados = pagamentosFiltrados.filter(
+        (p) => !['pago', 'QUITADO', 'PAGAMENTO_CONFIRMADO'].includes(p.status)
       );
       console.log(
         `[PAGAMENTOS DEBUG] Após ocultar pagos: ${antesPagos} -> ${pagamentosFiltrados.length}`
@@ -461,28 +473,28 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 
     // Filtrar por status
-    if (status && status !== "todos") {
+    if (status && status !== 'todos') {
       console.log(`[PAGAMENTOS DEBUG] Aplicando filtro de status: ${status}`);
       const antesStatus = pagamentosFiltrados.length;
-      pagamentosFiltrados = pagamentosFiltrados.filter(p => p.status === status);
+      pagamentosFiltrados = pagamentosFiltrados.filter((p) => p.status === status);
       console.log(
         `[PAGAMENTOS DEBUG] Após filtro status: ${antesStatus} -> ${pagamentosFiltrados.length}`
       );
     }
 
     // Filtrar por período
-    if (periodo && periodo !== "todos") {
+    if (periodo && periodo !== 'todos') {
       console.log(`[PAGAMENTOS DEBUG] Aplicando filtro de período: ${periodo}`);
       const antesPeriodo = pagamentosFiltrados.length;
       const now = new Date();
-      pagamentosFiltrados = pagamentosFiltrados.filter(p => {
+      pagamentosFiltrados = pagamentosFiltrados.filter((p) => {
         const dataReq = new Date(p.dataRequisicao);
         switch (periodo) {
-          case "hoje":
+          case 'hoje':
             return isToday(dataReq);
-          case "semana":
+          case 'semana':
             return isThisWeek(dataReq);
-          case "mes":
+          case 'mes':
             return isThisMonth(dataReq);
           default:
             return true;
@@ -504,13 +516,13 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     res.json(pagamentosFiltrados);
   } catch (error) {
-    console.error("Erro ao buscar pagamentos:", error);
-    res.status(500).json({ error: "Erro ao buscar pagamentos" });
+    console.error('Erro ao buscar pagamentos:', error);
+    res.status(500).json({ error: 'Erro ao buscar pagamentos' });
   }
 });
 
 // Aprovar pagamento
-router.post("/:id/aprovar", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/aprovar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { observacao } = req.body;
@@ -518,55 +530,55 @@ router.post("/:id/aprovar", jwtAuthMiddleware, async (req: AuthenticatedRequest,
     const userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     // Verificar se o usuário tem permissão para aprovar
-    if (!["ADMINISTRADOR", "DIRETOR", "FINANCEIRO", "GERENTE"].includes(userRole || "")) {
-      return res.status(403).json({ error: "Sem permissão para aprovar pagamentos" });
+    if (!['ADMINISTRADOR', 'DIRETOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
+      return res.status(403).json({ error: 'Sem permissão para aprovar pagamentos' });
     }
 
     // Buscar a proposta
     const proposta = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta.length) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
     try {
       await transitionTo({
         propostaId: id,
-        novoStatus: "pago",
+        novoStatus: 'pago',
         userId,
-        contexto: "pagamentos",
+        contexto: 'pagamentos',
         observacoes: `Pagamento aprovado. ${observacao || ''}`,
         metadata: {
-          tipoAcao: "APROVAR_PAGAMENTO",
+          tipoAcao: 'APROVAR_PAGAMENTO',
           aprovadoPor: userId,
           role: userRole,
-          dataAprovacao: new Date().toISOString()
-        }
+          dataAprovacao: new Date().toISOString(),
+        },
       });
     } catch (error) {
       if (error instanceof InvalidTransitionError) {
-        return res.status(409).json({ 
-          error: "Transição de status inválida",
-          message: error.message 
+        return res.status(409).json({
+          error: 'Transição de status inválida',
+          message: error.message,
         });
       }
       throw error;
     }
 
-    res.json({ message: "Pagamento aprovado com sucesso" });
+    res.json({ message: 'Pagamento aprovado com sucesso' });
   } catch (error) {
-    console.error("Erro ao aprovar pagamento:", error);
-    res.status(500).json({ error: "Erro ao aprovar pagamento" });
+    console.error('Erro ao aprovar pagamento:', error);
+    res.status(500).json({ error: 'Erro ao aprovar pagamento' });
   }
 });
 
 // Rejeitar pagamento
-router.post("/:id/rejeitar", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { motivo } = req.body;
@@ -574,88 +586,88 @@ router.post("/:id/rejeitar", jwtAuthMiddleware, async (req: AuthenticatedRequest
     const userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     // Verificar se o usuário tem permissão para rejeitar
-    if (!["ADMINISTRADOR", "DIRETOR", "FINANCEIRO", "GERENTE"].includes(userRole || "")) {
-      return res.status(403).json({ error: "Sem permissão para rejeitar pagamentos" });
+    if (!['ADMINISTRADOR', 'DIRETOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
+      return res.status(403).json({ error: 'Sem permissão para rejeitar pagamentos' });
     }
 
     if (!motivo) {
-      return res.status(400).json({ error: "Motivo da rejeição é obrigatório" });
+      return res.status(400).json({ error: 'Motivo da rejeição é obrigatório' });
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
     try {
       await transitionTo({
         propostaId: id,
-        novoStatus: "rejeitado",
+        novoStatus: 'rejeitado',
         userId,
-        contexto: "pagamentos",
+        contexto: 'pagamentos',
         observacoes: `Pagamento rejeitado. Motivo: ${motivo}`,
         metadata: {
-          tipoAcao: "REJEITAR_PAGAMENTO",
+          tipoAcao: 'REJEITAR_PAGAMENTO',
           rejeitadoPor: userId,
           role: userRole,
           motivoRejeicao: motivo,
-          dataRejeicao: new Date().toISOString()
-        }
+          dataRejeicao: new Date().toISOString(),
+        },
       });
     } catch (error) {
       if (error instanceof InvalidTransitionError) {
-        return res.status(409).json({ 
-          error: "Transição de status inválida",
-          message: error.message 
+        return res.status(409).json({
+          error: 'Transição de status inválida',
+          message: error.message,
         });
       }
       throw error;
     }
 
-    res.json({ message: "Pagamento rejeitado com sucesso" });
+    res.json({ message: 'Pagamento rejeitado com sucesso' });
   } catch (error) {
-    console.error("Erro ao rejeitar pagamento:", error);
-    res.status(500).json({ error: "Erro ao rejeitar pagamento" });
+    console.error('Erro ao rejeitar pagamento:', error);
+    res.status(500).json({ error: 'Erro ao rejeitar pagamento' });
   }
 });
 
 // Processar pagamento
-router.post("/:id/processar", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { comprovante } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     // Buscar a proposta
     const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
     try {
       await transitionTo({
         propostaId: id,
-        novoStatus: "pago",
+        novoStatus: 'pago',
         userId: userId,
-        contexto: "pagamentos",
-        observacoes: "[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente",
+        contexto: 'pagamentos',
+        observacoes: '[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente',
         metadata: {
-          tipoAcao: "PAGAMENTO_PROCESSADO",
+          tipoAcao: 'PAGAMENTO_PROCESSADO',
           dataPagamento: new Date().toISOString(),
-          comprovante: comprovante || null
-        }
+          comprovante: comprovante || null,
+        },
       });
     } catch (error) {
       if (error instanceof InvalidTransitionError) {
-        return res.status(409).json({ 
-          error: "Transição de status inválida",
-          message: error.message 
+        return res.status(409).json({
+          error: 'Transição de status inválida',
+          message: error.message,
         });
       }
       throw error;
@@ -666,22 +678,22 @@ router.post("/:id/processar", jwtAuthMiddleware, async (req: AuthenticatedReques
       .update(propostas)
       .set({
         dataPagamento: new Date(),
-        observacoes: `${proposta.observacoes || ""}\n\n[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente`,
+        observacoes: `${proposta.observacoes || ''}\n\n[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente`,
       })
       .where(eq(propostas.id, id));
 
     console.log(`[PAGAMENTOS] Pagamento processado para proposta ${id}`);
 
-    res.json({ success: true, message: "Pagamento processado com sucesso" });
+    res.json({ success: true, message: 'Pagamento processado com sucesso' });
   } catch (error) {
-    console.error("[PAGAMENTOS] Erro ao processar pagamento:", error);
-    res.status(500).json({ error: "Erro ao processar pagamento" });
+    console.error('[PAGAMENTOS] Erro ao processar pagamento:', error);
+    res.status(500).json({ error: 'Erro ao processar pagamento' });
   }
 });
 
 // Nova rota para verificar documentos CCB antes do pagamento
 router.get(
-  "/:id/verificar-documentos",
+  '/:id/verificar-documentos',
   jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -689,11 +701,11 @@ router.get(
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
+        return res.status(401).json({ error: 'Usuário não autenticado' });
       }
 
       // Registrar auditoria de visualização
-      await registrarAuditoriaPagamento(id, userId, "VISUALIZACAO_DOCUMENTOS_PRE_PAGAMENTO", {
+      await registrarAuditoriaPagamento(id, userId, 'VISUALIZACAO_DOCUMENTOS_PRE_PAGAMENTO', {
         timestamp: new Date().toISOString(),
       });
 
@@ -701,7 +713,7 @@ router.get(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
       if (!proposta) {
-        return res.status(404).json({ error: "Proposta não encontrada" });
+        return res.status(404).json({ error: 'Proposta não encontrada' });
       }
 
       // Verificar boletos no Inter
@@ -725,7 +737,7 @@ router.get(
             Number(proposta.valorIof || 0) -
             Number(proposta.valorTac || 0),
           destino: {
-            tipo: proposta.dadosPagamentoPix ? "PIX" : "CONTA_BANCARIA",
+            tipo: proposta.dadosPagamentoPix ? 'PIX' : 'CONTA_BANCARIA',
             banco: proposta.dadosPagamentoBanco,
             agencia: proposta.dadosPagamentoAgencia,
             conta: proposta.dadosPagamentoConta,
@@ -736,15 +748,15 @@ router.get(
 
       res.json(verificacoes);
     } catch (error) {
-      console.error("Erro ao verificar documentos:", error);
-      res.status(500).json({ error: "Erro ao verificar documentos" });
+      console.error('Erro ao verificar documentos:', error);
+      res.status(500).json({ error: 'Erro ao verificar documentos' });
     }
   }
 );
 
 // Nova rota para confirmar pagamento com segurança máxima
 router.post(
-  "/:id/confirmar-desembolso",
+  '/:id/confirmar-desembolso',
   jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -754,12 +766,12 @@ router.post(
       const userRole = req.user?.role;
 
       if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
+        return res.status(401).json({ error: 'Usuário não autenticado' });
       }
 
       // Verificar permissões - SEGREGAÇÃO DE FUNÇÕES
-      if (!["ADMINISTRADOR", "FINANCEIRO"].includes(userRole || "")) {
-        return res.status(403).json({ error: "Usuário sem permissão para confirmar desembolsos" });
+      if (!['ADMINISTRADOR', 'FINANCEIRO'].includes(userRole || '')) {
+        return res.status(403).json({ error: 'Usuário sem permissão para confirmar desembolsos' });
       }
 
       // TODO: Implementar verificação de senha/MFA
@@ -768,12 +780,12 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
       if (!proposta) {
-        return res.status(404).json({ error: "Proposta não encontrada" });
+        return res.status(404).json({ error: 'Proposta não encontrada' });
       }
 
       // Verificações críticas
       if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
-        return res.status(400).json({ error: "CCB não assinada. Desembolso bloqueado." });
+        return res.status(400).json({ error: 'CCB não assinada. Desembolso bloqueado.' });
       }
 
       const boletos = await db
@@ -782,34 +794,35 @@ router.post(
         .where(eq(interCollections.propostaId, id));
 
       if (boletos.length === 0) {
-        return res.status(400).json({ error: "Boletos não gerados. Desembolso bloqueado." });
+        return res.status(400).json({ error: 'Boletos não gerados. Desembolso bloqueado.' });
       }
 
       // PAM V1.0 - Usar FSM para validação de transição
       try {
         await transitionTo({
           propostaId: id,
-          novoStatus: "pago",
+          novoStatus: 'pago',
           userId: userId,
-          contexto: "pagamentos",
-          observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes || "Pagamento realizado ao cliente"}`,
+          contexto: 'pagamentos',
+          observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes || 'Pagamento realizado ao cliente'}`,
           metadata: {
-            tipoAcao: "DESEMBOLSO_CONFIRMADO",
+            tipoAcao: 'DESEMBOLSO_CONFIRMADO',
             userRole,
             valorDesembolsado: proposta.valorTotalFinanciado,
             dataPagamento: new Date().toISOString(),
             destino: {
-              tipo: proposta.dadosPagamentoPix ? "PIX" : "TED",
-              dados: proposta.dadosPagamentoPix || 
-                `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`
-            }
-          }
+              tipo: proposta.dadosPagamentoPix ? 'PIX' : 'TED',
+              dados:
+                proposta.dadosPagamentoPix ||
+                `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`,
+            },
+          },
         });
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
-          return res.status(409).json({ 
-            error: "Transição de status inválida",
-            message: error.message 
+          return res.status(409).json({
+            error: 'Transição de status inválida',
+            message: error.message,
           });
         }
         throw error;
@@ -820,47 +833,47 @@ router.post(
         .update(propostas)
         .set({
           dataPagamento: new Date(),
-          observacoes: `${proposta.observacoes || ""}\n\n[DESEMBOLSO CONFIRMADO] ${observacoes || "Pagamento realizado ao cliente"}`,
+          observacoes: `${proposta.observacoes || ''}\n\n[DESEMBOLSO CONFIRMADO] ${observacoes || 'Pagamento realizado ao cliente'}`,
         })
         .where(eq(propostas.id, id));
 
       // Registrar auditoria completa e imutável
-      await registrarAuditoriaPagamento(id, userId, "DESEMBOLSO_CONFIRMADO", {
+      await registrarAuditoriaPagamento(id, userId, 'DESEMBOLSO_CONFIRMADO', {
         timestamp: new Date().toISOString(),
         userRole,
         valorDesembolsado: proposta.valorTotalFinanciado,
         destino: {
-          tipo: proposta.dadosPagamentoPix ? "PIX" : "TED",
+          tipo: proposta.dadosPagamentoPix ? 'PIX' : 'TED',
           dados:
             proposta.dadosPagamentoPix ||
             `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`,
         },
         observacoes,
         ip: req.ip,
-        userAgent: req.headers["user-agent"],
+        userAgent: req.headers['user-agent'],
       });
 
       res.json({
         success: true,
-        message: "Desembolso confirmado com sucesso",
-        status: "DESEMBOLSADO",
+        message: 'Desembolso confirmado com sucesso',
+        status: 'DESEMBOLSADO',
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("Erro ao confirmar desembolso:", error);
-      res.status(500).json({ error: "Erro ao confirmar desembolso" });
+      console.error('Erro ao confirmar desembolso:', error);
+      res.status(500).json({ error: 'Erro ao confirmar desembolso' });
     }
   }
 );
 
 // Rota para buscar CCB assinada (primeiro tenta Supabase Storage, depois ClickSign)
-router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     console.log(`[PAGAMENTOS] Buscando CCB assinada para proposta: ${id}`);
@@ -869,16 +882,16 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
     const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // Verificar se a CCB foi gerada e assinada
     if (!proposta.ccbGerado) {
-      return res.status(400).json({ error: "CCB não foi gerada para esta proposta" });
+      return res.status(400).json({ error: 'CCB não foi gerada para esta proposta' });
     }
 
     if (!proposta.assinaturaEletronicaConcluida) {
-      return res.status(400).json({ error: "CCB ainda não foi assinada eletronicamente" });
+      return res.status(400).json({ error: 'CCB ainda não foi assinada eletronicamente' });
     }
 
     const filename = `CCB_${proposta.id}_assinada.pdf`;
@@ -892,33 +905,33 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
 
         // Baixar o arquivo do Storage
         const { data, error } = await supabase.storage
-          .from("documents")
+          .from('documents')
           .download(proposta.caminhoCcbAssinado);
 
         if (!error && data) {
           console.log(`[PAGAMENTOS] ✅ CCB encontrada no Supabase Storage`);
           const buffer = Buffer.from(await data.arrayBuffer());
 
-          res.setHeader("Content-Type", "application/pdf");
-          res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-          res.setHeader("Content-Length", buffer.length.toString());
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+          res.setHeader('Content-Length', buffer.length.toString());
           res.send(buffer);
           return;
         }
 
         console.log(`[PAGAMENTOS] ⚠️ CCB não encontrada no Storage, tentando ClickSign...`);
       } catch (storageError) {
-        console.error("[PAGAMENTOS] Erro ao buscar do Storage:", storageError);
+        console.error('[PAGAMENTOS] Erro ao buscar do Storage:', storageError);
       }
     }
 
     // ESTRATÉGIA 2: Se não encontrou no Storage, buscar da ClickSign e salvar
     if (!proposta.clicksignDocumentKey) {
-      return res.status(400).json({ error: "CCB assinada não encontrada" });
+      return res.status(400).json({ error: 'CCB assinada não encontrada' });
     }
 
     // Importar o serviço ClickSign
-    const { clickSignService } = await import("../../services/clickSignService.js");
+    const { clickSignService } = await import('../../services/clickSignService.js');
 
     try {
       // Baixar o documento assinado da ClickSign
@@ -932,9 +945,9 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
 
       console.log(`[PAGAMENTOS] Salvando CCB no Supabase Storage: ${storagePath}`);
       const { error: uploadError } = await supabase.storage
-        .from("documents")
+        .from('documents')
         .upload(storagePath, pdfBuffer, {
-          contentType: "application/pdf",
+          contentType: 'application/pdf',
           upsert: true,
         });
 
@@ -947,13 +960,13 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
 
         console.log(`[PAGAMENTOS] ✅ CCB salva no Storage e caminho atualizado no banco`);
       } else {
-        console.error("[PAGAMENTOS] Erro ao salvar no Storage:", uploadError);
+        console.error('[PAGAMENTOS] Erro ao salvar no Storage:', uploadError);
       }
 
       // Enviar o PDF como resposta
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-      res.setHeader("Content-Length", pdfBuffer.length.toString());
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length.toString());
 
       console.log(
         `[PAGAMENTOS] ✅ CCB assinada enviada com sucesso: ${filename} (${pdfBuffer.length} bytes)`
@@ -961,29 +974,29 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
 
       res.send(pdfBuffer);
     } catch (clickSignError: any) {
-      console.error("[PAGAMENTOS] Erro ao baixar CCB da ClickSign:", clickSignError);
+      console.error('[PAGAMENTOS] Erro ao baixar CCB da ClickSign:', clickSignError);
 
       // Tratar erros específicos
-      if (clickSignError.message?.includes("still being processed")) {
+      if (clickSignError.message?.includes('still being processed')) {
         return res.status(202).json({
           error:
-            "O documento ainda está sendo processado pela ClickSign. Tente novamente em alguns momentos.",
+            'O documento ainda está sendo processado pela ClickSign. Tente novamente em alguns momentos.',
         });
       }
 
       return res.status(500).json({
-        error: "Erro ao baixar o documento assinado",
+        error: 'Erro ao baixar o documento assinado',
         details: clickSignError.message,
       });
     }
   } catch (error) {
-    console.error("[PAGAMENTOS] Erro ao buscar CCB assinada:", error);
-    res.status(500).json({ error: "Erro ao buscar CCB assinada" });
+    console.error('[PAGAMENTOS] Erro ao buscar CCB assinada:', error);
+    res.status(500).json({ error: 'Erro ao buscar CCB assinada' });
   }
 });
 
 // Rota para verificar status de armazenamento da CCB
-router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-storage-status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
@@ -999,17 +1012,19 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
       WHERE id = ${id} 
       LIMIT 1
     `);
-    const proposta = result[0] as {
-      id: string;
-      ccbGerado: boolean;
-      assinaturaEletronicaConcluida: boolean;
-      caminhoCcbAssinado: string | null;
-      clicksignDocumentKey: string | null;
-      ccbDocumentoUrl: string | null;
-    } | undefined;
+    const proposta = result[0] as
+      | {
+          id: string;
+          ccbGerado: boolean;
+          assinaturaEletronicaConcluida: boolean;
+          caminhoCcbAssinado: string | null;
+          clicksignDocumentKey: string | null;
+          ccbDocumentoUrl: string | null;
+        }
+      | undefined;
 
     if (!proposta) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // Verificar se existe no Storage
@@ -1017,19 +1032,17 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
     let storageUrl = null;
 
     if (proposta.caminhoCcbAssinado) {
-      const pathParts = proposta.caminhoCcbAssinado.split("/");
-      const folderPath = pathParts.slice(0, -1).join("/");
-      const { data: files } = await supabase.storage
-        .from("documents")
-        .list(folderPath);
+      const pathParts = proposta.caminhoCcbAssinado.split('/');
+      const folderPath = pathParts.slice(0, -1).join('/');
+      const { data: files } = await supabase.storage.from('documents').list(folderPath);
 
       existsInStorage = files
-        ? files.some(f => proposta.caminhoCcbAssinado?.includes(f.name))
+        ? files.some((f) => proposta.caminhoCcbAssinado?.includes(f.name))
         : false;
 
       if (existsInStorage) {
         const { data: urlData } = await supabase.storage
-          .from("documents")
+          .from('documents')
           .createSignedUrl(proposta.caminhoCcbAssinado, 3600);
         storageUrl = urlData?.signedUrl;
       }
@@ -1053,17 +1066,17 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
       },
       recommendation:
         !existsInStorage && proposta.assinaturaEletronicaConcluida
-          ? "CCB assinada mas não está no Storage. Use o endpoint /ccb-url para baixar e armazenar."
-          : "CCB disponível no Storage",
+          ? 'CCB assinada mas não está no Storage. Use o endpoint /ccb-url para baixar e armazenar.'
+          : 'CCB disponível no Storage',
     });
   } catch (error) {
-    console.error("[PAGAMENTOS] Erro ao verificar status da CCB:", error);
-    res.status(500).json({ error: "Erro ao verificar status" });
+    console.error('[PAGAMENTOS] Erro ao verificar status da CCB:', error);
+    res.status(500).json({ error: 'Erro ao verificar status' });
   }
 });
 
 // Rota para buscar detalhes completos da proposta
-router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
@@ -1111,7 +1124,7 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     const propostaData = result[0];
 
     if (!propostaData) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // Buscar dados relacionados usando SQL direto para evitar problemas de schema
@@ -1140,7 +1153,7 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     }
 
     // Buscar boletos da Inter usando SQL direto
-    console.log("[DEBUG] Tentando buscar boletos para proposta:", id);
+    console.log('[DEBUG] Tentando buscar boletos para proposta:', id);
     let boletos: any[] = [];
     try {
       const boletosResult = await db.execute(sql`
@@ -1153,9 +1166,9 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
         WHERE proposta_id = ${id}
       `);
       boletos = boletosResult;
-      console.log("[DEBUG] Boletos encontrados:", boletos.length);
+      console.log('[DEBUG] Boletos encontrados:', boletos.length);
     } catch (boletoError) {
-      console.error("[DEBUG] ERRO ao buscar boletos:", boletoError);
+      console.error('[DEBUG] ERRO ao buscar boletos:', boletoError);
       boletos = [];
     }
 
@@ -1181,7 +1194,7 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
       lojaNome: lojaData?.nomeLoja,
       produtoNome: produtoData?.nomeProduto,
       usuarioNome: usuarioData?.fullName,
-      boletos: boletos.map(b => ({
+      boletos: boletos.map((b) => ({
         id: b.id,
         codigo: b.codigoSolicitacao,
         dataVencimento: b.dataVencimento,
@@ -1206,14 +1219,14 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     });
     res.json(respostaCompleta);
   } catch (error) {
-    console.error("[PAGAMENTOS] Erro ao buscar detalhes completos:", error);
-    res.status(500).json({ error: "Erro ao buscar detalhes da proposta" });
+    console.error('[PAGAMENTOS] Erro ao buscar detalhes completos:', error);
+    res.status(500).json({ error: 'Erro ao buscar detalhes da proposta' });
   }
 });
 
 // Rota para confirmar veracidade e autorizar pagamento
 router.post(
-  "/:id/confirmar-veracidade",
+  '/:id/confirmar-veracidade',
   jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -1223,12 +1236,15 @@ router.post(
       const userRole = req.user?.role;
 
       // Verificar permissões - apenas ADMIN e FINANCEIRO podem confirmar
-      if (userRole !== "ADMINISTRADOR" && userRole !== "FINANCEIRO") {
-        return res.status(403).json({ error: "Sem permissão para confirmar veracidade" });
+      if (userRole !== 'ADMINISTRADOR' && userRole !== 'FINANCEIRO') {
+        return res.status(403).json({ error: 'Sem permissão para confirmar veracidade' });
       }
 
       console.log(`[PAGAMENTOS] Confirmando veracidade da proposta: ${id} por usuário: ${userId}`);
-      console.log(`[PAGAMENTOS] Observações recebidas:`, observacoes || "Nenhuma observação fornecida");
+      console.log(
+        `[PAGAMENTOS] Observações recebidas:`,
+        observacoes || 'Nenhuma observação fornecida'
+      );
 
       console.log(`[PAGAMENTOS] 🔍 STEP 1: Iniciando busca da proposta no banco...`);
       // Buscar proposta usando SQL direto para evitar problemas de schema
@@ -1249,21 +1265,27 @@ router.post(
 
       if (!proposta) {
         console.log(`[PAGAMENTOS] ❌ Proposta não encontrada: ${id}`);
-        return res.status(404).json({ error: "Proposta não encontrada" });
+        return res.status(404).json({ error: 'Proposta não encontrada' });
       }
 
-      console.log(`[PAGAMENTOS] 🔍 Proposta encontrada: ${id} | Status atual: ${proposta.status} | CCB Assinada: ${proposta.assinaturaEletronicaConcluida}`);
-      console.log(`[PAGAMENTOS] 🔍 Tipo do status: ${typeof proposta.status} | Valor exato: "${proposta.status}"`);
+      console.log(
+        `[PAGAMENTOS] 🔍 Proposta encontrada: ${id} | Status atual: ${proposta.status} | CCB Assinada: ${proposta.assinaturaEletronicaConcluida}`
+      );
+      console.log(
+        `[PAGAMENTOS] 🔍 Tipo do status: ${typeof proposta.status} | Valor exato: "${proposta.status}"`
+      );
 
       // FASE 1: VERIFICAÇÃO DE IDEMPOTÊNCIA - Prevenir execução duplicada
-      if (proposta.status === "pagamento_autorizado") {
-        console.log(`[PAGAMENTOS] ✅ Proposta ${id} já foi autorizada anteriormente. Retornando sucesso idempotente.`);
-        
+      if (proposta.status === 'pagamento_autorizado') {
+        console.log(
+          `[PAGAMENTOS] ✅ Proposta ${id} já foi autorizada anteriormente. Retornando sucesso idempotente.`
+        );
+
         // Retornar sucesso sem re-executar a lógica
         return res.json({
           success: true,
-          message: "Pagamento já foi autorizado anteriormente",
-          status: "pagamento_autorizado",
+          message: 'Pagamento já foi autorizado anteriormente',
+          status: 'pagamento_autorizado',
           idempotent: true,
           dadosPagamento: {
             pix: proposta.dadosPagamentoPix,
@@ -1276,12 +1298,12 @@ router.post(
       }
 
       // Verificar se está no status correto para nova autorização
-      const statusValidos = ["pronto_pagamento", "BOLETOS_EMITIDOS", "em_processamento"];
+      const statusValidos = ['pronto_pagamento', 'BOLETOS_EMITIDOS', 'em_processamento'];
       const statusString = String(proposta.status);
       if (!statusValidos.includes(statusString)) {
         console.log(`[PAGAMENTOS] ⚠️ Status inválido para pagamento: ${statusString}`);
         return res.status(400).json({
-          error: "Proposta não está pronta para pagamento",
+          error: 'Proposta não está pronta para pagamento',
           statusAtual: statusString,
           statusEsperados: statusValidos,
         });
@@ -1290,7 +1312,7 @@ router.post(
       // Verificar se CCB foi assinada
       if (!proposta.assinaturaEletronicaConcluida) {
         return res.status(400).json({
-          error: "CCB ainda não foi assinada eletronicamente",
+          error: 'CCB ainda não foi assinada eletronicamente',
         });
       }
 
@@ -1313,7 +1335,7 @@ router.post(
       const user = userResult[0];
 
       // PAM V1.0: Montar mensagem com observações customizadas do usuário
-      const mensagemCompleta = observacoes 
+      const mensagemCompleta = observacoes
         ? `Pagamento autorizado por ${userRole}. Observação: ${observacoes}`
         : `Pagamento autorizado por ${userRole}. Nenhuma observação fornecida.`;
 
@@ -1325,17 +1347,17 @@ router.post(
         ) VALUES (
           ${id}, 
           ${mensagemCompleta}, 
-          ${user?.fullName || userId || "sistema"},
-          ${"CONFIRMACAO_VERACIDADE"},
+          ${user?.fullName || userId || 'sistema'},
+          ${'CONFIRMACAO_VERACIDADE'},
           ${JSON.stringify({
             autorId: userId,
             nomeAutor: user?.fullName,
             role: userRole,
             statusAnterior: proposta.status,
-            statusNovo: "pagamento_autorizado",
+            statusNovo: 'pagamento_autorizado',
             timestamp: new Date().toISOString(),
             ip: req.ip,
-            userAgent: req.headers["user-agent"],
+            userAgent: req.headers['user-agent'],
           })},
           ${new Date().toISOString()}
         )
@@ -1349,8 +1371,8 @@ router.post(
       // Retornar os dados de pagamento (incluindo chave PIX)
       res.json({
         success: true,
-        message: "Veracidade confirmada e pagamento autorizado",
-        status: "pagamento_autorizado",
+        message: 'Veracidade confirmada e pagamento autorizado',
+        status: 'pagamento_autorizado',
         dadosPagamento: {
           pix: proposta.dadosPagamentoPix,
           banco: proposta.dadosPagamentoBanco,
@@ -1366,18 +1388,20 @@ router.post(
         },
       });
     } catch (error) {
-      console.error("[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:", error);
-      console.error("[PAGAMENTOS] ❌ Stack trace:", (error as any).stack);
-      res.status(500).json({ error: "Erro ao confirmar veracidade", details: (error as any).message });
+      console.error('[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:', error);
+      console.error('[PAGAMENTOS] ❌ Stack trace:', (error as any).stack);
+      res
+        .status(500)
+        .json({ error: 'Erro ao confirmar veracidade', details: (error as any).message });
     }
   }
 );
 
 // Rota para marcar pagamento como pago
 router.post(
-  "/:id/marcar-pago",
+  '/:id/marcar-pago',
   jwtAuthMiddleware,
-  upload.single("comprovante"),
+  upload.single('comprovante'),
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
@@ -1389,10 +1413,10 @@ router.post(
       console.log(`[PAGAMENTOS] 🔍 [AUDIT] Usuário: ${userId} | Role: ${userRole}`);
 
       // Verificar se o usuário tem permissão (apenas ADMIN e FINANCEIRO)
-      if (!userRole || !["ADMINISTRADOR", "FINANCEIRO"].includes(userRole)) {
+      if (!userRole || !['ADMINISTRADOR', 'FINANCEIRO'].includes(userRole)) {
         console.log(`[PAGAMENTOS] ⛔ [AUDIT] Acesso negado - Role insuficiente: ${userRole}`);
         return res.status(403).json({
-          error: "Acesso negado. Apenas ADMIN e FINANCEIRO podem marcar pagamentos como pagos.",
+          error: 'Acesso negado. Apenas ADMIN e FINANCEIRO podem marcar pagamentos como pagos.',
         });
       }
 
@@ -1401,11 +1425,11 @@ router.post(
 
       if (!proposta) {
         console.log(`[PAGAMENTOS] ❌ [AUDIT] Proposta não encontrada: ${id}`);
-        return res.status(404).json({ error: "Proposta não encontrada" });
+        return res.status(404).json({ error: 'Proposta não encontrada' });
       }
 
       // Verificar se a proposta está no status correto
-      if (proposta.status !== "pagamento_autorizado") {
+      if (proposta.status !== 'pagamento_autorizado') {
         console.log(
           `[PAGAMENTOS] ⚠️ [AUDIT] Status inválido para pagamento - Atual: ${proposta.status}, Esperado: pagamento_autorizado`
         );
@@ -1427,11 +1451,11 @@ router.post(
         );
 
         // Validar tipo de arquivo
-        const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
         if (!allowedTypes.includes(req.file.mimetype)) {
           console.log(`[PAGAMENTOS] ❌ [AUDIT] Tipo de arquivo inválido: ${req.file.mimetype}`);
           return res.status(400).json({
-            error: "Tipo de arquivo não permitido. Use PDF, JPG ou PNG.",
+            error: 'Tipo de arquivo não permitido. Use PDF, JPG ou PNG.',
           });
         }
 
@@ -1440,43 +1464,43 @@ router.post(
         if (req.file.size > maxSize) {
           console.log(`[PAGAMENTOS] ❌ [AUDIT] Arquivo muito grande: ${req.file.size} bytes`);
           return res.status(400).json({
-            error: "Arquivo muito grande. Máximo 5MB permitido.",
+            error: 'Arquivo muito grande. Máximo 5MB permitido.',
           });
         }
 
         try {
           // Upload para Supabase Storage
-          const { supabase } = await import("../../lib/supabase.js");
+          const { supabase } = await import('../../lib/supabase.js');
           const fileName = `comprovante_${Date.now()}_${req.file.originalname}`;
           const filePath = `comprovantes/${id}/${fileName}`;
 
           console.log(`[PAGAMENTOS] 📤 [AUDIT] Fazendo upload para Storage - Caminho: ${filePath}`);
 
           const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("documents")
+            .from('documents')
             .upload(filePath, req.file.buffer, {
               contentType: req.file.mimetype,
-              cacheControl: "3600",
+              cacheControl: '3600',
               upsert: false,
             });
 
           if (uploadError) {
             console.error(`[PAGAMENTOS] ❌ [AUDIT] Erro no upload:`, uploadError);
             return res.status(500).json({
-              error: "Erro ao fazer upload do comprovante",
+              error: 'Erro ao fazer upload do comprovante',
               details: uploadError.message,
             });
           }
 
           // Gerar URL pública
-          const { data: urlData } = supabase.storage.from("documents").getPublicUrl(filePath);
+          const { data: urlData } = supabase.storage.from('documents').getPublicUrl(filePath);
 
           comprovanteUrl = urlData.publicUrl;
           console.log(`[PAGAMENTOS] ✅ [AUDIT] Upload concluído - URL: ${comprovanteUrl}`);
         } catch (error) {
           console.error(`[PAGAMENTOS] ❌ [AUDIT] Erro no processamento do arquivo:`, error);
           return res.status(500).json({
-            error: "Erro ao processar arquivo de comprovante",
+            error: 'Erro ao processar arquivo de comprovante',
           });
         }
       }
@@ -1485,24 +1509,24 @@ router.post(
       try {
         await transitionTo({
           propostaId: id,
-          novoStatus: "pago",
-          userId: userId || "system",
-          contexto: "pagamentos",
+          novoStatus: 'pago',
+          userId: userId || 'system',
+          contexto: 'pagamentos',
           observacoes: `Pagamento marcado como pago manualmente. ${observacoes || ''}`,
           metadata: {
-            tipoAcao: "MARCAR_COMO_PAGO",
+            tipoAcao: 'MARCAR_COMO_PAGO',
             marcadoPor: userId,
             role: userRole,
             comprovanteAnexado: !!comprovanteUrl,
             comprovanteUrl: comprovanteUrl || null,
-            dataMarcacao: new Date().toISOString()
-          }
+            dataMarcacao: new Date().toISOString(),
+          },
         });
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
-          return res.status(409).json({ 
-            error: "Transição de status inválida",
-            message: error.message 
+          return res.status(409).json({
+            error: 'Transição de status inválida',
+            message: error.message,
           });
         }
         throw error;
@@ -1510,7 +1534,8 @@ router.post(
 
       // Atualizar URL do comprovante se fornecido
       if (comprovanteUrl) {
-        await db.update(propostas)
+        await db
+          .update(propostas)
           .set({ urlComprovantePagamento: comprovanteUrl })
           .where(eq(propostas.id, id));
       }
@@ -1518,7 +1543,7 @@ router.post(
       console.log(`[PAGAMENTOS] ✅ [AUDIT] Status atualizado para 'pago' - Proposta: ${id}`);
 
       // Buscar informações do usuário para o log
-      const { profiles } = await import("@shared/schema");
+      const { profiles } = await import('@shared/schema');
       const [user] = await db
         .select({
           fullName: profiles.fullName,
@@ -1529,25 +1554,25 @@ router.post(
         .limit(1);
 
       // Registrar na tabela de histórico de observações
-      const { historicoObservacoesCobranca } = await import("@shared/schema");
-      const mensagemLog = `Proposta marcada como paga por ${user?.fullName || userId}. ${observacoes ? `Observações: ${observacoes}` : ""}${comprovanteUrl ? " Comprovante anexado." : ""}`;
+      const { historicoObservacoesCobranca } = await import('@shared/schema');
+      const mensagemLog = `Proposta marcada como paga por ${user?.fullName || userId}. ${observacoes ? `Observações: ${observacoes}` : ''}${comprovanteUrl ? ' Comprovante anexado.' : ''}`;
 
       await db.insert(historicoObservacoesCobranca).values({
         propostaId: id,
         mensagem: mensagemLog,
-        criadoPor: user?.fullName || userId || "sistema",
-        tipoAcao: "MARCACAO_PAGO",
+        criadoPor: user?.fullName || userId || 'sistema',
+        tipoAcao: 'MARCACAO_PAGO',
         dadosAcao: {
           autorId: userId,
           nomeAutor: user?.fullName,
           role: userRole,
-          statusAnterior: "pagamento_autorizado",
-          statusNovo: "pago",
+          statusAnterior: 'pagamento_autorizado',
+          statusNovo: 'pago',
           observacoes: observacoes || null,
           comprovanteUrl: comprovanteUrl || null,
           timestamp: new Date().toISOString(),
           ip: req.ip,
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
         },
       });
 
@@ -1558,8 +1583,8 @@ router.post(
 
       res.json({
         success: true,
-        message: "Pagamento marcado como pago com sucesso",
-        status: "pago",
+        message: 'Pagamento marcado como pago com sucesso',
+        status: 'pago',
         comprovanteUrl: comprovanteUrl,
         marcadoPor: {
           id: userId,
@@ -1569,14 +1594,14 @@ router.post(
         },
       });
     } catch (error) {
-      console.error("[PAGAMENTOS] ❌ [AUDIT] Erro ao marcar como pago:", error);
-      res.status(500).json({ error: "Erro ao marcar pagamento como pago" });
+      console.error('[PAGAMENTOS] ❌ [AUDIT] Erro ao marcar como pago:', error);
+      res.status(500).json({ error: 'Erro ao marcar pagamento como pago' });
     }
   }
 );
 
 // Rota para obter URL assinada do Supabase Storage para CCB - Com Cache Inteligente
-router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
@@ -1594,25 +1619,27 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       WHERE id = ${id} 
       LIMIT 1
     `);
-    const proposta = result[0] as {
-      id: string;
-      caminhoCcbAssinado: string | null;
-      clicksignDocumentKey: string | null;
-      assinaturaEletronicaConcluida: boolean;
-      clienteNome: string;
-    } | undefined;
+    const proposta = result[0] as
+      | {
+          id: string;
+          caminhoCcbAssinado: string | null;
+          clicksignDocumentKey: string | null;
+          assinaturaEletronicaConcluida: boolean;
+          clienteNome: string;
+        }
+      | undefined;
 
     if (!proposta) {
       console.log(`[PAGAMENTOS CCB-URL] ❌ Proposta ${id} não encontrada`);
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // Verificar se documento está assinado
     if (!proposta.assinaturaEletronicaConcluida || !proposta.clicksignDocumentKey) {
       console.log(`[PAGAMENTOS CCB-URL] ⚠️ CCB não assinada para proposta ${id}`);
       return res.status(404).json({
-        error: "CCB não está assinada ainda",
-        details: "O documento precisa ser assinado primeiro",
+        error: 'CCB não está assinada ainda',
+        details: 'O documento precisa ser assinado primeiro',
       });
     }
 
@@ -1623,7 +1650,7 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
     // PASSO 3: Verificar se arquivo existe no Storage (CACHE HIT)
     const folderPath = `ccb/assinadas/${id}`;
     const { data: files, error: listError } = await supabase.storage
-      .from("documents")
+      .from('documents')
       .list(folderPath);
 
     let fileExists = false;
@@ -1631,7 +1658,7 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
     if (files && files.length > 0) {
       // Arquivo existe - usar o primeiro arquivo PDF encontrado
-      const pdfFile = files.find(f => f.name.endsWith(".pdf"));
+      const pdfFile = files.find((f) => f.name.endsWith('.pdf'));
       if (pdfFile) {
         fileExists = true;
         actualFilePath = `${folderPath}/${pdfFile.name}`;
@@ -1645,7 +1672,7 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
       try {
         // Importar serviço ClickSign
-        const { clickSignService } = await import("../../services/clickSignService.js");
+        const { clickSignService } = await import('../../services/clickSignService.js');
 
         // Baixar documento do ClickSign
         console.log(`[PAGAMENTOS CCB-URL] 📥 Baixando documento: ${proposta.clicksignDocumentKey}`);
@@ -1654,23 +1681,23 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
         );
 
         if (!pdfBuffer || pdfBuffer.length === 0) {
-          throw new Error("PDF vazio recebido do ClickSign");
+          throw new Error('PDF vazio recebido do ClickSign');
         }
 
         console.log(`[PAGAMENTOS CCB-URL] 📄 PDF baixado: ${pdfBuffer.length} bytes`);
 
         // Salvar no Storage
         const timestamp = Date.now();
-        const cleanName = proposta.clienteNome.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
+        const cleanName = proposta.clienteNome.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
         const fileName = `CCB_${cleanName}_${timestamp}.pdf`;
         const storagePath = `ccb/assinadas/${id}/${fileName}`;
 
         console.log(`[PAGAMENTOS CCB-URL] 💾 Salvando no Storage: ${storagePath}`);
 
         const { error: uploadError } = await supabase.storage
-          .from("documents")
+          .from('documents')
           .upload(storagePath, pdfBuffer, {
-            contentType: "application/pdf",
+            contentType: 'application/pdf',
             upsert: true,
           });
 
@@ -1692,19 +1719,19 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
         console.error(`[PAGAMENTOS CCB-URL] ❌ Erro ao baixar/salvar CCB:`, downloadError);
 
         // Se o erro é que o documento ainda não foi assinado, informar status específico
-        if (downloadError.message && downloadError.message.includes("not signed yet")) {
+        if (downloadError.message && downloadError.message.includes('not signed yet')) {
           return res.status(202).json({
-            error: "CCB ainda não foi assinada",
+            error: 'CCB ainda não foi assinada',
             details:
-              "O documento está aguardando assinatura eletrônica. Tente novamente em alguns minutos.",
-            status: "pending_signature",
+              'O documento está aguardando assinatura eletrônica. Tente novamente em alguns minutos.',
+            status: 'pending_signature',
             retryAfter: 300, // 5 minutos
           });
         }
 
         return res.status(500).json({
-          error: "Erro ao obter CCB do ClickSign",
-          details: downloadError.message || "Tente novamente em alguns instantes",
+          error: 'Erro ao obter CCB do ClickSign',
+          details: downloadError.message || 'Tente novamente em alguns instantes',
         });
       }
     }
@@ -1713,34 +1740,34 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
     console.log(`[PAGAMENTOS CCB-URL] 🔗 Gerando URL assinada para: ${actualFilePath}`);
 
     const { data: urlData, error: urlError } = await supabase.storage
-      .from("documents")
+      .from('documents')
       .createSignedUrl(actualFilePath, 3600); // Válida por 1 hora
 
     if (urlError || !urlData?.signedUrl) {
-      console.error("[PAGAMENTOS CCB-URL] ❌ Erro ao gerar URL assinada:", urlError);
+      console.error('[PAGAMENTOS CCB-URL] ❌ Erro ao gerar URL assinada:', urlError);
       return res.status(500).json({
-        error: "Erro ao gerar URL para visualização",
-        details: urlError?.message || "Erro desconhecido",
+        error: 'Erro ao gerar URL para visualização',
+        details: urlError?.message || 'Erro desconhecido',
       });
     }
 
     // PASSO 6: Retornar URL para o frontend
     console.log(
-      `[PAGAMENTOS CCB-URL] ✅ Fluxo completo com sucesso - ${fileExists ? "CACHE HIT" : "CACHE MISS"}`
+      `[PAGAMENTOS CCB-URL] ✅ Fluxo completo com sucesso - ${fileExists ? 'CACHE HIT' : 'CACHE MISS'}`
     );
 
     res.json({
       url: urlData.signedUrl,
-      source: fileExists ? "cache_hit" : "cache_miss_downloaded",
+      source: fileExists ? 'cache_hit' : 'cache_miss_downloaded',
       storagePath: actualFilePath,
       expiresIn: 3600,
       cached: fileExists,
     });
   } catch (error) {
-    console.error("[PAGAMENTOS CCB-URL] ❌ Erro não tratado:", error);
+    console.error('[PAGAMENTOS CCB-URL] ❌ Erro não tratado:', error);
     res.status(500).json({
-      error: "Erro ao processar solicitação",
-      details: error instanceof Error ? error.message : "Erro desconhecido",
+      error: 'Erro ao processar solicitação',
+      details: error instanceof Error ? error.message : 'Erro desconhecido',
     });
   }
 });

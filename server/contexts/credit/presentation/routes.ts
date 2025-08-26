@@ -24,7 +24,7 @@ export function createCreditRoutes(): Router {
     markAsPaid: controller.markAsPaid.bind(controller),
     getByStore: controller.getByStore.bind(controller),
     getByCpf: controller.getByCpf.bind(controller),
-    getPendingAnalysis: controller.getPendingAnalysis.bind(controller)
+    getPendingAnalysis: controller.getPendingAnalysis.bind(controller),
   };
 
   // Proposal CRUD operations
@@ -32,7 +32,7 @@ export function createCreditRoutes(): Router {
   router.get('/proposals', boundController.getAll);
   router.get('/proposals/pending', boundController.getPendingAnalysis);
   router.get('/proposals/:id', boundController.getById);
-  
+
   // Proposal workflow actions
   router.post('/proposals/:id/submit', boundController.submitForAnalysis);
   router.post('/proposals/:id/analyze', boundController.analyze);
@@ -41,7 +41,7 @@ export function createCreditRoutes(): Router {
   router.post('/proposals/:id/pending', boundController.setPending);
   router.post('/proposals/:id/formalize', boundController.formalize);
   router.post('/proposals/:id/paid', boundController.markAsPaid);
-  
+
   // Query endpoints
   router.get('/proposals/store/:storeId', boundController.getByStore);
   router.get('/proposals/cpf/:cpf', boundController.getByCpf);

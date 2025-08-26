@@ -1,48 +1,48 @@
-import { Link } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { User, Mail, Shield, Settings, Lock, Monitor, ArrowRight } from "lucide-react";
+import { Link } from 'wouter';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { User, Mail, Shield, Settings, Lock, Monitor, ArrowRight } from 'lucide-react';
 
 export default function Configuracoes() {
   const { user } = useAuth();
-  const isAdmin = user?.role === "ADMINISTRADOR";
+  const isAdmin = user?.role === 'ADMINISTRADOR';
 
   const settingsOptions = [
     {
-      title: "Alterar Email",
-      description: "Altere o email associado à sua conta",
+      title: 'Alterar Email',
+      description: 'Altere o email associado à sua conta',
       icon: Mail,
-      href: "/configuracoes/alterar-email",
+      href: '/configuracoes/alterar-email',
       available: true,
     },
     {
-      title: "Sessões Ativas",
-      description: "Gerencie suas sessões de login ativas",
+      title: 'Sessões Ativas',
+      description: 'Gerencie suas sessões de login ativas',
       icon: Monitor,
-      href: "/configuracoes/sessoes",
+      href: '/configuracoes/sessoes',
       available: true,
     },
     {
-      title: "Alterar Senha",
-      description: "Atualize sua senha de acesso",
+      title: 'Alterar Senha',
+      description: 'Atualize sua senha de acesso',
       icon: Lock,
-      href: "/configuracoes/alterar-senha",
+      href: '/configuracoes/alterar-senha',
       available: false, // To be implemented
     },
     {
-      title: "Produtos de Crédito",
-      description: "Gerencie produtos de crédito disponíveis",
+      title: 'Produtos de Crédito',
+      description: 'Gerencie produtos de crédito disponíveis',
       icon: Settings,
-      href: "/configuracoes/produtos",
+      href: '/configuracoes/produtos',
       available: isAdmin,
     },
     {
-      title: "Tabelas Comerciais",
-      description: "Configure tabelas comerciais e taxas",
+      title: 'Tabelas Comerciais',
+      description: 'Configure tabelas comerciais e taxas',
       icon: Settings,
-      href: "/configuracoes/tabelas",
+      href: '/configuracoes/tabelas',
       available: isAdmin,
     },
   ];
@@ -71,7 +71,7 @@ export default function Configuracoes() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <div className="text-sm text-muted-foreground">Nome</div>
-                  <div className="font-medium">{user?.full_name || "Não informado"}</div>
+                  <div className="font-medium">{user?.full_name || 'Não informado'}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Email</div>
@@ -92,8 +92,8 @@ export default function Configuracoes() {
           {/* Settings Options Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {settingsOptions
-              .filter(option => option.available)
-              .map(option => (
+              .filter((option) => option.available)
+              .map((option) => (
                 <Card
                   key={option.href}
                   className="cursor-pointer transition-shadow hover:shadow-lg"

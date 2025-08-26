@@ -14,7 +14,7 @@ export interface WstgTestCase {
   description: string;
   testObjective: string;
   testTechnique: string;
-  currentStatus: "tested" | "vulnerable" | "secure" | "not_applicable" | "pending";
+  currentStatus: 'tested' | 'vulnerable' | 'secure' | 'not_applicable' | 'pending';
   findings?: string;
   remediation?: string;
   avsvMapping?: string[];
@@ -35,108 +35,108 @@ export interface WstgCategory {
 export class OwaspWstgService {
   private static categories: WstgCategory[] = [
     {
-      id: "WSTG-INFO",
-      name: "Information Gathering",
-      description: "Reconnaissance and information disclosure tests",
+      id: 'WSTG-INFO',
+      name: 'Information Gathering',
+      description: 'Reconnaissance and information disclosure tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-CONF",
-      name: "Configuration and Deployment",
-      description: "Infrastructure and deployment security tests",
+      id: 'WSTG-CONF',
+      name: 'Configuration and Deployment',
+      description: 'Infrastructure and deployment security tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-IDNT",
-      name: "Identity Management",
-      description: "Authentication and identity tests",
+      id: 'WSTG-IDNT',
+      name: 'Identity Management',
+      description: 'Authentication and identity tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-ATHN",
-      name: "Authentication",
-      description: "Authentication mechanism tests",
+      id: 'WSTG-ATHN',
+      name: 'Authentication',
+      description: 'Authentication mechanism tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-ATHZ",
-      name: "Authorization",
-      description: "Access control and authorization tests",
+      id: 'WSTG-ATHZ',
+      name: 'Authorization',
+      description: 'Access control and authorization tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-SESS",
-      name: "Session Management",
-      description: "Session handling security tests",
+      id: 'WSTG-SESS',
+      name: 'Session Management',
+      description: 'Session handling security tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-INPV",
-      name: "Input Validation",
-      description: "Data validation and injection tests",
+      id: 'WSTG-INPV',
+      name: 'Input Validation',
+      description: 'Data validation and injection tests',
       totalTests: 20,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-ERRH",
-      name: "Error Handling",
-      description: "Error and exception handling tests",
+      id: 'WSTG-ERRH',
+      name: 'Error Handling',
+      description: 'Error and exception handling tests',
       totalTests: 5,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-CRYP",
-      name: "Cryptography",
-      description: "Cryptographic implementation tests",
+      id: 'WSTG-CRYP',
+      name: 'Cryptography',
+      description: 'Cryptographic implementation tests',
       totalTests: 5,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-BUSLOGIC",
-      name: "Business Logic",
-      description: "Business logic vulnerability tests",
+      id: 'WSTG-BUSLOGIC',
+      name: 'Business Logic',
+      description: 'Business logic vulnerability tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-CLIENT",
-      name: "Client-side",
-      description: "Client-side security tests",
+      id: 'WSTG-CLIENT',
+      name: 'Client-side',
+      description: 'Client-side security tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
       secureTests: 0,
     },
     {
-      id: "WSTG-API",
-      name: "API",
-      description: "API security tests",
+      id: 'WSTG-API',
+      name: 'API',
+      description: 'API security tests',
       totalTests: 10,
       completedTests: 0,
       vulnerableTests: 0,
@@ -175,10 +175,10 @@ export class OwaspWstgService {
       subcategory: this.getSubcategory(testId),
       testName: this.getTestName(url),
       url: url,
-      description: "Pending implementation",
-      testObjective: "To be analyzed",
-      testTechnique: "To be implemented",
-      currentStatus: "pending",
+      description: 'Pending implementation',
+      testObjective: 'To be analyzed',
+      testTechnique: 'To be implemented',
+      currentStatus: 'pending',
       processedAt: new Date(),
     };
   }
@@ -188,15 +188,15 @@ export class OwaspWstgService {
    */
   private static extractTestId(url: string): string {
     const match = url.match(/WSTG-[A-Z]+-\d+/);
-    return match ? match[0] : "UNKNOWN";
+    return match ? match[0] : 'UNKNOWN';
   }
 
   /**
    * Get category from test ID
    */
   private static getCategoryFromId(testId: string): string {
-    const parts = testId.split("-");
-    return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "UNKNOWN";
+    const parts = testId.split('-');
+    return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'UNKNOWN';
   }
 
   /**
@@ -204,31 +204,31 @@ export class OwaspWstgService {
    */
   private static getSubcategory(testId: string): string {
     const categoryMap: { [key: string]: string } = {
-      "WSTG-INFO": "Information Gathering",
-      "WSTG-CONF": "Configuration Management",
-      "WSTG-IDNT": "Identity Management",
-      "WSTG-ATHN": "Authentication Testing",
-      "WSTG-ATHZ": "Authorization Testing",
-      "WSTG-SESS": "Session Management",
-      "WSTG-INPV": "Input Validation",
-      "WSTG-ERRH": "Error Handling",
-      "WSTG-CRYP": "Cryptography",
-      "WSTG-BUSLOGIC": "Business Logic",
-      "WSTG-CLIENT": "Client-side Testing",
-      "WSTG-API": "API Testing",
+      'WSTG-INFO': 'Information Gathering',
+      'WSTG-CONF': 'Configuration Management',
+      'WSTG-IDNT': 'Identity Management',
+      'WSTG-ATHN': 'Authentication Testing',
+      'WSTG-ATHZ': 'Authorization Testing',
+      'WSTG-SESS': 'Session Management',
+      'WSTG-INPV': 'Input Validation',
+      'WSTG-ERRH': 'Error Handling',
+      'WSTG-CRYP': 'Cryptography',
+      'WSTG-BUSLOGIC': 'Business Logic',
+      'WSTG-CLIENT': 'Client-side Testing',
+      'WSTG-API': 'API Testing',
     };
 
     const category = this.getCategoryFromId(testId);
-    return categoryMap[category] || "Unknown Category";
+    return categoryMap[category] || 'Unknown Category';
   }
 
   /**
    * Extract test name from URL
    */
   private static getTestName(url: string): string {
-    const urlParts = url.split("/");
+    const urlParts = url.split('/');
     const filename = urlParts[urlParts.length - 1];
-    return filename.replace(".html", "").replace(/-/g, " ");
+    return filename.replace('.html', '').replace(/-/g, ' ');
   }
 
   /**
@@ -265,16 +265,16 @@ export class OwaspWstgService {
     vulnerabilities: WstgTestCase[];
     recommendations: string[];
   } {
-    const vulnerabilities = testCases.filter(tc => tc.currentStatus === "vulnerable");
-    const tested = testCases.filter(tc => tc.currentStatus !== "pending");
+    const vulnerabilities = testCases.filter((tc) => tc.currentStatus === 'vulnerable');
+    const tested = testCases.filter((tc) => tc.currentStatus !== 'pending');
 
     return {
       summary: {
         totalTests: testCases.length,
         testedCount: tested.length,
         vulnerableCount: vulnerabilities.length,
-        secureCount: testCases.filter(tc => tc.currentStatus === "secure").length,
-        pendingCount: testCases.filter(tc => tc.currentStatus === "pending").length,
+        secureCount: testCases.filter((tc) => tc.currentStatus === 'secure').length,
+        pendingCount: testCases.filter((tc) => tc.currentStatus === 'pending').length,
       },
       vulnerabilities,
       recommendations: this.generateRecommendations(vulnerabilities),
@@ -300,20 +300,20 @@ export class OwaspWstgService {
     // Generate category-specific recommendations
     Object.entries(byCategory).forEach(([category, vulns]) => {
       switch (category) {
-        case "WSTG-INPV":
-          recommendations.push("Implement comprehensive input validation and sanitization");
+        case 'WSTG-INPV':
+          recommendations.push('Implement comprehensive input validation and sanitization');
           break;
-        case "WSTG-ATHN":
-          recommendations.push("Strengthen authentication mechanisms");
+        case 'WSTG-ATHN':
+          recommendations.push('Strengthen authentication mechanisms');
           break;
-        case "WSTG-ATHZ":
-          recommendations.push("Review and enhance authorization controls");
+        case 'WSTG-ATHZ':
+          recommendations.push('Review and enhance authorization controls');
           break;
-        case "WSTG-SESS":
-          recommendations.push("Improve session management security");
+        case 'WSTG-SESS':
+          recommendations.push('Improve session management security');
           break;
-        case "WSTG-CRYP":
-          recommendations.push("Update cryptographic implementations");
+        case 'WSTG-CRYP':
+          recommendations.push('Update cryptographic implementations');
           break;
       }
     });

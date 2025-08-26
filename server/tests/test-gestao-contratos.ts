@@ -5,10 +5,10 @@
  * com diferentes roles (ADMIN, DIRETOR, e roles não autorizados)
  */
 
-import axios from "axios";
+import axios from 'axios';
 
 // Configuração base
-const BASE_URL = process.env.API_URL || "http://localhost:5000";
+const BASE_URL = process.env.API_URL || 'http://localhost:5000';
 const API_ENDPOINT = `${BASE_URL}/api/contratos`;
 
 /**
@@ -16,21 +16,21 @@ const API_ENDPOINT = `${BASE_URL}/api/contratos`;
  * Em produção, use tokens reais obtidos via login
  */
 const MOCK_TOKENS = {
-  ADMIN: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.admin_token_here",
-  DIRETOR: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.diretor_token_here",
-  GERENTE: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.gerente_token_here",
-  ATENDENTE: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.atendente_token_here",
-  ANALISTA: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.analista_token_here",
+  ADMIN: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.admin_token_here',
+  DIRETOR: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.diretor_token_here',
+  GERENTE: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.gerente_token_here',
+  ATENDENTE: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.atendente_token_here',
+  ANALISTA: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.analista_token_here',
   NO_TOKEN: null,
 };
 
 // Cores para output no console
 const colors = {
-  green: "\x1b[32m",
-  red: "\x1b[31m",
-  yellow: "\x1b[33m",
-  blue: "\x1b[34m",
-  reset: "\x1b[0m",
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  reset: '\x1b[0m',
 };
 
 /**
@@ -45,7 +45,7 @@ async function testAdminAccess() {
     const response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.ADMIN,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -63,7 +63,7 @@ async function testAdminAccess() {
       console.log(`   - Cliente: ${primeiroContrato.clienteNome}`);
       console.log(`   - CPF/CNPJ: ${primeiroContrato.clienteCpf || primeiroContrato.clienteCnpj}`);
       console.log(`   - CCB Assinado: ${primeiroContrato.assinaturaEletronicaConcluida}`);
-      console.log(`   - URL CCB: ${primeiroContrato.urlCcbAssinado ? "Presente" : "Ausente"}`);
+      console.log(`   - URL CCB: ${primeiroContrato.urlCcbAssinado ? 'Presente' : 'Ausente'}`);
     }
 
     return true;
@@ -88,11 +88,11 @@ async function testDiretorAccess() {
     const response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.DIRETOR,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       params: {
         limite: 10,
-        status: "contratos_assinados",
+        status: 'contratos_assinados',
       },
     });
 
@@ -126,7 +126,7 @@ async function testGerenteAccess() {
     const response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.GERENTE,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -166,7 +166,7 @@ async function testAtendenteAccess() {
     const response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.ATENDENTE,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -199,7 +199,7 @@ async function testNoTokenAccess() {
   try {
     const response = await axios.get(API_ENDPOINT, {
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -233,7 +233,7 @@ async function testGetSpecificContract(contractId: string) {
     const response = await axios.get(`${API_ENDPOINT}/${contractId}`, {
       headers: {
         Authorization: MOCK_TOKENS.ADMIN,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -244,7 +244,7 @@ async function testGetSpecificContract(contractId: string) {
     console.log(`   - ID: ${response.data.contrato?.propostas?.id}`);
     console.log(`   - Histórico: ${response.data.contrato?.historico?.length || 0} registros`);
     console.log(
-      `   - URLs de documentos presentes: ${response.data.contrato?.urlCcbAssinado ? "Sim" : "Não"}`
+      `   - URLs de documentos presentes: ${response.data.contrato?.urlCcbAssinado ? 'Sim' : 'Não'}`
     );
 
     return true;
@@ -269,10 +269,10 @@ async function testSearchFilters() {
   console.log(`${colors.blue}========================================${colors.reset}`);
 
   const filters = [
-    { dataInicio: "2025-01-01", dataFim: "2025-01-31" },
-    { lojaId: "1" },
-    { status: "pago" },
-    { limite: "5" },
+    { dataInicio: '2025-01-01', dataFim: '2025-01-31' },
+    { lojaId: '1' },
+    { status: 'pago' },
+    { limite: '5' },
   ];
 
   for (const filter of filters) {
@@ -282,7 +282,7 @@ async function testSearchFilters() {
       const response = await axios.get(API_ENDPOINT, {
         headers: {
           Authorization: MOCK_TOKENS.DIRETOR,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         params: filter,
       });
@@ -327,8 +327,8 @@ async function runAllTests() {
   console.log(`${colors.yellow}║           RESUMO DOS TESTES              ║${colors.reset}`);
   console.log(`${colors.yellow}╚════════════════════════════════════════╝${colors.reset}`);
 
-  const passed = results.filter(r => r === true).length;
-  const failed = results.filter(r => r === false).length;
+  const passed = results.filter((r) => r === true).length;
+  const failed = results.filter((r) => r === false).length;
 
   console.log(`\nTestes aprovados: ${colors.green}${passed}${colors.reset}`);
   console.log(`Testes falhados: ${colors.red}${failed}${colors.reset}`);

@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
-import { AuthenticatedRequest } from "../../shared/types/express";
-import { db } from "../lib/supabase.js";
-import { users, propostas, statusContextuais } from "../../shared/schema.js";
-import { eq, gte, and, count, desc, sql } from "drizzle-orm";
-import { getBrasiliaTimestamp } from "../lib/timezone.js";
+import { Router } from 'express';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { AuthenticatedRequest } from '../../shared/types/express';
+import { db } from '../lib/supabase.js';
+import { users, propostas, statusContextuais } from '../../shared/schema.js';
+import { eq, gte, and, count, desc, sql } from 'drizzle-orm';
+import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
 const router = Router();
 
@@ -12,7 +12,7 @@ const router = Router();
 router.use(jwtAuthMiddleware);
 
 // GET /api/security-monitoring/real-time - Métricas de segurança em tempo real
-router.get("/real-time", async (req: AuthenticatedRequest, res) => {
+router.get('/real-time', async (req: AuthenticatedRequest, res) => {
   try {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -85,19 +85,19 @@ router.get("/real-time", async (req: AuthenticatedRequest, res) => {
           },
           {} as Record<string, number>
         ),
-        adminCount: usersByRole.find(r => r.role === "ADMINISTRADOR")?.count || 0,
-        managerCount: usersByRole.find(r => r.role === "GERENTE")?.count || 0,
-        attendantCount: usersByRole.find(r => r.role === "ATENDENTE")?.count || 0,
+        adminCount: usersByRole.find((r) => r.role === 'ADMINISTRADOR')?.count || 0,
+        managerCount: usersByRole.find((r) => r.role === 'GERENTE')?.count || 0,
+        attendantCount: usersByRole.find((r) => r.role === 'ATENDENTE')?.count || 0,
       },
       security: {
         // Dados reais de segurança
-        encryptionStatus: "AES-256 Active",
-        tlsVersion: "TLS 1.3",
+        encryptionStatus: 'AES-256 Active',
+        tlsVersion: 'TLS 1.3',
         certificateValid: true,
         certificateDaysRemaining: 365,
-        firewallStatus: "Active",
+        firewallStatus: 'Active',
         ddosProtection: true,
-        backupStatus: "Daily backups enabled",
+        backupStatus: 'Daily backups enabled',
         lastBackup: getBrasiliaTimestamp(),
       },
       compliance: {
@@ -122,16 +122,16 @@ router.get("/real-time", async (req: AuthenticatedRequest, res) => {
       data: metrics,
     });
   } catch (error) {
-    console.error("[SECURITY MONITORING] Error:", error);
+    console.error('[SECURITY MONITORING] Error:', error);
     res.status(500).json({
       success: false,
-      error: "Erro ao obter métricas de segurança",
+      error: 'Erro ao obter métricas de segurança',
     });
   }
 });
 
 // GET /api/security-monitoring/alerts - Alertas de segurança
-router.get("/alerts", async (req: AuthenticatedRequest, res) => {
+router.get('/alerts', async (req: AuthenticatedRequest, res) => {
   try {
     // Por enquanto, retornar alertas simulados baseados em atividade real
     const recentActivity = await db
@@ -146,8 +146,8 @@ router.get("/alerts", async (req: AuthenticatedRequest, res) => {
 
     const alerts = recentActivity.map((activity, index) => ({
       id: `alert-${index}`,
-      type: "info",
-      severity: "LOW",
+      type: 'info',
+      severity: 'LOW',
       message: `Nova proposta criada com status: ${activity.status}`,
       timestamp: activity.created_at,
       resolved: true,
@@ -158,16 +158,16 @@ router.get("/alerts", async (req: AuthenticatedRequest, res) => {
       data: alerts,
     });
   } catch (error) {
-    console.error("[SECURITY MONITORING] Alerts error:", error);
+    console.error('[SECURITY MONITORING] Alerts error:', error);
     res.status(500).json({
       success: false,
-      error: "Erro ao obter alertas",
+      error: 'Erro ao obter alertas',
     });
   }
 });
 
 // GET /api/security-monitoring/performance - Métricas de performance
-router.get("/performance", async (req: AuthenticatedRequest, res) => {
+router.get('/performance', async (req: AuthenticatedRequest, res) => {
   try {
     // Métricas de performance baseadas em dados reais
     const databaseStats = await db.execute(sql`
@@ -202,10 +202,10 @@ router.get("/performance", async (req: AuthenticatedRequest, res) => {
       },
     });
   } catch (error) {
-    console.error("[SECURITY MONITORING] Performance error:", error);
+    console.error('[SECURITY MONITORING] Performance error:', error);
     res.status(500).json({
       success: false,
-      error: "Erro ao obter métricas de performance",
+      error: 'Erro ao obter métricas de performance',
     });
   }
 });

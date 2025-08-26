@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { db } from "../lib/supabase";
-import { users } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { Request, Response, NextFunction } from 'express';
+import { db } from '../lib/supabase';
+import { users } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 /**
  * Multi-tenant security middleware
@@ -23,7 +23,7 @@ export async function multiTenantMiddleware(
 ) {
   try {
     if (!req.user?.email) {
-      return res.status(401).json({ message: "User context not found" });
+      return res.status(401).json({ message: 'User context not found' });
     }
 
     // Get user's loja_id from database
@@ -40,7 +40,7 @@ export async function multiTenantMiddleware(
       .limit(1);
 
     if (!userRecord.length) {
-      return res.status(401).json({ message: "User not found in system" });
+      return res.status(401).json({ message: 'User not found in system' });
     }
 
     const userData = userRecord[0];
@@ -62,8 +62,8 @@ export async function multiTenantMiddleware(
 
     next();
   } catch (error) {
-    console.error("Multi-tenant middleware error:", error);
-    return res.status(500).json({ message: "Failed to establish security context" });
+    console.error('Multi-tenant middleware error:', error);
+    return res.status(500).json({ message: 'Failed to establish security context' });
   }
 }
 

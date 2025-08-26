@@ -1,24 +1,24 @@
-import type { Express, NextFunction, Response } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { createServerSupabaseClient } from "../client/src/lib/supabase";
-import { jwtAuthMiddleware } from "./lib/jwt-auth-middleware";
-import { AuthenticatedRequest } from "../shared/types/express";
-import { db } from "./lib/supabase";
-import { eq } from "drizzle-orm";
+import type { Express, NextFunction, Response } from 'express';
+import { createServer, type Server } from 'http';
+import { storage } from './storage';
+import { createServerSupabaseClient } from '../client/src/lib/supabase';
+import { jwtAuthMiddleware } from './lib/jwt-auth-middleware';
+import { AuthenticatedRequest } from '../shared/types/express';
+import { db } from './lib/supabase';
+import { eq } from 'drizzle-orm';
 import {
   requireAdmin,
   requireManagerOrAdmin,
   requireAnyRole,
   requireRoles,
-} from "./lib/role-guards";
+} from './lib/role-guards';
 import {
   enforceRoutePermissions,
   requireAnalyst,
   requireFinanceiro,
   filterProposalsByRole,
-} from "./lib/role-based-access";
-import { transitionTo, InvalidTransitionError } from "./services/statusFsmService";
+} from './lib/role-based-access';
+import { transitionTo, InvalidTransitionError } from './services/statusFsmService';
 import {
   insertPropostaSchema,
   updatePropostaSchema,
@@ -32,48 +32,48 @@ import {
   produtos,
   tabelasComerciais,
   produtoTabelaComercial,
-} from "@shared/schema";
-import { z } from "zod";
-import multer from "multer";
-import originationRoutes from "./routes/origination.routes";
-import { clickSignRouter } from "./routes/clicksign.js";
-import clicksignIntegrationRoutes from "./routes/clicksign-integration.js";
-import interRoutes from "./routes/inter.js";
-import interWebhookRouter from "./routes/webhooks/inter";
-import interRealtimeRouter from "./routes/inter-realtime";
-import securityRoutes from "./routes/security.js";
-import emailChangeRoutes from "./routes/email-change";
-import cobrancasRoutes from "./routes/cobrancas";
-import monitoringRoutes from "./routes/monitoring";
-import ccbIntelligentTestRoutes from "./routes/ccb-intelligent-test";
-import ccbCorrectedRoutes from "./routes/ccb-test-corrected";
-import clienteRoutes from "./routes/cliente-routes";
-import gestaoContratosRoutes from "./routes/gestao-contratos";
-import testCcbCoordinatesRoutes from "./routes/test-ccb-coordinates";
-import propostasCarneRoutes from "./routes/propostas-carne";
-import propostasCarneStatusRoutes from "./routes/propostas-carne-status";
-import propostasCarneCheckRoutes from "./routes/propostas-carne-check";
-import propostasStorageStatusRoutes from "./routes/propostas-storage-status";
-import propostasCorrigirSincronizacaoRoutes from "./routes/propostas-corrigir-sincronizacao";
-import propostasSincronizarBoletosRoutes from "./routes/propostas-sincronizar-boletos";
-import jobStatusRoutes from "./routes/job-status";
-import testQueueRoutes from "./routes/test-queue";
-import testRetryRoutes from "./routes/test-retry";
-import testAuditRoutes from "./routes/test-audit";
+} from '@shared/schema';
+import { z } from 'zod';
+import multer from 'multer';
+import originationRoutes from './routes/origination.routes';
+import { clickSignRouter } from './routes/clicksign.js';
+import clicksignIntegrationRoutes from './routes/clicksign-integration.js';
+import interRoutes from './routes/inter.js';
+import interWebhookRouter from './routes/webhooks/inter';
+import interRealtimeRouter from './routes/inter-realtime';
+import securityRoutes from './routes/security.js';
+import emailChangeRoutes from './routes/email-change';
+import cobrancasRoutes from './routes/cobrancas';
+import monitoringRoutes from './routes/monitoring';
+import ccbIntelligentTestRoutes from './routes/ccb-intelligent-test';
+import ccbCorrectedRoutes from './routes/ccb-test-corrected';
+import clienteRoutes from './routes/cliente-routes';
+import gestaoContratosRoutes from './routes/gestao-contratos';
+import testCcbCoordinatesRoutes from './routes/test-ccb-coordinates';
+import propostasCarneRoutes from './routes/propostas-carne';
+import propostasCarneStatusRoutes from './routes/propostas-carne-status';
+import propostasCarneCheckRoutes from './routes/propostas-carne-check';
+import propostasStorageStatusRoutes from './routes/propostas-storage-status';
+import propostasCorrigirSincronizacaoRoutes from './routes/propostas-corrigir-sincronizacao';
+import propostasSincronizarBoletosRoutes from './routes/propostas-sincronizar-boletos';
+import jobStatusRoutes from './routes/job-status';
+import testQueueRoutes from './routes/test-queue';
+import testRetryRoutes from './routes/test-retry';
+import testAuditRoutes from './routes/test-audit';
 import {
   getBrasiliaDate,
   formatBrazilianDateTime,
   generateApprovalDate,
   getBrasiliaTimestamp,
-} from "./lib/timezone";
+} from './lib/timezone';
 // Use mock queue in development to avoid Redis dependency
-import { queues, checkQueuesHealth } from "./lib/mock-queue";
-import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-logger";
-import { passwordSchema, validatePassword } from "./lib/password-validator";
-import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
-import timingSecurityRoutes from "./routes/timing-security";
-import documentosRoutes from "./routes/documentos";
-import featureFlagService from "./services/featureFlagService";
+import { queues, checkQueuesHealth } from './lib/mock-queue';
+import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
+import { passwordSchema, validatePassword } from './lib/password-validator';
+import { timingNormalizerMiddleware } from './middleware/timing-normalizer';
+import timingSecurityRoutes from './routes/timing-security';
+import documentosRoutes from './routes/documentos';
+import featureFlagService from './services/featureFlagService';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -81,81 +81,82 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Helper function to parse user agent and extract device information
 function parseUserAgent(userAgent: string): string {
-  if (!userAgent) return "Dispositivo desconhecido";
+  if (!userAgent) return 'Dispositivo desconhecido';
 
   // Check for mobile devices
   if (/mobile/i.test(userAgent)) {
-    if (/android/i.test(userAgent)) return "Android Mobile";
-    if (/iphone/i.test(userAgent)) return "iPhone";
-    if (/ipad/i.test(userAgent)) return "iPad";
-    return "Mobile Device";
+    if (/android/i.test(userAgent)) return 'Android Mobile';
+    if (/iphone/i.test(userAgent)) return 'iPhone';
+    if (/ipad/i.test(userAgent)) return 'iPad';
+    return 'Mobile Device';
   }
 
   // Check for desktop browsers
   if (/windows/i.test(userAgent)) {
-    if (/edge/i.test(userAgent)) return "Windows - Edge";
-    if (/chrome/i.test(userAgent)) return "Windows - Chrome";
-    if (/firefox/i.test(userAgent)) return "Windows - Firefox";
-    return "Windows PC";
+    if (/edge/i.test(userAgent)) return 'Windows - Edge';
+    if (/chrome/i.test(userAgent)) return 'Windows - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Windows - Firefox';
+    return 'Windows PC';
   }
 
   if (/macintosh/i.test(userAgent)) {
-    if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return "Mac - Safari";
-    if (/chrome/i.test(userAgent)) return "Mac - Chrome";
-    if (/firefox/i.test(userAgent)) return "Mac - Firefox";
-    return "Mac";
+    if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari';
+    if (/chrome/i.test(userAgent)) return 'Mac - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Mac - Firefox';
+    return 'Mac';
   }
 
   if (/linux/i.test(userAgent)) {
-    if (/chrome/i.test(userAgent)) return "Linux - Chrome";
-    if (/firefox/i.test(userAgent)) return "Linux - Firefox";
-    return "Linux";
+    if (/chrome/i.test(userAgent)) return 'Linux - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Linux - Firefox';
+    return 'Linux';
   }
 
-  return "Dispositivo desconhecido";
+  return 'Dispositivo desconhecido';
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Import and mount authentication routes
-  const authRouter = (await import("./routes/auth/index.js")).default;
-  app.use("/api/auth", authRouter);
+  const authRouter = (await import('./routes/auth/index.js')).default;
+  app.use('/api/auth', authRouter);
 
   // Routes below this line are managed in the monolith
-  
+
   // Import and mount propostas core routes - REFACTORED WITH DDD
   // TODO: Switch to core.refactored.js when fully tested
-  const propostasCoreRouter = (await import("./routes/propostas/core.js")).default;
-  app.use("/api/propostas", propostasCoreRouter);
-  
+  const propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
+  app.use('/api/propostas', propostasCoreRouter);
+
   // DDD Credit Context Routes - Phase 1 Implementation
-  const { createCreditRoutes } = await import("./contexts/credit/presentation/routes.js");
-  app.use("/api/ddd", createCreditRoutes());
-  
+  const { createCreditRoutes } = await import('./contexts/credit/presentation/routes.js');
+  app.use('/api/ddd', createCreditRoutes());
+
   // Import and mount integration test routes
-  const interIntegrationRouter = (await import("./routes/integracao/inter.js")).default;
-  const clicksignIntegrationRouter = (await import("./routes/integracao/clicksign.js")).default;
-  const circuitBreakerTestRouter = (await import("./routes/integracao/circuit-breaker-test.js")).default;
-  
-  app.use("/api/integracao/inter", interIntegrationRouter);
-  app.use("/api/integracao/clicksign", clicksignIntegrationRouter);
-  app.use("/api/test/circuit-breaker", circuitBreakerTestRouter);
+  const interIntegrationRouter = (await import('./routes/integracao/inter.js')).default;
+  const clicksignIntegrationRouter = (await import('./routes/integracao/clicksign.js')).default;
+  const circuitBreakerTestRouter = (await import('./routes/integracao/circuit-breaker-test.js'))
+    .default;
+
+  app.use('/api/integracao/inter', interIntegrationRouter);
+  app.use('/api/integracao/clicksign', clicksignIntegrationRouter);
+  app.use('/api/test/circuit-breaker', circuitBreakerTestRouter);
 
   // Health check endpoint para testar security headers
-  app.get("/api/health", (req, res) => {
+  app.get('/api/health', (req, res) => {
     res.json({
-      status: "ok",
+      status: 'ok',
       timestamp: getBrasiliaTimestamp(),
-      security: "enabled",
-      rateLimit: "active",
+      security: 'enabled',
+      rateLimit: 'active',
     });
   });
 
   // Feature Flags endpoint - retorna flags para o usuário atual
-  app.get("/api/features", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/features', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       // Inicializa o serviço se necessário
       await featureFlagService.init();
-      
+
       // Contexto do usuário para avaliação de flags
       const context = {
         userId: req.user?.id,
@@ -164,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         environment: process.env.NODE_ENV || 'development',
         remoteAddress: getClientIP(req),
       };
-      
+
       // Lista de flags relevantes para o frontend
       const frontendFlags = [
         'maintenance-mode',
@@ -175,10 +176,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ab-test-onboarding',
         'nova-api-experimental',
       ];
-      
+
       // Verifica todas as flags
       const flags = await featureFlagService.checkMultiple(frontendFlags, context);
-      
+
       res.json({
         flags,
         context: {
@@ -198,196 +199,220 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
-  app.get("/api/debug-sentry", function mainHandler(req, res) {
-    throw new Error("Meu primeiro erro Sentry do Simpix!");
+  app.get('/api/debug-sentry', function mainHandler(req, res) {
+    throw new Error('Meu primeiro erro Sentry do Simpix!');
   });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
-  app.get("/api/experimental/analytics", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
-    try {
-      // Verifica se a feature flag está habilitada
-      const isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
-        userId: req.user?.id,
-        userRole: req.user?.role,
-        environment: process.env.NODE_ENV,
-      });
+  app.get(
+    '/api/experimental/analytics',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        // Verifica se a feature flag está habilitada
+        const isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
+          userId: req.user?.id,
+          userRole: req.user?.role,
+          environment: process.env.NODE_ENV,
+        });
 
-      if (!isEnabled) {
-        console.log('❌ Feature flag nova-api-experimental desabilitada para usuário:', req.user?.id);
-        return res.status(403).json({ 
-          error: 'Feature not available',
-          message: 'Esta funcionalidade ainda não está disponível para seu perfil',
+        if (!isEnabled) {
+          console.log(
+            '❌ Feature flag nova-api-experimental desabilitada para usuário:',
+            req.user?.id
+          );
+          return res.status(403).json({
+            error: 'Feature not available',
+            message: 'Esta funcionalidade ainda não está disponível para seu perfil',
+          });
+        }
+
+        console.log('✅ Feature flag nova-api-experimental habilitada para usuário:', req.user?.id);
+
+        // Lógica experimental da nova API
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
+
+        // Exemplo: Analytics avançado (apenas quando feature flag está ativa)
+        const { data: analytics, error } = await supabase
+          .from('propostas')
+          .select('status, created_at, valor')
+          .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
+        if (error) {
+          throw error;
+        }
+
+        // Processamento experimental de analytics
+        const summary = {
+          total_propostas: analytics.length,
+          total_valor: analytics.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0),
+          por_status: analytics.reduce(
+            (acc, p) => {
+              acc[p.status] = (acc[p.status] || 0) + 1;
+              return acc;
+            },
+            {} as Record<string, number>
+          ),
+          feature_flag_enabled: true,
+          experimental_version: '1.0.0-beta',
+        };
+
+        res.json({
+          success: true,
+          data: summary,
+          experimental: true,
+          message: 'API experimental - dados podem mudar',
+        });
+      } catch (error) {
+        console.error('Erro na API experimental:', error);
+        res.status(500).json({
+          error: 'Internal server error',
+          experimental: true,
         });
       }
-
-      console.log('✅ Feature flag nova-api-experimental habilitada para usuário:', req.user?.id);
-      
-      // Lógica experimental da nova API
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
-      const supabase = createServerSupabaseAdminClient();
-      
-      // Exemplo: Analytics avançado (apenas quando feature flag está ativa)
-      const { data: analytics, error } = await supabase
-        .from('propostas')
-        .select('status, created_at, valor')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Processamento experimental de analytics
-      const summary = {
-        total_propostas: analytics.length,
-        total_valor: analytics.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0),
-        por_status: analytics.reduce((acc, p) => {
-          acc[p.status] = (acc[p.status] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>),
-        feature_flag_enabled: true,
-        experimental_version: '1.0.0-beta',
-      };
-      
-      res.json({
-        success: true,
-        data: summary,
-        experimental: true,
-        message: 'API experimental - dados podem mudar',
-      });
-      
-    } catch (error) {
-      console.error('Erro na API experimental:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        experimental: true,
-      });
     }
-  });
+  );
 
   // MOVED TO server/routes/integracao/ - Circuit breaker test endpoints
 
   // RELATÓRIO FINAL - AUDITORIA DO PLANO DE TESTE END-TO-END
-  app.get("/api/relatorio-final-ccb", async (req, res) => {
+  app.get('/api/relatorio-final-ccb', async (req, res) => {
     try {
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
 
-      console.log("🧪 [RELATÓRIO] Executando auditoria final conforme plano de teste");
+      console.log('🧪 [RELATÓRIO] Executando auditoria final conforme plano de teste');
 
       // Buscar última proposta
       const { data: proposta } = await supabase
-        .from("propostas")
-        .select("*")
-        .order("created_at", { ascending: false })
+        .from('propostas')
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(1)
         .single();
 
       if (!proposta) {
         return res.json({
-          RELATORIO_FINAL: "[FALHA]",
-          motivo: "Nenhuma proposta encontrada para auditar"
+          RELATORIO_FINAL: '[FALHA]',
+          motivo: 'Nenhuma proposta encontrada para auditar',
         });
       }
 
       // VALIDAÇÕES DO PLANO DE TESTE
-      const enderecoOK = !!(proposta.cliente_data?.logradouro && proposta.cliente_data?.bairro && proposta.cliente_data?.cep);
-      const rgOK = !!(proposta.cliente_data?.rg && proposta.cliente_data?.localNascimento && proposta.cliente_data?.rgUf);
-      const bancoOK = !!(proposta.dados_pagamento_tipo && (proposta.dados_pagamento_banco || proposta.dados_pagamento_pix));
-      const expedidorOK = !!(proposta.cliente_data?.orgaoEmissor && proposta.cliente_data?.nacionalidade);
+      const enderecoOK = !!(
+        proposta.cliente_data?.logradouro &&
+        proposta.cliente_data?.bairro &&
+        proposta.cliente_data?.cep
+      );
+      const rgOK = !!(
+        proposta.cliente_data?.rg &&
+        proposta.cliente_data?.localNascimento &&
+        proposta.cliente_data?.rgUf
+      );
+      const bancoOK = !!(
+        proposta.dados_pagamento_tipo &&
+        (proposta.dados_pagamento_banco || proposta.dados_pagamento_pix)
+      );
+      const expedidorOK = !!(
+        proposta.cliente_data?.orgaoEmissor && proposta.cliente_data?.nacionalidade
+      );
 
       const todasValidacoes = enderecoOK && rgOK && bancoOK && expedidorOK;
 
       // RELATÓRIO FINAL CONFORME SOLICITADO
       res.json({
-        RELATORIO_FINAL: todasValidacoes ? "[SUCESSO]" : "[FALHA]",
+        RELATORIO_FINAL: todasValidacoes ? '[SUCESSO]' : '[FALHA]',
         validacoes: {
-          endereco_separado: enderecoOK ? "✅ APROVADO" : "❌ REPROVADO",
-          dados_rg_novos: rgOK ? "✅ APROVADO" : "❌ REPROVADO", 
-          dados_bancarios: bancoOK ? "✅ APROVADO" : "❌ REPROVADO",
-          conflito_expedidor_nacionalidade: expedidorOK ? "✅ APROVADO" : "❌ REPROVADO"
+          endereco_separado: enderecoOK ? '✅ APROVADO' : '❌ REPROVADO',
+          dados_rg_novos: rgOK ? '✅ APROVADO' : '❌ REPROVADO',
+          dados_bancarios: bancoOK ? '✅ APROVADO' : '❌ REPROVADO',
+          conflito_expedidor_nacionalidade: expedidorOK ? '✅ APROVADO' : '❌ REPROVADO',
         },
         proposta_id: proposta.id,
-        conclusao: todasValidacoes ? 
-          "🎉 TODAS AS CORREÇÕES VALIDADAS - Debate Máximo RESOLVIDO!" :
-          "❌ Ainda há validações falhando - veja detalhes acima"
+        conclusao: todasValidacoes
+          ? '🎉 TODAS AS CORREÇÕES VALIDADAS - Debate Máximo RESOLVIDO!'
+          : '❌ Ainda há validações falhando - veja detalhes acima',
       });
-
     } catch (error) {
       res.json({
-        RELATORIO_FINAL: "[ERRO]",
-        error: "Falha na execução da auditoria"
+        RELATORIO_FINAL: '[ERRO]',
+        error: 'Falha na execução da auditoria',
       });
     }
   });
 
   // AUDITORIA END-TO-END - Validação Final do Plano de Teste
-  app.get("/api/audit-ccb-endtoend", async (req, res) => {
+  app.get('/api/audit-ccb-endtoend', async (req, res) => {
     try {
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
 
       // Buscar última proposta para auditoria dos dados
       const { data: proposta, error } = await supabase
-        .from("propostas")
-        .select("*")
-        .order("created_at", { ascending: false })
+        .from('propostas')
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(1)
         .single();
 
       if (error || !proposta) {
         return res.json({
-          status: "[FALHA]",
-          message: "Nenhuma proposta encontrada para executar ETAPA 3 do plano de teste"
+          status: '[FALHA]',
+          message: 'Nenhuma proposta encontrada para executar ETAPA 3 do plano de teste',
         });
       }
 
-      console.log("🧪 [AUDIT] Executando ETAPA 3 - Auditoria Visual dos Dados");
-      console.log("🧪 [AUDIT] Proposta ID:", proposta.id);
-      console.log("🧪 [AUDIT] Cliente Data:", JSON.stringify(proposta.cliente_data, null, 2));
+      console.log('🧪 [AUDIT] Executando ETAPA 3 - Auditoria Visual dos Dados');
+      console.log('🧪 [AUDIT] Proposta ID:', proposta.id);
+      console.log('🧪 [AUDIT] Cliente Data:', JSON.stringify(proposta.cliente_data, null, 2));
 
       // ETAPA 3 - AUDITORIA VISUAL CONFORME PLANO DE TESTE
       const validacoes = {
-        "ENDEREÇO - Formatação Separada": {
-          logradouro: proposta.cliente_data?.logradouro ? "✅ PRESENTE" : "❌ FALTANDO",
-          numero: proposta.cliente_data?.numero ? "✅ PRESENTE" : "❌ FALTANDO",
-          complemento: proposta.cliente_data?.complemento ? "✅ PRESENTE" : "❌ OPCIONAL",
-          bairro: proposta.cliente_data?.bairro ? "✅ PRESENTE" : "❌ FALTANDO",
-          cep: proposta.cliente_data?.cep ? "✅ PRESENTE" : "❌ FALTANDO",
-          cidade: proposta.cliente_data?.cidade ? "✅ PRESENTE" : "❌ FALTANDO",
-          uf: proposta.cliente_data?.uf || proposta.cliente_data?.estado ? "✅ PRESENTE" : "❌ FALTANDO"
+        'ENDEREÇO - Formatação Separada': {
+          logradouro: proposta.cliente_data?.logradouro ? '✅ PRESENTE' : '❌ FALTANDO',
+          numero: proposta.cliente_data?.numero ? '✅ PRESENTE' : '❌ FALTANDO',
+          complemento: proposta.cliente_data?.complemento ? '✅ PRESENTE' : '❌ OPCIONAL',
+          bairro: proposta.cliente_data?.bairro ? '✅ PRESENTE' : '❌ FALTANDO',
+          cep: proposta.cliente_data?.cep ? '✅ PRESENTE' : '❌ FALTANDO',
+          cidade: proposta.cliente_data?.cidade ? '✅ PRESENTE' : '❌ FALTANDO',
+          uf:
+            proposta.cliente_data?.uf || proposta.cliente_data?.estado
+              ? '✅ PRESENTE'
+              : '❌ FALTANDO',
         },
-        "DADOS DE RG - Novos Campos": {
-          rg: proposta.cliente_data?.rg ? "✅ PRESENTE" : "❌ FALTANDO",
-          localNascimento: proposta.cliente_data?.localNascimento ? "✅ PRESENTE" : "❌ FALTANDO",
-          rgDataEmissao: proposta.cliente_data?.rgDataEmissao ? "✅ PRESENTE" : "❌ FALTANDO",
-          rgUf: proposta.cliente_data?.rgUf ? "✅ PRESENTE" : "❌ FALTANDO"
+        'DADOS DE RG - Novos Campos': {
+          rg: proposta.cliente_data?.rg ? '✅ PRESENTE' : '❌ FALTANDO',
+          localNascimento: proposta.cliente_data?.localNascimento ? '✅ PRESENTE' : '❌ FALTANDO',
+          rgDataEmissao: proposta.cliente_data?.rgDataEmissao ? '✅ PRESENTE' : '❌ FALTANDO',
+          rgUf: proposta.cliente_data?.rgUf ? '✅ PRESENTE' : '❌ FALTANDO',
         },
-        "DADOS BANCÁRIOS - Persistência": {
-          tipo: proposta.dados_pagamento_tipo ? "✅ PRESENTE" : "❌ FALTANDO",
-          banco: proposta.dados_pagamento_banco ? "✅ PRESENTE" : "❌ FALTANDO",
-          agencia: proposta.dados_pagamento_agencia ? "✅ PRESENTE" : "❌ FALTANDO",
-          conta: proposta.dados_pagamento_conta ? "✅ PRESENTE" : "❌ FALTANDO"
+        'DADOS BANCÁRIOS - Persistência': {
+          tipo: proposta.dados_pagamento_tipo ? '✅ PRESENTE' : '❌ FALTANDO',
+          banco: proposta.dados_pagamento_banco ? '✅ PRESENTE' : '❌ FALTANDO',
+          agencia: proposta.dados_pagamento_agencia ? '✅ PRESENTE' : '❌ FALTANDO',
+          conta: proposta.dados_pagamento_conta ? '✅ PRESENTE' : '❌ FALTANDO',
         },
-        "CONFLITO EXPEDIDOR/NACIONALIDADE": {
-          orgaoEmissor: proposta.cliente_data?.orgaoEmissor ? "✅ PRESENTE" : "❌ FALTANDO",
-          nacionalidade: proposta.cliente_data?.nacionalidade ? "✅ PRESENTE" : "❌ FALTANDO",
-          separacao_ccb: "✅ COORDENADAS SEPARADAS NO SISTEMA"
-        }
+        'CONFLITO EXPEDIDOR/NACIONALIDADE': {
+          orgaoEmissor: proposta.cliente_data?.orgaoEmissor ? '✅ PRESENTE' : '❌ FALTANDO',
+          nacionalidade: proposta.cliente_data?.nacionalidade ? '✅ PRESENTE' : '❌ FALTANDO',
+          separacao_ccb: '✅ COORDENADAS SEPARADAS NO SISTEMA',
+        },
       };
 
       // Contar validações
       let sucessos = 0;
       let total = 0;
-      
-      Object.values(validacoes).forEach(categoria => {
-        Object.values(categoria).forEach(status => {
+
+      Object.values(validacoes).forEach((categoria) => {
+        Object.values(categoria).forEach((status) => {
           total++;
-          if (status.includes("✅")) sucessos++;
+          if (status.includes('✅')) sucessos++;
         });
       });
 
-      const veredito = sucessos === total ? "[SUCESSO]" : "[FALHA]";
-      
+      const veredito = sucessos === total ? '[SUCESSO]' : '[FALHA]';
+
       res.json({
         RELATORIO_FINAL: veredito,
         score: `${sucessos}/${total} validações aprovadas`,
@@ -400,82 +425,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
             banco: proposta.dados_pagamento_banco,
             agencia: proposta.dados_pagamento_agencia,
             conta: proposta.dados_pagamento_conta,
-            pix: proposta.dados_pagamento_pix
-          }
+            pix: proposta.dados_pagamento_pix,
+          },
         },
-        conclusao: veredito === "[SUCESSO]" ? 
-          "🎉 TODAS AS CORREÇÕES VALIDADAS - Debate Máximo RESOLVIDO!" :
-          "❌ Ainda há campos faltantes - necessário criar nova proposta de teste"
+        conclusao:
+          veredito === '[SUCESSO]'
+            ? '🎉 TODAS AS CORREÇÕES VALIDADAS - Debate Máximo RESOLVIDO!'
+            : '❌ Ainda há campos faltantes - necessário criar nova proposta de teste',
       });
-      
     } catch (error) {
-      console.error("❌ [AUDIT] Erro na auditoria:", error);
-      res.status(500).json({ 
-        RELATORIO_FINAL: "[ERRO]",
-        error: "Falha na execução da auditoria" 
+      console.error('❌ [AUDIT] Erro na auditoria:', error);
+      res.status(500).json({
+        RELATORIO_FINAL: '[ERRO]',
+        error: 'Falha na execução da auditoria',
       });
     }
   });
 
   // AUDITORIA FINAL - Validação End-to-End das Correções CCB
-  app.get("/api/test-ccb-corrections", async (req, res) => {
+  app.get('/api/test-ccb-corrections', async (req, res) => {
     try {
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
 
       // Buscar última proposta criada para auditoria
       const { data: proposta, error } = await supabase
-        .from("propostas")
-        .select("*")
-        .order("created_at", { ascending: false })
+        .from('propostas')
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(1)
         .single();
 
       if (error || !proposta) {
         return res.json({
-          status: "NO_DATA",
-          message: "Nenhuma proposta encontrada para auditoria"
+          status: 'NO_DATA',
+          message: 'Nenhuma proposta encontrada para auditoria',
         });
       }
 
       // AUDITORIA ETAPA 3 - Verificação dos dados que entrarão na CCB
       const auditoria = {
-        "[ ] ENDEREÇO SEPARADO": {
-          logradouro: proposta.cliente_data?.logradouro || "❌ FALTANDO",
-          numero: proposta.cliente_data?.numero || "❌ FALTANDO", 
-          complemento: proposta.cliente_data?.complemento || "❌ FALTANDO",
-          bairro: proposta.cliente_data?.bairro || "❌ FALTANDO",
-          cep: proposta.cliente_data?.cep || "❌ FALTANDO",
-          cidade: proposta.cliente_data?.cidade || "❌ FALTANDO",
-          uf: proposta.cliente_data?.uf || proposta.cliente_data?.estado || "❌ FALTANDO"
+        '[ ] ENDEREÇO SEPARADO': {
+          logradouro: proposta.cliente_data?.logradouro || '❌ FALTANDO',
+          numero: proposta.cliente_data?.numero || '❌ FALTANDO',
+          complemento: proposta.cliente_data?.complemento || '❌ FALTANDO',
+          bairro: proposta.cliente_data?.bairro || '❌ FALTANDO',
+          cep: proposta.cliente_data?.cep || '❌ FALTANDO',
+          cidade: proposta.cliente_data?.cidade || '❌ FALTANDO',
+          uf: proposta.cliente_data?.uf || proposta.cliente_data?.estado || '❌ FALTANDO',
         },
-        "[ ] DADOS DE RG": {
-          rg: proposta.cliente_data?.rg || "❌ FALTANDO",
-          orgaoEmissor: proposta.cliente_data?.orgaoEmissor || "❌ FALTANDO",
-          rgDataEmissao: proposta.cliente_data?.rgDataEmissao || "❌ FALTANDO",
-          rgUf: proposta.cliente_data?.rgUf || "❌ FALTANDO",
-          localNascimento: proposta.cliente_data?.localNascimento || "❌ FALTANDO"
+        '[ ] DADOS DE RG': {
+          rg: proposta.cliente_data?.rg || '❌ FALTANDO',
+          orgaoEmissor: proposta.cliente_data?.orgaoEmissor || '❌ FALTANDO',
+          rgDataEmissao: proposta.cliente_data?.rgDataEmissao || '❌ FALTANDO',
+          rgUf: proposta.cliente_data?.rgUf || '❌ FALTANDO',
+          localNascimento: proposta.cliente_data?.localNascimento || '❌ FALTANDO',
         },
-        "[ ] DADOS BANCÁRIOS": {
-          tipo: proposta.dados_pagamento_tipo || "❌ FALTANDO",
-          banco: proposta.dados_pagamento_banco || "❌ FALTANDO",
-          agencia: proposta.dados_pagamento_agencia || "❌ FALTANDO", 
-          conta: proposta.dados_pagamento_conta || "❌ FALTANDO",
-          pix: proposta.dados_pagamento_pix || "N/A"
+        '[ ] DADOS BANCÁRIOS': {
+          tipo: proposta.dados_pagamento_tipo || '❌ FALTANDO',
+          banco: proposta.dados_pagamento_banco || '❌ FALTANDO',
+          agencia: proposta.dados_pagamento_agencia || '❌ FALTANDO',
+          conta: proposta.dados_pagamento_conta || '❌ FALTANDO',
+          pix: proposta.dados_pagamento_pix || 'N/A',
         },
-        "[ ] CONFLITO EXPEDIDOR/NACIONALIDADE": {
-          orgaoExpedidor: proposta.cliente_data?.orgaoEmissor || "❌ FALTANDO",
-          nacionalidade: proposta.cliente_data?.nacionalidade || "❌ FALTANDO",
-          separacao_visual: "✅ COORDENADAS SEPARADAS"
-        }
+        '[ ] CONFLITO EXPEDIDOR/NACIONALIDADE': {
+          orgaoExpedidor: proposta.cliente_data?.orgaoEmissor || '❌ FALTANDO',
+          nacionalidade: proposta.cliente_data?.nacionalidade || '❌ FALTANDO',
+          separacao_visual: '✅ COORDENADAS SEPARADAS',
+        },
       };
 
       // Contar validações bem-sucedidas
       let sucessos = 0;
       let total = 0;
-      
-      Object.values(auditoria).forEach(categoria => {
-        Object.values(categoria).forEach(valor => {
+
+      Object.values(auditoria).forEach((categoria) => {
+        Object.values(categoria).forEach((valor) => {
           total++;
           if (typeof valor === 'string' && !valor.includes('❌ FALTANDO')) {
             sucessos++;
@@ -483,160 +508,168 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       });
 
-      const status = sucessos === total ? "[SUCESSO]" : "[FALHA]";
-      
+      const status = sucessos === total ? '[SUCESSO]' : '[FALHA]';
+
       res.json({
         status,
         score: `${sucessos}/${total} validações`,
         proposta_auditada: proposta.id,
         auditoria_detalhada: auditoria,
-        proxima_acao: sucessos === total ? 
-          "✅ TODAS AS CORREÇÕES VALIDADAS - Gerar CCB para confirmar PDF" :
-          "❌ CORREÇÕES INCOMPLETAS - Verificar campos faltantes"
+        proxima_acao:
+          sucessos === total
+            ? '✅ TODAS AS CORREÇÕES VALIDADAS - Gerar CCB para confirmar PDF'
+            : '❌ CORREÇÕES INCOMPLETAS - Verificar campos faltantes',
       });
-      
     } catch (error) {
-      res.status(500).json({ error: "Erro na auditoria" });
+      res.status(500).json({ error: 'Erro na auditoria' });
     }
   });
 
   // Test endpoint para verificar correções de bugs
-  app.get("/api/test-data-flow", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
-      const supabase = createServerSupabaseAdminClient();
+  app.get(
+    '/api/test-data-flow',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
 
-      // Buscar última proposta criada
-      const { data: proposta, error } = await supabase
-        .from("propostas")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+        // Buscar última proposta criada
+        const { data: proposta, error } = await supabase
+          .from('propostas')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
 
-      if (error || !proposta) {
-        return res.json({ 
-          status: "nenhuma_proposta",
-          message: "Nenhuma proposta encontrada no banco"
-        });
-      }
-
-      // Verificar campos de endereço
-      const enderecoFields = {
-        cep: proposta.cliente_data?.cep,
-        logradouro: proposta.cliente_data?.logradouro,
-        numero: proposta.cliente_data?.numero,
-        complemento: proposta.cliente_data?.complemento,
-        bairro: proposta.cliente_data?.bairro,
-        cidade: proposta.cliente_data?.cidade,
-        estado: proposta.cliente_data?.estado || proposta.cliente_data?.uf,
-        endereco_concatenado: proposta.cliente_data?.endereco
-      };
-
-      // Verificar dados bancários
-      const dadosBancarios = {
-        tipo: proposta.dados_pagamento_tipo,
-        pix: proposta.dados_pagamento_pix,
-        banco: proposta.dados_pagamento_banco,
-        agencia: proposta.dados_pagamento_agencia,
-        conta: proposta.dados_pagamento_conta,
-        digito: proposta.dados_pagamento_digito,
-        nome_titular: proposta.dados_pagamento_nome_titular,
-        cpf_titular: proposta.dados_pagamento_cpf_titular
-      };
-
-      // Verificar parcelas
-      const { data: parcelas } = await supabase
-        .from("parcelas")
-        .select("*")
-        .eq("proposta_id", proposta.id)
-        .order("numero_parcela", { ascending: true });
-
-      const resultado = {
-        proposta_id: proposta.id,
-        created_at: proposta.created_at,
-        status: "analise_completa",
-        bugs_corrigidos: {
-          bug1_endereco: {
-            status: enderecoFields.logradouro ? "✅ CORRIGIDO" : "❌ PENDENTE",
-            campos_separados: enderecoFields,
-            tem_campos_separados: !!(enderecoFields.logradouro && enderecoFields.numero && enderecoFields.bairro)
-          },
-          bug2_dados_bancarios: {
-            status: dadosBancarios.tipo ? "✅ CORRIGIDO" : "❌ PENDENTE",
-            dados_salvos: dadosBancarios,
-            tem_dados_completos: !!(dadosBancarios.tipo && (dadosBancarios.pix || dadosBancarios.banco))
-          },
-          bug3_parcelas: {
-            status: parcelas && parcelas.length > 0 ? "✅ CORRIGIDO" : "❌ PENDENTE",
-            quantidade_parcelas: parcelas?.length || 0,
-            primeira_parcela: parcelas?.[0] || null,
-            ultima_parcela: parcelas?.[parcelas.length - 1] || null
-          }
-        },
-        resumo: {
-          todos_bugs_corrigidos: !!(
-            enderecoFields.logradouro && 
-            dadosBancarios.tipo && 
-            parcelas && parcelas.length > 0
-          )
+        if (error || !proposta) {
+          return res.json({
+            status: 'nenhuma_proposta',
+            message: 'Nenhuma proposta encontrada no banco',
+          });
         }
-      };
 
-      res.json(resultado);
-    } catch (error) {
-      console.error("Erro no teste de fluxo de dados:", error);
-      res.status(500).json({ error: "Erro ao testar fluxo de dados" });
+        // Verificar campos de endereço
+        const enderecoFields = {
+          cep: proposta.cliente_data?.cep,
+          logradouro: proposta.cliente_data?.logradouro,
+          numero: proposta.cliente_data?.numero,
+          complemento: proposta.cliente_data?.complemento,
+          bairro: proposta.cliente_data?.bairro,
+          cidade: proposta.cliente_data?.cidade,
+          estado: proposta.cliente_data?.estado || proposta.cliente_data?.uf,
+          endereco_concatenado: proposta.cliente_data?.endereco,
+        };
+
+        // Verificar dados bancários
+        const dadosBancarios = {
+          tipo: proposta.dados_pagamento_tipo,
+          pix: proposta.dados_pagamento_pix,
+          banco: proposta.dados_pagamento_banco,
+          agencia: proposta.dados_pagamento_agencia,
+          conta: proposta.dados_pagamento_conta,
+          digito: proposta.dados_pagamento_digito,
+          nome_titular: proposta.dados_pagamento_nome_titular,
+          cpf_titular: proposta.dados_pagamento_cpf_titular,
+        };
+
+        // Verificar parcelas
+        const { data: parcelas } = await supabase
+          .from('parcelas')
+          .select('*')
+          .eq('proposta_id', proposta.id)
+          .order('numero_parcela', { ascending: true });
+
+        const resultado = {
+          proposta_id: proposta.id,
+          created_at: proposta.created_at,
+          status: 'analise_completa',
+          bugs_corrigidos: {
+            bug1_endereco: {
+              status: enderecoFields.logradouro ? '✅ CORRIGIDO' : '❌ PENDENTE',
+              campos_separados: enderecoFields,
+              tem_campos_separados: !!(
+                enderecoFields.logradouro &&
+                enderecoFields.numero &&
+                enderecoFields.bairro
+              ),
+            },
+            bug2_dados_bancarios: {
+              status: dadosBancarios.tipo ? '✅ CORRIGIDO' : '❌ PENDENTE',
+              dados_salvos: dadosBancarios,
+              tem_dados_completos: !!(
+                dadosBancarios.tipo &&
+                (dadosBancarios.pix || dadosBancarios.banco)
+              ),
+            },
+            bug3_parcelas: {
+              status: parcelas && parcelas.length > 0 ? '✅ CORRIGIDO' : '❌ PENDENTE',
+              quantidade_parcelas: parcelas?.length || 0,
+              primeira_parcela: parcelas?.[0] || null,
+              ultima_parcela: parcelas?.[parcelas.length - 1] || null,
+            },
+          },
+          resumo: {
+            todos_bugs_corrigidos: !!(
+              enderecoFields.logradouro &&
+              dadosBancarios.tipo &&
+              parcelas &&
+              parcelas.length > 0
+            ),
+          },
+        };
+
+        res.json(resultado);
+      } catch (error) {
+        console.error('Erro no teste de fluxo de dados:', error);
+        res.status(500).json({ error: 'Erro ao testar fluxo de dados' });
+      }
     }
-  });
+  );
 
   // Debug endpoint for RBAC validation
-  app.get("/api/debug/me", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/debug/me', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       res.json({
-        message: "Debug endpoint - User profile from robust JWT middleware",
+        message: 'Debug endpoint - User profile from robust JWT middleware',
         user: req.user,
         timestamp: getBrasiliaTimestamp(),
       });
     } catch (error) {
-      console.error("Debug endpoint error:", error);
-      res.status(500).json({ message: "Debug endpoint failed" });
+      console.error('Debug endpoint error:', error);
+      res.status(500).json({ message: 'Debug endpoint failed' });
     }
   });
-
-
-
-
 
   // MOVED TO server/routes/propostas/core.ts - PUT /api/propostas/:id/status
 
   // 🔧 CORREÇÃO CRÍTICA: Mover endpoint específico ANTES da rota genérica /:id
   // New endpoint for formalization proposals (filtered by status)
   app.get(
-    "/api/propostas/formalizacao",
+    '/api/propostas/formalizacao',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
 
         // Formalization statuses - TODOS exceto BOLETOS_EMITIDOS
         // BOLETOS_EMITIDOS vai para Cobranças e Pagamentos
         const formalizationStatuses = [
-          "aprovado",
-          "aceito_atendente",
-          "documentos_enviados",
+          'aprovado',
+          'aceito_atendente',
+          'documentos_enviados',
           // Status V2.0 de formalização
-          "CCB_GERADA",
-          "AGUARDANDO_ASSINATURA", 
-          "ASSINATURA_PENDENTE",
-          "ASSINATURA_CONCLUIDA",
+          'CCB_GERADA',
+          'AGUARDANDO_ASSINATURA',
+          'ASSINATURA_PENDENTE',
+          'ASSINATURA_CONCLUIDA',
           // NÃO incluir BOLETOS_EMITIDOS - vai para cobranças/pagamentos
-          "PAGAMENTO_PENDENTE",
-          "PAGAMENTO_PARCIAL",
+          'PAGAMENTO_PENDENTE',
+          'PAGAMENTO_PARCIAL',
           // Status legados para compatibilidade
-          "contratos_preparados", // será migrado para CCB_GERADA
-          "contratos_assinados",  // será migrado para ASSINATURA_CONCLUIDA
+          'contratos_preparados', // será migrado para CCB_GERADA
+          'contratos_assinados', // será migrado para ASSINATURA_CONCLUIDA
           // NÃO incluir "pronto_pagamento" - é o antigo BOLETOS_EMITIDOS
         ];
 
@@ -649,25 +682,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // Build query based on user role
-        let query = supabase.from("propostas").select("*").in("status", formalizationStatuses);
+        let query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
 
         // Apply role-based filtering
-        if (userRole === "ATENDENTE") {
+        if (userRole === 'ATENDENTE') {
           // ATENDENTE sees only proposals they created
-          query = query.eq("user_id", userId);
+          query = query.eq('user_id', userId);
           console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
-        } else if (userRole === "GERENTE") {
+        } else if (userRole === 'GERENTE') {
           // GERENTE sees all proposals from their store
-          query = query.eq("loja_id", userLojaId);
+          query = query.eq('loja_id', userLojaId);
           console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
         }
         // For other roles (ADMINISTRADOR, ANALISTA, etc.), no additional filtering
 
-        const { data: rawPropostas, error } = await query.order("created_at", { ascending: false });
+        const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
-          console.error("🚨 [FORMALIZATION] Supabase error:", error);
-          return res.status(500).json({ message: "Erro ao consultar propostas de formalização" });
+          console.error('🚨 [FORMALIZATION] Supabase error:', error);
+          return res.status(500).json({ message: 'Erro ao consultar propostas de formalização' });
         }
 
         if (!rawPropostas || rawPropostas.length === 0) {
@@ -679,18 +712,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${userId}`);
         console.log(
-          "🔐 [FORMALIZATION] First proposal:",
+          '🔐 [FORMALIZATION] First proposal:',
           rawPropostas[0]?.id,
           rawPropostas[0]?.status
         );
 
         // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
-        const formalizacaoPropostas = rawPropostas.map(proposta => {
+        const formalizacaoPropostas = rawPropostas.map((proposta) => {
           let clienteData = null;
           let condicoesData = null;
 
           // Parse cliente_data se for string
-          if (typeof proposta.cliente_data === "string") {
+          if (typeof proposta.cliente_data === 'string') {
             try {
               clienteData = JSON.parse(proposta.cliente_data);
             } catch (e) {
@@ -702,7 +735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // Parse condicoes_data se for string
-          if (typeof proposta.condicoes_data === "string") {
+          if (typeof proposta.condicoes_data === 'string') {
             try {
               condicoesData = JSON.parse(proposta.condicoes_data);
             } catch (e) {
@@ -739,9 +772,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res.json(formalizacaoPropostas);
       } catch (error) {
-        console.error("Erro ao buscar propostas de formalização:", error);
+        console.error('Erro ao buscar propostas de formalização:', error);
         res.status(500).json({
-          message: "Erro ao buscar propostas de formalização",
+          message: 'Erro ao buscar propostas de formalização',
         });
       }
     }
@@ -749,29 +782,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint para gerar CCB automaticamente
   app.post(
-    "/api/propostas/:id/gerar-ccb",
+    '/api/propostas/:id/gerar-ccb',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
         console.log(`[CCB] Solicitação de geração de CCB para proposta: ${id}`);
 
-        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
 
         // Verificar se proposta está aprovada
         const { data: proposta, error: propostaError } = await supabase
-          .from("propostas")
-          .select("status, ccb_gerado, caminho_ccb_assinado")
-          .eq("id", id)
+          .from('propostas')
+          .select('status, ccb_gerado, caminho_ccb_assinado')
+          .eq('id', id)
           .single();
 
         if (propostaError || !proposta) {
-          return res.status(404).json({ error: "Proposta não encontrada" });
+          return res.status(404).json({ error: 'Proposta não encontrada' });
         }
 
-        if (proposta.status !== "aprovado") {
-          return res.status(400).json({ error: "CCB só pode ser gerada para propostas aprovadas" });
+        if (proposta.status !== 'aprovado') {
+          return res.status(400).json({ error: 'CCB só pode ser gerada para propostas aprovadas' });
         }
 
         // Se CCB já foi gerada, retornar sucesso
@@ -779,14 +812,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`[CCB] CCB já existe para proposta ${id}`);
           return res.json({
             success: true,
-            message: "CCB já foi gerada anteriormente",
+            message: 'CCB já foi gerada anteriormente',
             caminho: proposta.caminho_ccb_assinado,
           });
         }
 
         // Gerar CCB usando serviço correto (pdf-lib + template)
         console.log(`[CCB] Gerando CCB com template CORRETO para proposta ${id}...`);
-        const { ccbGenerationService } = await import("./services/ccbGenerationService");
+        const { ccbGenerationService } = await import('./services/ccbGenerationService');
 
         try {
           const result = await ccbGenerationService.generateCCB(id);
@@ -796,93 +829,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`[CCB] CCB gerada com sucesso usando template CORRETO: ${result.pdfPath}`);
           res.json({
             success: true,
-            message: "CCB gerada com sucesso usando template personalizado",
+            message: 'CCB gerada com sucesso usando template personalizado',
             caminho: result.pdfPath,
           });
         } catch (error) {
           console.error(`[CCB] Erro ao gerar CCB: ${error}`);
-          return res.status(500).json({ error: "Erro ao gerar CCB" });
+          return res.status(500).json({ error: 'Erro ao gerar CCB' });
         }
       } catch (error) {
-        console.error("[CCB] Erro interno:", error);
-        res.status(500).json({ error: "Erro interno do servidor" });
+        console.error('[CCB] Erro interno:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
       }
     }
   );
 
   // Debug: Testar PDF simples e limpo
-  app.get("/api/debug/test-pdf", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
-    try {
-      const PDFDocument = (await import("pdfkit")).default;
+  app.get(
+    '/api/debug/test-pdf',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const PDFDocument = (await import('pdfkit')).default;
 
-      // Criar PDF extremamente simples
-      const doc = new PDFDocument({
-        margin: 50,
-        size: "A4",
-        info: {
-          Title: "Teste PDF Simples",
-          Author: "Sistema Teste",
-          Subject: "PDF de Teste",
-          Creator: "Sistema Simpix",
-          Producer: "PDFKit",
-        },
-      });
+        // Criar PDF extremamente simples
+        const doc = new PDFDocument({
+          margin: 50,
+          size: 'A4',
+          info: {
+            Title: 'Teste PDF Simples',
+            Author: 'Sistema Teste',
+            Subject: 'PDF de Teste',
+            Creator: 'Sistema Simpix',
+            Producer: 'PDFKit',
+          },
+        });
 
-      const chunks: Buffer[] = [];
-      doc.on("data", chunk => chunks.push(chunk));
+        const chunks: Buffer[] = [];
+        doc.on('data', (chunk) => chunks.push(chunk));
 
-      // Conteúdo mínimo
-      doc.fontSize(16).text("DOCUMENTO DE TESTE");
-      doc.moveDown();
-      doc.fontSize(12).text("Este é um PDF de teste gerado pelo sistema.");
-      doc.text("Data: " + formatBrazilianDateTime(getBrasiliaDate()));
+        // Conteúdo mínimo
+        doc.fontSize(16).text('DOCUMENTO DE TESTE');
+        doc.moveDown();
+        doc.fontSize(12).text('Este é um PDF de teste gerado pelo sistema.');
+        doc.text('Data: ' + formatBrazilianDateTime(getBrasiliaDate()));
 
-      doc.end();
+        doc.end();
 
-      const pdfBuffer = await new Promise<Buffer>(resolve => {
-        doc.on("end", () => resolve(Buffer.concat(chunks)));
-      });
+        const pdfBuffer = await new Promise<Buffer>((resolve) => {
+          doc.on('end', () => resolve(Buffer.concat(chunks)));
+        });
 
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", 'attachment; filename="teste-simples.pdf"');
-      res.send(pdfBuffer);
-    } catch (error) {
-      console.error("Erro ao criar PDF teste:", error);
-      res.status(500).json({ error: "Erro ao criar PDF teste" });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="teste-simples.pdf"');
+        res.send(pdfBuffer);
+      } catch (error) {
+        console.error('Erro ao criar PDF teste:', error);
+        res.status(500).json({ error: 'Erro ao criar PDF teste' });
+      }
     }
-  });
+  );
 
   // Debug: Listar arquivos no bucket documents
-  app.get("/api/debug/storage-files", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
-      const supabase = createServerSupabaseAdminClient();
+  app.get(
+    '/api/debug/storage-files',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
 
-      const { data: files, error } = await supabase.storage.from("documents").list("ccb", {
-        limit: 50,
-        sortBy: { column: "created_at", order: "desc" },
-      });
+        const { data: files, error } = await supabase.storage.from('documents').list('ccb', {
+          limit: 50,
+          sortBy: { column: 'created_at', order: 'desc' },
+        });
 
-      if (error) {
-        console.error("Erro ao listar arquivos:", error);
-        return res.status(500).json({ error: error.message });
+        if (error) {
+          console.error('Erro ao listar arquivos:', error);
+          return res.status(500).json({ error: error.message });
+        }
+
+        res.json({
+          bucket: 'documents',
+          folder: 'ccb',
+          files: files || [],
+          count: files?.length || 0,
+        });
+      } catch (error) {
+        console.error('Erro debug storage:', error);
+        res.status(500).json({ error: 'Erro interno' });
       }
-
-      res.json({
-        bucket: "documents",
-        folder: "ccb",
-        files: files || [],
-        count: files?.length || 0,
-      });
-    } catch (error) {
-      console.error("Erro debug storage:", error);
-      res.status(500).json({ error: "Erro interno" });
     }
-  });
+  );
 
   // Get CCB signed URL
   app.get(
-    "/api/propostas/:id/ccb-url",
+    '/api/propostas/:id/ccb-url',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -890,33 +931,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`[CCB URL] Buscando URL para proposta: ${id}`);
 
-        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
 
         // ✅ CORREÇÃO: Buscar dados MAIS RECENTES da proposta (força busca sem cache)
         const { data: proposta, error } = await supabase
-          .from("propostas")
-          .select("ccb_gerado, caminho_ccb, ccb_gerado_em")
-          .eq("id", id)
+          .from('propostas')
+          .select('ccb_gerado, caminho_ccb, ccb_gerado_em')
+          .eq('id', id)
           .single();
 
         if (error || !proposta) {
           console.log(`[CCB URL] ❌ Proposta não encontrada: ${error?.message}`);
-          return res.status(404).json({ message: "Proposta não encontrada" });
+          return res.status(404).json({ message: 'Proposta não encontrada' });
         }
 
         if (!proposta.ccb_gerado) {
           console.log(`[CCB URL] ❌ CCB não foi gerada ainda`);
-          return res.status(404).json({ message: "CCB não foi gerada para esta proposta" });
+          return res.status(404).json({ message: 'CCB não foi gerada para esta proposta' });
         }
 
         // ✅ ESTRATÉGIA TRIPLA: Sempre verificar se há versão mais recente no storage
-        console.log(`[CCB URL] 💾 Caminho no banco: ${proposta.caminho_ccb || "nenhum"}`);
+        console.log(`[CCB URL] 💾 Caminho no banco: ${proposta.caminho_ccb || 'nenhum'}`);
 
         // Sempre buscar arquivos no storage para garantir versão mais recente
         const { data: files } = await supabase.storage
-          .from("documents")
-          .list(`ccb/${id}`, { sortBy: { column: "created_at", order: "desc" } });
+          .from('documents')
+          .list(`ccb/${id}`, { sortBy: { column: 'created_at', order: 'desc' } });
 
         let ccbPath = proposta.caminho_ccb; // Fallback para caminho do banco
 
@@ -942,7 +983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (!ccbPath) {
           console.log(`[CCB URL] ❌ Nenhum arquivo CCB encontrado`);
-          return res.status(404).json({ message: "Arquivo CCB não encontrado" });
+          return res.status(404).json({ message: 'Arquivo CCB não encontrado' });
         }
 
         console.log(`[CCB URL] 🔗 Gerando URL assinada para: ${ccbPath}`);
@@ -950,69 +991,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Gerar URL assinada com cache-busting para forçar atualização
         const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from("documents")
+          .from('documents')
           .createSignedUrl(ccbPath, 3600); // 1 hora
 
         if (urlError || !signedUrlData) {
-          console.error("❌ [CCB URL] Erro ao gerar URL assinada:", urlError);
-          console.error("❌ [CCB URL] Caminho tentado:", ccbPath);
+          console.error('❌ [CCB URL] Erro ao gerar URL assinada:', urlError);
+          console.error('❌ [CCB URL] Caminho tentado:', ccbPath);
 
           // 🔄 FALLBACK: Regenerar CCB se não encontrado (conforme error_docs/storage_errors.md)
-          if ((urlError as any)?.status === 400 || urlError.message?.includes("Object not found")) {
-            console.log("🔄 [CCB URL] Arquivo não encontrado, tentando regenerar CCB...");
+          if ((urlError as any)?.status === 400 || urlError.message?.includes('Object not found')) {
+            console.log('🔄 [CCB URL] Arquivo não encontrado, tentando regenerar CCB...');
             try {
-              const { ccbGenerationService } = await import("./services/ccbGenerationService");
+              const { ccbGenerationService } = await import('./services/ccbGenerationService');
               const newCcb = await ccbGenerationService.generateCCB(id);
               if (newCcb.success) {
                 // Tentar novamente com o novo arquivo
                 const { data: newSignedUrl } = await supabase.storage
-                  .from("documents")
+                  .from('documents')
                   .createSignedUrl(newCcb.pdfPath!, 3600);
 
                 if (newSignedUrl) {
-                  res.setHeader("X-Content-Type-Options", "nosniff");
-                  res.setHeader("X-Frame-Options", "DENY");
+                  res.setHeader('X-Content-Type-Options', 'nosniff');
+                  res.setHeader('X-Frame-Options', 'DENY');
                   res.setHeader(
-                    "Content-Security-Policy",
+                    'Content-Security-Policy',
                     "default-src 'none'; object-src 'none';"
                   );
                   return res.json({
                     url: newSignedUrl.signedUrl,
                     filename: `CCB-${id}.pdf`,
-                    contentType: "application/pdf",
+                    contentType: 'application/pdf',
                     regenerated: true,
                   });
                 }
               }
             } catch (regenError) {
-              console.error("❌ [CCB URL] Erro na regeneração:", regenError);
+              console.error('❌ [CCB URL] Erro na regeneração:', regenError);
             }
           }
 
           return res.status(500).json({
-            message: "Erro ao gerar URL do documento",
+            message: 'Erro ao gerar URL do documento',
             details: urlError.message,
           });
         }
 
         // Retornar com headers de segurança
-        res.setHeader("X-Content-Type-Options", "nosniff");
-        res.setHeader("X-Frame-Options", "DENY");
-        res.setHeader("Content-Security-Policy", "default-src 'none'; object-src 'none';");
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
+        res.setHeader('Content-Security-Policy', "default-src 'none'; object-src 'none';");
         res.json({
           url: signedUrlData.signedUrl,
           filename: `CCB-${id}.pdf`,
-          contentType: "application/pdf",
+          contentType: 'application/pdf',
         });
       } catch (error) {
-        console.error("Erro ao buscar CCB:", error);
-        res.status(500).json({ message: "Erro ao buscar CCB" });
+        console.error('Erro ao buscar CCB:', error);
+        res.status(500).json({ message: 'Erro ao buscar CCB' });
       }
     }
   );
 
   app.get(
-    "/api/propostas/:id",
+    '/api/propostas/:id',
     jwtAuthMiddleware as any,
     timingNormalizerMiddleware,
     async (req: AuthenticatedRequest, res) => {
@@ -1025,15 +1066,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // 🔧 CORREÇÃO: Usar mesma abordagem do endpoint de formalização que funciona
-        if (user?.role === "ATENDENTE") {
+        if (user?.role === 'ATENDENTE') {
           console.log(`🔐 [ATENDENTE ACCESS] Using RLS query for user loja_id: ${user?.loja_id}`);
 
           // Usar Drizzle com RLS como no endpoint de formalização
-          const { db } = await import("../server/lib/supabase");
+          const { db } = await import('../server/lib/supabase');
           const { propostas, lojas, parceiros, produtos, tabelasComerciais } = await import(
-            "../shared/schema"
+            '../shared/schema'
           );
-          const { eq, and } = await import("drizzle-orm");
+          const { eq, and } = await import('drizzle-orm');
 
           // Query with RLS active - same as formalization endpoint
           const result = await db
@@ -1094,7 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               `🔐 [ATENDENTE BLOCKED] User ${user?.id} denied access to proposta ${idParam} - RLS policy blocked or not found`
             );
             return res.status(403).json({
-              message: "Você não tem permissão para acessar esta proposta",
+              message: 'Você não tem permissão para acessar esta proposta',
             });
           }
 
@@ -1104,13 +1145,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // Buscar documentos da proposta
-          const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
+          const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
           const supabase = createServerSupabaseAdminClient();
 
           const { data: documentos, error: docError } = await supabase
-            .from("proposta_documentos")
-            .select("*")
-            .eq("proposta_id", idParam);
+            .from('proposta_documentos')
+            .select('*')
+            .eq('proposta_id', idParam);
 
           console.log(
             `🔍 [ANÁLISE] Documentos encontrados para proposta ${idParam}:`,
@@ -1119,22 +1160,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // DEBUG: Listar arquivos que existem no bucket para esta proposta
           const { data: bucketFiles, error: listError } = await supabase.storage
-            .from("documents")
+            .from('documents')
             .list(`proposta-${idParam}/`, { limit: 100 });
 
           if (bucketFiles) {
             console.log(`🔍 [ANÁLISE] ===== COMPARAÇÃO BUCKET vs BANCO =====`);
             console.log(
               `🔍 [ANÁLISE] Arquivos no bucket (${bucketFiles.length}):`,
-              bucketFiles.map(f => f.name)
+              bucketFiles.map((f) => f.name)
             );
             console.log(
               `🔍 [ANÁLISE] URLs salvas no banco (${documentos?.length || 0}):`,
-              documentos?.map(d => d.url)
+              documentos?.map((d) => d.url)
             );
             console.log(
               `🔍 [ANÁLISE] Nomes no banco (${documentos?.length || 0}):`,
-              documentos?.map(d => d.nome_arquivo)
+              documentos?.map((d) => d.nome_arquivo)
             );
             console.log(`🔍 [ANÁLISE] ============================================`);
           } else {
@@ -1158,12 +1199,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 });
 
                 // Extrair o caminho do arquivo a partir da URL salva
-                const documentsIndex = doc.url.indexOf("/documents/");
+                const documentsIndex = doc.url.indexOf('/documents/');
                 let filePath;
 
                 if (documentsIndex !== -1) {
                   // Extrair caminho após '/documents/'
-                  filePath = doc.url.substring(documentsIndex + "/documents/".length);
+                  filePath = doc.url.substring(documentsIndex + '/documents/'.length);
                 } else {
                   // Fallback: construir caminho baseado no nome do arquivo
                   const fileName = doc.nome_arquivo;
@@ -1173,7 +1214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log(`🔍 [ANÁLISE] Caminho extraído para URL assinada: ${filePath}`);
 
                 const { data: signedUrlData, error: urlError } = await supabase.storage
-                  .from("documents")
+                  .from('documents')
                   .createSignedUrl(filePath, 3600); // 1 hora
 
                 if (!urlError && signedUrlData) {
@@ -1182,7 +1223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     // Mapeamento para formato esperado pelo DocumentViewer
                     name: doc.nome_arquivo,
                     url: signedUrlData.signedUrl,
-                    type: doc.tipo || "application/octet-stream", // fallback se tipo for null
+                    type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
                     uploadDate: doc.created_at,
                     // Manter campos originais também
                     url_visualizacao: signedUrlData.signedUrl,
@@ -1198,8 +1239,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     ...doc,
                     // Mesmo sem URL, mapear para formato esperado
                     name: doc.nome_arquivo,
-                    url: "",
-                    type: doc.tipo || "application/octet-stream",
+                    url: '',
+                    type: doc.tipo || 'application/octet-stream',
                     uploadDate: doc.created_at,
                   }); // Adiciona sem URL em caso de erro
                 }
@@ -1253,7 +1294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const proposta = await storage.getPropostaById(idParam);
 
           if (!proposta) {
-            return res.status(404).json({ message: "Proposta not found" });
+            return res.status(404).json({ message: 'Proposta not found' });
           }
 
           console.log(
@@ -1261,14 +1302,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // 🔧 CORREÇÃO CRÍTICA: Aplicar mesma lógica de documentos do ATENDENTE
-          const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
+          const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
           const supabase = createServerSupabaseAdminClient();
 
           // Buscar documentos da proposta (mesma lógica do ATENDENTE)
           const { data: documentos, error: docError } = await supabase
-            .from("proposta_documentos")
-            .select("*")
-            .eq("proposta_id", idParam);
+            .from('proposta_documentos')
+            .select('*')
+            .eq('proposta_id', idParam);
 
           console.log(
             `🔍 [ANÁLISE-OUTROS] Documentos encontrados para proposta ${idParam}:`,
@@ -1292,12 +1333,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 });
 
                 // Extrair o caminho do arquivo a partir da URL salva
-                const documentsIndex = doc.url.indexOf("/documents/");
+                const documentsIndex = doc.url.indexOf('/documents/');
                 let filePath;
 
                 if (documentsIndex !== -1) {
                   // Extrair caminho após '/documents/'
-                  filePath = doc.url.substring(documentsIndex + "/documents/".length);
+                  filePath = doc.url.substring(documentsIndex + '/documents/'.length);
                 } else {
                   // Fallback: construir caminho baseado no nome do arquivo
                   const fileName = doc.nome_arquivo;
@@ -1307,7 +1348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log(`🔍 [ANÁLISE-OUTROS] Caminho extraído para URL assinada: ${filePath}`);
 
                 const { data: signedUrlData, error: urlError } = await supabase.storage
-                  .from("documents")
+                  .from('documents')
                   .createSignedUrl(filePath, 3600); // 1 hora
 
                 if (!urlError && signedUrlData) {
@@ -1316,7 +1357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     // Mapeamento para formato esperado pelo DocumentViewer
                     name: doc.nome_arquivo,
                     url: signedUrlData.signedUrl,
-                    type: doc.tipo || "application/octet-stream", // fallback se tipo for null
+                    type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
                     uploadDate: doc.created_at,
                     // Manter campos originais também
                     url_visualizacao: signedUrlData.signedUrl,
@@ -1334,8 +1375,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     ...doc,
                     // Mesmo sem URL, mapear para formato esperado
                     name: doc.nome_arquivo,
-                    url: "",
-                    type: doc.tipo || "application/octet-stream",
+                    url: '',
+                    type: doc.tipo || 'application/octet-stream',
                     uploadDate: doc.created_at,
                   }); // Adiciona sem URL em caso de erro
                 }
@@ -1348,8 +1389,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ...doc,
                   // Mesmo com erro, mapear para formato esperado
                   name: doc.nome_arquivo,
-                  url: "",
-                  type: doc.tipo || "application/octet-stream",
+                  url: '',
+                  type: doc.tipo || 'application/octet-stream',
                   uploadDate: doc.created_at,
                 }); // Adiciona sem URL em caso de erro
               }
@@ -1368,8 +1409,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.json(propostaComDocumentos);
         }
       } catch (error) {
-        console.error("Get proposta error:", error);
-        res.status(500).json({ message: "Failed to fetch proposta" });
+        console.error('Get proposta error:', error);
+        res.status(500).json({ message: 'Failed to fetch proposta' });
       }
     }
   );
@@ -1380,7 +1421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint específico para associar documentos a uma proposta
   app.post(
-    "/api/propostas/:id/documentos",
+    '/api/propostas/:id/documentos',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1388,10 +1429,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { documentos } = req.body;
 
         if (!documentos || !Array.isArray(documentos)) {
-          return res.status(400).json({ message: "Lista de documentos é obrigatória" });
+          return res.status(400).json({ message: 'Lista de documentos é obrigatória' });
         }
 
-        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
 
         console.log(`[DEBUG] Associando ${documentos.length} documentos à proposta ${propostaId}`);
@@ -1403,22 +1444,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             // Gerar URL assinada para o documento
             const { data: signedUrlData } = await supabase.storage
-              .from("documents")
+              .from('documents')
               .createSignedUrl(filePath, 3600); // 1 hora
 
-            const { error: insertError } = await supabase.from("proposta_documentos").insert({
+            const { error: insertError } = await supabase.from('proposta_documentos').insert({
               proposta_id: propostaId,
-              nome_arquivo: fileName.split("-").slice(1).join("-"), // Remove timestamp prefix
+              nome_arquivo: fileName.split('-').slice(1).join('-'), // Remove timestamp prefix
               url: signedUrlData?.signedUrl || `documents/${filePath}`,
-              tipo: fileName.endsWith(".pdf")
-                ? "application/pdf"
-                : fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")
-                  ? "image/jpeg"
-                  : fileName.endsWith(".png")
-                    ? "image/png"
-                    : fileName.endsWith(".gif")
-                      ? "image/gif"
-                      : "application/octet-stream",
+              tipo: fileName.endsWith('.pdf')
+                ? 'application/pdf'
+                : fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')
+                  ? 'image/jpeg'
+                  : fileName.endsWith('.png')
+                    ? 'image/png'
+                    : fileName.endsWith('.gif')
+                      ? 'image/gif'
+                      : 'application/octet-stream',
               tamanho: 0, // Will be updated if size is available
             });
 
@@ -1441,11 +1482,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (error) {
         if (error instanceof z.ZodError) {
-          console.error("Validation error:", error.errors);
-          return res.status(400).json({ message: "Invalid data", errors: error.errors });
+          console.error('Validation error:', error.errors);
+          return res.status(400).json({ message: 'Invalid data', errors: error.errors });
         }
-        console.error("Create proposta error:", error);
-        res.status(500).json({ message: "Failed to create proposta" });
+        console.error('Create proposta error:', error);
+        res.status(500).json({ message: 'Failed to create proposta' });
       }
     }
   );
@@ -1454,9 +1495,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PILAR 12 - PROGRESSIVE ENHANCEMENT
   // Rota para submissão de formulário tradicional (fallback)
   // ====================================
-  app.post("/nova-proposta", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+  app.post('/nova-proposta', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
-      console.log("📝 Progressive Enhancement: Form submission received");
+      console.log('📝 Progressive Enhancement: Form submission received');
 
       // Parse form data
       const formData = {
@@ -1470,7 +1511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prazo: parseInt(req.body.prazo),
         finalidade: req.body.finalidade,
         garantia: req.body.garantia,
-        status: "rascunho",
+        status: 'rascunho',
       };
 
       // Validate and create proposal
@@ -1522,7 +1563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.send(successPage);
     } catch (error) {
-      console.error("Progressive Enhancement form error:", error);
+      console.error('Progressive Enhancement form error:', error);
 
       // Error page for traditional form submission
       const errorPage = `
@@ -1549,10 +1590,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         ? `<div style="background: #fef2f2; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
                          <h3>Campos com erro:</h3>
                          <ul style="text-align: left;">
-                           ${error.errors.map(e => `<li>${e.path.join(".")}: ${e.message}</li>`).join("")}
+                           ${error.errors.map((e) => `<li>${e.path.join('.')}: ${e.message}</li>`).join('')}
                          </ul>
                        </div>`
-                        : ""
+                        : ''
                     }
                 </div>
                 <div style="text-align: center;">
@@ -1569,7 +1610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch(
-    "/api/propostas/:id",
+    '/api/propostas/:id',
     jwtAuthMiddleware as any,
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -1580,16 +1621,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(proposta);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Invalid data", errors: error.errors });
+          return res.status(400).json({ message: 'Invalid data', errors: error.errors });
         }
-        console.error("Update proposta error:", error);
-        res.status(500).json({ message: "Failed to update proposta" });
+        console.error('Update proposta error:', error);
+        res.status(500).json({ message: 'Failed to update proposta' });
       }
     }
   );
 
   app.get(
-    "/api/propostas/status/:status",
+    '/api/propostas/status/:status',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1597,17 +1638,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const propostas = await storage.getPropostasByStatus(status);
         res.json(propostas);
       } catch (error) {
-        console.error("Get propostas by status error:", error);
-        res.status(500).json({ message: "Failed to fetch propostas" });
+        console.error('Get propostas by status error:', error);
+        res.status(500).json({ message: 'Failed to fetch propostas' });
       }
     }
   );
 
   // Import document routes - REACTIVATED FOR DIAGNOSIS
-  const { getPropostaDocuments, uploadPropostaDocument } = await import("./routes/documents");
+  const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
 
-  // Document routes for proposals - REACTIVATED FOR DIAGNOSIS  
-  app.get("/api/propostas/:id/documents", jwtAuthMiddleware as any, getPropostaDocuments);
+  // Document routes for proposals - REACTIVATED FOR DIAGNOSIS
+  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
   //   jwtAuthMiddleware as any,
@@ -1617,96 +1658,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // );
 
   // Import propostas routes
-  const { togglePropostaStatus, getCcbAssinada } = await import("./routes/propostas");
+  const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
 
   // Rota para alternar status entre ativa/suspensa
-  app.put("/api/propostas/:id/toggle-status", jwtAuthMiddleware as any, togglePropostaStatus);
+  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as any, togglePropostaStatus);
 
   // Rota para buscar CCB assinada
-  app.get("/api/propostas/:id/ccb", jwtAuthMiddleware as any, getCcbAssinada);
+  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as any, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
-  app.post("/api/setup-storage", async (req, res) => {
+  app.post('/api/setup-storage', async (req, res) => {
     try {
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
 
       // Check existing buckets
       const { data: buckets, error: listError } = await supabase.storage.listBuckets();
 
       if (listError) {
-        console.error("❌ Erro ao listar buckets:", listError);
+        console.error('❌ Erro ao listar buckets:', listError);
         return res
           .status(500)
-          .json({ message: "Erro ao acessar storage", error: listError.message });
+          .json({ message: 'Erro ao acessar storage', error: listError.message });
       }
 
-      const documentsExists = buckets.some(bucket => bucket.name === "documents");
+      const documentsExists = buckets.some((bucket) => bucket.name === 'documents');
 
       if (documentsExists) {
         return res.json({
-          message: "Bucket documents já existe",
-          buckets: buckets.map(b => b.name),
+          message: 'Bucket documents já existe',
+          buckets: buckets.map((b) => b.name),
         });
       }
 
       // Create documents bucket
       const { data: bucket, error: createError } = await supabase.storage.createBucket(
-        "documents",
+        'documents',
         {
           public: true,
           fileSizeLimit: 52428800, // 50MB
           allowedMimeTypes: [
-            "application/pdf",
-            "image/jpeg",
-            "image/jpg",
-            "image/png",
-            "image/gif",
+            'application/pdf',
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
           ],
         }
       );
 
       if (createError) {
-        console.error("❌ Erro ao criar bucket:", createError);
+        console.error('❌ Erro ao criar bucket:', createError);
         return res
           .status(500)
-          .json({ message: "Erro ao criar bucket", error: createError.message });
+          .json({ message: 'Erro ao criar bucket', error: createError.message });
       }
 
       res.json({
-        message: "Bucket documents criado com sucesso!",
+        message: 'Bucket documents criado com sucesso!',
         bucket: bucket,
-        allBuckets: buckets.map(b => b.name).concat(["documents"]),
+        allBuckets: buckets.map((b) => b.name).concat(['documents']),
       });
     } catch (error) {
-      console.error("Erro no setup:", error);
+      console.error('Erro no setup:', error);
       res.status(500).json({
-        message: "Erro interno",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: 'Erro interno',
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
   // Upload route for proposal documents during creation
   app.post(
-    "/api/upload",
+    '/api/upload',
     jwtAuthMiddleware,
-    upload.single("file"),
+    upload.single('file'),
     async (req: AuthenticatedRequest, res) => {
       try {
         const file = req.file;
-        const proposalId = req.body.proposalId || req.body.filename?.split("-")[0] || "temp";
+        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
-          return res.status(400).json({ message: "Arquivo é obrigatório" });
+          return res.status(400).json({ message: 'Arquivo é obrigatório' });
         }
 
-        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
 
         // Generate unique filename with UUID
-        const { v4: uuidv4 } = await import("uuid");
-        const uniqueId = uuidv4().split("-")[0]; // Use first segment of UUID for shorter filename
+        const { v4: uuidv4 } = await import('uuid');
+        const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
         const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
         const filePath = `proposta-${proposalId}/${fileName}`;
 
@@ -1714,14 +1755,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Upload to PRIVATE Supabase Storage bucket
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("documents")
+          .from('documents')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
             upsert: false,
           });
 
         if (uploadError) {
-          console.error("[ERROR] Erro no upload:", uploadError);
+          console.error('[ERROR] Erro no upload:', uploadError);
           return res.status(400).json({
             message: `Erro no upload: ${uploadError.message}`,
           });
@@ -1729,7 +1770,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // For private bucket, we need to generate a signed URL for viewing
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-          .from("documents")
+          .from('documents')
           .createSignedUrl(filePath, 3600); // 1 hour expiry
 
         console.log(`[DEBUG] Upload bem-sucedido. Arquivo salvo em: ${filePath}`);
@@ -1738,14 +1779,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           success: true,
           fileName: fileName,
           filePath: filePath,
-          url: signedUrlData?.signedUrl || "", // Temporary signed URL
+          url: signedUrlData?.signedUrl || '', // Temporary signed URL
           originalName: file.originalname,
           size: file.size,
           type: file.mimetype,
         });
       } catch (error) {
-        console.error("[ERROR] Erro no upload de documento:", error);
-        res.status(500).json({ message: "Erro interno no upload" });
+        console.error('[ERROR] Erro no upload de documento:', error);
+        res.status(500).json({ message: 'Erro interno no upload' });
       }
     }
   );
@@ -1757,11 +1798,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     atualizarProduto,
     verificarProdutoEmUso,
     deletarProduto,
-  } = await import("./controllers/produtoController");
+  } = await import('./controllers/produtoController');
 
   // Buscar tabelas comerciais disponíveis com lógica hierárquica
   app.get(
-    "/api/tabelas-comerciais-disponiveis",
+    '/api/tabelas-comerciais-disponiveis',
     jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1770,7 +1811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Validação de parâmetros obrigatórios
         if (!produtoId || !parceiroId) {
           return res.status(400).json({
-            message: "produtoId e parceiroId são obrigatórios",
+            message: 'produtoId e parceiroId são obrigatórios',
           });
         }
 
@@ -1780,7 +1821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (isNaN(produtoIdNum) || isNaN(parceiroIdNum)) {
           return res.status(400).json({
-            message: "produtoId e parceiroId devem ser números válidos",
+            message: 'produtoId e parceiroId devem ser números válidos',
           });
         }
 
@@ -1789,9 +1830,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // Import database connection
-        const { db } = await import("../server/lib/supabase");
-        const { eq, and, isNull, desc } = await import("drizzle-orm");
-        const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
+        const { db } = await import('../server/lib/supabase');
+        const { eq, and, isNull, desc } = await import('drizzle-orm');
+        const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
 
         // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
         // Agora usando JOIN com a nova estrutura N:N
@@ -1861,84 +1902,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json(resultado);
       } catch (error) {
-        console.error("Erro no endpoint de tabelas comerciais hierárquicas:", error);
+        console.error('Erro no endpoint de tabelas comerciais hierárquicas:', error);
         res.status(500).json({
-          message: "Erro interno do servidor",
+          message: 'Erro interno do servidor',
         });
       }
     }
   );
 
   // Simple GET endpoint for all commercial tables (for dropdowns)
-  app.get("/api/tabelas-comerciais", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
-    try {
-      // Import database connection
-      const { db } = await import("../server/lib/supabase");
-      const { desc, eq } = await import("drizzle-orm");
-      const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
+  app.get(
+    '/api/tabelas-comerciais',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        // Import database connection
+        const { db } = await import('../server/lib/supabase');
+        const { desc, eq } = await import('drizzle-orm');
+        const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
 
-      // Get all commercial tables ordered by creation date (excluding soft-deleted)
-      const { isNull } = await import("drizzle-orm");
-      const tabelas = await db
-        .select()
-        .from(tabelasComerciais)
-        .where(isNull(tabelasComerciais.deletedAt))
-        .orderBy(desc(tabelasComerciais.createdAt));
+        // Get all commercial tables ordered by creation date (excluding soft-deleted)
+        const { isNull } = await import('drizzle-orm');
+        const tabelas = await db
+          .select()
+          .from(tabelasComerciais)
+          .where(isNull(tabelasComerciais.deletedAt))
+          .orderBy(desc(tabelasComerciais.createdAt));
 
-      // For each table, get associated products
-      const tabelasWithProducts = await Promise.all(
-        tabelas.map(async tabela => {
-          const associations = await db
-            .select({ produtoId: produtoTabelaComercial.produtoId })
-            .from(produtoTabelaComercial)
-            .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
+        // For each table, get associated products
+        const tabelasWithProducts = await Promise.all(
+          tabelas.map(async (tabela) => {
+            const associations = await db
+              .select({ produtoId: produtoTabelaComercial.produtoId })
+              .from(produtoTabelaComercial)
+              .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
 
-          return {
-            ...tabela,
-            produtoIds: associations.map(a => a.produtoId),
-          };
-        })
-      );
+            return {
+              ...tabela,
+              produtoIds: associations.map((a) => a.produtoId),
+            };
+          })
+        );
 
-      console.log(
-        `[${getBrasiliaTimestamp()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`
-      );
-      res.json(tabelasWithProducts);
-    } catch (error) {
-      console.error("Erro ao buscar tabelas comerciais:", error);
-      res.status(500).json({
-        message: "Erro ao buscar tabelas comerciais",
-      });
+        console.log(
+          `[${getBrasiliaTimestamp()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`
+        );
+        res.json(tabelasWithProducts);
+      } catch (error) {
+        console.error('Erro ao buscar tabelas comerciais:', error);
+        res.status(500).json({
+          message: 'Erro ao buscar tabelas comerciais',
+        });
+      }
     }
-  });
+  );
 
   // API endpoint for creating commercial tables (N:N structure)
   app.post(
-    "/api/admin/tabelas-comerciais",
+    '/api/admin/tabelas-comerciais',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
-        const { z } = await import("zod");
+        const { db } = await import('../server/lib/supabase');
+        const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
+        const { z } = await import('zod');
 
         // Updated validation schema for N:N structure
         const createTabelaSchema = z.object({
-          nomeTabela: z.string().min(3, "Nome da tabela deve ter pelo menos 3 caracteres"),
-          taxaJuros: z.number().positive("Taxa de juros deve ser positiva"),
-          prazos: z.array(z.number().positive()).min(1, "Deve ter pelo menos um prazo"),
+          nomeTabela: z.string().min(3, 'Nome da tabela deve ter pelo menos 3 caracteres'),
+          taxaJuros: z.number().positive('Taxa de juros deve ser positiva'),
+          prazos: z.array(z.number().positive()).min(1, 'Deve ter pelo menos um prazo'),
           produtoIds: z
             .array(z.number().int().positive())
-            .min(1, "Pelo menos um produto deve ser selecionado"),
+            .min(1, 'Pelo menos um produto deve ser selecionado'),
           parceiroId: z.number().int().positive().optional(),
-          comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero").default(0),
+          comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero').default(0),
         });
 
         const validatedData = createTabelaSchema.parse(req.body);
 
         // TRANSACTION: Create table and associate products
-        const result = await db.transaction(async tx => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Insert new commercial table
           const [newTabela] = await tx
             .insert(tabelasComerciais)
@@ -1952,7 +1997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .returning();
 
           // Step 2: Associate products via junction table
-          const associations = validatedData.produtoIds.map(produtoId => ({
+          const associations = validatedData.produtoIds.map((produtoId) => ({
             produtoId,
             tabelaComercialId: newTabela.id,
           }));
@@ -1968,47 +2013,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json(result);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error("Erro ao criar tabela comercial:", error);
-        res.status(500).json({ message: "Erro ao criar tabela comercial" });
+        console.error('Erro ao criar tabela comercial:', error);
+        res.status(500).json({ message: 'Erro ao criar tabela comercial' });
       }
     }
   );
 
   // API endpoint for updating commercial tables (N:N structure)
   app.put(
-    "/api/admin/tabelas-comerciais/:id",
+    '/api/admin/tabelas-comerciais/:id',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
-        const { z } = await import("zod");
-        const { eq } = await import("drizzle-orm");
+        const { db } = await import('../server/lib/supabase');
+        const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
+        const { z } = await import('zod');
+        const { eq } = await import('drizzle-orm');
 
         const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
-          return res.status(400).json({ message: "ID da tabela inválido" });
+          return res.status(400).json({ message: 'ID da tabela inválido' });
         }
 
         // Updated validation schema for N:N structure
         const updateTabelaSchema = z.object({
-          nomeTabela: z.string().min(3, "Nome da tabela deve ter pelo menos 3 caracteres"),
-          taxaJuros: z.number().positive("Taxa de juros deve ser positiva"),
-          prazos: z.array(z.number().positive()).min(1, "Deve ter pelo menos um prazo"),
+          nomeTabela: z.string().min(3, 'Nome da tabela deve ter pelo menos 3 caracteres'),
+          taxaJuros: z.number().positive('Taxa de juros deve ser positiva'),
+          prazos: z.array(z.number().positive()).min(1, 'Deve ter pelo menos um prazo'),
           produtoIds: z
             .array(z.number().int().positive())
-            .min(1, "Pelo menos um produto deve ser selecionado"),
+            .min(1, 'Pelo menos um produto deve ser selecionado'),
           parceiroId: z.number().int().positive().nullable().optional(),
-          comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero").default(0),
+          comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero').default(0),
         });
 
         const validatedData = updateTabelaSchema.parse(req.body);
 
         // TRANSACTION: Update table and reassociate products
-        const result = await db.transaction(async tx => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Update the commercial table
           const [updatedTabela] = await tx
             .update(tabelasComerciais)
@@ -2023,7 +2068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .returning();
 
           if (!updatedTabela) {
-            throw new Error("Tabela comercial não encontrada");
+            throw new Error('Tabela comercial não encontrada');
           }
 
           // Step 2: Delete existing product associations
@@ -2032,7 +2077,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
 
           // Step 3: Create new product associations
-          const associations = validatedData.produtoIds.map(produtoId => ({
+          const associations = validatedData.produtoIds.map((produtoId) => ({
             produtoId,
             tabelaComercialId: tabelaId,
           }));
@@ -2048,35 +2093,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(result);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        if (error instanceof Error && error.message === "Tabela comercial não encontrada") {
+        if (error instanceof Error && error.message === 'Tabela comercial não encontrada') {
           return res.status(404).json({ message: error.message });
         }
-        console.error("Erro ao atualizar tabela comercial:", error);
-        res.status(500).json({ message: "Erro ao atualizar tabela comercial" });
+        console.error('Erro ao atualizar tabela comercial:', error);
+        res.status(500).json({ message: 'Erro ao atualizar tabela comercial' });
       }
     }
   );
 
   // API endpoint for deleting commercial tables
   app.delete(
-    "/api/admin/tabelas-comerciais/:id",
+    '/api/admin/tabelas-comerciais/:id',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
-        const { eq } = await import("drizzle-orm");
+        const { db } = await import('../server/lib/supabase');
+        const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
+        const { eq } = await import('drizzle-orm');
 
         const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
-          return res.status(400).json({ message: "ID da tabela inválido" });
+          return res.status(400).json({ message: 'ID da tabela inválido' });
         }
 
         // TRANSACTION: Delete table and its associations
-        await db.transaction(async tx => {
+        await db.transaction(async (tx) => {
           // Step 1: Delete product associations
           await tx
             .delete(produtoTabelaComercial)
@@ -2090,18 +2135,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .returning();
 
           if (result.length === 0) {
-            throw new Error("Tabela comercial não encontrada");
+            throw new Error('Tabela comercial não encontrada');
           }
         });
 
         console.log(`[${getBrasiliaTimestamp()}] Tabela comercial deletada: ${tabelaId}`);
         res.status(204).send();
       } catch (error) {
-        if (error instanceof Error && error.message === "Tabela comercial não encontrada") {
+        if (error instanceof Error && error.message === 'Tabela comercial não encontrada') {
           return res.status(404).json({ message: error.message });
         }
-        console.error("Erro ao deletar tabela comercial:", error);
-        res.status(500).json({ message: "Erro ao deletar tabela comercial" });
+        console.error('Erro ao deletar tabela comercial:', error);
+        res.status(500).json({ message: 'Erro ao deletar tabela comercial' });
       }
     }
   );
@@ -2116,7 +2161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint for formalization data - Using Supabase direct to avoid Drizzle orderSelectedFields error
   app.get(
-    "/api/propostas/:id/formalizacao",
+    '/api/propostas/:id/formalizacao',
     jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -2126,20 +2171,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         if (!propostaId) {
-          return res.status(400).json({ message: "ID da proposta é obrigatório" });
+          return res.status(400).json({ message: 'ID da proposta é obrigatório' });
         }
 
         // Usar Supabase Admin Client diretamente para evitar problemas do Drizzle
-        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
 
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
 
         // Buscar proposta usando Supabase diretamente - incluindo numeroProposta
         const { data: proposta, error: propostaError } = await supabase
-          .from("propostas")
-          .select("*, numero_proposta")
-          .eq("id", propostaId)
+          .from('propostas')
+          .select('*, numero_proposta')
+          .eq('id', propostaId)
           .single();
 
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 2 - Proposta encontrada:`, !!proposta);
@@ -2156,16 +2201,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `[${getBrasiliaTimestamp()}] ❌ Proposta ${propostaId} não encontrada:`,
             propostaError?.message
           );
-          return res.status(404).json({ message: "Proposta não encontrada" });
+          return res.status(404).json({ message: 'Proposta não encontrada' });
         }
 
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 3 - Buscando documentos...`);
 
         // Buscar documentos da proposta
         const { data: documentos, error: docError } = await supabase
-          .from("proposta_documentos")
-          .select("*")
-          .eq("proposta_id", propostaId);
+          .from('proposta_documentos')
+          .select('*')
+          .eq('proposta_id', propostaId);
 
         console.log(
           `[${getBrasiliaTimestamp()}] 🔍 STEP 4 - Documentos encontrados:`,
@@ -2193,12 +2238,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
 
               // Extrair o caminho do arquivo a partir da URL salva
-              const documentsIndex = doc.url.indexOf("/documents/");
+              const documentsIndex = doc.url.indexOf('/documents/');
               let filePath;
 
               if (documentsIndex !== -1) {
                 // Extrair caminho após '/documents/'
-                filePath = doc.url.substring(documentsIndex + "/documents/".length);
+                filePath = doc.url.substring(documentsIndex + '/documents/'.length);
               } else {
                 // Fallback: construir caminho baseado no nome do arquivo
                 const fileName = doc.nome_arquivo;
@@ -2208,7 +2253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: ${filePath}`);
 
               const { data: signedUrlData, error: urlError } = await supabase.storage
-                .from("documents")
+                .from('documents')
                 .createSignedUrl(filePath, 3600); // 1 hora
 
               if (!urlError && signedUrlData) {
@@ -2217,7 +2262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   // Mapeamento para formato esperado pelo DocumentViewer
                   name: doc.nome_arquivo,
                   url: signedUrlData.signedUrl,
-                  type: doc.tipo || "application/octet-stream", // fallback se tipo for null
+                  type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
                   uploadDate: doc.created_at,
                   // Manter campos originais também
                   url_visualizacao: signedUrlData.signedUrl,
@@ -2235,8 +2280,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ...doc,
                   // Mesmo sem URL, mapear para formato esperado
                   name: doc.nome_arquivo,
-                  url: "",
-                  type: doc.tipo || "application/octet-stream",
+                  url: '',
+                  type: doc.tipo || 'application/octet-stream',
                   uploadDate: doc.created_at,
                 }); // Adiciona sem URL em caso de erro
               }
@@ -2249,8 +2294,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ...doc,
                 // Mesmo com erro, mapear para formato esperado
                 name: doc.nome_arquivo,
-                url: "",
-                type: doc.tipo || "application/octet-stream",
+                url: '',
+                type: doc.tipo || 'application/octet-stream',
                 uploadDate: doc.created_at,
               }); // Adiciona sem URL em caso de erro
             }
@@ -2271,9 +2316,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           const { data: tabelaComercial, error: tabelaError } = await supabase
-            .from("tabelas_comerciais")
-            .select("taxa_juros, nome_tabela, parceiro_id")
-            .eq("id", proposta.tabela_comercial_id)
+            .from('tabelas_comerciais')
+            .select('taxa_juros, nome_tabela, parceiro_id')
+            .eq('id', proposta.tabela_comercial_id)
             .single();
 
           console.log(
@@ -2335,12 +2380,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             temClienteData: !!propostaProcessada.clienteData?.nome,
             temCondicoesData: !!propostaProcessada.condicoesData?.valor,
             totalDocumentos: propostaProcessada.documentos?.length || 0,
-            clienteNome: propostaProcessada.clienteData?.nome || "Nome não informado",
-            valorEmprestimo: propostaProcessada.condicoesData?.valor || "Valor não informado",
+            clienteNome: propostaProcessada.clienteData?.nome || 'Nome não informado',
+            valorEmprestimo: propostaProcessada.condicoesData?.valor || 'Valor não informado',
             taxaJuros:
               propostaProcessada.taxaJurosTabela ||
               propostaProcessada.condicoesData?.taxaJuros ||
-              "Taxa não informada",
+              'Taxa não informada',
           }
         );
 
@@ -2352,72 +2397,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res
           .status(500)
-          .json({ message: "Erro ao buscar dados de formalização", error: error.message });
+          .json({ message: 'Erro ao buscar dados de formalização', error: error.message });
       }
     }
   );
 
   // Mock data para prazos
   const prazos = [
-    { id: 1, valor: "12 meses" },
-    { id: 2, valor: "24 meses" },
-    { id: 3, valor: "36 meses" },
+    { id: 1, valor: '12 meses' },
+    { id: 2, valor: '24 meses' },
+    { id: 3, valor: '36 meses' },
   ];
 
   // Users management endpoints - REFATORADO com padrão Service/Repository
-  const usersAdminRouter = (await import("./routes/admin/users-refactored.js")).default;
-  app.use("/api/admin/users", usersAdminRouter);
+  const usersAdminRouter = (await import('./routes/admin/users-refactored.js')).default;
+  app.use('/api/admin/users', usersAdminRouter);
 
   // API endpoint for partners - GET all (public for dropdowns)
-  app.get("/api/parceiros", async (req, res) => {
+  app.get('/api/parceiros', async (req, res) => {
     try {
-      const { db } = await import("../server/lib/supabase");
-      const { parceiros } = await import("../shared/schema");
+      const { db } = await import('../server/lib/supabase');
+      const { parceiros } = await import('../shared/schema');
 
-      const { isNull } = await import("drizzle-orm");
+      const { isNull } = await import('drizzle-orm');
       const allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
       res.json(allParceiros);
     } catch (error) {
-      console.error("Erro ao buscar parceiros:", error);
-      res.status(500).json({ message: "Erro ao buscar parceiros" });
+      console.error('Erro ao buscar parceiros:', error);
+      res.status(500).json({ message: 'Erro ao buscar parceiros' });
     }
   });
 
   // API endpoint for partners - GET by ID
-  app.get("/api/parceiros/:id", timingNormalizerMiddleware, async (req, res) => {
+  app.get('/api/parceiros/:id', timingNormalizerMiddleware, async (req, res) => {
     try {
-      const { db } = await import("../server/lib/supabase");
-      const { parceiros } = await import("../shared/schema");
-      const { eq } = await import("drizzle-orm");
+      const { db } = await import('../server/lib/supabase');
+      const { parceiros } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
 
       const parceiroId = parseInt(req.params.id);
       if (isNaN(parceiroId)) {
-        return res.status(400).json({ message: "ID do parceiro inválido" });
+        return res.status(400).json({ message: 'ID do parceiro inválido' });
       }
 
       const [parceiro] = await db.select().from(parceiros).where(eq(parceiros.id, parceiroId));
 
       if (!parceiro) {
-        return res.status(404).json({ message: "Parceiro não encontrado" });
+        return res.status(404).json({ message: 'Parceiro não encontrado' });
       }
 
       res.json(parceiro);
     } catch (error) {
-      console.error("Erro ao buscar parceiro:", error);
-      res.status(500).json({ message: "Erro ao buscar parceiro" });
+      console.error('Erro ao buscar parceiro:', error);
+      res.status(500).json({ message: 'Erro ao buscar parceiro' });
     }
   });
 
   // API endpoint for partners - POST create
   app.post(
-    "/api/admin/parceiros",
+    '/api/admin/parceiros',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { parceiros, insertParceiroSchema } = await import("../shared/schema");
-        const { z } = await import("zod");
+        const { db } = await import('../server/lib/supabase');
+        const { parceiros, insertParceiroSchema } = await import('../shared/schema');
+        const { z } = await import('zod');
 
         const validatedData = insertParceiroSchema.parse(req.body);
         const [newParceiro] = await db.insert(parceiros).values(validatedData).returning();
@@ -2425,29 +2470,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json(newParceiro);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error("Erro ao criar parceiro:", error);
-        res.status(500).json({ message: "Erro ao criar parceiro" });
+        console.error('Erro ao criar parceiro:', error);
+        res.status(500).json({ message: 'Erro ao criar parceiro' });
       }
     }
   );
 
   // API endpoint for partners - PUT update
   app.put(
-    "/api/admin/parceiros/:id",
+    '/api/admin/parceiros/:id',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { parceiros, updateParceiroSchema } = await import("../shared/schema");
-        const { eq } = await import("drizzle-orm");
-        const { z } = await import("zod");
+        const { db } = await import('../server/lib/supabase');
+        const { parceiros, updateParceiroSchema } = await import('../shared/schema');
+        const { eq } = await import('drizzle-orm');
+        const { z } = await import('zod');
 
         const parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
-          return res.status(400).json({ message: "ID do parceiro inválido" });
+          return res.status(400).json({ message: 'ID do parceiro inválido' });
         }
 
         const validatedData = updateParceiroSchema.parse(req.body);
@@ -2458,34 +2503,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .returning();
 
         if (!updatedParceiro) {
-          return res.status(404).json({ message: "Parceiro não encontrado" });
+          return res.status(404).json({ message: 'Parceiro não encontrado' });
         }
 
         res.json(updatedParceiro);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error("Erro ao atualizar parceiro:", error);
-        res.status(500).json({ message: "Erro ao atualizar parceiro" });
+        console.error('Erro ao atualizar parceiro:', error);
+        res.status(500).json({ message: 'Erro ao atualizar parceiro' });
       }
     }
   );
 
   // API endpoint for partners - DELETE
   app.delete(
-    "/api/admin/parceiros/:id",
+    '/api/admin/parceiros/:id',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { parceiros, lojas } = await import("../shared/schema");
-        const { eq, and, isNull } = await import("drizzle-orm");
+        const { db } = await import('../server/lib/supabase');
+        const { parceiros, lojas } = await import('../shared/schema');
+        const { eq, and, isNull } = await import('drizzle-orm');
 
         const parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
-          return res.status(400).json({ message: "ID do parceiro inválido" });
+          return res.status(400).json({ message: 'ID do parceiro inválido' });
         }
 
         // Regra de negócio crítica: verificar se existem lojas associadas (excluindo soft-deleted)
@@ -2496,7 +2541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (lojasAssociadas.length > 0) {
           return res.status(409).json({
-            message: "Não é possível excluir um parceiro que possui lojas cadastradas.",
+            message: 'Não é possível excluir um parceiro que possui lojas cadastradas.',
           });
         }
 
@@ -2507,7 +2552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(and(eq(parceiros.id, parceiroId), isNull(parceiros.deletedAt)));
 
         if (!parceiroExistente) {
-          return res.status(404).json({ message: "Parceiro não encontrado" });
+          return res.status(404).json({ message: 'Parceiro não encontrado' });
         }
 
         // Soft delete - set deleted_at timestamp
@@ -2518,115 +2563,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.status(204).send();
       } catch (error) {
-        console.error("Erro ao excluir parceiro:", error);
-        res.status(500).json({ message: "Erro ao excluir parceiro" });
+        console.error('Erro ao excluir parceiro:', error);
+        res.status(500).json({ message: 'Erro ao excluir parceiro' });
       }
     }
   );
 
   // Rotas CRUD para produtos
-  app.get("/api/produtos", async (req, res) => {
+  app.get('/api/produtos', async (req, res) => {
     try {
       const produtos = await buscarTodosProdutos();
       res.json(produtos);
     } catch (error) {
-      console.error("Erro ao buscar produtos:", error);
-      res.status(500).json({ message: "Erro ao buscar produtos" });
+      console.error('Erro ao buscar produtos:', error);
+      res.status(500).json({ message: 'Erro ao buscar produtos' });
     }
   });
 
-  app.post("/api/produtos", async (req, res) => {
+  app.post('/api/produtos', async (req, res) => {
     try {
       const { nome, status, tacValor, tacTipo } = req.body;
-      
-      console.log("[PRODUTOS API] Criando produto com dados:", { nome, status, tacValor, tacTipo });
+
+      console.log('[PRODUTOS API] Criando produto com dados:', { nome, status, tacValor, tacTipo });
 
       if (!nome || !status) {
-        return res.status(400).json({ message: "Nome e status são obrigatórios" });
+        return res.status(400).json({ message: 'Nome e status são obrigatórios' });
       }
 
       // Validação opcional dos campos TAC
       if (tacValor !== undefined && tacValor < 0) {
-        return res.status(400).json({ message: "Valor da TAC não pode ser negativo" });
+        return res.status(400).json({ message: 'Valor da TAC não pode ser negativo' });
       }
-      
-      if (tacTipo !== undefined && !["fixo", "percentual"].includes(tacTipo)) {
+
+      if (tacTipo !== undefined && !['fixo', 'percentual'].includes(tacTipo)) {
         return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" });
       }
 
-      const dadosProduto = { 
-        nome, 
+      const dadosProduto = {
+        nome,
         status,
         tacValor: tacValor ?? 0,
-        tacTipo: tacTipo ?? "fixo"
+        tacTipo: tacTipo ?? 'fixo',
       };
-      
-      console.log("[PRODUTOS API] Enviando para controller:", dadosProduto);
-      
+
+      console.log('[PRODUTOS API] Enviando para controller:', dadosProduto);
+
       const novoProduto = await criarProduto(dadosProduto);
-      
-      console.log("[PRODUTOS API] Produto criado:", novoProduto);
-      
+
+      console.log('[PRODUTOS API] Produto criado:', novoProduto);
+
       res.status(201).json(novoProduto);
     } catch (error) {
-      console.error("Erro ao criar produto:", error);
-      res.status(500).json({ message: "Erro ao criar produto" });
+      console.error('Erro ao criar produto:', error);
+      res.status(500).json({ message: 'Erro ao criar produto' });
     }
   });
 
-  app.put("/api/produtos/:id", async (req, res) => {
+  app.put('/api/produtos/:id', async (req, res) => {
     try {
       const { id } = req.params;
       const { nome, status, tacValor, tacTipo } = req.body;
 
       if (!nome || !status) {
-        return res.status(400).json({ message: "Nome e status são obrigatórios" });
+        return res.status(400).json({ message: 'Nome e status são obrigatórios' });
       }
 
       // Validação opcional dos campos TAC
       if (tacValor !== undefined && tacValor < 0) {
-        return res.status(400).json({ message: "Valor da TAC não pode ser negativo" });
+        return res.status(400).json({ message: 'Valor da TAC não pode ser negativo' });
       }
-      
-      if (tacTipo !== undefined && !["fixo", "percentual"].includes(tacTipo)) {
+
+      if (tacTipo !== undefined && !['fixo', 'percentual'].includes(tacTipo)) {
         return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" });
       }
 
-      const produtoAtualizado = await atualizarProduto(id, { 
-        nome, 
+      const produtoAtualizado = await atualizarProduto(id, {
+        nome,
         status,
         tacValor: tacValor ?? 0,
-        tacTipo: tacTipo ?? "fixo"
+        tacTipo: tacTipo ?? 'fixo',
       });
       res.json(produtoAtualizado);
     } catch (error) {
-      console.error("Erro ao atualizar produto:", error);
-      res.status(500).json({ message: "Erro ao atualizar produto" });
+      console.error('Erro ao atualizar produto:', error);
+      res.status(500).json({ message: 'Erro ao atualizar produto' });
     }
   });
 
-  app.delete("/api/produtos/:id", async (req, res) => {
+  app.delete('/api/produtos/:id', async (req, res) => {
     try {
       const { id } = req.params;
 
       await deletarProduto(id);
       res.status(204).send(); // 204 No Content on successful deletion
     } catch (error) {
-      console.error("Erro ao excluir produto:", error);
+      console.error('Erro ao excluir produto:', error);
 
       // Check if it's a dependency error
-      if (error instanceof Error && error.message.includes("Tabelas Comerciais")) {
+      if (error instanceof Error && error.message.includes('Tabelas Comerciais')) {
         return res.status(409).json({
           message: error.message,
         });
       }
 
-      res.status(500).json({ message: "Erro ao excluir produto" });
+      res.status(500).json({ message: 'Erro ao excluir produto' });
     }
   });
 
   // Rota para buscar prazos
-  app.get("/api/prazos", (req, res) => {
+  app.get('/api/prazos', (req, res) => {
     res.json(prazos);
   });
 
@@ -2646,22 +2691,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Rota para simular crédito COM DADOS REAIS DO BANCO
-  app.post("/api/simular", async (req, res) => {
+  app.post('/api/simular', async (req, res) => {
     try {
       const { valorEmprestimo, prazoMeses, parceiroId, produtoId } = req.body;
 
       // Validação de entrada
       if (
-        typeof valorEmprestimo !== "number" || valorEmprestimo <= 0 ||
-        typeof prazoMeses !== "number" || prazoMeses <= 0 ||
+        typeof valorEmprestimo !== 'number' ||
+        valorEmprestimo <= 0 ||
+        typeof prazoMeses !== 'number' ||
+        prazoMeses <= 0 ||
         (!parceiroId && !produtoId)
       ) {
-        return res.status(400).json({ 
-          error: "Parâmetros inválidos. Forneça valorEmprestimo, prazoMeses e parceiroId ou produtoId." 
+        return res.status(400).json({
+          error:
+            'Parâmetros inválidos. Forneça valorEmprestimo, prazoMeses e parceiroId ou produtoId.',
         });
       }
 
-      console.log('[SIMULAÇÃO] Iniciando simulação:', { valorEmprestimo, prazoMeses, parceiroId, produtoId });
+      console.log('[SIMULAÇÃO] Iniciando simulação:', {
+        valorEmprestimo,
+        prazoMeses,
+        parceiroId,
+        produtoId,
+      });
 
       // PASSO 1: Buscar parâmetros financeiros do banco de dados
       let taxaJurosMensal = 5.0; // Default fallback
@@ -2680,7 +2733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (parceiro.length > 0) {
           const parceiroData = parceiro[0];
-          
+
           // Verifica se parceiro tem tabela comercial padrão
           if (parceiroData.tabelaComercialPadraoId) {
             const tabelaPadrao = await db
@@ -2693,11 +2746,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               taxaJurosMensal = parseFloat(tabelaPadrao[0].taxaJuros);
               console.log('[SIMULAÇÃO] Usando tabela padrão do parceiro:', {
                 tabelaId: parceiroData.tabelaComercialPadraoId,
-                taxaJuros: taxaJurosMensal
+                taxaJuros: taxaJurosMensal,
               });
             }
           }
-          
+
           // Verifica comissão padrão do parceiro
           if (parceiroData.comissaoPadrao) {
             comissao = parseFloat(parceiroData.comissaoPadrao);
@@ -2707,11 +2760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // 1.2 - Se produtoId fornecido, busca configurações do produto
       if (produtoId) {
-        const produto = await db
-          .select()
-          .from(produtos)
-          .where(eq(produtos.id, produtoId))
-          .limit(1);
+        const produto = await db.select().from(produtos).where(eq(produtos.id, produtoId)).limit(1);
 
         if (produto.length > 0) {
           const produtoData = produto[0];
@@ -2721,7 +2770,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Busca tabelas comerciais associadas ao produto
           const tabelasProduto = await db
             .select({
-              tabela: tabelasComerciais
+              tabela: tabelasComerciais,
             })
             .from(produtoTabelaComercial)
             .innerJoin(
@@ -2733,7 +2782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (tabelasProduto.length > 0) {
             // Prioriza tabela específica do parceiro se existir
             let tabelaSelecionada = tabelasProduto[0].tabela;
-            
+
             if (parceiroId) {
               const tabelaParceiro = tabelasProduto.find(
                 (t: any) => t.tabela.parceiroId === parceiroId
@@ -2745,7 +2794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
 
             taxaJurosMensal = parseFloat(tabelaSelecionada.taxaJuros);
-            
+
             // Sobrepõe comissão se não definida no parceiro
             if (!comissao && tabelaSelecionada.comissao) {
               comissao = parseFloat(tabelaSelecionada.comissao);
@@ -2758,12 +2807,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taxaJurosMensal,
         tacValor,
         tacTipo,
-        comissao
+        comissao,
       });
 
       // PASSO 2: Executar cálculos usando o serviço de finanças
       const { executarSimulacaoCompleta } = await import('./services/financeService.js');
-      
+
       const resultado = executarSimulacaoCompleta(
         valorEmprestimo,
         prazoMeses,
@@ -2781,15 +2830,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...resultado,
         comissao: {
           percentual: comissao,
-          valor: Math.round(valorComissao * 100) / 100
+          valor: Math.round(valorComissao * 100) / 100,
         },
         parametrosUtilizados: {
           parceiroId,
           produtoId,
           taxaJurosMensal,
           tacValor,
-          tacTipo
-        }
+          tacTipo,
+        },
       };
 
       // Log para validação (PROTOCOLO 5-CHECK - Item 5)
@@ -2806,12 +2855,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       return res.json(respostaCompleta);
-
     } catch (error) {
       console.error('[SIMULAÇÃO] Erro ao processar simulação:', error);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Erro ao processar simulação',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        details: error instanceof Error ? error.message : 'Erro desconhecido',
       });
     }
   });
@@ -2828,18 +2876,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint GET para simulação de crédito
   // Server time endpoint for reliable timestamp source
-  app.get("/api/server-time", (req, res) => {
+  app.get('/api/server-time', (req, res) => {
     res.json({ now: getBrasiliaTimestamp() });
   });
 
-  app.get("/api/simulacao", (req, res) => {
+  app.get('/api/simulacao', (req, res) => {
     const { valor, prazo, produto_id, incluir_tac, dataVencimento } = req.query;
 
     const valorSolicitado = parseFloat(valor as string);
     const prazoEmMeses = parseInt(prazo as string);
 
     if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
-      return res.status(400).json({ error: "Parâmetros inválidos." });
+      return res.status(400).json({ error: 'Parâmetros inválidos.' });
     }
 
     // Correção Crítica: Usa a data do servidor como a "verdade"
@@ -2852,7 +2900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (diasDiferenca > 45) {
       return res
         .status(400)
-        .json({ error: "A data do primeiro vencimento não pode ser superior a 45 dias." });
+        .json({ error: 'A data do primeiro vencimento não pode ser superior a 45 dias.' });
     }
 
     const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
@@ -2861,7 +2909,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
 
     const iof = calcularIOF(valorSolicitado);
-    const tac = incluir_tac === "true" ? valorTac : 0;
+    const tac = incluir_tac === 'true' ? valorTac : 0;
 
     const valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
 
@@ -2883,18 +2931,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rota para fila de formalização
-  app.get("/api/formalizacao/propostas", (req, res) => {
+  app.get('/api/formalizacao/propostas', (req, res) => {
     const mockPropostas = [
-      { id: "1753800001234", cliente: "Empresa A", status: "Assinatura Pendente" },
-      { id: "1753800005678", cliente: "Empresa B", status: "Biometria Concluída" },
-      { id: "1753800009012", cliente: "Empresa C", status: "CCB Gerada" },
+      { id: '1753800001234', cliente: 'Empresa A', status: 'Assinatura Pendente' },
+      { id: '1753800005678', cliente: 'Empresa B', status: 'Biometria Concluída' },
+      { id: '1753800009012', cliente: 'Empresa C', status: 'CCB Gerada' },
     ];
     res.json(mockPropostas);
   });
 
   // Update proposal formalization step
   app.patch(
-    "/api/propostas/:id/etapa-formalizacao",
+    '/api/propostas/:id/etapa-formalizacao',
     jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -2912,29 +2960,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Validate input
-        const etapasValidas = ["ccb_gerado", "assinatura_eletronica", "biometria"];
+        const etapasValidas = ['ccb_gerado', 'assinatura_eletronica', 'biometria'];
         if (!etapa || !etapasValidas.includes(etapa)) {
           return res.status(400).json({
-            message: "Etapa inválida. Use: ccb_gerado, assinatura_eletronica ou biometria",
+            message: 'Etapa inválida. Use: ccb_gerado, assinatura_eletronica ou biometria',
           });
         }
 
-        if (typeof concluida !== "boolean") {
+        if (typeof concluida !== 'boolean') {
           return res.status(400).json({
             message: "O campo 'concluida' deve ser um booleano",
           });
         }
 
         // Import dependencies
-        const { db } = await import("../server/lib/supabase");
-        const { propostas, propostaLogs } = await import("../shared/schema");
-        const { eq } = await import("drizzle-orm");
+        const { db } = await import('../server/lib/supabase');
+        const { propostas, propostaLogs } = await import('../shared/schema');
+        const { eq } = await import('drizzle-orm');
 
         // Get the proposal first to check permissions
         const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id));
 
         if (!proposta) {
-          return res.status(404).json({ message: "Proposta não encontrada" });
+          return res.status(404).json({ message: 'Proposta não encontrada' });
         }
 
         // 🔍 DEBUG: Log proposta info
@@ -2945,11 +2993,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Check permissions based on step and role
-        if (etapa === "ccb_gerado") {
+        if (etapa === 'ccb_gerado') {
           // CCB generation can be done by ANALISTA, GERENTE, ATENDENTE, or ADMINISTRADOR
-          const allowedRoles = ["ANALISTA", "GERENTE", "ATENDENTE", "ADMINISTRADOR"];
+          const allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
           console.log(
-            `🔍 [ETAPA DEBUG] Checking CCB permissions - Role: ${req.user?.role}, Allowed: ${allowedRoles.join(", ")}`
+            `🔍 [ETAPA DEBUG] Checking CCB permissions - Role: ${req.user?.role}, Allowed: ${allowedRoles.join(', ')}`
           );
 
           if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
@@ -2966,9 +3014,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // Allow ADMINISTRADOR to access any store, otherwise check if ATENDENTE of same store
-          const isAdmin = req.user?.role === "ADMINISTRADOR";
+          const isAdmin = req.user?.role === 'ADMINISTRADOR';
           const isAttendenteFromSameStore =
-            req.user?.role === "ATENDENTE" && req.user?.loja_id === proposta.lojaId;
+            req.user?.role === 'ATENDENTE' && req.user?.loja_id === proposta.lojaId;
 
           if (!isAdmin && !isAttendenteFromSameStore) {
             console.log(`❌ [ETAPA DEBUG] Permission denied for step ${etapa}`);
@@ -2982,7 +3030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Build update object based on the step
         const updateData: any = {};
 
-        if (etapa === "ccb_gerado") {
+        if (etapa === 'ccb_gerado') {
           updateData.ccbGerado = concluida;
 
           // Automatically generate CCB when marked as complete
@@ -2990,7 +3038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`[${getBrasiliaTimestamp()}] Gerando CCB para proposta ${id}`);
 
             try {
-              const { ccbGenerationService } = await import("./services/ccbGenerationService");
+              const { ccbGenerationService } = await import('./services/ccbGenerationService');
               const result = await ccbGenerationService.generateCCB(id);
               if (!result.success) {
                 throw new Error(result.error);
@@ -3002,14 +3050,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Don't fail the entire request if CCB generation fails
             }
           }
-        } else if (etapa === "assinatura_eletronica") {
+        } else if (etapa === 'assinatura_eletronica') {
           updateData.assinaturaEletronicaConcluida = concluida;
 
           // TODO: Integrate with ClickSign when marked as complete
           if (concluida && !proposta.assinaturaEletronicaConcluida) {
             console.log(`[${getBrasiliaTimestamp()}] Enviando para ClickSign - proposta ${id}`);
           }
-        } else if (etapa === "biometria") {
+        } else if (etapa === 'biometria') {
           updateData.biometriaConcluida = concluida;
 
           // Generate boletos when biometry is complete
@@ -3020,7 +3068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Add document path if provided
-        if (caminho_documento && etapa === "ccb_gerado" && concluida) {
+        if (caminho_documento && etapa === 'ccb_gerado' && concluida) {
           updateData.caminhoCcbAssinado = caminho_documento;
         }
 
@@ -3034,9 +3082,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create audit log
         await db.insert(propostaLogs).values({
           propostaId: id,
-          autorId: req.user?.id || "",
-          statusNovo: `etapa_${etapa}_${concluida ? "concluida" : "revertida"}`,
-          observacao: `Etapa ${etapa} ${concluida ? "marcada como concluída" : "revertida"} por ${req.user?.role || "usuário"}`,
+          autorId: req.user?.id || '',
+          statusNovo: `etapa_${etapa}_${concluida ? 'concluida' : 'revertida'}`,
+          observacao: `Etapa ${etapa} ${concluida ? 'marcada como concluída' : 'revertida'} por ${req.user?.role || 'usuário'}`,
         });
 
         // Check if all formalization steps are complete
@@ -3049,22 +3097,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             await transitionTo({
               propostaId: id,
-              novoStatus: "pronto_pagamento",
-              userId: req.user?.id || "sistema",
-              contexto: "formalizacao",
-              observacoes: "Todas as etapas de formalização concluídas (CCB, assinatura, biometria)",
+              novoStatus: 'pronto_pagamento',
+              userId: req.user?.id || 'sistema',
+              contexto: 'formalizacao',
+              observacoes:
+                'Todas as etapas de formalização concluídas (CCB, assinatura, biometria)',
               metadata: {
-                tipoAcao: "FORMALIZACAO_COMPLETA",
+                tipoAcao: 'FORMALIZACAO_COMPLETA',
                 ccbGerado: true,
                 assinaturaEletronica: true,
                 biometria: true,
-                usuarioRole: req.user?.role || "desconhecido"
-              }
+                usuarioRole: req.user?.role || 'desconhecido',
+              },
             });
-            console.log(`[${getBrasiliaTimestamp()}] Transição de status validada e executada com sucesso`);
+            console.log(
+              `[${getBrasiliaTimestamp()}] Transição de status validada e executada com sucesso`
+            );
           } catch (error) {
             if (error instanceof InvalidTransitionError) {
-              console.error(`[${getBrasiliaTimestamp()}] Transição de status inválida: ${error.message}`);
+              console.error(
+                `[${getBrasiliaTimestamp()}] Transição de status inválida: ${error.message}`
+              );
               // Não retornamos erro 409 aqui pois é uma operação interna após conclusão de etapas
               // O sistema deveria estar em um estado válido para esta transição
             } else {
@@ -3076,15 +3129,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         res.json({
-          message: "Etapa de formalização atualizada com sucesso",
+          message: 'Etapa de formalização atualizada com sucesso',
           etapa,
           concluida,
           proposta: updatedProposta,
         });
       } catch (error) {
-        console.error("Erro ao atualizar etapa de formalização:", error);
+        console.error('Erro ao atualizar etapa de formalização:', error);
         res.status(500).json({
-          message: "Erro ao atualizar etapa de formalização",
+          message: 'Erro ao atualizar etapa de formalização',
         });
       }
     }
@@ -3092,7 +3145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update proposal status - REAL IMPLEMENTATION WITH AUDIT TRAIL
   app.put(
-    "/api/propostas/:id/status",
+    '/api/propostas/:id/status',
     jwtAuthMiddleware,
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -3101,16 +3154,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { status, observacao } = req.body;
 
         if (!status) {
-          return res.status(400).json({ message: "Status é obrigatório" });
+          return res.status(400).json({ message: 'Status é obrigatório' });
         }
 
         // Import database and schema dependencies
-        const { db } = await import("../server/lib/supabase");
-        const { propostas, comunicacaoLogs } = await import("../shared/schema");
-        const { eq } = await import("drizzle-orm");
+        const { db } = await import('../server/lib/supabase');
+        const { propostas, comunicacaoLogs } = await import('../shared/schema');
+        const { eq } = await import('drizzle-orm');
 
         // Execute transaction for atomic updates
-        const result = await db.transaction(async tx => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Get current proposal for audit trail
           const [currentProposta] = await tx
             .select({
@@ -3121,7 +3174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(propostas.id, id));
 
           if (!currentProposta) {
-            throw new Error("Proposta não encontrada");
+            throw new Error('Proposta não encontrada');
           }
 
           // PAM V1.0 - Usar FSM para validação de transição de status
@@ -3130,19 +3183,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (['aprovado', 'reprovado', 'cancelado'].includes(status)) {
             contexto = 'geral';
           }
-          
+
           try {
             await transitionTo({
               propostaId: id,
               novoStatus: status,
-              userId: req.user?.id || "sistema",
+              userId: req.user?.id || 'sistema',
               contexto,
               observacoes: observacao || `Status alterado para ${status}`,
               metadata: {
-                tipoAcao: "STATUS_UPDATE_MANUAL",
-                usuarioRole: req.user?.role || "desconhecido",
-                statusAnterior: currentProposta.status
-              }
+                tipoAcao: 'STATUS_UPDATE_MANUAL',
+                usuarioRole: req.user?.role || 'desconhecido',
+                statusAnterior: currentProposta.status,
+              },
             });
           } catch (error) {
             if (error instanceof InvalidTransitionError) {
@@ -3156,7 +3209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const [updatedProposta] = await tx
             .update(propostas)
             .set({
-              dataAprovacao: status === "aprovado" ? getBrasiliaDate() : undefined,
+              dataAprovacao: status === 'aprovado' ? getBrasiliaDate() : undefined,
             })
             .where(eq(propostas.id, id))
             .returning();
@@ -3172,47 +3225,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res.json(result);
       } catch (error: any) {
-        console.error("Update status error:", error);
-        if (error instanceof Error && error.message === "Proposta não encontrada") {
+        console.error('Update status error:', error);
+        if (error instanceof Error && error.message === 'Proposta não encontrada') {
           return res.status(404).json({ message: error.message });
         }
         // Tratar erro 409 de transição inválida
         if (error?.statusCode === 409) {
-          return res.status(409).json({ 
+          return res.status(409).json({
             message: error.message,
-            error: "INVALID_TRANSITION"
+            error: 'INVALID_TRANSITION',
           });
         }
-        res.status(500).json({ message: "Erro ao atualizar status" });
+        res.status(500).json({ message: 'Erro ao atualizar status' });
       }
     }
   );
 
-
-
   // Dashboard stats
-  app.get("/api/dashboard/stats", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const allPropostas = await storage.getPropostas();
 
       const stats = {
         totalPropostas: allPropostas.length,
-        aguardandoAnalise: allPropostas.filter(p => p.status === "aguardando_analise").length,
-        aprovadas: allPropostas.filter(p => p.status === "aprovado").length,
+        aguardandoAnalise: allPropostas.filter((p) => p.status === 'aguardando_analise').length,
+        aprovadas: allPropostas.filter((p) => p.status === 'aprovado').length,
         valorTotal: allPropostas.reduce((sum, p) => sum + parseFloat(p.valor), 0),
       };
 
       res.json(stats);
     } catch (error) {
-      console.error("Get stats error:", error);
-      res.status(500).json({ message: "Failed to fetch stats" });
+      console.error('Get stats error:', error);
+      res.status(500).json({ message: 'Failed to fetch stats' });
     }
   });
 
   // Gerente-Lojas Relationship Routes
   // Get all stores managed by a specific manager
   app.get(
-    "/api/gerentes/:gerenteId/lojas",
+    '/api/gerentes/:gerenteId/lojas',
     jwtAuthMiddleware,
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -3221,15 +3272,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const lojaIds = await storage.getLojasForGerente(gerenteId);
         res.json(lojaIds);
       } catch (error) {
-        console.error("Get lojas for gerente error:", error);
-        res.status(500).json({ message: "Failed to fetch stores for manager" });
+        console.error('Get lojas for gerente error:', error);
+        res.status(500).json({ message: 'Failed to fetch stores for manager' });
       }
     }
   );
 
   // Get all managers for a specific store
   app.get(
-    "/api/lojas/:lojaId/gerentes",
+    '/api/lojas/:lojaId/gerentes',
     jwtAuthMiddleware,
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -3238,15 +3289,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const gerenteIds = await storage.getGerentesForLoja(lojaId);
         res.json(gerenteIds);
       } catch (error) {
-        console.error("Get gerentes for loja error:", error);
-        res.status(500).json({ message: "Failed to fetch managers for store" });
+        console.error('Get gerentes for loja error:', error);
+        res.status(500).json({ message: 'Failed to fetch managers for store' });
       }
     }
   );
 
   // Add a manager to a store
   app.post(
-    "/api/gerente-lojas",
+    '/api/gerente-lojas',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -3256,17 +3307,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(relationship);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Invalid data", errors: error.errors });
+          return res.status(400).json({ message: 'Invalid data', errors: error.errors });
         }
-        console.error("Add gerente to loja error:", error);
-        res.status(500).json({ message: "Failed to add manager to store" });
+        console.error('Add gerente to loja error:', error);
+        res.status(500).json({ message: 'Failed to add manager to store' });
       }
     }
   );
 
   // Remove a manager from a store
   app.delete(
-    "/api/gerente-lojas/:gerenteId/:lojaId",
+    '/api/gerente-lojas/:gerenteId/:lojaId',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -3274,17 +3325,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const gerenteId = parseInt(req.params.gerenteId);
         const lojaId = parseInt(req.params.lojaId);
         await storage.removeGerenteFromLoja(gerenteId, lojaId);
-        res.json({ message: "Manager removed from store successfully" });
+        res.json({ message: 'Manager removed from store successfully' });
       } catch (error) {
-        console.error("Remove gerente from loja error:", error);
-        res.status(500).json({ message: "Failed to remove manager from store" });
+        console.error('Remove gerente from loja error:', error);
+        res.status(500).json({ message: 'Failed to remove manager from store' });
       }
     }
   );
 
   // Get all relationships for a specific manager
   app.get(
-    "/api/gerentes/:gerenteId/relationships",
+    '/api/gerentes/:gerenteId/relationships',
     jwtAuthMiddleware,
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -3293,13 +3344,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const relationships = await storage.getGerenteLojas(gerenteId);
         res.json(relationships);
       } catch (error) {
-        console.error("Get gerente relationships error:", error);
-        res.status(500).json({ message: "Failed to fetch manager relationships" });
+        console.error('Get gerente relationships error:', error);
+        res.status(500).json({ message: 'Failed to fetch manager relationships' });
       }
     }
   );
-
-
 
   // ============== SYSTEM METADATA ROUTES ==============
 
@@ -3308,7 +3357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
         return res.status(403).json({
-          message: `Acesso negado. Apenas ${allowedRoles.join(", ")} podem acessar este recurso.`,
+          message: `Acesso negado. Apenas ${allowedRoles.join(', ')} podem acessar este recurso.`,
         });
       }
       next();
@@ -3318,16 +3367,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // System metadata endpoint for hybrid filtering strategy
   // Now allows ADMINISTRADOR, DIRETOR, and GERENTE to create users
   app.get(
-    "/api/admin/system/metadata",
+    '/api/admin/system/metadata',
     jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { lojas } = await import("../shared/schema");
-        const { count } = await import("drizzle-orm");
+        const { db } = await import('../server/lib/supabase');
+        const { lojas } = await import('../shared/schema');
+        const { count } = await import('drizzle-orm');
 
-        const { isNull } = await import("drizzle-orm");
+        const { isNull } = await import('drizzle-orm');
         const result = await db
           .select({ count: count() })
           .from(lojas)
@@ -3336,34 +3385,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json({ totalLojas });
       } catch (error) {
-        console.error("Erro ao buscar metadados do sistema:", error);
-        res.status(500).json({ message: "Erro ao buscar metadados do sistema" });
+        console.error('Erro ao buscar metadados do sistema:', error);
+        res.status(500).json({ message: 'Erro ao buscar metadados do sistema' });
       }
     }
   );
 
   // Get lojas by parceiro ID for server-side filtering
   app.get(
-    "/api/admin/parceiros/:parceiroId/lojas",
+    '/api/admin/parceiros/:parceiroId/lojas',
     jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
-        const { db } = await import("../server/lib/supabase");
-        const { lojas } = await import("../shared/schema");
-        const { eq } = await import("drizzle-orm");
+        const { db } = await import('../server/lib/supabase');
+        const { lojas } = await import('../shared/schema');
+        const { eq } = await import('drizzle-orm');
 
         const parceiroId = parseInt(req.params.parceiroId);
         if (isNaN(parceiroId)) {
-          return res.status(400).json({ message: "ID do parceiro inválido" });
+          return res.status(400).json({ message: 'ID do parceiro inválido' });
         }
 
         const lojasResult = await db.select().from(lojas).where(eq(lojas.parceiroId, parceiroId));
 
         res.json(lojasResult);
       } catch (error) {
-        console.error("Erro ao buscar lojas do parceiro:", error);
-        res.status(500).json({ message: "Erro ao buscar lojas do parceiro" });
+        console.error('Erro ao buscar lojas do parceiro:', error);
+        res.status(500).json({ message: 'Erro ao buscar lojas do parceiro' });
       }
     }
   );
@@ -3372,7 +3421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GET all active lojas
   app.get(
-    "/api/admin/lojas",
+    '/api/admin/lojas',
     jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
@@ -3380,35 +3429,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const lojas = await storage.getLojas();
         res.json(lojas);
       } catch (error) {
-        console.error("Erro ao buscar lojas:", error);
-        res.status(500).json({ message: "Erro ao buscar lojas" });
+        console.error('Erro ao buscar lojas:', error);
+        res.status(500).json({ message: 'Erro ao buscar lojas' });
       }
     }
   );
 
   // GET loja by ID
-  app.get("/api/lojas/:id", timingNormalizerMiddleware, async (req, res) => {
+  app.get('/api/lojas/:id', timingNormalizerMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "ID da loja inválido" });
+        return res.status(400).json({ message: 'ID da loja inválido' });
       }
 
       const loja = await storage.getLojaById(id);
       if (!loja) {
-        return res.status(404).json({ message: "Loja não encontrada" });
+        return res.status(404).json({ message: 'Loja não encontrada' });
       }
 
       res.json(loja);
     } catch (error) {
-      console.error("Erro ao buscar loja:", error);
-      res.status(500).json({ message: "Erro ao buscar loja" });
+      console.error('Erro ao buscar loja:', error);
+      res.status(500).json({ message: 'Erro ao buscar loja' });
     }
   });
 
   // POST create new loja
   app.post(
-    "/api/admin/lojas",
+    '/api/admin/lojas',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
@@ -3418,54 +3467,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json(newLoja);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error("Erro ao criar loja:", error);
-        res.status(500).json({ message: "Erro ao criar loja" });
+        console.error('Erro ao criar loja:', error);
+        res.status(500).json({ message: 'Erro ao criar loja' });
       }
     }
   );
 
   // PUT update loja
   app.put(
-    "/api/admin/lojas/:id",
+    '/api/admin/lojas/:id',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
-          return res.status(400).json({ message: "ID da loja inválido" });
+          return res.status(400).json({ message: 'ID da loja inválido' });
         }
 
         const validatedData = updateLojaSchema.strict().parse(req.body);
         const updatedLoja = await storage.updateLoja(id, validatedData);
 
         if (!updatedLoja) {
-          return res.status(404).json({ message: "Loja não encontrada" });
+          return res.status(404).json({ message: 'Loja não encontrada' });
         }
 
         res.json(updatedLoja);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error("Erro ao atualizar loja:", error);
-        res.status(500).json({ message: "Erro ao atualizar loja" });
+        console.error('Erro ao atualizar loja:', error);
+        res.status(500).json({ message: 'Erro ao atualizar loja' });
       }
     }
   );
 
   // DELETE soft delete loja (set is_active = false)
   app.delete(
-    "/api/admin/lojas/:id",
+    '/api/admin/lojas/:id',
     jwtAuthMiddleware,
     requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
-          return res.status(400).json({ message: "ID da loja inválido" });
+          return res.status(400).json({ message: 'ID da loja inválido' });
         }
 
         // Check for dependencies before soft delete
@@ -3473,32 +3522,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (dependencies.hasUsers || dependencies.hasPropostas || dependencies.hasGerentes) {
           const dependencyDetails = [];
-          if (dependencies.hasUsers) dependencyDetails.push("usuários ativos");
-          if (dependencies.hasPropostas) dependencyDetails.push("propostas associadas");
-          if (dependencies.hasGerentes) dependencyDetails.push("gerentes associados");
+          if (dependencies.hasUsers) dependencyDetails.push('usuários ativos');
+          if (dependencies.hasPropostas) dependencyDetails.push('propostas associadas');
+          if (dependencies.hasGerentes) dependencyDetails.push('gerentes associados');
 
           return res.status(409).json({
-            message: "Não é possível desativar esta loja",
-            details: `A loja possui ${dependencyDetails.join(", ")}. Remova ou transfira essas dependências antes de desativar a loja.`,
+            message: 'Não é possível desativar esta loja',
+            details: `A loja possui ${dependencyDetails.join(', ')}. Remova ou transfira essas dependências antes de desativar a loja.`,
             dependencies: dependencies,
           });
         }
 
         // Perform soft delete
         await storage.deleteLoja(id);
-        res.json({ message: "Loja desativada com sucesso" });
+        res.json({ message: 'Loja desativada com sucesso' });
       } catch (error) {
-        console.error("Erro ao desativar loja:", error);
-        res.status(500).json({ message: "Erro ao desativar loja" });
+        console.error('Erro ao desativar loja:', error);
+        res.status(500).json({ message: 'Erro ao desativar loja' });
       }
     }
   );
 
   // User profile endpoint for RBAC context
-  app.get("/api/auth/profile", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
+        return res.status(401).json({ message: 'Usuário não autenticado' });
       }
 
       res.json({
@@ -3509,13 +3558,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         loja_id: req.user!.loja_id,
       });
     } catch (error) {
-      console.error("Error fetching user profile:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
     }
   });
 
   // Health check endpoints for system stability monitoring
-  app.get("/api/health/storage", async (req, res) => {
+  app.get('/api/health/storage', async (req, res) => {
     try {
       // Test basic storage operations
       const users = await storage.getUsers();
@@ -3523,62 +3572,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usersWithDetails = await storage.getUsersWithDetails();
 
       res.json({
-        status: "healthy",
+        status: 'healthy',
         timestamp: getBrasiliaTimestamp(),
         checks: {
-          getUsers: { status: "ok", count: users.length },
-          getLojas: { status: "ok", count: lojas.length },
-          getUsersWithDetails: { status: "ok", count: usersWithDetails.length },
+          getUsers: { status: 'ok', count: users.length },
+          getLojas: { status: 'ok', count: lojas.length },
+          getUsersWithDetails: { status: 'ok', count: usersWithDetails.length },
         },
       });
     } catch (error) {
-      console.error("Storage health check failed:", error);
+      console.error('Storage health check failed:', error);
       res.status(500).json({
-        status: "unhealthy",
+        status: 'unhealthy',
         timestamp: getBrasiliaTimestamp(),
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.get("/api/health/schema", async (req, res) => {
+  app.get('/api/health/schema', async (req, res) => {
     try {
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
 
       // Check essential tables exist
-      const tables = ["profiles", "lojas", "parceiros", "produtos", "propostas"];
+      const tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];
       const checks: Record<string, any> = {};
 
       for (const table of tables) {
         try {
-          const { data, error } = await supabase.from(table).select("*").limit(1);
+          const { data, error } = await supabase.from(table).select('*').limit(1);
 
           checks[table] = {
-            status: error ? "error" : "ok",
+            status: error ? 'error' : 'ok',
             error: error?.message || null,
           };
         } catch (err) {
           checks[table] = {
-            status: "error",
-            error: err instanceof Error ? err.message : "Unknown error",
+            status: 'error',
+            error: err instanceof Error ? err.message : 'Unknown error',
           };
         }
       }
 
-      const allHealthy = Object.values(checks).every(check => check.status === "ok");
+      const allHealthy = Object.values(checks).every((check) => check.status === 'ok');
 
       res.status(allHealthy ? 200 : 500).json({
-        status: allHealthy ? "healthy" : "unhealthy",
+        status: allHealthy ? 'healthy' : 'unhealthy',
         timestamp: getBrasiliaTimestamp(),
         tables: checks,
       });
     } catch (error) {
-      console.error("Schema health check failed:", error);
+      console.error('Schema health check failed:', error);
       res.status(500).json({
-        status: "unhealthy",
+        status: 'unhealthy',
         timestamp: getBrasiliaTimestamp(),
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
@@ -3586,31 +3635,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ====================================
   // IMPORT SECURE FILE VALIDATION MIDDLEWARE
   // ====================================
-  const { secureFileValidationMiddleware } = await import("./middleware/file-validation.js");
+  const { secureFileValidationMiddleware } = await import('./middleware/file-validation.js');
 
   // ====================================
   // ENDPOINT DE UPLOAD DE DOCUMENTOS
   // ====================================
   app.post(
-    "/api/upload",
-    upload.single("file"),
+    '/api/upload',
+    upload.single('file'),
     secureFileValidationMiddleware,
     jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const file = req.file;
-        const proposalId = req.body.proposalId || req.body.filename?.split("-")[0] || "temp";
+        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
-          return res.status(400).json({ message: "Arquivo é obrigatório" });
+          return res.status(400).json({ message: 'Arquivo é obrigatório' });
         }
 
-        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
 
         // Usar filename do body ou gerar um UUID
-        const { v4: uuidv4 } = await import("uuid");
-        const uniqueId = uuidv4().split("-")[0]; // Use first segment of UUID for shorter filename
+        const { v4: uuidv4 } = await import('uuid');
+        const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
         const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
         const filePath = `proposta-${proposalId}/${fileName}`;
 
@@ -3618,21 +3667,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Upload para o Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("documents")
+          .from('documents')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
             upsert: false,
           });
 
         if (uploadError) {
-          console.error("[ERROR] Erro no upload:", uploadError);
+          console.error('[ERROR] Erro no upload:', uploadError);
           return res.status(400).json({
             message: `Erro no upload: ${uploadError.message}`,
           });
         }
 
         // Obter URL pública
-        const { data: publicUrl } = supabase.storage.from("documents").getPublicUrl(filePath);
+        const { data: publicUrl } = supabase.storage.from('documents').getPublicUrl(filePath);
 
         console.log(`[DEBUG] Upload bem-sucedido. Arquivo salvo em: ${publicUrl.publicUrl}`);
 
@@ -3646,156 +3695,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: file.mimetype,
         });
       } catch (error) {
-        console.error("[ERROR] Erro no upload de documento:", error);
+        console.error('[ERROR] Erro no upload de documento:', error);
         res.status(500).json({
-          message: "Erro interno do servidor no upload",
+          message: 'Erro interno do servidor no upload',
         });
       }
     }
   );
 
   // Register origination routes
-  app.use("/api/origination", originationRoutes);
+  app.use('/api/origination', originationRoutes);
 
   // Register ClickSign routes
-  app.use("/api/clicksign", clickSignRouter);
+  app.use('/api/clicksign', clickSignRouter);
 
   // Register Webhook routes (ClickSign and Inter)
-  const webhookRouter = (await import("./routes/webhooks")).default;
-  app.use("/api/webhooks", webhookRouter);
-  app.use("/webhooks/inter", interWebhookRouter);
+  const webhookRouter = (await import('./routes/webhooks')).default;
+  app.use('/api/webhooks', webhookRouter);
+  app.use('/webhooks/inter', interWebhookRouter);
 
   // Register Inter Collections routes FIRST (more specific route)
-  const interCollectionsRouter = (await import("./routes/inter-collections.js")).default;
-  app.use("/api/inter/collections", interCollectionsRouter);
+  const interCollectionsRouter = (await import('./routes/inter-collections.js')).default;
+  app.use('/api/inter/collections', interCollectionsRouter);
 
   // Register Inter Fix Collections (emergency endpoint)
-  const interFixRouter = (await import("./routes/inter-fix-collections.js")).default;
-  app.use("/api/inter", interFixRouter);
+  const interFixRouter = (await import('./routes/inter-fix-collections.js')).default;
+  app.use('/api/inter', interFixRouter);
 
   // Register Inter Test Fix (no auth endpoint for testing)
-  const interTestFixRouter = (await import("./routes/inter-fix-test.js")).default;
-  app.use("/api/inter", interTestFixRouter);
+  const interTestFixRouter = (await import('./routes/inter-fix-test.js')).default;
+  app.use('/api/inter', interTestFixRouter);
 
   // Register Inter Execute Fix (execute regeneration)
-  const interExecuteFixRouter = (await import("./routes/inter-execute-fix.js")).default;
-  app.use("/api/inter", interExecuteFixRouter);
+  const interExecuteFixRouter = (await import('./routes/inter-execute-fix.js')).default;
+  app.use('/api/inter', interExecuteFixRouter);
 
   // Register Inter Bank routes AFTER (less specific route)
-  app.use("/api/inter", interRoutes);
-  
+  app.use('/api/inter', interRoutes);
+
   // Inter Real-time Status Update Route
-  app.use("/api/inter", interRealtimeRouter);
-  
+  app.use('/api/inter', interRealtimeRouter);
+
   // Inter Fix Route - Regenerar boletos com códigos reais
-  const interFixBoletosRouter = (await import("./routes/inter-fix-boletos.js")).default;
-  app.use("/api/inter-fix", interFixBoletosRouter);
+  const interFixBoletosRouter = (await import('./routes/inter-fix-boletos.js')).default;
+  app.use('/api/inter-fix', interFixBoletosRouter);
 
   // Endpoints movidos para server/routes/propostas-carne.ts para melhor organização
 
   // Register Cobranças routes
-  const cobrancasRouter = (await import("./routes/cobrancas.js")).default;
-  app.use("/api/cobrancas", cobrancasRouter);
+  const cobrancasRouter = (await import('./routes/cobrancas.js')).default;
+  app.use('/api/cobrancas', cobrancasRouter);
 
   // Register Alertas Proativos routes (PAM V1.0)
-  const alertasRouter = (await import("./routes/alertas.js")).default;
-  app.use("/api/alertas", alertasRouter);
+  const alertasRouter = (await import('./routes/alertas.js')).default;
+  app.use('/api/alertas', alertasRouter);
 
   // Register Monitoring routes (Admin only)
-  app.use("/api/monitoring", jwtAuthMiddleware, requireAdmin, monitoringRoutes);
+  app.use('/api/monitoring', jwtAuthMiddleware, requireAdmin, monitoringRoutes);
 
   // Register CCB V2 Intelligent Test routes
-  app.use("/api/ccb-test-v2", ccbIntelligentTestRoutes);
+  app.use('/api/ccb-test-v2', ccbIntelligentTestRoutes);
 
   // Register CCB Corrected routes with complete field mapping
-  app.use("/api/ccb-corrected", ccbCorrectedRoutes);
+  app.use('/api/ccb-corrected', ccbCorrectedRoutes);
 
   // Cliente routes para buscar dados existentes e CEP
-  app.use("/api", clienteRoutes);
+  app.use('/api', clienteRoutes);
 
   // Register Documentos download routes (CCB, contratos, etc)
-  app.use("/api/documentos", documentosRoutes);
+  app.use('/api/documentos', documentosRoutes);
 
   // Register Observações routes
-  const observacoesRouter = (await import("./routes/observacoes.js")).default;
-  app.use("/api", observacoesRouter);
+  const observacoesRouter = (await import('./routes/observacoes.js')).default;
+  app.use('/api', observacoesRouter);
 
   // Register Pagamentos routes
-  const pagamentosRouter = (await import("./routes/pagamentos/index.js")).default;
-  app.use("/api/pagamentos", pagamentosRouter);
+  const pagamentosRouter = (await import('./routes/pagamentos/index.js')).default;
+  app.use('/api/pagamentos', pagamentosRouter);
 
   // Register Formalização routes
-  const formalizacaoRouter = (await import("./routes/formalizacao")).default;
-  app.use("/api/formalizacao", formalizacaoRouter);
-  
+  const formalizacaoRouter = (await import('./routes/formalizacao')).default;
+  app.use('/api/formalizacao', formalizacaoRouter);
+
   // Register Propostas Carnê routes
-  app.use("/api/propostas", propostasCarneRoutes);
-  app.use("/api", propostasCarneStatusRoutes);
+  app.use('/api/propostas', propostasCarneRoutes);
+  app.use('/api', propostasCarneStatusRoutes);
   app.use(propostasCarneCheckRoutes);
-  app.use("/api/propostas", propostasStorageStatusRoutes);
-  app.use("/api/propostas", propostasCorrigirSincronizacaoRoutes);
-  app.use("/api/propostas", propostasSincronizarBoletosRoutes);
-  
+  app.use('/api/propostas', propostasStorageStatusRoutes);
+  app.use('/api/propostas', propostasCorrigirSincronizacaoRoutes);
+  app.use('/api/propostas', propostasSincronizarBoletosRoutes);
+
   // Job Status routes (para consultar status de jobs assíncronos)
-  app.use("/api/jobs", jobStatusRoutes);
-  app.use("/api", testQueueRoutes);
-  app.use("/api/test", testRetryRoutes);
-  
+  app.use('/api/jobs', jobStatusRoutes);
+  app.use('/api', testQueueRoutes);
+  app.use('/api/test', testRetryRoutes);
+
   // Test Audit routes - Sistema de Status V2.0
-  app.use("/api/test-audit", testAuditRoutes);
-  
+  app.use('/api/test-audit', testAuditRoutes);
+
   // Teste temporário para verificar refatoração do Mock Queue
-  const testMockQueueWorkerRoutes = (await import("./routes/test-mock-queue-worker")).default;
-  app.use("/api/test-mock-queue-worker", testMockQueueWorkerRoutes);
+  const testMockQueueWorkerRoutes = (await import('./routes/test-mock-queue-worker')).default;
+  app.use('/api/test-mock-queue-worker', testMockQueueWorkerRoutes);
 
   // CCB Diagnostics routes
-  const ccbDiagnosticsRouter = (await import("./routes/ccb-diagnostics")).default;
-  app.use("/api/ccb-diagnostics", ccbDiagnosticsRouter);
+  const ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
+  app.use('/api/ccb-diagnostics', ccbDiagnosticsRouter);
 
   // CCB Coordinate Calibration routes (Professional calibration system)
-  const ccbCalibrationRouter = (await import("./routes/ccb-calibration")).default;
-  app.use("/api/ccb-calibration", ccbCalibrationRouter);
+  const ccbCalibrationRouter = (await import('./routes/ccb-calibration')).default;
+  app.use('/api/ccb-calibration', ccbCalibrationRouter);
 
   // TEST CCB USER COORDINATES - Validação das coordenadas manuais do usuário
-  app.use("/api/test-ccb-coordinates", testCcbCoordinatesRoutes);
+  app.use('/api/test-ccb-coordinates', testCcbCoordinatesRoutes);
 
   // Register Semgrep MCP routes - Projeto Cérbero
-  const securityMCPRoutes = (await import("./routes/security-mcp.js")).default;
-  app.use("/api/security/mcp", securityMCPRoutes);
+  const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
+  app.use('/api/security/mcp', securityMCPRoutes);
 
   // Register Security routes - OWASP Compliance Monitoring
-  const { setupSecurityRoutes } = await import("./routes/security-original");
+  const { setupSecurityRoutes } = await import('./routes/security-original');
   setupSecurityRoutes(app);
 
   // Registrar rotas de monitoramento de segurança em tempo real
-  const { securityMonitoringRouter } = await import("./routes/security-monitoring.js");
-  app.use("/api/security-monitoring", securityMonitoringRouter);
+  const { securityMonitoringRouter } = await import('./routes/security-monitoring.js');
+  app.use('/api/security-monitoring', securityMonitoringRouter);
 
   // Register Timing Security routes - CRITICAL TIMING ATTACK MITIGATION
-  app.use("/api/timing-security", timingSecurityRoutes);
+  app.use('/api/timing-security', timingSecurityRoutes);
 
   // 🧪 TEST ENDPOINTS: Timing middleware validation (NO AUTH for testing)
   app.get(
-    "/api/test/timing-valid",
+    '/api/test/timing-valid',
     (req, res, next) => {
-      console.log("🧪 [TEST ENDPOINT] /api/test/timing-valid hit, applying timing middleware...");
+      console.log('🧪 [TEST ENDPOINT] /api/test/timing-valid hit, applying timing middleware...');
       timingNormalizerMiddleware(req, res, next);
     },
     async (req, res) => {
-      console.log("🧪 [TEST ENDPOINT] /api/test/timing-valid processing request...");
+      console.log('🧪 [TEST ENDPOINT] /api/test/timing-valid processing request...');
       // Simulate database lookup delay for valid ID
-      await new Promise(resolve => setTimeout(resolve, 5));
-      res.json({ message: "Valid test response", timestamp: new Date().toISOString() });
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      res.json({ message: 'Valid test response', timestamp: new Date().toISOString() });
     }
   );
 
   // 🧪 CCB TEST ENDPOINT: Generate CCB without auth for coordinate testing
-  app.post("/api/test/generate-ccb/:proposalId", async (req, res) => {
+  app.post('/api/test/generate-ccb/:proposalId', async (req, res) => {
     try {
       const { proposalId } = req.params;
-      console.log("🧪 [CCB TEST] Generating CCB for proposal:", proposalId);
+      console.log('🧪 [CCB TEST] Generating CCB for proposal:', proposalId);
 
-      const { ccbGenerationService } = await import("./services/ccbGenerationService");
+      const { ccbGenerationService } = await import('./services/ccbGenerationService');
       const result = await ccbGenerationService.generateCCB(proposalId);
 
       if (!result.success) {
@@ -3805,89 +3854,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log("✅ [CCB TEST] CCB generated successfully:", result.pdfPath);
+      console.log('✅ [CCB TEST] CCB generated successfully:', result.pdfPath);
       res.json({
         success: true,
-        message: "CCB gerado com sucesso para teste",
+        message: 'CCB gerado com sucesso para teste',
         pdfPath: result.pdfPath,
       });
     } catch (error) {
-      console.error("❌ [CCB TEST] Error:", error);
+      console.error('❌ [CCB TEST] Error:', error);
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Erro desconhecido",
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       });
     }
   });
 
   // 🧪 DEBUG ENDPOINT: Verificar dados de endereço no CCB
-  app.get("/api/test/ccb-address/:id", async (req, res) => {
+  app.get('/api/test/ccb-address/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Buscar proposta
       const proposal = await storage.getPropostaById(id);
       if (!proposal) {
-        return res.status(404).json({ error: "Proposta não encontrada" });
+        return res.status(404).json({ error: 'Proposta não encontrada' });
       }
-      
+
       // Extrair dados de endereço
-      const clienteData = proposal.cliente_data as any || {};
-      
+      const clienteData = (proposal.cliente_data as any) || {};
+
       const debugInfo = {
         proposalId: id,
         addressData: {
-          endereco: clienteData.endereco || "NÃO ENCONTRADO",
-          logradouro: clienteData.logradouro || "NÃO ENCONTRADO",
-          numero: clienteData.numero || "NÃO ENCONTRADO",
-          complemento: clienteData.complemento || "NÃO ENCONTRADO",
-          bairro: clienteData.bairro || "NÃO ENCONTRADO",
-          cep: clienteData.cep || "NÃO ENCONTRADO",
-          cidade: clienteData.cidade || "NÃO ENCONTRADO",
-          estado: clienteData.estado || "NÃO ENCONTRADO",
-          uf: clienteData.uf || "NÃO ENCONTRADO"
+          endereco: clienteData.endereco || 'NÃO ENCONTRADO',
+          logradouro: clienteData.logradouro || 'NÃO ENCONTRADO',
+          numero: clienteData.numero || 'NÃO ENCONTRADO',
+          complemento: clienteData.complemento || 'NÃO ENCONTRADO',
+          bairro: clienteData.bairro || 'NÃO ENCONTRADO',
+          cep: clienteData.cep || 'NÃO ENCONTRADO',
+          cidade: clienteData.cidade || 'NÃO ENCONTRADO',
+          estado: clienteData.estado || 'NÃO ENCONTRADO',
+          uf: clienteData.uf || 'NÃO ENCONTRADO',
         },
         coordinates: {
           enderecoCliente: { x: 100, y: 670, fontSize: 8 },
           cepCliente: { x: 270, y: 670, fontSize: 9 },
           cidadeCliente: { x: 380, y: 670, fontSize: 10 },
-          ufCliente: { x: 533, y: 670, fontSize: 9 }
+          ufCliente: { x: 533, y: 670, fontSize: 9 },
         },
         expectedRendering: {
-          endereco: clienteData.endereco || `${clienteData.logradouro || ""}, ${clienteData.numero || ""}`,
-          cep: clienteData.cep || "CEP NÃO INFORMADO",
-          cidade: clienteData.cidade || "CIDADE NÃO INFORMADA",
-          uf: clienteData.estado || clienteData.uf || "UF"
-        }
+          endereco:
+            clienteData.endereco || `${clienteData.logradouro || ''}, ${clienteData.numero || ''}`,
+          cep: clienteData.cep || 'CEP NÃO INFORMADO',
+          cidade: clienteData.cidade || 'CIDADE NÃO INFORMADA',
+          uf: clienteData.estado || clienteData.uf || 'UF',
+        },
       };
-      
-      console.log("🧪 [CCB DEBUG] Address data for proposal:", id);
-      console.log("🧪 [CCB DEBUG] Endereco:", debugInfo.expectedRendering.endereco);
-      console.log("🧪 [CCB DEBUG] CEP:", debugInfo.expectedRendering.cep);
-      console.log("🧪 [CCB DEBUG] Cidade:", debugInfo.expectedRendering.cidade);
-      console.log("🧪 [CCB DEBUG] UF:", debugInfo.expectedRendering.uf);
-      
+
+      console.log('🧪 [CCB DEBUG] Address data for proposal:', id);
+      console.log('🧪 [CCB DEBUG] Endereco:', debugInfo.expectedRendering.endereco);
+      console.log('🧪 [CCB DEBUG] CEP:', debugInfo.expectedRendering.cep);
+      console.log('🧪 [CCB DEBUG] Cidade:', debugInfo.expectedRendering.cidade);
+      console.log('🧪 [CCB DEBUG] UF:', debugInfo.expectedRendering.uf);
+
       return res.json(debugInfo);
     } catch (error) {
-      console.error("❌ Erro no teste de endereço:", error);
+      console.error('❌ Erro no teste de endereço:', error);
       return res.status(500).json({ error: error.message });
     }
   });
 
-  app.get("/api/test/timing-invalid", timingNormalizerMiddleware, async (req, res) => {
+  app.get('/api/test/timing-invalid', timingNormalizerMiddleware, async (req, res) => {
     // Immediate response for invalid ID
-    res.status(404).json({ message: "Invalid test response", timestamp: new Date().toISOString() });
+    res.status(404).json({ message: 'Invalid test response', timestamp: new Date().toISOString() });
   });
 
   // 🛡️ TEST ENDPOINT: File validation (NO AUTH for testing)
   app.post(
-    "/api/test/file-validation",
-    upload.single("file"),
+    '/api/test/file-validation',
+    upload.single('file'),
     secureFileValidationMiddleware,
     async (req, res) => {
-      console.log("🛡️ [TEST ENDPOINT] File validation passed, file is safe");
+      console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
       res.json({
-        message: "File validation passed",
+        message: 'File validation passed',
         filename: req.file?.originalname,
         size: req.file?.size,
         type: req.file?.mimetype,
@@ -3898,13 +3948,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🛡️ TEST ENDPOINT: File validation (NO AUTH for testing)
   app.post(
-    "/api/test/file-validation",
-    upload.single("file"),
+    '/api/test/file-validation',
+    upload.single('file'),
     secureFileValidationMiddleware,
     async (req, res) => {
-      console.log("🛡️ [TEST ENDPOINT] File validation passed, file is safe");
+      console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
       res.json({
-        message: "File validation passed",
+        message: 'File validation passed',
         filename: req.file?.originalname,
         size: req.file?.size,
         type: req.file?.mimetype,
@@ -3914,28 +3964,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Register Email Change routes - OWASP V6.1.3 Compliance
-  app.use("/api/auth", emailChangeRoutes);
+  app.use('/api/auth', emailChangeRoutes);
 
   // Register OWASP Assessment routes
-  const owaspRoutes = (await import("./routes/owasp.js")).default;
-  app.use("/api/owasp", owaspRoutes);
+  const owaspRoutes = (await import('./routes/owasp.js')).default;
+  app.use('/api/owasp', owaspRoutes);
 
   // ✅ PROJETO CÉRBERO - Endpoints simplificados para SCA e SAST
-  app.get("/api/security/run-sca", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/security/run-sca', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      console.log("🔍 [SCA] Executando análise SCA...");
+      console.log('🔍 [SCA] Executando análise SCA...');
 
       // Ler relatório real do dependency-check
-      const reportPath = "dependency-check-report.json";
+      const reportPath = 'dependency-check-report.json';
       let reportData = null;
 
       try {
-        const fs = await import("fs/promises");
-        const data = await fs.readFile(reportPath, "utf-8");
+        const fs = await import('fs/promises');
+        const data = await fs.readFile(reportPath, 'utf-8');
         reportData = JSON.parse(data);
       } catch (e) {
-        console.error("❌ [SCA] Erro ao ler relatório:", e);
-        return res.status(500).json({ success: false, error: "Relatório não encontrado" });
+        console.error('❌ [SCA] Erro ao ler relatório:', e);
+        return res.status(500).json({ success: false, error: 'Relatório não encontrado' });
       }
 
       // Processar vulnerabilidades
@@ -3951,10 +4001,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             for (const vuln of dep.vulnerabilities) {
               totalVulns++;
               const severity = vuln.severity;
-              if (severity === "CRITICAL") critical++;
-              else if (severity === "HIGH") high++;
-              else if (severity === "MEDIUM") medium++;
-              else if (severity === "LOW") low++;
+              if (severity === 'CRITICAL') critical++;
+              else if (severity === 'HIGH') high++;
+              else if (severity === 'MEDIUM') medium++;
+              else if (severity === 'LOW') low++;
             }
           }
         }
@@ -3972,45 +4022,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error("❌ [SCA] Erro:", error);
+      console.error('❌ [SCA] Erro:', error);
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Erro desconhecido",
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       });
     }
   });
 
-  app.get("/api/security/run-sast", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/security/run-sast', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      console.log("🔍 [SAST] Executando análise SAST...");
+      console.log('🔍 [SAST] Executando análise SAST...');
 
       // Análise de código mockada mas baseada em realidade
       const sastResults = {
         filesScanned: 25,
         vulnerabilities: [
           {
-            id: "hardcoded-secrets",
-            file: "server/routes/test-vulnerability.ts",
+            id: 'hardcoded-secrets',
+            file: 'server/routes/test-vulnerability.ts',
             line: 9,
-            severity: "HIGH",
-            message: "Hardcoded password detected",
+            severity: 'HIGH',
+            message: 'Hardcoded password detected',
             code: "const superSecretKey = 'password123';",
           },
           {
-            id: "sql-injection-direct",
-            file: "server/routes/test-vulnerability.ts",
+            id: 'sql-injection-direct',
+            file: 'server/routes/test-vulnerability.ts',
             line: 14,
-            severity: "CRITICAL",
-            message: "Direct SQL injection vulnerability",
-            code: "SELECT * FROM users WHERE id = ${req.query.id}",
+            severity: 'CRITICAL',
+            message: 'Direct SQL injection vulnerability',
+            code: 'SELECT * FROM users WHERE id = ${req.query.id}',
           },
           {
-            id: "xss-direct-output",
-            file: "server/routes/test-vulnerability.ts",
+            id: 'xss-direct-output',
+            file: 'server/routes/test-vulnerability.ts',
             line: 21,
-            severity: "HIGH",
-            message: "XSS vulnerability - unsanitized user input",
-            code: "res.send(`<div>${userInput}</div>`);",
+            severity: 'HIGH',
+            message: 'XSS vulnerability - unsanitized user input',
+            code: 'res.send(`<div>${userInput}</div>`);',
           },
         ],
       };
@@ -4025,126 +4075,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("❌ [SAST] Erro:", error);
+      console.error('❌ [SAST] Erro:', error);
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Erro desconhecido",
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       });
     }
   });
 
   // Security Scanners routes (SCA & SAST)
-  const securityScannersRoutes = (await import("./routes/security-scanners.js")).default;
-  app.use("/api/security-scanners", securityScannersRoutes);
+  const securityScannersRoutes = (await import('./routes/security-scanners.js')).default;
+  app.use('/api/security-scanners', securityScannersRoutes);
 
   // Security API routes (Projeto Cérbero)
-  const securityApiRoutes = (await import("./routes/security-api.js")).default;
-  app.use("/api/security", securityApiRoutes);
+  const securityApiRoutes = (await import('./routes/security-api.js')).default;
+  app.use('/api/security', securityApiRoutes);
 
   // Cobranças routes
-  const cobrancasRoutes = (await import("./routes/cobrancas.js")).default;
-  app.use("/api/cobrancas", cobrancasRoutes);
+  const cobrancasRoutes = (await import('./routes/cobrancas.js')).default;
+  app.use('/api/cobrancas', cobrancasRoutes);
 
   // Pagamentos routes
-  const pagamentosRoutes = (await import("./routes/pagamentos/index.js")).default;
-  app.use("/api/financeiro/pagamentos", pagamentosRoutes);
+  const pagamentosRoutes = (await import('./routes/pagamentos/index.js')).default;
+  app.use('/api/financeiro/pagamentos', pagamentosRoutes);
 
   // ClickSign Integration routes
-  app.use("/api", clicksignIntegrationRoutes);
+  app.use('/api', clicksignIntegrationRoutes);
 
   // Gestão de Contratos routes (ADMIN e DIRETOR apenas)
-  app.use("/api", gestaoContratosRoutes);
+  app.use('/api', gestaoContratosRoutes);
 
   // ======================= JOB QUEUE TEST ENDPOINT =======================
   // Endpoint temporário para teste da arquitetura de Job Queue
-  
+
   // Endpoint público de teste (sem autenticação para validação rápida)
-  app.get("/api/test/job-queue-health", async (req, res) => {
+  app.get('/api/test/job-queue-health', async (req, res) => {
     try {
-      console.log("[TEST ENDPOINT] 🏥 Verificando saúde do sistema de Job Queue");
-      
+      console.log('[TEST ENDPOINT] 🏥 Verificando saúde do sistema de Job Queue');
+
       const health = await checkQueuesHealth();
-      
+
       res.json({
         success: true,
-        message: "Job Queue Architecture is operational",
+        message: 'Job Queue Architecture is operational',
         timestamp: new Date().toISOString(),
         architecture: {
-          pattern: "Async Worker Queue",
+          pattern: 'Async Worker Queue',
           implementation: health.mode,
           benefits: [
-            "✅ Non-blocking operations",
-            "✅ Parallel processing",
-            "✅ Automatic retry on failure",
-            "✅ Progress tracking",
-            "✅ Scalable to 50+ simultaneous operations"
-          ]
+            '✅ Non-blocking operations',
+            '✅ Parallel processing',
+            '✅ Automatic retry on failure',
+            '✅ Progress tracking',
+            '✅ Scalable to 50+ simultaneous operations',
+          ],
         },
-        status: health
+        status: health,
       });
     } catch (error) {
-      console.error("[TEST ENDPOINT] ❌ Health check failed:", error);
+      console.error('[TEST ENDPOINT] ❌ Health check failed:', error);
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
-  
+
   app.post(
-    "/api/test/job-queue",
+    '/api/test/job-queue',
     jwtAuthMiddleware,
     requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
-        console.log("[TEST ENDPOINT] 🧪 Recebendo requisição de teste de Job Queue");
-        
-        const { type = "test", propostaId } = req.body;
-        
+        console.log('[TEST ENDPOINT] 🧪 Recebendo requisição de teste de Job Queue');
+
+        const { type = 'test', propostaId } = req.body;
+
         // Adicionar job à fila apropriada baseado no tipo
         let job;
         let queueName;
-        
+
         switch (type) {
-          case "pdf":
-            queueName = "pdf-processing";
-            job = await queues.pdfProcessing.add("TEST_PDF_JOB", {
-              type: "GENERATE_CARNE",
-              propostaId: propostaId || "TEST-PROPOSTA-123",
+          case 'pdf':
+            queueName = 'pdf-processing';
+            job = await queues.pdfProcessing.add('TEST_PDF_JOB', {
+              type: 'GENERATE_CARNE',
+              propostaId: propostaId || 'TEST-PROPOSTA-123',
               userId: req.user?.id,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             });
             break;
-            
-          case "boleto":
-            queueName = "boleto-sync";
-            job = await queues.boletoSync.add("TEST_BOLETO_JOB", {
-              type: "SYNC_BOLETOS",
-              propostaId: propostaId || "TEST-PROPOSTA-456",
+
+          case 'boleto':
+            queueName = 'boleto-sync';
+            job = await queues.boletoSync.add('TEST_BOLETO_JOB', {
+              type: 'SYNC_BOLETOS',
+              propostaId: propostaId || 'TEST-PROPOSTA-456',
               userId: req.user?.id,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             });
             break;
-            
+
           default:
-            queueName = "pdf-processing";
-            job = await queues.pdfProcessing.add("TEST_GENERIC_JOB", {
-              type: "TEST",
-              message: "Teste genérico da arquitetura de Job Queue",
+            queueName = 'pdf-processing';
+            job = await queues.pdfProcessing.add('TEST_GENERIC_JOB', {
+              type: 'TEST',
+              message: 'Teste genérico da arquitetura de Job Queue',
               userId: req.user?.id,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             });
         }
-        
+
         console.log(`[TEST ENDPOINT] ✅ Job adicionado à fila ${queueName}:`, {
           id: job.id,
           name: job.name,
-          data: job.data
+          data: job.data,
         });
-        
+
         // Verificar saúde das filas
         const health = await checkQueuesHealth();
-        
+
         res.json({
           success: true,
           message: `Job ${job.id} adicionado à fila ${queueName} com sucesso`,
@@ -4153,17 +4203,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: job.name,
             queue: queueName,
             data: job.data,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           },
-          queuesHealth: health
+          queuesHealth: health,
         });
-        
       } catch (error) {
-        console.error("[TEST ENDPOINT] ❌ Erro ao adicionar job:", error);
+        console.error('[TEST ENDPOINT] ❌ Erro ao adicionar job:', error);
         res.status(500).json({
           success: false,
-          error: error instanceof Error ? error.message : "Erro ao adicionar job à fila",
-          hint: "Verifique se o Redis está rodando e as filas estão configuradas"
+          error: error instanceof Error ? error.message : 'Erro ao adicionar job à fila',
+          hint: 'Verifique se o Redis está rodando e as filas estão configuradas',
         });
       }
     }
@@ -4171,26 +4220,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint para verificar status das filas
   app.get(
-    "/api/test/queue-status",
+    '/api/test/queue-status',
     jwtAuthMiddleware,
     requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
-        console.log("[TEST ENDPOINT] 📊 Verificando status das filas");
-        
+        console.log('[TEST ENDPOINT] 📊 Verificando status das filas');
+
         const health = await checkQueuesHealth();
-        
+
         res.json({
           success: true,
           timestamp: new Date().toISOString(),
-          queues: health
+          queues: health,
         });
-        
       } catch (error) {
-        console.error("[TEST ENDPOINT] ❌ Erro ao verificar status:", error);
+        console.error('[TEST ENDPOINT] ❌ Erro ao verificar status:', error);
         res.status(500).json({
           success: false,
-          error: error instanceof Error ? error.message : "Erro ao verificar status das filas"
+          error: error instanceof Error ? error.message : 'Erro ao verificar status das filas',
         });
       }
     }

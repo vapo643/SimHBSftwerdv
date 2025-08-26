@@ -1,17 +1,17 @@
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
-import { Users, Briefcase } from "lucide-react";
-import { MaskedInput } from "@/components/ui/MaskedInput";
+} from '@/components/ui/select';
+import { useProposal, useProposalActions } from '@/contexts/ProposalContext';
+import { Users, Briefcase } from 'lucide-react';
+import { MaskedInput } from '@/components/ui/MaskedInput';
 
 export function PersonalReferencesStep() {
   const { state } = useProposal();
@@ -24,34 +24,34 @@ export function PersonalReferencesStep() {
     if (personalReferences.length === 0) {
       // Criar primeira referência (obrigatoriamente pessoal)
       addReference({
-        nomeCompleto: "",
-        grauParentesco: "",
-        telefone: "",
-        tipo_referencia: "pessoal",
+        nomeCompleto: '',
+        grauParentesco: '',
+        telefone: '',
+        tipo_referencia: 'pessoal',
       });
       // Criar segunda referência (padrão profissional, mas pode ser alterada)
       addReference({
-        nomeCompleto: "",
-        grauParentesco: "",
-        telefone: "",
-        tipo_referencia: "profissional",
+        nomeCompleto: '',
+        grauParentesco: '',
+        telefone: '',
+        tipo_referencia: 'profissional',
       });
     } else if (personalReferences.length === 1) {
       // Se tiver apenas uma, garantir que a primeira seja pessoal e adicionar a segunda
-      if (personalReferences[0].tipo_referencia !== "pessoal") {
-        updateReference(0, { ...personalReferences[0], tipo_referencia: "pessoal" });
+      if (personalReferences[0].tipo_referencia !== 'pessoal') {
+        updateReference(0, { ...personalReferences[0], tipo_referencia: 'pessoal' });
       }
       // Adicionar segunda referência (padrão profissional)
       addReference({
-        nomeCompleto: "",
-        grauParentesco: "",
-        telefone: "",
-        tipo_referencia: "profissional",
+        nomeCompleto: '',
+        grauParentesco: '',
+        telefone: '',
+        tipo_referencia: 'profissional',
       });
     } else if (personalReferences.length >= 2) {
       // Garantir que a primeira seja sempre pessoal
-      if (personalReferences[0].tipo_referencia !== "pessoal") {
-        updateReference(0, { ...personalReferences[0], tipo_referencia: "pessoal" });
+      if (personalReferences[0].tipo_referencia !== 'pessoal') {
+        updateReference(0, { ...personalReferences[0], tipo_referencia: 'pessoal' });
       }
     }
     // Limpar referências extras se houver mais de 2
@@ -72,12 +72,17 @@ export function PersonalReferencesStep() {
     updateReference(index, updatedReference);
 
     // Validate the field
-    const tipo = personalReferences[index]?.tipo_referencia || "pessoal";
+    const tipo = personalReferences[index]?.tipo_referencia || 'pessoal';
     const errorKey = `reference_${tipo}_${field}`;
-    if (!value || value.trim() === "") {
-      const fieldLabel = field === "nomeCompleto" ? "Nome" : 
-                        field === "grauParentesco" ? (tipo === "pessoal" ? "Grau de parentesco" : "Relação profissional") : 
-                        "Telefone";
+    if (!value || value.trim() === '') {
+      const fieldLabel =
+        field === 'nomeCompleto'
+          ? 'Nome'
+          : field === 'grauParentesco'
+            ? tipo === 'pessoal'
+              ? 'Grau de parentesco'
+              : 'Relação profissional'
+            : 'Telefone';
       setError(errorKey, `${fieldLabel} é obrigatório`);
     } else {
       clearError(errorKey);
@@ -99,7 +104,9 @@ export function PersonalReferencesStep() {
             <Users className="h-5 w-5" />
             Referência Pessoal
           </CardTitle>
-          <CardDescription>Informações de contato de uma referência pessoal (obrigatório)</CardDescription>
+          <CardDescription>
+            Informações de contato de uma referência pessoal (obrigatório)
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {referencePessoal && (
@@ -110,13 +117,15 @@ export function PersonalReferencesStep() {
                   id="nomeCompleto_pessoal"
                   type="text"
                   value={referencePessoal.nomeCompleto}
-                  onChange={e => handleReferenceChange(indexPessoal, "nomeCompleto", e.target.value)}
-                  className={errors["reference_pessoal_nomeCompleto"] ? "border-destructive" : ""}
+                  onChange={(e) =>
+                    handleReferenceChange(indexPessoal, 'nomeCompleto', e.target.value)
+                  }
+                  className={errors['reference_pessoal_nomeCompleto'] ? 'border-destructive' : ''}
                   data-testid="input-nome-referencia-pessoal"
                 />
-                {errors["reference_pessoal_nomeCompleto"] && (
+                {errors['reference_pessoal_nomeCompleto'] && (
                   <p className="mt-1 text-sm text-destructive">
-                    {errors["reference_pessoal_nomeCompleto"]}
+                    {errors['reference_pessoal_nomeCompleto']}
                   </p>
                 )}
               </div>
@@ -125,10 +134,14 @@ export function PersonalReferencesStep() {
                 <Label htmlFor="grauParentesco_pessoal">Grau de Parentesco *</Label>
                 <Select
                   value={referencePessoal.grauParentesco}
-                  onValueChange={value => handleReferenceChange(indexPessoal, "grauParentesco", value)}
+                  onValueChange={(value) =>
+                    handleReferenceChange(indexPessoal, 'grauParentesco', value)
+                  }
                 >
                   <SelectTrigger
-                    className={errors["reference_pessoal_grauParentesco"] ? "border-destructive" : ""}
+                    className={
+                      errors['reference_pessoal_grauParentesco'] ? 'border-destructive' : ''
+                    }
                   >
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
@@ -146,9 +159,9 @@ export function PersonalReferencesStep() {
                     <SelectItem value="outro">Outro</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors["reference_pessoal_grauParentesco"] && (
+                {errors['reference_pessoal_grauParentesco'] && (
                   <p className="mt-1 text-sm text-destructive">
-                    {errors["reference_pessoal_grauParentesco"]}
+                    {errors['reference_pessoal_grauParentesco']}
                   </p>
                 )}
               </div>
@@ -158,14 +171,14 @@ export function PersonalReferencesStep() {
                 <MaskedInput
                   mask="(99) 99999-9999"
                   value={referencePessoal.telefone}
-                  onChange={(value) => handleReferenceChange(indexPessoal, "telefone", value)}
+                  onChange={(value) => handleReferenceChange(indexPessoal, 'telefone', value)}
                   placeholder="(11) 98765-4321"
-                  className={errors["reference_pessoal_telefone"] ? "border-destructive" : ""}
+                  className={errors['reference_pessoal_telefone'] ? 'border-destructive' : ''}
                   data-testid="input-telefone-referencia-pessoal"
                 />
-                {errors["reference_pessoal_telefone"] && (
+                {errors['reference_pessoal_telefone'] && (
                   <p className="mt-1 text-sm text-destructive">
-                    {errors["reference_pessoal_telefone"]}
+                    {errors['reference_pessoal_telefone']}
                   </p>
                 )}
               </div>
@@ -181,7 +194,10 @@ export function PersonalReferencesStep() {
             <Briefcase className="h-5 w-5" />
             Segunda Referência
           </CardTitle>
-          <CardDescription>Informações de contato de uma segunda referência - pode ser pessoal ou profissional (obrigatório)</CardDescription>
+          <CardDescription>
+            Informações de contato de uma segunda referência - pode ser pessoal ou profissional
+            (obrigatório)
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {segundaReferencia && (
@@ -191,7 +207,9 @@ export function PersonalReferencesStep() {
                 <Label htmlFor="tipo_segunda_referencia">Tipo de Referência *</Label>
                 <Select
                   value={segundaReferencia.tipo_referencia}
-                  onValueChange={value => handleReferenceChange(indexSegundaReferencia, "tipo_referencia", value)}
+                  onValueChange={(value) =>
+                    handleReferenceChange(indexSegundaReferencia, 'tipo_referencia', value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo..." />
@@ -209,8 +227,14 @@ export function PersonalReferencesStep() {
                   id="nomeCompleto_segunda"
                   type="text"
                   value={segundaReferencia.nomeCompleto}
-                  onChange={e => handleReferenceChange(indexSegundaReferencia, "nomeCompleto", e.target.value)}
-                  className={errors[`reference_${segundaReferencia.tipo_referencia}_nomeCompleto`] ? "border-destructive" : ""}
+                  onChange={(e) =>
+                    handleReferenceChange(indexSegundaReferencia, 'nomeCompleto', e.target.value)
+                  }
+                  className={
+                    errors[`reference_${segundaReferencia.tipo_referencia}_nomeCompleto`]
+                      ? 'border-destructive'
+                      : ''
+                  }
                   data-testid="input-nome-segunda-referencia"
                 />
                 {errors[`reference_${segundaReferencia.tipo_referencia}_nomeCompleto`] && (
@@ -222,19 +246,27 @@ export function PersonalReferencesStep() {
 
               <div>
                 <Label htmlFor="grauParentesco_segunda">
-                  {segundaReferencia.tipo_referencia === "pessoal" ? "Grau de Parentesco *" : "Relação Profissional *"}
+                  {segundaReferencia.tipo_referencia === 'pessoal'
+                    ? 'Grau de Parentesco *'
+                    : 'Relação Profissional *'}
                 </Label>
                 <Select
                   value={segundaReferencia.grauParentesco}
-                  onValueChange={value => handleReferenceChange(indexSegundaReferencia, "grauParentesco", value)}
+                  onValueChange={(value) =>
+                    handleReferenceChange(indexSegundaReferencia, 'grauParentesco', value)
+                  }
                 >
                   <SelectTrigger
-                    className={errors[`reference_${segundaReferencia.tipo_referencia}_grauParentesco`] ? "border-destructive" : ""}
+                    className={
+                      errors[`reference_${segundaReferencia.tipo_referencia}_grauParentesco`]
+                        ? 'border-destructive'
+                        : ''
+                    }
                   >
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {segundaReferencia.tipo_referencia === "pessoal" ? (
+                    {segundaReferencia.tipo_referencia === 'pessoal' ? (
                       <>
                         <SelectItem value="mae">Mãe</SelectItem>
                         <SelectItem value="pai">Pai</SelectItem>
@@ -275,9 +307,15 @@ export function PersonalReferencesStep() {
                 <MaskedInput
                   mask="(99) 99999-9999"
                   value={segundaReferencia.telefone}
-                  onChange={(value) => handleReferenceChange(indexSegundaReferencia, "telefone", value)}
+                  onChange={(value) =>
+                    handleReferenceChange(indexSegundaReferencia, 'telefone', value)
+                  }
                   placeholder="(11) 98765-4321"
-                  className={errors[`reference_${segundaReferencia.tipo_referencia}_telefone`] ? "border-destructive" : ""}
+                  className={
+                    errors[`reference_${segundaReferencia.tipo_referencia}_telefone`]
+                      ? 'border-destructive'
+                      : ''
+                  }
                   data-testid="input-telefone-segunda-referencia"
                 />
                 {errors[`reference_${segundaReferencia.tipo_referencia}_telefone`] && (

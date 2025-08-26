@@ -10,7 +10,7 @@ import {
   maskCreditCard,
   maskPII,
   isPII,
-  sanitizeObject
+  sanitizeObject,
 } from '../../shared/utils/pii-masking';
 
 describe('PII Masking Utilities', () => {
@@ -264,11 +264,11 @@ describe('PII Masking Utilities', () => {
         cpf: '123.456.789-01',
         email: 'john@example.com',
         phone: '11987654321',
-        address: 'Rua ABC, 123, São Paulo - SP'
+        address: 'Rua ABC, 123, São Paulo - SP',
       };
 
       const sanitized = sanitizeObject(obj);
-      
+
       expect(sanitized.name).toBe('John Doe');
       expect(sanitized.cpf).toBe('***.***.**9-**');
       expect(sanitized.email).toBe('jo***@example.com');
@@ -280,11 +280,11 @@ describe('PII Masking Utilities', () => {
       const obj = {
         cliente_cpf: '98765432100',
         cliente_email: 'client@test.com',
-        cliente_telefone: '2134567890'
+        cliente_telefone: '2134567890',
       };
 
       const sanitized = sanitizeObject(obj);
-      
+
       expect(sanitized.cliente_cpf).toBe('***.***.**1-**');
       expect(sanitized.cliente_email).toBe('cl*****@test.com');
       expect(sanitized.cliente_telefone).toBe('(21) ****-**90');
@@ -293,11 +293,11 @@ describe('PII Masking Utilities', () => {
     it('should use custom fields to mask when provided', () => {
       const obj = {
         customField: '123.456.789-01',
-        normalField: 'not masked'
+        normalField: 'not masked',
       };
 
       const sanitized = sanitizeObject(obj, ['customField']);
-      
+
       expect(sanitized.customField).toBe('***.***.**9-**');
       expect(sanitized.normalField).toBe('not masked');
     });
@@ -307,11 +307,11 @@ describe('PII Masking Utilities', () => {
         cpf: 12345678901,
         email: null,
         phone: undefined,
-        address: { street: 'ABC' }
+        address: { street: 'ABC' },
       };
 
       const sanitized = sanitizeObject(obj);
-      
+
       expect(sanitized.cpf).toBe(12345678901);
       expect(sanitized.email).toBe(null);
       expect(sanitized.phone).toBe(undefined);
@@ -320,11 +320,11 @@ describe('PII Masking Utilities', () => {
 
     it('should create a new object without modifying the original', () => {
       const obj = {
-        cpf: '123.456.789-01'
+        cpf: '123.456.789-01',
       };
 
       const sanitized = sanitizeObject(obj);
-      
+
       expect(sanitized).not.toBe(obj);
       expect(obj.cpf).toBe('123.456.789-01');
       expect(sanitized.cpf).toBe('***.***.**9-**');
@@ -342,7 +342,7 @@ describe('PII Masking Utilities', () => {
     it('should not expose information through timing attacks', () => {
       const shortValue = '123';
       const longValue = '123456789012345678901234567890';
-      
+
       // Both should be processed without revealing length through timing
       expect(maskPII(shortValue)).toBeDefined();
       expect(maskPII(longValue)).toBeDefined();
@@ -351,7 +351,7 @@ describe('PII Masking Utilities', () => {
     it('should handle international formats gracefully', () => {
       // US phone number (not Brazilian format)
       expect(maskPhone('+1 555 123 4567')).toBe('(**) *****-****');
-      
+
       // International email
       expect(maskEmail('user@example.co.uk')).toBe('us***@example.co.uk');
     });
@@ -360,7 +360,7 @@ describe('PII Masking Utilities', () => {
       const cpf = '123.456.789-01';
       const mask1 = maskCPF(cpf);
       const mask2 = maskCPF(cpf);
-      
+
       expect(mask1).toBe(mask2);
     });
   });

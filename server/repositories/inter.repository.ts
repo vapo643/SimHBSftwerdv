@@ -4,19 +4,19 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { BaseRepository } from "./base.repository.js";
-import { db } from "../lib/supabase.js";
-import { supabaseAdmin } from "../lib/supabase-admin.js";
-import { 
-  interCollections, 
-  propostas, 
+import { BaseRepository } from './base.repository.js';
+import { db } from '../lib/supabase.js';
+import { supabaseAdmin } from '../lib/supabase-admin.js';
+import {
+  interCollections,
+  propostas,
   historicoObservacoesCobranca,
   statusContextuais,
   type InterCollection,
-  type Proposta
-} from "@shared/schema";
-import { eq, and, gte, lte, or, inArray, desc, asc } from "drizzle-orm";
-import { getBrasiliaTimestamp } from "../lib/timezone.js";
+  type Proposta,
+} from '@shared/schema';
+import { eq, and, gte, lte, or, inArray, desc, asc } from 'drizzle-orm';
+import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
 export class InterRepository extends BaseRepository<typeof interCollections> {
   constructor() {
@@ -32,7 +32,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .from(interCollections)
       .where(eq(interCollections.propostaId, proposalId))
       .limit(1);
-    
+
     return result[0];
   }
 
@@ -45,7 +45,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
-    
+
     return result[0];
   }
 
@@ -124,11 +124,8 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       updatedAt: timestamp,
     };
 
-    const result = await db
-      .insert(interCollections)
-      .values(collectionData)
-      .returning();
-    
+    const result = await db.insert(interCollections).values(collectionData).returning();
+
     return result[0];
   }
 
@@ -136,7 +133,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Update collection
    */
   async updateCollection(
-    id: number, 
+    id: number,
     data: Partial<InterCollection>
   ): Promise<InterCollection | undefined> {
     const result = await db
@@ -147,7 +144,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       })
       .where(eq(interCollections.id, id))
       .returning();
-    
+
     return result[0];
   }
 
@@ -166,7 +163,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       })
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
-    
+
     return result[0];
   }
 
@@ -182,7 +179,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       })
       .where(eq(interCollections.id, id))
       .returning();
-    
+
     return result.length > 0;
   }
 
@@ -190,12 +187,8 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Get proposal by ID
    */
   async getProposal(proposalId: string): Promise<Proposta | undefined> {
-    const result = await db
-      .select()
-      .from(propostas)
-      .where(eq(propostas.id, proposalId))
-      .limit(1);
-    
+    const result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
+
     return result[0];
   }
 
@@ -216,7 +209,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       })
       .where(eq(propostas.id, proposalId))
       .returning();
-    
+
     return result[0];
   }
 
@@ -239,7 +232,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
         createdAt: getBrasiliaTimestamp(),
       })
       .returning();
-    
+
     return result[0];
   }
 
@@ -262,7 +255,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
         createdAt: getBrasiliaTimestamp(),
       })
       .returning();
-    
+
     return result[0];
   }
 
@@ -273,9 +266,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     return await db
       .select()
       .from(interCollections)
-      .where(
-        eq(interCollections.situacao, "A_RECEBER")
-      )
+      .where(eq(interCollections.situacao, 'A_RECEBER'))
       .limit(limit);
   }
 
@@ -284,9 +275,9 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    */
   async markAsProcessingPayment(id: number): Promise<InterCollection | undefined> {
     // Mark collection as being processed for payment
-    return await this.updateCollection(id, { 
-      situacao: "MARCADO_RECEBIDO",
-      updatedAt: getBrasiliaTimestamp() 
+    return await this.updateCollection(id, {
+      situacao: 'MARCADO_RECEBIDO',
+      updatedAt: getBrasiliaTimestamp(),
     });
   }
 
@@ -299,21 +290,17 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     file: Buffer | Uint8Array,
     contentType: string
   ): Promise<{ data: any; error: any }> {
-    return await supabaseAdmin.storage
-      .from(bucket)
-      .upload(path, file, {
-        contentType,
-        upsert: true,
-      });
+    return await supabaseAdmin.storage.from(bucket).upload(path, file, {
+      contentType,
+      upsert: true,
+    });
   }
 
   /**
    * Get download URL from storage
    */
   async getStorageUrl(bucket: string, path: string): Promise<{ data: any; error: any }> {
-    return supabaseAdmin.storage
-      .from(bucket)
-      .createSignedUrl(path, 3600); // 1 hour expiry
+    return supabaseAdmin.storage.from(bucket).createSignedUrl(path, 3600); // 1 hour expiry
   }
 }
 

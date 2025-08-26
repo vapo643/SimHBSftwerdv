@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { FileText, Download, Eye, Image, FileIcon, ExternalLink } from "lucide-react";
+} from '@/components/ui/dialog';
+import { FileText, Download, Eye, Image, FileIcon, ExternalLink } from 'lucide-react';
 
 interface Document {
   name: string;
@@ -36,7 +36,7 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
       if (propostaId) {
         setCcbLoading(true);
         try {
-          const { api } = await import("@/lib/apiClient");
+          const { api } = await import('@/lib/apiClient');
           // ✅ CORREÇÃO: Sempre usar endpoint padrão para buscar CCB
           const response = await api.get(`/api/formalizacao/${propostaId}/ccb`);
 
@@ -49,7 +49,7 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
             setCcbRealUrl(null);
           }
         } catch (error) {
-          console.error("Erro ao buscar status da CCB:", error);
+          console.error('Erro ao buscar status da CCB:', error);
           setCcbRealUrl(null);
         } finally {
           setCcbLoading(false);
@@ -67,43 +67,43 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
     ...(ccbRealUrl
       ? [
           {
-            name: "CCB - Cédula de Crédito Bancário",
+            name: 'CCB - Cédula de Crédito Bancário',
             url: ccbRealUrl,
-            type: "application/pdf",
-            uploadDate: "Sistema",
+            type: 'application/pdf',
+            uploadDate: 'Sistema',
           },
         ]
       : []),
   ];
 
   const getFileIcon = (type?: string, name?: string) => {
-    const nameExt = name?.toLowerCase() || "";
-    const fileType = type?.toLowerCase() || "";
-    if (fileType.includes("pdf") || nameExt.endsWith(".pdf"))
+    const nameExt = name?.toLowerCase() || '';
+    const fileType = type?.toLowerCase() || '';
+    if (fileType.includes('pdf') || nameExt.endsWith('.pdf'))
       return <FileText className="h-4 w-4" />;
     if (
-      fileType.includes("image") ||
-      nameExt.endsWith(".jpg") ||
-      nameExt.endsWith(".jpeg") ||
-      nameExt.endsWith(".png")
+      fileType.includes('image') ||
+      nameExt.endsWith('.jpg') ||
+      nameExt.endsWith('.jpeg') ||
+      nameExt.endsWith('.png')
     )
       return <Image className="h-4 w-4" />;
     return <FileIcon className="h-4 w-4" />;
   };
 
   const getFileTypeLabel = (type?: string, name?: string) => {
-    const nameExt = name?.toLowerCase() || "";
-    const fileType = type?.toLowerCase() || "";
-    if (fileType.includes("pdf") || nameExt.endsWith(".pdf")) return "PDF";
+    const nameExt = name?.toLowerCase() || '';
+    const fileType = type?.toLowerCase() || '';
+    if (fileType.includes('pdf') || nameExt.endsWith('.pdf')) return 'PDF';
     if (
-      fileType.includes("image") ||
-      nameExt.endsWith(".jpg") ||
-      nameExt.endsWith(".jpeg") ||
-      nameExt.endsWith(".png")
+      fileType.includes('image') ||
+      nameExt.endsWith('.jpg') ||
+      nameExt.endsWith('.jpeg') ||
+      nameExt.endsWith('.png')
     )
-      return "Imagem";
-    if (fileType.includes("doc")) return "DOC";
-    return "Arquivo";
+      return 'Imagem';
+    if (fileType.includes('doc')) return 'DOC';
+    return 'Arquivo';
   };
 
   const handleDownload = async (url: string, filename: string) => {
@@ -111,7 +111,7 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
       const response = await fetch(url);
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = filename;
       document.body.appendChild(link);
@@ -119,22 +119,22 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error("Erro ao baixar documento:", error);
+      console.error('Erro ao baixar documento:', error);
     }
   };
 
   const DocumentPreview = ({ document }: { document: Document }) => {
     const { url, type, name } = document;
-    const nameExt = name?.toLowerCase() || "";
-    const fileType = type?.toLowerCase() || "";
+    const nameExt = name?.toLowerCase() || '';
+    const fileType = type?.toLowerCase() || '';
 
     // Check both type and file extension
-    const isPDF = fileType.includes("pdf") || nameExt.endsWith(".pdf");
+    const isPDF = fileType.includes('pdf') || nameExt.endsWith('.pdf');
     const isImage =
-      fileType.includes("image") ||
-      nameExt.endsWith(".jpg") ||
-      nameExt.endsWith(".jpeg") ||
-      nameExt.endsWith(".png");
+      fileType.includes('image') ||
+      nameExt.endsWith('.jpg') ||
+      nameExt.endsWith('.jpeg') ||
+      nameExt.endsWith('.png');
 
     if (isPDF) {
       return (
@@ -213,10 +213,10 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => setSelectedDocument(doc)}
-                    disabled={doc.url === "#loading" || doc.url === "#error"}
+                    disabled={doc.url === '#loading' || doc.url === '#error'}
                   >
                     <Eye className="mr-1 h-4 w-4" />
-                    {doc.url === "#loading" ? "Carregando..." : "Visualizar"}
+                    {doc.url === '#loading' ? 'Carregando...' : 'Visualizar'}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-h-[90vh] max-w-4xl">
@@ -230,15 +230,15 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
                     <Button
                       variant="outline"
                       onClick={() => handleDownload(doc.url, doc.name)}
-                      disabled={doc.url === "#loading" || doc.url === "#error"}
+                      disabled={doc.url === '#loading' || doc.url === '#error'}
                     >
                       <Download className="mr-1 h-4 w-4" />
                       Baixar
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => window.open(doc.url, "_blank")}
-                      disabled={doc.url === "#loading" || doc.url === "#error"}
+                      onClick={() => window.open(doc.url, '_blank')}
+                      disabled={doc.url === '#loading' || doc.url === '#error'}
                     >
                       <ExternalLink className="mr-1 h-4 w-4" />
                       Abrir em Nova Aba
@@ -251,7 +251,7 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleDownload(doc.url, doc.name)}
-                disabled={doc.url === "#loading" || doc.url === "#error"}
+                disabled={doc.url === '#loading' || doc.url === '#error'}
               >
                 <Download className="h-4 w-4" />
               </Button>

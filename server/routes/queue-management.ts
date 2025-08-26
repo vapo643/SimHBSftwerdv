@@ -1,1 +1,12 @@
-import { Router } from "express"; import { paymentsService } from "../services/genericService"; const router = Router(); router.get("/queues", async (req, res) => { try { const result = await paymentsService.executeOperation("queue_management", req.query); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { paymentsService } from '../services/genericService';
+const router = Router();
+router.get('/queues', async (req, res) => {
+  try {
+    const result = await paymentsService.executeOperation('queue_management', req.query);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

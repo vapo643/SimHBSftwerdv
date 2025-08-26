@@ -43,7 +43,7 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
 
   // ENDEREÇO DO CLIENTE - TROCADO PARA Y:595
   enderecoCliente: { x: 55, y: 595, fontSize: 9, page: 1 }, // Endereço completo trocado para Y:595
-  cepCliente: { x: 270, y: 570, fontSize: 9, page: 1 }, // CEP  
+  cepCliente: { x: 270, y: 570, fontSize: 9, page: 1 }, // CEP
   cidadeCliente: { x: 380, y: 570, fontSize: 9, page: 1 }, // Cidade
   ufCliente: { x: 533, y: 570, fontSize: 9, page: 1 }, // UF
 
@@ -231,43 +231,43 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
  */
 export const SYSTEM_TO_CCB_MAPPING = {
   // IDENTIFICAÇÃO
-  "propostas.id": "numeroCedula",
-  "propostas.created_at": "dataEmissao",
-  "condicoes_data.finalidade": "finalidadeOperacao",
+  'propostas.id': 'numeroCedula',
+  'propostas.created_at': 'dataEmissao',
+  'condicoes_data.finalidade': 'finalidadeOperacao',
 
   // DADOS DO CLIENTE
-  "cliente_data.nome": "nomeCliente",
-  "cliente_data.cpf": "cpfCliente",
-  "cliente_data.rg": "rgCliente",
-  "cliente_data.orgaoEmissor": "rgExpedidor",
-  "cliente_data.nacionalidade": "nacionalidade",
-  "cliente_data.estadoCivil": "estadoCivil",
-  "cliente_data.endereco": "enderecoCliente",
-  "cliente_data.cep": "cepCliente",
-  "cliente_data.cidade": "cidadeCliente",
-  "cliente_data.estado": "ufCliente",
+  'cliente_data.nome': 'nomeCliente',
+  'cliente_data.cpf': 'cpfCliente',
+  'cliente_data.rg': 'rgCliente',
+  'cliente_data.orgaoEmissor': 'rgExpedidor',
+  'cliente_data.nacionalidade': 'nacionalidade',
+  'cliente_data.estadoCivil': 'estadoCivil',
+  'cliente_data.endereco': 'enderecoCliente',
+  'cliente_data.cep': 'cepCliente',
+  'cliente_data.cidade': 'cidadeCliente',
+  'cliente_data.estado': 'ufCliente',
 
   // DADOS DO CREDOR
-  loja_nome: "razaoSocialCredor",
-  loja_cnpj: "cnpjCredor",
+  loja_nome: 'razaoSocialCredor',
+  loja_cnpj: 'cnpjCredor',
 
   // CONDIÇÕES FINANCEIRAS
-  "condicoes_data.valor": "valorPrincipal",
-  "condicoes_data.prazo": "prazoAmortizacao",
-  "condicoes_data.taxa_juros": "taxaJurosEfetivaMensal",
-  "condicoes_data.valorIof": "iof",
-  "condicoes_data.valorTac": "tac",
+  'condicoes_data.valor': 'valorPrincipal',
+  'condicoes_data.prazo': 'prazoAmortizacao',
+  'condicoes_data.taxa_juros': 'taxaJurosEfetivaMensal',
+  'condicoes_data.valorIof': 'iof',
+  'condicoes_data.valorTac': 'tac',
 
   // DADOS BANCÁRIOS
-  dados_pagamento_codigo_banco: "bancoEmitente",
-  dados_pagamento_agencia: "agenciaEmitente",
-  dados_pagamento_conta: "contaEmitente",
-  dados_pagamento_tipo: "tipoContaEmitente",
-  dados_pagamento_pix: "chavePix",
+  dados_pagamento_codigo_banco: 'bancoEmitente',
+  dados_pagamento_agencia: 'agenciaEmitente',
+  dados_pagamento_conta: 'contaEmitente',
+  dados_pagamento_tipo: 'tipoContaEmitente',
+  dados_pagamento_pix: 'chavePix',
 
   // DADOS PJ (quando aplicável)
-  "cliente_data.razaoSocial": "razaoSocialEmitenteEmpresa",
-  "cliente_data.cnpj": "cnpjEmitenteEmpresa",
+  'cliente_data.razaoSocial': 'razaoSocialEmitenteEmpresa',
+  'cliente_data.cnpj': 'cnpjEmitenteEmpresa',
 };
 
 /**

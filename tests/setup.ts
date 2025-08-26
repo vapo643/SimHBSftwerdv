@@ -1,10 +1,10 @@
 /**
  * Vitest Test Environment Setup
  * PAM V1.0 - Isolated Test Database Configuration
- * 
+ *
  * This setup file configures the test environment to use a dedicated
  * test database, completely isolated from development and production.
- * 
+ *
  * @file tests/setup.ts
  * @created 2025-08-20
  */
@@ -37,5 +37,7 @@ if (process.env.NODE_ENV === 'test' && !process.env.TEST_DATABASE_URL) {
 
 console.log('[TEST SETUP] 🔧 Test environment configured:');
 console.log(`[TEST SETUP]   - NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`[TEST SETUP]   - Database: ${process.env.TEST_DATABASE_URL ? '✅ Isolated Test DB' : '⚠️ Check configuration'}`);
+console.log(
+  `[TEST SETUP]   - Database: ${process.env.TEST_DATABASE_URL ? '✅ Isolated Test DB' : '⚠️ Check configuration'}`
+);
 console.log('[TEST SETUP] 🛡️ Triple protection active: NODE_ENV=test, isolated DB, runtime guards');

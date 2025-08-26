@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Link } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Search,
   Filter,
@@ -23,7 +23,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface Proposta {
   id: number;
@@ -37,52 +37,56 @@ interface Proposta {
 }
 
 export default function FilaAnalise() {
-  const [statusFilter, setStatusFilter] = useState("");
-  const [valorMinimo, setValorMinimo] = useState("");
-  const [valorMaximo, setValorMaximo] = useState("");
-  const [busca, setBusca] = useState("");
-  const [prioridadeFilter, setPrioridadeFilter] = useState("");
-  const [ordenacao, setOrdenacao] = useState("data_desc");
+  const [statusFilter, setStatusFilter] = useState('');
+  const [valorMinimo, setValorMinimo] = useState('');
+  const [valorMaximo, setValorMaximo] = useState('');
+  const [busca, setBusca] = useState('');
+  const [prioridadeFilter, setPrioridadeFilter] = useState('');
+  const [ordenacao, setOrdenacao] = useState('data_desc');
 
   const { data: propostas, isLoading } = useQuery<Proposta[]>({
-    queryKey: ["/api/propostas"],
+    queryKey: ['/api/propostas'],
   });
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: "secondary" | "default" | "destructive" | "outline" }> = {
+    const statusMap: Record<
+      string,
+      { label: string; variant: 'secondary' | 'default' | 'destructive' | 'outline' }
+    > = {
       // Status V2.0
-      CCB_GERADA: { label: "CCB Gerada", variant: "default" },
-      AGUARDANDO_ASSINATURA: { label: "Aguardando Assinatura", variant: "secondary" },
-      ASSINATURA_CONCLUIDA: { label: "Assinatura Concluída", variant: "default" },
-      BOLETOS_EMITIDOS: { label: "Boletos Emitidos", variant: "default" },
+      CCB_GERADA: { label: 'CCB Gerada', variant: 'default' },
+      AGUARDANDO_ASSINATURA: { label: 'Aguardando Assinatura', variant: 'secondary' },
+      ASSINATURA_CONCLUIDA: { label: 'Assinatura Concluída', variant: 'default' },
+      BOLETOS_EMITIDOS: { label: 'Boletos Emitidos', variant: 'default' },
       // Status antigos
-      aguardando_analise: { label: "Pendente", variant: "secondary" },
-      em_analise: { label: "Em Análise", variant: "default" },
-      aprovado: { label: "Aprovado", variant: "default" },
-      rejeitado: { label: "Rejeitado", variant: "destructive" },
+      aguardando_analise: { label: 'Pendente', variant: 'secondary' },
+      em_analise: { label: 'Em Análise', variant: 'default' },
+      aprovado: { label: 'Aprovado', variant: 'default' },
+      rejeitado: { label: 'Rejeitado', variant: 'destructive' },
     };
 
     return (
-      statusMap[status] || statusMap[status.toUpperCase()] || { label: status, variant: "outline" as const }
+      statusMap[status] ||
+      statusMap[status.toUpperCase()] || { label: status, variant: 'outline' as const }
     );
   };
 
   const getPriorityBadge = (valor: string) => {
     const valorNum = parseFloat(valor);
-    if (valorNum > 100000) return { label: "Alta", variant: "destructive" as const };
-    if (valorNum > 50000) return { label: "Média", variant: "secondary" as const };
-    return { label: "Baixa", variant: "outline" as const };
+    if (valorNum > 100000) return { label: 'Alta', variant: 'destructive' as const };
+    if (valorNum > 50000) return { label: 'Média', variant: 'secondary' as const };
+    return { label: 'Baixa', variant: 'outline' as const };
   };
 
   const formatCurrency = (value: string) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(parseFloat(value));
   };
 
   const filteredPropostas = propostas
-    ?.filter(proposta => {
+    ?.filter((proposta) => {
       // PAM V1.0 - Usar status contextual com fallback
       const statusFinal = proposta.statusContextual || proposta.status;
       const matchesStatus = !statusFilter || statusFinal === statusFilter;
@@ -109,15 +113,15 @@ export default function FilaAnalise() {
     })
     ?.sort((a, b) => {
       switch (ordenacao) {
-        case "data_desc":
+        case 'data_desc':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case "data_asc":
+        case 'data_asc':
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case "valor_desc":
+        case 'valor_desc':
           return parseFloat(b.valor) - parseFloat(a.valor);
-        case "valor_asc":
+        case 'valor_asc':
           return parseFloat(a.valor) - parseFloat(b.valor);
-        case "prioridade":
+        case 'prioridade':
           const getPriorityValue = (valor: string) => {
             const num = parseFloat(valor);
             if (num > 100000) return 3;
@@ -131,22 +135,22 @@ export default function FilaAnalise() {
     });
 
   const clearFilters = () => {
-    setStatusFilter("");
-    setValorMinimo("");
-    setValorMaximo("");
-    setBusca("");
-    setPrioridadeFilter("");
-    setOrdenacao("data_desc");
+    setStatusFilter('');
+    setValorMinimo('');
+    setValorMaximo('');
+    setBusca('');
+    setPrioridadeFilter('');
+    setOrdenacao('data_desc');
   };
 
   // Estatísticas
   const getStats = () => {
     if (!propostas) return null;
 
-    const aguardando = propostas.filter(p => p.status === "aguardando_analise").length;
-    const emAnalise = propostas.filter(p => p.status === "em_analise").length;
-    const aprovadas = propostas.filter(p => p.status === "aprovado").length;
-    const rejeitadas = propostas.filter(p => p.status === "rejeitado").length;
+    const aguardando = propostas.filter((p) => p.status === 'aguardando_analise').length;
+    const emAnalise = propostas.filter((p) => p.status === 'em_analise').length;
+    const aprovadas = propostas.filter((p) => p.status === 'aprovado').length;
+    const rejeitadas = propostas.filter((p) => p.status === 'rejeitado').length;
 
     const valorTotal = propostas.reduce((acc, p) => acc + parseFloat(p.valor), 0);
     const valorMedio = valorTotal / propostas.length;
@@ -173,7 +177,7 @@ export default function FilaAnalise() {
               <div className="animate-pulse space-y-4">
                 <div className="h-4 w-1/4 rounded bg-gray-200 dark:bg-gray-700"></div>
                 <div className="grid grid-cols-4 gap-4">
-                  {[1, 2, 3, 4].map(i => (
+                  {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="h-10 rounded bg-gray-200 dark:bg-gray-700"></div>
                   ))}
                 </div>
@@ -296,7 +300,7 @@ export default function FilaAnalise() {
                   id="valorMinimo"
                   placeholder="R$ 0,00"
                   value={valorMinimo}
-                  onChange={e => setValorMinimo(e.target.value)}
+                  onChange={(e) => setValorMinimo(e.target.value)}
                 />
               </div>
 
@@ -306,7 +310,7 @@ export default function FilaAnalise() {
                   id="valorMaximo"
                   placeholder="R$ 100.000,00"
                   value={valorMaximo}
-                  onChange={e => setValorMaximo(e.target.value)}
+                  onChange={(e) => setValorMaximo(e.target.value)}
                 />
               </div>
 
@@ -318,7 +322,7 @@ export default function FilaAnalise() {
                     id="busca"
                     placeholder="Nome do cliente..."
                     value={busca}
-                    onChange={e => setBusca(e.target.value)}
+                    onChange={(e) => setBusca(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -345,7 +349,7 @@ export default function FilaAnalise() {
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {filteredPropostas
                   ? `${filteredPropostas.length} de ${propostas?.length || 0} propostas`
-                  : ""}
+                  : ''}
               </div>
               <div className="space-x-2">
                 <Button variant="outline" onClick={clearFilters}>
@@ -366,7 +370,7 @@ export default function FilaAnalise() {
               </span>
               {stats && (
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Valor Total: {formatCurrency(stats.valorTotal.toString())} | Média:{" "}
+                  Valor Total: {formatCurrency(stats.valorTotal.toString())} | Média:{' '}
                   {formatCurrency(stats.valorMedio.toString())}
                 </div>
               )}
@@ -405,7 +409,7 @@ export default function FilaAnalise() {
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   {filteredPropostas && filteredPropostas.length > 0 ? (
-                    filteredPropostas.map(proposta => {
+                    filteredPropostas.map((proposta) => {
                       const statusInfo = getStatusBadge(proposta.status);
                       const priorityInfo = getPriorityBadge(proposta.valor);
 
@@ -434,7 +438,7 @@ export default function FilaAnalise() {
                             <Badge variant={priorityInfo.variant}>{priorityInfo.label}</Badge>
                           </td>
                           <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(proposta.createdAt).toLocaleDateString("pt-BR")}
+                            {new Date(proposta.createdAt).toLocaleDateString('pt-BR')}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                             <div className="flex gap-2">
@@ -444,7 +448,7 @@ export default function FilaAnalise() {
                                   Analisar
                                 </Button>
                               </Link>
-                              {proposta.status === "aguardando_analise" && (
+                              {proposta.status === 'aguardando_analise' && (
                                 <Button size="sm" variant="outline">
                                   Iniciar
                                 </Button>

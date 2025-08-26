@@ -1,11 +1,11 @@
 /**
  * Job Status Routes - REFACTORED
  * Controller for job status operations
- * PAM V1.0 - Clean architecture implementation  
+ * PAM V1.0 - Clean architecture implementation
  */
 
-import { Router, Request, Response } from "express";
-import { testQueueService } from "../services/testService.js";
+import { Router, Request, Response } from 'express';
+import { testQueueService } from '../services/testService.js';
 
 const router = Router();
 
@@ -13,16 +13,16 @@ const router = Router();
  * GET /api/job-status/:id
  * Get job status
  */
-router.get("/:id", async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const result = await testQueueService.executeOperation("get_job_status", {
+    const result = await testQueueService.executeOperation('get_job_status', {
       jobId: req.params.id,
     });
     res.json(result);
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message || "Job status check failed",
+      error: error.message || 'Job status check failed',
     });
   }
 });
@@ -31,14 +31,14 @@ router.get("/:id", async (req: Request, res: Response) => {
  * GET /api/job-status
  * List all jobs
  */
-router.get("/", async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await testQueueService.executeOperation("list_jobs", req.query);
+    const result = await testQueueService.executeOperation('list_jobs', req.query);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message || "Job listing failed",
+      error: error.message || 'Job listing failed',
     });
   }
 });

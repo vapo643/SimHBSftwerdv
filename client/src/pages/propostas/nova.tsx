@@ -1,18 +1,18 @@
-import React from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import { ProposalProvider, useProposal, useProposalActions } from "@/contexts/ProposalContext";
-import { useProposalEffects } from "@/hooks/useProposalEffects";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { DollarSign, FileText, AlertCircle, Loader2, CheckCircle2, User } from "lucide-react";
-import { ClientDataStep } from "@/components/propostas/ClientDataStep";
-import { LoanConditionsStep } from "@/components/propostas/LoanConditionsStep";
-import { DocumentsStep } from "@/components/propostas/DocumentsStep";
-import { PersonalReferencesStep } from "@/components/propostas/PersonalReferencesStep";
+import React from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { ProposalProvider, useProposal, useProposalActions } from '@/contexts/ProposalContext';
+import { useProposalEffects } from '@/hooks/useProposalEffects';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { DollarSign, FileText, AlertCircle, Loader2, CheckCircle2, User } from 'lucide-react';
+import { ClientDataStep } from '@/components/propostas/ClientDataStep';
+import { LoanConditionsStep } from '@/components/propostas/LoanConditionsStep';
+import { DocumentsStep } from '@/components/propostas/DocumentsStep';
+import { PersonalReferencesStep } from '@/components/propostas/PersonalReferencesStep';
 
 // Component that uses the ProposalContext
 function ProposalForm() {
@@ -29,10 +29,10 @@ function ProposalForm() {
     error: contextError,
     data: contextData,
   } = useQuery({
-    queryKey: ["/api/origination/context"],
+    queryKey: ['/api/origination/context'],
     queryFn: async () => {
-      const response = await apiRequest("/api/origination/context", {
-        method: "GET",
+      const response = await apiRequest('/api/origination/context', {
+        method: 'GET',
       });
       return response;
     },
@@ -49,12 +49,12 @@ function ProposalForm() {
   // Handle errors
   React.useEffect(() => {
     if (contextError) {
-      console.error("Erro ao carregar contexto:", contextError);
+      console.error('Erro ao carregar contexto:', contextError);
       toast({
-        title: "Erro ao carregar dados",
+        title: 'Erro ao carregar dados',
         description:
-          "Não foi possível carregar os dados necessários. Por favor, recarregue a página.",
-        variant: "destructive",
+          'Não foi possível carregar os dados necessários. Por favor, recarregue a página.',
+        variant: 'destructive',
       });
       setLoading(false);
     }
@@ -102,7 +102,7 @@ function ProposalForm() {
 
         // Manter endereço concatenado para compatibilidade
         clienteEndereco:
-          `${state.clientData.logradouro || ""}, ${state.clientData.numero || ""}${state.clientData.complemento ? ", " + state.clientData.complemento : ""}, ${state.clientData.bairro || ""}, ${state.clientData.cidade || ""}/${state.clientData.estado || ""} - CEP: ${state.clientData.cep || ""}`.trim(),
+          `${state.clientData.logradouro || ''}, ${state.clientData.numero || ''}${state.clientData.complemento ? ', ' + state.clientData.complemento : ''}, ${state.clientData.bairro || ''}, ${state.clientData.cidade || ''}/${state.clientData.estado || ''} - CEP: ${state.clientData.cep || ''}`.trim(),
 
         // ===== DADOS PROFISSIONAIS =====
         clienteOcupacao: state.clientData.ocupacao,
@@ -131,7 +131,7 @@ function ProposalForm() {
         // ===== DADOS DO EMPRÉSTIMO =====
         produtoId: state.loanData.produtoId,
         tabelaComercialId: state.loanData.tabelaComercialId,
-        valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, "").replace(",", ".")),
+        valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
         prazo: state.loanData.prazo,
 
         // Valores calculados da simulação
@@ -146,21 +146,21 @@ function ProposalForm() {
         incluirTac: state.loanData.incluirTac,
 
         // ===== DADOS ADMINISTRATIVOS =====
-        status: "aguardando_analise",
+        status: 'aguardando_analise',
         lojaId: state.context?.atendente?.loja?.id,
-        finalidade: "Empréstimo pessoal",
-        garantia: "Sem garantia",
+        finalidade: 'Empréstimo pessoal',
+        garantia: 'Sem garantia',
 
         // ===== CAMPOS OPCIONAIS PARA CCB =====
         // Estes podem ser preenchidos posteriormente ou com valores padrão
-        formaLiberacao: "deposito", // Como será liberado: deposito, ted, pix
-        formaPagamento: "boleto", // Como cliente pagará: boleto, pix, debito
-        pracaPagamento: "São Paulo", // Cidade de pagamento
+        formaLiberacao: 'deposito', // Como será liberado: deposito, ted, pix
+        formaPagamento: 'boleto', // Como cliente pagará: boleto, pix, debito
+        pracaPagamento: 'São Paulo', // Cidade de pagamento
       };
 
       console.log(`[DEBUG] Criando proposta primeiro...`);
-      const propostaResponse = await apiRequest("/api/propostas", {
-        method: "POST",
+      const propostaResponse = await apiRequest('/api/propostas', {
+        method: 'POST',
         body: proposalData,
       });
 
@@ -182,12 +182,12 @@ function ProposalForm() {
 
             // Upload usando apiRequest com FormData
             const formData = new FormData();
-            formData.append("file", doc.file);
-            formData.append("filename", fileName);
-            formData.append("proposalId", propostaId); // Usar ID real da proposta
+            formData.append('file', doc.file);
+            formData.append('filename', fileName);
+            formData.append('proposalId', propostaId); // Usar ID real da proposta
 
-            const uploadResponse = await apiRequest("/api/upload", {
-              method: "POST",
+            const uploadResponse = await apiRequest('/api/upload', {
+              method: 'POST',
               body: formData,
             });
 
@@ -205,7 +205,7 @@ function ProposalForm() {
         if (uploadedDocuments.length > 0) {
           try {
             await apiRequest(`/api/propostas/${propostaId}/documentos`, {
-              method: "POST",
+              method: 'POST',
               body: { documentos: uploadedDocuments },
             });
             console.log(
@@ -220,9 +220,9 @@ function ProposalForm() {
 
       return propostaResponse;
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       toast({
-        title: "Proposta criada com sucesso!",
+        title: 'Proposta criada com sucesso!',
         description: `Proposta ${(data as any).id} foi encaminhada para análise com ${state.documents.length} documento(s) anexado(s).`,
       });
 
@@ -232,12 +232,12 @@ function ProposalForm() {
       }
       setStep(0);
     },
-    onError: error => {
+    onError: (error) => {
       toast({
-        title: "Erro ao criar proposta",
+        title: 'Erro ao criar proposta',
         description:
-          error instanceof Error ? error.message : "Ocorreu um erro ao criar a proposta.",
-        variant: "destructive",
+          error instanceof Error ? error.message : 'Ocorreu um erro ao criar a proposta.',
+        variant: 'destructive',
       });
     },
   });
@@ -263,19 +263,19 @@ function ProposalForm() {
 
   const handleStepChange = (value: string) => {
     const stepMap: Record<string, number> = {
-      "dados-cliente": 0,
-      "referencias-pessoais": 1,
-      "condicoes-emprestimo": 2,
-      "anexo-documentos": 3,
+      'dados-cliente': 0,
+      'referencias-pessoais': 1,
+      'condicoes-emprestimo': 2,
+      'anexo-documentos': 3,
     };
     setStep(stepMap[value] || 0);
   };
 
   const currentTabValue = [
-    "dados-cliente",
-    "referencias-pessoais",
-    "condicoes-emprestimo",
-    "anexo-documentos",
+    'dados-cliente',
+    'referencias-pessoais',
+    'condicoes-emprestimo',
+    'anexo-documentos',
   ][state.currentStep];
 
   return (
@@ -343,7 +343,7 @@ function ProposalForm() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {state.documents.length > 0
                   ? `Enviando ${state.documents.length} documentos...`
-                  : "Criando proposta..."}
+                  : 'Criando proposta...'}
               </>
             ) : (
               <>

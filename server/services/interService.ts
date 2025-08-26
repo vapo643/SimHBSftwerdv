@@ -4,13 +4,13 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { interRepository } from "../repositories/inter.repository.js";
-import { interBankService } from "./interBankService.js";
-import { storage } from "../storage.js";
-import { getQueue } from "../lib/mock-queue.js";
-import { getBrasiliaTimestamp } from "../lib/timezone.js";
-import { z } from "zod";
-import type { InterCollection, Proposta } from "@shared/schema";
+import { interRepository } from '../repositories/inter.repository.js';
+import { interBankService } from './interBankService.js';
+import { storage } from '../storage.js';
+import { getQueue } from '../lib/mock-queue.js';
+import { getBrasiliaTimestamp } from '../lib/timezone.js';
+import { z } from 'zod';
+import type { InterCollection, Proposta } from '@shared/schema';
 
 // Validation schemas
 const createCollectionSchema = z.object({
@@ -46,17 +46,17 @@ export class InterService {
   async createCollection(data: any, userId?: string): Promise<InterCollection> {
     // Validate input
     const validated = createCollectionSchema.parse(data);
-    
+
     // Check if proposal exists
     const proposal = await interRepository.getProposal(validated.proposalId);
     if (!proposal) {
-      throw new Error("Proposta não encontrada");
+      throw new Error('Proposta não encontrada');
     }
 
     // Check for existing collection
     const existingCollection = await interRepository.findByProposalId(validated.proposalId);
     if (existingCollection) {
-      throw new Error("Já existe uma cobrança para esta proposta");
+      throw new Error('Já existe uma cobrança para esta proposta');
     }
 
     // Create collection in Inter Bank
@@ -66,7 +66,7 @@ export class InterService {
       dataVencimento: validated.dataVencimento,
       numDiasAgenda: 30,
       pagador: {
-        cpfCnpj: validated.clienteData.cpf.replace(/\D/g, ""),
+        cpfCnpj: validated.clienteData.cpf.replace(/\D/g, ''),
         nome: validated.clienteData.nome,
         email: validated.clienteData.email,
         telefone: validated.clienteData.telefone,
@@ -76,11 +76,11 @@ export class InterService {
         bairro: validated.clienteData.bairro,
         cidade: validated.clienteData.cidade,
         uf: validated.clienteData.uf,
-        cep: validated.clienteData.cep.replace(/\D/g, ""),
+        cep: validated.clienteData.cep.replace(/\D/g, ''),
       },
       mensagem: {
         linha1: `Proposta: ${validated.proposalId}`,
-        linha2: "Pagamento via Banco Inter",
+        linha2: 'Pagamento via Banco Inter',
       },
     });
 
@@ -99,18 +99,14 @@ export class InterService {
     });
 
     // Update proposal status
-    await interRepository.updateProposalStatus(
-      validated.proposalId, 
-      "COBRANÇA_GERADA",
-      userId
-    );
+    await interRepository.updateProposalStatus(validated.proposalId, 'COBRANÇA_GERADA', userId);
 
     // Create observation history
     await interRepository.createObservationHistory({
       propostaId: validated.proposalId,
-      tipoObservacao: "COBRANÇA_GERADA",
+      tipoObservacao: 'COBRANÇA_GERADA',
       observacao: `Cobrança gerada com sucesso. Código: ${interResult.codigoSolicitacao}`,
-      usuarioNome: "Sistema",
+      usuarioNome: 'Sistema',
       usuarioId: userId,
       metadata: { codigoSolicitacao: interResult.codigoSolicitacao },
     });
@@ -126,8 +122,8 @@ export class InterService {
     totalPages: number;
     currentPage: number;
   }> {
-    const limit = parseInt(params.limit || "10");
-    const page = parseInt(params.page || "1");
+    const limit = parseInt(params.limit || '10');
+    const page = parseInt(params.page || '1');
     const offset = (page - 1) * limit;
 
     const collections = await interRepository.searchCollections({
@@ -154,7 +150,7 @@ export class InterService {
     // Get from database
     const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
     if (!collection) {
-      throw new Error("Cobrança não encontrada");
+      throw new Error('Cobrança não encontrada');
     }
 
     // Get updated info from Inter Bank
@@ -178,14 +174,14 @@ export class InterService {
    * Cancel collection
    */
   async cancelCollection(
-    codigoSolicitacao: string, 
+    codigoSolicitacao: string,
     motivo: string,
     userId?: string
   ): Promise<InterCollection> {
     // Get collection
     const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
     if (!collection) {
-      throw new Error("Cobrança não encontrada");
+      throw new Error('Cobrança não encontrada');
     }
 
     // Cancel in Inter Bank
@@ -193,23 +189,19 @@ export class InterService {
 
     // Update database
     const updated = await interRepository.updateByCodigoSolicitacao(codigoSolicitacao, {
-      situacao: "CANCELADO",
+      situacao: 'CANCELADO',
       motivoCancelamento: motivo,
     });
 
     // Update proposal status
-    await interRepository.updateProposalStatus(
-      collection.propostaId,
-      "COBRANÇA_CANCELADA",
-      userId
-    );
+    await interRepository.updateProposalStatus(collection.propostaId, 'COBRANÇA_CANCELADA', userId);
 
     // Create observation history
     await interRepository.createObservationHistory({
       propostaId: collection.propostaId,
-      tipoObservacao: "COBRANÇA_CANCELADA",
+      tipoObservacao: 'COBRANÇA_CANCELADA',
       observacao: `Cobrança cancelada. Motivo: ${motivo}`,
-      usuarioNome: "Sistema",
+      usuarioNome: 'Sistema',
       usuarioId: userId,
       metadata: { motivo },
     });
@@ -238,7 +230,7 @@ export class InterService {
         if (!collection) {
           errors.push({
             codigoSolicitacao,
-            error: "Cobrança não encontrada",
+            error: 'Cobrança não encontrada',
           });
           continue;
         }
@@ -258,9 +250,9 @@ export class InterService {
         // Create observation history
         await interRepository.createObservationHistory({
           propostaId: collection.propostaId,
-          tipoObservacao: "VENCIMENTO_PRORROGADO",
+          tipoObservacao: 'VENCIMENTO_PRORROGADO',
           observacao: `Vencimento prorrogado para ${novaDataVencimento}`,
-          usuarioNome: "Sistema",
+          usuarioNome: 'Sistema',
           usuarioId: userId,
           metadata: { novaDataVencimento },
         });
@@ -288,7 +280,7 @@ export class InterService {
     // Get collection details
     const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
     if (!collection) {
-      throw new Error("Cobrança não encontrada");
+      throw new Error('Cobrança não encontrada');
     }
 
     // Generate PDF from Inter Bank
@@ -296,12 +288,7 @@ export class InterService {
 
     // Save to storage
     const path = `collections/${collection.propostaId}/${codigoSolicitacao}.pdf`;
-    await interRepository.uploadToStorage(
-      "private-documents",
-      path,
-      pdfBuffer,
-      "application/pdf"
-    );
+    await interRepository.uploadToStorage('private-documents', path, pdfBuffer, 'application/pdf');
 
     return pdfBuffer;
   }
@@ -326,25 +313,22 @@ export class InterService {
     });
 
     // Handle payment confirmation
-    if (situacao === "RECEBIDO") {
+    if (situacao === 'RECEBIDO') {
       // Update proposal status
-      await interRepository.updateProposalStatus(
-        collection.propostaId,
-        "PAGAMENTO_CONFIRMADO"
-      );
+      await interRepository.updateProposalStatus(collection.propostaId, 'PAGAMENTO_CONFIRMADO');
 
       // Create observation
       await interRepository.createObservationHistory({
         propostaId: collection.propostaId,
-        tipoObservacao: "PAGAMENTO_CONFIRMADO",
-        observacao: "Pagamento confirmado via webhook Banco Inter",
-        usuarioNome: "Sistema",
+        tipoObservacao: 'PAGAMENTO_CONFIRMADO',
+        observacao: 'Pagamento confirmado via webhook Banco Inter',
+        usuarioNome: 'Sistema',
         metadata: webhookData,
       });
 
       // Queue for further processing
-      const queue = getQueue("payment-processing");
-      await queue.add("process-payment", {
+      const queue = getQueue('payment-processing');
+      await queue.add('process-payment', {
         propostaId: collection.propostaId,
         codigoSolicitacao,
         valorPago: collection.valorNominal,
@@ -368,26 +352,21 @@ export class InterService {
     for (const collection of collections) {
       try {
         // Get updated status from Inter
-        const details = await interBankService.getCollectionDetails(
-          collection.codigoSolicitacao
-        );
+        const details = await interBankService.getCollectionDetails(collection.codigoSolicitacao);
 
         // Update if changed
         if (details.situacao !== collection.situacao) {
-          await interRepository.updateByCodigoSolicitacao(
-            collection.codigoSolicitacao,
-            {
-              situacao: details.situacao,
-              dataHoraSituacao: details.dataHoraSituacao,
-            }
-          );
+          await interRepository.updateByCodigoSolicitacao(collection.codigoSolicitacao, {
+            situacao: details.situacao,
+            dataHoraSituacao: details.dataHoraSituacao,
+          });
           updated++;
 
           // Handle payment confirmation
-          if (details.situacao === "RECEBIDO") {
+          if (details.situacao === 'RECEBIDO') {
             await this.processWebhook({
               codigoSolicitacao: collection.codigoSolicitacao,
-              situacao: "RECEBIDO",
+              situacao: 'RECEBIDO',
               valorPago: details.valorTotalRecebimento,
             });
           }
@@ -406,7 +385,7 @@ export class InterService {
    */
   async getCollectionStatistics(): Promise<any> {
     const collections = await interRepository.searchCollections({});
-    
+
     const stats = {
       total: collections.length,
       pendentes: 0,
@@ -422,17 +401,17 @@ export class InterService {
       stats.valorTotal += valor;
 
       switch (collection.situacao) {
-        case "A_RECEBER":
+        case 'A_RECEBER':
           stats.pendentes++;
           break;
-        case "RECEBIDO":
+        case 'RECEBIDO':
           stats.recebidas++;
           stats.valorRecebido += valor;
           break;
-        case "CANCELADO":
+        case 'CANCELADO':
           stats.canceladas++;
           break;
-        case "EXPIRADO":
+        case 'EXPIRADO':
           stats.expiradas++;
           break;
       }

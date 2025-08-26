@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
  * Interface canônica para requests autenticados
  * Extende Express Request com dados de usuário validados
  * Compatible com extensões globais existentes (sentry.ts, logger.ts)
- * 
+ *
  * @interface AuthenticatedRequest
  * @extends Request
  */
@@ -28,18 +28,18 @@ export interface AuthenticatedRequest extends Request {
     /** ID da loja associada (se aplicável) */
     loja_id?: number | null;
   };
-  
+
   /**
    * ID da sessão Express (compatibilidade express-session)
    */
   sessionID?: string;
-  
+
   /**
    * Dados de arquivo para upload (compatibilidade multer)
    * Presente apenas em routes de upload
    */
   file?: Express.Multer.File;
-  
+
   /**
    * Múltiplos arquivos para upload (compatibilidade multer)
    */

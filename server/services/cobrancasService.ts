@@ -4,9 +4,9 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { cobrancasRepository } from "../repositories/cobrancas.repository.js";
-import { maskCPF, maskEmail, maskRG, maskTelefone } from "../utils/masking.js";
-import { format, parseISO, differenceInDays, isAfter } from "date-fns";
+import { cobrancasRepository } from '../repositories/cobrancas.repository.js';
+import { maskCPF, maskEmail, maskRG, maskTelefone } from '../utils/masking.js';
+import { format, parseISO, differenceInDays, isAfter } from 'date-fns';
 
 export class CobrancasService {
   /**
@@ -18,7 +18,7 @@ export class CobrancasService {
     userRole?: string;
   }): Promise<any[]> {
     try {
-      console.log("🔍 [COBRANCAS_SERVICE] Fetching proposals with filters:", filters);
+      console.log('🔍 [COBRANCAS_SERVICE] Fetching proposals with filters:', filters);
 
       // Get proposals from repository
       const propostas = await cobrancasRepository.getPropostasCobranca(filters);
@@ -27,16 +27,16 @@ export class CobrancasService {
       const processedPropostas = await Promise.all(
         propostas.map(async (proposta) => {
           const { propostas: prop } = proposta;
-          
+
           // Get installments
           const parcelas = await cobrancasRepository.getParcelasProposta(prop.id);
-          
+
           // Get Inter collections
           const collections = await cobrancasRepository.getInterCollections(prop.id);
-          
+
           // Calculate payment summary
           const paymentSummary = this.calculatePaymentSummary(parcelas);
-          
+
           // Apply PII masking
           const maskedData = {
             ...prop,
@@ -58,8 +58,8 @@ export class CobrancasService {
 
       return processedPropostas;
     } catch (error: any) {
-      console.error("[COBRANCAS_SERVICE] Error fetching proposals:", error);
-      throw new Error("Erro ao buscar propostas de cobrança");
+      console.error('[COBRANCAS_SERVICE] Error fetching proposals:', error);
+      throw new Error('Erro ao buscar propostas de cobrança');
     }
   }
 
@@ -71,9 +71,9 @@ export class CobrancasService {
       // Get proposal details
       const [propostaData] = await cobrancasRepository.getPropostasCobranca({});
       const proposta = propostaData?.propostas;
-      
+
       if (!proposta) {
-        throw new Error("Proposta não encontrada");
+        throw new Error('Proposta não encontrada');
       }
 
       // Get all related data
@@ -107,7 +107,7 @@ export class CobrancasService {
         paymentSummary,
       };
     } catch (error: any) {
-      console.error("[COBRANCAS_SERVICE] Error fetching proposal details:", error);
+      console.error('[COBRANCAS_SERVICE] Error fetching proposal details:', error);
       throw error;
     }
   }
@@ -125,7 +125,7 @@ export class CobrancasService {
       const observation = await cobrancasRepository.createObservacao(data);
 
       if (!observation) {
-        throw new Error("Erro ao criar observação");
+        throw new Error('Erro ao criar observação');
       }
 
       // Log the action
@@ -134,7 +134,7 @@ export class CobrancasService {
 
       return observation;
     } catch (error: any) {
-      console.error("[COBRANCAS_SERVICE] Error adding observation:", error);
+      console.error('[COBRANCAS_SERVICE] Error adding observation:', error);
       throw error;
     }
   }
@@ -142,25 +142,17 @@ export class CobrancasService {
   /**
    * Update installment payment status
    */
-  async updateParcelaStatus(
-    parcelaId: number,
-    status: string,
-    updateData?: any
-  ): Promise<boolean> {
+  async updateParcelaStatus(parcelaId: number, status: string, updateData?: any): Promise<boolean> {
     try {
-      const success = await cobrancasRepository.updateParcelaStatus(
-        parcelaId,
-        status,
-        updateData
-      );
+      const success = await cobrancasRepository.updateParcelaStatus(parcelaId, status, updateData);
 
       if (!success) {
-        throw new Error("Erro ao atualizar status da parcela");
+        throw new Error('Erro ao atualizar status da parcela');
       }
 
       return success;
     } catch (error: any) {
-      console.error("[COBRANCAS_SERVICE] Error updating installment:", error);
+      console.error('[COBRANCAS_SERVICE] Error updating installment:', error);
       throw error;
     }
   }
@@ -179,7 +171,7 @@ export class CobrancasService {
       const request = await cobrancasRepository.createSolicitacaoModificacao(data);
 
       if (!request) {
-        throw new Error("Erro ao criar solicitação de modificação");
+        throw new Error('Erro ao criar solicitação de modificação');
       }
 
       // Log action (to be implemented in repository if needed)
@@ -187,7 +179,7 @@ export class CobrancasService {
 
       return request;
     } catch (error: any) {
-      console.error("[COBRANCAS_SERVICE] Error requesting modification:", error);
+      console.error('[COBRANCAS_SERVICE] Error requesting modification:', error);
       throw error;
     }
   }
@@ -204,10 +196,10 @@ export class CobrancasService {
 
       // TODO: Implement detailed overdue breakdown by days
       const byDaysOverdue = [
-        { range: "1-30 dias", count: 0 },
-        { range: "31-60 dias", count: 0 },
-        { range: "61-90 dias", count: 0 },
-        { range: "90+ dias", count: 0 },
+        { range: '1-30 dias', count: 0 },
+        { range: '31-60 dias', count: 0 },
+        { range: '61-90 dias', count: 0 },
+        { range: '90+ dias', count: 0 },
       ];
 
       return {
@@ -215,7 +207,7 @@ export class CobrancasService {
         byDaysOverdue,
       };
     } catch (error: any) {
-      console.error("[COBRANCAS_SERVICE] Error getting overdue stats:", error);
+      console.error('[COBRANCAS_SERVICE] Error getting overdue stats:', error);
       throw error;
     }
   }
@@ -238,10 +230,10 @@ export class CobrancasService {
     }
 
     const today = new Date();
-    const parcelasPagas = parcelas.filter(p => p.status_pagamento === "pago");
-    const parcelasPendentes = parcelas.filter(p => p.status_pagamento === "pendente");
-    const parcelasVencidas = parcelasPendentes.filter(p => 
-      p.data_vencimento && isAfter(today, parseISO(p.data_vencimento))
+    const parcelasPagas = parcelas.filter((p) => p.status_pagamento === 'pago');
+    const parcelasPendentes = parcelas.filter((p) => p.status_pagamento === 'pendente');
+    const parcelasVencidas = parcelasPendentes.filter(
+      (p) => p.data_vencimento && isAfter(today, parseISO(p.data_vencimento))
     );
 
     const valorTotal = parcelas.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0);
@@ -249,11 +241,14 @@ export class CobrancasService {
     const valorPendente = valorTotal - valorPago;
 
     const proximaParcela = parcelasPendentes
-      .filter(p => p.data_vencimento && isAfter(parseISO(p.data_vencimento), today))
-      .sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime())[0];
+      .filter((p) => p.data_vencimento && isAfter(parseISO(p.data_vencimento), today))
+      .sort(
+        (a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()
+      )[0];
 
-    const parcelaMaisVencida = parcelasVencidas
-      .sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime())[0];
+    const parcelaMaisVencida = parcelasVencidas.sort(
+      (a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()
+    )[0];
 
     const diasAtraso = parcelaMaisVencida?.data_vencimento
       ? differenceInDays(today, parseISO(parcelaMaisVencida.data_vencimento))
@@ -275,12 +270,14 @@ export class CobrancasService {
   /**
    * Process batch payment update
    */
-  async processBatchPaymentUpdate(updates: Array<{
-    parcelaId: number;
-    status: string;
-    dataPagamento?: string;
-    valorPago?: number;
-  }>): Promise<{
+  async processBatchPaymentUpdate(
+    updates: Array<{
+      parcelaId: number;
+      status: string;
+      dataPagamento?: string;
+      valorPago?: number;
+    }>
+  ): Promise<{
     success: number;
     failed: number;
     errors: any[];
@@ -305,7 +302,7 @@ export class CobrancasService {
             success++;
           } else {
             failed++;
-            errors.push({ parcelaId: update.parcelaId, error: "Update failed" });
+            errors.push({ parcelaId: update.parcelaId, error: 'Update failed' });
           }
         } catch (error: any) {
           failed++;
@@ -315,7 +312,7 @@ export class CobrancasService {
 
       return { success, failed, errors };
     } catch (error: any) {
-      console.error("[COBRANCAS_SERVICE] Error in batch update:", error);
+      console.error('[COBRANCAS_SERVICE] Error in batch update:', error);
       throw error;
     }
   }

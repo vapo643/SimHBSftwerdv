@@ -1,11 +1,11 @@
 /**
  * Email Change Routes - REFACTORED
- * Controller for email change operations  
+ * Controller for email change operations
  * PAM V1.0 - Clean architecture implementation
  */
 
-import { Router, Request, Response } from "express";
-import { securityTestService } from "../services/genericService";
+import { Router, Request, Response } from 'express';
+import { securityTestService } from '../services/genericService';
 
 const router = Router();
 
@@ -13,14 +13,14 @@ const router = Router();
  * POST /api/email-change/request
  * Request email change
  */
-router.post("/request", async (req: Request, res: Response) => {
+router.post('/request', async (req: Request, res: Response) => {
   try {
-    const result = await securityTestService.executeOperation("email_change_request", req.body);
+    const result = await securityTestService.executeOperation('email_change_request', req.body);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message || "Email change request failed",
+      error: error.message || 'Email change request failed',
     });
   }
 });
@@ -29,14 +29,14 @@ router.post("/request", async (req: Request, res: Response) => {
  * POST /api/email-change/confirm
  * Confirm email change
  */
-router.post("/confirm", async (req: Request, res: Response) => {
+router.post('/confirm', async (req: Request, res: Response) => {
   try {
-    const result = await securityTestService.executeOperation("email_change_confirm", req.body);
+    const result = await securityTestService.executeOperation('email_change_confirm', req.body);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message || "Email change confirmation failed",
+      error: error.message || 'Email change confirmation failed',
     });
   }
 });

@@ -1,11 +1,11 @@
-import { useFeatureFlags, useFeatureFlag, FeatureGate } from "@/contexts/FeatureFlagContext";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle, XCircle, TrendingUp, DollarSign, FileText } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useFeatureFlags, useFeatureFlag, FeatureGate } from '@/contexts/FeatureFlagContext';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, CheckCircle, XCircle, TrendingUp, DollarSign, FileText } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 /**
  * Componente de exemplo demonstrando diferentes usos de feature flags
@@ -17,22 +17,26 @@ export function FeatureFlagExample() {
   const hasExperimentalApi = useFeatureFlag('nova-api-experimental');
   const hasAdvancedReports = useFeatureFlag('relatorios-avancados');
   const hasPixInstant = useFeatureFlag('pagamento-pix-instant');
-  
+
   // Query para buscar dados da API experimental (apenas se flag ativa)
-  const { data: analyticsData, isLoading: analyticsLoading, error: analyticsError } = useQuery({
+  const {
+    data: analyticsData,
+    isLoading: analyticsLoading,
+    error: analyticsError,
+  } = useQuery({
     queryKey: ['/api/experimental/analytics'],
     enabled: hasExperimentalApi, // Só executa se a flag estiver ativa
     queryFn: async () => {
       const response = await apiRequest('/api/experimental/analytics', {
         method: 'GET',
       });
-      
+
       const responseData = response as Response;
-      
+
       if (!responseData.ok) {
         throw new Error('Failed to fetch experimental analytics');
       }
-      
+
       return responseData.json();
     },
     retry: 1,
@@ -59,15 +63,9 @@ export function FeatureFlagExample() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Status das Feature Flags</CardTitle>
-              <CardDescription>
-                Funcionalidades controladas por feature flags
-              </CardDescription>
+              <CardDescription>Funcionalidades controladas por feature flags</CardDescription>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={refreshFlags}
-            >
+            <Button variant="outline" size="sm" onClick={refreshFlags}>
               Atualizar Flags
             </Button>
           </div>
@@ -75,14 +73,14 @@ export function FeatureFlagExample() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(flags).map(([flagName, isEnabled]) => (
-              <div 
+              <div
                 key={flagName}
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <span className="text-sm font-medium">{flagName}</span>
-                <Badge 
-                  variant={isEnabled ? "default" : "secondary"}
-                  className={isEnabled ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}
+                <Badge
+                  variant={isEnabled ? 'default' : 'secondary'}
+                  className={isEnabled ? 'bg-green-100 text-green-800 hover:bg-green-100' : ''}
                 >
                   {isEnabled ? (
                     <>
@@ -124,14 +122,12 @@ export function FeatureFlagExample() {
       )}
 
       {/* Feature Gate: Analytics Experimental */}
-      <FeatureGate 
+      <FeatureGate
         flag="nova-api-experimental"
         fallback={
           <Card>
             <CardHeader>
-              <CardTitle className="text-muted-foreground">
-                Analytics Avançado (Em Breve)
-              </CardTitle>
+              <CardTitle className="text-muted-foreground">Analytics Avançado (Em Breve)</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
@@ -145,11 +141,11 @@ export function FeatureFlagExample() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Analytics Avançado</CardTitle>
-              <Badge variant="outline" className="border-orange-200 text-orange-700">Beta</Badge>
+              <Badge variant="outline" className="border-orange-200 text-orange-700">
+                Beta
+              </Badge>
             </div>
-            <CardDescription>
-              Dados experimentais da nova API de analytics
-            </CardDescription>
+            <CardDescription>Dados experimentais da nova API de analytics</CardDescription>
           </CardHeader>
           <CardContent>
             {analyticsLoading ? (
@@ -160,9 +156,7 @@ export function FeatureFlagExample() {
             ) : analyticsError ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Erro ao carregar dados experimentais
-                </AlertDescription>
+                <AlertDescription>Erro ao carregar dados experimentais</AlertDescription>
               </Alert>
             ) : analyticsData?.data ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -178,9 +172,9 @@ export function FeatureFlagExample() {
                   <div>
                     <p className="text-sm text-muted-foreground">Valor Total</p>
                     <p className="text-2xl font-bold">
-                      {new Intl.NumberFormat('pt-BR', { 
-                        style: 'currency', 
-                        currency: 'BRL' 
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
                       }).format(analyticsData.data.total_valor)}
                     </p>
                   </div>
@@ -189,7 +183,9 @@ export function FeatureFlagExample() {
                   <TrendingUp className="h-8 w-8 text-purple-500" />
                   <div>
                     <p className="text-sm text-muted-foreground">Versão API</p>
-                    <p className="text-lg font-semibold">{analyticsData.data.experimental_version}</p>
+                    <p className="text-lg font-semibold">
+                      {analyticsData.data.experimental_version}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -203,14 +199,10 @@ export function FeatureFlagExample() {
         <Card>
           <CardHeader>
             <CardTitle>Relatórios Avançados</CardTitle>
-            <CardDescription>
-              Acesso a relatórios detalhados e personalizados
-            </CardDescription>
+            <CardDescription>Acesso a relatórios detalhados e personalizados</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full">
-              Acessar Relatórios Avançados
-            </Button>
+            <Button className="w-full">Acessar Relatórios Avançados</Button>
           </CardContent>
         </Card>
       </FeatureGate>
@@ -220,16 +212,12 @@ export function FeatureFlagExample() {
         <Card>
           <CardHeader>
             <CardTitle>PIX Instantâneo</CardTitle>
-            <CardDescription>
-              Processamento de pagamentos PIX em tempo real
-            </CardDescription>
+            <CardDescription>Processamento de pagamentos PIX em tempo real</CardDescription>
           </CardHeader>
           <CardContent>
             <Alert>
               <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                PIX Instantâneo está disponível para sua conta
-              </AlertDescription>
+              <AlertDescription>PIX Instantâneo está disponível para sua conta</AlertDescription>
             </Alert>
           </CardContent>
         </Card>
@@ -239,9 +227,7 @@ export function FeatureFlagExample() {
       <Card>
         <CardHeader>
           <CardTitle>Uso Programático</CardTitle>
-          <CardDescription>
-            Exemplo de verificação condicional de features
-          </CardDescription>
+          <CardDescription>Exemplo de verificação condicional de features</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -250,19 +236,13 @@ export function FeatureFlagExample() {
                 ✅ Novo dashboard está habilitado - renderizando versão atualizada
               </p>
             ) : (
-              <p className="text-sm">
-                ❌ Novo dashboard desabilitado - usando versão clássica
-              </p>
+              <p className="text-sm">❌ Novo dashboard desabilitado - usando versão clássica</p>
             )}
-            
+
             {checkFlag('ab-test-onboarding') ? (
-              <p className="text-sm">
-                ✅ Teste A/B de onboarding ativo - variante experimental
-              </p>
+              <p className="text-sm">✅ Teste A/B de onboarding ativo - variante experimental</p>
             ) : (
-              <p className="text-sm">
-                ❌ Teste A/B de onboarding inativo - fluxo padrão
-              </p>
+              <p className="text-sm">❌ Teste A/B de onboarding inativo - fluxo padrão</p>
             )}
           </div>
         </CardContent>

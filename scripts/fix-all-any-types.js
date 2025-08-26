@@ -9,7 +9,7 @@ const files = glob.sync('client/src/**/*.{ts,tsx}');
 
 let totalFixed = 0;
 
-files.forEach(filePath => {
+files.forEach((filePath) => {
   let content = fs.readFileSync(filePath, 'utf8');
   const originalContent = content;
 

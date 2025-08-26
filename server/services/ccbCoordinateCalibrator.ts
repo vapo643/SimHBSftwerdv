@@ -6,10 +6,10 @@
  * Data: 2025-08-08
  */
 
-import { PDFDocument, rgb, StandardFonts, PDFFont } from "pdf-lib";
-import fs from "fs/promises";
-import path from "path";
-import { CCB_COMPLETE_MAPPING, FieldPosition, yFromTop } from "./ccbFieldMappingComplete";
+import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
+import fs from 'fs/promises';
+import path from 'path';
+import { CCB_COMPLETE_MAPPING, FieldPosition, yFromTop } from './ccbFieldMappingComplete';
 
 export interface CalibrationResult {
   success: boolean;
@@ -27,8 +27,8 @@ export class CCBCoordinateCalibrator {
   private outputDir: string;
 
   constructor() {
-    this.templatePath = path.join(process.cwd(), "server", "templates", "template_ccb.pdf");
-    this.outputDir = path.join(process.cwd(), "temp", "ccb_calibration");
+    this.templatePath = path.join(process.cwd(), 'server', 'templates', 'template_ccb.pdf');
+    this.outputDir = path.join(process.cwd(), 'temp', 'ccb_calibration');
   }
 
   /**
@@ -42,7 +42,7 @@ export class CCBCoordinateCalibrator {
     recommendations: string[];
   }> {
     try {
-      console.log("🔍 [CALIBRATOR] Iniciando diagnóstico completo do template...");
+      console.log('🔍 [CALIBRATOR] Iniciando diagnóstico completo do template...');
 
       const templateBytes = await fs.readFile(this.templatePath);
       const pdfDoc = await PDFDocument.load(templateBytes);
@@ -53,7 +53,7 @@ export class CCBCoordinateCalibrator {
       const formFields: string[] = [];
 
       if (hasAcroForms) {
-        form.getFields().forEach(field => {
+        form.getFields().forEach((field) => {
           formFields.push(field.getName());
         });
       }
@@ -67,19 +67,19 @@ export class CCBCoordinateCalibrator {
 
       if (hasAcroForms) {
         recommendations.push(
-          "✅ Template possui AcroForms - considere usar preenchimento automático"
+          '✅ Template possui AcroForms - considere usar preenchimento automático'
         );
-        recommendations.push("💡 Use os nomes dos campos para mapeamento direto");
+        recommendations.push('💡 Use os nomes dos campos para mapeamento direto');
       } else {
-        recommendations.push("📍 Template requer mapeamento manual de coordenadas");
-        recommendations.push("🎯 Use ferramentas de calibração visual para posicionamento");
+        recommendations.push('📍 Template requer mapeamento manual de coordenadas');
+        recommendations.push('🎯 Use ferramentas de calibração visual para posicionamento');
       }
 
       recommendations.push(`📏 Dimensões: ${width}x${height} pontos`);
       recommendations.push(`📄 Total de páginas: ${pdfDoc.getPageCount()}`);
 
-      console.log("✅ [CALIBRATOR] Diagnóstico concluído:");
-      console.log(`   - AcroForms: ${hasAcroForms ? "Sim" : "Não"}`);
+      console.log('✅ [CALIBRATOR] Diagnóstico concluído:');
+      console.log(`   - AcroForms: ${hasAcroForms ? 'Sim' : 'Não'}`);
       console.log(`   - Campos detectados: ${formFields.length}`);
       console.log(`   - Dimensões: ${width}x${height}`);
 
@@ -90,7 +90,7 @@ export class CCBCoordinateCalibrator {
         recommendations,
       };
     } catch (error) {
-      console.error("❌ [CALIBRATOR] Erro no diagnóstico:", error);
+      console.error('❌ [CALIBRATOR] Erro no diagnóstico:', error);
       throw error;
     }
   }
@@ -105,7 +105,7 @@ export class CCBCoordinateCalibrator {
     highlightFields: string[] = []
   ): Promise<string> {
     try {
-      console.log("📐 [CALIBRATOR] Gerando grid de calibração visual...");
+      console.log('📐 [CALIBRATOR] Gerando grid de calibração visual...');
 
       // Garantir que diretório existe
       await fs.mkdir(this.outputDir, { recursive: true });
@@ -168,7 +168,7 @@ export class CCBCoordinateCalibrator {
 
       // Destacar campos específicos se solicitado
       if (highlightFields.length > 0) {
-        highlightFields.forEach(fieldName => {
+        highlightFields.forEach((fieldName) => {
           const fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
           if (fieldPos) {
             // Desenhar círculo de destaque
@@ -199,7 +199,7 @@ export class CCBCoordinateCalibrator {
       console.log(`✅ [CALIBRATOR] Grid de calibração salvo: ${outputPath}`);
       return outputPath;
     } catch (error) {
-      console.error("❌ [CALIBRATOR] Erro ao gerar grid:", error);
+      console.error('❌ [CALIBRATOR] Erro ao gerar grid:', error);
       throw error;
     }
   }
@@ -210,7 +210,7 @@ export class CCBCoordinateCalibrator {
    */
   async testFieldPositions(testData: FieldTestData): Promise<string> {
     try {
-      console.log("🧪 [CALIBRATOR] Testando posições dos campos...");
+      console.log('🧪 [CALIBRATOR] Testando posições dos campos...');
 
       await fs.mkdir(this.outputDir, { recursive: true });
 
@@ -230,7 +230,7 @@ export class CCBCoordinateCalibrator {
       Object.entries(testData).forEach(([fieldName, value]) => {
         const fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
         if (fieldPos && value) {
-          const font = (fieldPos as any).fontWeight === "bold" ? helveticaBold : helvetica;
+          const font = (fieldPos as any).fontWeight === 'bold' ? helveticaBold : helvetica;
 
           // Desenhar o texto
           firstPage.drawText(value, {
@@ -259,7 +259,7 @@ export class CCBCoordinateCalibrator {
       console.log(`✅ [CALIBRATOR] Teste de campos salvo: ${outputPath}`);
       return outputPath;
     } catch (error) {
-      console.error("❌ [CALIBRATOR] Erro no teste:", error);
+      console.error('❌ [CALIBRATOR] Erro no teste:', error);
       throw error;
     }
   }
@@ -274,7 +274,7 @@ export class CCBCoordinateCalibrator {
     recommendations: string[];
   }> {
     try {
-      console.log("⚡ [CALIBRATOR] Iniciando calibração inteligente...");
+      console.log('⚡ [CALIBRATOR] Iniciando calibração inteligente...');
 
       // Gerar versão original
       const originalPath = await this.testFieldPositions(sampleData);
@@ -286,14 +286,14 @@ export class CCBCoordinateCalibrator {
       // Gerar recomendações
       const recommendations = this.generateRecommendations(sampleData);
 
-      console.log("✅ [CALIBRATOR] Calibração inteligente concluída");
+      console.log('✅ [CALIBRATOR] Calibração inteligente concluída');
       return {
         originalPath,
         adjustedPath,
         recommendations,
       };
     } catch (error) {
-      console.error("❌ [CALIBRATOR] Erro na calibração inteligente:", error);
+      console.error('❌ [CALIBRATOR] Erro na calibração inteligente:', error);
       throw error;
     }
   }
@@ -313,10 +313,10 @@ export class CCBCoordinateCalibrator {
   private generateRecommendations(data: FieldTestData): string[] {
     const recommendations: string[] = [];
 
-    recommendations.push("📍 Verifique visualmente o posicionamento dos campos");
-    recommendations.push("🎯 Ajuste coordenadas X/Y conforme necessário");
-    recommendations.push("📏 Considere ajustar tamanhos de fonte se texto não couber");
-    recommendations.push("🔄 Teste com diferentes conjuntos de dados");
+    recommendations.push('📍 Verifique visualmente o posicionamento dos campos');
+    recommendations.push('🎯 Ajuste coordenadas X/Y conforme necessário');
+    recommendations.push('📏 Considere ajustar tamanhos de fonte se texto não couber');
+    recommendations.push('🔄 Teste com diferentes conjuntos de dados');
 
     return recommendations;
   }
@@ -330,35 +330,35 @@ export class CCBCoordinateCalibrator {
     recommendations: string[];
   }> {
     try {
-      console.log("📊 [CALIBRATOR] Gerando relatório completo...");
+      console.log('📊 [CALIBRATOR] Gerando relatório completo...');
 
       // Análise do template
       const templateAnalysis = await this.diagnoseTemplate();
 
       // Grid de calibração
       const gridPath = await this.generateCalibrationGrid(50, true, [
-        "devedorNome",
-        "devedorCpf",
-        "valorPrincipal",
+        'devedorNome',
+        'devedorCpf',
+        'valorPrincipal',
       ]);
 
       // Recomendações específicas
       const recommendations = [
-        "🎯 Use o grid de calibração para ajustar posições visualmente",
-        "📱 Teste com dados reais de diferentes comprimentos",
-        "🖨️ Considere diferenças entre visualização e impressão",
-        "📏 Valide com template impresso fisicamente",
-        "🔄 Itere ajustes baseado no feedback visual",
+        '🎯 Use o grid de calibração para ajustar posições visualmente',
+        '📱 Teste com dados reais de diferentes comprimentos',
+        '🖨️ Considere diferenças entre visualização e impressão',
+        '📏 Valide com template impresso fisicamente',
+        '🔄 Itere ajustes baseado no feedback visual',
       ];
 
-      console.log("✅ [CALIBRATOR] Relatório completo gerado");
+      console.log('✅ [CALIBRATOR] Relatório completo gerado');
       return {
         templateAnalysis,
         gridPath,
         recommendations,
       };
     } catch (error) {
-      console.error("❌ [CALIBRATOR] Erro no relatório:", error);
+      console.error('❌ [CALIBRATOR] Erro no relatório:', error);
       throw error;
     }
   }

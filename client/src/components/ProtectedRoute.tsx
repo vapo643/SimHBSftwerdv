@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
-import { User, onAuthStateChange } from "@/lib/auth";
+import { useEffect, useState } from 'react';
+import { useLocation } from 'wouter';
+import { User, onAuthStateChange } from '@/lib/auth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,12 +13,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     // Nossa nova camada de abstração retorna AuthSubscription diretamente
-    const subscription = onAuthStateChange(user => {
+    const subscription = onAuthStateChange((user) => {
       setUser(user);
       setLoading(false);
 
       if (!user) {
-        setLocation("/login");
+        setLocation('/login');
       }
     });
 

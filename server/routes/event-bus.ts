@@ -1,1 +1,12 @@
-import { Router } from "express"; import { integrationTestService } from "../services/genericService"; const router = Router(); router.post("/events", async (req, res) => { try { const result = await integrationTestService.executeOperation("event_bus", req.body); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { integrationTestService } from '../services/genericService';
+const router = Router();
+router.post('/events', async (req, res) => {
+  try {
+    const result = await integrationTestService.executeOperation('event_bus', req.body);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

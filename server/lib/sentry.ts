@@ -4,11 +4,11 @@
 // Critical Priority: P0
 // DSN Configured: 21/08/2025 13:10
 
-import * as Sentry from "@sentry/node";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { Express, Request, Response, NextFunction } from "express";
-import { logInfo, logError } from "./logger";
-import { config } from "./config";
+import * as Sentry from '@sentry/node';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import { Express, Request, Response, NextFunction } from 'express';
+import { logInfo, logError } from './logger';
+import { config } from './config';
 
 // Extend Express Request type
 declare global {
@@ -25,34 +25,32 @@ declare global {
 // Função principal de inicialização do Sentry (conforme PAM V1.0)
 export function initializeSentry() {
   if (!config.observability.sentryDsn) {
-    logInfo("⚠️ Sentry DSN not configured - error tracking disabled");
+    logInfo('⚠️ Sentry DSN not configured - error tracking disabled');
     return;
   }
-  
+
   Sentry.init({
     dsn: config.observability.sentryDsn,
-    integrations: [
-      nodeProfilingIntegration(),
-    ],
+    integrations: [nodeProfilingIntegration()],
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
     profileLifecycle: 'trace',
     enableLogs: true,
     sendDefaultPii: true,
   });
-  console.log("✅ Sentry SDK inicializado com sucesso.");
-  logInfo("✅ Sentry SDK initialized successfully - FASE 0 P0 Complete");
+  console.log('✅ Sentry SDK inicializado com sucesso.');
+  logInfo('✅ Sentry SDK initialized successfully - FASE 0 P0 Complete');
 }
 
 // Configuração do Sentry (função legada, mantida para compatibilidade)
 export function initSentry(app: Express) {
   const sentryDsn = config.observability.sentryDsn;
-  
+
   try {
     Sentry.init({
       dsn: sentryDsn,
-      environment: process.env.NODE_ENV || "development",
-      release: process.env.APP_VERSION || "1.0.0",
+      environment: process.env.NODE_ENV || 'development',
+      release: process.env.APP_VERSION || '1.0.0',
       integrations: [
         // Profiling para performance
         nodeProfilingIntegration(),
@@ -61,7 +59,7 @@ export function initSentry(app: Express) {
       tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
       // Sample rate para profiling
       profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-      
+
       // Filtrar dados sensíveis
       beforeSend(event, hint) {
         // Remover dados sensíveis
@@ -82,21 +80,21 @@ export function initSentry(app: Express) {
             );
           }
         }
-        
+
         // Remover dados pessoais do contexto
         if (event.user) {
           delete event.user.email;
           delete event.user.ip_address;
         }
-        
+
         // Log local do erro para auditoria
         logError('🔴 Error sent to Sentry', hint.originalException || hint.syntheticException, {
-          eventId: event.event_id
+          eventId: event.event_id,
         });
-        
+
         return event;
       },
-      
+
       // Ignorar alguns erros comuns
       ignoreErrors: [
         // Erros de browser extensions
@@ -110,13 +108,13 @@ export function initSentry(app: Express) {
         'Canceled',
       ],
     });
-    
-    logInfo("✅ Sentry initialized successfully", {
+
+    logInfo('✅ Sentry initialized successfully', {
       dsn: sentryDsn ? sentryDsn.substring(0, 20) + '...' : 'not configured',
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
     });
   } catch (error) {
-    logError("❌ Failed to initialize Sentry", error);
+    logError('❌ Failed to initialize Sentry', error);
   }
 }
 
@@ -129,12 +127,12 @@ export function sentryUserContext(req: Request, res: Response, next: NextFunctio
       // Não incluir email ou dados pessoais
     });
   }
-  
+
   // Adicionar correlation ID ao contexto
   if (req.correlationId) {
     Sentry.setTag('correlation_id', req.correlationId);
   }
-  
+
   next();
 }
 
@@ -144,16 +142,16 @@ export function sentryTransactionMiddleware(req: Request, res: Response, next: N
     op: 'http.server',
     name: `${req.method} ${req.route?.path || req.path}`,
   });
-  
+
   if (transaction) {
     Sentry.getCurrentScope().setSpan(transaction);
-    
+
     res.on('finish', () => {
       transaction.setHttpStatus(res.statusCode);
       transaction.end();
     });
   }
-  
+
   next();
 }
 
@@ -162,13 +160,17 @@ export function captureException(error: Error, context?: any) {
   logError('🔴 Capturing exception to Sentry', error, context);
   Sentry.captureException(error, {
     contexts: {
-      custom: context
-    }
+      custom: context,
+    },
   });
 }
 
 // Helper para capturar mensagens
-export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: any) {
+export function captureMessage(
+  message: string,
+  level: Sentry.SeverityLevel = 'info',
+  context?: any
+) {
   logInfo(`📝 Capturing message to Sentry: ${message}`, context);
   Sentry.captureMessage(message, level);
 }
@@ -180,7 +182,7 @@ export function addBreadcrumb(message: string, category: string, data?: any) {
     category,
     level: 'info',
     data,
-    timestamp: Date.now() / 1000
+    timestamp: Date.now() / 1000,
   });
 }
 

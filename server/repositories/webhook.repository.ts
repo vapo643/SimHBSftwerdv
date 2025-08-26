@@ -4,18 +4,18 @@
  * Following architectural boundary rules - controllers must not access DB directly
  */
 
-import { BaseRepository } from "./base.repository";
-import { createServerSupabaseAdminClient } from "../lib/supabase";
-import { db } from "../lib/supabase";
-import { sql } from "drizzle-orm";
+import { BaseRepository } from './base.repository';
+import { createServerSupabaseAdminClient } from '../lib/supabase';
+import { db } from '../lib/supabase';
+import { sql } from 'drizzle-orm';
 
 export interface WebhookLog {
   id?: string;
-  source: "clicksign" | "inter" | "other";
+  source: 'clicksign' | 'inter' | 'other';
   event: string;
   payload: any;
   signature?: string;
-  status: "pending" | "processed" | "failed";
+  status: 'pending' | 'processed' | 'failed';
   propostaId?: string;
   documentKey?: string;
   error?: string;
@@ -46,7 +46,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
   private supabaseAdmin;
 
   constructor() {
-    super("webhook_logs");
+    super('webhook_logs');
     this.supabaseAdmin = createServerSupabaseAdminClient();
   }
 
@@ -141,12 +141,15 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
   /**
    * Update proposal signature status
    */
-  async updateProposalSignatureStatus(propostaId: string, updates: {
-    assinaturaEletronicaConcluida?: boolean;
-    dataAssinatura?: string;
-    clicksignDocumentId?: string;
-    caminhoCcbAssinado?: string;
-  }): Promise<void> {
+  async updateProposalSignatureStatus(
+    propostaId: string,
+    updates: {
+      assinaturaEletronicaConcluida?: boolean;
+      dataAssinatura?: string;
+      clicksignDocumentId?: string;
+      caminhoCcbAssinado?: string;
+    }
+  ): Promise<void> {
     try {
       await db.execute(sql`
         UPDATE propostas 
@@ -166,12 +169,15 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
   /**
    * Update payment status
    */
-  async updatePaymentStatus(paymentId: string, updates: {
-    status?: string;
-    valorPago?: number;
-    dataPagamento?: string;
-    metadata?: any;
-  }): Promise<void> {
+  async updatePaymentStatus(
+    paymentId: string,
+    updates: {
+      status?: string;
+      valorPago?: number;
+      dataPagamento?: string;
+      metadata?: any;
+    }
+  ): Promise<void> {
     try {
       await db.execute(sql`
         UPDATE pagamentos 
@@ -205,27 +211,31 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         error: log.error,
         processed_at: log.processedAt,
         metadata: log.metadata,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       })
-      .select("id")
+      .select('id')
       .single();
 
     if (error) {
-      console.error("Failed to create webhook log:", error);
+      console.error('Failed to create webhook log:', error);
       // Non-critical error, don't throw
-      return "";
+      return '';
     }
 
-    return data?.id || "";
+    return data?.id || '';
   }
 
   /**
    * Update webhook log status
    */
-  async updateWebhookLogStatus(logId: string, status: "processed" | "failed", error?: string): Promise<void> {
+  async updateWebhookLogStatus(
+    logId: string,
+    status: 'processed' | 'failed',
+    error?: string
+  ): Promise<void> {
     const updateData: any = {
       status,
-      processed_at: new Date().toISOString()
+      processed_at: new Date().toISOString(),
     };
 
     if (error) {
@@ -235,10 +245,10 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
     const { error: updateError } = await this.supabaseAdmin
       .from(this.tableName)
       .update(updateData)
-      .eq("id", logId);
+      .eq('id', logId);
 
     if (updateError) {
-      console.error("Failed to update webhook log status:", updateError);
+      console.error('Failed to update webhook log status:', updateError);
       // Non-critical error, don't throw
     }
   }
@@ -249,14 +259,14 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
   async isWebhookProcessed(source: string, eventId: string): Promise<boolean> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("id")
-      .eq("source", source)
-      .eq("metadata->event_id", eventId)
-      .eq("status", "processed")
+      .select('id')
+      .eq('source', source)
+      .eq('metadata->event_id', eventId)
+      .eq('status', 'processed')
       .limit(1);
 
     if (error) {
-      console.error("Failed to check webhook idempotency:", error);
+      console.error('Failed to check webhook idempotency:', error);
       return false;
     }
 
@@ -269,8 +279,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
   async getRecentWebhookLogs(limit: number = 100): Promise<WebhookLog[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .order("created_at", { ascending: false })
+      .select('*')
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) {
@@ -286,9 +296,9 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
   async getWebhookLogsByProposal(propostaId: string): Promise<WebhookLog[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .eq("proposta_id", propostaId)
-      .order("created_at", { ascending: false });
+      .select('*')
+      .eq('proposta_id', propostaId)
+      .order('created_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to fetch webhook logs for proposal: ${error.message}`);

@@ -1,17 +1,17 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
-import { api } from "@/lib/apiClient";
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { AlertCircle } from 'lucide-react';
+import { api } from '@/lib/apiClient';
 
 interface HistoricoCompartilhadoV2Props {
   propostaId: string;
-  context?: "analise" | "edicao";
+  context?: 'analise' | 'edicao';
 }
 
 const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
   propostaId,
-  context = "analise",
+  context = 'analise',
 }) => {
   // Query para buscar dados da proposta - APENAS reativa (sem polling)
   const { data: proposta, isLoading } = useQuery({
@@ -34,7 +34,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
         const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
         return response.data;
       } catch (error) {
-        console.warn("Erro ao buscar logs de auditoria:", error);
+        console.warn('Erro ao buscar logs de auditoria:', error);
         return { logs: [] };
       }
     },
@@ -77,11 +77,11 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
               <p className="text-sm font-medium text-green-400">✅ Proposta Criada</p>
               <p className="text-xs text-gray-400">
                 {proposta?.createdAt
-                  ? new Date(proposta.createdAt).toLocaleString("pt-BR")
-                  : "Data não disponível"}
+                  ? new Date(proposta.createdAt).toLocaleString('pt-BR')
+                  : 'Data não disponível'}
               </p>
               <p className="mt-1 text-sm text-gray-300">
-                Proposta criada pelo atendente da loja {proposta?.loja?.nomeLoja || "N/A"}
+                Proposta criada pelo atendente da loja {proposta?.loja?.nomeLoja || 'N/A'}
               </p>
             </div>
           </div>
@@ -94,11 +94,11 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                 <p className="text-sm font-medium text-yellow-400">⚠️ Proposta Pendenciada</p>
                 <p className="text-xs text-gray-400">
                   {proposta?.dataAnalise
-                    ? new Date(proposta.dataAnalise).toLocaleString("pt-BR")
-                    : "Data não disponível"}
+                    ? new Date(proposta.dataAnalise).toLocaleString('pt-BR')
+                    : 'Data não disponível'}
                 </p>
                 <p className="mt-1 text-sm text-gray-300">
-                  <strong>Analista:</strong> {proposta?.analistaId || "Sistema"}
+                  <strong>Analista:</strong> {proposta?.analistaId || 'Sistema'}
                 </p>
                 <div className="mt-2 rounded border-l-2 border-yellow-500 bg-yellow-900/30 p-2 text-sm text-yellow-200">
                   "{proposta.motivoPendencia}"
@@ -125,56 +125,56 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                 index: number
               ) => {
                 // Determine user type from log data
-                const isAtendente = log.profiles?.role === "ATENDENTE";
+                const isAtendente = log.profiles?.role === 'ATENDENTE';
 
                 // Determine action type from status changes
                 const isResubmit =
-                  log.status_anterior === "pendenciado" && log.status_novo === "aguardando_analise";
-                const isPendency = log.status_novo === "pendenciado";
-                const isApproval = log.status_novo === "aprovado";
-                const isRejection = log.status_novo === "rejeitado";
+                  log.status_anterior === 'pendenciado' && log.status_novo === 'aguardando_analise';
+                const isPendency = log.status_novo === 'pendenciado';
+                const isApproval = log.status_novo === 'aprovado';
+                const isRejection = log.status_novo === 'rejeitado';
 
-                let bgColor = "bg-gray-800";
-                let borderColor = "";
-                let dotColor = "bg-blue-500";
-                let textColor = "text-blue-400";
-                let icon = "📝";
+                let bgColor = 'bg-gray-800';
+                let borderColor = '';
+                let dotColor = 'bg-blue-500';
+                let textColor = 'text-blue-400';
+                let icon = '📝';
 
                 // Special styling for ATENDENTE actions
                 if (isAtendente) {
-                  bgColor = "bg-indigo-900/40";
-                  borderColor = "border border-indigo-500/50";
-                  dotColor = "bg-indigo-400";
-                  textColor = "text-indigo-300";
-                  icon = "👤";
+                  bgColor = 'bg-indigo-900/40';
+                  borderColor = 'border border-indigo-500/50';
+                  dotColor = 'bg-indigo-400';
+                  textColor = 'text-indigo-300';
+                  icon = '👤';
                 }
 
                 if (isPendency) {
-                  bgColor = isAtendente ? "bg-indigo-900/40" : "bg-yellow-900/30";
+                  bgColor = isAtendente ? 'bg-indigo-900/40' : 'bg-yellow-900/30';
                   borderColor = isAtendente
-                    ? "border border-indigo-500/50"
-                    : "border border-yellow-600";
-                  dotColor = "bg-yellow-500";
-                  textColor = "text-yellow-400";
-                  icon = "⚠️";
+                    ? 'border border-indigo-500/50'
+                    : 'border border-yellow-600';
+                  dotColor = 'bg-yellow-500';
+                  textColor = 'text-yellow-400';
+                  icon = '⚠️';
                 } else if (isResubmit) {
-                  bgColor = "bg-blue-900/30";
-                  borderColor = "border border-blue-600";
-                  dotColor = "bg-blue-500";
-                  textColor = "text-blue-400";
-                  icon = "🔄";
+                  bgColor = 'bg-blue-900/30';
+                  borderColor = 'border border-blue-600';
+                  dotColor = 'bg-blue-500';
+                  textColor = 'text-blue-400';
+                  icon = '🔄';
                 } else if (isApproval) {
-                  bgColor = "bg-green-900/30";
-                  borderColor = "border border-green-600";
-                  dotColor = "bg-green-500";
-                  textColor = "text-green-400";
-                  icon = "✅";
+                  bgColor = 'bg-green-900/30';
+                  borderColor = 'border border-green-600';
+                  dotColor = 'bg-green-500';
+                  textColor = 'text-green-400';
+                  icon = '✅';
                 } else if (isRejection) {
-                  bgColor = "bg-red-900/30";
-                  borderColor = "border border-red-600";
-                  dotColor = "bg-red-500";
-                  textColor = "text-red-400";
-                  icon = "❌";
+                  bgColor = 'bg-red-900/30';
+                  borderColor = 'border border-red-600';
+                  dotColor = 'bg-red-500';
+                  textColor = 'text-red-400';
+                  icon = '❌';
                 }
 
                 return (
@@ -185,26 +185,26 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                     <div className={`h-2 w-2 ${dotColor} mt-2 flex-shrink-0 rounded-full`}></div>
                     <div className="flex-1">
                       <p className={`text-sm font-medium ${textColor}`}>
-                        {icon}{" "}
+                        {icon}{' '}
                         {isResubmit
-                          ? "Proposta reenviada para análise"
+                          ? 'Proposta reenviada para análise'
                           : isPendency
-                            ? "Proposta pendenciada"
+                            ? 'Proposta pendenciada'
                             : isApproval
-                              ? "Proposta aprovada"
+                              ? 'Proposta aprovada'
                               : isRejection
-                                ? "Proposta rejeitada"
-                                : "Status alterado"}
+                                ? 'Proposta rejeitada'
+                                : 'Status alterado'}
                       </p>
                       <p className="text-xs text-gray-400">
                         {log.created_at
-                          ? new Date(log.created_at).toLocaleString("pt-BR")
-                          : "Data não disponível"}
+                          ? new Date(log.created_at).toLocaleString('pt-BR')
+                          : 'Data não disponível'}
                       </p>
                       {log.profiles && (log.profiles as any).fullName && (
                         <p className="mt-1 text-sm text-gray-300">
                           <strong>Por:</strong> {(log.profiles as any).fullName} (
-                          {log.profiles.role || "Usuário"})
+                          {log.profiles.role || 'Usuário'})
                         </p>
                       )}
 
@@ -213,8 +213,8 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                         <div
                           className={`mt-2 rounded border-l-2 p-2 text-sm ${
                             isAtendente
-                              ? "border-indigo-400 bg-indigo-900/30 text-indigo-100"
-                              : "border-gray-500 bg-gray-700/50 text-gray-200"
+                              ? 'border-indigo-400 bg-indigo-900/30 text-indigo-100'
+                              : 'border-gray-500 bg-gray-700/50 text-gray-200'
                           }`}
                         >
                           {isAtendente && (
@@ -222,7 +222,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                               💬 Observação do Atendente:
                             </span>
                           )}
-                          <div className={isAtendente ? "mt-1 italic" : "mt-1"}>
+                          <div className={isAtendente ? 'mt-1 italic' : 'mt-1'}>
                             "{(log as any).observacao}"
                           </div>
                         </div>
@@ -238,15 +238,15 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
             <div className="mt-2 h-2 w-2 flex-shrink-0 animate-pulse rounded-full bg-gray-400"></div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-300">
-                {context === "edicao" ? "🔄 Em Correção" : "📋 Status Atual"}
+                {context === 'edicao' ? '🔄 Em Correção' : '📋 Status Atual'}
               </p>
               <p className="text-xs text-gray-400">
-                Atualizado em {new Date().toLocaleString("pt-BR")}
+                Atualizado em {new Date().toLocaleString('pt-BR')}
               </p>
               <p className="mt-1 text-sm text-gray-300">
-                {context === "edicao"
-                  ? "Atendente corrigindo dados conforme solicitação do analista"
-                  : `Status: ${proposta?.status || "Carregando..."}`}
+                {context === 'edicao'
+                  ? 'Atendente corrigindo dados conforme solicitação do analista'
+                  : `Status: ${proposta?.status || 'Carregando...'}`}
               </p>
             </div>
           </div>

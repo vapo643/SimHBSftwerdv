@@ -1,17 +1,17 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useState, useCallback, useEffect } from 'react';
+import { useProposal, useProposalActions } from '@/contexts/ProposalContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   User,
   Phone,
@@ -25,14 +25,14 @@ import {
   XCircle,
   Loader2,
   Save,
-} from "lucide-react";
-import CurrencyInput from "@/components/ui/CurrencyInput";
-import { MaskedInput } from "@/components/ui/MaskedInput";
+} from 'lucide-react';
+import CurrencyInput from '@/components/ui/CurrencyInput';
+import { MaskedInput } from '@/components/ui/MaskedInput';
 // Removido import do cpf-cnpj-validator
-import { commonBanks, brazilianBanks } from "@/utils/brazilianBanks";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Progress } from "@/components/ui/progress";
+import { commonBanks, brazilianBanks } from '@/utils/brazilianBanks';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 // Interfaces para tipagem das respostas da API
 interface CepApiResponse {
@@ -97,35 +97,35 @@ export function ClientDataStep() {
   // Função para buscar CEP usando nosso backend
   const fetchAddressByCep = useCallback(
     async (cep: string) => {
-      const cleanCep = cep.replace(/\D/g, "");
+      const cleanCep = cep.replace(/\D/g, '');
       if (cleanCep.length !== 8) return;
 
       setLoadingCep(true);
       try {
-        const data = await apiRequest(`/api/cep/${cleanCep}`, {
-          method: "GET",
-        }) as CepApiResponse;
+        const data = (await apiRequest(`/api/cep/${cleanCep}`, {
+          method: 'GET',
+        })) as CepApiResponse;
 
         if (data && data.logradouro) {
           // Auto-preencher os campos de endereço
           updateClient({
-            logradouro: data.logradouro || "",
-            bairro: data.bairro || "",
-            cidade: data.cidade || "",
-            estado: data.estado || "",
+            logradouro: data.logradouro || '',
+            bairro: data.bairro || '',
+            cidade: data.cidade || '',
+            estado: data.estado || '',
           });
 
-          clearError("cep");
+          clearError('cep');
           toast({
-            title: "CEP encontrado!",
-            description: "Endereço preenchido automaticamente.",
+            title: 'CEP encontrado!',
+            description: 'Endereço preenchido automaticamente.',
           });
         } else {
-          setError("cep", "CEP não encontrado");
+          setError('cep', 'CEP não encontrado');
         }
       } catch (error) {
-        console.error("Erro ao buscar CEP:", error);
-        setError("cep", "Erro ao buscar CEP");
+        console.error('Erro ao buscar CEP:', error);
+        setError('cep', 'Erro ao buscar CEP');
       } finally {
         setLoadingCep(false);
       }
@@ -136,14 +136,14 @@ export function ClientDataStep() {
   // Função para buscar dados existentes do cliente por CPF
   const fetchClientDataByCpf = useCallback(
     async (cpf: string) => {
-      const cleanCPF = cpf.replace(/\D/g, "");
+      const cleanCPF = cpf.replace(/\D/g, '');
       if (cleanCPF.length !== 11) return;
 
       setLoadingCpfData(true);
       try {
-        const response = await apiRequest(`/api/clientes/cpf/${cleanCPF}`, {
-          method: "GET",
-        }) as ClientDataApiResponse;
+        const response = (await apiRequest(`/api/clientes/cpf/${cleanCPF}`, {
+          method: 'GET',
+        })) as ClientDataApiResponse;
 
         if (response && response.exists && response.data) {
           const data = response.data;
@@ -156,47 +156,48 @@ export function ClientDataStep() {
           if (userConfirmed) {
             // Preencher todos os campos com dados existentes
             updateClient({
-              nome: data.nome || "",
-              email: data.email || "",
-              telefone: data.telefone || "",
-              dataNascimento: data.dataNascimento || "",
-              rg: data.rg || "",
-              orgaoEmissor: data.orgaoEmissor || "",
-              rgUf: data.rgUf || "",
-              rgDataEmissao: data.rgDataEmissao || "",
-              localNascimento: data.localNascimento || "",
-              estadoCivil: data.estadoCivil || "",
-              nacionalidade: data.nacionalidade || "",
-              cep: data.cep || "",
-              logradouro: data.logradouro || "",
-              numero: data.numero || "",
-              complemento: data.complemento || "",
-              bairro: data.bairro || "",
-              cidade: data.cidade || "",
-              estado: data.estado || "",
-              ocupacao: data.ocupacao || "",
-              rendaMensal: data.rendaMensal || "",
-              telefoneEmpresa: data.telefoneEmpresa || "",
-              metodoPagamento: (data.metodoPagamento as "conta_bancaria" | "pix") || "conta_bancaria",
-              dadosPagamentoBanco: data.dadosPagamentoBanco || "",
-              dadosPagamentoAgencia: data.dadosPagamentoAgencia || "",
-              dadosPagamentoConta: data.dadosPagamentoConta || "",
-              dadosPagamentoDigito: data.dadosPagamentoDigito || "",
-              dadosPagamentoPix: data.dadosPagamentoPix || "",
-              dadosPagamentoTipoPix: data.dadosPagamentoTipoPix || "",
-              dadosPagamentoPixBanco: data.dadosPagamentoPixBanco || "",
-              dadosPagamentoPixNomeTitular: data.dadosPagamentoPixNomeTitular || "",
-              dadosPagamentoPixCpfTitular: data.dadosPagamentoPixCpfTitular || "",
+              nome: data.nome || '',
+              email: data.email || '',
+              telefone: data.telefone || '',
+              dataNascimento: data.dataNascimento || '',
+              rg: data.rg || '',
+              orgaoEmissor: data.orgaoEmissor || '',
+              rgUf: data.rgUf || '',
+              rgDataEmissao: data.rgDataEmissao || '',
+              localNascimento: data.localNascimento || '',
+              estadoCivil: data.estadoCivil || '',
+              nacionalidade: data.nacionalidade || '',
+              cep: data.cep || '',
+              logradouro: data.logradouro || '',
+              numero: data.numero || '',
+              complemento: data.complemento || '',
+              bairro: data.bairro || '',
+              cidade: data.cidade || '',
+              estado: data.estado || '',
+              ocupacao: data.ocupacao || '',
+              rendaMensal: data.rendaMensal || '',
+              telefoneEmpresa: data.telefoneEmpresa || '',
+              metodoPagamento:
+                (data.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
+              dadosPagamentoBanco: data.dadosPagamentoBanco || '',
+              dadosPagamentoAgencia: data.dadosPagamentoAgencia || '',
+              dadosPagamentoConta: data.dadosPagamentoConta || '',
+              dadosPagamentoDigito: data.dadosPagamentoDigito || '',
+              dadosPagamentoPix: data.dadosPagamentoPix || '',
+              dadosPagamentoTipoPix: data.dadosPagamentoTipoPix || '',
+              dadosPagamentoPixBanco: data.dadosPagamentoPixBanco || '',
+              dadosPagamentoPixNomeTitular: data.dadosPagamentoPixNomeTitular || '',
+              dadosPagamentoPixCpfTitular: data.dadosPagamentoPixCpfTitular || '',
             });
 
             toast({
-              title: "Dados carregados!",
-              description: "Dados do cliente preenchidos automaticamente.",
+              title: 'Dados carregados!',
+              description: 'Dados do cliente preenchidos automaticamente.',
             });
           }
         }
       } catch (error) {
-        console.error("Erro ao buscar dados do cliente:", error);
+        console.error('Erro ao buscar dados do cliente:', error);
       } finally {
         setLoadingCpfData(false);
       }
@@ -207,18 +208,18 @@ export function ClientDataStep() {
   // Handlers
   const handleTipoPessoaChange = (checked: boolean) => {
     updateClient({
-      tipoPessoa: checked ? "PJ" : "PF",
+      tipoPessoa: checked ? 'PJ' : 'PF',
       // Clear PJ fields if switching to PF
-      ...(!checked && { razaoSocial: "", cnpj: "" }),
+      ...(!checked && { razaoSocial: '', cnpj: '' }),
     });
   };
 
   // Handlers simplificados - SEM VALIDAÇÃO
   const handleCPFChange = (value: string) => {
     updateClient({ cpf: value });
-    clearError("cpf");
+    clearError('cpf');
     // Buscar dados quando tiver 11 dígitos
-    const cleanCPF = value.replace(/\D/g, "");
+    const cleanCPF = value.replace(/\D/g, '');
     if (cleanCPF.length === 11) {
       fetchClientDataByCpf(value);
     }
@@ -226,24 +227,24 @@ export function ClientDataStep() {
 
   const handleCNPJChange = (value: string) => {
     updateClient({ cnpj: value });
-    clearError("cnpj");
+    clearError('cnpj');
   };
 
   const handleEmailChange = (value: string) => {
     updateClient({ email: value });
-    clearError("email");
+    clearError('email');
   };
 
   const handlePhoneChange = (value: string) => {
     updateClient({ telefone: value });
-    clearError("telefone");
+    clearError('telefone');
   };
 
   const handleCEPChange = (value: string) => {
     updateClient({ cep: value });
-    clearError("cep");
+    clearError('cep');
     // Auto-buscar endereço quando CEP tiver 8 dígitos
-    const cleanCep = value.replace(/\D/g, "");
+    const cleanCep = value.replace(/\D/g, '');
     if (cleanCep.length === 8) {
       fetchAddressByCep(value);
     }
@@ -251,7 +252,7 @@ export function ClientDataStep() {
 
   const handleNameChange = (value: string) => {
     updateClient({ nome: value });
-    clearError("nome");
+    clearError('nome');
   };
 
   // Calcular progresso do formulário
@@ -272,7 +273,7 @@ export function ClientDataStep() {
     ];
 
     const filledFields = requiredFields.filter(
-      field => field && field.toString().trim() !== ""
+      (field) => field && field.toString().trim() !== ''
     ).length;
     const totalFields = requiredFields.length;
     const progressValue = Math.round((filledFields / totalFields) * 100);
@@ -318,7 +319,7 @@ export function ClientDataStep() {
             </Label>
             <Switch
               id="tipo-pessoa"
-              checked={clientData.tipoPessoa === "PJ"}
+              checked={clientData.tipoPessoa === 'PJ'}
               onCheckedChange={handleTipoPessoaChange}
               data-testid="switch-tipo-pessoa"
             />
@@ -334,24 +335,24 @@ export function ClientDataStep() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            {clientData.tipoPessoa === "PJ" ? "Dados da Empresa" : "Dados Pessoais"}
+            {clientData.tipoPessoa === 'PJ' ? 'Dados da Empresa' : 'Dados Pessoais'}
           </CardTitle>
           <CardDescription>
-            {clientData.tipoPessoa === "PJ"
-              ? "Informações da empresa"
-              : "Informações básicas do cliente"}
+            {clientData.tipoPessoa === 'PJ'
+              ? 'Informações da empresa'
+              : 'Informações básicas do cliente'}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {clientData.tipoPessoa === "PJ" ? (
+          {clientData.tipoPessoa === 'PJ' ? (
             <>
               <div className="md:col-span-2">
                 <Label htmlFor="razaoSocial">Razão Social *</Label>
                 <Input
                   id="razaoSocial"
                   type="text"
-                  value={clientData.razaoSocial || ""}
-                  onChange={e => updateClient({ razaoSocial: e.target.value })}
+                  value={clientData.razaoSocial || ''}
+                  onChange={(e) => updateClient({ razaoSocial: e.target.value })}
                   placeholder="Nome da empresa"
                   data-testid="input-razao-social"
                 />
@@ -361,11 +362,11 @@ export function ClientDataStep() {
                 <div className="relative">
                   <MaskedInput
                     mask="99.999.999/9999-99"
-                    value={clientData.cnpj || ""}
+                    value={clientData.cnpj || ''}
                     onChange={(value) => handleCNPJChange(value)}
                     id="cnpj"
                     placeholder="00.000.000/0000-00"
-                    className={errors.cnpj ? "border-destructive focus:border-destructive" : ""}
+                    className={errors.cnpj ? 'border-destructive focus:border-destructive' : ''}
                     data-testid="input-cnpj"
                   />
                   {/* Ícone de validação CNPJ removido */}
@@ -379,8 +380,8 @@ export function ClientDataStep() {
                   id="nome"
                   type="text"
                   value={clientData.nome}
-                  onChange={e => handleNameChange(e.target.value)}
-                  className={errors.nome ? "border-destructive focus:border-destructive" : ""}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  className={errors.nome ? 'border-destructive focus:border-destructive' : ''}
                   placeholder="Nome do representante"
                   data-testid="input-nome-representante"
                 />
@@ -398,7 +399,7 @@ export function ClientDataStep() {
                     onChange={(value) => handleCPFChange(value)}
                     id="cpf"
                     placeholder="000.000.000-00"
-                    className={errors.cpf ? "border-destructive focus:border-destructive" : ""}
+                    className={errors.cpf ? 'border-destructive focus:border-destructive' : ''}
                     data-testid="input-cpf"
                   />
                   {/* Ícone de validação removido */}
@@ -413,8 +414,8 @@ export function ClientDataStep() {
                   id="nome"
                   type="text"
                   value={clientData.nome}
-                  onChange={e => handleNameChange(e.target.value)}
-                  className={errors.nome ? "border-destructive focus:border-destructive" : ""}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  className={errors.nome ? 'border-destructive focus:border-destructive' : ''}
                   data-testid="input-nome"
                 />
                 {errors.nome && <p className="mt-1 text-sm text-destructive">{errors.nome}</p>}
@@ -428,8 +429,8 @@ export function ClientDataStep() {
               id="dataNascimento"
               type="date"
               value={clientData.dataNascimento}
-              onChange={e => updateClient({ dataNascimento: e.target.value })}
-              className={errors.dataNascimento ? "border-red-500" : ""}
+              onChange={(e) => updateClient({ dataNascimento: e.target.value })}
+              className={errors.dataNascimento ? 'border-red-500' : ''}
               data-testid="input-data-nascimento"
             />
             {errors.dataNascimento && (
@@ -444,7 +445,7 @@ export function ClientDataStep() {
               type="text"
               placeholder="Cidade - UF"
               value={clientData.localNascimento}
-              onChange={e => updateClient({ localNascimento: e.target.value })}
+              onChange={(e) => updateClient({ localNascimento: e.target.value })}
               data-testid="input-local-nascimento"
             />
           </div>
@@ -453,7 +454,7 @@ export function ClientDataStep() {
             <Label htmlFor="estadoCivil">Estado Civil</Label>
             <Select
               value={clientData.estadoCivil}
-              onValueChange={value => updateClient({ estadoCivil: value })}
+              onValueChange={(value) => updateClient({ estadoCivil: value })}
             >
               <SelectTrigger data-testid="select-estado-civil">
                 <SelectValue placeholder="Selecione..." />
@@ -471,8 +472,8 @@ export function ClientDataStep() {
           <div>
             <Label htmlFor="nacionalidade">Nacionalidade</Label>
             <Select
-              value={clientData.nacionalidade || ""}
-              onValueChange={value => updateClient({ nacionalidade: value })}
+              value={clientData.nacionalidade || ''}
+              onValueChange={(value) => updateClient({ nacionalidade: value })}
             >
               <SelectTrigger data-testid="select-nacionalidade">
                 <SelectValue placeholder="Selecione a nacionalidade" />
@@ -502,7 +503,7 @@ export function ClientDataStep() {
               id="rg"
               type="text"
               value={clientData.rg}
-              onChange={e => updateClient({ rg: e.target.value })}
+              onChange={(e) => updateClient({ rg: e.target.value })}
               data-testid="input-rg"
             />
           </div>
@@ -514,14 +515,17 @@ export function ClientDataStep() {
               type="text"
               placeholder="SSP, Detran, etc."
               value={clientData.orgaoEmissor}
-              onChange={e => updateClient({ orgaoEmissor: e.target.value })}
+              onChange={(e) => updateClient({ orgaoEmissor: e.target.value })}
               data-testid="input-orgao-emissor"
             />
           </div>
 
           <div>
             <Label htmlFor="rgUf">UF de Emissão</Label>
-            <Select value={clientData.rgUf} onValueChange={value => updateClient({ rgUf: value })}>
+            <Select
+              value={clientData.rgUf}
+              onValueChange={(value) => updateClient({ rgUf: value })}
+            >
               <SelectTrigger data-testid="select-rg-uf">
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
@@ -563,7 +567,7 @@ export function ClientDataStep() {
               id="rgDataEmissao"
               type="date"
               value={clientData.rgDataEmissao}
-              onChange={e => updateClient({ rgDataEmissao: e.target.value })}
+              onChange={(e) => updateClient({ rgDataEmissao: e.target.value })}
               data-testid="input-rg-data-emissao"
             />
           </div>
@@ -589,7 +593,7 @@ export function ClientDataStep() {
               id="telefone"
               type="tel"
               placeholder="(11) 98765-4321"
-              className={errors.telefone ? "border-destructive focus:border-destructive" : ""}
+              className={errors.telefone ? 'border-destructive focus:border-destructive' : ''}
               data-testid="input-telefone"
             />
             {errors.telefone && <p className="mt-1 text-sm text-destructive">{errors.telefone}</p>}
@@ -602,8 +606,8 @@ export function ClientDataStep() {
                 id="email"
                 type="email"
                 value={clientData.email}
-                onChange={e => handleEmailChange(e.target.value)}
-                className={errors.email ? "border-destructive focus:border-destructive" : ""}
+                onChange={(e) => handleEmailChange(e.target.value)}
+                className={errors.email ? 'border-destructive focus:border-destructive' : ''}
                 data-testid="input-email"
               />
               {/* Ícone de validação email removido */}
@@ -635,10 +639,10 @@ export function ClientDataStep() {
                 placeholder="00000-000"
                 className={`${
                   errors.cep
-                    ? "border-destructive focus:border-destructive"
+                    ? 'border-destructive focus:border-destructive'
                     : clientData.logradouro && !loadingCep
-                      ? "border-green-500 focus:border-green-500"
-                      : ""
+                      ? 'border-green-500 focus:border-green-500'
+                      : ''
                 } pr-10`}
                 data-testid="input-cep"
               />
@@ -675,8 +679,8 @@ export function ClientDataStep() {
               type="text"
               placeholder="Ex: Rua das Flores, Avenida Brasil"
               value={clientData.logradouro}
-              onChange={e => updateClient({ logradouro: e.target.value })}
-              className={errors.logradouro ? "border-destructive" : ""}
+              onChange={(e) => updateClient({ logradouro: e.target.value })}
+              className={errors.logradouro ? 'border-destructive' : ''}
               data-testid="input-logradouro"
             />
             {errors.logradouro && (
@@ -690,7 +694,7 @@ export function ClientDataStep() {
               id="numero"
               type="text"
               value={clientData.numero}
-              onChange={e => updateClient({ numero: e.target.value })}
+              onChange={(e) => updateClient({ numero: e.target.value })}
               data-testid="input-numero"
             />
           </div>
@@ -702,7 +706,7 @@ export function ClientDataStep() {
               type="text"
               placeholder="Apto, Bloco, Sala, etc."
               value={clientData.complemento}
-              onChange={e => updateClient({ complemento: e.target.value })}
+              onChange={(e) => updateClient({ complemento: e.target.value })}
               data-testid="input-complemento"
             />
           </div>
@@ -713,7 +717,7 @@ export function ClientDataStep() {
               id="bairro"
               type="text"
               value={clientData.bairro}
-              onChange={e => updateClient({ bairro: e.target.value })}
+              onChange={(e) => updateClient({ bairro: e.target.value })}
               data-testid="input-bairro"
             />
           </div>
@@ -724,7 +728,7 @@ export function ClientDataStep() {
               id="cidade"
               type="text"
               value={clientData.cidade}
-              onChange={e => updateClient({ cidade: e.target.value })}
+              onChange={(e) => updateClient({ cidade: e.target.value })}
               data-testid="input-cidade"
             />
           </div>
@@ -733,7 +737,7 @@ export function ClientDataStep() {
             <Label htmlFor="estado">Estado</Label>
             <Select
               value={clientData.estado}
-              onValueChange={value => updateClient({ estado: value })}
+              onValueChange={(value) => updateClient({ estado: value })}
             >
               <SelectTrigger data-testid="select-estado">
                 <SelectValue placeholder="Selecione..." />
@@ -788,8 +792,8 @@ export function ClientDataStep() {
               id="ocupacao"
               type="text"
               value={clientData.ocupacao}
-              onChange={e => updateClient({ ocupacao: e.target.value })}
-              className={errors.ocupacao ? "border-destructive" : ""}
+              onChange={(e) => updateClient({ ocupacao: e.target.value })}
+              className={errors.ocupacao ? 'border-destructive' : ''}
               data-testid="input-ocupacao"
             />
             {errors.ocupacao && <p className="mt-1 text-sm text-destructive">{errors.ocupacao}</p>}
@@ -800,8 +804,8 @@ export function ClientDataStep() {
             <CurrencyInput
               id="rendaMensal"
               value={clientData.rendaMensal}
-              onChange={e => updateClient({ rendaMensal: e.target.value })}
-              className={errors.rendaMensal ? "border-destructive" : ""}
+              onChange={(e) => updateClient({ rendaMensal: e.target.value })}
+              className={errors.rendaMensal ? 'border-destructive' : ''}
               data-testid="input-renda-mensal"
             />
             {errors.rendaMensal && (
@@ -819,7 +823,7 @@ export function ClientDataStep() {
               type="tel"
               placeholder="(11) 3456-7890"
               className={
-                errors.telefoneEmpresa ? "border-destructive focus:border-destructive" : ""
+                errors.telefoneEmpresa ? 'border-destructive focus:border-destructive' : ''
               }
               data-testid="input-telefone-empresa"
             />
@@ -834,8 +838,8 @@ export function ClientDataStep() {
             <Input
               id="clienteEmpresaNome"
               type="text"
-              value={clientData.clienteEmpresaNome || ""}
-              onChange={e => updateClient({ clienteEmpresaNome: e.target.value })}
+              value={clientData.clienteEmpresaNome || ''}
+              onChange={(e) => updateClient({ clienteEmpresaNome: e.target.value })}
               placeholder="Ex: Empresa LTDA"
               data-testid="input-empresa-nome"
             />
@@ -846,8 +850,8 @@ export function ClientDataStep() {
             <Input
               id="clienteDataAdmissao"
               type="date"
-              value={clientData.clienteDataAdmissao || ""}
-              onChange={e => updateClient({ clienteDataAdmissao: e.target.value })}
+              value={clientData.clienteDataAdmissao || ''}
+              onChange={(e) => updateClient({ clienteDataAdmissao: e.target.value })}
               data-testid="input-data-admissao"
             />
           </div>
@@ -856,8 +860,8 @@ export function ClientDataStep() {
             <Label htmlFor="clienteDividasExistentes">Valor de Dívidas Existentes</Label>
             <CurrencyInput
               id="clienteDividasExistentes"
-              value={clientData.clienteDividasExistentes?.toString() || ""}
-              onChange={e => {
+              value={clientData.clienteDividasExistentes?.toString() || ''}
+              onChange={(e) => {
                 const value = parseFloat(e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.'));
                 updateClient({ clienteDividasExistentes: isNaN(value) ? undefined : value });
               }}
@@ -901,8 +905,8 @@ export function ClientDataStep() {
                 <div>
                   <Label htmlFor="banco">Banco</Label>
                   <Select
-                    value={clientData.dadosPagamentoBanco || ""}
-                    onValueChange={value => updateClient({ dadosPagamentoBanco: value })}
+                    value={clientData.dadosPagamentoBanco || ''}
+                    onValueChange={(value) => updateClient({ dadosPagamentoBanco: value })}
                   >
                     <SelectTrigger data-testid="select-banco">
                       <SelectValue placeholder="Selecione o banco..." />
@@ -911,7 +915,7 @@ export function ClientDataStep() {
                       <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
                         Bancos Populares
                       </div>
-                      {commonBanks.map(bank => (
+                      {commonBanks.map((bank) => (
                         <SelectItem key={bank.code} value={bank.code}>
                           {bank.code} - {bank.name}
                         </SelectItem>
@@ -920,8 +924,8 @@ export function ClientDataStep() {
                         Todos os Bancos
                       </div>
                       {brazilianBanks
-                        .filter(b => !commonBanks.find(c => c.code === b.code))
-                        .map(bank => (
+                        .filter((b) => !commonBanks.find((c) => c.code === b.code))
+                        .map((bank) => (
                           <SelectItem key={bank.code} value={bank.code}>
                             {bank.code} - {bank.name}
                           </SelectItem>
@@ -936,8 +940,8 @@ export function ClientDataStep() {
                     id="agencia"
                     type="text"
                     placeholder="0000"
-                    value={clientData.dadosPagamentoAgencia || ""}
-                    onChange={e => updateClient({ dadosPagamentoAgencia: e.target.value })}
+                    value={clientData.dadosPagamentoAgencia || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoAgencia: e.target.value })}
                     data-testid="input-agencia"
                   />
                 </div>
@@ -948,8 +952,8 @@ export function ClientDataStep() {
                     id="conta"
                     type="text"
                     placeholder="00000-0"
-                    value={clientData.dadosPagamentoConta || ""}
-                    onChange={e => updateClient({ dadosPagamentoConta: e.target.value })}
+                    value={clientData.dadosPagamentoConta || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoConta: e.target.value })}
                     data-testid="input-conta"
                   />
                 </div>
@@ -961,17 +965,17 @@ export function ClientDataStep() {
                     type="text"
                     placeholder="0"
                     maxLength={2}
-                    value={clientData.dadosPagamentoDigito || ""}
-                    onChange={e => updateClient({ dadosPagamentoDigito: e.target.value })}
+                    value={clientData.dadosPagamentoDigito || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoDigito: e.target.value })}
                     data-testid="input-digito"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="tipoConta">Tipo de Conta *</Label>
                   <Select
-                    value={clientData.dadosPagamentoTipo || ""}
-                    onValueChange={value => updateClient({ dadosPagamentoTipo: value })}
+                    value={clientData.dadosPagamentoTipo || ''}
+                    onValueChange={(value) => updateClient({ dadosPagamentoTipo: value })}
                   >
                     <SelectTrigger data-testid="select-tipo-conta">
                       <SelectValue placeholder="Selecione o tipo..." />
@@ -990,8 +994,8 @@ export function ClientDataStep() {
                 <div>
                   <Label htmlFor="tipoPix">Tipo de Chave PIX</Label>
                   <Select
-                    value={clientData.dadosPagamentoTipoPix || ""}
-                    onValueChange={value => updateClient({ dadosPagamentoTipoPix: value })}
+                    value={clientData.dadosPagamentoTipoPix || ''}
+                    onValueChange={(value) => updateClient({ dadosPagamentoTipoPix: value })}
                   >
                     <SelectTrigger data-testid="select-tipo-pix">
                       <SelectValue placeholder="Selecione o tipo..." />
@@ -1012,8 +1016,8 @@ export function ClientDataStep() {
                     id="chavePix"
                     type="text"
                     placeholder="Digite a chave PIX"
-                    value={clientData.dadosPagamentoPix || ""}
-                    onChange={e => updateClient({ dadosPagamentoPix: e.target.value })}
+                    value={clientData.dadosPagamentoPix || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoPix: e.target.value })}
                     data-testid="input-chave-pix"
                   />
                 </div>
@@ -1021,8 +1025,8 @@ export function ClientDataStep() {
                 <div>
                   <Label htmlFor="pixBanco">Banco do PIX</Label>
                   <Select
-                    value={clientData.dadosPagamentoPixBanco || ""}
-                    onValueChange={value => updateClient({ dadosPagamentoPixBanco: value })}
+                    value={clientData.dadosPagamentoPixBanco || ''}
+                    onValueChange={(value) => updateClient({ dadosPagamentoPixBanco: value })}
                   >
                     <SelectTrigger data-testid="select-pix-banco">
                       <SelectValue placeholder="Selecione o banco..." />
@@ -1031,7 +1035,7 @@ export function ClientDataStep() {
                       <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
                         Bancos Populares
                       </div>
-                      {commonBanks.map(bank => (
+                      {commonBanks.map((bank) => (
                         <SelectItem key={bank.code} value={bank.code}>
                           {bank.code} - {bank.name}
                         </SelectItem>
@@ -1040,8 +1044,8 @@ export function ClientDataStep() {
                         Todos os Bancos
                       </div>
                       {brazilianBanks
-                        .filter(b => !commonBanks.find(c => c.code === b.code))
-                        .map(bank => (
+                        .filter((b) => !commonBanks.find((c) => c.code === b.code))
+                        .map((bank) => (
                           <SelectItem key={bank.code} value={bank.code}>
                             {bank.code} - {bank.name}
                           </SelectItem>
@@ -1056,8 +1060,8 @@ export function ClientDataStep() {
                     id="pixNomeTitular"
                     type="text"
                     placeholder="Nome completo"
-                    value={clientData.dadosPagamentoPixNomeTitular || ""}
-                    onChange={e => updateClient({ dadosPagamentoPixNomeTitular: e.target.value })}
+                    value={clientData.dadosPagamentoPixNomeTitular || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoPixNomeTitular: e.target.value })}
                     data-testid="input-pix-nome-titular"
                   />
                 </div>
@@ -1068,13 +1072,11 @@ export function ClientDataStep() {
                     mask={
                       clientData.dadosPagamentoPixCpfTitular &&
                       clientData.dadosPagamentoPixCpfTitular.length > 14
-                        ? "99.999.999/9999-99"
-                        : "999.999.999-99"
+                        ? '99.999.999/9999-99'
+                        : '999.999.999-99'
                     }
-                    value={clientData.dadosPagamentoPixCpfTitular || ""}
-                    onChange={(value) =>
-                      updateClient({ dadosPagamentoPixCpfTitular: value })
-                    }
+                    value={clientData.dadosPagamentoPixCpfTitular || ''}
+                    onChange={(value) => updateClient({ dadosPagamentoPixCpfTitular: value })}
                     id="pixCpfTitular"
                     placeholder="CPF ou CNPJ do titular"
                     data-testid="input-pix-cpf-titular"

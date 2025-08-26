@@ -1,6 +1,6 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Log {
   id: number;
@@ -14,7 +14,7 @@ const fetchLogs = async (propostaId: string | undefined) => {
   if (!propostaId) return [];
   const response = await fetch(`/api/propostas/${propostaId}/logs`);
   if (!response.ok) {
-    throw new Error("Erro ao carregar histórico");
+    throw new Error('Erro ao carregar histórico');
   }
   return response.json();
 };
@@ -25,7 +25,7 @@ const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ prop
     isLoading,
     isError,
   } = useQuery<Log[]>({
-    queryKey: ["proposta_logs", propostaId],
+    queryKey: ['proposta_logs', propostaId],
     queryFn: () => fetchLogs(propostaId),
     enabled: !!propostaId,
   });
@@ -41,18 +41,18 @@ const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ prop
         {!isLoading && !isError && (
           <ul className="space-y-4">
             {logs && logs.length > 0 ? (
-              logs.map(log => (
+              logs.map((log) => (
                 <li key={log.id} className="border-b pb-2 text-sm">
                   <p>
-                    <strong>Status:</strong>{" "}
+                    <strong>Status:</strong>{' '}
                     <span className="font-semibold">{log.status_novo}</span>
                   </p>
                   <p>
-                    <strong>Observação:</strong> {log.observacao || "Nenhuma observação."}
+                    <strong>Observação:</strong> {log.observacao || 'Nenhuma observação.'}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    por: {log.user_id.substring(0, 8)}... em{" "}
-                    {new Date(log.created_at).toLocaleString("pt-BR")}
+                    por: {log.user_id.substring(0, 8)}... em{' '}
+                    {new Date(log.created_at).toLocaleString('pt-BR')}
                   </p>
                 </li>
               ))

@@ -4,8 +4,8 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { db } from "../lib/supabase.js";
-import { sql } from "drizzle-orm";
+import { db } from '../lib/supabase.js';
+import { sql } from 'drizzle-orm';
 
 export class MonitoringRepository {
   /**
@@ -22,7 +22,7 @@ export class MonitoringRepository {
       `);
       return result.rows[0];
     } catch (error) {
-      console.error("[MONITORING_REPO] Error fetching database stats:", error);
+      console.error('[MONITORING_REPO] Error fetching database stats:', error);
       throw error;
     }
   }
@@ -46,7 +46,7 @@ export class MonitoringRepository {
       `);
       return result.rows;
     } catch (error) {
-      console.error("[MONITORING_REPO] Error fetching table stats:", error);
+      console.error('[MONITORING_REPO] Error fetching table stats:', error);
       throw error;
     }
   }
@@ -70,7 +70,7 @@ export class MonitoringRepository {
       `);
       return result.rows;
     } catch (error) {
-      console.error("[MONITORING_REPO] Error fetching index usage:", error);
+      console.error('[MONITORING_REPO] Error fetching index usage:', error);
       throw error;
     }
   }
@@ -96,7 +96,7 @@ export class MonitoringRepository {
       `);
       return result.rows;
     } catch (error) {
-      console.error("[MONITORING_REPO] Error fetching connections:", error);
+      console.error('[MONITORING_REPO] Error fetching connections:', error);
       throw error;
     }
   }
@@ -132,11 +132,11 @@ export class MonitoringRepository {
       `);
       checks.writePermission = true;
 
-      const isHealthy = Object.values(checks).every(check => check === true);
+      const isHealthy = Object.values(checks).every((check) => check === true);
 
       return { isHealthy, checks };
     } catch (error) {
-      console.error("[MONITORING_REPO] Database health check failed:", error);
+      console.error('[MONITORING_REPO] Database health check failed:', error);
       return {
         isHealthy: false,
         checks: { error: error.message },
@@ -166,7 +166,7 @@ export class MonitoringRepository {
         health,
       };
     } catch (error) {
-      console.error("[MONITORING_REPO] Error generating report:", error);
+      console.error('[MONITORING_REPO] Error generating report:', error);
       throw error;
     }
   }

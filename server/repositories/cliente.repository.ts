@@ -4,10 +4,10 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { BaseRepository } from "./base.repository.js";
-import { db } from "../lib/supabase.js";
-import { propostas } from "@shared/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { BaseRepository } from './base.repository.js';
+import { db } from '../lib/supabase.js';
+import { propostas } from '@shared/schema';
+import { eq, desc, sql } from 'drizzle-orm';
 
 export class ClienteRepository extends BaseRepository<typeof propostas> {
   constructor() {
@@ -28,7 +28,7 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
 
       return proposta || null;
     } catch (error) {
-      console.error("[CLIENTE_REPO] Error finding client by CPF:", error);
+      console.error('[CLIENTE_REPO] Error finding client by CPF:', error);
       return null;
     }
   }
@@ -44,7 +44,7 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
         .where(eq(propostas.cpf, cpf))
         .orderBy(desc(propostas.created_at));
     } catch (error) {
-      console.error("[CLIENTE_REPO] Error getting proposals by CPF:", error);
+      console.error('[CLIENTE_REPO] Error getting proposals by CPF:', error);
       return [];
     }
   }
@@ -61,7 +61,7 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
 
       return (result[0]?.count || 0) > 0;
     } catch (error) {
-      console.error("[CLIENTE_REPO] Error checking client existence:", error);
+      console.error('[CLIENTE_REPO] Error checking client existence:', error);
       return false;
     }
   }

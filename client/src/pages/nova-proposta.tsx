@@ -1,80 +1,90 @@
-import { useState, useEffect, useCallback } from "react";
-import { useLocation } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { api } from "@/lib/apiClient";
-import { useToast } from "@/hooks/use-toast";
-import DashboardLayout from "@/components/DashboardLayout";
-import OfflineIndicator from "@/components/OfflineIndicator";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'wouter';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { api } from '@/lib/apiClient';
+import { useToast } from '@/hooks/use-toast';
+import DashboardLayout from '@/components/DashboardLayout';
+import OfflineIndicator from '@/components/OfflineIndicator';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ArrowLeft, ArrowRight, Upload, Search } from "lucide-react";
-import { MaskedInput } from "@/components/ui/MaskedInput";
+} from '@/components/ui/select';
+import { ArrowLeft, ArrowRight, Upload, Search } from 'lucide-react';
+import { MaskedInput } from '@/components/ui/MaskedInput';
 
 const clienteSchema = z.object({
-  clienteNome: z.string().min(1, "Nome é obrigatório").max(200, "Nome não pode exceder 200 caracteres"),
-  clienteCpf: z.string()
-    .min(11, "CPF deve ter pelo menos 11 dígitos")
-    .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "CPF deve estar em formato válido (000.000.000-00)"),
-  clienteEmail: z.string()
-    .min(1, "Email é obrigatório")
-    .email("Email deve ter formato válido")
-    .max(255, "Email não pode exceder 255 caracteres"),
-  clienteTelefone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos").max(20, "Telefone não pode exceder 20 caracteres"),
-  clienteDataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
-  clienteRenda: z.string().min(1, "Renda é obrigatória"),
+  clienteNome: z
+    .string()
+    .min(1, 'Nome é obrigatório')
+    .max(200, 'Nome não pode exceder 200 caracteres'),
+  clienteCpf: z
+    .string()
+    .min(11, 'CPF deve ter pelo menos 11 dígitos')
+    .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, 'CPF deve estar em formato válido (000.000.000-00)'),
+  clienteEmail: z
+    .string()
+    .min(1, 'Email é obrigatório')
+    .email('Email deve ter formato válido')
+    .max(255, 'Email não pode exceder 255 caracteres'),
+  clienteTelefone: z
+    .string()
+    .min(10, 'Telefone deve ter pelo menos 10 dígitos')
+    .max(20, 'Telefone não pode exceder 20 caracteres'),
+  clienteDataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
+  clienteRenda: z.string().min(1, 'Renda é obrigatória'),
   // Campos de documentação - ADICIONADOS PARA CORREÇÃO CCB
-  clienteRg: z.string().min(5, "RG é obrigatório"),
-  clienteOrgaoEmissor: z.string().min(2, "Órgão emissor é obrigatório"),
-  clienteRgDataEmissao: z.string().min(1, "Data de emissão do RG é obrigatória"),
-  clienteRgUf: z.string().length(2, "UF do RG deve ter 2 caracteres"),
-  clienteLocalNascimento: z.string().min(2, "Local de nascimento é obrigatório"),
-  clienteEstadoCivil: z.string().min(1, "Estado civil é obrigatório"),
-  clienteNacionalidade: z.string().min(1, "Nacionalidade é obrigatória"),
+  clienteRg: z.string().min(5, 'RG é obrigatório'),
+  clienteOrgaoEmissor: z.string().min(2, 'Órgão emissor é obrigatório'),
+  clienteRgDataEmissao: z.string().min(1, 'Data de emissão do RG é obrigatória'),
+  clienteRgUf: z.string().length(2, 'UF do RG deve ter 2 caracteres'),
+  clienteLocalNascimento: z.string().min(2, 'Local de nascimento é obrigatório'),
+  clienteEstadoCivil: z.string().min(1, 'Estado civil é obrigatório'),
+  clienteNacionalidade: z.string().min(1, 'Nacionalidade é obrigatória'),
   // Campos de endereço separados
-  clienteCep: z.string().min(8, "CEP inválido").optional(),
-  clienteLogradouro: z.string().min(1, "Logradouro é obrigatório").optional(),
-  clienteNumero: z.string().min(1, "Número é obrigatório").optional(),
+  clienteCep: z.string().min(8, 'CEP inválido').optional(),
+  clienteLogradouro: z.string().min(1, 'Logradouro é obrigatório').optional(),
+  clienteNumero: z.string().min(1, 'Número é obrigatório').optional(),
   clienteComplemento: z.string().optional(),
-  clienteBairro: z.string().min(1, "Bairro é obrigatório").optional(),
-  clienteCidade: z.string().min(1, "Cidade é obrigatória").optional(),
-  clienteUf: z.string().length(2, "UF deve ter 2 caracteres").optional(),
+  clienteBairro: z.string().min(1, 'Bairro é obrigatório').optional(),
+  clienteCidade: z.string().min(1, 'Cidade é obrigatória').optional(),
+  clienteUf: z.string().length(2, 'UF deve ter 2 caracteres').optional(),
 });
 
 const emprestimoSchema = z.object({
-  valor: z.string()
-    .min(1, "Valor é obrigatório")
-    .transform(val => {
+  valor: z
+    .string()
+    .min(1, 'Valor é obrigatório')
+    .transform((val) => {
       const num = parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'));
-      if (isNaN(num) || num < 100) throw new Error("Valor mínimo é R$ 100,00");
-      if (num > 1000000) throw new Error("Valor máximo é R$ 1.000.000,00");
+      if (isNaN(num) || num < 100) throw new Error('Valor mínimo é R$ 100,00');
+      if (num > 1000000) throw new Error('Valor máximo é R$ 1.000.000,00');
       return num;
     }),
-  prazo: z.string()
-    .min(1, "Prazo é obrigatório")
-    .transform(val => {
+  prazo: z
+    .string()
+    .min(1, 'Prazo é obrigatório')
+    .transform((val) => {
       const num = parseInt(val);
-      if (isNaN(num) || num < 1) throw new Error("Prazo mínimo é 1 mês");
-      if (num > 120) throw new Error("Prazo máximo é 120 meses");
+      if (isNaN(num) || num < 1) throw new Error('Prazo mínimo é 1 mês');
+      if (num > 120) throw new Error('Prazo máximo é 120 meses');
       return num;
     }),
-  finalidade: z.string().min(1, "Finalidade é obrigatória"),
-  garantia: z.string().min(1, "Garantia é obrigatória"),
+  finalidade: z.string().min(1, 'Finalidade é obrigatória'),
+  garantia: z.string().min(1, 'Garantia é obrigatória'),
   // Dados bancários para pagamento
-  dadosPagamentoTipo: z.enum(["pix", "conta_bancaria"]).optional(),
+  dadosPagamentoTipo: z.enum(['pix', 'conta_bancaria']).optional(),
   dadosPagamentoPix: z.string().optional(),
   dadosPagamentoBanco: z.string().optional(),
   dadosPagamentoAgencia: z.string().optional(),
@@ -111,7 +121,7 @@ export default function NovaProposta() {
     resolver: zodResolver(fullSchema),
     defaultValues: {
       documentos: [],
-      clienteNacionalidade: "Brasileira",
+      clienteNacionalidade: 'Brasileira',
     },
   });
 
@@ -128,13 +138,13 @@ export default function NovaProposta() {
           // NÃO restaura dados se já foi enviada
           return;
         }
-        
+
         // Só restaura se não foi enviada
         if (!parsed.enviada && parsed.data) {
           reset(parsed.data);
           toast({
-            title: "Dados recuperados",
-            description: "Seus dados anteriores foram restaurados.",
+            title: 'Dados recuperados',
+            description: 'Seus dados anteriores foram restaurados.',
           });
         }
       } catch (error) {
@@ -160,18 +170,18 @@ export default function NovaProposta() {
       }
       return false;
     };
-    
+
     const subscription = watch((data) => {
       // NÃO salva se já foi enviada
       if (checkIfSent()) {
         return;
       }
-      
+
       // Salva os dados temporariamente
       const tempData = {
         data: data,
         timestamp: new Date().toISOString(),
-        enviada: false
+        enviada: false,
       };
       localStorage.setItem('proposta_temp', JSON.stringify(tempData));
     });
@@ -179,77 +189,80 @@ export default function NovaProposta() {
   }, [watch]);
 
   // BUSCA POR CPF: Buscar dados de propostas anteriores do mesmo CPF
-  const buscarDadosPorCpf = useCallback(async (cpf: string) => {
-    // Remove formatação do CPF
-    const cpfLimpo = cpf.replace(/\D/g, '');
-    
-    if (cpfLimpo.length !== 11) return;
-    
-    setIsSearchingCpf(true);
-    try {
-      const response: any = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
-        method: "GET",
-      });
-      
-      if (response && response.data) {
-        // Preenche os campos com os dados encontrados
-        const dadosCliente = response.data.cliente_data || {};
-        
-        // Preenche todos os campos do cliente
-        setValue("clienteNome", dadosCliente.nome || "");
-        setValue("clienteEmail", dadosCliente.email || "");
-        setValue("clienteTelefone", dadosCliente.telefone || "");
-        setValue("clienteDataNascimento", dadosCliente.dataNascimento || "");
-        setValue("clienteRenda", dadosCliente.renda || "");
-        
-        // Campos de documentação
-        setValue("clienteRg", dadosCliente.rg || "");
-        setValue("clienteOrgaoEmissor", dadosCliente.orgaoEmissor || "");
-        setValue("clienteRgDataEmissao", dadosCliente.rgDataEmissao || "");
-        setValue("clienteRgUf", dadosCliente.rgUf || "");
-        setValue("clienteLocalNascimento", dadosCliente.localNascimento || "");
-        setValue("clienteEstadoCivil", dadosCliente.estadoCivil || "");
-        setValue("clienteNacionalidade", dadosCliente.nacionalidade || "");
-        
-        // Campos de endereço
-        setValue("clienteCep", dadosCliente.cep || "");
-        setValue("clienteLogradouro", dadosCliente.logradouro || "");
-        setValue("clienteNumero", dadosCliente.numero || "");
-        setValue("clienteComplemento", dadosCliente.complemento || "");
-        setValue("clienteBairro", dadosCliente.bairro || "");
-        setValue("clienteCidade", dadosCliente.cidade || "");
-        setValue("clienteUf", dadosCliente.uf || dadosCliente.estado || "");
-        
-        toast({
-          title: "Dados recuperados",
-          description: "Os dados do cliente foram preenchidos com base em propostas anteriores.",
+  const buscarDadosPorCpf = useCallback(
+    async (cpf: string) => {
+      // Remove formatação do CPF
+      const cpfLimpo = cpf.replace(/\D/g, '');
+
+      if (cpfLimpo.length !== 11) return;
+
+      setIsSearchingCpf(true);
+      try {
+        const response: any = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
+          method: 'GET',
         });
+
+        if (response && response.data) {
+          // Preenche os campos com os dados encontrados
+          const dadosCliente = response.data.cliente_data || {};
+
+          // Preenche todos os campos do cliente
+          setValue('clienteNome', dadosCliente.nome || '');
+          setValue('clienteEmail', dadosCliente.email || '');
+          setValue('clienteTelefone', dadosCliente.telefone || '');
+          setValue('clienteDataNascimento', dadosCliente.dataNascimento || '');
+          setValue('clienteRenda', dadosCliente.renda || '');
+
+          // Campos de documentação
+          setValue('clienteRg', dadosCliente.rg || '');
+          setValue('clienteOrgaoEmissor', dadosCliente.orgaoEmissor || '');
+          setValue('clienteRgDataEmissao', dadosCliente.rgDataEmissao || '');
+          setValue('clienteRgUf', dadosCliente.rgUf || '');
+          setValue('clienteLocalNascimento', dadosCliente.localNascimento || '');
+          setValue('clienteEstadoCivil', dadosCliente.estadoCivil || '');
+          setValue('clienteNacionalidade', dadosCliente.nacionalidade || '');
+
+          // Campos de endereço
+          setValue('clienteCep', dadosCliente.cep || '');
+          setValue('clienteLogradouro', dadosCliente.logradouro || '');
+          setValue('clienteNumero', dadosCliente.numero || '');
+          setValue('clienteComplemento', dadosCliente.complemento || '');
+          setValue('clienteBairro', dadosCliente.bairro || '');
+          setValue('clienteCidade', dadosCliente.cidade || '');
+          setValue('clienteUf', dadosCliente.uf || dadosCliente.estado || '');
+
+          toast({
+            title: 'Dados recuperados',
+            description: 'Os dados do cliente foram preenchidos com base em propostas anteriores.',
+          });
+        }
+      } catch (error) {
+        console.log('Nenhuma proposta anterior encontrada para este CPF');
+      } finally {
+        setIsSearchingCpf(false);
       }
-    } catch (error) {
-      console.log("Nenhuma proposta anterior encontrada para este CPF");
-    } finally {
-      setIsSearchingCpf(false);
-    }
-  }, [setValue, toast]);
+    },
+    [setValue, toast]
+  );
 
   const createProposta = useMutation({
     mutationFn: async (data: PropostaForm) => {
       // Clear previous errors
       clearErrors();
-      
+
       // Map frontend data to backend schema format - STRICT MAPPING
       const backendData = {
         // Required fields from createPropostaValidationSchema
         lojaId: Number(JSON.parse(localStorage.getItem('user_context') || '{}').lojaId) || 1,
-        clienteNome: data.clienteNome?.trim() || "",
-        clienteCpf: data.clienteCpf?.replace(/\D/g, '') || "", // Clean CPF
-        clienteEmail: data.clienteEmail?.trim() || "",
-        clienteTelefone: data.clienteTelefone?.replace(/\D/g, '') || "", // Clean phone
+        clienteNome: data.clienteNome?.trim() || '',
+        clienteCpf: data.clienteCpf?.replace(/\D/g, '') || '', // Clean CPF
+        clienteEmail: data.clienteEmail?.trim() || '',
+        clienteTelefone: data.clienteTelefone?.replace(/\D/g, '') || '', // Clean phone
         valor: Number(data.valor) || 0,
         prazo: Number(data.prazo) || 0,
-        finalidade: data.finalidade || "",
-        garantia: data.garantia || "",
-        
+        finalidade: data.finalidade || '',
+        garantia: data.garantia || '',
+
         // Optional fields - only include if not empty
         ...(data.clienteDataNascimento && { clienteDataNascimento: data.clienteDataNascimento }),
         ...(data.clienteRenda && { clienteRenda: data.clienteRenda }),
@@ -266,7 +279,7 @@ export default function NovaProposta() {
         ...(data.clienteBairro && { clienteBairro: data.clienteBairro }),
         ...(data.clienteCidade && { clienteCidade: data.clienteCidade }),
         ...(data.clienteUf && { clienteUf: data.clienteUf }),
-        
+
         // Payment data - only if provided
         ...(data.dadosPagamentoTipo && { metodoPagamento: data.dadosPagamentoTipo }),
         ...(data.dadosPagamentoPix && { dadosPagamentoPix: data.dadosPagamentoPix }),
@@ -274,16 +287,16 @@ export default function NovaProposta() {
         ...(data.dadosPagamentoAgencia && { dadosPagamentoAgencia: data.dadosPagamentoAgencia }),
         ...(data.dadosPagamentoConta && { dadosPagamentoConta: data.dadosPagamentoConta }),
         ...(data.dadosPagamentoDigito && { dadosPagamentoDigito: data.dadosPagamentoDigito }),
-        
+
         // Default values
-        clienteNacionalidade: "Brasileira",
-        status: "aguardando_analise",
+        clienteNacionalidade: 'Brasileira',
+        status: 'aguardando_analise',
       };
-      
-      console.log("[DEBUG] Enviando dados mapeados:", backendData);
-      
-      return apiRequest("/api/propostas", {
-        method: "POST",
+
+      console.log('[DEBUG] Enviando dados mapeados:', backendData);
+
+      return apiRequest('/api/propostas', {
+        method: 'POST',
         body: JSON.stringify(backendData),
       });
     },
@@ -292,98 +305,98 @@ export default function NovaProposta() {
       const tempData = {
         data: {},
         timestamp: new Date().toISOString(),
-        enviada: true // Marca que foi enviada com sucesso
+        enviada: true, // Marca que foi enviada com sucesso
       };
       localStorage.setItem('proposta_temp', JSON.stringify(tempData));
-      
+
       // LIMPA O FORMULÁRIO
       reset({
-        clienteNome: "",
-        clienteCpf: "",
-        clienteEmail: "",
-        clienteTelefone: "",
-        clienteDataNascimento: "",
-        clienteRenda: "",
-        clienteRg: "",
-        clienteOrgaoEmissor: "",
-        clienteRgDataEmissao: "",
-        clienteRgUf: "",
-        clienteLocalNascimento: "",
-        clienteEstadoCivil: "",
-        clienteNacionalidade: "",
-        clienteCep: "",
-        clienteLogradouro: "",
-        clienteNumero: "",
-        clienteComplemento: "",
-        clienteBairro: "",
-        clienteCidade: "",
-        clienteUf: "",
+        clienteNome: '',
+        clienteCpf: '',
+        clienteEmail: '',
+        clienteTelefone: '',
+        clienteDataNascimento: '',
+        clienteRenda: '',
+        clienteRg: '',
+        clienteOrgaoEmissor: '',
+        clienteRgDataEmissao: '',
+        clienteRgUf: '',
+        clienteLocalNascimento: '',
+        clienteEstadoCivil: '',
+        clienteNacionalidade: '',
+        clienteCep: '',
+        clienteLogradouro: '',
+        clienteNumero: '',
+        clienteComplemento: '',
+        clienteBairro: '',
+        clienteCidade: '',
+        clienteUf: '',
         valor: 0,
         prazo: 0,
-        finalidade: "",
-        garantia: "",
+        finalidade: '',
+        garantia: '',
         dadosPagamentoTipo: undefined,
-        dadosPagamentoPix: "",
-        dadosPagamentoBanco: "",
-        dadosPagamentoAgencia: "",
-        dadosPagamentoConta: "",
-        dadosPagamentoDigito: "",
-        documentos: []
+        dadosPagamentoPix: '',
+        dadosPagamentoBanco: '',
+        dadosPagamentoAgencia: '',
+        dadosPagamentoConta: '',
+        dadosPagamentoDigito: '',
+        documentos: [],
       });
-      
+
       // Reseta para o primeiro passo
       setCurrentStep(1);
-      
+
       toast({
-        title: "Proposta criada com sucesso!",
-        description: "A proposta foi enviada para análise.",
+        title: 'Proposta criada com sucesso!',
+        description: 'A proposta foi enviada para análise.',
       });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
-      
+
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+
       // Aguarda um pouco antes de redirecionar para dar tempo de ver a mensagem
       setTimeout(() => {
         // Limpa definitivamente o localStorage
         localStorage.removeItem('proposta_temp');
-        setLocation("/dashboard");
+        setLocation('/dashboard');
       }, 1500);
     },
     onError: (error: any) => {
-      console.error("[VALIDATION ERROR]", error);
-      
+      console.error('[VALIDATION ERROR]', error);
+
       // Se houver erros de validação específicos, destacar os campos
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
         const validationErrors = error.response.data.errors;
-        
+
         validationErrors.forEach((err: any) => {
           if (err.path && err.path.length > 0) {
             const fieldName = err.path[0];
             console.log(`[FIELD ERROR] ${fieldName}: ${err.message}`);
-            
+
             // Mapear para os campos do formulário e definir erro específico
             setError(fieldName as any, {
-              type: "server",
-              message: err.message || `${fieldName} é inválido`
+              type: 'server',
+              message: err.message || `${fieldName} é inválido`,
             });
           }
         });
-        
+
         toast({
-          title: "Dados inválidos",
-          description: "Verifique os campos destacados em vermelho abaixo.",
-          variant: "destructive",
+          title: 'Dados inválidos',
+          description: 'Verifique os campos destacados em vermelho abaixo.',
+          variant: 'destructive',
         });
       } else if (error.response?.data?.message) {
         toast({
-          title: "Erro na validação",
+          title: 'Erro na validação',
           description: error.response.data.message,
-          variant: "destructive",
+          variant: 'destructive',
         });
       } else {
         toast({
-          title: "Erro ao criar proposta",
-          description: error.message || "Tente novamente em alguns instantes.",
-          variant: "destructive",
+          title: 'Erro ao criar proposta',
+          description: error.message || 'Tente novamente em alguns instantes.',
+          variant: 'destructive',
         });
       }
     },
@@ -392,24 +405,24 @@ export default function NovaProposta() {
   const uploadFile = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
 
-      const response = await api.post("/api/upload", formData);
+      const response = await api.post('/api/upload', formData);
       return response.data;
     },
-    onSuccess: data => {
-      const currentDocs = watch("documentos") || [];
-      setValue("documentos", [...currentDocs, data.fileName]);
+    onSuccess: (data) => {
+      const currentDocs = watch('documentos') || [];
+      setValue('documentos', [...currentDocs, data.fileName]);
       toast({
-        title: "Documento enviado com sucesso!",
-        description: "O documento foi anexado à proposta.",
+        title: 'Documento enviado com sucesso!',
+        description: 'O documento foi anexado à proposta.',
       });
     },
     onError: () => {
       toast({
-        title: "Erro ao enviar documento",
-        description: "Tente novamente em alguns instantes.",
-        variant: "destructive",
+        title: 'Erro ao enviar documento',
+        description: 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
       });
     },
   });
@@ -438,9 +451,9 @@ export default function NovaProposta() {
   };
 
   const steps = [
-    { number: 1, title: "Dados do Cliente" },
-    { number: 2, title: "Condições" },
-    { number: 3, title: "Documentos" },
+    { number: 1, title: 'Dados do Cliente' },
+    { number: 2, title: 'Condições' },
+    { number: 3, title: 'Documentos' },
   ];
 
   return (
@@ -454,15 +467,15 @@ export default function NovaProposta() {
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
                     currentStep >= step.number
-                      ? "bg-primary text-white"
-                      : "bg-gray-200 text-gray-500"
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-200 text-gray-500'
                   }`}
                 >
                   {step.number}
                 </div>
                 <span
                   className={`ml-2 text-sm font-medium ${
-                    currentStep >= step.number ? "text-primary" : "text-gray-500"
+                    currentStep >= step.number ? 'text-primary' : 'text-gray-500'
                   }`}
                 >
                   {step.title}
@@ -497,8 +510,12 @@ export default function NovaProposta() {
                       <Input
                         id="clienteNome"
                         placeholder="Digite o nome completo"
-                        {...register("clienteNome")}
-                        className={errors.clienteNome ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        {...register('clienteNome')}
+                        className={
+                          errors.clienteNome
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : ''
+                        }
                         data-testid="input-cliente-nome"
                       />
                       {errors.clienteNome && (
@@ -511,16 +528,20 @@ export default function NovaProposta() {
                       <div className="relative">
                         <MaskedInput
                           mask="999.999.999-99"
-                          value={watch("clienteCpf") || ""}
+                          value={watch('clienteCpf') || ''}
                           onChange={(value) => {
-                            setValue("clienteCpf", value);
+                            setValue('clienteCpf', value);
                             // Buscar dados quando CPF estiver completo
                             if (value.replace(/\D/g, '').length === 11) {
                               buscarDadosPorCpf(value);
                             }
                           }}
                           placeholder="000.000.000-00"
-                          className={errors.clienteCpf ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                          className={
+                            errors.clienteCpf
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : ''
+                          }
                           data-testid="input-cliente-cpf"
                         />
                         {isSearchingCpf && (
@@ -531,7 +552,8 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.clienteCpf.message}</p>
                       )}
                       <p className="text-xs text-gray-500 mt-1">
-                        Se o CPF já teve proposta anterior, os dados serão preenchidos automaticamente
+                        Se o CPF já teve proposta anterior, os dados serão preenchidos
+                        automaticamente
                       </p>
                     </div>
 
@@ -541,8 +563,12 @@ export default function NovaProposta() {
                         id="clienteEmail"
                         type="email"
                         placeholder="email@exemplo.com"
-                        {...register("clienteEmail")}
-                        className={errors.clienteEmail ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        {...register('clienteEmail')}
+                        className={
+                          errors.clienteEmail
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : ''
+                        }
                         data-testid="input-cliente-email"
                       />
                       {errors.clienteEmail && (
@@ -554,10 +580,14 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteTelefone">Telefone</Label>
                       <MaskedInput
                         mask="(99) 99999-9999"
-                        value={watch("clienteTelefone") || ""}
-                        onChange={(value) => setValue("clienteTelefone", value)}
+                        value={watch('clienteTelefone') || ''}
+                        onChange={(value) => setValue('clienteTelefone', value)}
                         placeholder="(11) 99999-9999"
-                        className={errors.clienteTelefone ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        className={
+                          errors.clienteTelefone
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : ''
+                        }
                         data-testid="input-cliente-telefone"
                       />
                       {errors.clienteTelefone && (
@@ -570,8 +600,12 @@ export default function NovaProposta() {
                       <Input
                         id="clienteDataNascimento"
                         type="date"
-                        {...register("clienteDataNascimento")}
-                        className={errors.clienteDataNascimento ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        {...register('clienteDataNascimento')}
+                        className={
+                          errors.clienteDataNascimento
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : ''
+                        }
                         data-testid="input-cliente-data-nascimento"
                       />
                       {errors.clienteDataNascimento && (
@@ -586,8 +620,12 @@ export default function NovaProposta() {
                       <Input
                         id="clienteRenda"
                         placeholder="R$ 5.000,00"
-                        {...register("clienteRenda")}
-                        className={errors.clienteRenda ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        {...register('clienteRenda')}
+                        className={
+                          errors.clienteRenda
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : ''
+                        }
                         data-testid="input-cliente-renda"
                       />
                       {errors.clienteRenda && (
@@ -601,12 +639,7 @@ export default function NovaProposta() {
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                       <Label htmlFor="clienteRg">RG</Label>
-                      <Input
-                        id="clienteRg"
-                        
-                        placeholder="00.000.000-0"
-                        {...register("clienteRg")}
-                      />
+                      <Input id="clienteRg" placeholder="00.000.000-0" {...register('clienteRg')} />
                       {errors.clienteRg && (
                         <p className="text-sm text-red-600">{errors.clienteRg.message}</p>
                       )}
@@ -616,9 +649,8 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteOrgaoEmissor">Órgão Emissor</Label>
                       <Input
                         id="clienteOrgaoEmissor"
-                        
                         placeholder="SSP"
-                        {...register("clienteOrgaoEmissor")}
+                        {...register('clienteOrgaoEmissor')}
                       />
                       {errors.clienteOrgaoEmissor && (
                         <p className="text-sm text-red-600">{errors.clienteOrgaoEmissor.message}</p>
@@ -629,12 +661,13 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteRgDataEmissao">Data de Emissão do RG</Label>
                       <Input
                         id="clienteRgDataEmissao"
-                        
                         type="date"
-                        {...register("clienteRgDataEmissao")}
+                        {...register('clienteRgDataEmissao')}
                       />
                       {errors.clienteRgDataEmissao && (
-                        <p className="text-sm text-red-600">{errors.clienteRgDataEmissao.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.clienteRgDataEmissao.message}
+                        </p>
                       )}
                     </div>
 
@@ -642,10 +675,9 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteRgUf">UF do RG</Label>
                       <Input
                         id="clienteRgUf"
-                        
                         placeholder="SP"
                         maxLength={2}
-                        {...register("clienteRgUf")}
+                        {...register('clienteRgUf')}
                       />
                       {errors.clienteRgUf && (
                         <p className="text-sm text-red-600">{errors.clienteRgUf.message}</p>
@@ -656,18 +688,19 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteLocalNascimento">Local de Nascimento</Label>
                       <Input
                         id="clienteLocalNascimento"
-                        
                         placeholder="São Paulo - SP"
-                        {...register("clienteLocalNascimento")}
+                        {...register('clienteLocalNascimento')}
                       />
                       {errors.clienteLocalNascimento && (
-                        <p className="text-sm text-red-600">{errors.clienteLocalNascimento.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.clienteLocalNascimento.message}
+                        </p>
                       )}
                     </div>
 
                     <div>
                       <Label htmlFor="clienteEstadoCivil">Estado Civil</Label>
-                      <Select onValueChange={value => setValue("clienteEstadoCivil", value)}>
+                      <Select onValueChange={(value) => setValue('clienteEstadoCivil', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o estado civil" />
                         </SelectTrigger>
@@ -688,12 +721,13 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteNacionalidade">Nacionalidade</Label>
                       <Input
                         id="clienteNacionalidade"
-                        
                         placeholder="Brasileira"
-                        {...register("clienteNacionalidade")}
+                        {...register('clienteNacionalidade')}
                       />
                       {errors.clienteNacionalidade && (
-                        <p className="text-sm text-red-600">{errors.clienteNacionalidade.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.clienteNacionalidade.message}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -703,12 +737,7 @@ export default function NovaProposta() {
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                       <Label htmlFor="clienteCep">CEP</Label>
-                      <Input
-                        id="clienteCep"
-                        
-                        placeholder="12345-678"
-                        {...register("clienteCep")}
-                      />
+                      <Input id="clienteCep" placeholder="12345-678" {...register('clienteCep')} />
                       {errors.clienteCep && (
                         <p className="text-sm text-red-600">{errors.clienteCep.message}</p>
                       )}
@@ -718,9 +747,8 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteLogradouro">Logradouro</Label>
                       <Input
                         id="clienteLogradouro"
-                        
                         placeholder="Rua, Avenida, etc."
-                        {...register("clienteLogradouro")}
+                        {...register('clienteLogradouro')}
                       />
                       {errors.clienteLogradouro && (
                         <p className="text-sm text-red-600">{errors.clienteLogradouro.message}</p>
@@ -729,12 +757,7 @@ export default function NovaProposta() {
 
                     <div>
                       <Label htmlFor="clienteNumero">Número</Label>
-                      <Input
-                        id="clienteNumero"
-                        
-                        placeholder="123"
-                        {...register("clienteNumero")}
-                      />
+                      <Input id="clienteNumero" placeholder="123" {...register('clienteNumero')} />
                       {errors.clienteNumero && (
                         <p className="text-sm text-red-600">{errors.clienteNumero.message}</p>
                       )}
@@ -744,9 +767,8 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteComplemento">Complemento</Label>
                       <Input
                         id="clienteComplemento"
-                        
                         placeholder="Apto, Casa, etc. (opcional)"
-                        {...register("clienteComplemento")}
+                        {...register('clienteComplemento')}
                       />
                       {errors.clienteComplemento && (
                         <p className="text-sm text-red-600">{errors.clienteComplemento.message}</p>
@@ -757,9 +779,8 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteBairro">Bairro</Label>
                       <Input
                         id="clienteBairro"
-                        
                         placeholder="Nome do bairro"
-                        {...register("clienteBairro")}
+                        {...register('clienteBairro')}
                       />
                       {errors.clienteBairro && (
                         <p className="text-sm text-red-600">{errors.clienteBairro.message}</p>
@@ -770,9 +791,8 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteCidade">Cidade</Label>
                       <Input
                         id="clienteCidade"
-                        
                         placeholder="Nome da cidade"
-                        {...register("clienteCidade")}
+                        {...register('clienteCidade')}
                       />
                       {errors.clienteCidade && (
                         <p className="text-sm text-red-600">{errors.clienteCidade.message}</p>
@@ -783,10 +803,9 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteUf">UF</Label>
                       <Input
                         id="clienteUf"
-                        
                         placeholder="SP"
                         maxLength={2}
-                        {...register("clienteUf")}
+                        {...register('clienteUf')}
                       />
                       {errors.clienteUf && (
                         <p className="text-sm text-red-600">{errors.clienteUf.message}</p>
@@ -809,8 +828,12 @@ export default function NovaProposta() {
                       <Input
                         id="valor"
                         placeholder="R$ 50.000,00"
-                        {...register("valor")}
-                        className={errors.valor ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        {...register('valor')}
+                        className={
+                          errors.valor
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : ''
+                        }
                         data-testid="input-valor"
                       />
                       {errors.valor && (
@@ -821,9 +844,15 @@ export default function NovaProposta() {
                     <div>
                       <Label htmlFor="prazo">Prazo (meses)</Label>
                       {/* Hidden input for progressive enhancement */}
-                      <input type="hidden"  value={watch("prazo") || ""} />
-                      <Select onValueChange={value => setValue("prazo", parseInt(value))}>
-                        <SelectTrigger className={errors.prazo ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}>
+                      <input type="hidden" value={watch('prazo') || ''} />
+                      <Select onValueChange={(value) => setValue('prazo', parseInt(value))}>
+                        <SelectTrigger
+                          className={
+                            errors.prazo
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : ''
+                          }
+                        >
                           <SelectValue placeholder="Selecione o prazo" />
                         </SelectTrigger>
                         <SelectContent>
@@ -842,9 +871,15 @@ export default function NovaProposta() {
                     <div>
                       <Label htmlFor="finalidade">Finalidade</Label>
                       {/* Hidden input for progressive enhancement */}
-                      <input type="hidden"  value={watch("finalidade") || ""} />
-                      <Select onValueChange={value => setValue("finalidade", value)}>
-                        <SelectTrigger className={errors.finalidade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}>
+                      <input type="hidden" value={watch('finalidade') || ''} />
+                      <Select onValueChange={(value) => setValue('finalidade', value)}>
+                        <SelectTrigger
+                          className={
+                            errors.finalidade
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : ''
+                          }
+                        >
                           <SelectValue placeholder="Selecione a finalidade" />
                         </SelectTrigger>
                         <SelectContent>
@@ -863,9 +898,15 @@ export default function NovaProposta() {
                     <div>
                       <Label htmlFor="garantia">Tipo de Garantia</Label>
                       {/* Hidden input for progressive enhancement */}
-                      <input type="hidden"  value={watch("garantia") || ""} />
-                      <Select onValueChange={value => setValue("garantia", value)}>
-                        <SelectTrigger className={errors.garantia ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}>
+                      <input type="hidden" value={watch('garantia') || ''} />
+                      <Select onValueChange={(value) => setValue('garantia', value)}>
+                        <SelectTrigger
+                          className={
+                            errors.garantia
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : ''
+                          }
+                        >
                           <SelectValue placeholder="Selecione a garantia" />
                         </SelectTrigger>
                         <SelectContent>
@@ -883,7 +924,9 @@ export default function NovaProposta() {
                   </div>
 
                   {/* Dados Bancários para Pagamento */}
-                  <h4 className="mt-6 mb-4 text-md font-semibold text-gray-800">Dados para Pagamento</h4>
+                  <h4 className="mt-6 mb-4 text-md font-semibold text-gray-800">
+                    Dados para Pagamento
+                  </h4>
                   <div className="space-y-4">
                     <div>
                       <Label>Forma de Recebimento</Label>
@@ -892,7 +935,7 @@ export default function NovaProposta() {
                           <input
                             type="radio"
                             value="pix"
-                            {...register("dadosPagamentoTipo")}
+                            {...register('dadosPagamentoTipo')}
                             className="mr-2"
                           />
                           PIX
@@ -901,7 +944,7 @@ export default function NovaProposta() {
                           <input
                             type="radio"
                             value="conta_bancaria"
-                            {...register("dadosPagamentoTipo")}
+                            {...register('dadosPagamentoTipo')}
                             className="mr-2"
                           />
                           Conta Bancária
@@ -909,25 +952,25 @@ export default function NovaProposta() {
                       </div>
                     </div>
 
-                    {watch("dadosPagamentoTipo") === "pix" && (
+                    {watch('dadosPagamentoTipo') === 'pix' && (
                       <div>
                         <Label htmlFor="dadosPagamentoPix">Chave PIX</Label>
                         <Input
                           id="dadosPagamentoPix"
                           placeholder="CPF, E-mail, Telefone ou Chave Aleatória"
-                          {...register("dadosPagamentoPix")}
+                          {...register('dadosPagamentoPix')}
                         />
                       </div>
                     )}
 
-                    {watch("dadosPagamentoTipo") === "conta_bancaria" && (
+                    {watch('dadosPagamentoTipo') === 'conta_bancaria' && (
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                           <Label htmlFor="dadosPagamentoBanco">Banco</Label>
                           <Input
                             id="dadosPagamentoBanco"
                             placeholder="Ex: Banco do Brasil"
-                            {...register("dadosPagamentoBanco")}
+                            {...register('dadosPagamentoBanco')}
                           />
                         </div>
                         <div>
@@ -935,7 +978,7 @@ export default function NovaProposta() {
                           <Input
                             id="dadosPagamentoAgencia"
                             placeholder="0000"
-                            {...register("dadosPagamentoAgencia")}
+                            {...register('dadosPagamentoAgencia')}
                           />
                         </div>
                         <div>
@@ -943,7 +986,7 @@ export default function NovaProposta() {
                           <Input
                             id="dadosPagamentoConta"
                             placeholder="00000"
-                            {...register("dadosPagamentoConta")}
+                            {...register('dadosPagamentoConta')}
                           />
                         </div>
                         <div>
@@ -952,7 +995,7 @@ export default function NovaProposta() {
                             id="dadosPagamentoDigito"
                             placeholder="0"
                             maxLength={2}
-                            {...register("dadosPagamentoDigito")}
+                            {...register('dadosPagamentoDigito')}
                           />
                         </div>
                       </div>
@@ -968,11 +1011,11 @@ export default function NovaProposta() {
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     {[
-                      "Documento de Identidade",
-                      "Comprovante de Renda",
-                      "Comprovante de Residência",
-                      "Documentos Adicionais",
-                    ].map(docType => (
+                      'Documento de Identidade',
+                      'Comprovante de Renda',
+                      'Comprovante de Residência',
+                      'Documentos Adicionais',
+                    ].map((docType) => (
                       <div key={docType}>
                         <Label className="mb-2 block text-sm font-medium text-gray-700">
                           {docType}
@@ -996,7 +1039,7 @@ export default function NovaProposta() {
                             onClick={() => document.getElementById(`file-${docType}`)?.click()}
                             disabled={uploadFile.isPending}
                           >
-                            {uploadFile.isPending ? "Enviando..." : "Selecionar Arquivo"}
+                            {uploadFile.isPending ? 'Enviando...' : 'Selecionar Arquivo'}
                           </Button>
                         </div>
                       </div>
@@ -1028,7 +1071,7 @@ export default function NovaProposta() {
                     </Button>
                   ) : (
                     <Button type="submit" disabled={createProposta.isPending}>
-                      {createProposta.isPending ? "Criando..." : "Criar Proposta"}
+                      {createProposta.isPending ? 'Criando...' : 'Criar Proposta'}
                     </Button>
                   )}
                 </div>

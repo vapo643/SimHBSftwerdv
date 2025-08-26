@@ -1,5 +1,5 @@
-import zxcvbn from "zxcvbn";
-import { z } from "zod";
+import zxcvbn from 'zxcvbn';
+import { z } from 'zod';
 
 export interface PasswordValidationResult {
   isValid: boolean;
@@ -19,8 +19,8 @@ export function validatePassword(
     return {
       isValid: false,
       score: 0,
-      message: "Senha deve ter pelo menos 8 caracteres",
-      suggestions: ["Use uma senha mais longa"],
+      message: 'Senha deve ter pelo menos 8 caracteres',
+      suggestions: ['Use uma senha mais longa'],
     };
   }
 
@@ -31,13 +31,13 @@ export function validatePassword(
   // Score 0-1 means it's too weak (common password or very simple)
   if (result.score < 2) {
     const suggestions = result.feedback.suggestions || [];
-    const warning = result.feedback.warning || "Senha muito fraca";
+    const warning = result.feedback.warning || 'Senha muito fraca';
 
     return {
       isValid: false,
       score: result.score,
       message: warning,
-      suggestions: suggestions.length > 0 ? suggestions : ["Use uma senha mais forte e única"],
+      suggestions: suggestions.length > 0 ? suggestions : ['Use uma senha mais forte e única'],
     };
   }
 
@@ -57,11 +57,11 @@ export function validatePassword(
     return {
       isValid: false,
       score: result.score,
-      message: "Senha deve conter pelo menos 3 tipos diferentes de caracteres",
+      message: 'Senha deve conter pelo menos 3 tipos diferentes de caracteres',
       suggestions: [
-        "Use letras maiúsculas e minúsculas",
-        "Adicione números",
-        "Inclua caracteres especiais (!@#$%&*)",
+        'Use letras maiúsculas e minúsculas',
+        'Adicione números',
+        'Inclua caracteres especiais (!@#$%&*)',
       ].filter((_, i) => {
         if (i === 0) return !hasUpperCase || !hasLowerCase;
         if (i === 1) return !hasNumber;
@@ -74,7 +74,7 @@ export function validatePassword(
   return {
     isValid: true,
     score: result.score,
-    message: "Senha forte",
+    message: 'Senha forte',
     suggestions: [],
   };
 }
@@ -87,12 +87,12 @@ export const passwordSchema = z
   .string()
   .min(8)
   .refine(
-    password => {
+    (password) => {
       const validation = validatePassword(password);
       validationCache.set(password, validation); // Cache result
       return validation.isValid;
     },
-    password => {
+    (password) => {
       // Use cached result if available, otherwise validate again
       const validation = validationCache.get(password) || validatePassword(password);
       validationCache.delete(password); // Clean up cache
@@ -105,7 +105,7 @@ export function getPasswordStrengthFeedback(
   password: string,
   userInputs: string[] = []
 ): {
-  strength: "weak" | "fair" | "good" | "strong" | "very-strong";
+  strength: 'weak' | 'fair' | 'good' | 'strong' | 'very-strong';
   percentage: number;
   feedback: string;
   suggestions: string[];
@@ -113,17 +113,17 @@ export function getPasswordStrengthFeedback(
   const result = zxcvbn(password, userInputs);
 
   const strengthMap = {
-    0: "weak",
-    1: "weak",
-    2: "fair",
-    3: "good",
-    4: "strong",
+    0: 'weak',
+    1: 'weak',
+    2: 'fair',
+    3: 'good',
+    4: 'strong',
   } as const;
 
   return {
-    strength: strengthMap[result.score as keyof typeof strengthMap] || "weak",
+    strength: strengthMap[result.score as keyof typeof strengthMap] || 'weak',
     percentage: (result.score / 4) * 100,
-    feedback: result.feedback.warning || "Senha analisada",
+    feedback: result.feedback.warning || 'Senha analisada',
     suggestions: result.feedback.suggestions || [],
   };
 }

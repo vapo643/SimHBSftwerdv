@@ -1,5 +1,5 @@
-import { Router } from "express";
-import type { AuthenticatedRequest } from "../../../shared/types/express";
+import { Router } from 'express';
+import type { AuthenticatedRequest } from '../../../shared/types/express';
 
 const router = Router();
 
@@ -8,29 +8,29 @@ const router = Router();
 // =============================================
 
 // Endpoint que testa o circuit breaker real do ClickSignService
-router.get("/test/circuit-breaker", async (req: AuthenticatedRequest, res) => {
+router.get('/test/circuit-breaker', async (req: AuthenticatedRequest, res) => {
   try {
-    const { clickSignService } = await import("../../services/clickSignService");
-    
+    const { clickSignService } = await import('../../services/clickSignService');
+
     // Tentar uma conexão de teste
     const result = await clickSignService.testConnection();
-    
-    res.json({ 
-      success: true, 
-      serviceStatus: result ? "operational" : "unavailable",
-      circuitBreakerStatus: "closed"
+
+    res.json({
+      success: true,
+      serviceStatus: result ? 'operational' : 'unavailable',
+      circuitBreakerStatus: 'closed',
     });
   } catch (error: any) {
-    if (error.message?.includes("circuit breaker is OPEN")) {
-      console.log("[CIRCUIT TEST] ⚡ ClickSign circuit breaker is OPEN");
-      res.status(503).json({ 
-        error: "ClickSign API temporarily unavailable - circuit breaker is OPEN",
-        circuitBreakerStatus: "open"
+    if (error.message?.includes('circuit breaker is OPEN')) {
+      console.log('[CIRCUIT TEST] ⚡ ClickSign circuit breaker is OPEN');
+      res.status(503).json({
+        error: 'ClickSign API temporarily unavailable - circuit breaker is OPEN',
+        circuitBreakerStatus: 'open',
       });
     } else {
-      res.status(500).json({ 
+      res.status(500).json({
         error: error.message,
-        circuitBreakerStatus: "unknown"
+        circuitBreakerStatus: 'unknown',
       });
     }
   }

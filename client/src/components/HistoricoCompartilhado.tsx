@@ -1,6 +1,6 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   AlertCircle,
   MessageCircle,
@@ -9,12 +9,12 @@ import {
   XCircle,
   AlertTriangle,
   Send,
-} from "lucide-react";
-import { api } from "@/lib/apiClient";
+} from 'lucide-react';
+import { api } from '@/lib/apiClient';
 
 interface HistoricoCompartilhadoProps {
   propostaId: string;
-  context?: "analise" | "edicao";
+  context?: 'analise' | 'edicao';
 }
 
 const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propostaId }) => {
@@ -39,7 +39,7 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
         const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
         return response.data;
       } catch (error) {
-        console.warn("Erro ao buscar logs de auditoria:", error);
+        console.warn('Erro ao buscar logs de auditoria:', error);
         return { logs: [] };
       }
     },
@@ -88,11 +88,11 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
               </p>
               <p className="text-xs text-gray-400">
                 {proposta?.created_at
-                  ? new Date(proposta.created_at).toLocaleString("pt-BR")
-                  : "Data não disponível"}
+                  ? new Date(proposta.created_at).toLocaleString('pt-BR')
+                  : 'Data não disponível'}
               </p>
               <p className="mt-1 text-sm text-gray-300">
-                Proposta criada pelo atendente da loja {proposta?.loja?.nome_loja || "N/A"}
+                Proposta criada pelo atendente da loja {proposta?.loja?.nome_loja || 'N/A'}
               </p>
             </div>
           </div>
@@ -115,47 +115,47 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                 },
                 index: number
               ) => {
-                const isPendency = log.status_novo === "pendenciado";
+                const isPendency = log.status_novo === 'pendenciado';
                 const isResubmit =
-                  log.status_novo === "aguardando_analise" && log.status_anterior === "pendenciado";
-                const isApproval = log.status_novo === "aprovado";
-                const isRejection = log.status_novo === "rejeitado";
+                  log.status_novo === 'aguardando_analise' && log.status_anterior === 'pendenciado';
+                const isApproval = log.status_novo === 'aprovado';
+                const isRejection = log.status_novo === 'rejeitado';
 
                 // Verificar autoria baseada no role do perfil do autor
                 const autorRole = log.profiles?.role;
-                const isAtendente = autorRole === "ATENDENTE";
-                const isAnalista = autorRole === "ANALISTA";
+                const isAtendente = autorRole === 'ATENDENTE';
+                const isAnalista = autorRole === 'ANALISTA';
 
                 // Definir cores e ícones baseado no tipo
-                let bgColor = "bg-gray-800";
-                let borderColor = "";
-                let textColor = "text-gray-300";
-                let dotColor = "bg-gray-500";
+                let bgColor = 'bg-gray-800';
+                let borderColor = '';
+                let textColor = 'text-gray-300';
+                let dotColor = 'bg-gray-500';
                 let icon = <Clock className="mr-1 inline h-4 w-4" />;
 
                 if (isPendency) {
-                  bgColor = "bg-yellow-900/20";
-                  borderColor = "border border-yellow-600";
-                  textColor = "text-yellow-400";
-                  dotColor = "bg-yellow-500";
+                  bgColor = 'bg-yellow-900/20';
+                  borderColor = 'border border-yellow-600';
+                  textColor = 'text-yellow-400';
+                  dotColor = 'bg-yellow-500';
                   icon = <AlertTriangle className="mr-1 inline h-4 w-4" />;
                 } else if (isResubmit) {
-                  bgColor = "bg-indigo-900/20";
-                  borderColor = "border border-indigo-600";
-                  textColor = "text-indigo-400";
-                  dotColor = "bg-indigo-500";
+                  bgColor = 'bg-indigo-900/20';
+                  borderColor = 'border border-indigo-600';
+                  textColor = 'text-indigo-400';
+                  dotColor = 'bg-indigo-500';
                   icon = <Send className="mr-1 inline h-4 w-4" />;
                 } else if (isApproval) {
-                  bgColor = "bg-green-900/20";
-                  borderColor = "border border-green-600";
-                  textColor = "text-green-400";
-                  dotColor = "bg-green-500";
+                  bgColor = 'bg-green-900/20';
+                  borderColor = 'border border-green-600';
+                  textColor = 'text-green-400';
+                  dotColor = 'bg-green-500';
                   icon = <CheckCircle className="mr-1 inline h-4 w-4" />;
                 } else if (isRejection) {
-                  bgColor = "bg-red-900/20";
-                  borderColor = "border border-red-600";
-                  textColor = "text-red-400";
-                  dotColor = "bg-red-500";
+                  bgColor = 'bg-red-900/20';
+                  borderColor = 'border border-red-600';
+                  textColor = 'text-red-400';
+                  dotColor = 'bg-red-500';
                   icon = <XCircle className="mr-1 inline h-4 w-4" />;
                 }
 
@@ -167,21 +167,21 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                     <div className={`h-2 w-2 ${dotColor} mt-2 flex-shrink-0 rounded-full`}></div>
                     <div className="flex-1">
                       <p className={`text-sm font-medium ${textColor}`}>
-                        {icon}{" "}
+                        {icon}{' '}
                         {isResubmit
-                          ? "Proposta reenviada para análise"
+                          ? 'Proposta reenviada para análise'
                           : isPendency
-                            ? "Proposta pendenciada"
+                            ? 'Proposta pendenciada'
                             : isApproval
-                              ? "Proposta aprovada"
+                              ? 'Proposta aprovada'
                               : isRejection
-                                ? "Proposta rejeitada"
-                                : "Status alterado"}
+                                ? 'Proposta rejeitada'
+                                : 'Status alterado'}
                       </p>
                       <p className="text-xs text-gray-400">
                         {log.created_at
-                          ? new Date(log.created_at).toLocaleString("pt-BR")
-                          : "Data não disponível"}
+                          ? new Date(log.created_at).toLocaleString('pt-BR')
+                          : 'Data não disponível'}
                       </p>
 
                       {/* Destacar observação baseado no tipo de usuário e ação */}
@@ -189,10 +189,10 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                         <div
                           className={`mt-2 rounded border-l-2 p-2 text-sm ${
                             isAtendente
-                              ? "border-indigo-400 bg-indigo-900/30 text-indigo-100"
+                              ? 'border-indigo-400 bg-indigo-900/30 text-indigo-100'
                               : isPendency
-                                ? "border-yellow-400 bg-yellow-900/30 text-yellow-100"
-                                : "border-gray-500 bg-gray-700/50 text-gray-200"
+                                ? 'border-yellow-400 bg-yellow-900/30 text-yellow-100'
+                                : 'border-gray-500 bg-gray-700/50 text-gray-200'
                           }`}
                         >
                           {isAtendente && (
@@ -218,7 +218,7 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                               📝 Observação do Analista:
                             </span>
                           )}
-                          <div className={isAtendente ? "mt-1 italic" : "mt-1"}>
+                          <div className={isAtendente ? 'mt-1 italic' : 'mt-1'}>
                             "{log.detalhes || log.observacao}"
                           </div>
                         </div>

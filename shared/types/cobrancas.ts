@@ -19,7 +19,7 @@ export interface PropostaCobranca {
   valorEmAtraso?: number;
   quantidadeParcelas?: number;
   parcelasPagas?: number;
-  
+
   // Dados do Banco Inter
   interSituacao?: string;
   nossoNumero?: string;
@@ -30,21 +30,21 @@ export interface PropostaCobranca {
   linhaDigitavel?: string;
   pixCopiaECola?: string;
   pixQrCode?: string;
-  
+
   // Dados de contato
   telefone?: string;
   email?: string;
   celular?: string;
-  
+
   // Status de formalizacao
   ccbAssinada?: boolean;
   linkCcb?: string;
-  
+
   // Propriedades adicionais para compatibilidade
   codigoSolicitacao?: string;
   numeroParcela?: number;
   valor?: number;
-  situacao?: "Em dia" | "Atraso" | "Vencido";
+  situacao?: 'Em dia' | 'Atraso' | 'Vencido';
 }
 
 // Interface para KPIs de cobrança
@@ -221,7 +221,7 @@ export type StatusFilter = 'todos' | 'em_dia' | 'inadimplente' | 'quitado';
 export type AtrasoFilter = 'todos' | '1-30' | '31-60' | '61-90' | '90+';
 
 // Tipo para status de observação
-export type StatusObservacao = 
+export type StatusObservacao =
   | 'Contato Realizado'
   | 'Promessa de Pagamento'
   | 'Sem Retorno'

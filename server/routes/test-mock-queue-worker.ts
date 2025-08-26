@@ -17,26 +17,26 @@ router.get('/verify-worker-execution', async (req, res) => {
     console.log('\n================[ TESTE MOCK QUEUE → WORKER ]================');
     console.log('📋 Verificando se Mock Queue executa a lógica real do Worker');
     console.log('==============================================================\n');
-    
+
     // Usar proposta conhecida com dados reais
     const propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
-    
+
     console.log(`📌 Testando com proposta: ${propostaId}`);
     console.log('📌 Esta proposta tem 24 boletos no sistema');
-    
+
     // Adicionar job à fila
     const job = await queues.pdfProcessing.add('GENERATE_CARNE', {
       type: 'GENERATE_CARNE',
       propostaId: propostaId,
       userId: 'test-user',
       clienteNome: 'Cliente Teste',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     console.log(`✅ Job ${job.id} adicionado à fila`);
     console.log('⏳ O Worker será executado em breve...');
     console.log('\n⚠️  OBSERVE OS LOGS ABAIXO PARA VER [WORKER:PDF]');
-    
+
     res.json({
       success: true,
       message: 'Teste iniciado - verifique os logs do servidor',
@@ -47,16 +47,15 @@ router.get('/verify-worker-execution', async (req, res) => {
         '[WORKER:PDF] Processing job...',
         '[WORKER:PDF] Generating carnê...',
         'Logs de fusão de PDFs',
-        'Logs de salvamento no Storage'
+        'Logs de salvamento no Storage',
       ],
-      note: 'Se você vir os logs [WORKER:PDF], a refatoração funcionou!'
+      note: 'Se você vir os logs [WORKER:PDF], a refatoração funcionou!',
     });
-    
   } catch (error: any) {
     console.error('❌ Erro no teste:', error);
     res.status(500).json({
       error: 'Erro no teste',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -68,19 +67,18 @@ router.get('/verify-worker-execution', async (req, res) => {
 router.get('/status/:jobId', async (req, res) => {
   try {
     const { jobId } = req.params;
-    
+
     const counts = await queues.pdfProcessing.getJobCounts();
-    
+
     res.json({
       jobId,
       queueStatus: counts,
-      message: 'Verifique os logs do servidor para confirmar execução do Worker'
+      message: 'Verifique os logs do servidor para confirmar execução do Worker',
     });
-    
   } catch (error: any) {
     res.status(500).json({
       error: 'Erro ao verificar status',
-      message: error.message
+      message: error.message,
     });
   }
 });

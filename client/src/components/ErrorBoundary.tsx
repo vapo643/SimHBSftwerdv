@@ -26,13 +26,14 @@ export class ErrorBoundary extends Component<Props, State> {
       'mce-autosize-textarea',
       'custom element',
       'ResizeObserver loop limit exceeded',
-      'Non-Error promise rejection captured'
+      'Non-Error promise rejection captured',
     ];
 
-    const shouldIgnore = ignoredErrors.some(ignored => 
-      error.message?.includes(ignored) || 
-      error.stack?.includes(ignored) ||
-      errorInfo.componentStack?.includes(ignored)
+    const shouldIgnore = ignoredErrors.some(
+      (ignored) =>
+        error.message?.includes(ignored) ||
+        error.stack?.includes(ignored) ||
+        errorInfo.componentStack?.includes(ignored)
     );
 
     if (!shouldIgnore) {
@@ -43,8 +44,9 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       // Check if it's a critical error or ignorable
-      const isIgnorable = this.state.error?.message?.includes('mce-autosize-textarea') ||
-                         this.state.error?.message?.includes('message port closed');
+      const isIgnorable =
+        this.state.error?.message?.includes('mce-autosize-textarea') ||
+        this.state.error?.message?.includes('message port closed');
 
       if (isIgnorable) {
         // Reset error state for ignorable errors

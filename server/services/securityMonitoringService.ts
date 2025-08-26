@@ -1,8 +1,8 @@
-import { db } from "../lib/supabase";
-import { securityLogs, loginAttempts } from "../../shared/schema/security";
-import { propostas, users } from "../../shared/schema";
-import { eq, gte, and, count, desc, sql } from "drizzle-orm";
-import { getBrasiliaTimestamp } from "../lib/timezone";
+import { db } from '../lib/supabase';
+import { securityLogs, loginAttempts } from '../../shared/schema/security';
+import { propostas, users } from '../../shared/schema';
+import { eq, gte, and, count, desc, sql } from 'drizzle-orm';
+import { getBrasiliaTimestamp } from '../lib/timezone';
 
 interface SecurityMetrics {
   threats: {
@@ -67,7 +67,7 @@ class SecurityMonitoringService {
   }
 
   async getSecurityMetrics(): Promise<SecurityMetrics> {
-    const cacheKey = "security-metrics";
+    const cacheKey = 'security-metrics';
     const cached = this.getCachedData(cacheKey);
     if (cached) return cached;
 
@@ -114,7 +114,7 @@ class SecurityMonitoringService {
         .select({ count: count() })
         .from(securityLogs)
         .where(
-          and(gte(securityLogs.created_at, oneHourAgo), eq(securityLogs.event_type, "LOGIN_FAILED"))
+          and(gte(securityLogs.created_at, oneHourAgo), eq(securityLogs.event_type, 'LOGIN_FAILED'))
         );
 
       // Get active sessions count
@@ -127,7 +127,7 @@ class SecurityMonitoringService {
       const lastLogin = await db
         .select({ created_at: securityLogs.created_at })
         .from(securityLogs)
-        .where(eq(securityLogs.event_type, "LOGIN_SUCCESS"))
+        .where(eq(securityLogs.event_type, 'LOGIN_SUCCESS'))
         .orderBy(desc(securityLogs.created_at))
         .limit(1);
 
@@ -137,15 +137,15 @@ class SecurityMonitoringService {
 
       const metrics: SecurityMetrics = {
         threats: {
-          sqlInjectionAttempts: (threatMap.get("SQL_INJECTION_ATTEMPT") as number) || 0,
-          xssAttemptsBlocked: (threatMap.get("XSS_ATTEMPT") as number) || 0,
-          bruteForceAttempts: (threatMap.get("BRUTE_FORCE_ATTEMPT") as number) || 0,
-          rateLimitViolations: (threatMap.get("RATE_LIMIT_EXCEEDED") as number) || 0,
+          sqlInjectionAttempts: (threatMap.get('SQL_INJECTION_ATTEMPT') as number) || 0,
+          xssAttemptsBlocked: (threatMap.get('XSS_ATTEMPT') as number) || 0,
+          bruteForceAttempts: (threatMap.get('BRUTE_FORCE_ATTEMPT') as number) || 0,
+          rateLimitViolations: (threatMap.get('RATE_LIMIT_EXCEEDED') as number) || 0,
           lastHour: {
-            sqlInjection: (recentThreatMap.get("SQL_INJECTION_ATTEMPT") as number) || 0,
-            xss: (recentThreatMap.get("XSS_ATTEMPT") as number) || 0,
-            bruteForce: (recentThreatMap.get("BRUTE_FORCE_ATTEMPT") as number) || 0,
-            rateLimit: (recentThreatMap.get("RATE_LIMIT_EXCEEDED") as number) || 0,
+            sqlInjection: (recentThreatMap.get('SQL_INJECTION_ATTEMPT') as number) || 0,
+            xss: (recentThreatMap.get('XSS_ATTEMPT') as number) || 0,
+            bruteForce: (recentThreatMap.get('BRUTE_FORCE_ATTEMPT') as number) || 0,
+            rateLimit: (recentThreatMap.get('RATE_LIMIT_EXCEEDED') as number) || 0,
           },
         },
         authentication: {
@@ -175,10 +175,10 @@ class SecurityMonitoringService {
         },
         system: {
           lastSecurityScan: getBrasiliaTimestamp(),
-          encryptionStatus: "AES-256 (Active)",
-          backupStatus: "Daily backups enabled",
+          encryptionStatus: 'AES-256 (Active)',
+          backupStatus: 'Daily backups enabled',
           certificateExpiry: 365, // Would check actual cert
-          firewallStatus: "Active",
+          firewallStatus: 'Active',
           ddosProtection: true,
         },
       };
@@ -186,7 +186,7 @@ class SecurityMonitoringService {
       this.setCachedData(cacheKey, metrics);
       return metrics;
     } catch (error) {
-      console.error("[SECURITY MONITORING] Error getting metrics:", error);
+      console.error('[SECURITY MONITORING] Error getting metrics:', error);
       throw error;
     }
   }
@@ -196,7 +196,7 @@ class SecurityMonitoringService {
     user_id?: string;
     description: string;
     ip_address?: string;
-    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     metadata?: any;
   }) {
     try {
@@ -205,7 +205,7 @@ class SecurityMonitoringService {
         created_at: getBrasiliaTimestamp(),
       });
     } catch (error) {
-      console.error("[SECURITY MONITORING] Error recording event:", error);
+      console.error('[SECURITY MONITORING] Error recording event:', error);
     }
   }
 
@@ -220,7 +220,7 @@ class SecurityMonitoringService {
 
       return alerts;
     } catch (error) {
-      console.error("[SECURITY MONITORING] Error getting alerts:", error);
+      console.error('[SECURITY MONITORING] Error getting alerts:', error);
       return [];
     }
   }

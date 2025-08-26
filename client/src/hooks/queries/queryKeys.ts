@@ -8,62 +8,62 @@
 export const queryKeys = {
   // Users query keys hierarchy
   users: {
-    all: ["users"] as const,
-    lists: () => [...queryKeys.users.all, "list"] as const,
+    all: ['users'] as const,
+    lists: () => [...queryKeys.users.all, 'list'] as const,
     list: (filters?: Record<string, unknown>) => [...queryKeys.users.lists(), { filters }] as const,
-    details: () => [...queryKeys.users.all, "detail"] as const,
+    details: () => [...queryKeys.users.all, 'detail'] as const,
     detail: (id: string | number) => [...queryKeys.users.details(), id] as const,
-    withDetails: () => [...queryKeys.users.all, "withDetails"] as const,
+    withDetails: () => [...queryKeys.users.all, 'withDetails'] as const,
   },
 
   // Partners query keys hierarchy
   partners: {
-    all: ["partners"] as const,
-    lists: () => [...queryKeys.partners.all, "list"] as const,
+    all: ['partners'] as const,
+    lists: () => [...queryKeys.partners.all, 'list'] as const,
     list: (filters?: Record<string, unknown>) =>
       [...queryKeys.partners.lists(), { filters }] as const,
-    details: () => [...queryKeys.partners.all, "detail"] as const,
+    details: () => [...queryKeys.partners.all, 'detail'] as const,
     detail: (id: string | number) => [...queryKeys.partners.details(), id] as const,
   },
 
   // Stores query keys hierarchy
   stores: {
-    all: ["stores"] as const,
-    lists: () => [...queryKeys.stores.all, "list"] as const,
+    all: ['stores'] as const,
+    lists: () => [...queryKeys.stores.all, 'list'] as const,
     list: (filters?: Record<string, unknown>) =>
       [...queryKeys.stores.lists(), { filters }] as const,
-    details: () => [...queryKeys.stores.all, "detail"] as const,
+    details: () => [...queryKeys.stores.all, 'detail'] as const,
     detail: (id: string | number) => [...queryKeys.stores.details(), id] as const,
     byPartner: (partnerId: string | number) =>
-      [...queryKeys.stores.all, "byPartner", partnerId] as const,
+      [...queryKeys.stores.all, 'byPartner', partnerId] as const,
   },
 
   // System metadata query keys
   system: {
-    all: ["system"] as const,
-    metadata: () => [...queryKeys.system.all, "metadata"] as const,
-    health: () => [...queryKeys.system.all, "health"] as const,
+    all: ['system'] as const,
+    metadata: () => [...queryKeys.system.all, 'metadata'] as const,
+    health: () => [...queryKeys.system.all, 'health'] as const,
   },
 
   // Products query keys
   products: {
-    all: ["products"] as const,
-    lists: () => [...queryKeys.products.all, "list"] as const,
+    all: ['products'] as const,
+    lists: () => [...queryKeys.products.all, 'list'] as const,
     list: (filters?: Record<string, unknown>) =>
       [...queryKeys.products.lists(), { filters }] as const,
-    details: () => [...queryKeys.products.all, "detail"] as const,
+    details: () => [...queryKeys.products.all, 'detail'] as const,
     detail: (id: string | number) => [...queryKeys.products.details(), id] as const,
   },
 
   // Proposals query keys
   proposals: {
-    all: ["proposals"] as const,
-    lists: () => [...queryKeys.proposals.all, "list"] as const,
+    all: ['proposals'] as const,
+    lists: () => [...queryKeys.proposals.all, 'list'] as const,
     list: (filters?: Record<string, unknown>) =>
       [...queryKeys.proposals.lists(), { filters }] as const,
-    details: () => [...queryKeys.proposals.all, "detail"] as const,
+    details: () => [...queryKeys.proposals.all, 'detail'] as const,
     detail: (id: string | number) => [...queryKeys.proposals.details(), id] as const,
-    byStatus: (status: string) => [...queryKeys.proposals.all, "byStatus", status] as const,
+    byStatus: (status: string) => [...queryKeys.proposals.all, 'byStatus', status] as const,
   },
 } as const;
 

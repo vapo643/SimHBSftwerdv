@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { interBankService } from "../services/interBankService";
-import { db } from "../lib/supabase";
-import { interCollections, propostas } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { Router } from 'express';
+import { interBankService } from '../services/interBankService';
+import { db } from '../lib/supabase';
+import { interCollections, propostas } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
@@ -23,7 +23,7 @@ function generateValidUUID() {
  * ENDPOINT EXECUTAR: Regenerar boletos com códigos válidos da API Inter
  * POST /api/inter/execute-fix/:propostaId
  */
-router.post("/execute-fix/:propostaId", async (req, res) => {
+router.post('/execute-fix/:propostaId', async (req, res) => {
   try {
     const { propostaId } = req.params;
 
@@ -37,7 +37,7 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
       .limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: "Proposta não encontrada" });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // Buscar boletos atuais (válidos e inválidos)
@@ -49,19 +49,24 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
     console.log(`🔍 [EXECUTE FIX] Encontrados ${boletoesAtuais.length} boletos atuais`);
 
     // Identificar códigos inválidos
-    const codigosInvalidos = boletoesAtuais.filter(b =>
-      !b.codigoSolicitacao.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+    const codigosInvalidos = boletoesAtuais.filter(
+      (b) =>
+        !b.codigoSolicitacao.match(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        )
     );
 
     if (codigosInvalidos.length === 0) {
       return res.json({
         success: true,
-        message: "Todos os boletos já possuem códigos válidos",
+        message: 'Todos os boletos já possuem códigos válidos',
         totalBoletos: boletoesAtuais.length,
       });
     }
 
-    console.log(`⚠️ [EXECUTE FIX] ${codigosInvalidos.length} boletos com códigos inválidos encontrados`);
+    console.log(
+      `⚠️ [EXECUTE FIX] ${codigosInvalidos.length} boletos com códigos inválidos encontrados`
+    );
 
     // ===============================
     // EXECUTAR REGENERAÇÃO
@@ -78,7 +83,7 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
 
     // 2. Preparar dados das parcelas
     const parcelas = boletoesAtuais
-      .map(boleto => ({
+      .map((boleto) => ({
         numero: boleto.numeroParcela || 1,
         valor: parseFloat(boleto.valorNominal.toString()),
         vencimento: boleto.dataVencimento,
@@ -97,7 +102,9 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
       try {
         const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
 
-        console.log(`📄 [EXECUTE FIX] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`);
+        console.log(
+          `📄 [EXECUTE FIX] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`
+        );
 
         // Usar função UUID válida
 
@@ -113,19 +120,23 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
           dataVencimento: parcela.vencimento,
           numDiasAgenda: 60,
           pagador: {
-            cpfCnpj: proposta.clienteCpf?.replace(/\D/g, "") || "",
-            tipoPessoa: "FISICA" as const,
-            nome: proposta.clienteNome || "",
-            email: proposta.clienteEmail || "",
-            ddd: proposta.clienteTelefone ? proposta.clienteTelefone.replace(/\D/g, "").slice(0, 2) : "",
-            telefone: proposta.clienteTelefone ? proposta.clienteTelefone.replace(/\D/g, "").slice(2) : "",
-            endereco: proposta.clienteEndereco || "",
-            numero: proposta.clienteNumero || "",
-            complemento: proposta.clienteComplemento || "",
-            bairro: proposta.clienteBairro || "",
-            cidade: proposta.clienteCidade || "",
-            uf: proposta.clienteUf || "",
-            cep: proposta.clienteCep?.replace(/\D/g, "") || "",
+            cpfCnpj: proposta.clienteCpf?.replace(/\D/g, '') || '',
+            tipoPessoa: 'FISICA' as const,
+            nome: proposta.clienteNome || '',
+            email: proposta.clienteEmail || '',
+            ddd: proposta.clienteTelefone
+              ? proposta.clienteTelefone.replace(/\D/g, '').slice(0, 2)
+              : '',
+            telefone: proposta.clienteTelefone
+              ? proposta.clienteTelefone.replace(/\D/g, '').slice(2)
+              : '',
+            endereco: proposta.clienteEndereco || '',
+            numero: proposta.clienteNumero || '',
+            complemento: proposta.clienteComplemento || '',
+            bairro: proposta.clienteBairro || '',
+            cidade: proposta.clienteCidade || '',
+            uf: proposta.clienteUf || '',
+            cep: proposta.clienteCep?.replace(/\D/g, '') || '',
           },
           mensagem: {
             linha1: `Parcela ${parcela.numero}/${parcelas.length} - Empréstimo`,
@@ -136,11 +147,15 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
           },
         };
 
-        console.log(`[PAM V1.0 FIX] Criando boleto real no Banco Inter - Parcela ${parcela.numero}`);
+        console.log(
+          `[PAM V1.0 FIX] Criando boleto real no Banco Inter - Parcela ${parcela.numero}`
+        );
         const createResponse = await interBankService.emitirCobranca(boletoData);
 
         // 2. Buscar dados completos (incluindo PIX)
-        const interCollection = await interBankService.recuperarCobranca(createResponse.codigoSolicitacao);
+        const interCollection = await interBankService.recuperarCobranca(
+          createResponse.codigoSolicitacao
+        );
 
         // 3. Salvar dados completos no banco (incluindo PIX)
         const [novoBoleto] = await db
@@ -153,12 +168,13 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
             dataVencimento: parcela.vencimento,
             situacao: interCollection.cobranca.situacao,
             dataSituacao: interCollection.cobranca.dataSituacao,
-            nossoNumero: interCollection.boleto?.nossoNumero || "",
-            codigoBarras: interCollection.boleto?.codigoBarras || "",
-            linhaDigitavel: interCollection.boleto?.linhaDigitavel || "",
-            pixTxid: interCollection.pix?.txid || "",
-            pixCopiaECola: interCollection.pix?.pixCopiaECola || "", // **PIX AGORA PERSISTIDO**
-            dataEmissao: interCollection.cobranca.dataEmissao || new Date().toISOString().split("T")[0],
+            nossoNumero: interCollection.boleto?.nossoNumero || '',
+            codigoBarras: interCollection.boleto?.codigoBarras || '',
+            linhaDigitavel: interCollection.boleto?.linhaDigitavel || '',
+            pixTxid: interCollection.pix?.txid || '',
+            pixCopiaECola: interCollection.pix?.pixCopiaECola || '', // **PIX AGORA PERSISTIDO**
+            dataEmissao:
+              interCollection.cobranca.dataEmissao || new Date().toISOString().split('T')[0],
             numeroParcela: parcela.numero,
             totalParcelas: parcelas.length,
             isActive: true,
@@ -168,12 +184,11 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
         novosBoletosGerados.push(novoBoleto);
 
         console.log(`🎉 [EXECUTE FIX] Boleto ${parcela.numero} criado com sucesso!`);
-
       } catch (error) {
         console.error(`❌ [EXECUTE FIX] Erro ao criar boleto ${parcela.numero}:`, error);
         errosEncontrados.push({
           parcela: parcela.numero,
-          erro: error instanceof Error ? error.message : "Erro desconhecido"
+          erro: error instanceof Error ? error.message : 'Erro desconhecido',
         });
       }
     }
@@ -187,7 +202,9 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
       })
       .where(eq(propostas.id, propostaId));
 
-    console.log(`🎉 [EXECUTE FIX] Regeneração completa! ${novosBoletosGerados.length} novos boletos criados`);
+    console.log(
+      `🎉 [EXECUTE FIX] Regeneração completa! ${novosBoletosGerados.length} novos boletos criados`
+    );
 
     res.json({
       success: true,
@@ -198,18 +215,21 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
       boletosDesativados: resultUpdate.length,
       novosBoletosGerados: novosBoletosGerados.length,
       erros: errosEncontrados.length,
-      exemploNovosCodigos: novosBoletosGerados.slice(0, 3).map(b => ({
+      exemploNovosCodigos: novosBoletosGerados.slice(0, 3).map((b) => ({
         parcela: b.numeroParcela,
         codigo: b.codigoSolicitacao,
-        formato: b.codigoSolicitacao.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) ? "UUID_VÁLIDO" : "INVÁLIDO",
+        formato: b.codigoSolicitacao.match(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        )
+          ? 'UUID_VÁLIDO'
+          : 'INVÁLIDO',
       })),
     });
-
   } catch (error) {
-    console.error("❌ [EXECUTE FIX] Erro geral:", error);
+    console.error('❌ [EXECUTE FIX] Erro geral:', error);
     res.status(500).json({
-      error: "Erro ao executar regeneração de boletos",
-      details: error instanceof Error ? error.message : "Erro desconhecido",
+      error: 'Erro ao executar regeneração de boletos',
+      details: error instanceof Error ? error.message : 'Erro desconhecido',
     });
   }
 });

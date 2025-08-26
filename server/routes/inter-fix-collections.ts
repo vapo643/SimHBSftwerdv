@@ -4,8 +4,8 @@
  * PAM V1.0 - Clean architecture implementation
  */
 
-import { Router, Request, Response } from "express";
-import { interFixService } from "../services/genericService";
+import { Router, Request, Response } from 'express';
+import { interFixService } from '../services/genericService';
 
 const router = Router();
 
@@ -13,15 +13,15 @@ const router = Router();
  * POST /api/inter-fix-collections/execute
  * Fix collections issues
  */
-router.post("/execute", async (req: Request, res: Response) => {
+router.post('/execute', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation("fix_collections", req.body);
+    const result = await interFixService.executeOperation('fix_collections', req.body);
     res.json(result);
   } catch (error: any) {
-    console.error("[INTER_FIX_COLLECTIONS] Error:", error);
+    console.error('[INTER_FIX_COLLECTIONS] Error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || "Collections fix failed",
+      error: error.message || 'Collections fix failed',
     });
   }
 });

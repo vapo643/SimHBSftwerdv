@@ -4,10 +4,10 @@
  * Following architectural boundary rules - controllers must not access DB directly
  */
 
-import { BaseRepository } from "./base.repository";
-import { createServerSupabaseAdminClient } from "../lib/supabase";
-import type { UserDataSchema } from "../../shared/types/user";
-import type { z } from "zod";
+import { BaseRepository } from './base.repository';
+import { createServerSupabaseAdminClient } from '../lib/supabase';
+import type { UserDataSchema } from '../../shared/types/user';
+import type { z } from 'zod';
 
 export interface Profile {
   id: string;
@@ -42,7 +42,7 @@ export class UserRepository extends BaseRepository<Profile> {
   private supabaseAdmin;
 
   constructor() {
-    super("profiles");
+    super('profiles');
     this.supabaseAdmin = createServerSupabaseAdminClient();
   }
 
@@ -52,7 +52,7 @@ export class UserRepository extends BaseRepository<Profile> {
   async getAllUsersWithAuth(): Promise<UserWithAuth[]> {
     // Get all auth users first
     const { data: authUsers, error: authError } = await this.supabaseAdmin.auth.admin.listUsers();
-    
+
     if (authError) {
       throw new Error(`Failed to fetch auth users: ${authError.message}`);
     }
@@ -60,24 +60,26 @@ export class UserRepository extends BaseRepository<Profile> {
     // Get all profiles
     const { data: profiles, error: profileError } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .is("deleted_at", null)
-      .order("full_name");
+      .select('*')
+      .is('deleted_at', null)
+      .order('full_name');
 
     if (profileError) {
       throw new Error(`Failed to fetch profiles: ${profileError.message}`);
     }
 
     // Join auth users with profiles
-    const users = profiles.map(profile => {
-      const authUser = authUsers.users.find(user => user.id === profile.id);
+    const users = profiles.map((profile) => {
+      const authUser = authUsers.users.find((user) => user.id === profile.id);
       return {
         ...profile,
-        email: authUser?.email || "N/A",
-        auth_status: authUser ? {
-          email_confirmed: !!authUser.email_confirmed_at,
-          banned_until: (authUser as any).banned_until || null
-        } : undefined
+        email: authUser?.email || 'N/A',
+        auth_status: authUser
+          ? {
+              email_confirmed: !!authUser.email_confirmed_at,
+              banned_until: (authUser as any).banned_until || null,
+            }
+          : undefined,
       };
     });
 
@@ -91,31 +93,35 @@ export class UserRepository extends BaseRepository<Profile> {
     // Get profile
     const { data: profile, error: profileError } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .eq("id", userId)
+      .select('*')
+      .eq('id', userId)
       .single();
 
     if (profileError) {
-      if (profileError.code === "PGRST116") { // Not found
+      if (profileError.code === 'PGRST116') {
+        // Not found
         return null;
       }
       throw new Error(`Failed to fetch profile: ${profileError.message}`);
     }
 
     // Get auth user
-    const { data: authUser, error: authError } = await this.supabaseAdmin.auth.admin.getUserById(userId);
+    const { data: authUser, error: authError } =
+      await this.supabaseAdmin.auth.admin.getUserById(userId);
 
-    if (authError && authError.message !== "User not found") {
+    if (authError && authError.message !== 'User not found') {
       throw new Error(`Failed to fetch auth user: ${authError.message}`);
     }
 
     return {
       ...profile,
-      email: authUser?.user?.email || "N/A",
-      auth_status: authUser?.user ? {
-        email_confirmed: !!authUser.user.email_confirmed_at,
-        banned_until: (authUser.user as any).banned_until || null
-      } : undefined
+      email: authUser?.user?.email || 'N/A',
+      auth_status: authUser?.user
+        ? {
+            email_confirmed: !!authUser.user.email_confirmed_at,
+            banned_until: (authUser.user as any).banned_until || null,
+          }
+        : undefined,
     } as UserWithAuth;
   }
 
@@ -135,7 +141,7 @@ export class UserRepository extends BaseRepository<Profile> {
     }
 
     if (!authData.user) {
-      throw new Error("Auth user creation failed - no user returned");
+      throw new Error('Auth user creation failed - no user returned');
     }
 
     try {
@@ -164,8 +170,8 @@ export class UserRepository extends BaseRepository<Profile> {
         email: authData.user.email!,
         auth_status: {
           email_confirmed: true,
-          banned_until: undefined
-        }
+          banned_until: undefined,
+        },
       } as UserWithAuth;
     } catch (error) {
       // Rollback auth user if profile creation failed
@@ -182,9 +188,9 @@ export class UserRepository extends BaseRepository<Profile> {
       .from(this.tableName)
       .update({
         ...data,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq("id", userId)
+      .eq('id', userId)
       .select()
       .single();
 
@@ -202,7 +208,7 @@ export class UserRepository extends BaseRepository<Profile> {
     // Ban user for effectively permanent duration
     const { error } = await this.supabaseAdmin.auth.admin.updateUserById(userId, {
       email_confirm: false,
-      ban_duration: "876000h", // 100 years
+      ban_duration: '876000h', // 100 years
     });
 
     if (error) {
@@ -211,7 +217,7 @@ export class UserRepository extends BaseRepository<Profile> {
 
     // Also mark profile as deleted (soft delete)
     await this.updateProfile(userId, {
-      deleted_at: new Date().toISOString()
+      deleted_at: new Date().toISOString(),
     });
   }
 
@@ -222,7 +228,7 @@ export class UserRepository extends BaseRepository<Profile> {
     // Remove ban
     const { error } = await this.supabaseAdmin.auth.admin.updateUserById(userId, {
       email_confirm: true,
-      ban_duration: "none",
+      ban_duration: 'none',
     });
 
     if (error) {
@@ -231,7 +237,7 @@ export class UserRepository extends BaseRepository<Profile> {
 
     // Remove soft delete from profile
     await this.updateProfile(userId, {
-      deleted_at: null
+      deleted_at: null,
     });
   }
 
@@ -240,9 +246,9 @@ export class UserRepository extends BaseRepository<Profile> {
    */
   async emailExists(email: string): Promise<boolean> {
     const { data } = await this.supabaseAdmin
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
       .single();
 
     return !!data;
@@ -254,10 +260,10 @@ export class UserRepository extends BaseRepository<Profile> {
   async getUsersByRole(role: string): Promise<Profile[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .eq("role", role)
-      .is("deleted_at", null)
-      .order("full_name");
+      .select('*')
+      .eq('role', role)
+      .is('deleted_at', null)
+      .order('full_name');
 
     if (error) {
       throw new Error(`Failed to fetch users by role: ${error.message}`);
@@ -272,10 +278,10 @@ export class UserRepository extends BaseRepository<Profile> {
   async getUsersByLoja(lojaId: number): Promise<Profile[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
+      .select('*')
       .or(`loja_id.eq.${lojaId},loja_ids.cs.{${lojaId}}`)
-      .is("deleted_at", null)
-      .order("full_name");
+      .is('deleted_at', null)
+      .order('full_name');
 
     if (error) {
       throw new Error(`Failed to fetch users by loja: ${error.message}`);

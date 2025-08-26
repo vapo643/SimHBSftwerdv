@@ -5,21 +5,21 @@
  * com visualização de vulnerabilidades, anomalias e métricas.
  */
 
-import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Shield,
   AlertTriangle,
@@ -35,9 +35,9 @@ import {
   Target,
   FileSearch,
   Package,
-} from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
-import RefreshButton from "@/components/RefreshButton";
+} from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
+import RefreshButton from '@/components/RefreshButton';
 import {
   LineChart,
   Line,
@@ -54,7 +54,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
+} from 'recharts';
 
 interface SecurityMetrics {
   totalRequests: number;
@@ -87,7 +87,7 @@ interface SecurityMetrics {
 interface VulnerabilityReport {
   id: string;
   type: string;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   endpoint?: string;
   description: string;
   detectedAt: Date;
@@ -103,42 +103,42 @@ interface AnomalyDetection {
 }
 
 const SEVERITY_COLORS = {
-  CRITICAL: "#dc2626",
-  HIGH: "#ea580c",
-  MEDIUM: "#f59e0b",
-  LOW: "#10b981",
+  CRITICAL: '#dc2626',
+  HIGH: '#ea580c',
+  MEDIUM: '#f59e0b',
+  LOW: '#10b981',
 };
 
 export default function SecurityDashboard() {
   const queryClient = useQueryClient();
-  const [selectedTimeRange, setSelectedTimeRange] = useState("1h");
+  const [selectedTimeRange, setSelectedTimeRange] = useState('1h');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Dados em tempo real
   const { data: metrics, isLoading: metricsLoading } = useQuery<SecurityMetrics>({
-    queryKey: ["/api/security/metrics", selectedTimeRange],
+    queryKey: ['/api/security/metrics', selectedTimeRange],
     refetchInterval: autoRefresh ? 10000 : false, // 10 segundos
   });
 
   const { data: vulnerabilities, isLoading: vulnerabilitiesLoading } = useQuery<
     VulnerabilityReport[]
   >({
-    queryKey: ["/api/security/vulnerabilities"],
+    queryKey: ['/api/security/vulnerabilities'],
     refetchInterval: autoRefresh ? 30000 : false, // 30 segundos
   });
 
   const { data: anomalies, isLoading: anomaliesLoading } = useQuery<AnomalyDetection[]>({
-    queryKey: ["/api/security/anomalies"],
+    queryKey: ['/api/security/anomalies'],
     refetchInterval: autoRefresh ? 10000 : false,
   });
 
   const { data: dependencyScans, isLoading: dependencyLoading } = useQuery({
-    queryKey: ["/api/security/dependency-scan"],
+    queryKey: ['/api/security/dependency-scan'],
     refetchInterval: autoRefresh ? 300000 : false, // 5 minutos
   });
 
   const { data: semgrepFindings, isLoading: semgrepLoading } = useQuery({
-    queryKey: ["/api/security/semgrep-findings"],
+    queryKey: ['/api/security/semgrep-findings'],
     refetchInterval: autoRefresh ? 60000 : false, // 1 minuto
   });
 
@@ -146,49 +146,49 @@ export default function SecurityDashboard() {
   useEffect(() => {
     try {
       // Get the correct port from window.location
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.hostname;
-      const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
+      const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
       const wsUrl = `${protocol}//${host}:${port}/ws/security`;
 
-      console.log("🔌 [SecurityDashboard] Connecting to WebSocket:", wsUrl);
+      console.log('🔌 [SecurityDashboard] Connecting to WebSocket:', wsUrl);
 
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log("🔌 [SecurityDashboard] WebSocket connected successfully");
+        console.log('🔌 [SecurityDashboard] WebSocket connected successfully');
       };
 
-      ws.onmessage = event => {
+      ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
         switch (data.type) {
-          case "anomaly":
-            queryClient.invalidateQueries({ queryKey: ["/api/security/anomalies"] });
+          case 'anomaly':
+            queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
             break;
-          case "vulnerability":
-            queryClient.invalidateQueries({ queryKey: ["/api/security/vulnerabilities"] });
+          case 'vulnerability':
+            queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
             break;
-          case "critical-alert":
+          case 'critical-alert':
             // Mostrar notificação
             showCriticalAlert(data);
             break;
         }
       };
 
-      ws.onerror = error => {
-        console.error("🔌 [SecurityDashboard] WebSocket error:", error);
+      ws.onerror = (error) => {
+        console.error('🔌 [SecurityDashboard] WebSocket error:', error);
       };
 
-      ws.onclose = event => {
-        console.log("🔌 [SecurityDashboard] WebSocket closed:", event.code, event.reason);
+      ws.onclose = (event) => {
+        console.log('🔌 [SecurityDashboard] WebSocket closed:', event.code, event.reason);
       };
 
       return () => {
         ws.close();
       };
     } catch (error) {
-      console.error("🔌 [SecurityDashboard] Failed to create WebSocket connection:", error);
+      console.error('🔌 [SecurityDashboard] Failed to create WebSocket connection:', error);
     }
   }, [queryClient]);
 
@@ -197,7 +197,7 @@ export default function SecurityDashboard() {
     securityScore: calculateSecurityScore(metrics, vulnerabilities),
     totalVulnerabilities: Array.isArray(vulnerabilities) ? vulnerabilities.length : 0,
     criticalVulnerabilities: Array.isArray(vulnerabilities)
-      ? vulnerabilities.filter((v: VulnerabilityReport) => v.severity === "CRITICAL").length
+      ? vulnerabilities.filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length
       : 0,
     recentAnomalies: Array.isArray(anomalies)
       ? anomalies.filter(
@@ -207,11 +207,11 @@ export default function SecurityDashboard() {
   };
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/security/metrics"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/security/vulnerabilities"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/security/anomalies"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/security/dependency-scan"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/security/semgrep-findings"] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/metrics'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/dependency-scan'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/semgrep-findings'] });
   };
 
   return (
@@ -236,12 +236,12 @@ export default function SecurityDashboard() {
 
           <div className="flex items-center gap-4">
             <Badge
-              variant={autoRefresh ? "default" : "outline"}
+              variant={autoRefresh ? 'default' : 'outline'}
               className="cursor-pointer"
               onClick={() => setAutoRefresh(!autoRefresh)}
             >
               <Activity className="mr-1 h-4 w-4" />
-              {autoRefresh ? "Ao Vivo" : "Pausado"}
+              {autoRefresh ? 'Ao Vivo' : 'Pausado'}
             </Badge>
 
             <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
@@ -336,7 +336,7 @@ export default function SecurityDashboard() {
         {/* Alertas Críticos */}
         {Array.isArray(vulnerabilities) &&
           (vulnerabilities as VulnerabilityReport[]).filter(
-            (v: VulnerabilityReport) => v.severity === "CRITICAL"
+            (v: VulnerabilityReport) => v.severity === 'CRITICAL'
           ).length > 0 && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -346,7 +346,7 @@ export default function SecurityDashboard() {
                 <div className="mt-2 space-y-1">
                   {Array.isArray(vulnerabilities) &&
                     (vulnerabilities as VulnerabilityReport[])
-                      .filter((v: VulnerabilityReport) => v.severity === "CRITICAL")
+                      .filter((v: VulnerabilityReport) => v.severity === 'CRITICAL')
                       .slice(0, 3)
                       .map((vuln: VulnerabilityReport) => (
                         <div key={vuln.id} className="text-sm">
@@ -450,8 +450,8 @@ function StatsCard({ title, value, icon, trend, critical }: any) {
           <div className="flex flex-col items-end">
             {icon}
             {trend !== undefined && (
-              <Badge variant={trend > 0 ? "destructive" : "default"} className="mt-2">
-                {trend > 0 ? "+" : ""}
+              <Badge variant={trend > 0 ? 'destructive' : 'default'} className="mt-2">
+                {trend > 0 ? '+' : ''}
                 {trend}%
               </Badge>
             )}
@@ -486,7 +486,7 @@ function VulnerabilitiesPanel({ vulnerabilities }: any) {
                   <Badge
                     style={{
                       backgroundColor: SEVERITY_COLORS[vuln.severity],
-                      color: "white",
+                      color: 'white',
                     }}
                   >
                     {vuln.severity}
@@ -614,8 +614,8 @@ function DependenciesPanel({ scans }: any) {
                   <Badge
                     style={{
                       backgroundColor:
-                        SEVERITY_COLORS[dep.severity as keyof typeof SEVERITY_COLORS] || "#10b981",
-                      color: "white",
+                        SEVERITY_COLORS[dep.severity as keyof typeof SEVERITY_COLORS] || '#10b981',
+                      color: 'white',
                     }}
                   >
                     CVSS: {dep.cvssScore}
@@ -646,7 +646,7 @@ function CodeAnalysisPanel({ findings }: any) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="font-medium">{finding.rule}</p>
-                <Badge variant={finding.severity === "ERROR" ? "destructive" : "default"}>
+                <Badge variant={finding.severity === 'ERROR' ? 'destructive' : 'default'}>
                   {finding.severity}
                 </Badge>
               </div>
@@ -766,13 +766,13 @@ function calculateSecurityScore(metrics: any, vulnerabilities: any): number {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return "#10b981";
-  if (score >= 70) return "#f59e0b";
-  if (score >= 50) return "#ea580c";
-  return "#dc2626";
+  if (score >= 90) return '#10b981';
+  if (score >= 70) return '#f59e0b';
+  if (score >= 50) return '#ea580c';
+  return '#dc2626';
 }
 
 function showCriticalAlert(data: any) {
   // Implementar notificação do navegador ou toast
-  console.error("ALERTA CRÍTICO:", data);
+  console.error('ALERTA CRÍTICO:', data);
 }

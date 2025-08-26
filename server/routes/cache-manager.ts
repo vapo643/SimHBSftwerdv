@@ -1,1 +1,12 @@
-import { Router } from "express"; import { cacheService } from "../services/genericService"; const router = Router(); router.post("/clear", async (req, res) => { try { const result = await cacheService.executeOperation("clear_cache", req.body); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { cacheService } from '../services/genericService';
+const router = Router();
+router.post('/clear', async (req, res) => {
+  try {
+    const result = await cacheService.executeOperation('clear_cache', req.body);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

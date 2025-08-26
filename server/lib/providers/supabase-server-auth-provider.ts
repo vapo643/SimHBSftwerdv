@@ -3,8 +3,8 @@
  * Implementação específica do Supabase para autenticação no servidor
  */
 
-import { createServerSupabaseClient } from "../../../client/src/lib/supabase";
-import { ServerAuthProvider, ServerUser, TokenValidationResult } from "../auth-types";
+import { createServerSupabaseClient } from '../../../client/src/lib/supabase';
+import { ServerAuthProvider, ServerUser, TokenValidationResult } from '../auth-types';
 
 export class SupabaseServerAuthProvider implements ServerAuthProvider {
   private supabase = createServerSupabaseClient();
@@ -15,7 +15,7 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
   private mapSupabaseUser(supabaseUser: any): ServerUser {
     return {
       id: supabaseUser.id,
-      email: supabaseUser.email || "",
+      email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name,
       createdAt: supabaseUser.created_at ? new Date(supabaseUser.created_at) : undefined,
     };

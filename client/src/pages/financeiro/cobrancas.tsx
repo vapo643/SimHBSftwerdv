@@ -1,20 +1,20 @@
-import React, { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { useAuth } from "@/contexts/AuthContext";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import { useAuth } from '@/contexts/AuthContext';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -22,8 +22,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
+} from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -31,12 +31,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import {
   Calendar,
   Search,
@@ -64,7 +64,7 @@ import {
   CheckSquare,
   XCircle,
   Bell,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   format,
   addMonths,
@@ -74,8 +74,8 @@ import {
   startOfMonth,
   isBefore,
   addDays,
-} from "date-fns";
-import { ptBR } from "date-fns/locale";
+} from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface Parcela {
   id: string;
@@ -86,7 +86,7 @@ interface Parcela {
   codigoBoleto?: string;
   linhaDigitavel?: string;
   codigoBarras?: string;
-  status: "pago" | "pendente" | "vencido";
+  status: 'pago' | 'pendente' | 'vencido';
   diasAtraso?: number;
   // Inter Bank fields
   interCodigoSolicitacao?: string;
@@ -115,7 +115,7 @@ interface PropostaCobranca {
   valorTotalPago: number;
   valorTotalPendente: number;
   diasAtraso: number;
-  status: "em_dia" | "inadimplente" | "quitado";
+  status: 'em_dia' | 'inadimplente' | 'quitado';
   dataContrato: string;
   ccbAssinada: boolean;
   parcelas: Parcela[];
@@ -133,54 +133,57 @@ export default function Cobrancas() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const userRole = user?.role || "";
-  
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const userRole = user?.role || '';
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [selectedProposta, setSelectedProposta] = useState<PropostaCobranca | null>(null);
   const [showContactModal, setShowContactModal] = useState(false);
-  const [contactType, setContactType] = useState<"whatsapp" | "sms" | "email">("whatsapp");
-  const [dateRange, setDateRange] = useState<"todos" | "hoje" | "semana" | "mes">("todos");
+  const [contactType, setContactType] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp');
+  const [dateRange, setDateRange] = useState<'todos' | 'hoje' | 'semana' | 'mes'>('todos');
   const [showCpf, setShowCpf] = useState(false);
   const [showBoletosModal, setShowBoletosModal] = useState(false);
   const [selectedPropostaForBoletos, setSelectedPropostaForBoletos] =
     useState<PropostaCobranca | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+
   // Estados para modais de ação PAM V1.0
   const [showProrrogarModal, setShowProrrogarModal] = useState(false);
   const [showDescontoModal, setShowDescontoModal] = useState(false);
-  const [selectedBoleto, setSelectedBoleto] = useState<{ codigoSolicitacao: string; valorNominal: number } | null>(null);
-  const [novaDataVencimento, setNovaDataVencimento] = useState("");
-  const [tipoDesconto, setTipoDesconto] = useState<"PERCENTUAL" | "FIXO">("PERCENTUAL");
-  const [valorDesconto, setValorDesconto] = useState("");
-  const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
-  
+  const [selectedBoleto, setSelectedBoleto] = useState<{
+    codigoSolicitacao: string;
+    valorNominal: number;
+  } | null>(null);
+  const [novaDataVencimento, setNovaDataVencimento] = useState('');
+  const [tipoDesconto, setTipoDesconto] = useState<'PERCENTUAL' | 'FIXO'>('PERCENTUAL');
+  const [valorDesconto, setValorDesconto] = useState('');
+  const [dataLimiteDesconto, setDataLimiteDesconto] = useState('');
+
   // PAM V1.0 Blueprint V2.0 - Estados para observações
-  const [observacaoProrrogacao, setObservacaoProrrogacao] = useState("");
-  const [observacaoDesconto, setObservacaoDesconto] = useState("");
-  
+  const [observacaoProrrogacao, setObservacaoProrrogacao] = useState('');
+  const [observacaoDesconto, setObservacaoDesconto] = useState('');
+
   // PAM V1.0 Blueprint V2.0 - Estados para supervisor
   const [showSolicitacoesModal, setShowSolicitacoesModal] = useState(false);
   const [selectedSolicitacao, setSelectedSolicitacao] = useState<any>(null);
-  const [motivoRejeicao, setMotivoRejeicao] = useState("");
-  const [observacaoSupervisor, setObservacaoSupervisor] = useState("");
+  const [motivoRejeicao, setMotivoRejeicao] = useState('');
+  const [observacaoSupervisor, setObservacaoSupervisor] = useState('');
 
   // Função para copiar PIX ou linha digitável
-  const copyPaymentCode = (code: string, type: "pix" | "barcode") => {
+  const copyPaymentCode = (code: string, type: 'pix' | 'barcode') => {
     navigator.clipboard.writeText(code);
     toast({
-      title: type === "pix" ? "PIX copiado!" : "Linha digitável copiada!",
+      title: type === 'pix' ? 'PIX copiado!' : 'Linha digitável copiada!',
       description:
-        type === "pix"
-          ? "Cole no app do seu banco para pagar"
-          : "Use no internet banking para pagar",
+        type === 'pix'
+          ? 'Cole no app do seu banco para pagar'
+          : 'Use no internet banking para pagar',
     });
   };
 
   // Função para mascarar CPF/CNPJ (LGPD)
   const maskDocument = (doc: string) => {
-    if (!doc) return "";
+    if (!doc) return '';
     if (!showCpf) {
       // Mascara mantendo apenas os primeiros 3 e últimos 2 dígitos
       if (doc.length === 11) {
@@ -194,28 +197,32 @@ export default function Cobrancas() {
     // Formata o documento completo
     if (doc.length === 11) {
       // CPF
-      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     } else if (doc.length === 14) {
       // CNPJ
-      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
     return doc;
   };
 
   // PAM V1.0 Blueprint V2.0 - Mutation para SOLICITAR prorrogação
   const prorrogarMutation = useMutation({
-    mutationFn: async ({ 
-      codigoSolicitacao, 
+    mutationFn: async ({
+      codigoSolicitacao,
       novaDataVencimento,
-      observacao 
-    }: { 
-      codigoSolicitacao: string; 
+      observacao,
+    }: {
+      codigoSolicitacao: string;
       novaDataVencimento: string;
       observacao?: string;
     }) => {
-      console.log('[PAM V1.0 Blueprint V2.0] Solicitando prorrogação:', { codigoSolicitacao, novaDataVencimento, observacao });
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitando prorrogação:', {
+        codigoSolicitacao,
+        novaDataVencimento,
+        observacao,
+      });
       return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/solicitar-prorrogacao`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ novaDataVencimento, observacao }),
       });
     },
@@ -223,46 +230,52 @@ export default function Cobrancas() {
       console.log('[PAM V1.0 Blueprint V2.0] Solicitação de prorrogação enviada:', data);
       const isAutoApproved = data.autoApproved;
       toast({
-        title: isAutoApproved ? "Prorrogação executada" : "Solicitação enviada",
-        description: isAutoApproved 
-          ? "O vencimento foi prorrogado com sucesso."
-          : "Sua solicitação foi enviada para aprovação do supervisor.",
+        title: isAutoApproved ? 'Prorrogação executada' : 'Solicitação enviada',
+        description: isAutoApproved
+          ? 'O vencimento foi prorrogado com sucesso.'
+          : 'Sua solicitação foi enviada para aprovação do supervisor.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/solicitacoes'] });
       setShowProrrogarModal(false);
       setSelectedBoleto(null);
-      setNovaDataVencimento("");
-      setObservacaoProrrogacao("");
+      setNovaDataVencimento('');
+      setObservacaoProrrogacao('');
     },
     onError: (error: any) => {
       console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar prorrogação:', error);
       toast({
-        title: "Erro ao solicitar prorrogação",
-        description: error.response?.data?.message || "Não foi possível enviar a solicitação.",
-        variant: "destructive",
+        title: 'Erro ao solicitar prorrogação',
+        description: error.response?.data?.message || 'Não foi possível enviar a solicitação.',
+        variant: 'destructive',
       });
     },
   });
 
   // PAM V1.0 Blueprint V2.0 - Mutation para SOLICITAR desconto
   const descontoMutation = useMutation({
-    mutationFn: async ({ 
-      codigoSolicitacao, 
-      tipoDesconto, 
+    mutationFn: async ({
+      codigoSolicitacao,
+      tipoDesconto,
       valorDesconto,
       dataLimiteDesconto,
-      observacao 
-    }: { 
-      codigoSolicitacao: string; 
-      tipoDesconto: "PERCENTUAL" | "FIXO";
+      observacao,
+    }: {
+      codigoSolicitacao: string;
+      tipoDesconto: 'PERCENTUAL' | 'FIXO';
       valorDesconto: number;
       dataLimiteDesconto?: string;
       observacao?: string;
     }) => {
-      console.log('[PAM V1.0 Blueprint V2.0] Solicitando desconto:', { codigoSolicitacao, tipoDesconto, valorDesconto, dataLimiteDesconto, observacao });
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitando desconto:', {
+        codigoSolicitacao,
+        tipoDesconto,
+        valorDesconto,
+        dataLimiteDesconto,
+        observacao,
+      });
       return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/solicitar-desconto`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ tipoDesconto, valorDesconto, dataLimiteDesconto, observacao }),
       });
     },
@@ -270,107 +283,101 @@ export default function Cobrancas() {
       console.log('[PAM V1.0 Blueprint V2.0] Solicitação de desconto enviada:', data);
       const isAutoApproved = data.autoApproved;
       toast({
-        title: isAutoApproved ? "Desconto aplicado" : "Solicitação enviada",
-        description: isAutoApproved 
-          ? `Desconto de ${tipoDesconto === "PERCENTUAL" ? `${valorDesconto}%` : `R$ ${valorDesconto}`} aplicado com sucesso.`
-          : "Sua solicitação foi enviada para aprovação do supervisor.",
+        title: isAutoApproved ? 'Desconto aplicado' : 'Solicitação enviada',
+        description: isAutoApproved
+          ? `Desconto de ${tipoDesconto === 'PERCENTUAL' ? `${valorDesconto}%` : `R$ ${valorDesconto}`} aplicado com sucesso.`
+          : 'Sua solicitação foi enviada para aprovação do supervisor.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/solicitacoes'] });
       setShowDescontoModal(false);
       setSelectedBoleto(null);
-      setValorDesconto("");
-      setDataLimiteDesconto("");
-      setObservacaoDesconto("");
+      setValorDesconto('');
+      setDataLimiteDesconto('');
+      setObservacaoDesconto('');
     },
     onError: (error: any) => {
       console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar desconto:', error);
       toast({
-        title: "Erro ao solicitar desconto",
-        description: error.response?.data?.message || "Não foi possível enviar a solicitação.",
-        variant: "destructive",
+        title: 'Erro ao solicitar desconto',
+        description: error.response?.data?.message || 'Não foi possível enviar a solicitação.',
+        variant: 'destructive',
       });
     },
   });
 
   // PAM V1.0 Blueprint V2.0 - Query para buscar solicitações pendentes (supervisor)
   const { data: solicitacoesPendentes, refetch: refetchSolicitacoes } = useQuery({
-    queryKey: ["/api/cobrancas/solicitacoes"],
-    enabled: ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole),
+    queryKey: ['/api/cobrancas/solicitacoes'],
+    enabled: ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole),
     queryFn: async () => {
-      const response = await apiRequest("/api/cobrancas/solicitacoes?status=pendente", {
-        method: "GET",
-      }) as any[];
+      const response = (await apiRequest('/api/cobrancas/solicitacoes?status=pendente', {
+        method: 'GET',
+      })) as any[];
       return response;
     },
   });
 
   // PAM V1.0 Blueprint V2.0 - Mutation para aprovar solicitação
   const aprovarSolicitacaoMutation = useMutation({
-    mutationFn: async ({ 
-      id, 
-      observacao 
-    }: { 
-      id: number; 
-      observacao?: string;
-    }) => {
+    mutationFn: async ({ id, observacao }: { id: number; observacao?: string }) => {
       return apiRequest(`/api/cobrancas/solicitacoes/${id}/aprovar`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ observacao }),
       });
     },
     onSuccess: () => {
       toast({
-        title: "Solicitação aprovada",
-        description: "A solicitação foi aprovada e executada com sucesso.",
+        title: 'Solicitação aprovada',
+        description: 'A solicitação foi aprovada e executada com sucesso.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/solicitacoes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
       setShowSolicitacoesModal(false);
       setSelectedSolicitacao(null);
-      setObservacaoSupervisor("");
+      setObservacaoSupervisor('');
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao aprovar",
-        description: error.response?.data?.message || "Não foi possível aprovar a solicitação.",
-        variant: "destructive",
+        title: 'Erro ao aprovar',
+        description: error.response?.data?.message || 'Não foi possível aprovar a solicitação.',
+        variant: 'destructive',
       });
     },
   });
 
   // PAM V1.0 Blueprint V2.0 - Mutation para rejeitar solicitação
   const rejeitarSolicitacaoMutation = useMutation({
-    mutationFn: async ({ 
-      id, 
+    mutationFn: async ({
+      id,
       motivo,
-      observacao 
-    }: { 
-      id: number; 
+      observacao,
+    }: {
+      id: number;
       motivo: string;
       observacao?: string;
     }) => {
       return apiRequest(`/api/cobrancas/solicitacoes/${id}/rejeitar`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ motivo, observacao }),
       });
     },
     onSuccess: () => {
       toast({
-        title: "Solicitação rejeitada",
-        description: "A solicitação foi rejeitada.",
+        title: 'Solicitação rejeitada',
+        description: 'A solicitação foi rejeitada.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/solicitacoes'] });
       setShowSolicitacoesModal(false);
       setSelectedSolicitacao(null);
-      setMotivoRejeicao("");
-      setObservacaoSupervisor("");
+      setMotivoRejeicao('');
+      setObservacaoSupervisor('');
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao rejeitar",
-        description: error.response?.data?.message || "Não foi possível rejeitar a solicitação.",
-        variant: "destructive",
+        title: 'Erro ao rejeitar',
+        description: error.response?.data?.message || 'Não foi possível rejeitar a solicitação.',
+        variant: 'destructive',
       });
     },
   });
@@ -381,15 +388,15 @@ export default function Cobrancas() {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["/api/cobrancas"],
+    queryKey: ['/api/cobrancas'],
     queryFn: async () => {
       // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 1
       console.log('[DEBUG-FRONTEND-1] Chamando API de cobranças...');
-      
-      const response = await apiRequest("/api/cobrancas", {
-        method: "GET",
-      }) as PropostaCobranca[];
-      
+
+      const response = (await apiRequest('/api/cobrancas', {
+        method: 'GET',
+      })) as PropostaCobranca[];
+
       return response;
     },
   });
@@ -400,20 +407,20 @@ export default function Cobrancas() {
       console.log('[DEBUG-FRONTEND-2] Dados BRUTOS recebidos da API:', {
         totalRecebidos: propostas?.length || 0,
         primeiroItem: propostas?.[0] || null,
-        todosDados: propostas
+        todosDados: propostas,
       });
     }
   }, [propostas]);
 
   // Buscar sumário do Inter Bank
   const { data: sumarioInter, refetch: refetchSumario } = useQuery({
-    queryKey: ["/api/cobrancas/inter-sumario"],
+    queryKey: ['/api/cobrancas/inter-sumario'],
     enabled: !!propostas,
     refetchInterval: 30000, // Atualiza a cada 30 segundos
     queryFn: async () => {
-      const response = await apiRequest("/api/cobrancas/inter-sumario", {
-        method: "GET",
-      }) as any;
+      const response = (await apiRequest('/api/cobrancas/inter-sumario', {
+        method: 'GET',
+      })) as any;
       return response;
     },
   });
@@ -422,11 +429,11 @@ export default function Cobrancas() {
   const atualizarStatusBoleto = async (codigoSolicitacao: string) => {
     try {
       const response = await apiRequest(`/api/cobrancas/inter-status/${codigoSolicitacao}`, {
-        method: "GET",
+        method: 'GET',
       });
       return response;
     } catch (error) {
-      console.error("Erro ao buscar status do boleto:", error);
+      console.error('Erro ao buscar status do boleto:', error);
       return null;
     }
   };
@@ -440,8 +447,8 @@ export default function Cobrancas() {
     let totalErros = 0;
 
     toast({
-      title: "Sincronizando com Banco Inter...",
-      description: "Buscando status real de todos os boletos",
+      title: 'Sincronizando com Banco Inter...',
+      description: 'Buscando status real de todos os boletos',
     });
 
     try {
@@ -449,10 +456,10 @@ export default function Cobrancas() {
       if (propostas && propostas.length > 0) {
         for (const proposta of propostas) {
           try {
-            const response = await apiRequest("/api/cobrancas/inter-sync-all", {
-              method: "POST",
+            const response = (await apiRequest('/api/cobrancas/inter-sync-all', {
+              method: 'POST',
               body: JSON.stringify({ propostaId: proposta.id }),
-            }) as any;
+            })) as any;
 
             if (response.atualizados) {
               totalAtualizados += response.atualizados;
@@ -472,18 +479,18 @@ export default function Cobrancas() {
       await refetchSumario();
 
       toast({
-        title: "Sincronização concluída",
+        title: 'Sincronização concluída',
         description:
           totalErros > 0
             ? `${totalAtualizados} boletos atualizados, ${totalErros} erros`
             : `${totalAtualizados} boletos sincronizados com sucesso`,
-        variant: totalErros > 0 ? "default" : undefined,
+        variant: totalErros > 0 ? 'default' : undefined,
       });
     } catch (error) {
       toast({
-        title: "Erro ao sincronizar",
-        description: "Falha ao conectar com o Banco Inter",
-        variant: "destructive",
+        title: 'Erro ao sincronizar',
+        description: 'Falha ao conectar com o Banco Inter',
+        variant: 'destructive',
       });
     } finally {
       setIsRefreshing(false);
@@ -494,29 +501,29 @@ export default function Cobrancas() {
   const atualizarStatusParcelas = async (propostaId: string) => {
     try {
       await apiRequest(`/api/cobrancas/${propostaId}/atualizar-status`, {
-        method: "POST",
+        method: 'POST',
       });
       toast({
-        title: "Status atualizado",
-        description: "O status das parcelas foi atualizado com sucesso.",
+        title: 'Status atualizado',
+        description: 'O status das parcelas foi atualizado com sucesso.',
       });
       refetch();
     } catch (error) {
       toast({
-        title: "Erro ao atualizar",
-        description: "Não foi possível atualizar o status das parcelas.",
-        variant: "destructive",
+        title: 'Erro ao atualizar',
+        description: 'Não foi possível atualizar o status das parcelas.',
+        variant: 'destructive',
       });
     }
   };
 
   // Gerar mensagem padrão para contato
   const gerarMensagemContato = (proposta: PropostaCobranca, parcela?: Parcela) => {
-    const parcelasVencidas = proposta.parcelas.filter(p => p.status === "vencido");
+    const parcelasVencidas = proposta.parcelas.filter((p) => p.status === 'vencido');
     const valorTotalVencido = parcelasVencidas.reduce((acc, p) => acc + p.valorParcela, 0);
 
     if (parcela) {
-      return `Olá ${proposta.nomeCliente}!\n\nEste é um lembrete sobre a parcela ${parcela.numero} do seu contrato ${proposta.numeroContrato}.\n\nValor: R$ ${parcela.valorParcela.toFixed(2)}\nVencimento: ${format(new Date(parcela.dataVencimento), "dd/MM/yyyy")}\n${parcela.status === "vencido" ? `Dias em atraso: ${parcela.diasAtraso}\n` : ""}\n${parcela.linhaDigitavel ? `Linha digitável: ${parcela.linhaDigitavel}\n` : ""}\nPara sua comodidade, você também pode pagar via PIX usando a chave: contato@simpix.com.br\n\nCaso já tenha efetuado o pagamento, favor desconsiderar esta mensagem.\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe Simpix`;
+      return `Olá ${proposta.nomeCliente}!\n\nEste é um lembrete sobre a parcela ${parcela.numero} do seu contrato ${proposta.numeroContrato}.\n\nValor: R$ ${parcela.valorParcela.toFixed(2)}\nVencimento: ${format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}\n${parcela.status === 'vencido' ? `Dias em atraso: ${parcela.diasAtraso}\n` : ''}\n${parcela.linhaDigitavel ? `Linha digitável: ${parcela.linhaDigitavel}\n` : ''}\nPara sua comodidade, você também pode pagar via PIX usando a chave: contato@simpix.com.br\n\nCaso já tenha efetuado o pagamento, favor desconsiderar esta mensagem.\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe Simpix`;
     } else {
       return `Olá ${proposta.nomeCliente}!\n\nIdentificamos pendências em seu contrato ${proposta.numeroContrato}.\n\nParcelas vencidas: ${parcelasVencidas.length}\nValor total em atraso: R$ ${valorTotalVencido.toFixed(2)}\n\nPara regularizar sua situação, entre em contato conosco ou acesse sua área do cliente.\n\nEstamos à disposição para negociar as melhores condições de pagamento.\n\nAtenciosamente,\nEquipe Simpix`;
     }
@@ -525,28 +532,28 @@ export default function Cobrancas() {
   // Enviar mensagem de contato
   const enviarContato = async (proposta: PropostaCobranca, tipo: string, mensagem: string) => {
     try {
-      await apiRequest("/api/cobrancas/contato", {
-        method: "POST",
+      await apiRequest('/api/cobrancas/contato', {
+        method: 'POST',
         body: JSON.stringify({
           propostaId: proposta.id,
           tipo,
           destinatario:
-            tipo === "whatsapp" || tipo === "sms"
+            tipo === 'whatsapp' || tipo === 'sms'
               ? proposta.telefoneCliente
               : proposta.emailCliente,
           mensagem,
         }),
       });
       toast({
-        title: "Contato enviado",
+        title: 'Contato enviado',
         description: `Mensagem enviada com sucesso via ${tipo}.`,
       });
       setShowContactModal(false);
     } catch (error) {
       toast({
-        title: "Erro ao enviar",
-        description: "Não foi possível enviar a mensagem.",
-        variant: "destructive",
+        title: 'Erro ao enviar',
+        description: 'Não foi possível enviar a mensagem.',
+        variant: 'destructive',
       });
     }
   };
@@ -556,15 +563,15 @@ export default function Cobrancas() {
   console.log('[DEBUG-FRONTEND-3] Dados ANTES do filtro local:', {
     totalPropostas: propostas?.length || 0,
     dadosOriginais: propostas,
-    filtrosAtivos: { searchTerm, statusFilter, dateRange }
+    filtrosAtivos: { searchTerm, statusFilter, dateRange },
   });
 
-  const propostasFiltradas = propostas?.filter(proposta => {
+  const propostasFiltradas = propostas?.filter((proposta) => {
     // 🔍 AUDITORIA: Verificar se o campo nomeCliente existe antes de filtrar
-    const nomeCliente = proposta.nomeCliente || "";
-    const numeroContrato = proposta.numeroContrato || "";
-    const cpfCliente = proposta.cpfCliente || "";
-    const id = proposta.id || "";
+    const nomeCliente = proposta.nomeCliente || '';
+    const numeroContrato = proposta.numeroContrato || '';
+    const cpfCliente = proposta.cpfCliente || '';
+    const id = proposta.id || '';
 
     console.log('🔍 [AUDITORIA FRONTEND] CAMPOS DA PROPOSTA:', {
       id: proposta.id,
@@ -574,8 +581,8 @@ export default function Cobrancas() {
       camposVazios: {
         nomeVazio: !proposta.nomeCliente,
         cpfVazio: !proposta.cpfCliente,
-        contratoVazio: !proposta.numeroContrato
-      }
+        contratoVazio: !proposta.numeroContrato,
+      },
     });
 
     const matchesSearch =
@@ -585,28 +592,28 @@ export default function Cobrancas() {
       id.includes(searchTerm);
 
     let matchesStatus = true;
-    if (statusFilter === "adimplente") {
-      matchesStatus = proposta.status === "em_dia";
-    } else if (statusFilter === "atraso_1_15") {
+    if (statusFilter === 'adimplente') {
+      matchesStatus = proposta.status === 'em_dia';
+    } else if (statusFilter === 'atraso_1_15') {
       matchesStatus =
-        proposta.status === "inadimplente" && proposta.diasAtraso >= 1 && proposta.diasAtraso <= 15;
-    } else if (statusFilter === "atraso_30_mais") {
-      matchesStatus = proposta.status === "inadimplente" && proposta.diasAtraso > 30;
-    } else if (statusFilter !== "todos") {
+        proposta.status === 'inadimplente' && proposta.diasAtraso >= 1 && proposta.diasAtraso <= 15;
+    } else if (statusFilter === 'atraso_30_mais') {
+      matchesStatus = proposta.status === 'inadimplente' && proposta.diasAtraso > 30;
+    } else if (statusFilter !== 'todos') {
       matchesStatus = proposta.status === statusFilter;
     }
 
     let matchesDate = true;
-    if (dateRange !== "todos") {
+    if (dateRange !== 'todos') {
       const hoje = new Date();
       const dataContrato = new Date(proposta.dataContrato);
 
-      if (dateRange === "hoje") {
-        matchesDate = format(dataContrato, "yyyy-MM-dd") === format(hoje, "yyyy-MM-dd");
-      } else if (dateRange === "semana") {
+      if (dateRange === 'hoje') {
+        matchesDate = format(dataContrato, 'yyyy-MM-dd') === format(hoje, 'yyyy-MM-dd');
+      } else if (dateRange === 'semana') {
         const inicioSemana = startOfWeek(hoje, { weekStartsOn: 1 });
         matchesDate = isAfter(dataContrato, inicioSemana);
-      } else if (dateRange === "mes") {
+      } else if (dateRange === 'mes') {
         const inicioMes = startOfMonth(hoje);
         matchesDate = isAfter(dataContrato, inicioMes);
       }
@@ -618,7 +625,7 @@ export default function Cobrancas() {
       matchesSearch,
       matchesStatus,
       matchesDate,
-      passaFiltro
+      passaFiltro,
     });
 
     return passaFiltro;
@@ -629,15 +636,15 @@ export default function Cobrancas() {
     totalOriginal: propostas?.length || 0,
     totalFiltrado: propostasFiltradas?.length || 0,
     dadosFiltrados: propostasFiltradas,
-    primeiroDadoFiltrado: propostasFiltradas?.[0] || null
+    primeiroDadoFiltrado: propostasFiltradas?.[0] || null,
   });
 
   // Estatísticas gerais
   const estatisticas = {
     totalContratos: propostas?.length || 0,
-    contratosEmDia: propostas?.filter(p => p.status === "em_dia").length || 0,
-    contratosInadimplentes: propostas?.filter(p => p.status === "inadimplente").length || 0,
-    contratosQuitados: propostas?.filter(p => p.status === "quitado").length || 0,
+    contratosEmDia: propostas?.filter((p) => p.status === 'em_dia').length || 0,
+    contratosInadimplentes: propostas?.filter((p) => p.status === 'inadimplente').length || 0,
+    contratosQuitados: propostas?.filter((p) => p.status === 'quitado').length || 0,
     valorTotalCarteira: propostas?.reduce((acc, p) => acc + p.valorTotal, 0) || 0,
     valorTotalRecebido: propostas?.reduce((acc, p) => acc + p.valorTotalPago, 0) || 0,
     valorTotalPendente: propostas?.reduce((acc, p) => acc + p.valorTotalPendente, 0) || 0,
@@ -646,31 +653,31 @@ export default function Cobrancas() {
   const taxaInadimplencia =
     estatisticas.totalContratos > 0
       ? ((estatisticas.contratosInadimplentes / estatisticas.totalContratos) * 100).toFixed(1)
-      : "0";
+      : '0';
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "em_dia":
-        return "bg-green-100 text-green-800";
-      case "inadimplente":
-        return "bg-red-100 text-red-800";
-      case "quitado":
-        return "bg-blue-100 text-blue-800";
+      case 'em_dia':
+        return 'bg-green-100 text-green-800';
+      case 'inadimplente':
+        return 'bg-red-100 text-red-800';
+      case 'quitado':
+        return 'bg-blue-100 text-blue-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getParcelaStatusColor = (status: string) => {
     switch (status) {
-      case "pago":
-        return "bg-green-100 text-green-800";
-      case "vencido":
-        return "bg-red-100 text-red-800";
-      case "pendente":
-        return "bg-yellow-100 text-yellow-800";
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'vencido':
+        return 'bg-red-100 text-red-800';
+      case 'pendente':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -678,27 +685,30 @@ export default function Cobrancas() {
     <DashboardLayout title="Cobranças">
       <div className="space-y-6">
         {/* PAM V1.0 Blueprint V2.0 - Badge para supervisores */}
-        {["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && solicitacoesPendentes && solicitacoesPendentes.length > 0 && (
-          <Card className="mb-4 border-orange-500 bg-orange-50 dark:bg-orange-900/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-orange-600" />
-                  <CardTitle className="text-lg">Aprovações Pendentes</CardTitle>
+        {['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole) &&
+          solicitacoesPendentes &&
+          solicitacoesPendentes.length > 0 && (
+            <Card className="mb-4 border-orange-500 bg-orange-50 dark:bg-orange-900/20">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-orange-600" />
+                    <CardTitle className="text-lg">Aprovações Pendentes</CardTitle>
+                  </div>
+                  <Badge variant="default" className="bg-orange-600">
+                    {solicitacoesPendentes.length}{' '}
+                    {solicitacoesPendentes.length === 1 ? 'solicitação' : 'solicitações'}
+                  </Badge>
                 </div>
-                <Badge variant="default" className="bg-orange-600">
-                  {solicitacoesPendentes.length} {solicitacoesPendentes.length === 1 ? "solicitação" : "solicitações"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => setShowSolicitacoesModal(true)} className="w-full">
-                <CheckSquare className="mr-2 h-4 w-4" />
-                Revisar Solicitações
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => setShowSolicitacoesModal(true)} className="w-full">
+                  <CheckSquare className="mr-2 h-4 w-4" />
+                  Revisar Solicitações
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Estatísticas */}
         <div className="grid gap-4 md:grid-cols-4">
@@ -735,9 +745,9 @@ export default function Cobrancas() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
                 }).format(estatisticas.valorTotalRecebido)}
               </div>
               <Progress
@@ -754,9 +764,9 @@ export default function Cobrancas() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
                 }).format(estatisticas.valorTotalPendente)}
               </div>
               <div className="text-xs text-muted-foreground">A receber</div>
@@ -778,8 +788,8 @@ export default function Cobrancas() {
                 onClick={atualizarTodosStatus}
                 disabled={isRefreshing}
               >
-                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-                {isRefreshing ? "Atualizando..." : "Atualizar Status"}
+                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Atualizando...' : 'Atualizar Status'}
               </Button>
             </CardHeader>
             <CardContent>
@@ -787,8 +797,8 @@ export default function Cobrancas() {
                 <div>
                   <div className="text-sm text-muted-foreground">Total Recebido</div>
                   <div className="text-xl font-bold text-green-600">
-                    R${" "}
-                    {(sumarioInter.recebidos?.valor || 0).toLocaleString("pt-BR", {
+                    R${' '}
+                    {(sumarioInter.recebidos?.valor || 0).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </div>
@@ -799,8 +809,8 @@ export default function Cobrancas() {
                 <div>
                   <div className="text-sm text-muted-foreground">A Receber</div>
                   <div className="text-xl font-bold text-blue-600">
-                    R${" "}
-                    {(sumarioInter.aReceber?.valor || 0).toLocaleString("pt-BR", {
+                    R${' '}
+                    {(sumarioInter.aReceber?.valor || 0).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </div>
@@ -811,8 +821,8 @@ export default function Cobrancas() {
                 <div>
                   <div className="text-sm text-muted-foreground">Vencidos</div>
                   <div className="text-xl font-bold text-red-600">
-                    R${" "}
-                    {(sumarioInter.vencidos?.valor || 0).toLocaleString("pt-BR", {
+                    R${' '}
+                    {(sumarioInter.vencidos?.valor || 0).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </div>
@@ -837,8 +847,8 @@ export default function Cobrancas() {
                 disabled={isRefreshing}
                 className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"
               >
-                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-                {isRefreshing ? "Sincronizando..." : "Sincronizar com Banco Inter"}
+                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Sincronizando...' : 'Sincronizar com Banco Inter'}
               </Button>
             </div>
           </CardHeader>
@@ -851,7 +861,7 @@ export default function Cobrancas() {
                     <Input
                       placeholder="Buscar por nome, CPF/CNPJ, número da proposta ou contrato..."
                       value={searchTerm}
-                      onChange={e => setSearchTerm(e.target.value)}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -863,7 +873,7 @@ export default function Cobrancas() {
                   className="whitespace-nowrap"
                 >
                   {showCpf ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-                  {showCpf ? "Ocultar CPF" : "Mostrar CPF"}
+                  {showCpf ? 'Ocultar CPF' : 'Mostrar CPF'}
                 </Button>
               </div>
               <div className="flex gap-4">
@@ -881,8 +891,8 @@ export default function Cobrancas() {
                 </Select>
                 <Select
                   value={dateRange}
-                  onValueChange={value =>
-                    setDateRange(value as "todos" | "hoje" | "semana" | "mes")
+                  onValueChange={(value) =>
+                    setDateRange(value as 'todos' | 'hoje' | 'semana' | 'mes')
                   }
                 >
                   <SelectTrigger className="w-[200px]">
@@ -944,23 +954,26 @@ export default function Cobrancas() {
                     propostasFiltradas?.map((proposta, index) => {
                       // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 5
                       if (index === 0) {
-                        console.log('[DEBUG-FRONTEND-5] Dados da primeira proposta a serem renderizados:', proposta);
+                        console.log(
+                          '[DEBUG-FRONTEND-5] Dados da primeira proposta a serem renderizados:',
+                          proposta
+                        );
                       }
 
                       const parcelasPendentes = proposta.parcelas.filter(
-                        p => p.status === "pendente"
+                        (p) => p.status === 'pendente'
                       ).length;
                       const parcelasEmAtraso = proposta.parcelas.filter(
-                        p => p.status === "vencido"
+                        (p) => p.status === 'vencido'
                       ).length;
                       const valorPendente = proposta.parcelas
-                        .filter(p => p.status === "pendente")
+                        .filter((p) => p.status === 'pendente')
                         .reduce((acc, p) => acc + p.valorParcela, 0);
                       const valorEmAtraso = proposta.parcelas
-                        .filter(p => p.status === "vencido")
+                        .filter((p) => p.status === 'vencido')
                         .reduce((acc, p) => acc + p.valorParcela, 0);
                       const proximaParcela = proposta.parcelas
-                        .filter(p => p.status === "pendente" || p.status === "vencido")
+                        .filter((p) => p.status === 'pendente' || p.status === 'vencido')
                         .sort(
                           (a, b) =>
                             new Date(a.dataVencimento).getTime() -
@@ -986,18 +999,18 @@ export default function Cobrancas() {
                             {maskDocument(proposta.cpfCliente)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
                             }).format(proposta.valorTotal)}
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge className={getStatusColor(proposta.status)}>
-                              {proposta.status === "em_dia"
-                                ? "Em dia"
-                                : proposta.status === "inadimplente"
-                                  ? "Inadimplente"
-                                  : "Quitado"}
+                              {proposta.status === 'em_dia'
+                                ? 'Em dia'
+                                : proposta.status === 'inadimplente'
+                                  ? 'Inadimplente'
+                                  : 'Quitado'}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
@@ -1016,9 +1029,9 @@ export default function Cobrancas() {
                                   <span className="text-yellow-600">Pendentes:</span>
                                   <span className="font-medium">
                                     {parcelasPendentes} (
-                                    {new Intl.NumberFormat("pt-BR", {
-                                      style: "currency",
-                                      currency: "BRL",
+                                    {new Intl.NumberFormat('pt-BR', {
+                                      style: 'currency',
+                                      currency: 'BRL',
                                       minimumFractionDigits: 0,
                                       maximumFractionDigits: 0,
                                     }).format(valorPendente)}
@@ -1031,9 +1044,9 @@ export default function Cobrancas() {
                                   <span className="text-red-600">Em Atraso:</span>
                                   <span className="font-medium">
                                     {parcelasEmAtraso} (
-                                    {new Intl.NumberFormat("pt-BR", {
-                                      style: "currency",
-                                      currency: "BRL",
+                                    {new Intl.NumberFormat('pt-BR', {
+                                      style: 'currency',
+                                      currency: 'BRL',
                                       minimumFractionDigits: 0,
                                       maximumFractionDigits: 0,
                                     }).format(valorEmAtraso)}
@@ -1056,9 +1069,9 @@ export default function Cobrancas() {
                             {proximaParcela ? (
                               <div className="space-y-1">
                                 <div className="text-sm">
-                                  {format(new Date(proximaParcela.dataVencimento), "dd/MM/yyyy")}
+                                  {format(new Date(proximaParcela.dataVencimento), 'dd/MM/yyyy')}
                                 </div>
-                                {proximaParcela.status === "vencido" && (
+                                {proximaParcela.status === 'vencido' && (
                                   <Badge variant="destructive" className="text-xs">
                                     Vencido
                                   </Badge>
@@ -1073,7 +1086,7 @@ export default function Cobrancas() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={e => {
+                                onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedPropostaForBoletos(proposta);
                                   setShowBoletosModal(true);
@@ -1083,44 +1096,53 @@ export default function Cobrancas() {
                                 <Barcode className="h-4 w-4" />
                               </Button>
                               {/* PAM V1.0 - Botões de Ação */}
-                              {proposta.interCodigoSolicitacao && proposta.interSituacao === "A_RECEBER" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      setSelectedBoleto({ 
-                                        codigoSolicitacao: proposta.interCodigoSolicitacao!, 
-                                        valorNominal: proposta.valorTotalPendente 
-                                      });
-                                      setShowProrrogarModal(true);
-                                    }}
-                                    title={["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) ? "Prorrogar Vencimento" : "Solicitar Prorrogação"}
-                                  >
-                                    <CalendarPlus className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      setSelectedBoleto({ 
-                                        codigoSolicitacao: proposta.interCodigoSolicitacao!, 
-                                        valorNominal: proposta.valorTotalPendente 
-                                      });
-                                      setShowDescontoModal(true);
-                                    }}
-                                    title={["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) ? "Aplicar Desconto" : "Solicitar Desconto"}
-                                  >
-                                    <Percent className="h-4 w-4" />
-                                  </Button>
-                                </>
-                              )}
+                              {proposta.interCodigoSolicitacao &&
+                                proposta.interSituacao === 'A_RECEBER' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedBoleto({
+                                          codigoSolicitacao: proposta.interCodigoSolicitacao!,
+                                          valorNominal: proposta.valorTotalPendente,
+                                        });
+                                        setShowProrrogarModal(true);
+                                      }}
+                                      title={
+                                        ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)
+                                          ? 'Prorrogar Vencimento'
+                                          : 'Solicitar Prorrogação'
+                                      }
+                                    >
+                                      <CalendarPlus className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedBoleto({
+                                          codigoSolicitacao: proposta.interCodigoSolicitacao!,
+                                          valorNominal: proposta.valorTotalPendente,
+                                        });
+                                        setShowDescontoModal(true);
+                                      }}
+                                      title={
+                                        ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)
+                                          ? 'Aplicar Desconto'
+                                          : 'Solicitar Desconto'
+                                      }
+                                    >
+                                      <Percent className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={e => {
+                                onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedProposta(proposta);
                                   setShowContactModal(true);
@@ -1133,9 +1155,9 @@ export default function Cobrancas() {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    window.open(proposta.documentos.ccb, "_blank");
+                                    window.open(proposta.documentos.ccb, '_blank');
                                   }}
                                   title="Visualizar CCB Assinada"
                                 >
@@ -1175,7 +1197,7 @@ export default function Cobrancas() {
 
                 <TabsContent value="parcelas" className="space-y-4">
                   <div className="grid gap-2">
-                    {selectedProposta.parcelas.map(parcela => (
+                    {selectedProposta.parcelas.map((parcela) => (
                       <Card key={parcela.id}>
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
@@ -1185,19 +1207,19 @@ export default function Cobrancas() {
                                   Parcela {parcela.numero}/{selectedProposta.quantidadeParcelas}
                                 </span>
                                 <Badge className={getParcelaStatusColor(parcela.status)}>
-                                  {parcela.status === "pago"
-                                    ? "Pago"
-                                    : parcela.status === "vencido"
-                                      ? "Vencido"
-                                      : "Pendente"}
+                                  {parcela.status === 'pago'
+                                    ? 'Pago'
+                                    : parcela.status === 'vencido'
+                                      ? 'Vencido'
+                                      : 'Pendente'}
                                 </Badge>
                               </div>
                               <div className="text-sm text-muted-foreground">
-                                Vencimento: {format(new Date(parcela.dataVencimento), "dd/MM/yyyy")}
+                                Vencimento: {format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}
                                 {parcela.dataPagamento && (
                                   <span className="ml-2">
-                                    | Pago em:{" "}
-                                    {format(new Date(parcela.dataPagamento), "dd/MM/yyyy")}
+                                    | Pago em:{' '}
+                                    {format(new Date(parcela.dataPagamento), 'dd/MM/yyyy')}
                                   </span>
                                 )}
                                 {parcela.diasAtraso && parcela.diasAtraso > 0 && (
@@ -1223,14 +1245,14 @@ export default function Cobrancas() {
                                     {parcela.interSituacao && (
                                       <Badge
                                         variant={
-                                          parcela.interSituacao === "VENCIDO"
-                                            ? "destructive"
-                                            : "secondary"
+                                          parcela.interSituacao === 'VENCIDO'
+                                            ? 'destructive'
+                                            : 'secondary'
                                         }
                                         className={
-                                          parcela.interSituacao === "RECEBIDO"
-                                            ? "bg-green-600 text-white"
-                                            : ""
+                                          parcela.interSituacao === 'RECEBIDO'
+                                            ? 'bg-green-600 text-white'
+                                            : ''
                                         }
                                       >
                                         {parcela.interSituacao}
@@ -1256,7 +1278,7 @@ export default function Cobrancas() {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() =>
-                                              copyPaymentCode(parcela.interPixCopiaECola!, "pix")
+                                              copyPaymentCode(parcela.interPixCopiaECola!, 'pix')
                                             }
                                           >
                                             <Copy className="h-3 w-3" />
@@ -1285,8 +1307,8 @@ export default function Cobrancas() {
                                               const codigo =
                                                 parcela.linhaDigitavel ||
                                                 parcela.codigoBarras ||
-                                                "";
-                                              copyPaymentCode(codigo, "barcode");
+                                                '';
+                                              copyPaymentCode(codigo, 'barcode');
                                             }}
                                           >
                                             <Copy className="h-3 w-3" />
@@ -1305,12 +1327,12 @@ export default function Cobrancas() {
                             </div>
                             <div className="space-y-2 text-right">
                               <div className="font-semibold">
-                                {new Intl.NumberFormat("pt-BR", {
-                                  style: "currency",
-                                  currency: "BRL",
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
                                 }).format(parcela.valorParcela)}
                               </div>
-                              {parcela.status !== "pago" && (
+                              {parcela.status !== 'pago' && (
                                 <Button
                                   size="sm"
                                   onClick={() => {
@@ -1320,9 +1342,9 @@ export default function Cobrancas() {
                                     );
                                     navigator.clipboard.writeText(mensagem);
                                     toast({
-                                      title: "Mensagem copiada",
+                                      title: 'Mensagem copiada',
                                       description:
-                                        "A mensagem foi copiada para a área de transferência.",
+                                        'A mensagem foi copiada para a área de transferência.',
                                     });
                                   }}
                                 >
@@ -1356,14 +1378,14 @@ export default function Cobrancas() {
                       <div>
                         <label className="text-sm font-medium">Telefone</label>
                         <p className="text-sm text-muted-foreground">
-                          {selectedProposta.telefoneCliente || "Não informado"}
+                          {selectedProposta.telefoneCliente || 'Não informado'}
                         </p>
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium">E-mail</label>
                       <p className="text-sm text-muted-foreground">
-                        {selectedProposta.emailCliente || "Não informado"}
+                        {selectedProposta.emailCliente || 'Não informado'}
                       </p>
                     </div>
                     <div>
@@ -1377,7 +1399,7 @@ export default function Cobrancas() {
                             )}
                           </>
                         ) : (
-                          "Não informado"
+                          'Não informado'
                         )}
                       </p>
                     </div>
@@ -1385,15 +1407,15 @@ export default function Cobrancas() {
                       <div>
                         <label className="text-sm font-medium">Data do Contrato</label>
                         <p className="text-sm text-muted-foreground">
-                          {format(new Date(selectedProposta.dataContrato), "dd/MM/yyyy")}
+                          {format(new Date(selectedProposta.dataContrato), 'dd/MM/yyyy')}
                         </p>
                       </div>
                       <div>
                         <label className="text-sm font-medium">Valor Financiado</label>
                         <p className="text-sm text-muted-foreground">
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
                           }).format(selectedProposta.valorFinanciado)}
                         </p>
                       </div>
@@ -1405,14 +1427,14 @@ export default function Cobrancas() {
                       onClick={() => {
                         if (selectedProposta.telefoneCliente) {
                           window.open(
-                            `https://wa.me/55${selectedProposta.telefoneCliente.replace(/\D/g, "")}`,
-                            "_blank"
+                            `https://wa.me/55${selectedProposta.telefoneCliente.replace(/\D/g, '')}`,
+                            '_blank'
                           );
                         } else {
                           toast({
-                            title: "Telefone não disponível",
-                            description: "O cliente não possui telefone cadastrado.",
-                            variant: "destructive",
+                            title: 'Telefone não disponível',
+                            description: 'O cliente não possui telefone cadastrado.',
+                            variant: 'destructive',
                           });
                         }
                       }}
@@ -1424,12 +1446,12 @@ export default function Cobrancas() {
                       variant="outline"
                       onClick={() => {
                         if (selectedProposta.telefoneCliente) {
-                          window.open(`tel:${selectedProposta.telefoneCliente}`, "_blank");
+                          window.open(`tel:${selectedProposta.telefoneCliente}`, '_blank');
                         } else {
                           toast({
-                            title: "Telefone não disponível",
-                            description: "O cliente não possui telefone cadastrado.",
-                            variant: "destructive",
+                            title: 'Telefone não disponível',
+                            description: 'O cliente não possui telefone cadastrado.',
+                            variant: 'destructive',
                           });
                         }
                       }}
@@ -1447,7 +1469,7 @@ export default function Cobrancas() {
                         variant="outline"
                         className="w-full justify-start"
                         onClick={() => {
-                          window.open(selectedProposta.documentos.ccb, "_blank");
+                          window.open(selectedProposta.documentos.ccb, '_blank');
                         }}
                       >
                         <FileText className="mr-2 h-4 w-4" />
@@ -1460,7 +1482,7 @@ export default function Cobrancas() {
                         variant="outline"
                         className="w-full justify-start"
                         onClick={() => {
-                          window.open(comp, "_blank");
+                          window.open(comp, '_blank');
                         }}
                       >
                         <FileText className="mr-2 h-4 w-4" />
@@ -1519,7 +1541,7 @@ export default function Cobrancas() {
                 </Button>
                 <Button
                   onClick={() => {
-                    const textarea = document.querySelector("textarea");
+                    const textarea = document.querySelector('textarea');
                     if (textarea) {
                       enviarContato(selectedProposta, contactType, textarea.value);
                     }
@@ -1539,7 +1561,7 @@ export default function Cobrancas() {
             <DialogHeader>
               <DialogTitle>Boletos Banco Inter</DialogTitle>
               <DialogDescription>
-                {selectedPropostaForBoletos?.nomeCliente} -{" "}
+                {selectedPropostaForBoletos?.nomeCliente} -{' '}
                 {selectedPropostaForBoletos?.numeroContrato}
               </DialogDescription>
             </DialogHeader>
@@ -1547,7 +1569,7 @@ export default function Cobrancas() {
             {selectedPropostaForBoletos && (
               <div className="space-y-4">
                 {selectedPropostaForBoletos.parcelas
-                  .filter(p => p.status !== "pago")
+                  .filter((p) => p.status !== 'pago')
                   .map((parcela, index) => (
                     <Card key={parcela.id} className="p-4">
                       <div className="space-y-4">
@@ -1555,22 +1577,22 @@ export default function Cobrancas() {
                           <div>
                             <h4 className="font-semibold">Parcela {parcela.numero}</h4>
                             <p className="text-sm text-muted-foreground">
-                              Vencimento: {format(new Date(parcela.dataVencimento), "dd/MM/yyyy")}
+                              Vencimento: {format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="font-semibold">
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
                               }).format(parcela.valorParcela)}
                             </p>
                             <Badge className={getParcelaStatusColor(parcela.status)}>
-                              {parcela.status === "pago"
-                                ? "Pago"
-                                : parcela.status === "vencido"
-                                  ? "Vencido"
-                                  : "Pendente"}
+                              {parcela.status === 'pago'
+                                ? 'Pago'
+                                : parcela.status === 'vencido'
+                                  ? 'Vencido'
+                                  : 'Pendente'}
                             </Badge>
                           </div>
                         </div>
@@ -1589,7 +1611,7 @@ export default function Cobrancas() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => copyPaymentCode(parcela.interPixCopiaECola!, "pix")}
+                                onClick={() => copyPaymentCode(parcela.interPixCopiaECola!, 'pix')}
                               >
                                 <Copy className="h-4 w-4" />
                               </Button>
@@ -1613,8 +1635,8 @@ export default function Cobrancas() {
                                 variant="outline"
                                 onClick={() => {
                                   const codigo =
-                                    parcela.linhaDigitavel || parcela.codigoBarras || "";
-                                  copyPaymentCode(codigo, "barcode");
+                                    parcela.linhaDigitavel || parcela.codigoBarras || '';
+                                  copyPaymentCode(codigo, 'barcode');
                                 }}
                               >
                                 <Copy className="h-4 w-4" />
@@ -1629,7 +1651,7 @@ export default function Cobrancas() {
                             <span className="text-muted-foreground">Status Inter:</span>
                             <Badge
                               variant={
-                                parcela.interSituacao === "RECEBIDO" ? "default" : "secondary"
+                                parcela.interSituacao === 'RECEBIDO' ? 'default' : 'secondary'
                               }
                             >
                               {parcela.interSituacao}
@@ -1673,12 +1695,14 @@ export default function Cobrancas() {
                   type="date"
                   value={novaDataVencimento}
                   onChange={(e) => setNovaDataVencimento(e.target.value)}
-                  min={format(new Date(), "yyyy-MM-dd")}
+                  min={format(new Date(), 'yyyy-MM-dd')}
                 />
               </div>
-              {!["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && (
+              {!['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole) && (
                 <div>
-                  <Label htmlFor="observacao-prorrogacao">Observação <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="observacao-prorrogacao">
+                    Observação <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="observacao-prorrogacao"
                     value={observacaoProrrogacao}
@@ -1703,12 +1727,14 @@ export default function Cobrancas() {
               <Button
                 onClick={() => {
                   if (selectedBoleto && novaDataVencimento) {
-                    const needsObservation = !["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole);
+                    const needsObservation = !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(
+                      userRole
+                    );
                     if (needsObservation && !observacaoProrrogacao.trim()) {
                       toast({
-                        title: "Observação obrigatória",
-                        description: "Por favor, informe o motivo da solicitação.",
-                        variant: "destructive",
+                        title: 'Observação obrigatória',
+                        description: 'Por favor, informe o motivo da solicitação.',
+                        variant: 'destructive',
                       });
                       return;
                     }
@@ -1721,11 +1747,11 @@ export default function Cobrancas() {
                 }}
                 disabled={!novaDataVencimento || prorrogarMutation.isPending}
               >
-                {prorrogarMutation.isPending 
-                  ? "Processando..." 
-                  : ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) 
-                    ? "Confirmar Prorrogação" 
-                    : "Enviar Solicitação"}
+                {prorrogarMutation.isPending
+                  ? 'Processando...'
+                  : ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)
+                    ? 'Confirmar Prorrogação'
+                    : 'Enviar Solicitação'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1735,11 +1761,15 @@ export default function Cobrancas() {
         <Dialog open={showDescontoModal} onOpenChange={setShowDescontoModal}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) ? "Aplicar Desconto" : "Solicitar Desconto"}</DialogTitle>
+              <DialogTitle>
+                {['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)
+                  ? 'Aplicar Desconto'
+                  : 'Solicitar Desconto'}
+              </DialogTitle>
               <DialogDescription>
-                {["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) 
-                  ? "Configure o desconto a ser aplicado no boleto."
-                  : "Configure e solicite a aplicação de desconto ao supervisor."}
+                {['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)
+                  ? 'Configure o desconto a ser aplicado no boleto.'
+                  : 'Configure e solicite a aplicação de desconto ao supervisor.'}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -1747,7 +1777,7 @@ export default function Cobrancas() {
                 <Label htmlFor="tipo-desconto">Tipo de Desconto</Label>
                 <Select
                   value={tipoDesconto}
-                  onValueChange={(value: "PERCENTUAL" | "FIXO") => setTipoDesconto(value)}
+                  onValueChange={(value: 'PERCENTUAL' | 'FIXO') => setTipoDesconto(value)}
                 >
                   <SelectTrigger id="tipo-desconto">
                     <SelectValue />
@@ -1760,17 +1790,17 @@ export default function Cobrancas() {
               </div>
               <div>
                 <Label htmlFor="valor-desconto">
-                  {tipoDesconto === "PERCENTUAL" ? "Percentual de Desconto" : "Valor do Desconto"}
+                  {tipoDesconto === 'PERCENTUAL' ? 'Percentual de Desconto' : 'Valor do Desconto'}
                 </Label>
                 <Input
                   id="valor-desconto"
                   type="number"
                   min="0"
-                  max={tipoDesconto === "PERCENTUAL" ? "100" : undefined}
-                  step={tipoDesconto === "PERCENTUAL" ? "0.01" : "0.01"}
+                  max={tipoDesconto === 'PERCENTUAL' ? '100' : undefined}
+                  step={tipoDesconto === 'PERCENTUAL' ? '0.01' : '0.01'}
                   value={valorDesconto}
                   onChange={(e) => setValorDesconto(e.target.value)}
-                  placeholder={tipoDesconto === "PERCENTUAL" ? "Ex: 10" : "Ex: 50.00"}
+                  placeholder={tipoDesconto === 'PERCENTUAL' ? 'Ex: 10' : 'Ex: 50.00'}
                 />
               </div>
               <div>
@@ -1780,12 +1810,14 @@ export default function Cobrancas() {
                   type="date"
                   value={dataLimiteDesconto}
                   onChange={(e) => setDataLimiteDesconto(e.target.value)}
-                  min={format(new Date(), "yyyy-MM-dd")}
+                  min={format(new Date(), 'yyyy-MM-dd')}
                 />
               </div>
-              {!["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && (
+              {!['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole) && (
                 <div>
-                  <Label htmlFor="observacao-desconto">Observação <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="observacao-desconto">
+                    Observação <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="observacao-desconto"
                     value={observacaoDesconto}
@@ -1800,23 +1832,28 @@ export default function Cobrancas() {
                 <div className="rounded-lg border bg-muted p-3">
                   <p className="text-sm font-medium">Resumo do Desconto:</p>
                   <p className="text-sm text-muted-foreground">
-                    Valor Original: {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
+                    Valor Original:{' '}
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
                     }).format(selectedBoleto.valorNominal)}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Desconto: {tipoDesconto === "PERCENTUAL" ? `${valorDesconto}%` : new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(Number(valorDesconto))}
+                    Desconto:{' '}
+                    {tipoDesconto === 'PERCENTUAL'
+                      ? `${valorDesconto}%`
+                      : new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(Number(valorDesconto))}
                   </p>
                   <p className="text-sm font-medium text-green-600">
-                    Valor Final: {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
+                    Valor Final:{' '}
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
                     }).format(
-                      tipoDesconto === "PERCENTUAL" 
+                      tipoDesconto === 'PERCENTUAL'
                         ? selectedBoleto.valorNominal * (1 - Number(valorDesconto) / 100)
                         : selectedBoleto.valorNominal - Number(valorDesconto)
                     )}
@@ -1831,12 +1868,14 @@ export default function Cobrancas() {
               <Button
                 onClick={() => {
                   if (selectedBoleto && valorDesconto) {
-                    const needsObservation = !["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole);
+                    const needsObservation = !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(
+                      userRole
+                    );
                     if (needsObservation && !observacaoDesconto.trim()) {
                       toast({
-                        title: "Observação obrigatória",
-                        description: "Por favor, informe o motivo da solicitação.",
-                        variant: "destructive",
+                        title: 'Observação obrigatória',
+                        description: 'Por favor, informe o motivo da solicitação.',
+                        variant: 'destructive',
                       });
                       return;
                     }
@@ -1851,18 +1890,18 @@ export default function Cobrancas() {
                 }}
                 disabled={!valorDesconto || descontoMutation.isPending}
               >
-                {descontoMutation.isPending 
-                  ? "Processando..." 
-                  : ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) 
-                    ? "Confirmar Desconto" 
-                    : "Enviar Solicitação"}
+                {descontoMutation.isPending
+                  ? 'Processando...'
+                  : ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)
+                    ? 'Confirmar Desconto'
+                    : 'Enviar Solicitação'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* PAM V1.0 Blueprint V2.0 - Modal de Solicitações Pendentes (Supervisor) */}
-        {["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && (
+        {['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole) && (
           <Dialog open={showSolicitacoesModal} onOpenChange={setShowSolicitacoesModal}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
@@ -1871,7 +1910,7 @@ export default function Cobrancas() {
                   Revise e aprove ou rejeite as solicitações de prorrogação e desconto.
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="space-y-4 py-4">
                 {solicitacoesPendentes && solicitacoesPendentes.length > 0 ? (
                   solicitacoesPendentes.map((solicitacao: any) => (
@@ -1879,51 +1918,75 @@ export default function Cobrancas() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-start">
                           <div>
-                            <Badge className={solicitacao.tipo === "PRORROGACAO" ? "bg-blue-500" : "bg-green-500"}>
-                              {solicitacao.tipo === "PRORROGACAO" ? "Prorrogação" : "Desconto"}
+                            <Badge
+                              className={
+                                solicitacao.tipo === 'PRORROGACAO' ? 'bg-blue-500' : 'bg-green-500'
+                              }
+                            >
+                              {solicitacao.tipo === 'PRORROGACAO' ? 'Prorrogação' : 'Desconto'}
                             </Badge>
                             <p className="text-sm text-muted-foreground mt-1">
                               Solicitado por: {solicitacao.solicitadoPor}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              Data: {format(new Date(solicitacao.dataSolicitacao), "dd/MM/yyyy HH:mm")}
+                              Data:{' '}
+                              {format(new Date(solicitacao.dataSolicitacao), 'dd/MM/yyyy HH:mm')}
                             </p>
                           </div>
                           <Badge variant="outline">#{solicitacao.id}</Badge>
                         </div>
-                        
+
                         <div className="border-t pt-3">
                           <p className="text-sm font-medium">Detalhes da Solicitação:</p>
-                          {solicitacao.tipo === "PRORROGACAO" ? (
+                          {solicitacao.tipo === 'PRORROGACAO' ? (
                             <div className="text-sm text-muted-foreground">
-                              <p>Nova Data: {format(new Date(solicitacao.dadosSolicitacao.novaDataVencimento), "dd/MM/yyyy")}</p>
+                              <p>
+                                Nova Data:{' '}
+                                {format(
+                                  new Date(solicitacao.dadosSolicitacao.novaDataVencimento),
+                                  'dd/MM/yyyy'
+                                )}
+                              </p>
                               <p>Código do Boleto: {solicitacao.codigoSolicitacao}</p>
                             </div>
                           ) : (
                             <div className="text-sm text-muted-foreground">
                               <p>Tipo: {solicitacao.dadosSolicitacao.tipoDesconto}</p>
-                              <p>Valor: {solicitacao.dadosSolicitacao.tipoDesconto === "PERCENTUAL" 
-                                ? `${solicitacao.dadosSolicitacao.valorDesconto}%` 
-                                : `R$ ${solicitacao.dadosSolicitacao.valorDesconto}`}</p>
+                              <p>
+                                Valor:{' '}
+                                {solicitacao.dadosSolicitacao.tipoDesconto === 'PERCENTUAL'
+                                  ? `${solicitacao.dadosSolicitacao.valorDesconto}%`
+                                  : `R$ ${solicitacao.dadosSolicitacao.valorDesconto}`}
+                              </p>
                               {solicitacao.dadosSolicitacao.dataLimiteDesconto && (
-                                <p>Válido até: {format(new Date(solicitacao.dadosSolicitacao.dataLimiteDesconto), "dd/MM/yyyy")}</p>
+                                <p>
+                                  Válido até:{' '}
+                                  {format(
+                                    new Date(solicitacao.dadosSolicitacao.dataLimiteDesconto),
+                                    'dd/MM/yyyy'
+                                  )}
+                                </p>
                               )}
                               <p>Código do Boleto: {solicitacao.codigoSolicitacao}</p>
                             </div>
                           )}
                         </div>
-                        
+
                         {solicitacao.observacao && (
                           <div className="border-t pt-3">
                             <p className="text-sm font-medium">Observação do Solicitante:</p>
-                            <p className="text-sm text-muted-foreground">{solicitacao.observacao}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {solicitacao.observacao}
+                            </p>
                           </div>
                         )}
-                        
+
                         {selectedSolicitacao?.id === solicitacao.id ? (
                           <div className="border-t pt-3 space-y-3">
                             <div>
-                              <Label htmlFor={`obs-supervisor-${solicitacao.id}`}>Observação do Supervisor (Opcional)</Label>
+                              <Label htmlFor={`obs-supervisor-${solicitacao.id}`}>
+                                Observação do Supervisor (Opcional)
+                              </Label>
                               <Textarea
                                 id={`obs-supervisor-${solicitacao.id}`}
                                 value={observacaoSupervisor}
@@ -1944,13 +2007,13 @@ export default function Cobrancas() {
                                 disabled={aprovarSolicitacaoMutation.isPending}
                               >
                                 <CheckSquare className="mr-2 h-4 w-4" />
-                                {aprovarSolicitacaoMutation.isPending ? "Aprovando..." : "Aprovar"}
+                                {aprovarSolicitacaoMutation.isPending ? 'Aprovando...' : 'Aprovar'}
                               </Button>
                               <Button
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => {
-                                  const motivo = prompt("Motivo da rejeição:");
+                                  const motivo = prompt('Motivo da rejeição:');
                                   if (motivo) {
                                     rejeitarSolicitacaoMutation.mutate({
                                       id: solicitacao.id,
@@ -1962,14 +2025,16 @@ export default function Cobrancas() {
                                 disabled={rejeitarSolicitacaoMutation.isPending}
                               >
                                 <XCircle className="mr-2 h-4 w-4" />
-                                {rejeitarSolicitacaoMutation.isPending ? "Rejeitando..." : "Rejeitar"}
+                                {rejeitarSolicitacaoMutation.isPending
+                                  ? 'Rejeitando...'
+                                  : 'Rejeitar'}
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
                                   setSelectedSolicitacao(null);
-                                  setObservacaoSupervisor("");
+                                  setObservacaoSupervisor('');
                                 }}
                               >
                                 Cancelar
@@ -1997,7 +2062,7 @@ export default function Cobrancas() {
                   </div>
                 )}
               </div>
-              
+
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowSolicitacoesModal(false)}>
                   Fechar

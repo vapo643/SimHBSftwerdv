@@ -6,7 +6,7 @@
  */
 
 export interface EnvironmentConfig {
-  name: "development" | "staging" | "production";
+  name: 'development' | 'staging' | 'production';
 
   // Database
   databaseUrl: string;
@@ -52,21 +52,21 @@ export interface EnvironmentConfig {
  * Get configuration for current environment
  */
 export function getEnvironmentConfig(): EnvironmentConfig {
-  const env = process.env.NODE_ENV || "development";
+  const env = process.env.NODE_ENV || 'development';
 
   // Base configuration (shared across environments)
   const baseConfig: Partial<EnvironmentConfig> = {
     bcryptRounds: 12,
     rateLimitWindow: 15 * 60 * 1000, // 15 minutes
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    allowedFileTypes: ["pdf", "jpg", "jpeg", "png"],
+    allowedFileTypes: ['pdf', 'jpg', 'jpeg', 'png'],
   };
 
   // Environment-specific configurations
   const configs: Record<string, EnvironmentConfig> = {
     development: {
       ...baseConfig,
-      name: "development",
+      name: 'development',
 
       // Database
       databaseUrl: process.env.DATABASE_URL!,
@@ -78,15 +78,15 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
 
       // Security (development keys - NEVER use in production)
-      jwtSecret: process.env.JWT_SECRET || "dev-jwt-secret-change-in-production",
-      csrfSecret: process.env.CSRF_SECRET || "dev-csrf-secret-change-in-production",
-      sessionSecret: process.env.SESSION_SECRET || "dev-session-secret-change-in-production",
+      jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
+      csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret-change-in-production',
+      sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-production',
 
       // Rate Limiting (relaxed for development)
       rateLimitMaxRequests: 100,
 
       // CORS (allow local development)
-      corsOrigins: ["http://localhost:3000", "http://localhost:5000"],
+      corsOrigins: ['http://localhost:3000', 'http://localhost:5000'],
 
       // Monitoring
       enableSecurityMonitoring: false,
@@ -103,7 +103,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
 
     staging: {
       ...baseConfig,
-      name: "staging",
+      name: 'staging',
 
       // Database
       databaseUrl: process.env.STAGING_DATABASE_URL!,
@@ -141,7 +141,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
 
     production: {
       ...baseConfig,
-      name: "production",
+      name: 'production',
 
       // Database
       databaseUrl: process.env.PROD_DATABASE_URL!,
@@ -195,13 +195,13 @@ export function getEnvironmentConfig(): EnvironmentConfig {
  */
 function validateConfig(config: EnvironmentConfig): void {
   const required = [
-    "databaseUrl",
-    "supabaseUrl",
-    "supabaseAnonKey",
-    "supabaseServiceKey",
-    "jwtSecret",
-    "csrfSecret",
-    "sessionSecret",
+    'databaseUrl',
+    'supabaseUrl',
+    'supabaseAnonKey',
+    'supabaseServiceKey',
+    'jwtSecret',
+    'csrfSecret',
+    'sessionSecret',
   ];
 
   for (const field of required) {
@@ -211,23 +211,23 @@ function validateConfig(config: EnvironmentConfig): void {
   }
 
   // Production-specific validations
-  if (config.name === "production") {
+  if (config.name === 'production') {
     // Ensure production doesn't use development secrets
     if (
-      config.jwtSecret.includes("dev") ||
-      config.csrfSecret.includes("dev") ||
-      config.sessionSecret.includes("dev")
+      config.jwtSecret.includes('dev') ||
+      config.csrfSecret.includes('dev') ||
+      config.sessionSecret.includes('dev')
     ) {
-      throw new Error("Production environment using development secrets!");
+      throw new Error('Production environment using development secrets!');
     }
 
     // Ensure security features are enabled
     if (!config.enableSecurityMonitoring) {
-      throw new Error("Security monitoring must be enabled in production!");
+      throw new Error('Security monitoring must be enabled in production!');
     }
 
     if (!config.securityAlertEmail) {
-      throw new Error("Security alert email must be configured in production!");
+      throw new Error('Security alert email must be configured in production!');
     }
   }
 }
@@ -236,19 +236,19 @@ function validateConfig(config: EnvironmentConfig): void {
  * Log environment configuration (sanitized)
  */
 export function logEnvironmentConfig(config: EnvironmentConfig): void {
-  console.log("🔧 Environment Configuration:");
+  console.log('🔧 Environment Configuration:');
   console.log(`  - Environment: ${config.name}`);
-  console.log(`  - Security Monitoring: ${config.enableSecurityMonitoring ? "✅" : "❌"}`);
-  console.log(`  - Honeypots: ${config.enableHoneypots ? "✅" : "❌"}`);
-  console.log(`  - Code Obfuscation: ${config.enableObfuscation ? "✅" : "❌"}`);
-  console.log(`  - API Documentation: ${config.enableApiDocs ? "✅" : "❌"}`);
+  console.log(`  - Security Monitoring: ${config.enableSecurityMonitoring ? '✅' : '❌'}`);
+  console.log(`  - Honeypots: ${config.enableHoneypots ? '✅' : '❌'}`);
+  console.log(`  - Code Obfuscation: ${config.enableObfuscation ? '✅' : '❌'}`);
+  console.log(`  - API Documentation: ${config.enableApiDocs ? '✅' : '❌'}`);
   console.log(
     `  - Rate Limit: ${config.rateLimitMaxRequests} requests per ${config.rateLimitWindow / 60000} minutes`
   );
-  console.log(`  - CORS Origins: ${config.corsOrigins.join(", ")}`);
+  console.log(`  - CORS Origins: ${config.corsOrigins.join(', ')}`);
 
   // Never log sensitive values
   console.log(
-    `  - Secrets Configured: ✅ (${Object.keys(config).filter(k => k.includes("Secret")).length} secrets)`
+    `  - Secrets Configured: ✅ (${Object.keys(config).filter((k) => k.includes('Secret')).length} secrets)`
   );
 }

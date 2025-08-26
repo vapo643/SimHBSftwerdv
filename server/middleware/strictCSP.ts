@@ -7,8 +7,8 @@
  * - CSP Level 3 features with broad browser support
  */
 
-import { Request, Response, NextFunction } from "express";
-import crypto from "crypto";
+import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 
 interface CSPRequest extends Request {
   nonce?: string;
@@ -19,7 +19,7 @@ export class StrictCSP {
    * Generate cryptographically secure nonce
    */
   static generateNonce(): string {
-    return crypto.randomBytes(16).toString("base64");
+    return crypto.randomBytes(16).toString('base64');
   }
 
   /**
@@ -35,7 +35,7 @@ export class StrictCSP {
       res.locals.nonce = nonce;
 
       // Build CSP policy based on environment
-      const isDevelopment = process.env.NODE_ENV === "development";
+      const isDevelopment = process.env.NODE_ENV === 'development';
 
       const cspPolicy = [
         // Default source - only self and data URIs for images
@@ -85,45 +85,45 @@ export class StrictCSP {
         "manifest-src 'self'",
 
         // Upgrade insecure requests in production
-        ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
+        ...(process.env.NODE_ENV === 'production' ? ['upgrade-insecure-requests'] : []),
 
         // Block mixed content in production
-        ...(process.env.NODE_ENV === "production" ? ["block-all-mixed-content"] : []),
-      ].join("; ");
+        ...(process.env.NODE_ENV === 'production' ? ['block-all-mixed-content'] : []),
+      ].join('; ');
 
       // Set Content Security Policy header
-      res.setHeader("Content-Security-Policy", cspPolicy);
+      res.setHeader('Content-Security-Policy', cspPolicy);
 
       // Also set report-only for testing (optional)
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         const reportOnlyPolicy = cspPolicy.replace(
           `'nonce-${nonce}'`,
           `'nonce-${nonce}' 'unsafe-eval'`
         );
-        res.setHeader("Content-Security-Policy-Report-Only", reportOnlyPolicy);
+        res.setHeader('Content-Security-Policy-Report-Only', reportOnlyPolicy);
       }
 
       // Additional security headers
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Frame-Options", "DENY");
-      res.setHeader("X-XSS-Protection", "1; mode=block");
-      res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-XSS-Protection', '1; mode=block');
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
       // Permissions Policy (Feature Policy successor)
       res.setHeader(
-        "Permissions-Policy",
+        'Permissions-Policy',
         [
-          "camera=(), microphone=(), geolocation=(), payment=(), usb=(),",
-          "accelerometer=(), gyroscope=(), magnetometer=(), speaker=(),",
-          "notifications=(), push=(), vibrate=()",
-        ].join(" ")
+          'camera=(), microphone=(), geolocation=(), payment=(), usb=(),',
+          'accelerometer=(), gyroscope=(), magnetometer=(), speaker=(),',
+          'notifications=(), push=(), vibrate=()',
+        ].join(' ')
       );
 
-      console.log(`[CSP] ✅ ${isDevelopment ? "Development" : "Production"} CSP applied:`, {
-        nonce: nonce.substring(0, 8) + "...",
+      console.log(`[CSP] ✅ ${isDevelopment ? 'Development' : 'Production'} CSP applied:`, {
+        nonce: nonce.substring(0, 8) + '...',
         path: req.path,
-        mode: isDevelopment ? "dev" : "prod",
-        userAgent: req.headers["user-agent"]?.substring(0, 50),
+        mode: isDevelopment ? 'dev' : 'prod',
+        userAgent: req.headers['user-agent']?.substring(0, 50),
       });
 
       next();
@@ -137,15 +137,15 @@ export class StrictCSP {
     return (req: Request, res: Response) => {
       const report = req.body;
 
-      console.warn("[CSP] 🚨 CSP Violation Report:", {
-        documentURI: report["document-uri"],
-        violatedDirective: report["violated-directive"],
-        blockedURI: report["blocked-uri"],
-        lineNumber: report["line-number"],
-        columnNumber: report["column-number"],
-        sourceFile: report["source-file"],
-        statusCode: report["status-code"],
-        userAgent: req.headers["user-agent"],
+      console.warn('[CSP] 🚨 CSP Violation Report:', {
+        documentURI: report['document-uri'],
+        violatedDirective: report['violated-directive'],
+        blockedURI: report['blocked-uri'],
+        lineNumber: report['line-number'],
+        columnNumber: report['column-number'],
+        sourceFile: report['source-file'],
+        statusCode: report['status-code'],
+        userAgent: req.headers['user-agent'],
       });
 
       // Log to security monitoring system

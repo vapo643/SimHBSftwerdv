@@ -2,9 +2,9 @@
  * Utilitários para ajudar no mapeamento e teste de coordenadas CCB
  */
 
-import { PDFDocument, rgb, StandardFonts, PDFFont, PDFPage } from "pdf-lib";
-import fs from "fs/promises";
-import path from "path";
+import { PDFDocument, rgb, StandardFonts, PDFFont, PDFPage } from 'pdf-lib';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
  * Converte coordenadas do topo da página para o sistema de coordenadas PDF (base)
@@ -122,8 +122,8 @@ export async function generateTestCoordinatesPDF(
     bold?: boolean;
   }>
 ) {
-  const templatePath = path.resolve(process.cwd(), "server/templates/template_ccb.pdf");
-  const outputPath = path.resolve(process.cwd(), "template_ccb_COORDINATE_TEST.pdf");
+  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const outputPath = path.resolve(process.cwd(), 'template_ccb_COORDINATE_TEST.pdf');
 
   const templateBytes = await fs.readFile(templatePath);
   const pdfDoc = await PDFDocument.load(templateBytes);

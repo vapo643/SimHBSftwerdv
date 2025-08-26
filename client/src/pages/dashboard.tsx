@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Link, useLocation } from "wouter";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import React, { useEffect, useState, useMemo } from 'react';
+import { Link, useLocation } from 'wouter';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Loader2,
   FileText,
@@ -34,105 +34,105 @@ import {
   CheckCircle2,
   XCircle,
   Banknote,
-} from "lucide-react";
-import RefreshButton from "@/components/RefreshButton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { FeatureFlagExample } from "@/components/FeatureFlagExample";
-import { useFeatureFlag } from "@/contexts/FeatureFlagContext";
+} from 'lucide-react';
+import RefreshButton from '@/components/RefreshButton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { FeatureFlagExample } from '@/components/FeatureFlagExample';
+import { useFeatureFlag } from '@/contexts/FeatureFlagContext';
 
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
-    case "CCB_GERADA":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "AGUARDANDO_ASSINATURA":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "ASSINATURA_CONCLUIDA":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "BOLETOS_EMITIDOS":
-      return "bg-purple-100 text-purple-800 border-purple-200";
+    case 'CCB_GERADA':
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    case 'AGUARDANDO_ASSINATURA':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'ASSINATURA_CONCLUIDA':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'BOLETOS_EMITIDOS':
+      return 'bg-purple-100 text-purple-800 border-purple-200';
     // Status antigos mantidos para compatibilidade
-    case "APROVADO":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "EM_ANALISE":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "AGUARDANDO_ANALISE":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "PENDENCIADO":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    case "REJEITADO":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "PAGO":
-      return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    case "PRONTO_PAGAMENTO":
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case "RASCUNHO":
-      return "bg-gray-100 text-gray-800 border-gray-200";
-    case "CANCELADO":
-      return "bg-slate-100 text-slate-800 border-slate-200";
+    case 'APROVADO':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'EM_ANALISE':
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    case 'AGUARDANDO_ANALISE':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'PENDENCIADO':
+      return 'bg-orange-100 text-orange-800 border-orange-200';
+    case 'REJEITADO':
+      return 'bg-red-100 text-red-800 border-red-200';
+    case 'PAGO':
+      return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    case 'PRONTO_PAGAMENTO':
+      return 'bg-purple-100 text-purple-800 border-purple-200';
+    case 'RASCUNHO':
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+    case 'CANCELADO':
+      return 'bg-slate-100 text-slate-800 border-slate-200';
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return 'bg-gray-100 text-gray-800 border-gray-200';
   }
 };
 
 const getStatusText = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
-    case "CCB_GERADA":
-      return "CCB Gerada";
-    case "AGUARDANDO_ASSINATURA":
-      return "Aguardando Assinatura";
-    case "ASSINATURA_CONCLUIDA":
-      return "Assinatura Concluída";
-    case "BOLETOS_EMITIDOS":
-      return "Boletos Emitidos";
+    case 'CCB_GERADA':
+      return 'CCB Gerada';
+    case 'AGUARDANDO_ASSINATURA':
+      return 'Aguardando Assinatura';
+    case 'ASSINATURA_CONCLUIDA':
+      return 'Assinatura Concluída';
+    case 'BOLETOS_EMITIDOS':
+      return 'Boletos Emitidos';
     // Status antigos mantidos para compatibilidade
-    case "AGUARDANDO_ANALISE":
-      return "Aguardando Análise";
-    case "EM_ANALISE":
-      return "Em Análise";
-    case "PRONTO_PAGAMENTO":
-      return "Pronto para Pagamento";
-    case "APROVADO":
-      return "Aprovado";
-    case "REJEITADO":
-      return "Rejeitado";
-    case "PENDENCIADO":
-      return "Pendenciado";
-    case "PAGO":
-      return "Pago";
-    case "CANCELADO":
-      return "Cancelado";
+    case 'AGUARDANDO_ANALISE':
+      return 'Aguardando Análise';
+    case 'EM_ANALISE':
+      return 'Em Análise';
+    case 'PRONTO_PAGAMENTO':
+      return 'Pronto para Pagamento';
+    case 'APROVADO':
+      return 'Aprovado';
+    case 'REJEITADO':
+      return 'Rejeitado';
+    case 'PENDENCIADO':
+      return 'Pendenciado';
+    case 'PAGO':
+      return 'Pago';
+    case 'CANCELADO':
+      return 'Cancelado';
     default:
-      return status.replace(/_/g, " ").replace(/^\w/, (c: string) => c.toUpperCase());
+      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase());
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
-    case "CCB_GERADA":
+    case 'CCB_GERADA':
       return <FileText className="h-4 w-4" />;
-    case "AGUARDANDO_ASSINATURA":
+    case 'AGUARDANDO_ASSINATURA':
       return <Clock className="h-4 w-4" />;
-    case "ASSINATURA_CONCLUIDA":
+    case 'ASSINATURA_CONCLUIDA':
       return <CheckCircle2 className="h-4 w-4" />;
-    case "BOLETOS_EMITIDOS":
+    case 'BOLETOS_EMITIDOS':
       return <Banknote className="h-4 w-4" />;
     // Status antigos mantidos para compatibilidade
-    case "APROVADO":
+    case 'APROVADO':
       return <CheckCircle2 className="h-4 w-4" />;
-    case "REJEITADO":
+    case 'REJEITADO':
       return <XCircle className="h-4 w-4" />;
-    case "EM_ANALISE":
-    case "AGUARDANDO_ANALISE":
+    case 'EM_ANALISE':
+    case 'AGUARDANDO_ANALISE':
       return <Clock className="h-4 w-4" />;
-    case "PENDENCIADO":
+    case 'PENDENCIADO':
       return <AlertCircle className="h-4 w-4" />;
-    case "PAGO":
+    case 'PAGO':
       return <Banknote className="h-4 w-4" />;
     default:
       return <FileText className="h-4 w-4" />;
@@ -140,9 +140,9 @@ const getStatusIcon = (status: string) => {
 };
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
   }).format(value);
 };
 
@@ -150,10 +150,10 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("todos");
-  const [parceiroFilter, setParceiroFilter] = useState<string>("todos");
-  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('todos');
+  const [parceiroFilter, setParceiroFilter] = useState<string>('todos');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
   // Fetch real proposals data - only when authenticated
   const {
@@ -162,29 +162,29 @@ const Dashboard: React.FC = () => {
     error,
     refetch,
   } = useQuery<{ success: boolean; data: any[]; total: number }>({
-    queryKey: ["/api/propostas"],
+    queryKey: ['/api/propostas'],
     enabled: !!user, // Only fetch when user is authenticated
   });
-  
+
   // Log the query state for debugging
-  console.log("[Dashboard] Query state:", {
+  console.log('[Dashboard] Query state:', {
     user: !!user,
     userRole: user?.role,
     isLoading,
     error,
     data: propostasResponse,
   });
-  
+
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   // The apiClient automatically adds camelCase aliases for all snake_case keys
   const propostas = (propostasResponse?.data || []).map((p: any) => {
-    console.log("[Dashboard] Processing proposal:", p);
+    console.log('[Dashboard] Processing proposal:', p);
     return {
       id: p.id,
       status: p.status,
       // Use camelCase properties directly (added by dual-key transformation)
       nomeCliente: p.nomeCliente || p.clienteNome || p.cliente_nome, // Try all variations
-      cpfCliente: p.cpfCliente || p.clienteCpf || p.cliente_cpf,     // Try all variations
+      cpfCliente: p.cpfCliente || p.clienteCpf || p.cliente_cpf, // Try all variations
       valorSolicitado: p.valorSolicitado || p.valor,
       prazo: p.prazo,
       taxaJuros: p.taxaJuros || p.taxaJuros || p.taxa_juros,
@@ -194,7 +194,7 @@ const Dashboard: React.FC = () => {
       valorParcela: p.valorParcela || p.valor_parcela,
       // Add contextual status for compatibility
       statusContextual: p.status,
-      parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' }
+      parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' },
     };
   });
 
@@ -204,14 +204,14 @@ const Dashboard: React.FC = () => {
     semana: number;
     mes: number;
   }>({
-    queryKey: ["/api/propostas/metricas"],
-    enabled: user?.role === "ATENDENTE",
+    queryKey: ['/api/propostas/metricas'],
+    enabled: user?.role === 'ATENDENTE',
   });
 
   // Redirect ANALISTA to analysis queue
   useEffect(() => {
-    if (user?.role === "ANALISTA") {
-      setLocation("/credito/fila");
+    if (user?.role === 'ANALISTA') {
+      setLocation('/credito/fila');
     }
   }, [user?.role, setLocation]);
 
@@ -220,7 +220,7 @@ const Dashboard: React.FC = () => {
 
   // Filtrar propostas - HOOK SEMPRE EXECUTADO
   const propostasFiltradas = useMemo(() => {
-    return propostasData.filter(proposta => {
+    return propostasData.filter((proposta) => {
       const matchesSearch =
         proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         proposta.id.includes(searchTerm) ||
@@ -228,10 +228,10 @@ const Dashboard: React.FC = () => {
 
       // PAM V1.0 - Usar status contextual com fallback
       const statusFinal = proposta.statusContextual || proposta.status;
-      const matchesStatus = statusFilter === "todos" || statusFinal === statusFilter;
+      const matchesStatus = statusFilter === 'todos' || statusFinal === statusFilter;
 
       const matchesParceiro =
-        parceiroFilter === "todos" || proposta.parceiro?.razaoSocial === parceiroFilter;
+        parceiroFilter === 'todos' || proposta.parceiro?.razaoSocial === parceiroFilter;
 
       return matchesSearch && matchesStatus && matchesParceiro;
     });
@@ -240,16 +240,16 @@ const Dashboard: React.FC = () => {
   // Estatísticas computadas - HOOK SEMPRE EXECUTADO
   const estatisticas = useMemo(() => {
     const total = propostasData.length;
-    const aprovadas = propostasData.filter(p => p.status === "aprovado").length;
+    const aprovadas = propostasData.filter((p) => p.status === 'aprovado').length;
     const pendentes = propostasData.filter(
-      p => p.status === "aguardando_analise" || p.status === "em_analise"
+      (p) => p.status === 'aguardando_analise' || p.status === 'em_analise'
     ).length;
-    const rejeitadas = propostasData.filter(p => p.status === "rejeitado").length;
-    const pendenciadas = propostasData.filter(p => p.status === "pendenciado").length;
+    const rejeitadas = propostasData.filter((p) => p.status === 'rejeitado').length;
+    const pendenciadas = propostasData.filter((p) => p.status === 'pendenciado').length;
     // Debug: log first few values to understand the data structure
     console.log(
-      "DEBUG - First 3 proposals values:",
-      propostasData.slice(0, 3).map(p => ({
+      'DEBUG - First 3 proposals values:',
+      propostasData.slice(0, 3).map((p) => ({
         id: p.id,
         valorSolicitado: p.valorSolicitado,
         type: typeof p.valorSolicitado,
@@ -259,8 +259,8 @@ const Dashboard: React.FC = () => {
     // Convert to numbers safely and filter out invalid values
     const valorTotal = propostasData.reduce((acc, p) => {
       const valor =
-        typeof p.valorSolicitado === "string"
-          ? parseFloat(p.valorSolicitado.replace(/[^\d,.-]/g, "").replace(",", "."))
+        typeof p.valorSolicitado === 'string'
+          ? parseFloat(p.valorSolicitado.replace(/[^\d,.-]/g, '').replace(',', '.'))
           : Number(p.valorSolicitado) || 0;
       return acc + valor;
     }, 0);
@@ -277,7 +277,7 @@ const Dashboard: React.FC = () => {
 
     // Unique partners
     const parceiros = Array.from(
-      new Set(propostasData.map(p => p.parceiro?.razaoSocial).filter(Boolean))
+      new Set(propostasData.map((p) => p.parceiro?.razaoSocial).filter(Boolean))
     );
 
     return {
@@ -290,14 +290,14 @@ const Dashboard: React.FC = () => {
       valorMedio,
       statusCounts,
       parceiros,
-      taxaAprovacao: total > 0 ? ((aprovadas / total) * 100).toFixed(1) : "0",
+      taxaAprovacao: total > 0 ? ((aprovadas / total) * 100).toFixed(1) : '0',
     };
   }, [propostasData]);
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
-    if (user?.role === "ATENDENTE") {
-      queryClient.invalidateQueries({ queryKey: ["/api/propostas/metricas"] });
+    queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+    if (user?.role === 'ATENDENTE') {
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
     }
   };
 
@@ -386,12 +386,10 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Demonstração de Feature Flags (Apenas para Admins) */}
-        {user?.role === "ADMIN" && (
-          <FeatureFlagExample />
-        )}
+        {user?.role === 'ADMIN' && <FeatureFlagExample />}
 
         {/* Métricas de Performance para Atendentes */}
-        {user?.role === "ATENDENTE" && metricas && (
+        {user?.role === 'ATENDENTE' && metricas && (
           <Card>
             <CardHeader>
               <CardTitle>Suas Métricas</CardTitle>
@@ -431,7 +429,7 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>
-                  {user?.role === "ATENDENTE" ? "Minhas Propostas" : "Propostas"}
+                  {user?.role === 'ATENDENTE' ? 'Minhas Propostas' : 'Propostas'}
                 </CardTitle>
                 <CardDescription>
                   Gerencie e acompanhe todas as propostas de crédito
@@ -444,7 +442,7 @@ const Dashboard: React.FC = () => {
                     Nova Proposta
                   </Button>
                 </Link>
-                {user?.role === "ATENDENTE" && (
+                {user?.role === 'ATENDENTE' && (
                   <Link to="/aceite-atendente">
                     <Button variant="outline">
                       <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -463,7 +461,7 @@ const Dashboard: React.FC = () => {
                   <Input
                     placeholder="Buscar por nome, CPF ou ID..."
                     value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -490,7 +488,7 @@ const Dashboard: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos os Parceiros</SelectItem>
-                    {estatisticas.parceiros.map(parceiro => (
+                    {estatisticas.parceiros.map((parceiro) => (
                       <SelectItem key={parceiro} value={parceiro}>
                         {parceiro}
                       </SelectItem>
@@ -535,12 +533,14 @@ const Dashboard: React.FC = () => {
                       <div className="space-y-1">
                         <div className="flex items-center gap-4">
                           <h3 className="text-lg font-semibold">
-                            {proposta.nomeCliente || "Cliente não informado"}
+                            {proposta.nomeCliente || 'Cliente não informado'}
                           </h3>
-                          <Badge className={`${getStatusColor(proposta.statusContextual || proposta.status)} border`}>
+                          <Badge
+                            className={`${getStatusColor(proposta.statusContextual || proposta.status)} border`}
+                          >
                             {getStatusText(proposta.statusContextual || proposta.status)}
                           </Badge>
-                          {proposta.status === "pendenciado" && (
+                          {proposta.status === 'pendenciado' && (
                             <Badge
                               variant="outline"
                               className="gap-1 border-orange-200 text-orange-700"
@@ -551,11 +551,12 @@ const Dashboard: React.FC = () => {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Proposta: #{proposta.numeroProposta || proposta.id} | CPF: {proposta.cpfCliente || "Não informado"}
+                          Proposta: #{proposta.numeroProposta || proposta.id} | CPF:{' '}
+                          {proposta.cpfCliente || 'Não informado'}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Criado em:{" "}
-                          {format(new Date(proposta.createdAt), "dd/MM/yyyy HH:mm", {
+                          Criado em:{' '}
+                          {format(new Date(proposta.createdAt), 'dd/MM/yyyy HH:mm', {
                             locale: ptBR,
                           })}
                           {proposta.parceiro?.razaoSocial && (
@@ -564,7 +565,7 @@ const Dashboard: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        {proposta.status === "pendenciado" && proposta.motivo_pendencia && (
+                        {proposta.status === 'pendenciado' && proposta.motivo_pendencia && (
                           <div className="mt-2 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-2">
                             <AlertCircle className="h-4 w-4 text-orange-600" />
                             <span className="text-sm text-orange-700">
@@ -580,7 +581,7 @@ const Dashboard: React.FC = () => {
                         {formatCurrency(proposta.valorSolicitado || 0)}
                       </div>
                       <div className="flex justify-end gap-2">
-                        {proposta.status === "pendenciado" ? (
+                        {proposta.status === 'pendenciado' ? (
                           <Link to={`/propostas/editar/${proposta.id}`}>
                             <Button size="sm" variant="outline" className="flex items-center gap-1">
                               <Edit className="h-4 w-4" />

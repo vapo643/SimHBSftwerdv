@@ -31,7 +31,7 @@ const testWorkerOptions: WorkerOptions = {
   settings: {
     stalledInterval: 30000,
     maxStalledCount: 1,
-  }
+  },
 };
 
 // Test Retry Worker
@@ -39,12 +39,12 @@ const testRetryWorker = new Worker(
   'test-retry',
   async (job: Job) => {
     const attemptNumber = job.attemptsMade + 1;
-    
+
     console.log(`[TEST RETRY WORKER] 🔄 Processando job ${job.id}`);
     console.log(`[TEST RETRY WORKER] 📊 Tentativa ${attemptNumber} de ${job.opts.attempts || 1}`);
     console.log(`[TEST RETRY WORKER] ⏰ Timestamp: ${new Date().toISOString()}`);
     console.log(`[TEST RETRY WORKER] 📦 Dados do job:`, job.data);
-    
+
     // SEMPRE FALHA PROPOSITALMENTE
     console.log(`[TEST RETRY WORKER] 💥 Simulando falha intencional...`);
     throw new Error(`Falha simulada para teste de retry - Tentativa ${attemptNumber}`);
@@ -54,26 +54,32 @@ const testRetryWorker = new Worker(
 
 // Event handlers para demonstrar o retry
 testRetryWorker.on('completed', (job) => {
-  console.log(`[TEST RETRY WORKER] ✅ Job ${job.id} completado (isso nunca deveria acontecer neste teste)`);
+  console.log(
+    `[TEST RETRY WORKER] ✅ Job ${job.id} completado (isso nunca deveria acontecer neste teste)`
+  );
 });
 
 testRetryWorker.on('failed', (job, err) => {
   const attemptNumber = job?.attemptsMade || 0;
   const maxAttempts = job?.opts.attempts || 1;
-  
-  console.log(`[TEST RETRY WORKER] ❌ Job ${job?.id} falhou na tentativa ${attemptNumber}/${maxAttempts}`);
+
+  console.log(
+    `[TEST RETRY WORKER] ❌ Job ${job?.id} falhou na tentativa ${attemptNumber}/${maxAttempts}`
+  );
   console.log(`[TEST RETRY WORKER] 📝 Erro: ${err.message}`);
-  
+
   if (attemptNumber < maxAttempts) {
     // Calcular delay do backoff exponencial
-    const backoffDelay = job?.opts.backoff 
+    const backoffDelay = job?.opts.backoff
       ? Math.pow(2, attemptNumber - 1) * (job.opts.backoff.delay || 1000)
       : 0;
-      
+
     console.log(`[TEST RETRY WORKER] 🔄 Retry será tentado em ${backoffDelay}ms`);
     console.log(`[TEST RETRY WORKER] ⏳ Aguardando próxima tentativa...`);
   } else {
-    console.log(`[TEST RETRY WORKER] 🛑 Todas as tentativas esgotadas. Job falhou definitivamente.`);
+    console.log(
+      `[TEST RETRY WORKER] 🛑 Todas as tentativas esgotadas. Job falhou definitivamente.`
+    );
   }
 });
 

@@ -1,29 +1,29 @@
-import { createServerSupabaseAdminClient } from "../server/lib/supabase";
+import { createServerSupabaseAdminClient } from '../server/lib/supabase';
 
 async function testProfileQuery() {
   const supabase = createServerSupabaseAdminClient();
 
   // First, let's find an existing user profile
-  const { data: profiles, error: listError } = await supabase.from("profiles").select("*").limit(5);
+  const { data: profiles, error: listError } = await supabase.from('profiles').select('*').limit(5);
 
-  console.log("Existing profiles:", profiles);
+  console.log('Existing profiles:', profiles);
 
   if (profiles && profiles.length > 0) {
     const testProfileId = profiles[0].id;
 
     // Try the simple query first
     const { data: simpleData, error: simpleError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", testProfileId)
+      .from('profiles')
+      .select('*')
+      .eq('id', testProfileId)
       .single();
 
-    console.log("\nSimple profile query:", simpleData);
-    console.log("Simple error:", simpleError);
+    console.log('\nSimple profile query:', simpleData);
+    console.log('Simple error:', simpleError);
 
     // Try with join
     const { data: joinData, error: joinError } = await supabase
-      .from("profiles")
+      .from('profiles')
       .select(
         `
         id,
@@ -31,16 +31,16 @@ async function testProfileQuery() {
         loja_id
       `
       )
-      .eq("id", testProfileId)
+      .eq('id', testProfileId)
       .single();
 
-    console.log("\nProfile with basic select:", joinData);
-    console.log("Join error:", joinError);
+    console.log('\nProfile with basic select:', joinData);
+    console.log('Join error:', joinError);
 
     // If there's a loja_id, try to fetch loja separately
     if (joinData?.loja_id) {
       const { data: lojaData, error: lojaError } = await supabase
-        .from("lojas")
+        .from('lojas')
         .select(
           `
           id,
@@ -53,11 +53,11 @@ async function testProfileQuery() {
           )
         `
         )
-        .eq("id", joinData.loja_id)
+        .eq('id', joinData.loja_id)
         .single();
 
-      console.log("\nLoja data:", lojaData);
-      console.log("Loja error:", lojaError);
+      console.log('\nLoja data:', lojaData);
+      console.log('Loja error:', lojaError);
     }
   }
 }

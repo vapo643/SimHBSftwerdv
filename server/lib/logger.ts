@@ -15,42 +15,43 @@ const logger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  defaultMeta: { 
+  defaultMeta: {
     service: 'simpix-api',
     environment: process.env.NODE_ENV || 'development',
-    version: process.env.APP_VERSION || '1.0.0'
+    version: process.env.APP_VERSION || '1.0.0',
   },
   transports: [
     // Console output com formato legível para desenvolvimento
     new winston.transports.Console({
-      format: process.env.NODE_ENV === 'development' 
-        ? winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple(),
-            winston.format.printf(({ level, message, timestamp, ...metadata }) => {
-              let msg = `${timestamp} [${level}]: ${message}`;
-              if (Object.keys(metadata).length > 0) {
-                msg += ` ${JSON.stringify(metadata)}`;
-              }
-              return msg;
-            })
-          )
-        : winston.format.json()
+      format:
+        process.env.NODE_ENV === 'development'
+          ? winston.format.combine(
+              winston.format.colorize(),
+              winston.format.simple(),
+              winston.format.printf(({ level, message, timestamp, ...metadata }) => {
+                let msg = `${timestamp} [${level}]: ${message}`;
+                if (Object.keys(metadata).length > 0) {
+                  msg += ` ${JSON.stringify(metadata)}`;
+                }
+                return msg;
+              })
+            )
+          : winston.format.json(),
     }),
     // Arquivo para erros
-    new winston.transports.File({ 
-      filename: 'logs/error.log', 
+    new winston.transports.File({
+      filename: 'logs/error.log',
       level: 'error',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     }),
     // Arquivo para todos os logs
-    new winston.transports.File({ 
+    new winston.transports.File({
       filename: 'logs/combined.log',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
-    })
-  ]
+    }),
+  ],
 });
 
 // Criar pasta de logs se não existir
@@ -76,10 +77,10 @@ declare global {
 // Middleware para logging de requisições
 export function requestLoggingMiddleware(req: Request, res: Response, next: NextFunction) {
   // Adicionar correlation ID
-  const correlationId = req.headers['x-correlation-id'] as string || uuidv4();
+  const correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
   req.correlationId = correlationId;
   req.startTime = Date.now();
-  
+
   // Log inicial da requisição
   logger.info('📥 Request received', {
     correlationId,
@@ -89,14 +90,14 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
     query: req.query,
     ip: req.ip || req.connection.remoteAddress,
     userAgent: req.get('user-agent'),
-    referrer: req.get('referrer')
+    referrer: req.get('referrer'),
   });
-  
+
   // Interceptar o response para log final
   const originalSend = res.send;
-  res.send = function(data) {
+  res.send = function (data) {
     const duration = Date.now() - (req.startTime || Date.now());
-    
+
     // Log do response
     logger.info('📤 Request completed', {
       correlationId,
@@ -104,19 +105,19 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
       url: req.url,
       statusCode: res.statusCode,
       duration,
-      responseSize: Buffer.byteLength(JSON.stringify(data))
+      responseSize: Buffer.byteLength(JSON.stringify(data)),
     });
-    
+
     // Alertar para requisições lentas
     if (duration > 1000) {
       logger.warn('⚠️ Slow request detected', {
         correlationId,
         url: req.url,
         duration,
-        threshold: 1000
+        threshold: 1000,
       });
     }
-    
+
     // Alertar para erros
     if (res.statusCode >= 400) {
       logger.error('❌ Request error', {
@@ -125,13 +126,13 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
         url: req.url,
         statusCode: res.statusCode,
         duration,
-        error: data
+        error: data,
       });
     }
-    
+
     return originalSend.call(this, data);
   };
-  
+
   next();
 }
 
@@ -147,8 +148,8 @@ export const logError = (message: string, error: Error | any, metadata?: any) =>
       message: error.message,
       stack: error.stack,
       name: error.name,
-      ...(error.response && { response: error.response })
-    }
+      ...(error.response && { response: error.response }),
+    },
   });
 };
 
@@ -167,28 +168,37 @@ export const logMetric = (metricName: string, value: number, unit: string, metad
     value,
     unit,
     timestamp: new Date().toISOString(),
-    ...metadata
+    ...metadata,
   });
 };
 
 // Log de segurança
-export const logSecurity = (event: string, severity: 'low' | 'medium' | 'high' | 'critical', metadata?: any) => {
+export const logSecurity = (
+  event: string,
+  severity: 'low' | 'medium' | 'high' | 'critical',
+  metadata?: any
+) => {
   logger.warn(`🔒 Security Event: ${event}`, {
     severity,
     event,
     timestamp: new Date().toISOString(),
-    ...metadata
+    ...metadata,
   });
 };
 
 // Log de auditoria
-export const logAudit = (action: string, userId: string | null, resource: string, metadata?: any) => {
+export const logAudit = (
+  action: string,
+  userId: string | null,
+  resource: string,
+  metadata?: any
+) => {
   logger.info('📝 Audit Log', {
     action,
     userId,
     resource,
     timestamp: new Date().toISOString(),
-    ...metadata
+    ...metadata,
   });
 };
 

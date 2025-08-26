@@ -14,21 +14,41 @@ console.log('✅ cidadeCliente:', USER_CCB_COORDINATES.cidadeCliente);
 console.log('✅ ufCliente:', USER_CCB_COORDINATES.ufCliente);
 
 console.log('\n🎯 VERIFICAÇÃO CONFORME FONTE DA VERDADE:');
-console.log('📍 Endereço deve estar em: X:100, Y:670 :', 
-  USER_CCB_COORDINATES.enderecoCliente?.x === 100 && USER_CCB_COORDINATES.enderecoCliente?.y === 670 ? '✅ CORRETO' : '❌ INCORRETO');
-  
-console.log('📍 CEP deve estar em: X:270, Y:670 :', 
-  USER_CCB_COORDINATES.cepCliente?.x === 270 && USER_CCB_COORDINATES.cepCliente?.y === 670 ? '✅ CORRETO' : '❌ INCORRETO');
-  
-console.log('📍 Cidade deve estar em: X:380, Y:670 :', 
-  USER_CCB_COORDINATES.cidadeCliente?.x === 380 && USER_CCB_COORDINATES.cidadeCliente?.y === 670 ? '✅ CORRETO' : '❌ INCORRETO');
-  
-console.log('📍 UF deve estar em: X:533, Y:670 :', 
-  USER_CCB_COORDINATES.ufCliente?.x === 533 && USER_CCB_COORDINATES.ufCliente?.y === 670 ? '✅ CORRETO' : '❌ INCORRETO');
+console.log(
+  '📍 Endereço deve estar em: X:100, Y:670 :',
+  USER_CCB_COORDINATES.enderecoCliente?.x === 100 && USER_CCB_COORDINATES.enderecoCliente?.y === 670
+    ? '✅ CORRETO'
+    : '❌ INCORRETO'
+);
+
+console.log(
+  '📍 CEP deve estar em: X:270, Y:670 :',
+  USER_CCB_COORDINATES.cepCliente?.x === 270 && USER_CCB_COORDINATES.cepCliente?.y === 670
+    ? '✅ CORRETO'
+    : '❌ INCORRETO'
+);
+
+console.log(
+  '📍 Cidade deve estar em: X:380, Y:670 :',
+  USER_CCB_COORDINATES.cidadeCliente?.x === 380 && USER_CCB_COORDINATES.cidadeCliente?.y === 670
+    ? '✅ CORRETO'
+    : '❌ INCORRETO'
+);
+
+console.log(
+  '📍 UF deve estar em: X:533, Y:670 :',
+  USER_CCB_COORDINATES.ufCliente?.x === 533 && USER_CCB_COORDINATES.ufCliente?.y === 670
+    ? '✅ CORRETO'
+    : '❌ INCORRETO'
+);
 
 // Verifica se campos antigos foram removidos
-const camposRemovidosOK = !USER_CCB_COORDINATES.numeroCliente && !USER_CCB_COORDINATES.bairroCliente;
-console.log('📍 Campos desnecessários removidos:', camposRemovidosOK ? '✅ CORRETO' : '❌ INCORRETO');
+const camposRemovidosOK =
+  !USER_CCB_COORDINATES.numeroCliente && !USER_CCB_COORDINATES.bairroCliente;
+console.log(
+  '📍 Campos desnecessários removidos:',
+  camposRemovidosOK ? '✅ CORRETO' : '❌ INCORRETO'
+);
 
 console.log('\n📊 TOTAL DE CAMPOS MAPEADOS:', Object.keys(USER_CCB_COORDINATES).length);
 
@@ -39,7 +59,7 @@ console.log('• CEP: "29165-460"');
 console.log('• Cidade: "Serra"');
 console.log('• UF: "ES"');
 
-const todasCoordenadasCorretas = (
+const todasCoordenadasCorretas =
   USER_CCB_COORDINATES.enderecoCliente?.x === 100 &&
   USER_CCB_COORDINATES.enderecoCliente?.y === 670 &&
   USER_CCB_COORDINATES.cepCliente?.x === 270 &&
@@ -48,11 +68,13 @@ const todasCoordenadasCorretas = (
   USER_CCB_COORDINATES.cidadeCliente?.y === 670 &&
   USER_CCB_COORDINATES.ufCliente?.x === 533 &&
   USER_CCB_COORDINATES.ufCliente?.y === 670 &&
-  camposRemovidosOK
-);
+  camposRemovidosOK;
 
 console.log('\n' + '='.repeat(50));
-console.log('🎯 RESULTADO FINAL:', todasCoordenadasCorretas ? '✅ SUCESSO COMPLETO' : '❌ CORREÇÕES NECESSÁRIAS');
+console.log(
+  '🎯 RESULTADO FINAL:',
+  todasCoordenadasCorretas ? '✅ SUCESSO COMPLETO' : '❌ CORREÇÕES NECESSÁRIAS'
+);
 console.log('='.repeat(50));
 
 if (todasCoordenadasCorretas) {

@@ -28,7 +28,7 @@ export function initializeRedisClient(): Redis {
       console.error('[CACHE] ❌ Redis cache service error:', err);
     });
   }
-  
+
   return redisClient;
 }
 
@@ -49,16 +49,16 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
       console.log(`[CACHE-MEMORY] ❌ Cache MISS for key: ${key}`);
       return null;
     }
-    
+
     // Em produção, usar Redis
     const client = initializeRedisClient();
     const data = await client.get(key);
-    
+
     if (data) {
       console.log(`[CACHE-REDIS] 🎯 Cache HIT for key: ${key}`);
       return JSON.parse(data) as T;
     }
-    
+
     console.log(`[CACHE-REDIS] ❌ Cache MISS for key: ${key}`);
     return null;
   } catch (error) {
@@ -74,8 +74,8 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
  * @param ttlInSeconds Tempo de vida em segundos
  */
 export async function setToCache<T>(
-  key: string, 
-  value: T, 
+  key: string,
+  value: T,
   ttlInSeconds: number = 3600
 ): Promise<void> {
   try {
@@ -83,19 +83,19 @@ export async function setToCache<T>(
     if (isDevelopment) {
       inMemoryCache.set(key, {
         value,
-        expires: Date.now() + (ttlInSeconds * 1000)
+        expires: Date.now() + ttlInSeconds * 1000,
       });
       console.log(`[CACHE-MEMORY] 💾 Stored in cache with key: ${key} (TTL: ${ttlInSeconds}s)`);
       return;
     }
-    
+
     // Em produção, usar Redis
     const client = initializeRedisClient();
     const serialized = JSON.stringify(value);
-    
+
     // Armazena com TTL (EX = expire in seconds)
     await client.set(key, serialized, 'EX', ttlInSeconds);
-    
+
     console.log(`[CACHE-REDIS] 💾 Stored in cache with key: ${key} (TTL: ${ttlInSeconds}s)`);
   } catch (error) {
     console.error(`[CACHE] Error setting cache for key ${key}:`, error);
@@ -124,7 +124,7 @@ export async function invalidateCachePattern(pattern: string): Promise<void> {
   try {
     const client = initializeRedisClient();
     const keys = await client.keys(pattern);
-    
+
     if (keys.length > 0) {
       await client.del(...keys);
       console.log(`[CACHE] 🗑️ Invalidated ${keys.length} cache keys matching pattern: ${pattern}`);

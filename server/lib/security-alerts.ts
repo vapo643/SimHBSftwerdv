@@ -5,16 +5,16 @@
  * with configurable thresholds and notification channels.
  */
 
-import { SecurityEventType, securityLogger, SecurityEvent } from "./security-logger";
-import { db } from "./supabase";
-import { securityLogs } from "../../shared/schema/security";
-import { and, gte, eq, sql, desc } from "drizzle-orm";
-import { getBrasiliaTimestamp } from "./timezone";
+import { SecurityEventType, securityLogger, SecurityEvent } from './security-logger';
+import { db } from './supabase';
+import { securityLogs } from '../../shared/schema/security';
+import { and, gte, eq, sql, desc } from 'drizzle-orm';
+import { getBrasiliaTimestamp } from './timezone';
 
 export interface SecurityAlert {
   id: string;
   type: AlertType;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   title: string;
   description: string;
   detectedAt: Date;
@@ -25,16 +25,16 @@ export interface SecurityAlert {
 }
 
 export enum AlertType {
-  BRUTE_FORCE = "BRUTE_FORCE",
-  RATE_LIMIT_ABUSE = "RATE_LIMIT_ABUSE",
-  SUSPICIOUS_ACCESS_PATTERN = "SUSPICIOUS_ACCESS_PATTERN",
-  PRIVILEGE_ESCALATION_ATTEMPT = "PRIVILEGE_ESCALATION_ATTEMPT",
-  DATA_EXFILTRATION = "DATA_EXFILTRATION",
-  AUTHENTICATION_ANOMALY = "AUTHENTICATION_ANOMALY",
-  FILE_INTEGRITY_VIOLATION = "FILE_INTEGRITY_VIOLATION",
-  CONCURRENT_SESSION_LIMIT = "CONCURRENT_SESSION_LIMIT",
-  GEO_LOCATION_ANOMALY = "GEO_LOCATION_ANOMALY",
-  AUTOMATED_ATTACK = "AUTOMATED_ATTACK",
+  BRUTE_FORCE = 'BRUTE_FORCE',
+  RATE_LIMIT_ABUSE = 'RATE_LIMIT_ABUSE',
+  SUSPICIOUS_ACCESS_PATTERN = 'SUSPICIOUS_ACCESS_PATTERN',
+  PRIVILEGE_ESCALATION_ATTEMPT = 'PRIVILEGE_ESCALATION_ATTEMPT',
+  DATA_EXFILTRATION = 'DATA_EXFILTRATION',
+  AUTHENTICATION_ANOMALY = 'AUTHENTICATION_ANOMALY',
+  FILE_INTEGRITY_VIOLATION = 'FILE_INTEGRITY_VIOLATION',
+  CONCURRENT_SESSION_LIMIT = 'CONCURRENT_SESSION_LIMIT',
+  GEO_LOCATION_ANOMALY = 'GEO_LOCATION_ANOMALY',
+  AUTOMATED_ATTACK = 'AUTOMATED_ATTACK',
 }
 
 // Alert thresholds configuration
@@ -109,7 +109,7 @@ export class SecurityMonitor {
         this.checkAuthenticationAnomalies(),
       ]);
     } catch (error) {
-      console.error("[SECURITY MONITOR] Error running checks:", error);
+      console.error('[SECURITY MONITOR] Error running checks:', error);
     }
   }
 
@@ -127,7 +127,7 @@ export class SecurityMonitor {
       })
       .from(securityLogs)
       .where(
-        and(eq(securityLogs.event_type, "LOGIN_FAILED"), gte(securityLogs.created_at, oneHourAgo))
+        and(eq(securityLogs.event_type, 'LOGIN_FAILED'), gte(securityLogs.created_at, oneHourAgo))
       )
       .groupBy(securityLogs.ip_address);
 
@@ -135,13 +135,13 @@ export class SecurityMonitor {
       if (record.count >= ALERT_THRESHOLDS.FAILED_LOGINS_PER_IP_PER_HOUR) {
         this.createAlert({
           type: AlertType.BRUTE_FORCE,
-          severity: "HIGH",
-          title: "Possível ataque de força bruta detectado",
+          severity: 'HIGH',
+          title: 'Possível ataque de força bruta detectado',
           description: `IP ${record.ip_address} teve ${record.count} tentativas de login falhadas na última hora`,
           metadata: {
             ipAddress: record.ip_address,
             failedAttempts: record.count,
-            timeWindow: "1 hour",
+            timeWindow: '1 hour',
           },
         });
       }
@@ -162,7 +162,7 @@ export class SecurityMonitor {
       .from(securityLogs)
       .where(
         and(
-          eq(securityLogs.event_type, "RATE_LIMIT_EXCEEDED"),
+          eq(securityLogs.event_type, 'RATE_LIMIT_EXCEEDED'),
           gte(securityLogs.created_at, oneHourAgo)
         )
       )
@@ -172,13 +172,13 @@ export class SecurityMonitor {
       if (record.count >= ALERT_THRESHOLDS.RATE_LIMIT_VIOLATIONS_PER_IP_PER_HOUR) {
         this.createAlert({
           type: AlertType.RATE_LIMIT_ABUSE,
-          severity: "MEDIUM",
-          title: "Abuso de rate limit detectado",
+          severity: 'MEDIUM',
+          title: 'Abuso de rate limit detectado',
           description: `IP ${record.ip_address} excedeu o rate limit ${record.count} vezes na última hora`,
           metadata: {
             ipAddress: record.ip_address,
             violations: record.count,
-            timeWindow: "1 hour",
+            timeWindow: '1 hour',
           },
         });
       }
@@ -207,7 +207,7 @@ export class SecurityMonitor {
         .from(securityLogs)
         .where(
           and(
-            eq(securityLogs.event_type, "DATA_ACCESS"),
+            eq(securityLogs.event_type, 'DATA_ACCESS'),
             gte(securityLogs.created_at, fiveMinutesAgo)
           )
         )
@@ -218,8 +218,8 @@ export class SecurityMonitor {
           // More than 10 data accesses in 5 minutes at unusual hours
           this.createAlert({
             type: AlertType.SUSPICIOUS_ACCESS_PATTERN,
-            severity: "MEDIUM",
-            title: "Padrão de acesso suspeito detectado",
+            severity: 'MEDIUM',
+            title: 'Padrão de acesso suspeito detectado',
             description: `Usuário ${record.user_email} acessando dados em horário incomum (${currentHour}h)`,
             metadata: {
               userId: record.user_id,
@@ -248,7 +248,7 @@ export class SecurityMonitor {
       .from(securityLogs)
       .where(
         and(
-          eq(securityLogs.event_type, "DATA_EXPORT"),
+          eq(securityLogs.event_type, 'DATA_EXPORT'),
           gte(securityLogs.created_at, oneHourAgo),
           sql`details->>'size' IS NOT NULL`
         )
@@ -260,14 +260,14 @@ export class SecurityMonitor {
       if (sizeMB > ALERT_THRESHOLDS.LARGE_DATA_EXPORT_SIZE_MB) {
         this.createAlert({
           type: AlertType.DATA_EXFILTRATION,
-          severity: "HIGH",
-          title: "Possível exfiltração de dados detectada",
+          severity: 'HIGH',
+          title: 'Possível exfiltração de dados detectada',
           description: `Usuário ${record.user_email} exportou ${sizeMB.toFixed(2)}MB de dados na última hora`,
           metadata: {
             userId: record.user_id,
             userEmail: record.user_email,
             totalSizeMB: sizeMB,
-            timeWindow: "1 hour",
+            timeWindow: '1 hour',
           },
         });
       }
@@ -288,7 +288,7 @@ export class SecurityMonitor {
       .from(securityLogs)
       .where(
         and(
-          eq(securityLogs.event_type, "LOGIN_SUCCESS"),
+          eq(securityLogs.event_type, 'LOGIN_SUCCESS'),
           gte(securityLogs.created_at, new Date(Date.now() - 86400000)) // Last 24 hours
         )
       )
@@ -298,8 +298,8 @@ export class SecurityMonitor {
       if (record.session_count > ALERT_THRESHOLDS.MAX_CONCURRENT_SESSIONS_PER_USER) {
         this.createAlert({
           type: AlertType.CONCURRENT_SESSION_LIMIT,
-          severity: "MEDIUM",
-          title: "Múltiplas sessões concorrentes detectadas",
+          severity: 'MEDIUM',
+          title: 'Múltiplas sessões concorrentes detectadas',
           description: `Usuário ${record.user_email} tem ${record.session_count} sessões ativas`,
           metadata: {
             userId: record.user_id,
@@ -314,12 +314,12 @@ export class SecurityMonitor {
   /**
    * Create a new security alert
    */
-  private createAlert(data: Omit<SecurityAlert, "id" | "detectedAt" | "resolved">): void {
+  private createAlert(data: Omit<SecurityAlert, 'id' | 'detectedAt' | 'resolved'>): void {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Check if similar alert already exists
     const existingAlert = Array.from(activeAlerts.values()).find(
-      alert =>
+      (alert) =>
         alert.type === data.type &&
         JSON.stringify(alert.metadata) === JSON.stringify(data.metadata) &&
         !alert.resolved
@@ -343,7 +343,7 @@ export class SecurityMonitor {
     securityLogger.logEvent({
       type: SecurityEventType.SECURITY_ALERT,
       severity: data.severity,
-      endpoint: "security-monitor",
+      endpoint: 'security-monitor',
       success: true,
       details: {
         alertType: data.type,
@@ -375,7 +375,7 @@ export class SecurityMonitor {
    * Get active alerts
    */
   getActiveAlerts(): SecurityAlert[] {
-    return Array.from(activeAlerts.values()).filter(alert => !alert.resolved);
+    return Array.from(activeAlerts.values()).filter((alert) => !alert.resolved);
   }
 
   /**
@@ -406,6 +406,6 @@ export class SecurityMonitor {
 export const securityMonitor = new SecurityMonitor();
 
 // Auto-start monitoring in non-test environments
-if (process.env.NODE_ENV !== "test") {
+if (process.env.NODE_ENV !== 'test') {
   securityMonitor.start();
 }

@@ -4,8 +4,8 @@
  * Controllers should never access database directly - they must go through services/repositories
  */
 
-import { db, supabase } from "../lib/supabase";
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import { db, supabase } from '../lib/supabase';
+import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export abstract class BaseRepository<T> {
   protected tableName: string;
@@ -18,8 +18,8 @@ export abstract class BaseRepository<T> {
    * Find all records with optional filters
    */
   async findAll(filters?: Record<string, any>): Promise<T[]> {
-    let query = db.from(this.tableName).select("*");
-    
+    let query = db.from(this.tableName).select('*');
+
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -29,11 +29,11 @@ export abstract class BaseRepository<T> {
     }
 
     const { data, error } = await query;
-    
+
     if (error) {
       throw new Error(`Failed to fetch from ${this.tableName}: ${error.message}`);
     }
-    
+
     return data as T[];
   }
 
@@ -41,16 +41,13 @@ export abstract class BaseRepository<T> {
    * Find one record by ID
    */
   async findById(id: string | number): Promise<T | null> {
-    const { data, error } = await db
-      .from(this.tableName)
-      .select("*")
-      .eq("id", id)
-      .single();
-    
-    if (error && error.code !== "PGRST116") { // PGRST116 = not found
+    const { data, error } = await db.from(this.tableName).select('*').eq('id', id).single();
+
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 = not found
       throw new Error(`Failed to fetch ${this.tableName} by id ${id}: ${error.message}`);
     }
-    
+
     return data as T | null;
   }
 
@@ -58,16 +55,12 @@ export abstract class BaseRepository<T> {
    * Create a new record
    */
   async create(data: Partial<T>): Promise<T> {
-    const { data: created, error } = await db
-      .from(this.tableName)
-      .insert(data)
-      .select()
-      .single();
-    
+    const { data: created, error } = await db.from(this.tableName).insert(data).select().single();
+
     if (error) {
       throw new Error(`Failed to create ${this.tableName}: ${error.message}`);
     }
-    
+
     return created as T;
   }
 
@@ -78,14 +71,14 @@ export abstract class BaseRepository<T> {
     const { data: updated, error } = await db
       .from(this.tableName)
       .update(data)
-      .eq("id", id)
+      .eq('id', id)
       .select()
       .single();
-    
+
     if (error) {
       throw new Error(`Failed to update ${this.tableName} with id ${id}: ${error.message}`);
     }
-    
+
     return updated as T;
   }
 
@@ -96,8 +89,8 @@ export abstract class BaseRepository<T> {
     const { error } = await db
       .from(this.tableName)
       .update({ deleted_at: new Date().toISOString() })
-      .eq("id", id);
-    
+      .eq('id', id);
+
     if (error) {
       throw new Error(`Failed to delete ${this.tableName} with id ${id}: ${error.message}`);
     }
@@ -109,11 +102,11 @@ export abstract class BaseRepository<T> {
    */
   protected async executeRawQuery(query: PostgrestFilterBuilder<any, any, any>) {
     const { data, error } = await query;
-    
+
     if (error) {
       throw new Error(`Query failed: ${error.message}`);
     }
-    
+
     return data;
   }
 

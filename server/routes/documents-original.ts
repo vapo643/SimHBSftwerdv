@@ -4,9 +4,9 @@
  * PAM V1.0 - Clean architecture implementation
  */
 
-import { Request, Response } from "express";
-import { documentsService } from "../services/documentsService.js";
-import { AuthenticatedRequest } from "../../shared/types/express";
+import { Request, Response } from 'express';
+import { documentsService } from '../services/documentsService.js';
+import { AuthenticatedRequest } from '../../shared/types/express';
 
 /**
  * GET /api/propostas/:id/documents
@@ -17,19 +17,19 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
     const { id: propostaId } = req.params;
 
     if (!propostaId) {
-      return res.status(400).json({ 
-        message: "ID da proposta é obrigatório" 
+      return res.status(400).json({
+        message: 'ID da proposta é obrigatório',
       });
     }
 
     const result = await documentsService.getProposalDocuments(parseInt(propostaId));
     res.json(result);
   } catch (error: any) {
-    console.error("[DOCUMENTS_CONTROLLER] Error fetching proposal documents:", error);
-    
-    const statusCode = error.message === "Proposta não encontrada" ? 404 : 500;
+    console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error);
+
+    const statusCode = error.message === 'Proposta não encontrada' ? 404 : 500;
     res.status(statusCode).json({
-      message: error.message || "Erro interno do servidor ao buscar documentos",
+      message: error.message || 'Erro interno do servidor ao buscar documentos',
     });
   }
 };
@@ -44,21 +44,18 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
     const file = req.file;
 
     if (!propostaId) {
-      return res.status(400).json({ 
-        message: "ID da proposta é obrigatório" 
+      return res.status(400).json({
+        message: 'ID da proposta é obrigatório',
       });
     }
 
     if (!file) {
-      return res.status(400).json({ 
-        message: "Arquivo é obrigatório" 
+      return res.status(400).json({
+        message: 'Arquivo é obrigatório',
       });
     }
 
-    const result = await documentsService.uploadDocument(
-      parseInt(propostaId),
-      file
-    );
+    const result = await documentsService.uploadDocument(parseInt(propostaId), file);
 
     if (result.success) {
       res.json({
@@ -66,15 +63,15 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
         document: result.document,
       });
     } else {
-      const statusCode = result.error === "Proposta não encontrada" ? 404 : 400;
+      const statusCode = result.error === 'Proposta não encontrada' ? 404 : 400;
       res.status(statusCode).json({
-        message: result.error || "Erro no upload",
+        message: result.error || 'Erro no upload',
       });
     }
   } catch (error: any) {
-    console.error("[DOCUMENTS_CONTROLLER] Error uploading document:", error);
+    console.error('[DOCUMENTS_CONTROLLER] Error uploading document:', error);
     res.status(500).json({
-      message: "Erro interno do servidor no upload",
+      message: 'Erro interno do servidor no upload',
     });
   }
 };
@@ -88,20 +85,20 @@ export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Res
     const { propostaId, documentId } = req.params;
 
     if (!propostaId || !documentId) {
-      return res.status(400).json({ 
-        message: "IDs da proposta e documento são obrigatórios" 
+      return res.status(400).json({
+        message: 'IDs da proposta e documento são obrigatórios',
       });
     }
 
     // For now, return not implemented
     // This would need implementation in the service layer
     res.status(501).json({
-      message: "Funcionalidade de exclusão não implementada",
+      message: 'Funcionalidade de exclusão não implementada',
     });
   } catch (error: any) {
-    console.error("[DOCUMENTS_CONTROLLER] Error deleting document:", error);
+    console.error('[DOCUMENTS_CONTROLLER] Error deleting document:', error);
     res.status(500).json({
-      message: "Erro interno do servidor ao deletar documento",
+      message: 'Erro interno do servidor ao deletar documento',
     });
   }
 };
@@ -115,20 +112,20 @@ export const getPropostaDocument = async (req: AuthenticatedRequest, res: Respon
     const { propostaId, documentId } = req.params;
 
     if (!propostaId || !documentId) {
-      return res.status(400).json({ 
-        message: "IDs da proposta e documento são obrigatórios" 
+      return res.status(400).json({
+        message: 'IDs da proposta e documento são obrigatórios',
       });
     }
 
     // For now, return not implemented
     // This would need implementation in the service layer
     res.status(501).json({
-      message: "Funcionalidade não implementada",
+      message: 'Funcionalidade não implementada',
     });
   } catch (error: any) {
-    console.error("[DOCUMENTS_CONTROLLER] Error fetching document:", error);
+    console.error('[DOCUMENTS_CONTROLLER] Error fetching document:', error);
     res.status(500).json({
-      message: "Erro interno do servidor ao buscar documento",
+      message: 'Erro interno do servidor ao buscar documento',
     });
   }
 };

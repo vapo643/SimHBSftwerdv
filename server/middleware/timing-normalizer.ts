@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import crypto from "crypto";
+import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 
 interface TimingConfig {
   baselineMs: number;
@@ -24,12 +24,12 @@ class TimingNormalizer {
 
   constructor() {
     // Configurações padrão por categoria de endpoint
-    this.setConfig("/api/propostas/:id", { baselineMs: 25, jitterRange: 5 });
-    this.setConfig("/api/propostas/:id/status", { baselineMs: 30, jitterRange: 5 });
-    this.setConfig("/api/auth/*", { baselineMs: 100, jitterRange: 20 });
-    this.setConfig("/api/admin/*", { baselineMs: 20, jitterRange: 4 });
-    this.setConfig("/api/test/*", { baselineMs: 25, jitterRange: 5 }); // Test endpoints
-    this.setConfig("default", { baselineMs: 15, jitterRange: 3 });
+    this.setConfig('/api/propostas/:id', { baselineMs: 25, jitterRange: 5 });
+    this.setConfig('/api/propostas/:id/status', { baselineMs: 30, jitterRange: 5 });
+    this.setConfig('/api/auth/*', { baselineMs: 100, jitterRange: 20 });
+    this.setConfig('/api/admin/*', { baselineMs: 20, jitterRange: 4 });
+    this.setConfig('/api/test/*', { baselineMs: 25, jitterRange: 5 }); // Test endpoints
+    this.setConfig('default', { baselineMs: 15, jitterRange: 3 });
   }
 
   public setConfig(pattern: string, config: TimingConfig): void {
@@ -37,13 +37,13 @@ class TimingNormalizer {
   }
 
   private matchesPattern(path: string, pattern: string): boolean {
-    if (pattern === "default") return true;
+    if (pattern === 'default') return true;
 
     // Converter pattern do Express para regex
     const regexPattern = pattern
-      .replace(/:\w+/g, "[^/]+") // :id -> [^/]+
-      .replace(/\*/g, ".*") // * -> .*
-      .replace(/\//g, "\\/"); // escape /
+      .replace(/:\w+/g, '[^/]+') // :id -> [^/]+
+      .replace(/\*/g, '.*') // * -> .*
+      .replace(/\//g, '\\/'); // escape /
 
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(path);
@@ -53,13 +53,13 @@ class TimingNormalizer {
     // Buscar configuração específica
     const entries = Array.from(this.configs.entries());
     for (const [pattern, config] of entries) {
-      if (pattern !== "default" && this.matchesPattern(path, pattern)) {
+      if (pattern !== 'default' && this.matchesPattern(path, pattern)) {
         return config;
       }
     }
 
     // Fallback para configuração padrão
-    return this.configs.get("default") || { baselineMs: 15, jitterRange: 3 };
+    return this.configs.get('default') || { baselineMs: 15, jitterRange: 3 };
   }
 
   private generateSecureJitter(range: number): number {
@@ -72,7 +72,7 @@ class TimingNormalizer {
   private async artificialDelay(ms: number): Promise<void> {
     if (ms <= 0) return;
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // Usar setImmediate para evitar blocking do event loop
       setTimeout(() => resolve(), ms);
     });
@@ -110,15 +110,15 @@ class TimingNormalizer {
     let filteredMetrics = this.metrics;
 
     if (endpoint) {
-      filteredMetrics = this.metrics.filter(m => m.endpoint === endpoint);
+      filteredMetrics = this.metrics.filter((m) => m.endpoint === endpoint);
     }
 
     if (filteredMetrics.length === 0) {
       return { count: 0 };
     }
 
-    const actualTimes = filteredMetrics.map(m => m.actualTime);
-    const totalTimes = filteredMetrics.map(m => m.totalTime);
+    const actualTimes = filteredMetrics.map((m) => m.actualTime);
+    const totalTimes = filteredMetrics.map((m) => m.totalTime);
 
     actualTimes.sort((a, b) => a - b);
     totalTimes.sort((a, b) => a - b);
@@ -205,9 +205,9 @@ class TimingNormalizer {
 export const timingNormalizer = new TimingNormalizer();
 
 // Debug: Create middleware instance with logging
-console.log("🚀 [TIMING MIDDLEWARE] Creating middleware instance...");
+console.log('🚀 [TIMING MIDDLEWARE] Creating middleware instance...');
 export const timingNormalizerMiddleware = timingNormalizer.middleware();
-console.log("🚀 [TIMING MIDDLEWARE] Middleware instance created and exported");
+console.log('🚀 [TIMING MIDDLEWARE] Middleware instance created and exported');
 
 // Export para debugging/monitoring
 export { TimingNormalizer, TimingConfig, TimingMetrics };

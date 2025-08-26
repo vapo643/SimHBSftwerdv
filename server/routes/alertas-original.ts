@@ -3,12 +3,12 @@
  * Data: 15/08/2025
  */
 
-import { Router } from "express";
-import { alertasProativosService } from "../services/alertasProativosService";
-import { db } from "../lib/supabase";
-import { notificacoes, regrasAlertas, historicoExecucoesAlertas, users } from "@shared/schema";
-import { eq, and, desc, inArray, sql } from "drizzle-orm";
-import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
+import { Router } from 'express';
+import { alertasProativosService } from '../services/alertasProativosService';
+import { db } from '../lib/supabase';
+import { notificacoes, regrasAlertas, historicoExecucoesAlertas, users } from '@shared/schema';
+import { eq, and, desc, inArray, sql } from 'drizzle-orm';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 
 const router = Router();
 
@@ -16,15 +16,15 @@ const router = Router();
  * GET /api/alertas/teste
  * Endpoint de teste para verificar funcionamento do serviço
  */
-router.get("/teste", async (req, res) => {
+router.get('/teste', async (req, res) => {
   try {
     const resultado = await alertasProativosService.testarServico();
     res.json(resultado);
   } catch (error) {
-    console.error("[ALERTAS TESTE] Erro:", error);
+    console.error('[ALERTAS TESTE] Erro:', error);
     res.status(500).json({
       sucesso: false,
-      mensagem: "Erro ao testar serviço de alertas"
+      mensagem: 'Erro ao testar serviço de alertas',
     });
   }
 });
@@ -33,34 +33,34 @@ router.get("/teste", async (req, res) => {
  * POST /api/alertas/executar
  * Endpoint para executar verificação manual (apenas ADMINISTRADOR)
  */
-router.post("/executar", jwtAuthMiddleware, async (req: any, res) => {
+router.post('/executar', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const userRole = req.user?.role;
-    
+
     // Apenas ADMINISTRADOR pode executar manualmente
-    if (userRole !== "ADMINISTRADOR") {
+    if (userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
-        error: "Acesso negado",
-        message: "Apenas administradores podem executar verificação manual"
+        error: 'Acesso negado',
+        message: 'Apenas administradores podem executar verificação manual',
       });
     }
 
     console.log(`[ALERTAS] Execução manual solicitada por: ${req.user?.email}`);
-    
+
     // Executar verificação em background
-    alertasProativosService.executarVerificacaoDiaria().catch(error => {
-      console.error("[ALERTAS] Erro na execução manual:", error);
+    alertasProativosService.executarVerificacaoDiaria().catch((error) => {
+      console.error('[ALERTAS] Erro na execução manual:', error);
     });
 
     res.json({
       success: true,
-      message: "Verificação de alertas iniciada em background"
+      message: 'Verificação de alertas iniciada em background',
     });
   } catch (error) {
-    console.error("[ALERTAS EXECUTAR] Erro:", error);
+    console.error('[ALERTAS EXECUTAR] Erro:', error);
     res.status(500).json({
-      error: "Erro interno",
-      message: "Erro ao iniciar verificação de alertas"
+      error: 'Erro interno',
+      message: 'Erro ao iniciar verificação de alertas',
     });
   }
 });
@@ -69,31 +69,27 @@ router.post("/executar", jwtAuthMiddleware, async (req: any, res) => {
  * GET /api/alertas/notificacoes
  * Listar notificações do usuário
  */
-router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
+router.get('/notificacoes', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const userEmail = req.user?.email;
     const { status, limite = 50 } = req.query;
 
     if (!userEmail) {
       return res.status(401).json({
-        error: "Usuário não autenticado",
-        message: "Email do usuário não encontrado"
+        error: 'Usuário não autenticado',
+        message: 'Email do usuário não encontrado',
       });
     }
 
     // CORREÇÃO CRÍTICA: Buscar o ID do usuário local pela tabela users
-    const [localUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, userEmail))
-      .limit(1);
+    const [localUser] = await db.select().from(users).where(eq(users.email, userEmail)).limit(1);
 
     if (!localUser) {
       console.log(`[ALERTAS] Usuário local não encontrado para email: ${userEmail}`);
       // Retornar array vazio ao invés de erro 404
       return res.json({
         notificacoes: [],
-        totalNaoLidas: 0
+        totalNaoLidas: 0,
       });
     }
 
@@ -103,10 +99,7 @@ router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
     let whereConditions: any = eq(notificacoes.userId, localUserId);
 
     if (status) {
-      whereConditions = and(
-        whereConditions,
-        eq(notificacoes.status, status)
-      );
+      whereConditions = and(whereConditions, eq(notificacoes.status, status));
     }
 
     const listaNotificacoes = await db
@@ -120,24 +113,21 @@ router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
     const [{ count: naoLidas }] = await db
       .select({ count: sql<number>`COUNT(*)` })
       .from(notificacoes)
-      .where(
-        and(
-          eq(notificacoes.userId, localUserId),
-          eq(notificacoes.status, "nao_lida")
-        )
-      );
+      .where(and(eq(notificacoes.userId, localUserId), eq(notificacoes.status, 'nao_lida')));
 
-    console.log(`[ALERTAS] Encontradas ${listaNotificacoes.length} notificações, ${naoLidas || 0} não lidas`);
+    console.log(
+      `[ALERTAS] Encontradas ${listaNotificacoes.length} notificações, ${naoLidas || 0} não lidas`
+    );
 
     res.json({
       notificacoes: listaNotificacoes,
-      totalNaoLidas: naoLidas || 0
+      totalNaoLidas: naoLidas || 0,
     });
   } catch (error) {
-    console.error("[ALERTAS NOTIFICACOES] Erro:", error);
+    console.error('[ALERTAS NOTIFICACOES] Erro:', error);
     res.status(500).json({
-      error: "Erro interno",
-      message: "Erro ao buscar notificações"
+      error: 'Erro interno',
+      message: 'Erro ao buscar notificações',
     });
   }
 });
@@ -146,29 +136,25 @@ router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
  * POST /api/alertas/notificacoes/:id/marcar-lida
  * Marcar notificação como lida
  */
-router.post("/notificacoes/:id/marcar-lida", jwtAuthMiddleware, async (req: any, res) => {
+router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { id } = req.params;
     const userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
-        error: "Usuário não autenticado",
-        message: "Email do usuário não encontrado"
+        error: 'Usuário não autenticado',
+        message: 'Email do usuário não encontrado',
       });
     }
 
     // CORREÇÃO CRÍTICA: Buscar o ID do usuário local
-    const [localUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, userEmail))
-      .limit(1);
+    const [localUser] = await db.select().from(users).where(eq(users.email, userEmail)).limit(1);
 
     if (!localUser) {
       return res.status(404).json({
-        error: "Usuário não encontrado",
-        message: "Usuário não existe na tabela local"
+        error: 'Usuário não encontrado',
+        message: 'Usuário não existe na tabela local',
       });
     }
 
@@ -177,24 +163,19 @@ router.post("/notificacoes/:id/marcar-lida", jwtAuthMiddleware, async (req: any,
     await db
       .update(notificacoes)
       .set({
-        status: "lida",
+        status: 'lida',
         dataLeitura: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(notificacoes.id, parseInt(id)),
-          eq(notificacoes.userId, localUserId)
-        )
-      );
+      .where(and(eq(notificacoes.id, parseInt(id)), eq(notificacoes.userId, localUserId)));
 
     console.log(`[ALERTAS] Notificação ${id} marcada como lida para usuário ${userEmail}`);
     res.json({ success: true });
   } catch (error) {
-    console.error("[ALERTAS MARCAR LIDA] Erro:", error);
+    console.error('[ALERTAS MARCAR LIDA] Erro:', error);
     res.status(500).json({
-      error: "Erro interno",
-      message: "Erro ao marcar notificação como lida"
+      error: 'Erro interno',
+      message: 'Erro ao marcar notificação como lida',
     });
   }
 });
@@ -203,28 +184,24 @@ router.post("/notificacoes/:id/marcar-lida", jwtAuthMiddleware, async (req: any,
  * POST /api/alertas/notificacoes/marcar-todas-lidas
  * Marcar todas as notificações como lidas
  */
-router.post("/notificacoes/marcar-todas-lidas", jwtAuthMiddleware, async (req: any, res) => {
+router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
-        error: "Usuário não autenticado",
-        message: "Email do usuário não encontrado"
+        error: 'Usuário não autenticado',
+        message: 'Email do usuário não encontrado',
       });
     }
 
     // CORREÇÃO CRÍTICA: Buscar o ID do usuário local
-    const [localUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, userEmail))
-      .limit(1);
+    const [localUser] = await db.select().from(users).where(eq(users.email, userEmail)).limit(1);
 
     if (!localUser) {
       return res.status(404).json({
-        error: "Usuário não encontrado",
-        message: "Usuário não existe na tabela local"
+        error: 'Usuário não encontrado',
+        message: 'Usuário não existe na tabela local',
       });
     }
 
@@ -233,28 +210,25 @@ router.post("/notificacoes/marcar-todas-lidas", jwtAuthMiddleware, async (req: a
     const resultado = await db
       .update(notificacoes)
       .set({
-        status: "lida",
+        status: 'lida',
         dataLeitura: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(notificacoes.userId, localUserId),
-          eq(notificacoes.status, "nao_lida")
-        )
-      )
+      .where(and(eq(notificacoes.userId, localUserId), eq(notificacoes.status, 'nao_lida')))
       .returning({ id: notificacoes.id });
 
-    console.log(`[ALERTAS] ${resultado.length} notificações marcadas como lidas para usuário ${userEmail}`);
-    res.json({ 
+    console.log(
+      `[ALERTAS] ${resultado.length} notificações marcadas como lidas para usuário ${userEmail}`
+    );
+    res.json({
       success: true,
-      count: resultado.length 
+      count: resultado.length,
     });
   } catch (error) {
-    console.error("[ALERTAS MARCAR TODAS] Erro:", error);
+    console.error('[ALERTAS MARCAR TODAS] Erro:', error);
     res.status(500).json({
-      error: "Erro interno",
-      message: "Erro ao marcar todas as notificações como lidas"
+      error: 'Erro interno',
+      message: 'Erro ao marcar todas as notificações como lidas',
     });
   }
 });
@@ -263,28 +237,24 @@ router.post("/notificacoes/marcar-todas-lidas", jwtAuthMiddleware, async (req: a
  * DELETE /api/alertas/notificacoes/all
  * Limpar histórico de notificações (arquivar todas)
  */
-router.delete("/notificacoes/all", jwtAuthMiddleware, async (req: any, res) => {
+router.delete('/notificacoes/all', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
-        error: "Usuário não autenticado",
-        message: "Email do usuário não encontrado"
+        error: 'Usuário não autenticado',
+        message: 'Email do usuário não encontrado',
       });
     }
 
     // Buscar o ID do usuário local
-    const [localUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, userEmail))
-      .limit(1);
+    const [localUser] = await db.select().from(users).where(eq(users.email, userEmail)).limit(1);
 
     if (!localUser) {
       return res.status(404).json({
-        error: "Usuário não encontrado",
-        message: "Usuário não existe na tabela local"
+        error: 'Usuário não encontrado',
+        message: 'Usuário não existe na tabela local',
       });
     }
 
@@ -294,24 +264,26 @@ router.delete("/notificacoes/all", jwtAuthMiddleware, async (req: any, res) => {
     const resultado = await db
       .update(notificacoes)
       .set({
-        status: "arquivada",
+        status: 'arquivada',
         dataLeitura: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(notificacoes.userId, localUserId))
       .returning({ id: notificacoes.id });
 
-    console.log(`[ALERTAS] Histórico limpo - ${resultado.length} notificações arquivadas para usuário ${userEmail}`);
-    res.json({ 
-      success: true, 
-      message: "Histórico de notificações limpo com sucesso",
-      notificacoesArquivadas: resultado.length
+    console.log(
+      `[ALERTAS] Histórico limpo - ${resultado.length} notificações arquivadas para usuário ${userEmail}`
+    );
+    res.json({
+      success: true,
+      message: 'Histórico de notificações limpo com sucesso',
+      notificacoesArquivadas: resultado.length,
     });
   } catch (error) {
-    console.error("[ALERTAS LIMPAR HISTÓRICO] Erro:", error);
+    console.error('[ALERTAS LIMPAR HISTÓRICO] Erro:', error);
     res.status(500).json({
-      error: "Erro interno",
-      message: "Erro ao limpar histórico de notificações"
+      error: 'Erro interno',
+      message: 'Erro ao limpar histórico de notificações',
     });
   }
 });
@@ -320,28 +292,25 @@ router.delete("/notificacoes/all", jwtAuthMiddleware, async (req: any, res) => {
  * GET /api/alertas/regras
  * Listar regras de alertas (apenas ADMINISTRADOR)
  */
-router.get("/regras", jwtAuthMiddleware, async (req: any, res) => {
+router.get('/regras', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const userRole = req.user?.role;
-    
-    if (userRole !== "ADMINISTRADOR") {
+
+    if (userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
-        error: "Acesso negado",
-        message: "Apenas administradores podem visualizar regras"
+        error: 'Acesso negado',
+        message: 'Apenas administradores podem visualizar regras',
       });
     }
 
-    const regras = await db
-      .select()
-      .from(regrasAlertas)
-      .orderBy(regrasAlertas.nome);
+    const regras = await db.select().from(regrasAlertas).orderBy(regrasAlertas.nome);
 
     res.json(regras);
   } catch (error) {
-    console.error("[ALERTAS REGRAS] Erro:", error);
+    console.error('[ALERTAS REGRAS] Erro:', error);
     res.status(500).json({
-      error: "Erro interno",
-      message: "Erro ao buscar regras de alertas"
+      error: 'Erro interno',
+      message: 'Erro ao buscar regras de alertas',
     });
   }
 });
@@ -350,14 +319,14 @@ router.get("/regras", jwtAuthMiddleware, async (req: any, res) => {
  * GET /api/alertas/historico
  * Visualizar histórico de execuções (apenas ADMINISTRADOR)
  */
-router.get("/historico", jwtAuthMiddleware, async (req: any, res) => {
+router.get('/historico', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const userRole = req.user?.role;
-    
-    if (userRole !== "ADMINISTRADOR") {
+
+    if (userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
-        error: "Acesso negado",
-        message: "Apenas administradores podem visualizar histórico"
+        error: 'Acesso negado',
+        message: 'Apenas administradores podem visualizar histórico',
       });
     }
 
@@ -371,7 +340,7 @@ router.get("/historico", jwtAuthMiddleware, async (req: any, res) => {
         registrosProcessados: historicoExecucoesAlertas.registrosProcessados,
         notificacoesCriadas: historicoExecucoesAlertas.notificacoesCriadas,
         erroDetalhes: historicoExecucoesAlertas.erroDetalhes,
-        triggerOrigem: historicoExecucoesAlertas.triggerOrigem
+        triggerOrigem: historicoExecucoesAlertas.triggerOrigem,
       })
       .from(historicoExecucoesAlertas)
       .orderBy(desc(historicoExecucoesAlertas.dataExecucao))
@@ -379,10 +348,10 @@ router.get("/historico", jwtAuthMiddleware, async (req: any, res) => {
 
     res.json(historico);
   } catch (error) {
-    console.error("[ALERTAS HISTORICO] Erro:", error);
+    console.error('[ALERTAS HISTORICO] Erro:', error);
     res.status(500).json({
-      error: "Erro interno",
-      message: "Erro ao buscar histórico de execuções"
+      error: 'Erro interno',
+      message: 'Erro ao buscar histórico de execuções',
     });
   }
 });

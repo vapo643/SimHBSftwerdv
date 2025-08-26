@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Table,
   TableHeader,
@@ -10,17 +10,17 @@ import {
   TableHead,
   TableRow,
   TableCell,
-} from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import UserForm from "@/components/usuarios/UserForm";
-import DashboardLayout from "@/components/DashboardLayout";
-import { ErrorBoundary, UserFormErrorBoundary } from "@/components/ErrorBoundary";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { api } from "@/lib/apiClient";
-import { queryKeys, invalidationPatterns } from "@/hooks/queries/queryKeys";
-import type { User } from "@shared/schema";
+} from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import UserForm from '@/components/usuarios/UserForm';
+import DashboardLayout from '@/components/DashboardLayout';
+import { ErrorBoundary, UserFormErrorBoundary } from '@/components/ErrorBoundary';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/apiClient';
+import { queryKeys, invalidationPatterns } from '@/hooks/queries/queryKeys';
+import type { User } from '@shared/schema';
 import {
   Users,
   Edit,
@@ -35,8 +35,8 @@ import {
   Mail,
   Calendar,
   Settings,
-} from "lucide-react";
-import RefreshButton from "@/components/RefreshButton";
+} from 'lucide-react';
+import RefreshButton from '@/components/RefreshButton';
 
 const UsuariosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,7 +53,7 @@ const UsuariosPage: React.FC = () => {
   } = useQuery<User[]>({
     queryKey: queryKeys.users.withDetails(),
     queryFn: async () => {
-      const response = await api.get("/api/admin/users");
+      const response = await api.get('/api/admin/users');
       const data = response.data;
       return Array.isArray(data) ? data : (data as any)?.data || [];
     },
@@ -70,56 +70,56 @@ const UsuariosPage: React.FC = () => {
         password: userData.senha,
         role: userData.perfil,
         lojaId:
-          userData.perfil === "ATENDENTE" && userData.lojaId ? parseInt(userData.lojaId) : null,
+          userData.perfil === 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
         lojaIds:
-          userData.perfil === "GERENTE" && userData.lojaIds
+          userData.perfil === 'GERENTE' && userData.lojaIds
             ? userData.lojaIds.map((id: string) => parseInt(id))
             : null,
       };
 
-      console.log("🔍 [USER CREATE] Sending data:", JSON.stringify(apiData, null, 2));
+      console.log('🔍 [USER CREATE] Sending data:', JSON.stringify(apiData, null, 2));
 
-      const response = await api.post("/api/admin/users", apiData);
+      const response = await api.post('/api/admin/users', apiData);
       return response.data; // Retorna o corpo da resposta da API
     },
     onSuccess: () => {
       toast({
-        title: "Sucesso",
-        description: "Usuário criado com sucesso!",
+        title: 'Sucesso',
+        description: 'Usuário criado com sucesso!',
       });
 
       // Use invalidation patterns for consistent cache management
-      invalidationPatterns.onUserChange.forEach(pattern => {
+      invalidationPatterns.onUserChange.forEach((pattern) => {
         queryClient.invalidateQueries({ queryKey: pattern });
       });
       setIsModalOpen(false);
       setSelectedUser(null);
     },
     onError: (error: any) => {
-      console.error("❌ [USER CREATE ERROR]:", error);
-      console.error("❌ [ERROR DATA]:", error.data);
+      console.error('❌ [USER CREATE ERROR]:', error);
+      console.error('❌ [ERROR DATA]:', error.data);
 
       // Handle password validation errors specifically - use error.data from ApiError
       if (error.data?.errors?.fieldErrors?.password) {
         const passwordErrors = error.data.errors.fieldErrors.password;
-        let description = "Problema com a senha:\n";
+        let description = 'Problema com a senha:\n';
 
-        if (passwordErrors.includes("This is a top-10 common password")) {
-          description += "• Senha muito comum/simples\n";
-          description += "\nSugestões:\n";
-          description += "• Use pelo menos 8 caracteres\n";
-          description += "• Combine letras maiúsculas e minúsculas\n";
-          description += "• Inclua números e símbolos (@, #, !, etc.)\n";
+        if (passwordErrors.includes('This is a top-10 common password')) {
+          description += '• Senha muito comum/simples\n';
+          description += '\nSugestões:\n';
+          description += '• Use pelo menos 8 caracteres\n';
+          description += '• Combine letras maiúsculas e minúsculas\n';
+          description += '• Inclua números e símbolos (@, #, !, etc.)\n';
           description += "• Evite sequências como '12345678'\n";
-          description += "• Exemplo: MinhaSenh@123";
+          description += '• Exemplo: MinhaSenh@123';
         } else {
-          description += passwordErrors.join(", ");
+          description += passwordErrors.join(', ');
         }
 
         toast({
-          title: "Senha rejeitada por segurança",
+          title: 'Senha rejeitada por segurança',
           description: description,
-          variant: "destructive",
+          variant: 'destructive',
           duration: 8000, // 8 seconds to read suggestions
         });
         return;
@@ -128,18 +128,18 @@ const UsuariosPage: React.FC = () => {
       // Handle role validation errors
       if (error.data?.errors?.fieldErrors?.role) {
         toast({
-          title: "Erro no perfil do usuário",
-          description: "Perfil selecionado não é válido. Tente novamente.",
-          variant: "destructive",
+          title: 'Erro no perfil do usuário',
+          description: 'Perfil selecionado não é válido. Tente novamente.',
+          variant: 'destructive',
         });
         return;
       }
 
       // Generic error handling
       toast({
-        title: "Erro",
-        description: error.message || "Erro ao criar usuário",
-        variant: "destructive",
+        title: 'Erro',
+        description: error.message || 'Erro ao criar usuário',
+        variant: 'destructive',
       });
     },
   });
@@ -148,8 +148,8 @@ const UsuariosPage: React.FC = () => {
     if (selectedUser) {
       // TODO: Implement edit functionality when needed
       toast({
-        title: "Info",
-        description: "Edição de usuários será implementada em breve",
+        title: 'Info',
+        description: 'Edição de usuários será implementada em breve',
       });
     } else {
       // For creating new users, use the API
@@ -170,8 +170,8 @@ const UsuariosPage: React.FC = () => {
   const toggleUserStatus = (userId: number) => {
     // TODO: Implement user status toggle when API is ready
     toast({
-      title: "Info",
-      description: "Alteração de status será implementada em breve",
+      title: 'Info',
+      description: 'Alteração de status será implementada em breve',
     });
   };
 
@@ -313,13 +313,13 @@ const UsuariosPage: React.FC = () => {
   // Calcular estatísticas dos usuários
   const userStats = {
     total: users.length,
-    administradores: users.filter(u => u.role === "ADMINISTRADOR").length,
-    analistas: users.filter(u => u.role === "ANALISTA").length,
-    atendentes: users.filter(u => u.role === "ATENDENTE").length,
-    gerentes: users.filter(u => u.role === "GERENTE").length,
-    financeiro: users.filter(u => u.role === "FINANCEIRO").length,
+    administradores: users.filter((u) => u.role === 'ADMINISTRADOR').length,
+    analistas: users.filter((u) => u.role === 'ANALISTA').length,
+    atendentes: users.filter((u) => u.role === 'ATENDENTE').length,
+    gerentes: users.filter((u) => u.role === 'GERENTE').length,
+    financeiro: users.filter((u) => u.role === 'FINANCEIRO').length,
     ativosPercentual:
-      users.length > 0 ? ((users.length / (users.length + 0)) * 100).toFixed(1) : "0",
+      users.length > 0 ? ((users.length / (users.length + 0)) * 100).toFixed(1) : '0',
   };
 
   return (
@@ -464,29 +464,29 @@ const UsuariosPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map(user => {
+                    {users.map((user) => {
                       const initials = user.name
-                        .split(" ")
-                        .map(n => n[0])
-                        .join("")
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
                         .toUpperCase()
                         .slice(0, 2);
                       const roleColor =
                         {
                           ADMINISTRADOR:
-                            "bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200",
+                            'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200',
                           ANALISTA:
-                            "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200",
+                            'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200',
                           ATENDENTE:
-                            "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200",
+                            'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200',
                           GERENTE:
-                            "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200",
+                            'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200',
                           FINANCEIRO:
-                            "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200",
+                            'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200',
                           DIRETOR:
-                            "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200",
+                            'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200',
                         }[user.role] ||
-                        "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900 dark:text-gray-200";
+                        'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900 dark:text-gray-200';
 
                       return (
                         <TableRow
@@ -506,9 +506,9 @@ const UsuariosPage: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                                   <Calendar className="h-3 w-3" />
-                                  Criado em{" "}
+                                  Criado em{' '}
                                   {new Date(user.createdAt || Date.now()).toLocaleDateString(
-                                    "pt-BR"
+                                    'pt-BR'
                                   )}
                                 </div>
                               </div>
@@ -571,7 +571,7 @@ const UsuariosPage: React.FC = () => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedUser ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
+            <DialogTitle>{selectedUser ? 'Editar Usuário' : 'Novo Usuário'}</DialogTitle>
           </DialogHeader>
           <UserFormErrorBoundary>
             <UserForm

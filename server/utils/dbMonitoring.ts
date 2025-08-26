@@ -3,8 +3,8 @@
  * Queries para análise de performance e saúde do sistema
  */
 
-import { db } from "../lib/supabase";
-import { sql } from "drizzle-orm";
+import { db } from '../lib/supabase';
+import { sql } from 'drizzle-orm';
 
 /**
  * Retorna estatísticas gerais do banco
@@ -24,7 +24,7 @@ export async function getDatabaseStats() {
 
     return stats[0];
   } catch (error) {
-    console.error("Erro ao buscar estatísticas do banco:", error);
+    console.error('Erro ao buscar estatísticas do banco:', error);
     throw error;
   }
 }
@@ -53,7 +53,7 @@ export async function getSlowQueries(limit = 10) {
     return queries;
   } catch (error) {
     // pg_stat_statements pode não estar habilitado
-    console.warn("pg_stat_statements não disponível");
+    console.warn('pg_stat_statements não disponível');
     return [];
   }
 }
@@ -82,7 +82,7 @@ export async function getTableStats() {
 
     return stats;
   } catch (error) {
-    console.error("Erro ao buscar estatísticas das tabelas:", error);
+    console.error('Erro ao buscar estatísticas das tabelas:', error);
     throw error;
   }
 }
@@ -108,7 +108,7 @@ export async function getIndexUsage() {
 
     return usage;
   } catch (error) {
-    console.error("Erro ao buscar uso de índices:", error);
+    console.error('Erro ao buscar uso de índices:', error);
     throw error;
   }
 }
@@ -143,7 +143,7 @@ export async function getActiveConnections() {
 
     return connections;
   } catch (error) {
-    console.error("Erro ao buscar conexões ativas:", error);
+    console.error('Erro ao buscar conexões ativas:', error);
     throw error;
   }
 }
@@ -154,7 +154,7 @@ export async function getActiveConnections() {
 export async function checkDatabaseHealth() {
   try {
     const health = {
-      status: "healthy",
+      status: 'healthy',
       issues: [] as string[],
       metrics: {} as any,
     };
@@ -172,7 +172,7 @@ export async function checkDatabaseHealth() {
 
     if (conn.total > conn.max_allowed * 0.8) {
       health.issues.push(`Alto número de conexões: ${conn.total}/${conn.max_allowed}`);
-      health.status = "warning";
+      health.status = 'warning';
     }
 
     // Verificar bloat das tabelas
@@ -196,9 +196,9 @@ export async function checkDatabaseHealth() {
       if (table.dead_ratio > 20) {
         health.issues.push(`Tabela ${table.tablename} com ${table.dead_ratio}% de linhas mortas`);
         if (table.dead_ratio > 50) {
-          health.status = "critical";
-        } else if (health.status !== "critical") {
-          health.status = "warning";
+          health.status = 'critical';
+        } else if (health.status !== 'critical') {
+          health.status = 'warning';
         }
       }
     }
@@ -214,15 +214,15 @@ export async function checkDatabaseHealth() {
     const longCount = (longQueries[0] as any).count;
     if (longCount > 0) {
       health.issues.push(`${longCount} queries rodando há mais de 5 minutos`);
-      health.status = "warning";
+      health.status = 'warning';
     }
 
     return health;
   } catch (error) {
-    console.error("Erro ao verificar saúde do banco:", error);
+    console.error('Erro ao verificar saúde do banco:', error);
     return {
-      status: "error",
-      issues: ["Erro ao verificar saúde do banco"],
+      status: 'error',
+      issues: ['Erro ao verificar saúde do banco'],
       error: error instanceof Error ? error.message : String(error),
     };
   }
@@ -250,7 +250,7 @@ export async function generateMonitoringReport() {
       health: health,
     };
   } catch (error) {
-    console.error("Erro ao gerar relatório de monitoramento:", error);
+    console.error('Erro ao gerar relatório de monitoramento:', error);
     throw error;
   }
 }

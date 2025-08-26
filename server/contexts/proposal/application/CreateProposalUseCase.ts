@@ -1,6 +1,6 @@
 /**
  * Use Case: Criar Nova Proposta
- * 
+ *
  * Orquestra a criação de uma nova proposta de crédito
  */
 
@@ -31,10 +31,8 @@ export interface CreateProposalDTO {
 }
 
 export class CreateProposalUseCase {
-  constructor(
-    private proposalRepository: IProposalRepository
-  ) {}
-  
+  constructor(private proposalRepository: IProposalRepository) {}
+
   async execute(dto: CreateProposalDTO): Promise<{ id: string }> {
     // Mapear DTO para domínio
     const clienteData = {
@@ -51,9 +49,9 @@ export class CreateProposalUseCase {
       renda_mensal: dto.clienteRendaMensal,
       empregador: dto.clienteEmpregador,
       tempo_emprego: dto.clienteTempoEmprego,
-      dividas_existentes: dto.clienteDividasExistentes
+      dividas_existentes: dto.clienteDividasExistentes,
     };
-    
+
     // Criar agregado usando factory method
     const proposal = Proposal.create(
       clienteData,
@@ -64,10 +62,10 @@ export class CreateProposalUseCase {
       dto.lojaId,
       dto.atendenteId
     );
-    
+
     // Persistir
     await this.proposalRepository.save(proposal);
-    
+
     // Retornar ID da proposta criada
     return { id: proposal.id };
   }

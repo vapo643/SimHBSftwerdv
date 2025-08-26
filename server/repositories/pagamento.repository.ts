@@ -4,28 +4,28 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { BaseRepository } from "./base.repository.js";
-import { db } from "../lib/supabase.js";
-import { 
-  propostas, 
-  users, 
-  profiles, 
-  lojas, 
-  produtos, 
-  interCollections, 
+import { BaseRepository } from './base.repository.js';
+import { db } from '../lib/supabase.js';
+import {
+  propostas,
+  users,
+  profiles,
+  lojas,
+  produtos,
+  interCollections,
   statusContextuais,
   type Proposta,
   type User,
   type Loja,
   type Produto,
-  type InterCollection
-} from "@shared/schema";
-import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
-import { getBrasiliaTimestamp } from "../lib/timezone.js";
+  type InterCollection,
+} from '@shared/schema';
+import { eq, and, or, desc, sql, gte, lte, inArray } from 'drizzle-orm';
+import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
 export class PagamentoRepository extends BaseRepository<typeof propostas> {
   constructor() {
-    super("propostas");
+    super('propostas');
   }
 
   /**
@@ -43,16 +43,13 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       sql`${propostas.deletedAt} IS NULL`,
       // Proposals that have signed CCB or Inter Bank collections
       or(
-        and(
-          eq(propostas.ccbGerado, true),
-          eq(propostas.assinaturaEletronicaConcluida, true)
-        ),
+        and(eq(propostas.ccbGerado, true), eq(propostas.assinaturaEletronicaConcluida, true)),
         sql`${interCollections.codigoSolicitacao} IS NOT NULL`
-      )
+      ),
     ];
 
     // Apply status filter
-    if (filters.status && filters.status !== "todos") {
+    if (filters.status && filters.status !== 'todos') {
       conditions.push(eq(propostas.status, filters.status));
     }
 
@@ -63,11 +60,11 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       let endDate: Date;
 
       switch (filters.periodo) {
-        case "hoje":
+        case 'hoje':
           startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
           endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
           break;
-        case "semana":
+        case 'semana':
           const startOfWeek = new Date(now);
           startOfWeek.setDate(now.getDate() - now.getDay());
           startOfWeek.setHours(0, 0, 0, 0);
@@ -77,7 +74,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
           startDate = startOfWeek;
           endDate = endOfWeek;
           break;
-        case "mes":
+        case 'mes':
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
           break;
@@ -86,18 +83,12 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
           endDate = new Date();
       }
 
-      conditions.push(
-        gte(propostas.createdAt, startDate),
-        lte(propostas.createdAt, endDate)
-      );
+      conditions.push(gte(propostas.createdAt, startDate), lte(propostas.createdAt, endDate));
     }
 
     // Exclude paid proposals unless specifically requested
     if (!filters.incluirPagos) {
-      conditions.push(or(
-        sql`${propostas.status} IS NULL`,
-        sql`${propostas.status} != 'pago'`
-      ));
+      conditions.push(or(sql`${propostas.status} IS NULL`, sql`${propostas.status} != 'pago'`));
     }
 
     // Build single query with consolidated conditions
@@ -135,7 +126,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     const [propostasAprovadas] = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
-      .where(and(eq(propostas.status, "aprovado"), sql`${propostas.deletedAt} IS NULL`));
+      .where(and(eq(propostas.status, 'aprovado'), sql`${propostas.deletedAt} IS NULL`));
 
     const [propostasComCCB] = await db
       .select({ count: sql<number>`count(*)` })
@@ -211,10 +202,10 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
         valorLiquidoLiberado: String(data.valorLiquido),
         valorIof: String(data.valorIOF),
         valorTac: String(data.valorTAC),
-        condicoesData: JSON.stringify({contaBancaria: data.contaBancaria}),
+        condicoesData: JSON.stringify({ contaBancaria: data.contaBancaria }),
         formaPagamento: data.formaPagamento,
         observacoes: data.observacoes,
-        status: "PAGAMENTO_PENDENTE",
+        status: 'PAGAMENTO_PENDENTE',
         userId: data.userId,
         updatedAt: new Date(),
       })
@@ -228,8 +219,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
    * Update payment status
    */
   async updatePaymentStatus(
-    proposalId: string, 
-    status: string, 
+    proposalId: string,
+    status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
     const result = await db
@@ -249,8 +240,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
    * Update proposal status
    */
   async updateProposalStatus(
-    proposalId: string, 
-    status: string, 
+    proposalId: string,
+    status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
     const result = await db
@@ -306,10 +297,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     if (filters.dataInicio && filters.dataFim) {
       const startDate = new Date(filters.dataInicio);
       const endDate = new Date(filters.dataFim);
-      conditions.push(
-        gte(propostas.createdAt, startDate),
-        lte(propostas.createdAt, endDate)
-      );
+      conditions.push(gte(propostas.createdAt, startDate), lte(propostas.createdAt, endDate));
     }
 
     // Apply status filter

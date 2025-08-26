@@ -1,9 +1,9 @@
 /**
  * Suíte de Testes Unitários - TacCalculationService
- * 
+ *
  * Testes isolados da lógica de negócio para cálculo e isenção de TAC
  * com mocking completo das dependências de banco de dados.
- * 
+ *
  * @file tests/services/tacCalculationService.test.ts
  * @created 2025-08-20
  * @coverage 4 cenários críticos conforme PAM V1.0
@@ -15,8 +15,8 @@ import { TacCalculationService } from '../../server/services/tacCalculationServi
 // Mock do módulo de database
 vi.mock('../../server/lib/supabase.js', () => ({
   db: {
-    select: vi.fn()
-  }
+    select: vi.fn(),
+  },
 }));
 
 // Import do mock após declaração
@@ -32,13 +32,13 @@ describe('TacCalculationService', () => {
   beforeEach(() => {
     // Reset all mocks antes de cada teste
     vi.clearAllMocks();
-    
+
     // Setup da chain de métodos mockados
     mockLimit.mockResolvedValue([]);
     mockWhere.mockReturnValue({ limit: mockLimit });
     mockFrom.mockReturnValue({ where: mockWhere });
     mockSelect.mockReturnValue({ from: mockFrom });
-    
+
     // Mock principal do db.select
     (db.select as any) = mockSelect;
   });
@@ -58,15 +58,18 @@ describe('TacCalculationService', () => {
       // Mock: Cliente NÃO cadastrado (sem propostas anteriores)
       mockLimit
         .mockResolvedValueOnce([]) // Primeira chamada: isClienteCadastrado retorna vazio
-        .mockResolvedValueOnce([{ // Segunda chamada: busca configuração do produto
-          tacValor: tacValorFixo.toString(),
-          tacTipo: 'fixo'
-        }]);
+        .mockResolvedValueOnce([
+          {
+            // Segunda chamada: busca configuração do produto
+            tacValor: tacValorFixo.toString(),
+            tacTipo: 'fixo',
+          },
+        ]);
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoId, 
-        valorEmprestimo, 
+        produtoId,
+        valorEmprestimo,
         clienteCpf
       );
 
@@ -85,15 +88,18 @@ describe('TacCalculationService', () => {
       // Mock: Cliente NÃO cadastrado + produto com TAC percentual
       mockLimit
         .mockResolvedValueOnce([]) // Cliente não cadastrado
-        .mockResolvedValueOnce([{ // Produto com TAC percentual
-          tacValor: tacPercentual.toString(),
-          tacTipo: 'percentual'
-        }]);
+        .mockResolvedValueOnce([
+          {
+            // Produto com TAC percentual
+            tacValor: tacPercentual.toString(),
+            tacTipo: 'percentual',
+          },
+        ]);
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoId, 
-        valorEmprestimo, 
+        produtoId,
+        valorEmprestimo,
         clienteCpf
       );
 
@@ -112,15 +118,17 @@ describe('TacCalculationService', () => {
       const clienteCpf = '11111111111';
 
       // Mock: Cliente CADASTRADO (tem proposta aprovada)
-      mockLimit.mockResolvedValueOnce([{
-        id: 300001,
-        status: 'aprovado'
-      }]);
+      mockLimit.mockResolvedValueOnce([
+        {
+          id: 300001,
+          status: 'aprovado',
+        },
+      ]);
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoId, 
-        valorEmprestimo, 
+        produtoId,
+        valorEmprestimo,
         clienteCpf
       );
 
@@ -136,10 +144,12 @@ describe('TacCalculationService', () => {
       const clienteCpf = '22222222222';
 
       // Mock: Cliente com proposta assinada
-      mockLimit.mockResolvedValue([{
-        id: 300002,
-        status: 'ASSINATURA_CONCLUIDA'
-      }]);
+      mockLimit.mockResolvedValue([
+        {
+          id: 300002,
+          status: 'ASSINATURA_CONCLUIDA',
+        },
+      ]);
 
       // Act
       const resultado = await TacCalculationService.isClienteCadastrado(clienteCpf);
@@ -179,10 +189,12 @@ describe('TacCalculationService', () => {
         (db.select as any) = mockSelect;
 
         // Mock: Cliente com status específico
-        mockLimit.mockResolvedValue([{
-          id: 300003,
-          status: status
-        }]);
+        mockLimit.mockResolvedValue([
+          {
+            id: 300003,
+            status: status,
+          },
+        ]);
 
         // Act
         const resultado = await TacCalculationService.isClienteCadastrado(clienteCpf);
@@ -208,8 +220,8 @@ describe('TacCalculationService', () => {
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoIdInexistente, 
-        valorEmprestimo, 
+        produtoIdInexistente,
+        valorEmprestimo,
         clienteCpf
       );
 
@@ -224,7 +236,7 @@ describe('TacCalculationService', () => {
       const valorEmprestimo = 5000;
       const clienteCpf = '66666666666';
 
-      // Mock: Simulando erro na primeira consulta (isClienteCadastrado) 
+      // Mock: Simulando erro na primeira consulta (isClienteCadastrado)
       // e depois retorno vazio para o produto (segunda consulta)
       mockLimit
         .mockRejectedValueOnce(new Error('Database connection failed')) // Erro na primeira consulta
@@ -232,8 +244,8 @@ describe('TacCalculationService', () => {
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoId, 
-        valorEmprestimo, 
+        produtoId,
+        valorEmprestimo,
         clienteCpf
       );
 
@@ -268,15 +280,17 @@ describe('TacCalculationService', () => {
       // Mock: Cliente não cadastrado + produto com TAC = 0
       mockLimit
         .mockResolvedValueOnce([]) // Cliente não cadastrado
-        .mockResolvedValueOnce([{
-          tacValor: '0',
-          tacTipo: 'fixo'
-        }]);
+        .mockResolvedValueOnce([
+          {
+            tacValor: '0',
+            tacTipo: 'fixo',
+          },
+        ]);
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoId, 
-        valorEmprestimo, 
+        produtoId,
+        valorEmprestimo,
         clienteCpf
       );
 
@@ -294,15 +308,17 @@ describe('TacCalculationService', () => {
       // Mock: Cliente não cadastrado + produto com tipo desconhecido
       mockLimit
         .mockResolvedValueOnce([]) // Cliente não cadastrado
-        .mockResolvedValueOnce([{
-          tacValor: tacValor.toString(),
-          tacTipo: 'tipo_invalido'
-        }]);
+        .mockResolvedValueOnce([
+          {
+            tacValor: tacValor.toString(),
+            tacTipo: 'tipo_invalido',
+          },
+        ]);
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoId, 
-        valorEmprestimo, 
+        produtoId,
+        valorEmprestimo,
         clienteCpf
       );
 
@@ -320,15 +336,17 @@ describe('TacCalculationService', () => {
       // Mock: Cliente não cadastrado + TAC percentual
       mockLimit
         .mockResolvedValueOnce([]) // Cliente não cadastrado
-        .mockResolvedValueOnce([{
-          tacValor: tacPercentual.toString(),
-          tacTipo: 'percentual'
-        }]);
+        .mockResolvedValueOnce([
+          {
+            tacValor: tacPercentual.toString(),
+            tacTipo: 'percentual',
+          },
+        ]);
 
       // Act
       const resultado = await TacCalculationService.calculateTac(
-        produtoId, 
-        valorEmprestimo, 
+        produtoId,
+        valorEmprestimo,
         clienteCpf
       );
 

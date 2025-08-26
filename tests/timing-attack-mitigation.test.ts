@@ -1,41 +1,41 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import request from "supertest";
-import express from "express";
-import { registerRoutes } from "../server/routes";
-import type { Express } from "express";
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import request from 'supertest';
+import express from 'express';
+import { registerRoutes } from '../server/routes';
+import type { Express } from 'express';
 
 // Mock dependencies
-vi.mock("../server/lib/jwt-auth-middleware", () => ({
+vi.mock('../server/lib/jwt-auth-middleware', () => ({
   jwtAuthMiddleware: (req: any, res: any, next: any) => {
     req.user = {
-      id: "test-user-id",
-      email: "test@example.com",
-      role: "ATENDENTE",
+      id: 'test-user-id',
+      email: 'test@example.com',
+      role: 'ATENDENTE',
       loja_id: 1,
     };
     next();
   },
 }));
 
-vi.mock("../server/storage", () => ({
+vi.mock('../server/storage', () => ({
   storage: {
     getPropostaById: vi.fn((id: string) => {
       // Simulate database lookup time difference
-      if (id === "valid-id") {
-        return new Promise(resolve => {
+      if (id === 'valid-id') {
+        return new Promise((resolve) => {
           setTimeout(
             () =>
               resolve({
-                id: "valid-id",
-                status: "aguardando_analise",
-                clienteData: { nome: "Test Client" },
+                id: 'valid-id',
+                status: 'aguardando_analise',
+                clienteData: { nome: 'Test Client' },
                 condicoesData: { valor: 50000 },
               }),
             10
           ); // 10ms for valid ID (RLS check)
         });
       } else {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(() => resolve(undefined), 2); // 2ms for invalid ID (fast fail)
         });
       }
@@ -43,7 +43,7 @@ vi.mock("../server/storage", () => ({
   },
 }));
 
-describe("Timing Attack Mitigation Tests", () => {
+describe('Timing Attack Mitigation Tests', () => {
   let app: Express;
 
   beforeEach(async () => {
@@ -51,7 +51,7 @@ describe("Timing Attack Mitigation Tests", () => {
     await registerRoutes(app);
   });
 
-  it("should normalize response times for GET /api/propostas/:id endpoint", async () => {
+  it('should normalize response times for GET /api/propostas/:id endpoint', async () => {
     // Test multiple requests to measure timing consistency
     const validIdTimes: number[] = [];
     const invalidIdTimes: number[] = [];
@@ -60,7 +60,7 @@ describe("Timing Attack Mitigation Tests", () => {
     for (let i = 0; i < 5; i++) {
       const start = process.hrtime.bigint();
 
-      await request(app).get("/api/propostas/valid-id").expect(200);
+      await request(app).get('/api/propostas/valid-id').expect(200);
 
       const end = process.hrtime.bigint();
       const duration = Number(end - start) / 1e6; // Convert to milliseconds
@@ -71,7 +71,7 @@ describe("Timing Attack Mitigation Tests", () => {
     for (let i = 0; i < 5; i++) {
       const start = process.hrtime.bigint();
 
-      await request(app).get("/api/propostas/invalid-id").expect(404);
+      await request(app).get('/api/propostas/invalid-id').expect(404);
 
       const end = process.hrtime.bigint();
       const duration = Number(end - start) / 1e6; // Convert to milliseconds
@@ -82,7 +82,7 @@ describe("Timing Attack Mitigation Tests", () => {
     const avgValidTime = validIdTimes.reduce((a, b) => a + b, 0) / validIdTimes.length;
     const avgInvalidTime = invalidIdTimes.reduce((a, b) => a + b, 0) / invalidIdTimes.length;
 
-    console.log("🔍 Timing Analysis Results:");
+    console.log('🔍 Timing Analysis Results:');
     console.log(`  Valid ID avg: ${avgValidTime.toFixed(2)}ms`);
     console.log(`  Invalid ID avg: ${avgInvalidTime.toFixed(2)}ms`);
     console.log(`  Difference: ${Math.abs(avgValidTime - avgInvalidTime).toFixed(2)}ms`);
@@ -99,10 +99,10 @@ describe("Timing Attack Mitigation Tests", () => {
     expect(avgInvalidTime).toBeLessThan(30);
   });
 
-  it("should apply timing normalization to vulnerable endpoints", async () => {
+  it('should apply timing normalization to vulnerable endpoints', async () => {
     // Test that other vulnerable endpoints also have timing normalization
     const endpoints = [
-      "/api/propostas/123/status", // PUT endpoint with timing normalizer
+      '/api/propostas/123/status', // PUT endpoint with timing normalizer
     ];
 
     for (const endpoint of endpoints) {
@@ -111,8 +111,8 @@ describe("Timing Attack Mitigation Tests", () => {
       // This will fail due to method/validation, but timing should still be normalized
       await request(app)
         .put(endpoint)
-        .send({ status: "aprovado" })
-        .expect(res => {
+        .send({ status: 'aprovado' })
+        .expect((res) => {
           // We just care that the request completes, not the exact status
           expect([400, 404, 422, 500]).toContain(res.status);
         });

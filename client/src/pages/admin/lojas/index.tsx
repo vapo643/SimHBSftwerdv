@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import DashboardLayout from "@/components/DashboardLayout";
-import { api } from "@/lib/apiClient";
-import { queryKeys } from "@/hooks/queries/queryKeys";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import DashboardLayout from '@/components/DashboardLayout';
+import { api } from '@/lib/apiClient';
+import { queryKeys } from '@/hooks/queries/queryKeys';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import {
   Store,
   Edit,
@@ -19,15 +19,15 @@ import {
   TrendingUp,
   MapPin,
   Settings,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { LojaForm } from "@/components/lojas/LojaForm";
-import type { Loja, InsertLoja, UpdateLoja } from "@shared/schema";
+import { LojaForm } from '@/components/lojas/LojaForm';
+import type { Loja, InsertLoja, UpdateLoja } from '@shared/schema';
 
 export default function LojasPage() {
   const [selectedLoja, setSelectedLoja] = useState<Loja | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -35,7 +35,7 @@ export default function LojasPage() {
   const { data: lojas = [], isLoading: loadingLojas } = useQuery<Loja[]>({
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
-      const response = await api.get<Loja[]>("/api/admin/lojas");
+      const response = await api.get<Loja[]>('/api/admin/lojas');
       return response.data;
     },
   });
@@ -43,13 +43,13 @@ export default function LojasPage() {
   // Create mutation using new apiClient
   const createMutation = useMutation({
     mutationFn: async (data: InsertLoja) => {
-      const response = await api.post<Loja>("/api/admin/lojas", data);
+      const response = await api.post<Loja>('/api/admin/lojas', data);
       return response.data;
     },
     onSuccess: () => {
       toast({
-        title: "Sucesso",
-        description: "Loja criada com sucesso!",
+        title: 'Sucesso',
+        description: 'Loja criada com sucesso!',
       });
       // Invalidate all stores-related queries using hierarchical keys
       queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
@@ -61,9 +61,9 @@ export default function LojasPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Erro",
-        description: error.message || "Erro ao criar loja",
-        variant: "destructive",
+        title: 'Erro',
+        description: error.message || 'Erro ao criar loja',
+        variant: 'destructive',
       });
     },
   });
@@ -76,8 +76,8 @@ export default function LojasPage() {
     },
     onSuccess: () => {
       toast({
-        title: "Sucesso",
-        description: "Loja atualizada com sucesso!",
+        title: 'Sucesso',
+        description: 'Loja atualizada com sucesso!',
       });
       // Invalidate all stores-related queries using hierarchical keys
       queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
@@ -89,9 +89,9 @@ export default function LojasPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Erro",
-        description: error.message || "Erro ao atualizar loja",
-        variant: "destructive",
+        title: 'Erro',
+        description: error.message || 'Erro ao atualizar loja',
+        variant: 'destructive',
       });
     },
   });
@@ -104,8 +104,8 @@ export default function LojasPage() {
     },
     onSuccess: () => {
       toast({
-        title: "Sucesso",
-        description: "Loja desativada com sucesso!",
+        title: 'Sucesso',
+        description: 'Loja desativada com sucesso!',
       });
       // Invalidate all stores-related queries using hierarchical keys
       queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
@@ -115,21 +115,21 @@ export default function LojasPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao Desativar",
-        description: error.details || error.message || "Erro ao desativar loja",
-        variant: "destructive",
+        title: 'Erro ao Desativar',
+        description: error.details || error.message || 'Erro ao desativar loja',
+        variant: 'destructive',
       });
     },
   });
 
   const openNewModal = () => {
-    setModalMode("create");
+    setModalMode('create');
     setSelectedLoja(null);
     setIsModalOpen(true);
   };
 
   const openEditModal = (loja: Loja) => {
-    setModalMode("edit");
+    setModalMode('edit');
     setSelectedLoja(loja);
     setIsModalOpen(true);
   };
@@ -145,7 +145,7 @@ export default function LojasPage() {
   };
 
   const handleSubmit = (data: InsertLoja | UpdateLoja) => {
-    if (modalMode === "edit" && selectedLoja) {
+    if (modalMode === 'edit' && selectedLoja) {
       updateMutation.mutate({ id: selectedLoja.id, data: data as UpdateLoja });
     } else {
       createMutation.mutate(data as InsertLoja);
@@ -158,9 +158,9 @@ export default function LojasPage() {
   // Calcular estatísticas das lojas
   const lojaStats = {
     total: lojas.length,
-    ativas: lojas.filter(l => !l.deletedAt).length,
-    inativas: lojas.filter(l => l.deletedAt).length,
-    parceirosUnicos: new Set(lojas.map(l => l.parceiroId)).size,
+    ativas: lojas.filter((l) => !l.deletedAt).length,
+    inativas: lojas.filter((l) => l.deletedAt).length,
+    parceirosUnicos: new Set(lojas.map((l) => l.parceiroId)).size,
   };
 
   if (loadingLojas) {
@@ -266,7 +266,7 @@ export default function LojasPage() {
             size="lg"
           >
             <Plus className="mr-2 h-5 w-5" />
-            {createMutation.isPending ? "Criando..." : "Nova Loja"}
+            {createMutation.isPending ? 'Criando...' : 'Nova Loja'}
           </Button>
         </div>
 
@@ -411,7 +411,7 @@ export default function LojasPage() {
                           </span>
                         </div>
                         <span className="max-w-32 truncate text-sm text-gray-700 dark:text-gray-300">
-                          {loja.endereco || "Não informado"}
+                          {loja.endereco || 'Não informado'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -435,11 +435,11 @@ export default function LojasPage() {
                         <Badge
                           className={
                             !loja.deletedAt
-                              ? "border-green-200 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                              : "border-red-200 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                              ? 'border-green-200 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'border-red-200 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                           }
                         >
-                          {!loja.deletedAt ? "Ativa" : "Inativa"}
+                          {!loja.deletedAt ? 'Ativa' : 'Inativa'}
                         </Badge>
                       </div>
                       <div className="border-t border-gray-100 pt-2 dark:border-gray-700">
@@ -459,7 +459,7 @@ export default function LojasPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{modalMode === "create" ? "Nova Loja" : "Editar Loja"}</DialogTitle>
+            <DialogTitle>{modalMode === 'create' ? 'Nova Loja' : 'Editar Loja'}</DialogTitle>
           </DialogHeader>
           <LojaForm
             initialData={selectedLoja}

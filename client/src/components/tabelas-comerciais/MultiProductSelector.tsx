@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
-import { Produto } from "@shared/schema";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
+import { Produto } from '@shared/schema';
 
 interface MultiProductSelectorProps {
   selectedProducts: number[];
@@ -24,26 +24,26 @@ export function MultiProductSelector({
   availableProducts,
   disabled = false,
 }: MultiProductSelectorProps) {
-  const [selectedValue, setSelectedValue] = useState<string>("");
+  const [selectedValue, setSelectedValue] = useState<string>('');
 
   // Filter out already selected products
   const availableForSelection = availableProducts.filter(
-    produto => !selectedProducts.includes(produto.id)
+    (produto) => !selectedProducts.includes(produto.id)
   );
 
   const handleAddProduct = (produtoId: string) => {
     if (produtoId && !selectedProducts.includes(parseInt(produtoId))) {
       onProductsChange([...selectedProducts, parseInt(produtoId)]);
-      setSelectedValue(""); // Reset selection
+      setSelectedValue(''); // Reset selection
     }
   };
 
   const handleRemoveProduct = (produtoId: number) => {
-    onProductsChange(selectedProducts.filter(id => id !== produtoId));
+    onProductsChange(selectedProducts.filter((id) => id !== produtoId));
   };
 
   const getProductName = (produtoId: number) => {
-    const produto = availableProducts.find(p => p.id === produtoId);
+    const produto = availableProducts.find((p) => p.id === produtoId);
     return produto?.nomeProduto || `Produto ${produtoId}`;
   };
 
@@ -60,7 +60,7 @@ export function MultiProductSelector({
             <SelectValue placeholder="Selecione produtos para associar..." />
           </SelectTrigger>
           <SelectContent>
-            {availableForSelection.map(produto => (
+            {availableForSelection.map((produto) => (
               <SelectItem key={produto.id} value={produto.id.toString()}>
                 {produto.nomeProduto}
               </SelectItem>
@@ -85,7 +85,7 @@ export function MultiProductSelector({
             Produtos Selecionados ({selectedProducts.length}):
           </label>
           <div className="flex flex-wrap gap-2">
-            {selectedProducts.map(produtoId => (
+            {selectedProducts.map((produtoId) => (
               <Badge
                 key={produtoId}
                 variant="secondary"

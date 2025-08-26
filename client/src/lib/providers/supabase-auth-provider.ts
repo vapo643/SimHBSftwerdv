@@ -3,7 +3,7 @@
  * Implementação específica do Supabase isolada em provider
  */
 
-import { createClientSupabaseClient } from "../supabase";
+import { createClientSupabaseClient } from '../supabase';
 import {
   AuthProvider,
   User,
@@ -12,8 +12,8 @@ import {
   SignInResult,
   AuthStateChangeCallback,
   AuthSubscription,
-} from "../auth-types";
-import { User as SupabaseUser } from "@supabase/supabase-js";
+} from '../auth-types';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 export class SupabaseAuthProvider implements AuthProvider {
   private supabase = createClientSupabaseClient();
@@ -24,7 +24,7 @@ export class SupabaseAuthProvider implements AuthProvider {
   private mapSupabaseUser(supabaseUser: SupabaseUser): User {
     return {
       id: supabaseUser.id,
-      email: supabaseUser.email || "",
+      email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name,
       avatar: supabaseUser.user_metadata?.avatar_url,
       createdAt: supabaseUser.created_at ? new Date(supabaseUser.created_at) : undefined,
@@ -53,14 +53,14 @@ export class SupabaseAuthProvider implements AuthProvider {
 
     if (error) throw error;
     if (!data.user || !data.session) {
-      throw new Error("Falha na autenticação");
+      throw new Error('Falha na autenticação');
     }
 
     const user = this.mapSupabaseUser(data.user);
     const session = this.mapSupabaseSession(data.session);
 
     // Log de diagnóstico para rastrear o token JWT
-    console.log("[PASSO 1 - LOGIN]", {
+    console.log('[PASSO 1 - LOGIN]', {
       accessToken: data.session.access_token,
       tokenLength: data.session.access_token?.length,
       expiresAt: data.session.expires_at,

@@ -1,18 +1,18 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { signIn } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { signIn } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -34,12 +34,12 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await signIn(data.email, data.password);
-      setLocation("/dashboard");
+      setLocation('/dashboard');
     } catch (error: any) {
       toast({
-        title: "Erro ao fazer login",
-        description: error.message || "Credenciais inválidas",
-        variant: "destructive",
+        title: 'Erro ao fazer login',
+        description: error.message || 'Credenciais inválidas',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
                 type="email"
                 placeholder="seu@email.com"
                 required
-                {...register("email")}
+                {...register('email')}
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
@@ -78,13 +78,13 @@ const LoginPage: React.FC = () => {
               <div className="flex items-center">
                 <Label htmlFor="password">Senha</Label>
               </div>
-              <Input id="password" type="password" required {...register("password")} />
+              <Input id="password" type="password" required {...register('password')} />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
         </div>

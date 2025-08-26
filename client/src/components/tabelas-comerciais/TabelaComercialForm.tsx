@@ -1,35 +1,35 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
-import { X } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { TabelaComercial } from "@/pages/configuracoes/tabelas";
-import { Produto } from "@shared/schema";
-import { MultiProductSelector } from "./MultiProductSelector";
+import { X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { TabelaComercial } from '@/pages/configuracoes/tabelas';
+import { Produto } from '@shared/schema';
+import { MultiProductSelector } from './MultiProductSelector';
 
 // Updated schema for N:N structure
 const tabelaSchema = z.object({
-  nomeTabela: z.string().min(3, "Nome da Tabela deve ter pelo menos 3 caracteres."),
-  taxaJuros: z.number().positive("Taxa de Juros deve ser um número positivo."),
-  comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero.").default(0),
-  prazosPermitidos: z.array(z.number()).min(1, "Deve conter ao menos um prazo."),
+  nomeTabela: z.string().min(3, 'Nome da Tabela deve ter pelo menos 3 caracteres.'),
+  taxaJuros: z.number().positive('Taxa de Juros deve ser um número positivo.'),
+  comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero.').default(0),
+  prazosPermitidos: z.array(z.number()).min(1, 'Deve conter ao menos um prazo.'),
   produtoIds: z
     .array(z.number().int().positive())
-    .min(1, "Pelo menos um produto deve ser selecionado"),
+    .min(1, 'Pelo menos um produto deve ser selecionado'),
 });
 
 type TabelaFormData = z.infer<typeof tabelaSchema>;
 
 interface TabelaComercialFormProps {
   initialData?: TabelaComercial | null;
-  onSubmit: (data: Omit<TabelaComercial, "id">) => void;
+  onSubmit: (data: Omit<TabelaComercial, 'id'>) => void;
   onCancel: () => void;
 }
 
@@ -38,7 +38,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [novoPrazo, setNovoPrazo] = useState("");
+  const [novoPrazo, setNovoPrazo] = useState('');
   const [prazos, setPrazos] = useState<number[]>(initialData?.prazos || []);
   const [selectedProducts, setSelectedProducts] = useState<number[]>(initialData?.produtoIds || []);
 
@@ -50,7 +50,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
   } = useForm<TabelaFormData>({
     resolver: zodResolver(tabelaSchema),
     defaultValues: {
-      nomeTabela: initialData?.nomeTabela || "",
+      nomeTabela: initialData?.nomeTabela || '',
       taxaJuros: Number(initialData?.taxaJuros) || 0,
       comissao: Number(initialData?.comissao) || 0,
       prazosPermitidos: initialData?.prazos || [],
@@ -60,9 +60,9 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
 
   // Fetch products for dropdown
   const { data: produtos = [], isLoading: loadingProdutos } = useQuery<Produto[]>({
-    queryKey: ["/api/produtos"],
+    queryKey: ['/api/produtos'],
     queryFn: async () => {
-      const response = await apiRequest("/api/produtos", { method: "GET" });
+      const response = await apiRequest('/api/produtos', { method: 'GET' });
       return response.filter((p: Produto) => p.isActive);
     },
   });
@@ -72,15 +72,15 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     if (prazo > 0 && !prazos.includes(prazo)) {
       const novosPrazos = [...prazos, prazo].sort((a, b) => a - b);
       setPrazos(novosPrazos);
-      setValue("prazosPermitidos", novosPrazos);
-      setNovoPrazo("");
+      setValue('prazosPermitidos', novosPrazos);
+      setNovoPrazo('');
     }
   };
 
   const removerPrazo = (prazoRemover: number) => {
-    const novosPrazos = prazos.filter(p => p !== prazoRemover);
+    const novosPrazos = prazos.filter((p) => p !== prazoRemover);
     setPrazos(novosPrazos);
-    setValue("prazosPermitidos", novosPrazos);
+    setValue('prazosPermitidos', novosPrazos);
   };
 
   const handleFormSubmit = (data: TabelaFormData) => {
@@ -95,11 +95,11 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
 
   const handleProductsChange = (products: number[]) => {
     setSelectedProducts(products);
-    setValue("produtoIds", products);
+    setValue('produtoIds', products);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       adicionarPrazo();
     }
@@ -111,7 +111,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
         <Label htmlFor="nomeTabela">Nome da Tabela</Label>
         <Input
           id="nomeTabela"
-          {...register("nomeTabela")}
+          {...register('nomeTabela')}
           placeholder="Ex: Tabela A - Preferencial"
         />
         {errors.nomeTabela && (
@@ -143,7 +143,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
           type="number"
           step="0.01"
           min="0"
-          {...register("taxaJuros", { valueAsNumber: true })}
+          {...register('taxaJuros', { valueAsNumber: true })}
           placeholder="Ex: 1.5"
         />
         {errors.taxaJuros && (
@@ -160,7 +160,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
           type="number"
           step="0.01"
           min="0"
-          {...register("comissao", { valueAsNumber: true })}
+          {...register('comissao', { valueAsNumber: true })}
           placeholder="Ex: 10.00"
         />
         {errors.comissao && (
@@ -178,7 +178,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
             type="number"
             min="1"
             value={novoPrazo}
-            onChange={e => setNovoPrazo(e.target.value)}
+            onChange={(e) => setNovoPrazo(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ex: 12"
           />
@@ -192,7 +192,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {prazos.map(prazo => (
+          {prazos.map((prazo) => (
             <Badge key={prazo} variant="secondary" className="flex items-center gap-1">
               {prazo} meses
               <Button

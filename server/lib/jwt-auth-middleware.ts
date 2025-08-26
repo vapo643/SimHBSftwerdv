@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 // Import dinâmico para usar função correta com Service Role Key
-import { securityLogger, SecurityEventType, getClientIP } from "./security-logger";
+import { securityLogger, SecurityEventType, getClientIP } from './security-logger';
 // Importação direta da interface personalizada
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -43,9 +43,9 @@ export function addToBlacklist(token: string): void {
   tokenBlacklist.add(token);
   securityLogger.logEvent({
     type: SecurityEventType.TOKEN_BLACKLISTED,
-    severity: "LOW",
+    severity: 'LOW',
     success: true,
-    details: { reason: "Token added to blacklist" },
+    details: { reason: 'Token added to blacklist' },
   });
 }
 
@@ -56,15 +56,15 @@ export function addToBlacklist(token: string): void {
 export function invalidateAllUserTokens(userId: string): void {
   const tokens = userTokens.get(userId);
   if (tokens && tokens.size > 0) {
-    tokens.forEach(token => tokenBlacklist.add(token));
+    tokens.forEach((token) => tokenBlacklist.add(token));
     userTokens.delete(userId);
     securityLogger.logEvent({
       type: SecurityEventType.TOKEN_BLACKLISTED,
-      severity: "HIGH",
+      severity: 'HIGH',
       userId,
       success: true,
       details: {
-        reason: "All user tokens invalidated - token rotation",
+        reason: 'All user tokens invalidated - token rotation',
         tokenCount: tokens.size,
       },
     });
@@ -92,52 +92,52 @@ export async function jwtAuthMiddleware(
 ) {
   try {
     // Log detalhado para TODAS as rotas (diagnóstico completo)
-    console.log("[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====");
-    console.log("[JWT DEBUG] Rota acessada:", req.path);
-    console.log("[JWT DEBUG] Método:", req.method);
-    console.log("[JWT DEBUG] User-Agent:", req.headers["user-agent"]);
-    console.log("[JWT DEBUG] Origin:", req.headers.origin);
-    console.log("[JWT DEBUG] Referer:", req.headers.referer);
+    console.log('[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====');
+    console.log('[JWT DEBUG] Rota acessada:', req.path);
+    console.log('[JWT DEBUG] Método:', req.method);
+    console.log('[JWT DEBUG] User-Agent:', req.headers['user-agent']);
+    console.log('[JWT DEBUG] Origin:', req.headers.origin);
+    console.log('[JWT DEBUG] Referer:', req.headers.referer);
 
     // Step a: Validate JWT token
     const authHeader = req.headers.authorization;
-    console.log("[JWT DEBUG] Header Auth presente:", !!authHeader);
-    console.log("[JWT DEBUG] Header começa com Bearer:", authHeader?.startsWith("Bearer "));
+    console.log('[JWT DEBUG] Header Auth presente:', !!authHeader);
+    console.log('[JWT DEBUG] Header começa com Bearer:', authHeader?.startsWith('Bearer '));
 
     // Debug adicional para PDF downloads
-    if (req.path.includes("/pdf")) {
-      console.log("[JWT DEBUG - PDF ESPECÍFICO] Request path:", req.path);
-      console.log("[JWT DEBUG - PDF ESPECÍFICO] Auth header completo length:", authHeader?.length);
+    if (req.path.includes('/pdf')) {
+      console.log('[JWT DEBUG - PDF ESPECÍFICO] Request path:', req.path);
+      console.log('[JWT DEBUG - PDF ESPECÍFICO] Auth header completo length:', authHeader?.length);
       console.log(
-        "[JWT DEBUG - PDF ESPECÍFICO] Token preview:",
-        authHeader?.substring(0, 50) + "..."
+        '[JWT DEBUG - PDF ESPECÍFICO] Token preview:',
+        authHeader?.substring(0, 50) + '...'
       );
     }
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      if (req.path.includes("/pdf")) {
-        console.error("[JWT AUTH - PDF DOWNLOAD] Missing or invalid auth header");
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (req.path.includes('/pdf')) {
+        console.error('[JWT AUTH - PDF DOWNLOAD] Missing or invalid auth header');
       }
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_INVALID,
-        severity: "MEDIUM",
+        severity: 'MEDIUM',
         ipAddress: getClientIP(req),
-        userAgent: req.headers["user-agent"],
+        userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: "Missing or invalid authorization header" },
+        details: { reason: 'Missing or invalid authorization header' },
       });
-      return res.status(401).json({ message: "Token de acesso requerido" });
+      return res.status(401).json({ message: 'Token de acesso requerido' });
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Debug logging para PDF downloads - token info
-    if (req.path.includes("/pdf")) {
-      console.log("[JWT AUTH - PDF DOWNLOAD] Token length:", token.length);
+    if (req.path.includes('/pdf')) {
+      console.log('[JWT AUTH - PDF DOWNLOAD] Token length:', token.length);
       console.log(
-        "[JWT AUTH - PDF DOWNLOAD] Token first 20 chars:",
-        token.substring(0, 20) + "..."
+        '[JWT AUTH - PDF DOWNLOAD] Token first 20 chars:',
+        token.substring(0, 20) + '...'
       );
     }
 
@@ -145,14 +145,14 @@ export async function jwtAuthMiddleware(
     if (tokenBlacklist.has(token)) {
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_INVALID,
-        severity: "HIGH",
+        severity: 'HIGH',
         ipAddress: getClientIP(req),
-        userAgent: req.headers["user-agent"],
+        userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: "Token is blacklisted" },
+        details: { reason: 'Token is blacklisted' },
       });
-      return res.status(401).json({ message: "Token inválido" });
+      return res.status(401).json({ message: 'Token inválido' });
     }
 
     let userId: string | undefined;
@@ -176,50 +176,50 @@ export async function jwtAuthMiddleware(
       tokenType = 'local';
     }
 
-    console.log("[JWT DEBUG] Auto-detected token type:", tokenType);
+    console.log('[JWT DEBUG] Auto-detected token type:', tokenType);
 
     if (tokenType === 'supabase') {
       // Use Supabase validation for Supabase tokens
       try {
-        console.log("[JWT DEBUG] Using Supabase token validation");
-        const { createServerSupabaseAdminClient } = await import("./supabase");
+        console.log('[JWT DEBUG] Using Supabase token validation');
+        const { createServerSupabaseAdminClient } = await import('./supabase');
         const supabase = createServerSupabaseAdminClient();
         const supabaseResult = await supabase.auth.getUser(token);
-        
+
         data = supabaseResult.data;
         error = supabaseResult.error;
-        
+
         if (data?.user) {
           userId = data.user.id;
-          userEmail = data.user.email || "";
+          userEmail = data.user.email || '';
         }
       } catch (supabaseError: any) {
-        console.error("[JWT DEBUG] Supabase validation failed:", supabaseError.message);
+        console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
         error = { message: supabaseError.message };
         data = null;
       }
     } else {
       // Use local JWT validation for local tokens
       try {
-        console.log("[JWT DEBUG] Using local JWT validation");
+        console.log('[JWT DEBUG] Using local JWT validation');
         const jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
-        
+
         const decoded = jwt.default.verify(token, JWT_SECRET) as any;
-        console.log("[JWT DEBUG] JWT decoded successfully:", { 
-          userId: decoded.userId, 
+        console.log('[JWT DEBUG] JWT decoded successfully:', {
+          userId: decoded.userId,
           email: decoded.email,
-          role: decoded.role 
+          role: decoded.role,
         });
-        
+
         userId = decoded.userId;
-        userEmail = decoded.email || "";
-        
+        userEmail = decoded.email || '';
+
         // Create mock data object for consistency
         data = { user: { id: userId, email: userEmail } };
         error = null;
       } catch (jwtError: any) {
-        console.error("[JWT DEBUG] Local JWT verification failed:", jwtError.message);
+        console.error('[JWT DEBUG] Local JWT verification failed:', jwtError.message);
         error = { message: jwtError.message };
         data = null;
       }
@@ -227,7 +227,7 @@ export async function jwtAuthMiddleware(
 
     // Log completo do erro (CRUCIAL para diagnóstico)
     if (error) {
-      console.error("[JWT DEBUG] Falha na validação. Erro completo:", {
+      console.error('[JWT DEBUG] Falha na validação. Erro completo:', {
         message: error.message,
         mode: tokenType.toUpperCase(),
         fullError: JSON.stringify(error, null, 2),
@@ -235,37 +235,37 @@ export async function jwtAuthMiddleware(
     }
 
     // Security-aware logging - OWASP ASVS V7.1.1
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔐 JWT VALIDATION:", {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔐 JWT VALIDATION:', {
         hasError: !!error,
         errorType: error?.message || null,
         hasUser: !!data?.user,
         userId: data?.user?.id,
         timestamp: new Date().toISOString(),
-        mode: tokenType.toUpperCase()
+        mode: tokenType.toUpperCase(),
       });
     }
 
     if (error || !data?.user || !userId || !userEmail) {
-      console.error("[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====");
+      console.error('[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====');
       securityLogger.logEvent({
-        type: error?.message?.includes("expired")
+        type: error?.message?.includes('expired')
           ? SecurityEventType.TOKEN_EXPIRED
           : SecurityEventType.TOKEN_INVALID,
-        severity: "MEDIUM",
+        severity: 'MEDIUM',
         ipAddress: getClientIP(req),
-        userAgent: req.headers["user-agent"],
+        userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: error?.message || "Invalid token" },
+        details: { reason: error?.message || 'Invalid token' },
       });
-      return res.status(401).json({ message: "Token inválido ou expirado" });
+      return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
     // Step c: Query profiles table using direct DB connection (bypasses RLS)
-    const { db } = await import("./supabase");
-    const { profiles } = await import("@shared/schema");
-    const { eq } = await import("drizzle-orm");
+    const { db } = await import('./supabase');
+    const { profiles } = await import('@shared/schema');
+    const { eq } = await import('drizzle-orm');
 
     const profileResult = await db
       .select({
@@ -280,21 +280,21 @@ export async function jwtAuthMiddleware(
 
     // Step d: Security fallback - Block orphaned users (no profile)
     if (!profileResult.length) {
-      console.error("Profile query failed: No profile found for user", userId);
+      console.error('Profile query failed: No profile found for user', userId);
       securityLogger.logEvent({
         type: SecurityEventType.ACCESS_DENIED,
-        severity: "HIGH",
+        severity: 'HIGH',
         userId,
         userEmail,
         ipAddress: getClientIP(req),
-        userAgent: req.headers["user-agent"],
+        userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: "Orphaned user - no profile found" },
+        details: { reason: 'Orphaned user - no profile found' },
       });
       return res.status(403).json({
-        message: "Acesso negado. Perfil de usuário não encontrado.",
-        code: "ORPHANED_USER",
+        message: 'Acesso negado. Perfil de usuário não encontrado.',
+        code: 'ORPHANED_USER',
       });
     }
 
@@ -314,8 +314,8 @@ export async function jwtAuthMiddleware(
 
     next();
   } catch (error) {
-    console.error("JWT Auth middleware error:", error);
-    res.status(500).json({ message: "Erro interno de autenticação" });
+    console.error('JWT Auth middleware error:', error);
+    res.status(500).json({ message: 'Erro interno de autenticação' });
   }
 }
 
@@ -325,7 +325,7 @@ export async function jwtAuthMiddleware(
  */
 export async function extractRoleFromToken(authToken: string): Promise<string | null> {
   try {
-    const { createServerSupabaseAdminClient } = await import("./supabase");
+    const { createServerSupabaseAdminClient } = await import('./supabase');
     const supabase = createServerSupabaseAdminClient();
     const { data, error } = await supabase.auth.getUser(authToken);
 
@@ -336,14 +336,14 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
     const supabaseAdmin = createServerSupabaseAdminClient();
 
     const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
       .single();
 
     return profile?.role || null;
   } catch (error) {
-    console.error("Error extracting role from token:", error);
+    console.error('Error extracting role from token:', error);
     return null;
   }
 }

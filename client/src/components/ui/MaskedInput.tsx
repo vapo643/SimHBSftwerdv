@@ -41,7 +41,7 @@ const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
       const inputValue = e.target.value;
       const formatted = applyMask(inputValue, mask);
       setDisplayValue(formatted);
-      
+
       if (onChange) {
         // Return clean value (numbers only) to the parent
         const cleanValue = inputValue.replace(/\D/g, '');

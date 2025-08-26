@@ -1,20 +1,20 @@
-import { useRoute, useLocation } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { getSupabase } from "@/lib/supabase";
+import { useRoute, useLocation } from 'wouter';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { getSupabase } from '@/lib/supabase';
 import {
   CheckCircle,
   Clock,
@@ -43,14 +43,14 @@ import {
   QrCode,
   Barcode,
   RefreshCw,
-} from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import RefreshButton from "@/components/RefreshButton";
-import { useAuth } from "@/contexts/AuthContext";
-import { EtapaFormalizacaoControl } from "@/components/propostas/EtapaFormalizacaoControl";
-import { DocumentViewer } from "@/components/DocumentViewer";
-import { CCBViewer } from "@/components/CCBViewer";
+} from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import RefreshButton from '@/components/RefreshButton';
+import { useAuth } from '@/contexts/AuthContext';
+import { EtapaFormalizacaoControl } from '@/components/propostas/EtapaFormalizacaoControl';
+import { DocumentViewer } from '@/components/DocumentViewer';
+import { CCBViewer } from '@/components/CCBViewer';
 
 interface Proposta {
   id: string;
@@ -130,16 +130,16 @@ interface Proposta {
 const updateFormalizacaoSchema = z.object({
   status: z
     .enum([
-      "aprovado",
-      "documentos_enviados",
-      "CCB_GERADA",
-      "AGUARDANDO_ASSINATURA",
-      "ASSINATURA_PENDENTE",
-      "ASSINATURA_CONCLUIDA",
-      "BOLETOS_EMITIDOS",
-      "PAGAMENTO_PENDENTE",
-      "PAGAMENTO_PARCIAL",
-      "PAGAMENTO_CONFIRMADO",
+      'aprovado',
+      'documentos_enviados',
+      'CCB_GERADA',
+      'AGUARDANDO_ASSINATURA',
+      'ASSINATURA_PENDENTE',
+      'ASSINATURA_CONCLUIDA',
+      'BOLETOS_EMITIDOS',
+      'PAGAMENTO_PENDENTE',
+      'PAGAMENTO_PARCIAL',
+      'PAGAMENTO_CONFIRMADO',
     ])
     .optional(),
   documentosAdicionais: z.array(z.string()).optional(),
@@ -158,11 +158,11 @@ function FormalizacaoList() {
   // Função para parsing defensivo de dados JSONB
   const parseJsonbField = (field: any, fieldName: string, propostaId: string) => {
     // Se é null, undefined ou vazio, retornar objeto vazio
-    if (!field || field === "null" || field === "undefined") {
+    if (!field || field === 'null' || field === 'undefined') {
       return {};
     }
 
-    if (typeof field === "string" && field.trim() !== "") {
+    if (typeof field === 'string' && field.trim() !== '') {
       try {
         return JSON.parse(field);
       } catch (e) {
@@ -172,7 +172,7 @@ function FormalizacaoList() {
     }
 
     // Se já é um objeto, retornar como está
-    if (typeof field === "object") {
+    if (typeof field === 'object') {
       return field || {};
     }
 
@@ -184,76 +184,76 @@ function FormalizacaoList() {
     isLoading,
     error,
   } = useQuery<Proposta[]>({
-    queryKey: ["/api/propostas/formalizacao"],
+    queryKey: ['/api/propostas/formalizacao'],
     queryFn: async () => {
-      console.log("Fazendo requisição para /api/propostas/formalizacao");
-      const response = await apiRequest("/api/propostas/formalizacao");
-      console.log("Resposta do endpoint formalizacao:", response);
+      console.log('Fazendo requisição para /api/propostas/formalizacao');
+      const response = await apiRequest('/api/propostas/formalizacao');
+      console.log('Resposta do endpoint formalizacao:', response);
 
       // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
       const propostsWithParsedData = (response as any[]).map((proposta: any) => ({
         ...proposta,
-        cliente_data: parseJsonbField(proposta.cliente_data, "cliente_data", proposta.id),
-        condicoes_data: parseJsonbField(proposta.condicoes_data, "condicoes_data", proposta.id),
+        cliente_data: parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id),
+        condicoes_data: parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id),
       }));
 
-      console.log("Propostas com dados parseados:", propostsWithParsedData);
+      console.log('Propostas com dados parseados:', propostsWithParsedData);
       return propostsWithParsedData;
     },
   });
 
   // Debug: log error if any
   if (error) {
-    console.error("Erro na query de formalização:", error);
+    console.error('Erro na query de formalização:', error);
   }
 
   const formatCurrency = (value: string | number) => {
-    const numValue = typeof value === "string" ? parseFloat(value) : value;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(numValue);
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("pt-BR");
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const getStatusColor = (status: string) => {
     const statusColors = {
-      aprovado: "bg-green-500",
-      documentos_enviados: "bg-blue-500",
-      CCB_GERADA: "bg-purple-500",
-      ASSINATURA_CONCLUIDA: "bg-indigo-500",
-      BOLETOS_EMITIDOS: "bg-orange-500",
-      PAGAMENTO_CONFIRMADO: "bg-green-600",
+      aprovado: 'bg-green-500',
+      documentos_enviados: 'bg-blue-500',
+      CCB_GERADA: 'bg-purple-500',
+      ASSINATURA_CONCLUIDA: 'bg-indigo-500',
+      BOLETOS_EMITIDOS: 'bg-orange-500',
+      PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || "bg-gray-500";
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
   const getStatusText = (status: string) => {
     const statusTexts = {
-      aprovado: "Aprovado",
-      documentos_enviados: "Documentos Enviados",
-      CCB_GERADA: "CCB Gerada",
-      ASSINATURA_CONCLUIDA: "Assinatura Concluída",
-      BOLETOS_EMITIDOS: "Boletos Emitidos",
-      PAGAMENTO_CONFIRMADO: "Pagamento Confirmado",
+      aprovado: 'Aprovado',
+      documentos_enviados: 'Documentos Enviados',
+      CCB_GERADA: 'CCB Gerada',
+      ASSINATURA_CONCLUIDA: 'Assinatura Concluída',
+      BOLETOS_EMITIDOS: 'Boletos Emitidos',
+      PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
   // Backend already handles all permission filtering
   const formalizacaoPropostas = propostas || [];
-  
+
   // 🔍 PAM V1.0 - LOG DE DIAGNÓSTICO #1: Dados recebidos
-  console.log("🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual:", {
+  console.log('🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual:', {
     isLoading,
     hasError: !!error,
     totalPropostas: formalizacaoPropostas.length,
     propostas: formalizacaoPropostas,
-    primeiraPropostaStatus: formalizacaoPropostas[0]?.status || 'NENHUMA'
+    primeiraPropostaStatus: formalizacaoPropostas[0]?.status || 'NENHUMA',
   });
 
   if (isLoading) {
@@ -278,15 +278,15 @@ function FormalizacaoList() {
   }
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/propostas/formalizacao"] });
+    queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
   };
 
   const getTitle = () => {
-    return "Propostas em Formalização";
+    return 'Propostas em Formalização';
   };
 
   const getDescription = () => {
-    return "Acompanhe o processo de formalização das propostas aprovadas";
+    return 'Acompanhe o processo de formalização das propostas aprovadas';
   };
 
   return (
@@ -312,13 +312,13 @@ function FormalizacaoList() {
         {/* Status Overview */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {[
-            { status: "aprovado", label: "Aprovado", color: "bg-green-400" },
-            { status: "documentos_enviados", label: "Docs Enviados", color: "bg-blue-500" },
-            { status: "CCB_GERADA", label: "Contratos Prep.", color: "bg-purple-500" },
-            { status: "ASSINATURA_CONCLUIDA", label: "Assinados", color: "bg-indigo-500" },
-            { status: "BOLETOS_EMITIDOS", label: "Pronto Pag.", color: "bg-orange-500" },
-          ].map(item => {
-            const count = formalizacaoPropostas.filter(p => p.status === item.status).length;
+            { status: 'aprovado', label: 'Aprovado', color: 'bg-green-400' },
+            { status: 'documentos_enviados', label: 'Docs Enviados', color: 'bg-blue-500' },
+            { status: 'CCB_GERADA', label: 'Contratos Prep.', color: 'bg-purple-500' },
+            { status: 'ASSINATURA_CONCLUIDA', label: 'Assinados', color: 'bg-indigo-500' },
+            { status: 'BOLETOS_EMITIDOS', label: 'Pronto Pag.', color: 'bg-orange-500' },
+          ].map((item) => {
+            const count = formalizacaoPropostas.filter((p) => p.status === item.status).length;
             return (
               <Card
                 key={item.status}
@@ -340,77 +340,78 @@ function FormalizacaoList() {
 
         {/* Propostas List */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {formalizacaoPropostas.map(proposta => {
+          {formalizacaoPropostas.map((proposta) => {
             // 🔍 PAM V1.0 - LOG DE DIAGNÓSTICO #2: Renderização de cada proposta
-            console.log("🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta:", {
+            console.log('🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta:', {
               id: proposta.id,
               status: proposta.status,
               statusColor: getStatusColor(proposta.status),
               statusText: getStatusText(proposta.status),
               clienteData: proposta.cliente_data,
-              userRole: user?.role
+              userRole: user?.role,
             });
             return (
-            <Card
-              key={proposta.id}
-              className="cursor-pointer border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
-            >
-              <CardContent className="p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    #{proposta.id}
-                  </h3>
-                  <Badge className={`${getStatusColor(proposta.status)} text-white`}>
-                    {getStatusText(proposta.status)}
-                  </Badge>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Cliente</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {parseJsonbField(proposta.cliente_data, "cliente_data", proposta.id)?.nome ||
-                        "Nome não informado"}
-                    </p>
+              <Card
+                key={proposta.id}
+                className="cursor-pointer border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+              >
+                <CardContent className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      #{proposta.id}
+                    </h3>
+                    <Badge className={`${getStatusColor(proposta.status)} text-white`}>
+                      {getStatusText(proposta.status)}
+                    </Badge>
                   </div>
 
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Valor Aprovado</p>
-                    <p className="font-bold text-green-400">
-                      {formatCurrency(
-                        parseJsonbField(proposta.condicoes_data, "condicoes_data", proposta.id)
-                          ?.valor || 0
-                      )}
-                    </p>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Cliente</p>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id)
+                          ?.nome || 'Nome não informado'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Valor Aprovado</p>
+                      <p className="font-bold text-green-400">
+                        {formatCurrency(
+                          parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)
+                            ?.valor || 0
+                        )}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Data da Aprovação</p>
+                      <p className="text-gray-900 dark:text-white">
+                        {formatDate(proposta.data_aprovacao || proposta.created_at)}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Data da Aprovação</p>
-                    <p className="text-gray-900 dark:text-white">
-                      {formatDate(proposta.data_aprovacao || proposta.created_at)}
-                    </p>
+                  <div className="mt-4 border-t pt-4">
+                    <Button
+                      onClick={() => setLocation(`/formalizacao/acompanhamento/${proposta.id}`)}
+                      className="w-full"
+                      variant={
+                        user?.role === 'ATENDENTE' &&
+                        (proposta.status === 'aprovado' ||
+                          proposta.status === 'documentos_enviados')
+                          ? 'default'
+                          : 'outline'
+                      }
+                    >
+                      {user?.role === 'ATENDENTE' &&
+                      (proposta.status === 'aprovado' || proposta.status === 'documentos_enviados')
+                        ? 'Ação Necessária'
+                        : 'Acompanhar'}
+                    </Button>
                   </div>
-                </div>
-
-                <div className="mt-4 border-t pt-4">
-                  <Button
-                    onClick={() => setLocation(`/formalizacao/acompanhamento/${proposta.id}`)}
-                    className="w-full"
-                    variant={
-                      user?.role === "ATENDENTE" &&
-                      (proposta.status === "aprovado" || proposta.status === "documentos_enviados")
-                        ? "default"
-                        : "outline"
-                    }
-                  >
-                    {user?.role === "ATENDENTE" &&
-                    (proposta.status === "aprovado" || proposta.status === "documentos_enviados")
-                      ? "Ação Necessária"
-                      : "Acompanhar"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
@@ -429,9 +430,9 @@ function FormalizacaoList() {
 
 export default function Formalizacao() {
   // 🔧 CORREÇÃO CRÍTICA: TODOS os hooks devem estar ANTES de qualquer lógica condicional ou return
-  const [, params] = useRoute("/formalizacao/acompanhamento/:id");
+  const [, params] = useRoute('/formalizacao/acompanhamento/:id');
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<"timeline" | "documents" | "contracts">("timeline");
+  const [activeTab, setActiveTab] = useState<'timeline' | 'documents' | 'contracts'>('timeline');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -455,11 +456,13 @@ export default function Formalizacao() {
     status?: string;
     publicUrl?: string;
   }
-  
+
   const [clickSignData, setClickSignData] = useState<ClickSignData | null>(null);
   const [loadingClickSign, setLoadingClickSign] = useState(false);
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
-  const [interBoletoData, setInterBoletoData] = useState<{codigoSolicitacao?: string} | null>(null);
+  const [interBoletoData, setInterBoletoData] = useState<{ codigoSolicitacao?: string } | null>(
+    null
+  );
   const [loadingInter, setLoadingInter] = useState(false);
   const [loadingCarne, setLoadingCarne] = useState(false);
   const [carneUrl, setCarneUrl] = useState<string | null>(null);
@@ -472,7 +475,7 @@ export default function Formalizacao() {
     totalBoletos: number | null;
   } | null>(null);
   const [regenerateBoletos, setRegenerateBoletos] = useState<number | null>(null);
-  
+
   // Estado para Storage Status - Consciência de Storage
   const [storageStatus, setStorageStatus] = useState<{
     totalBoletos: number;
@@ -484,7 +487,7 @@ export default function Formalizacao() {
     needsCorrection: boolean;
   } | null>(null);
   const [checkingStorage, setCheckingStorage] = useState(false);
-  
+
   // Estado para carnê status automático
   const [carneStatus, setCarneStatus] = useState<{
     exists: boolean;
@@ -503,11 +506,11 @@ export default function Formalizacao() {
   // Função para verificar automaticamente status do carnê
   const checkCarneStatus = async () => {
     if (!propostaId) return;
-    
-    setCarneStatus(prev => ({ ...prev, isLoading: true }));
-    
+
+    setCarneStatus((prev) => ({ ...prev, isLoading: true }));
+
     try {
-      const response = await apiRequest(`/api/propostas/${propostaId}/carne-status`) as {
+      const response = (await apiRequest(`/api/propostas/${propostaId}/carne-status`)) as {
         carneExists: boolean;
         url?: string;
         fileName?: string;
@@ -515,14 +518,14 @@ export default function Formalizacao() {
         size?: number;
         error?: string;
       };
-      
+
       setCarneStatus({
         exists: response.carneExists || false,
         url: response.url || null,
         fileName: response.fileName || null,
         isLoading: false,
       });
-      
+
       // Se carnê existe, atualizar outros estados relacionados
       if (response.carneExists && response.url) {
         setCarneUrl(response.url);
@@ -534,7 +537,7 @@ export default function Formalizacao() {
         });
       }
     } catch (error) {
-      console.error("Erro ao verificar status do carnê:", error);
+      console.error('Erro ao verificar status do carnê:', error);
       setCarneStatus({
         exists: false,
         url: null,
@@ -549,9 +552,9 @@ export default function Formalizacao() {
     isLoading,
     refetch,
   } = useQuery<Proposta>({
-    queryKey: ["/api/propostas", propostaId, "formalizacao"],
+    queryKey: ['/api/propostas', propostaId, 'formalizacao'],
     queryFn: async (): Promise<Proposta> => {
-      const response = await apiRequest(`/api/propostas/${propostaId}/formalizacao`) as Proposta;
+      const response = (await apiRequest(`/api/propostas/${propostaId}/formalizacao`)) as Proposta;
       return response;
     },
     enabled: !!propostaId,
@@ -562,21 +565,21 @@ export default function Formalizacao() {
   // Função para verificar status do Storage
   const checkStorageStatus = async () => {
     if (!propostaId) return;
-    
+
     setCheckingStorage(true);
     try {
-      const response = await apiRequest(`/api/propostas/${propostaId}/storage-status`) as any;
-      
+      const response = (await apiRequest(`/api/propostas/${propostaId}/storage-status`)) as any;
+
       // Mapear resposta da API para o formato esperado
       const totalBoletos = response.totalParcelas || 0;
       const boletosInStorage = response.fileCount || 0;
       const hasCarnet = response.carneExists || false;
       const carnetUrl = response.carneUrl || null;
-      
+
       // Determinar estados baseados no syncStatus
       const needsSync = response.syncStatus === 'nenhum';
       const needsCorrection = response.syncStatus === 'incompleto';
-      
+
       // Calcular boletos faltantes
       const missingBoletos: string[] = [];
       if (response.boletosNoStorage && totalBoletos > 0) {
@@ -587,7 +590,7 @@ export default function Formalizacao() {
           }
         }
       }
-      
+
       setStorageStatus({
         totalBoletos,
         boletosInStorage,
@@ -597,7 +600,7 @@ export default function Formalizacao() {
         needsSync,
         needsCorrection,
       });
-      
+
       // Se carnê existe, atualizar estado
       if (hasCarnet && carnetUrl) {
         setExistingCarne({
@@ -609,10 +612,10 @@ export default function Formalizacao() {
         setCarneUrl(carnetUrl);
         setCarneTotalBoletos(totalBoletos);
       }
-      
+
       return response;
     } catch (error) {
-      console.error("[STORAGE STATUS] Erro ao verificar status:", error);
+      console.error('[STORAGE STATUS] Erro ao verificar status:', error);
       return null;
     } finally {
       setCheckingStorage(false);
@@ -621,15 +624,20 @@ export default function Formalizacao() {
 
   // Query para buscar boletos gerados - OTIMIZADA (após proposta carregar)
   const { data: collectionsData } = useQuery<any[]>({
-    queryKey: ["/api/inter/collections", propostaId],
+    queryKey: ['/api/inter/collections', propostaId],
     queryFn: async (): Promise<any[]> => {
       if (!propostaId) return [];
       console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
-      const response = await apiRequest(`/api/inter/collections/${propostaId}`) as any[];
-      console.log(`[INTER QUERY] Boletos encontrados: ${Array.isArray(response) ? response.length : 0}`);
+      const response = (await apiRequest(`/api/inter/collections/${propostaId}`)) as any[];
+      console.log(
+        `[INTER QUERY] Boletos encontrados: ${Array.isArray(response) ? response.length : 0}`
+      );
       return Array.isArray(response) ? response : [];
     },
-    enabled: !!propostaId && !!proposta && (proposta?.status === "ASSINATURA_CONCLUIDA" || proposta?.interBoletoGerado),
+    enabled:
+      !!propostaId &&
+      !!proposta &&
+      (proposta?.status === 'ASSINATURA_CONCLUIDA' || proposta?.interBoletoGerado),
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos para evitar chamadas excessivas
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
     retry: 1, // Reduzir tentativas de retry
@@ -641,7 +649,7 @@ export default function Formalizacao() {
       checkStorageStatus();
     }
   }, [propostaId, collectionsData]);
-  
+
   // Auto-verificar status do carnê quando proposta carrega
   useEffect(() => {
     if (proposta && propostaId && collectionsData && collectionsData.length > 0) {
@@ -652,88 +660,94 @@ export default function Formalizacao() {
   const form = useForm<UpdateFormalizacaoForm>({
     resolver: zodResolver(updateFormalizacaoSchema),
     defaultValues: {
-      status: proposta?.status as "documentos_enviados" | "CCB_GERADA" | "ASSINATURA_CONCLUIDA" | "BOLETOS_EMITIDOS" | "PAGAMENTO_CONFIRMADO" | undefined,
+      status: proposta?.status as
+        | 'documentos_enviados'
+        | 'CCB_GERADA'
+        | 'ASSINATURA_CONCLUIDA'
+        | 'BOLETOS_EMITIDOS'
+        | 'PAGAMENTO_CONFIRMADO'
+        | undefined,
       documentosAdicionais: proposta?.documentosAdicionais || [],
       contratoGerado: proposta?.contratoGerado || false,
       contratoAssinado: proposta?.contratoAssinado || false,
-      observacoesFormalização: proposta?.observacoesFormalização || "",
+      observacoesFormalização: proposta?.observacoesFormalização || '',
     },
   });
 
   const updateFormalizacao = useMutation({
     mutationFn: async (data: UpdateFormalizacaoForm) => {
       const response = await apiRequest(`/api/propostas/${propostaId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify(data),
       });
       return response;
     },
     onSuccess: () => {
       toast({
-        title: "Sucesso",
-        description: "Formalização atualizada com sucesso",
+        title: 'Sucesso',
+        description: 'Formalização atualizada com sucesso',
       });
       queryClient.invalidateQueries({
-        queryKey: ["/api/propostas", propostaId],
+        queryKey: ['/api/propostas', propostaId],
       });
       // Also invalidate the formalization list
       queryClient.invalidateQueries({
-        queryKey: ["/api/propostas/formalizacao"],
+        queryKey: ['/api/propostas/formalizacao'],
       });
     },
-    onError: error => {
+    onError: (error) => {
       toast({
-        title: "Erro",
-        description: "Erro ao atualizar formalização",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Erro ao atualizar formalização',
+        variant: 'destructive',
       });
     },
   });
 
   const formatCurrency = (value: string | number) => {
-    const numValue = typeof value === "string" ? parseFloat(value) : value;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(numValue);
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("pt-BR");
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const formatDateTime = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("pt-BR");
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('pt-BR');
   };
 
   // Função para gerar CCB
   const generateCCB = async (propostaId: string) => {
     try {
       toast({
-        title: "Gerando CCB",
-        description: "Aguarde, gerando CCB com todos os dados da proposta...",
+        title: 'Gerando CCB',
+        description: 'Aguarde, gerando CCB com todos os dados da proposta...',
       });
 
-      const response = await apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, {
-        method: "POST",
-      }) as {success?: boolean; message?: string};
+      const response = (await apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, {
+        method: 'POST',
+      })) as { success?: boolean; message?: string };
 
       if (response.success) {
         toast({
-          title: "Sucesso",
-          description: response.message || "CCB gerada com sucesso",
+          title: 'Sucesso',
+          description: response.message || 'CCB gerada com sucesso',
         });
         // Recarregar dados para atualizar status ccbGerado
         refetch();
       }
     } catch (error) {
-      console.error("Erro ao gerar CCB:", error);
+      console.error('Erro ao gerar CCB:', error);
       toast({
-        title: "Erro",
-        description: "Erro ao gerar CCB. Tente novamente.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Erro ao gerar CCB. Tente novamente.',
+        variant: 'destructive',
       });
     }
   };
@@ -742,25 +756,28 @@ export default function Formalizacao() {
   const viewCCB = async (propostaId: string) => {
     try {
       // ✅ CORREÇÃO: Usar endpoint de formalização padrão
-      const response = await apiRequest(`/api/formalizacao/${propostaId}/ccb`) as {status?: string; publicUrl?: string};
+      const response = (await apiRequest(`/api/formalizacao/${propostaId}/ccb`)) as {
+        status?: string;
+        publicUrl?: string;
+      };
       if (!response.publicUrl) {
         toast({
-          title: "CCB não disponível",
-          description: "A CCB ainda não foi gerada para esta proposta",
-          variant: "destructive",
+          title: 'CCB não disponível',
+          description: 'A CCB ainda não foi gerada para esta proposta',
+          variant: 'destructive',
         });
         return;
       }
       if (response.publicUrl) {
         // Abrir em nova aba
-        window.open(response.publicUrl, "_blank");
+        window.open(response.publicUrl, '_blank');
       }
     } catch (error) {
-      console.error("Erro ao visualizar CCB:", error);
+      console.error('Erro ao visualizar CCB:', error);
       toast({
-        title: "Erro",
-        description: "Erro ao visualizar CCB. Tente novamente.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Erro ao visualizar CCB. Tente novamente.',
+        variant: 'destructive',
       });
     }
   };
@@ -770,29 +787,29 @@ export default function Formalizacao() {
     setLoadingClickSign(true);
     try {
       toast({
-        title: "Enviando para ClickSign",
-        description: "Preparando CCB para assinatura eletrônica...",
+        title: 'Enviando para ClickSign',
+        description: 'Preparando CCB para assinatura eletrônica...',
       });
 
-      const response = await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
-        method: "POST",
-      }) as {success?: boolean; signUrl?: string; envelopeId?: string};
+      const response = (await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
+        method: 'POST',
+      })) as { success?: boolean; signUrl?: string; envelopeId?: string };
 
       if (response.success) {
         toast({
-          title: "Sucesso",
-          description: "CCB enviada para ClickSign! Link de assinatura gerado.",
+          title: 'Sucesso',
+          description: 'CCB enviada para ClickSign! Link de assinatura gerado.',
         });
         // Atualizar dados ClickSign
         await checkClickSignStatus(propostaId);
         refetch();
       }
     } catch (error: any) {
-      console.error("Erro ao enviar para ClickSign:", error);
+      console.error('Erro ao enviar para ClickSign:', error);
       toast({
-        title: "Erro",
-        description: error.message || "Erro ao enviar CCB para ClickSign.",
-        variant: "destructive",
+        title: 'Erro',
+        description: error.message || 'Erro ao enviar CCB para ClickSign.',
+        variant: 'destructive',
       });
     } finally {
       setLoadingClickSign(false);
@@ -802,22 +819,25 @@ export default function Formalizacao() {
   // Função para consultar status ClickSign
   const checkClickSignStatus = async (propostaId: string): Promise<ClickSignData | null> => {
     try {
-      console.log("🔍 [CLICKSIGN] Consultando status para proposta:", propostaId);
-      const response = await apiRequest(`/api/clicksign/status/${propostaId}`) as ClickSignData;
-      console.log("📡 [CLICKSIGN] Status retornado:", response);
+      console.log('🔍 [CLICKSIGN] Consultando status para proposta:', propostaId);
+      const response = (await apiRequest(`/api/clicksign/status/${propostaId}`)) as ClickSignData;
+      console.log('📡 [CLICKSIGN] Status retornado:', response);
       setClickSignData(response);
       return response;
     } catch (error) {
-      console.error("❌ [CLICKSIGN] Erro ao consultar status:", error);
+      console.error('❌ [CLICKSIGN] Erro ao consultar status:', error);
       return null;
     }
   };
 
   // Carregar status ClickSign na inicialização - OTIMIZADA (após proposta carregar)
   const { data: initialClickSignData } = useQuery({
-    queryKey: ["/api/clicksign/status", propostaId],
+    queryKey: ['/api/clicksign/status', propostaId],
     queryFn: () => checkClickSignStatus(propostaId!),
-    enabled: !!propostaId && !!proposta && (proposta?.status === "CCB_GERADA" || proposta?.status === "AGUARDANDO_ASSINATURA"),
+    enabled:
+      !!propostaId &&
+      !!proposta &&
+      (proposta?.status === 'CCB_GERADA' || proposta?.status === 'AGUARDANDO_ASSINATURA'),
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
     retry: 1, // Reduzir tentativas
@@ -837,8 +857,8 @@ export default function Formalizacao() {
   useEffect(() => {
     if (!propostaId) return;
 
-    console.log("🔄 [REALTIME] Configurando escuta para proposta:", propostaId);
-    
+    console.log('🔄 [REALTIME] Configurando escuta para proposta:', propostaId);
+
     const supabase = getSupabase();
     const channel = supabase
       .channel(`propostas-changes-${propostaId}`)
@@ -848,57 +868,60 @@ export default function Formalizacao() {
           event: '*', // Escutar todos os eventos (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'propostas',
-          filter: `id=eq.${propostaId}` // Filtrar apenas esta proposta
+          filter: `id=eq.${propostaId}`, // Filtrar apenas esta proposta
         },
         (payload) => {
-          console.log("📡 [REALTIME] Evento recebido:", payload);
-          
+          console.log('📡 [REALTIME] Evento recebido:', payload);
+
           if (payload.eventType === 'UPDATE') {
-            console.log("✅ [REALTIME] Proposta atualizada, analisando mudanças...");
-            
+            console.log('✅ [REALTIME] Proposta atualizada, analisando mudanças...');
+
             // Atualizar dados da proposta (sempre necessário)
             queryClient.invalidateQueries({
-              queryKey: ["/api/propostas", propostaId, "formalizacao"]
+              queryKey: ['/api/propostas', propostaId, 'formalizacao'],
             });
-            
-            // 🎯 CORREÇÃO: Só invalidar ClickSign se status realmente mudou 
+
+            // 🎯 CORREÇÃO: Só invalidar ClickSign se status realmente mudou
             const oldData = payload.old;
             const newData = payload.new;
-            
-            if (oldData?.status !== newData?.status && newData?.status === "ASSINATURA_CONCLUIDA") {
-              console.log("🔄 [REALTIME] Contrato foi assinado, atualizando timeline");
+
+            if (oldData?.status !== newData?.status && newData?.status === 'ASSINATURA_CONCLUIDA') {
+              console.log('🔄 [REALTIME] Contrato foi assinado, atualizando timeline');
               queryClient.invalidateQueries({
-                queryKey: ["/api/clicksign/status", propostaId]
+                queryKey: ['/api/clicksign/status', propostaId],
               });
             }
-            
+
             // Atualizar boletos APENAS se status mudou para ASSINATURA_CONCLUIDA ou Inter foi ativado
-            if (newData?.status === "ASSINATURA_CONCLUIDA" || newData?.interBoletoGerado !== oldData?.interBoletoGerado) {
-              console.log("🔄 [REALTIME] Atualizando boletos Inter devido a mudança relevante");
+            if (
+              newData?.status === 'ASSINATURA_CONCLUIDA' ||
+              newData?.interBoletoGerado !== oldData?.interBoletoGerado
+            ) {
+              console.log('🔄 [REALTIME] Atualizando boletos Inter devido a mudança relevante');
               queryClient.invalidateQueries({
-                queryKey: ["/api/inter/collections", propostaId]
+                queryKey: ['/api/inter/collections', propostaId],
               });
             }
-            
-            console.log("🔄 [REALTIME] Proposta atualizada silenciosamente");
+
+            console.log('🔄 [REALTIME] Proposta atualizada silenciosamente');
           }
         }
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log("✅ [REALTIME] Conectado ao canal de atualizações");
+          console.log('✅ [REALTIME] Conectado ao canal de atualizações');
         } else if (status === 'CHANNEL_ERROR') {
-          console.error("❌ [REALTIME] Erro ao conectar ao canal");
+          console.error('❌ [REALTIME] Erro ao conectar ao canal');
         } else if (status === 'TIMED_OUT') {
-          console.error("⏱️ [REALTIME] Timeout ao conectar");
+          console.error('⏱️ [REALTIME] Timeout ao conectar');
         } else if (status === 'CLOSED') {
-          console.log("🔌 [REALTIME] Canal fechado");
+          console.log('🔌 [REALTIME] Canal fechado');
         }
       });
 
     // Cleanup ao desmontar o componente
     return () => {
-      console.log("🧹 [REALTIME] Removendo canal de escuta");
+      console.log('🧹 [REALTIME] Removendo canal de escuta');
       supabase.removeChannel(channel);
     };
   }, [propostaId, queryClient, toast]);
@@ -917,24 +940,24 @@ export default function Formalizacao() {
 
   const getStatusColor = (status: string) => {
     const statusColors = {
-      aprovado: "bg-green-500",
-      documentos_enviados: "bg-blue-500",
-      CCB_GERADA: "bg-purple-500",
-      ASSINATURA_CONCLUIDA: "bg-indigo-500",
-      BOLETOS_EMITIDOS: "bg-orange-500",
-      PAGAMENTO_CONFIRMADO: "bg-green-600",
+      aprovado: 'bg-green-500',
+      documentos_enviados: 'bg-blue-500',
+      CCB_GERADA: 'bg-purple-500',
+      ASSINATURA_CONCLUIDA: 'bg-indigo-500',
+      BOLETOS_EMITIDOS: 'bg-orange-500',
+      PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || "bg-gray-500";
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
   const getStatusText = (status: string) => {
     const statusTexts = {
-      aprovado: "Aprovado",
-      documentos_enviados: "Documentos Enviados",
-      CCB_GERADA: "CCB Gerada",
-      ASSINATURA_CONCLUIDA: "Assinatura Concluída",
-      BOLETOS_EMITIDOS: "Boletos Emitidos",
-      PAGAMENTO_CONFIRMADO: "Pagamento Confirmado",
+      aprovado: 'Aprovado',
+      documentos_enviados: 'Documentos Enviados',
+      CCB_GERADA: 'CCB Gerada',
+      ASSINATURA_CONCLUIDA: 'Assinatura Concluída',
+      BOLETOS_EMITIDOS: 'Boletos Emitidos',
+      PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
@@ -950,86 +973,126 @@ export default function Formalizacao() {
   const getFormalizationSteps = (proposta: Proposta) => [
     {
       id: 1,
-      title: "Proposta Aprovada",
-      description: "Proposta foi aprovada pela equipe de crédito",
+      title: 'Proposta Aprovada',
+      description: 'Proposta foi aprovada pela equipe de crédito',
       icon: CheckCircle,
-      status: "completed",
+      status: 'completed',
       date: formatDate(proposta.dataAprovacao || proposta.createdAt),
       completed: true,
     },
     {
       id: 2,
-      title: "CCB Gerada",
-      description: "Cédula de Crédito Bancário gerada automaticamente",
+      title: 'CCB Gerada',
+      description: 'Cédula de Crédito Bancário gerada automaticamente',
       icon: FileText,
-      status: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" ? "completed" : "current",
-      date: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" ? formatDate(proposta.createdAt) : "Pendente",
-      completed: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS",
+      status:
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS'
+          ? 'completed'
+          : 'current',
+      date:
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS'
+          ? formatDate(proposta.createdAt)
+          : 'Pendente',
+      completed:
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS',
       interactive: true,
-      etapa: "ccb_gerado" as const,
+      etapa: 'ccb_gerado' as const,
     },
     {
       id: 3,
-      title: "Assinatura Eletrônica",
-      description: "Documento enviado para ClickSign para assinatura",
+      title: 'Assinatura Eletrônica',
+      description: 'Documento enviado para ClickSign para assinatura',
       icon: Signature,
-      status: (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "ASSINATURA_CONCLUIDA")
-        ? "completed"
-        : proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS"
-          ? "current"
-          : "pending",
-      date: (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "ASSINATURA_CONCLUIDA") 
-        ? formatDate(proposta.dataAssinatura || proposta.createdAt) 
-        : "Pendente",
-      completed: proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "ASSINATURA_CONCLUIDA",
-      interactive: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS",
-      etapa: "assinatura_eletronica" as const,
+      status:
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA'
+          ? 'completed'
+          : proposta.status === 'CCB_GERADA' ||
+              proposta.status === 'AGUARDANDO_ASSINATURA' ||
+              proposta.status === 'ASSINATURA_CONCLUIDA' ||
+              proposta.status === 'BOLETOS_EMITIDOS'
+            ? 'current'
+            : 'pending',
+      date:
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA'
+          ? formatDate(proposta.dataAssinatura || proposta.createdAt)
+          : 'Pendente',
+      completed:
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA',
+      interactive:
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS',
+      etapa: 'assinatura_eletronica' as const,
     },
     {
       id: 4,
-      title: "Biometria Validada",
-      description: "Validação biométrica concluída",
+      title: 'Biometria Validada',
+      description: 'Validação biométrica concluída',
       icon: Shield,
-      status: (proposta.biometriaConcluida || proposta.status === "ASSINATURA_CONCLUIDA")
-        ? "completed"
-        : proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS"
-          ? "current"
-          : "pending",
-      date: (proposta.biometriaConcluida || proposta.status === "ASSINATURA_CONCLUIDA") 
-        ? formatDate(proposta.dataAssinatura || proposta.createdAt) 
-        : "Pendente",
-      completed: proposta.biometriaConcluida || proposta.status === "ASSINATURA_CONCLUIDA",
-      interactive: proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS",
-      etapa: "biometria" as const,
+      status:
+        proposta.biometriaConcluida || proposta.status === 'ASSINATURA_CONCLUIDA'
+          ? 'completed'
+          : proposta.status === 'ASSINATURA_CONCLUIDA' || proposta.status === 'BOLETOS_EMITIDOS'
+            ? 'current'
+            : 'pending',
+      date:
+        proposta.biometriaConcluida || proposta.status === 'ASSINATURA_CONCLUIDA'
+          ? formatDate(proposta.dataAssinatura || proposta.createdAt)
+          : 'Pendente',
+      completed: proposta.biometriaConcluida || proposta.status === 'ASSINATURA_CONCLUIDA',
+      interactive:
+        proposta.status === 'ASSINATURA_CONCLUIDA' || proposta.status === 'BOLETOS_EMITIDOS',
+      etapa: 'biometria' as const,
     },
     {
       id: 5,
-      title: "Banco Inter - Boletos",
-      description: "Boletos gerados automaticamente pelo Banco Inter para pagamento",
+      title: 'Banco Inter - Boletos',
+      description: 'Boletos gerados automaticamente pelo Banco Inter para pagamento',
       icon: Building2,
       status: proposta.interBoletoGerado
-        ? "completed"
-        : (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "ASSINATURA_CONCLUIDA")
-          ? "current"
-          : "pending",
-      date: proposta.interBoletoGerado ? formatDate(proposta.createdAt) : "Pendente",
+        ? 'completed'
+        : proposta.status === 'ASSINATURA_CONCLUIDA' ||
+            proposta.status === 'BOLETOS_EMITIDOS' ||
+            proposta.status === 'ASSINATURA_CONCLUIDA'
+          ? 'current'
+          : 'pending',
+      date: proposta.interBoletoGerado ? formatDate(proposta.createdAt) : 'Pendente',
       completed: proposta.interBoletoGerado || false,
-      interactive: proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "ASSINATURA_CONCLUIDA",
-      etapa: "banco_inter" as const,
+      interactive:
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA',
+      etapa: 'banco_inter' as const,
     },
     {
       id: 6,
-      title: "Liberação do Pagamento",
-      description: "Valor liberado e disponível para transferência",
+      title: 'Liberação do Pagamento',
+      description: 'Valor liberado e disponível para transferência',
       icon: CreditCard,
       status:
-        proposta.status === "BOLETOS_EMITIDOS"
-          ? "current"
-          : proposta.status === "PAGAMENTO_CONFIRMADO"
-            ? "completed"
-            : "pending",
-      date: proposta.dataPagamento ? formatDate(proposta.dataPagamento) : "Pendente",
-      completed: proposta.status === "PAGAMENTO_CONFIRMADO",
+        proposta.status === 'BOLETOS_EMITIDOS'
+          ? 'current'
+          : proposta.status === 'PAGAMENTO_CONFIRMADO'
+            ? 'completed'
+            : 'pending',
+      date: proposta.dataPagamento ? formatDate(proposta.dataPagamento) : 'Pendente',
+      completed: proposta.status === 'PAGAMENTO_CONFIRMADO',
     },
   ];
 
@@ -1061,7 +1124,7 @@ export default function Formalizacao() {
         <div className="py-12 text-center">
           <FileText className="mx-auto mb-4 h-16 w-16 text-gray-400" />
           <p className="text-lg text-gray-500">Proposta não encontrada</p>
-          <Button onClick={() => setLocation("/credito/fila")} className="mt-4">
+          <Button onClick={() => setLocation('/credito/fila')} className="mt-4">
             Voltar para Fila de Análise
           </Button>
         </div>
@@ -1078,7 +1141,7 @@ export default function Formalizacao() {
 
   // Destino unificado do botão voltar
   const getBackLocation = () => {
-    return "/formalizacao";
+    return '/formalizacao';
   };
 
   // 🔧 SEGURANÇA: Verificação de permissão agora é feita no BACKEND via RLS
@@ -1134,35 +1197,35 @@ export default function Formalizacao() {
             <div className="border-b border-gray-600">
               <div className="flex space-x-8 px-6 py-4">
                 <button
-                  onClick={() => setActiveTab("timeline")}
+                  onClick={() => setActiveTab('timeline')}
                   className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
-                    activeTab === "timeline"
-                      ? "border-blue-400 text-blue-400"
-                      : "border-transparent text-gray-400 hover:text-gray-200"
+                    activeTab === 'timeline'
+                      ? 'border-blue-400 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-200'
                   }`}
                 >
                   <Activity className="h-4 w-4" />
-                  {user?.role === "ATENDENTE" ? "Progresso" : "Timeline"}
+                  {user?.role === 'ATENDENTE' ? 'Progresso' : 'Timeline'}
                 </button>
                 <button
-                  onClick={() => setActiveTab("documents")}
+                  onClick={() => setActiveTab('documents')}
                   className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
-                    activeTab === "documents"
-                      ? "border-blue-400 text-blue-400"
-                      : "border-transparent text-gray-400 hover:text-gray-200"
+                    activeTab === 'documents'
+                      ? 'border-blue-400 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-200'
                   }`}
                 >
                   <FileText className="h-4 w-4" />
                   Documentos
                 </button>
                 {/* ANALISTA vê todas as tabs, ATENDENTE pode ter acesso limitado */}
-                {user?.role !== "ATENDENTE" && (
+                {user?.role !== 'ATENDENTE' && (
                   <button
-                    onClick={() => setActiveTab("contracts")}
+                    onClick={() => setActiveTab('contracts')}
                     className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
-                      activeTab === "contracts"
-                        ? "border-blue-400 text-blue-400"
-                        : "border-transparent text-gray-400 hover:text-gray-200"
+                      activeTab === 'contracts'
+                        ? 'border-blue-400 text-blue-400'
+                        : 'border-transparent text-gray-400 hover:text-gray-200'
                     }`}
                   >
                     <FileCheck className="h-4 w-4" />
@@ -1178,7 +1241,7 @@ export default function Formalizacao() {
           {/* Main Content */}
           <div className="space-y-6 lg:col-span-2">
             {/* Timeline Tab */}
-            {activeTab === "timeline" && (
+            {activeTab === 'timeline' && (
               <Card className="border-gray-700 bg-gray-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
@@ -1191,12 +1254,12 @@ export default function Formalizacao() {
                     {formalizationSteps.map((step, index) => {
                       const Icon = step.icon;
                       const isCompleted = step.completed;
-                      const isCurrent = step.status === "current";
+                      const isCurrent = step.status === 'current';
 
                       // Se é uma etapa interativa, mostra o controle (independente do role)
                       if (step.interactive && step.etapa) {
                         // Para a etapa de CCB, mostrar o CCBViewer
-                        if (step.etapa === "ccb_gerado") {
+                        if (step.etapa === 'ccb_gerado') {
                           return (
                             <div key={step.id} className="mb-4">
                               <CCBViewer
@@ -1208,14 +1271,25 @@ export default function Formalizacao() {
                         }
 
                         // Para a etapa de assinatura eletrônica, mostrar interface customizada
-                        if (step.etapa === "assinatura_eletronica" && (proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS")) {
+                        if (
+                          step.etapa === 'assinatura_eletronica' &&
+                          (proposta.status === 'CCB_GERADA' ||
+                            proposta.status === 'AGUARDANDO_ASSINATURA' ||
+                            proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                            proposta.status === 'BOLETOS_EMITIDOS')
+                        ) {
                           return (
                             <div key={step.id} className="mb-4">
                               <div className="space-y-4">
                                 {/* Controle padrão da etapa */}
                                 <EtapaFormalizacaoControl
                                   propostaId={proposta.id}
-                                  etapa={step.etapa as "ccb_gerado" | "assinatura_eletronica" | "biometria"}
+                                  etapa={
+                                    step.etapa as
+                                      | 'ccb_gerado'
+                                      | 'assinatura_eletronica'
+                                      | 'biometria'
+                                  }
                                   titulo={step.title}
                                   descricao={step.description}
                                   concluida={isCompleted}
@@ -1224,73 +1298,81 @@ export default function Formalizacao() {
                                 />
 
                                 {/* 🎯 ESTADO INICIAL: Botão azul quando CCB gerada mas sem assinatura */}
-                                {(proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA") && 
-                                 !clickSignData?.signUrl && 
-                                 !initialClickSignData?.signUrl && (
-                                  <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
-                                    <div className="mb-3 flex items-center justify-between">
-                                      <h5 className="font-medium text-blue-300">
-                                        Enviar para Assinatura Eletrônica
-                                      </h5>
-                                      <Signature className="h-5 w-5 text-blue-400" />
+                                {(proposta.status === 'CCB_GERADA' ||
+                                  proposta.status === 'AGUARDANDO_ASSINATURA') &&
+                                  !clickSignData?.signUrl &&
+                                  !initialClickSignData?.signUrl && (
+                                    <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
+                                      <div className="mb-3 flex items-center justify-between">
+                                        <h5 className="font-medium text-blue-300">
+                                          Enviar para Assinatura Eletrônica
+                                        </h5>
+                                        <Signature className="h-5 w-5 text-blue-400" />
+                                      </div>
+                                      <p className="mb-4 text-sm text-blue-200">
+                                        CCB foi gerada com sucesso! Clique no botão para enviar ao
+                                        ClickSign e gerar o link de assinatura para o cliente.
+                                      </p>
+                                      <Button
+                                        onClick={async () => {
+                                          setLoadingClickSign(true);
+                                          try {
+                                            console.log(
+                                              '🚀 [CLICKSIGN] Enviando CCB para proposta:',
+                                              proposta.id
+                                            );
+                                            const response = (await apiRequest(
+                                              `/api/propostas/${proposta.id}/clicksign/enviar`,
+                                              {
+                                                method: 'POST',
+                                              }
+                                            )) as ClickSignData;
+
+                                            console.log(
+                                              '✅ [CLICKSIGN] Resposta recebida:',
+                                              response
+                                            );
+                                            setClickSignData(response);
+
+                                            toast({
+                                              title: 'Sucesso',
+                                              description:
+                                                'Contrato enviado para ClickSign com sucesso!',
+                                            });
+                                          } catch (error: any) {
+                                            console.error('❌ [CLICKSIGN] Erro ao enviar:', error);
+                                            toast({
+                                              title: 'Erro',
+                                              description:
+                                                error.response?.data?.message ||
+                                                'Erro ao enviar para ClickSign',
+                                              variant: 'destructive',
+                                            });
+                                          } finally {
+                                            setLoadingClickSign(false);
+                                          }
+                                        }}
+                                        disabled={loadingClickSign}
+                                        className="w-full bg-blue-600 hover:bg-blue-700"
+                                      >
+                                        {loadingClickSign ? (
+                                          <div className="flex items-center">
+                                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                                            Enviando para ClickSign...
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center">
+                                            <Signature className="mr-2 h-4 w-4" />
+                                            Enviar Contrato para Assinatura (ClickSign)
+                                          </div>
+                                        )}
+                                      </Button>
                                     </div>
-                                    <p className="mb-4 text-sm text-blue-200">
-                                      CCB foi gerada com sucesso! Clique no botão para enviar ao 
-                                      ClickSign e gerar o link de assinatura para o cliente.
-                                    </p>
-                                    <Button
-                                      onClick={async () => {
-                                        setLoadingClickSign(true);
-                                        try {
-                                          console.log("🚀 [CLICKSIGN] Enviando CCB para proposta:", proposta.id);
-                                          const response = await apiRequest(
-                                            `/api/propostas/${proposta.id}/clicksign/enviar`,
-                                            {
-                                              method: "POST",
-                                            }
-                                          ) as ClickSignData;
-                                          
-                                          console.log("✅ [CLICKSIGN] Resposta recebida:", response);
-                                          setClickSignData(response);
-                                          
-                                          toast({
-                                            title: "Sucesso",
-                                            description:
-                                              "Contrato enviado para ClickSign com sucesso!",
-                                          });
-                                        } catch (error: any) {
-                                          console.error("❌ [CLICKSIGN] Erro ao enviar:", error);
-                                          toast({
-                                            title: "Erro",
-                                            description:
-                                              error.response?.data?.message ||
-                                              "Erro ao enviar para ClickSign",
-                                            variant: "destructive",
-                                          });
-                                        } finally {
-                                          setLoadingClickSign(false);
-                                        }
-                                      }}
-                                      disabled={loadingClickSign}
-                                      className="w-full bg-blue-600 hover:bg-blue-700"
-                                    >
-                                      {loadingClickSign ? (
-                                        <div className="flex items-center">
-                                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                                          Enviando para ClickSign...
-                                        </div>
-                                      ) : (
-                                        <div className="flex items-center">
-                                          <Signature className="mr-2 h-4 w-4" />
-                                          Enviar Contrato para Assinatura (ClickSign)
-                                        </div>
-                                      )}
-                                    </Button>
-                                  </div>
-                                )}
+                                  )}
 
                                 {/* ✅ CONTRATO ASSINADO: Mostrar confirmação */}
-                                {(proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS") && (
+                                {(proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                                  proposta.status === 'BOLETOS_EMITIDOS') && (
                                   <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                     <div className="mb-3 flex items-center">
                                       <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
@@ -1299,127 +1381,148 @@ export default function Formalizacao() {
                                       </h5>
                                     </div>
                                     <p className="text-sm text-green-200">
-                                      O cliente assinou digitalmente o contrato via ClickSign com validação biométrica. 
-                                      Próximo passo: geração automática dos boletos de pagamento pelo Banco Inter.
+                                      O cliente assinou digitalmente o contrato via ClickSign com
+                                      validação biométrica. Próximo passo: geração automática dos
+                                      boletos de pagamento pelo Banco Inter.
                                     </p>
                                   </div>
                                 )}
 
                                 {/* 🎯 ESTADO POSTERIOR: Link existe (novo ou antigo) - manter fixo até assinatura */}
-                                {(clickSignData?.signUrl || initialClickSignData?.signUrl || proposta.clicksignSignUrl) && 
-                                 (proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA") && (
-                                  <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
-                                    <div className="mb-3 flex items-center">
-                                      <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
-                                      <h5 className="font-medium text-green-300">
-                                        Link de Assinatura Disponível
-                                      </h5>
-                                    </div>
-                                    <p className="mb-3 text-sm text-green-200">
-                                      Compartilhe o link abaixo com o cliente para assinatura
-                                      digital:
-                                    </p>
-                                    <div className="flex items-center gap-2 rounded border bg-gray-800 p-3">
-                                      <input
-                                        type="text"
-                                        value={
-                                          clickSignData?.signUrl || 
-                                          initialClickSignData?.signUrl || 
-                                          proposta.clicksignSignUrl || ""
-                                        }
-                                        readOnly
-                                        className="flex-1 bg-transparent text-sm text-white"
-                                      />
-                                      <Button
-                                        size="sm"
-                                        onClick={() => {
-                                          const linkUrl =
+                                {(clickSignData?.signUrl ||
+                                  initialClickSignData?.signUrl ||
+                                  proposta.clicksignSignUrl) &&
+                                  (proposta.status === 'CCB_GERADA' ||
+                                    proposta.status === 'AGUARDANDO_ASSINATURA') && (
+                                    <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
+                                      <div className="mb-3 flex items-center">
+                                        <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
+                                        <h5 className="font-medium text-green-300">
+                                          Link de Assinatura Disponível
+                                        </h5>
+                                      </div>
+                                      <p className="mb-3 text-sm text-green-200">
+                                        Compartilhe o link abaixo com o cliente para assinatura
+                                        digital:
+                                      </p>
+                                      <div className="flex items-center gap-2 rounded border bg-gray-800 p-3">
+                                        <input
+                                          type="text"
+                                          value={
                                             clickSignData?.signUrl ||
                                             initialClickSignData?.signUrl ||
                                             proposta.clicksignSignUrl ||
-                                            "";
-                                          navigator.clipboard.writeText(linkUrl);
-                                          toast({
-                                            title: "Copiado!",
-                                            description:
-                                              "Link de assinatura copiado para a área de transferência",
-                                          });
-                                        }}
-                                      >
-                                        Copiar
-                                      </Button>
-                                    </div>
-                                    {clickSignData?.envelopeId && (
-                                      <p className="mt-2 text-xs text-gray-400">
-                                        Envelope ID: {clickSignData.envelopeId}
-                                      </p>
-                                    )}
-
-                                    {/* Botão para regenerar link */}
-                                    <div className="mt-3 border-t border-gray-700 pt-3">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={async () => {
-                                          setLoadingClickSign(true);
-                                          try {
-                                            console.log("🔄 [CLICKSIGN] Regenerando link para proposta:", proposta.id);
-                                            console.log("📊 [CLICKSIGN] Estado atual:", clickSignData);
-                                            
-                                            const response = await apiRequest(
-                                              `/api/propostas/${proposta.id}/clicksign/regenerar`,
-                                              {
-                                                method: "POST",
-                                              }
-                                            ) as ClickSignData;
-                                            
-                                            console.log("✅ [CLICKSIGN] Novo link gerado:", response);
-                                            
-                                            // 🎯 CORREÇÃO CRÍTICA: Preservar o link na tela
-                                            setClickSignData(response);
-                                            
-                                            toast({
-                                              title: "✅ Link Regenerado",
-                                              description: "Novo link de assinatura disponível para o cliente!",
-                                              duration: 4000,
-                                            });
-                                            
-                                            // 🔄 Atualizar cache sem refetch para evitar flickering
-                                            queryClient.setQueryData(["/api/clicksign/status", propostaId], response);
-                                          } catch (error: any) {
-                                            console.error("❌ [CLICKSIGN] Erro ao regenerar:", error);
-                                            toast({
-                                              title: "Erro",
-                                              description:
-                                                error.response?.data?.error ||
-                                                "Erro ao regenerar link",
-                                              variant: "destructive",
-                                            });
-                                          } finally {
-                                            setLoadingClickSign(false);
+                                            ''
                                           }
-                                        }}
-                                        disabled={loadingClickSign}
-                                        className="border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
-                                      >
-                                        {loadingClickSign ? (
-                                          <div className="flex items-center">
-                                            <div className="mr-2 h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-400"></div>
-                                            Regenerando...
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-center">
-                                            <Signature className="mr-2 h-3 w-3" />
-                                            Gerar Novo Link
-                                          </div>
-                                        )}
-                                      </Button>
-                                      <p className="mt-1 text-xs text-gray-500">
-                                        Use caso o link anterior não esteja funcionando
-                                      </p>
+                                          readOnly
+                                          className="flex-1 bg-transparent text-sm text-white"
+                                        />
+                                        <Button
+                                          size="sm"
+                                          onClick={() => {
+                                            const linkUrl =
+                                              clickSignData?.signUrl ||
+                                              initialClickSignData?.signUrl ||
+                                              proposta.clicksignSignUrl ||
+                                              '';
+                                            navigator.clipboard.writeText(linkUrl);
+                                            toast({
+                                              title: 'Copiado!',
+                                              description:
+                                                'Link de assinatura copiado para a área de transferência',
+                                            });
+                                          }}
+                                        >
+                                          Copiar
+                                        </Button>
+                                      </div>
+                                      {clickSignData?.envelopeId && (
+                                        <p className="mt-2 text-xs text-gray-400">
+                                          Envelope ID: {clickSignData.envelopeId}
+                                        </p>
+                                      )}
+
+                                      {/* Botão para regenerar link */}
+                                      <div className="mt-3 border-t border-gray-700 pt-3">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={async () => {
+                                            setLoadingClickSign(true);
+                                            try {
+                                              console.log(
+                                                '🔄 [CLICKSIGN] Regenerando link para proposta:',
+                                                proposta.id
+                                              );
+                                              console.log(
+                                                '📊 [CLICKSIGN] Estado atual:',
+                                                clickSignData
+                                              );
+
+                                              const response = (await apiRequest(
+                                                `/api/propostas/${proposta.id}/clicksign/regenerar`,
+                                                {
+                                                  method: 'POST',
+                                                }
+                                              )) as ClickSignData;
+
+                                              console.log(
+                                                '✅ [CLICKSIGN] Novo link gerado:',
+                                                response
+                                              );
+
+                                              // 🎯 CORREÇÃO CRÍTICA: Preservar o link na tela
+                                              setClickSignData(response);
+
+                                              toast({
+                                                title: '✅ Link Regenerado',
+                                                description:
+                                                  'Novo link de assinatura disponível para o cliente!',
+                                                duration: 4000,
+                                              });
+
+                                              // 🔄 Atualizar cache sem refetch para evitar flickering
+                                              queryClient.setQueryData(
+                                                ['/api/clicksign/status', propostaId],
+                                                response
+                                              );
+                                            } catch (error: any) {
+                                              console.error(
+                                                '❌ [CLICKSIGN] Erro ao regenerar:',
+                                                error
+                                              );
+                                              toast({
+                                                title: 'Erro',
+                                                description:
+                                                  error.response?.data?.error ||
+                                                  'Erro ao regenerar link',
+                                                variant: 'destructive',
+                                              });
+                                            } finally {
+                                              setLoadingClickSign(false);
+                                            }
+                                          }}
+                                          disabled={loadingClickSign}
+                                          className="border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
+                                        >
+                                          {loadingClickSign ? (
+                                            <div className="flex items-center">
+                                              <div className="mr-2 h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-400"></div>
+                                              Regenerando...
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center">
+                                              <Signature className="mr-2 h-3 w-3" />
+                                              Gerar Novo Link
+                                            </div>
+                                          )}
+                                        </Button>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                          Use caso o link anterior não esteja funcionando
+                                        </p>
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
                               </div>
                             </div>
                           );
@@ -1427,8 +1530,10 @@ export default function Formalizacao() {
 
                         // Para a etapa do Banco Inter, mostrar interface customizada
                         if (
-                          step.etapa === "banco_inter" &&
-                          (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "ASSINATURA_CONCLUIDA")
+                          step.etapa === 'banco_inter' &&
+                          (proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                            proposta.status === 'BOLETOS_EMITIDOS' ||
+                            proposta.status === 'ASSINATURA_CONCLUIDA')
                         ) {
                           return (
                             <div key={step.id} className="mb-4">
@@ -1449,7 +1554,8 @@ export default function Formalizacao() {
                                   </p>
 
                                   {(!collectionsData || collectionsData.length === 0) &&
-                                  !interBoletoData && !proposta.interBoletoGerado ? (
+                                  !interBoletoData &&
+                                  !proposta.interBoletoGerado ? (
                                     // Botão para gerar boletos
                                     <Button
                                       onClick={async () => {
@@ -1470,7 +1576,7 @@ export default function Formalizacao() {
 
                                           if (enderecoIncompleto) {
                                             console.warn(
-                                              "[INTER] Dados de endereço incompletos, usando valores padrão temporários"
+                                              '[INTER] Dados de endereço incompletos, usando valores padrão temporários'
                                             );
                                           }
 
@@ -1479,61 +1585,65 @@ export default function Formalizacao() {
                                             valorTotal: proposta.condicoes_data?.valor || 0,
                                             dataVencimento: dataVencimento
                                               .toISOString()
-                                              .split("T")[0],
+                                              .split('T')[0],
                                             clienteData: {
-                                              nome: proposta.cliente_data?.nome || "",
-                                              cpf: proposta.cliente_data?.cpf || "",
-                                              email: proposta.cliente_data?.email || "",
+                                              nome: proposta.cliente_data?.nome || '',
+                                              cpf: proposta.cliente_data?.cpf || '',
+                                              email: proposta.cliente_data?.email || '',
                                               telefone:
-                                                proposta.cliente_data?.telefone || "00000000000",
+                                                proposta.cliente_data?.telefone || '00000000000',
                                               endereco:
-                                                proposta.cliente_data?.endereco || "Rua Principal",
-                                              numero: proposta.cliente_data?.numero || "100",
-                                              complemento: proposta.cliente_data?.complemento || "",
-                                              bairro: proposta.cliente_data?.bairro || "Centro",
-                                              cidade: proposta.cliente_data?.cidade || "São Paulo",
-                                              uf: proposta.cliente_data?.uf || "SP",
+                                                proposta.cliente_data?.endereco || 'Rua Principal',
+                                              numero: proposta.cliente_data?.numero || '100',
+                                              complemento: proposta.cliente_data?.complemento || '',
+                                              bairro: proposta.cliente_data?.bairro || 'Centro',
+                                              cidade: proposta.cliente_data?.cidade || 'São Paulo',
+                                              uf: proposta.cliente_data?.uf || 'SP',
                                               cep:
-                                                proposta.cliente_data?.cep?.replace(/\D/g, "") ||
-                                                "00000000",
+                                                proposta.cliente_data?.cep?.replace(/\D/g, '') ||
+                                                '00000000',
                                             },
                                           };
 
                                           console.log(
-                                            "[INTER] Enviando dados para gerar boleto:",
+                                            '[INTER] Enviando dados para gerar boleto:',
                                             requestData
                                           );
 
-                                          const response = await apiRequest(
-                                            "/api/inter/collections",
+                                          const response = (await apiRequest(
+                                            '/api/inter/collections',
                                             {
-                                              method: "POST",
+                                              method: 'POST',
                                               body: JSON.stringify(requestData),
                                             }
-                                          ) as InterBoletoResponse;
+                                          )) as InterBoletoResponse;
 
-                                          console.log("[INTER] Resposta da API:", response);
+                                          console.log('[INTER] Resposta da API:', response);
 
                                           toast({
-                                            title: "Sucesso",
+                                            title: 'Sucesso',
                                             description: `${response.totalCriados || 0} boleto(s) gerado(s) com sucesso!`,
                                           });
 
                                           // Atualizar estado local para mostrar os boletos
-                                          setInterBoletoData(response as {codigoSolicitacao?: string});
-                                          
+                                          setInterBoletoData(
+                                            response as { codigoSolicitacao?: string }
+                                          );
+
                                           // 🔥 IMPORTANTE: Recarregar dados da proposta e timeline
                                           await Promise.all([
                                             refetch(), // Recarregar dados da proposta para atualizar timeline
                                             queryClient.invalidateQueries({
-                                              queryKey: ["/api/inter/collections", proposta.id],
+                                              queryKey: ['/api/inter/collections', proposta.id],
                                             }),
                                             queryClient.invalidateQueries({
-                                              queryKey: [`/api/propostas/${proposta.id}/formalizacao`],
+                                              queryKey: [
+                                                `/api/propostas/${proposta.id}/formalizacao`,
+                                              ],
                                             }),
                                           ]);
                                         } catch (error: any) {
-                                          console.error("[INTER] Erro ao gerar boleto:", error);
+                                          console.error('[INTER] Erro ao gerar boleto:', error);
 
                                           // Verificar se é erro de boleto duplicado
                                           if (
@@ -1543,26 +1653,26 @@ export default function Formalizacao() {
                                             const existingCollections =
                                               error.response?.data?.existingCollections || [];
                                             toast({
-                                              title: "Boletos já existentes",
+                                              title: 'Boletos já existentes',
                                               description:
                                                 error.response?.data?.message ||
-                                                "Já existem boletos ativos para esta proposta. Verifique na lista abaixo.",
-                                              variant: "default",
+                                                'Já existem boletos ativos para esta proposta. Verifique na lista abaixo.',
+                                              variant: 'default',
                                             });
 
                                             // Recarregar para mostrar os boletos existentes
                                             queryClient.invalidateQueries({
-                                              queryKey: ["/api/inter/collections", proposta.id],
+                                              queryKey: ['/api/inter/collections', proposta.id],
                                             });
                                           } else {
                                             toast({
-                                              title: "Erro",
+                                              title: 'Erro',
                                               description:
                                                 error.response?.data?.message ||
                                                 error.response?.data?.details ||
                                                 error.response?.data?.error ||
-                                                "Erro ao gerar boletos",
-                                              variant: "destructive",
+                                                'Erro ao gerar boletos',
+                                              variant: 'destructive',
                                             });
                                           }
                                         } finally {
@@ -1593,21 +1703,22 @@ export default function Formalizacao() {
                                           <span className="font-medium text-green-300">
                                             {collectionsData && collectionsData.length > 0
                                               ? `${collectionsData.length} boleto(s) gerado(s) com sucesso`
-                                              : "Boletos gerados com sucesso"}
+                                              : 'Boletos gerados com sucesso'}
                                           </span>
                                         </div>
-                                        
+
                                         {/* MÁQUINA DE ESTADOS UI - CONSCIÊNCIA DE STORAGE */}
                                         {collectionsData && collectionsData.length > 1 && (
                                           <div className="space-y-2">
                                             {/* Indicador de status do Storage */}
                                             {storageStatus && (
                                               <div className="text-xs text-gray-400">
-                                                {storageStatus.boletosInStorage} de {storageStatus.totalBoletos} boletos no storage
-                                                {storageStatus.hasCarnet && " | Carnê disponível"}
+                                                {storageStatus.boletosInStorage} de{' '}
+                                                {storageStatus.totalBoletos} boletos no storage
+                                                {storageStatus.hasCarnet && ' | Carnê disponível'}
                                               </div>
                                             )}
-                                            
+
                                             {/* Botões condicionais baseados no estado automático */}
                                             {(() => {
                                               // Estado 1: Carnê já existe
@@ -1618,36 +1729,46 @@ export default function Formalizacao() {
                                                     variant="default"
                                                     className="bg-green-600 hover:bg-green-700"
                                                     onClick={() => {
-                                                      window.open(carneStatus.url!, "_blank");
+                                                      window.open(carneStatus.url!, '_blank');
                                                       toast({
-                                                        title: "Download iniciado",
-                                                        description: `Carnê com ${collectionsData?.length || 0} boletos`
+                                                        title: 'Download iniciado',
+                                                        description: `Carnê com ${collectionsData?.length || 0} boletos`,
                                                       });
                                                     }}
                                                   >
                                                     <Download className="mr-2 h-4 w-4" />
-                                                    Baixar Carnê ({collectionsData?.length || 0} boletos)
+                                                    Baixar Carnê ({collectionsData?.length ||
+                                                      0}{' '}
+                                                    boletos)
                                                   </Button>
                                                 );
                                               }
-                                              
+
                                               // Estado alternativo: usar storageStatus se carneStatus ainda carregando
-                                              if (!carneStatus.isLoading && storageStatus?.hasCarnet && storageStatus?.carnetUrl) {
+                                              if (
+                                                !carneStatus.isLoading &&
+                                                storageStatus?.hasCarnet &&
+                                                storageStatus?.carnetUrl
+                                              ) {
                                                 return (
                                                   <Button
                                                     size="sm"
                                                     variant="default"
                                                     className="bg-green-600 hover:bg-green-700"
                                                     onClick={() => {
-                                                      window.open(storageStatus.carnetUrl!, "_blank");
+                                                      window.open(
+                                                        storageStatus.carnetUrl!,
+                                                        '_blank'
+                                                      );
                                                     }}
                                                   >
                                                     <Download className="mr-2 h-4 w-4" />
-                                                    Baixar Carnê ({storageStatus.totalBoletos} boletos)
+                                                    Baixar Carnê ({storageStatus.totalBoletos}{' '}
+                                                    boletos)
                                                   </Button>
                                                 );
                                               }
-                                              
+
                                               // Estado 2: Sincronização incompleta - botão de correção
                                               if (storageStatus?.needsCorrection) {
                                                 return (
@@ -1659,23 +1780,24 @@ export default function Formalizacao() {
                                                       try {
                                                         setLoadingCarne(true);
                                                         toast({
-                                                          title: "Corrigindo sincronização",
-                                                          description: "Removendo dados incompletos e reiniciando...",
+                                                          title: 'Corrigindo sincronização',
+                                                          description:
+                                                            'Removendo dados incompletos e reiniciando...',
                                                         });
-                                                        
+
                                                         // Chamar endpoint de correção
                                                         const response = await apiRequest(
                                                           `/api/propostas/${proposta.id}/corrigir-sincronizacao`,
-                                                          { method: "POST" }
+                                                          { method: 'POST' }
                                                         );
-                                                        
+
                                                         const data = response as any;
                                                         if (data.success) {
                                                           toast({
-                                                            title: "Correção iniciada",
+                                                            title: 'Correção iniciada',
                                                             description: `Re-sincronização em andamento. Job ID: ${data.jobId}`,
                                                           });
-                                                          
+
                                                           // Aguardar um pouco e recarregar status
                                                           setTimeout(async () => {
                                                             await checkStorageStatus();
@@ -1683,9 +1805,11 @@ export default function Formalizacao() {
                                                         }
                                                       } catch (error: any) {
                                                         toast({
-                                                          title: "Erro",
-                                                          description: error.message || "Erro ao corrigir sincronização",
-                                                          variant: "destructive",
+                                                          title: 'Erro',
+                                                          description:
+                                                            error.message ||
+                                                            'Erro ao corrigir sincronização',
+                                                          variant: 'destructive',
                                                         });
                                                       } finally {
                                                         setLoadingCarne(false);
@@ -1707,9 +1831,14 @@ export default function Formalizacao() {
                                                   </Button>
                                                 );
                                               }
-                                              
+
                                               // Estado 3: Boletos sincronizados, gerar carnê (PAM V1.0 - verificação automática)
-                                              if (!carneStatus.exists && !carneStatus.isLoading && storageStatus?.boletosInStorage === storageStatus?.totalBoletos) {
+                                              if (
+                                                !carneStatus.exists &&
+                                                !carneStatus.isLoading &&
+                                                storageStatus?.boletosInStorage ===
+                                                  storageStatus?.totalBoletos
+                                              ) {
                                                 return (
                                                   <Button
                                                     size="sm"
@@ -1719,32 +1848,35 @@ export default function Formalizacao() {
                                                       try {
                                                         setLoadingCarne(true);
                                                         toast({
-                                                          title: "Gerando carnê",
-                                                          description: "Consolidando todos os boletos em um único PDF...",
+                                                          title: 'Gerando carnê',
+                                                          description:
+                                                            'Consolidando todos os boletos em um único PDF...',
                                                         });
-                                                        
+
                                                         // Chamar endpoint de geração de carnê
                                                         const response = await apiRequest(
                                                           `/api/propostas/${proposta.id}/gerar-carne`,
-                                                          { method: "POST" }
+                                                          { method: 'POST' }
                                                         );
-                                                        
+
                                                         const data = response as any;
                                                         if (data.success) {
                                                           toast({
-                                                            title: "Carnê gerado!",
-                                                            description: "Carnê consolidado disponível para download",
+                                                            title: 'Carnê gerado!',
+                                                            description:
+                                                              'Carnê consolidado disponível para download',
                                                           });
-                                                          
+
                                                           // Recarregar status automático PAM V1.0
                                                           await checkCarneStatus();
                                                           await checkStorageStatus();
                                                         }
                                                       } catch (error: any) {
                                                         toast({
-                                                          title: "Erro",
-                                                          description: error.message || "Erro ao gerar carnê",
-                                                          variant: "destructive",
+                                                          title: 'Erro',
+                                                          description:
+                                                            error.message || 'Erro ao gerar carnê',
+                                                          variant: 'destructive',
                                                         });
                                                       } finally {
                                                         setLoadingCarne(false);
@@ -1771,7 +1903,7 @@ export default function Formalizacao() {
                                                   </Button>
                                                 );
                                               }
-                                              
+
                                               // Estado 4: Precisa sincronizar
                                               return (
                                                 <Button
@@ -1781,36 +1913,38 @@ export default function Formalizacao() {
                                                     try {
                                                       setLoadingCarne(true);
                                                       toast({
-                                                        title: "Sincronizando boletos",
+                                                        title: 'Sincronizando boletos',
                                                         description: `Baixando ${collectionsData.length} boletos do Banco Inter...`,
                                                       });
-                                                      
+
                                                       // Sincronizar boletos
                                                       const response = await apiRequest(
                                                         `/api/propostas/${proposta.id}/sincronizar-boletos`,
                                                         {
-                                                          method: "POST",
+                                                          method: 'POST',
                                                           body: JSON.stringify({
-                                                            numeroBoletos: collectionsData.length
+                                                            numeroBoletos: collectionsData.length,
                                                           }),
                                                         }
                                                       );
-                                                      
+
                                                       const data = response as any;
                                                       if (data.success) {
                                                         toast({
-                                                          title: "Sincronização concluída",
+                                                          title: 'Sincronização concluída',
                                                           description: `${data.sucessos} boletos sincronizados com sucesso`,
                                                         });
-                                                        
+
                                                         // Recarregar status
                                                         await checkStorageStatus();
                                                       }
                                                     } catch (error: any) {
                                                       toast({
-                                                        title: "Erro",
-                                                        description: error.message || "Erro ao sincronizar boletos",
-                                                        variant: "destructive",
+                                                        title: 'Erro',
+                                                        description:
+                                                          error.message ||
+                                                          'Erro ao sincronizar boletos',
+                                                        variant: 'destructive',
                                                       });
                                                     } finally {
                                                       setLoadingCarne(false);
@@ -1841,17 +1975,17 @@ export default function Formalizacao() {
                                             size="sm"
                                             onClick={() => {
                                               // Download do carnê via URL assinada
-                                              const link = document.createElement("a");
+                                              const link = document.createElement('a');
                                               link.href = carneUrl;
                                               link.download = `carne-proposta-${proposta.id}.pdf`;
-                                              link.target = "_blank";
+                                              link.target = '_blank';
                                               document.body.appendChild(link);
                                               link.click();
                                               document.body.removeChild(link);
-                                              
+
                                               toast({
-                                                title: "Download iniciado",
-                                                description: `Carnê com ${carneTotalBoletos} boletos`
+                                                title: 'Download iniciado',
+                                                description: `Carnê com ${carneTotalBoletos} boletos`,
                                               });
                                             }}
                                             className="border-green-600 text-green-400 hover:bg-green-600/10 bg-green-900/20"
@@ -1883,32 +2017,30 @@ export default function Formalizacao() {
                                                   <div className="flex items-center gap-4 text-sm text-gray-400">
                                                     <span>Valor: R$ {boleto.valorNominal}</span>
                                                     <span>
-                                                      Venc:{" "}
+                                                      Venc:{' '}
                                                       {new Date(
                                                         boleto.dataVencimento
-                                                      ).toLocaleDateString("pt-BR")}
+                                                      ).toLocaleDateString('pt-BR')}
                                                     </span>
                                                   </div>
                                                 </div>
                                                 <Badge
                                                   variant={
-                                                    boleto.situacao === "RECEBIDO"
-                                                      ? "default"
-                                                      : boleto.situacao === "VENCIDO"
-                                                        ? "destructive"
-                                                        : "secondary"
+                                                    boleto.situacao === 'RECEBIDO'
+                                                      ? 'default'
+                                                      : boleto.situacao === 'VENCIDO'
+                                                        ? 'destructive'
+                                                        : 'secondary'
                                                   }
                                                   className={
-                                                    boleto.situacao === "RECEBIDO"
-                                                      ? "border-green-700 bg-green-900 text-green-300"
-                                                      : ""
+                                                    boleto.situacao === 'RECEBIDO'
+                                                      ? 'border-green-700 bg-green-900 text-green-300'
+                                                      : ''
                                                   }
                                                 >
                                                   {boleto.situacao}
                                                 </Badge>
                                               </div>
-
-
 
                                               {/* QR Code PIX e Linha Digitável */}
                                               <div className="space-y-3">
@@ -1933,9 +2065,9 @@ export default function Formalizacao() {
                                                             boleto.pixCopiaECola
                                                           );
                                                           toast({
-                                                            title: "PIX copiado!",
+                                                            title: 'PIX copiado!',
                                                             description:
-                                                              "Cole no app do seu banco para pagar",
+                                                              'Cole no app do seu banco para pagar',
                                                           });
                                                         }}
                                                       >
@@ -1968,9 +2100,9 @@ export default function Formalizacao() {
                                                             boleto.codigoBarras;
                                                           navigator.clipboard.writeText(codigo);
                                                           toast({
-                                                            title: "Linha digitável copiada!",
+                                                            title: 'Linha digitável copiada!',
                                                             description:
-                                                              "Use no internet banking para pagar",
+                                                              'Use no internet banking para pagar',
                                                           });
                                                         }}
                                                       >
@@ -1988,60 +2120,96 @@ export default function Formalizacao() {
                                                   variant="outline"
                                                   onClick={async () => {
                                                     try {
-                                                      console.log(`[PDF DOWNLOAD] Tentando baixar PDF para: ${boleto.codigoSolicitacao}`);
-                                                      console.log(`[PDF DOWNLOAD] Status do boleto: ${boleto.situacao}`);
-                                                      
+                                                      console.log(
+                                                        `[PDF DOWNLOAD] Tentando baixar PDF para: ${boleto.codigoSolicitacao}`
+                                                      );
+                                                      console.log(
+                                                        `[PDF DOWNLOAD] Status do boleto: ${boleto.situacao}`
+                                                      );
+
                                                       // Verificar status do boleto
-                                                      console.log(`[PDF DOWNLOAD] Tentativa de download para status: ${boleto.situacao}`);
-                                                      
+                                                      console.log(
+                                                        `[PDF DOWNLOAD] Tentativa de download para status: ${boleto.situacao}`
+                                                      );
+
                                                       // Se o status ainda é EM_PROCESSAMENTO, avisar o usuário
-                                                      if (boleto.situacao === 'EM_PROCESSAMENTO' || boleto.situacao === 'CODIGO_INVALIDO') {
+                                                      if (
+                                                        boleto.situacao === 'EM_PROCESSAMENTO' ||
+                                                        boleto.situacao === 'CODIGO_INVALIDO'
+                                                      ) {
                                                         toast({
-                                                          title: "PDF temporariamente indisponível",
-                                                          description: "O boleto está sendo processado. Use o código de barras abaixo para pagamento.",
-                                                          variant: "default",
+                                                          title: 'PDF temporariamente indisponível',
+                                                          description:
+                                                            'O boleto está sendo processado. Use o código de barras abaixo para pagamento.',
+                                                          variant: 'default',
                                                         });
-                                                        
+
                                                         // Copiar código de barras como fallback
-                                                        if (boleto.linhaDigitavel || boleto.codigoBarras) {
-                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
-                                                          await navigator.clipboard.writeText(codigo);
+                                                        if (
+                                                          boleto.linhaDigitavel ||
+                                                          boleto.codigoBarras
+                                                        ) {
+                                                          const codigo =
+                                                            boleto.linhaDigitavel ||
+                                                            boleto.codigoBarras;
+                                                          await navigator.clipboard.writeText(
+                                                            codigo
+                                                          );
                                                           toast({
-                                                            title: "✅ Código copiado!",
-                                                            description: "Use no app do banco ou PIX Copia e Cola",
+                                                            title: '✅ Código copiado!',
+                                                            description:
+                                                              'Use no app do banco ou PIX Copia e Cola',
                                                           });
                                                         }
                                                         return;
                                                       }
 
                                                       // Fazer download com autenticação correta usando TokenManager
-                                                      console.log(`[PDF DOWNLOAD] Usando código: ${boleto.codigoSolicitacao}`);
-                                                      console.log(`[PDF DOWNLOAD] Nosso número: ${boleto.nossoNumero || 'não definido'}`);
-                                                      console.log(`[PDF DOWNLOAD] Seu número: ${boleto.seuNumero || 'não definido'}`);
-                                                      
+                                                      console.log(
+                                                        `[PDF DOWNLOAD] Usando código: ${boleto.codigoSolicitacao}`
+                                                      );
+                                                      console.log(
+                                                        `[PDF DOWNLOAD] Nosso número: ${boleto.nossoNumero || 'não definido'}`
+                                                      );
+                                                      console.log(
+                                                        `[PDF DOWNLOAD] Seu número: ${boleto.seuNumero || 'não definido'}`
+                                                      );
+
                                                       // Obter token usando o TokenManager
-                                                      const { TokenManager } = await import("@/lib/apiClient");
-                                                      const tokenManager = TokenManager.getInstance();
-                                                      const token = await tokenManager.getValidToken();
-                                                      
+                                                      const { TokenManager } = await import(
+                                                        '@/lib/apiClient'
+                                                      );
+                                                      const tokenManager =
+                                                        TokenManager.getInstance();
+                                                      const token =
+                                                        await tokenManager.getValidToken();
+
                                                       if (!token) {
-                                                        throw new Error('Token de acesso não encontrado');
+                                                        throw new Error(
+                                                          'Token de acesso não encontrado'
+                                                        );
                                                       }
-                                                      
-                                                      console.log(`[PDF DOWNLOAD] Token obtido com sucesso (${token.length} caracteres)`);
-                                                      
-                                                      const response = await fetch(`/api/inter/collections/${boleto.codigoSolicitacao}/pdf`, {
-                                                        method: 'GET',
-                                                        headers: {
-                                                          'Authorization': `Bearer ${token}`,
-                                                          'Accept': 'application/pdf',
-                                                          'Content-Type': 'application/json'
+
+                                                      console.log(
+                                                        `[PDF DOWNLOAD] Token obtido com sucesso (${token.length} caracteres)`
+                                                      );
+
+                                                      const response = await fetch(
+                                                        `/api/inter/collections/${boleto.codigoSolicitacao}/pdf`,
+                                                        {
+                                                          method: 'GET',
+                                                          headers: {
+                                                            Authorization: `Bearer ${token}`,
+                                                            Accept: 'application/pdf',
+                                                            'Content-Type': 'application/json',
+                                                          },
                                                         }
-                                                      });
+                                                      );
 
                                                       if (response.ok) {
                                                         const blob = await response.blob();
-                                                        const url = window.URL.createObjectURL(blob);
+                                                        const url =
+                                                          window.URL.createObjectURL(blob);
                                                         const a = document.createElement('a');
                                                         a.href = url;
                                                         a.download = `boleto-${boleto.codigoSolicitacao}.pdf`;
@@ -2049,23 +2217,26 @@ export default function Formalizacao() {
                                                         a.click();
                                                         window.URL.revokeObjectURL(url);
                                                         document.body.removeChild(a);
-                                                        
+
                                                         toast({
-                                                          title: "PDF baixado com sucesso!",
-                                                          description: "Arquivo salvo na pasta de Downloads",
+                                                          title: 'PDF baixado com sucesso!',
+                                                          description:
+                                                            'Arquivo salvo na pasta de Downloads',
                                                         });
                                                       } else {
-                                                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                                                        throw new Error(
+                                                          `Erro ${response.status}: ${response.statusText}`
+                                                        );
                                                       }
-                                                      
                                                     } catch (error: any) {
-                                                      console.error("[PDF DOWNLOAD] Erro:", error);
-                                                      
+                                                      console.error('[PDF DOWNLOAD] Erro:', error);
+
                                                       // SEMPRE informar que o PDF está disponível e pode tentar novamente
                                                       toast({
-                                                        title: "Erro temporário ao baixar PDF",
-                                                        description: "Por favor, tente novamente em alguns segundos. O PDF está disponível.",
-                                                        variant: "destructive",
+                                                        title: 'Erro temporário ao baixar PDF',
+                                                        description:
+                                                          'Por favor, tente novamente em alguns segundos. O PDF está disponível.',
+                                                        variant: 'destructive',
                                                       });
                                                     }
                                                   }}
@@ -2092,33 +2263,45 @@ export default function Formalizacao() {
                                           onClick={async () => {
                                             try {
                                               // Atualizar status em tempo real
-                                              console.log(`[REALTIME UPDATE] Iniciando atualização para proposta: ${proposta.id}`);
-                                              
-                                              const { apiRequest } = await import("@/lib/queryClient");
-                                              const response = await apiRequest(`/api/inter/realtime-update/${proposta.id}`, {
-                                                method: "POST",
-                                              }) as { updated: number; removed: number; message?: string };
+                                              console.log(
+                                                `[REALTIME UPDATE] Iniciando atualização para proposta: ${proposta.id}`
+                                              );
+
+                                              const { apiRequest } = await import(
+                                                '@/lib/queryClient'
+                                              );
+                                              const response = (await apiRequest(
+                                                `/api/inter/realtime-update/${proposta.id}`,
+                                                {
+                                                  method: 'POST',
+                                                }
+                                              )) as {
+                                                updated: number;
+                                                removed: number;
+                                                message?: string;
+                                              };
 
                                               if (response.updated > 0 || response.removed > 0) {
                                                 // Recarregar a página para mostrar os dados atualizados
                                                 window.location.reload();
-                                                
+
                                                 toast({
-                                                  title: "Status atualizado!",
+                                                  title: 'Status atualizado!',
                                                   description: `${response.updated} boletos atualizados, ${response.removed} códigos inválidos removidos`,
                                                 });
                                               } else {
                                                 toast({
-                                                  title: "Sem atualizações",
-                                                  description: response.message || "Status já está atualizado",
+                                                  title: 'Sem atualizações',
+                                                  description:
+                                                    response.message || 'Status já está atualizado',
                                                 });
                                               }
                                             } catch (error) {
-                                              console.error("[REALTIME UPDATE] Erro:", error);
+                                              console.error('[REALTIME UPDATE] Erro:', error);
                                               toast({
-                                                title: "Erro",
-                                                description: "Erro ao atualizar status dos boletos",
-                                                variant: "destructive",
+                                                title: 'Erro',
+                                                description: 'Erro ao atualizar status dos boletos',
+                                                variant: 'destructive',
                                               });
                                             }
                                           }}
@@ -2127,7 +2310,7 @@ export default function Formalizacao() {
                                           <RefreshCw className="mr-2 h-4 w-4" />
                                           Atualizar Status
                                         </Button>
-                                        
+
                                         <Button
                                           variant="outline"
                                           onClick={async () => {
@@ -2140,13 +2323,13 @@ export default function Formalizacao() {
                                                 if (firstCollection.codigoSolicitacao) {
                                                   // Importar TokenManager para obter token válido
                                                   const { TokenManager } = await import(
-                                                    "@/lib/apiClient"
+                                                    '@/lib/apiClient'
                                                   );
                                                   const tokenManager = TokenManager.getInstance();
                                                   const token = await tokenManager.getValidToken();
 
                                                   if (!token) {
-                                                    throw new Error("Não autenticado");
+                                                    throw new Error('Não autenticado');
                                                   }
 
                                                   const response = await fetch(
@@ -2161,7 +2344,7 @@ export default function Formalizacao() {
                                                   if (response.ok) {
                                                     const blob = await response.blob();
                                                     const url = window.URL.createObjectURL(blob);
-                                                    const a = document.createElement("a");
+                                                    const a = document.createElement('a');
                                                     a.href = url;
                                                     a.download = `boleto-${firstCollection.seuNumero || firstCollection.codigoSolicitacao}.pdf`;
                                                     document.body.appendChild(a);
@@ -2169,28 +2352,28 @@ export default function Formalizacao() {
                                                     window.URL.revokeObjectURL(url);
                                                     document.body.removeChild(a);
                                                   } else {
-                                                    throw new Error("Erro ao baixar PDF");
+                                                    throw new Error('Erro ao baixar PDF');
                                                   }
                                                 } else {
                                                   toast({
-                                                    title: "Erro",
-                                                    description: "Código do boleto não encontrado",
-                                                    variant: "destructive",
+                                                    title: 'Erro',
+                                                    description: 'Código do boleto não encontrado',
+                                                    variant: 'destructive',
                                                   });
                                                 }
                                               } else {
                                                 toast({
-                                                  title: "Sem boletos",
+                                                  title: 'Sem boletos',
                                                   description:
-                                                    "Nenhum boleto foi gerado ainda para esta proposta",
-                                                  variant: "default",
+                                                    'Nenhum boleto foi gerado ainda para esta proposta',
+                                                  variant: 'default',
                                                 });
                                               }
                                             } catch (error) {
                                               toast({
-                                                title: "Erro",
-                                                description: "Erro ao baixar PDF do boleto",
-                                                variant: "destructive",
+                                                title: 'Erro',
+                                                description: 'Erro ao baixar PDF do boleto',
+                                                variant: 'destructive',
                                               });
                                             }
                                           }}
@@ -2211,32 +2394,32 @@ export default function Formalizacao() {
                                                 const statusInfo = collections
                                                   .map(
                                                     (col: any) =>
-                                                      `Parcela ${col.numeroParcela}: ${col.situacao || "Aguardando"}`
+                                                      `Parcela ${col.numeroParcela}: ${col.situacao || 'Aguardando'}`
                                                   )
-                                                  .join("\n");
+                                                  .join('\n');
 
                                                 toast({
-                                                  title: "Status dos Boletos",
+                                                  title: 'Status dos Boletos',
                                                   description:
-                                                    statusInfo || "Nenhum boleto encontrado",
+                                                    statusInfo || 'Nenhum boleto encontrado',
                                                 });
                                               } else {
                                                 toast({
-                                                  title: "Sem boletos",
+                                                  title: 'Sem boletos',
                                                   description:
-                                                    "Nenhum boleto foi gerado ainda para esta proposta",
-                                                  variant: "default",
+                                                    'Nenhum boleto foi gerado ainda para esta proposta',
+                                                  variant: 'default',
                                                 });
                                               }
                                             } catch (error) {
                                               console.error(
-                                                "[INTER] Erro ao consultar boletos:",
+                                                '[INTER] Erro ao consultar boletos:',
                                                 error
                                               );
                                               toast({
-                                                title: "Erro",
-                                                description: "Erro ao consultar status dos boletos",
-                                                variant: "destructive",
+                                                title: 'Erro',
+                                                description: 'Erro ao consultar status dos boletos',
+                                                variant: 'destructive',
                                               });
                                             }
                                           }}
@@ -2257,10 +2440,10 @@ export default function Formalizacao() {
                                         </p>
                                         <p>• Valor será creditado após compensação bancária</p>
                                         <p>
-                                          • Vencimento:{" "}
+                                          • Vencimento:{' '}
                                           {new Date(
                                             new Date().setDate(new Date().getDate() + 5)
-                                          ).toLocaleDateString("pt-BR")}
+                                          ).toLocaleDateString('pt-BR')}
                                         </p>
                                       </div>
                                     </div>
@@ -2272,7 +2455,7 @@ export default function Formalizacao() {
                         }
 
                         // Para outras etapas, usar o controle padrão se o tipo de etapa for válido
-                        if (step.etapa && step.etapa !== "banco_inter") {
+                        if (step.etapa && step.etapa !== 'banco_inter') {
                           return (
                             <div key={step.id} className="mb-4">
                               <EtapaFormalizacaoControl
@@ -2296,7 +2479,7 @@ export default function Formalizacao() {
                           {index !== formalizationSteps.length - 1 && (
                             <div
                               className={`absolute left-4 top-8 h-16 w-0.5 ${
-                                isCompleted ? "bg-green-500" : "bg-gray-600"
+                                isCompleted ? 'bg-green-500' : 'bg-gray-600'
                               }`}
                             />
                           )}
@@ -2305,10 +2488,10 @@ export default function Formalizacao() {
                             <div
                               className={`flex h-8 w-8 items-center justify-center rounded-full ${
                                 isCompleted
-                                  ? "bg-green-500 text-white"
+                                  ? 'bg-green-500 text-white'
                                   : isCurrent
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-gray-600 text-gray-400"
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-600 text-gray-400'
                               }`}
                             >
                               {isCompleted ? (
@@ -2324,7 +2507,7 @@ export default function Formalizacao() {
                               <div className="flex items-center justify-between">
                                 <h4
                                   className={`text-sm font-medium ${
-                                    isCompleted || isCurrent ? "text-white" : "text-gray-400"
+                                    isCompleted || isCurrent ? 'text-white' : 'text-gray-400'
                                   }`}
                                 >
                                   {step.title}
@@ -2333,7 +2516,7 @@ export default function Formalizacao() {
                               </div>
                               <p
                                 className={`text-sm ${
-                                  isCompleted || isCurrent ? "text-gray-300" : "text-gray-500"
+                                  isCompleted || isCurrent ? 'text-gray-300' : 'text-gray-500'
                                 }`}
                               >
                                 {step.description}
@@ -2354,46 +2537,51 @@ export default function Formalizacao() {
                               )}
 
                               {/* Botões para CCB e ClickSign */}
-                              {step.id === 2 && (proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS") && (
-                                <div className="mt-3">
-                                  <Button
-                                    onClick={async () => {
-                                      try {
-                                        // ✅ CORREÇÃO: Usar endpoint de formalização correto
-                                        const response = await apiRequest(
-                                          `/api/formalizacao/${proposta.id}/ccb`
-                                        ) as CCBResponse;
-                                        if (!response.publicUrl) {
+                              {step.id === 2 &&
+                                (proposta.status === 'CCB_GERADA' ||
+                                  proposta.status === 'AGUARDANDO_ASSINATURA' ||
+                                  proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                                  proposta.status === 'BOLETOS_EMITIDOS') && (
+                                  <div className="mt-3">
+                                    <Button
+                                      onClick={async () => {
+                                        try {
+                                          // ✅ CORREÇÃO: Usar endpoint de formalização correto
+                                          const response = (await apiRequest(
+                                            `/api/formalizacao/${proposta.id}/ccb`
+                                          )) as CCBResponse;
+                                          if (!response.publicUrl) {
+                                            toast({
+                                              title: 'CCB não disponível',
+                                              description:
+                                                'A CCB ainda não foi gerada para esta proposta',
+                                              variant: 'destructive',
+                                            });
+                                            return;
+                                          }
+                                          setCcbUrl(response.publicUrl || '');
+                                          setShowCcbViewer(true);
+                                        } catch (error) {
                                           toast({
-                                            title: "CCB não disponível",
-                                            description:
-                                              "A CCB ainda não foi gerada para esta proposta",
-                                            variant: "destructive",
+                                            title: 'Erro',
+                                            description: 'Erro ao visualizar CCB',
+                                            variant: 'destructive',
                                           });
-                                          return;
                                         }
-                                        setCcbUrl(response.publicUrl || "");
-                                        setShowCcbViewer(true);
-                                      } catch (error) {
-                                        toast({
-                                          title: "Erro",
-                                          description: "Erro ao visualizar CCB",
-                                          variant: "destructive",
-                                        });
-                                      }
-                                    }}
-                                    variant="outline"
-                                    size="sm"
-                                    className="mr-2"
-                                  >
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    Visualizar CCB
-                                  </Button>
-                                </div>
-                              )}
+                                      }}
+                                      variant="outline"
+                                      size="sm"
+                                      className="mr-2"
+                                    >
+                                      <FileText className="mr-2 h-4 w-4" />
+                                      Visualizar CCB
+                                    </Button>
+                                  </div>
+                                )}
 
                               {step.id === 3 &&
-                                (proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA") && (
+                                (proposta.status === 'CCB_GERADA' ||
+                                  proposta.status === 'AGUARDANDO_ASSINATURA') && (
                                   <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
                                     <div className="mb-3 flex items-center justify-between">
                                       <h5 className="font-medium text-blue-300">
@@ -2412,7 +2600,7 @@ export default function Formalizacao() {
                                         type="checkbox"
                                         id="useBiometricAuth"
                                         checked={useBiometricAuth}
-                                        onChange={e => setUseBiometricAuth(e.target.checked)}
+                                        onChange={(e) => setUseBiometricAuth(e.target.checked)}
                                         className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                                       />
                                       <label
@@ -2431,33 +2619,42 @@ export default function Formalizacao() {
                                       onClick={async () => {
                                         setLoadingClickSign(true);
                                         try {
-                                          console.log("🚀 [CLICKSIGN] Enviando CCB com biometria:", useBiometricAuth);
-                                          const response = await apiRequest(
+                                          console.log(
+                                            '🚀 [CLICKSIGN] Enviando CCB com biometria:',
+                                            useBiometricAuth
+                                          );
+                                          const response = (await apiRequest(
                                             `/api/propostas/${proposta.id}/clicksign/enviar`,
                                             {
-                                              method: "POST",
+                                              method: 'POST',
                                               body: JSON.stringify({
                                                 useBiometricAuth: useBiometricAuth,
                                               }),
                                             }
-                                          ) as ClickSignData;
-                                          
-                                          console.log("✅ [CLICKSIGN] Resposta com biometria:", response);
+                                          )) as ClickSignData;
+
+                                          console.log(
+                                            '✅ [CLICKSIGN] Resposta com biometria:',
+                                            response
+                                          );
                                           setClickSignData(response);
-                                          
+
                                           toast({
-                                            title: "Sucesso",
+                                            title: 'Sucesso',
                                             description:
-                                              "Contrato enviado para ClickSign com sucesso!",
+                                              'Contrato enviado para ClickSign com sucesso!',
                                           });
                                         } catch (error: any) {
-                                          console.error("❌ [CLICKSIGN] Erro no envio com biometria:", error);
+                                          console.error(
+                                            '❌ [CLICKSIGN] Erro no envio com biometria:',
+                                            error
+                                          );
                                           toast({
-                                            title: "Erro",
+                                            title: 'Erro',
                                             description:
                                               error.response?.data?.message ||
-                                              "Erro ao enviar para ClickSign",
-                                            variant: "destructive",
+                                              'Erro ao enviar para ClickSign',
+                                            variant: 'destructive',
                                           });
                                         } finally {
                                           setLoadingClickSign(false);
@@ -2496,7 +2693,7 @@ export default function Formalizacao() {
                                     <input
                                       type="text"
                                       value={
-                                        clickSignData?.signUrl || proposta.clicksignSignUrl || ""
+                                        clickSignData?.signUrl || proposta.clicksignSignUrl || ''
                                       }
                                       readOnly
                                       className="flex-1 bg-transparent text-sm text-white"
@@ -2505,12 +2702,12 @@ export default function Formalizacao() {
                                       size="sm"
                                       onClick={() => {
                                         const linkUrl =
-                                          clickSignData?.signUrl || proposta.clicksignSignUrl || "";
+                                          clickSignData?.signUrl || proposta.clicksignSignUrl || '';
                                         navigator.clipboard.writeText(linkUrl);
                                         toast({
-                                          title: "Copiado!",
+                                          title: 'Copiado!',
                                           description:
-                                            "Link de assinatura copiado para a área de transferência",
+                                            'Link de assinatura copiado para a área de transferência',
                                         });
                                       }}
                                     >
@@ -2531,60 +2728,72 @@ export default function Formalizacao() {
                                       onClick={async () => {
                                         setLoadingClickSign(true);
                                         try {
-                                          console.log("🔄 [CLICKSIGN] Regenerando link (seção 2) para proposta:", proposta.id);
-                                          console.log("📊 [CLICKSIGN] Estado atual (seção 2):", clickSignData);
-                                          
-                                          const response = await apiRequest(
+                                          console.log(
+                                            '🔄 [CLICKSIGN] Regenerando link (seção 2) para proposta:',
+                                            proposta.id
+                                          );
+                                          console.log(
+                                            '📊 [CLICKSIGN] Estado atual (seção 2):',
+                                            clickSignData
+                                          );
+
+                                          const response = (await apiRequest(
                                             `/api/propostas/${proposta.id}/clicksign/regenerar`,
                                             {
-                                              method: "POST",
+                                              method: 'POST',
                                             }
-                                          ) as ClickSignData;
-                                          
-                                          console.log("✅ [CLICKSIGN] Novo link gerado (seção 2):", response);
-                                          
+                                          )) as ClickSignData;
+
+                                          console.log(
+                                            '✅ [CLICKSIGN] Novo link gerado (seção 2):',
+                                            response
+                                          );
+
                                           // 🎯 CORREÇÃO CRÍTICA: Preservar o link na tela
                                           setClickSignData(response);
-                                          
+
                                           toast({
-                                            title: "Sucesso",
+                                            title: 'Sucesso',
                                             description:
-                                              "Novo link de assinatura gerado com sucesso!",
+                                              'Novo link de assinatura gerado com sucesso!',
                                           });
                                         } catch (error: any) {
-                                          console.error("❌ [CLICKSIGN] Erro ao regenerar (seção 2):", error);
+                                          console.error(
+                                            '❌ [CLICKSIGN] Erro ao regenerar (seção 2):',
+                                            error
+                                          );
                                           // Tratamento específico para erro de token ClickSign
                                           if (
                                             error.response?.status === 401 &&
                                             error.response?.data?.action ===
-                                              "UPDATE_CLICKSIGN_TOKEN"
+                                              'UPDATE_CLICKSIGN_TOKEN'
                                           ) {
                                             toast({
-                                              title: "Token ClickSign Inválido",
+                                              title: 'Token ClickSign Inválido',
                                               description:
                                                 error.response.data.details ||
-                                                "Token do ClickSign precisa ser atualizado. Entre em contato com o administrador.",
-                                              variant: "destructive",
+                                                'Token do ClickSign precisa ser atualizado. Entre em contato com o administrador.',
+                                              variant: 'destructive',
                                             });
                                           } else if (
                                             error.response?.status === 400 &&
                                             error.response?.data?.action ===
-                                              "CHECK_CLICKSIGN_SERVICE"
+                                              'CHECK_CLICKSIGN_SERVICE'
                                           ) {
                                             toast({
-                                              title: "Erro na API ClickSign",
+                                              title: 'Erro na API ClickSign',
                                               description:
                                                 error.response.data.details ||
-                                                "Problema com o serviço ClickSign. Tente novamente em alguns minutos.",
-                                              variant: "destructive",
+                                                'Problema com o serviço ClickSign. Tente novamente em alguns minutos.',
+                                              variant: 'destructive',
                                             });
                                           } else {
                                             toast({
-                                              title: "Erro",
+                                              title: 'Erro',
                                               description:
                                                 error.response?.data?.error ||
-                                                "Erro ao regenerar link",
-                                              variant: "destructive",
+                                                'Erro ao regenerar link',
+                                              variant: 'destructive',
                                             });
                                           }
                                         } finally {
@@ -2623,7 +2832,7 @@ export default function Formalizacao() {
             )}
 
             {/* Documents Tab */}
-            {activeTab === "documents" && (
+            {activeTab === 'documents' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -2637,7 +2846,12 @@ export default function Formalizacao() {
                     propostaId={proposta.id}
                     documents={[]}
                     ccbDocumentoUrl={
-                      proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" ? `/api/propostas/${proposta.id}/ccb-url` : undefined
+                      proposta.status === 'CCB_GERADA' ||
+                      proposta.status === 'AGUARDANDO_ASSINATURA' ||
+                      proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                      proposta.status === 'BOLETOS_EMITIDOS'
+                        ? `/api/propostas/${proposta.id}/ccb-url`
+                        : undefined
                     }
                   />
                 </CardContent>
@@ -2645,7 +2859,7 @@ export default function Formalizacao() {
             )}
 
             {/* Contracts Tab */}
-            {activeTab === "contracts" && (
+            {activeTab === 'contracts' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -2660,19 +2874,19 @@ export default function Formalizacao() {
                       <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                            proposta.contratoGerado ? "bg-green-100" : "bg-gray-200"
+                            proposta.contratoGerado ? 'bg-green-100' : 'bg-gray-200'
                           }`}
                         >
                           <FileCheck
                             className={`h-5 w-5 ${
-                              proposta.contratoGerado ? "text-green-600" : "text-gray-400"
+                              proposta.contratoGerado ? 'text-green-600' : 'text-gray-400'
                             }`}
                           />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Contrato Gerado</p>
                           <p className="text-sm text-gray-600">
-                            {proposta.contratoGerado ? "Sim" : "Não"}
+                            {proposta.contratoGerado ? 'Sim' : 'Não'}
                           </p>
                         </div>
                       </div>
@@ -2680,19 +2894,19 @@ export default function Formalizacao() {
                       <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                            proposta.contratoAssinado ? "bg-green-100" : "bg-gray-200"
+                            proposta.contratoAssinado ? 'bg-green-100' : 'bg-gray-200'
                           }`}
                         >
                           <Signature
                             className={`h-5 w-5 ${
-                              proposta.contratoAssinado ? "text-green-600" : "text-gray-400"
+                              proposta.contratoAssinado ? 'text-green-600' : 'text-gray-400'
                             }`}
                           />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Contrato Assinado</p>
                           <p className="text-sm text-gray-600">
-                            {proposta.contratoAssinado ? "Sim" : "Não"}
+                            {proposta.contratoAssinado ? 'Sim' : 'Não'}
                           </p>
                         </div>
                       </div>
@@ -2749,7 +2963,7 @@ export default function Formalizacao() {
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Cliente</Label>
                     <p className="font-medium text-white">
-                      {proposta.cliente_data?.nome || "Nome não informado"}
+                      {proposta.cliente_data?.nome || 'Nome não informado'}
                     </p>
                   </div>
                   <div>
@@ -2762,7 +2976,7 @@ export default function Formalizacao() {
                     <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
                     <p className="flex items-center gap-1 font-medium text-white">
                       <Percent className="h-4 w-4" />
-                      {"N/A"}% a.m.
+                      {'N/A'}% a.m.
                     </p>
                   </div>
                   <div>
@@ -2800,8 +3014,18 @@ export default function Formalizacao() {
                     </Label>
                     <select
                       className="w-full rounded-md border border-gray-600 bg-gray-700 p-2 text-white"
-                      value={form.watch("status") || proposta.status}
-                      onChange={e => form.setValue("status", e.target.value as "documentos_enviados" | "CCB_GERADA" | "ASSINATURA_CONCLUIDA" | "BOLETOS_EMITIDOS" | "PAGAMENTO_CONFIRMADO")}
+                      value={form.watch('status') || proposta.status}
+                      onChange={(e) =>
+                        form.setValue(
+                          'status',
+                          e.target.value as
+                            | 'documentos_enviados'
+                            | 'CCB_GERADA'
+                            | 'ASSINATURA_CONCLUIDA'
+                            | 'BOLETOS_EMITIDOS'
+                            | 'PAGAMENTO_CONFIRMADO'
+                        )
+                      }
                     >
                       <option value="aprovado">Aprovado</option>
                       <option value="documentos_enviados">Documentos Enviados</option>
@@ -2821,12 +3045,12 @@ export default function Formalizacao() {
                       rows={3}
                       placeholder="Adicione observações sobre o processo..."
                       className="border-gray-600 bg-gray-700 text-white"
-                      {...form.register("observacoesFormalização")}
+                      {...form.register('observacoesFormalização')}
                     />
                   </div>
 
                   <Button type="submit" className="w-full" disabled={updateFormalizacao.isPending}>
-                    {updateFormalizacao.isPending ? "Atualizando..." : "Atualizar Status"}
+                    {updateFormalizacao.isPending ? 'Atualizando...' : 'Atualizar Status'}
                   </Button>
                 </form>
               </CardContent>
@@ -2842,7 +3066,7 @@ export default function Formalizacao() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {proposta.status === "aprovado" && (
+                  {proposta.status === 'aprovado' && (
                     <div className="rounded-md border border-blue-700 bg-blue-900/30 p-3">
                       <p className="text-sm font-medium text-blue-300">
                         Aguardando documentos adicionais
@@ -2852,7 +3076,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status === "documentos_enviados" && (
+                  {proposta.status === 'documentos_enviados' && (
                     <div className="rounded-md border border-purple-700 bg-purple-900/30 p-3">
                       <p className="text-sm font-medium text-purple-300">Preparar contratos</p>
                       <p className="mt-1 text-sm text-purple-200">
@@ -2860,7 +3084,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status === "CCB_GERADA" && (
+                  {proposta.status === 'CCB_GERADA' && (
                     <div className="rounded-md border border-indigo-700 bg-indigo-900/30 p-3">
                       <p className="text-sm font-medium text-indigo-300">Aguardando assinatura</p>
                       <p className="mt-1 text-sm text-indigo-200">
@@ -2868,7 +3092,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status === "ASSINATURA_CONCLUIDA" && (
+                  {proposta.status === 'ASSINATURA_CONCLUIDA' && (
                     <div className="rounded-md border border-orange-700 bg-orange-900/30 p-3">
                       <p className="text-sm font-medium text-orange-300">Preparar pagamento</p>
                       <p className="mt-1 text-sm text-orange-200">
@@ -2876,7 +3100,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status === "BOLETOS_EMITIDOS" && (
+                  {proposta.status === 'BOLETOS_EMITIDOS' && (
                     <div className="rounded-md border border-green-700 bg-green-900/30 p-3">
                       <p className="text-sm font-medium text-green-300">Liberar pagamento</p>
                       <p className="mt-1 text-sm text-green-200">
@@ -2884,7 +3108,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status === "PAGAMENTO_CONFIRMADO" && (
+                  {proposta.status === 'PAGAMENTO_CONFIRMADO' && (
                     <div className="rounded-md border border-green-700 bg-green-900/30 p-3">
                       <p className="text-sm font-medium text-green-300">Processo concluído</p>
                       <p className="mt-1 text-sm text-green-200">

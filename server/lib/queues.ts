@@ -1,7 +1,7 @@
 /**
  * BullMQ Queue Configuration
  * Centralizes all job queue definitions for asynchronous processing
- * 
+ *
  * Architecture:
  * - Redis as message broker
  * - Separate workers for different task types

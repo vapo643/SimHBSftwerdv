@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/AuthContext";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import DashboardLayout from '@/components/DashboardLayout';
 import {
   Table,
   TableBody,
@@ -9,11 +9,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Pagination,
   PaginationContent,
@@ -21,19 +21,19 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { ExternalLink, FileText, AlertCircle } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/pagination';
+import { ExternalLink, FileText, AlertCircle } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { apiRequest } from '@/lib/queryClient';
 
 interface Contrato {
   id: string;
   clienteNome: string;
   clienteCpf?: string;
   clienteCnpj?: string;
-  tipoPessoa: "PF" | "PJ";
+  tipoPessoa: 'PF' | 'PJ';
   valor: string;
   prazo: number;
   valorTotalFinanciado: string;
@@ -71,11 +71,11 @@ export default function GestaoContratos() {
   const [loadingCcb, setLoadingCcb] = useState<string | null>(null);
 
   // Verificar permissão de acesso
-  const hasPermission = user?.role === "ADMINISTRADOR" || user?.role === "DIRETOR";
+  const hasPermission = user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR';
 
   // Buscar contratos
   const { data, isLoading, error } = useQuery<ContratosResponse>({
-    queryKey: ["/api/contratos"],
+    queryKey: ['/api/contratos'],
     enabled: hasPermission,
     staleTime: 30000, // 30 segundos
     refetchInterval: 60000, // Atualizar a cada minuto
@@ -88,25 +88,25 @@ export default function GestaoContratos() {
 
       // Se já temos a URL, abrir diretamente
       if (contrato.urlCcbAssinado) {
-        window.open(contrato.urlCcbAssinado, "_blank");
+        window.open(contrato.urlCcbAssinado, '_blank');
         return;
       }
 
       // Caso contrário, buscar URL segura do backend
       if (contrato.caminhoCcbAssinado) {
         const response = await apiRequest(`/api/formalizacao/${contrato.id}/ccb-url`, {
-          method: "POST",
+          method: 'POST',
         });
 
         const typedResponse = response as { url?: string };
         if (typedResponse.url) {
-          window.open(typedResponse.url, "_blank");
+          window.open(typedResponse.url, '_blank');
         } else {
-          console.error("URL do CCB não disponível");
+          console.error('URL do CCB não disponível');
         }
       }
     } catch (error) {
-      console.error("Erro ao abrir CCB:", error);
+      console.error('Erro ao abrir CCB:', error);
     } finally {
       setLoadingCcb(null);
     }
@@ -130,7 +130,7 @@ export default function GestaoContratos() {
                 </AlertDescription>
               </Alert>
               <div className="mt-4">
-                <Button onClick={() => (window.location.href = "/dashboard")}>
+                <Button onClick={() => (window.location.href = '/dashboard')}>
                   Voltar ao Dashboard
                 </Button>
               </div>
@@ -276,24 +276,24 @@ export default function GestaoContratos() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentContratos.map(contrato => (
+                  {currentContratos.map((contrato) => (
                     <TableRow key={contrato.id}>
                       <TableCell className="font-mono text-xs">
                         {contrato.id.slice(0, 8)}...
                       </TableCell>
                       <TableCell className="font-medium">{contrato.clienteNome}</TableCell>
                       <TableCell>
-                        {contrato.tipoPessoa === "PF"
-                          ? formatCpf(contrato.clienteCpf || "")
-                          : formatCnpj(contrato.clienteCnpj || "")}
+                        {contrato.tipoPessoa === 'PF'
+                          ? formatCpf(contrato.clienteCpf || '')
+                          : formatCnpj(contrato.clienteCnpj || '')}
                       </TableCell>
-                      <TableCell>{formatCurrency(parseFloat(contrato.valor || "0"))}</TableCell>
+                      <TableCell>{formatCurrency(parseFloat(contrato.valor || '0'))}</TableCell>
                       <TableCell>
                         {contrato.dataAssinatura
                           ? format(new Date(contrato.dataAssinatura), "dd/MM/yyyy 'às' HH:mm", {
                               locale: ptBR,
                             })
-                          : "-"}
+                          : '-'}
                       </TableCell>
                       <TableCell>
                         <StatusBadge status={contrato.statusFormalizacao} />
@@ -330,7 +330,7 @@ export default function GestaoContratos() {
                       <PaginationPrevious
                         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                         className={
-                          currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+                          currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
                         }
                       />
                     </PaginationItem>
@@ -352,8 +352,8 @@ export default function GestaoContratos() {
                         onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                         className={
                           currentPage === totalPages
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
+                            ? 'pointer-events-none opacity-50'
+                            : 'cursor-pointer'
                         }
                       />
                     </PaginationItem>
@@ -371,22 +371,22 @@ export default function GestaoContratos() {
 // Componente para badge de status
 function StatusBadge({ status }: { status?: string }) {
   const statusConfig = {
-    PENDENTE_GERACAO: { label: "Pendente", className: "bg-gray-100 text-gray-800" },
+    PENDENTE_GERACAO: { label: 'Pendente', className: 'bg-gray-100 text-gray-800' },
     AGUARDANDO_ASSINATURA: {
-      label: "Aguardando Assinatura",
-      className: "bg-yellow-100 text-yellow-800",
+      label: 'Aguardando Assinatura',
+      className: 'bg-yellow-100 text-yellow-800',
     },
     AGUARDANDO_PAGAMENTO: {
-      label: "Aguardando Pagamento",
-      className: "bg-orange-100 text-orange-800",
+      label: 'Aguardando Pagamento',
+      className: 'bg-orange-100 text-orange-800',
     },
-    CONCLUIDO: { label: "Concluído", className: "bg-green-100 text-green-800" },
-    EM_PROCESSAMENTO: { label: "Em Processamento", className: "bg-blue-100 text-blue-800" },
+    CONCLUIDO: { label: 'Concluído', className: 'bg-green-100 text-green-800' },
+    EM_PROCESSAMENTO: { label: 'Em Processamento', className: 'bg-blue-100 text-blue-800' },
   };
 
   const config = statusConfig[status as keyof typeof statusConfig] || {
-    label: status || "Desconhecido",
-    className: "bg-gray-100 text-gray-800",
+    label: status || 'Desconhecido',
+    className: 'bg-gray-100 text-gray-800',
   };
 
   return (
@@ -400,15 +400,15 @@ function StatusBadge({ status }: { status?: string }) {
 
 // Funções auxiliares de formatação
 function formatCpf(cpf: string): string {
-  if (!cpf) return "-";
-  const cleaned = cpf.replace(/\D/g, "");
+  if (!cpf) return '-';
+  const cleaned = cpf.replace(/\D/g, '');
   if (cleaned.length !== 11) return cpf;
-  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
 function formatCnpj(cnpj: string): string {
-  if (!cnpj) return "-";
-  const cleaned = cnpj.replace(/\D/g, "");
+  if (!cnpj) return '-';
+  const cleaned = cnpj.replace(/\D/g, '');
   if (cleaned.length !== 14) return cnpj;
-  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
 }

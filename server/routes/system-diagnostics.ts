@@ -1,1 +1,12 @@
-import { Router } from "express"; import { adminService } from "../services/genericService"; const router = Router(); router.get("/diagnostics", async (req, res) => { try { const result = await adminService.executeOperation("system_diagnostics", req.query); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { adminService } from '../services/genericService';
+const router = Router();
+router.get('/diagnostics', async (req, res) => {
+  try {
+    const result = await adminService.executeOperation('system_diagnostics', req.query);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

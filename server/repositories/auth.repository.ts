@@ -4,11 +4,11 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { BaseRepository } from "./base.repository.js";
-import { db } from "../lib/supabase.js";
-import { profiles, userSessions } from "@shared/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
-import type { Session } from "@shared/schema";
+import { BaseRepository } from './base.repository.js';
+import { db } from '../lib/supabase.js';
+import { profiles, userSessions } from '@shared/schema';
+import { eq, and, desc, sql } from 'drizzle-orm';
+import type { Session } from '@shared/schema';
 
 export class AuthRepository extends BaseRepository<typeof userSessions> {
   constructor() {
@@ -44,7 +44,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return session;
     } catch (error) {
-      console.error("[AUTH_REPO] Error creating session:", error);
+      console.error('[AUTH_REPO] Error creating session:', error);
       return null;
     }
   }
@@ -60,7 +60,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
         .where(eq(userSessions.userId, userId))
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
-      console.error("[AUTH_REPO] Error getting user sessions:", error);
+      console.error('[AUTH_REPO] Error getting user sessions:', error);
       return [];
     }
   }
@@ -82,7 +82,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
         )
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
-      console.error("[AUTH_REPO] Error getting active sessions:", error);
+      console.error('[AUTH_REPO] Error getting active sessions:', error);
       return [];
     }
   }
@@ -99,7 +99,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return result.length > 0;
     } catch (error) {
-      console.error("[AUTH_REPO] Error deleting session:", error);
+      console.error('[AUTH_REPO] Error deleting session:', error);
       return false;
     }
   }
@@ -116,7 +116,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return result.length;
     } catch (error) {
-      console.error("[AUTH_REPO] Error deleting user sessions:", error);
+      console.error('[AUTH_REPO] Error deleting user sessions:', error);
       return 0;
     }
   }
@@ -137,7 +137,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return result.length > 0;
     } catch (error) {
-      console.error("[AUTH_REPO] Error deactivating session:", error);
+      console.error('[AUTH_REPO] Error deactivating session:', error);
       return false;
     }
   }
@@ -158,7 +158,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return result.length > 0;
     } catch (error) {
-      console.error("[AUTH_REPO] Error updating session activity:", error);
+      console.error('[AUTH_REPO] Error updating session activity:', error);
       return false;
     }
   }
@@ -182,7 +182,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return !!session;
     } catch (error) {
-      console.error("[AUTH_REPO] Error checking session validity:", error);
+      console.error('[AUTH_REPO] Error checking session validity:', error);
       return false;
     }
   }
@@ -199,7 +199,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return result.length;
     } catch (error) {
-      console.error("[AUTH_REPO] Error cleaning up expired sessions:", error);
+      console.error('[AUTH_REPO] Error cleaning up expired sessions:', error);
       return 0;
     }
   }
@@ -217,7 +217,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return session || null;
     } catch (error) {
-      console.error("[AUTH_REPO] Error getting session by token:", error);
+      console.error('[AUTH_REPO] Error getting session by token:', error);
       return null;
     }
   }
@@ -227,15 +227,11 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
    */
   async getUserProfile(userId: string): Promise<any> {
     try {
-      const [profile] = await db
-        .select()
-        .from(profiles)
-        .where(eq(profiles.id, userId))
-        .limit(1);
+      const [profile] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 
       return profile || null;
     } catch (error) {
-      console.error("[AUTH_REPO] Error getting user profile:", error);
+      console.error('[AUTH_REPO] Error getting user profile:', error);
       return null;
     }
   }
@@ -258,7 +254,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
 
       return result[0]?.count || 0;
     } catch (error) {
-      console.error("[AUTH_REPO] Error counting active sessions:", error);
+      console.error('[AUTH_REPO] Error counting active sessions:', error);
       return 0;
     }
   }

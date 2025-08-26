@@ -1,20 +1,20 @@
-import React from "react";
-import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React from 'react';
+import { useProposal, useProposalActions } from '@/contexts/ProposalContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DollarSign, Package, Calculator, AlertCircle } from "lucide-react";
-import CurrencyInput from "@/components/ui/CurrencyInput";
-import { format } from "date-fns";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DollarSign, Package, Calculator, AlertCircle } from 'lucide-react';
+import CurrencyInput from '@/components/ui/CurrencyInput';
+import { format } from 'date-fns';
 
 export function LoanConditionsStep() {
   const { state } = useProposal();
@@ -31,11 +31,11 @@ export function LoanConditionsStep() {
   }
 
   // Get selected product
-  const selectedProduct = context.produtos.find(p => p.id === loanData.produtoId);
+  const selectedProduct = context.produtos.find((p) => p.id === loanData.produtoId);
 
   // Get available terms from selected table
   const selectedTable = selectedProduct?.tabelasDisponiveis.find(
-    t => t.id === loanData.tabelaComercialId
+    (t) => t.id === loanData.tabelaComercialId
   );
   const availableTerms = selectedTable?.prazos || [];
 
@@ -53,17 +53,17 @@ export function LoanConditionsStep() {
           <div>
             <Label htmlFor="produto">Produto de Crédito</Label>
             <Select
-              value={loanData.produtoId?.toString() || ""}
-              onValueChange={value => selectProduct(parseInt(value))}
+              value={loanData.produtoId?.toString() || ''}
+              onValueChange={(value) => selectProduct(parseInt(value))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um produto..." />
               </SelectTrigger>
               <SelectContent>
-                {context.produtos.map(produto => (
+                {context.produtos.map((produto) => (
                   <SelectItem key={produto.id} value={produto.id.toString()}>
                     {produto.nome}
-                    {produto.tacTipo === "fixo"
+                    {produto.tacTipo === 'fixo'
                       ? ` (TAC: R$ ${produto.tacValor})`
                       : ` (TAC: ${produto.tacValor}%)`}
                   </SelectItem>
@@ -78,21 +78,21 @@ export function LoanConditionsStep() {
           <div>
             <Label htmlFor="tabela">Tabela Comercial</Label>
             <Select
-              value={loanData.tabelaComercialId?.toString() || ""}
-              onValueChange={value => selectTable(parseInt(value))}
+              value={loanData.tabelaComercialId?.toString() || ''}
+              onValueChange={(value) => selectTable(parseInt(value))}
               disabled={!selectedProduct}
             >
               <SelectTrigger>
                 <SelectValue
                   placeholder={
                     !selectedProduct
-                      ? "Primeiro selecione um produto"
-                      : "Selecione uma tabela comercial..."
+                      ? 'Primeiro selecione um produto'
+                      : 'Selecione uma tabela comercial...'
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {selectedProduct?.tabelasDisponiveis.map(tabela => (
+                {selectedProduct?.tabelasDisponiveis.map((tabela) => (
                   <SelectItem key={tabela.id} value={tabela.id.toString()}>
                     {tabela.nomeTabela}
                     <span className="ml-2 text-sm text-muted-foreground">
@@ -123,9 +123,9 @@ export function LoanConditionsStep() {
             <CurrencyInput
               id="valorSolicitado"
               value={loanData.valorSolicitado}
-              onChange={e => updateLoanConditions({ valorSolicitado: e.target.value })}
-              placeholder={`Mín: R$ ${context.limites.valorMinimo.toLocaleString("pt-BR")} - Máx: R$ ${context.limites.valorMaximo.toLocaleString("pt-BR")}`}
-              className={errors.valorSolicitado ? "border-destructive" : ""}
+              onChange={(e) => updateLoanConditions({ valorSolicitado: e.target.value })}
+              placeholder={`Mín: R$ ${context.limites.valorMinimo.toLocaleString('pt-BR')} - Máx: R$ ${context.limites.valorMaximo.toLocaleString('pt-BR')}`}
+              className={errors.valorSolicitado ? 'border-destructive' : ''}
             />
             {errors.valorSolicitado && (
               <p className="mt-1 text-sm text-destructive">{errors.valorSolicitado}</p>
@@ -135,21 +135,21 @@ export function LoanConditionsStep() {
           <div>
             <Label htmlFor="prazo">Prazo (meses)</Label>
             <Select
-              value={loanData.prazo?.toString() || ""}
-              onValueChange={value => updateLoanConditions({ prazo: parseInt(value) })}
+              value={loanData.prazo?.toString() || ''}
+              onValueChange={(value) => updateLoanConditions({ prazo: parseInt(value) })}
               disabled={!selectedTable}
             >
               <SelectTrigger>
                 <SelectValue
                   placeholder={
                     !selectedTable
-                      ? "Primeiro selecione uma tabela comercial"
-                      : "Selecione o prazo..."
+                      ? 'Primeiro selecione uma tabela comercial'
+                      : 'Selecione o prazo...'
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {availableTerms.map(prazo => (
+                {availableTerms.map((prazo) => (
                   <SelectItem key={prazo} value={prazo.toString()}>
                     {prazo} meses
                   </SelectItem>
@@ -163,7 +163,7 @@ export function LoanConditionsStep() {
             <Checkbox
               id="incluirTac"
               checked={loanData.incluirTac}
-              onCheckedChange={checked => updateLoanConditions({ incluirTac: !!checked })}
+              onCheckedChange={(checked) => updateLoanConditions({ incluirTac: !!checked })}
             />
             <Label
               htmlFor="incluirTac"
@@ -178,10 +178,10 @@ export function LoanConditionsStep() {
             <Input
               id="dataCarencia"
               type="date"
-              value={loanData.dataCarencia || ""}
-              onChange={e => updateLoanConditions({ dataCarencia: e.target.value })}
-              min={format(new Date(), "yyyy-MM-dd")}
-              max={format(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")}
+              value={loanData.dataCarencia || ''}
+              onChange={(e) => updateLoanConditions({ dataCarencia: e.target.value })}
+              min={format(new Date(), 'yyyy-MM-dd')}
+              max={format(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd')}
             />
             <p className="mt-1 text-sm text-muted-foreground">Máximo de 45 dias a partir de hoje</p>
           </div>
@@ -202,8 +202,8 @@ export function LoanConditionsStep() {
               <div>
                 <p className="text-sm text-muted-foreground">Valor da Parcela</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  R${" "}
-                  {parseFloat(simulation.valorParcela).toLocaleString("pt-BR", {
+                  R${' '}
+                  {parseFloat(simulation.valorParcela).toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                   })}
                 </p>
@@ -223,21 +223,21 @@ export function LoanConditionsStep() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Valor Solicitado:</span>
                 <span className="text-foreground">
-                  R${" "}
-                  {parseFloat(loanData.valorSolicitado || "0").toLocaleString("pt-BR", {
+                  R${' '}
+                  {parseFloat(loanData.valorSolicitado || '0').toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                   })}
                 </span>
               </div>
-              
+
               {/* IOF Detalhado */}
               {simulation.iofDetalhado ? (
                 <>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">IOF Diário:</span>
                     <span className="text-foreground">
-                      R${" "}
-                      {parseFloat(simulation.iofDetalhado.diario).toLocaleString("pt-BR", {
+                      R${' '}
+                      {parseFloat(simulation.iofDetalhado.diario).toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
                       })}
                     </span>
@@ -245,8 +245,8 @@ export function LoanConditionsStep() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">IOF Adicional:</span>
                     <span className="text-foreground">
-                      R${" "}
-                      {parseFloat(simulation.iofDetalhado.adicional).toLocaleString("pt-BR", {
+                      R${' '}
+                      {parseFloat(simulation.iofDetalhado.adicional).toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
                       })}
                     </span>
@@ -254,8 +254,8 @@ export function LoanConditionsStep() {
                   <div className="flex justify-between text-sm font-medium">
                     <span className="text-muted-foreground">IOF Total:</span>
                     <span className="text-foreground">
-                      R${" "}
-                      {parseFloat(simulation.iofDetalhado.total).toLocaleString("pt-BR", {
+                      R${' '}
+                      {parseFloat(simulation.iofDetalhado.total).toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
                       })}
                     </span>
@@ -265,8 +265,8 @@ export function LoanConditionsStep() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">IOF:</span>
                   <span className="text-foreground">
-                    R${" "}
-                    {parseFloat(simulation.valorIOF).toLocaleString("pt-BR", {
+                    R${' '}
+                    {parseFloat(simulation.valorIOF).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </span>
@@ -278,8 +278,8 @@ export function LoanConditionsStep() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">TAC:</span>
                   <span className="text-foreground">
-                    R${" "}
-                    {parseFloat(simulation.valorTAC).toLocaleString("pt-BR", {
+                    R${' '}
+                    {parseFloat(simulation.valorTAC).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </span>
@@ -293,8 +293,8 @@ export function LoanConditionsStep() {
                     Comissão ({simulation.comissaoPercentual}%):
                   </span>
                   <span className="text-foreground">
-                    R${" "}
-                    {parseFloat(simulation.comissao).toLocaleString("pt-BR", {
+                    R${' '}
+                    {parseFloat(simulation.comissao).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </span>
@@ -308,8 +308,8 @@ export function LoanConditionsStep() {
                     Juros de Carência ({simulation.diasCarencia} dias):
                   </span>
                   <span className="text-foreground">
-                    R${" "}
-                    {parseFloat(simulation.jurosCarencia).toLocaleString("pt-BR", {
+                    R${' '}
+                    {parseFloat(simulation.jurosCarencia).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </span>
@@ -320,8 +320,8 @@ export function LoanConditionsStep() {
               <div className="flex justify-between border-t border-border pt-2 text-sm font-semibold">
                 <span className="text-foreground">Total Financiado:</span>
                 <span className="text-foreground">
-                  R${" "}
-                  {parseFloat(simulation.valorTotalFinanciado).toLocaleString("pt-BR", {
+                  R${' '}
+                  {parseFloat(simulation.valorTotalFinanciado).toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                   })}
                 </span>
@@ -332,8 +332,8 @@ export function LoanConditionsStep() {
                 <div className="flex justify-between text-sm font-semibold text-blue-600 dark:text-blue-400">
                   <span>Total que o Cliente Pagará:</span>
                   <span>
-                    R${" "}
-                    {parseFloat(simulation.valorTotalAPagar).toLocaleString("pt-BR", {
+                    R${' '}
+                    {parseFloat(simulation.valorTotalAPagar).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </span>
@@ -345,8 +345,8 @@ export function LoanConditionsStep() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Custo Total da Operação:</span>
                   <span className="text-foreground">
-                    R${" "}
-                    {parseFloat(simulation.custoTotalOperacao).toLocaleString("pt-BR", {
+                    R${' '}
+                    {parseFloat(simulation.custoTotalOperacao).toLocaleString('pt-BR', {
                       minimumFractionDigits: 2,
                     })}
                   </span>

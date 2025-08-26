@@ -1,7 +1,7 @@
 /**
  * Serviço de Pré-Aprovação Automática
  * PAM V1.0 - Implementado em 20/08/2025
- * 
+ *
  * Motor de decisão para análise automática de risco baseado em comprometimento de renda.
  * Aplica regra de negócio de 25% de comprometimento máximo para aprovação automática.
  */
@@ -59,7 +59,7 @@ export class PreApprovalService {
   async checkIncomeCommitment(proposalData: ProposalData): Promise<PreApprovalResult> {
     try {
       console.log(`[PRE-APPROVAL] Iniciando verificação para proposta ${proposalData.id}`);
-      
+
       // PASSO 1: Validar dados obrigatórios
       const validation = this.validateRequiredFinancialData(proposalData);
       if (!validation.valid) {
@@ -69,31 +69,31 @@ export class PreApprovalService {
           pendingData: true,
           status: 'pendente',
           reason: validation.reason,
-          requiredFields: validation.requiredFields
+          requiredFields: validation.requiredFields,
         };
       }
-      
+
       // PASSO 2: Calcular comprometimento de renda
       const renda = this.parseNumber(proposalData.clienteRenda);
       const dividasExistentes = this.parseNumber(proposalData.clienteDividasExistentes) || 0;
       const valorParcela = this.calculateMonthlyPayment(
-        proposalData.valor, 
-        proposalData.prazo, 
+        proposalData.valor,
+        proposalData.prazo,
         proposalData.taxaJuros || 2.5
       );
-      
+
       const comprometimentoTotal = dividasExistentes + valorParcela;
       const percentualComprometimento = (comprometimentoTotal / renda) * 100;
-      
+
       console.log(`[PRE-APPROVAL] Cálculo detalhado:`, {
         renda: `R$ ${renda.toFixed(2)}`,
         dividasExistentes: `R$ ${dividasExistentes.toFixed(2)}`,
         valorParcela: `R$ ${valorParcela.toFixed(2)}`,
         comprometimentoTotal: `R$ ${comprometimentoTotal.toFixed(2)}`,
         percentualComprometimento: `${percentualComprometimento.toFixed(1)}%`,
-        limite: `${this.LIMITE_COMPROMETIMENTO}%`
+        limite: `${this.LIMITE_COMPROMETIMENTO}%`,
       });
-      
+
       // PASSO 3: Aplicar regra de negócio (25%)
       if (percentualComprometimento > this.LIMITE_COMPROMETIMENTO) {
         // Registrar decisão para auditoria
@@ -102,46 +102,49 @@ export class PreApprovalService {
           reason: 'INCOME_COMMITMENT_EXCEEDED',
           calculatedCommitment: percentualComprometimento,
           limit: this.LIMITE_COMPROMETIMENTO,
-          details: { renda, dividasExistentes, valorParcela }
+          details: { renda, dividasExistentes, valorParcela },
         });
-        
-        console.log(`[PRE-APPROVAL] ❌ REJEITADO - Comprometimento ${percentualComprometimento.toFixed(1)}% excede limite de ${this.LIMITE_COMPROMETIMENTO}%`);
-        
+
+        console.log(
+          `[PRE-APPROVAL] ❌ REJEITADO - Comprometimento ${percentualComprometimento.toFixed(1)}% excede limite de ${this.LIMITE_COMPROMETIMENTO}%`
+        );
+
         return {
           rejected: true,
           status: 'rejeitado',
           reason: `Comprometimento de renda ${percentualComprometimento.toFixed(1)}% excede limite de ${this.LIMITE_COMPROMETIMENTO}%`,
-          calculatedCommitment: percentualComprometimento
+          calculatedCommitment: percentualComprometimento,
         };
       }
-      
+
       // PASSO 4: Aprovação automática
       await this.logPreApprovalDecision(proposalData.id, {
         decision: 'APPROVED',
         reason: 'INCOME_COMMITMENT_WITHIN_LIMIT',
         calculatedCommitment: percentualComprometimento,
         limit: this.LIMITE_COMPROMETIMENTO,
-        details: { renda, dividasExistentes, valorParcela }
+        details: { renda, dividasExistentes, valorParcela },
       });
-      
-      console.log(`[PRE-APPROVAL] ✅ APROVADO - Comprometimento ${percentualComprometimento.toFixed(1)}% dentro do limite`);
-      
+
+      console.log(
+        `[PRE-APPROVAL] ✅ APROVADO - Comprometimento ${percentualComprometimento.toFixed(1)}% dentro do limite`
+      );
+
       return {
         rejected: false,
         approved: true,
         calculatedCommitment: percentualComprometimento,
-        reason: `Comprometimento de renda ${percentualComprometimento.toFixed(1)}% dentro do limite permitido`
+        reason: `Comprometimento de renda ${percentualComprometimento.toFixed(1)}% dentro do limite permitido`,
       };
-      
     } catch (error) {
       console.error(`[PRE-APPROVAL] Erro na verificação:`, error);
-      
+
       // Em caso de erro, permitir análise manual
       return {
         rejected: false,
         error: true,
         status: 'aguardando_analise',
-        reason: 'Erro na verificação automática - encaminhado para análise manual'
+        reason: 'Erro na verificação automática - encaminhado para análise manual',
       };
     }
   }
@@ -158,17 +161,18 @@ export class PreApprovalService {
     if (valor <= 0 || prazo <= 0) {
       throw new Error('Valor e prazo devem ser positivos');
     }
-    
+
     // Taxa zero = parcela simples (sem juros)
     if (taxa === 0) {
       return valor / prazo;
     }
-    
+
     // Price formula para parcela fixa
     const taxaMensal = taxa / 100;
-    const parcela = valor * (taxaMensal * Math.pow(1 + taxaMensal, prazo)) / 
-                   (Math.pow(1 + taxaMensal, prazo) - 1);
-    
+    const parcela =
+      (valor * (taxaMensal * Math.pow(1 + taxaMensal, prazo))) /
+      (Math.pow(1 + taxaMensal, prazo) - 1);
+
     return parcela;
   }
 
@@ -179,32 +183,34 @@ export class PreApprovalService {
    */
   private validateRequiredFinancialData(data: ProposalData): ValidationResult {
     const missing: string[] = [];
-    
+
     // Verificar renda
     if (!data.clienteRenda || this.parseNumber(data.clienteRenda) <= 0) {
       missing.push('renda mensal');
     }
-    
+
     // Verificar dívidas existentes (NULL é considerado como "não informado")
     if (data.clienteDividasExistentes === null || data.clienteDividasExistentes === undefined) {
       missing.push('dívidas existentes');
     }
-    
+
     // Verificar valor da proposta
     if (!data.valor || data.valor <= 0) {
       missing.push('valor do empréstimo');
     }
-    
+
     // Verificar prazo
     if (!data.prazo || data.prazo <= 0) {
       missing.push('prazo em meses');
     }
-    
+
     return {
       valid: missing.length === 0,
-      reason: missing.length > 0 ? 
-        `Campos obrigatórios para pré-aprovação: ${missing.join(', ')}` : undefined,
-      requiredFields: missing
+      reason:
+        missing.length > 0
+          ? `Campos obrigatórios para pré-aprovação: ${missing.join(', ')}`
+          : undefined,
+      requiredFields: missing,
     };
   }
 
@@ -220,18 +226,21 @@ export class PreApprovalService {
       timestamp: new Date().toISOString(),
       decision: decision.decision,
       reason: decision.reason,
-      calculatedCommitment: decision.calculatedCommitment ? 
-        `${decision.calculatedCommitment.toFixed(2)}%` : null,
+      calculatedCommitment: decision.calculatedCommitment
+        ? `${decision.calculatedCommitment.toFixed(2)}%`
+        : null,
       limit: decision.limit ? `${decision.limit}%` : null,
-      details: decision.details ? {
-        renda: `R$ ${decision.details.renda.toFixed(2)}`,
-        dividasExistentes: `R$ ${decision.details.dividasExistentes.toFixed(2)}`,
-        valorParcela: `R$ ${decision.details.valorParcela.toFixed(2)}`
-      } : null
+      details: decision.details
+        ? {
+            renda: `R$ ${decision.details.renda.toFixed(2)}`,
+            dividasExistentes: `R$ ${decision.details.dividasExistentes.toFixed(2)}`,
+            valorParcela: `R$ ${decision.details.valorParcela.toFixed(2)}`,
+          }
+        : null,
     };
-    
+
     console.log(`[PRE-APPROVAL AUDIT]`, JSON.stringify(auditLog, null, 2));
-    
+
     // TODO: Implementar persistência em tabela de auditoria quando disponível
     // await db.insert(preApprovalAuditLog).values(auditLog);
   }
@@ -245,19 +254,19 @@ export class PreApprovalService {
     if (value === null || value === undefined) {
       return 0;
     }
-    
+
     if (typeof value === 'number') {
       return value;
     }
-    
+
     // Detectar formato e converter adequadamente
     let cleaned = value.replace(/R\$/g, '').trim();
-    
+
     // Detectar se é formato brasileiro (vírgula como decimal) ou internacional (ponto como decimal)
     const hasBothCommaAndDot = cleaned.includes(',') && cleaned.includes('.');
     const lastCommaIndex = cleaned.lastIndexOf(',');
     const lastDotIndex = cleaned.lastIndexOf('.');
-    
+
     if (hasBothCommaAndDot) {
       // Formato brasileiro: "10.000,50" ou "1.000.000,00"
       if (lastCommaIndex > lastDotIndex) {
@@ -274,13 +283,13 @@ export class PreApprovalService {
       // Apenas ponto ou sem separadores: formato internacional "1000.50" ou "1000"
       // Não remover pontos - manter como está
     }
-    
+
     const parsed = parseFloat(cleaned);
-    
+
     if (isNaN(parsed)) {
       throw new Error(`Valor inválido para conversão numérica: ${value}`);
     }
-    
+
     return parsed;
   }
 }

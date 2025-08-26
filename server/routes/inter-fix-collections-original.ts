@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware";
-import { interBankService } from "../services/interBankService";
-import { db } from "../lib/supabase";
-import { interCollections, propostas } from "@shared/schema";
-import { eq } from "drizzle-orm";
-import { storage } from "../storage";
+import { Router } from 'express';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { interBankService } from '../services/interBankService';
+import { db } from '../lib/supabase';
+import { interCollections, propostas } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import { storage } from '../storage';
 
 const router = Router();
 
@@ -13,16 +13,16 @@ const router = Router();
  * POST /api/inter/fix-collections/:propostaId
  */
 router.post(
-  "/fix-collections/:propostaId",
+  '/fix-collections/:propostaId',
   jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
-      
+
       // Verificar permissões
-      if (req.user?.role !== "ADMINISTRADOR") {
+      if (req.user?.role !== 'ADMINISTRADOR') {
         return res.status(403).json({
-          error: "Apenas administradores podem regenerar boletos",
+          error: 'Apenas administradores podem regenerar boletos',
         });
       }
 
@@ -36,7 +36,7 @@ router.post(
         .limit(1);
 
       if (!proposta) {
-        return res.status(404).json({ error: "Proposta não encontrada" });
+        return res.status(404).json({ error: 'Proposta não encontrada' });
       }
 
       // Buscar boletos atuais (possivelmente com códigos inválidos)
@@ -46,20 +46,25 @@ router.post(
         .where(eq(interCollections.propostaId, propostaId));
 
       console.log(`🔍 [FIX COLLECTIONS] Encontrados ${boletoesAtuais.length} boletos atuais`);
-      
+
       // Verificar se são códigos inválidos
-      const codigosInvalidos = boletoesAtuais.filter(b => 
-        !b.codigoSolicitacao.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+      const codigosInvalidos = boletoesAtuais.filter(
+        (b) =>
+          !b.codigoSolicitacao.match(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+          )
       );
 
       if (codigosInvalidos.length === 0) {
-        return res.json({ 
-          message: "Todos os boletos já possuem códigos válidos", 
-          totalBoletos: boletoesAtuais.length 
+        return res.json({
+          message: 'Todos os boletos já possuem códigos válidos',
+          totalBoletos: boletoesAtuais.length,
         });
       }
 
-      console.log(`⚠️ [FIX COLLECTIONS] ${codigosInvalidos.length} boletos com códigos inválidos encontrados`);
+      console.log(
+        `⚠️ [FIX COLLECTIONS] ${codigosInvalidos.length} boletos com códigos inválidos encontrados`
+      );
 
       // Desativar boletos atuais
       await db
@@ -68,11 +73,13 @@ router.post(
         .where(eq(interCollections.propostaId, propostaId));
 
       // Preparar dados para criação de novos boletos
-      const parcelas = boletoesAtuais.map(boleto => ({
-        numero: boleto.numeroParcela || 1,
-        valor: parseFloat(boleto.valorNominal.toString()),
-        vencimento: boleto.dataVencimento,
-      })).sort((a, b) => a.numero - b.numero);
+      const parcelas = boletoesAtuais
+        .map((boleto) => ({
+          numero: boleto.numeroParcela || 1,
+          valor: parseFloat(boleto.valorNominal.toString()),
+          vencimento: boleto.dataVencimento,
+        }))
+        .sort((a, b) => a.numero - b.numero);
 
       console.log(`🔄 [FIX COLLECTIONS] Criando ${parcelas.length} novos boletos na API Inter...`);
 
@@ -80,24 +87,28 @@ router.post(
 
       for (let i = 0; i < parcelas.length; i++) {
         const parcela = parcelas[i];
-        
+
         try {
           const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
-          
-          console.log(`📄 [FIX COLLECTIONS] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`);
+
+          console.log(
+            `📄 [FIX COLLECTIONS] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`
+          );
 
           // Criar cobrança na API Inter
           const collectionData = await interBankService.emitirCobranca({
             seuNumero,
             valorNominal: parcela.valor,
             dataVencimento: parcela.vencimento,
-            nomePagador: proposta.clienteNome || "Cliente",
-            cpfCnpjPagador: proposta.clienteCpf || "000.000.000-00",
-            telefonePagador: proposta.clienteTelefone || "",
-            emailPagador: proposta.clienteEmail || "",
+            nomePagador: proposta.clienteNome || 'Cliente',
+            cpfCnpjPagador: proposta.clienteCpf || '000.000.000-00',
+            telefonePagador: proposta.clienteTelefone || '',
+            emailPagador: proposta.clienteEmail || '',
           });
 
-          console.log(`✅ [FIX COLLECTIONS] Boleto criado com código válido: ${collectionData.codigoSolicitacao}`);
+          console.log(
+            `✅ [FIX COLLECTIONS] Boleto criado com código válido: ${collectionData.codigoSolicitacao}`
+          );
 
           // Salvar no banco com código válido
           const novoBoleto = await db
@@ -116,7 +127,6 @@ router.post(
             .returning();
 
           novosBoletosGerados.push(novoBoleto[0]);
-
         } catch (error) {
           console.error(`❌ [FIX COLLECTIONS] Erro ao criar boleto ${parcela.numero}:`, error);
         }
@@ -131,25 +141,26 @@ router.post(
         })
         .where(eq(propostas.id, propostaId));
 
-      console.log(`🎉 [FIX COLLECTIONS] Regeneração completa! ${novosBoletosGerados.length} boletos criados`);
+      console.log(
+        `🎉 [FIX COLLECTIONS] Regeneração completa! ${novosBoletosGerados.length} boletos criados`
+      );
 
       res.json({
         success: true,
         message: `${novosBoletosGerados.length} boletos regenerados com códigos válidos`,
         totalBoletosCriados: novosBoletosGerados.length,
-        boletosComCodigosValidos: novosBoletosGerados.map(b => ({
+        boletosComCodigosValidos: novosBoletosGerados.map((b) => ({
           codigoSolicitacao: b.codigoSolicitacao,
           numeroParcela: b.numeroParcela,
           valor: b.valorNominal,
           vencimento: b.dataVencimento,
         })),
       });
-
     } catch (error) {
-      console.error("❌ [FIX COLLECTIONS] Erro geral:", error);
-      res.status(500).json({ 
-        error: "Erro ao regenerar boletos", 
-        details: error instanceof Error ? error.message : "Unknown error" 
+      console.error('❌ [FIX COLLECTIONS] Erro geral:', error);
+      res.status(500).json({
+        error: 'Erro ao regenerar boletos',
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }

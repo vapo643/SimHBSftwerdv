@@ -1,1 +1,12 @@
-import { Router } from "express"; import { propostasSyncService } from "../services/proposalService.js"; const router = Router(); router.post("/sync-boletos", async (req, res) => { try { const result = await propostasSyncService.executeOperation("sync_boletos", req.body); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { propostasSyncService } from '../services/proposalService.js';
+const router = Router();
+router.post('/sync-boletos', async (req, res) => {
+  try {
+    const result = await propostasSyncService.executeOperation('sync_boletos', req.body);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

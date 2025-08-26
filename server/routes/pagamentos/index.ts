@@ -1,15 +1,15 @@
 /**
  * Pagamentos Routes - REFACTORED
- * Controller layer using service pattern  
+ * Controller layer using service pattern
  * PAM V1.0 - Clean architecture implementation
  */
 
-import { Router } from "express";
-import { jwtAuthMiddleware } from "../../lib/jwt-auth-middleware.js";
-import { AuthenticatedRequest } from "../../../shared/types/express";
-import { pagamentoService } from "../../services/pagamentoService.js";
-import { z } from "zod";
-import multer from "multer";
+import { Router } from 'express';
+import { jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
+import { AuthenticatedRequest } from '../../../shared/types/express';
+import { pagamentoService } from '../../services/pagamentoService.js';
+import { z } from 'zod';
+import multer from 'multer';
 
 // Multer configuration for file uploads
 const upload = multer({
@@ -25,20 +25,20 @@ const router = Router();
  * Get payments list with filters
  * GET /api/pagamentos
  */
-router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, periodo, incluir_pagos } = req.query;
     const userId = req.user?.id;
     const userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     const payments = await pagamentoService.getPayments({
       status: status as string,
       periodo: periodo as string,
-      incluir_pagos: incluir_pagos === "true",
+      incluir_pagos: incluir_pagos === 'true',
       userId,
       userRole,
     });
@@ -49,9 +49,9 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       total: payments.length,
     });
   } catch (error: any) {
-    console.error("[PAGAMENTOS] Error getting payments:", error);
+    console.error('[PAGAMENTOS] Error getting payments:', error);
     res.status(500).json({
-      error: "Erro ao buscar pagamentos",
+      error: 'Erro ao buscar pagamentos',
       details: error.message,
     });
   }
@@ -61,7 +61,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
  * Get specific proposal for payment
  * GET /api/pagamentos/:id
  */
-router.get("/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
@@ -72,13 +72,13 @@ router.get("/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => 
       data: proposal,
     });
   } catch (error: any) {
-    if (error.message.includes("não encontrada") || error.message.includes("não está pronta")) {
+    if (error.message.includes('não encontrada') || error.message.includes('não está pronta')) {
       return res.status(404).json({ error: error.message });
     }
 
-    console.error("[PAGAMENTOS] Error getting proposal:", error);
+    console.error('[PAGAMENTOS] Error getting proposal:', error);
     res.status(500).json({
-      error: "Erro ao buscar proposta para pagamento",
+      error: 'Erro ao buscar proposta para pagamento',
       details: error.message,
     });
   }
@@ -88,35 +88,35 @@ router.get("/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => 
  * Create new payment
  * POST /api/pagamentos
  */
-router.post("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user?.id;
     const userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     // Check user permissions
-    if (!["ADMINISTRADOR", "FINANCEIRO", "GERENTE"].includes(userRole || "")) {
+    if (!['ADMINISTRADOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
       return res.status(403).json({
-        error: "Apenas administradores, gerentes e equipe financeira podem criar pagamentos",
+        error: 'Apenas administradores, gerentes e equipe financeira podem criar pagamentos',
       });
     }
 
     // Validate payment data
     const validation = await pagamentoService.validatePaymentData(req.body);
-    
+
     if (!validation.valid) {
       return res.status(400).json({
-        error: "Dados de pagamento inválidos",
+        error: 'Dados de pagamento inválidos',
         errors: validation.errors,
         warnings: validation.warnings,
       });
     }
 
     if (validation.warnings.length > 0) {
-      console.warn("[PAGAMENTOS] Payment warnings:", validation.warnings);
+      console.warn('[PAGAMENTOS] Payment warnings:', validation.warnings);
     }
 
     // Create payment
@@ -124,22 +124,22 @@ router.post("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Pagamento criado com sucesso",
+      message: 'Pagamento criado com sucesso',
       data: payment,
     });
   } catch (error: any) {
-    console.error("[PAGAMENTOS] Error creating payment:", error);
+    console.error('[PAGAMENTOS] Error creating payment:', error);
 
-    if (error.message.includes("já possui pagamento")) {
+    if (error.message.includes('já possui pagamento')) {
       return res.status(409).json({ error: error.message });
     }
 
-    if (error.message.includes("não encontrada") || error.message.includes("não está pronta")) {
+    if (error.message.includes('não encontrada') || error.message.includes('não está pronta')) {
       return res.status(404).json({ error: error.message });
     }
 
     res.status(500).json({
-      error: "Erro ao criar pagamento",
+      error: 'Erro ao criar pagamento',
       details: error.message,
     });
   }
@@ -149,7 +149,7 @@ router.post("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
  * Update payment status
  * PATCH /api/pagamentos/:id/status
  */
-router.patch("/:id/status", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.patch('/:id/status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { status, observacoes } = req.body;
@@ -157,25 +157,26 @@ router.patch("/:id/status", jwtAuthMiddleware, async (req: AuthenticatedRequest,
     const userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     // Check user permissions
-    if (!["ADMINISTRADOR", "FINANCEIRO", "GERENTE"].includes(userRole || "")) {
+    if (!['ADMINISTRADOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
       return res.status(403).json({
-        error: "Apenas administradores, gerentes e equipe financeira podem alterar status de pagamentos",
+        error:
+          'Apenas administradores, gerentes e equipe financeira podem alterar status de pagamentos',
       });
     }
 
     if (!status) {
-      return res.status(400).json({ error: "Status é obrigatório" });
+      return res.status(400).json({ error: 'Status é obrigatório' });
     }
 
     // Validate status
-    const validStatuses = ["processando", "pago", "rejeitado", "cancelado"];
+    const validStatuses = ['processando', 'pago', 'rejeitado', 'cancelado'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
-        error: "Status inválido",
+        error: 'Status inválido',
         validStatuses,
       });
     }
@@ -193,14 +194,14 @@ router.patch("/:id/status", jwtAuthMiddleware, async (req: AuthenticatedRequest,
       data: updatedPayment,
     });
   } catch (error: any) {
-    console.error("[PAGAMENTOS] Error updating payment status:", error);
+    console.error('[PAGAMENTOS] Error updating payment status:', error);
 
-    if (error.message.includes("não encontrada")) {
+    if (error.message.includes('não encontrada')) {
       return res.status(404).json({ error: error.message });
     }
 
     res.status(500).json({
-      error: "Erro ao atualizar status do pagamento",
+      error: 'Erro ao atualizar status do pagamento',
       details: error.message,
     });
   }
@@ -210,37 +211,37 @@ router.patch("/:id/status", jwtAuthMiddleware, async (req: AuthenticatedRequest,
  * Export payments data
  * GET /api/pagamentos/export
  */
-router.get("/export/data", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/export/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const { dataInicio, dataFim, status, loja, formato = "csv" } = req.query;
+    const { dataInicio, dataFim, status, loja, formato = 'csv' } = req.query;
     const userRole = req.user?.role;
 
     // Check user permissions
-    if (!["ADMINISTRADOR", "GERENTE"].includes(userRole || "")) {
+    if (!['ADMINISTRADOR', 'GERENTE'].includes(userRole || '')) {
       return res.status(403).json({
-        error: "Apenas administradores e gerentes podem exportar dados de pagamentos",
+        error: 'Apenas administradores e gerentes podem exportar dados de pagamentos',
       });
     }
 
     const filters = {
       dataInicio: dataInicio as string,
       dataFim: dataFim as string,
-      status: status ? (status as string).split(",") : undefined,
+      status: status ? (status as string).split(',') : undefined,
       loja: loja as string,
-      formato: formato as "csv" | "excel",
+      formato: formato as 'csv' | 'excel',
     };
 
     const exportData = await pagamentoService.exportPayments(filters);
 
     // Set response headers for download
-    res.setHeader("Content-Type", exportData.contentType);
+    res.setHeader('Content-Type', exportData.contentType);
     res.setHeader(
-      "Content-Disposition",
+      'Content-Disposition',
       `attachment; filename="${exportData.filename}.${formato}"`
     );
 
     // For CSV format, convert data to CSV string
-    if (formato === "csv") {
+    if (formato === 'csv') {
       const csv = convertToCSV(exportData.data);
       res.send(csv);
     } else {
@@ -249,9 +250,9 @@ router.get("/export/data", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       res.json(exportData.data);
     }
   } catch (error: any) {
-    console.error("[PAGAMENTOS] Error exporting payments:", error);
+    console.error('[PAGAMENTOS] Error exporting payments:', error);
     res.status(500).json({
-      error: "Erro ao exportar dados de pagamentos",
+      error: 'Erro ao exportar dados de pagamentos',
       details: error.message,
     });
   }
@@ -261,7 +262,7 @@ router.get("/export/data", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
  * Get payments dashboard data
  * GET /api/pagamentos/dashboard
  */
-router.get("/dashboard/stats", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const dashboard = await pagamentoService.getPaymentsDashboard();
 
@@ -270,9 +271,9 @@ router.get("/dashboard/stats", jwtAuthMiddleware, async (req: AuthenticatedReque
       data: dashboard,
     });
   } catch (error: any) {
-    console.error("[PAGAMENTOS] Error getting dashboard:", error);
+    console.error('[PAGAMENTOS] Error getting dashboard:', error);
     res.status(500).json({
-      error: "Erro ao carregar dashboard de pagamentos",
+      error: 'Erro ao carregar dashboard de pagamentos',
       details: error.message,
     });
   }
@@ -282,7 +283,7 @@ router.get("/dashboard/stats", jwtAuthMiddleware, async (req: AuthenticatedReque
  * Get filter options for payment screens
  * GET /api/pagamentos/filter-options
  */
-router.get("/filter-options/data", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/filter-options/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const options = await pagamentoService.getFilterOptions();
 
@@ -291,9 +292,9 @@ router.get("/filter-options/data", jwtAuthMiddleware, async (req: AuthenticatedR
       data: options,
     });
   } catch (error: any) {
-    console.error("[PAGAMENTOS] Error getting filter options:", error);
+    console.error('[PAGAMENTOS] Error getting filter options:', error);
     res.status(500).json({
-      error: "Erro ao carregar opções de filtro",
+      error: 'Erro ao carregar opções de filtro',
       details: error.message,
     });
   }
@@ -303,7 +304,7 @@ router.get("/filter-options/data", jwtAuthMiddleware, async (req: AuthenticatedR
  * Validate payment data
  * POST /api/pagamentos/validate
  */
-router.post("/validate", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/validate', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const validation = await pagamentoService.validatePaymentData(req.body);
 
@@ -312,9 +313,9 @@ router.post("/validate", jwtAuthMiddleware, async (req: AuthenticatedRequest, re
       data: validation,
     });
   } catch (error: any) {
-    console.error("[PAGAMENTOS] Error validating payment data:", error);
+    console.error('[PAGAMENTOS] Error validating payment data:', error);
     res.status(500).json({
-      error: "Erro ao validar dados de pagamento",
+      error: 'Erro ao validar dados de pagamento',
       details: error.message,
     });
   }
@@ -325,9 +326,9 @@ router.post("/validate", jwtAuthMiddleware, async (req: AuthenticatedRequest, re
  * POST /api/pagamentos/:id/documents
  */
 router.post(
-  "/:id/documents",
+  '/:id/documents',
   jwtAuthMiddleware,
-  upload.single("document"),
+  upload.single('document'),
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
@@ -335,11 +336,11 @@ router.post(
       const file = req.file;
 
       if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
+        return res.status(401).json({ error: 'Usuário não autenticado' });
       }
 
       if (!file) {
-        return res.status(400).json({ error: "Arquivo é obrigatório" });
+        return res.status(400).json({ error: 'Arquivo é obrigatório' });
       }
 
       // TODO: Implement document upload logic
@@ -351,14 +352,14 @@ router.post(
 
       res.json({
         success: true,
-        message: "Documento enviado com sucesso",
+        message: 'Documento enviado com sucesso',
         filename: file.originalname,
         size: file.size,
       });
     } catch (error: any) {
-      console.error("[PAGAMENTOS] Error uploading document:", error);
+      console.error('[PAGAMENTOS] Error uploading document:', error);
       res.status(500).json({
-        error: "Erro ao fazer upload do documento",
+        error: 'Erro ao fazer upload do documento',
         details: error.message,
       });
     }
@@ -370,29 +371,29 @@ router.post(
  */
 function convertToCSV(data: any[]): string {
   if (!data || data.length === 0) {
-    return "";
+    return '';
   }
 
   const headers = Object.keys(data[0]);
   const csvRows = [];
 
   // Add headers
-  csvRows.push(headers.join(","));
+  csvRows.push(headers.join(','));
 
   // Add data rows
   for (const row of data) {
     const values = headers.map((header) => {
       const value = row[header];
       // Escape values that contain commas or quotes
-      if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
+      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
         return `"${value.replace(/"/g, '""')}"`;
       }
       return value;
     });
-    csvRows.push(values.join(","));
+    csvRows.push(values.join(','));
   }
 
-  return csvRows.join("\n");
+  return csvRows.join('\n');
 }
 
 export default router;

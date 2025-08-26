@@ -2,12 +2,12 @@
  * Rota de Teste para Sistema Inteligente de Geração CCB V2
  */
 
-import { Router } from "express";
-import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
-import { CCBGenerationServiceV2 } from "../services/ccbGenerationServiceV2";
-import { db } from "../lib/supabase";
-import { propostas } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { Router } from 'express';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { CCBGenerationServiceV2 } from '../services/ccbGenerationServiceV2';
+import { db } from '../lib/supabase';
+import { propostas } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
@@ -15,7 +15,7 @@ const router = Router();
  * POST /api/ccb-test-v2/generate/:propostaId
  * Testa geração de CCB com sistema inteligente
  */
-router.post("/generate/:propostaId", jwtAuthMiddleware, async (req, res) => {
+router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
     const { useTestData } = req.body;
@@ -29,20 +29,20 @@ router.post("/generate/:propostaId", jwtAuthMiddleware, async (req, res) => {
       // Dados de teste completos
       propostaData = {
         id: propostaId,
-        clienteNome: "João da Silva Teste",
-        clienteCpf: "123.456.789-00",
-        clienteRg: "12.345.678-9",
-        clienteEndereco: "Rua Teste, 123 - Bairro Exemplo - São Paulo/SP",
+        clienteNome: 'João da Silva Teste',
+        clienteCpf: '123.456.789-00',
+        clienteRg: '12.345.678-9',
+        clienteEndereco: 'Rua Teste, 123 - Bairro Exemplo - São Paulo/SP',
         valor: 10000.0,
         prazo: 6,
-        finalidade: "Capital de Giro",
-        taxaJuros: "2.5",
-        dadosPagamentoBanco: "Banco do Brasil",
-        dadosPagamentoAgencia: "1234-5",
-        dadosPagamentoConta: "56789-0",
-        dadosPagamentoTipo: "conta_corrente",
-        dadosPagamentoNomeTitular: "João da Silva Teste",
-        dadosPagamentoCpfTitular: "123.456.789-00",
+        finalidade: 'Capital de Giro',
+        taxaJuros: '2.5',
+        dadosPagamentoBanco: 'Banco do Brasil',
+        dadosPagamentoAgencia: '1234-5',
+        dadosPagamentoConta: '56789-0',
+        dadosPagamentoTipo: 'conta_corrente',
+        dadosPagamentoNomeTitular: 'João da Silva Teste',
+        dadosPagamentoCpfTitular: '123.456.789-00',
       };
     } else {
       // Buscar dados reais
@@ -55,7 +55,7 @@ router.post("/generate/:propostaId", jwtAuthMiddleware, async (req, res) => {
       if (!proposta) {
         return res.status(404).json({
           success: false,
-          error: "Proposta não encontrada",
+          error: 'Proposta não encontrada',
         });
       }
 
@@ -69,7 +69,7 @@ router.post("/generate/:propostaId", jwtAuthMiddleware, async (req, res) => {
     if (!result.success || !result.pdfBytes) {
       return res.status(500).json({
         success: false,
-        error: "Falha na geração do CCB",
+        error: 'Falha na geração do CCB',
         logs: result.logs,
       });
     }
@@ -80,7 +80,7 @@ router.post("/generate/:propostaId", jwtAuthMiddleware, async (req, res) => {
     if (!filePath) {
       return res.status(500).json({
         success: false,
-        error: "Falha ao salvar CCB no storage",
+        error: 'Falha ao salvar CCB no storage',
         logs: result.logs,
       });
     }
@@ -97,16 +97,16 @@ router.post("/generate/:propostaId", jwtAuthMiddleware, async (req, res) => {
       logs: result.logs,
       stats: {
         totalLogs: result.logs?.length || 0,
-        successLogs: result.logs?.filter(l => l.includes("✓")).length || 0,
-        warningLogs: result.logs?.filter(l => l.includes("⚠")).length || 0,
-        errorLogs: result.logs?.filter(l => l.includes("✗") || l.includes("❌")).length || 0,
+        successLogs: result.logs?.filter((l) => l.includes('✓')).length || 0,
+        warningLogs: result.logs?.filter((l) => l.includes('⚠')).length || 0,
+        errorLogs: result.logs?.filter((l) => l.includes('✗') || l.includes('❌')).length || 0,
       },
     });
   } catch (error) {
-    console.error("❌ Erro no teste CCB V2:", error);
+    console.error('❌ Erro no teste CCB V2:', error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : "Erro desconhecido",
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
     });
   }
 });
@@ -115,9 +115,9 @@ router.post("/generate/:propostaId", jwtAuthMiddleware, async (req, res) => {
  * GET /api/ccb-test-v2/validate-coordinates
  * Valida se as coordenadas estão corretas
  */
-router.get("/validate-coordinates", jwtAuthMiddleware, async (req, res) => {
+router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
   try {
-    const { CCB_FIELD_MAPPING_V2 } = await import("../services/ccbFieldMappingV2");
+    const { CCB_FIELD_MAPPING_V2 } = await import('../services/ccbFieldMappingV2');
 
     const validation = {
       totalFields: Object.keys(CCB_FIELD_MAPPING_V2).length,
@@ -164,7 +164,7 @@ router.get("/validate-coordinates", jwtAuthMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : "Erro ao validar coordenadas",
+      error: error instanceof Error ? error.message : 'Erro ao validar coordenadas',
     });
   }
 });
@@ -173,19 +173,19 @@ router.get("/validate-coordinates", jwtAuthMiddleware, async (req, res) => {
  * POST /api/ccb-test-v2/test-field-detection
  * Testa detecção de campo específico
  */
-router.post("/test-field-detection", jwtAuthMiddleware, async (req, res) => {
+router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
   try {
     const { fieldName, testValue, pageNumber } = req.body;
 
     if (!fieldName || !testValue) {
       return res.status(400).json({
         success: false,
-        error: "fieldName e testValue são obrigatórios",
+        error: 'fieldName e testValue são obrigatórios',
       });
     }
 
     const { CCB_FIELD_MAPPING_V2, CoordinateAdjuster } = await import(
-      "../services/ccbFieldMappingV2"
+      '../services/ccbFieldMappingV2'
     );
 
     const fieldCoord = CCB_FIELD_MAPPING_V2[fieldName];
@@ -227,7 +227,7 @@ router.post("/test-field-detection", jwtAuthMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : "Erro ao testar detecção",
+      error: error instanceof Error ? error.message : 'Erro ao testar detecção',
     });
   }
 });
@@ -236,31 +236,31 @@ router.post("/test-field-detection", jwtAuthMiddleware, async (req, res) => {
  * GET /api/ccb-test-v2/comparison
  * Compara sistema V1 vs V2
  */
-router.get("/comparison", jwtAuthMiddleware, async (req, res) => {
+router.get('/comparison', jwtAuthMiddleware, async (req, res) => {
   try {
     const comparison = {
       v1: {
-        description: "Sistema original com coordenadas fixas",
-        pros: ["Simples e direto", "Rápido para casos padrão"],
+        description: 'Sistema original com coordenadas fixas',
+        pros: ['Simples e direto', 'Rápido para casos padrão'],
         cons: [
-          "Não se adapta a variações",
-          "Falha se template mudar",
-          "Sem validação de preenchimento",
+          'Não se adapta a variações',
+          'Falha se template mudar',
+          'Sem validação de preenchimento',
         ],
       },
       v2: {
-        description: "Sistema inteligente com detecção e fallback",
+        description: 'Sistema inteligente com detecção e fallback',
         pros: [
-          "Detecção automática de campos",
-          "Ajuste inteligente de coordenadas",
-          "Sistema de fallback multinível",
-          "Validação de preenchimento",
-          "Logs detalhados",
-          "À prova de falhas (como polling+webhook)",
+          'Detecção automática de campos',
+          'Ajuste inteligente de coordenadas',
+          'Sistema de fallback multinível',
+          'Validação de preenchimento',
+          'Logs detalhados',
+          'À prova de falhas (como polling+webhook)',
         ],
-        cons: ["Mais complexo", "Pode ser ligeiramente mais lento"],
+        cons: ['Mais complexo', 'Pode ser ligeiramente mais lento'],
       },
-      recommendation: "Use V2 para produção devido à robustez e confiabilidade",
+      recommendation: 'Use V2 para produção devido à robustez e confiabilidade',
     };
 
     res.json({
@@ -270,7 +270,7 @@ router.get("/comparison", jwtAuthMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : "Erro na comparação",
+      error: error instanceof Error ? error.message : 'Erro na comparação',
     });
   }
 });

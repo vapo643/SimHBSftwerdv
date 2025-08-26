@@ -8,40 +8,40 @@
  * - ASVS V12.1.1, V12.1.2, V16.1.1 compliance
  */
 
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
 // Magic number signatures for allowed file types
 const FILE_SIGNATURES = {
-  "application/pdf": [
+  'application/pdf': [
     [0x25, 0x50, 0x44, 0x46], // %PDF
   ],
-  "image/jpeg": [
+  'image/jpeg': [
     [0xff, 0xd8, 0xff, 0xe0], // JFIF
     [0xff, 0xd8, 0xff, 0xe1], // EXIF
     [0xff, 0xd8, 0xff, 0xe2], // Canon
     [0xff, 0xd8, 0xff, 0xe3], // Samsung
     [0xff, 0xd8, 0xff, 0xe8], // SPIFF
   ],
-  "image/png": [
+  'image/png': [
     [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], // PNG signature
   ],
 } as const;
 
 // Allowed file extensions mapped to MIME types
 const ALLOWED_FILE_TYPES = {
-  ".pdf": "application/pdf",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
+  '.pdf': 'application/pdf',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
 } as const;
 
 interface FileValidationError {
   type:
-    | "INVALID_EXTENSION"
-    | "MIME_TYPE_MISMATCH"
-    | "MAGIC_NUMBER_MISMATCH"
-    | "FILE_TOO_LARGE"
-    | "MALICIOUS_CONTENT";
+    | 'INVALID_EXTENSION'
+    | 'MIME_TYPE_MISMATCH'
+    | 'MAGIC_NUMBER_MISMATCH'
+    | 'FILE_TOO_LARGE'
+    | 'MALICIOUS_CONTENT';
   message: string;
   details?: any;
 }
@@ -68,7 +68,7 @@ export class SecureFileValidator {
     const signatures = FILE_SIGNATURES[expectedMimeType as keyof typeof FILE_SIGNATURES];
     if (!signatures) return false;
 
-    return signatures.some(signature => {
+    return signatures.some((signature) => {
       if (buffer.length < signature.length) return false;
 
       return signature.every((byte, index) => buffer[index] === byte);
@@ -81,7 +81,7 @@ export class SecureFileValidator {
   private static scanForMaliciousContent(buffer: Buffer, filename: string): string[] {
     const warnings: string[] = [];
     const scanBuffer = buffer.subarray(0, this.SCAN_BUFFER_SIZE);
-    const content = scanBuffer.toString("binary");
+    const content = scanBuffer.toString('binary');
 
     // Check for embedded scripts or suspicious patterns
     const maliciousPatterns = [
@@ -108,12 +108,12 @@ export class SecureFileValidator {
     // Check for double extensions (e.g., file.pdf.exe)
     const extensionCount = (filename.match(/\./g) || []).length;
     if (extensionCount > 1) {
-      warnings.push("Multiple file extensions detected");
+      warnings.push('Multiple file extensions detected');
     }
 
     // Check for suspicious filename patterns
     if (/\.(exe|bat|scr|vbs|jar|com|pif)$/i.test(filename)) {
-      warnings.push("Executable file extension detected");
+      warnings.push('Executable file extension detected');
     }
 
     return warnings;
@@ -128,7 +128,7 @@ export class SecureFileValidator {
     // 1. File size validation
     if (size > this.MAX_FILE_SIZE) {
       return {
-        type: "FILE_TOO_LARGE",
+        type: 'FILE_TOO_LARGE',
         message: `File size ${size} bytes exceeds maximum allowed ${this.MAX_FILE_SIZE} bytes`,
         details: { size, maxSize: this.MAX_FILE_SIZE },
       };
@@ -138,8 +138,8 @@ export class SecureFileValidator {
     const expectedMimeType = this.validateExtension(originalname);
     if (!expectedMimeType) {
       return {
-        type: "INVALID_EXTENSION",
-        message: `File extension not allowed. Allowed types: ${Object.keys(ALLOWED_FILE_TYPES).join(", ")}`,
+        type: 'INVALID_EXTENSION',
+        message: `File extension not allowed. Allowed types: ${Object.keys(ALLOWED_FILE_TYPES).join(', ')}`,
         details: { filename: originalname, allowedTypes: Object.keys(ALLOWED_FILE_TYPES) },
       };
     }
@@ -147,7 +147,7 @@ export class SecureFileValidator {
     // 3. MIME type header validation
     if (mimetype !== expectedMimeType) {
       return {
-        type: "MIME_TYPE_MISMATCH",
+        type: 'MIME_TYPE_MISMATCH',
         message: `MIME type mismatch. Expected: ${expectedMimeType}, Received: ${mimetype}`,
         details: { expected: expectedMimeType, received: mimetype },
       };
@@ -156,13 +156,13 @@ export class SecureFileValidator {
     // 4. Magic number validation (CRITICAL SECURITY CHECK)
     if (!this.validateMagicNumbers(buffer, expectedMimeType)) {
       return {
-        type: "MAGIC_NUMBER_MISMATCH",
+        type: 'MAGIC_NUMBER_MISMATCH',
         message: `File content does not match expected file type ${expectedMimeType}`,
         details: {
           expectedType: expectedMimeType,
           actualSignature: Array.from(buffer.subarray(0, 8))
-            .map(b => `0x${b.toString(16).padStart(2, "0")}`)
-            .join(" "),
+            .map((b) => `0x${b.toString(16).padStart(2, '0')}`)
+            .join(' '),
         },
       };
     }
@@ -171,8 +171,8 @@ export class SecureFileValidator {
     const maliciousWarnings = this.scanForMaliciousContent(buffer, originalname);
     if (maliciousWarnings.length > 0) {
       return {
-        type: "MALICIOUS_CONTENT",
-        message: `Potentially malicious content detected: ${maliciousWarnings.join(", ")}`,
+        type: 'MALICIOUS_CONTENT',
+        message: `Potentially malicious content detected: ${maliciousWarnings.join(', ')}`,
         details: { warnings: maliciousWarnings },
       };
     }
@@ -187,8 +187,8 @@ export class SecureFileValidator {
 export const secureFileValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
   if (!req.file) {
     return res.status(400).json({
-      error: "No file uploaded",
-      code: "NO_FILE",
+      error: 'No file uploaded',
+      code: 'NO_FILE',
     });
   }
 
@@ -201,7 +201,7 @@ export const secureFileValidationMiddleware = (req: Request, res: Response, next
       message: validationError.message,
       details: validationError.details,
       clientIP: req.ip,
-      userAgent: req.get("User-Agent"),
+      userAgent: req.get('User-Agent'),
       timestamp: new Date().toISOString(),
     });
 

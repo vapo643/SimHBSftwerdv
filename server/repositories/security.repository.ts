@@ -4,11 +4,11 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { BaseRepository } from "./base.repository.js";
-import { db } from "../lib/supabase.js";
-import { securityLogs } from "@shared/schema/security";
-import { sql, eq, and, desc, gte } from "drizzle-orm";
-import { getBrasiliaTimestamp } from "../lib/timezone.js";
+import { BaseRepository } from './base.repository.js';
+import { db } from '../lib/supabase.js';
+import { securityLogs } from '@shared/schema/security';
+import { sql, eq, and, desc, gte } from 'drizzle-orm';
+import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
 export class SecurityRepository extends BaseRepository<any> {
   constructor() {
@@ -20,7 +20,7 @@ export class SecurityRepository extends BaseRepository<any> {
    */
   async getSecurityMetrics(timeRange: string): Promise<any> {
     const startDate = this.getTimeRangeDate(timeRange);
-    
+
     try {
       const [totalRequests] = await db
         .select({ count: sql<number>`count(*)` })
@@ -41,10 +41,7 @@ export class SecurityRepository extends BaseRepository<any> {
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
         .where(
-          and(
-            gte(securityLogs.created_at, startDate),
-            eq(securityLogs.event_type, "BLOCKED")
-          )
+          and(gte(securityLogs.created_at, startDate), eq(securityLogs.event_type, 'BLOCKED'))
         );
 
       return {
@@ -54,7 +51,7 @@ export class SecurityRepository extends BaseRepository<any> {
         timeRange,
       };
     } catch (error) {
-      console.error("[SECURITY_REPO] Error getting metrics:", error);
+      console.error('[SECURITY_REPO] Error getting metrics:', error);
       // Return fallback metrics if database query fails
       return {
         totalRequests: 0,
@@ -88,7 +85,7 @@ export class SecurityRepository extends BaseRepository<any> {
 
       return alerts;
     } catch (error) {
-      console.error("[SECURITY_REPO] Error getting active alerts:", error);
+      console.error('[SECURITY_REPO] Error getting active alerts:', error);
       return [];
     }
   }
@@ -98,7 +95,7 @@ export class SecurityRepository extends BaseRepository<any> {
    */
   async logSecurityEvent(event: {
     eventType: string;
-    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     ipAddress?: string;
     userId?: string;
     userAgent?: string;
@@ -112,7 +109,7 @@ export class SecurityRepository extends BaseRepository<any> {
         .insert(securityLogs)
         .values({
           event_type: event.eventType,
-          description: event.details?.description || event.eventType || "Security event",
+          description: event.details?.description || event.eventType || 'Security event',
           severity: event.severity,
           ip_address: event.ipAddress,
           user_id: event.userId,
@@ -123,7 +120,7 @@ export class SecurityRepository extends BaseRepository<any> {
 
       return result[0];
     } catch (error) {
-      console.error("[SECURITY_REPO] Error logging security event:", error);
+      console.error('[SECURITY_REPO] Error logging security event:', error);
       return undefined;
     }
   }
@@ -141,7 +138,7 @@ export class SecurityRepository extends BaseRepository<any> {
   }): Promise<any[]> {
     try {
       let query = db.select().from(securityLogs);
-      
+
       const conditions = [];
 
       if (filters.startDate) {
@@ -153,9 +150,11 @@ export class SecurityRepository extends BaseRepository<any> {
       }
 
       if (filters.severity && filters.severity.length > 0) {
-        conditions.push(sql`${securityLogs.severity} IN (${sql.raw(
-          filters.severity.map(s => `'${s}'`).join(',')
-        )})`);
+        conditions.push(
+          sql`${securityLogs.severity} IN (${sql.raw(
+            filters.severity.map((s) => `'${s}'`).join(',')
+          )})`
+        );
       }
 
       if (filters.eventType) {
@@ -178,7 +177,7 @@ export class SecurityRepository extends BaseRepository<any> {
 
       return await query;
     } catch (error) {
-      console.error("[SECURITY_REPO] Error getting security logs:", error);
+      console.error('[SECURITY_REPO] Error getting security logs:', error);
       return [];
     }
   }
@@ -205,7 +204,7 @@ export class SecurityRepository extends BaseRepository<any> {
 
       return result.length > 0;
     } catch (error) {
-      console.error("[SECURITY_REPO] Error resolving alert:", error);
+      console.error('[SECURITY_REPO] Error resolving alert:', error);
       return false;
     }
   }
@@ -232,31 +231,37 @@ export class SecurityRepository extends BaseRepository<any> {
       const severityResults = await db
         .select({
           severity: securityLogs.severity,
-          count: sql<number>`count(*)`
+          count: sql<number>`count(*)`,
         })
         .from(securityLogs)
         .where(gte(securityLogs.created_at, startDate))
         .groupBy(securityLogs.severity);
 
-      const eventsBySeverity = severityResults.reduce((acc, row) => {
-        acc[row.severity] = row.count;
-        return acc;
-      }, {} as Record<string, number>);
+      const eventsBySeverity = severityResults.reduce(
+        (acc, row) => {
+          acc[row.severity] = row.count;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       // Get events by type
       const typeResults = await db
         .select({
           event_type: securityLogs.event_type,
-          count: sql<number>`count(*)`
+          count: sql<number>`count(*)`,
         })
         .from(securityLogs)
         .where(gte(securityLogs.created_at, startDate))
         .groupBy(securityLogs.event_type);
 
-      const eventsByType = typeResults.reduce((acc, row) => {
-        acc[row.event_type] = row.count;
-        return acc;
-      }, {} as Record<string, number>);
+      const eventsByType = typeResults.reduce(
+        (acc, row) => {
+          acc[row.event_type] = row.count;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       return {
         totalEvents: totalEvents?.count || 0,
@@ -265,7 +270,7 @@ export class SecurityRepository extends BaseRepository<any> {
         trendData: [], // Will be generated by service layer
       };
     } catch (error) {
-      console.error("[SECURITY_REPO] Error getting security statistics:", error);
+      console.error('[SECURITY_REPO] Error getting security statistics:', error);
       return {
         totalEvents: 0,
         eventsBySeverity: {},
@@ -286,7 +291,7 @@ export class SecurityRepository extends BaseRepository<any> {
         .orderBy(desc(securityLogs.created_at))
         .limit(limit);
     } catch (error) {
-      console.error("[SECURITY_REPO] Error getting recent events:", error);
+      console.error('[SECURITY_REPO] Error getting recent events:', error);
       return [];
     }
   }
@@ -297,13 +302,13 @@ export class SecurityRepository extends BaseRepository<any> {
   private getTimeRangeDate(timeRange: string): Date {
     const now = new Date();
     switch (timeRange) {
-      case "1h":
+      case '1h':
         return new Date(now.getTime() - 60 * 60 * 1000);
-      case "24h":
+      case '24h':
         return new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      case "7d":
+      case '7d':
         return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      case "30d":
+      case '30d':
         return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       default:
         return new Date(now.getTime() - 60 * 60 * 1000);
@@ -325,7 +330,7 @@ export class SecurityRepository extends BaseRepository<any> {
 
       return result.length;
     } catch (error) {
-      console.error("[SECURITY_REPO] Error cleaning old logs:", error);
+      console.error('[SECURITY_REPO] Error cleaning old logs:', error);
       return 0;
     }
   }

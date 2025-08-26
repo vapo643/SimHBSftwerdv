@@ -28,38 +28,35 @@ export class CreditAnalysisService {
   public analyzeProposal(proposal: Proposal): AnalysisResult {
     const customerData = proposal.getCustomerData();
     const loanConditions = proposal.getLoanConditions();
-    
+
     // Calculate credit score based on multiple factors
     const score = this.calculateCreditScore(customerData, loanConditions);
-    
+
     // Determine approval based on score and business rules
     const approved = this.shouldApprove(score, loanConditions);
-    
+
     // Calculate maximum approved amount based on income and score
     const maxApprovedAmount = this.calculateMaxApprovedAmount(
       customerData.monthlyIncome || 0,
       score
     );
-    
+
     // Suggest optimal terms based on risk profile
     const suggestedTerms = this.suggestOptimalTerms(score.risk);
-    
+
     // Determine required documents based on amount and risk
-    const requiredDocuments = this.getRequiredDocuments(
-      loanConditions.requestedAmount,
-      score.risk
-    );
-    
+    const requiredDocuments = this.getRequiredDocuments(loanConditions.requestedAmount, score.risk);
+
     // Generate analysis observations
     const observations = this.generateObservations(score, approved);
-    
+
     return {
       approved,
       score,
       maxApprovedAmount,
       suggestedTerms,
       requiredDocuments,
-      observations
+      observations,
     };
   }
 
@@ -69,7 +66,7 @@ export class CreditAnalysisService {
   private calculateCreditScore(customerData: any, loanConditions: any): CreditScore {
     let score = 600; // Base score
     const factors: string[] = [];
-    
+
     // Income analysis
     if (customerData.monthlyIncome) {
       const debtToIncomeRatio = loanConditions.monthlyPayment / customerData.monthlyIncome;
@@ -84,7 +81,7 @@ export class CreditAnalysisService {
         factors.push('High debt-to-income ratio');
       }
     }
-    
+
     // Age analysis
     if (customerData.birthDate) {
       const age = this.calculateAge(customerData.birthDate);
@@ -93,13 +90,13 @@ export class CreditAnalysisService {
         factors.push('Prime working age');
       }
     }
-    
+
     // Employment stability
     if (customerData.occupation) {
       score += 30;
       factors.push('Employed');
     }
-    
+
     // Loan amount risk
     if (loanConditions.requestedAmount > 50000) {
       score -= 30;
@@ -108,11 +105,11 @@ export class CreditAnalysisService {
       score += 20;
       factors.push('Conservative loan amount');
     }
-    
+
     // Determine risk level
     let risk: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
     let recommendation: 'APPROVE' | 'REJECT' | 'MANUAL_REVIEW';
-    
+
     if (score >= 750) {
       risk = 'LOW';
       recommendation = 'APPROVE';
@@ -126,12 +123,12 @@ export class CreditAnalysisService {
       risk = 'VERY_HIGH';
       recommendation = 'REJECT';
     }
-    
+
     return {
       score,
       risk,
       factors,
-      recommendation
+      recommendation,
     };
   }
 
@@ -143,12 +140,12 @@ export class CreditAnalysisService {
     if (score.risk === 'LOW') {
       return true;
     }
-    
+
     // Auto-approve medium risk with conditions
     if (score.risk === 'MEDIUM' && loanConditions.requestedAmount <= 30000) {
       return true;
     }
-    
+
     // All other cases require manual review or rejection
     return false;
   }
@@ -158,7 +155,7 @@ export class CreditAnalysisService {
    */
   private calculateMaxApprovedAmount(monthlyIncome: number, score: CreditScore): number {
     if (!monthlyIncome) return 0;
-    
+
     let multiplier: number;
     switch (score.risk) {
       case 'LOW':
@@ -176,7 +173,7 @@ export class CreditAnalysisService {
       default:
         multiplier = 10;
     }
-    
+
     return Math.floor(monthlyIncome * multiplier);
   }
 
@@ -202,13 +199,8 @@ export class CreditAnalysisService {
    * Determine required documents based on amount and risk
    */
   private getRequiredDocuments(amount: number, risk: string): string[] {
-    const baseDocuments = [
-      'CPF',
-      'RG',
-      'Comprovante de Residência',
-      'Comprovante de Renda'
-    ];
-    
+    const baseDocuments = ['CPF', 'RG', 'Comprovante de Residência', 'Comprovante de Renda'];
+
     if (amount > 30000 || risk === 'HIGH' || risk === 'VERY_HIGH') {
       baseDocuments.push(
         'Extrato Bancário (3 meses)',
@@ -216,14 +208,11 @@ export class CreditAnalysisService {
         'Certidão de Estado Civil'
       );
     }
-    
+
     if (amount > 50000) {
-      baseDocuments.push(
-        'Certidão Negativa de Débitos',
-        'Referências Comerciais'
-      );
+      baseDocuments.push('Certidão Negativa de Débitos', 'Referências Comerciais');
     }
-    
+
     return baseDocuments;
   }
 
@@ -233,7 +222,7 @@ export class CreditAnalysisService {
   private generateObservations(score: CreditScore, approved: boolean): string {
     let observation = `Análise de crédito concluída. Score: ${score.score}. `;
     observation += `Nível de risco: ${this.translateRisk(score.risk)}. `;
-    
+
     if (approved) {
       observation += 'Proposta APROVADA com base nos critérios de análise automática. ';
     } else if (score.recommendation === 'MANUAL_REVIEW') {
@@ -241,11 +230,11 @@ export class CreditAnalysisService {
     } else {
       observation += 'Proposta NÃO APROVADA automaticamente. ';
     }
-    
+
     if (score.factors.length > 0) {
       observation += `Fatores considerados: ${score.factors.join(', ')}.`;
     }
-    
+
     return observation;
   }
 
@@ -257,11 +246,11 @@ export class CreditAnalysisService {
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--;
     }
-    
+
     return age;
   }
 
@@ -270,10 +259,10 @@ export class CreditAnalysisService {
    */
   private translateRisk(risk: string): string {
     const translations: { [key: string]: string } = {
-      'LOW': 'Baixo',
-      'MEDIUM': 'Médio',
-      'HIGH': 'Alto',
-      'VERY_HIGH': 'Muito Alto'
+      LOW: 'Baixo',
+      MEDIUM: 'Médio',
+      HIGH: 'Alto',
+      VERY_HIGH: 'Muito Alto',
     };
     return translations[risk] || risk;
   }

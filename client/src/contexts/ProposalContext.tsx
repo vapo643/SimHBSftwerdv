@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from "react";
+import { createContext, useContext, useReducer, ReactNode } from 'react';
 
 // Types from our orchestrator endpoint
 interface Atendente {
@@ -21,7 +21,7 @@ interface TabelaComercial {
   taxaJuros: string;
   prazos: number[];
   comissao: string;
-  tipo: "personalizada" | "geral";
+  tipo: 'personalizada' | 'geral';
 }
 
 interface Produto {
@@ -47,7 +47,7 @@ interface OriginationContext {
 // Client data interface
 interface ClientData {
   // Tipo de pessoa
-  tipoPessoa: "PF" | "PJ";
+  tipoPessoa: 'PF' | 'PJ';
 
   // Dados pessoais
   cpf: string;
@@ -84,14 +84,14 @@ interface ClientData {
   ocupacao: string;
   rendaMensal: string;
   telefoneEmpresa: string;
-  
+
   // Novos campos de empregador e dados financeiros
   clienteEmpresaNome?: string; // Nome da Empresa
   clienteDataAdmissao?: string; // Data de Admissão (formato string para DatePicker)
   clienteDividasExistentes?: number; // Valor de Dívidas Existentes
 
   // Dados de pagamento
-  metodoPagamento: "conta_bancaria" | "pix";
+  metodoPagamento: 'conta_bancaria' | 'pix';
 
   // Dados bancários (quando conta_bancaria)
   dadosPagamentoBanco?: string;
@@ -187,68 +187,68 @@ interface ProposalState {
 
 // Action types
 type ProposalAction =
-  | { type: "SET_CONTEXT"; payload: OriginationContext }
-  | { type: "UPDATE_CLIENT"; payload: Partial<ClientData> }
-  | { type: "SELECT_PRODUCT"; payload: number }
-  | { type: "SELECT_TABLE"; payload: number }
-  | { type: "UPDATE_LOAN_CONDITIONS"; payload: Partial<LoanData> }
-  | { type: "SET_SIMULATION_RESULT"; payload: SimulationResult }
-  | { type: "CLEAR_SIMULATION" }
-  | { type: "ADD_DOCUMENT"; payload: Document }
-  | { type: "REMOVE_DOCUMENT"; payload: string }
-  | { type: "ADD_REFERENCE"; payload: PersonalReference }
-  | { type: "UPDATE_REFERENCE"; payload: { index: number; reference: PersonalReference } }
-  | { type: "REMOVE_REFERENCE"; payload: number }
-  | { type: "SET_STEP"; payload: number }
-  | { type: "SET_ERROR"; payload: { field: string; message: string } }
-  | { type: "CLEAR_ERRORS" }
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "RESET" };
+  | { type: 'SET_CONTEXT'; payload: OriginationContext }
+  | { type: 'UPDATE_CLIENT'; payload: Partial<ClientData> }
+  | { type: 'SELECT_PRODUCT'; payload: number }
+  | { type: 'SELECT_TABLE'; payload: number }
+  | { type: 'UPDATE_LOAN_CONDITIONS'; payload: Partial<LoanData> }
+  | { type: 'SET_SIMULATION_RESULT'; payload: SimulationResult }
+  | { type: 'CLEAR_SIMULATION' }
+  | { type: 'ADD_DOCUMENT'; payload: Document }
+  | { type: 'REMOVE_DOCUMENT'; payload: string }
+  | { type: 'ADD_REFERENCE'; payload: PersonalReference }
+  | { type: 'UPDATE_REFERENCE'; payload: { index: number; reference: PersonalReference } }
+  | { type: 'REMOVE_REFERENCE'; payload: number }
+  | { type: 'SET_STEP'; payload: number }
+  | { type: 'SET_ERROR'; payload: { field: string; message: string } }
+  | { type: 'CLEAR_ERRORS' }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'RESET' };
 
 // Initial state
 const initialState: ProposalState = {
   context: null,
   clientData: {
-    tipoPessoa: "PF",
-    cpf: "",
-    nome: "",
-    email: "",
-    telefone: "",
-    razaoSocial: "",
-    cnpj: "",
-    rg: "",
-    orgaoEmissor: "",
-    rgUf: "",
-    rgDataEmissao: "",
-    dataNascimento: "",
-    localNascimento: "",
-    estadoCivil: "",
-    nacionalidade: "Brasileira",
-    cep: "",
-    logradouro: "",
-    numero: "",
-    complemento: "",
-    bairro: "",
-    cidade: "",
-    estado: "",
-    ocupacao: "",
-    rendaMensal: "",
-    telefoneEmpresa: "",
-    metodoPagamento: "conta_bancaria",
-    dadosPagamentoBanco: "",
-    dadosPagamentoAgencia: "",
-    dadosPagamentoConta: "",
-    dadosPagamentoDigito: "",
-    dadosPagamentoPix: "",
-    dadosPagamentoTipoPix: "",
-    dadosPagamentoPixBanco: "",
-    dadosPagamentoPixNomeTitular: "",
-    dadosPagamentoPixCpfTitular: "",
+    tipoPessoa: 'PF',
+    cpf: '',
+    nome: '',
+    email: '',
+    telefone: '',
+    razaoSocial: '',
+    cnpj: '',
+    rg: '',
+    orgaoEmissor: '',
+    rgUf: '',
+    rgDataEmissao: '',
+    dataNascimento: '',
+    localNascimento: '',
+    estadoCivil: '',
+    nacionalidade: 'Brasileira',
+    cep: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    ocupacao: '',
+    rendaMensal: '',
+    telefoneEmpresa: '',
+    metodoPagamento: 'conta_bancaria',
+    dadosPagamentoBanco: '',
+    dadosPagamentoAgencia: '',
+    dadosPagamentoConta: '',
+    dadosPagamentoDigito: '',
+    dadosPagamentoPix: '',
+    dadosPagamentoTipoPix: '',
+    dadosPagamentoPixBanco: '',
+    dadosPagamentoPixNomeTitular: '',
+    dadosPagamentoPixCpfTitular: '',
   },
   loanData: {
     produtoId: null,
     tabelaComercialId: null,
-    valorSolicitado: "",
+    valorSolicitado: '',
     prazo: null,
     incluirTac: true,
     dataCarencia: undefined,
@@ -264,13 +264,13 @@ const initialState: ProposalState = {
 // Reducer function
 function proposalReducer(state: ProposalState, action: ProposalAction): ProposalState {
   switch (action.type) {
-    case "SET_CONTEXT":
+    case 'SET_CONTEXT':
       return {
         ...state,
         context: action.payload,
       };
 
-    case "UPDATE_CLIENT":
+    case 'UPDATE_CLIENT':
       return {
         ...state,
         clientData: {
@@ -279,7 +279,7 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
         },
       };
 
-    case "SELECT_PRODUCT":
+    case 'SELECT_PRODUCT':
       return {
         ...state,
         loanData: {
@@ -290,7 +290,7 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
         simulation: null, // Clear simulation when product changes
       };
 
-    case "SELECT_TABLE":
+    case 'SELECT_TABLE':
       return {
         ...state,
         loanData: {
@@ -300,7 +300,7 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
         simulation: null, // Clear simulation when table changes
       };
 
-    case "UPDATE_LOAN_CONDITIONS":
+    case 'UPDATE_LOAN_CONDITIONS':
       return {
         ...state,
         loanData: {
@@ -310,37 +310,37 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
         simulation: null, // Clear simulation when conditions change
       };
 
-    case "SET_SIMULATION_RESULT":
+    case 'SET_SIMULATION_RESULT':
       return {
         ...state,
         simulation: action.payload,
       };
 
-    case "CLEAR_SIMULATION":
+    case 'CLEAR_SIMULATION':
       return {
         ...state,
         simulation: null,
       };
 
-    case "ADD_DOCUMENT":
+    case 'ADD_DOCUMENT':
       return {
         ...state,
         documents: [...state.documents, action.payload],
       };
 
-    case "REMOVE_DOCUMENT":
+    case 'REMOVE_DOCUMENT':
       return {
         ...state,
-        documents: state.documents.filter(doc => doc.id !== action.payload),
+        documents: state.documents.filter((doc) => doc.id !== action.payload),
       };
 
-    case "ADD_REFERENCE":
+    case 'ADD_REFERENCE':
       return {
         ...state,
         personalReferences: [...state.personalReferences, action.payload],
       };
 
-    case "UPDATE_REFERENCE":
+    case 'UPDATE_REFERENCE':
       return {
         ...state,
         personalReferences: state.personalReferences.map((ref, index) =>
@@ -348,19 +348,19 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
         ),
       };
 
-    case "REMOVE_REFERENCE":
+    case 'REMOVE_REFERENCE':
       return {
         ...state,
         personalReferences: state.personalReferences.filter((_, index) => index !== action.payload),
       };
 
-    case "SET_STEP":
+    case 'SET_STEP':
       return {
         ...state,
         currentStep: action.payload,
       };
 
-    case "SET_ERROR":
+    case 'SET_ERROR':
       return {
         ...state,
         errors: {
@@ -369,19 +369,19 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
         },
       };
 
-    case "CLEAR_ERRORS":
+    case 'CLEAR_ERRORS':
       return {
         ...state,
         errors: {},
       };
 
-    case "SET_LOADING":
+    case 'SET_LOADING':
       return {
         ...state,
         isLoading: action.payload,
       };
 
-    case "RESET":
+    case 'RESET':
       return initialState;
 
     default:
@@ -416,7 +416,7 @@ export function useProposal() {
   const context = useContext(ProposalContext);
 
   if (!context) {
-    throw new Error("useProposal must be used within a ProposalProvider");
+    throw new Error('useProposal must be used within a ProposalProvider');
   }
 
   return context;
@@ -428,46 +428,46 @@ export function useProposalActions() {
 
   return {
     setContext: (context: OriginationContext) =>
-      dispatch({ type: "SET_CONTEXT", payload: context }),
+      dispatch({ type: 'SET_CONTEXT', payload: context }),
 
-    updateClient: (data: Partial<ClientData>) => dispatch({ type: "UPDATE_CLIENT", payload: data }),
+    updateClient: (data: Partial<ClientData>) => dispatch({ type: 'UPDATE_CLIENT', payload: data }),
 
-    selectProduct: (productId: number) => dispatch({ type: "SELECT_PRODUCT", payload: productId }),
+    selectProduct: (productId: number) => dispatch({ type: 'SELECT_PRODUCT', payload: productId }),
 
-    selectTable: (tableId: number) => dispatch({ type: "SELECT_TABLE", payload: tableId }),
+    selectTable: (tableId: number) => dispatch({ type: 'SELECT_TABLE', payload: tableId }),
 
     updateLoanConditions: (data: Partial<LoanData>) =>
-      dispatch({ type: "UPDATE_LOAN_CONDITIONS", payload: data }),
+      dispatch({ type: 'UPDATE_LOAN_CONDITIONS', payload: data }),
 
     setSimulationResult: (result: SimulationResult) =>
-      dispatch({ type: "SET_SIMULATION_RESULT", payload: result }),
+      dispatch({ type: 'SET_SIMULATION_RESULT', payload: result }),
 
-    clearSimulation: () => dispatch({ type: "CLEAR_SIMULATION" }),
+    clearSimulation: () => dispatch({ type: 'CLEAR_SIMULATION' }),
 
-    addDocument: (document: Document) => dispatch({ type: "ADD_DOCUMENT", payload: document }),
+    addDocument: (document: Document) => dispatch({ type: 'ADD_DOCUMENT', payload: document }),
 
     removeDocument: (documentId: string) =>
-      dispatch({ type: "REMOVE_DOCUMENT", payload: documentId }),
+      dispatch({ type: 'REMOVE_DOCUMENT', payload: documentId }),
 
     addReference: (reference: PersonalReference) =>
-      dispatch({ type: "ADD_REFERENCE", payload: reference }),
+      dispatch({ type: 'ADD_REFERENCE', payload: reference }),
 
     updateReference: (index: number, reference: PersonalReference) =>
-      dispatch({ type: "UPDATE_REFERENCE", payload: { index, reference } }),
+      dispatch({ type: 'UPDATE_REFERENCE', payload: { index, reference } }),
 
-    removeReference: (index: number) => dispatch({ type: "REMOVE_REFERENCE", payload: index }),
+    removeReference: (index: number) => dispatch({ type: 'REMOVE_REFERENCE', payload: index }),
 
-    setStep: (step: number) => dispatch({ type: "SET_STEP", payload: step }),
+    setStep: (step: number) => dispatch({ type: 'SET_STEP', payload: step }),
 
     setError: (field: string, message: string) =>
-      dispatch({ type: "SET_ERROR", payload: { field, message } }),
+      dispatch({ type: 'SET_ERROR', payload: { field, message } }),
 
-    clearError: (field: string) => dispatch({ type: "SET_ERROR", payload: { field, message: "" } }),
+    clearError: (field: string) => dispatch({ type: 'SET_ERROR', payload: { field, message: '' } }),
 
-    clearErrors: () => dispatch({ type: "CLEAR_ERRORS" }),
+    clearErrors: () => dispatch({ type: 'CLEAR_ERRORS' }),
 
-    setLoading: (loading: boolean) => dispatch({ type: "SET_LOADING", payload: loading }),
+    setLoading: (loading: boolean) => dispatch({ type: 'SET_LOADING', payload: loading }),
 
-    reset: () => dispatch({ type: "RESET" }),
+    reset: () => dispatch({ type: 'RESET' }),
   };
 }

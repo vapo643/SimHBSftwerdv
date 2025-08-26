@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import DashboardLayout from "@/components/DashboardLayout";
-import ConfiguracaoComercialForm from "@/components/parceiros/ConfiguracaoComercialForm";
-import LojaForm from "@/components/parceiros/LojaForm";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useStoresByPartner } from "@/hooks/queries/useUserFormData";
-import { api } from "@/lib/apiClient";
+import React, { useState } from 'react';
+import { useRoute, Link } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import DashboardLayout from '@/components/DashboardLayout';
+import ConfiguracaoComercialForm from '@/components/parceiros/ConfiguracaoComercialForm';
+import LojaForm from '@/components/parceiros/LojaForm';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useStoresByPartner } from '@/hooks/queries/useUserFormData';
+import { api } from '@/lib/apiClient';
 import {
   Building2,
   Store,
@@ -21,7 +21,7 @@ import {
   Activity,
   Settings,
   BarChart3,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface Partner {
   id: number;
@@ -41,7 +41,7 @@ interface Store {
 }
 
 const PartnerDetailPage: React.FC = () => {
-  const [match, params] = useRoute("/parceiros/detalhe/:id");
+  const [match, params] = useRoute('/parceiros/detalhe/:id');
   const partnerId = params ? parseInt(params.id) : null;
 
   const [isLojaModalOpen, setIsLojaModalOpen] = useState(false);
@@ -52,9 +52,9 @@ const PartnerDetailPage: React.FC = () => {
     isLoading: partnerLoading,
     error: partnerError,
   } = useQuery<Partner>({
-    queryKey: ["partner", partnerId],
+    queryKey: ['partner', partnerId],
     queryFn: async () => {
-      if (!partnerId) throw new Error("Partner ID is required");
+      if (!partnerId) throw new Error('Partner ID is required');
       const response = await api.get<Partner>(`/api/parceiros/${partnerId}`);
       return response.data;
     },
@@ -69,7 +69,7 @@ const PartnerDetailPage: React.FC = () => {
   } = useStoresByPartner(partnerId, !!partnerId);
 
   const handleAddStore = (data: any) => {
-    console.log("Nova Loja Adicionada:", data);
+    console.log('Nova Loja Adicionada:', data);
     // Lógica para adicionar a loja ao parceiro no estado/backend será implementada na Fase 2
     setIsLojaModalOpen(false);
   };
@@ -93,7 +93,7 @@ const PartnerDetailPage: React.FC = () => {
     return (
       <DashboardLayout title="Parceiro não encontrado">
         <div className="text-center">
-          <p className="mb-4 text-red-600">{partnerError?.message || "Parceiro não encontrado."}</p>
+          <p className="mb-4 text-red-600">{partnerError?.message || 'Parceiro não encontrado.'}</p>
           <Link to="/parceiros" className="text-blue-600 hover:underline">
             Voltar para a lista de parceiros
           </Link>
@@ -110,7 +110,7 @@ const PartnerDetailPage: React.FC = () => {
   };
 
   return (
-    <DashboardLayout title={`Detalhe do Parceiro: ${partner.razaoSocial || "Parceiro"}`}>
+    <DashboardLayout title={`Detalhe do Parceiro: ${partner.razaoSocial || 'Parceiro'}`}>
       <div className="space-y-8">
         {/* Header Section */}
         <div className="flex items-center justify-between">
@@ -288,7 +288,7 @@ const PartnerDetailPage: React.FC = () => {
                           </span>
                         </div>
                         <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {loja.endereco || "Não informado"}
+                          {loja.endereco || 'Não informado'}
                         </span>
                       </div>
                       <div className="border-t border-gray-100 pt-2 dark:border-gray-700">

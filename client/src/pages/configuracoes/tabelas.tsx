@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Table,
   TableHeader,
@@ -6,17 +6,17 @@ import {
   TableHead,
   TableRow,
   TableCell,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Edit,
   Trash2,
@@ -28,15 +28,15 @@ import {
   Package,
   Calculator,
   Plus,
-} from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
-import TabelaComercialForm from "@/components/tabelas-comerciais/TabelaComercialForm";
-import ConfirmDeleteModal from "@/components/tabelas-comerciais/ConfirmDeleteModal";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
-import { api } from "@/lib/apiClient";
-import { Skeleton } from "@/components/ui/skeleton";
+} from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
+import TabelaComercialForm from '@/components/tabelas-comerciais/TabelaComercialForm';
+import ConfirmDeleteModal from '@/components/tabelas-comerciais/ConfirmDeleteModal';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
+import { api } from '@/lib/apiClient';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface TabelaComercial {
   id: string | number;
@@ -62,17 +62,17 @@ const TabelasComerciais: React.FC = () => {
     isLoading,
     error,
   } = useQuery<TabelaComercial[]>({
-    queryKey: ["tabelas-comerciais-admin"],
+    queryKey: ['tabelas-comerciais-admin'],
     queryFn: async () => {
-      const response = await api.get<TabelaComercial[]>("/api/tabelas-comerciais");
+      const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
       return response.data;
     },
   });
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: async (data: Omit<TabelaComercial, "id">) => {
-      const response = await api.post("/api/admin/tabelas-comerciais", {
+    mutationFn: async (data: Omit<TabelaComercial, 'id'>) => {
+      const response = await api.post('/api/admin/tabelas-comerciais', {
         nomeTabela: data.nomeTabela,
         taxaJuros: Number(data.taxaJuros),
         prazos: data.prazos || [],
@@ -82,26 +82,26 @@ const TabelasComerciais: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tabelas-comerciais-admin"] });
-      queryClient.invalidateQueries({ queryKey: ["tabelas-comerciais"] });
+      queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais'] });
       setIsCreateModalOpen(false);
       toast({
-        title: "Tabela criada com sucesso",
-        description: "A tabela comercial foi adicionada ao sistema.",
+        title: 'Tabela criada com sucesso',
+        description: 'A tabela comercial foi adicionada ao sistema.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao criar tabela",
-        description: error.message || "Ocorreu um erro ao criar a tabela comercial.",
-        variant: "destructive",
+        title: 'Erro ao criar tabela',
+        description: error.message || 'Ocorreu um erro ao criar a tabela comercial.',
+        variant: 'destructive',
       });
     },
   });
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: { id: string | number; data: Omit<TabelaComercial, "id"> }) => {
+    mutationFn: async (data: { id: string | number; data: Omit<TabelaComercial, 'id'> }) => {
       const response = await api.put(`/api/admin/tabelas-comerciais/${data.id}`, {
         nomeTabela: data.data.nomeTabela,
         taxaJuros: Number(data.data.taxaJuros),
@@ -112,20 +112,20 @@ const TabelasComerciais: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tabelas-comerciais-admin"] });
-      queryClient.invalidateQueries({ queryKey: ["tabelas-comerciais"] });
+      queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais'] });
       setIsEditModalOpen(false);
       setSelectedTabela(null);
       toast({
-        title: "Tabela atualizada com sucesso",
-        description: "As alterações foram salvas.",
+        title: 'Tabela atualizada com sucesso',
+        description: 'As alterações foram salvas.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao atualizar tabela",
-        description: error.message || "Ocorreu um erro ao atualizar a tabela comercial.",
-        variant: "destructive",
+        title: 'Erro ao atualizar tabela',
+        description: error.message || 'Ocorreu um erro ao atualizar a tabela comercial.',
+        variant: 'destructive',
       });
     },
   });
@@ -136,29 +136,29 @@ const TabelasComerciais: React.FC = () => {
       await api.delete(`/api/admin/tabelas-comerciais/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tabelas-comerciais-admin"] });
-      queryClient.invalidateQueries({ queryKey: ["tabelas-comerciais"] });
+      queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais'] });
       setIsDeleteModalOpen(false);
       setSelectedTabela(null);
       toast({
-        title: "Tabela excluída com sucesso",
-        description: "A tabela comercial foi removida do sistema.",
+        title: 'Tabela excluída com sucesso',
+        description: 'A tabela comercial foi removida do sistema.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao excluir tabela",
-        description: error.message || "Ocorreu um erro ao excluir a tabela comercial.",
-        variant: "destructive",
+        title: 'Erro ao excluir tabela',
+        description: error.message || 'Ocorreu um erro ao excluir a tabela comercial.',
+        variant: 'destructive',
       });
     },
   });
 
-  const handleCreate = (novaTabela: Omit<TabelaComercial, "id">) => {
+  const handleCreate = (novaTabela: Omit<TabelaComercial, 'id'>) => {
     createMutation.mutate(novaTabela);
   };
 
-  const handleEdit = (tabelaAtualizada: Omit<TabelaComercial, "id">) => {
+  const handleEdit = (tabelaAtualizada: Omit<TabelaComercial, 'id'>) => {
     if (selectedTabela) {
       updateMutation.mutate({ id: selectedTabela.id, data: tabelaAtualizada });
     }
@@ -196,13 +196,13 @@ const TabelasComerciais: React.FC = () => {
     taxaMediaJuros:
       tabelas.length > 0
         ? (tabelas.reduce((acc, t) => acc + Number(t.taxaJuros), 0) / tabelas.length).toFixed(2)
-        : "0.00",
+        : '0.00',
     comissaoMedia:
       tabelas.length > 0
         ? (tabelas.reduce((acc, t) => acc + Number(t.comissao), 0) / tabelas.length).toFixed(2)
-        : "0.00",
+        : '0.00',
     totalProdutos: tabelas.reduce((acc, t) => acc + (t.produtoIds?.length || 0), 0),
-    prazosUnicos: Array.from(new Set(tabelas.flatMap(t => t.prazos || []))).length,
+    prazosUnicos: Array.from(new Set(tabelas.flatMap((t) => t.prazos || []))).length,
   };
 
   return (
@@ -358,7 +358,7 @@ const TabelasComerciais: React.FC = () => {
             ) : (
               <div className="p-6">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {tabelas.map(tabela => (
+                  {tabelas.map((tabela) => (
                     <Card
                       key={tabela.id}
                       className="border border-gray-200 transition-shadow duration-200 hover:shadow-lg dark:border-gray-700"
@@ -434,7 +434,7 @@ const TabelasComerciais: React.FC = () => {
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {(tabela.prazos || []).map(prazo => (
+                            {(tabela.prazos || []).map((prazo) => (
                               <Badge key={prazo} variant="secondary" className="text-xs">
                                 {prazo}m
                               </Badge>
@@ -502,7 +502,7 @@ const TabelasComerciais: React.FC = () => {
             setSelectedTabela(null);
           }}
           onConfirm={handleDelete}
-          tabelaNome={selectedTabela?.nomeTabela || ""}
+          tabelaNome={selectedTabela?.nomeTabela || ''}
         />
       </div>
     </DashboardLayout>

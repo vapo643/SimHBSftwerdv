@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,13 +11,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Monitor, Smartphone, Tablet, Trash2, Shield } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Monitor, Smartphone, Tablet, Trash2, Shield } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface Session {
   id: string;
@@ -37,14 +37,14 @@ export default function SessoesAtivas() {
 
   // Buscar sessões ativas
   const { data: sessions, isLoading } = useQuery({
-    queryKey: ["/api/auth/sessions"],
+    queryKey: ['/api/auth/sessions'],
     queryFn: async () => {
-      const response = await fetch("/api/auth/sessions", {
+      const response = await fetch('/api/auth/sessions', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("supabase.auth.token")}`,
+          Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
         },
       });
-      if (!response.ok) throw new Error("Erro ao buscar sessões");
+      if (!response.ok) throw new Error('Erro ao buscar sessões');
       const data = await response.json();
       return data.sessions as Session[];
     },
@@ -54,40 +54,40 @@ export default function SessoesAtivas() {
   const deleteSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
       const response = await fetch(`/api/auth/sessions/${sessionId}`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("supabase.auth.token")}`,
+          Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
         },
       });
-      if (!response.ok) throw new Error("Erro ao encerrar sessão");
+      if (!response.ok) throw new Error('Erro ao encerrar sessão');
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Sessão encerrada",
-        description: "A sessão foi encerrada com sucesso.",
+        title: 'Sessão encerrada',
+        description: 'A sessão foi encerrada com sucesso.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/sessions"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/sessions'] });
       setSessionToDelete(null);
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Não foi possível encerrar a sessão.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível encerrar a sessão.',
+        variant: 'destructive',
       });
     },
   });
 
   const getDeviceIcon = (device: string) => {
     if (
-      device.toLowerCase().includes("mobile") ||
-      device.toLowerCase().includes("android") ||
-      device.toLowerCase().includes("iphone")
+      device.toLowerCase().includes('mobile') ||
+      device.toLowerCase().includes('android') ||
+      device.toLowerCase().includes('iphone')
     ) {
       return <Smartphone className="h-5 w-5" />;
     }
-    if (device.toLowerCase().includes("ipad") || device.toLowerCase().includes("tablet")) {
+    if (device.toLowerCase().includes('ipad') || device.toLowerCase().includes('tablet')) {
       return <Tablet className="h-5 w-5" />;
     }
     return <Monitor className="h-5 w-5" />;
@@ -113,7 +113,7 @@ export default function SessoesAtivas() {
               Nenhuma sessão ativa encontrada.
             </div>
           ) : (
-            sessions?.map(session => (
+            sessions?.map((session) => (
               <div
                 key={session.id}
                 className="hover:bg-accent/50 flex items-center justify-between rounded-lg border p-4 transition-colors"
@@ -131,13 +131,13 @@ export default function SessoesAtivas() {
                     </div>
                     <div className="text-sm text-muted-foreground">IP: {session.ipAddress}</div>
                     <div className="text-sm text-muted-foreground">
-                      Criada em:{" "}
+                      Criada em:{' '}
                       {format(new Date(session.createdAt), "dd 'de' MMMM 'às' HH:mm", {
                         locale: ptBR,
                       })}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Última atividade:{" "}
+                      Última atividade:{' '}
                       {format(new Date(session.lastActivityAt), "dd 'de' MMMM 'às' HH:mm", {
                         locale: ptBR,
                       })}

@@ -1,40 +1,40 @@
-import React from "react";
-import { useRoute, Link } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
+import { useRoute, Link } from 'wouter';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { AlertCircle } from "lucide-react";
-import { DocumentViewer } from "@/components/DocumentViewer";
-import { useAuth } from "@/contexts/AuthContext";
-import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
-import RefreshButton from "@/components/RefreshButton";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { AlertCircle } from 'lucide-react';
+import { DocumentViewer } from '@/components/DocumentViewer';
+import { useAuth } from '@/contexts/AuthContext';
+import HistoricoCompartilhado from '@/components/HistoricoCompartilhado';
+import RefreshButton from '@/components/RefreshButton';
 
-import { api } from "@/lib/apiClient";
+import { api } from '@/lib/apiClient';
 
 const fetchProposta = async (id: string | undefined) => {
-  if (!id) throw new Error("ID da proposta não fornecido.");
+  if (!id) throw new Error('ID da proposta não fornecido.');
   try {
     const response = await api.get(`/api/propostas/${id}`);
-    console.log("[Análise] Proposta carregada:", response.data);
+    console.log('[Análise] Proposta carregada:', response.data);
     // A API retorna {success: true, data: {...}}, precisamos apenas do data
     return response.data?.data || response.data;
   } catch (error) {
-    console.error("[Análise] Erro ao carregar proposta:", error);
-    throw new Error("Proposta não encontrada");
+    console.error('[Análise] Erro ao carregar proposta:', error);
+    throw new Error('Proposta não encontrada');
   }
 };
 
@@ -59,34 +59,34 @@ const updatePropostaStatus = async ({
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message || "Falha ao atualizar status");
+    throw new Error(error.message || 'Falha ao atualizar status');
   }
 };
 
 const decisionSchema = z
   .object({
-    status: z.enum(["aprovado", "rejeitado", "pendenciado"]),
+    status: z.enum(['aprovado', 'rejeitado', 'pendenciado']),
     observacao: z.string().optional(),
   })
   .refine(
-    data => {
+    (data) => {
       // Observação é obrigatória APENAS quando o status é "pendenciado"
-      if (data.status === "pendenciado") {
+      if (data.status === 'pendenciado') {
         return data.observacao && data.observacao.trim().length > 0;
       }
       // Para "aprovado" e "rejeitado", observação é opcional
       return true;
     },
     {
-      message: "Observação é obrigatória quando a proposta é pendenciada",
-      path: ["observacao"], // Aplica o erro no campo observacao
+      message: 'Observação é obrigatória quando a proposta é pendenciada',
+      path: ['observacao'], // Aplica o erro no campo observacao
     }
   );
 
 type DecisionFormData = z.infer<typeof decisionSchema>;
 
 const AnaliseManualPage: React.FC = () => {
-  const [match, params] = useRoute("/credito/analise/:id");
+  const [match, params] = useRoute('/credito/analise/:id');
   const propostaId = params?.id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -97,7 +97,7 @@ const AnaliseManualPage: React.FC = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["proposta", propostaId],
+    queryKey: ['proposta', propostaId],
     queryFn: () => fetchProposta(propostaId),
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
@@ -114,16 +114,16 @@ const AnaliseManualPage: React.FC = () => {
   const mutation = useMutation({
     mutationFn: updatePropostaStatus,
     onSuccess: () => {
-      toast({ title: "Sucesso!", description: "O status da proposta foi atualizado." });
+      toast({ title: 'Sucesso!', description: 'O status da proposta foi atualizado.' });
       // Invalidar múltiplas queries para sincronização completa
-      queryClient.invalidateQueries({ queryKey: ["proposta", propostaId] });
-      queryClient.invalidateQueries({ queryKey: ["proposta_logs", propostaId] });
+      queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
+      queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
     onError: (error: Error) => {
-      toast({ title: "Erro!", description: error.message, variant: "destructive" });
+      toast({ title: 'Erro!', description: error.message, variant: 'destructive' });
     },
   });
 
@@ -135,7 +135,7 @@ const AnaliseManualPage: React.FC = () => {
       id: propostaId,
       status: data.status,
       observacao: data.observacao,
-      ...(data.status === "pendenciado" && { motivoPendencia: data.observacao }),
+      ...(data.status === 'pendenciado' && { motivoPendencia: data.observacao }),
     };
 
     mutation.mutate(payload);
@@ -151,7 +151,7 @@ const AnaliseManualPage: React.FC = () => {
     return (
       <DashboardLayout title="Erro">
         <p className="p-6">
-          Proposta não encontrada.{" "}
+          Proposta não encontrada.{' '}
           <Link to="/credito/fila" className="text-blue-500 hover:underline">
             Voltar para a fila.
           </Link>
@@ -160,8 +160,8 @@ const AnaliseManualPage: React.FC = () => {
     );
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["proposta", propostaId] });
-    queryClient.invalidateQueries({ queryKey: ["proposta_logs", propostaId] });
+    queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
+    queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
     queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
     queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
   };
@@ -180,45 +180,85 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Nome:</strong> {proposta.cliente_nome || proposta.clienteNome || proposta.clienteData?.nome || "N/A"}
+                <strong>Nome:</strong>{' '}
+                {proposta.cliente_nome ||
+                  proposta.clienteNome ||
+                  proposta.clienteData?.nome ||
+                  'N/A'}
               </p>
               <p>
-                <strong>CPF:</strong> {proposta.cliente_cpf || proposta.clienteCpf || proposta.clienteData?.cpf || "N/A"}
+                <strong>CPF:</strong>{' '}
+                {proposta.cliente_cpf || proposta.clienteCpf || proposta.clienteData?.cpf || 'N/A'}
               </p>
               <p>
-                <strong>Email:</strong> {proposta.cliente_email || proposta.clienteEmail || proposta.clienteData?.email || "N/A"}
+                <strong>Email:</strong>{' '}
+                {proposta.cliente_email ||
+                  proposta.clienteEmail ||
+                  proposta.clienteData?.email ||
+                  'N/A'}
               </p>
               <p>
-                <strong>Telefone:</strong> {proposta.cliente_telefone || proposta.clienteTelefone || proposta.clienteData?.telefone || "N/A"}
+                <strong>Telefone:</strong>{' '}
+                {proposta.cliente_telefone ||
+                  proposta.clienteTelefone ||
+                  proposta.clienteData?.telefone ||
+                  'N/A'}
               </p>
               <p>
-                <strong>Data de Nascimento:</strong> {proposta.cliente_data_nascimento || proposta.clienteDataNascimento || proposta.clienteData?.dataNascimento || "N/A"}
+                <strong>Data de Nascimento:</strong>{' '}
+                {proposta.cliente_data_nascimento ||
+                  proposta.clienteDataNascimento ||
+                  proposta.clienteData?.dataNascimento ||
+                  'N/A'}
               </p>
               <p>
-                <strong>Renda Mensal:</strong>{" "}
-                {proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData?.renda ? 
-                  `R$ ${proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData.renda}` : "N/A"}
+                <strong>Renda Mensal:</strong>{' '}
+                {proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData?.renda
+                  ? `R$ ${proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData.renda}`
+                  : 'N/A'}
               </p>
               <p>
-                <strong>RG:</strong> {proposta.cliente_rg || proposta.clienteRg || proposta.clienteData?.rg || "N/A"}
+                <strong>RG:</strong>{' '}
+                {proposta.cliente_rg || proposta.clienteRg || proposta.clienteData?.rg || 'N/A'}
               </p>
               <p>
-                <strong>Órgão Emissor:</strong> {proposta.cliente_orgao_emissor || proposta.clienteOrgaoEmissor || proposta.clienteData?.orgaoEmissor || "N/A"}
+                <strong>Órgão Emissor:</strong>{' '}
+                {proposta.cliente_orgao_emissor ||
+                  proposta.clienteOrgaoEmissor ||
+                  proposta.clienteData?.orgaoEmissor ||
+                  'N/A'}
               </p>
               <p>
-                <strong>Estado Civil:</strong> {proposta.cliente_estado_civil || proposta.clienteEstadoCivil || proposta.clienteData?.estadoCivil || "N/A"}
+                <strong>Estado Civil:</strong>{' '}
+                {proposta.cliente_estado_civil ||
+                  proposta.clienteEstadoCivil ||
+                  proposta.clienteData?.estadoCivil ||
+                  'N/A'}
               </p>
               <p>
-                <strong>Nacionalidade:</strong> {proposta.cliente_nacionalidade || proposta.clienteNacionalidade || proposta.clienteData?.nacionalidade || "N/A"}
+                <strong>Nacionalidade:</strong>{' '}
+                {proposta.cliente_nacionalidade ||
+                  proposta.clienteNacionalidade ||
+                  proposta.clienteData?.nacionalidade ||
+                  'N/A'}
               </p>
               <p>
-                <strong>CEP:</strong> {proposta.cliente_cep || proposta.clienteCep || proposta.clienteData?.cep || "N/A"}
+                <strong>CEP:</strong>{' '}
+                {proposta.cliente_cep || proposta.clienteCep || proposta.clienteData?.cep || 'N/A'}
               </p>
               <p>
-                <strong>Endereço:</strong> {proposta.cliente_endereco || proposta.clienteEndereco || proposta.clienteData?.endereco || "N/A"}
+                <strong>Endereço:</strong>{' '}
+                {proposta.cliente_endereco ||
+                  proposta.clienteEndereco ||
+                  proposta.clienteData?.endereco ||
+                  'N/A'}
               </p>
               <p>
-                <strong>Ocupação:</strong> {proposta.cliente_ocupacao || proposta.clienteOcupacao || proposta.clienteData?.ocupacao || "N/A"}
+                <strong>Ocupação:</strong>{' '}
+                {proposta.cliente_ocupacao ||
+                  proposta.clienteOcupacao ||
+                  proposta.clienteData?.ocupacao ||
+                  'N/A'}
               </p>
             </CardContent>
           </Card>
@@ -230,36 +270,47 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Valor Solicitado:</strong>{" "}
-                {proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor ? 
-                  `R$ ${(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor).toLocaleString('pt-BR')}` : "N/A"}
+                <strong>Valor Solicitado:</strong>{' '}
+                {proposta.valor ||
+                proposta.valor_solicitado ||
+                proposta.valorSolicitado ||
+                proposta.condicoesData?.valor
+                  ? `R$ ${(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor).toLocaleString('pt-BR')}`
+                  : 'N/A'}
               </p>
               <p>
-                <strong>Prazo:</strong>{" "}
-                {proposta.prazo || proposta.condicoesData?.prazo ? 
-                  `${proposta.prazo || proposta.condicoesData.prazo} meses` : "N/A"}
+                <strong>Prazo:</strong>{' '}
+                {proposta.prazo || proposta.condicoesData?.prazo
+                  ? `${proposta.prazo || proposta.condicoesData.prazo} meses`
+                  : 'N/A'}
               </p>
               <p>
-                <strong>Finalidade:</strong> {proposta.finalidade || proposta.condicoesData?.finalidade || "N/A"}
+                <strong>Finalidade:</strong>{' '}
+                {proposta.finalidade || proposta.condicoesData?.finalidade || 'N/A'}
               </p>
               <p>
-                <strong>Garantia:</strong> {proposta.garantia || proposta.condicoesData?.garantia || "N/A"}
+                <strong>Garantia:</strong>{' '}
+                {proposta.garantia || proposta.condicoesData?.garantia || 'N/A'}
               </p>
               <p>
-                <strong>TAC:</strong>{" "}
-                {proposta.valor_tac || proposta.valorTac || proposta.condicoesData?.valorTac ? 
-                  `R$ ${proposta.valor_tac || proposta.valorTac || proposta.condicoesData.valorTac}` : "N/A"}
+                <strong>TAC:</strong>{' '}
+                {proposta.valor_tac || proposta.valorTac || proposta.condicoesData?.valorTac
+                  ? `R$ ${proposta.valor_tac || proposta.valorTac || proposta.condicoesData.valorTac}`
+                  : 'N/A'}
               </p>
               <p>
-                <strong>IOF:</strong>{" "}
-                {proposta.valor_iof || proposta.valorIof || proposta.condicoesData?.valorIof ? 
-                  `R$ ${proposta.valor_iof || proposta.valorIof || proposta.condicoesData.valorIof}` : "N/A"}
+                <strong>IOF:</strong>{' '}
+                {proposta.valor_iof || proposta.valorIof || proposta.condicoesData?.valorIof
+                  ? `R$ ${proposta.valor_iof || proposta.valorIof || proposta.condicoesData.valorIof}`
+                  : 'N/A'}
               </p>
               <p>
-                <strong>Valor Total Financiado:</strong>{" "}
-                {proposta.valor_total_financiado || proposta.valorTotalFinanciado || proposta.condicoesData?.valorTotalFinanciado
+                <strong>Valor Total Financiado:</strong>{' '}
+                {proposta.valor_total_financiado ||
+                proposta.valorTotalFinanciado ||
+                proposta.condicoesData?.valorTotalFinanciado
                   ? `R$ ${proposta.valor_total_financiado || proposta.valorTotalFinanciado || proposta.condicoesData.valorTotalFinanciado}`
-                  : "N/A"}
+                  : 'N/A'}
               </p>
             </CardContent>
           </Card>
@@ -271,19 +322,19 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Status Atual:</strong> {proposta.status || "N/A"}
+                <strong>Status Atual:</strong> {proposta.status || 'N/A'}
               </p>
               <p>
-                <strong>Parceiro:</strong> {proposta.parceiro?.razaoSocial || "N/A"}
+                <strong>Parceiro:</strong> {proposta.parceiro?.razaoSocial || 'N/A'}
               </p>
               <p>
-                <strong>Loja:</strong> {proposta.loja?.nomeLoja || "N/A"}
+                <strong>Loja:</strong> {proposta.loja?.nomeLoja || 'N/A'}
               </p>
               <p>
-                <strong>Data de Criação:</strong>{" "}
+                <strong>Data de Criação:</strong>{' '}
                 {proposta.createdAt
-                  ? new Date(proposta.createdAt).toLocaleDateString("pt-BR")
-                  : "N/A"}
+                  ? new Date(proposta.createdAt).toLocaleDateString('pt-BR')
+                  : 'N/A'}
               </p>
               {proposta.ccbDocumentoUrl && (
                 <p>
@@ -309,7 +360,7 @@ const AnaliseManualPage: React.FC = () => {
           />
 
           {/* Renderização condicional - Painel de Decisão apenas para ANALISTA e ADMINISTRADOR */}
-          {user && (user.role === "ANALISTA" || user.role === "ADMINISTRADOR") ? (
+          {user && (user.role === 'ANALISTA' || user.role === 'ADMINISTRADOR') ? (
             <Card>
               <CardHeader>
                 <CardTitle>Painel de Decisão</CardTitle>
@@ -337,10 +388,10 @@ const AnaliseManualPage: React.FC = () => {
                   </div>
                   <div>
                     <Label htmlFor="observacao">Observações (obrigatório se pendenciar)</Label>
-                    <Textarea id="observacao" {...register("observacao")} />
+                    <Textarea id="observacao" {...register('observacao')} />
                   </div>
                   <Button type="submit" className="w-full" disabled={mutation.isPending}>
-                    {mutation.isPending ? "Salvando..." : "Confirmar Decisão"}
+                    {mutation.isPending ? 'Salvando...' : 'Confirmar Decisão'}
                   </Button>
                 </form>
               </CardContent>

@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import {
   Shield,
   AlertTriangle,
@@ -21,9 +21,9 @@ import {
   Globe,
   Terminal,
   Cpu,
-} from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { toast } from "@/hooks/use-toast";
+} from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { toast } from '@/hooks/use-toast';
 
 interface WstgCategory {
   id: string;
@@ -46,18 +46,18 @@ interface WstgStatus {
 
 const getCategoryIcon = (categoryId: string) => {
   const icons: Record<string, any> = {
-    "WSTG-INFO": FileSearch,
-    "WSTG-CONF": Cpu,
-    "WSTG-IDNT": Users,
-    "WSTG-ATHN": Key,
-    "WSTG-ATHZ": Lock,
-    "WSTG-SESS": Cookie,
-    "WSTG-INPV": Code,
-    "WSTG-ERRH": AlertCircle,
-    "WSTG-CRYP": Shield,
-    "WSTG-BUSLOGIC": Database,
-    "WSTG-CLIENT": Globe,
-    "WSTG-API": Terminal,
+    'WSTG-INFO': FileSearch,
+    'WSTG-CONF': Cpu,
+    'WSTG-IDNT': Users,
+    'WSTG-ATHN': Key,
+    'WSTG-ATHZ': Lock,
+    'WSTG-SESS': Cookie,
+    'WSTG-INPV': Code,
+    'WSTG-ERRH': AlertCircle,
+    'WSTG-CRYP': Shield,
+    'WSTG-BUSLOGIC': Database,
+    'WSTG-CLIENT': Globe,
+    'WSTG-API': Terminal,
   };
   return icons[categoryId] || Shield;
 };
@@ -67,14 +67,14 @@ export function WstgPage() {
   const queryClient = useQueryClient();
 
   const { data: status, isLoading } = useQuery<WstgStatus>({
-    queryKey: ["/api/owasp/wstg/status"],
-    queryFn: () => apiRequest("/api/owasp/wstg/status"),
+    queryKey: ['/api/owasp/wstg/status'],
+    queryFn: () => apiRequest('/api/owasp/wstg/status'),
   });
 
   const processMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("/api/owasp/wstg/process", {
-        method: "POST",
+      const response = await apiRequest('/api/owasp/wstg/process', {
+        method: 'POST',
         body: {},
       });
       return response;
@@ -84,16 +84,16 @@ export function WstgPage() {
     },
     onSuccess: () => {
       toast({
-        title: "WSTG Processing Started",
-        description: "Processing 210 WSTG test cases. This may take several minutes.",
+        title: 'WSTG Processing Started',
+        description: 'Processing 210 WSTG test cases. This may take several minutes.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/owasp/wstg/status"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/owasp/wstg/status'] });
     },
     onError: (error: any) => {
       toast({
-        title: "Processing Error",
-        description: error.message || "Failed to process WSTG URLs",
-        variant: "destructive",
+        title: 'Processing Error',
+        description: error.message || 'Failed to process WSTG URLs',
+        variant: 'destructive',
       });
     },
     onSettled: () => {
@@ -102,10 +102,10 @@ export function WstgPage() {
   });
 
   const getStatusColor = (percentage: number) => {
-    if (percentage >= 90) return "text-green-600 dark:text-green-400";
-    if (percentage >= 70) return "text-yellow-600 dark:text-yellow-400";
-    if (percentage >= 50) return "text-orange-600 dark:text-orange-400";
-    return "text-red-600 dark:text-red-400";
+    if (percentage >= 90) return 'text-green-600 dark:text-green-400';
+    if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400';
+    if (percentage >= 50) return 'text-orange-600 dark:text-orange-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   const getCategoryProgress = (category: WstgCategory) => {
@@ -215,7 +215,7 @@ export function WstgPage() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {status?.categories.map(category => {
+          {status?.categories.map((category) => {
             const Icon = getCategoryIcon(category.id);
             const progress = getCategoryProgress(category);
 

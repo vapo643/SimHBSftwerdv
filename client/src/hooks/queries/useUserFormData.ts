@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/apiClient";
-import { queryKeys } from "./queryKeys";
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/apiClient';
+import { queryKeys } from './queryKeys';
 
 // Types for the data structures
 interface Partner {
@@ -37,8 +37,8 @@ export function useUserFormData() {
   } = useQuery({
     queryKey: queryKeys.system.metadata(),
     queryFn: async () => {
-      const response = await api.get<SystemMetadata>("/api/admin/system/metadata");
-      return 'data' in response ? response.data : response as SystemMetadata;
+      const response = await api.get<SystemMetadata>('/api/admin/system/metadata');
+      return 'data' in response ? response.data : (response as SystemMetadata);
     },
   });
 
@@ -50,8 +50,8 @@ export function useUserFormData() {
   } = useQuery({
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
-      const response = await api.get<Partner[]>("/api/parceiros");
-      return 'data' in response ? response.data : response as Partner[];
+      const response = await api.get<Partner[]>('/api/parceiros');
+      return 'data' in response ? response.data : (response as Partner[]);
     },
   });
 
@@ -66,8 +66,8 @@ export function useUserFormData() {
   } = useQuery({
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
-      const response = await api.get<Store[]>("/api/admin/lojas");
-      return 'data' in response ? response.data : response as Store[];
+      const response = await api.get<Store[]>('/api/admin/lojas');
+      return 'data' in response ? response.data : (response as Store[]);
     },
     enabled: shouldUseClientSideFiltering === true, // Only fetch if using client-side filtering
   });
@@ -80,7 +80,7 @@ export function useUserFormData() {
     } else {
       // Server-side filtering: fetch on-demand
       const response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);
-      return 'data' in response ? response.data : response as Store[];
+      return 'data' in response ? response.data : (response as Store[]);
     }
   };
 
@@ -111,7 +111,7 @@ export function useUserFormData() {
     allStoresError: shouldUseClientSideFiltering ? allStoresError : null,
 
     // Filtering strategy info
-    filteringStrategy: shouldUseClientSideFiltering ? "client-side" : "server-side",
+    filteringStrategy: shouldUseClientSideFiltering ? 'client-side' : 'server-side',
     totalLojas: metadata?.totalLojas || 0,
 
     // Methods
@@ -120,7 +120,7 @@ export function useUserFormData() {
     // Helper methods for UI
     getStoresByPartner: (partnerId: number) => {
       if (shouldUseClientSideFiltering && allStores) {
-        return allStores.filter(store => store.parceiroId === partnerId);
+        return allStores.filter((store) => store.parceiroId === partnerId);
       }
       return [];
     },
@@ -138,7 +138,7 @@ export function useStoresByPartner(partnerId: number | null, enabled = true) {
     queryFn: async () => {
       if (!partnerId) return [];
       const response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);
-      return 'data' in response ? response.data : response as Store[];
+      return 'data' in response ? response.data : (response as Store[]);
     },
     enabled: enabled && !!partnerId,
   });

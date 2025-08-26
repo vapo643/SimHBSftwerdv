@@ -2,41 +2,42 @@
  * Script para testar o serviço OWASP Cheat Sheets
  */
 
-import { OwaspCheatSheetService } from "../server/services/owaspCheatSheetService.js";
+import { OwaspCheatSheetService } from '../server/services/owaspCheatSheetService.js';
 
-console.log("=== TESTE DO SERVIÇO OWASP CHEAT SHEETS ===\n");
+console.log('=== TESTE DO SERVIÇO OWASP CHEAT SHEETS ===\n');
 
 async function testService() {
   try {
-    console.log("1. Processando todos os 111 cheat sheets...");
+    console.log('1. Processando todos os 111 cheat sheets...');
     const results = await OwaspCheatSheetService.processAllCheatSheets();
 
     console.log(`\n✅ Total de cheat sheets processados: ${results.length}`);
 
     // Estatísticas
-    const processed = results.filter(r => r.status === "processed").length;
+    const processed = results.filter((r) => r.status === 'processed').length;
     const totalRecommendations = results.reduce(
       (sum, cs) => sum + (cs.recommendations?.length || 0),
       0
     );
     const implemented = results.reduce(
       (sum, cs) =>
-        sum + (cs.recommendations?.filter(r => r.currentStatus === "implemented").length || 0),
+        sum + (cs.recommendations?.filter((r) => r.currentStatus === 'implemented').length || 0),
       0
     );
     const partial = results.reduce(
       (sum, cs) =>
-        sum + (cs.recommendations?.filter(r => r.currentStatus === "partial").length || 0),
+        sum + (cs.recommendations?.filter((r) => r.currentStatus === 'partial').length || 0),
       0
     );
     const notImplemented = results.reduce(
       (sum, cs) =>
-        sum + (cs.recommendations?.filter(r => r.currentStatus === "not_implemented").length || 0),
+        sum +
+        (cs.recommendations?.filter((r) => r.currentStatus === 'not_implemented').length || 0),
       0
     );
     const notApplicable = results.reduce(
       (sum, cs) =>
-        sum + (cs.recommendations?.filter(r => r.currentStatus === "not_applicable").length || 0),
+        sum + (cs.recommendations?.filter((r) => r.currentStatus === 'not_applicable').length || 0),
       0
     );
 
@@ -74,10 +75,10 @@ async function testService() {
     console.log(`- Critical gaps: ${summary.criticalGaps}`);
 
     console.log(
-      "\n✅ SERVIÇO FUNCIONAL! Todos os 111 cheat sheets estão implementados e prontos para uso."
+      '\n✅ SERVIÇO FUNCIONAL! Todos os 111 cheat sheets estão implementados e prontos para uso.'
     );
   } catch (error) {
-    console.error("❌ ERRO ao testar serviço:", error);
+    console.error('❌ ERRO ao testar serviço:', error);
   }
 }
 

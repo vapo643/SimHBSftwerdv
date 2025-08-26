@@ -1,1 +1,12 @@
-import { Router } from "express"; import { interRealtimeService } from "../services/genericService"; const router = Router(); router.get("/status", async (req, res) => { try { const result = await interRealtimeService.executeOperation("get_status", req.query); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { interRealtimeService } from '../services/genericService';
+const router = Router();
+router.get('/status', async (req, res) => {
+  try {
+    const result = await interRealtimeService.executeOperation('get_status', req.query);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

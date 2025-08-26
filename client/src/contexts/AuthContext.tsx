@@ -5,12 +5,12 @@ import React, {
   useState,
   ReactNode,
   useCallback,
-} from "react";
-import { getSupabase } from "@/lib/supabase";
-import { api } from "@/lib/apiClient";
-import { useIdleTimer } from "@/hooks/useIdleTimer";
-import { IdleWarningModal } from "@/components/IdleWarningModal";
-import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+} from 'react';
+import { getSupabase } from '@/lib/supabase';
+import { api } from '@/lib/apiClient';
+import { useIdleTimer } from '@/hooks/useIdleTimer';
+import { IdleWarningModal } from '@/components/IdleWarningModal';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Função para logout por inatividade
   const handleIdleLogout = useCallback(async () => {
-    console.log("🔐 [IDLE TIMEOUT] User being logged out due to inactivity");
+    console.log('🔐 [IDLE TIMEOUT] User being logged out due to inactivity');
     try {
       const supabase = getSupabase();
       await supabase.auth.signOut();
@@ -63,19 +63,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setShowIdleWarning(false);
       setError(null);
     } catch (error) {
-      console.error("Error during idle logout:", error);
+      console.error('Error during idle logout:', error);
     }
   }, []);
 
   // Função para mostrar aviso de inatividade
   const handleIdleWarning = useCallback(() => {
-    console.log("⚠️ [IDLE WARNING] Showing inactivity warning to user (2 minutes left)");
+    console.log('⚠️ [IDLE WARNING] Showing inactivity warning to user (2 minutes left)');
     setShowIdleWarning(true);
   }, []);
 
   // Função para continuar a sessão (resetar timer)
   const handleContinueSession = useCallback(() => {
-    console.log("🔄 [IDLE RESET] User chose to continue session");
+    console.log('🔄 [IDLE RESET] User chose to continue session');
     setShowIdleWarning(false);
     // O resetTimer será chamado automaticamente pelo useIdleTimer quando esta função executar
   }, []);
@@ -96,19 +96,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
             message: string;
             user: User;
             timestamp: string;
-          }>("/api/debug/me");
+          }>('/api/debug/me');
 
           // Handle both ApiResponse<T> and direct T response types
           const userData = 'data' in response ? response.data : response;
           if (userData?.user) {
-            console.log("🔐 [AUTH RESTORED] User profile loaded with valid token");
+            console.log('🔐 [AUTH RESTORED] User profile loaded with valid token');
             setUser(userData.user);
             setError(null);
           } else {
-            throw new Error("Invalid user data received");
+            throw new Error('Invalid user data received');
           }
         } catch (apiError) {
-          console.error("Error fetching profile data:", apiError);
+          console.error('Error fetching profile data:', apiError);
           setError(apiError as Error);
           setUser(null);
         }
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setError(null);
       }
     } catch (authError) {
-      console.error("Error checking authentication:", authError);
+      console.error('Error checking authentication:', authError);
       setError(authError as Error);
       setUser(null);
     } finally {
@@ -137,7 +137,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           message: string;
           user: User;
           timestamp: string;
-        }>("/api/debug/me");
+        }>('/api/debug/me');
 
         // Handle both ApiResponse<T> and direct T response types
         const userData = 'data' in response ? response.data : response;
@@ -150,7 +150,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setError(null);
       }
     } catch (err) {
-      console.error("Error refetching user:", err);
+      console.error('Error refetching user:', err);
       setError(err as Error);
       // Keep existing user data on error (conservative strategy)
     }
@@ -179,9 +179,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setSession(currentSession);
         setAccessToken(currentSession?.access_token || null);
 
-        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           fetchUserProfile(currentSession);
-        } else if (event === "SIGNED_OUT") {
+        } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setError(null);
           setIsLoading(false);
@@ -223,7 +223,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

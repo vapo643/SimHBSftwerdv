@@ -3,7 +3,7 @@
  * Permite ajustar posições dos campos através de configuração dinâmica
  */
 
-import { SIMPIX_CCB_MAPPING } from "./ccbFieldMapping";
+import { SIMPIX_CCB_MAPPING } from './ccbFieldMapping';
 
 export interface CoordinateAdjustment {
   fieldName: string;
@@ -36,31 +36,31 @@ export function applyCoordinateAdjustments(adjustments: CoordinateAdjustment[]) 
 export const COORDINATE_PRESETS = {
   // Mover todos os campos um pouco para a direita
   moveRight10: [
-    { fieldName: "nomeCliente", deltaX: 10, deltaY: 0 },
-    { fieldName: "cpfCliente", deltaX: 10, deltaY: 0 },
-    { fieldName: "valorEmprestimo", deltaX: 10, deltaY: 0 },
-    { fieldName: "numeroParcelas", deltaX: 10, deltaY: 0 },
-    { fieldName: "valorParcela", deltaX: 10, deltaY: 0 },
-    { fieldName: "dataEmissao", deltaX: 10, deltaY: 0 },
+    { fieldName: 'nomeCliente', deltaX: 10, deltaY: 0 },
+    { fieldName: 'cpfCliente', deltaX: 10, deltaY: 0 },
+    { fieldName: 'valorEmprestimo', deltaX: 10, deltaY: 0 },
+    { fieldName: 'numeroParcelas', deltaX: 10, deltaY: 0 },
+    { fieldName: 'valorParcela', deltaX: 10, deltaY: 0 },
+    { fieldName: 'dataEmissao', deltaX: 10, deltaY: 0 },
   ] as CoordinateAdjustment[],
 
   // Mover todos os campos para baixo
   moveDown20: [
-    { fieldName: "nomeCliente", deltaX: 0, deltaY: -20 },
-    { fieldName: "cpfCliente", deltaX: 0, deltaY: -20 },
-    { fieldName: "valorEmprestimo", deltaX: 0, deltaY: -20 },
-    { fieldName: "numeroParcelas", deltaX: 0, deltaY: -20 },
-    { fieldName: "valorParcela", deltaX: 0, deltaY: -20 },
-    { fieldName: "dataEmissao", deltaX: 0, deltaY: -20 },
+    { fieldName: 'nomeCliente', deltaX: 0, deltaY: -20 },
+    { fieldName: 'cpfCliente', deltaX: 0, deltaY: -20 },
+    { fieldName: 'valorEmprestimo', deltaX: 0, deltaY: -20 },
+    { fieldName: 'numeroParcelas', deltaX: 0, deltaY: -20 },
+    { fieldName: 'valorParcela', deltaX: 0, deltaY: -20 },
+    { fieldName: 'dataEmissao', deltaX: 0, deltaY: -20 },
   ] as CoordinateAdjustment[],
 
   // Aumentar fonte de todos os campos
   increaseFontSize: [
-    { fieldName: "nomeCliente", deltaX: 0, deltaY: 0, newSize: 14 },
-    { fieldName: "cpfCliente", deltaX: 0, deltaY: 0, newSize: 13 },
-    { fieldName: "valorEmprestimo", deltaX: 0, deltaY: 0, newSize: 14 },
-    { fieldName: "numeroParcelas", deltaX: 0, deltaY: 0, newSize: 13 },
-    { fieldName: "valorParcela", deltaX: 0, deltaY: 0, newSize: 13 },
+    { fieldName: 'nomeCliente', deltaX: 0, deltaY: 0, newSize: 14 },
+    { fieldName: 'cpfCliente', deltaX: 0, deltaY: 0, newSize: 13 },
+    { fieldName: 'valorEmprestimo', deltaX: 0, deltaY: 0, newSize: 14 },
+    { fieldName: 'numeroParcelas', deltaX: 0, deltaY: 0, newSize: 13 },
+    { fieldName: 'valorParcela', deltaX: 0, deltaY: 0, newSize: 13 },
   ] as CoordinateAdjustment[],
 };
 
@@ -68,7 +68,7 @@ export const COORDINATE_PRESETS = {
  * Gerar relatório de posições atuais
  */
 export function generatePositionReport(pageHeight: number): string {
-  const report = ["=== RELATÓRIO DE POSIÇÕES CCB ==="];
+  const report = ['=== RELATÓRIO DE POSIÇÕES CCB ==='];
 
   Object.entries(SIMPIX_CCB_MAPPING).forEach(([fieldName, coords]) => {
     const yFromTopValue = pageHeight - coords.y;
@@ -77,7 +77,7 @@ export function generatePositionReport(pageHeight: number): string {
     );
   });
 
-  return report.join("\n");
+  return report.join('\n');
 }
 
 /**

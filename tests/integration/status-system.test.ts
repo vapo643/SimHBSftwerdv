@@ -2,44 +2,43 @@
  * Testes de Integração - Sistema de Status FSM
  * PAM V1.0 - Validação de Transições e Atomicidade
  * Data: 19/08/2025
- * 
+ *
  * Esta suíte de testes valida o contrato do sistema de status,
  * garantindo a correta execução das transições de negócio e
  * a atomicidade das operações de dupla escrita.
  */
 
-import { describe, it, expect, beforeEach, afterEach, beforeAll } from "vitest";
-import { db } from "../../server/lib/supabase";
-import { 
-  propostas, 
-  propostaLogs, 
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
+import { db } from '../../server/lib/supabase';
+import {
+  propostas,
+  propostaLogs,
   statusContextuais,
   parceiros,
   lojas,
   produtos,
   tabelasComerciais,
-  users
-} from "@shared/schema";
-import { eq, and, desc } from "drizzle-orm";
-import { v4 as uuidv4 } from "uuid";
-import { cleanTestDatabase, verifyCleanDatabase, setupTestEnvironment } from "../lib/db-helper";
-import { 
-  ProposalStatus, 
+  users,
+} from '@shared/schema';
+import { eq, and, desc } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
+import { cleanTestDatabase, verifyCleanDatabase, setupTestEnvironment } from '../lib/db-helper';
+import {
+  ProposalStatus,
   InvalidTransitionError,
   transitionTo,
   getPossibleTransitions,
-  isFinalStatus
-} from "../../server/services/statusFsmService";
-import { 
-  updateStatusWithContext, 
-  StatusContexto 
-} from "../../server/lib/status-context-helper";
+  isFinalStatus,
+} from '../../server/services/statusFsmService';
+import { updateStatusWithContext, StatusContexto } from '../../server/lib/status-context-helper';
 
-describe("Sistema de Status FSM - Testes de Integração", () => {
+describe('Sistema de Status FSM - Testes de Integração', () => {
   // CRITICAL SECURITY GUARD - Prevent tests from running against production database
   beforeAll(() => {
     if (!process.env.DATABASE_URL?.includes('test')) {
-      throw new Error('FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.');
+      throw new Error(
+        'FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.'
+      );
     }
   });
 
@@ -48,264 +47,265 @@ describe("Sistema de Status FSM - Testes de Integração", () => {
   let testStoreId: number;
   let testProductId: number;
   let testCommercialTableId: number;
-  
+
   /**
    * Setup: Limpa banco e cria proposta de teste
    */
   beforeEach(async () => {
-    console.log("[TEST SETUP] 🧹 Iniciando setup do teste...");
-    
+    console.log('[TEST SETUP] 🧹 Iniciando setup do teste...');
+
     // Limpar banco primeiro
     await cleanTestDatabase();
-    
+
     // Verificar que o banco está limpo
     const isClean = await verifyCleanDatabase();
     if (!isClean) {
-      console.warn("[TEST SETUP] ⚠️ Banco pode não estar completamente limpo");
+      console.warn('[TEST SETUP] ⚠️ Banco pode não estar completamente limpo');
     }
-    
+
     try {
       // Usar o novo helper com Admin Client para criar dados de teste
       const testData = await setupTestEnvironment();
-      
+
       // Atribuir valores para uso nos testes
       testUserId = testData.testUserId;
       testStoreId = testData.testStoreId;
       testProductId = testData.testProductId;
       testCommercialTableId = testData.testCommercialTableId;
-      
+
       // Criar proposta de teste com os dados criados
       testProposalId = uuidv4();
-      const [newProposal] = await db.insert(propostas)
+      const [newProposal] = await db
+        .insert(propostas)
         .values({
           id: testProposalId,
           numeroProposta: 999999,
           status: ProposalStatus.RASCUNHO,
-          valor: "10000.00",
+          valor: '10000.00',
           prazo: 12,
-          taxaJuros: "1.99",
-          clienteNome: "Cliente Teste",
-          clienteCpf: "12345678901",
-          clienteTelefone: "11999999999",
-          clienteEmail: "teste@teste.com",
+          taxaJuros: '1.99',
+          clienteNome: 'Cliente Teste',
+          clienteCpf: '12345678901',
+          clienteTelefone: '11999999999',
+          clienteEmail: 'teste@teste.com',
           produtoId: testProductId,
           tabelaComercialId: testCommercialTableId,
           lojaId: testStoreId,
           userId: testUserId, // Usar o userId criado pelo Admin Client
-          finalidade: "Teste",
-          garantia: "Nenhuma",
+          finalidade: 'Teste',
+          garantia: 'Nenhuma',
         })
         .returning({ id: propostas.id });
-      
+
       console.log(`[TEST SETUP] ✅ Proposta de teste criada: ${testProposalId}`);
     } catch (error) {
-      console.error("[TEST SETUP] ❌ Erro ao criar dados de teste:", error);
+      console.error('[TEST SETUP] ❌ Erro ao criar dados de teste:', error);
       throw error;
     }
   });
-  
+
   /**
    * Teardown: Limpa banco após cada teste
    */
   afterEach(async () => {
-    console.log("[TEST TEARDOWN] 🧹 Limpando banco após teste...");
-    
+    console.log('[TEST TEARDOWN] 🧹 Limpando banco após teste...');
+
     // Usar o helper robusto de limpeza
     await cleanTestDatabase();
-    
-    console.log("[TEST TEARDOWN] ✅ Banco limpo");
+
+    console.log('[TEST TEARDOWN] ✅ Banco limpo');
   });
-  
+
   /**
    * CENÁRIO 1: Transição Válida
    * Testa uma transição permitida pelo grafo de estados
    */
-  describe("Cenário 1: Transição Válida", () => {
-    it("deve permitir transição de RASCUNHO para APROVADO", async () => {
-      console.log("[TEST] 🎯 Testando transição válida: RASCUNHO → APROVADO");
-      
+  describe('Cenário 1: Transição Válida', () => {
+    it('deve permitir transição de RASCUNHO para APROVADO', async () => {
+      console.log('[TEST] 🎯 Testando transição válida: RASCUNHO → APROVADO');
+
       // Executar transição
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.APROVADO,
         userId: testUserId,
-        observacoes: "Proposta aprovada pelo analista"
+        observacoes: 'Proposta aprovada pelo analista',
       });
-      
+
       // A função não retorna nada, então verificamos o banco
-      
+
       // Verificar atualização na tabela propostas
       const [updatedProposal] = await db
         .select()
         .from(propostas)
         .where(eq(propostas.id, testProposalId))
         .limit(1);
-      
+
       expect(updatedProposal.status).toBe(ProposalStatus.APROVADO);
-      
+
       // Verificar criação de log
       const logs = await db
         .select()
         .from(propostaLogs)
         .where(eq(propostaLogs.propostaId, testProposalId))
         .orderBy(desc(propostaLogs.createdAt));
-      
+
       expect(logs.length).toBeGreaterThan(0);
       const latestLog = logs[0];
       expect(latestLog.statusNovo).toBe(ProposalStatus.APROVADO);
-      expect(latestLog.observacao).toContain("Proposta aprovada pelo analista");
-      
-      console.log("[TEST] ✅ Transição válida executada com sucesso");
+      expect(latestLog.observacao).toContain('Proposta aprovada pelo analista');
+
+      console.log('[TEST] ✅ Transição válida executada com sucesso');
     });
-    
-    it("deve permitir múltiplas transições válidas em sequência", async () => {
-      console.log("[TEST] 🎯 Testando cadeia de transições válidas");
-      
+
+    it('deve permitir múltiplas transições válidas em sequência', async () => {
+      console.log('[TEST] 🎯 Testando cadeia de transições válidas');
+
       // RASCUNHO → APROVADO
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.APROVADO,
-        userId: testUserId
+        userId: testUserId,
       });
-      
+
       // APROVADO → CCB_GERADA
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.CCB_GERADA,
-        userId: testUserId
+        userId: testUserId,
       });
-      
+
       // CCB_GERADA → AGUARDANDO_ASSINATURA
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.AGUARDANDO_ASSINATURA,
         userId: testUserId,
-        observacoes: "CCB enviada para assinatura"
+        observacoes: 'CCB enviada para assinatura',
       });
-      
+
       // Verificar estado final
       const [finalProposal] = await db
         .select()
         .from(propostas)
         .where(eq(propostas.id, testProposalId))
         .limit(1);
-      
+
       expect(finalProposal.status).toBe(ProposalStatus.AGUARDANDO_ASSINATURA);
-      
-      console.log("[TEST] ✅ Cadeia de transições executada com sucesso");
+
+      console.log('[TEST] ✅ Cadeia de transições executada com sucesso');
     });
   });
-  
+
   /**
    * CENÁRIO 2: Transição Inválida
    * Testa transições não permitidas pelo grafo de estados
    */
-  describe("Cenário 2: Transição Inválida", () => {
-    it("deve rejeitar transição de APROVADO para REJEITADO diretamente", async () => {
-      console.log("[TEST] 🚫 Testando transição inválida: APROVADO → REJEITADO");
-      
+  describe('Cenário 2: Transição Inválida', () => {
+    it('deve rejeitar transição de APROVADO para REJEITADO diretamente', async () => {
+      console.log('[TEST] 🚫 Testando transição inválida: APROVADO → REJEITADO');
+
       // Primeiro, mover para APROVADO
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.APROVADO,
-        userId: testUserId
+        userId: testUserId,
       });
-      
+
       // Tentar transição inválida (APROVADO pode virar REJEITADO segundo o grafo, vamos testar outro caso)
       // Vamos testar ASSINATURA_CONCLUIDA → RASCUNHO que é claramente inválida
-      
+
       // Primeiro vamos para ASSINATURA_CONCLUIDA através de transições válidas
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.CCB_GERADA,
-        userId: testUserId
+        userId: testUserId,
       });
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.AGUARDANDO_ASSINATURA,
-        userId: testUserId
+        userId: testUserId,
       });
       await transitionTo({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.ASSINATURA_CONCLUIDA,
-        userId: testUserId
+        userId: testUserId,
       });
-      
+
       // Agora tentar voltar para RASCUNHO (inválido)
       await expect(
         transitionTo({
           propostaId: testProposalId,
           novoStatus: ProposalStatus.RASCUNHO,
-          userId: testUserId
+          userId: testUserId,
         })
       ).rejects.toThrow(InvalidTransitionError);
-      
+
       // Verificar que o status não mudou
       const [unchangedProposal] = await db
         .select()
         .from(propostas)
         .where(eq(propostas.id, testProposalId))
         .limit(1);
-      
+
       expect(unchangedProposal.status).toBe(ProposalStatus.ASSINATURA_CONCLUIDA);
-      
-      console.log("[TEST] ✅ Transição inválida corretamente rejeitada");
+
+      console.log('[TEST] ✅ Transição inválida corretamente rejeitada');
     });
-    
-    it("deve validar corretamente transições através do método getPossibleTransitions", async () => {
-      console.log("[TEST] 🔍 Testando validação de transições");
-      
+
+    it('deve validar corretamente transições através do método getPossibleTransitions', async () => {
+      console.log('[TEST] 🔍 Testando validação de transições');
+
       // Obter transições possíveis
       const fromRascunho = getPossibleTransitions(ProposalStatus.RASCUNHO);
       expect(fromRascunho).toContain(ProposalStatus.APROVADO);
       expect(fromRascunho).toContain(ProposalStatus.REJEITADO);
-      
+
       const fromRejeitado = getPossibleTransitions(ProposalStatus.REJEITADO);
       expect(fromRejeitado).toHaveLength(0); // Estado final
-      
+
       // Validar estados finais
       expect(isFinalStatus(ProposalStatus.REJEITADO)).toBe(true);
       expect(isFinalStatus(ProposalStatus.PAGAMENTO_AUTORIZADO)).toBe(true);
       expect(isFinalStatus(ProposalStatus.RASCUNHO)).toBe(false);
-      
-      console.log("[TEST] ✅ Validação de transições funcionando corretamente");
+
+      console.log('[TEST] ✅ Validação de transições funcionando corretamente');
     });
   });
-  
+
   /**
    * CENÁRIO 3: Atomicidade da Dupla Escrita
    * Valida que as escritas nas tabelas propostas e status_contextuais
    * ocorrem de forma atômica (tudo ou nada)
    */
-  describe("Cenário 3: Atomicidade da Dupla Escrita", () => {
-    it("deve garantir atomicidade ao atualizar status com contexto", async () => {
-      console.log("[TEST] ⚛️ Testando atomicidade da dupla escrita");
-      
-      const contexto: StatusContexto = "formalizacao";
+  describe('Cenário 3: Atomicidade da Dupla Escrita', () => {
+    it('deve garantir atomicidade ao atualizar status com contexto', async () => {
+      console.log('[TEST] ⚛️ Testando atomicidade da dupla escrita');
+
+      const contexto: StatusContexto = 'formalizacao';
       const novoStatus = ProposalStatus.APROVADO;
-      
+
       // Executar atualização com contexto
       const result = await updateStatusWithContext({
         propostaId: testProposalId,
         novoStatus: novoStatus,
         contexto: contexto,
         userId: testUserId,
-        observacoes: "Teste de atomicidade",
-        metadata: { teste: true }
+        observacoes: 'Teste de atomicidade',
+        metadata: { teste: true },
       });
-      
+
       expect(result.success).toBe(true);
       expect(result.statusLegado).toBe(novoStatus);
       expect(result.statusContextual).toBe(novoStatus);
       expect(result.contexto).toBe(contexto);
-      
+
       // Verificar que ambas as tabelas foram atualizadas
       const [propostaAtualizada] = await db
         .select()
         .from(propostas)
         .where(eq(propostas.id, testProposalId))
         .limit(1);
-      
+
       const [statusContextual] = await db
         .select()
         .from(statusContextuais)
@@ -316,122 +316,122 @@ describe("Sistema de Status FSM - Testes de Integração", () => {
           )
         )
         .limit(1);
-      
+
       // Ambas devem ter o mesmo status
       expect(propostaAtualizada.status).toBe(novoStatus);
       expect(statusContextual.status).toBe(novoStatus);
       expect(statusContextual.contexto).toBe(contexto);
-      
-      console.log("[TEST] ✅ Atomicidade garantida - ambas as tabelas atualizadas");
+
+      console.log('[TEST] ✅ Atomicidade garantida - ambas as tabelas atualizadas');
     });
-    
-    it("deve criar log de auditoria durante dupla escrita", async () => {
-      console.log("[TEST] 📝 Testando criação de logs de auditoria");
-      
+
+    it('deve criar log de auditoria durante dupla escrita', async () => {
+      console.log('[TEST] 📝 Testando criação de logs de auditoria');
+
       // Executar atualização
       await updateStatusWithContext({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.APROVADO,
-        contexto: "geral",
+        contexto: 'geral',
         userId: testUserId,
-        observacoes: "Aprovação para teste de auditoria"
+        observacoes: 'Aprovação para teste de auditoria',
       });
-      
+
       // Verificar logs
       const logs = await db
         .select()
         .from(propostaLogs)
         .where(eq(propostaLogs.propostaId, testProposalId))
         .orderBy(desc(propostaLogs.createdAt));
-      
+
       expect(logs.length).toBeGreaterThan(0);
-      
+
       const auditLog = logs[0];
       expect(auditLog.statusAnterior).toBe(ProposalStatus.RASCUNHO);
       expect(auditLog.statusNovo).toBe(ProposalStatus.APROVADO);
       expect(auditLog.autorId).toBe(testUserId);
-      
-      console.log("[TEST] ✅ Log de auditoria criado corretamente");
+
+      console.log('[TEST] ✅ Log de auditoria criado corretamente');
     });
-    
-    it("deve manter consistência mesmo com múltiplos contextos", async () => {
-      console.log("[TEST] 🔄 Testando múltiplos contextos");
-      
+
+    it('deve manter consistência mesmo com múltiplos contextos', async () => {
+      console.log('[TEST] 🔄 Testando múltiplos contextos');
+
       // Atualizar com contexto 'formalizacao'
       await updateStatusWithContext({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.APROVADO,
-        contexto: "formalizacao",
-        userId: testUserId
+        contexto: 'formalizacao',
+        userId: testUserId,
       });
-      
+
       // Atualizar com contexto 'pagamentos' (mesmo status)
       await updateStatusWithContext({
         propostaId: testProposalId,
         novoStatus: ProposalStatus.APROVADO,
-        contexto: "pagamentos",
-        userId: testUserId
+        contexto: 'pagamentos',
+        userId: testUserId,
       });
-      
+
       // Verificar que existem 2 registros de contexto
       const contextosRegistrados = await db
         .select()
         .from(statusContextuais)
         .where(eq(statusContextuais.propostaId, testProposalId));
-      
+
       expect(contextosRegistrados.length).toBe(2);
-      expect(contextosRegistrados.every(c => c.status === ProposalStatus.APROVADO)).toBe(true);
-      
+      expect(contextosRegistrados.every((c) => c.status === ProposalStatus.APROVADO)).toBe(true);
+
       // Verificar que a tabela principal tem o status correto
       const [proposta] = await db
         .select()
         .from(propostas)
         .where(eq(propostas.id, testProposalId))
         .limit(1);
-      
+
       expect(proposta.status).toBe(ProposalStatus.APROVADO);
-      
-      console.log("[TEST] ✅ Múltiplos contextos mantêm consistência");
+
+      console.log('[TEST] ✅ Múltiplos contextos mantêm consistência');
     });
   });
-  
+
   /**
    * Testes Adicionais: Edge Cases e Validações
    */
-  describe("Edge Cases e Validações", () => {
-    it("deve rejeitar transição para proposta inexistente", async () => {
-      console.log("[TEST] 🚫 Testando proposta inexistente");
-      
+  describe('Edge Cases e Validações', () => {
+    it('deve rejeitar transição para proposta inexistente', async () => {
+      console.log('[TEST] 🚫 Testando proposta inexistente');
+
       await expect(
         transitionTo({
-          propostaId: "proposta-inexistente",
+          propostaId: 'proposta-inexistente',
           novoStatus: ProposalStatus.APROVADO,
-          userId: testUserId
+          userId: testUserId,
         })
       ).rejects.toThrow();
-      
-      console.log("[TEST] ✅ Erro lançado para proposta inexistente");
+
+      console.log('[TEST] ✅ Erro lançado para proposta inexistente');
     });
-    
-    it("deve obter transições possíveis para proposta específica", async () => {
-      console.log("[TEST] 🎰 Testando obtenção de transições possíveis");
-      
+
+    it('deve obter transições possíveis para proposta específica', async () => {
+      console.log('[TEST] 🎰 Testando obtenção de transições possíveis');
+
       // Buscar proposta atual
       const [proposta] = await db
         .select()
         .from(propostas)
         .where(eq(propostas.id, testProposalId))
         .limit(1);
-      
+
       // Obter transições possíveis do status atual
       const possibleTransitions = getPossibleTransitions(proposta.status);
-      
+
       expect(proposta.status).toBe(ProposalStatus.RASCUNHO);
       expect(possibleTransitions).toContain(ProposalStatus.APROVADO);
       expect(possibleTransitions).toContain(ProposalStatus.REJEITADO);
       expect(possibleTransitions).toContain(ProposalStatus.SUSPENSA);
-      
-      console.log("[TEST] ✅ Transições possíveis obtidas corretamente");
+
+      console.log('[TEST] ✅ Transições possíveis obtidas corretamente');
     });
   });
 });

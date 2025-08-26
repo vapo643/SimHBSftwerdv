@@ -4,11 +4,11 @@
  * Following architectural boundary rules - controllers must not access DB directly
  */
 
-import { BaseRepository } from "./base.repository";
-import { createServerSupabaseAdminClient } from "../lib/supabase";
-import { db } from "../lib/supabase";
-import { propostas, statusContextuais } from "@shared/schema";
-import { eq, and, desc, isNull } from "drizzle-orm";
+import { BaseRepository } from './base.repository';
+import { createServerSupabaseAdminClient } from '../lib/supabase';
+import { db } from '../lib/supabase';
+import { propostas, statusContextuais } from '@shared/schema';
+import { eq, and, desc, isNull } from 'drizzle-orm';
 
 export interface Proposta {
   id: string;
@@ -45,7 +45,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   private supabaseAdmin;
 
   constructor() {
-    super("propostas");
+    super('propostas');
     this.supabaseAdmin = createServerSupabaseAdminClient();
   }
 
@@ -62,7 +62,9 @@ export class PropostaRepository extends BaseRepository<Proposta> {
 
       return (proposta as any) || null;
     } catch (error) {
-      throw new Error(`Failed to fetch proposta: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to fetch proposta: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -72,16 +74,19 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async getPropostaWithDetails(propostaId: string): Promise<PropostaWithDetails | null> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select(`
+      .select(
+        `
         *,
         user:profiles!propostas_user_id_fkey(id, full_name, email),
         loja:lojas!propostas_loja_id_fkey(id, nome)
-      `)
-      .eq("id", propostaId)
+      `
+      )
+      .eq('id', propostaId)
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") { // Not found
+      if (error.code === 'PGRST116') {
+        // Not found
         return null;
       }
       throw new Error(`Failed to fetch proposta with details: ${error.message}`);
@@ -96,11 +101,11 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async updateStatus(propostaId: string, novoStatus: string): Promise<void> {
     const { error } = await this.supabaseAdmin
       .from(this.tableName)
-      .update({ 
+      .update({
         status: novoStatus,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq("id", propostaId);
+      .eq('id', propostaId);
 
     if (error) {
       throw new Error(`Failed to update proposta status: ${error.message}`);
@@ -113,10 +118,10 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async getPropostasByStatus(status: string): Promise<Proposta[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .eq("status", status)
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false });
+      .select('*')
+      .eq('status', status)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to fetch propostas by status: ${error.message}`);
@@ -131,10 +136,10 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async getPropostasByUser(userId: string): Promise<Proposta[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .eq("user_id", userId)
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false });
+      .select('*')
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to fetch propostas by user: ${error.message}`);
@@ -149,10 +154,10 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async getPropostasByLoja(lojaId: number): Promise<Proposta[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .eq("loja_id", lojaId)
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false });
+      .select('*')
+      .eq('loja_id', lojaId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to fetch propostas by loja: ${error.message}`);
@@ -170,15 +175,13 @@ export class PropostaRepository extends BaseRepository<Proposta> {
     tipo: string;
     mensagem: string;
   }): Promise<void> {
-    const { error } = await this.supabaseAdmin
-      .from("comunicacao_logs")
-      .insert({
-        ...log,
-        created_at: new Date().toISOString()
-      });
+    const { error } = await this.supabaseAdmin.from('comunicacao_logs').insert({
+      ...log,
+      created_at: new Date().toISOString(),
+    });
 
     if (error) {
-      console.error("Failed to create communication log:", error);
+      console.error('Failed to create communication log:', error);
       // Non-critical error, don't throw
     }
   }
@@ -189,11 +192,11 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async getPropostasPendingSignature(): Promise<Proposta[]> {
     const { data, error } = await this.supabaseAdmin
       .from(this.tableName)
-      .select("*")
-      .eq("ccb_gerado", true)
-      .eq("assinatura_eletronica_concluida", false)
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false });
+      .select('*')
+      .eq('ccb_gerado', true)
+      .eq('assinatura_eletronica_concluida', false)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to fetch propostas pending signature: ${error.message}`);
@@ -208,11 +211,11 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async updateCcbPath(propostaId: string, ccbPath: string): Promise<void> {
     const { error } = await this.supabaseAdmin
       .from(this.tableName)
-      .update({ 
+      .update({
         caminho_ccb_assinado: ccbPath,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq("id", propostaId);
+      .eq('id', propostaId);
 
     if (error) {
       throw new Error(`Failed to update CCB path: ${error.message}`);
@@ -225,11 +228,11 @@ export class PropostaRepository extends BaseRepository<Proposta> {
   async markCcbGenerated(propostaId: string): Promise<void> {
     const { error } = await this.supabaseAdmin
       .from(this.tableName)
-      .update({ 
+      .update({
         ccb_gerado: true,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq("id", propostaId);
+      .eq('id', propostaId);
 
     if (error) {
       throw new Error(`Failed to mark CCB as generated: ${error.message}`);
@@ -243,7 +246,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
     const updateData: any = {
       assinatura_eletronica_concluida: true,
       data_aprovacao: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     if (clicksignKey) {
@@ -253,7 +256,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
     const { error } = await this.supabaseAdmin
       .from(this.tableName)
       .update(updateData)
-      .eq("id", propostaId);
+      .eq('id', propostaId);
 
     if (error) {
       throw new Error(`Failed to mark signature as completed: ${error.message}`);
@@ -265,11 +268,11 @@ export class PropostaRepository extends BaseRepository<Proposta> {
    */
   async generateCcbSignedUrl(path: string, expiresIn: number = 3600): Promise<string | null> {
     const { data, error } = await this.supabaseAdmin.storage
-      .from("documents")
+      .from('documents')
       .createSignedUrl(path, expiresIn);
 
     if (error) {
-      console.error("Failed to generate signed URL:", error);
+      console.error('Failed to generate signed URL:', error);
       return null;
     }
 
@@ -281,13 +284,13 @@ export class PropostaRepository extends BaseRepository<Proposta> {
    */
   async checkCcbExists(path: string): Promise<boolean> {
     const { data, error } = await this.supabaseAdmin.storage
-      .from("documents")
-      .list(path.split("/").slice(0, -1).join("/"), {
-        search: path.split("/").pop()
+      .from('documents')
+      .list(path.split('/').slice(0, -1).join('/'), {
+        search: path.split('/').pop(),
       });
 
     if (error) {
-      console.error("Failed to check CCB existence:", error);
+      console.error('Failed to check CCB existence:', error);
       return false;
     }
 

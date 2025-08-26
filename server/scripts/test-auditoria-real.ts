@@ -3,50 +3,50 @@
  * Executa operações reais e captura logs de auditoria completos
  */
 
-import axios from "axios";
+import axios from 'axios';
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = 'http://localhost:5000/api';
 
-console.log("🔍 ====== TESTE REAL DE AUDITORIA ======\n");
+console.log('🔍 ====== TESTE REAL DE AUDITORIA ======\n');
 
 async function fazerLogin(): Promise<string> {
   try {
-    console.log("🔐 Fazendo login como administrador...");
+    console.log('🔐 Fazendo login como administrador...');
 
     const response = await axios.post(`${API_URL}/auth/login`, {
-      email: "admin@simpix.com", // Sem .br
-      password: "admin123", // Senha simples que funciona
+      email: 'admin@simpix.com', // Sem .br
+      password: 'admin123', // Senha simples que funciona
     });
 
     if (response.data.token) {
-      console.log("✅ Login realizado com sucesso!\n");
+      console.log('✅ Login realizado com sucesso!\n');
       return response.data.token;
     } else {
-      throw new Error("Token não retornado");
+      throw new Error('Token não retornado');
     }
   } catch (error: any) {
-    console.log("❌ Erro no login, tentando criar usuário admin...\n");
+    console.log('❌ Erro no login, tentando criar usuário admin...\n');
 
     // Tentar criar usuário admin se não existir
     try {
       await axios.post(`${API_URL}/auth/register`, {
-        email: "admin@simpix.com",
-        password: "admin123",
-        nome: "Administrador",
-        role: "ADMINISTRADOR",
+        email: 'admin@simpix.com',
+        password: 'admin123',
+        nome: 'Administrador',
+        role: 'ADMINISTRADOR',
       });
 
-      console.log("✅ Usuário admin criado, fazendo login...");
+      console.log('✅ Usuário admin criado, fazendo login...');
 
       const loginResponse = await axios.post(`${API_URL}/auth/login`, {
-        email: "admin@simpix.com",
-        password: "admin123",
+        email: 'admin@simpix.com',
+        password: 'admin123',
       });
 
       return loginResponse.data.token;
     } catch (createError) {
-      console.error("❌ Erro ao criar usuário admin:", createError);
-      throw new Error("Não foi possível autenticar");
+      console.error('❌ Erro ao criar usuário admin:', createError);
+      throw new Error('Não foi possível autenticar');
     }
   }
 }
@@ -55,7 +55,7 @@ async function buscarPropostaComBoletos(
   token: string
 ): Promise<{ propostaId: string; codigoSolicitacao: string }> {
   try {
-    console.log("📋 Buscando proposta com boletos ativos...");
+    console.log('📋 Buscando proposta com boletos ativos...');
 
     // Buscar primeira proposta com boletos ativos
     const response = await axios.get(`${API_URL}/inter/collections/list`, {
@@ -66,10 +66,10 @@ async function buscarPropostaComBoletos(
     });
 
     const collections = response.data.collections || [];
-    const boletoAtivo = collections.find((c: any) => c.isActive && c.situacao === "A_RECEBER");
+    const boletoAtivo = collections.find((c: any) => c.isActive && c.situacao === 'A_RECEBER');
 
     if (!boletoAtivo) {
-      throw new Error("Nenhum boleto ativo encontrado");
+      throw new Error('Nenhum boleto ativo encontrado');
     }
 
     console.log(`✅ Boleto encontrado: ${boletoAtivo.codigoSolicitacao}\n`);
@@ -79,20 +79,20 @@ async function buscarPropostaComBoletos(
       codigoSolicitacao: boletoAtivo.codigoSolicitacao,
     };
   } catch (error) {
-    console.error("❌ Erro ao buscar boletos:", error);
+    console.error('❌ Erro ao buscar boletos:', error);
     throw error;
   }
 }
 
 async function testarProrrogacaoComAuditoria(token: string, codigoSolicitacao: string) {
-  console.log("🚀 TESTE 1: PRORROGAÇÃO DE VENCIMENTO COM AUDITORIA");
-  console.log("===================================================\n");
+  console.log('🚀 TESTE 1: PRORROGAÇÃO DE VENCIMENTO COM AUDITORIA');
+  console.log('===================================================\n');
 
   try {
     // Calcular nova data (30 dias a mais)
     const hoje = new Date();
     hoje.setDate(hoje.getDate() + 30);
-    const novaData = hoje.toISOString().split("T")[0];
+    const novaData = hoje.toISOString().split('T')[0];
 
     console.log(`📅 Prorrogando boleto ${codigoSolicitacao} para ${novaData}...\n`);
 
@@ -106,25 +106,25 @@ async function testarProrrogacaoComAuditoria(token: string, codigoSolicitacao: s
         headers: {
           Authorization: `Bearer ${token}`,
           Cookie: `jwt=${token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
-    console.log("✅ RESPOSTA DA PRORROGAÇÃO:");
+    console.log('✅ RESPOSTA DA PRORROGAÇÃO:');
     console.log(JSON.stringify(response.data, null, 2));
-    console.log("\n");
+    console.log('\n');
 
     return true;
   } catch (error: any) {
-    console.error("❌ Erro na prorrogação:", error.response?.data || error.message);
+    console.error('❌ Erro na prorrogação:', error.response?.data || error.message);
     return false;
   }
 }
 
 async function testarDescontoComAuditoria(token: string, propostaId: string) {
-  console.log("🚀 TESTE 2: DESCONTO DE QUITAÇÃO COM AUDITORIA");
-  console.log("===============================================\n");
+  console.log('🚀 TESTE 2: DESCONTO DE QUITAÇÃO COM AUDITORIA');
+  console.log('===============================================\n');
 
   try {
     // Buscar informações da proposta
@@ -141,7 +141,7 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     const { valorRestante } = proposalResponse.data;
 
     if (!valorRestante || valorRestante <= 0) {
-      console.log("❌ Valor restante não encontrado ou inválido");
+      console.log('❌ Valor restante não encontrado ou inválido');
       return false;
     }
 
@@ -157,8 +157,8 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     parcela2Data.setDate(parcela2Data.getDate() + 60);
 
     const novasParcelas = [
-      { valor: novoValorTotal / 2, dataVencimento: parcela1Data.toISOString().split("T")[0] },
-      { valor: novoValorTotal / 2, dataVencimento: parcela2Data.toISOString().split("T")[0] },
+      { valor: novoValorTotal / 2, dataVencimento: parcela1Data.toISOString().split('T')[0] },
+      { valor: novoValorTotal / 2, dataVencimento: parcela2Data.toISOString().split('T')[0] },
     ];
 
     console.log(`💰 Aplicando desconto de quitação:`);
@@ -178,18 +178,18 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
         headers: {
           Authorization: `Bearer ${token}`,
           Cookie: `jwt=${token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
-    console.log("✅ RESPOSTA DO DESCONTO:");
+    console.log('✅ RESPOSTA DO DESCONTO:');
     console.log(JSON.stringify(response.data, null, 2));
-    console.log("\n");
+    console.log('\n');
 
     return true;
   } catch (error: any) {
-    console.error("❌ Erro no desconto:", error.response?.data || error.message);
+    console.error('❌ Erro no desconto:', error.response?.data || error.message);
     return false;
   }
 }
@@ -200,24 +200,24 @@ async function executarTestes() {
     const token = await fazerLogin();
     const { propostaId, codigoSolicitacao } = await buscarPropostaComBoletos(token);
 
-    console.log("📊 DADOS PARA TESTE:");
+    console.log('📊 DADOS PARA TESTE:');
     console.log(`   • Proposta ID: ${propostaId}`);
     console.log(`   • Código Solicitação: ${codigoSolicitacao}\n`);
 
     const resultadoProrrogacao = await testarProrrogacaoComAuditoria(token, codigoSolicitacao);
 
     // Aguardar um pouco entre os testes
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const resultadoDesconto = await testarDescontoComAuditoria(token, propostaId);
 
-    console.log("🏁 ====== RELATÓRIO FINAL ======");
-    console.log(`✅ Prorrogação: ${resultadoProrrogacao ? "SUCESSO" : "FALHA"}`);
-    console.log(`✅ Desconto: ${resultadoDesconto ? "SUCESSO" : "FALHA"}`);
-    console.log("\n🔍 Verifique os logs do servidor para ver a auditoria completa!");
-    console.log("====== FIM DOS TESTES ======\n");
+    console.log('🏁 ====== RELATÓRIO FINAL ======');
+    console.log(`✅ Prorrogação: ${resultadoProrrogacao ? 'SUCESSO' : 'FALHA'}`);
+    console.log(`✅ Desconto: ${resultadoDesconto ? 'SUCESSO' : 'FALHA'}`);
+    console.log('\n🔍 Verifique os logs do servidor para ver a auditoria completa!');
+    console.log('====== FIM DOS TESTES ======\n');
   } catch (error) {
-    console.error("❌ Erro geral nos testes:", error);
+    console.error('❌ Erro geral nos testes:', error);
   }
 }
 

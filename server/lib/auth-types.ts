@@ -34,6 +34,6 @@ export interface ServerAuthProvider {
  * Configuração do provedor de autenticação no servidor
  */
 export interface ServerAuthConfig {
-  provider: "supabase" | "firebase" | "auth0" | "custom";
+  provider: 'supabase' | 'firebase' | 'auth0' | 'custom';
   options?: Record<string, any>;
 }

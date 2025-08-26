@@ -1,27 +1,27 @@
-import { useState, useEffect } from "react";
-import { useRoute, useLocation } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+import { useState, useEffect } from 'react';
+import { useRoute, useLocation } from 'wouter';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   CheckCircle,
   AlertTriangle,
@@ -40,11 +40,11 @@ import {
   AlertCircle,
   Clock,
   Calculator,
-} from "lucide-react";
-import RefreshButton from "@/components/RefreshButton";
+} from 'lucide-react';
+import RefreshButton from '@/components/RefreshButton';
 
 const decisionSchema = z.object({
-  status: z.enum(["aprovado", "rejeitado", "solicitar_info"]),
+  status: z.enum(['aprovado', 'rejeitado', 'solicitar_info']),
   valorAprovado: z.string().optional(),
   taxaJuros: z.string().optional(),
   observacoes: z.string().optional(),
@@ -73,7 +73,7 @@ interface Proposta {
 }
 
 export default function AnaliseManual() {
-  const [, params] = useRoute("/credito/analise/:id");
+  const [, params] = useRoute('/credito/analise/:id');
   const [, setLocation] = useLocation();
   const propostaId = params?.id;
   const { toast } = useToast();
@@ -87,21 +87,21 @@ export default function AnaliseManual() {
     error,
     isError,
   } = useQuery<Proposta>({
-    queryKey: ["/api/propostas", propostaId],
+    queryKey: ['/api/propostas', propostaId],
     enabled: !!propostaId,
     retry: (failureCount, error) => {
       // Only retry on network errors, not on 404s
-      if (error instanceof Error && error.message.includes("404")) {
+      if (error instanceof Error && error.message.includes('404')) {
         return false;
       }
       return failureCount < 2;
     },
     onError: (error: any) => {
-      console.error("Failed to fetch proposta:", error);
+      console.error('Failed to fetch proposta:', error);
       toast({
-        title: "Erro ao carregar proposta",
-        description: error.message || "Não foi possível carregar os dados da proposta.",
-        variant: "destructive",
+        title: 'Erro ao carregar proposta',
+        description: error.message || 'Não foi possível carregar os dados da proposta.',
+        variant: 'destructive',
       });
     },
   });
@@ -118,21 +118,21 @@ export default function AnaliseManual() {
 
   const updateProposta = useMutation({
     mutationFn: async (data: DecisionForm) => {
-      const response = await apiRequest("PATCH", `/api/propostas/${propostaId}`, data);
+      const response = await apiRequest('PATCH', `/api/propostas/${propostaId}`, data);
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Decisão salva com sucesso!",
-        description: "A proposta foi atualizada.",
+        title: 'Decisão salva com sucesso!',
+        description: 'A proposta foi atualizada.',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao salvar decisão",
-        description: error.message || "Tente novamente em alguns instantes.",
-        variant: "destructive",
+        title: 'Erro ao salvar decisão',
+        description: error.message || 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
       });
     },
   });
@@ -142,23 +142,23 @@ export default function AnaliseManual() {
   };
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/propostas", propostaId] });
+    queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
   };
 
   const formatCurrency = (value: string) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(parseFloat(value));
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("pt-BR");
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   // Enhanced credit analysis logic
   const getCreditAnalysis = (proposta: Proposta) => {
-    const renda = parseFloat(proposta.clienteRenda.replace(/[^\d,]/g, "").replace(",", "."));
+    const renda = parseFloat(proposta.clienteRenda.replace(/[^\d,]/g, '').replace(',', '.'));
     const valor = parseFloat(proposta.valor);
     const idade = new Date().getFullYear() - new Date(proposta.clienteDataNascimento).getFullYear();
 
@@ -176,34 +176,34 @@ export default function AnaliseManual() {
     else if (incomeRatio <= 20) score += 20;
 
     // Loan purpose
-    if (proposta.finalidade === "investimento") score += 30;
-    else if (proposta.finalidade === "capital_giro") score += 20;
+    if (proposta.finalidade === 'investimento') score += 30;
+    else if (proposta.finalidade === 'capital_giro') score += 20;
 
     // Collateral
-    if (proposta.garantia === "imovel") score += 80;
-    else if (proposta.garantia === "veiculo") score += 40;
-    else if (proposta.garantia === "aval") score += 30;
+    if (proposta.garantia === 'imovel') score += 80;
+    else if (proposta.garantia === 'veiculo') score += 40;
+    else if (proposta.garantia === 'aval') score += 30;
 
     // Risk assessment
-    let risco = "Baixo";
-    let riscoColor = "green";
+    let risco = 'Baixo';
+    let riscoColor = 'green';
     let taxaSugerida = 1.8;
 
     if (score >= 750) {
-      risco = "Baixo";
-      riscoColor = "green";
+      risco = 'Baixo';
+      riscoColor = 'green';
       taxaSugerida = 1.8;
     } else if (score >= 650) {
-      risco = "Médio";
-      riscoColor = "yellow";
+      risco = 'Médio';
+      riscoColor = 'yellow';
       taxaSugerida = 2.5;
     } else if (score >= 550) {
-      risco = "Alto";
-      riscoColor = "orange";
+      risco = 'Alto';
+      riscoColor = 'orange';
       taxaSugerida = 4.2;
     } else {
-      risco = "Muito Alto";
-      riscoColor = "red";
+      risco = 'Muito Alto';
+      riscoColor = 'red';
       taxaSugerida = 6.5;
     }
 
@@ -216,10 +216,10 @@ export default function AnaliseManual() {
       idade,
       recommendation:
         score >= 650
-          ? "Aprovação recomendada"
+          ? 'Aprovação recomendada'
           : score >= 550
-            ? "Análise detalhada necessária"
-            : "Rejeição recomendada",
+            ? 'Análise detalhada necessária'
+            : 'Rejeição recomendada',
     };
   };
 
@@ -229,7 +229,7 @@ export default function AnaliseManual() {
   useEffect(() => {
     if (analysisStarted && analysisProgress < 100) {
       const timer = setTimeout(() => {
-        setAnalysisProgress(prev => Math.min(100, prev + 10));
+        setAnalysisProgress((prev) => Math.min(100, prev + 10));
       }, 200);
       return () => clearTimeout(timer);
     }
@@ -245,7 +245,7 @@ export default function AnaliseManual() {
       <DashboardLayout title="Análise Manual">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardContent className="p-6">
                   <div className="h-32 rounded bg-gray-200"></div>
@@ -275,12 +275,12 @@ export default function AnaliseManual() {
             <p className="mt-2 text-gray-500">
               {error instanceof Error
                 ? error.message
-                : "Não foi possível carregar os dados da proposta"}
+                : 'Não foi possível carregar os dados da proposta'}
             </p>
           </div>
           <Button
             variant="outline"
-            onClick={() => setLocation("/credito/fila")}
+            onClick={() => setLocation('/credito/fila')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -304,7 +304,7 @@ export default function AnaliseManual() {
           </div>
           <Button
             variant="outline"
-            onClick={() => setLocation("/credito/fila")}
+            onClick={() => setLocation('/credito/fila')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -325,7 +325,7 @@ export default function AnaliseManual() {
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
-            onClick={() => setLocation("/credito/fila")}
+            onClick={() => setLocation('/credito/fila')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -333,16 +333,22 @@ export default function AnaliseManual() {
           </Button>
 
           <div className="flex items-center gap-2">
-            <Badge variant={(proposta.statusContextual || proposta.status) === "aguardando_analise" ? "secondary" : "default"}>
-              {(proposta.statusContextual || proposta.status) === "aguardando_analise"
-                ? "Aguardando Análise"
-                : (proposta.statusContextual || proposta.status) === "em_analise"
-                  ? "Em Análise"
-                  : (proposta.statusContextual || proposta.status) === "aprovado"
-                    ? "Aprovado"
-                    : (proposta.statusContextual || proposta.status) === "rejeitado"
-                      ? "Rejeitado"
-                      : (proposta.statusContextual || proposta.status)}
+            <Badge
+              variant={
+                (proposta.statusContextual || proposta.status) === 'aguardando_analise'
+                  ? 'secondary'
+                  : 'default'
+              }
+            >
+              {(proposta.statusContextual || proposta.status) === 'aguardando_analise'
+                ? 'Aguardando Análise'
+                : (proposta.statusContextual || proposta.status) === 'em_analise'
+                  ? 'Em Análise'
+                  : (proposta.statusContextual || proposta.status) === 'aprovado'
+                    ? 'Aprovado'
+                    : (proposta.statusContextual || proposta.status) === 'rejeitado'
+                      ? 'Rejeitado'
+                      : proposta.statusContextual || proposta.status}
             </Badge>
             <Button
               onClick={startAnalysis}
@@ -350,7 +356,7 @@ export default function AnaliseManual() {
               className="flex items-center gap-2"
             >
               {analysisStarted ? <Clock className="h-4 w-4" /> : <Calculator className="h-4 w-4" />}
-              {analysisStarted ? "Analisando..." : "Iniciar Análise"}
+              {analysisStarted ? 'Analisando...' : 'Iniciar Análise'}
             </Button>
           </div>
         </div>
@@ -484,23 +490,23 @@ export default function AnaliseManual() {
                       <div
                         className={`mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full ${
                           creditAnalysis.score >= 750
-                            ? "bg-green-100"
+                            ? 'bg-green-100'
                             : creditAnalysis.score >= 650
-                              ? "bg-yellow-100"
+                              ? 'bg-yellow-100'
                               : creditAnalysis.score >= 550
-                                ? "bg-orange-100"
-                                : "bg-red-100"
+                                ? 'bg-orange-100'
+                                : 'bg-red-100'
                         }`}
                       >
                         <CheckCircle
                           className={`h-8 w-8 ${
                             creditAnalysis.score >= 750
-                              ? "text-green-600"
+                              ? 'text-green-600'
                               : creditAnalysis.score >= 650
-                                ? "text-yellow-600"
+                                ? 'text-yellow-600'
                                 : creditAnalysis.score >= 550
-                                  ? "text-orange-600"
-                                  : "text-red-600"
+                                  ? 'text-orange-600'
+                                  : 'text-red-600'
                           }`}
                         />
                       </div>
@@ -508,12 +514,12 @@ export default function AnaliseManual() {
                       <p
                         className={`text-2xl font-bold ${
                           creditAnalysis.score >= 750
-                            ? "text-green-600"
+                            ? 'text-green-600'
                             : creditAnalysis.score >= 650
-                              ? "text-yellow-600"
+                              ? 'text-yellow-600'
                               : creditAnalysis.score >= 550
-                                ? "text-orange-600"
-                                : "text-red-600"
+                                ? 'text-orange-600'
+                                : 'text-red-600'
                         }`}
                       >
                         {creditAnalysis.score}
@@ -522,37 +528,37 @@ export default function AnaliseManual() {
                     <div className="text-center">
                       <div
                         className={`mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full ${
-                          creditAnalysis.riscoColor === "green"
-                            ? "bg-green-100"
-                            : creditAnalysis.riscoColor === "yellow"
-                              ? "bg-yellow-100"
-                              : creditAnalysis.riscoColor === "orange"
-                                ? "bg-orange-100"
-                                : "bg-red-100"
+                          creditAnalysis.riscoColor === 'green'
+                            ? 'bg-green-100'
+                            : creditAnalysis.riscoColor === 'yellow'
+                              ? 'bg-yellow-100'
+                              : creditAnalysis.riscoColor === 'orange'
+                                ? 'bg-orange-100'
+                                : 'bg-red-100'
                         }`}
                       >
                         <AlertTriangle
                           className={`h-8 w-8 ${
-                            creditAnalysis.riscoColor === "green"
-                              ? "text-green-600"
-                              : creditAnalysis.riscoColor === "yellow"
-                                ? "text-yellow-600"
-                                : creditAnalysis.riscoColor === "orange"
-                                  ? "text-orange-600"
-                                  : "text-red-600"
+                            creditAnalysis.riscoColor === 'green'
+                              ? 'text-green-600'
+                              : creditAnalysis.riscoColor === 'yellow'
+                                ? 'text-yellow-600'
+                                : creditAnalysis.riscoColor === 'orange'
+                                  ? 'text-orange-600'
+                                  : 'text-red-600'
                           }`}
                         />
                       </div>
                       <p className="text-sm font-medium text-gray-700">Nível de Risco</p>
                       <p
                         className={`text-2xl font-bold ${
-                          creditAnalysis.riscoColor === "green"
-                            ? "text-green-600"
-                            : creditAnalysis.riscoColor === "yellow"
-                              ? "text-yellow-600"
-                              : creditAnalysis.riscoColor === "orange"
-                                ? "text-orange-600"
-                                : "text-red-600"
+                          creditAnalysis.riscoColor === 'green'
+                            ? 'text-green-600'
+                            : creditAnalysis.riscoColor === 'yellow'
+                              ? 'text-yellow-600'
+                              : creditAnalysis.riscoColor === 'orange'
+                                ? 'text-orange-600'
+                                : 'text-red-600'
                         }`}
                       >
                         {creditAnalysis.risco}
@@ -596,7 +602,7 @@ export default function AnaliseManual() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div>
                     <Label htmlFor="status">Decisão</Label>
-                    <Select onValueChange={value => setValue("status", value as unknown)}>
+                    <Select onValueChange={(value) => setValue('status', value as unknown)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma decisão" />
                       </SelectTrigger>
@@ -616,7 +622,7 @@ export default function AnaliseManual() {
                     <Input
                       id="valorAprovado"
                       placeholder={formatCurrency(proposta.valor)}
-                      {...register("valorAprovado")}
+                      {...register('valorAprovado')}
                     />
                   </div>
 
@@ -624,8 +630,8 @@ export default function AnaliseManual() {
                     <Label htmlFor="taxaJuros">Taxa de Juros (%)</Label>
                     <Input
                       id="taxaJuros"
-                      placeholder={creditAnalysis ? creditAnalysis.taxaSugerida.toString() : "2.5"}
-                      {...register("taxaJuros")}
+                      placeholder={creditAnalysis ? creditAnalysis.taxaSugerida.toString() : '2.5'}
+                      {...register('taxaJuros')}
                     />
                   </div>
 
@@ -635,12 +641,12 @@ export default function AnaliseManual() {
                       id="observacoes"
                       rows={4}
                       placeholder="Adicione observações sobre a decisão..."
-                      {...register("observacoes")}
+                      {...register('observacoes')}
                     />
                   </div>
 
                   <Button type="submit" className="w-full" disabled={updateProposta.isPending}>
-                    {updateProposta.isPending ? "Salvando..." : "Salvar Decisão"}
+                    {updateProposta.isPending ? 'Salvando...' : 'Salvar Decisão'}
                   </Button>
                 </form>
               </CardContent>
@@ -763,7 +769,7 @@ export default function AnaliseManual() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                   <Label htmlFor="status">Decisão</Label>
-                  <Select onValueChange={value => setValue("status", value as unknown)}>
+                  <Select onValueChange={(value) => setValue('status', value as unknown)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma decisão" />
                     </SelectTrigger>
@@ -781,13 +787,13 @@ export default function AnaliseManual() {
                   <Input
                     id="valorAprovado"
                     placeholder={formatCurrency(proposta.valor)}
-                    {...register("valorAprovado")}
+                    {...register('valorAprovado')}
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="taxaJuros">Taxa de Juros (%)</Label>
-                  <Input id="taxaJuros" placeholder="2.5" {...register("taxaJuros")} />
+                  <Input id="taxaJuros" placeholder="2.5" {...register('taxaJuros')} />
                 </div>
 
                 <div>
@@ -796,12 +802,12 @@ export default function AnaliseManual() {
                     id="observacoes"
                     rows={4}
                     placeholder="Adicione observações sobre a decisão..."
-                    {...register("observacoes")}
+                    {...register('observacoes')}
                   />
                 </div>
 
                 <Button type="submit" className="w-full" disabled={updateProposta.isPending}>
-                  {updateProposta.isPending ? "Salvando..." : "Salvar Decisão"}
+                  {updateProposta.isPending ? 'Salvando...' : 'Salvar Decisão'}
                 </Button>
               </form>
             </CardContent>

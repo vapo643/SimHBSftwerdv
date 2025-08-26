@@ -133,21 +133,21 @@ describe('Masking Utilities - PII Data Protection', () => {
         cpf: '123.456.789-00',
         email: 'joao.silva@empresa.com',
         rg: '12.345.678-9',
-        telefone: '(11) 98765-4321'
+        telefone: '(11) 98765-4321',
       };
 
       const maskedProfile = {
         cpf: maskCPF(userProfile.cpf),
         email: maskEmail(userProfile.email),
         rg: maskRG(userProfile.rg),
-        telefone: maskTelefone(userProfile.telefone)
+        telefone: maskTelefone(userProfile.telefone),
       };
 
       expect(maskedProfile).toEqual({
         cpf: '***.456.789-**',
         email: 'j***@e***.com',
         rg: '**.***.678-*',
-        telefone: '(**) *****-4321'
+        telefone: '(**) *****-4321',
       });
     });
 
@@ -156,21 +156,21 @@ describe('Masking Utilities - PII Data Protection', () => {
         cpf: '',
         email: 'invalid',
         rg: null as any,
-        telefone: undefined as any
+        telefone: undefined as any,
       };
 
       const maskedEdgeCases = {
         cpf: maskCPF(edgeCases.cpf),
         email: maskEmail(edgeCases.email),
         rg: maskRG(edgeCases.rg),
-        telefone: maskTelefone(edgeCases.telefone)
+        telefone: maskTelefone(edgeCases.telefone),
       };
 
       expect(maskedEdgeCases).toEqual({
         cpf: '',
         email: '',
         rg: '',
-        telefone: ''
+        telefone: '',
       });
     });
   });

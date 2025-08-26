@@ -1,36 +1,36 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import RefreshButton from "@/components/RefreshButton";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import RefreshButton from '@/components/RefreshButton';
 import {
   Clock,
   DollarSign,
@@ -53,7 +53,7 @@ import {
   Shield,
   CheckCircle2,
   XCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface Pagamento {
   id: string;
@@ -90,7 +90,7 @@ interface Pagamento {
   motivoRejeicao: string;
   observacoes?: string;
   comprovante: string;
-  formaPagamento: "ted" | "pix";
+  formaPagamento: 'ted' | 'pix';
   loja: string;
   produto: string;
 }
@@ -120,7 +120,7 @@ interface Proposta {
 const paymentSchema = z.object({
   propostaId: z.string(),
   valorPago: z.string(),
-  metodoPagamento: z.enum(["transferencia", "ted", "pix", "boleto"]),
+  metodoPagamento: z.enum(['transferencia', 'ted', 'pix', 'boleto']),
   numeroConta: z.string().optional(),
   agencia: z.string().optional(),
   banco: z.string().optional(),
@@ -132,21 +132,21 @@ type PaymentForm = z.infer<typeof paymentSchema>;
 
 export default function Pagamentos() {
   const [selectedPropostas, setSelectedPropostas] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("dataAprovacao");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('dataAprovacao');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedProposta, setSelectedProposta] = useState<Pagamento | null>(null);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("queue");
+  const [activeTab, setActiveTab] = useState('queue');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: paymentPropostas, isLoading } = useQuery<Pagamento[]>({
-    queryKey: ["/api/pagamentos"],
+    queryKey: ['/api/pagamentos'],
     queryFn: async () => {
-      const response = await apiRequest("/api/pagamentos");
+      const response = await apiRequest('/api/pagamentos');
       return response as Pagamento[];
     },
   });
@@ -154,18 +154,18 @@ export default function Pagamentos() {
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      metodoPagamento: "transferencia",
-      valorPago: "",
-      observacoes: "",
+      metodoPagamento: 'transferencia',
+      valorPago: '',
+      observacoes: '',
     },
   });
 
   const processPaymentMutation = useMutation({
     mutationFn: async (data: PaymentForm) => {
       const response = await apiRequest(`/api/propostas/${data.propostaId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({
-          status: "pago",
+          status: 'pago',
           dataPagamento: new Date().toISOString(),
           observacoesFormalização: data.observacoes,
         }),
@@ -174,30 +174,30 @@ export default function Pagamentos() {
     },
     onSuccess: () => {
       toast({
-        title: "Pagamento processado com sucesso!",
+        title: 'Pagamento processado com sucesso!',
         description: "O status da proposta foi atualizado para 'pago'.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
       setIsPaymentDialogOpen(false);
       setSelectedProposta(null);
       form.reset();
     },
-    onError: error => {
+    onError: (error) => {
       toast({
-        title: "Erro ao processar pagamento",
-        description: "Tente novamente em alguns instantes.",
-        variant: "destructive",
+        title: 'Erro ao processar pagamento',
+        description: 'Tente novamente em alguns instantes.',
+        variant: 'destructive',
       });
     },
   });
 
   const batchProcessMutation = useMutation({
     mutationFn: async (proposalIds: string[]) => {
-      const promises = proposalIds.map(id =>
+      const promises = proposalIds.map((id) =>
         apiRequest(`/api/propostas/${id}`, {
-          method: "PATCH",
+          method: 'PATCH',
           body: JSON.stringify({
-            status: "pago",
+            status: 'pago',
             // dataPagamento will be handled by backend
           }),
         })
@@ -206,68 +206,68 @@ export default function Pagamentos() {
     },
     onSuccess: () => {
       toast({
-        title: "Lote processado com sucesso!",
+        title: 'Lote processado com sucesso!',
         description: `${selectedPropostas.length} pagamentos foram processados.`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
       setSelectedPropostas([]);
     },
-    onError: error => {
+    onError: (error) => {
       toast({
-        title: "Erro ao processar lote",
-        description: "Alguns pagamentos podem não ter sido processados.",
-        variant: "destructive",
+        title: 'Erro ao processar lote',
+        description: 'Alguns pagamentos podem não ter sido processados.',
+        variant: 'destructive',
       });
     },
   });
 
   const formatCurrency = (value: string | number) => {
-    const numValue = typeof value === "string" ? parseFloat(value) : value;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(numValue);
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("pt-BR");
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const getStatusColor = (status: string) => {
     const statusColors = {
-      contratos_assinados: "bg-purple-500",
-      pronto_pagamento: "bg-orange-500",
-      BOLETOS_EMITIDOS: "bg-blue-600",
-      PAGAMENTO_PENDENTE: "bg-yellow-500",
-      PAGAMENTO_PARCIAL: "bg-amber-500",
-      INADIMPLENTE: "bg-red-600",
-      QUITADO: "bg-green-600",
-      pago: "bg-green-600",
+      contratos_assinados: 'bg-purple-500',
+      pronto_pagamento: 'bg-orange-500',
+      BOLETOS_EMITIDOS: 'bg-blue-600',
+      PAGAMENTO_PENDENTE: 'bg-yellow-500',
+      PAGAMENTO_PARCIAL: 'bg-amber-500',
+      INADIMPLENTE: 'bg-red-600',
+      QUITADO: 'bg-green-600',
+      pago: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || "bg-gray-500";
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
   const getStatusText = (status: string) => {
     const statusTexts = {
-      contratos_assinados: "Contratos Assinados",
-      pronto_pagamento: "Pronto para Pagamento",
-      BOLETOS_EMITIDOS: "Boletos Emitidos",
-      PAGAMENTO_PENDENTE: "Aguardando Pagamento",
-      PAGAMENTO_PARCIAL: "Pagamento Parcial",
-      INADIMPLENTE: "Inadimplente",
-      QUITADO: "Quitado",
-      pago: "Pago",
+      contratos_assinados: 'Contratos Assinados',
+      pronto_pagamento: 'Pronto para Pagamento',
+      BOLETOS_EMITIDOS: 'Boletos Emitidos',
+      PAGAMENTO_PENDENTE: 'Aguardando Pagamento',
+      PAGAMENTO_PARCIAL: 'Pagamento Parcial',
+      INADIMPLENTE: 'Inadimplente',
+      QUITADO: 'Quitado',
+      pago: 'Pago',
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
   const getMethodText = (method: string) => {
     const methodTexts = {
-      transferencia: "Transferência",
-      ted: "TED",
-      pix: "PIX",
-      boleto: "Boleto",
+      transferencia: 'Transferência',
+      ted: 'TED',
+      pix: 'PIX',
+      boleto: 'Boleto',
     };
     return methodTexts[method as keyof typeof methodTexts] || method;
   };
@@ -276,16 +276,18 @@ export default function Pagamentos() {
   const allPaymentPropostas = paymentPropostas || [];
 
   // For completed payments, filter from the main query
-  const completedPayments: Pagamento[] = allPaymentPropostas.filter(p => p.status === "pago" || p.status === "QUITADO");
+  const completedPayments: Pagamento[] = allPaymentPropostas.filter(
+    (p) => p.status === 'pago' || p.status === 'QUITADO'
+  );
 
   // Apply filters and search
-  const filteredPropostas = allPaymentPropostas.filter(proposta => {
+  const filteredPropostas = allPaymentPropostas.filter((proposta) => {
     const matchesSearch =
       proposta.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       proposta.cpfCliente.includes(searchTerm) ||
       proposta.id.toString().includes(searchTerm);
 
-    const matchesStatus = filterStatus === "all" || proposta.status === filterStatus;
+    const matchesStatus = filterStatus === 'all' || proposta.status === filterStatus;
 
     return matchesSearch && matchesStatus;
   });
@@ -295,16 +297,16 @@ export default function Pagamentos() {
     let aVal: any;
     let bVal: any;
 
-    if (sortBy === "valor" || sortBy === "valorSolicitado" || sortBy === "valorAprovado") {
+    if (sortBy === 'valor' || sortBy === 'valorSolicitado' || sortBy === 'valorAprovado') {
       aVal = a.valorFinanciado || 0;
       bVal = b.valorFinanciado || 0;
-    } else if (sortBy === "clienteNome") {
+    } else if (sortBy === 'clienteNome') {
       aVal = a.nomeCliente;
       bVal = b.nomeCliente;
-    } else if (sortBy === "dataAprovacao") {
+    } else if (sortBy === 'dataAprovacao') {
       aVal = new Date(a.dataAprovacao || a.dataRequisicao || 0);
       bVal = new Date(b.dataAprovacao || b.dataRequisicao || 0);
-    } else if (sortBy === "prazo") {
+    } else if (sortBy === 'prazo') {
       // We don't have prazo in the new structure, use dataRequisicao as fallback
       aVal = new Date(a.dataRequisicao || 0);
       bVal = new Date(b.dataRequisicao || 0);
@@ -314,7 +316,7 @@ export default function Pagamentos() {
       bVal = b.status;
     }
 
-    if (sortOrder === "asc") {
+    if (sortOrder === 'asc') {
       return aVal > bVal ? 1 : -1;
     } else {
       return aVal < bVal ? 1 : -1;
@@ -322,8 +324,8 @@ export default function Pagamentos() {
   });
 
   const handleSelectProposta = (propostaId: string) => {
-    setSelectedPropostas(prev =>
-      prev.includes(propostaId) ? prev.filter(id => id !== propostaId) : [...prev, propostaId]
+    setSelectedPropostas((prev) =>
+      prev.includes(propostaId) ? prev.filter((id) => id !== propostaId) : [...prev, propostaId]
     );
   };
 
@@ -331,14 +333,14 @@ export default function Pagamentos() {
     if (selectedPropostas.length === sortedPropostas.length) {
       setSelectedPropostas([]);
     } else {
-      setSelectedPropostas(sortedPropostas.map(p => p.id));
+      setSelectedPropostas(sortedPropostas.map((p) => p.id));
     }
   };
 
   const handleProcessPayment = (proposta: Pagamento) => {
     setSelectedProposta(proposta);
-    form.setValue("propostaId", proposta.id);
-    form.setValue("valorPago", proposta.valorLiquido.toString());
+    form.setValue('propostaId', proposta.id);
+    form.setValue('valorPago', proposta.valorLiquido.toString());
     setIsPaymentDialogOpen(true);
   };
 
@@ -349,9 +351,9 @@ export default function Pagamentos() {
   const handleBatchProcess = () => {
     if (selectedPropostas.length === 0) {
       toast({
-        title: "Nenhuma proposta selecionada",
-        description: "Selecione ao menos uma proposta para processar.",
-        variant: "destructive",
+        title: 'Nenhuma proposta selecionada',
+        description: 'Selecione ao menos uma proposta para processar.',
+        variant: 'destructive',
       });
       return;
     }
@@ -360,17 +362,16 @@ export default function Pagamentos() {
   };
 
   // Calculate statistics
-  const totalPendingValue = allPaymentPropostas.reduce(
-    (sum, p) => sum + p.valorFinanciado,
-    0
-  );
+  const totalPendingValue = allPaymentPropostas.reduce((sum, p) => sum + p.valorFinanciado, 0);
 
-  const totalCompletedValue = completedPayments.reduce(
-    (sum, p) => sum + p.valorFinanciado,
-    0
-  );
+  const totalCompletedValue = completedPayments.reduce((sum, p) => sum + p.valorFinanciado, 0);
 
-  const readyForPayment = allPaymentPropostas.filter(p => p.status === "BOLETOS_EMITIDOS" || p.status === "pronto_pagamento" || p.status === "em_processamento").length;
+  const readyForPayment = allPaymentPropostas.filter(
+    (p) =>
+      p.status === 'BOLETOS_EMITIDOS' ||
+      p.status === 'pronto_pagamento' ||
+      p.status === 'em_processamento'
+  ).length;
   const contractsSigned = 0; // Since we're only showing pronto_pagamento, this would be 0
 
   if (isLoading) {
@@ -394,7 +395,7 @@ export default function Pagamentos() {
   }
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+    queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
   };
 
   return (
@@ -508,7 +509,7 @@ export default function Pagamentos() {
                 <Input
                   placeholder="Buscar por cliente, CPF ou ID..."
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -541,9 +542,9 @@ export default function Pagamentos() {
 
               <Button
                 variant="outline"
-                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
               >
-                {sortOrder === "asc" ? "↑" : "↓"}
+                {sortOrder === 'asc' ? '↑' : '↓'}
               </Button>
             </div>
 
@@ -565,10 +566,10 @@ export default function Pagamentos() {
               {selectedPropostas.length > 0 && (
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600">
-                    Total:{" "}
+                    Total:{' '}
                     {formatCurrency(
                       selectedPropostas.reduce((sum, id) => {
-                        const proposta = sortedPropostas.find(p => p.id === id);
+                        const proposta = sortedPropostas.find((p) => p.id === id);
                         return sum + (proposta?.valorFinanciado || 0);
                       }, 0)
                     )}
@@ -582,7 +583,7 @@ export default function Pagamentos() {
 
             {/* Payment Queue Table */}
             <div className="space-y-4">
-              {sortedPropostas.map(proposta => (
+              {sortedPropostas.map((proposta) => (
                 <Card key={proposta.id} className="transition-shadow hover:shadow-md">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -594,7 +595,9 @@ export default function Pagamentos() {
                         <div className="flex-1">
                           <div className="flex items-center space-x-4">
                             <div>
-                              <p className="font-semibold text-gray-900">#{proposta.id.slice(0, 8)}</p>
+                              <p className="font-semibold text-gray-900">
+                                #{proposta.id.slice(0, 8)}
+                              </p>
                               <p className="text-sm text-gray-600">{proposta.nomeCliente}</p>
                             </div>
                             <div className="hidden sm:block">
@@ -649,14 +652,14 @@ export default function Pagamentos() {
               <div className="py-12 text-center">
                 <CreditCard className="mx-auto mb-4 h-16 w-16 text-gray-400" />
                 <p className="text-lg text-gray-500">
-                  {searchTerm || filterStatus !== "all"
-                    ? "Nenhuma proposta encontrada"
-                    : "Nenhuma proposta na fila de pagamento"}
+                  {searchTerm || filterStatus !== 'all'
+                    ? 'Nenhuma proposta encontrada'
+                    : 'Nenhuma proposta na fila de pagamento'}
                 </p>
                 <p className="mt-2 text-gray-400">
-                  {searchTerm || filterStatus !== "all"
-                    ? "Tente ajustar os filtros de busca"
-                    : "Propostas com boletos emitidos aparecerão aqui"}
+                  {searchTerm || filterStatus !== 'all'
+                    ? 'Tente ajustar os filtros de busca'
+                    : 'Propostas com boletos emitidos aparecerão aqui'}
                 </p>
               </div>
             )}
@@ -681,7 +684,7 @@ export default function Pagamentos() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {completedPayments.map(proposta => (
+                  {completedPayments.map((proposta) => (
                     <Card key={proposta.id}>
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
@@ -693,9 +696,7 @@ export default function Pagamentos() {
                               <p className="font-semibold text-gray-900">
                                 #{proposta.id.slice(0, 8)} - {proposta.nomeCliente}
                               </p>
-                              <p className="text-sm text-gray-600">
-                                CPF: {proposta.cpfCliente}
-                              </p>
+                              <p className="text-sm text-gray-600">CPF: {proposta.cpfCliente}</p>
                             </div>
                           </div>
                           <div className="text-right">
@@ -703,7 +704,12 @@ export default function Pagamentos() {
                               {formatCurrency(proposta.valorFinanciado)}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Pago em {formatDate(proposta.dataPagamento || proposta.dataAprovacao || proposta.dataRequisicao)}
+                              Pago em{' '}
+                              {formatDate(
+                                proposta.dataPagamento ||
+                                  proposta.dataAprovacao ||
+                                  proposta.dataRequisicao
+                              )}
                             </p>
                           </div>
                         </div>
@@ -754,7 +760,7 @@ export default function Pagamentos() {
                     <Label htmlFor="valorPago">Valor a Pagar</Label>
                     <Input
                       id="valorPago"
-                      {...form.register("valorPago")}
+                      {...form.register('valorPago')}
                       placeholder="0,00"
                       className="mt-1"
                     />
@@ -762,7 +768,7 @@ export default function Pagamentos() {
                   <div>
                     <Label htmlFor="metodoPagamento">Método de Pagamento</Label>
                     <Select
-                      onValueChange={value => form.setValue("metodoPagamento", value as unknown)}
+                      onValueChange={(value) => form.setValue('metodoPagamento', value as unknown)}
                     >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Selecione o método" />
@@ -783,7 +789,7 @@ export default function Pagamentos() {
                     <Label htmlFor="banco">Banco</Label>
                     <Input
                       id="banco"
-                      {...form.register("banco")}
+                      {...form.register('banco')}
                       placeholder="Banco do Brasil"
                       className="mt-1"
                     />
@@ -792,7 +798,7 @@ export default function Pagamentos() {
                     <Label htmlFor="agencia">Agência</Label>
                     <Input
                       id="agencia"
-                      {...form.register("agencia")}
+                      {...form.register('agencia')}
                       placeholder="1234-5"
                       className="mt-1"
                     />
@@ -801,7 +807,7 @@ export default function Pagamentos() {
                     <Label htmlFor="numeroConta">Número da Conta</Label>
                     <Input
                       id="numeroConta"
-                      {...form.register("numeroConta")}
+                      {...form.register('numeroConta')}
                       placeholder="12345-6"
                       className="mt-1"
                     />
@@ -813,7 +819,7 @@ export default function Pagamentos() {
                   <Label htmlFor="chavePixCpf">Chave PIX (CPF)</Label>
                   <Input
                     id="chavePixCpf"
-                    {...form.register("chavePixCpf")}
+                    {...form.register('chavePixCpf')}
                     placeholder="123.456.789-00"
                     className="mt-1"
                   />
@@ -824,7 +830,7 @@ export default function Pagamentos() {
                   <Label htmlFor="observacoes">Observações</Label>
                   <Textarea
                     id="observacoes"
-                    {...form.register("observacoes")}
+                    {...form.register('observacoes')}
                     placeholder="Observações sobre o pagamento..."
                     className="mt-1"
                     rows={3}

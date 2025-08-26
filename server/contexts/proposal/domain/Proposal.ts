@@ -1,6 +1,6 @@
 /**
  * Aggregate Root: Proposal
- * 
+ *
  * Este agregado encapsula toda a lógica de negócio relacionada a propostas de crédito.
  * Segue os princípios de Domain-Driven Design (DDD).
  */
@@ -82,7 +82,7 @@ export enum ProposalStatus {
   BOLETOS_EMITIDOS = 'BOLETOS_EMITIDOS',
   PAGAMENTO_AUTORIZADO = 'pagamento_autorizado',
   SUSPENSA = 'suspensa',
-  CANCELADO = 'cancelado'
+  CANCELADO = 'cancelado',
 }
 
 // Invariantes de Negócio
@@ -100,7 +100,7 @@ const TAXA_JUROS_MAXIMA = 5.0;
  */
 export class Proposal {
   private _events: ProposalDomainEvent[] = [];
-  
+
   // Estado do agregado
   private _id: string;
   private _status: ProposalStatus;
@@ -141,7 +141,7 @@ export class Proposal {
     this._status = ProposalStatus.RASCUNHO;
     this._createdAt = new Date();
     this._updatedAt = new Date();
-    
+
     // Validar invariantes na criação
     this.validateInvariants();
   }
@@ -167,14 +167,16 @@ export class Proposal {
       lojaId,
       atendenteId
     );
-    
-    proposal.addEvent(new ProposalCreatedEvent(id, 'ProposalCreated', {
-      clienteData,
-      valor,
-      prazo,
-      taxaJuros
-    }));
-    
+
+    proposal.addEvent(
+      new ProposalCreatedEvent(id, 'ProposalCreated', {
+        clienteData,
+        valor,
+        prazo,
+        taxaJuros,
+      })
+    );
+
     return proposal;
   }
 
@@ -190,7 +192,7 @@ export class Proposal {
       data.loja_id,
       data.atendente_id
     );
-    
+
     proposal._status = data.status;
     proposal._dadosPagamento = data.dados_pagamento;
     proposal._motivoRejeicao = data.motivo_rejeicao;
@@ -200,28 +202,32 @@ export class Proposal {
     proposal._updatedAt = data.updated_at;
     proposal._tabelaComercialId = data.tabela_comercial_id;
     proposal._parceiroId = data.parceiro_id;
-    
+
     return proposal;
   }
 
   // ========== INVARIANTES DE NEGÓCIO ==========
-  
+
   private validateInvariants(): void {
     // Invariante 1: Valor deve estar dentro dos limites
     if (this._valor < VALOR_MINIMO_EMPRESTIMO || this._valor > VALOR_MAXIMO_EMPRESTIMO) {
-      throw new Error(`Valor do empréstimo deve estar entre R$ ${VALOR_MINIMO_EMPRESTIMO} e R$ ${VALOR_MAXIMO_EMPRESTIMO}`);
+      throw new Error(
+        `Valor do empréstimo deve estar entre R$ ${VALOR_MINIMO_EMPRESTIMO} e R$ ${VALOR_MAXIMO_EMPRESTIMO}`
+      );
     }
-    
+
     // Invariante 2: Prazo deve estar dentro dos limites
     if (this._prazo < PRAZO_MINIMO_MESES || this._prazo > PRAZO_MAXIMO_MESES) {
       throw new Error(`Prazo deve estar entre ${PRAZO_MINIMO_MESES} e ${PRAZO_MAXIMO_MESES} meses`);
     }
-    
+
     // Invariante 3: Taxa de juros deve estar dentro dos limites
     if (this._taxaJuros < TAXA_JUROS_MINIMA || this._taxaJuros > TAXA_JUROS_MAXIMA) {
-      throw new Error(`Taxa de juros deve estar entre ${TAXA_JUROS_MINIMA}% e ${TAXA_JUROS_MAXIMA}%`);
+      throw new Error(
+        `Taxa de juros deve estar entre ${TAXA_JUROS_MINIMA}% e ${TAXA_JUROS_MAXIMA}%`
+      );
     }
-    
+
     // Invariante 4: CPF deve ser válido
     if (!this.isValidCPF(this._clienteData.cpf)) {
       throw new Error('CPF inválido');
@@ -231,18 +237,18 @@ export class Proposal {
   private isValidCPF(cpf: string): boolean {
     // Remove caracteres não numéricos
     const cleanCPF = cpf.replace(/\D/g, '');
-    
+
     // Verifica se tem 11 dígitos
     if (cleanCPF.length !== 11) return false;
-    
+
     // Em desenvolvimento, permite CPFs de teste (sequências repetidas)
     if (process.env.NODE_ENV === 'development' && /^(\d)\1{10}$/.test(cleanCPF)) {
       return true; // Permite CPFs como 11111111111 em desenvolvimento
     }
-    
+
     // Verifica se todos os dígitos são iguais (apenas em produção)
     if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
-    
+
     // Validação dos dígitos verificadores
     let sum = 0;
     for (let i = 0; i < 9; i++) {
@@ -251,7 +257,7 @@ export class Proposal {
     let digit = 11 - (sum % 11);
     if (digit >= 10) digit = 0;
     if (digit !== parseInt(cleanCPF.charAt(9))) return false;
-    
+
     sum = 0;
     for (let i = 0; i < 10; i++) {
       sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
@@ -259,12 +265,12 @@ export class Proposal {
     digit = 11 - (sum % 11);
     if (digit >= 10) digit = 0;
     if (digit !== parseInt(cleanCPF.charAt(10))) return false;
-    
+
     return true;
   }
 
   // ========== COMANDOS (MÉTODOS DE NEGÓCIO) ==========
-  
+
   /**
    * Submete a proposta para análise
    */
@@ -272,7 +278,7 @@ export class Proposal {
     if (this._status !== ProposalStatus.RASCUNHO) {
       throw new Error('Apenas propostas em rascunho podem ser submetidas para análise');
     }
-    
+
     this._status = ProposalStatus.EM_ANALISE;
     this._updatedAt = new Date();
   }
@@ -284,26 +290,31 @@ export class Proposal {
     if (this._status !== ProposalStatus.EM_ANALISE) {
       throw new Error('Apenas propostas em análise podem ser aprovadas');
     }
-    
+
     // Verificar comprometimento de renda antes de aprovar
     if (this._clienteData.renda_mensal && this._clienteData.dividas_existentes !== undefined) {
       const valorParcela = this.calculateMonthlyPayment();
       const comprometimentoTotal = (this._clienteData.dividas_existentes || 0) + valorParcela;
-      const percentualComprometimento = (comprometimentoTotal / this._clienteData.renda_mensal) * 100;
-      
+      const percentualComprometimento =
+        (comprometimentoTotal / this._clienteData.renda_mensal) * 100;
+
       if (percentualComprometimento > LIMITE_COMPROMETIMENTO_RENDA) {
-        throw new Error(`Comprometimento de renda (${percentualComprometimento.toFixed(1)}%) excede o limite de ${LIMITE_COMPROMETIMENTO_RENDA}%`);
+        throw new Error(
+          `Comprometimento de renda (${percentualComprometimento.toFixed(1)}%) excede o limite de ${LIMITE_COMPROMETIMENTO_RENDA}%`
+        );
       }
     }
-    
+
     this._status = ProposalStatus.APROVADO;
     this._observacoes = observacoes;
     this._updatedAt = new Date();
-    
-    this.addEvent(new ProposalApprovedEvent(this._id, 'ProposalApproved', {
-      analistaId,
-      observacoes
-    }));
+
+    this.addEvent(
+      new ProposalApprovedEvent(this._id, 'ProposalApproved', {
+        analistaId,
+        observacoes,
+      })
+    );
   }
 
   /**
@@ -313,19 +324,21 @@ export class Proposal {
     if (this._status !== ProposalStatus.EM_ANALISE) {
       throw new Error('Apenas propostas em análise podem ser rejeitadas');
     }
-    
+
     if (!motivo || motivo.trim().length === 0) {
       throw new Error('Motivo da rejeição é obrigatório');
     }
-    
+
     this._status = ProposalStatus.REJEITADO;
     this._motivoRejeicao = motivo;
     this._updatedAt = new Date();
-    
-    this.addEvent(new ProposalRejectedEvent(this._id, 'ProposalRejected', {
-      analistaId,
-      motivo
-    }));
+
+    this.addEvent(
+      new ProposalRejectedEvent(this._id, 'ProposalRejected', {
+        analistaId,
+        motivo,
+      })
+    );
   }
 
   /**
@@ -335,7 +348,7 @@ export class Proposal {
     if (this._status !== ProposalStatus.APROVADO) {
       throw new Error('CCB só pode ser gerada para propostas aprovadas');
     }
-    
+
     this._ccbUrl = ccbUrl;
     this._status = ProposalStatus.CCB_GERADA;
     this._updatedAt = new Date();
@@ -348,7 +361,7 @@ export class Proposal {
     if (this._status !== ProposalStatus.CCB_GERADA) {
       throw new Error('Proposta deve ter CCB gerada antes de aguardar assinatura');
     }
-    
+
     this._status = ProposalStatus.AGUARDANDO_ASSINATURA;
     this._updatedAt = new Date();
   }
@@ -360,7 +373,7 @@ export class Proposal {
     if (this._status !== ProposalStatus.AGUARDANDO_ASSINATURA) {
       throw new Error('Proposta deve estar aguardando assinatura');
     }
-    
+
     this._status = ProposalStatus.ASSINATURA_CONCLUIDA;
     this._updatedAt = new Date();
   }
@@ -370,9 +383,11 @@ export class Proposal {
    */
   updatePaymentData(dadosPagamento: DadosPagamento): void {
     if (this._status === ProposalStatus.REJEITADO || this._status === ProposalStatus.CANCELADO) {
-      throw new Error('Não é possível atualizar dados de pagamento em propostas rejeitadas ou canceladas');
+      throw new Error(
+        'Não é possível atualizar dados de pagamento em propostas rejeitadas ou canceladas'
+      );
     }
-    
+
     this._dadosPagamento = dadosPagamento;
     this._updatedAt = new Date();
   }
@@ -381,12 +396,14 @@ export class Proposal {
    * Cancela a proposta
    */
   cancel(motivo: string): void {
-    if (this._status === ProposalStatus.REJEITADO || 
-        this._status === ProposalStatus.CANCELADO ||
-        this._status === ProposalStatus.PAGAMENTO_AUTORIZADO) {
+    if (
+      this._status === ProposalStatus.REJEITADO ||
+      this._status === ProposalStatus.CANCELADO ||
+      this._status === ProposalStatus.PAGAMENTO_AUTORIZADO
+    ) {
       throw new Error('Proposta não pode ser cancelada neste status');
     }
-    
+
     this._status = ProposalStatus.CANCELADO;
     this._motivoRejeicao = motivo;
     this._updatedAt = new Date();
@@ -396,11 +413,10 @@ export class Proposal {
    * Suspende a proposta
    */
   suspend(motivo: string): void {
-    if (this._status === ProposalStatus.REJEITADO || 
-        this._status === ProposalStatus.CANCELADO) {
+    if (this._status === ProposalStatus.REJEITADO || this._status === ProposalStatus.CANCELADO) {
       throw new Error('Proposta não pode ser suspensa neste status');
     }
-    
+
     this._status = ProposalStatus.SUSPENSA;
     this._observacoes = motivo;
     this._updatedAt = new Date();
@@ -413,14 +429,14 @@ export class Proposal {
     if (this._status !== ProposalStatus.SUSPENSA) {
       throw new Error('Apenas propostas suspensas podem ser reativadas');
     }
-    
+
     // Volta ao status anterior (simplificado - idealmente manteria histórico)
     this._status = ProposalStatus.EM_ANALISE;
     this._updatedAt = new Date();
   }
 
   // ========== CÁLCULOS DE NEGÓCIO ==========
-  
+
   /**
    * Calcula o valor da parcela mensal
    */
@@ -428,15 +444,15 @@ export class Proposal {
     const principal = this._valor;
     const monthlyRate = this._taxaJuros / 100;
     const numberOfPayments = this._prazo;
-    
+
     if (monthlyRate === 0) {
       return principal / numberOfPayments;
     }
-    
-    const payment = principal * 
-      (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
+
+    const payment =
+      (principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) /
       (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-    
+
     return Math.round(payment * 100) / 100;
   }
 
@@ -455,33 +471,67 @@ export class Proposal {
     // Em produção, usar cálculo completo segundo regulação BACEN
     const valorTotal = this.calculateTotalAmount();
     const custoTotal = valorTotal + (tac || 0);
-    const cet = ((custoTotal / this._valor) - 1) * 100;
-    
+    const cet = (custoTotal / this._valor - 1) * 100;
+
     return Math.round(cet * 100) / 100;
   }
 
   // ========== GETTERS ==========
-  
-  get id(): string { return this._id; }
-  get status(): ProposalStatus { return this._status; }
-  get clienteData(): ClienteData { return this._clienteData; }
-  get valor(): number { return this._valor; }
-  get prazo(): number { return this._prazo; }
-  get taxaJuros(): number { return this._taxaJuros; }
-  get produtoId(): number | undefined { return this._produtoId; }
-  get tabelaComercialId(): number | undefined { return this._tabelaComercialId; }
-  get lojaId(): number | undefined { return this._lojaId; }
-  get parceiroId(): number | undefined { return this._parceiroId; }
-  get atendenteId(): string | undefined { return this._atendenteId; }
-  get dadosPagamento(): DadosPagamento | undefined { return this._dadosPagamento; }
-  get motivoRejeicao(): string | undefined { return this._motivoRejeicao; }
-  get observacoes(): string | undefined { return this._observacoes; }
-  get ccbUrl(): string | undefined { return this._ccbUrl; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+
+  get id(): string {
+    return this._id;
+  }
+  get status(): ProposalStatus {
+    return this._status;
+  }
+  get clienteData(): ClienteData {
+    return this._clienteData;
+  }
+  get valor(): number {
+    return this._valor;
+  }
+  get prazo(): number {
+    return this._prazo;
+  }
+  get taxaJuros(): number {
+    return this._taxaJuros;
+  }
+  get produtoId(): number | undefined {
+    return this._produtoId;
+  }
+  get tabelaComercialId(): number | undefined {
+    return this._tabelaComercialId;
+  }
+  get lojaId(): number | undefined {
+    return this._lojaId;
+  }
+  get parceiroId(): number | undefined {
+    return this._parceiroId;
+  }
+  get atendenteId(): string | undefined {
+    return this._atendenteId;
+  }
+  get dadosPagamento(): DadosPagamento | undefined {
+    return this._dadosPagamento;
+  }
+  get motivoRejeicao(): string | undefined {
+    return this._motivoRejeicao;
+  }
+  get observacoes(): string | undefined {
+    return this._observacoes;
+  }
+  get ccbUrl(): string | undefined {
+    return this._ccbUrl;
+  }
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 
   // ========== DOMAIN EVENTS ==========
-  
+
   private addEvent(event: ProposalDomainEvent): void {
     this._events.push(event);
   }
@@ -495,7 +545,7 @@ export class Proposal {
   }
 
   // ========== SERIALIZAÇÃO ==========
-  
+
   /**
    * Converte o agregado para formato de persistência
    */
@@ -517,7 +567,7 @@ export class Proposal {
       observacoes: this._observacoes,
       ccb_url: this._ccbUrl,
       created_at: this._createdAt,
-      updated_at: this._updatedAt
+      updated_at: this._updatedAt,
     };
   }
 }

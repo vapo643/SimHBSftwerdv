@@ -16,7 +16,7 @@ describe('Health Check Endpoint - Smoke Test', () => {
   beforeAll(async () => {
     // Configurar aplicação Express para teste
     app = express() as Express;
-    
+
     // Registrar todas as rotas (incluindo /api/health)
     server = await registerRoutes(app);
   });
@@ -30,9 +30,7 @@ describe('Health Check Endpoint - Smoke Test', () => {
 
   it('should return status 200 and correct response format for /api/health', async () => {
     // Fazer requisição GET para /api/health
-    const response = await request(app)
-      .get('/api/health')
-      .expect(200);
+    const response = await request(app).get('/api/health').expect(200);
 
     // Validar estrutura da resposta
     expect(response.body).toBeDefined();
@@ -50,16 +48,14 @@ describe('Health Check Endpoint - Smoke Test', () => {
 
   it('should respond within acceptable time limits', async () => {
     const startTime = Date.now();
-    
-    await request(app)
-      .get('/api/health')
-      .expect(200);
-    
+
+    await request(app).get('/api/health').expect(200);
+
     const responseTime = Date.now() - startTime;
-    
+
     // Validar que resposta é rápida (< 1000ms)
     expect(responseTime).toBeLessThan(1000);
-    
+
     console.log(`✅ Health check response time: ${responseTime}ms`);
   });
 });

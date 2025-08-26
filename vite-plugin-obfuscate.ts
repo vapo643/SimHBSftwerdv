@@ -5,8 +5,8 @@
  * reverse engineering and protect business logic.
  */
 
-import { Plugin } from "vite";
-import JavaScriptObfuscator from "javascript-obfuscator";
+import { Plugin } from 'vite';
+import JavaScriptObfuscator from 'javascript-obfuscator';
 
 export interface ObfuscatorOptions {
   // Control flow flattening makes code harder to understand
@@ -20,11 +20,11 @@ export interface ObfuscatorOptions {
   // String obfuscation
   stringArray: boolean;
   rotateStringArray: boolean;
-  stringArrayEncoding: ("none" | "base64" | "rc4")[];
+  stringArrayEncoding: ('none' | 'base64' | 'rc4')[];
   stringArrayThreshold: number;
 
   // Identifier obfuscation
-  identifierNamesGenerator: "hexadecimal" | "mangled" | "mangled-shuffled";
+  identifierNamesGenerator: 'hexadecimal' | 'mangled' | 'mangled-shuffled';
 
   // Other options
   selfDefending: boolean;
@@ -39,9 +39,9 @@ const defaultOptions: ObfuscatorOptions = {
   deadCodeInjectionThreshold: 0.4,
   stringArray: true,
   rotateStringArray: true,
-  stringArrayEncoding: ["base64"],
+  stringArrayEncoding: ['base64'],
   stringArrayThreshold: 0.75,
-  identifierNamesGenerator: "hexadecimal",
+  identifierNamesGenerator: 'hexadecimal',
   selfDefending: true,
   debugProtection: true,
   disableConsoleOutput: true,
@@ -51,13 +51,13 @@ export function obfuscatorPlugin(options: Partial<ObfuscatorOptions> = {}): Plug
   const config = { ...defaultOptions, ...options };
 
   return {
-    name: "vite-plugin-obfuscate",
+    name: 'vite-plugin-obfuscate',
 
     // Only apply in production builds
-    apply: "build",
+    apply: 'build',
 
     // Transform code after other plugins
-    enforce: "post",
+    enforce: 'post',
 
     // Transform JavaScript/TypeScript files
     transform(code: string, id: string) {
@@ -67,12 +67,12 @@ export function obfuscatorPlugin(options: Partial<ObfuscatorOptions> = {}): Plug
       }
 
       // Skip node_modules
-      if (id.includes("node_modules")) {
+      if (id.includes('node_modules')) {
         return null;
       }
 
       // Skip already minified files
-      if (id.includes(".min.")) {
+      if (id.includes('.min.')) {
         return null;
       }
 
@@ -104,7 +104,7 @@ export function obfuscatorPlugin(options: Partial<ObfuscatorOptions> = {}): Plug
           stringArrayWrappersCount: 2,
           stringArrayWrappersChainedCalls: true,
           stringArrayWrappersParametersMaxCount: 4,
-          stringArrayWrappersType: "function",
+          stringArrayWrappersType: 'function',
           stringArrayThreshold: config.stringArrayThreshold,
           unicodeEscapeSequence: true,
         });
@@ -124,12 +124,12 @@ export function obfuscatorPlugin(options: Partial<ObfuscatorOptions> = {}): Plug
       return {
         build: {
           // Minify with terser for additional obfuscation
-          minify: "terser",
+          minify: 'terser',
           terserOptions: {
             compress: {
               drop_console: true,
               drop_debugger: true,
-              pure_funcs: ["console.log", "console.info", "console.debug", "console.warn"],
+              pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
             },
             mangle: {
               toplevel: true,

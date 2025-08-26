@@ -5,7 +5,7 @@
  * anomalias e métricas de segurança para o sistema Simpix.
  */
 
-import SecurityDashboard from "@/pages/SecurityDashboard";
+import SecurityDashboard from '@/pages/SecurityDashboard';
 
 export default function MonitoramentoAvancadoPage() {
   return <SecurityDashboard />;

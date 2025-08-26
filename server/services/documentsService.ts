@@ -4,7 +4,7 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { documentsRepository } from "../repositories/documents.repository.js";
+import { documentsRepository } from '../repositories/documents.repository.js';
 
 export class DocumentsService {
   /**
@@ -20,7 +20,7 @@ export class DocumentsService {
       const proposta = await documentsRepository.getProposalById(propostaId);
 
       if (!proposta) {
-        throw new Error("Proposta não encontrada");
+        throw new Error('Proposta não encontrada');
       }
 
       const documents = [];
@@ -28,11 +28,11 @@ export class DocumentsService {
       // Add CCB if exists
       if (proposta.ccb_documento_url) {
         documents.push({
-          name: "CCB - Cédula de Crédito Bancário",
+          name: 'CCB - Cédula de Crédito Bancário',
           url: proposta.ccb_documento_url,
-          type: "application/pdf",
-          category: "ccb",
-          uploadDate: "Sistema",
+          type: 'application/pdf',
+          category: 'ccb',
+          uploadDate: 'Sistema',
           isRequired: true,
         });
       }
@@ -43,13 +43,13 @@ export class DocumentsService {
       for (const doc of propostaDocuments) {
         try {
           // Extract file path from URL
-          const documentsIndex = doc.url.indexOf("/documents/");
+          const documentsIndex = doc.url.indexOf('/documents/');
           let filePath;
 
           if (documentsIndex !== -1) {
-            filePath = doc.url.substring(documentsIndex + "/documents/".length);
+            filePath = doc.url.substring(documentsIndex + '/documents/'.length);
           } else {
-            const urlParts = doc.url.split("/");
+            const urlParts = doc.url.split('/');
             const fileName = urlParts[urlParts.length - 1];
             filePath = `proposta-${propostaId}/${fileName}`;
           }
@@ -62,21 +62,24 @@ export class DocumentsService {
           documents.push({
             name: doc.nome_arquivo,
             url: signedUrl || doc.url, // Fallback to original URL
-            type: doc.tipo || "application/octet-stream",
+            type: doc.tipo || 'application/octet-stream',
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
             uploadDate: doc.created_at,
-            category: "supporting",
+            category: 'supporting',
           });
         } catch (error) {
-          console.error(`[DOCUMENTS_SERVICE] Error generating signed URL for ${doc.nome_arquivo}:`, error);
+          console.error(
+            `[DOCUMENTS_SERVICE] Error generating signed URL for ${doc.nome_arquivo}:`,
+            error
+          );
           // Fallback to original URL
           documents.push({
             name: doc.nome_arquivo,
             url: doc.url,
-            type: doc.tipo || "application/octet-stream",
+            type: doc.tipo || 'application/octet-stream',
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
             uploadDate: doc.created_at,
-            category: "supporting",
+            category: 'supporting',
           });
         }
       }
@@ -87,7 +90,7 @@ export class DocumentsService {
         documents,
       };
     } catch (error: any) {
-      console.error("[DOCUMENTS_SERVICE] Error getting proposal documents:", error);
+      console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error);
       throw error;
     }
   }
@@ -110,7 +113,7 @@ export class DocumentsService {
       if (!proposta) {
         return {
           success: false,
-          error: "Proposta não encontrada",
+          error: 'Proposta não encontrada',
         };
       }
 
@@ -129,7 +132,7 @@ export class DocumentsService {
       if (!uploadResult) {
         return {
           success: false,
-          error: "Erro no upload do arquivo",
+          error: 'Erro no upload do arquivo',
         };
       }
 
@@ -151,14 +154,14 @@ export class DocumentsService {
           type: file.mimetype,
           size: `${Math.round(file.size / 1024)} KB`,
           uploadDate: new Date().toISOString(),
-          category: "supporting",
+          category: 'supporting',
         },
       };
     } catch (error: any) {
-      console.error("[DOCUMENTS_SERVICE] Error uploading document:", error);
+      console.error('[DOCUMENTS_SERVICE] Error uploading document:', error);
       return {
         success: false,
-        error: error.message || "Erro interno do servidor no upload",
+        error: error.message || 'Erro interno do servidor no upload',
       };
     }
   }
@@ -179,10 +182,10 @@ export class DocumentsService {
       const signedUrl = await documentsRepository.generateSignedUrl(path, 3600);
 
       if (!signedUrl) {
-        const isNotFound = path.includes("not-found");
+        const isNotFound = path.includes('not-found');
         return {
           success: false,
-          error: isNotFound ? "Documento não encontrado" : "Erro ao acessar documento",
+          error: isNotFound ? 'Documento não encontrado' : 'Erro ao acessar documento',
         };
       }
 
@@ -192,13 +195,13 @@ export class DocumentsService {
         success: true,
         url: signedUrl,
         filename: `documento-${path.split('/').pop()}`,
-        contentType: "application/pdf",
+        contentType: 'application/pdf',
       };
     } catch (error: any) {
-      console.error("[DOCUMENTS_SERVICE] Error downloading document:", error);
+      console.error('[DOCUMENTS_SERVICE] Error downloading document:', error);
       return {
         success: false,
-        error: error.message || "Erro interno do servidor",
+        error: error.message || 'Erro interno do servidor',
       };
     }
   }

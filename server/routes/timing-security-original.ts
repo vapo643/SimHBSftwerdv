@@ -1,7 +1,7 @@
-import { Router } from "express";
-import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
-import { timingNormalizer } from "../middleware/timing-normalizer.js";
-import { requireAdmin } from "../lib/role-guards.js";
+import { Router } from 'express';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
+import { timingNormalizer } from '../middleware/timing-normalizer.js';
+import { requireAdmin } from '../lib/role-guards.js';
 
 const router = Router();
 
@@ -9,7 +9,7 @@ const router = Router();
 router.use(jwtAuthMiddleware);
 
 // GET /api/timing-security/metrics - Obter métricas de timing
-router.get("/metrics", requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const { endpoint } = req.query;
 
@@ -19,8 +19,8 @@ router.get("/metrics", requireAdmin, async (req: AuthenticatedRequest, res) => {
     // Análise de vulnerabilidade de timing attack
     const vulnerabilityAssessment = {
       isVulnerable: false,
-      riskLevel: "LOW",
-      details: "Sistema protegido por normalização temporal",
+      riskLevel: 'LOW',
+      details: 'Sistema protegido por normalização temporal',
     };
 
     // Se temos métricas suficientes, fazer análise estatística
@@ -32,10 +32,10 @@ router.get("/metrics", requireAdmin, async (req: AuthenticatedRequest, res) => {
       // pode indicar vazamento de informação
       if (actualTimeVariance > 10 && totalTimeVariance < 5) {
         vulnerabilityAssessment.isVulnerable = true;
-        vulnerabilityAssessment.riskLevel = "HIGH";
+        vulnerabilityAssessment.riskLevel = 'HIGH';
         vulnerabilityAssessment.details = `Variance detectada: actual=${actualTimeVariance.toFixed(2)}ms, normalized=${totalTimeVariance.toFixed(2)}ms`;
       } else if (actualTimeVariance > 5) {
-        vulnerabilityAssessment.riskLevel = "MEDIUM";
+        vulnerabilityAssessment.riskLevel = 'MEDIUM';
         vulnerabilityAssessment.details = `Variance moderada detectada: ${actualTimeVariance.toFixed(2)}ms`;
       }
     }
@@ -48,44 +48,44 @@ router.get("/metrics", requireAdmin, async (req: AuthenticatedRequest, res) => {
       recentMetrics: metrics.slice(-50), // Últimas 50 métricas
     });
   } catch (error) {
-    console.error("Erro ao obter métricas de timing:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error('Erro ao obter métricas de timing:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
 // GET /api/timing-security/config - Obter configurações atuais
-router.get("/config", requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/config', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Como configs é privado, vou retornar informações sobre configuração
     const configInfo = {
       defaultBaseline: 15,
       endpoints: {
-        "/api/propostas/:id": { baseline: 25, jitter: 5 },
-        "/api/propostas/:id/status": { baseline: 30, jitter: 5 },
-        "/api/auth/*": { baseline: 100, jitter: 20 },
-        "/api/admin/*": { baseline: 20, jitter: 4 },
+        '/api/propostas/:id': { baseline: 25, jitter: 5 },
+        '/api/propostas/:id/status': { baseline: 30, jitter: 5 },
+        '/api/auth/*': { baseline: 100, jitter: 20 },
+        '/api/admin/*': { baseline: 20, jitter: 4 },
       },
       protection: {
         enabled: true,
-        algorithm: "Secure Jitter + Artificial Delay",
+        algorithm: 'Secure Jitter + Artificial Delay',
         cryptographicJitter: true,
       },
     };
 
     res.json(configInfo);
   } catch (error) {
-    console.error("Erro ao obter configuração:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error('Erro ao obter configuração:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
 // POST /api/timing-security/test - Executar teste de timing attack
-router.post("/test", requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const { endpoint = "/api/propostas/1", iterations = 100 } = req.body;
+    const { endpoint = '/api/propostas/1', iterations = 100 } = req.body;
 
     if (iterations > 1000) {
-      return res.status(400).json({ error: "Máximo 1000 iterações permitidas" });
+      return res.status(400).json({ error: 'Máximo 1000 iterações permitidas' });
     }
 
     const testResults = {
@@ -104,7 +104,7 @@ router.post("/test", requireAdmin, async (req: AuthenticatedRequest, res) => {
       const startTime = process.hrtime.bigint();
 
       // Simular request (em implementação real, faria requests HTTP)
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 5 + 15));
+      await new Promise((resolve) => setTimeout(resolve, Math.random() * 5 + 15));
 
       const endTime = process.hrtime.bigint();
       const responseTime = Number(endTime - startTime) / 1_000_000;
@@ -117,7 +117,7 @@ router.post("/test", requireAdmin, async (req: AuthenticatedRequest, res) => {
     }
 
     // Análise estatística dos resultados
-    const responseTimes = testResults.results.map(r => r.responseTime);
+    const responseTimes = testResults.results.map((r) => r.responseTime);
     responseTimes.sort((a, b) => a - b);
 
     const statistics = {
@@ -139,8 +139,8 @@ router.post("/test", requireAdmin, async (req: AuthenticatedRequest, res) => {
       variance: statistics.max - statistics.min,
       recommendation:
         statistics.stdDev > 5
-          ? "CRÍTICO: Variance alta detectada. Verificar normalização temporal."
-          : "OK: Timing consistente. Sistema protegido contra timing attacks.",
+          ? 'CRÍTICO: Variance alta detectada. Verificar normalização temporal.'
+          : 'OK: Timing consistente. Sistema protegido contra timing attacks.',
     };
 
     res.json({
@@ -150,15 +150,15 @@ router.post("/test", requireAdmin, async (req: AuthenticatedRequest, res) => {
       completedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Erro ao executar teste:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error('Erro ao executar teste:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
 // POST /api/timing-security/simulate-attack - Simular timing attack real
-router.post("/simulate-attack", requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const { targetEndpoint = "/api/propostas", validIds = [], invalidIds = [] } = req.body;
+    const { targetEndpoint = '/api/propostas', validIds = [], invalidIds = [] } = req.body;
 
     const attackSimulation = {
       target: targetEndpoint,
@@ -169,7 +169,7 @@ router.post("/simulate-attack", requireAdmin, async (req: AuthenticatedRequest, 
         analysis: {
           timingLeakDetected: false,
           avgDifference: 0,
-          riskLevel: "LOW",
+          riskLevel: 'LOW',
         },
       },
     };
@@ -180,7 +180,7 @@ router.post("/simulate-attack", requireAdmin, async (req: AuthenticatedRequest, 
       const samples = [];
       for (let i = 0; i < 10; i++) {
         const startTime = process.hrtime.bigint();
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 20)); // Simular tempo de response
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 10 + 20)); // Simular tempo de response
         const endTime = process.hrtime.bigint();
         samples.push(Number(endTime - startTime) / 1_000_000);
       }
@@ -199,7 +199,7 @@ router.post("/simulate-attack", requireAdmin, async (req: AuthenticatedRequest, 
       const samples = [];
       for (let i = 0; i < 10; i++) {
         const startTime = process.hrtime.bigint();
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 8 + 18)); // Simular tempo de response
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 8 + 18)); // Simular tempo de response
         const endTime = process.hrtime.bigint();
         samples.push(Number(endTime - startTime) / 1_000_000);
       }
@@ -229,14 +229,14 @@ router.post("/simulate-attack", requireAdmin, async (req: AuthenticatedRequest, 
 
       if (difference > 5) {
         attackSimulation.results.analysis.timingLeakDetected = true;
-        attackSimulation.results.analysis.riskLevel = difference > 10 ? "HIGH" : "MEDIUM";
+        attackSimulation.results.analysis.riskLevel = difference > 10 ? 'HIGH' : 'MEDIUM';
       }
     }
 
     res.json(attackSimulation);
   } catch (error) {
-    console.error("Erro ao simular attack:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error('Erro ao simular attack:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 

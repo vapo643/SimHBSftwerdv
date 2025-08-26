@@ -3,13 +3,13 @@
  * Implementa validação HMAC e processamento assíncrono
  */
 
-import express from "express";
-import crypto from "crypto";
-import { db } from "../lib/supabase";
-import { sql } from "drizzle-orm";
-import { documentProcessingService, ProcessingSource } from "../services/documentProcessingService";
-import { clickSignWebhookService } from "../services/clickSignWebhookService";
-import { z } from "zod";
+import express from 'express';
+import crypto from 'crypto';
+import { db } from '../lib/supabase';
+import { sql } from 'drizzle-orm';
+import { documentProcessingService, ProcessingSource } from '../services/documentProcessingService';
+import { clickSignWebhookService } from '../services/clickSignWebhookService';
+import { z } from 'zod';
 
 const router = express.Router();
 
@@ -39,7 +39,7 @@ const interWebhookSchema = z.object({
   valorPago: z.number().optional(),
   dataVencimento: z.string().optional(),
   dataPagamento: z.string().optional(),
-  origemRecebimento: z.enum(["BOLETO", "PIX"]).optional(),
+  origemRecebimento: z.enum(['BOLETO', 'PIX']).optional(),
   pixTxid: z.string().optional(),
   codigoBarras: z.string().optional(),
   linhaDigitavel: z.string().optional(),
@@ -52,11 +52,11 @@ function validateClickSignHMAC(payload: string, signature: string): boolean {
   const secret = process.env.CLICKSIGN_WEBHOOK_SECRET;
 
   if (!secret) {
-    console.error("❌ [WEBHOOK] CLICKSIGN_WEBHOOK_SECRET not configured");
+    console.error('❌ [WEBHOOK] CLICKSIGN_WEBHOOK_SECRET not configured');
     return false;
   }
 
-  const expectedSignature = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
   // Timing-safe comparison
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
@@ -69,28 +69,32 @@ function validateInterHMAC(payload: string, signature: string): boolean {
   const secret = process.env.INTER_WEBHOOK_SECRET;
 
   if (!secret) {
-    console.error("❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET not configured");
+    console.error('❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET not configured');
     return false;
   }
 
   // Remover prefixos possíveis (sha256=, etc.)
   const cleanSignature = signature.replace(/^(sha256=|SHA256=)?/, '');
-  
-  const expectedSignature = crypto.createHmac("sha256", secret).update(payload).digest("hex");
 
-  console.log(`🔐 [WEBHOOK INTER] Signature received (clean): ${cleanSignature.substring(0, 20)}...`);
+  const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+  console.log(
+    `🔐 [WEBHOOK INTER] Signature received (clean): ${cleanSignature.substring(0, 20)}...`
+  );
   console.log(`🔐 [WEBHOOK INTER] Signature expected: ${expectedSignature.substring(0, 20)}...`);
 
   try {
     // Garantir que ambas as strings tenham o mesmo tamanho
     if (cleanSignature.length !== expectedSignature.length) {
-      console.error(`❌ [WEBHOOK INTER] Signature length mismatch: received ${cleanSignature.length}, expected ${expectedSignature.length}`);
+      console.error(
+        `❌ [WEBHOOK INTER] Signature length mismatch: received ${cleanSignature.length}, expected ${expectedSignature.length}`
+      );
       return false;
     }
 
     // Timing-safe comparison
     return crypto.timingSafeEqual(
-      Buffer.from(cleanSignature, 'hex'), 
+      Buffer.from(cleanSignature, 'hex'),
       Buffer.from(expectedSignature, 'hex')
     );
   } catch (error) {
@@ -103,24 +107,24 @@ function validateInterHMAC(payload: string, signature: string): boolean {
  * POST /api/webhooks/clicksign
  * Recebe eventos de assinatura do ClickSign
  */
-router.post("/clicksign", express.raw({ type: "application/json" }), async (req, res) => {
+router.post('/clicksign', express.raw({ type: 'application/json' }), async (req, res) => {
   const startTime = Date.now();
 
   try {
-    console.log("🔔 [WEBHOOK] ClickSign webhook received");
+    console.log('🔔 [WEBHOOK] ClickSign webhook received');
 
     // 1. Validar assinatura HMAC
-    const signature = req.headers["content-hmac"] as string;
+    const signature = req.headers['content-hmac'] as string;
     const payload = req.body.toString();
 
     if (!signature) {
-      console.warn("⚠️ [WEBHOOK] Missing HMAC signature");
-      return res.status(401).json({ error: "Missing signature" });
+      console.warn('⚠️ [WEBHOOK] Missing HMAC signature');
+      return res.status(401).json({ error: 'Missing signature' });
     }
 
     if (!validateClickSignHMAC(payload, signature)) {
-      console.error("❌ [WEBHOOK] Invalid HMAC signature");
-      return res.status(401).json({ error: "Invalid signature" });
+      console.error('❌ [WEBHOOK] Invalid HMAC signature');
+      return res.status(401).json({ error: 'Invalid signature' });
     }
 
     // 2. Parse e validar payload
@@ -129,30 +133,30 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
       webhookData = JSON.parse(payload);
       clickSignWebhookSchema.parse(webhookData);
     } catch (parseError) {
-      console.error("❌ [WEBHOOK] Invalid payload format:", parseError);
-      return res.status(400).json({ error: "Invalid payload" });
+      console.error('❌ [WEBHOOK] Invalid payload format:', parseError);
+      return res.status(400).json({ error: 'Invalid payload' });
     }
 
     const { event, document } = webhookData;
-    console.log(`📋 [WEBHOOK] Event: ${event.name}, Document: ${document?.key || "N/A"}`);
+    console.log(`📋 [WEBHOOK] Event: ${event.name}, Document: ${document?.key || 'N/A'}`);
 
     // 3. Processar apenas eventos de documento finalizado
-    const signedEvents = ["document.signed", "document.finished", "auto_close"];
+    const signedEvents = ['document.signed', 'document.finished', 'auto_close'];
 
     if (!signedEvents.includes(event.name)) {
       console.log(`ℹ️ [WEBHOOK] Ignoring event ${event.name} (not a signing completion event)`);
       return res.status(200).json({
-        message: "Event received but not processed",
+        message: 'Event received but not processed',
         event: event.name,
       });
     }
 
-    if (!document || document.status !== "closed") {
+    if (!document || document.status !== 'closed') {
       console.log(
-        `ℹ️ [WEBHOOK] Document not ready for processing. Status: ${document?.status || "unknown"}`
+        `ℹ️ [WEBHOOK] Document not ready for processing. Status: ${document?.status || 'unknown'}`
       );
       return res.status(200).json({
-        message: "Document not ready",
+        message: 'Document not ready',
         status: document?.status,
       });
     }
@@ -168,7 +172,7 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
 
     if (!proposalResult || proposalResult.length === 0) {
       console.warn(`⚠️ [WEBHOOK] No proposal found for document ${document.key}`);
-      return res.status(404).json({ error: "Proposal not found" });
+      return res.status(404).json({ error: 'Proposal not found' });
     }
 
     const proposal = proposalResult[0];
@@ -177,7 +181,7 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
     // 5. Processar documento de forma assíncrona
     // Responder rapidamente ao webhook
     res.status(200).json({
-      message: "Webhook received and queued for processing",
+      message: 'Webhook received and queued for processing',
       proposalId: proposal.id,
     });
 
@@ -190,9 +194,9 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
           data: {
             document: document,
             signer: event.data?.signer,
-            list: event.data?.list
+            list: event.data?.list,
           },
-          occurred_at: event.occurred_at
+          occurred_at: event.occurred_at,
         });
 
         if (result.processed) {
@@ -201,7 +205,7 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
           );
 
           // Também processar o download do documento assinado
-          if (document.status === "closed") {
+          if (document.status === 'closed') {
             await documentProcessingService.processSignedDocument(
               proposal.id as string,
               ProcessingSource.WEBHOOK,
@@ -219,7 +223,7 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
               processing_time,
               created_at
             ) VALUES (
-              ${"clicksign"},
+              ${'clicksign'},
               ${event.name},
               ${JSON.stringify(webhookData)},
               ${true},
@@ -237,7 +241,7 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
       }
     });
   } catch (error) {
-    console.error("❌ [WEBHOOK] Unexpected error:", error);
+    console.error('❌ [WEBHOOK] Unexpected error:', error);
 
     // Log webhook error
     try {
@@ -250,19 +254,19 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
           error,
           created_at
         ) VALUES (
-          ${"clicksign"},
-          ${"error"},
-          ${JSON.stringify({ headers: req.headers, body: req.body?.toString() || "" })},
+          ${'clicksign'},
+          ${'error'},
+          ${JSON.stringify({ headers: req.headers, body: req.body?.toString() || '' })},
           ${false},
-          ${error instanceof Error ? error.message : "Unknown error"},
+          ${error instanceof Error ? error.message : 'Unknown error'},
           NOW()
         )
       `);
     } catch (logError) {
-      console.error("Failed to log webhook error:", logError);
+      console.error('Failed to log webhook error:', logError);
     }
 
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -270,41 +274,45 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
  * POST /api/webhooks/inter
  * Recebe notificações de pagamento do Banco Inter
  */
-router.post("/inter", express.json(), async (req, res) => {
+router.post('/inter', express.json(), async (req, res) => {
   const startTime = Date.now();
   let codigoSolicitacao: string | undefined;
 
   try {
-    console.log("🏦 [WEBHOOK INTER] Webhook recebido");
+    console.log('🏦 [WEBHOOK INTER] Webhook recebido');
 
     // 1. Validar presença do secret
     const secret = process.env.INTER_WEBHOOK_SECRET;
     if (!secret) {
-      console.error("❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET não configurado");
-      return res.status(500).json({ error: "Webhook secret not configured" });
+      console.error('❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET não configurado');
+      return res.status(500).json({ error: 'Webhook secret not configured' });
     }
 
     // 2. Validar assinatura HMAC (o header exato pode variar)
-    const signature = req.headers["x-signature"] || req.headers["x-inter-signature"] || req.headers["signature"];
+    const signature =
+      req.headers['x-signature'] || req.headers['x-inter-signature'] || req.headers['signature'];
     const payload = JSON.stringify(req.body);
 
-    console.log(`🔐 [WEBHOOK INTER] Headers recebidos:`, Object.keys(req.headers).filter(h => h.includes('sig')));
+    console.log(
+      `🔐 [WEBHOOK INTER] Headers recebidos:`,
+      Object.keys(req.headers).filter((h) => h.includes('sig'))
+    );
     console.log(`🔐 [WEBHOOK INTER] Signature header: ${signature ? 'presente' : 'ausente'}`);
 
     // Em desenvolvimento, permitir webhooks sem assinatura para testes
     const isDevelopment = process.env.NODE_ENV === 'development';
-    
+
     if (signature) {
       if (!validateInterHMAC(payload, signature as string)) {
-        console.error("❌ [WEBHOOK INTER] Assinatura HMAC inválida");
-        return res.status(401).json({ error: "Invalid signature" });
+        console.error('❌ [WEBHOOK INTER] Assinatura HMAC inválida');
+        return res.status(401).json({ error: 'Invalid signature' });
       }
-      console.log("✅ [WEBHOOK INTER] Assinatura HMAC válida");
+      console.log('✅ [WEBHOOK INTER] Assinatura HMAC válida');
     } else if (!isDevelopment) {
-      console.warn("⚠️ [WEBHOOK INTER] Assinatura ausente em produção");
-      return res.status(401).json({ error: "Missing signature" });
+      console.warn('⚠️ [WEBHOOK INTER] Assinatura ausente em produção');
+      return res.status(401).json({ error: 'Missing signature' });
     } else {
-      console.log("🔧 [WEBHOOK INTER] Modo desenvolvimento - assinatura não obrigatória");
+      console.log('🔧 [WEBHOOK INTER] Modo desenvolvimento - assinatura não obrigatória');
     }
 
     // 3. Usar payload já parseado pelo express.json()
@@ -313,13 +321,18 @@ router.post("/inter", express.json(), async (req, res) => {
     // 4. Validar schema
     const validationResult = interWebhookSchema.safeParse(webhookData);
     if (!validationResult.success) {
-      console.warn("⚠️ [WEBHOOK INTER] Schema inválido, processando mesmo assim:", validationResult.error.errors);
+      console.warn(
+        '⚠️ [WEBHOOK INTER] Schema inválido, processando mesmo assim:',
+        validationResult.error.errors
+      );
     }
 
     codigoSolicitacao = webhookData.codigoSolicitacao;
     const situacao = webhookData.situacao;
 
-    console.log(`🏦 [WEBHOOK INTER] Evento para codigoSolicitacao: ${codigoSolicitacao}, situacao: ${situacao}`);
+    console.log(
+      `🏦 [WEBHOOK INTER] Evento para codigoSolicitacao: ${codigoSolicitacao}, situacao: ${situacao}`
+    );
 
     // 5. Salvar callback na tabela inter_callbacks
     await db.execute(sql`
@@ -340,7 +353,7 @@ router.post("/inter", express.json(), async (req, res) => {
 
     // 6. Responder rapidamente ao webhook
     res.status(200).json({
-      message: "Webhook recebido e será processado",
+      message: 'Webhook recebido e será processado',
       codigoSolicitacao: codigoSolicitacao,
     });
 
@@ -350,19 +363,18 @@ router.post("/inter", express.json(), async (req, res) => {
         await processInterWebhookEvent(codigoSolicitacao!, webhookData, startTime);
       } catch (error) {
         console.error(`❌ [WEBHOOK INTER] Erro no processamento em background:`, error);
-        
+
         // Marcar como erro no banco
         await db.execute(sql`
           UPDATE inter_callbacks 
-          SET erro = ${error instanceof Error ? error.message : "Unknown error"} 
+          SET erro = ${error instanceof Error ? error.message : 'Unknown error'} 
           WHERE codigo_solicitacao = ${codigoSolicitacao} 
           AND created_at >= NOW() - INTERVAL '1 minute'
         `);
       }
     });
-
   } catch (error) {
-    console.error("❌ [WEBHOOK INTER] Erro inesperado:", error);
+    console.error('❌ [WEBHOOK INTER] Erro inesperado:', error);
 
     // Salvar erro se conseguimos extrair o codigoSolicitacao
     if (codigoSolicitacao) {
@@ -377,26 +389,30 @@ router.post("/inter", express.json(), async (req, res) => {
             created_at
           ) VALUES (
             ${codigoSolicitacao},
-            ${"error"},
-            ${JSON.stringify(req.body) || ""},
+            ${'error'},
+            ${JSON.stringify(req.body) || ''},
             ${false},
-            ${error instanceof Error ? error.message : "Unknown error"},
+            ${error instanceof Error ? error.message : 'Unknown error'},
             NOW()
           )
         `);
       } catch (logError) {
-        console.error("❌ [WEBHOOK INTER] Falha ao salvar erro:", logError);
+        console.error('❌ [WEBHOOK INTER] Falha ao salvar erro:', logError);
       }
     }
 
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 /**
  * Processa evento do webhook do Banco Inter em background
  */
-async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: any, startTime: number) {
+async function processInterWebhookEvent(
+  codigoSolicitacao: string,
+  webhookData: any,
+  startTime: number
+) {
   console.log(`🔄 [WEBHOOK INTER] Processando evento para ${codigoSolicitacao}`);
 
   const situacao = webhookData.situacao;
@@ -411,7 +427,7 @@ async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: 
       UPDATE inter_collections 
       SET 
         situacao = ${situacao},
-        data_situacao = ${dataPagamento || "NOW()"},
+        data_situacao = ${dataPagamento || 'NOW()'},
         valor_total_recebido = ${valorPago || null},
         origem_recebimento = ${origemRecebimento || null},
         updated_at = NOW()
@@ -420,7 +436,9 @@ async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: 
     `);
 
     if (updateResult.length === 0) {
-      console.warn(`⚠️ [WEBHOOK INTER] Nenhum registro encontrado para codigoSolicitacao: ${codigoSolicitacao}`);
+      console.warn(
+        `⚠️ [WEBHOOK INTER] Nenhum registro encontrado para codigoSolicitacao: ${codigoSolicitacao}`
+      );
     } else {
       console.log(`✅ [WEBHOOK INTER] Status atualizado para ${codigoSolicitacao}: ${situacao}`);
     }
@@ -438,29 +456,35 @@ async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: 
       const { proposta_id, numero_parcela, total_parcelas, proposta_status } = collection[0] as any;
 
       // Se foi pago, verificar se todas as parcelas foram pagas
-      if (situacao === "PAGO" || situacao === "RECEBIDO") {
+      if (situacao === 'PAGO' || situacao === 'RECEBIDO') {
         // PAM V1.0 - RECONCILIAÇÃO CRÍTICA: Sincronizar status entre inter_collections e parcelas
         // Esta é a ponte que falta para unificar nossa fonte da verdade
-        console.log(`🔄 [RECONCILIAÇÃO PAM V1.0] Sincronizando pagamento para parcela ${numero_parcela} da proposta ${proposta_id}`);
-        
+        console.log(
+          `🔄 [RECONCILIAÇÃO PAM V1.0] Sincronizando pagamento para parcela ${numero_parcela} da proposta ${proposta_id}`
+        );
+
         // Atualizar o status da parcela correspondente para 'pago'
         const updateParcelaResult = await tx.execute(sql`
           UPDATE parcelas 
           SET 
             status = 'pago',
-            data_pagamento = ${dataPagamento || "NOW()"},
+            data_pagamento = ${dataPagamento || 'NOW()'},
             updated_at = NOW()
           WHERE proposta_id = ${proposta_id}
           AND numero_parcela = ${numero_parcela}
           RETURNING id
         `);
-        
+
         if (updateParcelaResult.length > 0) {
-          console.log(`✅ [RECONCILIAÇÃO PAM V1.0] Parcela ${numero_parcela} da proposta ${proposta_id} marcada como PAGA na tabela parcelas`);
+          console.log(
+            `✅ [RECONCILIAÇÃO PAM V1.0] Parcela ${numero_parcela} da proposta ${proposta_id} marcada como PAGA na tabela parcelas`
+          );
         } else {
-          console.error(`❌ [RECONCILIAÇÃO PAM V1.0] ERRO CRÍTICO: Não foi possível atualizar parcela ${numero_parcela} da proposta ${proposta_id}`);
+          console.error(
+            `❌ [RECONCILIAÇÃO PAM V1.0] ERRO CRÍTICO: Não foi possível atualizar parcela ${numero_parcela} da proposta ${proposta_id}`
+          );
         }
-        
+
         const allPaid = await tx.execute(sql`
           SELECT COUNT(*) as total_paid
           FROM inter_collections 
@@ -494,17 +518,19 @@ async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: 
     `);
   });
 
-  console.log(`✅ [WEBHOOK INTER] Processamento concluído para ${codigoSolicitacao} em ${Date.now() - startTime}ms`);
+  console.log(
+    `✅ [WEBHOOK INTER] Processamento concluído para ${codigoSolicitacao} em ${Date.now() - startTime}ms`
+  );
 }
 
 /**
  * GET /api/webhooks/health
  * Health check para verificar se o serviço de webhooks está ativo
  */
-router.get("/health", (req, res) => {
+router.get('/health', (req, res) => {
   res.status(200).json({
-    status: "healthy",
-    service: "webhooks",
+    status: 'healthy',
+    service: 'webhooks',
     timestamp: new Date().toISOString(),
   });
 });

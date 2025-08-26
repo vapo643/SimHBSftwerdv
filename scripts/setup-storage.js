@@ -4,17 +4,17 @@
  * Script para configurar o bucket de documentos no Supabase Storage
  */
 
-const { createClient } = require("@supabase/supabase-js");
+const { createClient } = require('@supabase/supabase-js');
 
 async function setupStorage() {
-  console.log("🔧 Configurando Supabase Storage...");
+  console.log('🔧 Configurando Supabase Storage...');
 
   // Verificar variáveis de ambiente
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceKey) {
-    console.error("❌ SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não encontrados");
+    console.error('❌ SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não encontrados');
     process.exit(1);
   }
 
@@ -31,21 +31,21 @@ async function setupStorage() {
 
   try {
     // Verificar buckets existentes
-    console.log("📋 Verificando buckets existentes...");
+    console.log('📋 Verificando buckets existentes...');
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
 
     if (listError) {
-      console.error("❌ Erro ao listar buckets:", listError);
+      console.error('❌ Erro ao listar buckets:', listError);
       return;
     }
 
     console.log(
-      "📦 Buckets encontrados:",
-      buckets.map(b => b.name)
+      '📦 Buckets encontrados:',
+      buckets.map((b) => b.name)
     );
 
     // Verificar se bucket 'documents' já existe
-    const documentsExists = buckets.some(bucket => bucket.name === "documents");
+    const documentsExists = buckets.some((bucket) => bucket.name === 'documents');
 
     if (documentsExists) {
       console.log('✅ Bucket "documents" já existe!');
@@ -54,21 +54,21 @@ async function setupStorage() {
 
     // Criar bucket 'documents'
     console.log('🔨 Criando bucket "documents"...');
-    const { data: bucket, error: createError } = await supabase.storage.createBucket("documents", {
+    const { data: bucket, error: createError } = await supabase.storage.createBucket('documents', {
       public: true,
       fileSizeLimit: 52428800, // 50MB
-      allowedMimeTypes: ["application/pdf", "image/jpeg", "image/jpg", "image/png", "image/gif"],
+      allowedMimeTypes: ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
     });
 
     if (createError) {
-      console.error("❌ Erro ao criar bucket:", createError);
+      console.error('❌ Erro ao criar bucket:', createError);
       return;
     }
 
     console.log('✅ Bucket "documents" criado com sucesso!');
-    console.log("📊 Configuração:", bucket);
+    console.log('📊 Configuração:', bucket);
   } catch (error) {
-    console.error("❌ Erro geral:", error);
+    console.error('❌ Erro geral:', error);
   }
 }
 

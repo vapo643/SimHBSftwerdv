@@ -4,11 +4,11 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { GenericService } from "./genericService.js";
+import { GenericService } from './genericService.js';
 
 export class ProposalService extends GenericService {
   constructor() {
-    super("PROPOSAL_SERVICE");
+    super('PROPOSAL_SERVICE');
   }
 
   /**
@@ -17,7 +17,7 @@ export class ProposalService extends GenericService {
   async processProposal(operation: string, data: any): Promise<any> {
     try {
       console.log(`[PROPOSAL_SERVICE] Processing ${operation}`, data);
-      
+
       return await this.executeOperation(operation, data);
     } catch (error: any) {
       console.error(`[PROPOSAL_SERVICE] Operation ${operation} failed:`, error);
@@ -34,7 +34,7 @@ export class ProposalService extends GenericService {
 }
 
 export const proposalService = new ProposalService();
-export const propostasCarneService = new GenericService("PROPOSTAS_CARNE");
-export const propostasStatusService = new GenericService("PROPOSTAS_STATUS");
-export const propostasStorageService = new GenericService("PROPOSTAS_STORAGE");
-export const propostasSyncService = new GenericService("PROPOSTAS_SYNC");
+export const propostasCarneService = new GenericService('PROPOSTAS_CARNE');
+export const propostasStatusService = new GenericService('PROPOSTAS_STATUS');
+export const propostasStorageService = new GenericService('PROPOSTAS_STORAGE');
+export const propostasSyncService = new GenericService('PROPOSTAS_SYNC');

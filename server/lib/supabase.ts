@@ -1,18 +1,18 @@
-import { createClient } from "@supabase/supabase-js";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import * as schema from "@shared/schema";
+import { createClient } from '@supabase/supabase-js';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import * as schema from '@shared/schema';
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
-const databaseUrl = process.env.DATABASE_URL || "";
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+const databaseUrl = process.env.DATABASE_URL || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables");
+  throw new Error('Missing Supabase environment variables');
 }
 
 if (!databaseUrl) {
-  throw new Error("Missing DATABASE_URL environment variable");
+  throw new Error('Missing DATABASE_URL environment variable');
 }
 
 // Server-side Supabase client - properly isolated from client-side singleton
@@ -21,7 +21,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // NOVA FUNÇÃO para operações Admin:
 export function createServerSupabaseAdminClient() {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY é obrigatória para operações administrativas");
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY é obrigatória para operações administrativas');
   }
 
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -46,7 +46,7 @@ export function createServerSupabaseClient(accessToken?: string) {
     // Configurar sessão manualmente para RLS
     client.auth.setSession({
       access_token: accessToken,
-      refresh_token: "",
+      refresh_token: '',
     });
   }
 
@@ -57,26 +57,26 @@ export function createServerSupabaseClient(accessToken?: string) {
 // Temporary: Use lazy connection to prevent server crash
 let dbClient;
 
-if (databaseUrl.includes("supabase.com")) {
-  console.log("✅ Database: Configuring Supabase connection...");
+if (databaseUrl.includes('supabase.com')) {
+  console.log('✅ Database: Configuring Supabase connection...');
 
   // Use transaction pooler port and SSL
   let correctedUrl = databaseUrl;
-  if (!correctedUrl.includes("sslmode=")) {
-    correctedUrl += correctedUrl.includes("?") ? "&sslmode=require" : "?sslmode=require";
+  if (!correctedUrl.includes('sslmode=')) {
+    correctedUrl += correctedUrl.includes('?') ? '&sslmode=require' : '?sslmode=require';
   }
-  if (correctedUrl.includes(":5432")) {
-    correctedUrl = correctedUrl.replace(":5432", ":6543");
+  if (correctedUrl.includes(':5432')) {
+    correctedUrl = correctedUrl.replace(':5432', ':6543');
   }
 
   // Create connection with proper configuration
   dbClient = postgres(correctedUrl, {
-    ssl: "require",
+    ssl: 'require',
     max: 5,
     idle_timeout: 30,
     connect_timeout: 10,
   });
-  console.log("✅ Database: Connection configured (lazy)");
+  console.log('✅ Database: Connection configured (lazy)');
 } else {
   dbClient = postgres(databaseUrl);
 }
@@ -88,10 +88,10 @@ export const db = drizzle(client, { schema });
 setTimeout(async () => {
   try {
     await client`SELECT 1`;
-    console.log("✅ Database: Connection test successful");
+    console.log('✅ Database: Connection test successful');
   } catch (error) {
-    console.warn("⚠️  Database: Connection test failed -", (error as Error).message);
-    console.warn("⚠️  Database: Check DATABASE_URL credentials in Secrets");
-    console.warn("⚠️  Database: App will continue using Supabase REST API only");
+    console.warn('⚠️  Database: Connection test failed -', (error as Error).message);
+    console.warn('⚠️  Database: Check DATABASE_URL credentials in Secrets');
+    console.warn('⚠️  Database: App will continue using Supabase REST API only');
   }
 }, 2000);

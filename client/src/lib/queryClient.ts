@@ -1,5 +1,5 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { api, ApiError, ApiErrorCode } from "./apiClient";
+import { QueryClient, QueryFunction } from '@tanstack/react-query';
+import { api, ApiError, ApiErrorCode } from './apiClient';
 
 async function _throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -10,15 +10,17 @@ async function _throwIfResNotOk(res: Response) {
 
 export async function apiRequest(
   url: string,
-  options: { method: string; body?: unknown; responseType?: "json" | "blob" | "text" } = { method: "GET" }
+  options: { method: string; body?: unknown; responseType?: 'json' | 'blob' | 'text' } = {
+    method: 'GET',
+  }
 ): Promise<unknown> {
-  const { method, body, responseType = "json" } = options;
+  const { method, body, responseType = 'json' } = options;
 
   // PAM V1.0 - FASE 1: Suporte a blob responses para downloads de PDF
-  if (responseType === "blob") {
+  if (responseType === 'blob') {
     // Para blob responses, usar apiClient com responseType blob
-    if (method === "GET") {
-      const blob = await api.get(url, { responseType: "blob" }) as Blob;
+    if (method === 'GET') {
+      const blob = (await api.get(url, { responseType: 'blob' })) as Blob;
       return blob;
     } else {
       throw new Error(`Blob responseType not supported for method: ${method}`);
@@ -26,20 +28,20 @@ export async function apiRequest(
   }
 
   // Use the new api client methods for JSON responses
-  if (method === "GET") {
+  if (method === 'GET') {
     const response = await api.get(url);
     return response.data;
-  } else if (method === "POST") {
+  } else if (method === 'POST') {
     const response = await api.post(url, body);
     return response.data;
-  } else if (method === "PUT") {
+  } else if (method === 'PUT') {
     const response = await api.put(url, body);
     return response.data;
-  } else if (method === "PATCH") {
+  } else if (method === 'PATCH') {
     // PAM V1.0 - HOTFIX: Adicionar suporte para PATCH
     const response = await api.patch(url, body);
     return response.data;
-  } else if (method === "DELETE") {
+  } else if (method === 'DELETE') {
     const response = await api.delete(url);
     return response.data;
   }
@@ -47,17 +49,17 @@ export async function apiRequest(
   throw new Error(`Unsupported method: ${method}`);
 }
 
-type UnauthorizedBehavior = "returnNull" | "throw";
+type UnauthorizedBehavior = 'returnNull' | 'throw';
 export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
       // Convert queryKey array to URL string
-      const url = queryKey.join("/") as string;
+      const url = queryKey.join('/') as string;
       const response = await api.get(url);
       return response.data;
     } catch (error: any) {
-      if (unauthorizedBehavior === "returnNull" && error.message?.includes("401")) {
+      if (unauthorizedBehavior === 'returnNull' && error.message?.includes('401')) {
         return null;
       }
       throw error;
@@ -67,8 +69,8 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      
+      queryFn: getQueryFn({ on401: 'throw' }),
+
       // RETRY STRATEGY - Exponential Backoff com error categorization
       retry: (failureCount, error: any) => {
         // Não fazer retry em erros de cliente (4xx) exceto 401
@@ -76,50 +78,53 @@ export const queryClient = new QueryClient({
           if (error.status >= 400 && error.status < 500 && error.status !== 401) {
             return false;
           }
-          
+
           // Máximo 3 tentativas para erros de servidor (5xx)
           if (error.status >= 500) {
             return failureCount < 3;
           }
-          
+
           // Retry em erros de rede
-          if (error.code === ApiErrorCode.NETWORK_ERROR || error.code === ApiErrorCode.TIMEOUT_ERROR) {
+          if (
+            error.code === ApiErrorCode.NETWORK_ERROR ||
+            error.code === ApiErrorCode.TIMEOUT_ERROR
+          ) {
             return failureCount < 5;
           }
         }
-        
+
         return failureCount < 3;
       },
-      
+
       // EXPONENTIAL BACKOFF
       retryDelay: (attemptIndex) => {
         // 1s, 2s, 4s, 8s, 16s...
         const baseDelay = 1000;
         const maxDelay = 30000;
         const delay = Math.min(baseDelay * Math.pow(2, attemptIndex), maxDelay);
-        
+
         // Adicionar jitter para evitar thundering herd
         const jitter = Math.random() * 0.3 * delay;
         return delay + jitter;
       },
-      
+
       // CACHE STRATEGY
-      staleTime: 5 * 60 * 1000,    // 5 minutos - dados considerados fresh
-      gcTime: 10 * 60 * 1000,      // 10 minutos - tempo em cache após unused (v5: cacheTime → gcTime)
-      
+      staleTime: 5 * 60 * 1000, // 5 minutos - dados considerados fresh
+      gcTime: 10 * 60 * 1000, // 10 minutos - tempo em cache após unused (v5: cacheTime → gcTime)
+
       // REFETCH BEHAVIOR
-      refetchOnWindowFocus: true,    // Refetch quando usuário volta à aba
-      refetchOnMount: true,          // Refetch em mount se dados stale
-      refetchOnReconnect: true,      // Refetch quando conexão restaurada
-      refetchInterval: false,        // Não fazer polling por padrão
-      
+      refetchOnWindowFocus: true, // Refetch quando usuário volta à aba
+      refetchOnMount: true, // Refetch em mount se dados stale
+      refetchOnReconnect: true, // Refetch quando conexão restaurada
+      refetchInterval: false, // Não fazer polling por padrão
+
       // ERROR BOUNDARY INTEGRATION - (v5: useErrorBoundary removido)
       // Erros críticos serão tratados via onError callback
-      
+
       // NETWORK MODE - Funciona offline com cache
       networkMode: 'online',
     },
-    
+
     mutations: {
       // Mutations não têm retry automático por padrão
       retry: (failureCount, error: any) => {
@@ -129,36 +134,39 @@ export const queryClient = new QueryClient({
         }
         return false;
       },
-      
+
       retryDelay: (attemptIndex) => {
         // Retry mais rápido para mutations
         return Math.min(1000 * Math.pow(1.5, attemptIndex), 5000);
       },
-      
+
       // Error handling para mutations
       onError: (error, variables, context) => {
         // Log para monitoring
-        console.error('🔴 [MUTATION FAILED]', { 
-          error: error instanceof ApiError ? {
-            message: error.message,
-            status: error.status,
-            code: error.code,
-            isRetryable: error.isRetryable
-          } : error, 
-          variables 
+        console.error('🔴 [MUTATION FAILED]', {
+          error:
+            error instanceof ApiError
+              ? {
+                  message: error.message,
+                  status: error.status,
+                  code: error.code,
+                  isRetryable: error.isRetryable,
+                }
+              : error,
+          variables,
         });
-        
+
         // Enviar para Sentry se disponível
         if (typeof window !== 'undefined' && (window as any).Sentry) {
           (window as any).Sentry.captureException(error, {
             extra: { variables, context },
-            tags: { type: 'mutation-error' }
+            tags: { type: 'mutation-error' },
           });
         }
       },
-      
+
       // Network mode para mutations
       networkMode: 'online',
-    }
-  }
+    },
+  },
 });

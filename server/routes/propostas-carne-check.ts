@@ -1,1 +1,12 @@
-import { Router } from "express"; import { propostasCarneService } from "../services/proposalService.js"; const router = Router(); router.post("/check", async (req, res) => { try { const result = await propostasCarneService.executeOperation("check_carne", req.body); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+import { Router } from 'express';
+import { propostasCarneService } from '../services/proposalService.js';
+const router = Router();
+router.post('/check', async (req, res) => {
+  try {
+    const result = await propostasCarneService.executeOperation('check_carne', req.body);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+export default router;

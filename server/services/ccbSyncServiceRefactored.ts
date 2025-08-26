@@ -4,9 +4,9 @@
  * Runs with reduced frequency (every 6 hours instead of every 2 minutes)
  */
 
-import { db } from "../lib/supabase";
-import { sql } from "drizzle-orm";
-import { documentProcessingService, ProcessingSource } from "./documentProcessingService";
+import { db } from '../lib/supabase';
+import { sql } from 'drizzle-orm';
+import { documentProcessingService, ProcessingSource } from './documentProcessingService';
 
 export class CCBSyncService {
   private syncInterval: NodeJS.Timeout | null = null;
@@ -25,7 +25,7 @@ export class CCBSyncService {
    */
   startAutoSync(intervalHours: number = 6) {
     if (this.isRunning) {
-      console.log("[CCB SYNC] ⚠️ Fallback polling already running");
+      console.log('[CCB SYNC] ⚠️ Fallback polling already running');
       return;
     }
 
@@ -60,7 +60,7 @@ export class CCBSyncService {
       clearInterval(this.syncInterval);
       this.syncInterval = null;
       this.isRunning = false;
-      console.log("[CCB SYNC] ⛔ Fallback polling stopped");
+      console.log('[CCB SYNC] ⛔ Fallback polling stopped');
     }
   }
 
@@ -72,7 +72,7 @@ export class CCBSyncService {
     const startTime = Date.now();
 
     try {
-      console.log("[CCB SYNC] 🔍 Running fallback check for missed documents...");
+      console.log('[CCB SYNC] 🔍 Running fallback check for missed documents...');
       this.syncStats.totalSyncs++;
       this.lastSyncTime = new Date();
 
@@ -107,7 +107,7 @@ export class CCBSyncService {
       `);
 
       if (!pendingProposals.rows || pendingProposals.rows.length === 0) {
-        console.log("[CCB SYNC] ✅ No missed documents found (webhook system working correctly)");
+        console.log('[CCB SYNC] ✅ No missed documents found (webhook system working correctly)');
         return;
       }
 
@@ -117,7 +117,7 @@ export class CCBSyncService {
       );
 
       // Process in batch
-      const processingTasks = proposals.map(proposal => ({
+      const processingTasks = proposals.map((proposal) => ({
         id: proposal.id as string,
         documentKey: (proposal.clicksign_document_id || proposal.clicksign_envelope_id) as string,
       }));
@@ -128,8 +128,8 @@ export class CCBSyncService {
       );
 
       // Count successes
-      const successCount = results.filter(r => r.success).length;
-      const failureCount = results.filter(r => !r.success).length;
+      const successCount = results.filter((r) => r.success).length;
+      const failureCount = results.filter((r) => !r.success).length;
 
       this.syncStats.documentsProcessed += successCount;
       this.syncStats.failedAttempts += failureCount;
@@ -170,12 +170,12 @@ export class CCBSyncService {
             details,
             created_at
           ) VALUES (
-            ${"webhook_failure_suspected"},
-            ${"high"},
+            ${'webhook_failure_suspected'},
+            ${'high'},
             ${`High number of documents (${successCount}) processed via polling fallback`},
             ${JSON.stringify({
               documentsProcessed: successCount,
-              proposalIds: results.filter(r => r.success).map(r => r.proposalId),
+              proposalIds: results.filter((r) => r.success).map((r) => r.proposalId),
               syncTime: new Date().toISOString(),
             })},
             NOW()
@@ -183,7 +183,7 @@ export class CCBSyncService {
         `);
       }
     } catch (error) {
-      console.error("[CCB SYNC] ❌ Error during fallback sync:", error);
+      console.error('[CCB SYNC] ❌ Error during fallback sync:', error);
       this.syncStats.failedAttempts++;
     }
   }

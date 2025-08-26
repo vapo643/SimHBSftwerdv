@@ -1,10 +1,10 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { toast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { toast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import {
   ChevronLeft,
   CheckCircle,
@@ -16,10 +16,10 @@ import {
   Calendar,
   DollarSign,
   Clock,
-} from "lucide-react";
-import { useState } from "react";
+} from 'lucide-react';
+import { useState } from 'react';
 // Remove formatCurrency from utils import
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface PropostaAceite {
   id: string;
@@ -48,16 +48,16 @@ export default function AceiteAtendente() {
   const [observacoes, setObservacoes] = useState<Record<string, string>>({});
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(value);
   };
 
   const { data: propostas, isLoading } = useQuery<PropostaAceite[]>({
-    queryKey: ["/api/propostas/aguardando-aceite"],
+    queryKey: ['/api/propostas/aguardando-aceite'],
     queryFn: async () => {
-      const response = await apiRequest("/api/propostas?status=aguardando_aceite_atendente");
+      const response = await apiRequest('/api/propostas?status=aguardando_aceite_atendente');
       return response;
     },
   });
@@ -73,20 +73,20 @@ export default function AceiteAtendente() {
       observacao: string;
     }) => {
       return apiRequest(`/api/propostas/${id}/status`, {
-        method: "PUT",
+        method: 'PUT',
         body: { status, observacao },
       });
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/propostas/aguardando-aceite"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas/aguardando-aceite'] });
       toast({
-        title: variables.status === "aceito_atendente" ? "Proposta aceita" : "Proposta cancelada",
+        title: variables.status === 'aceito_atendente' ? 'Proposta aceita' : 'Proposta cancelada',
         description:
-          variables.status === "aceito_atendente"
-            ? "A proposta foi aceita e está pronta para formalização"
-            : "A proposta foi cancelada",
+          variables.status === 'aceito_atendente'
+            ? 'A proposta foi aceita e está pronta para formalização'
+            : 'A proposta foi cancelada',
       });
-      setObservacoes(prev => {
+      setObservacoes((prev) => {
         const updated = { ...prev };
         delete updated[variables.id];
         return updated;
@@ -94,29 +94,29 @@ export default function AceiteAtendente() {
     },
     onError: () => {
       toast({
-        title: "Erro ao atualizar status",
-        description: "Não foi possível atualizar o status da proposta",
-        variant: "destructive",
+        title: 'Erro ao atualizar status',
+        description: 'Não foi possível atualizar o status da proposta',
+        variant: 'destructive',
       });
     },
   });
 
   const handleAccept = (id: string) => {
-    const observacao = observacoes[id] || "Proposta aceita pelo atendente para formalização";
-    updateStatusMutation.mutate({ id, status: "aceito_atendente", observacao });
+    const observacao = observacoes[id] || 'Proposta aceita pelo atendente para formalização';
+    updateStatusMutation.mutate({ id, status: 'aceito_atendente', observacao });
   };
 
   const handleReject = (id: string) => {
     const observacao = observacoes[id];
-    if (!observacao || observacao.trim() === "") {
+    if (!observacao || observacao.trim() === '') {
       toast({
-        title: "Observação obrigatória",
-        description: "Por favor, informe o motivo do cancelamento",
-        variant: "destructive",
+        title: 'Observação obrigatória',
+        description: 'Por favor, informe o motivo do cancelamento',
+        variant: 'destructive',
       });
       return;
     }
-    updateStatusMutation.mutate({ id, status: "cancelado", observacao });
+    updateStatusMutation.mutate({ id, status: 'cancelado', observacao });
   };
 
   if (isLoading) {
@@ -163,7 +163,7 @@ export default function AceiteAtendente() {
           </Card>
         ) : (
           <div className="grid gap-6">
-            {propostas.map(proposta => (
+            {propostas.map((proposta) => (
               <Card key={proposta.id} className="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -263,9 +263,9 @@ export default function AceiteAtendente() {
                       Suas Observações
                     </label>
                     <Textarea
-                      value={observacoes[proposta.id] || ""}
-                      onChange={e =>
-                        setObservacoes(prev => ({ ...prev, [proposta.id]: e.target.value }))
+                      value={observacoes[proposta.id] || ''}
+                      onChange={(e) =>
+                        setObservacoes((prev) => ({ ...prev, [proposta.id]: e.target.value }))
                       }
                       placeholder="Digite observações sobre o aceite ou cancelamento..."
                       className="w-full"

@@ -4,17 +4,17 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { securityRepository } from "../repositories/security.repository.js";
-import { getSecurityScanner } from "../lib/autonomous-security-scanner.js";
-import { getVulnerabilityDetector } from "../lib/vulnerability-detector.js";
-import { getDependencyScanner } from "../lib/dependency-scanner.js";
-import { getSemgrepScanner } from "../lib/semgrep-scanner.js";
+import { securityRepository } from '../repositories/security.repository.js';
+import { getSecurityScanner } from '../lib/autonomous-security-scanner.js';
+import { getVulnerabilityDetector } from '../lib/vulnerability-detector.js';
+import { getDependencyScanner } from '../lib/dependency-scanner.js';
+import { getSemgrepScanner } from '../lib/semgrep-scanner.js';
 
 export class SecurityService {
   /**
    * Get comprehensive security metrics for dashboard
    */
-  async getSecurityMetrics(timeRange: string = "1h"): Promise<any> {
+  async getSecurityMetrics(timeRange: string = '1h'): Promise<any> {
     try {
       // Get real metrics from database
       const dbMetrics = await securityRepository.getSecurityMetrics(timeRange);
@@ -39,7 +39,7 @@ export class SecurityService {
         timeRange,
       };
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error getting metrics:", error);
+      console.error('[SECURITY_SERVICE] Error getting metrics:', error);
       // Return fallback data to ensure dashboard functionality
       return this.getFallbackMetrics(timeRange);
     }
@@ -52,9 +52,9 @@ export class SecurityService {
     try {
       // Get vulnerabilities from security logs
       const recentLogs = await securityRepository.getSecurityLogs({
-        eventType: "vulnerability",
+        eventType: 'vulnerability',
         startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
-        severity: ["HIGH", "CRITICAL"],
+        severity: ['HIGH', 'CRITICAL'],
         limit: 50,
       });
 
@@ -63,7 +63,7 @@ export class SecurityService {
         id: log.id,
         type: this.inferVulnerabilityType(log.eventType || 'unknown'),
         severity: log.severity,
-        endpoint: log.endpoint || "/unknown",
+        endpoint: log.endpoint || '/unknown',
         description: log.eventType || 'Security event detected',
         detectedAt: log.createdAt,
         falsePositiveScore: this.calculateFalsePositiveScore(log),
@@ -77,13 +77,13 @@ export class SecurityService {
 
       // Filter by false positive score and sort by severity
       return vulnerabilities
-        .filter(v => v.falsePositiveScore < 0.5)
+        .filter((v) => v.falsePositiveScore < 0.5)
         .sort((a, b) => {
           const severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
           return (severityOrder as any)[b.severity] - (severityOrder as any)[a.severity];
         });
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error getting vulnerabilities:", error);
+      console.error('[SECURITY_SERVICE] Error getting vulnerabilities:', error);
       return this.getMockVulnerabilities();
     }
   }
@@ -95,13 +95,13 @@ export class SecurityService {
     try {
       // Get anomaly events from security logs
       const anomalyLogs = await securityRepository.getSecurityLogs({
-        eventType: "anomaly",
+        eventType: 'anomaly',
         startDate: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24h
         limit: 20,
       });
 
       // Transform to anomaly format
-      const anomalies = anomalyLogs.map(log => ({
+      const anomalies = anomalyLogs.map((log) => ({
         id: log.id,
         type: this.inferAnomalyType(log.eventType || 'unknown'),
         confidence: this.calculateConfidence(log),
@@ -117,10 +117,10 @@ export class SecurityService {
 
       // Filter by confidence and recency
       return anomalies
-        .filter(a => new Date(a.timestamp).getTime() > Date.now() - 86400000) // Last 24h
-        .filter(a => a.confidence > 0.7);
+        .filter((a) => new Date(a.timestamp).getTime() > Date.now() - 86400000) // Last 24h
+        .filter((a) => a.confidence > 0.7);
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error getting anomalies:", error);
+      console.error('[SECURITY_SERVICE] Error getting anomalies:', error);
       return this.getMockAnomalies();
     }
   }
@@ -147,7 +147,7 @@ export class SecurityService {
       // Return mock data for demo
       return this.getMockDependencyScan();
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error getting dependency scan:", error);
+      console.error('[SECURITY_SERVICE] Error getting dependency scan:', error);
       return this.getMockDependencyScan();
     }
   }
@@ -166,20 +166,20 @@ export class SecurityService {
         return findings.map((finding: any) => ({
           id: finding.id || `semgrep-${Math.random().toString(36).substr(2, 9)}`,
           rule: finding.rule_id,
-          severity: finding.extra?.severity?.toUpperCase() || "MEDIUM",
+          severity: finding.extra?.severity?.toUpperCase() || 'MEDIUM',
           file: finding.path,
           line: finding.start?.line,
           column: finding.start?.col,
           message: finding.extra?.message || finding.message,
-          category: finding.extra?.metadata?.category || "Security",
-          fixSuggestion: finding.extra?.fix || "Review and fix manually",
+          category: finding.extra?.metadata?.category || 'Security',
+          fixSuggestion: finding.extra?.fix || 'Review and fix manually',
         }));
       }
 
       // Return mock findings for demo
       return this.getMockSemgrepFindings();
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error getting Semgrep findings:", error);
+      console.error('[SECURITY_SERVICE] Error getting Semgrep findings:', error);
       return this.getMockSemgrepFindings();
     }
   }
@@ -190,51 +190,55 @@ export class SecurityService {
   async executeScan(type: string): Promise<{ success: boolean; message: string }> {
     try {
       switch (type) {
-        case "vulnerability":
+        case 'vulnerability':
           const vulnScanner = getSecurityScanner();
           // Execute vulnerability scan
           await securityRepository.logSecurityEvent({
-            eventType: "scan_initiated",
-            severity: "MEDIUM",
-            details: { scanType: type, description: "Vulnerability scan initiated" },
+            eventType: 'scan_initiated',
+            severity: 'MEDIUM',
+            details: { scanType: type, description: 'Vulnerability scan initiated' },
           });
-          return { success: true, message: "Scan de vulnerabilidades iniciado" };
+          return { success: true, message: 'Scan de vulnerabilidades iniciado' };
 
-        case "dependency":
+        case 'dependency':
           const depScanner = getDependencyScanner();
           if (depScanner.runScan) {
             await depScanner.runScan();
           }
           await securityRepository.logSecurityEvent({
-            eventType: "scan_initiated",
-            severity: "MEDIUM",
-            details: { scanType: type, description: "Dependency scan initiated" },
+            eventType: 'scan_initiated',
+            severity: 'MEDIUM',
+            details: { scanType: type, description: 'Dependency scan initiated' },
           });
-          return { success: true, message: "Scan de dependências iniciado" };
+          return { success: true, message: 'Scan de dependências iniciado' };
 
-        case "code":
+        case 'code':
           const codeScanner = getSemgrepScanner();
           if (codeScanner.runScan) {
             await codeScanner.runScan();
           }
           await securityRepository.logSecurityEvent({
-            eventType: "scan_initiated",
-            severity: "MEDIUM",
-            details: { scanType: type, description: "Code analysis scan initiated" },
+            eventType: 'scan_initiated',
+            severity: 'MEDIUM',
+            details: { scanType: type, description: 'Code analysis scan initiated' },
           });
-          return { success: true, message: "Análise de código iniciada" };
+          return { success: true, message: 'Análise de código iniciada' };
 
         default:
-          return { success: false, message: "Tipo de scan inválido" };
+          return { success: false, message: 'Tipo de scan inválido' };
       }
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error executing scan:", error);
+      console.error('[SECURITY_SERVICE] Error executing scan:', error);
       await securityRepository.logSecurityEvent({
-        eventType: "scan_error",
-        severity: "HIGH",
-        details: { scanType: type, error: (error as Error).message, description: `Error executing ${type} scan` },
+        eventType: 'scan_error',
+        severity: 'HIGH',
+        details: {
+          scanType: type,
+          error: (error as Error).message,
+          description: `Error executing ${type} scan`,
+        },
       });
-      return { success: false, message: "Erro ao executar scan" };
+      return { success: false, message: 'Erro ao executar scan' };
     }
   }
 
@@ -245,7 +249,7 @@ export class SecurityService {
     try {
       return await securityRepository.getActiveAlerts();
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error getting active alerts:", error);
+      console.error('[SECURITY_SERVICE] Error getting active alerts:', error);
       return [];
     }
   }
@@ -256,19 +260,23 @@ export class SecurityService {
   async resolveAlert(alertId: string, userId: string, reason?: string): Promise<boolean> {
     try {
       const resolved = await securityRepository.resolveAlert(alertId, userId, reason);
-      
+
       if (resolved) {
         await securityRepository.logSecurityEvent({
-          eventType: "alert_resolved",
-          severity: "LOW",
+          eventType: 'alert_resolved',
+          severity: 'LOW',
           userId,
-          details: { alertId, reason, description: `Security alert ${alertId} resolved by ${userId}` },
+          details: {
+            alertId,
+            reason,
+            description: `Security alert ${alertId} resolved by ${userId}`,
+          },
         });
       }
 
       return resolved;
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error resolving alert:", error);
+      console.error('[SECURITY_SERVICE] Error resolving alert:', error);
       return false;
     }
   }
@@ -278,7 +286,7 @@ export class SecurityService {
    */
   async generateSecurityReport(): Promise<any> {
     try {
-      const metrics = await this.getSecurityMetrics("30d");
+      const metrics = await this.getSecurityMetrics('30d');
       const vulnerabilities = await this.getVulnerabilities();
       const anomalies = await this.getAnomalies();
       const dependencyResults = await this.getDependencyScanResults();
@@ -297,23 +305,28 @@ export class SecurityService {
         anomalies: anomalies,
         dependencies: dependencyResults,
         codeAnalysis: codeResults,
-        recommendations: this.generateRecommendations(vulnerabilities, anomalies, dependencyResults, codeResults),
+        recommendations: this.generateRecommendations(
+          vulnerabilities,
+          anomalies,
+          dependencyResults,
+          codeResults
+        ),
       };
 
       // Log report generation
       await securityRepository.logSecurityEvent({
-        eventType: "report_generated",
-        severity: "LOW",
-        details: { 
+        eventType: 'report_generated',
+        severity: 'LOW',
+        details: {
           reportSummary: report.summary,
           timestamp: report.generatedAt,
-          description: "Security report generated"
+          description: 'Security report generated',
         },
       });
 
       return report;
     } catch (error) {
-      console.error("[SECURITY_SERVICE] Error generating report:", error);
+      console.error('[SECURITY_SERVICE] Error generating report:', error);
       throw error;
     }
   }
@@ -324,9 +337,9 @@ export class SecurityService {
     const totalEvents = statistics.totalEvents;
     const criticalEvents = statistics.eventsBySeverity.CRITICAL || 0;
     const highEvents = statistics.eventsBySeverity.HIGH || 0;
-    
+
     if (totalEvents === 0) return 0;
-    
+
     return Math.min(((criticalEvents * 3 + highEvents * 2) / totalEvents) * 100, 100);
   }
 
@@ -350,7 +363,7 @@ export class SecurityService {
   }
 
   private generateTrendData(logs: any[], timeRange: string): any[] {
-    const intervals = timeRange === "1h" ? 12 : 24;
+    const intervals = timeRange === '1h' ? 12 : 24;
     const trend = [];
 
     for (let i = 0; i < intervals; i++) {
@@ -366,50 +379,55 @@ export class SecurityService {
 
   private calculateOverallScore(metrics: any, vulnerabilities: any[], anomalies: any[]): number {
     let score = 100;
-    
+
     // Deduct for vulnerabilities
-    score -= vulnerabilities.filter(v => v.severity === "CRITICAL").length * 10;
-    score -= vulnerabilities.filter(v => v.severity === "HIGH").length * 5;
-    score -= vulnerabilities.filter(v => v.severity === "MEDIUM").length * 2;
-    
+    score -= vulnerabilities.filter((v) => v.severity === 'CRITICAL').length * 10;
+    score -= vulnerabilities.filter((v) => v.severity === 'HIGH').length * 5;
+    score -= vulnerabilities.filter((v) => v.severity === 'MEDIUM').length * 2;
+
     // Deduct for anomalies
     score -= anomalies.length * 3;
-    
+
     // Factor in blocked vs total requests
     if (metrics.totalRequests > 0) {
       const blockRate = (metrics.blockedRequests / metrics.totalRequests) * 100;
       if (blockRate > 10) score -= 15; // Too many blocks might indicate issues
     }
-    
+
     return Math.max(score, 0);
   }
 
-  private generateRecommendations(vulnerabilities: any[], anomalies: any[], dependencies: any, codeIssues: any[]): string[] {
+  private generateRecommendations(
+    vulnerabilities: any[],
+    anomalies: any[],
+    dependencies: any,
+    codeIssues: any[]
+  ): string[] {
     const recommendations = [];
-    
-    if (vulnerabilities.filter(v => v.severity === "CRITICAL").length > 0) {
-      recommendations.push("Corrigir vulnerabilidades críticas imediatamente");
+
+    if (vulnerabilities.filter((v) => v.severity === 'CRITICAL').length > 0) {
+      recommendations.push('Corrigir vulnerabilidades críticas imediatamente');
     }
-    
+
     if (dependencies.totalVulnerabilities > 5) {
-      recommendations.push("Atualizar dependências com vulnerabilidades conhecidas");
+      recommendations.push('Atualizar dependências com vulnerabilidades conhecidas');
     }
-    
+
     if (anomalies.length > 10) {
-      recommendations.push("Investigar padrões anômalos de acesso detectados");
+      recommendations.push('Investigar padrões anômalos de acesso detectados');
     }
-    
-    if (codeIssues.filter(i => i.severity === "HIGH").length > 0) {
-      recommendations.push("Revisar e corrigir problemas de código de alta severidade");
+
+    if (codeIssues.filter((i) => i.severity === 'HIGH').length > 0) {
+      recommendations.push('Revisar e corrigir problemas de código de alta severidade');
     }
-    
+
     // Default recommendations
     recommendations.push(
-      "Implementar autenticação multifator para usuários administrativos",
-      "Revisar configurações de CORS e headers de segurança",
-      "Aumentar cobertura de testes de segurança automatizados"
+      'Implementar autenticação multifator para usuários administrativos',
+      'Revisar configurações de CORS e headers de segurança',
+      'Aumentar cobertura de testes de segurança automatizados'
     );
-    
+
     return recommendations;
   }
 
@@ -434,20 +452,20 @@ export class SecurityService {
   private getMockVulnerabilities(): any[] {
     return [
       {
-        id: "vuln-001",
-        type: "SQL Injection",
-        severity: "HIGH",
-        endpoint: "/api/auth/login",
-        description: "Potential SQL injection vulnerability detected in authentication endpoint",
+        id: 'vuln-001',
+        type: 'SQL Injection',
+        severity: 'HIGH',
+        endpoint: '/api/auth/login',
+        description: 'Potential SQL injection vulnerability detected in authentication endpoint',
         detectedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
         falsePositiveScore: 0.1,
       },
       {
-        id: "vuln-002",
-        type: "XSS",
-        severity: "MEDIUM",
-        endpoint: "/api/users/profile",
-        description: "Cross-site scripting vulnerability in user profile input",
+        id: 'vuln-002',
+        type: 'XSS',
+        severity: 'MEDIUM',
+        endpoint: '/api/users/profile',
+        description: 'Cross-site scripting vulnerability in user profile input',
         detectedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
         falsePositiveScore: 0.2,
       },
@@ -457,17 +475,17 @@ export class SecurityService {
   private getMockAnomalies(): any[] {
     return [
       {
-        id: "anom-001",
-        type: "Unusual Login Pattern",
+        id: 'anom-001',
+        type: 'Unusual Login Pattern',
         confidence: 0.85,
-        description: "Multiple failed login attempts from different IP addresses within 5 minutes",
+        description: 'Multiple failed login attempts from different IP addresses within 5 minutes',
         timestamp: new Date(Date.now() - 30 * 60 * 1000),
       },
       {
-        id: "anom-002",
-        type: "API Rate Spike",
+        id: 'anom-002',
+        type: 'API Rate Spike',
         confidence: 0.92,
-        description: "Unusual spike in API requests from single IP address",
+        description: 'Unusual spike in API requests from single IP address',
         timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
       },
     ];
@@ -480,12 +498,12 @@ export class SecurityService {
       bySeverity: { CRITICAL: 2, HIGH: 3, MEDIUM: 5, LOW: 2 },
       vulnerabilities: [
         {
-          cve: "CVE-2023-26136",
-          dependency: "tough-cookie@4.0.0",
-          description: "Prototype pollution vulnerability in tough-cookie",
-          severity: "CRITICAL",
+          cve: 'CVE-2023-26136',
+          dependency: 'tough-cookie@4.0.0',
+          description: 'Prototype pollution vulnerability in tough-cookie',
+          severity: 'CRITICAL',
           cvssScore: 9.8,
-          version: "4.0.0",
+          version: '4.0.0',
         },
       ],
     };
@@ -494,30 +512,31 @@ export class SecurityService {
   private getMockSemgrepFindings(): any[] {
     return [
       {
-        id: "semgrep-001",
-        rule: "javascript.express.security.audit.express-cookie-session-no-httponly",
-        severity: "HIGH",
-        file: "server/routes/auth.ts",
+        id: 'semgrep-001',
+        rule: 'javascript.express.security.audit.express-cookie-session-no-httponly',
+        severity: 'HIGH',
+        file: 'server/routes/auth.ts',
         line: 45,
         column: 12,
-        message: "Cookie session without httpOnly flag detected",
-        category: "Security",
-        fixSuggestion: "Add httpOnly: true to cookie session configuration",
+        message: 'Cookie session without httpOnly flag detected',
+        category: 'Security',
+        fixSuggestion: 'Add httpOnly: true to cookie session configuration',
       },
     ];
   }
 
   private inferVulnerabilityType(message: string): string {
-    if (message.toLowerCase().includes("sql")) return "SQL Injection";
-    if (message.toLowerCase().includes("xss")) return "XSS";
-    if (message.toLowerCase().includes("csrf")) return "CSRF";
-    return "Security Issue";
+    if (message.toLowerCase().includes('sql')) return 'SQL Injection';
+    if (message.toLowerCase().includes('xss')) return 'XSS';
+    if (message.toLowerCase().includes('csrf')) return 'CSRF';
+    return 'Security Issue';
   }
 
   private inferAnomalyType(message: string): string {
-    if (message.toLowerCase().includes("login")) return "Unusual Login Pattern";
-    if (message.toLowerCase().includes("rate") || message.toLowerCase().includes("spike")) return "API Rate Spike";
-    return "Anomalous Behavior";
+    if (message.toLowerCase().includes('login')) return 'Unusual Login Pattern';
+    if (message.toLowerCase().includes('rate') || message.toLowerCase().includes('spike'))
+      return 'API Rate Spike';
+    return 'Anomalous Behavior';
   }
 
   private calculateFalsePositiveScore(log: any): number {
@@ -532,11 +551,14 @@ export class SecurityService {
   }
 
   private groupBySeverity(vulnerabilities: any[]): Record<string, number> {
-    return vulnerabilities.reduce((acc, vuln) => {
-      const severity = vuln.severity || "MEDIUM";
-      acc[severity] = (acc[severity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    return vulnerabilities.reduce(
+      (acc, vuln) => {
+        const severity = vuln.severity || 'MEDIUM';
+        acc[severity] = (acc[severity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }
 }
 

@@ -4,20 +4,20 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { BaseRepository } from "./base.repository.js";
-import { db } from "../lib/supabase.js";
-import { 
-  propostas, 
-  parcelas, 
+import { BaseRepository } from './base.repository.js';
+import { db } from '../lib/supabase.js';
+import {
+  propostas,
+  parcelas,
   observacoesCobranca,
   historicoObservacoesCobranca,
   interCollections,
   profiles,
   solicitacoesModificacao,
   propostaLogs,
-  statusContextuais 
-} from "@shared/schema";
-import { eq, and, sql, desc, gte, lte, inArray, or, not, isNotNull, isNull } from "drizzle-orm";
+  statusContextuais,
+} from '@shared/schema';
+import { eq, and, sql, desc, gte, lte, inArray, or, not, isNotNull, isNull } from 'drizzle-orm';
 
 export class CobrancasRepository extends BaseRepository<typeof propostas> {
   constructor() {
@@ -27,17 +27,14 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   /**
    * Get proposals with billing status
    */
-  async getPropostasCobranca(filters: {
-    status?: string;
-    atraso?: string;
-  }): Promise<any[]> {
+  async getPropostasCobranca(filters: { status?: string; atraso?: string }): Promise<any[]> {
     try {
       const statusElegiveis = [
-        "BOLETOS_EMITIDOS",
-        "PAGAMENTO_PENDENTE",
-        "PAGAMENTO_PARCIAL",
-        "PAGAMENTO_CONFIRMADO",
-        "pronto_pagamento", // Legacy
+        'BOLETOS_EMITIDOS',
+        'PAGAMENTO_PENDENTE',
+        'PAGAMENTO_PARCIAL',
+        'PAGAMENTO_CONFIRMADO',
+        'pronto_pagamento', // Legacy
       ];
 
       let whereConditions = and(
@@ -52,14 +49,14 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
           statusContextuais,
           and(
             eq(statusContextuais.proposta_id, propostas.id),
-            eq(statusContextuais.contexto, "cobranca")
+            eq(statusContextuais.contexto, 'cobranca')
           )
         )
         .where(whereConditions);
 
       return result;
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error fetching proposals:", error);
+      console.error('[COBRANCAS_REPO] Error fetching proposals:', error);
       return [];
     }
   }
@@ -75,7 +72,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(parcelas.proposta_id, propostaId))
         .orderBy(parcelas.numero_parcela);
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error fetching installments:", error);
+      console.error('[COBRANCAS_REPO] Error fetching installments:', error);
       return [];
     }
   }
@@ -91,7 +88,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(interCollections.proposta_id, propostaId))
         .orderBy(desc(interCollections.created_at));
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error fetching Inter collections:", error);
+      console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error);
       return [];
     }
   }
@@ -117,7 +114,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(observacoesCobranca.proposta_id, propostaId))
         .orderBy(desc(observacoesCobranca.created_at));
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error fetching observations:", error);
+      console.error('[COBRANCAS_REPO] Error fetching observations:', error);
       return [];
     }
   }
@@ -145,7 +142,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return observation;
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error creating observation:", error);
+      console.error('[COBRANCAS_REPO] Error creating observation:', error);
       return null;
     }
   }
@@ -153,11 +150,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   /**
    * Update installment status
    */
-  async updateParcelaStatus(
-    parcelaId: number,
-    status: string,
-    updateData?: any
-  ): Promise<boolean> {
+  async updateParcelaStatus(parcelaId: number, status: string, updateData?: any): Promise<boolean> {
     try {
       const updates: any = {
         status_pagamento: status,
@@ -176,7 +169,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return result.length > 0;
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error updating installment:", error);
+      console.error('[COBRANCAS_REPO] Error updating installment:', error);
       return false;
     }
   }
@@ -192,7 +185,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(solicitacoesModificacao.proposta_id, propostaId))
         .orderBy(desc(solicitacoesModificacao.created_at));
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error fetching modification requests:", error);
+      console.error('[COBRANCAS_REPO] Error fetching modification requests:', error);
       return [];
     }
   }
@@ -216,14 +209,14 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
           motivo: data.motivo,
           detalhes: data.detalhes,
           solicitado_por: data.solicitado_por,
-          status: "pendente",
+          status: 'pendente',
           created_at: new Date().toISOString(),
         })
         .returning();
 
       return request;
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error creating modification request:", error);
+      console.error('[COBRANCAS_REPO] Error creating modification request:', error);
       return null;
     }
   }
@@ -240,7 +233,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(propostaLogs.created_at))
         .limit(50); // Limit recent logs
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error fetching logs:", error);
+      console.error('[COBRANCAS_REPO] Error fetching logs:', error);
       return [];
     }
   }
@@ -257,15 +250,15 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(
           and(
             isNull(propostas.deletedAt),
-            inArray(propostas.status, ["BOLETOS_EMITIDOS", "PAGAMENTO_PENDENTE"]),
+            inArray(propostas.status, ['BOLETOS_EMITIDOS', 'PAGAMENTO_PENDENTE']),
             lte(parcelas.data_vencimento, new Date().toISOString()),
-            eq(parcelas.status_pagamento, "pendente")
+            eq(parcelas.status_pagamento, 'pendente')
           )
         );
 
       return result[0]?.count || 0;
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error counting overdue:", error);
+      console.error('[COBRANCAS_REPO] Error counting overdue:', error);
       return 0;
     }
   }
@@ -296,7 +289,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return result.length > 0;
     } catch (error) {
-      console.error("[COBRANCAS_REPO] Error updating proposal status:", error);
+      console.error('[COBRANCAS_REPO] Error updating proposal status:', error);
       return false;
     }
   }

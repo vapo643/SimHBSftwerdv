@@ -1,6 +1,6 @@
 // Headers de Segurança Avançados - OWASP A05: Security Misconfiguration
-import helmet from "helmet";
-import { Request, Response, NextFunction } from "express";
+import helmet from 'helmet';
+import { Request, Response, NextFunction } from 'express';
 
 // Configuração aprimorada do Helmet seguindo OWASP
 export function setupSecurityHeaders() {
@@ -11,24 +11,24 @@ export function setupSecurityHeaders() {
       "'self'",
       "'unsafe-inline'", // Necessário para React em dev
       "'unsafe-eval'", // Necessário para Vite em dev
-      "https://cdnjs.cloudflare.com", // Para bibliotecas externas
-      "https://unpkg.com",
-      "https://replit.com", // Para banner de desenvolvimento Replit
+      'https://cdnjs.cloudflare.com', // Para bibliotecas externas
+      'https://unpkg.com',
+      'https://replit.com', // Para banner de desenvolvimento Replit
     ],
     styleSrc: [
       "'self'",
       "'unsafe-inline'", // Necessário para styled components
-      "https://fonts.googleapis.com",
+      'https://fonts.googleapis.com',
     ],
-    fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"], // data: necessário para fontes embutidas do ambiente Replit
-    imgSrc: ["'self'", "data:", "https:", "blob:"],
+    fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'], // data: necessário para fontes embutidas do ambiente Replit
+    imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
     connectSrc: [
       "'self'",
-      "https://*.supabase.co", // Supabase
-      "https://cdn.inter.co", // Banco Inter
-      "https://api.clicksign.com", // ClickSign
-      "wss://*.supabase.co", // WebSocket Supabase
-      process.env.NODE_ENV === "development" ? "ws://localhost:*" : "",
+      'https://*.supabase.co', // Supabase
+      'https://cdn.inter.co', // Banco Inter
+      'https://api.clicksign.com', // ClickSign
+      'wss://*.supabase.co', // WebSocket Supabase
+      process.env.NODE_ENV === 'development' ? 'ws://localhost:*' : '',
     ].filter(Boolean),
     mediaSrc: ["'none'"],
     objectSrc: ["'none'"],
@@ -39,7 +39,7 @@ export function setupSecurityHeaders() {
   };
 
   // Only add upgradeInsecureRequests in production
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === 'production') {
     cspDirectives.upgradeInsecureRequests = [];
   }
 
@@ -53,7 +53,7 @@ export function setupSecurityHeaders() {
     dnsPrefetchControl: { allow: false },
 
     // X-Frame-Options - Previne clickjacking
-    frameguard: { action: "deny" },
+    frameguard: { action: 'deny' },
 
     // Strict-Transport-Security - Força HTTPS
     hsts: {
@@ -66,10 +66,10 @@ export function setupSecurityHeaders() {
     noSniff: true,
 
     // X-Permitted-Cross-Domain-Policies
-    permittedCrossDomainPolicies: { permittedPolicies: "none" },
+    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
 
     // Referrer-Policy - Controla informações do referrer
-    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 
     // X-XSS-Protection - Proteção XSS legada (para browsers antigos)
     xssFilter: true,
@@ -78,13 +78,13 @@ export function setupSecurityHeaders() {
     hidePoweredBy: true,
 
     // Cross-Origin-Embedder-Policy
-    crossOriginEmbedderPolicy: process.env.NODE_ENV === "production",
+    crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
 
     // Cross-Origin-Opener-Policy
-    crossOriginOpenerPolicy: { policy: "same-origin" },
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
 
     // Cross-Origin-Resource-Policy
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   });
 }
 
@@ -92,27 +92,27 @@ export function setupSecurityHeaders() {
 export function additionalSecurityHeaders(req: Request, res: Response, next: NextFunction) {
   // Permissions Policy (antiga Feature Policy)
   res.setHeader(
-    "Permissions-Policy",
-    "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+    'Permissions-Policy',
+    'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
   );
 
   // Cache Control para dados sensíveis
-  if (req.path.startsWith("/api/")) {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
+  if (req.path.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
   }
 
   // X-Request-ID para rastreamento
-  const requestId = req.headers["x-request-id"] || generateRequestId();
-  res.setHeader("X-Request-ID", requestId);
+  const requestId = req.headers['x-request-id'] || generateRequestId();
+  res.setHeader('X-Request-ID', requestId);
 
   // Previne informações de timing
-  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
 
   // Clear Site Data em logout
-  if (req.path === "/api/auth/logout") {
-    res.setHeader("Clear-Site-Data", '"cache", "cookies", "storage"');
+  if (req.path === '/api/auth/logout') {
+    res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
   }
 
   next();
@@ -127,13 +127,13 @@ function generateRequestId(): string {
 export function setupCORS() {
   // In development, allow Replit preview URLs and localhost
   const allowedOrigins =
-    process.env.NODE_ENV === "production"
-      ? [process.env.FRONTEND_URL || "https://simpix.com.br"]
-      : ["http://localhost:5000", "http://localhost:3000", "http://127.0.0.1:5000"];
+    process.env.NODE_ENV === 'production'
+      ? [process.env.FRONTEND_URL || 'https://simpix.com.br']
+      : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'];
 
   // Allow any Replit URL in development
   const isReplitUrl = (origin: string) => {
-    return origin.includes(".replit.dev") || origin.includes(".repl.co");
+    return origin.includes('.replit.dev') || origin.includes('.repl.co');
   };
 
   return {
@@ -149,18 +149,18 @@ export function setupCORS() {
       // Allow configured origins or any Replit URL in development
       if (
         allowedOrigins.includes(origin) ||
-        (process.env.NODE_ENV !== "production" && isReplitUrl(origin))
+        (process.env.NODE_ENV !== 'production' && isReplitUrl(origin))
       ) {
         callback(null, true);
       } else {
         console.warn(`[CORS] Blocked origin: ${origin}`);
-        callback(new Error("CORS não permitido para esta origem"));
+        callback(new Error('CORS não permitido para esta origem'));
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Request-ID"],
-    exposedHeaders: ["X-Request-ID"],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+    exposedHeaders: ['X-Request-ID'],
     maxAge: 86400, // 24 horas
   };
 }

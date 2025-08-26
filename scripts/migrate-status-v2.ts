@@ -1,9 +1,9 @@
 /**
  * SCRIPT DE MIGRAÇÃO - SISTEMA DE STATUS V2.0
- * 
+ *
  * Este script atualiza todas as propostas existentes para o novo sistema de status
  * baseado nas flags booleanas antigas.
- * 
+ *
  * LÓGICA DE MAPEAMENTO:
  * 1. Se tem boletos no inter_collections → BOLETOS_EMITIDOS
  * 2. Se assinatura_eletronica_concluida = true → ASSINATURA_CONCLUIDA
@@ -20,11 +20,11 @@ import { getBrasiliaTimestamp } from '../server/lib/timezone';
 async function migrateStatusV2() {
   console.log('🚀 [MIGRAÇÃO V2.0] Iniciando migração de status...');
   console.log('📅 Timestamp:', getBrasiliaTimestamp());
-  
+
   try {
     // 1. Buscar estatísticas atuais
     console.log('\n📊 [MIGRAÇÃO V2.0] Analisando propostas existentes...');
-    
+
     const stats = await db.execute(sql`
       SELECT 
         COUNT(*) as total,
@@ -35,12 +35,12 @@ async function migrateStatusV2() {
       FROM propostas p
       LEFT JOIN inter_collections ic ON p.id = ic.proposta_id
     `);
-    
+
     console.log('📊 Estatísticas encontradas:', stats[0]);
-    
+
     // 2. PRIORIDADE 1: Propostas com boletos emitidos
     console.log('\n🔄 [FASE 1] Atualizando propostas com BOLETOS_EMITIDOS...');
-    
+
     const boletosResult = await db.execute(sql`
       UPDATE propostas 
       SET 
@@ -53,12 +53,12 @@ async function migrateStatusV2() {
       AND status != 'BOLETOS_EMITIDOS'
       RETURNING id
     `);
-    
+
     console.log(`✅ ${boletosResult.length} propostas atualizadas para BOLETOS_EMITIDOS`);
-    
+
     // 3. PRIORIDADE 2: Propostas com assinatura concluída (mas sem boletos)
     console.log('\n🔄 [FASE 2] Atualizando propostas com ASSINATURA_CONCLUIDA...');
-    
+
     const assinaturaResult = await db.execute(sql`
       UPDATE propostas 
       SET 
@@ -72,12 +72,12 @@ async function migrateStatusV2() {
       )
       RETURNING id
     `);
-    
+
     console.log(`✅ ${assinaturaResult.length} propostas atualizadas para ASSINATURA_CONCLUIDA`);
-    
+
     // 4. PRIORIDADE 3: Propostas aguardando assinatura no ClickSign
     console.log('\n🔄 [FASE 3] Atualizando propostas AGUARDANDO_ASSINATURA...');
-    
+
     const aguardandoResult = await db.execute(sql`
       UPDATE propostas 
       SET 
@@ -88,12 +88,12 @@ async function migrateStatusV2() {
       AND status NOT IN ('BOLETOS_EMITIDOS', 'ASSINATURA_CONCLUIDA', 'AGUARDANDO_ASSINATURA')
       RETURNING id
     `);
-    
+
     console.log(`✅ ${aguardandoResult.length} propostas atualizadas para AGUARDANDO_ASSINATURA`);
-    
+
     // 5. PRIORIDADE 4: Propostas com CCB gerado
     console.log('\n🔄 [FASE 4] Atualizando propostas com CCB_GERADA...');
-    
+
     const ccbResult = await db.execute(sql`
       UPDATE propostas 
       SET 
@@ -103,12 +103,12 @@ async function migrateStatusV2() {
       AND status NOT IN ('BOLETOS_EMITIDOS', 'ASSINATURA_CONCLUIDA', 'AGUARDANDO_ASSINATURA', 'CCB_GERADA')
       RETURNING id
     `);
-    
+
     console.log(`✅ ${ccbResult.length} propostas atualizadas para CCB_GERADA`);
-    
+
     // 6. Criar registros na tabela status_transitions para auditoria
     console.log('\n🔄 [FASE 5] Criando registros de auditoria...');
-    
+
     const auditResult = await db.execute(sql`
       INSERT INTO status_transitions (
         id,
@@ -144,12 +144,12 @@ async function migrateStatusV2() {
       )
       RETURNING proposta_id
     `);
-    
+
     console.log(`✅ ${auditResult.length} registros de auditoria criados`);
-    
+
     // 7. Relatório final
     console.log('\n📊 [MIGRAÇÃO V2.0] RELATÓRIO FINAL:');
-    
+
     const finalStats = await db.execute(sql`
       SELECT 
         status,
@@ -168,15 +168,15 @@ async function migrateStatusV2() {
           ELSE 8
         END
     `);
-    
+
     console.log('\n📊 Distribuição final de status:');
     finalStats.forEach((stat: any) => {
       console.log(`  ${stat.status}: ${stat.total} propostas`);
     });
-    
+
     // 8. Verificar integridade
     console.log('\n🔍 [MIGRAÇÃO V2.0] Verificando integridade...');
-    
+
     const integrity = await db.execute(sql`
       SELECT COUNT(*) as inconsistentes
       FROM propostas p
@@ -185,17 +185,18 @@ async function migrateStatusV2() {
         OR (p.assinatura_eletronica_concluida = true AND p.status NOT IN ('ASSINATURA_CONCLUIDA', 'BOLETOS_EMITIDOS'))
         OR (p.id IN (SELECT DISTINCT proposta_id FROM inter_collections) AND p.status != 'BOLETOS_EMITIDOS')
     `);
-    
+
     const integrityRow = integrity[0] as { inconsistentes: number };
     if (integrityRow.inconsistentes > 0) {
-      console.warn(`⚠️ AVISO: ${integrityRow.inconsistentes} propostas com possível inconsistência detectada`);
+      console.warn(
+        `⚠️ AVISO: ${integrityRow.inconsistentes} propostas com possível inconsistência detectada`
+      );
     } else {
       console.log('✅ Todas as propostas estão consistentes!');
     }
-    
+
     console.log('\n✅ [MIGRAÇÃO V2.0] Migração concluída com sucesso!');
     console.log('📅 Finalizado em:', getBrasiliaTimestamp());
-    
   } catch (error) {
     console.error('❌ [MIGRAÇÃO V2.0] Erro durante migração:', error);
     process.exit(1);

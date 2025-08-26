@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -19,8 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import {
   Pencil,
   Trash2,
@@ -30,35 +30,35 @@ import {
   Activity,
   Settings,
   TrendingUp,
-} from "lucide-react";
-import { api } from "@/lib/apiClient";
-import { handleApiError, showSuccessMessage } from "@/lib/errorHandler";
-import { useLoadingStates } from "@/hooks/useLoadingStates";
-import DashboardLayout from "@/components/DashboardLayout";
+} from 'lucide-react';
+import { api } from '@/lib/apiClient';
+import { handleApiError, showSuccessMessage } from '@/lib/errorHandler';
+import { useLoadingStates } from '@/hooks/useLoadingStates';
+import DashboardLayout from '@/components/DashboardLayout';
 
 interface Produto {
   id: number;
   nomeProduto: string;
   isActive: boolean;
   tacValor?: number;
-  tacTipo?: "fixo" | "percentual";
+  tacTipo?: 'fixo' | 'percentual';
 }
 
 interface ProdutoFormData {
   nome: string;
-  status: "Ativo" | "Inativo";
+  status: 'Ativo' | 'Inativo';
   tacValor: number;
-  tacTipo: "fixo" | "percentual";
+  tacTipo: 'fixo' | 'percentual';
 }
 
 export default function GestãoProdutos() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Produto | null>(null);
   const [formData, setFormData] = useState<ProdutoFormData>({
-    nome: "",
-    status: "Ativo",
+    nome: '',
+    status: 'Ativo',
     tacValor: 0,
-    tacTipo: "fixo",
+    tacTipo: 'fixo',
   });
 
   const { toast } = useToast();
@@ -67,9 +67,9 @@ export default function GestãoProdutos() {
 
   // Query para buscar produtos
   const { data: produtos = [], isLoading } = useQuery({
-    queryKey: ["produtos"],
+    queryKey: ['produtos'],
     queryFn: async () => {
-      const response = await api.get<Produto[]>("/api/produtos");
+      const response = await api.get<Produto[]>('/api/produtos');
       return response.data;
     },
   });
@@ -77,7 +77,7 @@ export default function GestãoProdutos() {
   // Mutation para criar produto
   const createMutation = useMutation({
     mutationFn: async (data: ProdutoFormData) => {
-      const response = await api.post<Produto>("/api/produtos", {
+      const response = await api.post<Produto>('/api/produtos', {
         nome: data.nome,
         status: data.status,
         tacValor: data.tacValor,
@@ -86,8 +86,8 @@ export default function GestãoProdutos() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["produtos"] });
-      showSuccessMessage("create", "Produto");
+      queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      showSuccessMessage('create', 'Produto');
       handleCloseDialog();
     },
     onError: (error: any) => {
@@ -107,8 +107,8 @@ export default function GestãoProdutos() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["produtos"] });
-      showSuccessMessage("update", "Produto");
+      queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      showSuccessMessage('update', 'Produto');
       handleCloseDialog();
     },
     onError: (error: any) => {
@@ -122,8 +122,8 @@ export default function GestãoProdutos() {
       await api.delete(`/api/produtos/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["produtos"] });
-      showSuccessMessage("delete", "Produto");
+      queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      showSuccessMessage('delete', 'Produto');
     },
     onError: (error: any) => {
       handleApiError(error);
@@ -146,15 +146,15 @@ export default function GestãoProdutos() {
     setEditingProduct(produto);
     setFormData({
       nome: produto.nomeProduto,
-      status: produto.isActive ? "Ativo" : "Inativo",
+      status: produto.isActive ? 'Ativo' : 'Inativo',
       tacValor: produto.tacValor || 0,
-      tacTipo: produto.tacTipo || "fixo",
+      tacTipo: produto.tacTipo || 'fixo',
     });
     setIsDialogOpen(true);
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Tem certeza de que deseja excluir este produto?")) {
+    if (confirm('Tem certeza de que deseja excluir este produto?')) {
       deleteMutation.mutate(id);
     }
   };
@@ -162,12 +162,12 @@ export default function GestãoProdutos() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProduct(null);
-    setFormData({ nome: "", status: "Ativo", tacValor: 0, tacTipo: "fixo" });
+    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
   };
 
   const handleOpenDialog = () => {
     setEditingProduct(null);
-    setFormData({ nome: "", status: "Ativo", tacValor: 0, tacTipo: "fixo" });
+    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
     setIsDialogOpen(true);
   };
 
@@ -212,12 +212,12 @@ export default function GestãoProdutos() {
   // Calcular estatísticas dos produtos
   const produtosStats = {
     total: produtos.length,
-    ativos: produtos.filter(p => p.isActive).length,
-    inativos: produtos.filter(p => !p.isActive).length,
+    ativos: produtos.filter((p) => p.isActive).length,
+    inativos: produtos.filter((p) => !p.isActive).length,
     percentualAtivos:
       produtos.length > 0
-        ? ((produtos.filter(p => p.isActive).length / produtos.length) * 100).toFixed(1)
-        : "0",
+        ? ((produtos.filter((p) => p.isActive).length / produtos.length) * 100).toFixed(1)
+        : '0',
   };
 
   return (
@@ -252,12 +252,12 @@ export default function GestãoProdutos() {
             <DialogContent className="border-border bg-card">
               <DialogHeader>
                 <DialogTitle className="text-card-foreground">
-                  {editingProduct ? "Editar Produto" : "Novo Produto"}
+                  {editingProduct ? 'Editar Produto' : 'Novo Produto'}
                 </DialogTitle>
                 <DialogDescription className="text-muted-foreground">
                   {editingProduct
-                    ? "Atualize as informações do produto"
-                    : "Adicione um novo produto de crédito"}
+                    ? 'Atualize as informações do produto'
+                    : 'Adicione um novo produto de crédito'}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -268,7 +268,7 @@ export default function GestãoProdutos() {
                   <Input
                     id="nome"
                     value={formData.nome}
-                    onChange={e => setFormData({ ...formData, nome: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                     placeholder="Ex: Crédito Pessoal"
                     className="border-border bg-input text-foreground"
                     required
@@ -280,7 +280,7 @@ export default function GestãoProdutos() {
                   </Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value: "Ativo" | "Inativo") =>
+                    onValueChange={(value: 'Ativo' | 'Inativo') =>
                       setFormData({ ...formData, status: value })
                     }
                   >
@@ -308,8 +308,8 @@ export default function GestãoProdutos() {
                     {createMutation.isPending || updateMutation.isPending
                       ? loadingStates.saving
                       : editingProduct
-                        ? "Atualizar"
-                        : "Criar"}
+                        ? 'Atualizar'
+                        : 'Criar'}
                   </Button>
                 </div>
               </form>
@@ -412,7 +412,7 @@ export default function GestãoProdutos() {
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {produtos.map(produto => (
+                {produtos.map((produto) => (
                   <Card
                     key={produto.id}
                     className="border border-gray-200 transition-all duration-200 hover:border-cyan-300 hover:shadow-lg dark:border-gray-700 dark:hover:border-cyan-600"
@@ -460,11 +460,11 @@ export default function GestãoProdutos() {
                         <Badge
                           className={
                             produto.isActive
-                              ? "border-green-200 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                              : "border-red-200 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                              ? 'border-green-200 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'border-red-200 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                           }
                         >
-                          {produto.isActive ? "Ativo" : "Inativo"}
+                          {produto.isActive ? 'Ativo' : 'Inativo'}
                         </Badge>
                       </div>
                       <div className="border-t border-gray-100 pt-2 dark:border-gray-700">

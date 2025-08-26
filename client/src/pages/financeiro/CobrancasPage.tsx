@@ -1,20 +1,20 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { getSupabase } from "@/lib/supabase";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { getSupabase } from '@/lib/supabase';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -22,8 +22,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
+} from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -31,23 +31,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Calendar,
   Search,
@@ -83,10 +78,10 @@ import {
   Percent,
   CheckSquare,
   Loader2,
-} from "lucide-react";
-import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useAuth } from "@/contexts/AuthContext";
+} from 'lucide-react';
+import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Importar todas as interfaces necessárias
 import type {
@@ -103,34 +98,36 @@ import type {
   StatusFilter,
   AtrasoFilter,
   StatusObservacao,
-} from "@shared/types/cobrancas";
+} from '@shared/types/cobrancas';
 
 // Interfaces removidas - usando as importadas de @shared/types/cobrancas
 
 export default function CobrancasPage() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
-  const [atrasoFilter, setAtrasoFilter] = useState<AtrasoFilter>("todos");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos');
+  const [atrasoFilter, setAtrasoFilter] = useState<AtrasoFilter>('todos');
   const [showCpf, setShowCpf] = useState(false);
   const [selectedPropostaId, setSelectedPropostaId] = useState<string | null>(null);
   const [showFichaModal, setShowFichaModal] = useState(false);
-  const [novaObservacao, setNovaObservacao] = useState("");
-  const [tipoContato, setTipoContato] = useState("");
-  const [statusPromessa, setStatusPromessa] = useState("");
-  const [dataPromessaPagamento, setDataPromessaPagamento] = useState("");
+  const [novaObservacao, setNovaObservacao] = useState('');
+  const [tipoContato, setTipoContato] = useState('');
+  const [statusPromessa, setStatusPromessa] = useState('');
+  const [dataPromessaPagamento, setDataPromessaPagamento] = useState('');
 
   // Estados para modais de modificação de boletos
   const [showProrrogarModal, setShowProrrogarModal] = useState(false);
   const [showDescontoModal, setShowDescontoModal] = useState(false);
   const [selectedBoleto, setSelectedBoleto] = useState<PropostaCobranca | null>(null);
-  const [novaDataVencimento, setNovaDataVencimento] = useState("");
-  const [valorDesconto, setValorDesconto] = useState("");
-  const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
-  
+  const [novaDataVencimento, setNovaDataVencimento] = useState('');
+  const [valorDesconto, setValorDesconto] = useState('');
+  const [dataLimiteDesconto, setDataLimiteDesconto] = useState('');
+
   // PAM V1.0 - Estados para polling inteligente de sincronização
-  const [syncStatus, setSyncStatus] = useState<'nao_iniciado' | 'em_andamento' | 'concluido' | 'falhou' | null>(null);
+  const [syncStatus, setSyncStatus] = useState<
+    'nao_iniciado' | 'em_andamento' | 'concluido' | 'falhou' | null
+  >(null);
   const [isPolling, setIsPolling] = useState(false);
   const [pollCount, setPollCount] = useState(0);
 
@@ -151,12 +148,12 @@ export default function CobrancasPage() {
   const [observacoes, setObservacoes] = useState<ObservacaoCobranca[]>([]);
   const [loadingObservacoes, setLoadingObservacoes] = useState(false);
   const [salvandoObservacao, setSalvandoObservacao] = useState(false);
-  const [statusObservacao, setStatusObservacao] = useState<StatusObservacao>("Outros");
+  const [statusObservacao, setStatusObservacao] = useState<StatusObservacao>('Outros');
 
   // Verificar se o usuário tem role de cobrança
-  const isCobrancaUser = user?.role === "COBRANÇA";
-  const isAdmin = user?.role === "ADMINISTRADOR";
-  const isFinanceiro = user?.role === "FINANCEIRO";
+  const isCobrancaUser = user?.role === 'COBRANÇA';
+  const isAdmin = user?.role === 'ADMINISTRADOR';
+  const isFinanceiro = user?.role === 'FINANCEIRO';
   const canModifyBoletos = isAdmin || isFinanceiro; // ADMIN ou FINANCEIRO podem modificar boletos
 
   // Buscar informações de dívida para desconto de quitação
@@ -165,25 +162,27 @@ export default function CobrancasPage() {
     isLoading: loadingDebt,
     refetch: refetchDebt,
   } = useQuery<DebtInfo>({
-    queryKey: ["/api/inter/collections/proposal", selectedPropostaId],
+    queryKey: ['/api/inter/collections/proposal', selectedPropostaId],
     enabled: !!selectedPropostaId && showDescontoModal,
     queryFn: async () => {
-      return apiRequest(`/api/inter/collections/proposal/${selectedPropostaId}`) as Promise<DebtInfo>;
+      return apiRequest(
+        `/api/inter/collections/proposal/${selectedPropostaId}`
+      ) as Promise<DebtInfo>;
     },
   });
 
   // Mutation para prorrogar vencimento em lote
   const prorrogarMutation = useMutation<MutationResponse, Error, ProrrogacaoData>({
     mutationFn: async (data: ProrrogacaoData) => {
-      return apiRequest("/api/inter/collections/batch-extend", {
-        method: "PATCH",
+      return apiRequest('/api/inter/collections/batch-extend', {
+        method: 'PATCH',
         body: JSON.stringify(data),
       }) as Promise<MutationResponse>;
     },
     onSuccess: (result: MutationResponse) => {
       toast({
-        title: "Sucesso",
-        description: result.message || "Vencimento(s) prorrogado(s) com sucesso",
+        title: 'Sucesso',
+        description: result.message || 'Vencimento(s) prorrogado(s) com sucesso',
       });
       setShowProrrogarModal(false);
       setBoletosParaProrrogar([]);
@@ -191,9 +190,9 @@ export default function CobrancasPage() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro",
-        description: error.message || "Falha ao prorrogar vencimento",
-        variant: "destructive",
+        title: 'Erro',
+        description: error.message || 'Falha ao prorrogar vencimento',
+        variant: 'destructive',
       });
     },
   });
@@ -201,15 +200,15 @@ export default function CobrancasPage() {
   // Mutation para aplicar desconto de quitação
   const descontoQuitacaoMutation = useMutation<MutationResponse, Error, DescontoQuitacaoData>({
     mutationFn: async (data: DescontoQuitacaoData) => {
-      return apiRequest("/api/inter/collections/settlement-discount", {
-        method: "POST",
+      return apiRequest('/api/inter/collections/settlement-discount', {
+        method: 'POST',
         body: JSON.stringify(data),
       }) as Promise<MutationResponse>;
     },
     onSuccess: (result: MutationResponse) => {
       toast({
-        title: "Sucesso",
-        description: result.message || "Desconto de quitação aplicado com sucesso",
+        title: 'Sucesso',
+        description: result.message || 'Desconto de quitação aplicado com sucesso',
       });
       setShowDescontoModal(false);
       setEtapaDesconto(1);
@@ -218,9 +217,9 @@ export default function CobrancasPage() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro",
-        description: error.message || "Falha ao aplicar desconto de quitação",
-        variant: "destructive",
+        title: 'Erro',
+        description: error.message || 'Falha ao aplicar desconto de quitação',
+        variant: 'destructive',
       });
     },
   });
@@ -231,11 +230,11 @@ export default function CobrancasPage() {
     isLoading,
     refetch,
   } = useQuery<PropostaCobranca[]>({
-    queryKey: ["/api/cobrancas", statusFilter, atrasoFilter],
+    queryKey: ['/api/cobrancas', statusFilter, atrasoFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (statusFilter !== "todos") params.append("status", statusFilter);
-      if (atrasoFilter !== "todos") params.append("atraso", atrasoFilter);
+      if (statusFilter !== 'todos') params.append('status', statusFilter);
+      if (atrasoFilter !== 'todos') params.append('atraso', atrasoFilter);
 
       return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>;
     },
@@ -243,20 +242,20 @@ export default function CobrancasPage() {
 
   // Função para atualizar sem precisar recarregar a página
   const handleRefresh = () => {
-    console.log("[COBRANÇAS] Atualizando dados da API do Banco Inter...");
+    console.log('[COBRANÇAS] Atualizando dados da API do Banco Inter...');
     refetch();
   };
 
   // Buscar KPIs
   const { data: kpis } = useQuery<KPIsCobranca>({
-    queryKey: ["/api/cobrancas/kpis"],
-    queryFn: () => apiRequest("/api/cobrancas/kpis") as Promise<KPIsCobranca>,
+    queryKey: ['/api/cobrancas/kpis'],
+    queryFn: () => apiRequest('/api/cobrancas/kpis') as Promise<KPIsCobranca>,
   });
 
   // 🔄 REALTIME: Escutar mudanças nas tabelas propostas e inter_collections
   useEffect(() => {
-    console.log("🔄 [REALTIME] Configurando escuta para atualizações de cobranças");
-    
+    console.log('🔄 [REALTIME] Configurando escuta para atualizações de cobranças');
+
     const supabase = getSupabase();
     const channel = supabase
       .channel('cobrancas-realtime-updates')
@@ -265,26 +264,28 @@ export default function CobrancasPage() {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'propostas'
+          table: 'propostas',
         },
         (payload) => {
-          console.log("📡 [REALTIME] Evento de UPDATE recebido em propostas:", payload);
-          console.log("📡 [REALTIME] Dados alterados:", {
+          console.log('📡 [REALTIME] Evento de UPDATE recebido em propostas:', payload);
+          console.log('📡 [REALTIME] Dados alterados:', {
             id: payload.new?.id,
             assinaturaEletronicaConcluida: payload.new?.assinatura_eletronica_concluida,
-            ccbGerado: payload.new?.ccb_gerado
+            ccbGerado: payload.new?.ccb_gerado,
           });
-          
+
           // Invalidar as queries para forçar um refetch
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
-          
+
           // Se uma assinatura foi concluída, notificar
-          if (payload.new?.assinatura_eletronica_concluida === true && 
-              payload.old?.assinatura_eletronica_concluida !== true) {
+          if (
+            payload.new?.assinatura_eletronica_concluida === true &&
+            payload.old?.assinatura_eletronica_concluida !== true
+          ) {
             toast({
-              title: "Nova proposta assinada",
-              description: "Uma nova proposta foi assinada e pode aparecer na lista",
+              title: 'Nova proposta assinada',
+              description: 'Uma nova proposta foi assinada e pode aparecer na lista',
               duration: 3000,
             });
           }
@@ -295,43 +296,45 @@ export default function CobrancasPage() {
         {
           event: '*', // Escutar todos os eventos (INSERT, UPDATE, DELETE)
           schema: 'public',
-          table: 'inter_collections'
+          table: 'inter_collections',
         },
         (payload) => {
-          console.log("📡 [REALTIME] Evento recebido em inter_collections:", payload);
-          console.log("📡 [REALTIME] Tipo de evento:", payload.eventType);
-          console.log("📡 [REALTIME] Dados do boleto:", {
+          console.log('📡 [REALTIME] Evento recebido em inter_collections:', payload);
+          console.log('📡 [REALTIME] Tipo de evento:', payload.eventType);
+          console.log('📡 [REALTIME] Dados do boleto:', {
             propostaId: payload.new?.proposta_id || payload.old?.proposta_id,
             situacao: payload.new?.situacao || payload.old?.situacao,
-            isActive: payload.new?.is_active
+            isActive: payload.new?.is_active,
           });
-          
+
           // Invalidar as queries para forçar um refetch
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
-          
+
           // Notificações específicas por tipo de evento
           if (payload.eventType === 'INSERT') {
-            console.log("📡 [REALTIME] Novo boleto inserido - atualizando lista");
+            console.log('📡 [REALTIME] Novo boleto inserido - atualizando lista');
             toast({
-              title: "Novos boletos gerados",
-              description: "A lista de cobranças foi atualizada com novos boletos",
+              title: 'Novos boletos gerados',
+              description: 'A lista de cobranças foi atualizada com novos boletos',
               duration: 2000,
             });
           } else if (payload.eventType === 'UPDATE') {
             // Se o boleto foi cancelado
             if (payload.new?.situacao === 'CANCELADO' && payload.old?.situacao !== 'CANCELADO') {
-              console.log("📡 [REALTIME] Boleto cancelado - verificando se proposta deve sair da lista");
+              console.log(
+                '📡 [REALTIME] Boleto cancelado - verificando se proposta deve sair da lista'
+              );
               toast({
-                title: "Boleto cancelado",
-                description: "Um boleto foi cancelado e a lista foi atualizada",
+                title: 'Boleto cancelado',
+                description: 'Um boleto foi cancelado e a lista foi atualizada',
                 duration: 2000,
               });
             }
             // Se foi um pagamento
             else if (payload.new?.situacao === 'RECEBIDO') {
               toast({
-                title: "✅ Pagamento recebido",
+                title: '✅ Pagamento recebido',
                 description: `Boleto ${payload.new?.seu_numero || ''} foi pago`,
                 duration: 3000,
               });
@@ -341,30 +344,31 @@ export default function CobrancasPage() {
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log("✅ [REALTIME] Conectado ao canal de atualizações de cobranças");
+          console.log('✅ [REALTIME] Conectado ao canal de atualizações de cobranças');
         } else if (status === 'CHANNEL_ERROR') {
-          console.error("❌ [REALTIME] Erro ao conectar ao canal");
+          console.error('❌ [REALTIME] Erro ao conectar ao canal');
         } else if (status === 'TIMED_OUT') {
-          console.error("⏱️ [REALTIME] Timeout ao conectar");
+          console.error('⏱️ [REALTIME] Timeout ao conectar');
         } else if (status === 'CLOSED') {
-          console.log("🔌 [REALTIME] Canal fechado");
+          console.log('🔌 [REALTIME] Canal fechado');
         }
       });
 
     // Cleanup ao desmontar o componente
     return () => {
-      console.log("🧹 [REALTIME] Removendo canal de escuta de cobranças");
+      console.log('🧹 [REALTIME] Removendo canal de escuta de cobranças');
       supabase.removeChannel(channel);
     };
   }, [queryClient, toast]);
 
   // Buscar ficha do cliente
   const { data: fichaCliente, isLoading: loadingFicha } = useQuery<FichaCliente>({
-    queryKey: ["/api/cobrancas/ficha", selectedPropostaId],
-    queryFn: () => apiRequest(`/api/cobrancas/${selectedPropostaId}/ficha`) as Promise<FichaCliente>,
+    queryKey: ['/api/cobrancas/ficha', selectedPropostaId],
+    queryFn: () =>
+      apiRequest(`/api/cobrancas/${selectedPropostaId}/ficha`) as Promise<FichaCliente>,
     enabled: !!selectedPropostaId && showFichaModal,
   });
-  
+
   // PAM V1.0 - Polling inteligente para status de sincronização
   useEffect(() => {
     if (!showFichaModal || !selectedPropostaId) {
@@ -373,56 +377,60 @@ export default function CobrancasPage() {
       setPollCount(0);
       return;
     }
-    
+
     const checkSyncStatus = async () => {
       try {
-        console.log(`[PAM V1.0 POLLING] Verificando status de sincronização para proposta ${selectedPropostaId}`);
-        const response = await apiRequest(
-          `/api/propostas/${selectedPropostaId}/sync-status`,
-          { method: "GET" }
-        ) as {
+        console.log(
+          `[PAM V1.0 POLLING] Verificando status de sincronização para proposta ${selectedPropostaId}`
+        );
+        const response = (await apiRequest(`/api/propostas/${selectedPropostaId}/sync-status`, {
+          method: 'GET',
+        })) as {
           success: boolean;
           syncStatus: 'nao_iniciado' | 'em_andamento' | 'concluido' | 'falhou';
           totalBoletos: number;
           boletosSincronizados: number;
         };
-        
+
         if (response.success) {
           setSyncStatus(response.syncStatus);
-          console.log(`[PAM V1.0 POLLING] Status: ${response.syncStatus} (${response.boletosSincronizados}/${response.totalBoletos})`);
-          
+          console.log(
+            `[PAM V1.0 POLLING] Status: ${response.syncStatus} (${response.boletosSincronizados}/${response.totalBoletos})`
+          );
+
           // Se está em andamento e não atingiu limite, continuar polling
           if (response.syncStatus === 'em_andamento' && pollCount < 20) {
             setIsPolling(true);
-            setPollCount(prev => prev + 1);
+            setPollCount((prev) => prev + 1);
           } else {
             setIsPolling(false);
             if (pollCount >= 20) {
               console.log(`[PAM V1.0 POLLING] Limite de tentativas atingido (20)`);
               toast({
-                title: "Sincronização demorada",
-                description: "A sincronização está demorando mais que o esperado. Tente novamente em alguns instantes.",
-                variant: "destructive",
+                title: 'Sincronização demorada',
+                description:
+                  'A sincronização está demorando mais que o esperado. Tente novamente em alguns instantes.',
+                variant: 'destructive',
               });
             }
           }
         }
       } catch (error) {
-        console.error("[PAM V1.0 POLLING] Erro ao verificar status:", error);
+        console.error('[PAM V1.0 POLLING] Erro ao verificar status:', error);
         setSyncStatus('falhou');
         setIsPolling(false);
       }
     };
-    
+
     // Verificar imediatamente ao abrir
     checkSyncStatus();
-    
+
     // Configurar polling se necessário
     let intervalId: NodeJS.Timeout | null = null;
     if (isPolling) {
       intervalId = setInterval(checkSyncStatus, 3000); // 3 segundos
     }
-    
+
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
@@ -437,7 +445,7 @@ export default function CobrancasPage() {
     setSalvandoObservacao(true);
     try {
       await apiRequest(`/api/propostas/${selectedPropostaId}/observacoes`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
           mensagem: novaObservacao,
           tipo_acao: statusObservacao,
@@ -445,21 +453,21 @@ export default function CobrancasPage() {
       });
 
       // Limpar formulário
-      setNovaObservacao("");
+      setNovaObservacao('');
 
       // Recarregar ficha para atualizar observações
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/ficha", selectedPropostaId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/ficha', selectedPropostaId] });
 
       toast({
-        title: "Sucesso",
-        description: "Observação salva com sucesso",
+        title: 'Sucesso',
+        description: 'Observação salva com sucesso',
       });
     } catch (error) {
-      console.error("Erro ao salvar observação:", error);
+      console.error('Erro ao salvar observação:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar a observação",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível salvar a observação',
+        variant: 'destructive',
       });
     } finally {
       setSalvandoObservacao(false);
@@ -470,25 +478,25 @@ export default function CobrancasPage() {
   const adicionarObservacaoMutation = useMutation({
     mutationFn: (data: any) =>
       apiRequest(`/api/cobrancas/${selectedPropostaId}/observacao`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify(data),
       }),
     onSuccess: () => {
       toast({
-        title: "Observação adicionada",
-        description: "A observação foi registrada com sucesso.",
+        title: 'Observação adicionada',
+        description: 'A observação foi registrada com sucesso.',
       });
-      setNovaObservacao("");
-      setTipoContato("");
-      setStatusPromessa("");
-      setDataPromessaPagamento("");
-      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/ficha"] });
+      setNovaObservacao('');
+      setTipoContato('');
+      setStatusPromessa('');
+      setDataPromessaPagamento('');
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/ficha'] });
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Não foi possível adicionar a observação.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível adicionar a observação.',
+        variant: 'destructive',
       });
     },
   });
@@ -498,13 +506,13 @@ export default function CobrancasPage() {
     navigator.clipboard.writeText(text);
     toast({
       title: `${label} copiado!`,
-      description: "Código copiado para a área de transferência.",
+      description: 'Código copiado para a área de transferência.',
     });
   };
 
   // Função para mascarar CPF/CNPJ
   const maskDocument = (doc: string) => {
-    if (!doc) return "";
+    if (!doc) return '';
     if (!showCpf) {
       if (doc.length === 11) {
         // CPF
@@ -520,13 +528,15 @@ export default function CobrancasPage() {
   // Função para exportar inadimplentes
   const exportarInadimplentes = async () => {
     try {
-      const data = await apiRequest("/api/cobrancas/exportar/inadimplentes") as ExportacaoInadimplentes;
+      const data = (await apiRequest(
+        '/api/cobrancas/exportar/inadimplentes'
+      )) as ExportacaoInadimplentes;
 
       // Verificar se há dados
       if (!data || !data.inadimplentes || data.inadimplentes.length === 0) {
         toast({
-          title: "Sem dados para exportar",
-          description: "Não há inadimplentes para exportar.",
+          title: 'Sem dados para exportar',
+          description: 'Não há inadimplentes para exportar.',
         });
         return;
       }
@@ -534,104 +544,103 @@ export default function CobrancasPage() {
       // Criar CSV manualmente
       const headers = Object.keys(data.inadimplentes[0] || {});
       const csv = [
-        headers.join(","),
+        headers.join(','),
         ...data.inadimplentes.map((row: any) =>
-          headers.map(header => `"${row[header] || ""}"`).join(",")
+          headers.map((header) => `"${row[header] || ''}"`).join(',')
         ),
-      ].join("\n");
+      ].join('\n');
 
       // Download do CSV
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `inadimplentes_${format(new Date(), "yyyy-MM-dd")}.csv`;
+      link.download = `inadimplentes_${format(new Date(), 'yyyy-MM-dd')}.csv`;
       link.click();
 
       toast({
-        title: "Exportação concluída",
+        title: 'Exportação concluída',
         description: `${data.total} registros exportados com sucesso.`,
       });
     } catch (error) {
       toast({
-        title: "Erro na exportação",
-        description: "Não foi possível exportar os dados.",
-        variant: "destructive",
+        title: 'Erro na exportação',
+        description: 'Não foi possível exportar os dados.',
+        variant: 'destructive',
       });
     }
   };
 
   // Filtrar propostas localmente pela busca (lógica robusta para campos vazios)
-  const propostasFiltradas = propostas?.filter((proposta: PropostaCobranca) => {
-    if (!searchTerm) return true; // Sem busca = mostrar todas
-    
-    const search = searchTerm.toLowerCase();
-    
-    // Cria lista de campos pesquisáveis, removendo valores vazios/null/undefined
-    const searchableFields = [
-      proposta.nomeCliente,
-      proposta.cpfCliente, 
-      proposta.numeroContrato,
-      proposta.id,
-      proposta.numero_proposta // Adicionar campo de número da proposta
-    ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
-    
-    // Verifica se algum dos campos válidos contém o termo de busca
-    return searchableFields.some(field => 
-      String(field).toLowerCase().includes(search)
-    );
-  }) || [];
+  const propostasFiltradas =
+    propostas?.filter((proposta: PropostaCobranca) => {
+      if (!searchTerm) return true; // Sem busca = mostrar todas
+
+      const search = searchTerm.toLowerCase();
+
+      // Cria lista de campos pesquisáveis, removendo valores vazios/null/undefined
+      const searchableFields = [
+        proposta.nomeCliente,
+        proposta.cpfCliente,
+        proposta.numeroContrato,
+        proposta.id,
+        proposta.numero_proposta, // Adicionar campo de número da proposta
+      ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
+
+      // Verifica se algum dos campos válidos contém o termo de busca
+      return searchableFields.some((field) => String(field).toLowerCase().includes(search));
+    }) || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "em_dia":
-        return "bg-green-100 text-green-800";
-      case "inadimplente":
-        return "bg-red-100 text-red-800";
-      case "quitado":
-        return "bg-blue-100 text-blue-800";
+      case 'em_dia':
+        return 'bg-green-100 text-green-800';
+      case 'inadimplente':
+        return 'bg-red-100 text-red-800';
+      case 'quitado':
+        return 'bg-blue-100 text-blue-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getParcelaStatusColor = (status: string) => {
     switch (status) {
-      case "pago":
-        return "bg-green-100 text-green-800";
-      case "vencido":
-        return "bg-red-100 text-red-800";
-      case "pendente":
-        return "bg-yellow-100 text-yellow-800";
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'vencido':
+        return 'bg-red-100 text-red-800';
+      case 'pendente':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   // Função para mapear status do Inter Bank para cores
   const getInterBankStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
-      case "RECEBIDO":
-      case "MARCADO_RECEBIDO":
-        return "bg-green-100 text-green-800";
-      case "CANCELADO":
-      case "EXPIRADO":
-      case "FALHA_EMISSAO":
-        return "bg-gray-100 text-gray-800";
-      case "ATRASADO":
-      case "PROTESTO":
-        return "bg-red-100 text-red-800";
-      case "A_RECEBER":
-      case "EM_PROCESSAMENTO":
-      case "EMITIDO":
-        return "bg-blue-100 text-blue-800";
-      case "pago":
-        return "bg-green-100 text-green-800";
-      case "vencido":
-        return "bg-red-100 text-red-800";
-      case "pendente":
-        return "bg-yellow-100 text-yellow-800";
+      case 'RECEBIDO':
+      case 'MARCADO_RECEBIDO':
+        return 'bg-green-100 text-green-800';
+      case 'CANCELADO':
+      case 'EXPIRADO':
+      case 'FALHA_EMISSAO':
+        return 'bg-gray-100 text-gray-800';
+      case 'ATRASADO':
+      case 'PROTESTO':
+        return 'bg-red-100 text-red-800';
+      case 'A_RECEBER':
+      case 'EM_PROCESSAMENTO':
+      case 'EMITIDO':
+        return 'bg-blue-100 text-blue-800';
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'vencido':
+        return 'bg-red-100 text-red-800';
+      case 'pendente':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -644,30 +653,30 @@ export default function CobrancasPage() {
     // Priorizar status do Inter Bank se disponível
     if (interSituacao) {
       switch (interSituacao.toUpperCase()) {
-        case "RECEBIDO":
-        case "MARCADO_RECEBIDO":
-        case "PAGO":  // PAM V1.0 - FASE 1: Reconhecer "PAGO" como status válido
-          return "Pago";
-        case "CANCELADO":
-        case "EXPIRADO":
-        case "FALHA_EMISSAO":
-          return "Cancelado";
-        case "ATRASADO":
-        case "PROTESTO":
-          return "Vencido";
-        case "A_RECEBER":
-        case "EM_PROCESSAMENTO":
-        case "EMITIDO":
-          return "Pendente";
+        case 'RECEBIDO':
+        case 'MARCADO_RECEBIDO':
+        case 'PAGO': // PAM V1.0 - FASE 1: Reconhecer "PAGO" como status válido
+          return 'Pago';
+        case 'CANCELADO':
+        case 'EXPIRADO':
+        case 'FALHA_EMISSAO':
+          return 'Cancelado';
+        case 'ATRASADO':
+        case 'PROTESTO':
+          return 'Vencido';
+        case 'A_RECEBER':
+        case 'EM_PROCESSAMENTO':
+        case 'EMITIDO':
+          return 'Pendente';
         default:
           return interSituacao;
       }
     }
 
     // Fallback para status local
-    if (localStatus === "pago") return "Pago";
-    if (vencida) return "Vencido";
-    return "Pendente";
+    if (localStatus === 'pago') return 'Pago';
+    if (vencida) return 'Vencido';
+    return 'Pendente';
   };
 
   // Função para calcular o Status de Vencimento inteligente
@@ -675,17 +684,17 @@ export default function CobrancasPage() {
     // Se tem situação do Inter Bank, verificar status especiais
     if (proposta.interSituacao) {
       const situacao = proposta.interSituacao.toUpperCase();
-      if (situacao === "RECEBIDO" || situacao === "MARCADO_RECEBIDO") {
-        return { text: "Pago", color: "text-green-600" };
+      if (situacao === 'RECEBIDO' || situacao === 'MARCADO_RECEBIDO') {
+        return { text: 'Pago', color: 'text-green-600' };
       }
-      if (situacao === "CANCELADO" || situacao === "EXPIRADO" || situacao === "FALHA_EMISSAO") {
-        return { text: "Cancelado", color: "text-gray-600" };
+      if (situacao === 'CANCELADO' || situacao === 'EXPIRADO' || situacao === 'FALHA_EMISSAO') {
+        return { text: 'Cancelado', color: 'text-gray-600' };
       }
     }
 
     // Se o status local indica pago
-    if (proposta.status === "quitado" || proposta.status === "pago") {
-      return { text: "Pago", color: "text-green-600" };
+    if (proposta.status === 'quitado' || proposta.status === 'pago') {
+      return { text: 'Pago', color: 'text-green-600' };
     }
 
     // Calcular baseado na data de vencimento
@@ -695,34 +704,34 @@ export default function CobrancasPage() {
       : null;
 
     if (!dataVencimento) {
-      return { text: "Sem vencimento", color: "text-gray-500" };
+      return { text: 'Sem vencimento', color: 'text-gray-500' };
     }
 
     // Se já venceu
     if (proposta.diasAtraso > 0) {
       return {
         text: `Vencido há ${proposta.diasAtraso} dias`,
-        color: "text-red-600 font-semibold",
+        color: 'text-red-600 font-semibold',
       };
     }
 
     // Se vence hoje
     if (isToday(dataVencimento)) {
-      return { text: "Vence hoje", color: "text-orange-600 font-semibold" };
+      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' };
     }
 
     // Se vence nos próximos 7 dias
     const diasParaVencer = differenceInDays(dataVencimento, hoje);
     if (diasParaVencer > 0 && diasParaVencer <= 7) {
-      return { text: `Vence em ${diasParaVencer} dias`, color: "text-yellow-600" };
+      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' };
     }
 
     // Para todos os outros casos, mostrar a data de vencimento
     if (isFuture(dataVencimento)) {
-      return { text: format(dataVencimento, "dd/MM/yyyy"), color: "text-gray-600" };
+      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' };
     }
 
-    return { text: "Em dia", color: "text-green-600" };
+    return { text: 'Em dia', color: 'text-green-600' };
   };
 
   return (
@@ -737,7 +746,7 @@ export default function CobrancasPage() {
                 <div>
                   <h3 className="font-semibold text-orange-800">Modo Cobrança Ativo</h3>
                   <p className="text-sm text-orange-700">
-                    Você está visualizando apenas contratos: <strong>inadimplentes</strong>,{" "}
+                    Você está visualizando apenas contratos: <strong>inadimplentes</strong>,{' '}
                     <strong>em atraso</strong> ou que <strong>vencem nos próximos 3 dias</strong>.
                   </p>
                 </div>
@@ -754,9 +763,9 @@ export default function CobrancasPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
                 }).format(kpis?.valorTotalEmAtraso || 0)}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -783,9 +792,9 @@ export default function CobrancasPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
                 }).format(kpis?.valorTotalCarteira || 0)}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -814,7 +823,7 @@ export default function CobrancasPage() {
                 size="sm"
                 className="w-full"
                 onClick={() => {
-                  console.log("[COBRANÇAS] Atualizando dados da API do Banco Inter...");
+                  console.log('[COBRANÇAS] Atualizando dados da API do Banco Inter...');
                   refetch();
                 }}
               >
@@ -837,13 +846,16 @@ export default function CobrancasPage() {
                 <Input
                   placeholder="Buscar por nome, CPF, contrato..."
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8"
                   data-testid="input-search-cobrancas"
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+              <Select
+                value={statusFilter}
+                onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+              >
                 <SelectTrigger data-testid="select-status-filter">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -855,7 +867,10 @@ export default function CobrancasPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={atrasoFilter} onValueChange={(value) => setAtrasoFilter(value as AtrasoFilter)}>
+              <Select
+                value={atrasoFilter}
+                onValueChange={(value) => setAtrasoFilter(value as AtrasoFilter)}
+              >
                 <SelectTrigger data-testid="select-atraso-filter">
                   <SelectValue placeholder="Dias de Atraso" />
                 </SelectTrigger>
@@ -928,16 +943,16 @@ export default function CobrancasPage() {
                     propostasFiltradas?.map((proposta: any) => (
                       <TableRow
                         key={proposta.id}
-                        className={proposta.diasAtraso > 30 ? "bg-red-50" : ""}
+                        className={proposta.diasAtraso > 30 ? 'bg-red-50' : ''}
                       >
                         <TableCell className="font-medium">{proposta.numeroContrato}</TableCell>
                         <TableCell>{proposta.nomeCliente}</TableCell>
                         <TableCell>{maskDocument(proposta.cpfCliente)}</TableCell>
                         <TableCell>{proposta.telefoneCliente}</TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
                           }).format(proposta.valorTotal)}
                         </TableCell>
                         <TableCell>
@@ -951,11 +966,11 @@ export default function CobrancasPage() {
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(proposta.status)}>
-                            {proposta.status === "em_dia"
-                              ? "Em Dia"
-                              : proposta.status === "inadimplente"
-                                ? "Inadimplente"
-                                : "Quitado"}
+                            {proposta.status === 'em_dia'
+                              ? 'Em Dia'
+                              : proposta.status === 'inadimplente'
+                                ? 'Inadimplente'
+                                : 'Quitado'}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -985,23 +1000,23 @@ export default function CobrancasPage() {
                                     onClick={() => {
                                       if (!canModifyBoletos) {
                                         toast({
-                                          title: "Acesso Negado",
+                                          title: 'Acesso Negado',
                                           description:
-                                            "Apenas administradores e equipe financeira podem prorrogar vencimentos",
-                                          variant: "destructive",
+                                            'Apenas administradores e equipe financeira podem prorrogar vencimentos',
+                                          variant: 'destructive',
                                         });
                                         return;
                                       }
                                       const canModify = [
-                                        "A_RECEBER",
-                                        "ATRASADO",
-                                        "EM_PROCESSAMENTO",
-                                      ].includes(proposta.interSituacao?.toUpperCase() || "");
+                                        'A_RECEBER',
+                                        'ATRASADO',
+                                        'EM_PROCESSAMENTO',
+                                      ].includes(proposta.interSituacao?.toUpperCase() || '');
                                       if (!canModify) {
                                         toast({
-                                          title: "Ação não permitida",
-                                          description: "Este boleto não pode ser modificado",
-                                          variant: "destructive",
+                                          title: 'Ação não permitida',
+                                          description: 'Este boleto não pode ser modificado',
+                                          variant: 'destructive',
                                         });
                                         return;
                                       }
@@ -1010,15 +1025,15 @@ export default function CobrancasPage() {
                                       // Buscar boletos ativos da proposta
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then(data => {
+                                      ).then((data) => {
                                         setTodosBoletosAtivos(data.boletosAtivos || []);
                                       });
                                       setShowProrrogarModal(true);
                                     }}
                                     disabled={
                                       !canModifyBoletos ||
-                                      ["PAGO", "CANCELADO", "RECEBIDO"].includes(
-                                        proposta.interSituacao?.toUpperCase() || ""
+                                      ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
+                                        proposta.interSituacao?.toUpperCase() || ''
                                       )
                                     }
                                   >
@@ -1030,23 +1045,23 @@ export default function CobrancasPage() {
                                     onClick={() => {
                                       if (!canModifyBoletos) {
                                         toast({
-                                          title: "Acesso Negado",
+                                          title: 'Acesso Negado',
                                           description:
-                                            "Apenas administradores e equipe financeira podem aplicar descontos",
-                                          variant: "destructive",
+                                            'Apenas administradores e equipe financeira podem aplicar descontos',
+                                          variant: 'destructive',
                                         });
                                         return;
                                       }
                                       const canModify = [
-                                        "A_RECEBER",
-                                        "ATRASADO",
-                                        "EM_PROCESSAMENTO",
-                                      ].includes(proposta.interSituacao?.toUpperCase() || "");
+                                        'A_RECEBER',
+                                        'ATRASADO',
+                                        'EM_PROCESSAMENTO',
+                                      ].includes(proposta.interSituacao?.toUpperCase() || '');
                                       if (!canModify) {
                                         toast({
-                                          title: "Ação não permitida",
-                                          description: "Este boleto não pode ser modificado",
-                                          variant: "destructive",
+                                          title: 'Ação não permitida',
+                                          description: 'Este boleto não pode ser modificado',
+                                          variant: 'destructive',
                                         });
                                         return;
                                       }
@@ -1055,7 +1070,7 @@ export default function CobrancasPage() {
                                       // Buscar informações de dívida
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then(data => {
+                                      ).then((data) => {
                                         setDebtInfo(data);
                                         setNovoValorQuitacao(data.valorRestante * 0.5); // Sugerir 50% de desconto inicial
                                       });
@@ -1063,8 +1078,8 @@ export default function CobrancasPage() {
                                     }}
                                     disabled={
                                       !canModifyBoletos ||
-                                      ["PAGO", "CANCELADO", "RECEBIDO"].includes(
-                                        proposta.interSituacao?.toUpperCase() || ""
+                                      ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
+                                        proposta.interSituacao?.toUpperCase() || ''
                                       )
                                     }
                                   >
@@ -1088,11 +1103,11 @@ export default function CobrancasPage() {
         {/* Modal - Prorrogar Vencimento (Seleção Múltipla) */}
         <Dialog
           open={showProrrogarModal}
-          onOpenChange={open => {
+          onOpenChange={(open) => {
             setShowProrrogarModal(open);
             if (!open) {
               setBoletosParaProrrogar([]);
-              setNovaDataVencimento("");
+              setNovaDataVencimento('');
             }
           }}
         >
@@ -1110,17 +1125,17 @@ export default function CobrancasPage() {
                 <Label>Boletos Disponíveis</Label>
                 <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border p-2">
                   {todosBoletosAtivos.length > 0 ? (
-                    todosBoletosAtivos.map(boleto => (
+                    todosBoletosAtivos.map((boleto) => (
                       <div
                         key={boleto.codigoSolicitacao}
                         className="flex cursor-pointer items-center space-x-3 rounded-lg p-2 hover:bg-muted"
                         onClick={() => {
                           if (boletosParaProrrogar.includes(boleto.codigoSolicitacao)) {
-                            setBoletosParaProrrogar(prev =>
-                              prev.filter(c => c !== boleto.codigoSolicitacao)
+                            setBoletosParaProrrogar((prev) =>
+                              prev.filter((c) => c !== boleto.codigoSolicitacao)
                             );
                           } else {
-                            setBoletosParaProrrogar(prev => [...prev, boleto.codigoSolicitacao]);
+                            setBoletosParaProrrogar((prev) => [...prev, boleto.codigoSolicitacao]);
                           }
                         }}
                       >
@@ -1133,15 +1148,15 @@ export default function CobrancasPage() {
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium">
-                            Parcela {boleto.numeroParcela} -{" "}
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
+                            Parcela {boleto.numeroParcela} -{' '}
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
                             }).format(boleto.valor)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Vencimento atual:{" "}
-                            {new Date(boleto.dataVencimento).toLocaleDateString("pt-BR")}
+                            Vencimento atual:{' '}
+                            {new Date(boleto.dataVencimento).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                       </div>
@@ -1161,8 +1176,8 @@ export default function CobrancasPage() {
                   id="nova-data"
                   type="date"
                   value={novaDataVencimento}
-                  onChange={e => setNovaDataVencimento(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setNovaDataVencimento(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
                 />
               </div>
 
@@ -1190,17 +1205,17 @@ export default function CobrancasPage() {
                 onClick={() => {
                   if (boletosParaProrrogar.length === 0) {
                     toast({
-                      title: "Erro",
-                      description: "Selecione pelo menos um boleto",
-                      variant: "destructive",
+                      title: 'Erro',
+                      description: 'Selecione pelo menos um boleto',
+                      variant: 'destructive',
                     });
                     return;
                   }
                   if (!novaDataVencimento) {
                     toast({
-                      title: "Erro",
-                      description: "Selecione uma nova data de vencimento",
-                      variant: "destructive",
+                      title: 'Erro',
+                      description: 'Selecione uma nova data de vencimento',
+                      variant: 'destructive',
                     });
                     return;
                   }
@@ -1212,7 +1227,7 @@ export default function CobrancasPage() {
                 disabled={prorrogarMutation.isPending || boletosParaProrrogar.length === 0}
               >
                 {prorrogarMutation.isPending
-                  ? "Processando..."
+                  ? 'Processando...'
                   : `Prorrogar ${boletosParaProrrogar.length} Boleto(s)`}
               </Button>
             </DialogFooter>
@@ -1222,7 +1237,7 @@ export default function CobrancasPage() {
         {/* Modal - Aplicar Desconto de Quitação (Multi-etapas) */}
         <Dialog
           open={showDescontoModal}
-          onOpenChange={open => {
+          onOpenChange={(open) => {
             setShowDescontoModal(open);
             if (!open) {
               setEtapaDesconto(1);
@@ -1235,9 +1250,9 @@ export default function CobrancasPage() {
             <DialogHeader>
               <DialogTitle>Desconto para Quitação - Etapa {etapaDesconto} de 3</DialogTitle>
               <DialogDescription>
-                {etapaDesconto === 1 && "Análise da dívida atual"}
-                {etapaDesconto === 2 && "Configurar novo valor e parcelamento"}
-                {etapaDesconto === 3 && "Confirmar operação"}
+                {etapaDesconto === 1 && 'Análise da dívida atual'}
+                {etapaDesconto === 2 && 'Configurar novo valor e parcelamento'}
+                {etapaDesconto === 3 && 'Confirmar operação'}
               </DialogDescription>
             </DialogHeader>
 
@@ -1257,27 +1272,27 @@ export default function CobrancasPage() {
                           <div>
                             <p className="text-sm text-muted-foreground">Valor Total Financiado</p>
                             <p className="text-lg font-bold">
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
                               }).format(debtInfo.valorTotal)}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Valor Já Pago</p>
                             <p className="text-lg font-bold text-green-600">
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
                               }).format(debtInfo.valorPago)}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Valor Restante</p>
                             <p className="text-lg font-bold text-orange-600">
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
                               }).format(debtInfo.valorRestante)}
                             </p>
                           </div>
@@ -1299,13 +1314,13 @@ export default function CobrancasPage() {
                               >
                                 <span>Parcela {b.numeroParcela}</span>
                                 <span>
-                                  {new Intl.NumberFormat("pt-BR", {
-                                    style: "currency",
-                                    currency: "BRL",
+                                  {new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL',
                                   }).format(b.valor)}
                                 </span>
                                 <span>
-                                  Venc: {new Date(b.dataVencimento).toLocaleDateString("pt-BR")}
+                                  Venc: {new Date(b.dataVencimento).toLocaleDateString('pt-BR')}
                                 </span>
                               </div>
                             ))}
@@ -1327,7 +1342,7 @@ export default function CobrancasPage() {
                       type="number"
                       step="0.01"
                       value={novoValorQuitacao}
-                      onChange={e => {
+                      onChange={(e) => {
                         const valor = parseFloat(e.target.value);
                         setNovoValorQuitacao(valor);
                         // Recalcular parcelas
@@ -1339,7 +1354,7 @@ export default function CobrancasPage() {
                             dataVenc.setMonth(dataVenc.getMonth() + i + 1);
                             parcelas.push({
                               valor: valorParcela,
-                              dataVencimento: dataVenc.toISOString().split("T")[0],
+                              dataVencimento: dataVenc.toISOString().split('T')[0],
                             });
                           }
                           setNovasParcelas(parcelas);
@@ -1349,10 +1364,10 @@ export default function CobrancasPage() {
                       max={debtInfo.valorRestante}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Máximo:{" "}
-                      {new Intl.NumberFormat("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
+                      Máximo:{' '}
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
                       }).format(debtInfo.valorRestante)}
                     </p>
                   </div>
@@ -1361,7 +1376,7 @@ export default function CobrancasPage() {
                     <Label htmlFor="parcelas">Quantidade de Parcelas</Label>
                     <Select
                       value={quantidadeParcelas.toString()}
-                      onValueChange={value => {
+                      onValueChange={(value) => {
                         const qtd = parseInt(value);
                         setQuantidadeParcelas(qtd);
                         // Recalcular parcelas
@@ -1373,7 +1388,7 @@ export default function CobrancasPage() {
                             dataVenc.setMonth(dataVenc.getMonth() + i + 1);
                             parcelas.push({
                               valor: valorParcela,
-                              dataVencimento: dataVenc.toISOString().split("T")[0],
+                              dataVencimento: dataVenc.toISOString().split('T')[0],
                             });
                           }
                           setNovasParcelas(parcelas);
@@ -1384,9 +1399,9 @@ export default function CobrancasPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 12, 24].map(n => (
+                        {[1, 2, 3, 4, 5, 6, 12, 24].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
-                            {n} {n === 1 ? "parcela" : "parcelas"}
+                            {n} {n === 1 ? 'parcela' : 'parcelas'}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1396,10 +1411,10 @@ export default function CobrancasPage() {
                   {novoValorQuitacao > 0 && (
                     <div className="rounded-lg bg-green-50 p-3">
                       <p className="text-sm font-medium text-green-800">
-                        Desconto aplicado:{" "}
-                        {new Intl.NumberFormat("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
+                        Desconto aplicado:{' '}
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
                         }).format(debtInfo.valorRestante - novoValorQuitacao)}
                       </p>
                       <p className="text-xs text-green-600">
@@ -1417,12 +1432,12 @@ export default function CobrancasPage() {
                           <div key={idx} className="flex justify-between text-sm">
                             <span>Parcela {idx + 1}</span>
                             <span>
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
                               }).format(p.valor)}
                             </span>
-                            <span>{new Date(p.dataVencimento).toLocaleDateString("pt-BR")}</span>
+                            <span>{new Date(p.dataVencimento).toLocaleDateString('pt-BR')}</span>
                           </div>
                         ))}
                       </div>
@@ -1444,10 +1459,10 @@ export default function CobrancasPage() {
                           <li>Cancelar {debtInfo.totalBoletosAtivos} boleto(s) ativo(s)</li>
                           <li>Criar {quantidadeParcelas} novo(s) boleto(s)</li>
                           <li>
-                            Aplicar desconto de{" "}
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
+                            Aplicar desconto de{' '}
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
                             }).format(debtInfo.valorRestante - novoValorQuitacao)}
                           </li>
                         </ul>
@@ -1461,27 +1476,27 @@ export default function CobrancasPage() {
                       <div>
                         <p className="text-muted-foreground">Dívida Anterior</p>
                         <p className="font-medium">
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
                           }).format(debtInfo.valorRestante)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Novo Valor</p>
                         <p className="font-medium text-green-600">
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
                           }).format(novoValorQuitacao)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Desconto Total</p>
                         <p className="font-medium">
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
                           }).format(debtInfo.valorRestante - novoValorQuitacao)}
                         </p>
                       </div>
@@ -1523,9 +1538,9 @@ export default function CobrancasPage() {
                       setEtapaDesconto(3);
                     } else {
                       toast({
-                        title: "Erro",
-                        description: "Configure todos os campos necessários",
-                        variant: "destructive",
+                        title: 'Erro',
+                        description: 'Configure todos os campos necessários',
+                        variant: 'destructive',
                       });
                     }
                   }}
@@ -1548,7 +1563,7 @@ export default function CobrancasPage() {
                   disabled={descontoQuitacaoMutation.isPending}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  {descontoQuitacaoMutation.isPending ? "Processando..." : "Confirmar Quitação"}
+                  {descontoQuitacaoMutation.isPending ? 'Processando...' : 'Confirmar Quitação'}
                 </Button>
               )}
             </DialogFooter>
@@ -1595,7 +1610,7 @@ export default function CobrancasPage() {
                             size="sm"
                             variant="ghost"
                             onClick={() =>
-                              copyToClipboard(fichaCliente.cliente.telefone, "Telefone")
+                              copyToClipboard(fichaCliente.cliente.telefone, 'Telefone')
                             }
                           >
                             <Copy className="h-3 w-3" />
@@ -1640,7 +1655,7 @@ export default function CobrancasPage() {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => copyToClipboard(ref.telefone, "Telefone")}
+                                  onClick={() => copyToClipboard(ref.telefone, 'Telefone')}
                                 >
                                   <Copy className="h-3 w-3" />
                                 </Button>
@@ -1652,7 +1667,7 @@ export default function CobrancasPage() {
                     </Card>
                   )}
 
-{/* PAM V1.0 FASE 3 - Seção "Dados Bancários" removida conforme especificação */}
+                  {/* PAM V1.0 FASE 3 - Seção "Dados Bancários" removida conforme especificação */}
 
                   {/* Resumo Financeiro */}
                   <Card>
@@ -1666,27 +1681,27 @@ export default function CobrancasPage() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="text-center">
                           <p className="text-2xl font-bold text-green-600">
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
                             }).format(fichaCliente.resumoFinanceiro.totalPago || 0)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Pago</p>
                         </div>
                         <div className="text-center">
                           <p className="text-2xl font-bold text-red-600">
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
                             }).format(fichaCliente.resumoFinanceiro.totalVencido || 0)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Vencido</p>
                         </div>
                         <div className="text-center">
                           <p className="text-2xl font-bold text-yellow-600">
-                            {new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
                             }).format(fichaCliente.resumoFinanceiro.totalPendente || 0)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Pendente</p>
@@ -1696,19 +1711,22 @@ export default function CobrancasPage() {
                       <div className="mt-4 grid grid-cols-3 gap-4">
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {(fichaCliente.parcelas?.filter((p: any) => p.status === 'pago').length || 0)}
+                            {fichaCliente.parcelas?.filter((p: any) => p.status === 'pago')
+                              .length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pagas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {(fichaCliente.parcelas?.filter((p: any) => p.vencida).length || 0)}
+                            {fichaCliente.parcelas?.filter((p: any) => p.vencida).length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Vencidas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {(fichaCliente.parcelas?.filter((p: any) => p.status === 'pendente' && !p.vencida).length || 0)}
+                            {fichaCliente.parcelas?.filter(
+                              (p: any) => p.status === 'pendente' && !p.vencida
+                            ).length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pendentes</p>
                         </div>
@@ -1735,7 +1753,7 @@ export default function CobrancasPage() {
                                 id="observacao-text"
                                 placeholder="Digite sua observação sobre este cliente ou proposta..."
                                 value={novaObservacao}
-                                onChange={e => setNovaObservacao(e.target.value)}
+                                onChange={(e) => setNovaObservacao(e.target.value)}
                                 className="min-h-[80px]"
                               />
                             </div>
@@ -1768,7 +1786,7 @@ export default function CobrancasPage() {
                                     Salvando...
                                   </>
                                 ) : (
-                                  "Salvar Observação"
+                                  'Salvar Observação'
                                 )}
                               </Button>
                             </div>
@@ -1790,20 +1808,20 @@ export default function CobrancasPage() {
                         ) : (
                           <ScrollArea className="h-[300px]">
                             <div className="space-y-3 pr-4">
-                              {fichaCliente.observacoes.map(obs => (
+                              {fichaCliente.observacoes.map((obs) => (
                                 <div key={obs.id} className="space-y-2 rounded-lg border p-3">
                                   <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
                                         <Badge
                                           variant={
-                                            obs.tipoContato === "Acordo Fechado"
-                                              ? "default"
-                                              : obs.tipoContato === "Contato Realizado"
-                                                ? "secondary"
-                                                : obs.tipoContato === "Negociação em Andamento"
-                                                  ? "outline"
-                                                  : "secondary"
+                                            obs.tipoContato === 'Acordo Fechado'
+                                              ? 'default'
+                                              : obs.tipoContato === 'Contato Realizado'
+                                                ? 'secondary'
+                                                : obs.tipoContato === 'Negociação em Andamento'
+                                                  ? 'outline'
+                                                  : 'secondary'
                                           }
                                         >
                                           {obs.tipoContato}
@@ -1843,17 +1861,17 @@ export default function CobrancasPage() {
                             onClick={async () => {
                               try {
                                 toast({
-                                  title: "Gerando carnê...",
-                                  description: "Compilando carnê consolidado de boletos",
+                                  title: 'Gerando carnê...',
+                                  description: 'Compilando carnê consolidado de boletos',
                                 });
-                                
+
                                 // Chamar endpoint de geração de carnê consolidado
-                                const response = await apiRequest(
+                                const response = (await apiRequest(
                                   `/api/propostas/${selectedPropostaId}/gerar-carne`,
-                                  { method: "POST" }
-                                ) as { 
-                                  success: boolean; 
-                                  message?: string; 
+                                  { method: 'POST' }
+                                )) as {
+                                  success: boolean;
+                                  message?: string;
                                   existingFile?: boolean;
                                   jobId?: string;
                                   status?: string;
@@ -1863,43 +1881,52 @@ export default function CobrancasPage() {
                                     propostaId?: string;
                                   };
                                 };
-                                
+
                                 // PAM V1.0: Lógica inteligente de dois estágios
                                 if (response.success) {
                                   if (response.existingFile && response.data?.url) {
                                     // CENÁRIO 1: O carnê já existe. Iniciar download imediato.
-                                    console.log('[CARNE] Carnê já existente encontrado. Iniciando download...');
+                                    console.log(
+                                      '[CARNE] Carnê já existente encontrado. Iniciando download...'
+                                    );
                                     window.open(response.data.url, '_blank');
-                                    toast({ 
-                                      title: "Download iniciado", 
-                                      description: "O carnê já estava pronto." 
+                                    toast({
+                                      title: 'Download iniciado',
+                                      description: 'O carnê já estava pronto.',
                                     });
                                   } else if (response.jobId) {
                                     // CENÁRIO 2: Novo carnê está a ser gerado. Iniciar polling.
-                                    console.log('[CARNE] Geração de novo carnê iniciada. Job ID:', response.jobId);
+                                    console.log(
+                                      '[CARNE] Geração de novo carnê iniciada. Job ID:',
+                                      response.jobId
+                                    );
                                     toast({
-                                      title: "Carnê em processamento",
-                                      description: "Gerando carnê consolidado... Aguarde a conclusão.",
+                                      title: 'Carnê em processamento',
+                                      description:
+                                        'Gerando carnê consolidado... Aguarde a conclusão.',
                                     });
-                                    
+
                                     // TODO: Implementar polling para aguardar conclusão
                                     // (Polling será implementado em iteração futura conforme necessário)
                                   } else {
                                     // CENÁRIO DE ERRO: Resposta inesperada
-                                    throw new Error('Resposta da API inválida - sem data.url nem jobId.');
+                                    throw new Error(
+                                      'Resposta da API inválida - sem data.url nem jobId.'
+                                    );
                                   }
                                 } else {
                                   toast({
-                                    title: "Erro na geração",
-                                    description: response.message || "Falha ao gerar carnê consolidado",
-                                    variant: "destructive",
+                                    title: 'Erro na geração',
+                                    description:
+                                      response.message || 'Falha ao gerar carnê consolidado',
+                                    variant: 'destructive',
                                   });
                                 }
                               } catch (error) {
                                 toast({
-                                  title: "Erro ao gerar carnê",
-                                  description: "Não foi possível gerar o carnê consolidado",
-                                  variant: "destructive",
+                                  title: 'Erro ao gerar carnê',
+                                  description: 'Não foi possível gerar o carnê consolidado',
+                                  variant: 'destructive',
                                 });
                               }
                             }}
@@ -1908,7 +1935,7 @@ export default function CobrancasPage() {
                             <FileText className="mr-2 h-3 w-3" />
                             Carnê Consolidado
                           </Button>
-                          
+
                           {/* Botão de Atualização de Status */}
                           <Button
                             size="sm"
@@ -1916,29 +1943,29 @@ export default function CobrancasPage() {
                             onClick={async () => {
                               try {
                                 toast({
-                                  title: "Sincronizando...",
-                                  description: "Atualizando status das parcelas com o Banco Inter",
+                                  title: 'Sincronizando...',
+                                  description: 'Atualizando status das parcelas com o Banco Inter',
                                 });
-                                
-                                const response = await apiRequest(
+
+                                const response = (await apiRequest(
                                   `/api/cobrancas/sincronizar/${selectedPropostaId}`,
-                                  { method: "POST" }
-                                ) as { updated: number; message: string };
-                                
+                                  { method: 'POST' }
+                                )) as { updated: number; message: string };
+
                                 toast({
-                                  title: "Sincronização concluída",
+                                  title: 'Sincronização concluída',
                                   description: `${response.updated || 0} parcelas atualizadas`,
                                 });
-                                
+
                                 // Invalidar a query para forçar recarregar a ficha do cliente
-                                queryClient.invalidateQueries({ 
-                                  queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
+                                queryClient.invalidateQueries({
+                                  queryKey: ['/api/cobrancas/ficha', selectedPropostaId],
                                 });
                               } catch (error) {
                                 toast({
-                                  title: "Erro na sincronização",
-                                  description: "Não foi possível sincronizar com o Banco Inter",
-                                  variant: "destructive",
+                                  title: 'Erro na sincronização',
+                                  description: 'Não foi possível sincronizar com o Banco Inter',
+                                  variant: 'destructive',
                                 });
                               }
                             }}
@@ -1952,29 +1979,29 @@ export default function CobrancasPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {fichaCliente.parcelas?.map(parcela => (
+                        {fichaCliente.parcelas?.map((parcela) => (
                           <div
                             key={parcela.id}
                             className={`rounded border p-3 ${
                               (parcela as any).vencida
-                                ? "border-red-300 bg-red-50"
-                                : parcela.status === "pago"
-                                  ? "border-green-300 bg-green-50"
-                                  : "border-gray-200"
+                                ? 'border-red-300 bg-red-50'
+                                : parcela.status === 'pago'
+                                  ? 'border-green-300 bg-green-50'
+                                  : 'border-gray-200'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div>
                                 <p className="font-medium">
-                                  Parcela {parcela.numeroParcela} -{" "}
-                                  {new Intl.NumberFormat("pt-BR", {
-                                    style: "currency",
-                                    currency: "BRL",
+                                  Parcela {parcela.numeroParcela} -{' '}
+                                  {new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL',
                                   }).format(Number(parcela.valorParcela))}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                  Vencimento:{" "}
-                                  {format(parseISO(parcela.dataVencimento), "dd/MM/yyyy")}
+                                  Vencimento:{' '}
+                                  {format(parseISO(parcela.dataVencimento), 'dd/MM/yyyy')}
                                   {parcela.diasAtraso && parcela.diasAtraso > 0 && (
                                     <span className="ml-2 font-semibold text-red-600">
                                       ({parcela.diasAtraso} dias de atraso)
@@ -1993,12 +2020,13 @@ export default function CobrancasPage() {
                                         disabled={!parcela.pixCopiaECola}
                                         onClick={() => {
                                           if (parcela.pixCopiaECola) {
-                                            copyToClipboard(parcela.pixCopiaECola, "PIX");
+                                            copyToClipboard(parcela.pixCopiaECola, 'PIX');
                                           } else {
                                             toast({
-                                              title: "PIX não disponível",
-                                              description: "PIX não fornecido pelo banco para esta parcela",
-                                              variant: "destructive",
+                                              title: 'PIX não disponível',
+                                              description:
+                                                'PIX não fornecido pelo banco para esta parcela',
+                                              variant: 'destructive',
                                             });
                                           }
                                         }}
@@ -2010,13 +2038,13 @@ export default function CobrancasPage() {
                                     <TooltipContent>
                                       <p>
                                         {parcela.pixCopiaECola
-                                          ? "Copiar código PIX para pagamento"
-                                          : "PIX não fornecido pelo banco para esta parcela"}
+                                          ? 'Copiar código PIX para pagamento'
+                                          : 'PIX não fornecido pelo banco para esta parcela'}
                                       </p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
-                                
+
                                 {/* PAM V1.0 RESTAURAÇÃO - Botão Download PDF Individual */}
                                 <Button
                                   size="sm"
@@ -2025,56 +2053,67 @@ export default function CobrancasPage() {
                                   onClick={async () => {
                                     if (!parcela.codigoSolicitacao) {
                                       toast({
-                                        title: "PDF não disponível",
-                                        description: "Código de solicitação não encontrado para esta parcela",
-                                        variant: "destructive",
+                                        title: 'PDF não disponível',
+                                        description:
+                                          'Código de solicitação não encontrado para esta parcela',
+                                        variant: 'destructive',
                                       });
                                       return;
                                     }
 
                                     try {
                                       toast({
-                                        title: "Abrindo PDF...",
+                                        title: 'Abrindo PDF...',
                                         description: `Abrindo boleto da parcela ${parcela.numeroParcela} em nova guia`,
                                       });
 
                                       // PAM V1.0 CORRIGIDO: URL autenticada sem responseType blob
                                       // BUG CORRIGIDO: responseType blob interferia com autenticação JWT
                                       const pdfUrl = `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`;
-                                      
+
                                       // Abrir diretamente - o servidor retorna o PDF com headers corretos
                                       window.open(pdfUrl, '_blank');
-                                      
+
                                       toast({
-                                        title: "PDF aberto",
+                                        title: 'PDF aberto',
                                         description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
                                       });
                                     } catch (error: any) {
-                                      console.error("[PDF VIEW] Erro ao abrir PDF individual:", error);
-                                      
-                                      if (error?.message?.includes("PDF_NOT_AVAILABLE") || error?.message?.includes("404")) {
+                                      console.error(
+                                        '[PDF VIEW] Erro ao abrir PDF individual:',
+                                        error
+                                      );
+
+                                      if (
+                                        error?.message?.includes('PDF_NOT_AVAILABLE') ||
+                                        error?.message?.includes('404')
+                                      ) {
                                         toast({
-                                          title: "PDF não sincronizado",
-                                          description: "O PDF ainda não foi sincronizado. Tente 'Atualizar Status' primeiro.",
-                                          variant: "destructive",
+                                          title: 'PDF não sincronizado',
+                                          description:
+                                            "O PDF ainda não foi sincronizado. Tente 'Atualizar Status' primeiro.",
+                                          variant: 'destructive',
                                         });
-                                      } else if (error?.message?.includes("BOLETO_NOT_FOUND")) {
+                                      } else if (error?.message?.includes('BOLETO_NOT_FOUND')) {
                                         toast({
-                                          title: "Boleto não encontrado",
-                                          description: "Boleto não encontrado no sistema do banco.",
-                                          variant: "destructive",
+                                          title: 'Boleto não encontrado',
+                                          description: 'Boleto não encontrado no sistema do banco.',
+                                          variant: 'destructive',
                                         });
-                                      } else if (error?.message?.includes("401") || error?.message?.includes("Token")) {
+                                      } else if (
+                                        error?.message?.includes('401') ||
+                                        error?.message?.includes('Token')
+                                      ) {
                                         toast({
-                                          title: "Erro de autenticação",
-                                          description: "Sessão expirada. Faça login novamente.",
-                                          variant: "destructive",
+                                          title: 'Erro de autenticação',
+                                          description: 'Sessão expirada. Faça login novamente.',
+                                          variant: 'destructive',
                                         });
                                       } else {
                                         toast({
-                                          title: "Erro ao abrir PDF",
-                                          description: "Não foi possível abrir o PDF do boleto.",
-                                          variant: "destructive",
+                                          title: 'Erro ao abrir PDF',
+                                          description: 'Não foi possível abrir o PDF do boleto.',
+                                          variant: 'destructive',
                                         });
                                       }
                                     }
@@ -2084,7 +2123,7 @@ export default function CobrancasPage() {
                                   <Eye className="mr-1.5 h-3 w-3" />
                                   Visualizar PDF
                                 </Button>
-                                
+
                                 {/* Badge de Status - Usando status REAL do Inter */}
                                 <Badge
                                   className={getInterBankStatusColor(
@@ -2098,43 +2137,49 @@ export default function CobrancasPage() {
                                     (parcela as any).vencida
                                   )}
                                 </Badge>
-                                
+
                                 {/* PAM V1.0 - FASE 3: Botão Marcar como Pago */}
-                                {parcela.interSituacao !== "PAGO" && parcela.codigoSolicitacao && (
+                                {parcela.interSituacao !== 'PAGO' && parcela.codigoSolicitacao && (
                                   <Button
                                     size="sm"
                                     variant="secondary"
                                     onClick={async () => {
                                       try {
                                         // PAM V1.0 - FASE 3: Tipagem correta da resposta
-                                        const response = await apiRequest(
+                                        const response = (await apiRequest(
                                           `/api/cobrancas/parcelas/${parcela.codigoSolicitacao}/marcar-pago`,
-                                          { method: "PATCH" }
-                                        ) as { success: boolean; message: string; codigoSolicitacao: string; numeroParcela: number };
-                                        
+                                          { method: 'PATCH' }
+                                        )) as {
+                                          success: boolean;
+                                          message: string;
+                                          codigoSolicitacao: string;
+                                          numeroParcela: number;
+                                        };
+
                                         if (response.success) {
                                           toast({
-                                            title: "Parcela marcada como paga",
+                                            title: 'Parcela marcada como paga',
                                             description: `Parcela ${parcela.numeroParcela} foi marcada como paga com sucesso`,
                                           });
-                                          
+
                                           // PAM V1.0 FASE 2: Blindagem total - invalidar todos os caches relevantes
-                                          queryClient.invalidateQueries({ 
-                                            queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
+                                          queryClient.invalidateQueries({
+                                            queryKey: ['/api/cobrancas/ficha', selectedPropostaId],
                                           });
-                                          queryClient.invalidateQueries({ 
-                                            queryKey: ["/api/cobrancas"] 
+                                          queryClient.invalidateQueries({
+                                            queryKey: ['/api/cobrancas'],
                                           });
-                                          queryClient.invalidateQueries({ 
-                                            queryKey: ["/api/cobrancas/kpis"] 
+                                          queryClient.invalidateQueries({
+                                            queryKey: ['/api/cobrancas/kpis'],
                                           });
                                         }
                                       } catch (error) {
-                                        console.error("Erro ao marcar como pago:", error);
+                                        console.error('Erro ao marcar como pago:', error);
                                         toast({
-                                          title: "Erro",
-                                          description: "Não foi possível marcar a parcela como paga",
-                                          variant: "destructive",
+                                          title: 'Erro',
+                                          description:
+                                            'Não foi possível marcar a parcela como paga',
+                                          variant: 'destructive',
                                         });
                                       }
                                     }}

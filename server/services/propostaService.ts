@@ -4,8 +4,12 @@
  * Following Clean Architecture principles - separates business logic from controllers
  */
 
-import { propostaRepository, Proposta, PropostaWithDetails } from "../repositories/proposta.repository";
-import { transitionTo, InvalidTransitionError } from "./statusFsmService";
+import {
+  propostaRepository,
+  Proposta,
+  PropostaWithDetails,
+} from '../repositories/proposta.repository';
+import { transitionTo, InvalidTransitionError } from './statusFsmService';
 
 export interface PropostaToggleStatusRequest {
   propostaId: string;
@@ -33,62 +37,69 @@ export interface CcbAssinadaResponse {
 }
 
 export class PropostaService {
-  private readonly statusSuspensiveis = ["rascunho", "aguardando_analise", "em_analise", "pendente"];
+  private readonly statusSuspensiveis = [
+    'rascunho',
+    'aguardando_analise',
+    'em_analise',
+    'pendente',
+  ];
 
   /**
    * Toggle proposta status between active and suspended
    */
-  async togglePropostaStatus(request: PropostaToggleStatusRequest): Promise<PropostaToggleStatusResponse> {
+  async togglePropostaStatus(
+    request: PropostaToggleStatusRequest
+  ): Promise<PropostaToggleStatusResponse> {
     const { propostaId, userId, userRole } = request;
 
     // 1. Fetch current proposta
     const proposta = await propostaRepository.getPropostaById(propostaId);
-    
+
     if (!proposta) {
-      throw new Error("Proposta não encontrada");
+      throw new Error('Proposta não encontrada');
     }
 
     // 2. Check permissions
-    if (userRole !== "ADMINISTRADOR" && proposta.userId !== userId) {
-      throw new Error("Você não tem permissão para alterar o status desta proposta");
+    if (userRole !== 'ADMINISTRADOR' && proposta.userId !== userId) {
+      throw new Error('Você não tem permissão para alterar o status desta proposta');
     }
 
     // 3. Validate if proposta can be suspended/reactivated
-    if (!this.statusSuspensiveis.includes(proposta.status) && proposta.status !== "suspensa") {
-      throw new Error("Esta proposta não pode ser suspensa/reativada no status atual");
+    if (!this.statusSuspensiveis.includes(proposta.status) && proposta.status !== 'suspensa') {
+      throw new Error('Esta proposta não pode ser suspensa/reativada no status atual');
     }
 
     // 4. Determine new status
-    const novoStatus = proposta.status === "suspensa" ? "aguardando_analise" : "suspensa";
+    const novoStatus = proposta.status === 'suspensa' ? 'aguardando_analise' : 'suspensa';
 
     // 5. Use FSM for status transition validation
     try {
       await transitionTo({
         propostaId,
         novoStatus,
-        userId: userId || "sistema",
-        contexto: "geral",
-        observacoes: `Status ${novoStatus === "suspensa" ? "suspenso" : "reativado"} pelo usuário`,
+        userId: userId || 'sistema',
+        contexto: 'geral',
+        observacoes: `Status ${novoStatus === 'suspensa' ? 'suspenso' : 'reativado'} pelo usuário`,
         metadata: {
-          tipoAcao: novoStatus === "suspensa" ? "SUSPENDER_PROPOSTA" : "REATIVAR_PROPOSTA",
+          tipoAcao: novoStatus === 'suspensa' ? 'SUSPENDER_PROPOSTA' : 'REATIVAR_PROPOSTA',
           statusAnterior: proposta.status,
-          usuarioRole: userRole || "desconhecido",
-          motivoSuspensao: novoStatus === "suspensa" ? "Ação manual do usuário" : null
-        }
+          usuarioRole: userRole || 'desconhecido',
+          motivoSuspensao: novoStatus === 'suspensa' ? 'Ação manual do usuário' : null,
+        },
       });
     } catch (error) {
       if (error instanceof InvalidTransitionError) {
         throw new Error(error.message);
       }
-      throw new Error("Erro ao atualizar status da proposta");
+      throw new Error('Erro ao atualizar status da proposta');
     }
 
     // 6. Create communication log
     await propostaRepository.createCommunicationLog({
       proposta_id: propostaId,
       usuario_id: userId,
-      tipo: "status_change",
-      mensagem: `Status alterado de ${proposta.status} para ${novoStatus}`
+      tipo: 'status_change',
+      mensagem: `Status alterado de ${proposta.status} para ${novoStatus}`,
     });
 
     return {
@@ -96,9 +107,10 @@ export class PropostaService {
       propostaId,
       statusAnterior: proposta.status,
       statusNovo: novoStatus,
-      message: novoStatus === "suspensa" 
-        ? "Proposta suspensa com sucesso" 
-        : "Proposta reativada com sucesso"
+      message:
+        novoStatus === 'suspensa'
+          ? 'Proposta suspensa com sucesso'
+          : 'Proposta reativada com sucesso',
     };
   }
 
@@ -112,7 +124,7 @@ export class PropostaService {
     const proposta = await propostaRepository.getPropostaById(propostaId);
 
     if (!proposta) {
-      throw new Error("Proposta não encontrada");
+      throw new Error('Proposta não encontrada');
     }
 
     console.log(`[CCB] Proposta encontrada. Caminho CCB: ${proposta.caminhoCcbAssinado}`);
@@ -121,22 +133,24 @@ export class PropostaService {
     if (proposta.caminhoCcbAssinado) {
       try {
         console.log(`[CCB] Tentando gerar URL para caminho: ${proposta.caminhoCcbAssinado}`);
-        
-        const signedUrl = await propostaRepository.generateCcbSignedUrl(proposta.caminhoCcbAssinado);
-        
+
+        const signedUrl = await propostaRepository.generateCcbSignedUrl(
+          proposta.caminhoCcbAssinado
+        );
+
         if (signedUrl) {
           console.log(`[CCB] ✅ URL assinada gerada com sucesso`);
           return {
             url: signedUrl,
             nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
-            status: "assinado",
+            status: 'assinado',
             dataAssinatura: proposta.dataAprovacao,
-            fonte: "storage",
-            caminho: proposta.caminhoCcbAssinado
+            fonte: 'storage',
+            caminho: proposta.caminhoCcbAssinado,
           };
         }
       } catch (error) {
-        console.error("[CCB] Erro ao buscar CCB pelo caminho salvo:", error);
+        console.error('[CCB] Erro ao buscar CCB pelo caminho salvo:', error);
       }
     }
 
@@ -144,21 +158,21 @@ export class PropostaService {
     try {
       const legacyPath = `proposta-${propostaId}/ccb-assinada.pdf`;
       console.log(`[CCB] Tentando caminho legado: ${legacyPath}`);
-      
+
       const signedUrl = await propostaRepository.generateCcbSignedUrl(legacyPath);
-      
+
       if (signedUrl) {
         console.log(`[CCB] ✅ URL legada gerada com sucesso`);
         return {
           url: signedUrl,
           nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
-          status: "assinado",
+          status: 'assinado',
           dataAssinatura: proposta.dataAprovacao,
-          fonte: "storage_legado"
+          fonte: 'storage_legado',
         };
       }
     } catch (error) {
-      console.error("[CCB] Erro ao buscar no Storage legado:", error);
+      console.error('[CCB] Erro ao buscar no Storage legado:', error);
     }
 
     // PRIORITY 3: ClickSign as fallback
@@ -167,24 +181,24 @@ export class PropostaService {
       return {
         clicksignDocumentId: proposta.clicksignDocumentKey,
         nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
-        status: "assinado",
+        status: 'assinado',
         dataAssinatura: proposta.dataAprovacao,
-        fonte: "clicksign",
-        message: "Documento disponível no ClickSign. Acesse sua conta para visualizar."
+        fonte: 'clicksign',
+        message: 'Documento disponível no ClickSign. Acesse sua conta para visualizar.',
       };
     }
 
     // CCB not found
     console.log(`[CCB] ❌ CCB não encontrada para proposta ${propostaId}`);
-    
+
     const debugInfo = {
       propostaId,
       caminhosSalvos: proposta.caminhoCcbAssinado,
       clicksignKey: proposta.clicksignDocumentKey,
       ccbGerado: proposta.ccbGerado,
-      assinaturaConcluida: proposta.assinaturaEletronicaConcluida
+      assinaturaConcluida: proposta.assinaturaEletronicaConcluida,
     };
-    
+
     throw new Error(
       `CCB assinada não encontrada. Verifique se o documento foi processado corretamente. Debug: ${JSON.stringify(debugInfo)}`
     );

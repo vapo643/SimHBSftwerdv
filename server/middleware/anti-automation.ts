@@ -10,9 +10,9 @@
  * - Cloudflare Turnstile
  */
 
-import { Request, Response, NextFunction } from "express";
-import { securityLogger, SecurityEventType, getClientIP } from "../lib/security-logger";
-import { createHash } from "crypto";
+import { Request, Response, NextFunction } from 'express';
+import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
+import { createHash } from 'crypto';
 
 // In-memory store for challenges (use Redis in production)
 const challengeStore = new Map<
@@ -42,18 +42,18 @@ setInterval(() => {
 function generateChallenge(): { challenge: string; answer: string } {
   const a = Math.floor(Math.random() * 10) + 1;
   const b = Math.floor(Math.random() * 10) + 1;
-  const operations = ["+", "-"];
+  const operations = ['+', '-'];
   const op = operations[Math.floor(Math.random() * operations.length)];
 
   let answer: number;
   let challenge: string;
 
   switch (op) {
-    case "+":
+    case '+':
       answer = a + b;
       challenge = `${a} + ${b}`;
       break;
-    case "-":
+    case '-':
       answer = Math.max(a, b) - Math.min(a, b);
       challenge = `${Math.max(a, b)} - ${Math.min(a, b)}`;
       break;
@@ -70,9 +70,9 @@ function generateChallenge(): { challenge: string; answer: string } {
  */
 function getClientFingerprint(req: Request): string {
   const ip = getClientIP(req);
-  const userAgent = req.headers["user-agent"] || "unknown";
+  const userAgent = req.headers['user-agent'] || 'unknown';
   const fingerprint = `${ip}:${userAgent}`;
-  return createHash("sha256").update(fingerprint).digest("hex");
+  return createHash('sha256').update(fingerprint).digest('hex');
 }
 
 /**
@@ -88,7 +88,7 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
   const existingChallenge = challengeStore.get(fingerprint);
 
   // Check if challenge answer is provided
-  const challengeAnswer = req.headers["x-challenge-answer"] || req.body?.challengeAnswer;
+  const challengeAnswer = req.headers['x-challenge-answer'] || req.body?.challengeAnswer;
 
   if (existingChallenge && challengeAnswer) {
     // Verify answer
@@ -106,16 +106,16 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
 
         securityLogger.logEvent({
           type: SecurityEventType.SUSPICIOUS_ACTIVITY,
-          severity: "HIGH",
+          severity: 'HIGH',
           ipAddress: getClientIP(req),
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,
           success: false,
-          details: { reason: "Failed anti-automation challenge multiple times" },
+          details: { reason: 'Failed anti-automation challenge multiple times' },
         });
 
         return res.status(403).json({
-          error: "Acesso negado. Muitas tentativas falhadas.",
+          error: 'Acesso negado. Muitas tentativas falhadas.',
         });
       }
 
@@ -125,7 +125,7 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
       existingChallenge.answer = answer;
 
       return res.status(428).json({
-        error: "Resposta incorreta. Tente novamente.",
+        error: 'Resposta incorreta. Tente novamente.',
         challenge: challenge,
         remainingAttempts: 3 - existingChallenge.attempts,
       });
@@ -143,9 +143,9 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
   });
 
   return res.status(428).json({
-    error: "Verificação anti-automação necessária",
+    error: 'Verificação anti-automação necessária',
     challenge: challenge,
-    message: "Por favor, resolva este desafio matemático simples",
+    message: 'Por favor, resolva este desafio matemático simples',
   });
 }
 

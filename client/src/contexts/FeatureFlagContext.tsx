@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 
 // Interface para as feature flags
 interface FeatureFlags {
@@ -53,13 +53,13 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
   // Atualizar state local quando dados chegarem
   useEffect(() => {
     if (data && typeof data === 'object' && 'flags' in data) {
-      setFlags(prevFlags => ({
+      setFlags((prevFlags) => ({
         ...prevFlags,
         ...(data as any).flags,
       }));
     } else if (data && typeof data === 'object') {
       // Se data é diretamente o objeto de flags
-      setFlags(prevFlags => ({
+      setFlags((prevFlags) => ({
         ...prevFlags,
         ...(data as FeatureFlags),
       }));
@@ -107,11 +107,7 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
     refreshFlags,
   };
 
-  return (
-    <FeatureFlagContext.Provider value={value}>
-      {children}
-    </FeatureFlagContext.Provider>
-  );
+  return <FeatureFlagContext.Provider value={value}>{children}</FeatureFlagContext.Provider>;
 }
 
 // Hook para usar o contexto
@@ -133,11 +129,11 @@ export function useFeatureFlag(flagName: string): boolean {
 export function useFeatureFlagsMultiple(flagNames: string[]): Record<string, boolean> {
   const { flags } = useFeatureFlags();
   const result: Record<string, boolean> = {};
-  
-  flagNames.forEach(flagName => {
+
+  flagNames.forEach((flagName) => {
     result[flagName] = flags[flagName] ?? false;
   });
-  
+
   return result;
 }
 
@@ -156,34 +152,28 @@ export function FeatureGate({ flag, children, fallback = null }: FeatureGateProp
 // Componente para modo de manutenção
 export function MaintenanceMode({ children }: { children: ReactNode }) {
   const isMaintenanceMode = useFeatureFlag('maintenance-mode');
-  
+
   if (isMaintenanceMode) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Sistema em Manutenção
-          </h1>
-          <p className="text-lg text-gray-600 mb-4">
-            Estamos realizando melhorias no sistema.
-          </p>
-          <p className="text-md text-gray-500">
-            Por favor, tente novamente em alguns minutos.
-          </p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Sistema em Manutenção</h1>
+          <p className="text-lg text-gray-600 mb-4">Estamos realizando melhorias no sistema.</p>
+          <p className="text-md text-gray-500">Por favor, tente novamente em alguns minutos.</p>
         </div>
       </div>
     );
   }
-  
+
   return <>{children}</>;
 }
 
 // Componente para modo read-only
 export function ReadOnlyBanner() {
   const isReadOnly = useFeatureFlag('read-only-mode');
-  
+
   if (!isReadOnly) return null;
-  
+
   return (
     <div className="bg-yellow-50 border-b border-yellow-200">
       <div className="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">

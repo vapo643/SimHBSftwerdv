@@ -4,11 +4,11 @@
  * PAM V1.0 - Clean architecture implementation
  */
 
-import { Router, Request, Response } from "express";
-import { securityService } from "../services/securityService.js";
-import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
-import { requireAdmin, requireManagerOrAdmin } from "../lib/role-guards.js";
-import { AuthenticatedRequest } from "../../shared/types/express";
+import { Router, Request, Response } from 'express';
+import { securityService } from '../services/securityService.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { requireAdmin, requireManagerOrAdmin } from '../lib/role-guards.js';
+import { AuthenticatedRequest } from '../../shared/types/express';
 
 const router = Router();
 
@@ -19,16 +19,16 @@ router.use(jwtAuthMiddleware);
  * GET /api/security/metrics
  * Security metrics for dashboard
  */
-router.get("/metrics", async (req: Request, res: Response) => {
+router.get('/metrics', async (req: Request, res: Response) => {
   try {
-    const timeRange = (req.query.timeRange as string) || "1h";
+    const timeRange = (req.query.timeRange as string) || '1h';
     const metrics = await securityService.getSecurityMetrics(timeRange);
     res.json(metrics);
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting metrics:", error);
-    res.status(500).json({ 
-      error: "Erro ao obter métricas de segurança",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting metrics:', error);
+    res.status(500).json({
+      error: 'Erro ao obter métricas de segurança',
+      details: error.message,
     });
   }
 });
@@ -37,15 +37,15 @@ router.get("/metrics", async (req: Request, res: Response) => {
  * GET /api/security/vulnerabilities
  * Get detected vulnerabilities
  */
-router.get("/vulnerabilities", async (req: Request, res: Response) => {
+router.get('/vulnerabilities', async (req: Request, res: Response) => {
   try {
     const vulnerabilities = await securityService.getVulnerabilities();
     res.json(vulnerabilities);
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting vulnerabilities:", error);
-    res.status(500).json({ 
-      error: "Erro ao obter vulnerabilidades",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting vulnerabilities:', error);
+    res.status(500).json({
+      error: 'Erro ao obter vulnerabilidades',
+      details: error.message,
     });
   }
 });
@@ -54,15 +54,15 @@ router.get("/vulnerabilities", async (req: Request, res: Response) => {
  * GET /api/security/anomalies
  * Get ML-detected anomalies
  */
-router.get("/anomalies", async (req: Request, res: Response) => {
+router.get('/anomalies', async (req: Request, res: Response) => {
   try {
     const anomalies = await securityService.getAnomalies();
     res.json(anomalies);
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting anomalies:", error);
-    res.status(500).json({ 
-      error: "Erro ao obter anomalias",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting anomalies:', error);
+    res.status(500).json({
+      error: 'Erro ao obter anomalias',
+      details: error.message,
     });
   }
 });
@@ -71,15 +71,15 @@ router.get("/anomalies", async (req: Request, res: Response) => {
  * GET /api/security/dependency-scan
  * OWASP dependency check results
  */
-router.get("/dependency-scan", async (req: Request, res: Response) => {
+router.get('/dependency-scan', async (req: Request, res: Response) => {
   try {
     const scanResults = await securityService.getDependencyScanResults();
     res.json(scanResults);
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting dependency scan:", error);
-    res.status(500).json({ 
-      error: "Erro ao obter resultados do scan de dependências",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting dependency scan:', error);
+    res.status(500).json({
+      error: 'Erro ao obter resultados do scan de dependências',
+      details: error.message,
     });
   }
 });
@@ -88,15 +88,15 @@ router.get("/dependency-scan", async (req: Request, res: Response) => {
  * GET /api/security/semgrep-findings
  * SAST analysis results
  */
-router.get("/semgrep-findings", async (req: Request, res: Response) => {
+router.get('/semgrep-findings', async (req: Request, res: Response) => {
   try {
     const findings = await securityService.getSemgrepFindings();
     res.json(findings);
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting Semgrep findings:", error);
-    res.status(500).json({ 
-      error: "Erro ao obter resultados da análise SAST",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting Semgrep findings:', error);
+    res.status(500).json({
+      error: 'Erro ao obter resultados da análise SAST',
+      details: error.message,
     });
   }
 });
@@ -105,45 +105,45 @@ router.get("/semgrep-findings", async (req: Request, res: Response) => {
  * POST /api/security/scan
  * Execute security scan
  */
-router.post("/scan", requireAdmin, async (req: Request, res: Response) => {
+router.post('/scan', requireAdmin, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const { type } = authReq.body;
 
     if (!type) {
-      return res.status(400).json({ 
-        error: "Tipo de scan é obrigatório",
-        validTypes: ["vulnerability", "dependency", "code"]
+      return res.status(400).json({
+        error: 'Tipo de scan é obrigatório',
+        validTypes: ['vulnerability', 'dependency', 'code'],
       });
     }
 
-    const validTypes = ["vulnerability", "dependency", "code"];
+    const validTypes = ['vulnerability', 'dependency', 'code'];
     if (!validTypes.includes(type)) {
-      return res.status(400).json({ 
-        error: "Tipo de scan inválido",
-        validTypes 
+      return res.status(400).json({
+        error: 'Tipo de scan inválido',
+        validTypes,
       });
     }
 
     const result = await securityService.executeScan(type);
 
     if (result.success) {
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: result.message,
-        scanType: type 
+        scanType: type,
       });
     } else {
-      res.status(500).json({ 
+      res.status(500).json({
         error: result.message,
-        scanType: type 
+        scanType: type,
       });
     }
   } catch (error: any) {
-    console.error("[SECURITY_API] Error executing scan:", error);
-    res.status(500).json({ 
-      error: "Erro ao executar scan de segurança",
-      details: error.message 
+    console.error('[SECURITY_API] Error executing scan:', error);
+    res.status(500).json({
+      error: 'Erro ao executar scan de segurança',
+      details: error.message,
     });
   }
 });
@@ -152,14 +152,14 @@ router.post("/scan", requireAdmin, async (req: Request, res: Response) => {
  * GET /api/security/alerts/active
  * Get active security alerts
  */
-router.get("/alerts/active", async (req: Request, res: Response) => {
+router.get('/alerts/active', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
     const alerts = await securityService.getActiveAlerts();
-    
+
     // Apply limit if specified
     const limitedAlerts = limit ? alerts.slice(0, limit) : alerts;
-    
+
     res.json({
       success: true,
       data: limitedAlerts,
@@ -167,10 +167,10 @@ router.get("/alerts/active", async (req: Request, res: Response) => {
       showing: limitedAlerts.length,
     });
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting active alerts:", error);
-    res.status(500).json({ 
-      error: "Erro ao obter alertas ativos",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting active alerts:', error);
+    res.status(500).json({
+      error: 'Erro ao obter alertas ativos',
+      details: error.message,
     });
   }
 });
@@ -179,7 +179,7 @@ router.get("/alerts/active", async (req: Request, res: Response) => {
  * POST /api/security/alerts/:id/resolve
  * Resolve security alert
  */
-router.post("/alerts/:id/resolve", requireAdmin, async (req: Request, res: Response) => {
+router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const { id } = authReq.params;
@@ -187,32 +187,32 @@ router.post("/alerts/:id/resolve", requireAdmin, async (req: Request, res: Respo
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
     if (!id) {
-      return res.status(400).json({ error: "ID do alerta é obrigatório" });
+      return res.status(400).json({ error: 'ID do alerta é obrigatório' });
     }
 
     const resolved = await securityService.resolveAlert(id, userId, reason);
 
     if (resolved) {
-      res.json({ 
+      res.json({
         success: true,
-        message: "Alerta resolvido com sucesso",
-        alertId: id 
+        message: 'Alerta resolvido com sucesso',
+        alertId: id,
       });
     } else {
-      res.status(404).json({ 
-        error: "Alerta não encontrado ou não pôde ser resolvido",
-        alertId: id 
+      res.status(404).json({
+        error: 'Alerta não encontrado ou não pôde ser resolvido',
+        alertId: id,
       });
     }
   } catch (error: any) {
-    console.error("[SECURITY_API] Error resolving alert:", error);
-    res.status(500).json({ 
-      error: "Erro ao resolver alerta",
-      details: error.message 
+    console.error('[SECURITY_API] Error resolving alert:', error);
+    res.status(500).json({
+      error: 'Erro ao resolver alerta',
+      details: error.message,
     });
   }
 });
@@ -221,19 +221,19 @@ router.post("/alerts/:id/resolve", requireAdmin, async (req: Request, res: Respo
  * GET /api/security/report
  * Generate comprehensive security report
  */
-router.get("/report", requireAdmin, async (req: Request, res: Response) => {
+router.get('/report', requireAdmin, async (req: Request, res: Response) => {
   try {
     const report = await securityService.generateSecurityReport();
-    
+
     res.json({
       success: true,
       data: report,
     });
   } catch (error: any) {
-    console.error("[SECURITY_API] Error generating security report:", error);
-    res.status(500).json({ 
-      error: "Erro ao gerar relatório de segurança",
-      details: error.message 
+    console.error('[SECURITY_API] Error generating security report:', error);
+    res.status(500).json({
+      error: 'Erro ao gerar relatório de segurança',
+      details: error.message,
     });
   }
 });
@@ -242,10 +242,10 @@ router.get("/report", requireAdmin, async (req: Request, res: Response) => {
  * GET /api/security/dashboard
  * Get security dashboard data
  */
-router.get("/dashboard", async (req: Request, res: Response) => {
+router.get('/dashboard', async (req: Request, res: Response) => {
   try {
-    const timeRange = (req.query.timeRange as string) || "24h";
-    
+    const timeRange = (req.query.timeRange as string) || '24h';
+
     // Get all dashboard data in parallel
     const [metrics, vulnerabilities, anomalies, alerts] = await Promise.all([
       securityService.getSecurityMetrics(timeRange),
@@ -261,7 +261,7 @@ router.get("/dashboard", async (req: Request, res: Response) => {
       alerts: alerts.slice(0, 10), // Top 10 for dashboard
       summary: {
         totalVulnerabilities: vulnerabilities.length,
-        criticalVulnerabilities: vulnerabilities.filter(v => v.severity === "CRITICAL").length,
+        criticalVulnerabilities: vulnerabilities.filter((v) => v.severity === 'CRITICAL').length,
         totalAnomalies: anomalies.length,
         activeAlerts: alerts.length,
         securityScore: metrics.securityScore || 85,
@@ -273,10 +273,10 @@ router.get("/dashboard", async (req: Request, res: Response) => {
       data: dashboard,
     });
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting dashboard data:", error);
-    res.status(500).json({ 
-      error: "Erro ao carregar dashboard de segurança",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting dashboard data:', error);
+    res.status(500).json({
+      error: 'Erro ao carregar dashboard de segurança',
+      details: error.message,
     });
   }
 });
@@ -285,26 +285,26 @@ router.get("/dashboard", async (req: Request, res: Response) => {
  * GET /api/security/status
  * Get overall security status
  */
-router.get("/status", async (req: Request, res: Response) => {
+router.get('/status', async (req: Request, res: Response) => {
   try {
     const [metrics, vulnerabilities, alerts] = await Promise.all([
-      securityService.getSecurityMetrics("24h"),
+      securityService.getSecurityMetrics('24h'),
       securityService.getVulnerabilities(),
       securityService.getActiveAlerts(),
     ]);
 
-    const criticalIssues = vulnerabilities.filter(v => v.severity === "CRITICAL").length;
-    const highIssues = vulnerabilities.filter(v => v.severity === "HIGH").length;
-    
-    let status = "healthy";
-    let message = "Sistema operando normalmente";
-    
+    const criticalIssues = vulnerabilities.filter((v) => v.severity === 'CRITICAL').length;
+    const highIssues = vulnerabilities.filter((v) => v.severity === 'HIGH').length;
+
+    let status = 'healthy';
+    let message = 'Sistema operando normalmente';
+
     if (criticalIssues > 0) {
-      status = "critical";
+      status = 'critical';
       message = `${criticalIssues} vulnerabilidade(s) crítica(s) detectada(s)`;
     } else if (highIssues > 3 || alerts.length > 10) {
-      status = "warning";
-      message = "Problemas de segurança requerem atenção";
+      status = 'warning';
+      message = 'Problemas de segurança requerem atenção';
     }
 
     res.json({
@@ -323,10 +323,10 @@ router.get("/status", async (req: Request, res: Response) => {
       },
     });
   } catch (error: any) {
-    console.error("[SECURITY_API] Error getting security status:", error);
-    res.status(500).json({ 
-      error: "Erro ao obter status de segurança",
-      details: error.message 
+    console.error('[SECURITY_API] Error getting security status:', error);
+    res.status(500).json({
+      error: 'Erro ao obter status de segurança',
+      details: error.message,
     });
   }
 });
@@ -335,37 +335,37 @@ router.get("/status", async (req: Request, res: Response) => {
  * POST /api/security/test-alert
  * Test alert system (admin only)
  */
-router.post("/test-alert", requireAdmin, async (req: Request, res: Response) => {
+router.post('/test-alert', requireAdmin, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
-    const { severity = "MEDIUM", message = "Alert de teste" } = authReq.body;
+    const { severity = 'MEDIUM', message = 'Alert de teste' } = authReq.body;
     const userId = authReq.user?.id;
 
-    const validSeverities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+    const validSeverities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
     if (!validSeverities.includes(severity)) {
-      return res.status(400).json({ 
-        error: "Severity inválida",
-        validSeverities 
+      return res.status(400).json({
+        error: 'Severity inválida',
+        validSeverities,
       });
     }
 
     // This would typically create a test alert via the security service
     // For now, we'll just return a success response
-    res.json({ 
+    res.json({
       success: true,
-      message: "Alerta de teste criado",
+      message: 'Alerta de teste criado',
       testAlert: {
         severity,
         message,
         createdBy: userId,
         timestamp: new Date(),
-      }
+      },
     });
   } catch (error: any) {
-    console.error("[SECURITY_API] Error creating test alert:", error);
-    res.status(500).json({ 
-      error: "Erro ao criar alerta de teste",
-      details: error.message 
+    console.error('[SECURITY_API] Error creating test alert:', error);
+    res.status(500).json({
+      error: 'Erro ao criar alerta de teste',
+      details: error.message,
     });
   }
 });

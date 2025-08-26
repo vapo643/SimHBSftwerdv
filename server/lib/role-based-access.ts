@@ -1,5 +1,5 @@
-import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../../shared/types/express";
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../../shared/types/express';
 
 /**
  * Mapeamento de rotas por role segundo documento de permissões
@@ -10,25 +10,25 @@ import { AuthenticatedRequest } from "../../shared/types/express";
  */
 const ROUTE_PERMISSIONS: Record<string, string[]> = {
   // Dashboard - ATENDENTE, GERENTE, ADMIN
-  "/api/propostas": ["ATENDENTE", "GERENTE", "ADMINISTRADOR"],
-  "/api/propostas/new": ["ATENDENTE", "GERENTE", "ADMINISTRADOR"],
+  '/api/propostas': ['ATENDENTE', 'GERENTE', 'ADMINISTRADOR'],
+  '/api/propostas/new': ['ATENDENTE', 'GERENTE', 'ADMINISTRADOR'],
 
   // Fila de Análise - ANALISTA, ADMIN
-  "/api/propostas?analysis=true": ["ANALISTA", "ADMINISTRADOR"],
-  "/api/propostas/analise": ["ANALISTA", "ADMINISTRADOR"],
+  '/api/propostas?analysis=true': ['ANALISTA', 'ADMINISTRADOR'],
+  '/api/propostas/analise': ['ANALISTA', 'ADMINISTRADOR'],
 
   // Fila de Formalização - ATENDENTE (apenas suas), GERENTE, ADMIN
-  "/api/propostas/formalizacao": ["ATENDENTE", "GERENTE", "ADMINISTRADOR"],
+  '/api/propostas/formalizacao': ['ATENDENTE', 'GERENTE', 'ADMINISTRADOR'],
 
   // Fila de Pagamento - FINANCEIRO, ADMIN
-  "/api/pagamentos": ["FINANCEIRO", "ADMINISTRADOR"],
+  '/api/pagamentos': ['FINANCEIRO', 'ADMINISTRADOR'],
 
   // Configurações Admin - GERENTE, ADMIN
-  "/api/users": ["GERENTE", "ADMINISTRADOR"],
-  "/api/parceiros": ["GERENTE", "ADMINISTRADOR"],
-  "/api/lojas": ["GERENTE", "ADMINISTRADOR"],
-  "/api/produtos": ["GERENTE", "ADMINISTRADOR"],
-  "/api/tabelas-comerciais": ["GERENTE", "ADMINISTRADOR"],
+  '/api/users': ['GERENTE', 'ADMINISTRADOR'],
+  '/api/parceiros': ['GERENTE', 'ADMINISTRADOR'],
+  '/api/lojas': ['GERENTE', 'ADMINISTRADOR'],
+  '/api/produtos': ['GERENTE', 'ADMINISTRADOR'],
+  '/api/tabelas-comerciais': ['GERENTE', 'ADMINISTRADOR'],
 };
 
 /**
@@ -41,7 +41,7 @@ export function enforceRoutePermissions(
   next: NextFunction
 ): void {
   if (!req.user) {
-    res.status(401).json({ message: "Usuário não autenticado" });
+    res.status(401).json({ message: 'Usuário não autenticado' });
     return;
   }
 
@@ -54,11 +54,11 @@ export function enforceRoutePermissions(
 
   // Verificar rota exata primeiro
   for (const [route, roles] of Object.entries(ROUTE_PERMISSIONS)) {
-    if (path.startsWith(route.split("?")[0])) {
+    if (path.startsWith(route.split('?')[0])) {
       // Verificar query params se necessário
-      if (route.includes("?")) {
-        const queryParam = route.split("?")[1];
-        const [key, value] = queryParam.split("=");
+      if (route.includes('?')) {
+        const queryParam = route.split('?')[1];
+        const [key, value] = queryParam.split('=');
         if (req.query[key] === value) {
           allowedRoles = roles;
           break;
@@ -80,7 +80,7 @@ export function enforceRoutePermissions(
   if (!userRole || !allowedRoles.includes(userRole)) {
     console.warn(`🚫 [SECURITY] Acesso negado: ${userRole} tentou acessar ${path}`);
     res.status(403).json({
-      message: "Acesso negado. Você não tem permissão para acessar esta funcionalidade.",
+      message: 'Acesso negado. Você não tem permissão para acessar esta funcionalidade.',
       requiredRoles: allowedRoles,
       userRole: userRole,
     });
@@ -96,14 +96,14 @@ export function enforceRoutePermissions(
  */
 export function requireAnalyst(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   if (!req.user) {
-    res.status(401).json({ message: "Usuário não autenticado" });
+    res.status(401).json({ message: 'Usuário não autenticado' });
     return;
   }
 
-  const allowedRoles = ["ANALISTA", "ADMINISTRADOR"];
+  const allowedRoles = ['ANALISTA', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
-      message: "Acesso negado. Apenas analistas podem acessar a fila de análise.",
+      message: 'Acesso negado. Apenas analistas podem acessar a fila de análise.',
       requiredRoles: allowedRoles,
       userRole: req.user.role,
     });
@@ -123,14 +123,14 @@ export function requireFinanceiro(
   next: NextFunction
 ): void {
   if (!req.user) {
-    res.status(401).json({ message: "Usuário não autenticado" });
+    res.status(401).json({ message: 'Usuário não autenticado' });
     return;
   }
 
-  const allowedRoles = ["FINANCEIRO", "ADMINISTRADOR"];
+  const allowedRoles = ['FINANCEIRO', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
-      message: "Acesso negado. Apenas o setor financeiro pode acessar a fila de pagamento.",
+      message: 'Acesso negado. Apenas o setor financeiro pode acessar a fila de pagamento.',
       requiredRoles: allowedRoles,
       userRole: req.user.role,
     });
@@ -147,23 +147,23 @@ export function filterProposalsByRole(proposals: any[], user: any): any[] {
   if (!user || !user.role) return [];
 
   switch (user.role) {
-    case "ATENDENTE":
+    case 'ATENDENTE':
       // ATENDENTE vê apenas suas próprias propostas
-      return proposals.filter(p => p.userId === user.id);
+      return proposals.filter((p) => p.userId === user.id);
 
-    case "ANALISTA":
+    case 'ANALISTA':
       // ANALISTA vê apenas propostas em análise
-      return proposals.filter(p => ["aguardando_analise", "em_analise"].includes(p.status));
+      return proposals.filter((p) => ['aguardando_analise', 'em_analise'].includes(p.status));
 
-    case "FINANCEIRO":
+    case 'FINANCEIRO':
       // FINANCEIRO vê apenas propostas aprovadas/pagamento
-      return proposals.filter(p => ["aprovado", "pronto_pagamento", "pago"].includes(p.status));
+      return proposals.filter((p) => ['aprovado', 'pronto_pagamento', 'pago'].includes(p.status));
 
-    case "GERENTE":
+    case 'GERENTE':
       // GERENTE vê todas da sua loja (já filtrado por RLS)
       return proposals;
 
-    case "ADMINISTRADOR":
+    case 'ADMINISTRADOR':
       // ADMIN vê tudo
       return proposals;
 

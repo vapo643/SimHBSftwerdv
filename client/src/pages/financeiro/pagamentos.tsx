@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -21,7 +21,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -29,18 +29,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { api } from "@/lib/apiClient";
-import { format, isToday, isThisWeek, isThisMonth } from "date-fns";
-import { ptBR } from "date-fns/locale";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { api } from '@/lib/apiClient';
+import { format, isToday, isThisWeek, isThisMonth } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import {
   Search,
   DollarSign,
@@ -68,9 +68,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   ShieldCheck,
-} from "lucide-react";
-import PaymentReviewModal from "./pagamentos-review";
-import MarcarPagoModal from "./marcar-pago-modal";
+} from 'lucide-react';
+import PaymentReviewModal from './pagamentos-review';
+import MarcarPagoModal from './marcar-pago-modal';
 
 interface Pagamento {
   id: string;
@@ -90,12 +90,12 @@ interface Pagamento {
     titular: string;
   };
   status:
-    | "aguardando_aprovacao"
-    | "aprovado"
-    | "em_processamento"
-    | "pago"
-    | "rejeitado"
-    | "cancelado";
+    | 'aguardando_aprovacao'
+    | 'aprovado'
+    | 'em_processamento'
+    | 'pago'
+    | 'rejeitado'
+    | 'cancelado';
   dataRequisicao: string;
   dataAprovacao?: string;
   dataPagamento?: string;
@@ -112,7 +112,7 @@ interface Pagamento {
   motivoRejeicao?: string;
   observacoes?: string;
   comprovante?: string;
-  formaPagamento: "ted" | "pix" | "doc";
+  formaPagamento: 'ted' | 'pix' | 'doc';
   loja: string;
   produto: string;
 }
@@ -120,9 +120,9 @@ interface Pagamento {
 export default function Pagamentos() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("todos");
-  const [periodoFilter, setPeriodoFilter] = useState("todos");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todos');
+  const [periodoFilter, setPeriodoFilter] = useState('todos');
   const [selectedPagamento, setSelectedPagamento] = useState<Pagamento | null>(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
@@ -131,11 +131,11 @@ export default function Pagamentos() {
   const [selectedPropostaForReview, setSelectedPropostaForReview] = useState<any>(null);
   const [showMarcarPagoModal, setShowMarcarPagoModal] = useState(false);
   const [selectedPropostaForPago, setSelectedPropostaForPago] = useState<any>(null);
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [approvalObservation, setApprovalObservation] = useState("");
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [approvalObservation, setApprovalObservation] = useState('');
   const [verificationData, setVerificationData] = useState<any>(null);
-  const [paymentPassword, setPaymentPassword] = useState("");
-  const [paymentObservation, setPaymentObservation] = useState("");
+  const [paymentPassword, setPaymentPassword] = useState('');
+  const [paymentObservation, setPaymentObservation] = useState('');
   const [mostrarPagos, setMostrarPagos] = useState(false);
 
   // Buscar pagamentos
@@ -145,23 +145,27 @@ export default function Pagamentos() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["/api/pagamentos", { status: statusFilter, periodo: periodoFilter, mostrarPagos }],
+    queryKey: ['/api/pagamentos', { status: statusFilter, periodo: periodoFilter, mostrarPagos }],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (statusFilter !== "todos") params.append("status", statusFilter);
-      if (periodoFilter !== "todos") params.append("periodo", periodoFilter);
-      if (mostrarPagos) params.append("incluir_pagos", "true");
+      if (statusFilter !== 'todos') params.append('status', statusFilter);
+      if (periodoFilter !== 'todos') params.append('periodo', periodoFilter);
+      if (mostrarPagos) params.append('incluir_pagos', 'true');
 
-      console.log("[PAGAMENTOS] Buscando pagamentos com filtros:", { statusFilter, periodoFilter, mostrarPagos });
+      console.log('[PAGAMENTOS] Buscando pagamentos com filtros:', {
+        statusFilter,
+        periodoFilter,
+        mostrarPagos,
+      });
 
       try {
         const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
-          method: "GET",
+          method: 'GET',
         });
-        console.log("[PAGAMENTOS] Resposta recebida:", response);
+        console.log('[PAGAMENTOS] Resposta recebida:', response);
         return response as Pagamento[];
       } catch (err) {
-        console.error("[PAGAMENTOS] Erro ao buscar:", err);
+        console.error('[PAGAMENTOS] Erro ao buscar:', err);
         throw err;
       }
     },
@@ -173,11 +177,11 @@ export default function Pagamentos() {
 
   // Buscar dados de verificação quando modal abrir
   const { data: verificacoes, isLoading: isLoadingVerificacao } = useQuery({
-    queryKey: ["/api/pagamentos", selectedPagamento?.id, "verificar-documentos"],
+    queryKey: ['/api/pagamentos', selectedPagamento?.id, 'verificar-documentos'],
     queryFn: async () => {
       if (!selectedPagamento?.id) return null;
       return await apiRequest(`/api/pagamentos/${selectedPagamento.id}/verificar-documentos`, {
-        method: "GET",
+        method: 'GET',
       });
     },
     enabled: showSecurityVerificationModal && !!selectedPagamento?.id,
@@ -187,24 +191,24 @@ export default function Pagamentos() {
   const aprovarMutation = useMutation({
     mutationFn: async ({ id, observacao }: { id: string; observacao: string }) => {
       return await apiRequest(`/api/pagamentos/${id}/aprovar`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ observacao }),
       });
     },
     onSuccess: () => {
       toast({
-        title: "Pagamento aprovado",
-        description: "O pagamento foi aprovado e será processado em breve.",
+        title: 'Pagamento aprovado',
+        description: 'O pagamento foi aprovado e será processado em breve.',
       });
       setShowApprovalModal(false);
-      setApprovalObservation("");
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      setApprovalObservation('');
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
     onError: () => {
       toast({
-        title: "Erro ao aprovar",
-        description: "Não foi possível aprovar o pagamento.",
-        variant: "destructive",
+        title: 'Erro ao aprovar',
+        description: 'Não foi possível aprovar o pagamento.',
+        variant: 'destructive',
       });
     },
   });
@@ -221,26 +225,26 @@ export default function Pagamentos() {
       observacoes: string;
     }) => {
       return await apiRequest(`/api/pagamentos/${id}/confirmar-desembolso`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ senha, observacoes }),
       });
     },
     onSuccess: () => {
       toast({
-        title: "Desembolso confirmado",
-        description: "O pagamento foi realizado com sucesso ao cliente.",
-        className: "bg-green-50 border-green-200",
+        title: 'Desembolso confirmado',
+        description: 'O pagamento foi realizado com sucesso ao cliente.',
+        className: 'bg-green-50 border-green-200',
       });
       setShowSecurityVerificationModal(false);
-      setPaymentPassword("");
-      setPaymentObservation("");
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      setPaymentPassword('');
+      setPaymentObservation('');
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao confirmar desembolso",
-        description: error.message || "Verifique as validações de segurança.",
-        variant: "destructive",
+        title: 'Erro ao confirmar desembolso',
+        description: error.message || 'Verifique as validações de segurança.',
+        variant: 'destructive',
       });
     },
   });
@@ -249,32 +253,32 @@ export default function Pagamentos() {
   const rejeitarMutation = useMutation({
     mutationFn: async ({ id, motivo }: { id: string; motivo: string }) => {
       return await apiRequest(`/api/pagamentos/${id}/rejeitar`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ motivo }),
       });
     },
     onSuccess: () => {
       toast({
-        title: "Pagamento rejeitado",
-        description: "O pagamento foi rejeitado com sucesso.",
+        title: 'Pagamento rejeitado',
+        description: 'O pagamento foi rejeitado com sucesso.',
       });
       setShowRejectionModal(false);
-      setRejectionReason("");
-      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      setRejectionReason('');
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
     onError: () => {
       toast({
-        title: "Erro ao rejeitar",
-        description: "Não foi possível rejeitar o pagamento.",
-        variant: "destructive",
+        title: 'Erro ao rejeitar',
+        description: 'Não foi possível rejeitar o pagamento.',
+        variant: 'destructive',
       });
     },
   });
 
   // Filtrar pagamentos
-  const pagamentosFiltrados = pagamentos?.filter(pagamento => {
+  const pagamentosFiltrados = pagamentos?.filter((pagamento) => {
     // Se não há termo de busca, retorna todos
-    if (!searchTerm || searchTerm.trim() === "") {
+    if (!searchTerm || searchTerm.trim() === '') {
       return true;
     }
 
@@ -288,89 +292,90 @@ export default function Pagamentos() {
   });
 
   // Debug para ver o que está acontecendo
-  console.log("[PAGAMENTOS FRONTEND] Dados recebidos:", pagamentos?.length);
-  console.log("[PAGAMENTOS FRONTEND] Termo de busca:", searchTerm);
-  console.log("[PAGAMENTOS FRONTEND] Dados filtrados:", pagamentosFiltrados?.length);
+  console.log('[PAGAMENTOS FRONTEND] Dados recebidos:', pagamentos?.length);
+  console.log('[PAGAMENTOS FRONTEND] Termo de busca:', searchTerm);
+  console.log('[PAGAMENTOS FRONTEND] Dados filtrados:', pagamentosFiltrados?.length);
   if (pagamentos?.length > 0) {
-    console.log("[PAGAMENTOS FRONTEND] Primeiro pagamento:", pagamentos[0]);
+    console.log('[PAGAMENTOS FRONTEND] Primeiro pagamento:', pagamentos[0]);
   }
 
   // Estatísticas
   const stats = {
-    aguardandoAprovacao: pagamentos?.filter(p => p.status === "aguardando_aprovacao").length || 0,
-    aprovados: pagamentos?.filter(p => p.status === "aprovado").length || 0,
-    emProcessamento: pagamentos?.filter(p => p.status === "em_processamento").length || 0,
-    pagos: pagamentos?.filter(p => p.status === "pago").length || 0,
-    rejeitados: pagamentos?.filter(p => p.status === "rejeitado").length || 0,
+    aguardandoAprovacao: pagamentos?.filter((p) => p.status === 'aguardando_aprovacao').length || 0,
+    aprovados: pagamentos?.filter((p) => p.status === 'aprovado').length || 0,
+    emProcessamento: pagamentos?.filter((p) => p.status === 'em_processamento').length || 0,
+    pagos: pagamentos?.filter((p) => p.status === 'pago').length || 0,
+    rejeitados: pagamentos?.filter((p) => p.status === 'rejeitado').length || 0,
     valorTotalAguardando:
       pagamentos
-        ?.filter(p => p.status === "aguardando_aprovacao")
+        ?.filter((p) => p.status === 'aguardando_aprovacao')
         .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
     valorTotalPago:
-      pagamentos?.filter(p => p.status === "pago").reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
+      pagamentos?.filter((p) => p.status === 'pago').reduce((acc, p) => acc + p.valorLiquido, 0) ||
+      0,
     valorTotalProcessando:
       pagamentos
-        ?.filter(p => p.status === "em_processamento" || p.status === "aprovado")
+        ?.filter((p) => p.status === 'em_processamento' || p.status === 'aprovado')
         .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "aguardando_aprovacao":
-        return "bg-yellow-100 text-yellow-800";
-      case "aprovado":
-        return "bg-blue-100 text-blue-800";
-      case "em_processamento":
-        return "bg-purple-100 text-purple-800";
-      case "pronto_pagamento":
-        return "bg-indigo-100 text-indigo-800";
-      case "pagamento_autorizado":
-        return "bg-emerald-100 text-emerald-800";
-      case "pago":
-        return "bg-green-100 text-green-800";
-      case "rejeitado":
-        return "bg-red-100 text-red-800";
-      case "cancelado":
-        return "bg-gray-100 text-gray-800";
+      case 'aguardando_aprovacao':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'aprovado':
+        return 'bg-blue-100 text-blue-800';
+      case 'em_processamento':
+        return 'bg-purple-100 text-purple-800';
+      case 'pronto_pagamento':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'pagamento_autorizado':
+        return 'bg-emerald-100 text-emerald-800';
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'rejeitado':
+        return 'bg-red-100 text-red-800';
+      case 'cancelado':
+        return 'bg-gray-100 text-gray-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "aguardando_aprovacao":
-        return "Aguardando Aprovação";
-      case "aprovado":
-        return "Aprovado";
-      case "em_processamento":
-        return "Em Processamento";
-      case "pronto_pagamento":
-        return "Pronto para Pagamento";
-      case "pagamento_autorizado":
-        return "Pagamento Autorizado";
-      case "pago":
-        return "Pago";
-      case "rejeitado":
-        return "Rejeitado";
-      case "cancelado":
-        return "Cancelado";
+      case 'aguardando_aprovacao':
+        return 'Aguardando Aprovação';
+      case 'aprovado':
+        return 'Aprovado';
+      case 'em_processamento':
+        return 'Em Processamento';
+      case 'pronto_pagamento':
+        return 'Pronto para Pagamento';
+      case 'pagamento_autorizado':
+        return 'Pagamento Autorizado';
+      case 'pago':
+        return 'Pago';
+      case 'rejeitado':
+        return 'Rejeitado';
+      case 'cancelado':
+        return 'Cancelado';
       default:
         return status;
     }
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(value);
   };
 
   const formatCPF = (cpf: string) => {
-    if (!cpf) return "";
-    const cleaned = cpf.replace(/\D/g, "");
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    if (!cpf) return '';
+    const cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   const formatBankAccount = (conta: any) => {
@@ -413,7 +418,7 @@ export default function Pagamentos() {
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Tentar novamente
                 </Button>
-                <Button variant="outline" onClick={() => setLocation("/dashboard")}>
+                <Button variant="outline" onClick={() => setLocation('/dashboard')}>
                   Voltar ao Dashboard
                 </Button>
               </div>
@@ -525,7 +530,7 @@ export default function Pagamentos() {
                   <Input
                     placeholder="Buscar por nome, CPF, contrato ou proposta..."
                     value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -645,7 +650,7 @@ export default function Pagamentos() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    pagamentosFiltrados?.map(pagamento => (
+                    pagamentosFiltrados?.map((pagamento) => (
                       <TableRow key={pagamento.id} className="hover:bg-muted/50 cursor-pointer">
                         <TableCell className="font-medium">
                           <div className="space-y-1">
@@ -687,10 +692,10 @@ export default function Pagamentos() {
                         <TableCell className="text-center">
                           <div className="space-y-1">
                             <div className="text-sm">
-                              {format(new Date(pagamento.dataRequisicao), "dd/MM/yyyy")}
+                              {format(new Date(pagamento.dataRequisicao), 'dd/MM/yyyy')}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(pagamento.dataRequisicao), "HH:mm")}
+                              {format(new Date(pagamento.dataRequisicao), 'HH:mm')}
                             </div>
                           </div>
                         </TableCell>
@@ -713,7 +718,7 @@ export default function Pagamentos() {
                               <Eye className="h-4 w-4" />
                             </Button>
                             {/* FASE 2: Alinhamento Frontend/Backend - Botão para status em_processamento (BOLETOS_EMITIDOS) */}
-                            {(pagamento.status === "em_processamento") &&
+                            {pagamento.status === 'em_processamento' &&
                               userHasApprovalPermission() && (
                                 <Button
                                   size="sm"
@@ -729,22 +734,21 @@ export default function Pagamentos() {
                                   Confirmar Veracidade
                                 </Button>
                               )}
-                            {pagamento.status === "aprovado" &&
-                              userHasApprovalPermission() && (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  className="gap-2 bg-green-600 hover:bg-green-700"
-                                  onClick={() => {
-                                    setSelectedPropostaForPago(pagamento);
-                                    setShowMarcarPagoModal(true);
-                                  }}
-                                  title="Marcar como Pago"
-                                >
-                                  <Banknote className="h-4 w-4" />
-                                  Marcar como Pago
-                                </Button>
-                              )}
+                            {pagamento.status === 'aprovado' && userHasApprovalPermission() && (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="gap-2 bg-green-600 hover:bg-green-700"
+                                onClick={() => {
+                                  setSelectedPropostaForPago(pagamento);
+                                  setShowMarcarPagoModal(true);
+                                }}
+                                title="Marcar como Pago"
+                              >
+                                <Banknote className="h-4 w-4" />
+                                Marcar como Pago
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -810,7 +814,7 @@ export default function Pagamentos() {
                       <Label>Solicitado por</Label>
                       <p className="text-sm">{selectedPagamento.requisitadoPor.nome}</p>
                       <p className="text-sm text-muted-foreground">
-                        {selectedPagamento.requisitadoPor.papel} -{" "}
+                        {selectedPagamento.requisitadoPor.papel} -{' '}
                         {format(
                           new Date(selectedPagamento.dataRequisicao),
                           "dd/MM/yyyy 'às' HH:mm"
@@ -823,7 +827,7 @@ export default function Pagamentos() {
                         <Label>Aprovado por</Label>
                         <p className="text-sm">{selectedPagamento.aprovadoPor.nome}</p>
                         <p className="text-sm text-muted-foreground">
-                          {selectedPagamento.aprovadoPor.papel} -{" "}
+                          {selectedPagamento.aprovadoPor.papel} -{' '}
                           {selectedPagamento.dataAprovacao &&
                             format(
                               new Date(selectedPagamento.dataAprovacao),
@@ -898,7 +902,7 @@ export default function Pagamentos() {
                           {selectedPagamento.contaBancaria.tipoConta})
                         </p>
                         <p className="text-sm">
-                          <strong>Forma de Pagamento:</strong>{" "}
+                          <strong>Forma de Pagamento:</strong>{' '}
                           {selectedPagamento.formaPagamento.toUpperCase()}
                         </p>
                       </div>
@@ -910,7 +914,7 @@ export default function Pagamentos() {
                         <Button
                           variant="outline"
                           className="mt-2 w-full"
-                          onClick={() => window.open(selectedPagamento.comprovante, "_blank")}
+                          onClick={() => window.open(selectedPagamento.comprovante, '_blank')}
                         >
                           <Download className="mr-2 h-4 w-4" />
                           Baixar Comprovante
@@ -929,7 +933,7 @@ export default function Pagamentos() {
                       <div className="flex-1">
                         <p className="text-sm font-medium">Solicitação Criada</p>
                         <p className="text-sm text-muted-foreground">
-                          Por {selectedPagamento.requisitadoPor.nome} em{" "}
+                          Por {selectedPagamento.requisitadoPor.nome} em{' '}
                           {format(
                             new Date(selectedPagamento.dataRequisicao),
                             "dd/MM/yyyy 'às' HH:mm"
@@ -946,7 +950,7 @@ export default function Pagamentos() {
                         <div className="flex-1">
                           <p className="text-sm font-medium">Pagamento Aprovado</p>
                           <p className="text-sm text-muted-foreground">
-                            Por {selectedPagamento.aprovadoPor?.nome} em{" "}
+                            Por {selectedPagamento.aprovadoPor?.nome} em{' '}
                             {format(
                               new Date(selectedPagamento.dataAprovacao),
                               "dd/MM/yyyy 'às' HH:mm"
@@ -964,7 +968,7 @@ export default function Pagamentos() {
                         <div className="flex-1">
                           <p className="text-sm font-medium">Pagamento Realizado</p>
                           <p className="text-sm text-muted-foreground">
-                            Em{" "}
+                            Em{' '}
                             {format(
                               new Date(selectedPagamento.dataPagamento),
                               "dd/MM/yyyy 'às' HH:mm"
@@ -1012,8 +1016,8 @@ export default function Pagamentos() {
             <DialogHeader>
               <DialogTitle>Aprovar Pagamento</DialogTitle>
               <DialogDescription>
-                Você está prestes a aprovar o pagamento de{" "}
-                {selectedPagamento && formatCurrency(selectedPagamento.valorLiquido)} para{" "}
+                Você está prestes a aprovar o pagamento de{' '}
+                {selectedPagamento && formatCurrency(selectedPagamento.valorLiquido)} para{' '}
                 {selectedPagamento?.nomeCliente}.
               </DialogDescription>
             </DialogHeader>
@@ -1032,7 +1036,7 @@ export default function Pagamentos() {
                 <Textarea
                   placeholder="Adicione observações sobre a aprovação..."
                   value={approvalObservation}
-                  onChange={e => setApprovalObservation(e.target.value)}
+                  onChange={(e) => setApprovalObservation(e.target.value)}
                   className="mt-2"
                 />
               </div>
@@ -1043,7 +1047,7 @@ export default function Pagamentos() {
                 variant="outline"
                 onClick={() => {
                   setShowApprovalModal(false);
-                  setApprovalObservation("");
+                  setApprovalObservation('');
                 }}
               >
                 Cancelar
@@ -1059,7 +1063,7 @@ export default function Pagamentos() {
                 }}
                 disabled={aprovarMutation.isPending}
               >
-                {aprovarMutation.isPending ? "Aprovando..." : "Aprovar Pagamento"}
+                {aprovarMutation.isPending ? 'Aprovando...' : 'Aprovar Pagamento'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1081,7 +1085,7 @@ export default function Pagamentos() {
                 <Textarea
                   placeholder="Descreva o motivo da rejeição..."
                   value={rejectionReason}
-                  onChange={e => setRejectionReason(e.target.value)}
+                  onChange={(e) => setRejectionReason(e.target.value)}
                   className="mt-2"
                   required
                 />
@@ -1093,7 +1097,7 @@ export default function Pagamentos() {
                 variant="outline"
                 onClick={() => {
                   setShowRejectionModal(false);
-                  setRejectionReason("");
+                  setRejectionReason('');
                 }}
               >
                 Cancelar
@@ -1110,7 +1114,7 @@ export default function Pagamentos() {
                 }}
                 disabled={!rejectionReason.trim() || rejeitarMutation.isPending}
               >
-                {rejeitarMutation.isPending ? "Rejeitando..." : "Rejeitar Pagamento"}
+                {rejeitarMutation.isPending ? 'Rejeitando...' : 'Rejeitar Pagamento'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1179,7 +1183,7 @@ export default function Pagamentos() {
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
-                          className={verificacoes.ccbAssinada ? "text-green-700" : "text-red-700"}
+                          className={verificacoes.ccbAssinada ? 'text-green-700' : 'text-red-700'}
                         >
                           CCB Assinada e Localizada
                         </span>
@@ -1192,7 +1196,7 @@ export default function Pagamentos() {
                         )}
                         <span
                           className={
-                            verificacoes.boletosGerados ? "text-green-700" : "text-red-700"
+                            verificacoes.boletosGerados ? 'text-green-700' : 'text-red-700'
                           }
                         >
                           Boletos Registrados no Inter
@@ -1206,7 +1210,7 @@ export default function Pagamentos() {
                         )}
                         <span
                           className={
-                            verificacoes.titularidadeConta ? "text-green-700" : "text-yellow-700"
+                            verificacoes.titularidadeConta ? 'text-green-700' : 'text-yellow-700'
                           }
                         >
                           Titularidade da Conta
@@ -1232,7 +1236,7 @@ export default function Pagamentos() {
                           onClick={async () => {
                             try {
                               console.log(
-                                "[CCB] Buscando CCB assinada para proposta:",
+                                '[CCB] Buscando CCB assinada para proposta:',
                                 selectedPagamento.id
                               );
 
@@ -1240,39 +1244,39 @@ export default function Pagamentos() {
                               const response = await api.get(
                                 `/api/pagamentos/${selectedPagamento.id}/ccb-assinada`,
                                 {
-                                  responseType: "blob",
+                                  responseType: 'blob',
                                 }
                               );
 
-                              console.log("[CCB] Resposta recebida:", response);
+                              console.log('[CCB] Resposta recebida:', response);
 
                               // Verificar se recebemos um blob
                               if (response.data instanceof Blob) {
                                 const blob = response.data;
                                 const url = window.URL.createObjectURL(blob);
-                                window.open(url, "_blank");
+                                window.open(url, '_blank');
 
                                 // Limpar a URL após um tempo
                                 setTimeout(() => window.URL.revokeObjectURL(url), 1000);
 
                                 toast({
-                                  title: "CCB aberta",
-                                  description: "O documento foi aberto em uma nova aba",
+                                  title: 'CCB aberta',
+                                  description: 'O documento foi aberto em uma nova aba',
                                 });
                               } else {
                                 // Se não for um blob, pode ser um erro
-                                console.error("[CCB] Resposta não é um blob:", response);
+                                console.error('[CCB] Resposta não é um blob:', response);
                                 toast({
-                                  title: "Erro ao abrir CCB",
-                                  description: "Formato de resposta inesperado",
-                                  variant: "destructive",
+                                  title: 'Erro ao abrir CCB',
+                                  description: 'Formato de resposta inesperado',
+                                  variant: 'destructive',
                                 });
                               }
                             } catch (error: any) {
-                              console.error("[CCB] Erro ao buscar CCB assinada:", error);
+                              console.error('[CCB] Erro ao buscar CCB assinada:', error);
 
                               // Tratar erros específicos
-                              let errorMessage = "Erro ao carregar documento assinado";
+                              let errorMessage = 'Erro ao carregar documento assinado';
 
                               if (error.response?.data?.error) {
                                 errorMessage = error.response.data.error;
@@ -1281,9 +1285,9 @@ export default function Pagamentos() {
                               }
 
                               toast({
-                                title: "Erro ao buscar CCB",
+                                title: 'Erro ao buscar CCB',
                                 description: errorMessage,
-                                variant: "destructive",
+                                variant: 'destructive',
                               });
                             }
                           }}
@@ -1309,13 +1313,13 @@ export default function Pagamentos() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-1 rounded bg-gray-50 p-3 text-xs dark:bg-gray-800">
-                        {selectedPagamento.contaBancaria.banco !== "N/A" ? (
+                        {selectedPagamento.contaBancaria.banco !== 'N/A' ? (
                           <>
                             <p>
                               <strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}
                             </p>
                             <p>
-                              <strong>Ag:</strong> {selectedPagamento.contaBancaria.agencia} |{" "}
+                              <strong>Ag:</strong> {selectedPagamento.contaBancaria.agencia} |{' '}
                               <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta}
                             </p>
                             <p>
@@ -1357,7 +1361,7 @@ export default function Pagamentos() {
                         type="password"
                         placeholder="Digite sua senha de segurança para pagamentos"
                         value={paymentPassword}
-                        onChange={e => setPaymentPassword(e.target.value)}
+                        onChange={(e) => setPaymentPassword(e.target.value)}
                         className="mt-1"
                       />
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -1370,7 +1374,7 @@ export default function Pagamentos() {
                       <Textarea
                         placeholder="Observações sobre o desembolso"
                         value={paymentObservation}
-                        onChange={e => setPaymentObservation(e.target.value)}
+                        onChange={(e) => setPaymentObservation(e.target.value)}
                         className="mt-1 h-20"
                       />
                     </div>
@@ -1385,8 +1389,8 @@ export default function Pagamentos() {
                 size="sm"
                 onClick={() => {
                   setShowSecurityVerificationModal(false);
-                  setPaymentPassword("");
-                  setPaymentObservation("");
+                  setPaymentPassword('');
+                  setPaymentObservation('');
                 }}
               >
                 Cancelar

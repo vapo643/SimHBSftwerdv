@@ -3,14 +3,14 @@
  * Configuração dinâmica de provedores de autenticação
  */
 
-import { AuthConfig, AuthProvider } from "./auth-types";
-import { SupabaseAuthProvider } from "./providers/supabase-auth-provider";
+import { AuthConfig, AuthProvider } from './auth-types';
+import { SupabaseAuthProvider } from './providers/supabase-auth-provider';
 
 /**
  * Configuração padrão - pode ser alterada via variáveis de ambiente
  */
 const defaultConfig: AuthConfig = {
-  provider: (import.meta.env.VITE_AUTH_PROVIDER as AuthConfig["provider"]) || "supabase",
+  provider: (import.meta.env.VITE_AUTH_PROVIDER as AuthConfig['provider']) || 'supabase',
   options: {
     supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
     supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
@@ -22,20 +22,20 @@ const defaultConfig: AuthConfig = {
  */
 export function createAuthProvider(config: AuthConfig = defaultConfig): AuthProvider {
   switch (config.provider) {
-    case "supabase":
+    case 'supabase':
       return new SupabaseAuthProvider();
 
-    case "firebase":
+    case 'firebase':
       // Implementação futura
-      throw new Error("Firebase provider não implementado ainda");
+      throw new Error('Firebase provider não implementado ainda');
 
-    case "auth0":
+    case 'auth0':
       // Implementação futura
-      throw new Error("Auth0 provider não implementado ainda");
+      throw new Error('Auth0 provider não implementado ainda');
 
-    case "custom":
+    case 'custom':
       // Implementação futura
-      throw new Error("Custom provider não implementado ainda");
+      throw new Error('Custom provider não implementado ainda');
 
     default:
       throw new Error(`Provedor de autenticação desconhecido: ${config.provider}`);

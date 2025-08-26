@@ -1,17 +1,17 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Parceiro } from "@shared/schema";
-import { Save, X, Loader2 } from "lucide-react";
-import { z } from "zod";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Parceiro } from '@shared/schema';
+import { Save, X, Loader2 } from 'lucide-react';
+import { z } from 'zod';
 
 // Simplified schema with only essential fields
 const simplifiedPartnerSchema = z.object({
-  razaoSocial: z.string().min(1, "Razão Social é obrigatória"),
-  cnpj: z.string().min(1, "CNPJ é obrigatório"),
+  razaoSocial: z.string().min(1, 'Razão Social é obrigatória'),
+  cnpj: z.string().min(1, 'CNPJ é obrigatório'),
 });
 
 type SimplifiedPartnerData = z.infer<typeof simplifiedPartnerSchema>;
@@ -41,8 +41,8 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           cnpj: initialData.cnpj,
         }
       : {
-          razaoSocial: "",
-          cnpj: "",
+          razaoSocial: '',
+          cnpj: '',
         },
   });
 
@@ -55,7 +55,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           </Label>
           <Input
             id="razaoSocial"
-            {...register("razaoSocial")}
+            {...register('razaoSocial')}
             placeholder="Nome oficial da empresa"
             disabled={isLoading}
             className="mt-1"
@@ -71,7 +71,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           </Label>
           <Input
             id="cnpj"
-            {...register("cnpj")}
+            {...register('cnpj')}
             placeholder="00.000.000/0001-00"
             disabled={isLoading}
             className="mt-1"
@@ -95,12 +95,12 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              {initialData ? "Atualizando..." : "Criando..."}
+              {initialData ? 'Atualizando...' : 'Criando...'}
             </>
           ) : (
             <>
               <Save className="h-4 w-4" />
-              {initialData ? "Atualizar Parceiro" : "Criar Parceiro"}
+              {initialData ? 'Atualizar Parceiro' : 'Criar Parceiro'}
             </>
           )}
         </Button>

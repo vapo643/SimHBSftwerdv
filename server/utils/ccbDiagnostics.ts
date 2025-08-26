@@ -3,17 +3,17 @@
  * Baseado na resposta da IA externa - Missão Crítica
  */
 
-import { PDFDocument, rgb, StandardFonts, PDFPage, PDFFont } from "pdf-lib";
-import fs from "fs/promises";
-import path from "path";
+import { PDFDocument, rgb, StandardFonts, PDFPage, PDFFont } from 'pdf-lib';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
  * FASE 1: Verifica se o template possui AcroForms (campos editáveis)
  * Se tiver, não precisamos mapear coordenadas manualmente!
  */
 export async function diagnoseAcroForms() {
-  console.log("🔍 Iniciando diagnóstico de AcroForms no template CCB...");
-  const templatePath = path.resolve(process.cwd(), "server/templates/template_ccb.pdf");
+  console.log('🔍 Iniciando diagnóstico de AcroForms no template CCB...');
+  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
 
   try {
     const templateBytes = await fs.readFile(templatePath);
@@ -22,11 +22,11 @@ export async function diagnoseAcroForms() {
     const form = pdfDoc.getForm();
 
     if (form && form.getFields().length > 0) {
-      console.log("✅✅✅ SUCESSO! AcroForms detectados. ✅✅✅");
-      console.log("Use os nomes abaixo para preencher. IGNORE AS FASES 2 e 3.");
+      console.log('✅✅✅ SUCESSO! AcroForms detectados. ✅✅✅');
+      console.log('Use os nomes abaixo para preencher. IGNORE AS FASES 2 e 3.');
 
       const fields: string[] = [];
-      form.getFields().forEach(field => {
+      form.getFields().forEach((field) => {
         const fieldName = field.getName();
         console.log(`- Nome do Campo: ${fieldName}`);
         fields.push(fieldName);
@@ -34,12 +34,12 @@ export async function diagnoseAcroForms() {
 
       return { hasAcroForms: true, fields };
     } else {
-      console.log("❌ NENHUM AcroForm detectado. Prossiga para a FASE 2 (Mapeamento Manual).");
+      console.log('❌ NENHUM AcroForm detectado. Prossiga para a FASE 2 (Mapeamento Manual).');
       return { hasAcroForms: false, fields: [] };
     }
   } catch (error) {
     console.error(
-      "⚠️ Erro ao analisar o PDF (pode ser XFA ou protegido). Prossiga para a FASE 2.",
+      '⚠️ Erro ao analisar o PDF (pode ser XFA ou protegido). Prossiga para a FASE 2.',
       error
     );
     return { hasAcroForms: false, fields: [], error };
@@ -51,10 +51,10 @@ export async function diagnoseAcroForms() {
  * Para identificar visualmente onde colocar cada campo
  */
 export async function generateCoordinateGridPDF() {
-  const templatePath = path.resolve(process.cwd(), "server/templates/template_ccb.pdf");
-  const outputPath = path.resolve(process.cwd(), "template_ccb_DEBUG_GRID.pdf");
+  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const outputPath = path.resolve(process.cwd(), 'template_ccb_DEBUG_GRID.pdf');
 
-  console.log("📐 Gerando PDF com grade de coordenadas...");
+  console.log('📐 Gerando PDF com grade de coordenadas...');
 
   const templateBytes = await fs.readFile(templatePath);
   const pdfDoc = await PDFDocument.load(templateBytes);
@@ -145,11 +145,11 @@ export async function generateCoordinateGridPDF() {
 
     // Adicionar pontos de referência importantes
     const referencePoints = [
-      { name: "Centro", x: width / 2, y: height / 2 },
-      { name: "TopLeft", x: 0, y: height },
-      { name: "TopRight", x: width, y: height },
-      { name: "BottomLeft", x: 0, y: 0 },
-      { name: "BottomRight", x: width, y: 0 },
+      { name: 'Centro', x: width / 2, y: height / 2 },
+      { name: 'TopLeft', x: 0, y: height },
+      { name: 'TopRight', x: width, y: height },
+      { name: 'BottomLeft', x: 0, y: 0 },
+      { name: 'BottomRight', x: width, y: 0 },
     ];
 
     for (const point of referencePoints) {
@@ -235,10 +235,10 @@ export function drawTextCentered(
  * Útil para ajuste fino
  */
 export async function testCoordinateMapping() {
-  const templatePath = path.resolve(process.cwd(), "server/templates/template_ccb.pdf");
-  const outputPath = path.resolve(process.cwd(), "template_ccb_TEST_FILL.pdf");
+  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const outputPath = path.resolve(process.cwd(), 'template_ccb_TEST_FILL.pdf');
 
-  console.log("🧪 Testando preenchimento de campos...");
+  console.log('🧪 Testando preenchimento de campos...');
 
   const templateBytes = await fs.readFile(templatePath);
   const pdfDoc = await PDFDocument.load(templateBytes);
@@ -253,12 +253,12 @@ export async function testCoordinateMapping() {
 
   // Adicionar textos de teste em várias posições
   const testFields = [
-    { text: "TESTE TOPO", x: 100, y: 750, bold: true },
-    { text: "TESTE CENTRO", x: 250, y: 400, bold: false },
-    { text: "TESTE BAIXO", x: 100, y: 100, bold: false },
-    { text: "Gabriel Santana", x: 150, y: 600, bold: true },
-    { text: "CPF: 123.456.789-00", x: 150, y: 580, bold: false },
-    { text: "R$ 50.000,00", x: 400, y: 600, bold: true },
+    { text: 'TESTE TOPO', x: 100, y: 750, bold: true },
+    { text: 'TESTE CENTRO', x: 250, y: 400, bold: false },
+    { text: 'TESTE BAIXO', x: 100, y: 100, bold: false },
+    { text: 'Gabriel Santana', x: 150, y: 600, bold: true },
+    { text: 'CPF: 123.456.789-00', x: 150, y: 580, bold: false },
+    { text: 'R$ 50.000,00', x: 400, y: 600, bold: true },
   ];
 
   for (const field of testFields) {

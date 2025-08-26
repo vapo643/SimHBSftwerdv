@@ -2,36 +2,36 @@
 
 /**
  * PAM V1.0 - SCRIPT DE REPARO DE DADOS CORROMPIDOS
- * 
- * MISSÃO: Reparar a proposta `88a44696-9b63-42ee-aa81-15f9519d24cb` 
+ *
+ * MISSÃO: Reparar a proposta `88a44696-9b63-42ee-aa81-15f9519d24cb`
  * extraindo dados do JSON `cliente_data` e populando campos relacionais vazios.
- * 
+ *
  * EVIDÊNCIA DO PROBLEMA:
- * - nomeCliente: 'Sem nome' 
+ * - nomeCliente: 'Sem nome'
  * - cpfCliente: ''
  * - Outros campos de cliente podem estar vazios/NULL
- * 
+ *
  * ESTRATÉGIA:
  * 1. SELECT na proposta corrompida
  * 2. Extrair dados do JSON cliente_data
  * 3. UPDATE nos campos relacionais com dados do JSON
  */
 
-import { db } from "../server/lib/supabase";
-import { propostas } from "../shared/schema";
-import { eq } from "drizzle-orm";
+import { db } from '../server/lib/supabase';
+import { propostas } from '../shared/schema';
+import { eq } from 'drizzle-orm';
 
 const PROPOSTA_ID = '88a44696-9b63-42ee-aa81-15f9519d24cb';
 
 async function repairProposal() {
   console.log('🔧 PAM V1.0 - INICIANDO REPARO DE DADOS CORROMPIDOS');
   console.log(`🎯 Alvo: Proposta ${PROPOSTA_ID}`);
-  console.log('=' .repeat(80));
+  console.log('='.repeat(80));
 
   try {
     // ETAPA 1: SELECT na proposta corrompida
     console.log('📋 ETAPA 1: Buscando proposta corrompida...');
-    
+
     const propostaCorrupta = await db
       .select()
       .from(propostas)
@@ -44,25 +44,25 @@ async function repairProposal() {
     }
 
     const proposta = propostaCorrupta[0];
-    
+
     console.log('✅ Proposta encontrada!');
     console.log('📊 DADOS ATUAIS (CORROMPIDOS):');
     console.log(`   - clienteNome: "${proposta.clienteNome}"`);
     console.log(`   - clienteCpf: "${proposta.clienteCpf}"`);
     console.log(`   - clienteEmail: "${proposta.clienteEmail}"`);
     console.log(`   - clienteTelefone: "${proposta.clienteTelefone}"`);
-    
+
     // ETAPA 2: Analisar dados JSON disponíveis
     console.log('\n📋 ETAPA 2: Analisando dados JSON disponíveis...');
-    
+
     console.log(`🔍 Cliente Data (raw): "${proposta.clienteData}"`);
     console.log(`🔍 Condicoes Data (raw): "${proposta.condicoesData}"`);
-    
+
     // Tentar múltiplas estratégias de recuperação de dados
     let dadosEncontrados = null;
-    
+
     // Estratégia 1: Parsear cliente_data se for JSON válido
-    if (proposta.clienteData && proposta.clienteData !== "[object Object]") {
+    if (proposta.clienteData && proposta.clienteData !== '[object Object]') {
       try {
         dadosEncontrados = JSON.parse(proposta.clienteData);
         console.log('✅ Dados encontrados em cliente_data!');
@@ -70,9 +70,13 @@ async function repairProposal() {
         console.log('⚠️ cliente_data não é JSON válido');
       }
     }
-    
+
     // Estratégia 2: Parsear condicoes_data (pode ter dados do cliente)
-    if (!dadosEncontrados && proposta.condicoesData && proposta.condicoesData !== "[object Object]") {
+    if (
+      !dadosEncontrados &&
+      proposta.condicoesData &&
+      proposta.condicoesData !== '[object Object]'
+    ) {
       try {
         const condicoesJson = JSON.parse(proposta.condicoesData);
         if (condicoesJson.cliente || condicoesJson.clienteNome) {
@@ -83,7 +87,7 @@ async function repairProposal() {
         console.log('⚠️ condicoes_data não é JSON válido');
       }
     }
-    
+
     // Estratégia 3: Verificar se temos dados suficientes para reparo
     if (!dadosEncontrados) {
       console.error('❌ ERRO: Nenhuma fonte de dados válida foi encontrada');
@@ -98,7 +102,7 @@ async function repairProposal() {
     console.log(`   - cpf: "${clienteDataJson.cpf || 'VAZIO'}"`);
     console.log(`   - email: "${clienteDataJson.email || 'VAZIO'}"`);
     console.log(`   - telefone: "${clienteDataJson.telefone || 'VAZIO'}"`);
-    
+
     // Validar se temos dados suficientes para reparo
     if (!clienteDataJson.nome || !clienteDataJson.cpf) {
       console.error('❌ ERRO: JSON cliente_data também está incompleto (faltam nome ou CPF)');
@@ -108,7 +112,7 @@ async function repairProposal() {
 
     // ETAPA 3: UPDATE nos campos relacionais
     console.log('\n📋 ETAPA 3: Executando UPDATE nos campos relacionais...');
-    
+
     const dadosParaReparo = {
       clienteNome: clienteDataJson.nome,
       clienteCpf: clienteDataJson.cpf,
@@ -144,10 +148,10 @@ async function repairProposal() {
     }
 
     console.log('✅ UPDATE executado com sucesso!');
-    
+
     // ETAPA 4: Verificação final
     console.log('\n📋 ETAPA 4: Verificação final - SELECT pós-reparo...');
-    
+
     const propostaReparada = await db
       .select()
       .from(propostas)
@@ -155,20 +159,20 @@ async function repairProposal() {
       .limit(1);
 
     const reparada = propostaReparada[0];
-    
+
     console.log('📊 DADOS APÓS REPARO:');
     console.log(`   - clienteNome: "${reparada.clienteNome}"`);
     console.log(`   - clienteCpf: "${reparada.clienteCpf}"`);
     console.log(`   - clienteEmail: "${reparada.clienteEmail}"`);
     console.log(`   - clienteTelefone: "${reparada.clienteTelefone}"`);
-    
+
     // Verificar se o reparo foi bem-sucedido
-    const reparoComSucesso = 
-      reparada.clienteNome && 
+    const reparoComSucesso =
+      reparada.clienteNome &&
       reparada.clienteNome !== 'Sem nome' &&
       reparada.clienteCpf &&
       reparada.clienteCpf !== '';
-    
+
     if (reparoComSucesso) {
       console.log('\n🎉 SUCESSO! Proposta reparada com êxito!');
       console.log('🔧 PAM V1.0 - FASE 1 CONCLUÍDA');
@@ -176,7 +180,6 @@ async function repairProposal() {
       console.error('\n❌ FALHA! Reparo não funcionou conforme esperado');
       process.exit(1);
     }
-    
   } catch (error) {
     console.error('💥 ERRO CRÍTICO durante reparo:', error);
     process.exit(1);

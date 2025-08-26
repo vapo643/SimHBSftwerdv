@@ -4,9 +4,9 @@
  * PAM V9.0 - Consolidated AuthenticatedRequest usage
  */
 
-import { Router, Request, Response } from "express";
-import { clientService } from "../services/genericService";
-import { AuthenticatedRequest } from "../../shared/types/express";
+import { Router, Request, Response } from 'express';
+import { clientService } from '../services/genericService';
+import { AuthenticatedRequest } from '../../shared/types/express';
 
 const router = Router();
 
@@ -14,14 +14,14 @@ const router = Router();
  * GET /api/clientes
  * List all clients
  */
-router.get("/", async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await clientService.executeOperation("list_clients", req.query);
+    const result = await clientService.executeOperation('list_clients', req.query);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message || "Failed to fetch clients"
+      error: error.message || 'Failed to fetch clients',
     });
   }
 });
