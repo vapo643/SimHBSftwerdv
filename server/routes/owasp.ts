@@ -9,9 +9,22 @@ import { OwaspWstgService } from "../services/owaspWstgService.js";
 import multer from "multer";
 import path from "path";
 
+// Type interfaces for OWASP data structures
+interface CheatSheet {
+  status: string;
+  recommendations?: Recommendation[];
+}
+
+interface Recommendation {
+  category: string;
+  priority: string;
+  currentStatus: string;
+}
+
 const router = Router();
 const owaspService = new OWASPAssessmentService();
 const sammUrlProcessor = new SAMMUrlProcessor();
+const owaspCheatSheetService = new OwaspCheatSheetService();
 
 // Configure multer for OWASP document uploads
 const storage = multer.diskStorage({
@@ -275,27 +288,27 @@ router.post("/samm/process-pdf", requireAdmin, async (req: AuthenticatedRequest,
 // GET /api/owasp/cheatsheets - OWASP Cheat Sheets Analysis
 router.get("/cheatsheets", requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const cheatsheets = await owaspCheatSheetService.processAllCheatSheets();
+    const cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
     res.json({
       success: true,
       data: {
         totalCheatSheets: cheatsheets.length,
-        processedCheatSheets: cheatsheets.filter(cs => cs.status === "processed").length,
+        processedCheatSheets: cheatsheets.filter((cs: CheatSheet) => cs.status === "processed").length,
         cheatsheets,
         summary: {
           totalRecommendations: cheatsheets.reduce(
-            (sum, cs) => sum + (cs.recommendations?.length || 0),
+            (sum: number, cs: CheatSheet) => sum + (cs.recommendations?.length || 0),
             0
           ),
           criticalRecommendations: cheatsheets.reduce(
-            (sum, cs) =>
-              sum + (cs.recommendations?.filter(r => r.priority === "critical").length || 0),
+            (sum: number, cs: CheatSheet) =>
+              sum + (cs.recommendations?.filter((r: Recommendation) => r.priority === "critical").length || 0),
             0
           ),
           implementedItems: cheatsheets.reduce(
-            (sum, cs) =>
+            (sum: number, cs: CheatSheet) =>
               sum +
-              (cs.recommendations?.filter(r => r.currentStatus === "implemented").length || 0),
+              (cs.recommendations?.filter((r: Recommendation) => r.currentStatus === "implemented").length || 0),
             0
           ),
         },
@@ -314,26 +327,26 @@ router.get("/cheatsheets", requireAdmin, async (req: AuthenticatedRequest, res) 
 // GET /api/owasp/cheatsheets/recommendations - Get All Security Recommendations
 router.get("/cheatsheets/recommendations", requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const cheatsheets = await owaspCheatSheetService.processCheatSheets();
-    const allRecommendations = cheatsheets.flatMap(cs => cs.recommendations || []);
+    const cheatsheets = await OwaspCheatSheetService.processCheatSheets();
+    const allRecommendations = cheatsheets.flatMap((cs: CheatSheet) => cs.recommendations || []);
 
     // Group by category and priority
     const byCategory = allRecommendations.reduce(
-      (acc, rec) => {
+      (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
         if (!acc[rec.category]) acc[rec.category] = [];
         acc[rec.category].push(rec);
         return acc;
       },
-      {} as Record<string, any[]>
+      {} as Record<string, Recommendation[]>
     );
 
     const byPriority = allRecommendations.reduce(
-      (acc, rec) => {
+      (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
         if (!acc[rec.priority]) acc[rec.priority] = [];
         acc[rec.priority].push(rec);
         return acc;
       },
-      {} as Record<string, any[]>
+      {} as Record<string, Recommendation[]>
     );
 
     res.json({
@@ -347,9 +360,9 @@ router.get("/cheatsheets/recommendations", requireAdmin, async (req: Authenticat
           high: byPriority.high?.length || 0,
           medium: byPriority.medium?.length || 0,
           low: byPriority.low?.length || 0,
-          implemented: allRecommendations.filter(r => r.currentStatus === "implemented").length,
-          partial: allRecommendations.filter(r => r.currentStatus === "partial").length,
-          notImplemented: allRecommendations.filter(r => r.currentStatus === "not_implemented")
+          implemented: allRecommendations.filter((r: Recommendation) => r.currentStatus === "implemented").length,
+          partial: allRecommendations.filter((r: Recommendation) => r.currentStatus === "partial").length,
+          notImplemented: allRecommendations.filter((r: Recommendation) => r.currentStatus === "not_implemented")
             .length,
         },
       },

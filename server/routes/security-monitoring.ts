@@ -136,7 +136,7 @@ router.get("/alerts", async (req: AuthenticatedRequest, res) => {
     // Por enquanto, retornar alertas simulados baseados em atividade real
     const recentActivity = await db
       .select({
-        user_id: propostas.atendenteId,
+        user_id: propostas.userId,
         created_at: propostas.createdAt,
         status: propostas.status,
       })

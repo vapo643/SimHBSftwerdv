@@ -139,12 +139,18 @@ router.get(
         console.log(`[PDF STORAGE] Código customizado detectado: ${codigoSolicitacao}`);
         
         // Buscar boleto com UUID real para a mesma parcela
+        const numeroParcela = collection[0].numeroParcela;
+        if (numeroParcela === null) {
+          console.log(`[PDF STORAGE] ⚠️ Número da parcela é null - não é possível buscar UUID real`);
+          return res.status(400).json({ error: "Número da parcela não encontrado" });
+        }
+        
         const realCollection = await db
           .select()
           .from(interCollections)
           .where(and(
             eq(interCollections.propostaId, propostaId),
-            eq(interCollections.numeroParcela, collection[0].numeroParcela),
+            eq(interCollections.numeroParcela, numeroParcela),
             not(like(interCollections.codigoSolicitacao, 'CORRETO-%'))
           ))
           .limit(1);
