@@ -66,7 +66,7 @@ export function WstgPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: status, isLoading } = useQuery<WstgStatus>({
+  const { data: status, isLoading } = useQuery({
     queryKey: ['/api/owasp/wstg/status'],
     queryFn: () => apiRequest('/api/owasp/wstg/status'),
   });
@@ -141,23 +141,23 @@ export function WstgPage() {
             <div>
               <h2 className="text-2xl font-semibold">Overall Compliance</h2>
               <p className="text-muted-foreground">
-                {status?.completedTests || 0} of {status?.totalTests || 210} tests completed
+                {(status as any)?.completedTests || 0} of {(status as any)?.totalTests || 210} tests completed
               </p>
             </div>
             <div
-              className={`text-5xl font-bold ${getStatusColor(status?.compliancePercentage || 0)}`}
+              className={`text-5xl font-bold ${getStatusColor((status as any)?.compliancePercentage || 0)}`}
             >
-              {status?.compliancePercentage || 0}%
+              {(status as any)?.compliancePercentage || 0}%
             </div>
           </div>
 
-          <Progress value={status?.compliancePercentage || 0} className="mb-4 h-4" />
+          <Progress value={(status as any)?.compliancePercentage || 0} className="mb-4 h-4" />
 
           <div className="mt-6 grid grid-cols-4 gap-4">
             <div className="text-center">
               <div className="mb-2 flex items-center justify-center">
                 <Clock className="mr-2 h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{status?.totalTests || 210}</span>
+                <span className="text-2xl font-bold">{(status as any)?.totalTests || 210}</span>
               </div>
               <p className="text-sm text-muted-foreground">Total Tests</p>
             </div>
@@ -165,7 +165,7 @@ export function WstgPage() {
               <div className="mb-2 flex items-center justify-center">
                 <CheckCircle className="mr-2 h-5 w-5 text-green-600" />
                 <span className="text-2xl font-bold text-green-600">
-                  {status?.secureTests || 0}
+                  {(status as any)?.secureTests || 0}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">Secure</p>
@@ -174,7 +174,7 @@ export function WstgPage() {
               <div className="mb-2 flex items-center justify-center">
                 <Bug className="mr-2 h-5 w-5 text-red-600" />
                 <span className="text-2xl font-bold text-red-600">
-                  {status?.vulnerableTests || 0}
+                  {(status as any)?.vulnerableTests || 0}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">Vulnerable</p>
@@ -183,7 +183,7 @@ export function WstgPage() {
               <div className="mb-2 flex items-center justify-center">
                 <Clock className="mr-2 h-5 w-5 text-yellow-600" />
                 <span className="text-2xl font-bold text-yellow-600">
-                  {(status?.totalTests || 210) - (status?.completedTests || 0)}
+                  {((status as any)?.totalTests || 210) - ((status as any)?.completedTests || 0)}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">Pending</p>
@@ -215,7 +215,7 @@ export function WstgPage() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {status?.categories.map((category) => {
+          {(status as any)?.categories?.map((category: any) => {
             const Icon = getCategoryIcon(category.id);
             const progress = getCategoryProgress(category);
 

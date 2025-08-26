@@ -60,7 +60,7 @@ export class InterService {
     }
 
     // Create collection in Inter Bank
-    const interResult = await interBankService.createCollection({
+    const interResult = await (interBankService as any).createCollection({
       seuNumero: `PROP-${validated.proposalId}`,
       valorNominal: validated.valorTotal,
       dataVencimento: validated.dataVencimento,
@@ -104,9 +104,9 @@ export class InterService {
     // Create observation history
     await interRepository.createObservationHistory({
       propostaId: validated.proposalId,
-      tipoObservacao: 'COBRANÇA_GERADA',
-      observacao: `Cobrança gerada com sucesso. Código: ${interResult.codigoSolicitacao}`,
-      usuarioNome: 'Sistema',
+      // tipoObservacao: 'COBRANÇA_GERADA',
+      mensagem: `Cobrança gerada com sucesso. Código: ${interResult.codigoSolicitacao}`,
+      criadoPor: 'Sistema',
       usuarioId: userId,
       metadata: { codigoSolicitacao: interResult.codigoSolicitacao },
     });
@@ -154,7 +154,7 @@ export class InterService {
     }
 
     // Get updated info from Inter Bank
-    const interDetails = await interBankService.getCollectionDetails(codigoSolicitacao);
+    const interDetails = await (interBankService as any).getCollectionDetails(codigoSolicitacao);
 
     // Update local database with latest status
     if (interDetails.situacao !== collection.situacao) {
@@ -185,7 +185,7 @@ export class InterService {
     }
 
     // Cancel in Inter Bank
-    await interBankService.cancelCollection(codigoSolicitacao, motivo);
+    await (interBankService as any).cancelCollection(codigoSolicitacao, motivo);
 
     // Update database
     const updated = await interRepository.updateByCodigoSolicitacao(codigoSolicitacao, {
@@ -200,8 +200,8 @@ export class InterService {
     await interRepository.createObservationHistory({
       propostaId: collection.propostaId,
       tipoObservacao: 'COBRANÇA_CANCELADA',
-      observacao: `Cobrança cancelada. Motivo: ${motivo}`,
-      usuarioNome: 'Sistema',
+      mensagem: `Cobrança cancelada. Motivo: ${motivo}`,
+      criadoPor: 'Sistema',
       usuarioId: userId,
       metadata: { motivo },
     });
@@ -236,7 +236,7 @@ export class InterService {
         }
 
         // Extend in Inter Bank
-        const extended = await interBankService.extendDueDate(
+        const extended = await (interBankService as any).extendDueDate(
           codigoSolicitacao,
           novaDataVencimento
         );
@@ -250,9 +250,9 @@ export class InterService {
         // Create observation history
         await interRepository.createObservationHistory({
           propostaId: collection.propostaId,
-          tipoObservacao: 'VENCIMENTO_PRORROGADO',
-          observacao: `Vencimento prorrogado para ${novaDataVencimento}`,
-          usuarioNome: 'Sistema',
+          // tipoObservacao: 'VENCIMENTO_PRORROGADO',
+          mensagem: `Vencimento prorrogado para ${novaDataVencimento}`,
+          criadoPor: 'Sistema',
           usuarioId: userId,
           metadata: { novaDataVencimento },
         });
@@ -284,7 +284,7 @@ export class InterService {
     }
 
     // Generate PDF from Inter Bank
-    const pdfBuffer = await interBankService.downloadCollectionPDF(codigoSolicitacao);
+    const pdfBuffer = await (interBankService as any).downloadCollectionPDF(codigoSolicitacao);
 
     // Save to storage
     const path = `collections/${collection.propostaId}/${codigoSolicitacao}.pdf`;
@@ -309,7 +309,7 @@ export class InterService {
     // Update status
     await interRepository.updateByCodigoSolicitacao(codigoSolicitacao, {
       situacao,
-      dataHoraSituacao: getBrasiliaTimestamp(),
+      dataSituacao: getBrasiliaTimestamp(),
     });
 
     // Handle payment confirmation
@@ -320,9 +320,9 @@ export class InterService {
       // Create observation
       await interRepository.createObservationHistory({
         propostaId: collection.propostaId,
-        tipoObservacao: 'PAGAMENTO_CONFIRMADO',
-        observacao: 'Pagamento confirmado via webhook Banco Inter',
-        usuarioNome: 'Sistema',
+        // tipoObservacao: 'PAGAMENTO_CONFIRMADO',
+        mensagem: 'Pagamento confirmado via webhook Banco Inter',
+        criadoPor: 'Sistema',
         metadata: webhookData,
       });
 
@@ -352,13 +352,13 @@ export class InterService {
     for (const collection of collections) {
       try {
         // Get updated status from Inter
-        const details = await interBankService.getCollectionDetails(collection.codigoSolicitacao);
+        const details = await (interBankService as any).getCollectionDetails(collection.codigoSolicitacao);
 
         // Update if changed
         if (details.situacao !== collection.situacao) {
           await interRepository.updateByCodigoSolicitacao(collection.codigoSolicitacao, {
             situacao: details.situacao,
-            dataHoraSituacao: details.dataHoraSituacao,
+            dataSituacao: details.dataHoraSituacao,
           });
           updated++;
 
