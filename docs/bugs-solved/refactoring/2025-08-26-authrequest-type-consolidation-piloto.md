@@ -1,4 +1,8 @@
-# RELATO DE EXECUÇÃO PAM V9.0 - Consolidação Piloto AuthenticatedRequest
+# Workflow: "Quality Check"
+npm run lint
+npm run test
+npm run type-check
+npm run security-scan# RELATO DE EXECUÇÃO PAM V9.0 - Consolidação Piloto AuthenticatedRequest
 
 ## CONTEXTO DA MISSÃO
 **PAM ID:** V9.0 - Fase B.1 (Rollout Piloto)
