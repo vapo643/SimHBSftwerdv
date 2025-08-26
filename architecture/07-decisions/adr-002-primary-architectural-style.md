@@ -194,6 +194,232 @@ gantt
 - [ ] Observability completa (logs, metrics, traces)
 - [ ] Team ownership estabelecido
 
+### 4.3 **Especificação Técnica de Decomposição**
+
+#### **Preparação para Extração de Serviços**
+
+```typescript
+// Interface padrão para futura extração
+interface BoundedContextInterface {
+  // Contratos de API bem definidos
+  readonly api: {
+    version: string;
+    endpoints: APIEndpoint[];
+    schemas: JSONSchema[];
+  };
+  
+  // Isolamento de dados preparado
+  readonly data: {
+    schema: string;           // Schema dedicado no PostgreSQL
+    migrations: Migration[];  // Histórico de mudanças
+    seedData: SeedScript[];  // Dados de teste isolados
+  };
+  
+  // Métricas de extração
+  readonly metrics: {
+    coupling: number;        // < 0.3 para ser extraível
+    cohesion: number;       // > 0.7 para ser extraível
+    complexity: number;     // < 100 pontos máximo
+  };
+}
+
+// Implementação exemplo - Credit Proposal Context
+const creditProposalContext: BoundedContextInterface = {
+  api: {
+    version: "v1",
+    endpoints: ["/proposals", "/proposals/{id}", "/proposals/{id}/analyze"],
+    schemas: ["ProposalCreateSchema", "ProposalResponseSchema"]
+  },
+  data: {
+    schema: "credit_proposal",  // Schema isolado
+    migrations: ["001_create_proposals", "002_add_status_enum"],
+    seedData: ["proposal_templates", "risk_categories"]
+  },
+  metrics: {
+    coupling: 0.25,     // Baixo acoplamento
+    cohesion: 0.85,     // Alta coesão  
+    complexity: 78      // Abaixo do threshold
+  }
+};
+
+// Payment Processing Context - Primeiro candidato à extração
+const paymentProcessingContext: BoundedContextInterface = {
+  api: {
+    version: "v1",
+    endpoints: ["/payments", "/payments/{id}/status", "/payments/webhooks"],
+    schemas: ["PaymentRequestSchema", "PaymentStatusSchema", "WebhookSchema"]
+  },
+  data: {
+    schema: "payment_processing",
+    migrations: ["001_create_payments", "002_add_webhook_events"],
+    seedData: ["payment_methods", "gateway_configs"]
+  },
+  metrics: {
+    coupling: 0.15,     // Muito baixo acoplamento - ideal para extração
+    cohesion: 0.92,     // Altíssima coesão
+    complexity: 45      // Baixa complexidade
+  }
+};
+
+// Contract Management Context - Segundo candidato
+const contractManagementContext: BoundedContextInterface = {
+  api: {
+    version: "v1", 
+    endpoints: ["/contracts", "/contracts/{id}/sign", "/contracts/{id}/status"],
+    schemas: ["ContractSchema", "SignatureRequestSchema", "StatusSchema"]
+  },
+  data: {
+    schema: "contract_management",
+    migrations: ["001_create_contracts", "002_add_signature_tracking"],
+    seedData: ["contract_templates", "signature_providers"]
+  },
+  metrics: {
+    coupling: 0.28,     // Acoplamento próximo ao limite
+    cohesion: 0.88,     // Alta coesão
+    complexity: 67      // Complexidade moderada
+  }
+};
+```
+
+#### **Estratégia de Database-per-Module**
+
+```sql
+-- Schema Isolation Strategy
+-- Cada bounded context terá schema dedicado
+
+-- Credit Proposal Schema
+CREATE SCHEMA IF NOT EXISTS credit_proposal;
+GRANT USAGE ON SCHEMA credit_proposal TO app_user;
+
+-- Payment Processing Schema  
+CREATE SCHEMA IF NOT EXISTS payment_processing;
+GRANT USAGE ON SCHEMA payment_processing TO app_user;
+
+-- Contract Management Schema
+CREATE SCHEMA IF NOT EXISTS contract_management;
+GRANT USAGE ON SCHEMA contract_management TO app_user;
+
+-- Cross-schema communication apenas via APIs internas
+-- Regra: ZERO foreign keys cross-schema
+-- Regra: Comunicação assíncrona via events quando possível
+```
+
+#### **Module Extraction Fitness Functions**
+
+```typescript
+// Fitness functions para validar readiness para extração
+describe('Module Extraction Readiness', () => {
+  test('Bounded context has low coupling', async () => {
+    const coupling = await calculateCoupling('payment_processing');
+    expect(coupling).toBeLessThan(0.3);
+  });
+  
+  test('Bounded context has high cohesion', async () => {
+    const cohesion = await calculateCohesion('payment_processing');
+    expect(cohesion).toBeGreaterThan(0.7);
+  });
+  
+  test('No direct database cross-references', async () => {
+    const violations = await findCrossSchemaDependencies('payment_processing');
+    expect(violations).toHaveLength(0);
+  });
+  
+  test('API contracts are stable', async () => {
+    const breakingChanges = await detectAPIBreakingChanges(
+      'payment_processing',
+      '30d'
+    );
+    expect(breakingChanges).toHaveLength(0);
+  });
+  
+  test('Module complexity within limits', async () => {
+    const complexity = await calculateCyclomaticComplexity('payment_processing');
+    expect(complexity).toBeLessThan(100);
+  });
+});
+```
+
+#### **Event-Driven Communication Patterns**
+
+```typescript
+// Domain Events para comunicação entre contexts
+interface DomainEvent {
+  id: string;
+  aggregateId: string;
+  eventType: string;
+  version: number;
+  timestamp: Date;
+  payload: unknown;
+}
+
+// Payment events para comunicação assíncrona
+const paymentEvents = {
+  PaymentInitiated: {
+    eventType: 'payment.initiated',
+    schema: {
+      proposalId: 'string',
+      amount: 'number',
+      method: 'string'
+    }
+  },
+  PaymentCompleted: {
+    eventType: 'payment.completed',
+    schema: {
+      paymentId: 'string',
+      proposalId: 'string',
+      status: 'completed'
+    }
+  },
+  PaymentFailed: {
+    eventType: 'payment.failed',
+    schema: {
+      paymentId: 'string',
+      proposalId: 'string',
+      error: 'string'
+    }
+  }
+};
+
+// Event sourcing preparatório
+CREATE TABLE event_store (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  aggregate_id UUID NOT NULL,
+  event_type VARCHAR(100) NOT NULL,
+  version INTEGER NOT NULL,
+  event_data JSONB NOT NULL,
+  metadata JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(aggregate_id, version)
+);
+```
+
+#### **API Versioning Strategy**
+
+```typescript
+// Versionamento preparado para extração
+const apiVersioning = {
+  strategy: 'URL path versioning',
+  pattern: '/api/v{version}/{context}/{resource}',
+  
+  examples: {
+    monolith: '/api/v1/proposals/12345',
+    extracted: '/api/v1/payments/67890'
+  },
+  
+  deprecationPolicy: {
+    supportDuration: '12 months',
+    warningPeriod: '6 months',
+    removalNotice: '3 months'
+  },
+  
+  backwardCompatibility: {
+    additive: 'allowed',
+    modificative: 'requires_new_version',
+    destructive: 'forbidden'
+  }
+};
+```
+
 ---
 
 ## 5. Critérios de Gatilho (Trigger Criteria) para Evolução

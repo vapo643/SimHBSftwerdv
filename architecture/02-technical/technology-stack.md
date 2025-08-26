@@ -301,6 +301,352 @@ const queueStack = {
 | **AWS S3** | @aws-sdk/client-s3 | 3.490.0 | REST | Unlimited* |
 | **SendGrid** | @sendgrid/mail | 8.1.0 | REST | 100 emails/s |
 
+### 3.6 **Anti-Corruption Layers (ACL) - REFINAMENTO P2**
+
+**⚠️ AUDITORIA 2025-08-26: IMPLEMENTAÇÃO DE PROTEÇÃO DO DOMÍNIO**
+
+#### **Estratégia Anti-Corruption**
+
+```typescript
+// Padrão ACL para proteger domínio interno das APIs externas
+interface AntiCorruptionLayer<TExternal, TInternal> {
+  // Tradução de dados externos para modelo interno
+  readonly adapter: {
+    fromExternal: (external: TExternal) => TInternal;
+    toExternal: (internal: TInternal) => TExternal;
+  };
+  
+  // Tolerância a falhas da API externa
+  readonly resilience: {
+    circuitBreaker: CircuitBreakerConfig;
+    retryPolicy: RetryConfig;
+    fallbackStrategy: FallbackStrategy;
+  };
+  
+  // Validação defensiva
+  readonly validation: {
+    inputSchema: ZodSchema<TExternal>;
+    outputSchema: ZodSchema<TInternal>;
+    sanitization: SanitizationRules;
+  };
+  
+  // Observabilidade da integração
+  readonly monitoring: {
+    metrics: MetricsCollector;
+    logging: StructuredLogger;
+    tracing: DistributedTracing;
+  };
+}
+
+// Implementação ACL para Banco Inter
+const bancoInterACL: AntiCorruptionLayer<InterAPIResponse, PaymentDomain> = {
+  adapter: {
+    fromExternal: (response: InterAPIResponse): PaymentDomain => ({
+      id: PaymentId.create(response.nossoNumero),
+      amount: Money.fromCents(response.valorNominal),
+      status: mapInterStatusToInternal(response.situacao),
+      dueDate: DateVO.create(response.dataVencimento),
+      barcode: response.codigoBarras,
+      pixKey: response.txid,
+      // Proteção: mapeamento defensivo
+      metadata: {
+        externalId: response.nossoNumero,
+        provider: 'banco-inter',
+        rawResponse: JSON.stringify(response) // audit trail
+      }
+    }),
+    
+    toExternal: (payment: PaymentDomain): InterPaymentRequest => ({
+      seuNumero: payment.id.value,
+      valorNominal: payment.amount.toCents(),
+      dataVencimento: payment.dueDate.toISOString(),
+      // Anti-corruption: não vazar conceitos internos
+      nomePagador: payment.payer.name,
+      // Sanitização automática
+      ...sanitizeForExternalAPI(payment)
+    })
+  },
+  
+  resilience: {
+    circuitBreaker: {
+      threshold: 5,           // falhas consecutivas
+      timeout: 60000,         // 1 minuto aberto
+      halfOpenRequests: 3,    // tentativas em half-open
+      monitoringWindow: 10000 // janela de 10s
+    },
+    
+    retryPolicy: {
+      maxAttempts: 3,
+      backoffStrategy: 'exponential',
+      baseDelay: 1000,
+      maxDelay: 8000,
+      retryableErrors: ['TIMEOUT', 'CONNECTION_ERROR', '5XX']
+    },
+    
+    fallbackStrategy: {
+      type: 'cache-then-queue',
+      cacheTTL: 300000,       // 5 minutos
+      queueStrategy: 'redis-persistent',
+      deadLetterQueue: true
+    }
+  },
+  
+  validation: {
+    inputSchema: InterAPIResponseSchema,
+    outputSchema: PaymentDomainSchema,
+    
+    sanitization: {
+      removeNullBytes: true,
+      escapeHtml: true,
+      trimWhitespace: true,
+      normalizeEncoding: 'utf-8',
+      maxStringLength: 1000
+    }
+  },
+  
+  monitoring: {
+    metrics: {
+      requestDuration: 'inter_api_request_duration_ms',
+      errorRate: 'inter_api_error_rate',
+      circuitBreakerState: 'inter_api_circuit_breaker_state',
+      cacheHitRate: 'inter_api_cache_hit_rate'
+    },
+    
+    logging: {
+      logLevel: 'info',
+      includeRequestBody: false,  // security
+      includeResponseBody: false, // security
+      correlationId: true,
+      sanitizeSecrets: true
+    },
+    
+    tracing: {
+      spanName: 'banco-inter-integration',
+      includeHeaders: false,      // security
+      propagateContext: true
+    }
+  }
+};
+```
+
+#### **ACL para ClickSign API**
+
+```typescript
+// ClickSign Anti-Corruption Layer
+const clickSignACL: AntiCorruptionLayer<ClickSignDocument, ContractDomain> = {
+  adapter: {
+    fromExternal: (doc: ClickSignDocument): ContractDomain => ({
+      id: ContractId.create(doc.key),
+      title: doc.name,
+      status: mapClickSignStatus(doc.status),
+      signers: doc.signers.map(signer => ({
+        email: EmailVO.create(signer.email),
+        name: signer.name,
+        signedAt: signer.signed_at ? DateVO.create(signer.signed_at) : null,
+        ipAddress: signer.ip_address
+      })),
+      
+      // Proteção: transformação defensiva
+      document: {
+        url: doc.download_url,
+        filename: sanitizeFilename(doc.filename),
+        size: doc.file_size,
+        checksum: doc.file_checksum
+      },
+      
+      // Anti-corruption: conceitos internos protegidos
+      businessContext: {
+        proposalId: extractProposalId(doc.metadata),
+        contractType: deriveContractType(doc.name),
+        priority: calculatePriority(doc.metadata)
+      }
+    }),
+    
+    toExternal: (contract: ContractDomain): ClickSignCreateRequest => ({
+      name: contract.title,
+      signers: contract.signers.map(signer => ({
+        email: signer.email.value,
+        name: signer.name,
+        // Anti-corruption: não exposer dados internos
+        act: 'sign'
+      })),
+      
+      // Sanitização para API externa
+      message: sanitizeMessage(contract.signingMessage),
+      auto_close: true,
+      locale: 'pt-BR'
+    })
+  },
+  
+  resilience: {
+    circuitBreaker: {
+      threshold: 3,          // menor threshold - ClickSign menos estável
+      timeout: 120000,       // 2 minutos
+      halfOpenRequests: 2,
+      monitoringWindow: 15000
+    },
+    
+    retryPolicy: {
+      maxAttempts: 2,        // menos retries - webhooks duplicados
+      backoffStrategy: 'fixed',
+      baseDelay: 2000,
+      retryableErrors: ['TIMEOUT', '503', '502', '500']
+    },
+    
+    fallbackStrategy: {
+      type: 'manual-intervention',
+      notificationChannel: 'slack',
+      escalationTimeout: 900000 // 15 minutos
+    }
+  },
+  
+  validation: {
+    inputSchema: ClickSignDocumentSchema,
+    outputSchema: ContractDomainSchema,
+    
+    sanitization: {
+      documentValidation: true,
+      virusScan: true,          // crítico para documentos
+      contentTypeCheck: 'pdf-only',
+      maxFileSize: 10485760     // 10MB
+    }
+  }
+};
+```
+
+#### **Padrões Transversais de ACL**
+
+```typescript
+// Base abstrata para todos os ACLs
+abstract class BaseAntiCorruptionLayer<T, U> {
+  protected readonly logger: Logger;
+  protected readonly metrics: MetricsCollector;
+  protected readonly circuitBreaker: CircuitBreaker;
+  
+  constructor(config: ACLConfig) {
+    this.logger = createLogger(`acl:${config.serviceName}`);
+    this.metrics = createMetrics(config.metricsConfig);
+    this.circuitBreaker = new CircuitBreaker(config.resilience);
+  }
+  
+  // Método principal - executa com todas as proteções
+  async execute<R>(
+    operation: () => Promise<R>,
+    context: ExecutionContext
+  ): Promise<Result<R, ACLError>> {
+    const startTime = Date.now();
+    const correlationId = context.correlationId;
+    
+    try {
+      // 1. Rate limiting
+      await this.checkRateLimit(context);
+      
+      // 2. Input validation
+      await this.validateInput(context.input);
+      
+      // 3. Circuit breaker protection
+      const result = await this.circuitBreaker.execute(operation);
+      
+      // 4. Output validation
+      await this.validateOutput(result);
+      
+      // 5. Logging & metrics
+      this.recordSuccess(startTime, correlationId);
+      
+      return Ok(result);
+      
+    } catch (error) {
+      this.recordFailure(error, startTime, correlationId);
+      
+      // 6. Fallback strategy
+      const fallbackResult = await this.executeFallback(context);
+      
+      return fallbackResult 
+        ? Ok(fallbackResult)
+        : Err(new ACLError(error, context));
+    }
+  }
+  
+  // Isolation: cada ACL tem seu próprio rate limiter
+  private async checkRateLimit(context: ExecutionContext): Promise<void> {
+    const key = `acl:${this.serviceName}:${context.userId}`;
+    const allowed = await this.rateLimiter.check(key);
+    
+    if (!allowed) {
+      throw new RateLimitError(`Rate limit exceeded for ${this.serviceName}`);
+    }
+  }
+  
+  // Defensive programming: validação rigorosa
+  private async validateInput(input: unknown): Promise<void> {
+    const result = this.inputSchema.safeParse(input);
+    
+    if (!result.success) {
+      throw new ValidationError('Invalid input', result.error);
+    }
+    
+    // Sanitização adicional
+    await this.sanitizeInput(result.data);
+  }
+  
+  // Observabilidade: métricas detalhadas por ACL
+  private recordSuccess(startTime: number, correlationId: string): void {
+    const duration = Date.now() - startTime;
+    
+    this.metrics.increment('acl.requests.success', {
+      service: this.serviceName,
+      correlationId
+    });
+    
+    this.metrics.histogram('acl.request.duration', duration, {
+      service: this.serviceName
+    });
+    
+    this.logger.info('ACL operation completed successfully', {
+      service: this.serviceName,
+      duration,
+      correlationId
+    });
+  }
+}
+
+// Factory para criar ACLs configurados
+class ACLFactory {
+  static createBancoInter(config: BancoInterConfig): BancoInterACL {
+    return new BancoInterACL({
+      ...config,
+      resilience: {
+        circuitBreaker: { threshold: 5, timeout: 60000 },
+        retry: { maxAttempts: 3, backoff: 'exponential' },
+        fallback: 'cache-then-queue'
+      }
+    });
+  }
+  
+  static createClickSign(config: ClickSignConfig): ClickSignACL {
+    return new ClickSignACL({
+      ...config,
+      resilience: {
+        circuitBreaker: { threshold: 3, timeout: 120000 },
+        retry: { maxAttempts: 2, backoff: 'fixed' },
+        fallback: 'manual-intervention'
+      }
+    });
+  }
+}
+```
+
+#### **Métricas de Proteção ACL**
+
+| Métrica | Target | Monitoramento | Alerta |
+|---------|--------|---------------|--------|
+| **Translation Success Rate** | > 99.5% | Contínuo | < 99% |
+| **Circuit Breaker Opens** | < 5/dia | Tempo real | > 3/hora |
+| **Fallback Activations** | < 10/dia | Tempo real | > 5/hora |
+| **Data Corruption Detection** | 0 | Contínuo | > 0 |
+| **Schema Validation Failures** | < 1% | Contínuo | > 2% |
+| **Timeout Events** | < 2% | Tempo real | > 5% |
+
 ---
 
 ## 🗄️ **4. DATA & STORAGE STACK**

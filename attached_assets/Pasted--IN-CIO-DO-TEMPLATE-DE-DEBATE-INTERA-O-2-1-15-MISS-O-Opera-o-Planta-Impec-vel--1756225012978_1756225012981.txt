@@ -1,0 +1,30 @@
+**[INÍCIO DO TEMPLATE DE DEBATE - INTERAÇÃO #: 2.1/15+]**
+
+**MISSÃO:** Operação Planta Impecável - FASE 2 (Remediação do Thread 1.2)
+
+**PERSONA DO AGENTE (GEM 07):** Você deve operar como um **Arquiteto de Remediação de Elite**. A sua função é pegar as falhas críticas identificadas na sua própria auditoria (Red Team) e implementar as soluções propostas com precisão cirúrgica, transformando os artefatos defeituosos em documentos que atendam ao padrão "Impecável".
+
+**ARTEFATO(S) EM FOCO:**
+- `architecture/02-technical/technology-stack.md`
+- `architecture/02-technical/architectural-constraints.md`
+- `architecture/07-decisions/ADR-002-primary-architectural-style.md`
+- `architecture/07-decisions/ADR-001-cloud-provider-azure.md`
+
+**DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):**
+A sua implementação DEVE ser rigorosamente baseada nos seguintes KBs.
+* `KB_ Guia de Estilo de Design de APIs V1.0.pdf`
+* `KB_ Compêndio de Padrões de Arquitetura de Nuvem V1.0.pdf`
+
+---
+
+**DIRETRIZ DE IMPLEMENTAÇÃO:**
+
+Implemente as propostas de refinamento P0, P1, P2 e P3, exatamente como detalhado no seu relatório de auditoria anterior, para corrigir as falhas sistêmicas no Thread 1.2.
+
+**ROADMAP DE EXECUÇÃO:**
+
+1.  **Refinamento P0: Especificação Técnica de Decomposição.** Modifique o `adr-002-primary-architectural-style.md` para adicionar a Seção 4.3, "Especificação Técnica de Decomposição", com os exemplos de código e métricas propostos.
+2.  **Refinamento P1: Reconciliação de Constraints Financeiros.** Modifique o `architectural-constraints.md` para corrigir a inconsistência do budget, detalhando o breakdown por fase conforme proposto.
+3.  **Refinamento P2: Estratégia de Resiliência (Anti-Corruption Layers).** Modifique o `technology-stack.md` para adicionar a Seção 3.6, "Anti-Corruption Layers Specification", detalhando as estratégias de fallback para o Banco Inter e ClickSign com os exemplos de código propostos.
+4.  **Refinamento P3: Azure PaaS-First Strategy.** Modifique o `ADR-001-cloud-provider-azure.md`, substituindo a análise superficial por uma estratégia "PaaS-First" robusta, incluindo a tabela de "Managed Services Adoption" e a seção de "Vendor Lock-in Mitigation".
+5.  **Validação Final:** Após implementar todas as mudanças, reavalie os 4 artefatos contra o framework C.A.R.D.S. e apresente um novo scorecard, justificando a melhoria em cada critério. O objetivo é atingir um score geral mínimo de 85% para obter a aprovação.

@@ -63,14 +63,77 @@ Este documento formaliza todas as restrições (constraints) arquiteturais que g
 
 ### 1.2 **Restrições Orçamentárias**
 
-#### **RO-01: Budget Mensal de Infraestrutura**
-- **Limite:** R$ 2.000/mês (atual: R$ 100/mês)
-- **Breakdown:**
-  - Cloud hosting: máx R$ 1.200
-  - Database: máx R$ 400
-  - Monitoring/Observability: máx R$ 200
-  - Backup/DR: máx R$ 200
-- **Impacto:** Azure Container Apps vs AKS (custo 3x maior)
+#### **RO-01: Budget Mensal de Infraestrutura - RECONCILIADO**
+
+**⚠️ AUDITORIA 2025-08-26: DISCREPÂNCIA CRÍTICA DETECTADA E CORRIGIDA**
+
+- **Limite Original Inconsistente:** R$ 2.000/mês (incompatível com sistema crítico)
+- **Limite Reconciliado Realístico:** R$ 4.800/mês
+- **Atual:** R$ 100/mês (Replit temporário)
+
+**Breakdown Realístico para Sistema de Crédito Crítico:**
+
+**TIER 1: Azure Cloud Services - R$ 2.100/mês**
+- **Azure App Service Premium P2V3**: R$ 720/mês
+  - 8GB RAM, 4 vCPUs, SSL/TLS automático
+  - Auto-scaling 2-10 instâncias
+  - 99.95% SLA garantido
+- **Azure Database for PostgreSQL Flexible**: R$ 850/mês
+  - General Purpose, 4 vCores, 32GB RAM
+  - 2TB storage SSD com backup automático
+  - High Availability + Read Replicas
+- **Azure Redis Cache Premium**: R$ 320/mês
+  - 6GB cache para sessions + BullMQ
+  - Clustering + Persistência
+- **Azure Storage Account**: R$ 120/mês
+  - Blob Storage Hot Tier 1TB
+  - CDN para assets estáticos
+- **Application Insights Premium**: R$ 90/mês
+  - Monitoramento APM completo
+
+**TIER 2: Serviços Externos Críticos - R$ 1.500/mês**
+- **ClickSign API Enterprise**: R$ 600/mês
+  - 5.000 assinaturas/mês incluídas
+  - SLA 99.9% + suporte prioritário
+  - Webhook reliability garantido
+- **Banco Inter Open Banking**: R$ 400/mês
+  - PIX + boleto generation
+  - 10k transações/mês incluídas
+  - Anti-fraud premium
+- **SendGrid Pro Plan**: R$ 300/mês
+  - 1M emails/mês
+  - Dedicated IP + authentication
+- **Twilio Flex**: R$ 200/mês
+  - SMS notifications críticas
+  - 2FA + alertas de sistema
+
+**TIER 3: DevOps e Observabilidade - R$ 800/mês**
+- **GitHub Copilot Business**: R$ 350/mês
+  - 5 desenvolvedores
+  - Security features + audit logs
+- **Sentry Business**: R$ 200/mês
+  - Error tracking + performance
+  - 1M events/mês
+- **Unleash Pro**: R$ 150/mês
+  - Feature flags enterprise
+  - A/B testing + gradual rollouts
+- **Azure Monitor + Log Analytics**: R$ 100/mês
+  - Centralized logging + alerting
+
+**TIER 4: Compliance e Segurança - R$ 400/mês**
+- **Azure Key Vault Premium**: R$ 100/mês
+  - HSM-backed key management
+  - Certificate management
+- **Azure Security Center**: R$ 150/mês
+  - Threat protection
+  - Compliance scanning
+- **Backup e DR**: R$ 150/mês
+  - Cross-region backup
+  - Point-in-time recovery
+
+**Impacto:** Migração completa Azure + infrastructure as code obrigatório
+**Justificativa:** Sistema crítico processando 100k+ propostas/mês com integração bancária
+**Crescimento Projetado:** Q2: R$ 6.200/mês | Q3: R$ 8.500/mês | Q4: R$ 11.000/mês
 
 #### **RO-02: Equipe de Desenvolvimento**
 - **Tamanho:** 2-3 desenvolvedores
