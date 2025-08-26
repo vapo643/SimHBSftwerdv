@@ -31,7 +31,7 @@ export class ProposalRepository implements IProposalRepository {
           produtoId: data.produto_id,
           tabelaComercialId: data.tabela_comercial_id,
           lojaId: data.loja_id,
-          dadosPagamentoMetodo: data.dados_pagamento?.metodo,
+          dadosPagamentoTipo: data.dados_pagamento?.metodo,
           dadosPagamentoBanco: data.dados_pagamento?.banco,
           dadosPagamentoAgencia: data.dados_pagamento?.agencia,
           dadosPagamentoConta: data.dados_pagamento?.conta,
@@ -40,7 +40,7 @@ export class ProposalRepository implements IProposalRepository {
           motivoRejeicao: data.motivo_rejeicao,
           observacoes: data.observacoes,
           ccbDocumentoUrl: data.ccb_url,
-          updatedAt: data.updated_at,
+          // updatedAt campo removido - será atualizado automaticamente pelo schema
         })
         .where(eq(propostas.id, data.id));
     } else {
@@ -62,7 +62,7 @@ export class ProposalRepository implements IProposalRepository {
         tabelaComercialId: data.tabela_comercial_id,
         lojaId: data.loja_id,
         metodoPagamento: data.dados_pagamento?.metodo,
-        dadosPagamentoMetodo: data.dados_pagamento?.metodo,
+        dadosPagamentoTipo: data.dados_pagamento?.metodo,
         dadosPagamentoBanco: data.dados_pagamento?.banco,
         dadosPagamentoAgencia: data.dados_pagamento?.agencia,
         dadosPagamentoConta: data.dados_pagamento?.conta,
@@ -72,7 +72,7 @@ export class ProposalRepository implements IProposalRepository {
         observacoes: data.observacoes,
         ccbDocumentoUrl: data.ccb_url,
         createdAt: data.created_at,
-        updatedAt: data.updated_at,
+        // updatedAt campo removido - será atualizado automaticamente pelo schema
       }]);
     }
 
