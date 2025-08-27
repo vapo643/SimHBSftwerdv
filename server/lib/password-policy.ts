@@ -172,7 +172,7 @@ export function logPasswordPolicyViolation(
   ipAddress?: string
 ): void {
   securityLogger.logEvent({
-    type: SecurityEventType.SUSPICIOUS_ACTIVITY,
+    type: SecurityEventType.LOGIN_FAILURE,
     severity: 'LOW',
     userId,
     userEmail: email,

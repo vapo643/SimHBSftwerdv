@@ -68,9 +68,7 @@ import { registerRoutes } from './routes';
     }
 
     const vulnDetector = getVulnerabilityDetector();
-    if (vulnDetector && typeof vulnDetector.start === 'function') {
-      vulnDetector.start();
-    }
+    // VulnerabilityDetector does not have start method - scanner is event-driven
 
     const depScanner = getDependencyScanner();
     depScanner.start();

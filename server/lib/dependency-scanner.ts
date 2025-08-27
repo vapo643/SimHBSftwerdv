@@ -8,6 +8,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs/promises';
+import { watchFile } from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 
@@ -266,12 +267,14 @@ export class DependencyScanner extends EventEmitter {
   private watchPackageChanges() {
     const packagePath = path.join(process.cwd(), 'package.json');
 
-    fs.watch(packagePath, async (eventType) => {
-      if (eventType === 'change') {
+    try {
+      watchFile(packagePath, async () => {
         console.log('📦 [DEPENDENCY-CHECK] package.json modificado, executando novo scan...');
         await this.runScan();
-      }
-    });
+      });
+    } catch (error) {
+      console.warn('Failed to watch package.json changes:', error);
+    }
   }
 
   /**

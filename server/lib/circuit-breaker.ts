@@ -54,7 +54,7 @@ export const CLICKSIGN_BREAKER_OPTIONS: CircuitBreaker.Options = {
 export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
   asyncFunction: T,
   options: CircuitBreaker.Options
-): CircuitBreaker<T> {
+): CircuitBreaker<any[], any> {
   const breaker = new CircuitBreaker(asyncFunction, options);
   const name = options.name || 'UnnamedBreaker';
 

@@ -115,7 +115,6 @@ export default function PaymentReviewModal({
       const response = await apiRequest(`/api/pagamentos/${proposta?.id}/marcar-pago`, {
         method: 'POST',
         body: formData,
-        isFormData: true,
       });
 
       return response;

@@ -1723,7 +1723,7 @@ export default function OWASPAssessment() {
                     Vulnerabilidades Encontradas: {sastData.data.vulnerabilities.length}
                   </h4>
                   <div className="max-h-64 space-y-2 overflow-y-auto">
-                    {sastData.data.vulnerabilities.map((vuln, index) => (
+                    {sastData.data.vulnerabilities.map((vuln: any, index: number) => (
                       <div
                         key={index}
                         className={`rounded-lg border-l-4 p-3 ${

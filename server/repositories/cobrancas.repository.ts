@@ -69,7 +69,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(parcelas)
-        .where(eq(parcelas.propostaId, propostaId))
+        .where(eq(parcelas.propostaId, String(propostaId)))
         .orderBy(parcelas.numeroParcela);
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching installments:', error);
@@ -111,7 +111,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         })
         .from(observacoesCobranca)
         .leftJoin(profiles, eq(profiles.id, observacoesCobranca.createdBy))
-        .where(eq(observacoesCobranca.propostaId, propostaId))
+        .where(eq(observacoesCobranca.propostaId, String(propostaId)))
         .orderBy(desc(observacoesCobranca.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching observations:', error);
@@ -132,7 +132,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       const [observation] = await db
         .insert(observacoesCobranca)
         .values({
-          propostaId: data.proposta_id,
+          propostaId: String(data.proposta_id),
           observacao: data.observacao,
           createdBy: data.created_by,
           createdAt: new Date(),
@@ -181,7 +181,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(solicitacoesModificacao)
-        .where(eq(solicitacoesModificacao.propostaId, propostaId))
+        .where(eq(solicitacoesModificacao.propostaId, String(propostaId)))
         .orderBy(desc(solicitacoesModificacao.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching modification requests:', error);
@@ -203,7 +203,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       const [request] = await db
         .insert(solicitacoesModificacao)
         .values({
-          propostaId: data.proposta_id,
+          propostaId: String(data.proposta_id),
           tipo: data.tipo,
           motivo: data.motivo,
           detalhes: data.detalhes,
@@ -228,7 +228,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(propostaLogs)
-        .where(eq(propostaLogs.propostaId, propostaId))
+        .where(eq(propostaLogs.propostaId, String(propostaId)))
         .orderBy(desc(propostaLogs.createdAt))
         .limit(50); // Limit recent logs
     } catch (error) {
@@ -283,7 +283,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       const result = await db
         .update(propostas)
         .set(updates)
-        .where(eq(propostas.id, propostaId))
+        .where(eq(propostas.id, String(propostaId)))
         .returning();
 
       return result.length > 0;

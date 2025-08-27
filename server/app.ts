@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
+// @ts-ignore
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { registerRoutes } from './routes';

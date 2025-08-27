@@ -62,7 +62,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
   const { data: produtos = [], isLoading: loadingProdutos } = useQuery<Produto[]>({
     queryKey: ['/api/produtos'],
     queryFn: async () => {
-      const response = await apiRequest('/api/produtos', { method: 'GET' });
+      const response = await apiRequest('/api/produtos', { method: 'GET' }) as Produto[];
       return response.filter((p: Produto) => p.isActive);
     },
   });
