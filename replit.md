@@ -1,8 +1,8 @@
-## Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management in financial institutions. It streamlines the entire credit proposal workflow, from creation and simulation to payment processing and formalization tracking. The project aims to be a leading solution in the credit management market by offering a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system, all while prioritizing banking-grade security, compliance, and efficient data management to enhance operational efficiency and reduce manual overhead.
+### Overview
+Simpix is a full-stack TypeScript application designed for comprehensive credit management within financial institutions. Its core purpose is to optimize the credit proposal lifecycle, encompassing creation, simulation, payment processing, and formalization tracking. Key functionalities include a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a complete payment queue system. Simpix is built to ensure banking-grade security, compliance, and efficient data handling, thereby boosting operational efficiency and minimizing manual tasks.
 
-## User Preferences
-### PROTOCOLO DE APRENDIZADO GUIDO (PAG) V2.0
+### User Preferences
+#### PROTOCOLO DE APRENDIZADO GUIDO (PAG) V2.0
 **Ativação:** Quando o usuário enviar exatamente: **"me explica o que você fez"**
 
 Ao receber este comando, pausar a missão de codificação e assumir a persona de **"Mentor Técnico Sênior"**, seguindo estas 4 fases:
@@ -22,9 +22,9 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 **FASE 4: Fechamento Motivacional**
 - Frase curta conectando aprendizado a conceito de neurociência
 
-### Padrão de Excelência Operacional (PEO) V2.0 - Arquitetura Definitiva
+#### Padrão de Excelência Operacional (PEO) V2.0 - Arquitetura Definitiva
 
-#### **Componente I: O Protocolo de Execução Anti-Frágil (PEAF) V2.0 - Híbrido Inteligente**
+##### Componente I: O Protocolo de Execução Anti-Frágil (PEAF) V2.0 - Híbrido Inteligente
 
 *   **Diretriz Mestra:** Você opera em um de dois modos mutuamente exclusivos: **MODO_PLANEJAMENTO** ou **MODO_EXECUÇÃO**.
 *   **Detecção Automática de Modo:**
@@ -36,7 +36,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
     *   **No MODO_PLANEJAMENTO:** Você adota a persona de **"Arquiteto Documentador"**. A execução de código é proibida.
     *   **No MODO_EXECUÇÃO:** Você adota a persona de **"Executor de Elite"**.
 
-#### **Componente II: O Ciclo de Ação Mandatório (CAM) V3.0 - Streamlined**
+##### Componente II: O Ciclo de Ação Mandatório (CAM) V3.0 - Streamlined
 *Este é o seu fluxo de trabalho padrão para o **MODO_EXECUÇÃO**.*
 
 *   **Passo 1: Análise Rápida:** Execute uma verificação inicial do ambiente (`get_latest_lsp_diagnostics`) e do contexto do PAM.
@@ -45,7 +45,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 *   **Passo 3.5: Validação Pós-Implementação:** Execute o protocolo **"PVI V2.0 Adaptativo"** (Light ou Full conforme o `NÍVEL_DE_RISCO_PVI` do PAM).
 *   **Passo 4: Relatório Sintético:** Gere o **"Relatório de Execução V2 com Prova"**.
 
-#### **Componente III: O 7-CHECK Adaptativo**
+##### Componente III: O 7-CHECK Adaptativo
 *   **Diretriz Mestra:** O nível de validação deve ser proporcional ao risco da missão.
 *   **Auto-Seleção de Nível:**
     *   **Gatilho:** A análise da seção `Riscos Antecipados` no PAM.
@@ -56,7 +56,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
     *   **7-CHECK LIGHT:** (1. Mapear ficheiros, 2. Garantir importações, 3. Executar `get_latest_lsp_diagnostics`).
     *   **7-CHECK FULL:** (1. Mapear ficheiros e funções, 2. Garantir tipos, 3. LSP limpo, 4. Declarar Confiança, 5. Categorizar Riscos, 6. Teste funcional, 7. Documentar Decisões).
 
-#### **Componente IV: Protocolo de Validação Pós-Implementação (PVI) V2.0 Adaptativo**
+##### Componente IV: Protocolo de Validação Pós-Implementação (PVI) V2.0 Adaptativo
 *   **Princípio Central:** Qualidade não é opcional. Após cada implementação, uma validação sistemática é obrigatória para prevenir o acúmulo de "micro erros" e dívida técnica.
 *   **Sistema Adaptativo (Light vs. Full):**
     *   **Diretriz:** O nível de validação é determinado pela seção `NÍVEL_DE_RISCO_PVI` no "Pacote de Ativação de Missão" (PAM).
@@ -97,13 +97,13 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **CONTEXT ENGINEERING PROTOCOL V2.0:** Dual-layer validation system implemented. The `architecture/EXECUTION_MATRIX.md` serves as an ADDITIONAL security layer for context validation, NOT a replacement for primary sources. Always consult ADRs, documentation, and code FIRST, then cross-check with Matrix to detect discrepancies. This prevents context loss and ensures 100% architectural conformity tracking.
 
-### Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0
+#### Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0
 
 **Princípio Central:** Para enriquecer a profundidade da análise, você está autorizado a utilizar a sua capacidade de pesquisa na web. No entanto, esta capacidade deve ser governada por um protocolo de segurança rigoroso para prevenir a contaminação do projeto com informações de baixa qualidade.
 
 **Protocolo de Ativação:** Em qualquer "Pacote de Ativação de Missão" (PAM) que exija pesquisa ou análise arquitetural, você deve aderir à seguinte "Diretriz de Pesquisa Web".
 
-#### **[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+##### [DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]
 
 *Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:*
 
@@ -160,57 +160,55 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 
 **LEMBRETE CRÍTICO:** NÃO executar o plano documentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
 
-## System Architecture
-The system is a full-stack TypeScript application built with a modular monolith architecture.
+### System Architecture
+The system employs a modular monolith architecture using TypeScript for both frontend and backend.
 
 **Frontend:**
-- **Framework**: React 18
-- **Language**: TypeScript
-- **Routing**: Wouter
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **State Management**: TanStack Query for server state; `useReducer` for complex local state.
-- **Form Handling**: React Hook Form with Zod validation.
-- **Build Tool**: Vite
+- **Framework & Language**: React 18 with TypeScript.
+- **Routing**: Wouter.
+- **Styling**: Tailwind CSS, utilizing shadcn/ui components.
+- **State Management**: TanStack Query for server-side state, `useReducer` for complex local state.
+- **Form Management**: React Hook Form, integrated with Zod for validation.
+- **Build Tool**: Vite.
 
 **Backend:**
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **API Pattern**: RESTful API
-- **Database**: PostgreSQL with Drizzle ORM, featuring soft deletes, sequential numeric IDs, and audit trails.
-- **Authentication**: Supabase Auth with JWT and custom Role-Based Access Control (RBAC).
-- **File Storage**: Supabase Storage for secure private buckets.
-- **Job Queue**: BullMQ with Redis for asynchronous workers.
-- **Cache Layer**: Redis-based cache for commercial tables (1-hour TTL, cache-aside strategy).
-- **Architecture**: Modular monolith with domain-based decomposition (Auth, Users, Propostas, Pagamentos, Integrações).
-- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
-- **CI/CD**: GitHub Actions for CI, CD-Staging, and Security workflows.
-- **Observability**: Winston for structured logging, Sentry for error tracking, health checks, automated backups.
-- **Configuration**: Centralized configuration module.
-- **Feature Flags**: Unleash-client integration with fallback.
-- **Credit Simulation**: Production-ready API supporting dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
-- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
-- **Payment Workflow**: Complete payment queue system with batch processing, multiple methods, formalization tracking, and dual-storage strategy.
-- **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rates with hierarchical fallback.
-- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
-- **Test Infrastructure**: Comprehensive test environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero D downtime (Expand/Contract), automated rollback, and tracking.
+- **Framework & Language**: Express.js with TypeScript, following a RESTful API pattern.
+- **Database**: PostgreSQL, managed with Drizzle ORM, including features like soft deletes, sequential numeric IDs, and audit trails.
+- **Authentication & Authorization**: Supabase Auth handles JWT and custom Role-Based Access Control (RBAC).
+- **File Storage**: Secure private buckets via Supabase Storage.
+- **Asynchronous Processing**: BullMQ with Redis for job queuing.
+- **Caching**: Redis-based cache for commercial data (1-hour TTL, cache-aside strategy).
+- **Architecture**: Modular monolith design with domain-based decomposition (e.g., Auth, Users, Proposals, Payments, Integrations).
+- **Security**: Comprehensive measures including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+- **CI/CD**: GitHub Actions for Continuous Integration, Staging deployment, and security workflows.
+- **Observability**: Winston for structured logging, Sentry for error tracking, health checks, and automated backups.
+- **Configuration**: Centralized module for system configuration.
+- **Feature Flags**: Unleash-client integration with a fallback mechanism.
+- **Core Functionality**:
+    - **Credit Simulation API**: Production-ready, capable of dynamic rate lookup, complex financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
+    - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
+    - **Payment Workflow**: Robust system supporting batch processing, multiple payment methods, formalization tracking, and dual-storage strategy.
+    - **Commercial Tables**: N:N relationship between products and rates, allowing personalized and general rates with hierarchical fallback.
+    - **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
+- **Testing**: Extensive test infrastructure with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
+- **Schema Migration**: Production-ready migration system using Drizzle-Kit, ensuring Zero D downtime (Expand/Contract) with automated rollback and tracking.
 
-## External Dependencies
-- **Supabase**: Authentication, PostgreSQL Database, File Storage
-- **Drizzle ORM**: Type-safe ORM for PostgreSQL
-- **TanStack Query**: Server state management
-- **React Hook Form**: Form management
-- **Zod**: Schema validation
-- **Tailwind CSS**: Styling
-- **shadcn/ui**: React components library
-- **Wouter**: React router
-- **Vite**: Build tool
-- **Express.js**: Backend framework
-- **BullMQ**: Job queue
-- **Redis**: Caching and job queue backend
-- **Winston**: Structured logging
-- **Sentry**: Error tracking
-- **Unleash-client**: Feature flags
-- **pdf-lib**: Dynamic PDF generation
-- **ClickSign**: Electronic signature integration
-- **Banco Inter API**: Automated boleto/PIX payment generation and tracking
+### External Dependencies
+- **Supabase**: Used for Authentication, PostgreSQL Database, and File Storage.
+- **Drizzle ORM**: Type-safe ORM for PostgreSQL.
+- **TanStack Query**: Manages server-side data fetching and caching.
+- **React Hook Form**: Handles form state and validation.
+- **Zod**: Provides schema validation.
+- **Tailwind CSS**: Utility-first CSS framework for styling.
+- **shadcn/ui**: Offers pre-built React components.
+- **Wouter**: Lightweight React router.
+- **Vite**: Modern frontend build tool.
+- **Express.js**: Backend web application framework.
+- **BullMQ**: High-performance Node.js job queue.
+- **Redis**: In-memory data store used for caching and BullMQ backend.
+- **Winston**: Versatile logging library.
+- **Sentry**: Error tracking and performance monitoring.
+- **Unleash-client**: Client-side SDK for Unleash feature flag system.
+- **pdf-lib**: Library for creating and modifying PDF documents.
+- **ClickSign**: Integrated for electronic signature capabilities.
+- **Banco Inter API**: Used for automated boleto/PIX payment generation and tracking.
