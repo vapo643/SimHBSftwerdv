@@ -109,7 +109,7 @@ export class PdfMergeService {
           const _pdfDoc = await PDFDocument.load(pdfBuffers[i]);
 
           // Copiar todas as páginas
-          const _pages = await mergedPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+          const pages = await mergedPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
 
           // Adicionar páginas ao documento final
           for (const page of pages) {
@@ -124,7 +124,7 @@ export class PdfMergeService {
       }
 
       // Verificar se tem páginas no documento final
-      const _totalPages = mergedPdfDoc.getPageCount();
+      const totalPages = mergedPdfDoc.getPageCount();
       if (totalPages == 0) {
         throw new Error('Documento final não contém páginas');
       }
@@ -132,12 +132,12 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] 📊 Documento final contém ${totalPages} páginas`);
 
       // 4. SALVAR: Converter para buffer
-      const _mergedPdfBytes = await mergedPdfDoc.save();
-      const _mergedBuffer = Buffer.from(mergedPdfBytes);
+      const mergedPdfBytes = await mergedPdfDoc.save();
+      const mergedBuffer = Buffer.from(mergedPdfBytes);
 
       console.log(`[PDF MERGE] ✅ Carnê gerado com sucesso (${mergedBuffer.length} bytes)`);
 
-      return mergedBuffer; }
+      return mergedBuffer;
     } catch (error) {
       console.error(`[PDF MERGE] ❌ Erro ao gerar carnê:`, error);
       throw error;
@@ -154,12 +154,12 @@ export class PdfMergeService {
     try {
       console.log(`[PDF MERGE] 💾 Salvando carnê no Supabase Storage...`);
 
-      const _timestamp = getBrasiliaTimestamp().replace(/[^0-9]/g, '');
-      const _fileName = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
+      const timestamp = getBrasiliaTimestamp().replace(/[^0-9]/g, '');
+      const fileName = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
 
       // Upload para o Supabase Storage
-      const _supabase = createServerSupabaseAdminClient();
-      const { data: uploadData, error: uploadError } = await _supabase.storage
+      const supabase = createServerSupabaseAdminClient();
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents')
         .upload(fileName, pdfBuffer, {
           contentType: 'application/pdf',
@@ -174,7 +174,7 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] ✅ Upload concluído: ${fileName}`);
 
       // Gerar URL assinada (válida por 1 hora)
-      const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from('documents')
         .createSignedUrl(fileName, 3600); // 1 hora
 
