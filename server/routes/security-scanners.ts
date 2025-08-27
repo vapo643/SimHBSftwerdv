@@ -50,7 +50,8 @@ router.get('/sca/latest', _requireAdmin, async (req: AuthenticatedRequest, res) 
         reportData = JSON.parse(_data);
         reportPath = path;
         break;
-      } catch (e) {
+      }
+catch (e) {
         // Continue trying other paths
       }
     }
@@ -93,11 +94,14 @@ router.get('/sca/latest', _requireAdmin, async (req: AuthenticatedRequest, res) 
             // Check CVSS score or severity
             if (vuln.cvssv3?.baseScore >= 9.0 || vuln.cvssv2?.score >= 9.0) {
               vulnerabilities.critical++;
-            } else if (vuln.cvssv3?.baseScore >= 7.0 || vuln.cvssv2?.score >= 7.0) {
+            }
+else if (vuln.cvssv3?.baseScore >= 7.0 || vuln.cvssv2?.score >= 7.0) {
               vulnerabilities.high++;
-            } else if (vuln.cvssv3?.baseScore >= 4.0 || vuln.cvssv2?.score >= 4.0) {
+            }
+else if (vuln.cvssv3?.baseScore >= 4.0 || vuln.cvssv2?.score >= 4.0) {
               vulnerabilities.medium++;
-            } else {
+            }
+else {
               vulnerabilities.low++;
             }
           });
@@ -115,7 +119,8 @@ router.get('/sca/latest', _requireAdmin, async (req: AuthenticatedRequest, res) 
         _reportPath,
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SCA] Error reading dependency check report:', error);
     res.status(500).json({
       success: false,
@@ -135,7 +140,8 @@ router.post('/sca/run', _requireAdmin, async (req: AuthenticatedRequest, res) =>
 
     try {
       await fs.access(scriptPath);
-    } catch (e) {
+    }
+catch (e) {
       return res.status(500).json({
         success: false,
         error: 'Script de análise não encontrado',
@@ -160,10 +166,11 @@ router.post('/sca/run', _requireAdmin, async (req: AuthenticatedRequest, res) =>
         console.log('[SCA] Analysis completed:', stdout);
         if (stderr) console.error('[SCA] Warnings:', stderr);
       })
-      .catch((error) => {
+      .catch ((error) => {
         console.error('[SCA] Analysis failed:', error);
       });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SCA] Error running dependency check:', error);
     res.status(500).json({
       success: false,

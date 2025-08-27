@@ -113,7 +113,8 @@ export function useProposalEffects() {
           _diasCarencia,
           parametrosUtilizados: response.parametrosUtilizados,
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error('Erro na simulação:', error);
         setError('simulation', 'Erro ao calcular simulação');
 
@@ -123,7 +124,8 @@ export function useProposalEffects() {
             description: error.message,
             variant: 'destructive',
           });
-        } else {
+        }
+else {
           toast({
             title: 'Erro na simulação',
             description: 'Não foi possível calcular a simulação. Tente novamente.',
@@ -158,9 +160,11 @@ export function useProposalEffects() {
 
     if (valor < valorMinimo) {
       setError('valorSolicitado', `Valor mínimo: R$ ${valorMinimo.toLocaleString('pt-BR')}`);
-    } else if (valor > valorMaximo) {
+    }
+else if (valor > valorMaximo) {
       setError('valorSolicitado', `Valor máximo: R$ ${valorMaximo.toLocaleString('pt-BR')}`);
-    } else {
+    }
+else {
       setError('valorSolicitado', '');
     }
   }, [state.loanData.valorSolicitado, state.context]);
@@ -175,9 +179,11 @@ export function useProposalEffects() {
 
     if (state.loanData.prazo < prazoMinimo) {
       setError('prazo', `Prazo mínimo: ${prazoMinimo} meses`);
-    } else if (state.loanData.prazo > prazoMaximo) {
+    }
+else if (state.loanData.prazo > prazoMaximo) {
       setError('prazo', `Prazo máximo: ${prazoMaximo} meses`);
-    } else {
+    }
+else {
       setError('prazo', '');
     }
   }, [state.loanData.prazo, state.context]);

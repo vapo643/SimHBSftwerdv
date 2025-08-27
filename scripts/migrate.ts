@@ -230,7 +230,7 @@ runMigration()
       process.exit(0);
     }
   })
-  .catch((error) => {
+  .catch ((error) => {
     logger.error('💥 Erro fatal no processo de migração:', error);
     process.exit(1);
   });

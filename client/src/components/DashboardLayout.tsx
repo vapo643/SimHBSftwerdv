@@ -166,16 +166,18 @@ catch {
 
                       case 'FINANCEIRO': {
                         // FINANCEIRO: Sem acesso ao workflow principal
-                        return false; }
+                        return false;
 
                       case 'GERENTE': {
+        break;
+      }
                       case 'ADMINISTRADOR': {
                       case 'DIRETOR': {
                         // Gestores: Acesso completo
-                        return true; }
+                        return true;
 
                       default:
-                        return false; }
+                        return false;
                     }
                   })
                   .map((item) => {

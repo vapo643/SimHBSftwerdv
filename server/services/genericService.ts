@@ -31,7 +31,8 @@ export class GenericService {
       };
 
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[${this.serviceName}] Operation failed:`, error);
       throw new Error(`${this.serviceName} operation failed: ${error.message}`);
     }
@@ -52,7 +53,8 @@ export class GenericService {
         serviceName: this.serviceName,
         timestamp: new Date().toISOString(),
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[${this.serviceName}] Connection test failed:`, error);
       throw error;
     }

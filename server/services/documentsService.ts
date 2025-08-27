@@ -48,7 +48,8 @@ export class DocumentsService {
 
           if (documentsIndex !== -1) {
             filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-          } else {
+          }
+else {
             const _urlParts = doc.url.split('/');
             const _fileName = urlParts[urlParts.length - 1];
             filePath = `proposta-${propostaId}/${fileName}`;
@@ -67,7 +68,8 @@ export class DocumentsService {
             uploadDate: doc.createdAt,
             category: 'supporting',
           });
-        } catch (error) {
+        }
+catch (error) {
           console.error(
             `[DOCUMENTS_SERVICE] Error generating signed URL for ${doc.nomeArquivo}:`,
             error
@@ -89,7 +91,8 @@ export class DocumentsService {
         totalDocuments: documents.length,
         _documents,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error);
       throw error;
     }
@@ -157,7 +160,8 @@ export class DocumentsService {
           category: 'supporting',
         },
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_SERVICE] Error uploading document:', error);
       return {
         success: false,
@@ -197,7 +201,8 @@ export class DocumentsService {
         filename: `documento-${path.split('/').pop()}`,
         contentType: 'application/pdf',
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_SERVICE] Error downloading document:', error);
       return {
         success: false,

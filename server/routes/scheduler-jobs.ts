@@ -5,7 +5,8 @@ router.get('/jobs', async (req, res) => {
   try {
     const _result = await adminService.executeOperation('scheduler_jobs', req.query);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

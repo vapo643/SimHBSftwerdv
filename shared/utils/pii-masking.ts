@@ -74,7 +74,8 @@ export function maskPhone(phone: string | null | undefined): string {
   if (digits.length == 11) {
     // Mobile with 9 digits
     return `(${areaCode}) *****-**${lastTwo}`;
-  } else {
+  }
+else {
     // Landline with 8 digits
     return `(${areaCode}) ****-**${lastTwo}`;
   }
@@ -163,7 +164,8 @@ export function maskAddress(address: string | null | undefined): string {
       if (match.length == 2) {
         // Only state matched
         return `***, ${match[1].toUpperCase()}`;
-      } else {
+      }
+else {
         // City and state matched
         return `***, ${match[1].trim()} - ${match[2].toUpperCase()}`;
       }
@@ -364,7 +366,8 @@ export function sanitizeObject<T extends Record<string, any>>(
           const cleanValue = value.replace(/\D/g, '');
           if (cleanValue.length == 11) {
             sanitized[key] = maskCPF(value);
-          } else {
+          }
+else {
             sanitized[key] = maskPII(value);
           }
         }
@@ -406,25 +409,33 @@ export function sanitizeObject<T extends Record<string, any>>(
         // Auto-detect type based on field name
         if (lowerKey.includes('cpf')) {
           sanitized[key] = maskCPF(value);
-        } else if (lowerKey.includes('rg')) {
+        }
+else if (lowerKey.includes('rg')) {
           sanitized[key] = maskRG(value);
-        } else if (
+        }
+else if (
           lowerKey.includes('phone') ||
           lowerKey.includes('telefone') ||
           lowerKey.includes('celular')
         ) {
           sanitized[key] = maskPhone(value);
-        } else if (lowerKey.includes('email')) {
+        }
+else if (lowerKey.includes('email')) {
           sanitized[key] = maskEmail(value);
-        } else if (lowerKey.includes('conta') || lowerKey.includes('account')) {
+        }
+else if (lowerKey.includes('conta') || lowerKey.includes('account')) {
           sanitized[key] = maskBankAccount(value);
-        } else if (lowerKey.includes('address') || lowerKey.includes('endereco')) {
+        }
+else if (lowerKey.includes('address') || lowerKey.includes('endereco')) {
           sanitized[key] = maskAddress(value);
-        } else if (lowerKey.includes('cnpj')) {
+        }
+else if (lowerKey.includes('cnpj')) {
           sanitized[key] = maskCNPJ(value);
-        } else if (lowerKey.includes('card') || lowerKey.includes('cartao')) {
+        }
+else if (lowerKey.includes('card') || lowerKey.includes('cartao')) {
           sanitized[key] = maskCreditCard(value);
-        } else {
+        }
+else {
           sanitized[key] = maskPII(value);
         }
       }

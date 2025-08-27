@@ -28,7 +28,7 @@ router.post(
       const _proposta = queryResult[0];
 
       if (!proposta) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.log(`[INTER FIX] ✅ Proposta encontrada`);

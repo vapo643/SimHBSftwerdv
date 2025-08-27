@@ -67,7 +67,8 @@ async function testAdminAccess() {
     }
 
     return true;
-  } catch (error) {
+  }
+catch (error) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
@@ -105,7 +106,8 @@ async function testDiretorAccess() {
     );
 
     return true;
-  } catch (error) {
+  }
+catch (error) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
@@ -134,7 +136,8 @@ async function testGerenteAccess() {
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
     return false;
-  } catch (error) {
+  }
+catch (error) {
     if (error.response?.status == 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Mensagem: ${error.response.data.message}${colors.reset}`);
@@ -145,7 +148,8 @@ async function testGerenteAccess() {
         `${colors.green}✅ Role do usuário: ${error.response.data.userRole}${colors.reset}`
       );
       return true;
-    } else {
+    }
+else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
@@ -174,12 +178,14 @@ async function testAtendenteAccess() {
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
     return false;
-  } catch (error) {
+  }
+catch (error) {
     if (error.response?.status == 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Bloqueado para ATENDENTE como esperado${colors.reset}`);
       return true;
-    } else {
+    }
+else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
@@ -207,12 +213,14 @@ async function testNoTokenAccess() {
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 401${colors.reset}`
     );
     return false;
-  } catch (error) {
+  }
+catch (error) {
     if (error.response?.status == 401) {
       console.log(`${colors.green}✅ Status: 401 - Não autenticado corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Mensagem: ${error.response.data.message}${colors.reset}`);
       return true;
-    } else {
+    }
+else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
@@ -248,10 +256,12 @@ async function testGetSpecificContract(contractId: string) {
     );
 
     return true;
-  } catch (error) {
+  }
+catch (error) {
     if (error.response?.status == 404) {
       console.log(`${colors.yellow}⚠️ Contrato ${contractId} não encontrado (404)${colors.reset}`);
-    } else {
+    }
+else {
       console.log(
         `${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`
       );
@@ -290,7 +300,8 @@ async function testSearchFilters() {
       console.log(`${colors.green}✅ Filtro aplicado com sucesso${colors.reset}`);
       console.log(`   - Contratos retornados: ${response.data.contratos?.length || 0}`);
       console.log(`   - Filtros aplicados:`, response.data.filtrosAplicados);
-    } catch (error) {
+    }
+catch (error) {
       console.log(`${colors.red}❌ Erro ao aplicar filtro: ${error.message}${colors.reset}`);
     }
   }
@@ -335,7 +346,8 @@ async function runAllTests() {
 
   if (failed == 0) {
     console.log(`\n${colors.green}✅ TODOS OS TESTES PASSARAM!${colors.reset}\n`);
-  } else {
+  }
+else {
     console.log(`\n${colors.red}❌ ALGUNS TESTES FALHARAM${colors.reset}\n`);
   }
 }
@@ -375,7 +387,7 @@ function printInstructions() {
 // Executar se chamado diretamente
 if (require.main == module) {
   printInstructions();
-  runAllTests().catch(console.error);
+  runAllTests().catch (console.error);
 }
 
 export { runAllTests, testAdminAccess, testDiretorAccess };

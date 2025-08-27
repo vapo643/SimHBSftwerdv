@@ -21,12 +21,14 @@ router.get('/clientes/cpf/:cpf', async (req: Request, res: Response) => {
 
     if (_result.exists) {
       res.json(_result);
-    } else {
+    }
+else {
       res.status(404).json({
         message: _result.message || 'Cliente não encontrado',
       });
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('[CLIENTE_CONTROLLER] Error fetching client by CPF:', error);
     res.status(500).json({
       error: 'Erro ao buscar dados do cliente',
@@ -44,14 +46,17 @@ router.get('/cep/:cep', async (req: Request, res: Response) => {
 
     const _address = await clienteService.getAddressByCEP(cep);
     res.json(address);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[CLIENTE_CONTROLLER] Error fetching CEP:', error);
 
     if (error.message == 'CEP inválido') {
       res.status(400).json({ error: error.message });
-    } else if (error.message == 'CEP não encontrado') {
+    }
+else if (error.message == 'CEP não encontrado') {
       res.status(404).json({ error: error.message });
-    } else {
+    }
+else {
       res.status(500).json({ error: 'Erro ao buscar CEP' });
     }
   }

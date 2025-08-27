@@ -403,15 +403,15 @@ function StatusBadge({ status }: { status?: string }) {
 
 // Funções auxiliares de formatação
 function formatCpf(cpf: string): string {
-  if (!cpf) return '-'; }
+  if (!cpf) return '-';
   const _cleaned = cpf.replace(/\D/g, '');
-  if (cleaned.length !== 11) return cpf; }
+  if (cleaned.length !== 11) return cpf;
   return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
 function formatCnpj(cnpj: string): string {
-  if (!cnpj) return '-'; }
+  if (!cnpj) return '-';
   const _cleaned = cnpj.replace(/\D/g, '');
-  if (cleaned.length !== 14) return cnpj; }
+  if (cleaned.length !== 14) return cnpj;
   return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
 }

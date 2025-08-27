@@ -37,6 +37,8 @@ const _pdfWorker = new Worker(
     try {
       switch (job.data.type) {
         case 'GENERATE_CARNE': {
+        break;
+        }
           console.log(`[WORKER:PDF] 📚 Generating carnê for proposal ${job.data.propostaId}`);
 
           // Update job progress
@@ -67,6 +69,8 @@ const _pdfWorker = new Worker(
           };
 
         case 'MERGE_PDFS': {
+        break;
+        }
           console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
           // Implementation for generic PDF merging
           // TODO: Implement when needed
@@ -95,6 +99,8 @@ const _boletoWorker = new Worker(
     try {
       switch (job.data.type) {
         case 'SYNC_BOLETOS': {
+        break;
+        }
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
 
           await job.updateProgress(10);
@@ -122,6 +128,8 @@ const _boletoWorker = new Worker(
           };
 
         case 'GENERATE_AND_SYNC_CARNE': {
+        break;
+        }
           console.log(
             `[WORKER:BOLETO] 📚 Full carnê generation for proposal ${job.data.propostaId}`
           );
@@ -176,11 +184,15 @@ const _documentWorker = new Worker(
     try {
       switch (job.data.type) {
         case 'UPLOAD_TO_CLICKSIGN': {
+        break;
+        }
           console.log(`[WORKER:DOC] 📤 Uploading document to ClickSign`);
           // TODO: Implement ClickSign upload
           return { success: true, message: 'ClickSign upload not yet implemented' }
 
         case 'DOWNLOAD_SIGNED_DOCUMENT': {
+        break;
+        }
           console.log(`[WORKER:DOC] 📥 Downloading signed document from ClickSign`);
           // TODO: Implement ClickSign download
           return { success: true, message: 'ClickSign download not yet implemented' }
@@ -208,11 +220,15 @@ const _notificationWorker = new Worker(
     try {
       switch (job.data.type) {
         case 'SEND_EMAIL': {
+        break;
+        }
           console.log(`[WORKER:NOTIFY] 📧 Sending email notification`);
           // TODO: Implement email sending
           return { success: true, message: 'Email notification not yet implemented' }
 
         case 'WEBHOOK': {
+        break;
+        }
           console.log(`[WORKER:NOTIFY] 🔔 Sending webhook notification`);
           // TODO: Implement webhook
           return { success: true, message: 'Webhook not yet implemented' }

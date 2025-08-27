@@ -162,7 +162,7 @@ export default function Pagamentos() {
           method: 'GET',
         });
         console.log('[PAGAMENTOS] Resposta recebida:',_response);
-        return response as Pagamento[]; }
+        return response as Pagamento[];
       }
 catch (err) {
         console.error('[PAGAMENTOS] Erro ao buscar:', err);
@@ -179,7 +179,7 @@ catch (err) {
   const { data: verificacoes, isLoading: isLoadingVerificacao } = useQuery({
     queryKey: ['/api/pagamentos', selectedPagamento?.id, 'verificar-documentos'],
     queryFn: async () => {
-      if (!selectedPagamento?.id) return null; }
+      if (!selectedPagamento?.id) return null;
       return await apiRequest(`/api/pagamentos/${selectedPagamento.id}/verificar-documentos`, {
         method: 'GET',
       });
@@ -280,7 +280,7 @@ catch (err) {
     ? pagamentos.filter((pagamento) => {
         // Se não há termo de busca, retorna todos
         if (!searchTerm || searchTerm.trim() == '') {
-          return true; }
+          return true;
         }
 
         const _matchesSearch =
@@ -289,7 +289,7 @@ catch (err) {
           pagamento.cpfCliente.includes(searchTerm) ||
           pagamento.propostaId.includes(searchTerm);
 
-        return matchesSearch; }
+        return matchesSearch;
       })
     : [];
 
@@ -342,46 +342,46 @@ catch (err) {
   const _getStatusColor = (status: string) => {
     switch (status) {
       case 'aguardando_aprovacao': {
-        return 'bg-yellow-100 text-yellow-800'; }
+        return 'bg-yellow-100 text-yellow-800';
       case 'aprovado': {
-        return 'bg-blue-100 text-blue-800'; }
+        return 'bg-blue-100 text-blue-800';
       case 'em_processamento': {
-        return 'bg-purple-100 text-purple-800'; }
+        return 'bg-purple-100 text-purple-800';
       case 'pronto_pagamento': {
-        return 'bg-indigo-100 text-indigo-800'; }
+        return 'bg-indigo-100 text-indigo-800';
       case 'pagamento_autorizado': {
-        return 'bg-emerald-100 text-emerald-800'; }
+        return 'bg-emerald-100 text-emerald-800';
       case 'pago': {
-        return 'bg-green-100 text-green-800'; }
+        return 'bg-green-100 text-green-800';
       case 'rejeitado': {
-        return 'bg-red-100 text-red-800'; }
+        return 'bg-red-100 text-red-800';
       case 'cancelado': {
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const _getStatusLabel = (status: string) => {
     switch (status) {
       case 'aguardando_aprovacao': {
-        return 'Aguardando Aprovação'; }
+        return 'Aguardando Aprovação';
       case 'aprovado': {
-        return 'Aprovado'; }
+        return 'Aprovado';
       case 'em_processamento': {
-        return 'Em Processamento'; }
+        return 'Em Processamento';
       case 'pronto_pagamento': {
-        return 'Pronto para Pagamento'; }
+        return 'Pronto para Pagamento';
       case 'pagamento_autorizado': {
-        return 'Pagamento Autorizado'; }
+        return 'Pagamento Autorizado';
       case 'pago': {
-        return 'Pago'; }
+        return 'Pago';
       case 'rejeitado': {
-        return 'Rejeitado'; }
+        return 'Rejeitado';
       case 'cancelado': {
-        return 'Cancelado'; }
+        return 'Cancelado';
       default:
-        return status; }
+        return status;
     }
   };
 
@@ -393,13 +393,13 @@ catch (err) {
   };
 
   const _formatCPF = (cpf: string) => {
-    if (!cpf) return ''; }
+    if (!cpf) return '';
     const _cleaned = cpf.replace(/\D/g, '');
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   const _formatBankAccount = (conta) => {
-    return `${conta.banco} | Ag: ${conta.agencia} | Conta: ${conta.conta} (${conta.tipoConta})`; }
+    return `${conta.banco} | Ag: ${conta.agencia} | Conta: ${conta.conta} (${conta.tipoConta})`;
   };
 
   const _userHasApprovalPermission = () => {

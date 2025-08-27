@@ -143,7 +143,7 @@ router.post('/change-email', _jwtAuthMiddleware, async (req: AuthenticatedReques
   }
 catch (error) {
     if (error.name == 'ZodError') {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.error('Email change error:', error);
@@ -232,7 +232,7 @@ router.post('/verify-email-change', async (req, res) => {
   }
 catch (error) {
     if (error.name == 'ZodError') {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.error('Email verification error:', error);

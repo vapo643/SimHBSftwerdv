@@ -51,7 +51,7 @@ const PartnersPage: React.FC = () => {
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
       const _response = await api.get<Parceiro[]>('/api/parceiros');
-      return Array.isArray(_response) ? response : (response as unknown).data || []; }
+      return Array.isArray(_response) ? response : (response as unknown).data || [];
     },
   });
 
@@ -59,7 +59,7 @@ const PartnersPage: React.FC = () => {
   const _createMutation = useMutation({
     mutationFn: async (data: InsertParceiro) => {
       const _response = await api.post<Parceiro>('/api/admin/parceiros',_data);
-      return (response as unknown).data || response; }
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -83,7 +83,7 @@ const PartnersPage: React.FC = () => {
   const _updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertParceiro> }) => {
       const _response = await api.put<Parceiro>(`/api/admin/parceiros/${id}`,_data);
-      return (response as unknown).data || response; }
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -107,7 +107,7 @@ const PartnersPage: React.FC = () => {
   const _deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       const _response = await api.delete(`/api/admin/parceiros/${id}`);
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });

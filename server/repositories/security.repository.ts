@@ -120,7 +120,7 @@ catch (error) {
         })
         .returning();
 
-      return result[0];
+      return _result[0];
     }
 catch (error) {
       console.error('[SECURITY_REPO] Error logging security event:', error);
@@ -310,12 +310,20 @@ catch (error) {
     const _now = new Date();
     switch (timeRange) {
       case '1h': {
+        break;
+        }
         return new Date(now.getTime() - 60 * 60 * 1000);
       case '24h': {
+        break;
+        }
         return new Date(now.getTime() - 24 * 60 * 60 * 1000);
       case '7d': {
+        break;
+        }
         return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       case '30d': {
+        break;
+        }
         return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       default:
         return new Date(now.getTime() - 60 * 60 * 1000);

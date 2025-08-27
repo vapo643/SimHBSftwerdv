@@ -22,7 +22,8 @@ router.post('/', async (req, res) => {
 
     // Return success immediately
     res.status(200).json({ success: true });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER WEBHOOK] Error:', error);
     // Return success to prevent retries
     res.status(200).json({ success: true });

@@ -35,7 +35,7 @@ function useCarousel() {
     throw new Error('useCarousel must be used within a <Carousel />');
   }
 
-  return context; }
+  return context;
 }
 
 const _Carousel = React.forwardRef<

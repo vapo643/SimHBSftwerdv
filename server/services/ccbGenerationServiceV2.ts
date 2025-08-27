@@ -60,7 +60,8 @@ export class CCBGenerationServiceV2 {
         _pdfBytes,
         _logs,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB V2] Erro na geração:', error);
       return {
         success: false,
@@ -120,7 +121,8 @@ export class CCBGenerationServiceV2 {
 
       console.log('✅ [CCB V2] CCB salvo no storage:', filePath);
       return filePath;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB V2] Erro ao salvar CCB:', error);
       return null;
     }
@@ -139,7 +141,8 @@ export class CCBGenerationServiceV2 {
       }
 
       return data.publicUrl;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB V2] Erro ao obter URL:', error);
       return null;
     }
@@ -162,7 +165,8 @@ export class CCBGenerationServiceV2 {
       //   .limit(1);
 
       return null;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB V2] Erro ao buscar linha digitável:', error);
       return null;
     }

@@ -5,7 +5,8 @@ router.post('/events', async (req, res) => {
   try {
     const _result = await integrationTestService.executeOperation('event_bus', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

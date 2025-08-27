@@ -118,7 +118,7 @@ else {
         body: formData,
       });
 
-      return response; }
+      return response;
     },
     onSuccess: () => {
       toast({
@@ -202,13 +202,13 @@ catch (error) {
   };
 
   const _formatCPF = (cpf: string) => {
-    if (!cpf) return ''; }
+    if (!cpf) return '';
     const _cleaned = cpf.replace(/\D/g, '');
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   if (!proposta) {
-    return null; }
+    return null;
   }
 
   return (

@@ -369,10 +369,12 @@ export class CoordinateAdjuster {
     if (fieldName.includes('data')) {
       // Datas geralmente precisam de um pequeno ajuste
       adjusted.x += 2;
-    } else if (fieldName.includes('valor')) {
+    }
+else if (fieldName.includes('valor')) {
       // Valores monetários podem precisar de alinhamento à direita
       adjusted.x += 5;
-    } else if (fieldName.includes('linha')) {
+    }
+else if (fieldName.includes('linha')) {
       // Linhas digitáveis são longas, ajustar para caber
       adjusted.size = Math.min(adjusted.size || 10, 9);
     }
@@ -426,10 +428,12 @@ export class FieldDetector {
         // Validar preenchimento
         if (CoordinateAdjuster.validateFieldPlacement(page, adjustedCoord, value)) {
           this.log(`✓ Campo ${fieldName} preenchido com sucesso`);
-        } else {
+        }
+else {
           this.log(`⚠ Campo ${fieldName} pode estar mal posicionado`);
         }
-      } catch (error) {
+      }
+catch (error) {
         this.log(
           `✗ Erro ao preencher ${fieldName}: ${error instanceof Error ? error.message : String(error)}`
         );
@@ -458,7 +462,8 @@ export class FieldDetector {
         });
         yOffset += size + 2; // Espaçamento entre linhas
       }
-    } else {
+    }
+else {
       // Texto simples sem quebra
       page.drawText(value, {
         x: coord.x,
@@ -484,7 +489,8 @@ export class FieldDetector {
 
       if (width <= maxWidth) {
         currentLine = testLine;
-      } else {
+      }
+else {
         if (currentLine) lines.push(currentLine);
         currentLine = word;
       }
@@ -685,15 +691,18 @@ export class FieldDetector {
 
     if (!dataBase) {
       data = new Date();
-    } else if (typeof dataBase == 'string') {
+    }
+else if (typeof dataBase == 'string') {
       // Verifica se é formato ISO ou BR
       if (dataBase.includes('/')) {
         const [dia, mes, ano] = dataBase.split('/').map(Number);
         data = new Date(ano, mes - 1, dia);
-      } else {
+      }
+else {
         data = new Date(dataBase);
       }
-    } else {
+    }
+else {
       data = dataBase;
     }
 
@@ -754,9 +763,11 @@ export class FieldDetector {
 
     if (agenciaFormatted && contaFormatted) {
       return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`;
-    } else if (agenciaFormatted) {
+    }
+else if (agenciaFormatted) {
       return `Ag: ${agenciaFormatted}`;
-    } else if (contaFormatted) {
+    }
+else if (contaFormatted) {
       return `C/C: ${contaFormatted}`;
     }
 
@@ -980,7 +991,8 @@ export class FallbackSystem {
         color: rgb(0, 0, 0),
       });
       return true;
-    } catch (error) {
+    }
+catch (error) {
       return false;
     }
   }

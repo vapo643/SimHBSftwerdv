@@ -39,7 +39,8 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
         user: this.mapSupabaseUser(user),
         valid: true,
       };
-    } catch (error) {
+    }
+catch (error) {
       return {
         user: {} as ServerUser,
         valid: false,
@@ -52,7 +53,8 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
       // Para Supabase, precisaríamos de um token administrativo para buscar usuário por ID
       // Por agora, retornamos null pois essa operação requer privilégios admin
       return null;
-    } catch (error) {
+    }
+catch (error) {
       return null;
     }
   }

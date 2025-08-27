@@ -65,7 +65,7 @@ const TabelasComerciais: React.FC = () => {
     queryKey: ['tabelas-comerciais-admin'],
     queryFn: async () => {
       const _response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
-      return Array.isArray(_response) ? response : (response as unknown).data || []; }
+      return Array.isArray(_response) ? response : (response as unknown).data || [];
     },
   });
 
@@ -79,7 +79,7 @@ const TabelasComerciais: React.FC = () => {
         produtoIds: data.produtoIds || [],
         comissao: Number(data.comissao),
       });
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais-admin'] });
@@ -109,7 +109,7 @@ const TabelasComerciais: React.FC = () => {
         produtoIds: data.data.produtoIds || [],
         comissao: Number(data.data.comissao),
       });
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais-admin'] });

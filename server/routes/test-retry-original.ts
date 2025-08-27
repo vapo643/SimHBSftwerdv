@@ -53,7 +53,8 @@ router.post('/retry', async (req: Request, res: Response) => {
         data: testData,
         hint: 'Observe os logs do worker para ver as tentativas de retry',
       });
-    } else {
+    }
+else {
       // Usar queue real em produção
       const { Queue } = await import('bullmq');
       const { Redis } = await import('ioredis');
@@ -107,7 +108,8 @@ router.post('/retry', async (req: Request, res: Response) => {
         hint: 'Observe os logs do worker para ver as tentativas de retry com backoff exponencial',
       });
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('[TEST RETRY] ❌ Erro ao adicionar job de teste:', error);
 
     return res.status(500).json({
@@ -134,7 +136,8 @@ router.get('/retry/status', async (req: Request, res: Response) => {
       message: 'Fila de teste de retry operacional',
       retryInfo: 'Jobs nesta fila sempre falham para demonstrar o mecanismo de retry',
     });
-  } catch (error) {
+  }
+catch (error) {
     return res.status(500).json({
       success: false,
       error: 'Erro ao verificar status',

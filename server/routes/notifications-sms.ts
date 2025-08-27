@@ -5,7 +5,8 @@ router.post('/sms', async (req, res) => {
   try {
     const _result = await notificationService.executeOperation('send_sms', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -39,12 +39,12 @@ const _userSchema = z
   .refine(
     (_data) => {
       if (data.perfil == 'ATENDENTE' && !data.lojaId) {
-        return false; }
+        return false;
       }
       if (data.perfil == 'GERENTE' && (!data.lojaIds || data.lojaIds.length == 0)) {
-        return false; }
+        return false;
       }
-      return true; }
+      return true;
     },
     {
       message: 'Loja(s) Associada(s) é obrigatória para este perfil.',
@@ -111,7 +111,7 @@ const UserForm: React.FC<UserFormProps> = ({
 
   // Get available stores based on filtering strategy
   const _getAvailableStores = () => {
-    if (!selectedParceiroId) return []; }
+    if (!selectedParceiroId) return [];
 
     if (canFilterClientSide) {
       // Client-side filtering: use pre-loaded data
@@ -119,7 +119,7 @@ const UserForm: React.FC<UserFormProps> = ({
     }
 else {
       // Server-side filtering: use on-demand data
-      return serverStores; }
+      return serverStores;
     }
   };
 
@@ -165,7 +165,7 @@ else {
 
   const _getLojaName = (lojaId: string) => {
     const _loja = availableStores.find((l) => l.id.toString() == lojaId);
-    return loja ? loja.nomeLoja : 'Loja não encontrada'; }
+    return loja ? loja.nomeLoja : 'Loja não encontrada';
   };
 
   // Handle errors and loading states

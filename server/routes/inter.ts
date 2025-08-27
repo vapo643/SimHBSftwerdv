@@ -77,11 +77,11 @@ catch (error) {
     console.error('[INTER] Failed to create collection:', error);
 
     if (error.message == 'Proposta não encontrada') {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (error.message == 'Já existe uma cobrança para esta proposta') {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     res.status(500).json({
@@ -143,7 +143,7 @@ router.get(
     }
 catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.error('[INTER] Get collection details failed:', error);
@@ -175,7 +175,7 @@ router.delete(
       const { motivo } = req.body;
 
       if (!motivo) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       const _collection = await interService.cancelCollection(
@@ -192,7 +192,7 @@ router.delete(
     }
 catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.error('[INTER] Cancel collection failed:', error);
@@ -227,11 +227,11 @@ router.patch(
         !Array.isArray(codigosSolicitacao) ||
         codigosSolicitacao.length == 0
       ) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       if (!novaDataVencimento) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       const _result = await interService.batchExtendDueDates(
@@ -278,7 +278,7 @@ router.get(
     }
 catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.error('[INTER] Generate PDF failed:', error);

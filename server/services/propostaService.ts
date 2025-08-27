@@ -87,7 +87,8 @@ export class PropostaService {
           motivoSuspensao: novoStatus == 'suspensa' ? 'Ação manual do usuário' : null,
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof InvalidTransitionError) {
         throw new Error(error.message);
       }
@@ -149,7 +150,8 @@ export class PropostaService {
             caminho: proposta.caminhoCcbAssinado,
           };
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error('[CCB] Erro ao buscar CCB pelo caminho salvo:', error);
       }
     }
@@ -171,7 +173,8 @@ export class PropostaService {
           fonte: 'storage_legado',
         };
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CCB] Erro ao buscar no Storage legado:', error);
     }
 

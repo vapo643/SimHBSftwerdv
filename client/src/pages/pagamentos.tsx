@@ -147,7 +147,7 @@ export default function Pagamentos() {
     queryKey: ['/api/pagamentos'],
     queryFn: async () => {
       const _response = await apiRequest('/api/pagamentos');
-      return response as Pagamento[]; }
+      return response as Pagamento[];
     },
   });
 
@@ -170,7 +170,7 @@ export default function Pagamentos() {
           observacoesFormalização: data.observacoes,
         }),
       });
-      return response; }
+      return response;
     },
     onSuccess: () => {
       toast({
@@ -230,7 +230,7 @@ export default function Pagamentos() {
   };
 
   const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'; }
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
@@ -245,7 +245,7 @@ export default function Pagamentos() {
       QUITADO: 'bg-green-600',
       pago: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
   const _getStatusText = (status: string) => {
@@ -259,7 +259,7 @@ export default function Pagamentos() {
       QUITADO: 'Quitado',
       pago: 'Pago',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status; }
+    return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
   const _getMethodText = (method: string) => {
@@ -269,7 +269,7 @@ export default function Pagamentos() {
       pix: 'PIX',
       boleto: 'Boleto',
     };
-    return methodTexts[method as keyof typeof methodTexts] || method; }
+    return methodTexts[method as keyof typeof methodTexts] || method;
   };
 
   // Backend now filters by V2.0 status including BOLETOS_EMITIDOS
@@ -289,7 +289,7 @@ export default function Pagamentos() {
 
     const _matchesStatus = filterStatus == 'all' || proposta.status == filterStatus;
 
-    return matchesSearch && matchesStatus; }
+    return matchesSearch && matchesStatus;
   });
 
   // Sort propostas
@@ -321,10 +321,10 @@ else {
     }
 
     if (sortOrder == 'asc') {
-      return aVal > bVal ? 1 : -1; }
+      return aVal > bVal ? 1 : -1;
     }
 else {
-      return aVal < bVal ? 1 : -1; }
+      return aVal < bVal ? 1 : -1;
     }
   });
 

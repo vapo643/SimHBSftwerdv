@@ -123,7 +123,7 @@ else {
       if (shouldUseClientSideFiltering && allStores) {
         return allStores.filter((store) => store.parceiroId == partnerId);
       }
-      return []; }
+      return [];
     },
 
     // Data readiness flags
@@ -137,7 +137,7 @@ export function useStoresByPartner(partnerId: number | null, enabled = true) {
   return useQuery({
     queryKey: partnerId ? queryKeys.stores.byPartner(partnerId) : [],
     queryFn: async () => {
-      if (!partnerId) return []; }
+      if (!partnerId) return [];
       const _response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);
       return 'data' in response ? response.data : (response as Store[]);
     },

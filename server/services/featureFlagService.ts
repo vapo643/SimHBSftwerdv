@@ -143,7 +143,8 @@ class FeatureFlagService {
 
       this.initialized = true;
       logger.info(`Feature flag service initialized for ${this._config.environment}`);
-    } catch (error) {
+    }
+catch (error) {
       logger.error('Failed to initialize feature flags:', error);
       this.initialized = true; // Marca como inicializado para usar fallback
     }
@@ -189,7 +190,8 @@ class FeatureFlagService {
       const _enabled = unleashIsEnabled(flagName, sanitizedContext);
       logger.debug(`Flag ${flagName}: ${enabled}`, { context: sanitizedContext });
       return enabled;
-    } catch (error) {
+    }
+catch (error) {
       logger.error(`Error checking flag ${flagName}:`, error);
       // Em caso de erro, usa fallback
       return this.fallbackFlags.get(flagName) ?? false;
@@ -203,7 +205,7 @@ class FeatureFlagService {
     flagNames: string[],
     context?: FeatureFlagContext
   ): Promise<Record<string, boolean>> {
-    const results: Record<string, boolean> = {};
+    const _results: Record<string, boolean> = {};
 
     // Executa verificações em paralelo
     await Promise.all(
@@ -212,7 +214,7 @@ class FeatureFlagService {
       })
     );
 
-    return results;
+    return _results;
   }
 
   /**
@@ -243,7 +245,8 @@ class FeatureFlagService {
       const _variant = getVariant(flagName, sanitizedContext);
       logger.debug(`Variant for ${flagName}:`, variant);
       return variant;
-    } catch (error) {
+    }
+catch (error) {
       logger.error(`Error getting variant for ${flagName}:`, error);
       return { name: 'disabled', enabled: false };
     }

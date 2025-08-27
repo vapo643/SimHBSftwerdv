@@ -20,7 +20,8 @@ router.get('/teste', async (req, res) => {
   try {
     const _resultado = await alertasProativosService.testarServico();
     res.json(resultado);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS TESTE] Erro:', error);
     res.status(500).json({
       sucesso: false,
@@ -48,7 +49,7 @@ router.post('/executar', _jwtAuthMiddleware, async (req, res) => {
     console.log(`[ALERTAS] Execução manual solicitada por: ${req.user?.email}`);
 
     // Executar verificação em background
-    alertasProativosService.executarVerificacaoDiaria().catch((error) => {
+    alertasProativosService.executarVerificacaoDiaria().catch ((error) => {
       console.error('[ALERTAS] Erro na execução manual:', error);
     });
 
@@ -56,7 +57,8 @@ router.post('/executar', _jwtAuthMiddleware, async (req, res) => {
       success: true,
       message: 'Verificação de alertas iniciada em background',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS EXECUTAR] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -123,7 +125,8 @@ router.get('/notificacoes', _jwtAuthMiddleware, async (req, res) => {
       notificacoes: listaNotificacoes,
       totalNaoLidas: naoLidas || 0,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS NOTIFICACOES] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -171,7 +174,8 @@ router.post('/notificacoes/:id/marcar-lida', _jwtAuthMiddleware, async (req, res
 
     console.log(`[ALERTAS] Notificação ${id} marcada como lida para usuário ${userEmail}`);
     res.json({ success: true });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS MARCAR LIDA] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -224,7 +228,8 @@ router.post('/notificacoes/marcar-todas-lidas', _jwtAuthMiddleware, async (req, 
       success: true,
       count: resultado.length,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS MARCAR TODAS] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -279,7 +284,8 @@ router.delete('/notificacoes/all', _jwtAuthMiddleware, async (req, res) => {
       message: 'Histórico de notificações limpo com sucesso',
       notificacoesArquivadas: resultado.length,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS LIMPAR HISTÓRICO] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -306,7 +312,8 @@ router.get('/regras', _jwtAuthMiddleware, async (req, res) => {
     const _regras = await db.select().from(regrasAlertas).orderBy(regrasAlertas.nome);
 
     res.json(regras);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS REGRAS] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -347,7 +354,8 @@ router.get('/historico', _jwtAuthMiddleware, async (req, res) => {
       .limit(100);
 
     res.json(historico);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ALERTAS HISTORICO] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',

@@ -360,7 +360,7 @@ router.get(
 
       let _urlCcbAssinado = null;
       let _urlCcbOriginal = null;
-      let documentosAdicionais: Record<string, unknown>[]>{ path: string; url: string | null; nome: string }> = [];
+      let documentosAdicionais: Array<{ path: string; url: string | null; nome: string }> = [];
 
       if (contratoData.caminhoCcbAssinado) {
         const { data: ccbUrl } = supabaseAdmin.storage

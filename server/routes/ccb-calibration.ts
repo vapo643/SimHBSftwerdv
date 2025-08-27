@@ -5,7 +5,8 @@ router.post('/calibrate', async (req, res) => {
   try {
     const _result = await ccbTestService.executeOperation('calibrate', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

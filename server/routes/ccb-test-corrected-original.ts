@@ -69,7 +69,8 @@ router.post('/test/:propostaId', _jwtAuthMiddleware, async (req, res) => {
       };
 
       console.log('📋 Usando dados de teste completos com todos os campos mapeados');
-    } else {
+    }
+else {
       // Buscar dados reais do banco
       const [proposta] = await db
         .select()
@@ -159,7 +160,8 @@ router.post('/test/:propostaId', _jwtAuthMiddleware, async (req, res) => {
           .filter(Boolean),
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro no teste CCB corrigido:', error);
     res.status(500).json({
       success: false,
@@ -228,7 +230,8 @@ router.get('/field-mapping', _jwtAuthMiddleware, async (req, res) => {
         status: 'Sistema funcionando com mapeamento corrigido',
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro ao obter mapeamento',
@@ -315,7 +318,8 @@ router.post('/validate-proposal/:propostaId', _jwtAuthMiddleware, async (req, re
           : '⚠️ CCB pode ser gerado mas alguns campos estarão vazios'
         : '❌ Preencha os campos obrigatórios antes de gerar o CCB',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro na validação:', error);
     res.status(500).json({
       success: false,

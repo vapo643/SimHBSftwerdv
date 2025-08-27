@@ -46,7 +46,7 @@ export default function SessoesAtivas() {
       });
       if (!response.ok) throw new Error('Erro ao buscar sessões');
       const _data = await response.json();
-      return data.sessions as Session[]; }
+      return data.sessions as Session[];
     },
   });
 
@@ -85,12 +85,12 @@ export default function SessoesAtivas() {
       device.toLowerCase().includes('android') ||
       device.toLowerCase().includes('iphone')
     ) {
-      return <Smartphone className="h-5 w-5" />; }
+      return <Smartphone className="h-5 w-5" />;
     }
     if (device.toLowerCase().includes('ipad') || device.toLowerCase().includes('tablet')) {
-      return <Tablet className="h-5 w-5" />; }
+      return <Tablet className="h-5 w-5" />;
     }
-    return <Monitor className="h-5 w-5" />; }
+    return <Monitor className="h-5 w-5" />;
   };
 
   return (

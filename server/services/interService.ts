@@ -405,16 +405,24 @@ catch (error) {
 
       switch (collection.situacao) {
         case 'A_RECEBER': {
+        break;
+        }
           stats.pendentes++;
           break;
         case 'RECEBIDO': {
+        break;
+        }
           stats.recebidas++;
           stats.valorRecebido += valor;
           break;
         case 'CANCELADO': {
+        break;
+        }
           stats.canceladas++;
           break;
         case 'EXPIRADO': {
+        break;
+        }
           stats.expiradas++;
           break;
       }

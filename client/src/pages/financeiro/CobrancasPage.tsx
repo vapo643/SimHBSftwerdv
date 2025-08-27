@@ -137,7 +137,7 @@ export default function CobrancasPage() {
   const [novoValorQuitacao, setNovoValorQuitacao] = useState(0);
   const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
   const [novasParcelas, setNovasParcelas] = useState<
-    Record<string, unknown>[]>{ valor: number; dataVencimento: string }>
+    Array<{ valor: number; dataVencimento: string }>
   >([]);
 
   // Estados para Prorrogar Vencimento (seleção múltipla)
@@ -236,7 +236,7 @@ export default function CobrancasPage() {
       if (statusFilter !== 'todos') params.append('status', statusFilter);
       if (atrasoFilter !== 'todos') params.append('atraso', atrasoFilter);
 
-      return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>; }
+      return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>;
     },
   });
 
@@ -521,18 +521,18 @@ finally {
 
   // Função para mascarar CPF/CNPJ
   const _maskDocument = (doc: string) => {
-    if (!doc) return ''; }
+    if (!doc) return '';
     if (!showCpf) {
       if (doc.length == 11) {
         // CPF
-        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`; }
+        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`;
       }
 else if (doc.length == 14) {
         // CNPJ
-        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`; }
+        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`;
       }
     }
-    return doc; }
+    return doc;
   };
 
   // Função para exportar inadimplentes
@@ -605,26 +605,26 @@ catch (error) {
   const _getStatusColor = (status: string) => {
     switch (status) {
       case 'em_dia': {
-        return 'bg-green-100 text-green-800'; }
+        return 'bg-green-100 text-green-800';
       case 'inadimplente': {
-        return 'bg-red-100 text-red-800'; }
+        return 'bg-red-100 text-red-800';
       case 'quitado': {
-        return 'bg-blue-100 text-blue-800'; }
+        return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const _getParcelaStatusColor = (status: string) => {
     switch (status) {
       case 'pago': {
-        return 'bg-green-100 text-green-800'; }
+        return 'bg-green-100 text-green-800';
       case 'vencido': {
-        return 'bg-red-100 text-red-800'; }
+        return 'bg-red-100 text-red-800';
       case 'pendente': {
-        return 'bg-yellow-100 text-yellow-800'; }
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -632,27 +632,35 @@ catch (error) {
   const _getInterBankStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
       case 'RECEBIDO': {
+        break;
+      }
       case 'MARCADO_RECEBIDO': {
-        return 'bg-green-100 text-green-800'; }
+        return 'bg-green-100 text-green-800';
       case 'CANCELADO': {
+        break;
+      }
       case 'EXPIRADO': {
       case 'FALHA_EMISSAO': {
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
       case 'ATRASADO': {
+        break;
+      }
       case 'PROTESTO': {
-        return 'bg-red-100 text-red-800'; }
+        return 'bg-red-100 text-red-800';
       case 'A_RECEBER': {
+        break;
+      }
       case 'EM_PROCESSAMENTO': {
       case 'EMITIDO': {
-        return 'bg-blue-100 text-blue-800'; }
+        return 'bg-blue-100 text-blue-800';
       case 'pago': {
-        return 'bg-green-100 text-green-800'; }
+        return 'bg-green-100 text-green-800';
       case 'vencido': {
-        return 'bg-red-100 text-red-800'; }
+        return 'bg-red-100 text-red-800';
       case 'pendente': {
-        return 'bg-yellow-100 text-yellow-800'; }
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -666,29 +674,37 @@ catch (error) {
     if (interSituacao) {
       switch (interSituacao.toUpperCase()) {
         case 'RECEBIDO': {
+        break;
+      }
         case 'MARCADO_RECEBIDO': {
         case 'PAGO': // PAM V1.0 - FASE 1: Reconhecer "PAGO" como status válido
-          return 'Pago'; }
+          return 'Pago';
         case 'CANCELADO': {
+        break;
+      }
         case 'EXPIRADO': {
         case 'FALHA_EMISSAO': {
-          return 'Cancelado'; }
+          return 'Cancelado';
         case 'ATRASADO': {
+        break;
+      }
         case 'PROTESTO': {
-          return 'Vencido'; }
+          return 'Vencido';
         case 'A_RECEBER': {
+        break;
+      }
         case 'EM_PROCESSAMENTO': {
         case 'EMITIDO': {
-          return 'Pendente'; }
+          return 'Pendente';
         default:
-          return interSituacao; }
+          return interSituacao;
       }
     }
 
     // Fallback para status local
-    if (localStatus == 'pago') return 'Pago'; }
-    if (vencida) return 'Vencido'; }
-    return 'Pendente'; }
+    if (localStatus == 'pago') return 'Pago';
+    if (vencida) return 'Vencido';
+    return 'Pendente';
   };
 
   // Função para calcular o Status de Vencimento inteligente
@@ -973,7 +989,7 @@ catch (error) {
                         <TableCell>
                           {(() => {
                             const _statusInfo = getStatusVencimento(proposta);
-                            return <span className={statusInfo.color}>{statusInfo.text}</span>; }
+                            return <span className={statusInfo.color}>{statusInfo.text}</span>;
                           })()}
                         </TableCell>
                         <TableCell>

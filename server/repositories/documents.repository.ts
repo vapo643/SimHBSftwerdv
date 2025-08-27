@@ -25,7 +25,8 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .from(propostaDocumentos)
         .where(eq(propostaDocumentos.propostaId, propostaId))
         .orderBy(desc(propostaDocumentos.createdAt));
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting proposal documents:', error);
       return [];
     }
@@ -43,7 +44,8 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .limit(1);
 
       return proposta || null;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting proposal by ID:', error);
       return null;
     }
@@ -73,7 +75,8 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .returning();
 
       return document;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_REPO] Error creating document:', error);
       return null;
     }
@@ -90,7 +93,8 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .returning();
 
       return _result.length > 0;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_REPO] Error deleting document:', error);
       return false;
     }
@@ -108,7 +112,8 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .limit(1);
 
       return document || null;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting document by ID:', error);
       return null;
     }
@@ -140,7 +145,8 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
       const { data: publicUrl } = _supabase.storage.from('documents').getPublicUrl(filePath);
 
       return publicUrl;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_REPO] Error uploading to storage:', error);
       return null;
     }
@@ -163,7 +169,8 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
       }
 
       return data.signedUrl;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
       return null;
     }

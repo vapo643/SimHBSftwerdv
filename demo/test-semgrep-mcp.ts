@@ -202,7 +202,7 @@ async function runAllTests() {
 
 // Executar testes se rodado diretamente
 if (require.main == module) {
-  runAllTests().catch(console.error);
+  runAllTests().catch (console.error);
 }
 
 export { runAllTests };

@@ -77,7 +77,8 @@ if (databaseUrl.includes('_supabase.com')) {
     connect_timeout: 10,
   });
   console.log('✅ Database: Connection configured (lazy)');
-} else {
+}
+else {
   dbClient = postgres(databaseUrl);
 }
 
@@ -89,7 +90,8 @@ setTimeout(async () => {
   try {
     await client`SELECT 1`;
     console.log('✅ Database: Connection test successful');
-  } catch (error) {
+  }
+catch (error) {
     console.warn('⚠️  Database: Connection test failed -', (error as Error).message);
     console.warn('⚠️  Database: Check DATABASE_URL credentials in Secrets');
     console.warn('⚠️  Database: App will continue using Supabase REST API only');

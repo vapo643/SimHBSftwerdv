@@ -61,10 +61,14 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
 
       switch (filters.periodo) {
         case 'hoje': {
+        break;
+        }
           startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
           endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
           break;
         case 'semana': {
+        break;
+        }
           const _startOfWeek = new Date(now);
           startOfWeek.setDate(now.getDate() - now.getDay());
           startOfWeek.setHours(0, 0, 0, 0);
@@ -75,6 +79,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
           endDate = endOfWeek;
           break;
         case 'mes': {
+        break;
+        }
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
           break;
@@ -172,7 +178,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(and(eq(propostas.id, proposalId), sql`${propostas.deletedAt} IS NULL`))
       .limit(1);
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -212,7 +218,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, data.propostaId))
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -233,7 +239,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -254,7 +260,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -278,7 +284,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       })
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**

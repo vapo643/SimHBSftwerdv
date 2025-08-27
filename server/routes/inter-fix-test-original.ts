@@ -26,7 +26,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
       .limit(1);
 
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Buscar boletos atuais

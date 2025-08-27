@@ -26,7 +26,8 @@ if (isDevelopment) {
 
     console.log('[WORKER] 🚀 Processo worker iniciado. Aguardando jobs...');
   });
-} else {
+}
+else {
   // Usar BullMQ real em produção
   import('bullmq').then(({ Worker }) => {
     const _worker = new Worker(

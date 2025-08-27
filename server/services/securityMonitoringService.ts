@@ -185,7 +185,8 @@ class SecurityMonitoringService {
 
       this.setCachedData(cacheKey, metrics);
       return metrics;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[SECURITY MONITORING] Error getting metrics:', error);
       throw error;
     }
@@ -210,7 +211,8 @@ class SecurityMonitoringService {
       //   createdAt: new Date(),
       // }); // FIXED: Security log insertion disabled
       console.log('[SECURITY MONITORING] Event logged:', event);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[SECURITY MONITORING] Error recording event:', error);
     }
   }
@@ -225,7 +227,8 @@ class SecurityMonitoringService {
         .limit(limit);
 
       return alerts;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[SECURITY MONITORING] Error getting alerts:', error);
       return [];
     }

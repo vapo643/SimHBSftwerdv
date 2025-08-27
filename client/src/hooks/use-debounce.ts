@@ -13,5 +13,5 @@ export function useDebounce<T>(value: T, delay: number): T {
     };
   }, [value, delay]);
 
-  return debouncedValue; }
+  return debouncedValue;
 }

@@ -64,8 +64,9 @@ export async function logStatusTransition(transition: StatusTransitionLog) {
 
     console.log(`[AUDIT V2.0] ✅ Transition logged successfully with ID: ${_result.id}`);
 
-    return result;
-  } catch (error) {
+    return _result;
+  }
+catch (error) {
     console.error(`[AUDIT V2.0] ❌ Failed to log status transition:`, error);
     throw error;
   }
@@ -90,7 +91,8 @@ export async function getProposalStatusHistory(propostaId: string) {
     console.log(`[AUDIT V2.0] Found ${transitions.length} transitions`);
 
     return transitions;
-  } catch (error) {
+  }
+catch (error) {
     console.error(`[AUDIT V2.0] ❌ Failed to fetch status history:`, error);
     throw error;
   }
@@ -114,7 +116,8 @@ export async function getLastTransition(propostaId: string) {
       .limit(1);
 
     return transitions[0] || null;
-  } catch (error) {
+  }
+catch (error) {
     console.error(`[AUDIT V2.0] ❌ Failed to fetch last transition:`, error);
     throw error;
   }

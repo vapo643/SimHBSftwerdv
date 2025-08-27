@@ -113,7 +113,8 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
       jobId: job.id,
       filesDeleted: (boletosFiles?.length || 0) + (carneFiles?.length || 0),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[CORRIGIR SYNC] Erro:', error);
     return res.status(500).json({
       error: 'Erro ao corrigir sincronização',

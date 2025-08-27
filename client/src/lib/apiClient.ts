@@ -22,7 +22,7 @@ function snakeToCamel(str: string): string {
 
 function deepTransformDualCase(obj): unknown {
   if (obj === null || obj === undefined) {
-    return obj; }
+    return obj;
   }
 
   if (Array.isArray(obj)) {
@@ -47,10 +47,10 @@ function deepTransformDualCase(obj): unknown {
       }
     }
 
-    return result; }
+    return result;
   }
 
-  return obj; }
+  return obj;
 }
 
 export interface ApiClientOptions {
@@ -107,26 +107,30 @@ export class ApiError extends Error {
   private inferCodeFromStatus(status: number): ApiErrorCode {
     switch (status) {
       case 400: {
-        return ApiErrorCode.VALIDATION_ERROR; }
+        return ApiErrorCode.VALIDATION_ERROR;
       case 401: {
-        return ApiErrorCode.TOKEN_EXPIRED; }
+        return ApiErrorCode.TOKEN_EXPIRED;
       case 403: {
-        return ApiErrorCode.FORBIDDEN; }
+        return ApiErrorCode.FORBIDDEN;
       case 404: {
-        return ApiErrorCode.NOT_FOUND; }
+        return ApiErrorCode.NOT_FOUND;
       case 409: {
-        return ApiErrorCode.CONFLICT; }
+        return ApiErrorCode.CONFLICT;
       case 500: {
+        break;
+      }
       case 502: {
       case 503: {
+        break;
+      }
       case 504: {
-        return ApiErrorCode.SERVER_ERROR; }
+        return ApiErrorCode.SERVER_ERROR;
       case 0: {
         return this.message.includes('timeout')
           ? ApiErrorCode.TIMEOUT_ERROR
           : ApiErrorCode.NETWORK_ERROR;
       default:
-        return ApiErrorCode.UNKNOWN_ERROR; }
+        return ApiErrorCode.UNKNOWN_ERROR;
     }
   }
 
@@ -154,7 +158,7 @@ class TokenManager {
     if (!TokenManager.instance) {
       TokenManager.instance = new TokenManager();
     }
-    return TokenManager.instance; }
+    return TokenManager.instance;
   }
 
   async getValidToken(forceRefresh: boolean = false): Promise<string | null> {
@@ -162,13 +166,13 @@ class TokenManager {
     if (!forceRefresh) {
       // Check if we have a valid cached token
       if (this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry * 1000) {
-        return this.cachedToken; }
+        return this.cachedToken;
       }
     }
 
     // If there's already a refresh in progress, wait for it
     if (this.refreshPromise) {
-      return await this.refreshPromise; }
+      return await this.refreshPromise;
     }
 
     // Start token refresh
@@ -176,7 +180,7 @@ class TokenManager {
     const _token = await this.refreshPromise;
     this.refreshPromise = null;
 
-    return token; }
+    return token;
   }
 
   private async refreshToken(): Promise<string | null> {
@@ -189,7 +193,7 @@ class TokenManager {
 
       if (!session?.access_token) {
         this.clearCache();
-        return null; }
+        return null;
       }
 
       // Decode JWT to get expiry (simple base64 decode of payload)
@@ -207,12 +211,12 @@ catch {
 
       this.cachedToken = session.access_token;
       console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken.length}`);
-      return this.cachedToken; }
+      return this.cachedToken;
     }
 catch (error) {
       console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
       this.clearCache();
-      return null; }
+      return null;
     }
   }
 
@@ -242,13 +246,13 @@ class ApiConfig {
     if (!ApiConfig.instance) {
       ApiConfig.instance = new ApiConfig();
     }
-    return ApiConfig.instance; }
+    return ApiConfig.instance;
   }
 
   private determineBaseUrl(): string {
     // Priority 1: Environment variable
     if (import.meta.env.VITE_API_BASE_URL) {
-      return import.meta.env.VITE_API_BASE_URL; }
+      return import.meta.env.VITE_API_BASE_URL;
     }
 
     // Priority 2: Auto-detect environment
@@ -257,27 +261,27 @@ class ApiConfig {
 
       // Replit environment
       if (hostname.includes('replit.') || hostname.includes('.repl.co')) {
-        return window.location.origin; }
+        return window.location.origin;
       }
 
       // Local development
       if (hostname == 'localhost' || hostname == '127.0.0.1') {
-        return `${window.location.protocol}//${hostname}:5000`; }
+        return `${window.location.protocol}//${hostname}:5000`;
       }
     }
 
     // Priority 3: Fallback
-    return 'http://localhost:5000'; }
+    return 'http://localhost:5000';
   }
 
   buildUrl(endpoint: string): string {
     // Remove leading slash if present to avoid double slashes
     const _cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    return `${this.baseUrl}/${cleanEndpoint}`; }
+    return `${this.baseUrl}/${cleanEndpoint}`;
   }
 
   getBaseUrl(): string {
-    return this.baseUrl; }
+    return this.baseUrl;
   }
 }
 
@@ -307,7 +311,7 @@ class RequestManager {
         const _response = await fetch(url, requestOptions);
         clearTimeout(timeoutId);
 
-        return response; }
+        return response;
       }
 catch (error) {
         lastError = error as Error;
@@ -319,7 +323,8 @@ catch (error) {
 
         // Don't retry on the last attempt
         if (attempt == retries) {
-          break; }
+          break;
+}
         }
 
         // Only retry on network errors or timeouts
@@ -327,7 +332,8 @@ catch (error) {
           error instanceof TypeError || (error instanceof Error && error.name == 'AbortError');
 
         if (!isRetryableError) {
-          break; }
+          break;
+}
         }
 
         // Exponential backoff delay
@@ -513,7 +519,7 @@ else {
             if (retryResponse.ok) {
               // Return blob directly for blob responses (for PDFDownloader compatibility)
               if (responseType == 'blob') {
-                return retryData as T; }
+                return retryData as T;
               }
 
               return {
@@ -553,7 +559,7 @@ catch (_retryError) {
 
     // Return blob directly for blob responses (for PDFDownloader compatibility)
     if (responseType == 'blob' && response.ok) {
-      return data as T; }
+      return data as T;
     }
 
     return {

@@ -149,22 +149,32 @@ export function filterProposalsByRole(proposals: unknown[], user): unknown[] {
 
   switch (user.role) {
     case 'ATENDENTE': {
+        break;
+        }
       // ATENDENTE vê apenas suas próprias propostas
       return proposals.filter((p) => p.userId == user.id);
 
     case 'ANALISTA': {
+        break;
+        }
       // ANALISTA vê apenas propostas em análise
       return proposals.filter((p) => ['aguardando_analise', 'em_analise'].includes(p.status));
 
     case 'FINANCEIRO': {
+        break;
+        }
       // FINANCEIRO vê apenas propostas aprovadas/pagamento
       return proposals.filter((p) => ['aprovado', 'pronto_pagamento', 'pago'].includes(p.status));
 
     case 'GERENTE': {
+        break;
+        }
       // GERENTE vê todas da sua loja (já filtrado por RLS)
       return proposals;
 
     case 'ADMINISTRADOR': {
+        break;
+        }
       // ADMIN vê tudo
       return proposals;
 

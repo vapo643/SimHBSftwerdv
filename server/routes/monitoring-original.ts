@@ -22,7 +22,8 @@ router.get('/stats', async (req, res) => {
   try {
     const _stats = await getDatabaseStats();
     res.json({ success: true, data: stats });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar estatísticas:', error);
     res.status(500).json({
       success: false,
@@ -39,7 +40,8 @@ router.get('/tables', async (req, res) => {
   try {
     const _stats = await getTableStats();
     res.json({ success: true, data: stats });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar estatísticas das tabelas:', error);
     res.status(500).json({
       success: false,
@@ -56,7 +58,8 @@ router.get('/indexes', async (req, res) => {
   try {
     const _usage = await getIndexUsage();
     res.json({ success: true, data: usage });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar uso de índices:', error);
     res.status(500).json({
       success: false,
@@ -73,7 +76,8 @@ router.get('/connections', async (req, res) => {
   try {
     const _connections = await getActiveConnections();
     res.json({ success: true, data: connections });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar conexões:', error);
     res.status(500).json({
       success: false,
@@ -99,7 +103,8 @@ router.get('/health', async (req, res) => {
             : 500;
 
     res.status(statusCode).json({ success: true, data: health });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao verificar saúde:', error);
     res.status(500).json({
       success: false,
@@ -116,7 +121,8 @@ router.get('/report', async (req, res) => {
   try {
     const _report = await generateMonitoringReport();
     res.json({ success: true, data: report });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao gerar relatório:', error);
     res.status(500).json({
       success: false,

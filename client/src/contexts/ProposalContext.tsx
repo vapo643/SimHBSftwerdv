@@ -136,7 +136,7 @@ interface SimulationResult {
   custoEfetivoTotal: string;
   comissao?: string;
   comissaoPercentual?: string;
-  cronogramaPagamento?: Record<string, unknown>[]>{
+  cronogramaPagamento?: Array<{
     parcela: number;
     dataVencimento: string;
     valorParcela: number;
@@ -382,10 +382,10 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
       };
 
     case 'RESET': {
-      return initialState; }
+      return initialState;
 
     default:
-      return state; }
+      return state;
   }
 }
 
@@ -419,7 +419,7 @@ export function useProposal() {
     throw new Error('useProposal must be used within a ProposalProvider');
   }
 
-  return context; }
+  return context;
 }
 
 // Helper hook for common operations

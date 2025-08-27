@@ -29,12 +29,12 @@ interface OriginationContext {
       };
     };
   };
-  produtos: Record<string, unknown>[]>{
+  produtos: Array<{
     id: number;
     nome: string;
     tacValor: string;
     tacTipo: string;
-    tabelasDisponiveis: Record<string, unknown>[]>{
+    tabelasDisponiveis: Array<{
       id: number;
       nomeTabela: string;
       taxaJuros: string;
@@ -58,7 +58,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
     // 1. Get authenticated user with their store and partner data
     const _userId = req.user?.id;
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Fetch user profile with store and partner information using Supabase client
@@ -74,7 +74,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 
     if (profileError || !profileData) {
       console.error('Profile fetch error:', profileError);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // CRITICAL FIX: Handle users without stores gracefully (e.g. ANALISTA role)
@@ -117,7 +117,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 
     if (lojaError || !lojaData) {
       console.error('Loja fetch error:', lojaError);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Fix: parceiros should be a single object, not an array
@@ -146,7 +146,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 
         // Tentar buscar do cache primeiro
         const _cachedTabelas = await getFromCache<
-          Record<string, unknown>[]>{
+          Array<{
             id: number;
             nomeTabela: string;
             taxaJuros: string;
@@ -189,7 +189,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
             )
           );
 
-        let tabelasDisponiveis: Record<string, unknown>[]>{
+        let tabelasDisponiveis: Array<{
           id: number;
           nomeTabela: string;
           taxaJuros: string;

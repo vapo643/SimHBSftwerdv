@@ -5,7 +5,8 @@ router.get('/stats', async (req, res) => {
   try {
     const _result = await cacheService.executeOperation('cache_stats', req.query);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

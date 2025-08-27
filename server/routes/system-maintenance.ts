@@ -5,7 +5,8 @@ router.post('/maintenance', async (req, res) => {
   try {
     const _result = await adminService.executeOperation('system_maintenance', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

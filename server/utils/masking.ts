@@ -151,7 +151,8 @@ export function maskTelefone(telefone: string): string {
   // Retorna formato apropriado
   if (isMobile) {
     return `(**) *****-${lastFourDigits}`;
-  } else {
+  }
+else {
     return `(**) ****-${lastFourDigits}`;
   }
 }

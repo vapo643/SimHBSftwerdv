@@ -18,7 +18,8 @@ export class UserService {
   async getAllUsers(): Promise<UserWithAuth[]> {
     try {
       return await userRepository.getAllUsersWithAuth();
-    } catch (error) {
+    }
+catch (error) {
       console.error('[UserService] Error fetching users:', error);
       throw new Error('Erro ao buscar usuários');
     }
@@ -30,7 +31,8 @@ export class UserService {
   async getUserById(userId: string): Promise<UserWithAuth | null> {
     try {
       return await userRepository.getUserWithAuth(userId);
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[UserService] Error fetching user ${userId}:`, error);
       throw new Error('Erro ao buscar usuário');
     }
@@ -76,7 +78,8 @@ export class UserService {
       console.log(`✅ [UserService] User created successfully: ${newUser.email}`);
 
       return newUser;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[UserService] Error creating user:', error);
       throw error;
     }
@@ -148,7 +151,8 @@ export class UserService {
         user: userToDeactivate,
         message: 'Usuário desativado com sucesso. Todas as sessões foram invalidadas.',
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[UserService] Error deactivating user ${targetUserId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao desativar usuário');
     }
@@ -205,7 +209,8 @@ export class UserService {
       return {
         message: 'Usuário reativado com sucesso.',
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[UserService] Error reactivating user ${targetUserId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao reativar usuário');
     }
@@ -254,7 +259,8 @@ export class UserService {
       });
 
       return updatedProfile;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[UserService] Error updating user ${userId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao atualizar usuário');
     }
@@ -266,7 +272,8 @@ export class UserService {
   async getUsersByRole(role: string): Promise<Profile[]> {
     try {
       return await userRepository.getUsersByRole(role);
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[UserService] Error fetching users by role ${role}:`, error);
       throw new Error('Erro ao buscar usuários por perfil');
     }
@@ -278,7 +285,8 @@ export class UserService {
   async getUsersByLoja(lojaId: number): Promise<Profile[]> {
     try {
       return await userRepository.getUsersByLoja(lojaId);
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[UserService] Error fetching users by loja ${lojaId}:`, error);
       throw new Error('Erro ao buscar usuários por loja');
     }

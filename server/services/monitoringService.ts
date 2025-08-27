@@ -21,7 +21,8 @@ export class MonitoringService {
         totalRows: parseInt(stats.total_rows),
         timestamp: new Date().toISOString(),
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[MONITORING_SERVICE] Error fetching database stats:', error);
       throw new Error('Failed to fetch database statistics');
     }
@@ -44,7 +45,8 @@ export class MonitoringService {
         totalSize: table.total_size,
         needsVacuum: parseInt(table.dead_rows || 0) > parseInt(table.row_count || 0) * 0.1,
       }));
-    } catch (error) {
+    }
+catch (error) {
       console.error('[MONITORING_SERVICE] Error fetching table stats:', error);
       throw new Error('Failed to fetch table statistics');
     }
@@ -67,7 +69,8 @@ export class MonitoringService {
         size: index.index_size,
         efficiency: this.calculateIndexEfficiency(index),
       }));
-    } catch (error) {
+    }
+catch (error) {
       console.error('[MONITORING_SERVICE] Error fetching index usage:', error);
       throw new Error('Failed to fetch index usage');
     }
@@ -113,7 +116,8 @@ export class MonitoringService {
         _byState,
         _byApplication,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[MONITORING_SERVICE] Error fetching connections:', error);
       throw new Error('Failed to fetch active connections');
     }
@@ -155,7 +159,8 @@ export class MonitoringService {
         checks: health.checks,
         _recommendations,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[MONITORING_SERVICE] Health check failed:', error);
       return {
         status: 'unhealthy',
@@ -183,7 +188,8 @@ export class MonitoringService {
         ...report,
         _analysis,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[MONITORING_SERVICE] Error generating report:', error);
       throw new Error('Failed to generate monitoring report');
     }

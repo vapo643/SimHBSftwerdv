@@ -67,7 +67,8 @@ export async function createUser(userData: UserData) {
       message: 'Usuário criado com sucesso.',
       user: createdProfile,
     };
-  } catch (error) {
+  }
+catch (error) {
     if (createdAuthUser) {
       console.error('ERRO DETECTADO. Iniciando rollback completo...');
       await _supabase.auth.admin.deleteUser(createdAuthUser.id);

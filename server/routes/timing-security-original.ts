@@ -88,14 +88,14 @@ router.post('/test', _requireAdmin, async (req: AuthenticatedRequest, res) => {
     const { endpoint = '/api/propostas/1', iterations = 100 } = req.body;
 
     if (iterations > 1000) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _testResults = {
   _endpoint,
   _iterations,
       startTime: new Date().toISOString(),
-      results: [] as Record<string, unknown>[]>{
+      results: [] as Array<{
         iteration: number;
         responseTime: number;
         status: number;
@@ -168,8 +168,8 @@ router.post('/simulate-attack', _requireAdmin, async (req: AuthenticatedRequest,
       target: targetEndpoint,
       timestamp: new Date().toISOString(),
       results: {
-        validIdRequests: [] as Record<string, unknown>[]>{ id: string; avgTime: number; samples: number }>,
-        invalidIdRequests: [] as Record<string, unknown>[]>{ id: string; avgTime: number; samples: number }>,
+        validIdRequests: [] as Array<{ id: string; avgTime: number; samples: number }>,
+        invalidIdRequests: [] as Array<{ id: string; avgTime: number; samples: number }>,
         analysis: {
           timingLeakDetected: false,
           avgDifference: 0,

@@ -87,17 +87,23 @@ export class BoletoStatusService {
       // Mapear evento para status
       switch (evento) {
         case 'cobranca-paga': {
+        break;
+        }
           updateData.situacao = 'RECEBIDO';
           updateData.valorPago = cobranca.valorRecebido?.toString();
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
           break;
 
         case 'cobranca-vencida': {
+        break;
+        }
           updateData.situacao = 'ATRASADO';
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
           break;
 
         case 'cobranca-cancelada': {
+        break;
+        }
           updateData.situacao = 'CANCELADO';
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
           break;

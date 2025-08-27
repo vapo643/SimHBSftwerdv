@@ -31,7 +31,7 @@ const _fetchProposta = async (id: string | undefined) => {
     const _response = await api.get(`/api/propostas/${id}`);
     console.log('[Análise] Proposta carregada:', response.data);
     // A API retorna {success: true, data: {...}}, precisamos apenas do data
-    return response.data?.data || response.data; }
+    return response.data?.data || response.data;
   }
 catch (error) {
     console.error('[Análise] Erro ao carregar proposta:', error);
@@ -58,7 +58,7 @@ const _updatePropostaStatus = async ({
   _observacao,
   _motivoPendencia,
     });
-    return response.data; }
+    return response.data;
   }
 catch (error) {
     throw new Error(error.message || 'Falha ao atualizar status');
@@ -74,10 +74,10 @@ const _decisionSchema = z
     (_data) => {
       // Observação é obrigatória APENAS quando o status é "pendenciado"
       if (data.status == 'pendenciado') {
-        return data.observacao && data.observacao.trim().length > 0; }
+        return data.observacao && data.observacao.trim().length > 0;
       }
       // Para "aprovado" e "rejeitado", observação é opcional
-      return true; }
+      return true;
     },
     {
       message: 'Observação é obrigatória quando a proposta é pendenciada',

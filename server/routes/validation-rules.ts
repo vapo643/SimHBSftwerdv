@@ -5,7 +5,8 @@ router.get('/rules', async (req, res) => {
   try {
     const _result = await validationService.executeOperation('get_rules', req.query);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

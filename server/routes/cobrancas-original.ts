@@ -499,7 +499,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
     const [proposta] = result;
 
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Referências pessoais
@@ -660,7 +660,7 @@ router.patch(
         .limit(1);
 
       if (!boletoInter) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Atualizar status para PAGO
@@ -720,7 +720,7 @@ router.post('/:propostaId/observacao', async (req, res) => {
     const _userName = req.user?.name || 'Sistema';
 
     if (!observacao) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _novaObservacao = await db
@@ -752,7 +752,7 @@ router.get('/inter-sumario', async (req, res) => {
     // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-SUMARIO] Acesso negado - Role:', userRole);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const { interBankService } = await import('../services/interBankService');
@@ -787,11 +787,11 @@ router.post('/inter-sync-all', _jwtAuthMiddleware, async (req, res) => {
     // Verificar se usuário tem permissão
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-SYNC-ALL] Acesso negado - Role:', userRole);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!propostaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.log(`[INTER-SYNC-ALL] Iniciando sincronização para proposta: ${propostaId}`);
@@ -919,7 +919,7 @@ router.get('/inter-status/:codigoSolicitacao', async (req, res) => {
     // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-STATUS] Acesso negado - Role:', userRole);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const { interBankService } = await import('../services/interBankService');
@@ -960,21 +960,51 @@ router.get('/inter-status/:codigoSolicitacao', async (req, res) => {
         // Mapear status do Inter para status da parcela
         switch (novoStatus) {
           case 'RECEBIDO': {
+        break;
+        }
+        break;
+      }
           case 'MARCADO_RECEBIDO': {
+        break;
+        }
             novoStatusParcela = 'pago';
             break;
           case 'CANCELADO': {
+        break;
+        }
+        break;
+      }
           case 'EXPIRADO': {
+        break;
+        }
+      }
           case 'FALHA_EMISSAO': {
+        break;
+        }
             novoStatusParcela = 'cancelado';
             break;
           case 'VENCIDO': {
+        break;
+        }
+        break;
+      }
           case 'ATRASADO': {
+        break;
+        }
+      }
           case 'PROTESTO': {
+        break;
+        }
             novoStatusParcela = 'vencido';
             break;
           case 'A_RECEBER': {
+        break;
+        }
+        break;
+      }
           case 'EM_PROCESSAMENTO': {
+        break;
+        }
           default:
             novoStatusParcela = 'pendente';
             break;
@@ -1032,7 +1062,7 @@ router.post('/sincronizar/:propostaId', _jwtAuthMiddleware, async (req, res) => 
     // Verificar permissão
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[SYNC] Acesso negado - Role:', userRole);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.log(`[SYNC] Iniciando sincronização para proposta ${propostaId}`);

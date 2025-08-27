@@ -167,14 +167,16 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
 
       if (response.publicUrl) {
         window.open(response.publicUrl, '_blank');
-      } else {
+      }
+else {
         toast({
           title: 'CCB Assinada não disponível',
           description: response.message || 'O documento assinado ainda não está disponível',
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao visualizar CCB assinada:', error);
       toast({
         title: 'Erro',
@@ -307,7 +309,8 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                           link.download = `CCB_Assinada_${proposalId}.pdf`;
                           link.click();
                         }
-                      } catch (_error) {
+                      }
+catch (_error) {
                         toast({
                           title: 'Erro ao baixar',
                           description: 'Erro ao baixar CCB assinada',

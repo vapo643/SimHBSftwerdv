@@ -115,7 +115,7 @@ export interface IStorage {
     expiresAt: Date;
   }): Promise<void>;
   getUserSessions(userId: string): Promise<
-    Record<string, unknown>[]>{
+    Array<{
       id: string;
       userId: string;
       ipAddress: string | null;
@@ -134,17 +134,17 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
     const _result = await db.select().from(users).where(eq(users.id, id)).limit(1);
-    return result[0];
+    return _result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const _result = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    return result[0];
+    return _result[0];
   }
 
   async createUser(user: InsertUser): Promise<User> {
     const _result = await db.insert(users).values(user).returning();
-    return result[0];
+    return _result[0];
   }
 
   async getUsers(): Promise<User[]> {
@@ -585,7 +585,7 @@ catch (error) {
       .set(proposta)
       .where(eq(propostas.id, propostaId))
       .returning();
-    return result[0];
+    return _result[0];
   }
 
   async deleteProposta(id, deletedBy?: string): Promise<void> {
@@ -621,17 +621,17 @@ catch (error) {
         )
       )
       .limit(1);
-    return result[0];
+    return _result[0];
   }
 
   async createLoja(loja: InsertLoja): Promise<Loja> {
     const _result = await db.insert(lojas).values(loja).returning();
-    return result[0];
+    return _result[0];
   }
 
   async updateLoja(id: number, loja: UpdateLoja): Promise<Loja> {
     const _result = await db.update(lojas).set(loja).where(eq(lojas.id, id)).returning();
-    return result[0];
+    return _result[0];
   }
 
   async deleteLoja(id: number, deletedBy?: string): Promise<void> {
@@ -702,7 +702,7 @@ catch (error) {
 
   async addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas> {
     const _result = await db.insert(gerenteLojas).values(relationship).returning();
-    return result[0];
+    return _result[0];
   }
 
   async removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void> {
@@ -722,18 +722,24 @@ catch (error) {
       case 'document': {
         whereCondition = eq(propostas.clicksignDocumentKey, key);
         break;
+        }
+      }
       case 'list': {
         whereCondition = eq(propostas.clicksignListKey, key);
         break;
+        }
+      }
       case 'signer': {
         whereCondition = eq(propostas.clicksignSignerKey, key);
         break;
+        }
+      }
       default:
         throw new Error(`Invalid keyType: ${keyType}`);
     }
 
     const _result = await db.select().from(propostas).where(whereCondition).limit(1);
-    return result[0];
+    return _result[0];
   }
 
   async getCcbUrl(propostaId: string): Promise<string | null> {
@@ -784,7 +790,7 @@ catch (error) {
       })
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   // ==== INTER BANK METHODS ====
@@ -792,7 +798,7 @@ catch (error) {
   // Inter Bank Collections
   async createInterCollection(collection: InsertInterCollection): Promise<InterCollection> {
     const _result = await db.insert(interCollections).values(collection).returning();
-    return result[0];
+    return _result[0];
   }
 
   async getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined> {
@@ -801,7 +807,7 @@ catch (error) {
       .from(interCollections)
       .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
       .limit(1);
-    return result[0];
+    return _result[0];
   }
 
   async getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]> {
@@ -820,7 +826,7 @@ catch (error) {
       .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
-    return result[0];
+    return _result[0];
   }
 
   async updateInterCollection(
@@ -832,7 +838,7 @@ catch (error) {
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
-    return result[0];
+    return _result[0];
   }
 
   async getInterCollections(): Promise<InterCollection[]> {
@@ -849,7 +855,7 @@ catch (error) {
     await db.update(interWebhooks).set({ isActive: false });
 
     const _result = await db.insert(interWebhooks).values(webhook).returning();
-    return result[0];
+    return _result[0];
   }
 
   async getActiveInterWebhook(): Promise<InterWebhook | undefined> {
@@ -858,7 +864,7 @@ catch (error) {
       .from(interWebhooks)
       .where(eq(interWebhooks.isActive, true))
       .limit(1);
-    return result[0];
+    return _result[0];
   }
 
   async updateInterWebhook(
@@ -870,7 +876,7 @@ catch (error) {
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interWebhooks.id, id))
       .returning();
-    return result[0];
+    return _result[0];
   }
 
   async deleteInterWebhook(id: number): Promise<void> {
@@ -880,7 +886,7 @@ catch (error) {
   // Inter Bank Callbacks
   async createInterCallback(callback: InsertInterCallback): Promise<InterCallback> {
     const _result = await db.insert(interCallbacks).values(callback).returning();
-    return result[0];
+    return _result[0];
   }
 
   async getUnprocessedInterCallbacks(): Promise<InterCallback[]> {
@@ -926,7 +932,7 @@ catch (error) {
   }
 
   async getUserSessions(userId: string): Promise<
-    Record<string, unknown>[]>{
+    Array<{
       id: string;
       userId: string;
       token: string;

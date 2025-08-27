@@ -112,7 +112,7 @@ export function getRightAlignedX(
  * Gera um PDF de teste com coordenadas específicas marcadas
  */
 export async function generateTestCoordinatesPDF(
-  coordinates: Record<string, unknown>[]>{
+  coordinates: Array<{
     page: number;
     x: number;
     y: number;

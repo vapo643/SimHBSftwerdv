@@ -5,7 +5,8 @@ router.get('/', async (req, res) => {
   try {
     const _result = await configService.executeOperation('get_config', req.query);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

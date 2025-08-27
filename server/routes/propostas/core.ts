@@ -81,7 +81,7 @@ router.get('/:id/observacoes', auth, async (req, res) => {
 
     if (error) {
       console.warn('Erro ao buscar logs de auditoria:', error);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _transformedLogs =

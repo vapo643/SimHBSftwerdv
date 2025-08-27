@@ -26,8 +26,8 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
     const supabase = createServerSupabaseClient();
 
     // Clean up any existing test users
-    await _supabase.auth.admin.deleteUser(testEmail).catch(() => {});
-    await _supabase.auth.admin.deleteUser(newTestEmail).catch(() => {});
+    await _supabase.auth.admin.deleteUser(testEmail).catch (() => {});
+    await _supabase.auth.admin.deleteUser(newTestEmail).catch (() => {});
 
     // Create test user
     const { data: userData, error: createError } = await _supabase.auth.admin.createUser({
@@ -58,8 +58,8 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
   afterAll(async () => {
     // Clean up test users
     const supabase = createServerSupabaseClient();
-    await _supabase.auth.admin.deleteUser(userId).catch(() => {});
-    await _supabase.auth.admin.deleteUser(newTestEmail).catch(() => {});
+    await _supabase.auth.admin.deleteUser(userId).catch (() => {});
+    await _supabase.auth.admin.deleteUser(newTestEmail).catch (() => {});
   });
 
   describe('POST /api/auth/change-email', () => {

@@ -123,7 +123,7 @@ if (isMainModule) {
       console.log('✅ OPERAÇÃO DE LIMPEZA CONCLUÍDA COM SUCESSO');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch ((error) => {
       console.error('\n❌ FALHA NA OPERAÇÃO DE LIMPEZA:', error);
       process.exit(1);
     });

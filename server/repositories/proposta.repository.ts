@@ -61,7 +61,8 @@ export class PropostaRepository extends BaseRepository<Proposta> {
         .limit(1);
 
       return (proposta as unknown) || null;
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(
         `Failed to fetch proposta: ${error instanceof Error ? error.message : String(error)}`
       );

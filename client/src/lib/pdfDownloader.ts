@@ -56,7 +56,8 @@ export class PDFDownloader {
       document.body.removeChild(a);
 
       console.log('[PDF_DOWNLOAD] ✅ Download completed successfully');
-    } catch (error) {
+    }
+catch (error) {
       console.error('[PDF_DOWNLOAD] ❌ Error in API client download:', error);
       throw error;
     }
@@ -129,11 +130,13 @@ export class PDFDownloader {
               errorMessage = errorJson.error || response.statusText;
               errorDetails = errorJson;
               console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status} (JSON):`, errorJson);
-            } catch {
+            }
+catch {
               errorMessage = await response.text();
               console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status} (Text):`, errorMessage);
             }
-          } else {
+          }
+else {
             errorMessage = await response.text();
             console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status} (Text):`, errorMessage);
           }
@@ -206,7 +209,8 @@ export class PDFDownloader {
 
         console.log('[PDF_DOWNLOAD] ✅ Fetch download completed successfully');
         return; // Sucesso, sair do loop
-      } catch (error) {
+      }
+catch (error) {
         lastError = error as Error;
         console.error(`[PDF_DOWNLOAD] ❌ Fetch attempt ${attempt} failed:`, error);
 
@@ -257,7 +261,8 @@ export class PDFDownloader {
         });
 
         return; // Sucesso, sair da função
-      } catch (error) {
+      }
+catch (error) {
         lastError = error as Error;
         console.error(`[PDF_DOWNLOAD] Strategy "${strategy.name}" failed:`, error);
         continue; // Tentar próxima estratégia
@@ -281,15 +286,18 @@ export class PDFDownloader {
       errorTitle = 'PDF não disponível';
       errorDescription =
         'O banco Inter não disponibiliza o PDF para download. Use o código de barras ou QR Code exibidos na tela para realizar o pagamento.';
-    } else if (lastError?.message.includes('não está disponível para download')) {
+    }
+else if (lastError?.message.includes('não está disponível para download')) {
       errorTitle = 'Boleto não disponível';
       errorDescription =
         'O boleto ainda não foi gerado ou não está pronto para download. Tente novamente em alguns instantes.';
-    } else if (lastError?.message.includes('400')) {
+    }
+else if (lastError?.message.includes('400')) {
       errorTitle = 'Boleto indisponível';
       errorDescription =
         'O banco não conseguiu gerar o PDF do boleto. Verifique se o boleto foi criado corretamente.';
-    } else if (
+    }
+else if (
       lastError?.message.includes('401') ||
       lastError?.message.includes('Authentication')
     ) {
@@ -348,11 +356,13 @@ export class DownloadDebugger {
       if (response.ok) {
         const _user = await response.json();
         console.log('[DEBUG] ✅ Token is valid for user:', user.id);
-      } else {
+      }
+else {
         const _error = await response.text();
         console.error('[DEBUG] ❌ Token validation failed:', error);
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DEBUG] ❌ Token test failed:', error);
     }
   }
@@ -398,11 +408,13 @@ export class DownloadDebugger {
           size: blob.size,
           type: blob.type,
         });
-      } else {
+      }
+else {
         const _errorText = await response.text();
         console.error('[DEBUG] ❌ PDF endpoint failed:', errorText);
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DEBUG] ❌ PDF endpoint test failed:', error);
     }
   }

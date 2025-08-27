@@ -75,7 +75,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         clicksignDocumentId: row.clicksign_document_id as string | undefined,
         clicksignEnvelopeId: row.clicksign_envelope_id as string | undefined,
       };
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Failed to find proposal by ClickSign document: ${error.message}`);
     }
   }
@@ -103,7 +104,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         status: row.status as string,
         nossoNumero: row.nosso_numero as string | undefined,
       };
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Failed to find proposal by nosso_numero: ${error.message}`);
     }
   }
@@ -133,7 +135,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         status: row.status as string,
         propostaId: row.proposta_id as string,
       };
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Failed to find payment by nosso_numero: ${error.message}`);
     }
   }
@@ -161,7 +164,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
           updated_at = NOW()
         WHERE id = ${propostaId}
       `);
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Failed to update proposal signature status: ${error.message}`);
     }
   }
@@ -189,7 +193,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
           updated_at = NOW()
         WHERE id = ${paymentId}
       `);
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Failed to update payment status: ${error.message}`);
     }
   }

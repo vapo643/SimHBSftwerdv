@@ -52,7 +52,7 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
         `[PAM V1.0 DIAGNÓSTICO] 📤 JSON_ENVIADO_FRONTEND (ERROR):`,
         JSON.stringify(errorResponse, null, 2)
       );
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!files || files.length == 0) {
@@ -68,7 +68,7 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
         `[PAM V1.0 DIAGNÓSTICO] 📤 JSON_ENVIADO_FRONTEND (NO_FILES):`,
         JSON.stringify(noCarneResponse, null, 2)
       );
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Carnê existe - gerar URL assinada
@@ -116,7 +116,7 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
       JSON.stringify(successResponse, null, 2)
     );
 
-    return res.*);
+    return res.status(401).json({error: "Unauthorized"});
   }
 catch (error) {
     console.error('[CARNE STATUS] ❌ Erro:', error);

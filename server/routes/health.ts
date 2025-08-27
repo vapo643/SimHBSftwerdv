@@ -18,7 +18,8 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const _result = { status: 'healthy', timestamp: new Date().toISOString() };
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Health check failed',

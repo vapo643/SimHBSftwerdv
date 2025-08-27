@@ -5,7 +5,8 @@ router.post('/corrigir-sync', async (req, res) => {
   try {
     const _result = await propostasSyncService.executeOperation('fix_sync', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

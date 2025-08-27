@@ -93,9 +93,9 @@ export default function AnaliseManual() {
     retry: (failureCount, error) => {
       // Only retry on network errors, not on 404s
       if (error instanceof Error && error.message.includes('404')) {
-        return false; }
+        return false;
       }
-      return failureCount < 2; }
+      return failureCount < 2;
     },
   }) as { data: Proposta | undefined; isLoading: boolean; error: unknown; isError: boolean };
 

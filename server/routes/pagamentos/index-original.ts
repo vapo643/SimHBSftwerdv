@@ -81,7 +81,7 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Primeiro, vamos debugar para ver quantas propostas existem com cada condição
@@ -499,10 +499,16 @@ else if (statusAtual == 'cancelado') {
         const _dataReq = new Date(p.dataRequisicao);
         switch (periodo) {
           case 'hoje': {
+        break;
+        }
             return isToday(dataReq);
           case 'semana': {
+        break;
+        }
             return isThisWeek(dataReq);
           case 'mes': {
+        break;
+        }
             return isThisMonth(dataReq);
           default:
             return true;
@@ -539,19 +545,19 @@ router.post('/:id/aprovar', _jwtAuthMiddleware, async (req: AuthenticatedRequest
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Verificar se o usuário tem permissão para aprovar
     if (!['ADMINISTRADOR', 'DIRETOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Buscar a proposta
     const _proposta = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta.length) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
@@ -597,16 +603,16 @@ router.post('/:id/rejeitar', _jwtAuthMiddleware, async (req: AuthenticatedReques
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Verificar se o usuário tem permissão para rejeitar
     if (!['ADMINISTRADOR', 'DIRETOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!motivo) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
@@ -652,14 +658,14 @@ router.post('/:id/processar', _jwtAuthMiddleware, async (req: AuthenticatedReque
     const _userId = req.user?.id;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Buscar a proposta
     const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
@@ -716,7 +722,7 @@ router.get(
       const _userId = req.user?.id;
 
       if (!userId) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Registrar auditoria de visualização
@@ -728,7 +734,7 @@ router.get(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
       if (!proposta) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Verificar boletos no Inter
@@ -782,12 +788,12 @@ router.post(
       const _userRole = req.user?.role;
 
       if (!userId) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Verificar permissões - SEGREGAÇÃO DE FUNÇÕES
       if (!['ADMINISTRADOR', 'FINANCEIRO'].includes(userRole || '')) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // TODO: Implementar verificação de senha/MFA
@@ -796,12 +802,12 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
       if (!proposta) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Verificações críticas
       if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       const _boletos = await db
@@ -810,7 +816,7 @@ router.post(
         .where(eq(interCollections.propostaId, id));
 
       if (boletos.length == 0) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // PAM V1.0 - Usar FSM para validação de transição
@@ -891,7 +897,7 @@ router.get('/:id/ccb-assinada', _jwtAuthMiddleware, async (req: AuthenticatedReq
     const _userId = req.user?.id;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.log(`[PAGAMENTOS] Buscando CCB assinada para proposta: ${id}`);
@@ -900,16 +906,16 @@ router.get('/:id/ccb-assinada', _jwtAuthMiddleware, async (req: AuthenticatedReq
     const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Verificar se a CCB foi gerada e assinada
     if (!proposta.ccbGerado) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!proposta.assinaturaEletronicaConcluida) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _filename = `CCB_${proposta.id}_assinada.pdf`;
@@ -946,7 +952,7 @@ catch (storageError) {
 
     // ESTRATÉGIA 2: Se não encontrou no Storage, buscar da ClickSign e salvar
     if (!proposta.clicksignDocumentKey) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Importar o serviço ClickSign
@@ -1046,7 +1052,7 @@ router.get('/:id/ccb-storage-status', _jwtAuthMiddleware, async (req: Authentica
       | undefined;
 
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Verificar se existe no Storage
@@ -1147,7 +1153,7 @@ router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: Authentica
     const _propostaData = result[0];
 
     if (!propostaData) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Buscar dados relacionados usando SQL direto para evitar problemas de schema
@@ -1262,7 +1268,7 @@ router.post(
 
       // Verificar permissões - apenas ADMIN e FINANCEIRO podem confirmar
       if (userRole !== 'ADMINISTRADOR' && userRole !== 'FINANCEIRO') {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.log(`[PAGAMENTOS] Confirmando veracidade da proposta: ${id} por usuário: ${userId}`);
@@ -1290,7 +1296,7 @@ router.post(
 
       if (!proposta) {
         console.log(`[PAGAMENTOS] ❌ Proposta não encontrada: ${id}`);
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.log(
@@ -1451,7 +1457,7 @@ router.post(
 
       if (!proposta) {
         console.log(`[PAGAMENTOS] ❌ [AUDIT] Proposta não encontrada: ${id}`);
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Verificar se a proposta está no status correto
@@ -1660,7 +1666,7 @@ router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
 
     if (!proposta) {
       console.log(`[PAGAMENTOS CCB-URL] ❌ Proposta ${id} não encontrada`);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Verificar se documento está assinado

@@ -55,7 +55,8 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
     validateHeaders(req);
 
     next();
-  } catch (error) {
+  }
+catch (error) {
     securityLogger.logEvent({
       type: SecurityEventType.XSS_ATTEMPT,
       severity: 'HIGH',
@@ -94,7 +95,8 @@ function sanitizeObject(obj, req: Request): unknown {
       // Validação extra para campos de alto risco
       if (HIGH_RISK_FIELDS.includes(key.toLowerCase())) {
         sanitized[key] = validateHighRiskField(key, obj[key], req);
-      } else {
+      }
+else {
         sanitized[key] = sanitizeValue(obj[key], key, req);
       }
     }

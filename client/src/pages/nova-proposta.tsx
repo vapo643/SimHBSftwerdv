@@ -70,7 +70,7 @@ const _emprestimoSchema = z.object({
       const _num = parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'));
       if (_isNaN(num) || num < 100) throw new Error('Valor mínimo é R$ 100,00');
       if (num > 1000000) throw new Error('Valor máximo é R$ 1.000.000,00');
-      return num; }
+      return num;
     }),
   prazo: z
     .string()
@@ -79,7 +79,7 @@ const _emprestimoSchema = z.object({
       const _num = parseInt(val);
       if (_isNaN(num) || num < 1) throw new Error('Prazo mínimo é 1 mês');
       if (num > 120) throw new Error('Prazo máximo é 120 meses');
-      return num; }
+      return num;
     }),
   finalidade: z.string().min(1, 'Finalidade é obrigatória'),
   garantia: z.string().min(1, 'Garantia é obrigatória'),
@@ -164,13 +164,13 @@ catch (error) {
       if (saved) {
         try {
           const _parsed = JSON.parse(saved);
-          return parsed.enviada == true; }
+          return parsed.enviada == true;
         }
 catch {
-          return false; }
+          return false;
         }
       }
-      return false; }
+      return false;
     };
 
     const _subscription = watch((_data) => {
@@ -414,7 +414,7 @@ else {
       formData.append('file', file);
 
       const _response = await api.post('/api/upload', formData);
-      return response.data; }
+      return response.data;
     },
     onSuccess: (_data) => {
       const _currentDocs = watch('documentos') || [];

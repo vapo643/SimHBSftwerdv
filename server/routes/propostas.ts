@@ -20,7 +20,7 @@ export const _togglePropostaStatus = async (req: AuthenticatedRequest, res: Resp
 
     // Input validation
     if (!propostaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Delegate to service layer
@@ -38,15 +38,15 @@ catch (error) {
     console.error('Erro ao alterar status da proposta:', error);
 
     if (error.message == 'Proposta não encontrada') {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (error.message?.includes('permissão')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (error.message?.includes('não pode ser suspensa')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (error.message?.includes('Invalid transition')) {
@@ -72,7 +72,7 @@ export const _getCcbAssinada = async (req: AuthenticatedRequest, res: Response) 
 
     // Input validation
     if (!propostaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Delegate to service layer
@@ -86,7 +86,7 @@ catch (error) {
     console.error('Erro ao buscar CCB:', error);
 
     if (error.message == 'Proposta não encontrada') {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (error.message?.includes('CCB assinada não encontrada')) {
@@ -124,7 +124,7 @@ export const _getPropostasByStatus = async (req: AuthenticatedRequest, res: Resp
     const { status } = req.params;
 
     if (!status) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _propostas = await propostaService.getPropostasByStatus(status);
@@ -147,7 +147,7 @@ export const _getPropostasByUser = async (req: AuthenticatedRequest, res: Respon
     const { userId } = req.params;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check permissions
@@ -177,12 +177,12 @@ export const _getPropostasByLoja = async (req: AuthenticatedRequest, res: Respon
     const { lojaId } = req.params;
 
     if (!lojaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _lojaIdNumber = parseInt(lojaId, 10);
     if (_isNaN(lojaIdNumber)) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _propostas = await propostaService.getPropostasByLoja(lojaIdNumber);
@@ -230,11 +230,11 @@ export const _updateCcbPath = async (req: AuthenticatedRequest, res: Response) =
     const { ccbPath } = req.body;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!ccbPath) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check permissions - only admins or system can update CCB path
@@ -264,7 +264,7 @@ export const _markCcbGenerated = async (req: AuthenticatedRequest, res: Response
     const { id: propostaId } = req.params;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check permissions
@@ -295,7 +295,7 @@ export const _markSignatureCompleted = async (req: AuthenticatedRequest, res: Re
     const { clicksignKey } = req.body;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check permissions
@@ -325,13 +325,13 @@ export const _getPropostaWithDetails = async (req: AuthenticatedRequest, res: Re
     const { id: propostaId } = req.params;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _proposta = await propostaService.getPropostaWithDetails(propostaId);
 
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check permissions

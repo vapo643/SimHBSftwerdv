@@ -5,7 +5,8 @@ router.post('/render', async (req, res) => {
   try {
     const _result = await documentService.executeOperation('template_engine', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

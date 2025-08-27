@@ -72,7 +72,8 @@ export class ProposalController {
         success: true,
         data: result,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[ProposalController.create] Error:', error);
 
       // Tratar erros de validação do domínio
@@ -138,7 +139,8 @@ export class ProposalController {
         success: true,
         _data,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[ProposalController.getById] Error:', error);
 
       return res.status(500).json({
@@ -166,7 +168,8 @@ export class ProposalController {
       // Se for ATENDENTE, filtrar apenas suas propostas
       if (user?.role == 'ATENDENTE') {
         criteria.atendenteId = user.id;
-      } else if (atendente_id) {
+      }
+else if (atendente_id) {
         criteria.atendenteId = atendente_id as string;
       }
 
@@ -194,7 +197,8 @@ export class ProposalController {
         _data,
         total: data.length,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[ProposalController.list] Error:', error);
 
       return res.status(500).json({
@@ -232,7 +236,8 @@ export class ProposalController {
         success: true,
         message: 'Proposta aprovada com sucesso',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[ProposalController.approve] Error:', error);
 
       if (error.message.includes('não encontrada')) {
@@ -294,7 +299,8 @@ export class ProposalController {
         success: true,
         message: 'Proposta rejeitada',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[ProposalController.reject] Error:', error);
 
       if (error.message.includes('não encontrada')) {
@@ -355,7 +361,8 @@ export class ProposalController {
           cliente_data: latestProposal.clienteData,
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[ProposalController.getByCpf] Error:', error);
 
       return res.status(500).json({
@@ -391,7 +398,8 @@ export class ProposalController {
         success: true,
         message: 'Proposta submetida para análise',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[ProposalController.submitForAnalysis] Error:', error);
 
       if (error.message.includes('Apenas propostas em rascunho')) {

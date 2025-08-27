@@ -77,7 +77,7 @@ const FilaAnalise: React.FC = () => {
     switch (user?.role) {
       case 'ATENDENTE': {
         // ATENDENTE vê apenas suas próprias propostas
-        return `/api/propostas?atendenteId=${user.id}`; }
+        return `/api/propostas?atendenteId=${user.id}`;
 
       case 'ANALISTA': {
         // ANALISTA vê fila de análise OU histórico completo
@@ -86,13 +86,15 @@ const FilaAnalise: React.FC = () => {
           : '/api/propostas?queue=analysis'; // Apenas fila de análise
 
       case 'GERENTE': {
+        break;
+      }
       case 'ADMINISTRADOR': {
       case 'DIRETOR': {
         // Gestores veem tudo ou fila de análise dependendo da página
-        return '/api/propostas?queue=analysis'; }
+        return '/api/propostas?queue=analysis';
 
       default:
-        return '/api/propostas'; }
+        return '/api/propostas';
     }
   }, [user?.role, user?.id, showHistorico]);
 
@@ -110,13 +112,13 @@ const FilaAnalise: React.FC = () => {
   const _propostas = propostasResponse?.data || [];
 
   // Fetch partners data
-  const { data: parceiros } = useQuery<Record<string, unknown>[]>{ id: number; razaoSocial: string }>>({
+  const { data: parceiros } = useQuery<Array<{ id: number; razaoSocial: string }>>({
     queryKey: ['/api/parceiros'],
   });
 
   const _filteredData = useMemo(() => {
     if (!propostas || !Array.isArray(propostas)) {
-      return []; }
+      return [];
     }
 
     let _filtered = propostas;
@@ -134,7 +136,7 @@ const FilaAnalise: React.FC = () => {
       const _byPartner =
         filterPartner !== 'all' ? proposta.parceiro?.razaoSocial == filterPartner : true;
       const _byStore = filterStore !== 'all' ? proposta.loja?.nomeLoja == filterStore : true;
-      return byStatus && byPartner && byStore; }
+      return byStatus && byPartner && byStore;
     });
   }, [propostas, filterStatus, filterPartner, filterStore, user?.role, showHistorico]);
 
@@ -157,7 +159,7 @@ const FilaAnalise: React.FC = () => {
       const _response = await apiRequest(`/api/propostas/${propostaId}/toggle-status`, {
         method: 'PUT',
       });
-      return response; }
+      return response;
     },
     onSuccess: (data) => {
       toast({

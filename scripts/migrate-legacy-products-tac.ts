@@ -98,7 +98,7 @@ console.log('   MIGRAÇÃO DE DADOS - TAC PRODUTOS LEGADOS   ');
 console.log('═══════════════════════════════════════════════');
 console.log('');
 
-migrateLegacyProductsTac().catch((error) => {
+migrateLegacyProductsTac().catch ((error) => {
   console.error('❌ [MIGRAÇÃO TAC] Erro fatal:', error);
   process.exit(1);
 });

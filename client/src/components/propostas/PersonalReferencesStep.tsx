@@ -36,7 +36,8 @@ export function PersonalReferencesStep() {
         telefone: '',
         tipo_referencia: 'profissional',
       });
-    } else if (personalReferences.length == 1) {
+    }
+else if (personalReferences.length == 1) {
       // Se tiver apenas uma, garantir que a primeira seja pessoal e adicionar a segunda
       if (personalReferences[0].tipo_referencia !== 'pessoal') {
         updateReference(0, { ...personalReferences[0], tipo_referencia: 'pessoal' });
@@ -48,7 +49,8 @@ export function PersonalReferencesStep() {
         telefone: '',
         tipo_referencia: 'profissional',
       });
-    } else if (personalReferences.length >= 2) {
+    }
+else if (personalReferences.length >= 2) {
       // Garantir que a primeira seja sempre pessoal
       if (personalReferences[0].tipo_referencia !== 'pessoal') {
         updateReference(0, { ...personalReferences[0], tipo_referencia: 'pessoal' });
@@ -84,7 +86,8 @@ export function PersonalReferencesStep() {
               : 'Relação profissional'
             : 'Telefone';
       setError(errorKey, `${fieldLabel} é obrigatório`);
-    } else {
+    }
+else {
       clearError(errorKey);
     }
   };

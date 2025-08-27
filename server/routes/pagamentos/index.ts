@@ -32,7 +32,7 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _payments = await pagamentoService.getPayments({
@@ -75,7 +75,7 @@ router.get('/:id', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
   }
 catch (error) {
     if (error.message.includes('não encontrada') || error.message.includes('não está pronta')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.error('[PAGAMENTOS] Error getting proposal:', error);
@@ -96,7 +96,7 @@ router.post('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check user permissions
@@ -134,11 +134,11 @@ catch (error) {
     console.error('[PAGAMENTOS] Error creating payment:', error);
 
     if (error.message.includes('já possui pagamento')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (error.message.includes('não encontrada') || error.message.includes('não está pronta')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     res.status(500).json({
@@ -160,7 +160,7 @@ router.patch('/:id/status', _jwtAuthMiddleware, async (req: AuthenticatedRequest
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check user permissions
@@ -172,7 +172,7 @@ router.patch('/:id/status', _jwtAuthMiddleware, async (req: AuthenticatedRequest
     }
 
     if (!status) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Validate status
@@ -201,7 +201,7 @@ catch (error) {
     console.error('[PAGAMENTOS] Error updating payment status:', error);
 
     if (error.message.includes('não encontrada')) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     res.status(500).json({
@@ -345,11 +345,11 @@ router.post(
       const _file = req.file;
 
       if (!userId) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       if (!file) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // TODO: Implement document upload logic

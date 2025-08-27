@@ -104,10 +104,14 @@ class SecurityLogger {
     switch (event.severity) {
       case 'CRITICAL':
       case 'HIGH': {
+        break;
+        }
         console.error(`🚨 [SECURITY] ${logMessage}`);
         break;
       }
       case 'MEDIUM': {
+        break;
+        }
         console.warn(`⚠️ [SECURITY] ${logMessage}`);
         break;
       }

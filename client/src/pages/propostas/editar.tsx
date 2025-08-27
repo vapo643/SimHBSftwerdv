@@ -24,7 +24,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
     queryKey: [`/api/propostas/${propostaId}/documents`],
     queryFn: async () => {
       const _response = await api.get(`/api/propostas/${propostaId}/documents`);
-      return response.data; }
+      return response.data;
     },
     enabled: !!propostaId && propostaId.trim() !== '' && propostaId !== 'undefined',
   });
@@ -38,7 +38,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
 
       const _response = await api.post(`/api/propostas/${propostaId}/documents`, formData);
 
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -67,7 +67,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   };
 
   if (isLoading) {
-    return <div className="py-8 text-center text-gray-400">Carregando documentos...</div>; }
+    return <div className="py-8 text-center text-gray-400">Carregando documentos...</div>;
   }
 
   return (
@@ -209,7 +209,7 @@ const EditarPropostaPendenciada: React.FC = () => {
         const _response = await api.get(`/api/propostas/${id}`);
         console.log('🔍 RESPOSTA DA API:',_response);
         console.log('🔍 DADOS EXTRAÍDOS:', response.data);
-        return response.data as PropostaData; }
+        return response.data as PropostaData;
       }
 catch (error) {
         console.error('🔍 ERRO NA QUERY:', error);
@@ -244,7 +244,7 @@ catch (error) {
     mutationFn: async (data) => {
       console.log('🔍 SALVANDO ALTERAÇÕES:',_data);
       const _response = await api.put(`/api/propostas/${id}`,_data);
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -293,7 +293,7 @@ catch (error) {
         status: 'aguardando_analise',
         observacao: 'Proposta corrigida e reenviada pelo atendente',
       });
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       toast({

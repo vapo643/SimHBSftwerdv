@@ -27,7 +27,8 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
         .limit(1);
 
       return proposta || null;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CLIENTE_REPO] Error finding client by CPF:', error);
       return null;
     }
@@ -43,7 +44,8 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
         .from(propostas)
         .where(eq(propostas.clienteCpf, cpf))
         .orderBy(desc(propostas.createdAt));
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CLIENTE_REPO] Error getting proposals by CPF:', error);
       return [];
     }
@@ -60,7 +62,8 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
         .where(eq(propostas.clienteCpf, cpf));
 
       return (result[0]?.count || 0) > 0;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CLIENTE_REPO] Error checking client existence:', error);
       return false;
     }

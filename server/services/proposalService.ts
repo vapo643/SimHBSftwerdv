@@ -19,7 +19,8 @@ export class ProposalService extends GenericService {
       console.log(`[PROPOSAL_SERVICE] Processing ${operation}`, _data);
 
       return await this.executeOperation(operation, _data);
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[PROPOSAL_SERVICE] Operation ${operation} failed:`, error);
       throw error;
     }

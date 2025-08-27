@@ -19,7 +19,8 @@ router.get('/:id', async (req: Request, res: Response) => {
       jobId: req.params.id,
     });
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Job status check failed',
@@ -35,7 +36,8 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const _result = await testQueueService.executeOperation('list_jobs', req.query);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Job listing failed',

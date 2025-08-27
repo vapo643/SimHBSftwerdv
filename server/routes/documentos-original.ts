@@ -44,18 +44,21 @@ router.get(
             filename: _result.filename,
             contentType: _result.contentType,
           });
-        } else {
+        }
+else {
           // Redirect to signed URL (legacy behavior)
           res.redirect(_result.url!);
         }
-      } else {
+      }
+else {
         const _statusCode = _result.error?.includes('não encontrado') ? 404 : 500;
         res.status(statusCode).json({
           error: _result.error,
           details: statusCode == 404 ? `Arquivo '${path}' não existe no storage` : undefined,
         });
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTOS_CONTROLLER] Internal error:', error);
       res.status(500).json({
         error: 'Erro interno do servidor',
@@ -84,7 +87,8 @@ router.get(
 
       const _result = await documentsService.getProposalDocuments(String(propostaId));
       res.json(_result);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DOCUMENTOS_CONTROLLER] Error listing documents:', error);
 
       const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;

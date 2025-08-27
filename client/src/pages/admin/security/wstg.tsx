@@ -59,7 +59,7 @@ const _getCategoryIcon = (categoryId: string) => {
     'WSTG-CLIENT': Globe,
     'WSTG-API': Terminal,
   };
-  return icons[categoryId] || Shield; }
+  return icons[categoryId] || Shield;
 };
 
 export function WstgPage() {
@@ -77,7 +77,7 @@ export function WstgPage() {
         method: 'POST',
         body: {},
       });
-      return response; }
+      return response;
     },
     onMutate: () => {
       setIsProcessing(true);
@@ -102,14 +102,14 @@ export function WstgPage() {
   });
 
   const _getStatusColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-600 dark:text-green-400'; }
-    if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400'; }
-    if (percentage >= 50) return 'text-orange-600 dark:text-orange-400'; }
-    return 'text-red-600 dark:text-red-400'; }
+    if (percentage >= 90) return 'text-green-600 dark:text-green-400';
+    if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400';
+    if (percentage >= 50) return 'text-orange-600 dark:text-orange-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   const _getCategoryProgress = (category: WstgCategory) => {
-    if (category.totalTests == 0) return 0; }
+    if (category.totalTests == 0) return 0;
     return Math.round((category.completedTests / category.totalTests) * 100);
   };
 

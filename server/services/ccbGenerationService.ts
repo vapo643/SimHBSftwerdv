@@ -120,7 +120,8 @@ export class CCBGenerationService {
             enderecoParseado.cidade = cidadeEstadoMatch[1].trim();
             enderecoParseado.estado = cidadeEstadoMatch[2].trim();
             enderecoParseado.cep = cidadeEstadoMatch[3].trim();
-          } else if (ultimaParte.includes('/')) {
+          }
+else if (ultimaParte.includes('/')) {
             const [cidade, resto] = ultimaParte.split('/');
             enderecoParseado.cidade = cidade.trim();
             const _estadoCepMatch = resto.match(/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
@@ -220,7 +221,8 @@ export class CCBGenerationService {
         console.log(
           `🏢 [CCB] Cliente PJ - Razão Social: ${dadosCliente.razaoSocial}, CNPJ: ${dadosCliente.cnpj}`
         );
-      } else {
+      }
+else {
         console.log(`👤 [CCB] Cliente PF - Nome: ${dadosCliente.nome}, CPF: ${dadosCliente.cpf}`);
       }
 
@@ -333,7 +335,8 @@ export class CCBGenerationService {
           }
           console.log(`📊 [CCB] ${parcelas.length} parcelas geradas automaticamente`);
         }
-      } catch (parcelasError) {
+      }
+catch (parcelasError) {
         console.warn('⚠️ [CCB] Erro ao buscar parcelas:', parcelasError);
         parcelas = [];
       }
@@ -512,7 +515,8 @@ export class CCBGenerationService {
             color: rgb(0, 0, 0),
           });
         }
-      } else if (isPJ) {
+      }
+else if (isPJ) {
         // ===========================
         // CAMPOS ESPECÍFICOS DE PESSOA JURÍDICA (PJ)
         // Só renderizar se o cliente for PJ
@@ -558,7 +562,8 @@ export class CCBGenerationService {
           if (enderecoParseado.complemento && enderecoParseado.complemento !== 'NÃO INFORMADO') {
             enderecoBasico += `, ${enderecoParseado.complemento}`;
           }
-        } else if (dadosCliente.logradouro) {
+        }
+else if (dadosCliente.logradouro) {
           // Fallback para dados diretos
           enderecoBasico = dadosCliente.logradouro;
           if (dadosCliente.numero) {
@@ -988,7 +993,8 @@ export class CCBGenerationService {
               color: rgb(0, 0, 0),
             });
           }
-        } else if (isPJ) {
+        }
+else if (isPJ) {
           // DADOS BANCÁRIOS PESSOA JURÍDICA
           console.log('🏢 [CCB] Renderizando dados bancários de PJ...');
 
@@ -1196,7 +1202,8 @@ export class CCBGenerationService {
       console.log(`✅ [CCB] Próximo passo: Ajustar coordenadas conforme feedback visual`);
 
       return { success: true, pdfPath: filePath };
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB] Erro na geração:', error);
       return {
         success: false,
@@ -1320,7 +1327,8 @@ export class CCBGenerationService {
         prazo_meses: proposta.condicoes_data?.prazo || 12,
         taxa_juros: proposta.condicoes_data?.taxa_juros || 0,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB] Erro ao buscar dados da proposta:', error);
       return null;
     }
@@ -1382,7 +1390,8 @@ export class CCBGenerationService {
       const { data } = supabaseAdmin.storage.from('documents').getPublicUrl(filePath);
 
       return data?.publicUrl || null;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB] Erro ao obter URL pública:', error);
       return null;
     }
@@ -1401,7 +1410,8 @@ export class CCBGenerationService {
 
       const _proposal = result[0];
       return proposal?.ccb_gerado == true && !!proposal?.caminho_ccb;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB] Erro ao verificar status:', error);
       return false;
     }

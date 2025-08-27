@@ -281,7 +281,7 @@ catch (error) {
    * Process batch payment update
    */
   async processBatchPaymentUpdate(
-    updates: Record<string, unknown>[]>{
+    updates: Array<{
       parcelaId: number;
       status: string;
       dataPagamento?: string;

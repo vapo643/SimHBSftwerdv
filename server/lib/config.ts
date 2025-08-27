@@ -166,7 +166,8 @@ export function loadConfig(): AppConfig {
         frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5000',
       },
     };
-  } catch (error) {
+  }
+catch (error) {
     const _errorMsg = _error instanceof Error ? error.message : String(error);
     log(`❌ Error loading config: ${errorMsg}`);
     // Em produção, falha fatal se secrets críticos estão faltando

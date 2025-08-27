@@ -41,13 +41,16 @@ router.get(
       if (jobId.startsWith('pdf-processing')) {
         queueName = 'pdf-processing';
         job = await queues.pdfProcessing.getJob(jobId);
-      } else if (jobId.startsWith('boleto-sync')) {
+      }
+else if (jobId.startsWith('boleto-sync')) {
         queueName = 'boleto-sync';
         job = await queues.boletoSync.getJob(jobId);
-      } else if (jobId.startsWith('document-processing')) {
+      }
+else if (jobId.startsWith('document-processing')) {
         queueName = 'document-processing';
         job = await queues.document.getJob(jobId);
-      } else if (jobId.startsWith('notifications')) {
+      }
+else if (jobId.startsWith('notifications')) {
         queueName = 'notifications';
         job = await queues.notification.getJob(jobId);
       }
@@ -74,7 +77,8 @@ router.get(
             size: returnvalue.size,
             timestamp: new Date().toISOString(),
           };
-        } else if (state == 'failed') {
+        }
+else if (state == 'failed') {
           responseData = {
             success: false,
             error: job.failedReason || 'Erro desconhecido no processamento',
@@ -105,7 +109,8 @@ router.get(
         _jobId,
         hint: 'O job pode ter expirado ou o ID está incorreto',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[JOB STATUS API] ❌ Erro ao consultar status:`, error);
       return res.status(500).json({
         error: 'Erro ao consultar status do job',

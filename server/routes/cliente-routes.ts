@@ -18,7 +18,8 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const _result = await clientService.executeOperation('list_clients', req.query);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to fetch clients',

@@ -113,7 +113,8 @@ export async function updateStatusWithContext(
               : statusContextualExistente.metadata,
           })
           .where(eq(statusContextuais.id, statusContextualExistente.id));
-      } else {
+      }
+else {
         console.log(`[DUPLA-ESCRITA] ➕ Criando novo status contextual...`);
         await tx.insert(statusContextuais).values({
           _propostaId,
@@ -148,8 +149,9 @@ export async function updateStatusWithContext(
       };
     });
 
-    return result;
-  } catch (error) {
+    return _result;
+  }
+catch (error) {
     const _duration = Date.now() - startTime;
     console.error(`[DUPLA-ESCRITA] ❌ Erro na transação após ${duration}ms:`, error);
 
@@ -196,7 +198,8 @@ export async function getStatusByContext(
       .limit(1);
 
     return propostaLegada?.status || null;
-  } catch (error) {
+  }
+catch (error) {
     console.error(`[STATUS-CONTEXT] ❌ Erro ao buscar status:`, error);
     return null;
   }
@@ -253,7 +256,8 @@ export async function validateStatusConsistency(
         _inconsistencias,
       },
     };
-  } catch (error) {
+  }
+catch (error) {
     console.error(`[CONSISTÊNCIA] ❌ Erro na validação:`, error);
     return {
       isConsistent: false,

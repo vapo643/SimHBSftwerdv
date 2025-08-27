@@ -205,7 +205,8 @@ class InterBankService {
 
     try {
       return await this.tokenBreaker.fire();
-    } catch (error) {
+    }
+catch (error) {
       if (isCircuitBreakerOpen(error)) {
         console.log(formatCircuitBreakerError(error, 'Inter Token API'));
         throw new Error('Inter Bank token service temporarily unavailable');
@@ -367,7 +368,8 @@ class InterBankService {
 
         // Return early if fetch succeeded
         return response;
-      } catch (fetchError) {
+      }
+catch (fetchError) {
         console.error(`[INTER] ❌ Fetch error: ${(fetchError as Error).message}`);
 
         // Fallback to raw HTTPS request
@@ -407,7 +409,8 @@ class InterBankService {
                 json: async () => {
                   try {
                     return JSON.parse(_data);
-                  } catch (e) {
+                  }
+catch (e) {
                     throw new Error('Invalid JSON response');
                   }
                 },
@@ -435,7 +438,8 @@ class InterBankService {
         try {
           const _errorJson = JSON.parse(errorText);
           console.log(`[INTER] ❌ Parsed error JSON:`, errorJson);
-        } catch (e) {
+        }
+catch (e) {
           console.log(`[INTER] ❌ Error response is not JSON`);
         }
 
@@ -454,7 +458,8 @@ class InterBankService {
         `[INTER] ✅ Access token obtained successfully (expires in ${tokenData.expires_in}s)`
       );
       return tokenData.access_token;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to get access token:', error);
       throw error;
     }
@@ -473,7 +478,8 @@ class InterBankService {
 
     try {
       return await this.apiBreaker.fire(endpoint, method, _data, additionalHeaders);
-    } catch (error) {
+    }
+catch (error) {
       if (isCircuitBreakerOpen(error)) {
         console.log(formatCircuitBreakerError(error, 'Inter API'));
         throw new Error('Inter Bank API temporarily unavailable - circuit breaker is OPEN');
@@ -545,7 +551,8 @@ class InterBankService {
         if (this._config.contaCorrente) {
           headers['x-conta-corrente'] = this._config.contaCorrente;
           console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this._config.contaCorrente);
-        } else {
+        }
+else {
           console.log('[INTER] ⚠️ NO CONTA CORRENTE CONFIGURED!');
         }
 
@@ -614,11 +621,13 @@ class InterBankService {
               if (errorText.length == 0) {
                 console.log('[INTER] 📋 EMPTY ERROR BODY!');
                 console.log('[INTER] 📋 Response headers for debugging:', res.headers);
-              } else {
+              }
+else {
                 try {
                   const _errorJson = JSON.parse(errorText);
                   console.log('[INTER] 📋 Error as JSON:', JSON.stringify(errorJson, null, 2));
-                } catch (e) {
+                }
+catch (e) {
                   console.log('[INTER] 📋 Error is not JSON, raw text:', errorText);
                 }
               }
@@ -650,7 +659,8 @@ class InterBankService {
             try {
               const _responseText = buffer.toString('utf-8');
               resolve(JSON.parse(responseText));
-            } catch (e) {
+            }
+catch (e) {
               // Return raw text if not JSON
               resolve(buffer.toString('utf-8'));
             }
@@ -675,7 +685,8 @@ class InterBankService {
 
         req.end();
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[INTER] Request failed for ${endpoint}:`, error);
       throw error;
     }
@@ -714,7 +725,8 @@ class InterBankService {
       await this.getAccessToken();
       console.log('[INTER] ✅ Connection test successful');
       return true;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Connection test failed:', error);
       return false;
     }
@@ -744,7 +756,8 @@ class InterBankService {
 
       console.log(`[INTER] ✅ Collection created successfully: ${response.codigoSolicitacao}`);
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to create collection:', error);
       throw error;
     }
@@ -780,7 +793,8 @@ class InterBankService {
       console.log(`[INTER] 📊 PIX disponível: ${enrichedData.pixCopiaECola ? 'Sim' : 'Não'}`);
 
       return enrichedData;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to retrieve collection:', error);
       throw error;
     }
@@ -794,7 +808,8 @@ class InterBankService {
       // Por enquanto, retornar null - em produção, usar biblioteca QR code
       console.log(`[INTER] ⚠️ QR Code generation not implemented yet`);
       return null;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to generate QR code:', error);
       return null;
     }
@@ -831,9 +846,11 @@ class InterBankService {
         if (value !== undefined) {
           if (key == 'itensPorPagina') {
             queryParams.append('paginacao.itensPorPagina', value.toString());
-          } else if (key == 'paginaAtual') {
+          }
+else if (key == 'paginaAtual') {
             queryParams.append('paginacao.paginaAtual', value.toString());
-          } else {
+          }
+else {
             queryParams.append(key, value.toString());
           }
         }
@@ -843,7 +860,8 @@ class InterBankService {
 
       console.log(`[INTER] ✅ Found ${response.totalElementos} collections`);
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to search collections:', error);
       throw error;
     }
@@ -874,7 +892,8 @@ class InterBankService {
       console.log(`🔍 [AUDIT-INTER] ==== FIM EDIÇÃO ====`);
 
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('🔍 [AUDIT-INTER] ❌ Erro ao editar cobrança:', error);
       throw error;
     }
@@ -902,7 +921,8 @@ class InterBankService {
       console.log(`🔍 [AUDIT-INTER] ==== FIM CANCELAMENTO ====`);
 
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('🔍 [AUDIT-INTER] ❌ Erro ao cancelar cobrança:', error);
       throw error;
     }
@@ -975,7 +995,8 @@ class InterBankService {
           if (typeof response.data == 'string') {
             base64String = response.data;
             foundField = 'data';
-          } else if (response.data.pdf) {
+          }
+else if (response.data.pdf) {
             base64String = response.data.pdf;
             foundField = 'data.pdf';
           }
@@ -1019,7 +1040,8 @@ class InterBankService {
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
             return pdfBuffer;
-          } else {
+          }
+else {
             console.log(
               `[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`,
               pdfBuffer.slice(0, 20)
@@ -1051,7 +1073,8 @@ class InterBankService {
             console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
             return pdfBuffer;
           }
-        } catch (decodeError) {
+        }
+catch (decodeError) {
           console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);
         }
       }
@@ -1065,7 +1088,8 @@ class InterBankService {
       });
 
       throw new Error('PDF não encontrado na resposta da API - formato inesperado');
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Erro ao obter PDF:', error.message);
 
       // Tentar endpoints alternativos
@@ -1111,7 +1135,8 @@ class InterBankService {
           console.log(`[INTER] ✅ PDF binário encontrado em endpoint alternativo!`);
           return response;
         }
-      } catch (err) {
+      }
+catch (err) {
         console.log(`[INTER] ❌ Endpoint ${endpoint} falhou`);
       }
     }
@@ -1135,7 +1160,8 @@ class InterBankService {
       if (response instanceof Buffer) {
         console.log('Buffer size:', response.length);
         console.log('Is PDF:', response.slice(0, 5).toString('utf8').startsWith('%PDF'));
-      } else if (typeof response == 'object') {
+      }
+else if (typeof response == 'object') {
         console.log('Object keys:', Object.keys(_response));
         console.log('Sample (first 1000 chars):');
         console.log(JSON.stringify(_response, null, 2).substring(0, 1000));
@@ -1152,7 +1178,8 @@ class InterBankService {
       }
 
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;
     }
@@ -1182,7 +1209,8 @@ class InterBankService {
 
       console.log(`[INTER] ✅ Summary retrieved successfully`);
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to get summary:', error);
       throw error;
     }
@@ -1199,7 +1227,8 @@ class InterBankService {
 
       console.log(`[INTER] ✅ Webhook configured successfully`);
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to configure webhook:', error);
       throw error;
     }
@@ -1216,7 +1245,8 @@ class InterBankService {
 
       console.log(`[INTER] ✅ Webhook configuration retrieved`);
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to get webhook:', error);
       throw error;
     }
@@ -1233,7 +1263,8 @@ class InterBankService {
 
       console.log(`[INTER] ✅ Webhook deleted successfully`);
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to delete webhook:', error);
       throw error;
     }
@@ -1258,7 +1289,8 @@ class InterBankService {
 
       console.log(`[INTER] ✅ Payment simulated successfully`);
       return response;
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to simulate payment:', error);
       throw error;
     }
@@ -1352,7 +1384,8 @@ class InterBankService {
           const _sufixoParcela = parcelaMatch[0]; // ex: "-1"
           const _prefixo = seuNumeroUnico.substring(0, 15 - sufixoParcela.length);
           seuNumeroUnico = prefixo + sufixoParcela;
-        } else {
+        }
+else {
           // Não tem sufixo, apenas truncar
           seuNumeroUnico = seuNumeroUnico.substring(0, 15);
         }
@@ -1428,8 +1461,9 @@ class InterBankService {
       const _result = await this.emitirCobranca(cobrancaData);
 
       console.log(`[INTER] ✅ Collection created for proposal successfully`);
-      return result;
-    } catch (error) {
+      return _result;
+    }
+catch (error) {
       console.error('[INTER] ❌ Failed to create collection for proposal:', error);
       throw error;
     }

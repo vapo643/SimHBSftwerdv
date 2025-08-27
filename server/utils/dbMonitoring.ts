@@ -23,7 +23,8 @@ export async function getDatabaseStats() {
     `);
 
     return stats[0];
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar estatísticas do banco:', error);
     throw error;
   }
@@ -51,7 +52,8 @@ export async function getSlowQueries(limit = 10) {
     `);
 
     return queries;
-  } catch (error) {
+  }
+catch (error) {
     // pg_stat_statements pode não estar habilitado
     console.warn('pg_stat_statements não disponível');
     return [];
@@ -81,7 +83,8 @@ export async function getTableStats() {
     `);
 
     return stats;
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar estatísticas das tabelas:', error);
     throw error;
   }
@@ -107,7 +110,8 @@ export async function getIndexUsage() {
     `);
 
     return usage;
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar uso de índices:', error);
     throw error;
   }
@@ -142,7 +146,8 @@ export async function getActiveConnections() {
     `);
 
     return connections;
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar conexões ativas:', error);
     throw error;
   }
@@ -197,7 +202,8 @@ export async function checkDatabaseHealth() {
         health.issues.push(`Tabela ${table.tablename} com ${table.dead_ratio}% de linhas mortas`);
         if (table.dead_ratio > 50) {
           health.status = 'critical';
-        } else if (health.status !== 'critical') {
+        }
+else if (health.status !== 'critical') {
           health.status = 'warning';
         }
       }
@@ -218,7 +224,8 @@ export async function checkDatabaseHealth() {
     }
 
     return health;
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao verificar saúde do banco:', error);
     return {
       status: 'error',
@@ -249,7 +256,8 @@ export async function generateMonitoringReport() {
       connections: activeConnections,
       health: health,
     };
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao gerar relatório de monitoramento:', error);
     throw error;
   }

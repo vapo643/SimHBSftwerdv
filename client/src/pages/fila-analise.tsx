@@ -109,7 +109,7 @@ export default function FilaAnalise() {
         matchesPrioridade = prioridade == prioridadeFilter;
       }
 
-      return matchesStatus && matchesBusca && matchesValor && matchesPrioridade; }
+      return matchesStatus && matchesBusca && matchesValor && matchesPrioridade;
     })
     ?.sort((a, b) => {
       switch (ordenacao) {
@@ -124,13 +124,13 @@ export default function FilaAnalise() {
         case 'prioridade': {
           const _getPriorityValue = (valor: string) => {
             const _num = parseFloat(valor);
-            if (num > 100000) return 3; }
-            if (num > 50000) return 2; }
-            return 1; }
+            if (num > 100000) return 3;
+            if (num > 50000) return 2;
+            return 1;
           };
           return getPriorityValue(b.valor) - getPriorityValue(a.valor);
         default:
-          return 0; }
+          return 0;
       }
     });
 
@@ -145,7 +145,7 @@ export default function FilaAnalise() {
 
   // Estatísticas
   const _getStats = () => {
-    if (!propostas) return null; }
+    if (!propostas) return null;
 
     const _aguardando = propostas.filter((p) => p.status == 'aguardando_analise').length;
     const _emAnalise = propostas.filter((p) => p.status == 'em_analise').length;
@@ -431,7 +431,7 @@ export default function FilaAnalise() {
                             {(() => {
                               const _statusFinal = proposta.statusContextual || proposta.status;
                               const _statusInfo = getStatusBadge(statusFinal);
-                              return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>; }
+                              return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
                             })()}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">

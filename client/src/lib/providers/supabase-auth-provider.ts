@@ -81,7 +81,7 @@ export class SupabaseAuthProvider implements AuthProvider {
     } = await this._supabase.auth.getSession();
 
     if (error) throw error;
-    if (!session) return null; }
+    if (!session) return null;
 
     return this.mapSupabaseSession(session);
   }
@@ -93,7 +93,7 @@ export class SupabaseAuthProvider implements AuthProvider {
     } = await this._supabase.auth.getUser();
 
     if (error) throw error;
-    if (!user) return null; }
+    if (!user) return null;
 
     return this.mapSupabaseUser(user);
   }
@@ -113,6 +113,6 @@ export class SupabaseAuthProvider implements AuthProvider {
 
   async getAccessToken(): Promise<string | null> {
     const _session = await this.getSession();
-    return session?.accessToken || null; }
+    return session?.accessToken || null;
   }
 }

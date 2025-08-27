@@ -42,7 +42,8 @@ export class ProposalRepository implements IProposalRepository {
           // updatedAt campo removido - será atualizado automaticamente pelo schema
         })
         .where(eq(propostas.id, data.id));
-    } else {
+    }
+else {
       // Create - gerar IDs sequenciais
       const _sequentialId = await this.getNextSequentialId();
       const _numeroProposta = await this.getNextNumeroProposta();
@@ -134,13 +135,13 @@ for aggregate ${event.aggregateId}`);
       .from(propostas)
       .where(and(...conditions));
 
-    return results.map((row) => this.mapToDomain(row));
+    return _results.map((row) => this.mapToDomain(row));
   }
 
   async findAll(): Promise<Proposal[]> {
     const _results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
 
-    return results.map((row) => this.mapToDomain(row));
+    return _results.map((row) => this.mapToDomain(row));
   }
 
   async findByStatus(status: string): Promise<Proposal[]> {
@@ -149,7 +150,7 @@ for aggregate ${event.aggregateId}`);
       .from(propostas)
       .where(and(eq(propostas.status, status), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return _results.map((row) => this.mapToDomain(row));
   }
 
   async findByCPF(cpf: string): Promise<Proposal[]> {
@@ -160,7 +161,7 @@ for aggregate ${event.aggregateId}`);
       .from(propostas)
       .where(and(eq(propostas.clienteCpf, cleanCPF), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return _results.map((row) => this.mapToDomain(row));
   }
 
   async findByLojaId(lojaId: number): Promise<Proposal[]> {
@@ -169,7 +170,7 @@ for aggregate ${event.aggregateId}`);
       .from(propostas)
       .where(and(eq(propostas.lojaId, lojaId), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return _results.map((row) => this.mapToDomain(row));
   }
 
   async findByAtendenteId(atendenteId: string): Promise<Proposal[]> {
@@ -178,7 +179,7 @@ for aggregate ${event.aggregateId}`);
       .from(propostas)
       .where(and(eq(propostas.analistaId, atendenteId), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return _results.map((row) => this.mapToDomain(row));
   }
 
   async exists(id: string): Promise<boolean> {
@@ -187,7 +188,7 @@ for aggregate ${event.aggregateId}`);
       .from(propostas)
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)));
 
-    return result[0].count > 0;
+    return _result[0].count > 0;
   }
 
   async delete(id: string): Promise<void> {
@@ -203,7 +204,7 @@ for aggregate ${event.aggregateId}`);
       .select({ maxId: sql<number>`COALESCE(MAX(CAST(id AS INTEGER)), 300000)` })
       .from(propostas);
 
-    return result[0].maxId + 1;
+    return _result[0].maxId + 1;
   }
 
   async getNextNumeroProposta(): Promise<number> {
@@ -213,7 +214,7 @@ for aggregate ${event.aggregateId}`);
       .select({ maxNumero: sql<number>`COALESCE(MAX(numero_proposta), 300000)` })
       .from(propostas);
 
-    return result[0].maxNumero + 1;
+    return _result[0].maxNumero + 1;
   }
 
   /**
@@ -229,7 +230,8 @@ for aggregate ${event.aggregateId}`);
       try {
         clienteData =
           typeof row.clienteData == 'string' ? JSON.parse(row.clienteData) : row.clienteData;
-      } catch {
+      }
+catch {
         clienteData = {
           nome: row.clienteNome,
           cpf: row.clienteCpf,
@@ -249,7 +251,8 @@ for aggregate ${event.aggregateId}`);
             : undefined,
         };
       }
-    } else {
+    }
+else {
       clienteData = {
         nome: row.clienteNome,
         cpf: row.clienteCpf,

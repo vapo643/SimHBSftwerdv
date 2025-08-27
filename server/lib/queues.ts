@@ -97,7 +97,8 @@ export async function checkQueuesHealth() {
         notification: results[3],
       },
     };
-  } catch (error) {
+  }
+catch (error) {
     console.error('[QUEUE] Health check failed:', error);
     return {
       healthy: false,

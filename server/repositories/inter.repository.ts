@@ -33,7 +33,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.propostaId, proposalId))
       .limit(1);
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -46,7 +46,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -143,7 +143,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
 
     const _result = await db.insert(interCollections).values([collectionData]).returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -162,7 +162,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.id, id))
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -181,7 +181,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -206,7 +206,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
   async getProposal(proposalId: string): Promise<Proposta | undefined> {
     const _result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -227,7 +227,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -253,7 +253,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       ])
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**
@@ -281,7 +281,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       ])
       .returning();
 
-    return result[0];
+    return _result[0];
   }
 
   /**

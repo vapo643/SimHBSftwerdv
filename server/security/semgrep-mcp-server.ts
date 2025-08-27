@@ -115,11 +115,13 @@ export class SemgrepMCPServer {
           console.log('[SEMGREP MCP] Connected to Redis cache');
           this.useMemoryCache = false;
         });
-      } catch (error) {
+      }
+catch (error) {
         console.log('[SEMGREP MCP] Redis initialization failed, using in-memory cache');
         this.useMemoryCache = true;
       }
-    } else {
+    }
+else {
       console.log('[SEMGREP MCP] Development mode - using in-memory cache');
       this.useMemoryCache = true;
     }
@@ -146,7 +148,8 @@ export class SemgrepMCPServer {
 
     try {
       return this.redis ? await this.redis.get(key) : null;
-    } catch (err) {
+    }
+catch (err) {
       console.error('[SEMGREP MCP] Cache get error:', err);
       return null;
     }
@@ -165,7 +168,8 @@ export class SemgrepMCPServer {
       if (this.redis) {
         await this.redis.setex(key, ttlSeconds, value);
       }
-    } catch (err) {
+    }
+catch (err) {
       console.error('[SEMGREP MCP] Cache set error:', err);
       // Fallback para memória em caso de erro
       this.memoryCache.set(key, {
@@ -194,7 +198,8 @@ export class SemgrepMCPServer {
           await this.redis.del(...keys);
         }
       }
-    } catch (err) {
+    }
+catch (err) {
       console.error('[SEMGREP MCP] Cache delete error:', err);
     }
   }
@@ -256,7 +261,8 @@ export class SemgrepMCPServer {
       await this.addToHistory(filePath, processed);
 
       return processed;
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Semgrep scan failed for ${filePath}: ${error.message}`);
     }
   }
@@ -279,9 +285,10 @@ export class SemgrepMCPServer {
         risk_score: this.calculateRiskScore(enrichedResult),
         compliance_status: await this.checkCompliance(enrichedResult),
       };
-    } finally {
+    }
+finally {
       // Limpar arquivo temporário
-      await fs.unlink(tempFile).catch(() => {});
+      await fs.unlink(tempFile).catch (() => {});
     }
   }
 
@@ -338,8 +345,9 @@ export class SemgrepMCPServer {
       // Cache por 24 horas
       await this.cacheSet(cacheKey, JSON.stringify(_result), 86400);
 
-      return result;
-    } catch (error) {
+      return _result;
+    }
+catch (error) {
       console.error('[SEMGREP MCP] Failed to get rules:', error);
       return [];
     }
@@ -369,19 +377,23 @@ export class SemgrepMCPServer {
             // Se o output não for JSON, retornar como texto
             if (args.includes('--list-rules')) {
               resolve(stdout.split('\n').filter((line) => line.trim()));
-            } else {
+            }
+else {
               resolve(JSON.parse(stdout));
             }
-          } catch (parseError) {
+          }
+catch (parseError) {
             // Se falhar o parse, tentar limpar o output
             const _cleanOutput = stdout.substring(stdout.indexOf('{'));
             try {
               resolve(JSON.parse(cleanOutput));
-            } catch {
+            }
+catch {
               reject(new Error(`Failed to parse Semgrep output: ${parseError}`));
             }
           }
-        } else {
+        }
+else {
           reject(new Error(`Semgrep failed with code ${code}: ${stderr}`));
         }
       });
@@ -454,7 +466,8 @@ export class SemgrepMCPServer {
       try {
         await this.scanFile(filePath, { force_refresh: true });
         console.log(`[SEMGREP MCP] Real-time analysis completed for ${filePath}`);
-      } catch (error) {
+      }
+catch (error) {
         console.error(`[SEMGREP MCP] Real-time analysis failed for ${filePath}:`, error);
       }
     });
@@ -467,7 +480,8 @@ export class SemgrepMCPServer {
     try {
       const _content = await fs.readFile(filePath, 'utf8');
       return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8);
-    } catch {
+    }
+catch {
       return 'unknown';
     }
   }
@@ -479,7 +493,8 @@ export class SemgrepMCPServer {
     try {
       await fs.access(path);
       return true;
-    } catch {
+    }
+catch {
       return false;
     }
   }
@@ -548,7 +563,7 @@ export class SemgrepMCPServer {
       // Adicionar análise de tipos
     }
 
-    return result;
+    return _result;
   }
 
   /**
@@ -607,7 +622,8 @@ export class SemgrepMCPServer {
             files.push(join(dir, entry.name));
           }
         }
-      } catch {
+      }
+catch {
         // Ignorar diretórios não encontrados
       }
     }

@@ -68,7 +68,7 @@ catch (error) {
 }
 
 // Executar verificação
-checkProductsTac().catch((error) => {
+checkProductsTac().catch ((error) => {
   console.error('❌ Erro fatal:', error);
   process.exit(1);
 });

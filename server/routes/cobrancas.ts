@@ -31,7 +31,8 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Respo
       _propostas,
       total: propostas.length,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[COBRANCAS_CONTROLLER] Error fetching proposals:', error);
     res.status(500).json({
       success: false,
@@ -60,7 +61,8 @@ router.get('/:id', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Re
       success: true,
       ...details,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[COBRANCAS_CONTROLLER] Error fetching proposal details:', error);
 
     const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
@@ -101,7 +103,8 @@ router.post(
         success: true,
         _observation,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS_CONTROLLER] Error adding observation:', error);
       res.status(500).json({
         success: false,
@@ -139,7 +142,8 @@ router.put(
         _success,
         message: success ? 'Parcela atualizada com sucesso' : 'Erro ao atualizar parcela',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS_CONTROLLER] Error updating installment:', error);
       res.status(500).json({
         success: false,
@@ -180,7 +184,8 @@ router.post(
         success: true,
         _request,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS_CONTROLLER] Error requesting modification:', error);
       res.status(500).json({
         success: false,
@@ -204,7 +209,8 @@ router.get(
         success: true,
         ...stats,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS_CONTROLLER] Error fetching overdue stats:', error);
       res.status(500).json({
         success: false,
@@ -239,7 +245,8 @@ router.post(
         failed: _result.failed || 0,
         errors: _result.errors || [],
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS_CONTROLLER] Error in batch update:', error);
       res.status(500).json({
         success: false,
@@ -260,7 +267,8 @@ router.get('/kpis', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: R
       success: true,
       ...kpis,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[COBRANCAS_CONTROLLER] Error fetching KPIs:', error);
     res.status(500).json({
       success: false,

@@ -133,7 +133,8 @@ export class AuthService {
       }
 
       return { success: false, error: 'Login failed' };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Login error:', error);
       return { success: false, error: 'Login failed' };
     }
@@ -178,7 +179,8 @@ export class AuthService {
           session: data.session,
         },
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Register error:', error);
       return { success: false, error: 'Registration failed' };
     }
@@ -197,7 +199,8 @@ export class AuthService {
       }
 
       return { success: true };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Logout error:', error);
       return { success: false, error: 'Logout failed' };
     }
@@ -283,7 +286,8 @@ export class AuthService {
         success: true,
         requiresRelogin: true,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Change password error:', error);
       return { success: false, error: 'Erro ao alterar senha' };
     }
@@ -324,7 +328,8 @@ export class AuthService {
         message:
           'Se o email existe em nosso sistema, você receberá instruções para redefinir sua senha.',
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Password reset error:', error);
       return {
         success: false,
@@ -354,7 +359,8 @@ export class AuthService {
       }));
 
       return { sessions: formattedSessions };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Error fetching sessions:', error);
       throw new Error('Erro ao buscar sessões');
     }
@@ -398,7 +404,8 @@ export class AuthService {
       }
 
       return { success: deleted };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Error deleting session:', error);
       return { success: false, error: 'Erro ao encerrar sessão' };
     }
@@ -410,7 +417,8 @@ export class AuthService {
   async getUserProfile(userId: string): Promise<unknown> {
     try {
       return await authRepository.getUserProfile(userId);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Error getting user profile:', error);
       throw new Error('Erro ao buscar perfil do usuário');
     }
@@ -422,7 +430,8 @@ export class AuthService {
   async cleanupExpiredSessions(): Promise<number> {
     try {
       return await authRepository.cleanupExpiredSessions();
-    } catch (error) {
+    }
+catch (error) {
       console.error('[AUTH_SERVICE] Error cleaning up sessions:', error);
       return 0;
     }

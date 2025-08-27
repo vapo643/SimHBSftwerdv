@@ -70,7 +70,8 @@ export class PdfMergeService {
             console.log(`[PDF MERGE] ⏳ Aguardando 2s antes da próxima requisição...`);
             await new Promise((resolve) => setTimeout(resolve, 2000));
           }
-        } catch (error) {
+        }
+catch (error) {
           console.error(
             `[PDF MERGE] ❌ Erro ao baixar parcela ${collection.numeroParcela}:`,
             error.message
@@ -117,7 +118,8 @@ export class PdfMergeService {
           }
 
           console.log(`[PDF MERGE] ✅ PDF ${i + 1} adicionado (${pages.length} páginas)`);
-        } catch (error) {
+        }
+catch (error) {
           console.error(`[PDF MERGE] ❌ Erro ao processar PDF ${i + 1}:`, error.message);
           // Continuar com os outros PDFs mesmo se um falhar
         }
@@ -138,7 +140,8 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] ✅ Carnê gerado com sucesso (${mergedBuffer.length} bytes)`);
 
       return mergedBuffer;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[PDF MERGE] ❌ Erro ao gerar carnê:`, error);
       throw error;
     }
@@ -186,7 +189,8 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] ✅ URL assinada gerada com sucesso`);
 
       return signedUrlData.signedUrl;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[PDF MERGE] ❌ Erro ao salvar carnê:`, error);
       throw error;
     }

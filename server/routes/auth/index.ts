@@ -181,7 +181,7 @@ router.get('/sessions', _jwtAuthMiddleware, async (req: Request, res: Response) 
     const _authReq = req as AuthenticatedRequest;
 
     if (!authReq.user?.id) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _currentToken = authReq.headers.authorization?.replace('Bearer ', '');
@@ -205,7 +205,7 @@ router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: Request, r
     const { sessionId } = authReq.params;
 
     if (!authReq.user?.id) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _result = await authService.deleteSession(authReq.user.id, sessionId, authReq);
@@ -232,7 +232,7 @@ router.get('/profile', _jwtAuthMiddleware, async (req: Request, res: Response) =
     const _authReq = req as AuthenticatedRequest;
 
     if (!authReq.user) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     res.json({

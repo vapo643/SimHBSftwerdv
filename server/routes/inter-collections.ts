@@ -130,7 +130,7 @@ router.get(
         .limit(1);
 
       if (collection.length == 0) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.log(`[PDF STORAGE] Dados do boleto:`, {
@@ -152,7 +152,7 @@ router.get(
           console.log(
             `[PDF STORAGE] ⚠️ Número da parcela é null - não é possível buscar UUID real`
           );
-          return res.*);
+          return res.status(401).json({error: "Unauthorized"});
         }
 
         const _realCollection = await db
@@ -206,7 +206,7 @@ else {
           console.log(`[PDF STORAGE] ✅ URL assinada gerada com sucesso`);
 
           // Redirecionar para URL assinada para visualização inline
-          return res.*);
+          return res.status(401).json({error: "Unauthorized"});
         }
 else {
           console.error(`[PDF STORAGE] ❌ Erro ao gerar URL assinada:`, signedUrlError);

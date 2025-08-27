@@ -108,9 +108,11 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
 
     if (fileCount == 0) {
       syncStatus = 'nenhum';
-    } else if (fileCount < totalParcelas) {
+    }
+else if (fileCount < totalParcelas) {
       syncStatus = 'incompleto';
-    } else {
+    }
+else {
       syncStatus = 'completo';
     }
 
@@ -130,7 +132,8 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
       _carneUrl,
       carneFileName: carneFile?.name || null,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[STORAGE STATUS] Erro:', error);
     return res.status(500).json({
       error: 'Erro ao verificar status do storage',
@@ -222,9 +225,11 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
 
     if (boletosSincronizados == 0) {
       syncStatus = 'nao_iniciado';
-    } else if (boletosSincronizados < totalBoletos) {
+    }
+else if (boletosSincronizados < totalBoletos) {
       syncStatus = 'em_andamento';
-    } else {
+    }
+else {
       syncStatus = 'concluido';
     }
 
@@ -252,7 +257,8 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
         tempoConclusao: syncStatus == 'concluido' ? Math.floor(Math.random() * 10) + 5 : undefined,
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SYNC STATUS PAM V1.0] Erro:', error);
     return res.status(500).json({
       success: false,

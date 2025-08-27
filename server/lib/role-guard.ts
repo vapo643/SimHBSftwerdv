@@ -6,11 +6,11 @@ export function roleGuard(allowedRoles: string[]) {
     const _userRole = req.user?.role;
 
     if (!userRole) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!allowedRoles.includes(userRole)) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     next();

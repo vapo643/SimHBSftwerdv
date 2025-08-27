@@ -71,7 +71,8 @@ router.get('/:proposalId/status', _jwtAuthMiddleware, async (req, res) => {
       _proposal,
       timeline: logsResult || [],
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao buscar status:', error);
     res.status(500).json({
       error: 'Erro ao buscar status da formalização',
@@ -122,7 +123,8 @@ router.post('/generate-ccb', _jwtAuthMiddleware, async (req, res) => {
       pdfPath: _result.pdfPath,
       _publicUrl,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao gerar CCB:', error);
     res.status(500).json({
       error: 'Erro interno ao gerar CCB',
@@ -188,7 +190,8 @@ router.get('/:proposalId/ccb', _jwtAuthMiddleware, async (req, res) => {
               regenerated: true,
             });
           }
-        } catch (regenError) {
+        }
+catch (regenError) {
           console.error('❌ [FORMALIZACAO] Erro na regeneração:', regenError);
         }
       }
@@ -205,7 +208,8 @@ router.get('/:proposalId/ccb', _jwtAuthMiddleware, async (req, res) => {
       signedUrl: signedUrl?.signedUrl,
       generatedAt: proposal.ccb_gerado_em,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao buscar CCB:', error);
     res.status(500).json({
       error: 'Erro ao buscar CCB',
@@ -249,7 +253,8 @@ router.post('/:proposalId/regenerate-ccb', _jwtAuthMiddleware, async (req, res) 
       pdfPath: _result.pdfPath,
       _publicUrl,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao regenerar CCB:', error);
     res.status(500).json({
       error: 'Erro ao regenerar CCB',
@@ -282,7 +287,8 @@ router.get('/:proposalId/timeline', _jwtAuthMiddleware, async (req, res) => {
       success: true,
       timeline: result || [],
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao buscar timeline:', error);
     res.status(500).json({
       error: 'Erro ao buscar timeline',
@@ -366,7 +372,8 @@ router.get(
         dataAssinatura: proposal.data_assinatura,
         status: 'assinado',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [FORMALIZACAO] Erro ao buscar CCB assinada:', error);
       res.status(500).json({
         error: 'Erro interno ao buscar CCB assinada',

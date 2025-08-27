@@ -109,7 +109,8 @@ class ClickSignSecurityService {
       }
 
       return ClientDataSchema.parse(_data);
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof z.ZodError) {
         const _issues = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
         throw new Error(`Invalid client data: ${issues}`);
@@ -247,7 +248,8 @@ class ClickSignSecurityService {
       for (const key in obj) {
         if (this._config.sensitiveFields.includes(key.toLowerCase())) {
           obj[key] = this.maskSensitiveValue(obj[key]);
-        } else if (typeof obj[key] == 'object') {
+        }
+else if (typeof obj[key] == 'object') {
           sanitizeObject(obj[key]);
         }
       }

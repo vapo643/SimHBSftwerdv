@@ -101,7 +101,8 @@ export class AutonomousSecurityScanner {
             middleware: [],
           });
         });
-      } else if (middleware.name == 'router') {
+      }
+else if (middleware.name == 'router') {
         // Sub-router
         middleware.handle.stack.forEach((handler) => {
           if (handler.route) {

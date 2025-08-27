@@ -66,7 +66,8 @@ export class TacCalculationService {
       );
 
       return tacCalculada;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[TAC] Erro ao calcular TAC:`, error);
       // Em caso de erro, retorna 0 para não bloquear o fluxo
       return 0;
@@ -111,12 +112,14 @@ export class TacCalculationService {
         console.log(
           `[TAC] Cliente ${cpf} cadastrado - proposta ${existingProposals[0].id} com status ${existingProposals[0].status}`
         );
-      } else {
+      }
+else {
         console.log(`[TAC] Cliente ${cpf} não é cadastrado - primeira operação`);
       }
 
       return isRegistered;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[TAC] Erro ao verificar se cliente é cadastrado:`, error);
       // Em caso de erro, considera como não cadastrado para aplicar TAC
       return false;
@@ -146,12 +149,14 @@ export class TacCalculationService {
     if (tacTipo == 'fixo') {
       // TAC fixo: retorna o valor direto
       return tacValor;
-    } else if (tacTipo == 'percentual') {
+    }
+else if (tacTipo == 'percentual') {
       // TAC percentual: calcula porcentagem sobre o valor do empréstimo
       const _tacCalculada = (valorEmprestimo * tacValor) / 100;
       // Arredonda para 2 casas decimais
       return Math.round(tacCalculada * 100) / 100;
-    } else {
+    }
+else {
       console.warn(`[TAC] Tipo de TAC desconhecido: ${tacTipo}. Usando valor fixo como padrão.`);
       // Fallback para tipo fixo se tipo desconhecido
       return tacValor;

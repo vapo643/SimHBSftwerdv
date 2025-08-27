@@ -84,7 +84,8 @@ class CCBSyncService {
       }
 
       console.log('[CCB SYNC] ✅ Synchronization complete');
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CCB SYNC] ❌ Error during synchronization:', error);
     }
   }
@@ -145,7 +146,8 @@ class CCBSyncService {
 
       console.log(`[CCB SYNC] ✅ Successfully synced CCB for ${proposalId}`);
       return true;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CCB SYNC] ❌ Error syncing CCB for ${proposalId}:`, error);
       return false;
     }
@@ -192,7 +194,8 @@ class CCBSyncService {
         proposal.clicksignDocumentKey as string,
         proposal.clienteNome as string
       );
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CCB SYNC] ❌ Error force syncing ${proposalId}:`, error);
       return false;
     }
@@ -205,7 +208,8 @@ export const _ccbSyncService = new CCBSyncService();
 // Auto-start sync in production
 if (process.env.NODE_ENV == 'production') {
   ccbSyncService.startAutoSync(5); // Every 5 minutes
-} else {
+}
+else {
   // In development, sync every 2 minutes
   ccbSyncService.startAutoSync(2);
 }

@@ -94,7 +94,8 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
       carneExists: false,
       message: 'Carnê ainda não foi gerado',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[CARNE STATUS] Erro inesperado:', error);
     return res.status(500).json({
       error: 'Erro ao verificar status do carnê',

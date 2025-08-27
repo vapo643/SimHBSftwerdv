@@ -196,6 +196,8 @@ catch (error) {
     try {
       switch (type) {
         case 'vulnerability': {
+        break;
+        }
           const _vulnScanner = getSecurityScanner();
           // Execute vulnerability scan
           await securityRepository.logSecurityEvent({
@@ -206,6 +208,8 @@ catch (error) {
           return { success: true, message: 'Scan de vulnerabilidades iniciado' }
 
         case 'dependency': {
+        break;
+        }
           const _depScanner = getDependencyScanner();
           if (depScanner.runScan) {
             await depScanner.runScan();
@@ -218,6 +222,8 @@ catch (error) {
           return { success: true, message: 'Scan de dependências iniciado' }
 
         case 'code': {
+        break;
+        }
           const _codeScanner = getSemgrepScanner();
           if (codeScanner.runScan) {
             await codeScanner.runScan();

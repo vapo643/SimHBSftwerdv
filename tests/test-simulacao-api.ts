@@ -127,7 +127,7 @@ console.log('Iniciando testes da API de simulação...\n');
 console.log('⚠️  Certifique-se de que o servidor está rodando na porta 5000\n');
 
 setTimeout(() => {
-  testarSimulacao().catch(console.error);
+  testarSimulacao().catch (console.error);
 }, 2000);
 
 export { testarSimulacao };

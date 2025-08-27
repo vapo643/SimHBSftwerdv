@@ -50,10 +50,14 @@ function generateChallenge(): { challenge: string; answer: string } {
 
   switch (op) {
     case '+': {
+        break;
+        }
       answer = a + b;
       challenge = `${a} + ${b}`;
       break;
     case '-': {
+        break;
+        }
       answer = Math.max(a, b) - Math.min(a, b);
       challenge = `${Math.max(a, b)} - ${Math.min(a, b)}`;
       break;

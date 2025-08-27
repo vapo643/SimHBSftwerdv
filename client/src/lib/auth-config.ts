@@ -52,7 +52,7 @@ export function setAuthConfig(config: Partial<AuthConfig>) {
 }
 
 export function getAuthConfig(): AuthConfig {
-  return globalConfig; }
+  return globalConfig;
 }
 
 /**
@@ -64,7 +64,7 @@ export function getAuthProvider(): AuthProvider {
   if (!authProviderInstance) {
     authProviderInstance = createAuthProvider(globalConfig);
   }
-  return authProviderInstance; }
+  return authProviderInstance;
 }
 
 /**

@@ -111,9 +111,11 @@ export class ProposalApplicationService {
     // Update proposal based on analysis result
     if (analysisResult.approved) {
       proposal.approve();
-    } else if (analysisResult.score.recommendation == 'REJECT') {
+    }
+else if (analysisResult.score.recommendation == 'REJECT') {
       proposal.reject(analysisResult.observations);
-    } else {
+    }
+else {
       proposal.setPending('Manual review required: ' + analysisResult.observations);
     }
 

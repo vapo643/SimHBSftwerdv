@@ -211,7 +211,7 @@ migrateStatusV2()
     console.log('\n🎉 Script finalizado com sucesso!');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch ((error) => {
     console.error('\n❌ Erro fatal:', error);
     process.exit(1);
   });

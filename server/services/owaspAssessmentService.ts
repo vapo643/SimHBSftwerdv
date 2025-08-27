@@ -54,7 +54,8 @@ export class OWASPAssessmentService {
     try {
       await fs.mkdir(this.documentsPath, { recursive: true });
       await fs.mkdir(this.assessmentPath, { recursive: true });
-    } catch (error) {
+    }
+catch (error) {
       console.error('Error creating OWASP directories:', error);
     }
   }
@@ -351,7 +352,8 @@ export class OWASPAssessmentService {
       const _filePath = path.join(this.assessmentPath, filename);
       await fs.writeFile(filePath, JSON.stringify(_data, null, 2));
       console.log(`✅ Assessment saved: ${filename}`);
-    } catch (error) {
+    }
+catch (error) {
       console.error(`Error saving assessment ${filename}:`, error);
     }
   }

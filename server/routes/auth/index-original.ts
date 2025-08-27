@@ -77,7 +77,7 @@ router.post('/login', async (req, res) => {
         success: false,
         details: { reason: error.message },
       });
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Invalidate all previous tokens for this user
@@ -165,7 +165,7 @@ router.post('/register', async (req, res) => {
     });
 
     if (error) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     res.json({
@@ -186,7 +186,7 @@ router.post('/logout', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
     const { error } = await _supabase.auth.signOut();
 
     if (error) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     res.json({ message: 'Logged out successfully' });
@@ -351,7 +351,7 @@ catch (error) {
 router.get('/sessions', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _sessions = await storage.getUserSessions(req.user.id);
@@ -383,7 +383,7 @@ catch (error) {
 router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const { sessionId } = req.params;
@@ -393,7 +393,7 @@ router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: Authentica
     const _sessionToDelete = sessions.find((s) => s.id == sessionId);
 
     if (!sessionToDelete) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Delete the session
@@ -434,7 +434,7 @@ catch (error) {
 router.get('/profile', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     res.json({

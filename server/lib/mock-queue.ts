@@ -114,20 +114,28 @@ class MockQueue extends EventEmitter {
         case 'pdf-processing': {
           result = await this.processPdfJob(mockJob);
           break;
+        }
+        }
 
         case 'boleto-sync': {
           result = await this.processBoletoJob(mockJob);
           break;
+        }
+        }
 
         case 'document-processing': {
           // TODO: Implementar quando necessário
           result = { success: true, message: 'Document processing not yet implemented' };
           break;
+        }
+        }
 
         case 'notifications': {
           // TODO: Implementar quando necessário
           result = { success: true, message: 'Notification processing not yet implemented' };
           break;
+        }
+        }
 
         default:
           throw new Error(`Unknown queue: ${this.name}`);
@@ -166,6 +174,8 @@ catch (error) {
     try {
       switch (job.data.type) {
         case 'GENERATE_CARNE': {
+        break;
+        }
           console.log(`[WORKER:PDF] 📚 Generating carnê for proposal ${job.data.propostaId}`);
 
           await job.updateProgress(10);
@@ -195,6 +205,8 @@ catch (error) {
           };
 
         case 'MERGE_PDFS': {
+        break;
+        }
           console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
           return { success: true, message: 'PDF merge not yet implemented' }
 
@@ -219,6 +231,10 @@ catch (error) {
     try {
       switch (job.data.type) {
         case 'SYNC_BOLETOS': {
+        break;
+        }
+        break;
+      }
         case 'SYNC_PROPOSAL_BOLETOS': // PAM V1.0 - Suporte para fallback assíncrono de PDFs
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
 
@@ -255,6 +271,8 @@ catch (error) {
           };
 
         case 'GENERATE_AND_SYNC_CARNE': {
+        break;
+        }
           console.log(
             `[WORKER:BOLETO] 📚 Full carnê generation for proposal ${job.data.propostaId}`
           );
@@ -406,12 +424,20 @@ export const _queues = {
 export function getQueue(queueName: string): MockQueue {
   switch (queueName) {
     case 'pdf-processing': {
+        break;
+        }
       return pdfProcessingQueue;
     case 'boleto-sync': {
+        break;
+        }
       return boletoSyncQueue;
     case 'document-processing': {
+        break;
+        }
       return documentQueue;
     case 'notifications': {
+        break;
+        }
       return notificationQueue;
     default:
       throw new Error(`Queue ${queueName} not found`);

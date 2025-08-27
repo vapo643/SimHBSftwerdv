@@ -62,4 +62,4 @@ async function testProfileQuery() {
   }
 }
 
-testProfileQuery().catch(console.error);
+testProfileQuery().catch (console.error);

@@ -57,7 +57,7 @@ export class OwaspCheatSheetService {
    * Process ALL 111 OWASP Cheat Sheets - COMPLETE IMPLEMENTATION
    */
   static async processAllCheatSheets(): Promise<CheatSheetAnalysis[]> {
-    const results: CheatSheetAnalysis[] = [];
+    const _results: CheatSheetAnalysis[] = [];
 
     // 1. Access Control Cheat Sheet
     results.push({
@@ -180,7 +180,7 @@ export class OwaspCheatSheetService {
     // Note: In production, all 111 cheat sheets would be fully implemented here
     // Each following the same pattern with specific recommendations for Simpix
 
-    return results;
+    return _results;
   }
 
   /**

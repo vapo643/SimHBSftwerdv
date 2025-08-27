@@ -282,7 +282,7 @@ catch (error) {
 // Executar se chamado diretamente
 // Em ES modules, usamos import.meta.url
 if (import.meta.url == `file://${process.argv[1]}`) {
-  main().catch(console.error);
+  main().catch (console.error);
 }
 
 export { validateStatusConsistency, validateByContext };

@@ -17,7 +17,8 @@ router.post('/execute', async (req: Request, res: Response) => {
   try {
     const _result = await interFixService.executeOperation('fix_boletos', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER_FIX_BOLETOS] Error:', error);
     res.status(500).json({
       success: false,

@@ -5,7 +5,8 @@ router.post('/preferences', async (req, res) => {
   try {
     const _result = await clientService.executeOperation('user_preferences', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

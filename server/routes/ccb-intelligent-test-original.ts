@@ -44,7 +44,8 @@ router.post('/generate/:propostaId', _jwtAuthMiddleware, async (req, res) => {
         dadosPagamentoNomeTitular: 'João da Silva Teste',
         dadosPagamentoCpfTitular: '123.456.789-00',
       };
-    } else {
+    }
+else {
       // Buscar dados reais
       const [proposta] = await db
         .select()
@@ -102,7 +103,8 @@ router.post('/generate/:propostaId', _jwtAuthMiddleware, async (req, res) => {
         errorLogs: _result.logs?.filter((l) => l.includes('✗') || l.includes('❌')).length || 0,
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro no teste CCB V2:', error);
     res.status(500).json({
       success: false,
@@ -161,7 +163,8 @@ router.get('/validate-coordinates', _jwtAuthMiddleware, async (req, res) => {
         })),
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro ao validar coordenadas',
@@ -224,7 +227,8 @@ router.post('/test-field-detection', _jwtAuthMiddleware, async (req, res) => {
       label: fieldCoord.label,
       maxWidth: fieldCoord.maxWidth,
     });
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro ao testar detecção',
@@ -267,7 +271,8 @@ router.get('/comparison', _jwtAuthMiddleware, async (req, res) => {
       success: true,
       _comparison,
     });
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro na comparação',

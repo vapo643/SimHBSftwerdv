@@ -358,7 +358,7 @@ else {
       process.exit(1);
     }
   })
-  .catch((error) => {
+  .catch ((error) => {
     logger.error('💥 Erro fatal no processo de rollback:', error);
     process.exit(1);
   });

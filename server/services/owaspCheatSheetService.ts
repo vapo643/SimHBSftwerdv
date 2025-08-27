@@ -55,7 +55,7 @@ export class OwaspCheatSheetService {
    * Process ALL 111 OWASP Cheat Sheets - COMPLETE IMPLEMENTATION
    */
   static async processAllCheatSheets(): Promise<CheatSheetAnalysis[]> {
-    const results: CheatSheetAnalysis[] = [];
+    const _results: CheatSheetAnalysis[] = [];
 
     // 1. Access Control
     results.push({
@@ -2610,7 +2610,7 @@ export class OwaspCheatSheetService {
       ],
     });
 
-    return results;
+    return _results;
   }
 
   /**

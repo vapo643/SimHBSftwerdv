@@ -140,7 +140,7 @@ criarBoletosReais(PROPOSTA_ID)
     console.log('\n🎉 Script finalizado com sucesso!');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch ((error) => {
     console.error('\n❌ Script falhou:', error);
     process.exit(1);
   });

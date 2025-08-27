@@ -72,7 +72,7 @@ catch (error) {
         const { type, severity, details } = req.body;
 
         if (!type || !severity) {
-          return res.*);
+          return res.status(401).json({error: "Unauthorized"});
         }
 
         securityLogger.logEvent({
@@ -156,7 +156,7 @@ function generateRecommendations(metrics): string[] {
 }
 
 // Identifica principais ameaças
-function identifyTopThreats(metrics): Record<string, unknown>[]>{ type: string; count: number }> {
+function identifyTopThreats(metrics): Array<{ type: string; count: number }> {
   const _threats = [
     { type: 'Brute Force Attempts', count: metrics.failedLogins },
     { type: 'Unauthorized Access', count: metrics.accessDenied },

@@ -58,7 +58,8 @@ router.get('/propostas/:propostaId/observacoes', _jwtAuthMiddleware, async (req,
       _observacoes,
       total: observacoes.length,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [Controller/Observações] Erro ao buscar histórico:', error);
     res.status(500).json({
       success: false,
@@ -103,7 +104,8 @@ router.post('/propostas/:propostaId/observacoes', _jwtAuthMiddleware, async (req
       observacao: novaObservacao,
       message: 'Observação criada com sucesso',
     });
-  } catch (error) {
+  }
+catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -148,7 +150,8 @@ router.put('/observacoes/:observacaoId', _jwtAuthMiddleware, async (req, res) =>
       observacao: observacaoAtualizada,
       message: 'Observação atualizada com sucesso',
     });
-  } catch (error) {
+  }
+catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -186,7 +189,8 @@ router.delete('/observacoes/:observacaoId', _jwtAuthMiddleware, async (req, res)
       success: true,
       message: 'Observação deletada com sucesso',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [Controller/Observações] Erro ao deletar observação:', error);
 
     const _statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
@@ -232,7 +236,8 @@ router.get('/observacoes', _jwtAuthMiddleware, async (req, res) => {
       success: true,
       ...result,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [Controller/Observações] Erro ao listar observações:', error);
     res.status(500).json({
       success: false,

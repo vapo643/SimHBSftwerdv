@@ -271,18 +271,24 @@ router.post('/scan', _requireAdmin, async (req: Request, res: Response) => {
 
     switch (type) {
       case 'vulnerability': {
+        break;
+        }
         const _vulnScanner = getSecurityScanner();
         // Executar scan
         res.json({ message: 'Scan de vulnerabilidades iniciado' });
         break;
 
       case 'dependency': {
+        break;
+        }
         const _depScanner = getDependencyScanner();
         depScanner.runScan();
         res.json({ message: 'Scan de dependências iniciado' });
         break;
 
       case 'code': {
+        break;
+        }
         const _codeScanner = getSemgrepScanner();
         codeScanner.runScan();
         res.json({ message: 'Análise de código iniciada' });
@@ -397,12 +403,20 @@ function getTimeRangeDate(timeRange: string): Date {
   const _now = new Date();
   switch (timeRange) {
     case '1h': {
+        break;
+        }
       return new Date(now.getTime() - 60 * 60 * 1000);
     case '24h': {
+        break;
+        }
       return new Date(now.getTime() - 24 * 60 * 60 * 1000);
     case '7d': {
+        break;
+        }
       return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     case '30d': {
+        break;
+        }
       return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     default:
       return new Date(now.getTime() - 60 * 60 * 1000);

@@ -149,24 +149,38 @@ class ClickSignWebhookService {
     // Process based on event type (API v1/v2)
     switch (eventType) {
       case 'auto_close': {
+        break;
+        }
         return await this.handleAutoClose(proposta, eventData);
 
       case 'document_closed': {
+        break;
+        }
         return await this.handleDocumentClosed(proposta, eventData);
 
       case 'cancel': {
+        break;
+        }
         return await this.handleCancel(proposta, eventData);
 
       case 'deadline': {
+        break;
+        }
         return await this.handleDeadline(proposta, eventData);
 
       case 'upload': {
+        break;
+        }
         return await this.handleUpload(proposta, eventData);
 
       case 'sign': {
+        break;
+        }
         return await this.handleSign(proposta, eventData);
 
       case 'refusal': {
+        break;
+        }
         return await this.handleRefusal(proposta, eventData);
 
       default:

@@ -152,7 +152,7 @@ catch (error) {
       const _report = JSON.parse(jsonReport);
       const _vulnerabilities = this.parseVulnerabilities(report);
 
-      const result: DependencyScanResult = {
+      const _result: DependencyScanResult = {
   _timestamp,
         totalDependencies: report.dependencies?.length || 0,
         vulnerableDependencies: vulnerabilities.length,
@@ -177,7 +177,7 @@ catch (error) {
         `✅ [DEPENDENCY-CHECK] Scan concluído: ${vulnerabilities.length} vulnerabilidades encontradas`
       );
 
-      return result;
+      return _result;
     }
 catch (error) {
       console.error('❌ [DEPENDENCY-CHECK] Erro no scan:', error);
@@ -331,7 +331,7 @@ catch (error) {
   /**
    * Criar arquivo de supressão
    */
-  async createSuppressionFile(suppressions: Record<string, unknown>[]>{ cve: string; reason: string }>) {
+  async createSuppressionFile(suppressions: Array<{ cve: string; reason: string }>) {
     const _xml = `<?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 ${suppressions

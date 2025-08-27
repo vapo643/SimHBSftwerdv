@@ -154,7 +154,8 @@ export class CCBGridGenerator {
 
       console.log(`✅ [CCB GRID] Grade gerada! Arquivo: ${filePath}`);
       return { success: true, pdfPath: filePath };
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB GRID] Erro na geração:', error);
       return {
         success: false,
@@ -172,7 +173,8 @@ export class CCBGridGenerator {
       const { data } = supabaseAdmin.storage.from('documents').getPublicUrl(filePath);
 
       return data?.publicUrl || null;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CCB GRID] Erro ao obter URL pública:', error);
       return null;
     }

@@ -195,11 +195,11 @@ router.post('/alerts/:id/resolve', _requireAdmin, async (req: Request, res: Resp
     const _userId = authReq.user?.id;
 
     if (!userId) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!id) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _resolved = await securityService.resolveAlert(id, userId, reason);

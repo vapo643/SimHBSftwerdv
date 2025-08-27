@@ -17,7 +17,7 @@ export const _createServerSupabaseClient = () => {
 // Função para criar ou retornar a instância única do cliente para o lado do cliente (React)
 export const _createClientSupabaseClient = () => {
   if (clientSupabaseInstance) {
-    return clientSupabaseInstance; }
+    return clientSupabaseInstance;
   }
 
   // Check if we're in a browser environment before accessing import.meta.env
@@ -30,7 +30,7 @@ export const _createClientSupabaseClient = () => {
     }
 
     clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
-    return clientSupabaseInstance; }
+    return clientSupabaseInstance;
   }
 
   // For server-side, create a basic client that won't be used

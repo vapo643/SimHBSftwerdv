@@ -37,7 +37,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
       .limit(1);
 
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Buscar boletos atuais (válidos e inválidos)

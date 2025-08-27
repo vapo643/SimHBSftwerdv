@@ -212,7 +212,7 @@ export function gerarCronogramaPagamento(
   prazoMeses: number,
   taxaJurosMensal: number,
   dataInicio: Date = new Date()
-): Record<string, unknown>[]>{
+): Array<{
   parcela: number;
   dataVencimento: string;
   valorParcela: number;

@@ -182,7 +182,8 @@ export class CCBSyncService {
           )
         `);
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CCB SYNC] ❌ Error during fallback sync:', error);
       this.syncStats.failedAttempts++;
     }
@@ -213,7 +214,8 @@ export class CCBSyncService {
       );
 
       return _result.success;
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CCB SYNC] ❌ Manual sync failed for ${proposalId}:`, error);
       return false;
     }

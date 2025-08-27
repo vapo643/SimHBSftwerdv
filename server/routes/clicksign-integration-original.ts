@@ -105,7 +105,7 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Verificar se CCB foi gerado
@@ -328,7 +328,7 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.log(
@@ -505,7 +505,7 @@ router.get(
         .where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       if (!proposta.clicksignListKey) {

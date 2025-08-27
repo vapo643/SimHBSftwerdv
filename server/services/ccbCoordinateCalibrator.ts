@@ -70,7 +70,8 @@ export class CCBCoordinateCalibrator {
           '✅ Template possui AcroForms - considere usar preenchimento automático'
         );
         recommendations.push('💡 Use os nomes dos campos para mapeamento direto');
-      } else {
+      }
+else {
         recommendations.push('📍 Template requer mapeamento manual de coordenadas');
         recommendations.push('🎯 Use ferramentas de calibração visual para posicionamento');
       }
@@ -89,7 +90,8 @@ export class CCBCoordinateCalibrator {
         pageSize: { width, height },
         _recommendations,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CALIBRATOR] Erro no diagnóstico:', error);
       throw error;
     }
@@ -198,7 +200,8 @@ export class CCBCoordinateCalibrator {
 
       console.log(`✅ [CALIBRATOR] Grid de calibração salvo: ${outputPath}`);
       return outputPath;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CALIBRATOR] Erro ao gerar grid:', error);
       throw error;
     }
@@ -258,7 +261,8 @@ export class CCBCoordinateCalibrator {
 
       console.log(`✅ [CALIBRATOR] Teste de campos salvo: ${outputPath}`);
       return outputPath;
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CALIBRATOR] Erro no teste:', error);
       throw error;
     }
@@ -292,7 +296,8 @@ export class CCBCoordinateCalibrator {
         _adjustedPath,
         _recommendations,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CALIBRATOR] Erro na calibração inteligente:', error);
       throw error;
     }
@@ -357,7 +362,8 @@ export class CCBCoordinateCalibrator {
         _gridPath,
         _recommendations,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CALIBRATOR] Erro no relatório:', error);
       throw error;
     }

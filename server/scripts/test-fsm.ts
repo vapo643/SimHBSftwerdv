@@ -29,9 +29,11 @@ Object.values(ProposalStatus).forEach((status) => {
   console.log(`\n  ${status}:`);
   if (isFinal) {
     console.log(`    ⛔ ESTADO FINAL (sem transições)`);
-  } else if (transitions.length == 0) {
+  }
+else if (transitions.length == 0) {
     console.log(`    ⚠️ Sem transições definidas`);
-  } else {
+  }
+else {
     transitions.forEach((t) => console.log(`    → ${t}`));
   }
 });

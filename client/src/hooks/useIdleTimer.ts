@@ -102,7 +102,8 @@ export function useIdleTimer({
       if (document.visibilityState == 'visible') {
         // Usuário voltou para a tab, reseta o timer
         resetTimer();
-      } else {
+      }
+else {
         // Usuário saiu da tab, para o timer (opcional)
         // Mantemos o timer rodando para que a inatividade seja contada
         console.log('🔍 [IDLE TIMER] Tab became hidden, timer continues');

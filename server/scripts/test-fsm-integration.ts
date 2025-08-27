@@ -66,20 +66,24 @@ async function testIntegration() {
       if (test.shouldSucceed) {
         console.log(`✅ ${test.name}`);
         passed++;
-      } else {
+      }
+else {
         console.log(`❌ ${test.name} - Expected to fail but succeeded`);
         failed++;
       }
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof InvalidTransitionError) {
         if (!test.shouldSucceed) {
           console.log(`✅ ${test.name} - Correctly rejected`);
           passed++;
-        } else {
+        }
+else {
           console.log(`❌ ${test.name} - Unexpected rejection: ${error.message}`);
           failed++;
         }
-      } else {
+      }
+else {
         console.log(`❌ ${test.name} - Unexpected error: ${error}`);
         failed++;
       }
@@ -103,10 +107,12 @@ async function testIntegration() {
 
     if (count == 0) {
       console.log('✅ No remaining updateStatusWithContext calls found');
-    } else {
+    }
+else {
       console.log(`⚠️ Found ${count} remaining updateStatusWithContext calls`);
     }
-  } catch (error) {
+  }
+catch (error) {
     console.log('❌ Error checking for remaining calls:', error);
   }
 
@@ -118,4 +124,4 @@ async function testIntegration() {
 }
 
 // Run the test
-testIntegration().catch(console.error);
+testIntegration().catch (console.error);

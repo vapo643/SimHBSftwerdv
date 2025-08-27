@@ -160,7 +160,8 @@ export function formatTextWithLineBreaks(text: string, maxWidth: number = 50): s
   for (const word of words) {
     if ((currentLine + ' ' + word).length <= maxWidth) {
       currentLine += (currentLine ? ' ' : '') + word;
-    } else {
+    }
+else {
       if (currentLine) lines.push(currentLine);
       currentLine = word;
     }

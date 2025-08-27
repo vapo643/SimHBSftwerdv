@@ -199,7 +199,7 @@ catch (e) {
       }));
 
       console.log('Propostas com dados parseados:', propostsWithParsedData);
-      return propostsWithParsedData; }
+      return propostsWithParsedData;
     },
   });
 
@@ -217,7 +217,7 @@ catch (e) {
   };
 
   const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'; }
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
@@ -230,7 +230,7 @@ catch (e) {
       BOLETOS_EMITIDOS: 'bg-orange-500',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
   const _getStatusText = (status: string) => {
@@ -242,7 +242,7 @@ catch (e) {
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status; }
+    return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
   // Backend already handles all permission filtering
@@ -283,11 +283,11 @@ catch (e) {
   };
 
   const _getTitle = () => {
-    return 'Propostas em Formalização'; }
+    return 'Propostas em Formalização';
   };
 
   const _getDescription = () => {
-    return 'Acompanhe o processo de formalização das propostas aprovadas'; }
+    return 'Acompanhe o processo de formalização das propostas aprovadas';
   };
 
   return (
@@ -557,7 +557,7 @@ catch (error) {
     queryKey: ['/api/propostas', propostaId, 'formalizacao'],
     queryFn: async (): Promise<Proposta> => {
       const _response = (await apiRequest(`/api/propostas/${propostaId}/formalizacao`)) as Proposta;
-      return response; }
+      return response;
     },
     enabled: !!propostaId,
     staleTime: 1 * 60 * 1000, // Cache por 1 minuto
@@ -615,11 +615,11 @@ catch (error) {
         setCarneTotalBoletos(totalBoletos);
       }
 
-      return response; }
+      return response;
     }
 catch (error) {
       console.error('[STORAGE STATUS] Erro ao verificar status:', error);
-      return null; }
+      return null;
     }
 finally {
       setCheckingStorage(false);
@@ -630,13 +630,13 @@ finally {
   const { data: collectionsData } = useQuery<any[]>({
     queryKey: ['/api/inter/collections', propostaId],
     queryFn: async (): Promise<any[]> => {
-      if (!propostaId) return []; }
+      if (!propostaId) return [];
       console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
       const _response = (await apiRequest(`/api/inter/collections/${propostaId}`)) as unknown[];
       console.log(
         `[INTER QUERY] Boletos encontrados: ${Array.isArray(_response) ? response.length : 0}`
       );
-      return Array.isArray(_response) ? response : []; }
+      return Array.isArray(_response) ? response : [];
     },
     enabled:
       !!propostaId &&
@@ -684,7 +684,7 @@ finally {
         method: 'PATCH',
         body: JSON.stringify(_data),
       });
-      return response; }
+      return response;
     },
     onSuccess: () => {
       toast({
@@ -717,12 +717,12 @@ finally {
   };
 
   const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'; }
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const _formatDateTime = (dateString: string) => {
-    if (!dateString) return 'N/A'; }
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('pt-BR');
   };
 
@@ -831,11 +831,11 @@ finally {
       const _response = (await apiRequest(`/api/clicksign/status/${propostaId}`)) as ClickSignData;
       console.log('📡 [CLICKSIGN] Status retornado:',_response);
       setClickSignData(_response);
-      return response; }
+      return response;
     }
 catch (error) {
       console.error('❌ [CLICKSIGN] Erro ao consultar status:', error);
-      return null; }
+      return null;
     }
   };
 
@@ -948,7 +948,7 @@ else if (status == 'CLOSED') {
       BOLETOS_EMITIDOS: 90,
       pago: 100,
     };
-    return statusMap[status as keyof typeof statusMap] || 0; }
+    return statusMap[status as keyof typeof statusMap] || 0;
   };
 
   const _getStatusColor = (status: string) => {
@@ -960,7 +960,7 @@ else if (status == 'CLOSED') {
       BOLETOS_EMITIDOS: 'bg-orange-500',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
   const _getStatusText = (status: string) => {
@@ -972,7 +972,7 @@ else if (status == 'CLOSED') {
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status; }
+    return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
   // AGORA toda a lógica condicional pode vir aqui, APÓS todos os hooks
@@ -980,7 +980,7 @@ else if (status == 'CLOSED') {
   // 🔧 CORREÇÃO CRÍTICA: Lógica condicional APÓS todos os hooks
   // Se não tem ID, mostrar lista de propostas
   if (!propostaId) {
-    return <FormalizacaoList />; }
+    return <FormalizacaoList />;
   }
 
   const _getFormalizationSteps = (proposta: Proposta) => [
@@ -1149,12 +1149,12 @@ else if (status == 'CLOSED') {
 
   // Título unificado para todos os roles
   const _getTitle = () => {
-    return `Formalização - Proposta #${proposta.id}`; }
+    return `Formalização - Proposta #${proposta.id}`;
   };
 
   // Destino unificado do botão voltar
   const _getBackLocation = () => {
-    return '/formalizacao'; }
+    return '/formalizacao';
   };
 
   // 🔧 SEGURANÇA: Verificação de permissão agora é feita no BACKEND via RLS
@@ -2506,7 +2506,7 @@ catch (error) {
                             </div>
                           );
                         }
-                        return null; }
+                        return null;
                       }
 
                       // Caso contrário, mostra a timeline normal

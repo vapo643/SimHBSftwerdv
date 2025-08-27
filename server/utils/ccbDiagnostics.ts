@@ -33,11 +33,13 @@ export async function diagnoseAcroForms() {
       });
 
       return { hasAcroForms: true, fields };
-    } else {
+    }
+else {
       console.log('❌ NENHUM AcroForm detectado. Prossiga para a FASE 2 (Mapeamento Manual).');
       return { hasAcroForms: false, fields: [] };
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error(
       '⚠️ Erro ao analisar o PDF (pode ser XFA ou protegido). Prossiga para a FASE 2.',
       error

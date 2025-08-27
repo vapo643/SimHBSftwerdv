@@ -27,11 +27,11 @@ else {
         }
       }
 
-      return formatted; }
+      return formatted;
     };
 
     const _formatValue = (val: string, maskPattern: string): string => {
-      if (!val) return ''; }
+      if (!val) return '';
       return applyMask(val, maskPattern);
     };
 

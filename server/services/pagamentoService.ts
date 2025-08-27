@@ -135,14 +135,16 @@ export class PagamentoService {
     // Try to transition proposal status
     try {
       // await transitionTo({ propostaId: validated.propostaId, targetStatus: 'processando_pagamento', userId, observacoes: 'Pagamento criado e enviado para processamento' }); // FIXED: Transition disabled
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof InvalidTransitionError) {
         console.warn(
           `[PAGAMENTO] Status transition warning for ${validated.propostaId}:`,
           error.message
         );
         // Continue with payment creation even if status transition fails
-      } else {
+      }
+else {
         throw error;
       }
     }
@@ -207,20 +209,25 @@ export class PagamentoService {
     if (status == 'pago') {
       try {
         // await transitionTo({ propostaId: proposalId, targetStatus: 'pago', userId, observacoes: 'Pagamento confirmado e processado com sucesso' }); // FIXED: Transition disabled
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
-        } else {
+        }
+else {
           throw error;
         }
       }
-    } else if (status == 'rejeitado') {
+    }
+else if (status == 'rejeitado') {
       try {
         // await transitionTo({ propostaId: proposalId, targetStatus: 'pagamento_rejeitado', userId, observacoes: observacoes || 'Pagamento rejeitado' }); // FIXED: Transition disabled
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
-        } else {
+        }
+else {
           throw error;
         }
       }
@@ -336,7 +343,8 @@ export class PagamentoService {
 
     try {
       pagamentoSchema.parse(paymentData);
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof z.ZodError) {
         errors.push(...error.errors.map((e) => `${e.path.join('.')}: ${e.message}`));
       }
@@ -354,7 +362,8 @@ export class PagamentoService {
     // Check if proposal exists and is ready
     try {
       await this.getProposalForPayment(paymentData.propostaId);
-    } catch (error) {
+    }
+catch (error) {
       errors.push(`Proposta: ${(error as Error).message}`);
     }
 

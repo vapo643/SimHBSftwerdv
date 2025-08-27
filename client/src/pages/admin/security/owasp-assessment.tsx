@@ -268,28 +268,28 @@ catch (_error) {
   const _getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'HIGH': {
-        return 'destructive'; }
+        return 'destructive';
       case 'MEDIUM': {
-        return 'secondary'; }
+        return 'secondary';
       case 'LOW': {
-        return 'outline'; }
+        return 'outline';
       default:
-        return 'outline'; }
+        return 'outline';
     }
   };
 
   const _getComplianceColor = (compliance: string) => {
     switch (compliance) {
       case 'COMPLIANT': {
-        return 'default'; }
+        return 'default';
       case 'PARTIAL': {
-        return 'secondary'; }
+        return 'secondary';
       case 'NON_COMPLIANT': {
-        return 'destructive'; }
+        return 'destructive';
       case 'NOT_APPLICABLE': {
-        return 'outline'; }
+        return 'outline';
       default:
-        return 'outline'; }
+        return 'outline';
     }
   };
 

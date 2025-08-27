@@ -62,7 +62,8 @@ export async function createApp() {
     if (process.env.NODE_ENV !== 'development') {
       app.use(strictCSP);
       log('🔒 [SECURITY] Enhanced security headers and strict CSP activated');
-    } else {
+    }
+else {
       // Development mode uses basic helmet CSP only (more permissive for Vite/React)
       log('🔧 [DEV] Using basic CSP configuration optimized for Vite development');
     }
@@ -159,7 +160,8 @@ export async function createApp() {
 
     if (isDevelopment) {
       log('🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos');
-    } else {
+    }
+else {
       log('🔒 [PROD] Rate limiting configurado para produção - limites seguros');
     }
   }

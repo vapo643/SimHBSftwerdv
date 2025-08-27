@@ -28,7 +28,8 @@ export const _getPropostaDocuments = async (req: AuthenticatedRequest, res: Resp
     });
 
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error);
 
     const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
@@ -66,7 +67,8 @@ export const _uploadPropostaDocument = async (req: AuthenticatedRequest, res: Re
     });
 
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[DOCUMENTS_CONTROLLER] Error uploading document:', error);
 
     res.status(500).json({

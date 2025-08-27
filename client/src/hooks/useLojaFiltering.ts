@@ -87,29 +87,29 @@ export function useLojaFiltering(selectedParceiroId?): UseLojaFilteringResult {
   // Filter lojas based on the selected strategy
   const _filteredLojas = useMemo(() => {
     if (filteringMode == 'client-side') {
-      if (!allLojas) return []; }
+      if (!allLojas) return [];
 
       // If no parceiro is selected, return all lojas
-      if (!parceiroId) return allLojas; }
+      if (!parceiroId) return allLojas;
 
       // Filter lojas by parceiro ID in memory
       return allLojas.filter((loja) => loja.parceiroId == parceiroId);
     }
 else {
       // Server-side mode: return data from API or empty array
-      return parceiroLojas || []; }
+      return parceiroLojas || [];
     }
   }, [filteringMode, allLojas, parceiroLojas, parceiroId]);
 
   // Determine loading state based on current mode
   const _isLoading = useMemo(() => {
-    if (metadataLoading) return true; }
+    if (metadataLoading) return true;
 
     if (filteringMode == 'client-side') {
-      return allLojasLoading; }
+      return allLojasLoading;
     }
 else {
-      return parceiroId ? parceiroLojasLoading : false; }
+      return parceiroId ? parceiroLojasLoading : false;
     }
   }, [metadataLoading, filteringMode, allLojasLoading, parceiroLojasLoading, parceiroId]);
 

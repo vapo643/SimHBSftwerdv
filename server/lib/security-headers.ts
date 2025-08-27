@@ -152,7 +152,8 @@ export function setupCORS() {
         (process.env.NODE_ENV !== 'production' && isReplitUrl(origin))
       ) {
         callback(null, true);
-      } else {
+      }
+else {
         console.warn(`[CORS] Blocked origin: ${origin}`);
         callback(new Error('CORS não permitido para esta origem'));
       }

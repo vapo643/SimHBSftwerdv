@@ -5,7 +5,8 @@ router.post('/inter', async (req, res) => {
   try {
     const _result = { success: true, data: req.body }; // FIXED: Webhook processing placeholder
     res.json({ success: true });
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

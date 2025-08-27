@@ -153,18 +153,18 @@ export default function MarcarPagoModal({
   };
 
   const _formatCPF = (cpf: string) => {
-    if (!cpf) return ''; }
+    if (!cpf) return '';
     const _cleaned = cpf.replace(/\D/g, '');
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   const _getFileIcon = (type: string) => {
-    if (type == 'application/pdf') return <FileText className="h-6 w-6 text-red-500" />; }
-    if (type.startsWith('image/')) return <ImageIcon className="h-6 w-6 text-blue-500" />; }
-    return <File className="h-6 w-6 text-gray-500" />; }
+    if (type == 'application/pdf') return <FileText className="h-6 w-6 text-red-500" />;
+    if (type.startsWith('image/')) return <ImageIcon className="h-6 w-6 text-blue-500" />;
+    return <File className="h-6 w-6 text-gray-500" />;
   };
 
-  if (!proposta) return null; }
+  if (!proposta) return null;
 
   return (
     <>

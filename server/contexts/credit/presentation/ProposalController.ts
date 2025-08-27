@@ -77,19 +77,22 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal created successfully',
       });
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({
           success: false,
           error: 'Validation error',
           details: error.errors,
         });
-      } else if (error instanceof Error) {
+      }
+else if (error instanceof Error) {
         res.status(500).json({
           success: false,
           error: error.message,
         });
-      } else {
+      }
+else {
         res.status(500).json({
           success: false,
           error: 'Internal server error',
@@ -120,7 +123,8 @@ export class ProposalController {
         success: true,
         data: proposal,
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -141,7 +145,8 @@ export class ProposalController {
         data: proposals,
         total: proposals.length,
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -164,7 +169,8 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal submitted for analysis',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -187,7 +193,8 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal analyzed successfully',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -210,7 +217,8 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal approved',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -242,7 +250,8 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal rejected',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -274,7 +283,8 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal set as pending',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -297,7 +307,8 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal formalized',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -320,7 +331,8 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal marked as paid',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -343,7 +355,8 @@ export class ProposalController {
         data: proposals,
         total: proposals.length,
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -366,7 +379,8 @@ export class ProposalController {
         data: proposals,
         total: proposals.length,
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -387,7 +401,8 @@ export class ProposalController {
         data: proposals,
         total: proposals.length,
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',

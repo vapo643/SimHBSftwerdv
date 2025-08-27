@@ -36,7 +36,7 @@ interface ClientData {
 interface ClickSignDocument {
   key: string;
   filename: string;
-  uploads: Record<string, unknown>[]>{
+  uploads: Array<{
     key: string;
     created_at: string;
     original_name: string;
@@ -61,7 +61,7 @@ interface ClickSignList {
   key: string;
   name: string;
   status: string;
-  signers: Record<string, unknown>[]>{
+  signers: Array<{
     key: string;
     email: string;
     sign_url: string;

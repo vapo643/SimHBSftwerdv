@@ -34,7 +34,7 @@ function ProposalForm() {
       const _response = await apiRequest('/api/origination/context', {
         method: 'GET',
       });
-      return response; }
+      return response;
     },
   });
 
@@ -220,7 +220,7 @@ catch (associationError) {
         }
       }
 
-      return propostaResponse; }
+      return propostaResponse;
     },
     onSuccess: (_data) => {
       toast({

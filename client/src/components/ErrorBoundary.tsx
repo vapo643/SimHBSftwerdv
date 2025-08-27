@@ -51,7 +51,7 @@ export class ErrorBoundary extends Component<Props, State> {
       if (isIgnorable) {
         // Reset error state for ignorable errors
         this.setState({ hasError: false, error: undefined });
-        return this.props.children; }
+        return this.props.children;
       }
 
       return (
@@ -72,7 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children; }
+    return this.props.children;
   }
 }
 

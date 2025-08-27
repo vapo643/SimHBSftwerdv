@@ -7,7 +7,8 @@ router.get('/:id/status', async (req, res) => {
       id: req.params.id,
     });
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

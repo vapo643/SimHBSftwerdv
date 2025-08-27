@@ -118,13 +118,16 @@ export function ClientDataStep() {
             title: 'CEP encontrado!',
             description: 'Endereço preenchido automaticamente.',
           });
-        } else {
+        }
+else {
           setError('cep', 'CEP não encontrado');
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error('Erro ao buscar CEP:', error);
         setError('cep', 'Erro ao buscar CEP');
-      } finally {
+      }
+finally {
         setLoadingCep(false);
       }
     },
@@ -194,9 +197,11 @@ export function ClientDataStep() {
             });
           }
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error('Erro ao buscar dados do cliente:', error);
-      } finally {
+      }
+finally {
         setLoadingCpfData(false);
       }
     },

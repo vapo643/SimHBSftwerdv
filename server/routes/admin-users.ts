@@ -37,7 +37,8 @@ router.get('/users', async (req: Request, res: Response) => {
       data: allUsers,
       total: allUsers.length,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[ADMIN USERS] Error fetching users:', error);
     res.status(500).json({
       success: false,

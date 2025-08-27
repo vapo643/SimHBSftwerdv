@@ -25,15 +25,23 @@ export function createServerAuthProvider(
 ): ServerAuthProvider {
   switch (_config.provider) {
     case 'supabase': {
+        break;
+        }
       return new SupabaseServerAuthProvider();
 
     case 'firebase': {
+        break;
+        }
       throw new Error('Firebase server provider não implementado ainda');
 
     case 'auth0': {
+        break;
+        }
       throw new Error('Auth0 server provider não implementado ainda');
 
     case 'custom': {
+        break;
+        }
       throw new Error('Custom server provider não implementado ainda');
 
     default:

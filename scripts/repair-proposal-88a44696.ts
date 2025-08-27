@@ -196,7 +196,7 @@ repairProposal()
     console.log('\n✅ Script de reparo finalizado com sucesso');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch ((error) => {
     console.error('\n💥 Script de reparo falhou:', error);
     process.exit(1);
   });

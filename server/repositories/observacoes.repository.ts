@@ -43,7 +43,8 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         .orderBy(desc(observacoesCobranca.createdAt));
 
       return data as unknown[];
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Failed to fetch observacoes for proposta ${propostaId}: ${error}`);
     }
   }
@@ -73,7 +74,8 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
       }
 
       return data as unknown as Observacao;
-    } catch (error) {
+    }
+catch (error) {
       throw new Error(`Failed to create observacao: ${error}`);
     }
   }

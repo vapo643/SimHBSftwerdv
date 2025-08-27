@@ -165,15 +165,23 @@ else {
     let multiplier: number;
     switch (score.risk) {
       case 'LOW': {
+        break;
+        }
         multiplier = 20;
         break;
       case 'MEDIUM': {
+        break;
+        }
         multiplier = 15;
         break;
       case 'HIGH': {
+        break;
+        }
         multiplier = 10;
         break;
       case 'VERY_HIGH': {
+        break;
+        }
         multiplier = 5;
         break;
       default:
@@ -189,12 +197,20 @@ else {
   private suggestOptimalTerms(risk: string): number[] {
     switch (risk) {
       case 'LOW': {
+        break;
+        }
         return [12, 24, 36, 48, 60, 72, 84];
       case 'MEDIUM': {
+        break;
+        }
         return [12, 24, 36, 48, 60];
       case 'HIGH': {
+        break;
+        }
         return [12, 24, 36];
       case 'VERY_HIGH': {
+        break;
+        }
         return [12, 24];
       default:
         return [12, 24, 36];

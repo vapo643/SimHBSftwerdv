@@ -32,7 +32,7 @@ interface BoletoSyncResult {
   totalBoletos: number;
   boletosProcessados: number;
   boletosComErro: number;
-  erros: Record<string, unknown>[]>{
+  erros: Array<{
     codigoSolicitacao: string;
     erro: string;
   }>;
@@ -62,7 +62,7 @@ class BoletoStorageService {
     // Iniciar medição de tempo total
     console.time(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);
 
-    const result: BoletoSyncResult = {
+    const _result: BoletoSyncResult = {
       success: true,
   _propostaId,
       totalBoletos: 0,
@@ -79,7 +79,7 @@ class BoletoStorageService {
       if (!collections || collections.length == 0) {
         console.log(`[BOLETO STORAGE] ⚠️ Nenhum boleto encontrado para proposta ${propostaId}`);
         console.timeEnd(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);
-        return result;
+        return _result;
       }
 
       _result.totalBoletos = collections.length;
@@ -279,7 +279,7 @@ else {
         console.log(`[BOLETO STORAGE] ⚠️ Erros encontrados:`, _result.erros);
       }
 
-      return result;
+      return _result;
     }
 catch (error) {
       console.error(`[BOLETO STORAGE] ❌ Erro crítico na sincronização:`, error);
@@ -290,7 +290,7 @@ catch (error) {
         erro: error.message || 'Erro crítico desconhecido',
       });
 
-      return result;
+      return _result;
     }
   }
 

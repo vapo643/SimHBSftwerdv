@@ -127,7 +127,7 @@ export async function _jwtAuthMiddleware(
         success: false,
         details: { reason: 'Missing or invalid authorization header' },
       });
-      return res.*);
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const _token = authHeader.substring(7); // Remove 'Bearer ' prefix
@@ -152,7 +152,7 @@ export async function _jwtAuthMiddleware(
         success: false,
         details: { reason: 'Token is blacklisted' },
       });
-      return res.*);
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     let userId: string | undefined;
@@ -263,7 +263,7 @@ catch (jwtError) {
         success: false,
         details: { reason: error?.message || 'Invalid token' },
       });
-      return res.*);
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     // Step c: Query profiles table using direct DB connection (bypasses RLS)

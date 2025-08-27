@@ -36,7 +36,7 @@ router.post(
         .limit(1);
 
       if (!proposta) {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       // Buscar boletos atuais (possivelmente com códigos inválidos)

@@ -255,7 +255,7 @@ catch (error) {
       const _findings = this.parseFindings(results);
       const _scanDuration = Date.now() - startTime;
 
-      const result: SemgrepScanResult = {
+      const _result: SemgrepScanResult = {
         timestamp: new Date(),
         totalFindings: findings.length,
         criticalFindings: findings.filter((f) => f.severity == 'ERROR').length,
@@ -283,9 +283,9 @@ catch (error) {
       );
 
       // Limpar arquivo temporário
-      await fsPromises.unlink(resultsPath).catch(() => {});
+      await fsPromises.unlink(resultsPath).catch (() => {});
 
-      return result;
+      return _result;
     }
 catch (error) {
       console.error('❌ [SEMGREP] Erro no scan:', error);
@@ -334,11 +334,26 @@ finally {
   private mapSeverity(severity: string): 'INFO' | 'WARNING' | 'ERROR' {
     switch (severity.toUpperCase()) {
       case 'ERROR': {
+        break;
+        }
+        break;
+      }
       case 'CRITICAL': {
+        break;
+        }
+      }
       case 'HIGH': {
+        break;
+        }
         return 'ERROR';
       case 'WARNING': {
+        break;
+        }
+        break;
+      }
       case 'MEDIUM': {
+        break;
+        }
         return 'WARNING';
       default:
         return 'INFO';

@@ -121,7 +121,8 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
       success: true,
       data: metrics,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SECURITY MONITORING] Error:', error);
     res.status(500).json({
       success: false,
@@ -157,7 +158,8 @@ router.get('/alerts', async (req: AuthenticatedRequest, res) => {
       success: true,
       data: alerts,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SECURITY MONITORING] Alerts error:', error);
     res.status(500).json({
       success: false,
@@ -201,7 +203,8 @@ router.get('/performance', async (req: AuthenticatedRequest, res) => {
         },
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SECURITY MONITORING] Performance error:', error);
     res.status(500).json({
       success: false,

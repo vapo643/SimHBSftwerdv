@@ -108,7 +108,8 @@ export class SecurityMonitor {
         this.checkDataExfiltration(),
         this.checkAuthenticationAnomalies(),
       ]);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[SECURITY MONITOR] Error running checks:', error);
     }
   }

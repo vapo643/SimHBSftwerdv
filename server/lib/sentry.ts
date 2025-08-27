@@ -113,7 +113,8 @@ export function initSentry(app: Express) {
       dsn: sentryDsn ? sentryDsn.substring(0, 20) + '...' : 'not configured',
       environment: process.env.NODE_ENV,
     });
-  } catch (error) {
+  }
+catch (error) {
     logError('❌ Failed to initialize Sentry', error);
   }
 }
@@ -152,7 +153,8 @@ export function sentryTransactionMiddleware(req: Request, res: Response, next: N
       transaction.setAttribute('http.status_code', res.statusCode.toString());
       if (res.statusCode >= 400) {
         transaction.setStatus({ code: 2, message: 'Error' }); // UNKNOWN status
-      } else {
+      }
+else {
         transaction.setStatus({ code: 1, message: 'OK' }); // OK status
       }
       transaction.end();

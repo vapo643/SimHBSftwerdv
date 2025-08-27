@@ -79,7 +79,7 @@ export function getAuthService(): AuthService {
   if (!authServiceInstance) {
     authServiceInstance = new AuthService();
   }
-  return authServiceInstance; }
+  return authServiceInstance;
 }
 
 /**

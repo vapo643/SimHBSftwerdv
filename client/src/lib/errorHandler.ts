@@ -127,7 +127,7 @@ export const _validateApiResponse = (response) => {
   if (!response || (response as unknown).error) {
     throw new Error((response as unknown)?.error?.message || 'Resposta inválida da API');
   }
-  return response; }
+  return response;
 };
 
 /**

@@ -224,9 +224,9 @@ catch (logError) {
    * Processa múltiplos documentos em lote
    */
   async processBatch(
-    proposals: Record<string, unknown>[]>{ id: string; documentKey?: string }>,
+    proposals: Array<{ id: string; documentKey?: string }>,
     source: ProcessingSource
-  ): Promise<Record<string, unknown>[]>{ proposalId: string; success: boolean; message: string }>> {
+  ): Promise<Array<{ proposalId: string; success: boolean; message: string }>> {
     console.log(
       `🔄 [DOCUMENT PROCESSING] Processing batch of ${proposals.length} documents via ${source}`
     );
@@ -235,7 +235,7 @@ catch (logError) {
       proposals.map((p) => this.processSignedDocument(p.id, source, p.documentKey))
     );
 
-    return results.map((_result, index) => ({
+    return _results.map((_result, index) => ({
       proposalId: proposals[index].id,
       success: _result.status == 'fulfilled' ? _result.value.success : false,
       message: _result.status == 'fulfilled' ? _result.value.message : 'Processing failed',

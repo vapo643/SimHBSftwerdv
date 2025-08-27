@@ -101,7 +101,8 @@ export class ClienteService {
         exists: true,
         data: maskedData,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CLIENTE_SERVICE] Error getting client by CPF:', error);
       throw new Error('Erro ao buscar dados do cliente');
     }
@@ -142,7 +143,8 @@ export class ClienteService {
                   cep: data.cep || cleanCep,
                 };
               }
-            } else if (apiUrl.includes('brasilapi')) {
+            }
+else if (apiUrl.includes('brasilapi')) {
               return {
                 logradouro: data.street || '',
                 bairro: data.neighborhood || '',
@@ -150,7 +152,8 @@ export class ClienteService {
                 estado: data.state || '',
                 cep: data.cep || cleanCep,
               };
-            } else if (apiUrl.includes('awesomeapi')) {
+            }
+else if (apiUrl.includes('awesomeapi')) {
               return {
                 logradouro: data.address || '',
                 bairro: data.district || '',
@@ -160,14 +163,16 @@ export class ClienteService {
               };
             }
           }
-        } catch (apiError) {
+        }
+catch (apiError) {
           console.log(`[CLIENTE_SERVICE] API ${apiUrl} failed, trying next...`);
           continue;
         }
       }
 
       throw new Error('CEP não encontrado');
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CLIENTE_SERVICE] Error fetching CEP:', error);
       throw error;
     }

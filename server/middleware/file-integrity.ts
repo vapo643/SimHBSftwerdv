@@ -159,7 +159,8 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       errors: verification.errors,
       storedAt: storedIntegrity.generatedAt,
     });
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       error: 'Erro ao verificar integridade do arquivo',
       message: error.message,

@@ -78,7 +78,8 @@ testRetryWorker.on('failed', (job, err) => {
 
     console.log(`[TEST RETRY WORKER] 🔄 Retry será tentado em ${backoffDelay}ms`);
     console.log(`[TEST RETRY WORKER] ⏳ Aguardando próxima tentativa...`);
-  } else {
+  }
+else {
     console.log(
       `[TEST RETRY WORKER] 🛑 Todas as tentativas esgotadas. Job falhou definitivamente.`
     );

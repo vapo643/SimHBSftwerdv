@@ -193,13 +193,25 @@ export function logPasswordPolicyViolation(
 export function getPasswordStrengthMessage(score: number): string {
   switch (score) {
     case 0: {
+        break;
+        }
+        break;
+      }
     case 1: {
+        break;
+        }
       return 'Senha muito fraca - facilmente adivinhável';
     case 2: {
+        break;
+        }
       return 'Senha fraca - precisa ser mais complexa';
     case 3: {
+        break;
+        }
       return 'Senha razoável - pode ser melhorada';
     case 4: {
+        break;
+        }
       return 'Senha forte - boa escolha!';
     default:
       return 'Força da senha desconhecida';

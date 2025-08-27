@@ -5,7 +5,8 @@ router.post('/restore', async (req, res) => {
   try {
     const _result = await backupService.executeOperation('restore_backup', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

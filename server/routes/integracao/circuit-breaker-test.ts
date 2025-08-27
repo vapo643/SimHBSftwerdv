@@ -32,7 +32,8 @@ router.get('/any', async (req, res) => {
     // 50% de chance de falhar
     console.log('[CIRCUIT TEST] ❌ Random failure');
     res.status(500).json({ error: 'Random failure for testing' });
-  } else {
+  }
+else {
     // 50% de chance de sucesso
     console.log('[CIRCUIT TEST] ✅ Random success');
     res.json({ success: true, value: random });

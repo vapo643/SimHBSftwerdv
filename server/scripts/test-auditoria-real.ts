@@ -21,10 +21,12 @@ async function fazerLogin(): Promise<string> {
     if (response.data.token) {
       console.log('✅ Login realizado com sucesso!\n');
       return response.data.token;
-    } else {
+    }
+else {
       throw new Error('Token não retornado');
     }
-  } catch (error) {
+  }
+catch (error) {
     console.log('❌ Erro no login, tentando criar usuário admin...\n');
 
     // Tentar criar usuário admin se não existir
@@ -44,7 +46,8 @@ async function fazerLogin(): Promise<string> {
       });
 
       return loginResponse.data.token;
-    } catch (createError) {
+    }
+catch (createError) {
       console.error('❌ Erro ao criar usuário admin:', createError);
       throw new Error('Não foi possível autenticar');
     }
@@ -78,7 +81,8 @@ async function buscarPropostaComBoletos(
       propostaId: boletoAtivo.propostaId,
       codigoSolicitacao: boletoAtivo.codigoSolicitacao,
     };
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro ao buscar boletos:', error);
     throw error;
   }
@@ -116,7 +120,8 @@ async function testarProrrogacaoComAuditoria(token: string, codigoSolicitacao: s
     console.log('\n');
 
     return true;
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro na prorrogação:', error.response?.data || error.message);
     return false;
   }
@@ -188,7 +193,8 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     console.log('\n');
 
     return true;
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro no desconto:', error.response?.data || error.message);
     return false;
   }
@@ -216,12 +222,13 @@ async function executarTestes() {
     console.log(`✅ Desconto: ${resultadoDesconto ? 'SUCESSO' : 'FALHA'}`);
     console.log('\n🔍 Verifique os logs do servidor para ver a auditoria completa!');
     console.log('==== FIM DOS TESTES ====\n');
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro geral nos testes:', error);
   }
 }
 
 // Aguardar servidor estar pronto
 setTimeout(() => {
-  executarTestes().catch(console.error);
+  executarTestes().catch (console.error);
 }, 2000);

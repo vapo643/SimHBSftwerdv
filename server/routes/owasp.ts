@@ -43,7 +43,8 @@ const _upload = multer({
   fileFilter: (req, file, cb) => {
     if (file.mimetype == 'application/pdf') {
       cb(null, true);
-    } else {
+    }
+else {
       cb(new Error('Apenas arquivos PDF são aceitos para documentos OWASP'));
     }
   },
@@ -75,7 +76,8 @@ router.get('/samm', _requireAdmin, async (req: AuthenticatedRequest, res) => {
       data: assessment,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP SAMM] Assessment error:', error);
     res.status(500).json({
       success: false,
@@ -91,7 +93,8 @@ router.get('/samm/report', _requireAdmin, async (req: AuthenticatedRequest, res)
     res.setHeader('Content-Type', 'text/markdown');
     res.setHeader('Content-Disposition', 'attachment; filename="samm_maturity_report.md"');
     res.send(report);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP SAMM] Report generation error:', error);
     res.status(500).json({
       success: false,
@@ -109,7 +112,8 @@ router.get('/asvs', _requireAdmin, async (req: AuthenticatedRequest, res) => {
       data: requirements,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP ASVS] Requirements error:', error);
     res.status(500).json({
       success: false,
@@ -125,7 +129,8 @@ router.get('/strategic-plan', _requireAdmin, async (req: AuthenticatedRequest, r
     res.setHeader('Content-Type', 'text/markdown');
     res.setHeader('Content-Disposition', 'attachment; filename="owasp_strategic_plan.md"');
     res.send(plan);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP STRATEGIC] Plan generation error:', error);
     res.status(500).json({
       success: false,
@@ -169,7 +174,8 @@ router.post(
           processedAt: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[OWASP UPLOAD] Document processing error:', error);
       res.status(500).json({
         success: false,
@@ -221,7 +227,8 @@ router.get('/status', _requireAdmin, async (req: AuthenticatedRequest, res) => {
         lastUpdated: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP STATUS] Status check error:', error);
     res.status(500).json({
       success: false,
@@ -251,7 +258,8 @@ router.get('/samm/urls', _requireAdmin, async (req: AuthenticatedRequest, res) =
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP SAMM URLs] Error retrieving URLs:', error);
     res.status(500).json({
       success: false,
@@ -278,7 +286,8 @@ router.post('/samm/process-pdf', _requireAdmin, async (req: AuthenticatedRequest
         processedAt: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP SAMM PDF] Processing error:', error);
     res.status(500).json({
       success: false,
@@ -321,7 +330,8 @@ router.get('/cheatsheets', _requireAdmin, async (req: AuthenticatedRequest, res)
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[OWASP CHEAT SHEETS] Analysis error:', error);
     res.status(500).json({
       success: false,
@@ -381,7 +391,8 @@ router.get(
         },
         timestamp: new Date().toISOString(),
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[OWASP RECOMMENDATIONS] Analysis error:', error);
       res.status(500).json({
         success: false,
@@ -421,7 +432,8 @@ router.post('/wstg/process', _requireAdmin, async (req: AuthenticatedRequest, re
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[WSTG] Processing error:', error);
     res.status(500).json({
       success: false,
@@ -439,7 +451,8 @@ router.get('/wstg/status', _requireAdmin, async (req: AuthenticatedRequest, res)
       data: status,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[WSTG] Status error:', error);
     res.status(500).json({
       success: false,

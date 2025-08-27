@@ -29,7 +29,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   async findByCpf(cpf: string): Promise<Proposal[]> {
     const _results = await db.select().from(propostas).where(eq(propostas.clienteCpf, cpf));
 
-    return results.map((r) => this.toDomainEntity(r));
+    return _results.map((r) => this.toDomainEntity(r));
   }
 
   /**
@@ -41,7 +41,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(eq(propostas.lojaId, parseInt(storeId)));
 
-    return results.map((r) => this.toDomainEntity(r));
+    return _results.map((r) => this.toDomainEntity(r));
   }
 
   /**
@@ -50,7 +50,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   async findAll(): Promise<Proposal[]> {
     const _results = await db.select().from(propostas).orderBy(propostas.createdAt);
 
-    return results.map((r) => this.toDomainEntity(r));
+    return _results.map((r) => this.toDomainEntity(r));
   }
 
   /**
@@ -87,7 +87,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(eq(propostas.status, 'aguardando_analise'));
 
-    return results.map((r) => this.toDomainEntity(r));
+    return _results.map((r) => this.toDomainEntity(r));
   }
 
   /**
@@ -103,7 +103,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(and(eq(propostas.status, status), between(propostas.createdAt, startDate, endDate)));
 
-    return results.map((r) => this.toDomainEntity(r));
+    return _results.map((r) => this.toDomainEntity(r));
   }
 
   /**
@@ -115,7 +115,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(eq(propostas.status, status));
 
-    return result[0]?.count || 0;
+    return _result[0]?.count || 0;
   }
 
   /**
@@ -127,7 +127,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(eq(propostas.status, status));
 
-    return result[0]?.total || 0;
+    return _result[0]?.total || 0;
   }
 
   /**

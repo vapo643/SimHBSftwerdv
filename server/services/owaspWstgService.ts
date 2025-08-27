@@ -149,14 +149,14 @@ export class OwaspWstgService {
    */
   static async processWstgUrls(urls: string[]): Promise<WstgTestCase[]> {
     console.log(`[WSTG] Processing ${urls.length} test URLs...`);
-    const results: WstgTestCase[] = [];
+    const _results: WstgTestCase[] = [];
 
     for (const url of urls) {
       const _testCase = await this.analyzeWstgUrl(url);
       results.push(testCase);
     }
 
-    return results;
+    return _results;
   }
 
   /**
@@ -301,18 +301,28 @@ export class OwaspWstgService {
     Object.entries(byCategory).forEach(([category, vulns]) => {
       switch (category) {
         case 'WSTG-INPV': {
+        break;
+        }
           recommendations.push('Implement comprehensive input validation and sanitization');
           break;
         case 'WSTG-ATHN': {
+        break;
+        }
           recommendations.push('Strengthen authentication mechanisms');
           break;
         case 'WSTG-ATHZ': {
+        break;
+        }
           recommendations.push('Review and enhance authorization controls');
           break;
         case 'WSTG-SESS': {
+        break;
+        }
           recommendations.push('Improve session management security');
           break;
         case 'WSTG-CRYP': {
+        break;
+        }
           recommendations.push('Update cryptographic implementations');
           break;
       }

@@ -126,7 +126,7 @@ router.post(
 
       console.log(`✅ [Controller/Users] User created: ${newUser.email}`);
 
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 catch (error) {
       // Handle validation errors
@@ -160,7 +160,7 @@ else if (flatErrors.fieldErrors.role) {
 
       // Handle conflict errors
       if (error.name == 'ConflictError') {
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
 
       console.error('❌ [Controller/Users] Error creating user:', error.message);

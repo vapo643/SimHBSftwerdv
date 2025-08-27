@@ -77,14 +77,16 @@ import { registerRoutes } from './routes';
     semgrepScanner.start();
 
     log('✅ All security scanners started');
-  } else {
+  }
+else {
     log('ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable');
   }
 
   // Setup Vite or static serving based on environment
   if (app.get('env') == 'development') {
     await setupVite(app, server);
-  } else {
+  }
+else {
     serveStatic(app);
   }
 
@@ -129,7 +131,8 @@ import { registerRoutes } from './routes';
             return;
           }
           log('✅ Public bucket deleted.');
-        } else {
+        }
+else {
           log('✅ Storage bucket "documents" already exists as PRIVATE');
           return;
         }
@@ -167,7 +170,8 @@ import { registerRoutes } from './routes';
       }
 
       log('✅ Storage bucket "documents" created successfully!');
-    } catch (error) {
+    }
+catch (error) {
       log(
         '⚠️ Storage initialization error:',
         error instanceof Error ? error.message : 'Unknown error'

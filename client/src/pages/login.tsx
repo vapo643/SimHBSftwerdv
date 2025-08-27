@@ -35,13 +35,15 @@ const LoginPage: React.FC = () => {
     try {
       await signIn(data.email, data.password);
       setLocation('/dashboard');
-    } catch (error) {
+    }
+catch (error) {
       toast({
         title: 'Erro ao fazer login',
         description: error.message || 'Credenciais inválidas',
         variant: 'destructive',
       });
-    } finally {
+    }
+finally {
       setLoading(false);
     }
   };

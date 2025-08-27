@@ -23,7 +23,7 @@ export async function multiTenantMiddleware(
 ) {
   try {
     if (!req.user?.email) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Get user's loja_id from database via gerente_lojas junction table
@@ -41,7 +41,7 @@ export async function multiTenantMiddleware(
       .limit(1);
 
     if (!userRecord.length) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _userData = userRecord[0];
@@ -68,7 +68,7 @@ export async function multiTenantMiddleware(
   }
 catch (error) {
     console.error('Multi-tenant middleware error:', error);
-    return res.*);
+    return res.status(401).json({error: "Unauthorized"});
   }
 }
 

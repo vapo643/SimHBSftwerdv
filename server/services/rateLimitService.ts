@@ -123,7 +123,8 @@ class RateLimitService {
       console.log(
         `[RATE LIMIT] 🔴 Rate limit atingido! Backoff: ${state.currentDelay}ms (tentativa ${state.failureCount}/${_config.maxRetries})`
       );
-    } else {
+    }
+else {
       // Delay menor para outros erros
       state.currentDelay = Math.min(
         _config.baseDelayMs * state.failureCount,
@@ -183,8 +184,9 @@ class RateLimitService {
         // Registrar sucesso
         this.handleSuccess(serviceId);
 
-        return result;
-      } catch (error) {
+        return _result;
+      }
+catch (error) {
         lastError = error;
         console.error(`[RATE LIMIT] Tentativa ${attempt + 1}/${_config.maxRetries} falhou:`, error);
 

@@ -26,7 +26,8 @@ router.get('/test-validation', async (req, res) => {
       version: '2.0',
       phase: '1&2 Complete',
     });
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -59,7 +60,8 @@ router.get('/scan/*', async (req: Request, res: Response) => {
       file: filePath,
       analysis: result,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[MCP API] Scan error:', error);
     res.status(500).json({
       success: false,
@@ -93,7 +95,8 @@ router.post('/analyze', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       analysis: result,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[MCP API] Analysis error:', error);
     res.status(500).json({
       success: false,
@@ -120,7 +123,8 @@ router.get('/context/:component', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       _context,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[MCP API] Context error:', error);
     res.status(500).json({
       success: false,
@@ -148,7 +152,8 @@ router.get('/history/*', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       _history,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[MCP API] History error:', error);
     res.status(500).json({
       success: false,
@@ -184,7 +189,8 @@ router.get('/rules', async (req: Request, res: Response) => {
         list: rules,
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[MCP API] Rules error:', error);
     res.status(500).json({
       success: false,

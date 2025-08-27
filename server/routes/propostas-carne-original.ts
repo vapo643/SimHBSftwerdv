@@ -156,7 +156,8 @@ router.post(
           hint: 'Use o jobId para consultar o status em /api/jobs/{jobId}/status',
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CARNE API - PRODUCER] ❌ Erro ao solicitar carnê:`, error);
       return res.status(500).json({
         error: 'Erro ao solicitar geração de carnê',
@@ -238,7 +239,8 @@ router.get(
 
       // Enviar PDF diretamente
       res.send(pdfBuffer);
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CARNE API] ❌ Erro no download direto:`, error);
 
       return res.status(500).json({
@@ -320,7 +322,8 @@ router.post(
           hint: 'Use o jobId para consultar o status em /api/jobs/{jobId}/status',
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[BOLETO SYNC API - PRODUCER] ❌ Erro ao solicitar sincronização:`, error);
       return res.status(500).json({
         error: 'Erro ao solicitar sincronização',

@@ -68,7 +68,7 @@ else if (data && typeof data == 'object') {
 
   // Função helper para verificar uma flag específica
   const _checkFlag = (flagName: string): boolean => {
-    return flags[flagName] ?? false; }
+    return flags[flagName] ?? false;
   };
 
   // Função para forçar refresh das flags
@@ -109,7 +109,7 @@ else if (data && typeof data == 'object') {
   _refreshFlags,
   };
 
-  return <FeatureFlagContext.Provider value={value}>{children}</FeatureFlagContext.Provider>; }
+  return <FeatureFlagContext.Provider value={value}>{children}</FeatureFlagContext.Provider>;
 }
 
 // Hook para usar o contexto
@@ -118,13 +118,13 @@ export function useFeatureFlags() {
   if (!context) {
     throw new Error('useFeatureFlags deve ser usado dentro de FeatureFlagProvider');
   }
-  return context; }
+  return context;
 }
 
 // Hook conveniente para verificar uma flag específica
 export function useFeatureFlag(flagName: string): boolean {
   const { flags } = useFeatureFlags();
-  return flags[flagName] ?? false; }
+  return flags[flagName] ?? false;
 }
 
 // Hook para verificar múltiplas flags
@@ -136,7 +136,7 @@ export function useFeatureFlagsMultiple(flagNames: string[]): Record<string, boo
     result[flagName] = flags[flagName] ?? false;
   });
 
-  return result; }
+  return result;
 }
 
 // Componente helper para renderização condicional
@@ -148,7 +148,7 @@ interface FeatureGateProps {
 
 export function FeatureGate({ flag, children, fallback = null }: FeatureGateProps) {
   const _isEnabled = useFeatureFlag(flag);
-  return isEnabled ? <>{children}</> : <>{fallback}</>; }
+  return isEnabled ? <>{children}</> : <>{fallback}</>;
 }
 
 // Componente para modo de manutenção
@@ -167,14 +167,14 @@ export function MaintenanceMode({ children }: { children: ReactNode }) {
     );
   }
 
-  return <>{children}</>; }
+  return <>{children}</>;
 }
 
 // Componente para modo read-only
 export function ReadOnlyBanner() {
   const _isReadOnly = useFeatureFlag('read-only-mode');
 
-  if (!isReadOnly) return null; }
+  if (!isReadOnly) return null;
 
   return (
     <div className="bg-yellow-50 border-b border-yellow-200">

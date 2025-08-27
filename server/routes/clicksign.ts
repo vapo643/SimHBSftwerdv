@@ -34,7 +34,7 @@ router.post('/send-ccb/:propostaId', _jwtAuthMiddleware, async (req: Authenticat
     // 1. Get proposal data
     const _proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Validate proposal is approved and CCB is generated
@@ -45,7 +45,7 @@ router.post('/send-ccb/:propostaId', _jwtAuthMiddleware, async (req: Authenticat
     }
 
     if (!proposta.ccbGerado) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check if already sent to ClickSign
@@ -60,7 +60,7 @@ router.post('/send-ccb/:propostaId', _jwtAuthMiddleware, async (req: Authenticat
     // 2. Get CCB file from Supabase Storage
     const _ccbUrl = await storage.getCcbUrl(propostaId);
     if (!ccbUrl) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Download CCB as buffer
@@ -181,7 +181,7 @@ router.get('/status/:propostaId', _jwtAuthMiddleware, async (req, res) => {
 
     const _proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!proposta.clicksignDocumentKey) {
@@ -239,12 +239,12 @@ router.post('/webhook', async (req, res) => {
 
     if (!clickSignSecurityService.validateWebhookIP(clientIP)) {
       console.error('[CLICKSIGN WEBHOOK] Blocked request from unauthorized IP:', clientIP);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!clickSignSecurityService.checkWebhookRateLimit(clientIP)) {
       console.error('[CLICKSIGN WEBHOOK] Rate limit exceeded for IP:', clientIP);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Security: Validate event structure
@@ -254,7 +254,7 @@ router.post('/webhook', async (req, res) => {
     }
 catch (error) {
       console.error('[CLICKSIGN WEBHOOK] Invalid event structure:', error);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Security: Log sanitized event
@@ -275,7 +275,7 @@ catch (error) {
 
       if (!isValid) {
         console.error('[CLICKSIGN WEBHOOK] ❌ Invalid signature or expired timestamp');
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
     }
 
@@ -283,14 +283,14 @@ catch (error) {
     const _eventData = validatedEvent;
 
     if (!eventData.event || !eventData.data) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check for duplicate events
     const _eventId = `${eventData.event}_${eventData.data.document?.key || eventData.data.list?.key || ''}_${eventData.occurred_at || Date.now()}`;
     if (clickSignWebhookService.isDuplicateEvent(eventId)) {
       console.log('[CLICKSIGN WEBHOOK] Duplicate event detected, skipping');
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Process event using webhook service
@@ -298,7 +298,7 @@ catch (error) {
 
     if (!_result.processed) {
       console.log(`[CLICKSIGN WEBHOOK] Event not processed: ${_result.reason}`);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.log(`[CLICKSIGN WEBHOOK] ✅ Event ${eventData.event} processed successfully:`,_result);
@@ -319,7 +319,7 @@ catch (error) {
  */
 router.post('/webhook-test', async (req, res) => {
   if (process.env.NODE_ENV == 'production') {
-    return res.*);
+    return res.status(401).json({error: "Unauthorized"});
   }
 
   try {
@@ -330,7 +330,7 @@ router.post('/webhook-test', async (req, res) => {
 
     if (!_result.processed) {
       console.log(`[CLICKSIGN WEBHOOK TEST] Event not processed: ${_result.reason}`);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     console.log(`[CLICKSIGN WEBHOOK TEST] ✅ Event processed successfully:`,_result);

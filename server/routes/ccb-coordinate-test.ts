@@ -5,7 +5,8 @@ router.post('/coordinate-test', async (req, res) => {
   try {
     const _result = await ccbTestService.executeOperation('coordinate_test', req.body);
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

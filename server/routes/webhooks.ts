@@ -120,12 +120,12 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
 
     if (!signature) {
       console.warn('⚠️ [WEBHOOK] Missing HMAC signature');
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!validateClickSignHMAC(payload, signature)) {
       console.error('❌ [WEBHOOK] Invalid HMAC signature');
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // 2. Parse e validar payload
@@ -136,7 +136,7 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     }
 catch (parseError) {
       console.error('❌ [WEBHOOK] Invalid payload format:', parseError);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const { event, document } = webhookData;
@@ -174,7 +174,7 @@ catch (parseError) {
 
     if (!proposalResult || proposalResult.length == 0) {
       console.warn(`⚠️ [WEBHOOK] No proposal found for document ${document.key}`);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _proposal = proposalResult[0];
@@ -292,7 +292,7 @@ router.post('/inter', express.json(), async (req, res) => {
     const _secret = process.env.INTER_WEBHOOK_SECRET;
     if (!secret) {
       console.error('❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET não configurado');
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // 2. Validar assinatura HMAC (o header exato pode variar)
@@ -312,13 +312,13 @@ router.post('/inter', express.json(), async (req, res) => {
     if (signature) {
       if (!validateInterHMAC(payload, signature as string)) {
         console.error('❌ [WEBHOOK INTER] Assinatura HMAC inválida');
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
       console.log('✅ [WEBHOOK INTER] Assinatura HMAC válida');
     }
 else if (!isDevelopment) {
       console.warn('⚠️ [WEBHOOK INTER] Assinatura ausente em produção');
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 else {
       console.log('🔧 [WEBHOOK INTER] Modo desenvolvimento - assinatura não obrigatória');

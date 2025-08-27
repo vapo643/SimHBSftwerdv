@@ -18,7 +18,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
     queryKey: [`/api/propostas/${propostaId}`],
     queryFn: async () => {
       const _response = await api.get(`/api/propostas/${propostaId}`);
-      return response.data; }
+      return response.data;
     },
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar requests desnecessários
@@ -32,7 +32,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
     queryFn: async () => {
       try {
         const _response = await api.get(`/api/propostas/${propostaId}/observacoes`);
-        return response.data; }
+        return response.data;
       }
 catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);

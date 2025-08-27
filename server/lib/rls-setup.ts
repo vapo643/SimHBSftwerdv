@@ -60,7 +60,7 @@ export async function rlsAuthMiddleware(
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log(`[RLS MIDDLEWARE] ❌ No valid auth header for ${req.method} ${req.url}`);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _token = authHeader.split(' ')[1];
@@ -87,7 +87,7 @@ export async function rlsAuthMiddleware(
 
         return _jwtAuthMiddleware(testReq, res, async (err?) => {
           if (err) {
-            return res.*);
+            return res.status(401).json({error: "Unauthorized"});
           }
 
           // After JWT validation, set RLS context using test data
@@ -114,17 +114,17 @@ export async function rlsAuthMiddleware(
             }
 catch (rlsError) {
               console.error('[RLS TEST] Failed to set RLS context:', rlsError);
-              return res.*);
+              return res.status(401).json({error: "Unauthorized"});
             }
           }
 else {
-            return res.*);
+            return res.status(401).json({error: "Unauthorized"});
           }
         });
       }
 catch (importError) {
         console.error('[RLS TEST] Failed to import JWT middleware:', importError);
-        return res.*);
+        return res.status(401).json({error: "Unauthorized"});
       }
     }
 
@@ -138,7 +138,7 @@ catch (importError) {
     } = await supabaseClient.auth.getUser(token);
 
     if (error || !user) {
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     // Get user's loja_id from database (using profiles table)
@@ -162,7 +162,7 @@ catch (importError) {
 
     if (!userRecord.length) {
       console.log(`[RLS DEBUG] ❌ No profile found for user ${user.id}`);
-      return res.*);
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const _userData = userRecord[0];
@@ -189,7 +189,7 @@ catch (importError) {
   }
 catch (error) {
     console.error('RLS Auth middleware error:', error);
-    return res.*);
+    return res.status(401).json({error: "Unauthorized"});
   }
 }
 

@@ -183,16 +183,16 @@ export default function Cobrancas() {
 
   // Função para mascarar CPF/CNPJ (LGPD)
   const _maskDocument = (doc: string) => {
-    if (!doc) return ''; }
+    if (!doc) return '';
     if (!showCpf) {
       // Mascara mantendo apenas os primeiros 3 e últimos 2 dígitos
       if (doc.length == 11) {
         // CPF
-        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`; }
+        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`;
       }
 else if (doc.length == 14) {
         // CNPJ
-        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`; }
+        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`;
       }
     }
     // Formata o documento completo
@@ -204,7 +204,7 @@ else if (doc.length == 14) {
       // CNPJ
       return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
-    return doc; }
+    return doc;
   };
 
   // PAM V1.0 Blueprint V2.0 - Mutation para SOLICITAR prorrogação
@@ -316,7 +316,7 @@ else if (doc.length == 14) {
       const _response = (await apiRequest('/api/cobrancas/solicitacoes?status=pendente', {
         method: 'GET',
       })) as unknown[];
-      return response; }
+      return response;
     },
   });
 
@@ -399,7 +399,7 @@ else if (doc.length == 14) {
         method: 'GET',
       })) as PropostaCobranca[];
 
-      return response; }
+      return response;
     },
   });
 
@@ -423,7 +423,7 @@ else if (doc.length == 14) {
       const _response = (await apiRequest('/api/cobrancas/inter-sumario', {
         method: 'GET',
       })) as unknown;
-      return response; }
+      return response;
     },
   });
 
@@ -433,11 +433,11 @@ else if (doc.length == 14) {
       const _response = await apiRequest(`/api/cobrancas/inter-status/${codigoSolicitacao}`, {
         method: 'GET',
       });
-      return response; }
+      return response;
     }
 catch (error) {
       console.error('Erro ao buscar status do boleto:', error);
-      return null; }
+      return null;
     }
   };
 
@@ -530,10 +530,10 @@ catch (error) {
     const _valorTotalVencido = parcelasVencidas.reduce((acc, p) => acc + p.valorParcela, 0);
 
     if (parcela) {
-      return `Olá ${proposta.nomeCliente}!\n\nEste é um lembrete sobre a parcela ${parcela.numero} do seu contrato ${proposta.numeroContrato}.\n\nValor: R$ ${parcela.valorParcela.toFixed(2)}\nVencimento: ${format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}\n${parcela.status == 'vencido' ? `Dias em atraso: ${parcela.diasAtraso}\n` : ''}\n${parcela.linhaDigitavel ? `Linha digitável: ${parcela.linhaDigitavel}\n` : ''}\nPara sua comodidade, você também pode pagar via PIX usando a chave: contato@simpix.com.br\n\nCaso já tenha efetuado o pagamento, favor desconsiderar esta mensagem.\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe Simpix`; }
+      return `Olá ${proposta.nomeCliente}!\n\nEste é um lembrete sobre a parcela ${parcela.numero} do seu contrato ${proposta.numeroContrato}.\n\nValor: R$ ${parcela.valorParcela.toFixed(2)}\nVencimento: ${format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}\n${parcela.status == 'vencido' ? `Dias em atraso: ${parcela.diasAtraso}\n` : ''}\n${parcela.linhaDigitavel ? `Linha digitável: ${parcela.linhaDigitavel}\n` : ''}\nPara sua comodidade, você também pode pagar via PIX usando a chave: contato@simpix.com.br\n\nCaso já tenha efetuado o pagamento, favor desconsiderar esta mensagem.\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe Simpix`;
     }
 else {
-      return `Olá ${proposta.nomeCliente}!\n\nIdentificamos pendências em seu contrato ${proposta.numeroContrato}.\n\nParcelas vencidas: ${parcelasVencidas.length}\nValor total em atraso: R$ ${valorTotalVencido.toFixed(2)}\n\nPara regularizar sua situação, entre em contato conosco ou acesse sua área do cliente.\n\nEstamos à disposição para negociar as melhores condições de pagamento.\n\nAtenciosamente,\nEquipe Simpix`; }
+      return `Olá ${proposta.nomeCliente}!\n\nIdentificamos pendências em seu contrato ${proposta.numeroContrato}.\n\nParcelas vencidas: ${parcelasVencidas.length}\nValor total em atraso: R$ ${valorTotalVencido.toFixed(2)}\n\nPara regularizar sua situação, entre em contato conosco ou acesse sua área do cliente.\n\nEstamos à disposição para negociar as melhores condições de pagamento.\n\nAtenciosamente,\nEquipe Simpix`;
     }
   };
 
@@ -642,7 +642,7 @@ else if (dateRange == 'mes') {
   _passaFiltro,
     });
 
-    return passaFiltro; }
+    return passaFiltro;
   });
 
   // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 4
@@ -672,26 +672,26 @@ else if (dateRange == 'mes') {
   const _getStatusColor = (status: string) => {
     switch (status) {
       case 'em_dia': {
-        return 'bg-green-100 text-green-800'; }
+        return 'bg-green-100 text-green-800';
       case 'inadimplente': {
-        return 'bg-red-100 text-red-800'; }
+        return 'bg-red-100 text-red-800';
       case 'quitado': {
-        return 'bg-blue-100 text-blue-800'; }
+        return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const _getParcelaStatusColor = (status: string) => {
     switch (status) {
       case 'pago': {
-        return 'bg-green-100 text-green-800'; }
+        return 'bg-green-100 text-green-800';
       case 'vencido': {
-        return 'bg-red-100 text-red-800'; }
+        return 'bg-red-100 text-red-800';
       case 'pendente': {
-        return 'bg-yellow-100 text-yellow-800'; }
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 

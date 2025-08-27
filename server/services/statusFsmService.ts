@@ -246,7 +246,8 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     }
 
     console.log(`[FSM] ✅ Transição concluída com sucesso`);
-  } catch (error) {
+  }
+catch (error) {
     // Re-lançar InvalidTransitionError sem modificação
     if (error instanceof InvalidTransitionError) {
       throw error;

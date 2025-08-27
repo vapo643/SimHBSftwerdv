@@ -81,7 +81,8 @@ export class HealthService {
         status: latency < 100 ? 'healthy' : 'degraded',
         _latency,
       };
-    } catch (error) {
+    }
+catch (error) {
       return {
         status: 'unhealthy',
         error: error.message,
@@ -120,7 +121,8 @@ export class HealthService {
         status: latency < 200 ? 'healthy' : 'degraded',
         _latency,
       };
-    } catch (error) {
+    }
+catch (error) {
       return {
         status: 'unhealthy',
         error: error.message,
@@ -149,7 +151,8 @@ export class HealthService {
         status: 'healthy',
         writable: true,
       };
-    } catch (error) {
+    }
+catch (error) {
       return {
         status: 'unhealthy',
         writable: false,
@@ -248,7 +251,8 @@ export class HealthService {
     try {
       await db.execute(sql`SELECT 1`);
       checks.database = true;
-    } catch {
+    }
+catch {
       checks.database = false;
     }
 

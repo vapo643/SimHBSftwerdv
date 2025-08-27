@@ -58,7 +58,8 @@ router.post('/test-transition', async (req, res) => {
       totalTransitions: history.length,
       history: history.slice(-5), // Last 5 transitions
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[TEST AUDIT] ❌ Test failed:', error);
     res.status(500).json({
       error: 'Failed to test audit service',
@@ -90,7 +91,8 @@ router.post('/validate-transition', async (req, res) => {
         ? 'Transition is valid according to V2.0 workflow'
         : 'Transition is not allowed in V2.0 workflow',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[TEST AUDIT] ❌ Validation failed:', error);
     res.status(500).json({
       error: 'Failed to validate transition',
@@ -113,7 +115,8 @@ router.get('/history/:propostaId', async (req, res) => {
       totalTransitions: history.length,
       _history,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[TEST AUDIT] ❌ Failed to fetch history:', error);
     res.status(500).json({
       error: 'Failed to fetch status history',

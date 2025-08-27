@@ -4257,6 +4257,8 @@ catch (error) {
 
         switch (type) {
           case 'pdf': {
+        break;
+        }
             queueName = 'pdf-processing';
             job = await queues.pdfProcessing.add('TEST_PDF_JOB', {
               type: 'GENERATE_CARNE',
@@ -4267,6 +4269,8 @@ catch (error) {
             break;
           }
           case 'boleto': {
+        break;
+        }
             queueName = 'boleto-sync';
             job = await queues.boletoSync.add('TEST_BOLETO_JOB', {
               type: 'SYNC_BOLETOS',

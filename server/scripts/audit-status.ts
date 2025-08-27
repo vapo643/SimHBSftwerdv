@@ -53,7 +53,8 @@ async function main() {
       if (count == 0) {
         console.log(`${statusFormatted}| ${countFormatted} | [LEGACY] ⚠️`);
         statusLegados++;
-      } else {
+      }
+else {
         console.log(`${statusFormatted}| ${countFormatted} | Ativo ✅`);
         statusAtivos++;
       }
@@ -78,7 +79,8 @@ async function main() {
       statusInUseNotInEnum.forEach((_result) => {
         console.log(`   - "${_result.status}" (${_result.count} propostas) ❌`);
       });
-    } else {
+    }
+else {
       console.log(`   ✅ Todos os status em uso estão definidos no enum`);
     }
 
@@ -97,14 +99,15 @@ async function main() {
     }
 
     console.log(`\n🏁 ==== AUDITORIA CONCLUÍDA ====\n`);
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro durante a auditoria:', error);
     process.exit(1);
   }
 }
 
 // Executar função principal e capturar erros
-main().catch((error) => {
+main().catch ((error) => {
   console.error('💥 Falha crítica na auditoria:', error);
   process.exit(1);
 });

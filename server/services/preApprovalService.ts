@@ -136,7 +136,8 @@ export class PreApprovalService {
         calculatedCommitment: percentualComprometimento,
         reason: `Comprometimento de renda ${percentualComprometimento.toFixed(1)}% dentro do limite permitido`,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[PRE-APPROVAL] Erro na verificação:`, error);
 
       // Em caso de erro, permitir análise manual
@@ -272,14 +273,17 @@ export class PreApprovalService {
       if (lastCommaIndex > lastDotIndex) {
         // Vírgula é decimal, pontos são separadores de milhar
         cleaned = cleaned.replace(/\./g, '').replace(',', '.');
-      } else {
+      }
+else {
         // Ponto é decimal, vírgulas são separadores de milhar (formato raro)
         cleaned = cleaned.replace(/,/g, '');
       }
-    } else if (cleaned.includes(',') && !cleaned.includes('.')) {
+    }
+else if (cleaned.includes(',') && !cleaned.includes('.')) {
       // Apenas vírgula: assumir decimal brasileiro "1000,50"
       cleaned = cleaned.replace(',', '.');
-    } else {
+    }
+else {
       // Apenas ponto ou sem separadores: formato internacional "1000.50" ou "1000"
       // Não remover pontos - manter como está
     }

@@ -173,7 +173,8 @@ export class UserRepository extends BaseRepository<Profile> {
           banned_until: undefined,
         },
       } as UserWithAuth;
-    } catch (error) {
+    }
+catch (error) {
       // Rollback auth user if profile creation failed
       await this.supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       throw error;

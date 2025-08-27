@@ -27,7 +27,8 @@ router.get('/health', async (req: Request, res: Response) => {
     const _statusCode = health.status == 'healthy' ? 200 : health.status == 'degraded' ? 503 : 500;
 
     res.status(statusCode).json(health);
-  } catch (error) {
+  }
+catch (error) {
     const _duration = Date.now() - startTime;
     logError('Health check failed', { error: error.message, duration });
 
@@ -47,7 +48,8 @@ router.get('/health/live', async (req: Request, res: Response) => {
   try {
     const _liveness = await healthService.getLiveness();
     res.status(200).json(liveness);
-  } catch (error) {
+  }
+catch (error) {
     res.status(500).json({
       status: 'dead',
       timestamp: new Date().toISOString(),
@@ -66,7 +68,8 @@ router.get('/health/ready', async (req: Request, res: Response) => {
     const _statusCode = readiness.ready ? 200 : 503;
 
     res.status(statusCode).json(readiness);
-  } catch (error) {
+  }
+catch (error) {
     res.status(503).json({
       ready: false,
       timestamp: new Date().toISOString(),

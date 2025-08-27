@@ -22,7 +22,7 @@ interface EnvelopeData {
   auto_close?: boolean;
   deadline_at?: string;
   block_after_refusal?: boolean;
-  documents?: Record<string, unknown>[]>{
+  documents?: Array<{
     filename: string;
     content_base64: string;
   }>; // For atomic document creation
@@ -65,7 +65,7 @@ interface WebhookData {
 
 interface ClickSignV3Response<T> {
   data: T;
-  errors?: Record<string, unknown>[]>{
+  errors?: Array<{
     code: string;
     message: string;
     field?: string;
@@ -633,7 +633,7 @@ catch (error) {
           console.log(`[CLICKSIGN V1] Requirement body:`, JSON.stringify(requirementBody, null, 2));
 
           // Try to add requirement (may not be needed in v1, but won't hurt)
-          await this.makeRequest<unknown>('POST', '/requirements', requirementBody).catch((err) => {
+          await this.makeRequest<unknown>('POST', '/requirements', requirementBody).catch ((err) => {
             console.log(
               `[CLICKSIGN V1] ⚠️ Requirements endpoint not available in v1, continuing...`
             );

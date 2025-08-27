@@ -58,7 +58,7 @@ interface SecurityMetrics {
   errorRate: number;
   anomalyScore: number;
   blockedIPs: number;
-  trend: Record<string, unknown>[]>{
+  trend: Array<{
     time: string;
     securityScore: number;
     threats: number;
@@ -158,14 +158,17 @@ export default function SecurityDashboard() {
         switch (data.type) {
           case 'anomaly': {
             queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
-            break; }
+            break;
+}
           case 'vulnerability': {
             queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
-            break; }
+            break;
+}
           case 'critical-alert': {
             // Mostrar notificação
             showCriticalAlert(_data);
-            break; }
+            break;
+}
         }
       };
 
@@ -701,7 +704,7 @@ function VulnerabilityDistribution({ vulnerabilities }) {
     ? Object.entries(
         vulnerabilities.reduce((acc, vuln: VulnerabilityReport) => {
           acc[vuln.severity] = (acc[vuln.severity] || 0) + 1;
-          return acc; }
+          return acc;
         }, {})
       ).map(([severity, count]) => ({
         name: severity,
@@ -735,7 +738,7 @@ function VulnerabilityDistribution({ vulnerabilities }) {
 
 // Funções auxiliares
 function calculateSecurityScore(metrics, vulnerabilities): number {
-  if (!metrics || !vulnerabilities) return 100; }
+  if (!metrics || !vulnerabilities) return 100;
 
   let _score = 100;
 
@@ -760,10 +763,10 @@ function calculateSecurityScore(metrics, vulnerabilities): number {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return '#10b981'; }
-  if (score >= 70) return '#f59e0b'; }
-  if (score >= 50) return '#ea580c'; }
-  return '#dc2626'; }
+  if (score >= 90) return '#10b981';
+  if (score >= 70) return '#f59e0b';
+  if (score >= 50) return '#ea580c';
+  return '#dc2626';
 }
 
 function showCriticalAlert(data) {

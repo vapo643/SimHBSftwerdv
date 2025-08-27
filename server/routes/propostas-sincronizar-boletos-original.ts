@@ -77,24 +77,28 @@ router.post(
                   `[PAM V1.0 SYNC] ✅ Boleto ${collection.codigoSolicitacao} salvo no Storage`
                 );
                 boletosProcessados++;
-              } else {
+              }
+else {
                 console.error(
                   `[PAM V1.0 SYNC] ❌ Erro ao salvar boleto ${collection.codigoSolicitacao}:`,
                   'Service error' // _result.error
                 );
                 erros++;
               }
-            } else {
+            }
+else {
               console.error(
                 `[PAM V1.0 SYNC] PDF inválido para boleto ${collection.codigoSolicitacao}`
               );
               erros++;
             }
-          } else {
+          }
+else {
             console.error(`[PAM V1.0 SYNC] PDF vazio para boleto ${collection.codigoSolicitacao}`);
             erros++;
           }
-        } catch (error) {
+        }
+catch (error) {
           console.error(
             `[PAM V1.0 SYNC] Erro ao processar boleto ${collection.codigoSolicitacao}:`,
             error
@@ -117,7 +121,8 @@ router.post(
             ? `${boletosProcessados} boletos sincronizados, ${erros} falharam`
             : `Todos os ${boletosProcessados} boletos foram sincronizados com sucesso`,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[PAM V1.0 SYNC] Erro geral na sincronização:', error);
       return res.status(500).json({
         success: false,

@@ -20,14 +20,16 @@ router.get('/test/circuit-breaker', async (req: AuthenticatedRequest, res) => {
       serviceStatus: result ? 'operational' : 'unavailable',
       circuitBreakerStatus: 'closed',
     });
-  } catch (error) {
+  }
+catch (error) {
     if (error.message?.includes('circuit breaker is OPEN')) {
       console.log('[CIRCUIT TEST] ⚡ ClickSign circuit breaker is OPEN');
       res.status(503).json({
         error: 'ClickSign API temporarily unavailable - circuit breaker is OPEN',
         circuitBreakerStatus: 'open',
       });
-    } else {
+    }
+else {
       res.status(500).json({
         error: error.message,
         circuitBreakerStatus: 'unknown',

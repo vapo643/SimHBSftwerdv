@@ -71,7 +71,7 @@ export class AlertasProativosService {
             )
           );
 
-        return resultado.map((r) => ({
+        return _resultado.map((r) => ({
           tipo: 'alto_valor_vencimento_proximo',
           titulo: 'Proposta de Alto Valor Vencendo',
           mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - Valor Total: R$ ${parseFloat(r.valorTotal || 0).toFixed(2)} - Parcela ${r.numeroParcela} vence em ${format(new Date(r.dataVencimento), 'dd/MM/yyyy')}`,
@@ -112,7 +112,7 @@ export class AlertasProativosService {
           )
           .groupBy(propostas.id);
 
-        return resultado.map((r) => ({
+        return _resultado.map((r) => ({
           tipo: 'atraso_longo_30_dias',
           titulo: 'Atraso Superior a 30 Dias',
           mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - ${r.parcelasVencidas} parcelas vencidas há mais de 30 dias - Total: R$ ${r.valorTotalVencido.toFixed(2)}`,
@@ -191,7 +191,7 @@ export class AlertasProativosService {
         );
 
         // Criar notificações para cada resultado e cada usuário
-        for (const resultado of resultados) {
+        for (const _resultado of resultados) {
           for (const usuario of usuariosDestino) {
             const notificacao: InsertNotificacao = {
               tipo: resultado.tipo,
@@ -274,10 +274,16 @@ catch (error) {
   private obterRolesDestino(nomeRegra: string): string[] {
     switch (nomeRegra) {
       case 'alto_valor_vencimento_proximo': {
+        break;
+        }
         return ['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
       case 'atraso_longo_30_dias': {
+        break;
+        }
         return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
       case 'boleto_visualizado_nao_pago': {
+        break;
+        }
         return ['ADMINISTRADOR', 'COBRANCA'];
       default:
         return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'];

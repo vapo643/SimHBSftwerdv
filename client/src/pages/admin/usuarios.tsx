@@ -112,7 +112,8 @@ const UsuariosPage: React.FC = () => {
           description += '• Inclua números e símbolos (@, #, !, etc.)\n';
           description += "• Evite sequências como '12345678'\n";
           description += '• Exemplo: MinhaSenh@123';
-        } else {
+        }
+else {
           description += passwordErrors.join(', ');
         }
 
@@ -151,7 +152,8 @@ const UsuariosPage: React.FC = () => {
         title: 'Info',
         description: 'Edição de usuários será implementada em breve',
       });
-    } else {
+    }
+else {
       // For creating new users, use the API
       createUserMutation.mutate(userData);
     }
