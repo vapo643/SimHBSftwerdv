@@ -61,7 +61,7 @@ export class CCBGenerationServiceV2 {
   _logs,
       };
     } catch (error) {
-      console.error('❌ [CCB V2] Erro na geração:', error: unknown);
+      console.error('❌ [CCB V2] Erro na geração:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -108,20 +108,20 @@ export class CCBGenerationServiceV2 {
       const _fileName = `ccb_${propostaId}_${Date.now()}.pdf`;
       const _filePath = `ccb/${fileName}`;
 
-      const { data, error } = await supabase.storage.from('documents').upload(filePath, pdfBytes, {
+      const { data, error } = await _supabase.storage.from('documents').upload(filePath, pdfBytes, {
         contentType: 'application/pdf',
         upsert: true,
       });
 
       if (error) {
-        console.error('❌ [CCB V2] Erro ao salvar no storage:', error: unknown);
+        console.error('❌ [CCB V2] Erro ao salvar no storage:', error);
         return null; }
       }
 
       console.log('✅ [CCB V2] CCB salvo no storage:', filePath);
       return filePath; }
     } catch (error) {
-      console.error('❌ [CCB V2] Erro ao salvar CCB:', error: unknown);
+      console.error('❌ [CCB V2] Erro ao salvar CCB:', error);
       return null; }
     }
   }
@@ -131,7 +131,7 @@ export class CCBGenerationServiceV2 {
    */
   async getCCBPublicUrl(filePath: string): Promise<string | null> {
     try {
-      const { data } = supabase.storage.from('documents').getPublicUrl(filePath);
+      const { data } = _supabase.storage.from('documents').getPublicUrl(filePath);
 
       if (!data?.publicUrl) {
         console.error('❌ [CCB V2] Erro ao gerar URL pública');
@@ -140,7 +140,7 @@ export class CCBGenerationServiceV2 {
 
       return data.publicUrl; }
     } catch (error) {
-      console.error('❌ [CCB V2] Erro ao obter URL:', error: unknown);
+      console.error('❌ [CCB V2] Erro ao obter URL:', error);
       return null; }
     }
   }
@@ -163,7 +163,7 @@ export class CCBGenerationServiceV2 {
 
       return null; }
     } catch (error) {
-      console.error('❌ [CCB V2] Erro ao buscar linha digitável:', error: unknown);
+      console.error('❌ [CCB V2] Erro ao buscar linha digitável:', error);
       return null; }
     }
   }

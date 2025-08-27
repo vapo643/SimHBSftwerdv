@@ -5,7 +5,7 @@ import {
   _invalidateAllUserTokens,
   _trackUserToken,
 } from '../../lib/jwt-auth-middleware.js';
-import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../../lib/supabase.js';
+import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../../lib/_supabase.js';
 import { validatePassword } from '../../lib/password-validator.js';
 import { securityLogger, SecurityEventType, getClientIP } from '../../lib/security-logger.js';
 import { storage } from '../../storage.js';
@@ -59,9 +59,9 @@ router.post('/login', async (req, res) => {
     // First, check if user already has active sessions
     const {
       data: { user: existingUser },
-    } = await supabase.auth.getUser();
+    } = await _supabase.auth.getUser();
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await _supabase.auth.signInWithPassword({
   _email,
   _password,
     });
@@ -77,7 +77,7 @@ router.post('/login', async (req, res) => {
         success: false,
         details: { reason: error.message },
       });
-      return res.status(401).json({ message: error.message }); }
+      return res.*);
     }
 
     // Invalidate all previous tokens for this user
@@ -132,7 +132,7 @@ router.post('/login', async (req, res) => {
       session: data.session,
     });
   } catch (error) {
-    console.error('Login error:', error: unknown);
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Login failed' });
   }
 });
@@ -152,7 +152,7 @@ router.post('/register', async (req, res) => {
     }
 
     const _supabase = createServerSupabaseClient();
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await _supabase.auth.signUp({
   _email,
   _password,
       options: {
@@ -163,7 +163,7 @@ router.post('/register', async (req, res) => {
     });
 
     if (error) {
-      return res.status(400).json({ message: error.message }); }
+      return res.*);
     }
 
     res.json({
@@ -171,7 +171,7 @@ router.post('/register', async (req, res) => {
       session: data.session,
     });
   } catch (error) {
-    console.error('Register error:', error: unknown);
+    console.error('Register error:', error);
     res.status(500).json({ message: 'Registration failed' });
   }
 });
@@ -180,15 +180,15 @@ router.post('/register', async (req, res) => {
 router.post('/logout', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const _supabase = createServerSupabaseClient();
-    const { error } = await supabase.auth.signOut();
+    const { error } = await _supabase.auth.signOut();
 
     if (error) {
-      return res.status(400).json({ message: error.message }); }
+      return res.*);
     }
 
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
-    console.error('Logout error:', error: unknown);
+    console.error('Logout error:', error);
     res.status(500).json({ message: 'Logout failed' });
   }
 });
@@ -232,7 +232,7 @@ router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequ
 
     // Step 1: Verify current password
     const _supabase = createServerSupabaseClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error: signInError } = await _supabase.auth.signInWithPassword({
       email: req.user.email,
       password: currentPassword,
     });
@@ -290,7 +290,7 @@ router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequ
       requiresRelogin: true,
     });
   } catch (error) {
-    console.error('Change password error:', error: unknown);
+    console.error('Change password error:', error);
     res.status(500).json({ message: 'Erro ao alterar senha' });
   }
 });
@@ -311,7 +311,7 @@ router.post('/forgot-password', async (req, res) => {
 
     // Always return the same message regardless of whether the email exists
     // This prevents user enumeration attacks
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await _supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:5000'}/reset-password`,
     });
 
@@ -335,7 +335,7 @@ router.post('/forgot-password', async (req, res) => {
         'Se o email existe em nosso sistema, você receberá instruções para redefinir sua senha.',
     });
   } catch (error) {
-    console.error('Password reset error:', error: unknown);
+    console.error('Password reset error:', error);
     res.status(500).json({ message: 'Erro ao processar solicitação' });
   }
 });
@@ -345,7 +345,7 @@ router.post('/forgot-password', async (req, res) => {
 router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
-      return res.status(401).json({ message: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     const _sessions = await storage.getUserSessions(req.user.id);
@@ -366,7 +366,7 @@ router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 
     res.json({ sessions: formattedSessions });
   } catch (error) {
-    console.error('Error fetching user sessions:', error: unknown);
+    console.error('Error fetching user sessions:', error);
     res.status(500).json({ message: 'Erro ao buscar sessões' });
   }
 });
@@ -376,7 +376,7 @@ router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
-      return res.status(401).json({ message: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     const { sessionId } = req.params;
@@ -386,7 +386,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Authenticat
     const _sessionToDelete = sessions.find((s) => s.id == sessionId);
 
     if (!sessionToDelete) {
-      return res.status(404).json({ message: 'Sessão não encontrada' }); }
+      return res.*);
     }
 
     // Delete the session
@@ -416,7 +416,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Authenticat
 
     res.json({ message: 'Sessão encerrada com sucesso' });
   } catch (error) {
-    console.error('Error deleting session:', error: unknown);
+    console.error('Error deleting session:', error);
     res.status(500).json({ message: 'Erro ao encerrar sessão' });
   }
 });
@@ -426,7 +426,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Authenticat
 router.get('/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     res.json({
@@ -437,7 +437,7 @@ router.get('/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       loja_id: req.user.loja_id,
     });
   } catch (error) {
-    console.error('Error fetching user profile:', error: unknown);
+    console.error('Error fetching user profile:', error);
     res.status(500).json({ message: 'Erro interno do servidor' });
   }
 });

@@ -9,13 +9,13 @@ import { Router } from 'express';
 import { ProposalController } from '../../contexts/proposal/presentation/proposalController.js';
 
 // Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
-const _auth = async (req, res: unknown, next: unknown) => {
+const _auth = async (req, res: unknown, next) => {
   try {
     // Import dinâmico do middleware RLS - RETURN Promise não await
     const { rlsAuthMiddleware } = await import('../../lib/rls-setup.js');
     return rlsAuthMiddleware(req, res, next); // ← RETURN não AWAIT
   } catch (error) {
-    console.error('[RLS WRAPPER] Error in auth middleware:', error: unknown);
+    console.error('[RLS WRAPPER] Error in auth middleware:', error);
     next(error);
   }
 };
@@ -26,37 +26,37 @@ const _controller = new ProposalController();
 // ==== ROTAS PRINCIPAIS ====
 
 // GET /api/propostas - Listar propostas
-router.get('/', auth, (req, res: unknown) => controller.list(req, res));
+router.get('/', auth, (req, res) => controller.list(req, res));
 
 // GET /api/propostas/buscar-por-cpf/:cpf - Buscar por CPF (antes do /:id para evitar conflito)
-router.get('/buscar-por-cpf/:cpf', auth, (req, res: unknown) =>
+router.get('/buscar-por-cpf/:cpf', auth, (req, res) =>
   controller.getByCpf(req, res)
 );
 
 // GET /api/propostas/:id - Buscar proposta por ID
-router.get('/:id', auth, (req, res: unknown) => controller.getById(req, res));
+router.get('/:id', auth, (req, res) => controller.getById(req, res));
 
 // POST /api/propostas - Criar nova proposta
-router.post('/', auth, (req, res: unknown) => controller.create(req, res));
+router.post('/', auth, (req, res) => controller.create(req, res));
 
 // PUT /api/propostas/:id/submit - Submeter para análise
-router.put('/:id/submit', auth, (req, res: unknown) =>
+router.put('/:id/submit', auth, (req, res) =>
   controller.submitForAnalysis(req, res)
 );
 
 // PUT /api/propostas/:id/approve - Aprovar proposta
-router.put('/:id/approve', auth, (req, res: unknown) => controller.approve(req, res));
+router.put('/:id/approve', auth, (req, res) => controller.approve(req, res));
 
 // PUT /api/propostas/:id/reject - Rejeitar proposta
-router.put('/:id/reject', auth, (req, res: unknown) => controller.reject(req, res));
+router.put('/:id/reject', auth, (req, res) => controller.reject(req, res));
 
 // ==== ROTAS LEGACY (mantidas temporariamente para compatibilidade) ====
 
 // GET /:id/observacoes - Logs de auditoria (manter original por enquanto)
-router.get('/:id/observacoes', auth, async (req, res: unknown) => {
+router.get('/:id/observacoes', auth, async (req, res) => {
   try {
     const _propostaId = req.params.id;
-    const { createServerSupabaseAdminClient } = await import('../../lib/supabase.js');
+    const { createServerSupabaseAdminClient } = await import('../../lib/_supabase.js');
     const _supabase = createServerSupabaseAdminClient();
 
     const { data: logs, error } = await supabase
@@ -79,8 +79,8 @@ router.get('/:id/observacoes', auth, async (req, res: unknown) => {
       .order('created_at', { ascending: true });
 
     if (error) {
-      console.warn('Erro ao buscar logs de auditoria:', error: unknown);
-      return res.json({ logs: [] }); }
+      console.warn('Erro ao buscar logs de auditoria:', error);
+      return res.*);
     }
 
     const _transformedLogs =
@@ -105,13 +105,13 @@ router.get('/:id/observacoes', auth, async (req, res: unknown) => {
       total: transformedLogs.length,
     });
   } catch (error) {
-    console.error('Error fetching proposal audit logs:', error: unknown);
+    console.error('Error fetching proposal audit logs:', error);
     res.json({ logs: [] });
   }
 });
 
 // PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
-router.put('/:id/status', auth, async (req, res: unknown) => {
+router.put('/:id/status', auth, async (req, res) => {
   const { status } = req.body;
 
   // Mapear para os novos endpoints baseado no status

@@ -6,7 +6,7 @@
  * @module scripts/check-products-tac
  */
 
-import { db } from '../server/lib/supabase.js';
+import { db } from '../server/lib/_supabase.js';
 import { produtos } from '../shared/schema.js';
 
 async function checkProductsTac() {

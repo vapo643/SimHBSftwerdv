@@ -41,7 +41,7 @@ export default function SessoesAtivas() {
     queryFn: async () => {
       const _response = await fetch('/api/auth/sessions', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+          Authorization: `Bearer ${localStorage.getItem('_supabase.auth.token')}`,
         },
       });
       if (!response.ok) throw new Error('Erro ao buscar sessões');
@@ -56,7 +56,7 @@ export default function SessoesAtivas() {
       const _response = await fetch(`/api/auth/sessions/${sessionId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+          Authorization: `Bearer ${localStorage.getItem('_supabase.auth.token')}`,
         },
       });
       if (!response.ok) throw new Error('Erro ao encerrar sessão');

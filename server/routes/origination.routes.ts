@@ -58,7 +58,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     // 1. Get authenticated user with their store and partner data
     const _userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({ message: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     // Fetch user profile with store and partner information using Supabase client
@@ -74,7 +74,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
     if (profileError || !profileData) {
       console.error('Profile fetch error:', profileError);
-      return res.status(404).json({ message: 'Perfil do usuário não encontrado' }); }
+      return res.*);
     }
 
     // CRITICAL FIX: Handle users without stores gracefully (e.g. ANALISTA role)
@@ -117,7 +117,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
     if (lojaError || !lojaData) {
       console.error('Loja fetch error:', lojaError);
-      return res.status(404).json({ message: 'Loja não encontrada' }); }
+      return res.*);
     }
 
     // Fix: parceiros should be a single object, not an array
@@ -286,7 +286,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     );
     res.json(context);
   } catch (error) {
-    console.error('Erro ao buscar contexto de originação:', error: unknown);
+    console.error('Erro ao buscar contexto de originação:', error);
     res.status(500).json({
       message: 'Erro ao buscar dados de originação',
       error:

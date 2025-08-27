@@ -12,6 +12,18 @@
     "node": true,
     "jest": true
   },
+  "globals": {
+    "console": "readonly",
+    "process": "readonly",
+    "setTimeout": "readonly",
+    "clearTimeout": "readonly",
+    "setInterval": "readonly",
+    "clearInterval": "readonly",
+    "Buffer": "readonly",
+    "global": "readonly",
+    "__dirname": "readonly",
+    "__filename": "readonly"
+  },
   "rules": {},
   "ignorePatterns": [
     "node_modules/",

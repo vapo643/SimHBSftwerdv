@@ -106,7 +106,7 @@ import { registerRoutes } from './routes';
       log('📦 Checking storage buckets...');
 
       // Check existing buckets
-      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      const { data: buckets, error: listError } = await _supabase.storage.listBuckets();
 
       if (listError) {
         log('⚠️ Could not list buckets:', listError.message);
@@ -123,7 +123,7 @@ import { registerRoutes } from './routes';
 
           // Delete the public bucket
           log('🗑️ Deleting public bucket...');
-          const { error: deleteError } = await supabase.storage.deleteBucket('documents');
+          const { error: deleteError } = await _supabase.storage.deleteBucket('documents');
           if (deleteError) {
             log('❌ Could not delete bucket:', deleteError.message);
             return;
@@ -138,7 +138,7 @@ import { registerRoutes } from './routes';
       // Delete existing public bucket if it exists (to recreate as private)
       if (documentsExists) {
         log('🗑️ Deleting existing public bucket to recreate as private...');
-        const { error: deleteError } = await supabase.storage.deleteBucket('documents');
+        const { error: deleteError } = await _supabase.storage.deleteBucket('documents');
         if (deleteError) {
           log('⚠️ Could not delete bucket:', deleteError.message);
         }
@@ -146,7 +146,7 @@ import { registerRoutes } from './routes';
 
       // Create documents bucket AS PRIVATE
       log('🔨 Creating PRIVATE storage bucket "documents"...');
-      const { data: bucket, error: createError } = await supabase.storage.createBucket(
+      const { data: bucket, error: createError } = await _supabase.storage.createBucket(
         'documents',
         {
           public: false, // PRIVATE bucket for security

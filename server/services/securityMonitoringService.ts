@@ -188,7 +188,7 @@ class SecurityMonitoringService {
       this.setCachedData(cacheKey, metrics);
       return metrics; }
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error getting metrics:', error: unknown);
+      console.error('[SECURITY MONITORING] Error getting metrics:', error);
       throw error;
     }
   }
@@ -213,7 +213,7 @@ class SecurityMonitoringService {
       // }); // FIXED: Security log insertion disabled
       console.log('[SECURITY MONITORING] Event logged:', event);
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error recording event:', error: unknown);
+      console.error('[SECURITY MONITORING] Error recording event:', error);
     }
   }
 
@@ -228,7 +228,7 @@ class SecurityMonitoringService {
 
       return alerts; }
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error getting alerts:', error: unknown);
+      console.error('[SECURITY MONITORING] Error getting alerts:', error);
       return []; }
     }
   }
@@ -265,7 +265,7 @@ class SecurityMonitoringService {
     return null; }
   }
 
-  private setCachedData(key: string, data: unknown): void {
+  private setCachedData(key: string, data): void {
     this.metricsCache.set(key, {
   _data,
       timestamp: Date.now(),

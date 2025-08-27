@@ -73,7 +73,7 @@ export class ProposalController {
         data: result,
       });
     } catch (error) {
-      console.error('[ProposalController.create] Error:', error: unknown);
+      console.error('[ProposalController.create] Error:', error);
 
       // Tratar erros de validação do domínio
       if (
@@ -136,10 +136,10 @@ export class ProposalController {
 
       return res.json({
         success: true,
-  _data,
+        _data,
       });
     } catch (error) {
-      console.error('[ProposalController.getById] Error:', error: unknown);
+      console.error('[ProposalController.getById] Error:', error);
 
       return res.status(500).json({
         success: false,
@@ -191,11 +191,11 @@ export class ProposalController {
 
       return res.json({
         success: true,
-  _data,
+        _data,
         total: data.length,
       });
     } catch (error) {
-      console.error('[ProposalController.list] Error:', error: unknown);
+      console.error('[ProposalController.list] Error:', error);
 
       return res.status(500).json({
         success: false,
@@ -224,8 +224,8 @@ export class ProposalController {
 
       await useCase.execute({
         proposalId: id,
-  _analistaId,
-  _observacoes,
+        _analistaId,
+        _observacoes,
       });
 
       return res.json({
@@ -233,7 +233,7 @@ export class ProposalController {
         message: 'Proposta aprovada com sucesso',
       });
     } catch (error) {
-      console.error('[ProposalController.approve] Error:', error: unknown);
+      console.error('[ProposalController.approve] Error:', error);
 
       if (error.message.includes('não encontrada')) {
         return res.status(404).json({
@@ -286,8 +286,8 @@ export class ProposalController {
 
       await useCase.execute({
         proposalId: id,
-  _analistaId,
-  _motivo,
+        _analistaId,
+        _motivo,
       });
 
       return res.json({
@@ -295,7 +295,7 @@ export class ProposalController {
         message: 'Proposta rejeitada',
       });
     } catch (error) {
-      console.error('[ProposalController.reject] Error:', error: unknown);
+      console.error('[ProposalController.reject] Error:', error);
 
       if (error.message.includes('não encontrada')) {
         return res.status(404).json({
@@ -356,7 +356,7 @@ export class ProposalController {
         },
       });
     } catch (error) {
-      console.error('[ProposalController.getByCpf] Error:', error: unknown);
+      console.error('[ProposalController.getByCpf] Error:', error);
 
       return res.status(500).json({
         success: false,
@@ -392,7 +392,7 @@ export class ProposalController {
         message: 'Proposta submetida para análise',
       });
     } catch (error) {
-      console.error('[ProposalController.submitForAnalysis] Error:', error: unknown);
+      console.error('[ProposalController.submitForAnalysis] Error:', error);
 
       if (error.message.includes('Apenas propostas em rascunho')) {
         return res.status(400).json({

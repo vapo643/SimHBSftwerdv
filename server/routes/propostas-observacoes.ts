@@ -12,7 +12,7 @@ export const _getPropostaObservacoes = async (req: Request, res: Response) => {
 
     res.json(observacoes);
   } catch (error) {
-    console.error('Error fetching proposal observations:', error: unknown);
+    console.error('Error fetching proposal observations:', error);
     res.status(500).json({ error: 'Failed to fetch observations' });
   }
 };

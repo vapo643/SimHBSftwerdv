@@ -34,8 +34,7 @@ export const _queryKeys = {
       [...queryKeys.stores.lists(), { filters }] as const,
     details: () => [...queryKeys.stores.all, 'detail'] as const,
     detail: (id) => [...queryKeys.stores.details(), id] as const,
-    byPartner: (partnerId) =>
-      [...queryKeys.stores.all, 'byPartner', partnerId] as const,
+    byPartner: (partnerId) => [...queryKeys.stores.all, 'byPartner', partnerId] as const,
   },
 
   // System metadata query keys

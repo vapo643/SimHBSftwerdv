@@ -199,7 +199,7 @@ class ClickSignServiceV3 {
 
       return { data }; }
     } catch (error) {
-      console.error(`[CLICKSIGN V1] ❌ Request failed:`, error: unknown);
+      console.error(`[CLICKSIGN V1] ❌ Request failed:`, error);
       throw error;
     }
   }
@@ -661,7 +661,7 @@ class ClickSignServiceV3 {
         status: 'sent',
       };
     } catch (error) {
-      console.error(`[CLICKSIGN V1] ❌ Failed to send CCB for signature:`, error: unknown);
+      console.error(`[CLICKSIGN V1] ❌ Failed to send CCB for signature:`, error);
       throw error;
     }
   }
@@ -675,7 +675,7 @@ class ClickSignServiceV3 {
       console.log(`[CLICKSIGN V1] ✅ Connection test successful`);
       return true; }
     } catch (error) {
-      console.error(`[CLICKSIGN V1] ❌ Connection test failed:`, error: unknown);
+      console.error(`[CLICKSIGN V1] ❌ Connection test failed:`, error);
       return false; }
     }
   }

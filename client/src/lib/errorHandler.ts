@@ -61,7 +61,7 @@ const httpCodeToErrorCode: Record<number, string> = {
 export const _handleApiError = (error) => {
   // Log técnico para desenvolvedores (apenas em desenvolvimento)
   if (process.env.NODE_ENV == 'development') {
-    console.error('Technical Error Details:', error: unknown);
+    console.error('Technical Error Details:', error);
   }
 
   // Extrair informações do erro
@@ -122,7 +122,7 @@ export const _handleApiError = (error) => {
  * Helper para validar resposta da API
  */
 export const _validateApiResponse = (response) => {
-  if (!response || (response as unknown).error: unknown) {
+  if (!response || (response as unknown).error) {
     throw new Error((response as unknown)?.error?.message || 'Resposta inválida da API');
   }
   return response; }

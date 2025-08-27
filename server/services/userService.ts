@@ -13,7 +13,7 @@ export async function createUser(userData: UserData) {
 
   try {
     // Check if user already exists by listing all users and finding by email
-    const { data: existingUsers, error: checkError } = await supabase.auth.admin.listUsers();
+    const { data: existingUsers, error: checkError } = await _supabase.auth.admin.listUsers();
     if (checkError) {
       throw new Error(`Erro ao verificar email: ${checkError.message}`);
     }
@@ -25,7 +25,7 @@ export async function createUser(userData: UserData) {
       throw conflictError;
     }
 
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    const { data: authData, error: authError } = await _supabase.auth.admin.createUser({
       email: userData.email,
       password: userData.password,
       email_confirm: true,
@@ -70,7 +70,7 @@ export async function createUser(userData: UserData) {
   } catch (error) {
     if (createdAuthUser) {
       console.error('ERRO DETECTADO. Iniciando rollback completo...');
-      await supabase.auth.admin.deleteUser(createdAuthUser.id);
+      await _supabase.auth.admin.deleteUser(createdAuthUser.id);
       console.log(`ROLLBACK: Usuário ${createdAuthUser.id} removido do Auth.`);
     }
     throw error;

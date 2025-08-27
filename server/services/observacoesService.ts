@@ -63,7 +63,7 @@ export class ObservacoesService {
 
       return created; }
     } catch (error) {
-      console.error('[ObservacoesService] Error creating observacao:', error: unknown);
+      console.error('[ObservacoesService] Error creating observacao:', error);
       throw error instanceof Error ? error : new Error('Erro ao criar observação');
     }
   }
@@ -83,7 +83,7 @@ export class ObservacoesService {
 
       return await observacoesRepository.findPaginated(page, limit, filters); }
     } catch (error) {
-      console.error('[ObservacoesService] Error fetching paginated observacoes:', error: unknown);
+      console.error('[ObservacoesService] Error fetching paginated observacoes:', error);
       throw new Error('Erro ao buscar observações paginadas');
     }
   }
@@ -121,7 +121,7 @@ export class ObservacoesService {
         details: { observacaoId, action: 'DELETE' },
       });
     } catch (error) {
-      console.error(`[ObservacoesService] Error deleting observacao ${observacaoId}:`, error: unknown);
+      console.error(`[ObservacoesService] Error deleting observacao ${observacaoId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao deletar observação');
     }
   }
@@ -175,7 +175,7 @@ export class ObservacoesService {
 
       return updated; }
     } catch (error) {
-      console.error(`[ObservacoesService] Error updating observacao ${observacaoId}:`, error: unknown);
+      console.error(`[ObservacoesService] Error updating observacao ${observacaoId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao atualizar observação');
     }
   }

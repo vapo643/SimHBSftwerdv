@@ -26,7 +26,7 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
       const {
         data: { user },
   _error,
-      } = await this.supabase.auth.getUser(token);
+      } = await this._supabase.auth.getUser(token);
 
       if (error || !user) {
         return {

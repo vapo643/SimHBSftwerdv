@@ -96,7 +96,7 @@ const UsuariosPage: React.FC = () => {
       setSelectedUser(null);
     },
     onError: (error) => {
-      console.error('❌ [USER CREATE ERROR]:', error: unknown);
+      console.error('❌ [USER CREATE ERROR]:', error);
       console.error('❌ [ERROR DATA]:', error.data);
 
       // Handle password validation errors specifically - use error.data from ApiError

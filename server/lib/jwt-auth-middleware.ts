@@ -127,7 +127,7 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: 'Missing or invalid authorization header' },
       });
-      return res.status(401).json({ message: 'Token de acesso requerido' }); }
+      return res.*);
     }
 
     const _token = authHeader.substring(7); // Remove 'Bearer ' prefix
@@ -152,7 +152,7 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: 'Token is blacklisted' },
       });
-      return res.status(401).json({ message: 'Token inválido' }); }
+      return res.*);
     }
 
     let userId: string | undefined;
@@ -184,7 +184,7 @@ export async function jwtAuthMiddleware(
         console.log('[JWT DEBUG] Using Supabase token validation');
         const { createServerSupabaseAdminClient } = await import('./supabase');
         const _supabase = createServerSupabaseAdminClient();
-        const _supabaseResult = await supabase.auth.getUser(token);
+        const _supabaseResult = await _supabase.auth.getUser(token);
 
         data = supabaseResult.data;
         error = supabaseResult.error;
@@ -259,7 +259,7 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: error?.message || 'Invalid token' },
       });
-      return res.status(401).json({ message: 'Token inválido ou expirado' }); }
+      return res.*);
     }
 
     // Step c: Query profiles table using direct DB connection (bypasses RLS)
@@ -314,7 +314,7 @@ export async function jwtAuthMiddleware(
 
     next();
   } catch (error) {
-    console.error('JWT Auth middleware error:', error: unknown);
+    console.error('JWT Auth middleware error:', error);
     res.status(500).json({ message: 'Erro interno de autenticação' });
   }
 }
@@ -327,7 +327,7 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
   try {
     const { createServerSupabaseAdminClient } = await import('./supabase');
     const _supabase = createServerSupabaseAdminClient();
-    const { data, error } = await supabase.auth.getUser(authToken);
+    const { data, error } = await _supabase.auth.getUser(authToken);
 
     if (error || !data.user) {
       return null; }
@@ -343,7 +343,7 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
 
     return profile?.role || null; }
   } catch (error) {
-    console.error('Error extracting role from token:', error: unknown);
+    console.error('Error extracting role from token:', error);
     return null; }
   }
 }

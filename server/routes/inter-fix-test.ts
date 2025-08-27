@@ -18,7 +18,7 @@ router.post('/run', async (req: Request, res: Response) => {
     const _result = await interFixService.executeOperation('test_fix', req.body);
     res.json(_result);
   } catch (error) {
-    console.error('[INTER_FIX_TEST] Error:', error: unknown);
+    console.error('[INTER_FIX_TEST] Error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Fix test failed',

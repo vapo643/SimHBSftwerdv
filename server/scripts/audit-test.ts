@@ -212,5 +212,5 @@ async function executarAuditoria() {
 
 // Aguardar servidor estar pronto e executar
 setTimeout(() => {
-  executarAuditoria().catch(console.error: unknown);
+  executarAuditoria().catch(console.error);
 }, 3000);

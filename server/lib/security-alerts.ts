@@ -109,7 +109,7 @@ export class SecurityMonitor {
         this.checkAuthenticationAnomalies(),
       ]);
     } catch (error) {
-      console.error('[SECURITY MONITOR] Error running checks:', error: unknown);
+      console.error('[SECURITY MONITOR] Error running checks:', error);
     }
   }
 

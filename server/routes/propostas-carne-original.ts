@@ -52,7 +52,7 @@ router.post(
         .single();
 
       if (error || !proposta) {
-        console.error(`[CARNE API - PRODUCER] ❌ Proposta não encontrada: ${id}`, error: unknown);
+        console.error(`[CARNE API - PRODUCER] ❌ Proposta não encontrada: ${id}`, error);
         return res.status(404).json({
           error: 'Proposta não encontrada',
         });
@@ -71,7 +71,7 @@ router.post(
         `[PAM V1.0 DIAGNÓSTICO] 🔍 /gerar-carne CAMINHO_EXATO: "${gearCarneStoragePath}"`
       );
 
-      const { data: existingFiles, error: listError } = await supabase.storage
+      const { data: existingFiles, error: listError } = await _supabase.storage
         .from('documents')
         .list(gearCarneStoragePath, {
           limit: 1,
@@ -109,7 +109,7 @@ router.post(
         );
 
         // Gerar URL assinada para o carnê existente
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
           .from('documents')
           .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -157,7 +157,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error(`[CARNE API - PRODUCER] ❌ Erro ao solicitar carnê:`, error: unknown);
+      console.error(`[CARNE API - PRODUCER] ❌ Erro ao solicitar carnê:`, error);
       return res.status(500).json({
         error: 'Erro ao solicitar geração de carnê',
         message: error.message || 'Erro desconhecido',
@@ -239,7 +239,7 @@ router.get(
       // Enviar PDF diretamente
       res.send(pdfBuffer);
     } catch (error) {
-      console.error(`[CARNE API] ❌ Erro no download direto:`, error: unknown);
+      console.error(`[CARNE API] ❌ Erro no download direto:`, error);
 
       return res.status(500).json({
         error: 'Erro ao baixar carnê',
@@ -321,7 +321,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error(`[BOLETO SYNC API - PRODUCER] ❌ Erro ao solicitar sincronização:`, error: unknown);
+      console.error(`[BOLETO SYNC API - PRODUCER] ❌ Erro ao solicitar sincronização:`, error);
       return res.status(500).json({
         error: 'Erro ao solicitar sincronização',
         message: error.message || 'Erro desconhecido',

@@ -21,7 +21,7 @@ router.get('/teste', async (req, res) => {
     const _resultado = await alertasProativosService.testarServico();
     res.json(resultado);
   } catch (error) {
-    console.error('[ALERTAS TESTE] Erro:', error: unknown);
+    console.error('[ALERTAS TESTE] Erro:', error);
     res.status(500).json({
       sucesso: false,
       mensagem: 'Erro ao testar serviço de alertas',
@@ -49,7 +49,7 @@ router.post('/executar', jwtAuthMiddleware, async (req, res) => {
 
     // Executar verificação em background
     alertasProativosService.executarVerificacaoDiaria().catch((error) => {
-      console.error('[ALERTAS] Erro na execução manual:', error: unknown);
+      console.error('[ALERTAS] Erro na execução manual:', error);
     });
 
     res.json({
@@ -57,7 +57,7 @@ router.post('/executar', jwtAuthMiddleware, async (req, res) => {
       message: 'Verificação de alertas iniciada em background',
     });
   } catch (error) {
-    console.error('[ALERTAS EXECUTAR] Erro:', error: unknown);
+    console.error('[ALERTAS EXECUTAR] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao iniciar verificação de alertas',
@@ -124,7 +124,7 @@ router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
       totalNaoLidas: naoLidas || 0,
     });
   } catch (error) {
-    console.error('[ALERTAS NOTIFICACOES] Erro:', error: unknown);
+    console.error('[ALERTAS NOTIFICACOES] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao buscar notificações',
@@ -172,7 +172,7 @@ router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req, res)
     console.log(`[ALERTAS] Notificação ${id} marcada como lida para usuário ${userEmail}`);
     res.json({ success: true });
   } catch (error) {
-    console.error('[ALERTAS MARCAR LIDA] Erro:', error: unknown);
+    console.error('[ALERTAS MARCAR LIDA] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao marcar notificação como lida',
@@ -225,7 +225,7 @@ router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req, r
       count: resultado.length,
     });
   } catch (error) {
-    console.error('[ALERTAS MARCAR TODAS] Erro:', error: unknown);
+    console.error('[ALERTAS MARCAR TODAS] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao marcar todas as notificações como lidas',
@@ -280,7 +280,7 @@ router.delete('/notificacoes/all', jwtAuthMiddleware, async (req, res) => {
       notificacoesArquivadas: resultado.length,
     });
   } catch (error) {
-    console.error('[ALERTAS LIMPAR HISTÓRICO] Erro:', error: unknown);
+    console.error('[ALERTAS LIMPAR HISTÓRICO] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao limpar histórico de notificações',
@@ -307,7 +307,7 @@ router.get('/regras', jwtAuthMiddleware, async (req, res) => {
 
     res.json(regras);
   } catch (error) {
-    console.error('[ALERTAS REGRAS] Erro:', error: unknown);
+    console.error('[ALERTAS REGRAS] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao buscar regras de alertas',
@@ -348,7 +348,7 @@ router.get('/historico', jwtAuthMiddleware, async (req, res) => {
 
     res.json(historico);
   } catch (error) {
-    console.error('[ALERTAS HISTORICO] Erro:', error: unknown);
+    console.error('[ALERTAS HISTORICO] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao buscar histórico de execuções',

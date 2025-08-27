@@ -30,7 +30,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     const _boletosPath = `propostas/${id}/boletos/`;
 
     // Listar todos os boletos existentes
-    const { data: boletosFiles, error: listError } = await supabase.storage
+    const { data: boletosFiles, error: listError } = await _supabase.storage
       .from('documents')
       .list(boletosPath, {
         limit: 100,
@@ -53,7 +53,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
       if (filesToDelete.length > 0) {
         console.log(`[CORRIGIR SYNC] Deletando ${filesToDelete.length} boletos existentes`);
 
-        const { error: deleteError } = await supabase.storage
+        const { error: deleteError } = await _supabase.storage
           .from('documents')
           .remove(filesToDelete);
 
@@ -69,7 +69,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     // Passo 2: Deletar carnês existentes
     const _carnePath = `propostas/${id}/carnes/`;
 
-    const { data: carneFiles, error: carneListError } = await supabase.storage
+    const { data: carneFiles, error: carneListError } = await _supabase.storage
       .from('documents')
       .list(carnePath, {
         limit: 10,
@@ -84,7 +84,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
       if (carnesToDelete.length > 0) {
         console.log(`[CORRIGIR SYNC] Deletando ${carnesToDelete.length} carnês existentes`);
 
-        const { error: deleteCarneError } = await supabase.storage
+        const { error: deleteCarneError } = await _supabase.storage
           .from('documents')
           .remove(carnesToDelete);
 
@@ -114,7 +114,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
       filesDeleted: (boletosFiles?.length || 0) + (carneFiles?.length || 0),
     });
   } catch (error) {
-    console.error('[CORRIGIR SYNC] Erro:', error: unknown);
+    console.error('[CORRIGIR SYNC] Erro:', error);
     return res.status(500).json({
       error: 'Erro ao corrigir sincronização',
       details: error instanceof Error ? error.message : 'Erro desconhecido',

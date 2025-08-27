@@ -59,7 +59,7 @@ export async function rlsAuthMiddleware(
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log(`[RLS MIDDLEWARE] ❌ No valid auth header for ${req.method} ${req.url}`);
-      return res.status(401).json({ message: 'No token provided' }); }
+      return res.*);
     }
 
     const _token = authHeader.split(' ')[1];
@@ -84,9 +84,9 @@ export async function rlsAuthMiddleware(
         // Cast to any to avoid type conflicts in test environment
         const _testReq = req as unknown;
 
-        return jwtAuthMiddleware(testReq, res, async (err?: unknown) => {
+        return jwtAuthMiddleware(testReq, res, async (err?) => {
           if (err) {
-            return res.status(401).json({ message: 'Invalid test token' }); }
+            return res.*);
           }
 
           // After JWT validation, set RLS context using test data
@@ -112,15 +112,15 @@ export async function rlsAuthMiddleware(
               next();
             } catch (rlsError) {
               console.error('[RLS TEST] Failed to set RLS context:', rlsError);
-              return res.status(500).json({ message: 'Failed to set security context' }); }
+              return res.*);
             }
           } else {
-            return res.status(401).json({ message: 'Test user data missing' }); }
+            return res.*);
           }
         });
       } catch (importError) {
         console.error('[RLS TEST] Failed to import JWT middleware:', importError);
-        return res.status(500).json({ message: 'Authentication system error' }); }
+        return res.*);
       }
     }
 
@@ -134,7 +134,7 @@ export async function rlsAuthMiddleware(
     } = await supabaseClient.auth.getUser(token);
 
     if (error || !user) {
-      return res.status(401).json({ message: 'Invalid token' }); }
+      return res.*);
     }
 
     // Get user's loja_id from database (using profiles table)
@@ -158,7 +158,7 @@ export async function rlsAuthMiddleware(
 
     if (!userRecord.length) {
       console.log(`[RLS DEBUG] ❌ No profile found for user ${user.id}`);
-      return res.status(401).json({ message: 'User not found in system' }); }
+      return res.*);
     }
 
     const _userData = userRecord[0];
@@ -183,8 +183,8 @@ export async function rlsAuthMiddleware(
 
     next();
   } catch (error) {
-    console.error('RLS Auth middleware error:', error: unknown);
-    return res.status(401).json({ message: 'Authentication failed' }); }
+    console.error('RLS Auth middleware error:', error);
+    return res.*);
   }
 }
 

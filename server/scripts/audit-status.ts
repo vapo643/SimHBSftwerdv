@@ -98,13 +98,13 @@ async function main() {
 
     console.log(`\n🏁 ==== AUDITORIA CONCLUÍDA ====\n`);
   } catch (error) {
-    console.error('❌ Erro durante a auditoria:', error: unknown);
+    console.error('❌ Erro durante a auditoria:', error);
     process.exit(1);
   }
 }
 
 // Executar função principal e capturar erros
 main().catch((error) => {
-  console.error('💥 Falha crítica na auditoria:', error: unknown);
+  console.error('💥 Falha crítica na auditoria:', error);
   process.exit(1);
 });

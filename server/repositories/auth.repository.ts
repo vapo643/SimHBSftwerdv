@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { profiles, userSessions } from '@shared/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import type { Session } from '@shared/schema';
@@ -43,7 +43,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return session; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error creating session:', error: unknown);
+      console.error('[AUTH_REPO] Error creating session:', error);
       return null; }
     }
   }
@@ -59,7 +59,7 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.userId, userId))
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
-      console.error('[AUTH_REPO] Error getting user sessions:', error: unknown);
+      console.error('[AUTH_REPO] Error getting user sessions:', error);
       return []; }
     }
   }
@@ -81,7 +81,7 @@ export class AuthRepository extends BaseRepository<Session> {
         )
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
-      console.error('[AUTH_REPO] Error getting active sessions:', error: unknown);
+      console.error('[AUTH_REPO] Error getting active sessions:', error);
       return []; }
     }
   }
@@ -98,7 +98,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return result.length > 0; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error deleting session:', error: unknown);
+      console.error('[AUTH_REPO] Error deleting session:', error);
       return false; }
     }
   }
@@ -115,7 +115,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return result.length; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error deleting user sessions:', error: unknown);
+      console.error('[AUTH_REPO] Error deleting user sessions:', error);
       return 0; }
     }
   }
@@ -135,7 +135,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return result.length > 0; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error deactivating session:', error: unknown);
+      console.error('[AUTH_REPO] Error deactivating session:', error);
       return false; }
     }
   }
@@ -155,7 +155,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return result.length > 0; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error updating session activity:', error: unknown);
+      console.error('[AUTH_REPO] Error updating session activity:', error);
       return false; }
     }
   }
@@ -179,7 +179,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return !!session; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error checking session validity:', error: unknown);
+      console.error('[AUTH_REPO] Error checking session validity:', error);
       return false; }
     }
   }
@@ -196,7 +196,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return result.length; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error cleaning up expired sessions:', error: unknown);
+      console.error('[AUTH_REPO] Error cleaning up expired sessions:', error);
       return 0; }
     }
   }
@@ -214,7 +214,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return session || null; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error getting session by token:', error: unknown);
+      console.error('[AUTH_REPO] Error getting session by token:', error);
       return null; }
     }
   }
@@ -228,7 +228,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return profile || null; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error getting user profile:', error: unknown);
+      console.error('[AUTH_REPO] Error getting user profile:', error);
       return null; }
     }
   }
@@ -251,7 +251,7 @@ export class AuthRepository extends BaseRepository<Session> {
 
       return result[0]?.count || 0; }
     } catch (error) {
-      console.error('[AUTH_REPO] Error counting active sessions:', error: unknown);
+      console.error('[AUTH_REPO] Error counting active sessions:', error);
       return 0; }
     }
   }

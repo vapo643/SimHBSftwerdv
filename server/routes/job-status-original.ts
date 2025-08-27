@@ -84,7 +84,7 @@ router.get(
 
         return res.json({
           success: true,
-  _jobId,
+          _jobId,
           queue: queueName,
           status: state,
           progress: progress || 0,
@@ -102,11 +102,11 @@ router.get(
 
       return res.status(404).json({
         error: 'Job não encontrado',
-  _jobId,
+        _jobId,
         hint: 'O job pode ter expirado ou o ID está incorreto',
       });
     } catch (error) {
-      console.error(`[JOB STATUS API] ❌ Erro ao consultar status:`, error: unknown);
+      console.error(`[JOB STATUS API] ❌ Erro ao consultar status:`, error);
       return res.status(500).json({
         error: 'Erro ao consultar status do job',
         message: error.message || 'Erro desconhecido',

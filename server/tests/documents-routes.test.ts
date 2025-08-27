@@ -62,7 +62,7 @@ describe('Documents Routes Integration Test - PAM V4.0', () => {
   });
 
   describe('🌐 API Endpoint Tests', () => {
-    it('should respond to GET /api/propostas/:id/documents with authentication error (not undefined error: unknown)', async () => {
+    it('should respond to GET /api/propostas/:id/documents with authentication error (not undefined error)', async () => {
       const _response = await request(app)
         .get('/api/propostas/123/documents')
         .expect((res) => {

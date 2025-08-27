@@ -161,7 +161,7 @@ router.post('/test/:propostaId', jwtAuthMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('❌ Erro no teste CCB corrigido:', error: unknown);
+    console.error('❌ Erro no teste CCB corrigido:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -317,7 +317,7 @@ router.post('/validate-proposal/:propostaId', jwtAuthMiddleware, async (req, res
         : '❌ Preencha os campos obrigatórios antes de gerar o CCB',
     });
   } catch (error) {
-    console.error('❌ Erro na validação:', error: unknown);
+    console.error('❌ Erro na validação:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro na validação',

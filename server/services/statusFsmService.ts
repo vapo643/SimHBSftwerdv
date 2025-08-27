@@ -253,7 +253,7 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     }
 
     // Encapsular outros erros
-    console.error(`[FSM] ❌ Erro durante transição:`, error: unknown);
+    console.error(`[FSM] ❌ Erro durante transição:`, error);
     throw new Error(
       `Erro ao processar transição de status: ${
         error instanceof Error ? error.message : 'Erro desconhecido'

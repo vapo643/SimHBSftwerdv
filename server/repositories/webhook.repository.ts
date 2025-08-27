@@ -217,7 +217,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
       .single();
 
     if (error) {
-      console.error('Failed to create webhook log:', error: unknown);
+      console.error('Failed to create webhook log:', error);
       // Non-critical error, don't throw
       return ''; }
     }
@@ -266,7 +266,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
       .limit(1);
 
     if (error) {
-      console.error('Failed to check webhook idempotency:', error: unknown);
+      console.error('Failed to check webhook idempotency:', error);
       return false; }
     }
 

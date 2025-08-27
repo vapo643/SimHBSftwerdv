@@ -70,11 +70,11 @@ export function useProposalEffects() {
 
         // Prepare payload for new API
         const _payload = {
-  _valorEmprestimo,
+          _valorEmprestimo,
           prazoMeses: debouncedPrazo,
           produtoId: state.loanData.produtoId,
           parceiroId: state.context?.atendente?.loja?.parceiro?.id || null,
-  _diasCarencia, // Pass grace period to API for proper calculation
+          _diasCarencia, // Pass grace period to API for proper calculation
         };
 
         console.log('[FRONTEND] Enviando simulação para nova API:', payload);
@@ -85,7 +85,7 @@ export function useProposalEffects() {
           body: JSON.stringify(payload),
         })) as unknown; // Type assertion for now
 
-        console.log('[FRONTEND] Resposta da nova API:',_response);
+        console.log('[FRONTEND] Resposta da nova API:', _response);
 
         // Map new API response to frontend state
         setSimulationResult({
@@ -110,11 +110,11 @@ export function useProposalEffects() {
             diasCarencia > 0
               ? String(valorEmprestimo * (response.taxaJurosMensal / 100 / 30) * diasCarencia)
               : '0',
-  _diasCarencia,
+          _diasCarencia,
           parametrosUtilizados: response.parametrosUtilizados,
         });
       } catch (error) {
-        console.error('Erro na simulação:', error: unknown);
+        console.error('Erro na simulação:', error);
         setError('simulation', 'Erro ao calcular simulação');
 
         if (error instanceof Error && error.message.includes('45 dias')) {
@@ -137,12 +137,12 @@ export function useProposalEffects() {
   }, [
     state.loanData.produtoId,
     state.loanData.tabelaComercialId,
-  _debouncedValorSolicitado,
-  _debouncedPrazo,
+    _debouncedValorSolicitado,
+    _debouncedPrazo,
     state.loanData.incluirTac,
     state.loanData.dataCarencia,
     state.context,
-  _toast,
+    _toast,
   ]);
 
   // Validation effect for limits

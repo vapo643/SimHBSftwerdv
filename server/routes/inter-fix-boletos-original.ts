@@ -28,7 +28,7 @@ router.post(
       const _proposta = queryResult[0];
 
       if (!proposta) {
-        return res.status(404).json({ error: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       console.log(`[INTER FIX] ✅ Proposta encontrada`);
@@ -151,7 +151,7 @@ router.post(
         detalhes: results,
       });
     } catch (error) {
-      console.error('[INTER FIX] ❌ Erro fatal:', error: unknown);
+      console.error('[INTER FIX] ❌ Erro fatal:', error);
       return res.status(500).json({
         error: 'Erro ao regenerar boletos',
         message: error.message,

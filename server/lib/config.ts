@@ -89,8 +89,8 @@ function validateSecrets(): {
 
   return {
     isValid: missing.length == 0,
-  _missing,
-  _warnings,
+    _missing,
+    _warnings,
   };
 }
 
@@ -217,7 +217,7 @@ export function logConfigStatus(): void {
   log(`  - Port: ${_config.port}`);
   log(`  - Environment: ${_config.nodeEnv}`);
   log(`  - Database: ${_config.database.url ? '✅ Connected' : '❌ Not configured'}`);
-  log(`  - Supabase: ${_config.supabase.url ? '✅ Connected' : '❌ Not configured'}`);
+  log(`  - Supabase: ${_config._supabase.url ? '✅ Connected' : '❌ Not configured'}`);
   log(
     `  - Security: Rate Limit ${_config.security.enableRateLimit ? '✅' : '❌'}, Helmet ${_config.security.enableHelmet ? '✅' : '❌'}`
   );

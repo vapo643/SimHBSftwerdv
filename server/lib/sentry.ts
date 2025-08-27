@@ -114,7 +114,7 @@ export function initSentry(app: Express) {
       environment: process.env.NODE_ENV,
     });
   } catch (error) {
-    logError('❌ Failed to initialize Sentry', error: unknown);
+    logError('❌ Failed to initialize Sentry', error);
   }
 }
 
@@ -163,7 +163,7 @@ export function sentryTransactionMiddleware(req: Request, res: Response, next: N
 }
 
 // Helper para capturar exceções manuais
-export function captureException(error: Error, context?: unknown) {
+export function captureException(error: Error, context?) {
   logError('🔴 Capturing exception to Sentry', error, context);
   Sentry.captureException(error, {
     contexts: {
@@ -183,7 +183,7 @@ export function captureMessage(
 }
 
 // Helper para adicionar breadcrumbs
-export function addBreadcrumb(message: string, category: string, data?: unknown) {
+export function addBreadcrumb(message: string, category: string, data?) {
   Sentry.addBreadcrumb({
   _message,
   _category,

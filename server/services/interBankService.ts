@@ -455,7 +455,7 @@ class InterBankService {
       );
       return tokenData.access_token; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to get access token:', error: unknown);
+      console.error('[INTER] ❌ Failed to get access token:', error);
       throw error;
     }
   }
@@ -674,7 +674,7 @@ class InterBankService {
         req.end();
       });
     } catch (error) {
-      console.error(`[INTER] Request failed for ${endpoint}:`, error: unknown);
+      console.error(`[INTER] Request failed for ${endpoint}:`, error);
       throw error;
     }
   }
@@ -713,7 +713,7 @@ class InterBankService {
       console.log('[INTER] ✅ Connection test successful');
       return true; }
     } catch (error) {
-      console.error('[INTER] ❌ Connection test failed:', error: unknown);
+      console.error('[INTER] ❌ Connection test failed:', error);
       return false; }
     }
   }
@@ -743,7 +743,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Collection created successfully: ${response.codigoSolicitacao}`);
       return response; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to create collection:', error: unknown);
+      console.error('[INTER] ❌ Failed to create collection:', error);
       throw error;
     }
   }
@@ -779,7 +779,7 @@ class InterBankService {
 
       return enrichedData; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to retrieve collection:', error: unknown);
+      console.error('[INTER] ❌ Failed to retrieve collection:', error);
       throw error;
     }
   }
@@ -793,7 +793,7 @@ class InterBankService {
       console.log(`[INTER] ⚠️ QR Code generation not implemented yet`);
       return null; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to generate QR code:', error: unknown);
+      console.error('[INTER] ❌ Failed to generate QR code:', error);
       return null; }
     }
   }
@@ -842,7 +842,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Found ${response.totalElementos} collections`);
       return response; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to search collections:', error: unknown);
+      console.error('[INTER] ❌ Failed to search collections:', error);
       throw error;
     }
   }
@@ -873,7 +873,7 @@ class InterBankService {
 
       return response; }
     } catch (error) {
-      console.error('🔍 [AUDIT-INTER] ❌ Erro ao editar cobrança:', error: unknown);
+      console.error('🔍 [AUDIT-INTER] ❌ Erro ao editar cobrança:', error);
       throw error;
     }
   }
@@ -901,7 +901,7 @@ class InterBankService {
 
       return response; }
     } catch (error) {
-      console.error('🔍 [AUDIT-INTER] ❌ Erro ao cancelar cobrança:', error: unknown);
+      console.error('🔍 [AUDIT-INTER] ❌ Erro ao cancelar cobrança:', error);
       throw error;
     }
   }
@@ -1181,7 +1181,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Summary retrieved successfully`);
       return response; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to get summary:', error: unknown);
+      console.error('[INTER] ❌ Failed to get summary:', error);
       throw error;
     }
   }
@@ -1198,7 +1198,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Webhook configured successfully`);
       return response; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to configure webhook:', error: unknown);
+      console.error('[INTER] ❌ Failed to configure webhook:', error);
       throw error;
     }
   }
@@ -1215,7 +1215,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Webhook configuration retrieved`);
       return response; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to get webhook:', error: unknown);
+      console.error('[INTER] ❌ Failed to get webhook:', error);
       throw error;
     }
   }
@@ -1232,7 +1232,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Webhook deleted successfully`);
       return response; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to delete webhook:', error: unknown);
+      console.error('[INTER] ❌ Failed to delete webhook:', error);
       throw error;
     }
   }
@@ -1257,7 +1257,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Payment simulated successfully`);
       return response; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to simulate payment:', error: unknown);
+      console.error('[INTER] ❌ Failed to simulate payment:', error);
       throw error;
     }
   }
@@ -1428,7 +1428,7 @@ class InterBankService {
       console.log(`[INTER] ✅ Collection created for proposal successfully`);
       return result; }
     } catch (error) {
-      console.error('[INTER] ❌ Failed to create collection for proposal:', error: unknown);
+      console.error('[INTER] ❌ Failed to create collection for proposal:', error);
       throw error;
     }
   }

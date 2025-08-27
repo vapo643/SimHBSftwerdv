@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { users, propostas, statusContextuais } from '../../shared/schema.js';
 import { eq, gte, and, count, desc, sql } from 'drizzle-orm';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
@@ -122,7 +122,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
       data: metrics,
     });
   } catch (error) {
-    console.error('[SECURITY MONITORING] Error:', error: unknown);
+    console.error('[SECURITY MONITORING] Error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao obter métricas de segurança',
@@ -158,7 +158,7 @@ router.get('/alerts', async (req: AuthenticatedRequest, res) => {
       data: alerts,
     });
   } catch (error) {
-    console.error('[SECURITY MONITORING] Alerts error:', error: unknown);
+    console.error('[SECURITY MONITORING] Alerts error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao obter alertas',
@@ -202,7 +202,7 @@ router.get('/performance', async (req: AuthenticatedRequest, res) => {
       },
     });
   } catch (error) {
-    console.error('[SECURITY MONITORING] Performance error:', error: unknown);
+    console.error('[SECURITY MONITORING] Performance error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao obter métricas de performance',

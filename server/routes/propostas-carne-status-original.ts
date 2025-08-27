@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { createServerSupabaseAdminClient } from '../lib/_supabase.js';
 import { jwtAuthMiddleware as jwtMiddleware } from '../lib/jwt-auth-middleware.js';
 
 const _router = Router();
@@ -26,7 +26,7 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
     console.log(`[PAM V1.0 DIAGNÓSTICO] 🔧 CORREÇÃO: Usando Admin Client (igual ao /gerar-carne)`);
 
     // Buscar arquivos de carnê no Storage
-    const { data: files, error: listError } = await supabase.storage
+    const { data: files, error: listError } = await _supabase.storage
       .from('documents')
       .list(fullStoragePath, {
         limit: 1,
@@ -52,7 +52,7 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
         `[PAM V1.0 DIAGNÓSTICO] 📤 JSON_ENVIADO_FRONTEND (ERROR):`,
         JSON.stringify(errorResponse, null, 2)
       );
-      return res.json(errorResponse); }
+      return res.*);
     }
 
     if (!files || files.length == 0) {
@@ -68,7 +68,7 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
         `[PAM V1.0 DIAGNÓSTICO] 📤 JSON_ENVIADO_FRONTEND (NO_FILES):`,
         JSON.stringify(noCarneResponse, null, 2)
       );
-      return res.json(noCarneResponse); }
+      return res.*);
     }
 
     // Carnê existe - gerar URL assinada
@@ -78,7 +78,7 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
     console.log(`[CARNE STATUS] ✅ Carnê encontrado: ${fileName}`);
 
     // Gerar URL assinada válida por 1 hora
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
       .from('documents')
       .createSignedUrl(filePath, 3600);
 
@@ -116,9 +116,9 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
       JSON.stringify(successResponse, null, 2)
     );
 
-    return res.json(successResponse); }
+    return res.*);
   } catch (error) {
-    console.error('[CARNE STATUS] ❌ Erro:', error: unknown);
+    console.error('[CARNE STATUS] ❌ Erro:', error);
     return res.status(500).json({
       success: false,
       hasCarnet: false,

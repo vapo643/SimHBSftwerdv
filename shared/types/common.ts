@@ -5,5 +5,5 @@ export type AnyArray = unknown[];
 export type AnyFunction = (...args: unknown[]) => unknown;
 export type ErrorType = Error | unknown;
 export type ApiResponse<T = unknown> = T;
-export type EventHandler = (event: unknown) => void;
+export type EventHandler = (event) => void;
 export type AsyncFunction<T = unknown> = (...args: unknown[]) => Promise<T>;

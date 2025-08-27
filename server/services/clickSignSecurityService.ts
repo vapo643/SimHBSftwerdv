@@ -286,7 +286,7 @@ class ClickSignSecurityService {
 
     // Check for error responses
     if (response.errors && Array.isArray(response.errors)) {
-      const _errors = response.errors.map((e) => e.message || e.error: unknown).join(', ');
+      const _errors = response.errors.map((e) => e.message || e.error).join(', ');
       throw new Error(`ClickSign API errors: ${errors}`);
     }
   }

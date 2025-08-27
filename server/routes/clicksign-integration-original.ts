@@ -9,7 +9,7 @@ import { clickSignServiceV3 } from '../services/clickSignServiceV3.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { createServerSupabaseAdminClient } from '../lib/_supabase.js';
 
 const _router = express.Router();
 
@@ -58,7 +58,7 @@ router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: Authenticated
       });
     }
   } catch (error) {
-    console.error('[CLICKSIGN] ❌ Error testing token:', error: unknown);
+    console.error('[CLICKSIGN] ❌ Error testing token:', error);
     res.status(500).json({
       success: false,
       error: 'Erro interno ao testar token',
@@ -103,7 +103,7 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.status(404).json({ message: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       // Verificar se CCB foi gerado
@@ -158,7 +158,7 @@ router.post(
           .where(eq(propostas.id, propostaId));
 
         // Read the newly generated CCB from Supabase Storage
-        const { data: ccbData, error: downloadError } = await supabase.storage
+        const { data: ccbData, error: downloadError } = await _supabase.storage
           .from('documents')
           .download(ccbPath);
 
@@ -173,7 +173,7 @@ router.post(
       } else {
         // Try to read existing CCB from Supabase Storage
         try {
-          const { data: ccbData, error: downloadError } = await supabase.storage
+          const { data: ccbData, error: downloadError } = await _supabase.storage
             .from('documents')
             .download(proposta.caminhoCcbAssinado);
 
@@ -207,7 +207,7 @@ router.post(
             .where(eq(propostas.id, propostaId));
 
           // Read the newly generated CCB from Supabase Storage
-          const { data: ccbData, error: downloadError } = await supabase.storage
+          const { data: ccbData, error: downloadError } = await _supabase.storage
             .from('documents')
             .download(ccbPath);
 
@@ -256,7 +256,7 @@ router.post(
         message: 'Novo link de assinatura gerado com sucesso',
       });
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Error regenerating signature link:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Error regenerating signature link:', error);
 
       // Tratamento específico para erro de autenticação
       if (error instanceof Error && error.message.includes('401')) {
@@ -322,7 +322,7 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.status(404).json({ message: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       console.log(
@@ -369,7 +369,7 @@ router.post(
       console.log(`[CLICKSIGN] Buscando CCB no caminho: ${ccbPath}`);
 
       // Baixar o CCB do Supabase Storage
-      const { data: ccbFile, error: downloadError } = await supabase.storage
+      const { data: ccbFile, error: downloadError } = await _supabase.storage
         .from('documents')
         .download(ccbPath);
 
@@ -459,7 +459,7 @@ router.post(
         createdAt: getBrasiliaTimestamp(),
       });
     } catch (error) {
-      console.error(`[CLICKSIGN] ❌ Erro ao enviar para ClickSign:`, error: unknown);
+      console.error(`[CLICKSIGN] ❌ Erro ao enviar para ClickSign:`, error);
 
       res.status(500).json({
         message: 'Erro ao enviar contrato para ClickSign',
@@ -498,7 +498,7 @@ router.get(
         .where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.status(404).json({ message: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       if (!proposta.clicksignListKey) {
@@ -533,7 +533,7 @@ router.get(
         });
       }
     } catch (error) {
-      console.error(`[CLICKSIGN] Erro ao consultar status:`, error: unknown);
+      console.error(`[CLICKSIGN] Erro ao consultar status:`, error);
       res.status(500).json({
         message: 'Erro ao consultar status do ClickSign',
       });

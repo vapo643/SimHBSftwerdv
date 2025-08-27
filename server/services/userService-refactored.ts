@@ -19,7 +19,7 @@ export class UserService {
     try {
       return await userRepository.getAllUsersWithAuth(); }
     } catch (error) {
-      console.error('[UserService] Error fetching users:', error: unknown);
+      console.error('[UserService] Error fetching users:', error);
       throw new Error('Erro ao buscar usuários');
     }
   }
@@ -31,7 +31,7 @@ export class UserService {
     try {
       return await userRepository.getUserWithAuth(userId); }
     } catch (error) {
-      console.error(`[UserService] Error fetching user ${userId}:`, error: unknown);
+      console.error(`[UserService] Error fetching user ${userId}:`, error);
       throw new Error('Erro ao buscar usuário');
     }
   }
@@ -77,7 +77,7 @@ export class UserService {
 
       return newUser; }
     } catch (error) {
-      console.error('[UserService] Error creating user:', error: unknown);
+      console.error('[UserService] Error creating user:', error);
       throw error;
     }
   }
@@ -149,7 +149,7 @@ export class UserService {
         message: 'Usuário desativado com sucesso. Todas as sessões foram invalidadas.',
       };
     } catch (error) {
-      console.error(`[UserService] Error deactivating user ${targetUserId}:`, error: unknown);
+      console.error(`[UserService] Error deactivating user ${targetUserId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao desativar usuário');
     }
   }
@@ -206,7 +206,7 @@ export class UserService {
         message: 'Usuário reativado com sucesso.',
       };
     } catch (error) {
-      console.error(`[UserService] Error reactivating user ${targetUserId}:`, error: unknown);
+      console.error(`[UserService] Error reactivating user ${targetUserId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao reativar usuário');
     }
   }
@@ -255,7 +255,7 @@ export class UserService {
 
       return updatedProfile; }
     } catch (error) {
-      console.error(`[UserService] Error updating user ${userId}:`, error: unknown);
+      console.error(`[UserService] Error updating user ${userId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao atualizar usuário');
     }
   }
@@ -267,7 +267,7 @@ export class UserService {
     try {
       return await userRepository.getUsersByRole(role); }
     } catch (error) {
-      console.error(`[UserService] Error fetching users by role ${role}:`, error: unknown);
+      console.error(`[UserService] Error fetching users by role ${role}:`, error);
       throw new Error('Erro ao buscar usuários por perfil');
     }
   }
@@ -279,7 +279,7 @@ export class UserService {
     try {
       return await userRepository.getUsersByLoja(lojaId); }
     } catch (error) {
-      console.error(`[UserService] Error fetching users by loja ${lojaId}:`, error: unknown);
+      console.error(`[UserService] Error fetching users by loja ${lojaId}:`, error);
       throw new Error('Erro ao buscar usuários por loja');
     }
   }

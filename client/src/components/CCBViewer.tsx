@@ -35,8 +35,8 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   // Query para buscar status do CCB
   const {
     data: ccbStatus,
-  _isLoading,
-  _error,
+    _isLoading,
+    _error,
   } = useQuery<CCBStatus>({
     queryKey: [`/api/formalizacao/${proposalId}/ccb`],
     refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
@@ -175,7 +175,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         });
       }
     } catch (error) {
-      console.error('Erro ao visualizar CCB assinada:', error: unknown);
+      console.error('Erro ao visualizar CCB assinada:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao visualizar CCB assinada. Tente novamente.',

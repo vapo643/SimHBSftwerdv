@@ -358,7 +358,7 @@ export default function CobrancasPage() {
     // Cleanup ao desmontar o componente
     return () => {
       console.log('🧹 [REALTIME] Removendo canal de escuta de cobranças');
-      supabase.removeChannel(channel);
+      _supabase.removeChannel(channel);
     };
   }, [queryClient, toast]);
 
@@ -417,7 +417,7 @@ export default function CobrancasPage() {
           }
         }
       } catch (error) {
-        console.error('[PAM V1.0 POLLING] Erro ao verificar status:', error: unknown);
+        console.error('[PAM V1.0 POLLING] Erro ao verificar status:', error);
         setSyncStatus('falhou');
         setIsPolling(false);
       }
@@ -464,7 +464,7 @@ export default function CobrancasPage() {
         description: 'Observação salva com sucesso',
       });
     } catch (error) {
-      console.error('Erro ao salvar observação:', error: unknown);
+      console.error('Erro ao salvar observação:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar a observação',
@@ -2186,7 +2186,7 @@ export default function CobrancasPage() {
                                           });
                                         }
                                       } catch (error) {
-                                        console.error('Erro ao marcar como pago:', error: unknown);
+                                        console.error('Erro ao marcar como pago:', error);
                                         toast({
                                           title: 'Erro',
                                           description:

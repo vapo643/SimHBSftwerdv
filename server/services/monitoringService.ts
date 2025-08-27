@@ -22,7 +22,7 @@ export class MonitoringService {
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('[MONITORING_SERVICE] Error fetching database stats:', error: unknown);
+      console.error('[MONITORING_SERVICE] Error fetching database stats:', error);
       throw new Error('Failed to fetch database statistics');
     }
   }
@@ -45,7 +45,7 @@ export class MonitoringService {
         needsVacuum: parseInt(table.dead_rows || 0) > parseInt(table.row_count || 0) * 0.1,
       }));
     } catch (error) {
-      console.error('[MONITORING_SERVICE] Error fetching table stats:', error: unknown);
+      console.error('[MONITORING_SERVICE] Error fetching table stats:', error);
       throw new Error('Failed to fetch table statistics');
     }
   }
@@ -68,7 +68,7 @@ export class MonitoringService {
         efficiency: this.calculateIndexEfficiency(index),
       }));
     } catch (error) {
-      console.error('[MONITORING_SERVICE] Error fetching index usage:', error: unknown);
+      console.error('[MONITORING_SERVICE] Error fetching index usage:', error);
       throw new Error('Failed to fetch index usage');
     }
   }
@@ -114,7 +114,7 @@ export class MonitoringService {
   _byApplication,
       };
     } catch (error) {
-      console.error('[MONITORING_SERVICE] Error fetching connections:', error: unknown);
+      console.error('[MONITORING_SERVICE] Error fetching connections:', error);
       throw new Error('Failed to fetch active connections');
     }
   }
@@ -156,7 +156,7 @@ export class MonitoringService {
   _recommendations,
       };
     } catch (error) {
-      console.error('[MONITORING_SERVICE] Health check failed:', error: unknown);
+      console.error('[MONITORING_SERVICE] Health check failed:', error);
       return {
         status: 'unhealthy',
         checks: { error: error.message },
@@ -184,7 +184,7 @@ export class MonitoringService {
   _analysis,
       };
     } catch (error) {
-      console.error('[MONITORING_SERVICE] Error generating report:', error: unknown);
+      console.error('[MONITORING_SERVICE] Error generating report:', error);
       throw new Error('Failed to generate monitoring report');
     }
   }

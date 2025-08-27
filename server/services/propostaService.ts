@@ -150,7 +150,7 @@ export class PropostaService {
           };
         }
       } catch (error) {
-        console.error('[CCB] Erro ao buscar CCB pelo caminho salvo:', error: unknown);
+        console.error('[CCB] Erro ao buscar CCB pelo caminho salvo:', error);
       }
     }
 
@@ -172,7 +172,7 @@ export class PropostaService {
         };
       }
     } catch (error) {
-      console.error('[CCB] Erro ao buscar no Storage legado:', error: unknown);
+      console.error('[CCB] Erro ao buscar no Storage legado:', error);
     }
 
     // PRIORITY 3: ClickSign as fallback

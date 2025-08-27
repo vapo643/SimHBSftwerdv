@@ -36,7 +36,7 @@ router.post(
         .limit(1);
 
       if (!proposta) {
-        return res.status(404).json({ error: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       // Buscar boletos atuais (possivelmente com códigos inválidos)
@@ -138,7 +138,7 @@ router.post(
 
           novosBoletosGerados.push(novoBoleto[0]);
         } catch (error) {
-          console.error(`❌ [FIX COLLECTIONS] Erro ao criar boleto ${parcela.numero}:`, error: unknown);
+          console.error(`❌ [FIX COLLECTIONS] Erro ao criar boleto ${parcela.numero}:`, error);
         }
       }
 
@@ -167,7 +167,7 @@ router.post(
         })),
       });
     } catch (error) {
-      console.error('❌ [FIX COLLECTIONS] Erro geral:', error: unknown);
+      console.error('❌ [FIX COLLECTIONS] Erro geral:', error);
       res.status(500).json({
         error: 'Erro ao regenerar boletos',
         details: error instanceof Error ? error.message : 'Unknown error',

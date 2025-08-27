@@ -56,7 +56,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
 
     res.json(mockMetrics);
   } catch (error) {
-    console.error('Erro ao obter métricas:', error: unknown);
+    console.error('Erro ao obter métricas:', error);
     res.status(500).json({ error: 'Erro ao obter métricas' });
   }
 });
@@ -107,7 +107,7 @@ router.get('/vulnerabilities', async (req: Request, res: Response) => {
 
     res.json(filtered);
   } catch (error) {
-    console.error('Erro ao obter vulnerabilidades:', error: unknown);
+    console.error('Erro ao obter vulnerabilidades:', error);
     res.status(500).json({ error: 'Erro ao obter vulnerabilidades' });
   }
 });
@@ -150,7 +150,7 @@ router.get('/anomalies', async (req: Request, res: Response) => {
 
     res.json(filtered);
   } catch (error) {
-    console.error('Erro ao obter anomalias:', error: unknown);
+    console.error('Erro ao obter anomalias:', error);
     res.status(500).json({ error: 'Erro ao obter anomalias' });
   }
 });
@@ -201,7 +201,7 @@ router.get('/dependency-scan', async (req: Request, res: Response) => {
 
     res.json(mockData);
   } catch (error) {
-    console.error('Erro ao obter scan de dependências:', error: unknown);
+    console.error('Erro ao obter scan de dependências:', error);
     res.status(500).json({ error: 'Erro ao obter scan de dependências' });
   }
 });
@@ -251,7 +251,7 @@ router.get('/semgrep-findings', async (req: Request, res: Response) => {
 
     res.json(mockFindings);
   } catch (error) {
-    console.error('Erro ao obter findings do Semgrep:', error: unknown);
+    console.error('Erro ao obter findings do Semgrep:', error);
     res.status(500).json({ error: 'Erro ao obter findings' });
   }
 });
@@ -287,7 +287,7 @@ router.post('/scan', requireAdmin, async (req: Request, res: Response) => {
         res.status(400).json({ error: 'Tipo de scan inválido' });
     }
   } catch (error) {
-    console.error('Erro ao iniciar scan:', error: unknown);
+    console.error('Erro ao iniciar scan:', error);
     res.status(500).json({ error: 'Erro ao iniciar scan' });
   }
 });
@@ -317,7 +317,7 @@ router.get('/alerts/active', async (req: Request, res: Response) => {
 
     res.json(alerts);
   } catch (error) {
-    console.error('Erro ao obter alertas:', error: unknown);
+    console.error('Erro ao obter alertas:', error);
     res.status(500).json({ error: 'Erro ao obter alertas' });
   }
 });
@@ -342,7 +342,7 @@ router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Respo
 
     res.json({ message: 'Alerta resolvido' });
   } catch (error) {
-    console.error('Erro ao resolver alerta:', error: unknown);
+    console.error('Erro ao resolver alerta:', error);
     res.status(500).json({ error: 'Erro ao resolver alerta' });
   }
 });
@@ -378,7 +378,7 @@ router.get('/report', requireAdmin, async (req: Request, res: Response) => {
 
     res.json(report);
   } catch (error) {
-    console.error('Erro ao gerar relatório:', error: unknown);
+    console.error('Erro ao gerar relatório:', error);
     res.status(500).json({ error: 'Erro ao gerar relatório' });
   }
 });

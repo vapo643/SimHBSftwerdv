@@ -55,11 +55,11 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, 
 
     res.json({
       success: true,
-  _observacoes,
+      _observacoes,
       total: observacoes.length,
     });
   } catch (error) {
-    console.error('❌ [Controller/Observações] Erro ao buscar histórico:', error: unknown);
+    console.error('❌ [Controller/Observações] Erro ao buscar histórico:', error);
     res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Erro ao buscar observações',
@@ -94,7 +94,7 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
     const _novaObservacao = await observacoesService.createObservacao(
       Number(propostaId),
       validatedData.observacao,
-  _userId,
+      _userId,
       clientIp
     );
 
@@ -112,7 +112,7 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
       });
     }
 
-    console.error('❌ [Controller/Observações] Erro ao criar observação:', error: unknown);
+    console.error('❌ [Controller/Observações] Erro ao criar observação:', error);
     res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Erro ao criar observação',
@@ -139,7 +139,7 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => 
     const _observacaoAtualizada = await observacoesService.updateObservacao(
       Number(observacaoId),
       validatedData.observacao,
-  _userId,
+      _userId,
       clientIp
     );
 
@@ -157,7 +157,7 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => 
       });
     }
 
-    console.error('❌ [Controller/Observações] Erro ao atualizar observação:', error: unknown);
+    console.error('❌ [Controller/Observações] Erro ao atualizar observação:', error);
 
     const _statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
     res.status(statusCode).json({
@@ -187,7 +187,7 @@ router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) 
       message: 'Observação deletada com sucesso',
     });
   } catch (error) {
-    console.error('❌ [Controller/Observações] Erro ao deletar observação:', error: unknown);
+    console.error('❌ [Controller/Observações] Erro ao deletar observação:', error);
 
     const _statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
     res.status(statusCode).json({
@@ -233,7 +233,7 @@ router.get('/observacoes', jwtAuthMiddleware, async (req, res) => {
       ...result,
     });
   } catch (error) {
-    console.error('❌ [Controller/Observações] Erro ao listar observações:', error: unknown);
+    console.error('❌ [Controller/Observações] Erro ao listar observações:', error);
     res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Erro ao listar observações',

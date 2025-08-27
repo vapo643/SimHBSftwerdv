@@ -183,7 +183,7 @@ export class CCBSyncService {
         `);
       }
     } catch (error) {
-      console.error('[CCB SYNC] ❌ Error during fallback sync:', error: unknown);
+      console.error('[CCB SYNC] ❌ Error during fallback sync:', error);
       this.syncStats.failedAttempts++;
     }
   }
@@ -214,7 +214,7 @@ export class CCBSyncService {
 
       return result.success; }
     } catch (error) {
-      console.error(`[CCB SYNC] ❌ Manual sync failed for ${proposalId}:`, error: unknown);
+      console.error(`[CCB SYNC] ❌ Manual sync failed for ${proposalId}:`, error);
       return false; }
     }
   }

@@ -243,7 +243,7 @@ export default function Cobrancas() {
       setObservacaoProrrogacao('');
     },
     onError: (error) => {
-      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar prorrogação:', error: unknown);
+      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar prorrogação:', error);
       toast({
         title: 'Erro ao solicitar prorrogação',
         description: error.response?.data?.message || 'Não foi possível enviar a solicitação.',
@@ -297,7 +297,7 @@ export default function Cobrancas() {
       setObservacaoDesconto('');
     },
     onError: (error) => {
-      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar desconto:', error: unknown);
+      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar desconto:', error);
       toast({
         title: 'Erro ao solicitar desconto',
         description: error.response?.data?.message || 'Não foi possível enviar a solicitação.',
@@ -433,7 +433,7 @@ export default function Cobrancas() {
       });
       return response; }
     } catch (error) {
-      console.error('Erro ao buscar status do boleto:', error: unknown);
+      console.error('Erro ao buscar status do boleto:', error);
       return null; }
     }
   };
@@ -468,7 +468,7 @@ export default function Cobrancas() {
               totalErros += response.erros;
             }
           } catch (error) {
-            console.error(`Erro ao sincronizar proposta ${proposta.id}:`, error: unknown);
+            console.error(`Erro ao sincronizar proposta ${proposta.id}:`, error);
             totalErros++;
           }
         }

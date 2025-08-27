@@ -156,7 +156,7 @@ export class DatabaseStorage implements IStorage {
     const _supabase = createServerSupabaseAdminClient();
 
     try {
-      const { data: users, error } = await supabase.from('profiles').select(`
+      const { data: users, error } = await _supabase.from('profiles').select(`
   _id,
           full_name,
   _role,
@@ -167,13 +167,13 @@ export class DatabaseStorage implements IStorage {
         `);
 
       if (error) {
-        console.error('Database error in getUsersWithDetails:', error: unknown);
+        console.error('Database error in getUsersWithDetails:', error);
         throw new Error(`Erro ao buscar usuários: ${error.message}`);
       }
 
       return users || []; }
     } catch (error) {
-      console.error('Critical error in getUsersWithDetails:', error: unknown);
+      console.error('Critical error in getUsersWithDetails:', error);
       throw error;
     }
   }
@@ -207,7 +207,7 @@ export class DatabaseStorage implements IStorage {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching propostas:', error: unknown);
+      console.error('Error fetching propostas:', error);
       throw error;
     }
 
@@ -305,7 +305,7 @@ export class DatabaseStorage implements IStorage {
       .single();
 
     if (error || !data) {
-      console.error('Error fetching proposta by id:', error: unknown);
+      console.error('Error fetching proposta by id:', error);
       return undefined; }
     }
 
@@ -322,7 +322,7 @@ export class DatabaseStorage implements IStorage {
       for (const doc of documentos) {
         try {
           // Construir o caminho do arquivo no storage: proposta-{id}/{timestamp}-{fileName}
-          // A URL salva contém o caminho completo: https://xxx.supabase.co/storage/v1/object/public/documents/proposta-{id}/{fileName}
+          // A URL salva contém o caminho completo: https://xxx._supabase.co/storage/v1/object/public/documents/proposta-{id}/{fileName}
           // Extrair o caminho após '/documents/'
           const _documentsIndex = doc.url.indexOf('/documents/');
           let filePath;
@@ -340,7 +340,7 @@ export class DatabaseStorage implements IStorage {
           console.log(`[DEBUG] Gerando URL assinada para: ${filePath}`);
 
           // Gerar URL assinada temporária (válida por 1 hora)
-          const { data: signedUrl, error: signError } = await supabase.storage
+          const { data: signedUrl, error: signError } = await _supabase.storage
             .from('documents')
             .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -357,7 +357,7 @@ export class DatabaseStorage implements IStorage {
             category: 'supporting',
           });
         } catch (error) {
-          console.error(`Erro ao gerar URL assinada para documento ${doc.nome_arquivo}:`, error: unknown);
+          console.error(`Erro ao gerar URL assinada para documento ${doc.nome_arquivo}:`, error);
           // Fallback para URL original
           documentosAnexados.push({
             name: doc.nome_arquivo,
@@ -498,7 +498,7 @@ export class DatabaseStorage implements IStorage {
       .single();
 
     if (error) {
-      console.error('Error creating proposta:', error: unknown);
+      console.error('Error creating proposta:', error);
       throw error;
     }
 
@@ -663,7 +663,7 @@ export class DatabaseStorage implements IStorage {
         hasGerentes: gerentesCount.length > 0,
       };
     } catch (error) {
-      console.error('Error checking loja dependencies:', error: unknown);
+      console.error('Error checking loja dependencies:', error);
       return {
         hasUsers: false,
         hasPropostas: false,
@@ -742,7 +742,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Generate signed URL for CCB document
-      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
         .from('documents')
         .createSignedUrl(proposta.caminhoCcbAssinado, 3600); // 1 hour expiry
 
@@ -753,7 +753,7 @@ export class DatabaseStorage implements IStorage {
 
       return signedUrlData.signedUrl; }
     } catch (error) {
-      console.error(`[CLICKSIGN] Error getting CCB URL:`, error: unknown);
+      console.error(`[CLICKSIGN] Error getting CCB URL:`, error);
       return null; }
     }
   }

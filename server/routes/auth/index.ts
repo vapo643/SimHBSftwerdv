@@ -34,7 +34,7 @@ router.post('/login', async (req: Request, res: Response) => {
       res.status(401).json({ message: result.error });
     }
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Login error:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Login error:', error);
     res.status(500).json({ message: 'Login failed' });
   }
 });
@@ -64,7 +64,7 @@ router.post('/register', async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Register error:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Register error:', error);
     res.status(500).json({ message: 'Registration failed' });
   }
 });
@@ -83,7 +83,7 @@ router.post('/logout', jwtAuthMiddleware, async (req: Request, res: Response) =>
       res.status(400).json({ message: result.error });
     }
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Logout error:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Logout error:', error);
     res.status(500).json({ message: 'Logout failed' });
   }
 });
@@ -136,7 +136,7 @@ router.post('/change-password', jwtAuthMiddleware, async (req: Request, res: Res
       });
     }
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Change password error:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Change password error:', error);
     res.status(500).json({ message: 'Erro ao alterar senha' });
   }
 });
@@ -158,7 +158,7 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     const _result = await authService.requestPasswordReset(email, req);
     res.json({ message: result.message });
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Password reset error:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Password reset error:', error);
     res.status(500).json({ message: 'Erro ao processar solicitação' });
   }
 });
@@ -172,7 +172,7 @@ router.get('/sessions', jwtAuthMiddleware, async (req: Request, res: Response) =
     const _authReq = req as AuthenticatedRequest;
 
     if (!authReq.user?.id) {
-      return res.status(401).json({ message: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     const _currentToken = authReq.headers.authorization?.replace('Bearer ', '');
@@ -180,7 +180,7 @@ router.get('/sessions', jwtAuthMiddleware, async (req: Request, res: Response) =
 
     res.json(_result);
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Error fetching sessions:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Error fetching sessions:', error);
     res.status(500).json({ message: 'Erro ao buscar sessões' });
   }
 });
@@ -195,7 +195,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Request, re
     const { sessionId } = authReq.params;
 
     if (!authReq.user?.id) {
-      return res.status(401).json({ message: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     const _result = await authService.deleteSession(authReq.user.id, sessionId, authReq);
@@ -206,7 +206,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Request, re
       res.status(404).json({ message: result.error || 'Sessão não encontrada' });
     }
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Error deleting session:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Error deleting session:', error);
     res.status(500).json({ message: 'Erro ao encerrar sessão' });
   }
 });
@@ -220,7 +220,7 @@ router.get('/profile', jwtAuthMiddleware, async (req: Request, res: Response) =>
     const _authReq = req as AuthenticatedRequest;
 
     if (!authReq.user) {
-      return res.status(401).json({ message: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     res.json({
@@ -231,7 +231,7 @@ router.get('/profile', jwtAuthMiddleware, async (req: Request, res: Response) =>
       loja_id: authReq.user.loja_id,
     });
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Error fetching profile:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Error fetching profile:', error);
     res.status(500).json({ message: 'Erro interno do servidor' });
   }
 });
@@ -260,7 +260,7 @@ router.get('/validate', jwtAuthMiddleware, async (req: Request, res: Response) =
       },
     });
   } catch (error) {
-    console.error('[AUTH_CONTROLLER] Error validating session:', error: unknown);
+    console.error('[AUTH_CONTROLLER] Error validating session:', error);
     res.status(500).json({
       valid: false,
       message: 'Erro ao validar sessão',

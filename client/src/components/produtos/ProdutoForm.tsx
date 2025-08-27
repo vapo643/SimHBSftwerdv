@@ -36,9 +36,9 @@ interface ProdutoFormProps {
 
 const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialData }) => {
   const {
-  _control,
-  _register,
-  _handleSubmit,
+    _control,
+    _register,
+    _handleSubmit,
     formState: { errors },
   } = useForm<ProdutoFormData>({
     resolver: zodResolver(produtoSchema),

@@ -53,7 +53,7 @@ const _upload = multer({
 });
 
 // Helper function to check admin role
-const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next: unknown) => {
+const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -76,7 +76,7 @@ router.get('/samm', requireAdmin, async (req: AuthenticatedRequest, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[OWASP SAMM] Assessment error:', error: unknown);
+    console.error('[OWASP SAMM] Assessment error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao processar avaliação SAMM',
@@ -92,7 +92,7 @@ router.get('/samm/report', requireAdmin, async (req: AuthenticatedRequest, res) 
     res.setHeader('Content-Disposition', 'attachment; filename="samm_maturity_report.md"');
     res.send(report);
   } catch (error) {
-    console.error('[OWASP SAMM] Report generation error:', error: unknown);
+    console.error('[OWASP SAMM] Report generation error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao gerar relatório SAMM',
@@ -110,7 +110,7 @@ router.get('/asvs', requireAdmin, async (req: AuthenticatedRequest, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[OWASP ASVS] Requirements error:', error: unknown);
+    console.error('[OWASP ASVS] Requirements error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao processar requisitos ASVS',
@@ -126,7 +126,7 @@ router.get('/strategic-plan', requireAdmin, async (req: AuthenticatedRequest, re
     res.setHeader('Content-Disposition', 'attachment; filename="owasp_strategic_plan.md"');
     res.send(plan);
   } catch (error) {
-    console.error('[OWASP STRATEGIC] Plan generation error:', error: unknown);
+    console.error('[OWASP STRATEGIC] Plan generation error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao gerar plano estratégico',
@@ -170,7 +170,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error('[OWASP UPLOAD] Document processing error:', error: unknown);
+      console.error('[OWASP UPLOAD] Document processing error:', error);
       res.status(500).json({
         success: false,
         error: 'Erro ao processar documento OWASP',
@@ -222,7 +222,7 @@ router.get('/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
       },
     });
   } catch (error) {
-    console.error('[OWASP STATUS] Status check error:', error: unknown);
+    console.error('[OWASP STATUS] Status check error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao verificar status OWASP',
@@ -252,7 +252,7 @@ router.get('/samm/urls', requireAdmin, async (req: AuthenticatedRequest, res) =>
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[OWASP SAMM URLs] Error retrieving URLs:', error: unknown);
+    console.error('[OWASP SAMM URLs] Error retrieving URLs:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao recuperar URLs do SAMM',
@@ -279,7 +279,7 @@ router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest,
       },
     });
   } catch (error) {
-    console.error('[OWASP SAMM PDF] Processing error:', error: unknown);
+    console.error('[OWASP SAMM PDF] Processing error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao processar PDF do SAMM',
@@ -322,7 +322,7 @@ router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) 
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[OWASP CHEAT SHEETS] Analysis error:', error: unknown);
+    console.error('[OWASP CHEAT SHEETS] Analysis error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao processar Cheat Sheets OWASP',
@@ -379,7 +379,7 @@ router.get('/cheatsheets/recommendations', requireAdmin, async (req: Authenticat
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[OWASP RECOMMENDATIONS] Analysis error:', error: unknown);
+    console.error('[OWASP RECOMMENDATIONS] Analysis error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao processar recomendações de segurança',
@@ -418,7 +418,7 @@ router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[WSTG] Processing error:', error: unknown);
+    console.error('[WSTG] Processing error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao processar URLs WSTG',
@@ -436,7 +436,7 @@ router.get('/wstg/status', requireAdmin, async (req: AuthenticatedRequest, res) 
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[WSTG] Status error:', error: unknown);
+    console.error('[WSTG] Status error:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao obter status WSTG',

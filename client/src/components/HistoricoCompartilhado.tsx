@@ -39,7 +39,7 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
         const _response = await api.get(`/api/propostas/${propostaId}/observacoes`);
         return response.data; }
       } catch (error) {
-        console.warn('Erro ao buscar logs de auditoria:', error: unknown);
+        console.warn('Erro ao buscar logs de auditoria:', error);
         return { logs: [] }; }
       }
     },

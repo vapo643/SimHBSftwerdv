@@ -155,7 +155,7 @@ export class CCBGridGenerator {
       console.log(`✅ [CCB GRID] Grade gerada! Arquivo: ${filePath}`);
       return { success: true, pdfPath: filePath }; }
     } catch (error) {
-      console.error('❌ [CCB GRID] Erro na geração:', error: unknown);
+      console.error('❌ [CCB GRID] Erro na geração:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -173,7 +173,7 @@ export class CCBGridGenerator {
 
       return data?.publicUrl || null; }
     } catch (error) {
-      console.error('❌ [CCB GRID] Erro ao obter URL pública:', error: unknown);
+      console.error('❌ [CCB GRID] Erro ao obter URL pública:', error);
       return null; }
     }
   }

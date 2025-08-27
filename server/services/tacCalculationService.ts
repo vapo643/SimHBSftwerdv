@@ -8,7 +8,7 @@
  * @created 2025-01-20
  */
 
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { propostas, produtos } from '../../shared/schema';
 import { eq, or, and, isNull, inArray } from 'drizzle-orm';
 
@@ -67,7 +67,7 @@ export class TacCalculationService {
 
       return tacCalculada; }
     } catch (error) {
-      console.error(`[TAC] Erro ao calcular TAC:`, error: unknown);
+      console.error(`[TAC] Erro ao calcular TAC:`, error);
       // Em caso de erro, retorna 0 para não bloquear o fluxo
       return 0; }
     }
@@ -117,7 +117,7 @@ export class TacCalculationService {
 
       return isRegistered; }
     } catch (error) {
-      console.error(`[TAC] Erro ao verificar se cliente é cadastrado:`, error: unknown);
+      console.error(`[TAC] Erro ao verificar se cliente é cadastrado:`, error);
       // Em caso de erro, considera como não cadastrado para aplicar TAC
       return false; }
     }

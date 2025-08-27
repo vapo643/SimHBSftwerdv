@@ -90,7 +90,7 @@ export default function AnaliseManual() {
   } = useQuery({
     queryKey: ['/api/propostas', propostaId],
     enabled: !!propostaId,
-    retry: (failureCount, error: unknown) => {
+    retry: (failureCount, error) => {
       // Only retry on network errors, not on 404s
       if (error instanceof Error && error.message.includes('404')) {
         return false; }

@@ -211,7 +211,7 @@ const EditarPropostaPendenciada: React.FC = () => {
         console.log('🔍 DADOS EXTRAÍDOS:', response.data);
         return response.data as PropostaData; }
       } catch (error) {
-        console.error('🔍 ERRO NA QUERY:', error: unknown);
+        console.error('🔍 ERRO NA QUERY:', error);
         throw error;
       }
     },
@@ -412,7 +412,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     );
   }
 
-  const _handleClientChange = (field: string, value: unknown) => {
+  const _handleClientChange = (field: string, value) => {
     setFormData((prev) => ({
       ...prev,
       clienteData: {
@@ -422,7 +422,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
-  const _handleCondicoesChange = (field: string, value: unknown) => {
+  const _handleCondicoesChange = (field: string, value) => {
     setFormData((prev) => ({
       ...prev,
       condicoesData: {

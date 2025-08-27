@@ -85,12 +85,12 @@ export class DocumentsService {
       }
 
       return {
-  _propostaId,
+        _propostaId,
         totalDocuments: documents.length,
-  _documents,
+        _documents,
       };
     } catch (error) {
-      console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error: unknown);
+      console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error);
       throw error;
     }
   }
@@ -124,7 +124,7 @@ export class DocumentsService {
 
       // Upload to storage
       const _uploadResult = await documentsRepository.uploadToStorage(
-  _filePath,
+        _filePath,
         file.buffer,
         file.mimetype
       );
@@ -158,7 +158,7 @@ export class DocumentsService {
         },
       };
     } catch (error) {
-      console.error('[DOCUMENTS_SERVICE] Error uploading document:', error: unknown);
+      console.error('[DOCUMENTS_SERVICE] Error uploading document:', error);
       return {
         success: false,
         error: error.message || 'Erro interno do servidor no upload',
@@ -198,7 +198,7 @@ export class DocumentsService {
         contentType: 'application/pdf',
       };
     } catch (error) {
-      console.error('[DOCUMENTS_SERVICE] Error downloading document:', error: unknown);
+      console.error('[DOCUMENTS_SERVICE] Error downloading document:', error);
       return {
         success: false,
         error: error.message || 'Erro interno do servidor',

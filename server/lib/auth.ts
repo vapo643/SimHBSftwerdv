@@ -21,14 +21,14 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('Auth middleware: No token provided');
-      return res.status(401).json({ message: 'No token provided' }); }
+      return res.*);
     }
 
     const _token = authHeader.split(' ')[1];
 
     if (!token || token == 'undefined' || token == 'null') {
       console.log('Auth middleware: Invalid token format');
-      return res.status(401).json({ message: 'Invalid token format' }); }
+      return res.*);
     }
 
     // Usa a camada de abstração em vez de chamar Supabase diretamente
@@ -37,14 +37,14 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
 
     if (!validationResult.valid) {
       console.log('Auth middleware: Token validation failed');
-      return res.status(401).json({ message: 'Invalid token' }); }
+      return res.*);
     }
 
     req.user = validationResult.user;
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error: unknown);
-    return res.status(401).json({ message: 'Authentication failed' }); }
+    console.error('Auth middleware error:', error);
+    return res.*);
   }
 }
 

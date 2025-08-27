@@ -37,7 +37,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
       .limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // Buscar boletos atuais (válidos e inválidos)
@@ -185,7 +185,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
 
         console.log(`🎉 [EXECUTE FIX] Boleto ${parcela.numero} criado com sucesso!`);
       } catch (error) {
-        console.error(`❌ [EXECUTE FIX] Erro ao criar boleto ${parcela.numero}:`, error: unknown);
+        console.error(`❌ [EXECUTE FIX] Erro ao criar boleto ${parcela.numero}:`, error);
         errosEncontrados.push({
           parcela: parcela.numero,
           erro: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -226,7 +226,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
       })),
     });
   } catch (error) {
-    console.error('❌ [EXECUTE FIX] Erro geral:', error: unknown);
+    console.error('❌ [EXECUTE FIX] Erro geral:', error);
     res.status(500).json({
       error: 'Erro ao executar regeneração de boletos',
       details: error instanceof Error ? error.message : 'Erro desconhecido',

@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import {
   _propostas,
   _parcelas,
@@ -56,7 +56,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return result; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching proposals:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error fetching proposals:', error);
       return []; }
     }
   }
@@ -72,7 +72,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(parcelas.propostaId, String(propostaId)))
         .orderBy(parcelas.numeroParcela);
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching installments:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error fetching installments:', error);
       return []; }
     }
   }
@@ -88,7 +88,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(interCollections.propostaId, String(propostaId)))
         .orderBy(desc(interCollections.createdAt));
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error);
       return []; }
     }
   }
@@ -114,7 +114,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(observacoesCobranca.propostaId, String(propostaId)))
         .orderBy(desc(observacoesCobranca.createdAt));
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching observations:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error fetching observations:', error);
       return []; }
     }
   }
@@ -142,7 +142,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return observation; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error creating observation:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error creating observation:', error);
       return null; }
     }
   }
@@ -173,7 +173,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return result.length > 0; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error updating installment:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error updating installment:', error);
       return false; }
     }
   }
@@ -189,7 +189,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(solicitacoesModificacao.propostaId, String(propostaId)))
         .orderBy(desc(solicitacoesModificacao.createdAt));
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching modification requests:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error fetching modification requests:', error);
       return []; }
     }
   }
@@ -221,7 +221,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return request; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error creating modification request:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error creating modification request:', error);
       return null; }
     }
   }
@@ -238,7 +238,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(propostaLogs.createdAt))
         .limit(50); // Limit recent logs
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching logs:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error fetching logs:', error);
       return []; }
     }
   }
@@ -263,7 +263,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return result[0]?.count || 0; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error counting overdue:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error counting overdue:', error);
       return 0; }
     }
   }
@@ -294,7 +294,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
 
       return result.length > 0; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error updating proposal status:', error: unknown);
+      console.error('[COBRANCAS_REPO] Error updating proposal status:', error);
       return false; }
     }
   }

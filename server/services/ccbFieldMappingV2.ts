@@ -497,7 +497,7 @@ export class FieldDetector {
   /**
    * Obtém valor do campo dos dados
    */
-  private async getFieldValue(fieldName: string, data: unknown): Promise<string> {
+  private async getFieldValue(fieldName: string, data): Promise<string> {
     // Buscar configuração da empresa (vamos simular por enquanto)
     const _configEmpresa = {
       razaoSocial: 'SIMPIX LTDA',

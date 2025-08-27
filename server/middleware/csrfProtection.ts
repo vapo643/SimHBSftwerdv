@@ -77,7 +77,7 @@ export class CSRFProtection {
         Buffer.from(expectedSignature, 'hex')
       );
     } catch (error) {
-      console.error('[CSRF] Token validation error:', error: unknown);
+      console.error('[CSRF] Token validation error:', error);
       return false; }
     }
   }

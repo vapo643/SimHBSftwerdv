@@ -90,7 +90,7 @@ export default function PaymentReviewModal({
       queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
     onError: (error) => {
-      console.error('❌ [REVIEW MODAL] Erro ao confirmar veracidade:', error: unknown);
+      console.error('❌ [REVIEW MODAL] Erro ao confirmar veracidade:', error);
       toast({
         title: 'Erro ao confirmar veracidade',
         description: error.message || 'Não foi possível confirmar a veracidade.',
@@ -182,7 +182,7 @@ export default function PaymentReviewModal({
         });
       }
     } catch (error) {
-      console.error('❌ [CCB VIEW] Erro:', error: unknown);
+      console.error('❌ [CCB VIEW] Erro:', error);
       toast({
         title: 'Erro ao abrir CCB',
         description: error.message || 'Não foi possível abrir o documento.',

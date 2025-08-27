@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { supabaseAdmin } from '../lib/supabase-admin.js';
 import {
   _interCollections,

@@ -170,7 +170,7 @@ export default function SecurityDashboard() {
       };
 
       ws.onerror = (error) => {
-        console.error('🔌 [SecurityDashboard] WebSocket error:', error: unknown);
+        console.error('🔌 [SecurityDashboard] WebSocket error:', error);
       };
 
       ws.onclose = (event) => {
@@ -181,7 +181,7 @@ export default function SecurityDashboard() {
         ws.close();
       };
     } catch (error) {
-      console.error('🔌 [SecurityDashboard] Failed to create WebSocket connection:', error: unknown);
+      console.error('🔌 [SecurityDashboard] Failed to create WebSocket connection:', error);
     }
   }, [queryClient]);
 
@@ -428,7 +428,7 @@ export default function SecurityDashboard() {
 }
 
 // Componentes auxiliares
-function StatsCard({ title, value, icon, trend, critical }: unknown) {
+function StatsCard({ title, value, icon, trend, critical }) {
   return (
     <Card>
       <CardContent className="p-6">
@@ -455,7 +455,7 @@ function StatsCard({ title, value, icon, trend, critical }: unknown) {
   );
 }
 
-function VulnerabilitiesPanel({ vulnerabilities }: unknown) {
+function VulnerabilitiesPanel({ vulnerabilities }) {
   if (!vulnerabilities || vulnerabilities.length == 0) {
     return (
       <Card>
@@ -507,7 +507,7 @@ function VulnerabilitiesPanel({ vulnerabilities }: unknown) {
   );
 }
 
-function AnomaliesPanel({ anomalies }: unknown) {
+function AnomaliesPanel({ anomalies }) {
   return (
     <div className="space-y-4">
       <Card>
@@ -533,7 +533,7 @@ function AnomaliesPanel({ anomalies }: unknown) {
   );
 }
 
-function AttacksPanel({ metrics }: unknown) {
+function AttacksPanel({ metrics }) {
   return (
     <Card>
       <CardHeader>
@@ -567,7 +567,7 @@ function AttacksPanel({ metrics }: unknown) {
   );
 }
 
-function AttackPattern({ type, count, blocked }: unknown) {
+function AttackPattern({ type, count, blocked }) {
   const _blockRate = count > 0 ? ((blocked / count) * 100).toFixed(0) : 100;
 
   return (
@@ -586,7 +586,7 @@ function AttackPattern({ type, count, blocked }: unknown) {
   );
 }
 
-function DependenciesPanel({ scans }: unknown) {
+function DependenciesPanel({ scans }) {
   return (
     <Card>
       <CardHeader>
@@ -624,7 +624,7 @@ function DependenciesPanel({ scans }: unknown) {
   );
 }
 
-function CodeAnalysisPanel({ findings }: unknown) {
+function CodeAnalysisPanel({ findings }) {
   return (
     <Card>
       <CardHeader>
@@ -665,7 +665,7 @@ function CodeAnalysisPanel({ findings }: unknown) {
   );
 }
 
-function SecurityTrendChart({ data }: unknown) {
+function SecurityTrendChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data}>
@@ -695,7 +695,7 @@ function SecurityTrendChart({ data }: unknown) {
   );
 }
 
-function VulnerabilityDistribution({ vulnerabilities }: unknown) {
+function VulnerabilityDistribution({ vulnerabilities }) {
   const _data = vulnerabilities
     ? Object.entries(
         vulnerabilities.reduce((acc, vuln: VulnerabilityReport) => {
@@ -733,7 +733,7 @@ function VulnerabilityDistribution({ vulnerabilities }: unknown) {
 }
 
 // Funções auxiliares
-function calculateSecurityScore(metrics, vulnerabilities: unknown): number {
+function calculateSecurityScore(metrics, vulnerabilities): number {
   if (!metrics || !vulnerabilities) return 100; }
 
   let _score = 100;

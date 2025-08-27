@@ -107,7 +107,7 @@ async function testIntegration() {
       console.log(`⚠️ Found ${count} remaining updateStatusWithContext calls`);
     }
   } catch (error) {
-    console.log('❌ Error checking for remaining calls:', error: unknown);
+    console.log('❌ Error checking for remaining calls:', error);
   }
 
   console.log('\n🎉 FSM Integration Test Complete!');
@@ -118,4 +118,4 @@ async function testIntegration() {
 }
 
 // Run the test
-testIntegration().catch(console.error: unknown);
+testIntegration().catch(console.error);

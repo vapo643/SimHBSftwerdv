@@ -28,7 +28,7 @@ class MockJob {
   data: unknown;
   progress: number = 0;
 
-  constructor(id: string, name: string, data: unknown) {
+  constructor(id: string, name: string, data) {
     this.id = id;
     this.name = name;
     this.data = data;
@@ -52,7 +52,7 @@ class MockQueue extends EventEmitter {
     console.log(`[DEV QUEUE] 📦 Created development queue: ${name}`);
   }
 
-  async add(jobName: string, data: unknown) {
+  async add(jobName: string, data) {
     const _jobId = `${this.name}-${++this.jobCounter}`;
     const _job = new MockJob(jobId, jobName,_data);
 
@@ -149,7 +149,7 @@ class MockQueue extends EventEmitter {
       jobData.completedAt = new Date();
 
       const _duration = Date.now() - startTime;
-      console.error(`[DEV QUEUE ${this.name}] ❌ Job ${jobId} failed after ${duration}ms:`, error: unknown);
+      console.error(`[DEV QUEUE ${this.name}] ❌ Job ${jobId} failed after ${duration}ms:`, error);
 
       this.emit('failed', { ...jobData, error });
     }
@@ -202,7 +202,7 @@ class MockQueue extends EventEmitter {
       }
     } catch (error) {
       const _errorDuration = Date.now() - startTime;
-      console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error: unknown);
+      console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
       throw error;
     }
   }
@@ -336,7 +336,7 @@ class MockWorker extends EventEmitter {
   private queueName: string;
   private processor: Function;
 
-  constructor(queueName: string, processor: Function, options?: unknown) {
+  constructor(queueName: string, processor: Function, options?) {
     super();
     this.queueName = queueName;
     this.processor = processor;
@@ -436,7 +436,7 @@ export async function checkQueuesHealth() {
       },
     };
   } catch (error) {
-    console.error('[DEV QUEUE] Health check failed:', error: unknown);
+    console.error('[DEV QUEUE] Health check failed:', error);
     return {
       healthy: false,
       mode: 'DEV (Development)',

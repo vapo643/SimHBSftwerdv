@@ -49,7 +49,7 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
             setCcbRealUrl(null);
           }
         } catch (error) {
-          console.error('Erro ao buscar status da CCB:', error: unknown);
+          console.error('Erro ao buscar status da CCB:', error);
           setCcbRealUrl(null);
         } finally {
           setCcbLoading(false);
@@ -119,7 +119,7 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error('Erro ao baixar documento:', error: unknown);
+      console.error('Erro ao baixar documento:', error);
     }
   };
 

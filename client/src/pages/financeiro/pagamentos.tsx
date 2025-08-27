@@ -1300,12 +1300,12 @@ export default function Pagamentos() {
                                 });
                               }
                             } catch (error) {
-                              console.error('[CCB] Erro ao buscar CCB assinada:', error: unknown);
+                              console.error('[CCB] Erro ao buscar CCB assinada:', error);
 
                               // Tratar erros específicos
                               let _errorMessage = 'Erro ao carregar documento assinado';
 
-                              if (error.response?.data?.error: unknown) {
+                              if (error.response?.data?.error) {
                                 errorMessage = error.response.data.error;
                               } else if (error.message) {
                                 errorMessage = error.message;

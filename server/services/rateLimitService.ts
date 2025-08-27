@@ -183,7 +183,7 @@ class RateLimitService {
         return result; }
       } catch (error) {
         lastError = error;
-        console.error(`[RATE LIMIT] Tentativa ${attempt + 1}/${_config.maxRetries} falhou:`, error: unknown);
+        console.error(`[RATE LIMIT] Tentativa ${attempt + 1}/${_config.maxRetries} falhou:`, error);
 
         // Verificar se deve tentar novamente
         const _shouldRetry = await this.handleFailure(serviceId, error, config);

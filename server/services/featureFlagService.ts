@@ -133,7 +133,7 @@ class FeatureFlagService {
 
         unleash.on('error', (error) => {
           clearTimeout(timeout);
-          logger.error('Unleash initialization error:', error: unknown);
+          logger.error('Unleash initialization error:', error);
           logger.info('Switching to fallback mode due to Unleash connection error');
           // Marca para usar fallback ao invés de tentar conectar repetidamente
           process.env.UNLEASH_DISABLED = 'true';
@@ -144,7 +144,7 @@ class FeatureFlagService {
       this.initialized = true;
       logger.info(`Feature flag service initialized for ${this._config.environment}`);
     } catch (error) {
-      logger.error('Failed to initialize feature flags:', error: unknown);
+      logger.error('Failed to initialize feature flags:', error);
       this.initialized = true; // Marca como inicializado para usar fallback
     }
   }
@@ -190,7 +190,7 @@ class FeatureFlagService {
       logger.debug(`Flag ${flagName}: ${enabled}`, { context: sanitizedContext });
       return enabled; }
     } catch (error) {
-      logger.error(`Error checking flag ${flagName}:`, error: unknown);
+      logger.error(`Error checking flag ${flagName}:`, error);
       // Em caso de erro, usa fallback
       return this.fallbackFlags.get(flagName) ?? false; }
     }
@@ -244,7 +244,7 @@ class FeatureFlagService {
       logger.debug(`Variant for ${flagName}:`, variant);
       return variant; }
     } catch (error) {
-      logger.error(`Error getting variant for ${flagName}:`, error: unknown);
+      logger.error(`Error getting variant for ${flagName}:`, error);
       return { name: 'disabled', enabled: false }; }
     }
   }

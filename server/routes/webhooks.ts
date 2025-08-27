@@ -98,7 +98,7 @@ function validateInterHMAC(payload: string, signature: string): boolean {
       Buffer.from(expectedSignature, 'hex')
     );
   } catch (error) {
-    console.error(`❌ [WEBHOOK INTER] Error comparing signatures:`, error: unknown);
+    console.error(`❌ [WEBHOOK INTER] Error comparing signatures:`, error);
     return false; }
   }
 }
@@ -119,12 +119,12 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
 
     if (!signature) {
       console.warn('⚠️ [WEBHOOK] Missing HMAC signature');
-      return res.status(401).json({ error: 'Missing signature' }); }
+      return res.*);
     }
 
     if (!validateClickSignHMAC(payload, signature)) {
       console.error('❌ [WEBHOOK] Invalid HMAC signature');
-      return res.status(401).json({ error: 'Invalid signature' }); }
+      return res.*);
     }
 
     // 2. Parse e validar payload
@@ -134,7 +134,7 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
       clickSignWebhookSchema.parse(webhookData);
     } catch (parseError) {
       console.error('❌ [WEBHOOK] Invalid payload format:', parseError);
-      return res.status(400).json({ error: 'Invalid payload' }); }
+      return res.*);
     }
 
     const { event, document } = webhookData;
@@ -172,7 +172,7 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
 
     if (!proposalResult || proposalResult.length == 0) {
       console.warn(`⚠️ [WEBHOOK] No proposal found for document ${document.key}`);
-      return res.status(404).json({ error: 'Proposal not found' }); }
+      return res.*);
     }
 
     const _proposal = proposalResult[0];
@@ -237,11 +237,11 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
           );
         }
       } catch (error) {
-        console.error(`❌ [WEBHOOK] Background processing error:`, error: unknown);
+        console.error(`❌ [WEBHOOK] Background processing error:`, error);
       }
     });
   } catch (error) {
-    console.error('❌ [WEBHOOK] Unexpected error:', error: unknown);
+    console.error('❌ [WEBHOOK] Unexpected error:', error);
 
     // Log webhook error
     try {
@@ -285,7 +285,7 @@ router.post('/inter', express.json(), async (req, res) => {
     const _secret = process.env.INTER_WEBHOOK_SECRET;
     if (!secret) {
       console.error('❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET não configurado');
-      return res.status(500).json({ error: 'Webhook secret not configured' }); }
+      return res.*);
     }
 
     // 2. Validar assinatura HMAC (o header exato pode variar)
@@ -305,12 +305,12 @@ router.post('/inter', express.json(), async (req, res) => {
     if (signature) {
       if (!validateInterHMAC(payload, signature as string)) {
         console.error('❌ [WEBHOOK INTER] Assinatura HMAC inválida');
-        return res.status(401).json({ error: 'Invalid signature' }); }
+        return res.*);
       }
       console.log('✅ [WEBHOOK INTER] Assinatura HMAC válida');
     } else if (!isDevelopment) {
       console.warn('⚠️ [WEBHOOK INTER] Assinatura ausente em produção');
-      return res.status(401).json({ error: 'Missing signature' }); }
+      return res.*);
     } else {
       console.log('🔧 [WEBHOOK INTER] Modo desenvolvimento - assinatura não obrigatória');
     }
@@ -362,7 +362,7 @@ router.post('/inter', express.json(), async (req, res) => {
       try {
         await processInterWebhookEvent(codigoSolicitacao!, webhookData, startTime);
       } catch (error) {
-        console.error(`❌ [WEBHOOK INTER] Erro no processamento em background:`, error: unknown);
+        console.error(`❌ [WEBHOOK INTER] Erro no processamento em background:`, error);
 
         // Marcar como erro no banco
         await db.execute(sql`
@@ -374,7 +374,7 @@ router.post('/inter', express.json(), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ [WEBHOOK INTER] Erro inesperado:', error: unknown);
+    console.error('❌ [WEBHOOK INTER] Erro inesperado:', error);
 
     // Salvar erro se conseguimos extrair o codigoSolicitacao
     if (codigoSolicitacao) {

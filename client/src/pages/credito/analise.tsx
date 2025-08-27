@@ -33,7 +33,7 @@ const _fetchProposta = async (id: string | undefined) => {
     // A API retorna {success: true, data: {...}}, precisamos apenas do data
     return response.data?.data || response.data; }
   } catch (error) {
-    console.error('[Análise] Erro ao carregar proposta:', error: unknown);
+    console.error('[Análise] Erro ao carregar proposta:', error);
     throw new Error('Proposta não encontrada');
   }
 };

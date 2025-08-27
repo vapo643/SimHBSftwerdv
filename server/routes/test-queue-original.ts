@@ -68,7 +68,7 @@ router.post('/test-queue', async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.error('[TEST QUEUE] ❌ Erro ao adicionar job:', error: unknown);
+    console.error('[TEST QUEUE] ❌ Erro ao adicionar job:', error);
 
     return res.status(500).json({
       success: false,

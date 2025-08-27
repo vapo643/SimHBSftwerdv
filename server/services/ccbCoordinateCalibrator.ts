@@ -90,7 +90,7 @@ export class CCBCoordinateCalibrator {
   _recommendations,
       };
     } catch (error) {
-      console.error('❌ [CALIBRATOR] Erro no diagnóstico:', error: unknown);
+      console.error('❌ [CALIBRATOR] Erro no diagnóstico:', error);
       throw error;
     }
   }
@@ -199,7 +199,7 @@ export class CCBCoordinateCalibrator {
       console.log(`✅ [CALIBRATOR] Grid de calibração salvo: ${outputPath}`);
       return outputPath; }
     } catch (error) {
-      console.error('❌ [CALIBRATOR] Erro ao gerar grid:', error: unknown);
+      console.error('❌ [CALIBRATOR] Erro ao gerar grid:', error);
       throw error;
     }
   }
@@ -259,7 +259,7 @@ export class CCBCoordinateCalibrator {
       console.log(`✅ [CALIBRATOR] Teste de campos salvo: ${outputPath}`);
       return outputPath; }
     } catch (error) {
-      console.error('❌ [CALIBRATOR] Erro no teste:', error: unknown);
+      console.error('❌ [CALIBRATOR] Erro no teste:', error);
       throw error;
     }
   }
@@ -293,7 +293,7 @@ export class CCBCoordinateCalibrator {
   _recommendations,
       };
     } catch (error) {
-      console.error('❌ [CALIBRATOR] Erro na calibração inteligente:', error: unknown);
+      console.error('❌ [CALIBRATOR] Erro na calibração inteligente:', error);
       throw error;
     }
   }
@@ -358,7 +358,7 @@ export class CCBCoordinateCalibrator {
   _recommendations,
       };
     } catch (error) {
-      console.error('❌ [CALIBRATOR] Erro no relatório:', error: unknown);
+      console.error('❌ [CALIBRATOR] Erro no relatório:', error);
       throw error;
     }
   }

@@ -37,7 +37,7 @@ const _PaginationLink = ({ className, isActive, size = 'icon', ...props }: Pagin
     className={cn(
       buttonVariants({
         variant: isActive ? 'outline' : 'ghost',
-  _size,
+        _size,
       }),
       className
     )}

@@ -48,7 +48,7 @@ router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
       recentMetrics: metrics.slice(-50), // Últimas 50 métricas
     });
   } catch (error) {
-    console.error('Erro ao obter métricas de timing:', error: unknown);
+    console.error('Erro ao obter métricas de timing:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -74,7 +74,7 @@ router.get('/config', requireAdmin, async (req: AuthenticatedRequest, res) => {
 
     res.json(configInfo);
   } catch (error) {
-    console.error('Erro ao obter configuração:', error: unknown);
+    console.error('Erro ao obter configuração:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -85,7 +85,7 @@ router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
     const { endpoint = '/api/propostas/1', iterations = 100 } = req.body;
 
     if (iterations > 1000) {
-      return res.status(400).json({ error: 'Máximo 1000 iterações permitidas' }); }
+      return res.*);
     }
 
     const _testResults = {
@@ -150,7 +150,7 @@ router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
       completedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Erro ao executar teste:', error: unknown);
+    console.error('Erro ao executar teste:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -235,7 +235,7 @@ router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, 
 
     res.json(attackSimulation);
   } catch (error) {
-    console.error('Erro ao simular attack:', error: unknown);
+    console.error('Erro ao simular attack:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

@@ -46,7 +46,7 @@ export class SupabaseAuthProvider implements AuthProvider {
   }
 
   async signIn(credentials: SignInCredentials): Promise<SignInResult> {
-    const { data, error } = await this.supabase.auth.signInWithPassword({
+    const { data, error } = await this._supabase.auth.signInWithPassword({
       email: credentials.email,
       password: credentials.password,
     });
@@ -70,7 +70,7 @@ export class SupabaseAuthProvider implements AuthProvider {
   }
 
   async signOut(): Promise<void> {
-    const { error } = await this.supabase.auth.signOut();
+    const { error } = await this._supabase.auth.signOut();
     if (error) throw error;
   }
 
@@ -78,7 +78,7 @@ export class SupabaseAuthProvider implements AuthProvider {
     const {
       data: { session },
   _error,
-    } = await this.supabase.auth.getSession();
+    } = await this._supabase.auth.getSession();
 
     if (error) throw error;
     if (!session) return null; }
@@ -90,7 +90,7 @@ export class SupabaseAuthProvider implements AuthProvider {
     const {
       data: { user },
   _error,
-    } = await this.supabase.auth.getUser();
+    } = await this._supabase.auth.getUser();
 
     if (error) throw error;
     if (!user) return null; }
@@ -99,8 +99,8 @@ export class SupabaseAuthProvider implements AuthProvider {
   }
 
   onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription {
-    const { data: subscription } = this.supabase.auth.onAuthStateChange(
-      (event, session: unknown) => {
+    const { data: subscription } = this._supabase.auth.onAuthStateChange(
+      (event, session) => {
         const _user = session?.user ? this.mapSupabaseUser(session.user) : null;
         callback(user);
       }

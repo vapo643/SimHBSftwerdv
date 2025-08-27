@@ -26,7 +26,7 @@ console.log(
       timestamp: new Date().toISOString(),
       usuario: dadosProrrogar.usuario,
     },
-  _null,
+    _null,
     2
   )
 );
@@ -42,7 +42,7 @@ console.log(
       numeroParcela: 4,
       valorNominal: '166.67',
     },
-  _null,
+    _null,
     2
   )
 );
@@ -55,7 +55,7 @@ console.log(
     {
       dataVencimento: '2025-12-25',
     },
-  _null,
+    _null,
     2
   )
 );
@@ -74,7 +74,7 @@ console.log(
       atualizacaoConfirmada: true,
       statusAPI: 'A_RECEBER',
     },
-  _null,
+    _null,
     2
   )
 );
@@ -88,7 +88,7 @@ console.log(
       dataVencimentoDepois: '2025-12-25',
       atualizacaoBancoConfirmada: true,
     },
-  _null,
+    _null,
     2
   )
 );
@@ -103,7 +103,7 @@ console.log(
       falhas: 0,
       taxaSucesso: '100.0%',
     },
-  _null,
+    _null,
     2
   )
 );
@@ -128,7 +128,7 @@ console.log(
         sucesso: true,
       },
     ],
-  _null,
+    _null,
     2
   )
 );
@@ -161,7 +161,7 @@ setTimeout(() => {
         timestamp: new Date().toISOString(),
         usuario: 'admin@simpix.com',
       },
-  _null,
+      _null,
       2
     )
   );
@@ -176,7 +176,7 @@ setTimeout(() => {
         percentualDesconto: '50.0%',
         novoValorTotal: 500.0,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -190,7 +190,7 @@ setTimeout(() => {
         valorOriginal: '333.33',
         dataVencimentoOriginal: '2025-08-15',
       },
-  _null,
+      _null,
       2
     )
   );
@@ -203,7 +203,7 @@ setTimeout(() => {
         statusRetornadoAPI: 'CANCELADO',
         cancelamentoConfirmado: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -217,7 +217,7 @@ setTimeout(() => {
         valorOriginal: '333.33',
         dataVencimentoOriginal: '2025-09-15',
       },
-  _null,
+      _null,
       2
     )
   );
@@ -230,7 +230,7 @@ setTimeout(() => {
         statusRetornadoAPI: 'CANCELADO',
         cancelamentoConfirmado: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -243,7 +243,7 @@ setTimeout(() => {
         valor: 250.0,
         dataVencimento: '2025-09-15',
       },
-  _null,
+      _null,
       2
     )
   );
@@ -255,7 +255,7 @@ setTimeout(() => {
         codigoSolicitacao: 'novo-boleto-quit-1',
         sucesso: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -270,7 +270,7 @@ setTimeout(() => {
         situacao: 'A_RECEBER',
         criacaoConfirmada: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -283,7 +283,7 @@ setTimeout(() => {
         valor: 250.0,
         dataVencimento: '2025-10-15',
       },
-  _null,
+      _null,
       2
     )
   );
@@ -295,7 +295,7 @@ setTimeout(() => {
         codigoSolicitacao: 'novo-boleto-quit-2',
         sucesso: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -310,7 +310,7 @@ setTimeout(() => {
         situacao: 'A_RECEBER',
         criacaoConfirmada: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -325,7 +325,7 @@ setTimeout(() => {
         boletosInativosCorretos: true,
         novosBoletosCorretos: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -342,7 +342,7 @@ setTimeout(() => {
         novosBoletosData: 2,
         sucesso: true,
       },
-  _null,
+      _null,
       2
     )
   );
@@ -390,7 +390,7 @@ setTimeout(() => {
           },
         ],
       },
-  _null,
+      _null,
       2
     )
   );

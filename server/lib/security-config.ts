@@ -134,7 +134,7 @@ export const _payloadLimits = {
 // ========================
 // LOGS DE SEGURANÇA
 // ========================
-export function logSecurityEvent(event: string, details: unknown) {
+export function logSecurityEvent(event: string, details) {
   const _timestamp = new Date().toISOString();
   const _logMessage = `🛡️ [SECURITY] ${timestamp} - ${event}: ${JSON.stringify(details)}`;
   log(logMessage);

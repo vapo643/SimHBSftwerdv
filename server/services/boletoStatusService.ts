@@ -126,7 +126,7 @@ export class BoletoStatusService {
         updatedCount: 1,
       };
     } catch (error) {
-      console.error('[STATUS SERVICE] ❌ Erro ao processar webhook:', error: unknown);
+      console.error('[STATUS SERVICE] ❌ Erro ao processar webhook:', error);
       return {
         success: false,
         message: 'Erro ao processar webhook',
@@ -220,7 +220,7 @@ export class BoletoStatusService {
         errors: errors.length > 0 ? errors : undefined,
       };
     } catch (error) {
-      console.error('[STATUS SERVICE] ❌ Erro fatal na sincronização:', error: unknown);
+      console.error('[STATUS SERVICE] ❌ Erro fatal na sincronização:', error);
       return {
         success: false,
         message: 'Erro fatal na sincronização',
@@ -241,7 +241,7 @@ export class BoletoStatusService {
       const _propostaId = parts[1];
       await this.verificarQuitacaoProposta(propostaId);
     } catch (error) {
-      console.error('[STATUS SERVICE] ❌ Erro ao verificar quitação:', error: unknown);
+      console.error('[STATUS SERVICE] ❌ Erro ao verificar quitação:', error);
     }
   }
 
@@ -320,7 +320,7 @@ export class BoletoStatusService {
         updatedCount: 1,
       };
     } catch (error) {
-      console.error('[STATUS SERVICE] ❌ Erro ao sincronizar boleto:', error: unknown);
+      console.error('[STATUS SERVICE] ❌ Erro ao sincronizar boleto:', error);
       return {
         success: false,
         message: 'Erro ao sincronizar boleto',

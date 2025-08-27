@@ -30,8 +30,8 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
   isLoading = false,
 }) => {
   const {
-  _register,
-  _handleSubmit,
+    _register,
+    _handleSubmit,
     formState: { errors },
   } = useForm<SimplifiedPartnerData>({
     resolver: zodResolver(simplifiedPartnerSchema),

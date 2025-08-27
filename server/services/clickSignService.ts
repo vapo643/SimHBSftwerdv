@@ -162,7 +162,7 @@ class ClickSignService {
       );
       return success; }
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Connection test failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Connection test failed:', error);
       return false; }
     }
   }
@@ -198,7 +198,7 @@ class ClickSignService {
 
       return document; }
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Document upload failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Document upload failed:', error);
       throw error;
     }
   }
@@ -383,7 +383,7 @@ class ClickSignService {
         `Failed to download document from any endpoint. Document key: ${documentKey}`
       );
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Document download failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Document download failed:', error);
       throw error;
     }
   }
@@ -428,7 +428,7 @@ class ClickSignService {
 
       return signer; }
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Signer creation failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Signer creation failed:', error);
       throw error;
     }
   }
@@ -478,7 +478,7 @@ class ClickSignService {
 
       return list; }
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Signature list creation failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Signature list creation failed:', error);
       throw error;
     }
   }
@@ -523,7 +523,7 @@ class ClickSignService {
 
       return signUrl; }
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Add signer to list failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Add signer to list failed:', error);
       throw error;
     }
   }
@@ -562,7 +562,7 @@ class ClickSignService {
         signUrl: signUrl,
       };
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Complete workflow failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Complete workflow failed:', error);
       throw error;
     }
   }
@@ -582,7 +582,7 @@ class ClickSignService {
 
       return await response.json(); }
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Get document status failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Get document status failed:', error);
       throw error;
     }
   }
@@ -602,7 +602,7 @@ class ClickSignService {
 
       return await response.json(); }
     } catch (error) {
-      console.error('[CLICKSIGN] ❌ Get list status failed:', error: unknown);
+      console.error('[CLICKSIGN] ❌ Get list status failed:', error);
       throw error;
     }
   }

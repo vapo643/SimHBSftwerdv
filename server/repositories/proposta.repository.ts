@@ -181,7 +181,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
     });
 
     if (error) {
-      console.error('Failed to create communication log:', error: unknown);
+      console.error('Failed to create communication log:', error);
       // Non-critical error, don't throw
     }
   }
@@ -272,7 +272,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
       .createSignedUrl(path, expiresIn);
 
     if (error) {
-      console.error('Failed to generate signed URL:', error: unknown);
+      console.error('Failed to generate signed URL:', error);
       return null; }
     }
 
@@ -290,7 +290,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
       });
 
     if (error) {
-      console.error('Failed to check CCB existence:', error: unknown);
+      console.error('Failed to check CCB existence:', error);
       return false; }
     }
 

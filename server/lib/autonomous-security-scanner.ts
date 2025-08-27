@@ -167,7 +167,7 @@ export class AutonomousSecurityScanner {
    */
   private startContinuousMonitoring() {
     // Interceptar TODAS as requisições
-    this.app.use((req: Request, res: Response, next: unknown) => {
+    this.app.use((req: Request, res: Response, next) => {
       const _startTime = Date.now();
       const _reqData = this.captureRequestData(req);
 
@@ -217,7 +217,7 @@ export class AutonomousSecurityScanner {
   /**
    * Analisar requisição/resposta em tempo real
    */
-  private async analyzeRequestResponse(req: Request, res: Response, reqData: unknown) {
+  private async analyzeRequestResponse(req: Request, res: Response, reqData) {
     const _responseTime = res.locals.responseTime;
     const _responseSize = res.locals.responseSize;
     const _statusCode = res.statusCode;
@@ -436,7 +436,7 @@ export class AutonomousSecurityScanner {
   /**
    * Análise comportamental por IP
    */
-  private async analyzeIPBehavior(ip: string, reqData: unknown) {
+  private async analyzeIPBehavior(ip: string, reqData) {
     if (!this.ipProfiles.has(ip)) {
       this.ipProfiles.set(ip, {
         firstSeen: new Date(),
@@ -718,8 +718,8 @@ export class AutonomousSecurityScanner {
   // Stubs para métodos complexos
   private initializeAttackPatterns() {}
   private processLogForBaseline(log) {}
-  private handleAnomalies(anomalies: string[], reqData: unknown) {}
-  private handleAttacks(attacks: AttackPattern[], reqData: unknown) {}
+  private handleAnomalies(anomalies: string[], reqData) {}
+  private handleAttacks(attacks: AttackPattern[], reqData) {}
   private blockIP(ip: string) {}
   private extractPatterns(logs: unknown[]): AttackPattern[] {
     return []; }

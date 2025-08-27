@@ -23,16 +23,16 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Respon
     const _propostas = await cobrancasService.getPropostasCobranca({
       status: status as string,
       atraso: atraso as string,
-  _userRole,
+      _userRole,
     });
 
     res.json({
       success: true,
-  _propostas,
+      _propostas,
       total: propostas.length,
     });
   } catch (error) {
-    console.error('[COBRANCAS_CONTROLLER] Error fetching proposals:', error: unknown);
+    console.error('[COBRANCAS_CONTROLLER] Error fetching proposals:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Erro ao buscar propostas de cobrança',
@@ -61,7 +61,7 @@ router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Res
       ...details,
     });
   } catch (error) {
-    console.error('[COBRANCAS_CONTROLLER] Error fetching proposal details:', error: unknown);
+    console.error('[COBRANCAS_CONTROLLER] Error fetching proposal details:', error);
 
     const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
     res.status(statusCode).json({
@@ -92,17 +92,17 @@ router.post(
 
       const _observation = await cobrancasService.addObservacao({
         proposta_id: parseInt(id),
-  _observacao,
-  _tipo,
+        _observacao,
+        _tipo,
         created_by: req.user?.id || '',
       });
 
       res.json({
         success: true,
-  _observation,
+        _observation,
       });
     } catch (error) {
-      console.error('[COBRANCAS_CONTROLLER] Error adding observation:', error: unknown);
+      console.error('[COBRANCAS_CONTROLLER] Error adding observation:', error);
       res.status(500).json({
         success: false,
         error: error.message || 'Erro ao adicionar observação',
@@ -136,11 +136,11 @@ router.put(
       });
 
       res.json({
-  _success,
+        _success,
         message: success ? 'Parcela atualizada com sucesso' : 'Erro ao atualizar parcela',
       });
     } catch (error) {
-      console.error('[COBRANCAS_CONTROLLER] Error updating installment:', error: unknown);
+      console.error('[COBRANCAS_CONTROLLER] Error updating installment:', error);
       res.status(500).json({
         success: false,
         error: error.message || 'Erro ao atualizar parcela',
@@ -170,18 +170,18 @@ router.post(
 
       const _request = await cobrancasService.requestModification({
         proposta_id: parseInt(id),
-  _tipo,
-  _motivo,
-  _detalhes,
+        _tipo,
+        _motivo,
+        _detalhes,
         solicitado_por: req.user?.id || '',
       });
 
       res.json({
         success: true,
-  _request,
+        _request,
       });
     } catch (error) {
-      console.error('[COBRANCAS_CONTROLLER] Error requesting modification:', error: unknown);
+      console.error('[COBRANCAS_CONTROLLER] Error requesting modification:', error);
       res.status(500).json({
         success: false,
         error: error.message || 'Erro ao criar solicitação de modificação',
@@ -205,7 +205,7 @@ router.get(
         ...stats,
       });
     } catch (error) {
-      console.error('[COBRANCAS_CONTROLLER] Error fetching overdue stats:', error: unknown);
+      console.error('[COBRANCAS_CONTROLLER] Error fetching overdue stats:', error);
       res.status(500).json({
         success: false,
         error: error.message || 'Erro ao buscar estatísticas de atraso',
@@ -240,7 +240,7 @@ router.post(
         errors: result.errors || [],
       });
     } catch (error) {
-      console.error('[COBRANCAS_CONTROLLER] Error in batch update:', error: unknown);
+      console.error('[COBRANCAS_CONTROLLER] Error in batch update:', error);
       res.status(500).json({
         success: false,
         error: error.message || 'Erro ao processar atualizações em lote',
@@ -261,7 +261,7 @@ router.get('/kpis', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Re
       ...kpis,
     });
   } catch (error) {
-    console.error('[COBRANCAS_CONTROLLER] Error fetching KPIs:', error: unknown);
+    console.error('[COBRANCAS_CONTROLLER] Error fetching KPIs:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Erro ao buscar KPIs de cobrança',

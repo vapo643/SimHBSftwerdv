@@ -47,7 +47,7 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
 
     // Listar boletos individuais
     const _boletosPath = `propostas/${id}/boletos/`;
-    const { data: boletosFiles, error: boletosError } = await supabase.storage
+    const { data: boletosFiles, error: boletosError } = await _supabase.storage
       .from('documents')
       .list(boletosPath, {
         limit: 100,
@@ -70,7 +70,7 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
 
     // Verificar se existe carnê consolidado
     const _carnePath = `propostas/${id}/carnes/`;
-    const { data: carneFiles, error: carneError } = await supabase.storage
+    const { data: carneFiles, error: carneError } = await _supabase.storage
       .from('documents')
       .list(carnePath, {
         limit: 10,
@@ -91,7 +91,7 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
 
     // Se existe carnê, gerar URL assinada
     if (carneExists && carneFile) {
-      const { data: urlData, error: urlError } = await supabase.storage
+      const { data: urlData, error: urlError } = await _supabase.storage
         .from('documents')
         .createSignedUrl(
           `${carnePath}${carneFile.name}`,
@@ -115,23 +115,23 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
     }
 
     console.log(`[STORAGE STATUS] Proposta ${id}:`, {
-  _syncStatus,
-  _carneExists,
-  _fileCount,
-  _totalParcelas,
+      _syncStatus,
+      _carneExists,
+      _fileCount,
+      _totalParcelas,
     });
 
     return res.json({
-  _syncStatus,
-  _carneExists,
-  _fileCount,
-  _totalParcelas,
-  _boletosNoStorage,
-  _carneUrl,
+      _syncStatus,
+      _carneExists,
+      _fileCount,
+      _totalParcelas,
+      _boletosNoStorage,
+      _carneUrl,
       carneFileName: carneFile?.name || null,
     });
   } catch (error) {
-    console.error('[STORAGE STATUS] Erro:', error: unknown);
+    console.error('[STORAGE STATUS] Erro:', error);
     return res.status(500).json({
       error: 'Erro ao verificar status do storage',
       details: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -191,7 +191,7 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
 
     // Verificar quantos PDFs existem no Storage
     const _boletosPath = `propostas/${id}/boletos/emitidos_pendentes/`;
-    const { data: boletosFiles, error: boletosError } = await supabase.storage
+    const { data: boletosFiles, error: boletosError } = await _supabase.storage
       .from('documents')
       .list(boletosPath, {
         limit: 100,
@@ -203,7 +203,7 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
       return res.json({
         success: true,
         syncStatus: 'falhou',
-  _totalBoletos,
+        _totalBoletos,
         boletosSincronizados: 0,
         ultimaAtualizacao: new Date().toISOString(),
         detalhes: {
@@ -237,23 +237,23 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
     }
 
     console.log(`[SYNC STATUS PAM V1.0] Proposta ${id}:`, {
-  _syncStatus,
-  _totalBoletos,
-  _boletosSincronizados,
+      _syncStatus,
+      _totalBoletos,
+      _boletosSincronizados,
     });
 
     return res.json({
       success: true,
-  _syncStatus,
-  _totalBoletos,
-  _boletosSincronizados,
+      _syncStatus,
+      _totalBoletos,
+      _boletosSincronizados,
       ultimaAtualizacao: new Date().toISOString(),
       detalhes: {
         tempoConclusao: syncStatus == 'concluido' ? Math.floor(Math.random() * 10) + 5 : undefined,
       },
     });
   } catch (error) {
-    console.error('[SYNC STATUS PAM V1.0] Erro:', error: unknown);
+    console.error('[SYNC STATUS PAM V1.0] Erro:', error);
     return res.status(500).json({
       success: false,
       error: 'Erro ao verificar status de sincronização',

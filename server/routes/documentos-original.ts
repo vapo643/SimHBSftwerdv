@@ -56,7 +56,7 @@ router.get(
         });
       }
     } catch (error) {
-      console.error('[DOCUMENTOS_CONTROLLER] Internal error:', error: unknown);
+      console.error('[DOCUMENTOS_CONTROLLER] Internal error:', error);
       res.status(500).json({
         error: 'Erro interno do servidor',
       });
@@ -85,7 +85,7 @@ router.get(
       const _result = await documentsService.getProposalDocuments(String(propostaId));
       res.json(_result);
     } catch (error) {
-      console.error('[DOCUMENTOS_CONTROLLER] Error listing documents:', error: unknown);
+      console.error('[DOCUMENTOS_CONTROLLER] Error listing documents:', error);
 
       const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
       res.status(statusCode).json({

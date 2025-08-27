@@ -249,11 +249,11 @@ router.get(
         totalContratos: contratosComUrls.length,
         aguardandoPagamento: contratosComUrls.filter((c) => c.aguardandoPagamento).length,
         pagos: contratosComUrls.filter((c) => c.dataPagamento).length,
-        valorTotalContratado: contratosComUrls.reduce((sum: number, c: unknown) => {
+        valorTotalContratado: contratosComUrls.reduce((sum: number, c) => {
           const _valor = parseFloat(c.valor || '0');
           return sum + valor; }
         }, 0),
-        valorTotalLiberado: contratosComUrls.reduce((sum: number, c: unknown) => {
+        valorTotalLiberado: contratosComUrls.reduce((sum: number, c) => {
           const _valor = parseFloat(c.valorLiquidoLiberado || '0');
           return sum + (c.dataPagamento ? valor : 0); }
         }, 0),
@@ -273,7 +273,7 @@ router.get(
         },
       });
     } catch (error) {
-      console.error('[CONTRATOS] Erro ao buscar contratos:', error: unknown);
+      console.error('[CONTRATOS] Erro ao buscar contratos:', error);
 
       // Log de erro
       securityLogger.logEvent({
@@ -402,7 +402,7 @@ router.get(
         },
       });
     } catch (error) {
-      console.error('[CONTRATOS] Erro ao buscar detalhes do contrato:', error: unknown);
+      console.error('[CONTRATOS] Erro ao buscar detalhes do contrato:', error);
 
       res.status(500).json({
         success: false,

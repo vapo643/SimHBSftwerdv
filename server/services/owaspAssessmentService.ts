@@ -55,7 +55,7 @@ export class OWASPAssessmentService {
       await fs.mkdir(this.documentsPath, { recursive: true });
       await fs.mkdir(this.assessmentPath, { recursive: true });
     } catch (error) {
-      console.error('Error creating OWASP directories:', error: unknown);
+      console.error('Error creating OWASP directories:', error);
     }
   }
 
@@ -346,13 +346,13 @@ export class OWASPAssessmentService {
   }
 
   // Salvar assessments em arquivos
-  private async saveAssessment(filename: string, data: unknown): Promise<void> {
+  private async saveAssessment(filename: string, data): Promise<void> {
     try {
       const _filePath = path.join(this.assessmentPath, filename);
       await fs.writeFile(filePath, JSON.stringify(_data, null, 2));
       console.log(`✅ Assessment saved: ${filename}`);
     } catch (error) {
-      console.error(`Error saving assessment ${filename}:`, error: unknown);
+      console.error(`Error saving assessment ${filename}:`, error);
     }
   }
 

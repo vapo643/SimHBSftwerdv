@@ -58,7 +58,7 @@ export class CobrancasService {
 
       return processedPropostas; }
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error fetching proposals:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error fetching proposals:', error);
       throw new Error('Erro ao buscar propostas de cobrança');
     }
   }
@@ -107,7 +107,7 @@ export class CobrancasService {
   _paymentSummary,
       };
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error fetching proposal details:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error fetching proposal details:', error);
       throw error;
     }
   }
@@ -134,7 +134,7 @@ export class CobrancasService {
 
       return observation; }
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error adding observation:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error adding observation:', error);
       throw error;
     }
   }
@@ -156,7 +156,7 @@ export class CobrancasService {
 
       return success; }
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error updating installment:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error updating installment:', error);
       throw error;
     }
   }
@@ -183,7 +183,7 @@ export class CobrancasService {
 
       return request; }
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error requesting modification:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error requesting modification:', error);
       throw error;
     }
   }
@@ -211,7 +211,7 @@ export class CobrancasService {
   _byDaysOverdue,
       };
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error getting overdue stats:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error getting overdue stats:', error);
       throw error;
     }
   }
@@ -316,7 +316,7 @@ export class CobrancasService {
 
       return { success, failed, errors }; }
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error in batch update:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error in batch update:', error);
       throw error;
     }
   }
@@ -384,7 +384,7 @@ export class CobrancasService {
       console.log('[COBRANCAS_SERVICE] KPIs calculated:', kpis);
       return kpis; }
     } catch (error) {
-      console.error('[COBRANCAS_SERVICE] Error calculating KPIs:', error: unknown);
+      console.error('[COBRANCAS_SERVICE] Error calculating KPIs:', error);
       throw new Error('Erro ao calcular KPIs de cobrança');
     }
   }

@@ -98,7 +98,7 @@ export async function checkQueuesHealth() {
       },
     };
   } catch (error) {
-    console.error('[QUEUE] Health check failed:', error: unknown);
+    console.error('[QUEUE] Health check failed:', error);
     return {
       healthy: false,
       error: error instanceof Error ? error.message : 'Unknown error',

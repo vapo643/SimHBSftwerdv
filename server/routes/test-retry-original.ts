@@ -67,7 +67,7 @@ router.post('/retry', async (req: Request, res: Response) => {
       });
 
       const _testRetryQueue = new Queue('test-retry', {
-  _connection,
+        _connection,
         defaultJobOptions: {
           attempts: 5,
           backoff: {
@@ -108,7 +108,7 @@ router.post('/retry', async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.error('[TEST RETRY] ❌ Erro ao adicionar job de teste:', error: unknown);
+    console.error('[TEST RETRY] ❌ Erro ao adicionar job de teste:', error);
 
     return res.status(500).json({
       success: false,

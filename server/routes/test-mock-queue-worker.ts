@@ -52,7 +52,7 @@ router.get('/verify-worker-execution', async (req, res) => {
       note: 'Se você vir os logs [WORKER:PDF], a refatoração funcionou!',
     });
   } catch (error) {
-    console.error('❌ Erro no teste:', error: unknown);
+    console.error('❌ Erro no teste:', error);
     res.status(500).json({
       error: 'Erro no teste',
       message: error.message,
@@ -71,7 +71,7 @@ router.get('/status/:jobId', async (req, res) => {
     const _counts = await queues.pdfProcessing.getJobCounts();
 
     res.json({
-  _jobId,
+      _jobId,
       queueStatus: counts,
       message: 'Verifique os logs do servidor para confirmar execução do Worker',
     });

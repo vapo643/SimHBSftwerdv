@@ -102,7 +102,7 @@ export class ClienteService {
         data: maskedData,
       };
     } catch (error) {
-      console.error('[CLIENTE_SERVICE] Error getting client by CPF:', error: unknown);
+      console.error('[CLIENTE_SERVICE] Error getting client by CPF:', error);
       throw new Error('Erro ao buscar dados do cliente');
     }
   }
@@ -168,7 +168,7 @@ export class ClienteService {
 
       throw new Error('CEP não encontrado');
     } catch (error) {
-      console.error('[CLIENTE_SERVICE] Error fetching CEP:', error: unknown);
+      console.error('[CLIENTE_SERVICE] Error fetching CEP:', error);
       throw error;
     }
   }

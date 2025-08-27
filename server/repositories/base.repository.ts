@@ -18,7 +18,7 @@ export abstract class BaseRepository<T> {
    * Find all records with optional filters
    */
   async findAll(filters?: Record<string, any>): Promise<T[]> {
-    let _query = supabase.from(this.tableName).select('*');
+    let _query = _supabase.from(this.tableName).select('*');
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -41,7 +41,7 @@ export abstract class BaseRepository<T> {
    * Find one record by ID
    */
   async findById(id): Promise<T | null> {
-    const { data, error } = await supabase.from(this.tableName).select('*').eq('id', id).single();
+    const { data, error } = await _supabase.from(this.tableName).select('*').eq('id', id).single();
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = not found
@@ -119,6 +119,6 @@ export abstract class BaseRepository<T> {
    * Repositories handling file uploads need this
    */
   protected getStorageClient() {
-    return supabase.storage; }
+    return _supabase.storage; }
   }
 }

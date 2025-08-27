@@ -373,7 +373,7 @@ export class InterService {
           }
         }
       } catch (error) {
-        console.error(`Error syncing collection ${collection.codigoSolicitacao}:`, error: unknown);
+        console.error(`Error syncing collection ${collection.codigoSolicitacao}:`, error);
         errors++;
       }
     }

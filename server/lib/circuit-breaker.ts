@@ -75,7 +75,7 @@ export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<u
   });
 
   breaker.on('failure', (error) => {
-    console.log(`[CIRCUIT_BREAKER] ❌ ${name} request failed:`, error.message || error: unknown);
+    console.log(`[CIRCUIT_BREAKER] ❌ ${name} request failed:`, error.message || error);
   });
 
   breaker.on('success', () => {

@@ -49,7 +49,7 @@ router.get(
 
       res.json(formattedUsers);
     } catch (error) {
-      console.error('❌ [Controller/Users] Error fetching users:', error: unknown);
+      console.error('❌ [Controller/Users] Error fetching users:', error);
       res.status(500).json({
         message: error instanceof Error ? error.message : 'Erro ao buscar usuários',
       });
@@ -90,7 +90,7 @@ router.get(
 
       res.json(formattedUser);
     } catch (error) {
-      console.error(`❌ [Controller/Users] Error fetching user ${req.params.id}:`, error: unknown);
+      console.error(`❌ [Controller/Users] Error fetching user ${req.params.id}:`, error);
       res.status(500).json({
         message: error instanceof Error ? error.message : 'Erro ao buscar usuário',
       });
@@ -124,7 +124,7 @@ router.post(
 
       console.log(`✅ [Controller/Users] User created: ${newUser.email}`);
 
-      return res.status(201).json(formattedUser); }
+      return res.*);
     } catch (error) {
       // Handle validation errors
       if (error instanceof z.ZodError) {
@@ -156,7 +156,7 @@ router.post(
 
       // Handle conflict errors
       if (error.name == 'ConflictError') {
-        return res.status(409).json({ message: error.message }); }
+        return res.*);
       }
 
       console.error('❌ [Controller/Users] Error creating user:', error.message);
@@ -211,7 +211,7 @@ router.put(
         },
       });
     } catch (error) {
-      console.error('❌ [Controller/Users] Error deactivating user:', error: unknown);
+      console.error('❌ [Controller/Users] Error deactivating user:', error);
 
       const _statusCode =
         error instanceof Error &&
@@ -265,7 +265,7 @@ router.put(
         message: result.message,
       });
     } catch (error) {
-      console.error('❌ [Controller/Users] Error reactivating user:', error: unknown);
+      console.error('❌ [Controller/Users] Error reactivating user:', error);
 
       const _statusCode =
         error instanceof Error && error.message.includes('já está ativo') ? 400 : 500;
@@ -359,7 +359,7 @@ export default router;
  *
  * ANTES (Violação):
  * Controller → Supabase Client (direto)
- * - Imports dinâmicos de "../lib/supabase.js"
+ * - Imports dinâmicos de "../lib/_supabase.js"
  * - Queries diretas no controller
  * - Lógica de negócio misturada
  *
@@ -377,7 +377,7 @@ export default router;
  * 5. ✅ Conformidade com SOLID principles
  *
  * VIOLAÇÕES ELIMINADAS:
- * - Removido import de "../../lib/supabase.js"
+ * - Removido import de "../../lib/_supabase.js"
  * - Eliminadas queries diretas a "profiles" e "auth.users"
  * - Transferida lógica de negócio para camada apropriada
  */

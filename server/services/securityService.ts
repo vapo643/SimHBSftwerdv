@@ -39,7 +39,7 @@ export class SecurityService {
   _timeRange,
       };
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error getting metrics:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error getting metrics:', error);
       // Return fallback data to ensure dashboard functionality
       return this.getFallbackMetrics(timeRange); }
     }
@@ -83,7 +83,7 @@ export class SecurityService {
           return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity]; }
         });
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error getting vulnerabilities:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error getting vulnerabilities:', error);
       return this.getMockVulnerabilities(); }
     }
   }
@@ -120,7 +120,7 @@ export class SecurityService {
         .filter((a) => new Date(a.timestamp).getTime() > Date.now() - 86400000) // Last 24h
         .filter((a) => a.confidence > 0.7);
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error getting anomalies:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error getting anomalies:', error);
       return this.getMockAnomalies(); }
     }
   }
@@ -147,7 +147,7 @@ export class SecurityService {
       // Return mock data for demo
       return this.getMockDependencyScan(); }
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error getting dependency scan:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error getting dependency scan:', error);
       return this.getMockDependencyScan(); }
     }
   }
@@ -179,7 +179,7 @@ export class SecurityService {
       // Return mock findings for demo
       return this.getMockSemgrepFindings(); }
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error getting Semgrep findings:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error getting Semgrep findings:', error);
       return this.getMockSemgrepFindings(); }
     }
   }
@@ -228,7 +228,7 @@ export class SecurityService {
           return { success: false, message: 'Tipo de scan inválido' }; }
       }
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error executing scan:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error executing scan:', error);
       await securityRepository.logSecurityEvent({
         eventType: 'scan_error',
         severity: 'HIGH',
@@ -249,7 +249,7 @@ export class SecurityService {
     try {
       return await securityRepository.getActiveAlerts(); }
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error getting active alerts:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error getting active alerts:', error);
       return []; }
     }
   }
@@ -276,7 +276,7 @@ export class SecurityService {
 
       return resolved; }
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error resolving alert:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error resolving alert:', error);
       return false; }
     }
   }
@@ -326,7 +326,7 @@ export class SecurityService {
 
       return report; }
     } catch (error) {
-      console.error('[SECURITY_SERVICE] Error generating report:', error: unknown);
+      console.error('[SECURITY_SERVICE] Error generating report:', error);
       throw error;
     }
   }

@@ -105,7 +105,7 @@ export class DependencyScanner extends EventEmitter {
 
       console.log('✅ [DEPENDENCY-CHECK] Instalação concluída');
     } catch (error) {
-      console.error('❌ [DEPENDENCY-CHECK] Erro na instalação:', error: unknown);
+      console.error('❌ [DEPENDENCY-CHECK] Erro na instalação:', error);
       this.emit('error', { type: 'installation', error });
     }
   }
@@ -177,7 +177,7 @@ export class DependencyScanner extends EventEmitter {
 
       return result; }
     } catch (error) {
-      console.error('❌ [DEPENDENCY-CHECK] Erro no scan:', error: unknown);
+      console.error('❌ [DEPENDENCY-CHECK] Erro no scan:', error);
       this.emit('error', { type: 'scan', error });
       return null; }
     } finally {
@@ -273,7 +273,7 @@ export class DependencyScanner extends EventEmitter {
         await this.runScan();
       });
     } catch (error) {
-      console.warn('Failed to watch package.json changes:', error: unknown);
+      console.warn('Failed to watch package.json changes:', error);
     }
   }
 

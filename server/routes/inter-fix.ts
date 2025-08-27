@@ -18,7 +18,7 @@ router.post('/execute', async (req: Request, res: Response) => {
     const _result = await interFixService.executeOperation('execute_fix', req.body);
     res.json(_result);
   } catch (error) {
-    console.error('[INTER_FIX] Error:', error: unknown);
+    console.error('[INTER_FIX] Error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Fix execution failed',
@@ -35,7 +35,7 @@ router.post('/boletos', async (req: Request, res: Response) => {
     const _result = await interFixService.executeOperation('fix_boletos', req.body);
     res.json(_result);
   } catch (error) {
-    console.error('[INTER_FIX] Boletos fix failed:', error: unknown);
+    console.error('[INTER_FIX] Boletos fix failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Boletos fix failed',
@@ -52,7 +52,7 @@ router.post('/collections', async (req: Request, res: Response) => {
     const _result = await interFixService.executeOperation('fix_collections', req.body);
     res.json(_result);
   } catch (error) {
-    console.error('[INTER_FIX] Collections fix failed:', error: unknown);
+    console.error('[INTER_FIX] Collections fix failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Collections fix failed',
@@ -69,7 +69,7 @@ router.get('/test', async (req: Request, res: Response) => {
     const _result = await interFixService.testConnection();
     res.json(_result);
   } catch (error) {
-    console.error('[INTER_FIX] Test failed:', error: unknown);
+    console.error('[INTER_FIX] Test failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Test failed',

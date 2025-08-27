@@ -24,10 +24,10 @@ export function setupSecurityHeaders() {
     imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
     connectSrc: [
       "'self'",
-      'https://*.supabase.co', // Supabase
+      'https://*._supabase.co', // Supabase
       'https://cdn.inter.co', // Banco Inter
       'https://api.clicksign.com', // ClickSign
-      'wss://*.supabase.co', // WebSocket Supabase
+      'wss://*._supabase.co', // WebSocket Supabase
       process.env.NODE_ENV == 'development' ? 'ws://localhost:*' : '',
     ].filter(Boolean),
     mediaSrc: ["'none'"],

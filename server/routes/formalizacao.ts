@@ -19,7 +19,7 @@ router.post('/execute', async (req: AuthenticatedRequest, res: Response) => {
     const _result = await proposalService.executeOperation('formalization', req.body);
     res.json(_result);
   } catch (error) {
-    console.error('[FORMALIZACAO] Error:', error: unknown);
+    console.error('[FORMALIZACAO] Error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Formalization failed',

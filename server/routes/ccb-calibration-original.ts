@@ -18,7 +18,7 @@ router.post('/calibrate', async (req: Request, res: Response) => {
     const _result = await ccbCalibrationService.executeOperation('calibrate', req.body);
     res.json(_result);
   } catch (error) {
-    console.error('[CCB_CALIBRATION] Error:', error: unknown);
+    console.error('[CCB_CALIBRATION] Error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Calibration failed',
@@ -35,7 +35,7 @@ router.get('/test', async (req: Request, res: Response) => {
     const _result = await ccbCalibrationService.testConnection();
     res.json(_result);
   } catch (error) {
-    console.error('[CCB_CALIBRATION] Test failed:', error: unknown);
+    console.error('[CCB_CALIBRATION] Test failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Test failed',
@@ -52,7 +52,7 @@ router.get('/status', async (req: Request, res: Response) => {
     const _status = await ccbCalibrationService.getStatus();
     res.json(status);
   } catch (error) {
-    console.error('[CCB_CALIBRATION] Status check failed:', error: unknown);
+    console.error('[CCB_CALIBRATION] Status check failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Status check failed',

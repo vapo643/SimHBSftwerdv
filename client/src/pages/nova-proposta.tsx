@@ -148,7 +148,7 @@ export default function NovaProposta() {
           });
         }
       } catch (error) {
-        console.error('Erro ao recuperar dados:', error: unknown);
+        console.error('Erro ao recuperar dados:', error);
         // Em caso de erro, limpa o localStorage corrompido
         localStorage.removeItem('proposta_temp');
       }
@@ -362,7 +362,7 @@ export default function NovaProposta() {
       }, 1500);
     },
     onError: (error) => {
-      console.error('[VALIDATION ERROR]', error: unknown);
+      console.error('[VALIDATION ERROR]', error);
 
       // Se houver erros de validação específicos, destacar os campos
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {

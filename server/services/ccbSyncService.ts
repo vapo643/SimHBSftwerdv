@@ -3,7 +3,7 @@
  * Automatically downloads signed CCBs from ClickSign and stores them in Supabase Storage
  */
 
-import { db, supabase } from '../lib/supabase.js';
+import { db, supabase } from '../lib/_supabase.js';
 import { propostas } from '@shared/schema.js';
 import { sql } from 'drizzle-orm';
 
@@ -85,7 +85,7 @@ class CCBSyncService {
 
       console.log('[CCB SYNC] ✅ Synchronization complete');
     } catch (error) {
-      console.error('[CCB SYNC] ❌ Error during synchronization:', error: unknown);
+      console.error('[CCB SYNC] ❌ Error during synchronization:', error);
     }
   }
 
@@ -122,7 +122,7 @@ class CCBSyncService {
       console.log(`[CCB SYNC] 💾 Saving to Storage: ${storagePath}`);
 
       // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await _supabase.storage
         .from('documents')
         .upload(storagePath, pdfBuffer, {
           contentType: 'application/pdf',
@@ -146,7 +146,7 @@ class CCBSyncService {
       console.log(`[CCB SYNC] ✅ Successfully synced CCB for ${proposalId}`);
       return true; }
     } catch (error) {
-      console.error(`[CCB SYNC] ❌ Error syncing CCB for ${proposalId}:`, error: unknown);
+      console.error(`[CCB SYNC] ❌ Error syncing CCB for ${proposalId}:`, error);
       return false; }
     }
   }
@@ -193,7 +193,7 @@ class CCBSyncService {
         proposal.clienteNome as string
       );
     } catch (error) {
-      console.error(`[CCB SYNC] ❌ Error force syncing ${proposalId}:`, error: unknown);
+      console.error(`[CCB SYNC] ❌ Error force syncing ${proposalId}:`, error);
       return false; }
     }
   }

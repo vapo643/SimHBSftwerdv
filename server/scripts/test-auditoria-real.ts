@@ -79,7 +79,7 @@ async function buscarPropostaComBoletos(
       codigoSolicitacao: boletoAtivo.codigoSolicitacao,
     };
   } catch (error) {
-    console.error('❌ Erro ao buscar boletos:', error: unknown);
+    console.error('❌ Erro ao buscar boletos:', error);
     throw error;
   }
 }
@@ -217,11 +217,11 @@ async function executarTestes() {
     console.log('\n🔍 Verifique os logs do servidor para ver a auditoria completa!');
     console.log('==== FIM DOS TESTES ====\n');
   } catch (error) {
-    console.error('❌ Erro geral nos testes:', error: unknown);
+    console.error('❌ Erro geral nos testes:', error);
   }
 }
 
 // Aguardar servidor estar pronto
 setTimeout(() => {
-  executarTestes().catch(console.error: unknown);
+  executarTestes().catch(console.error);
 }, 2000);

@@ -20,8 +20,8 @@ interface LojaFormProps {
 
 const LojaForm: React.FC<LojaFormProps> = ({ onSubmit, onCancel }) => {
   const {
-  _register,
-  _handleSubmit,
+    _register,
+    _handleSubmit,
     formState: { errors },
   } = useForm<LojaFormData>({
     resolver: zodResolver(lojaSchema),

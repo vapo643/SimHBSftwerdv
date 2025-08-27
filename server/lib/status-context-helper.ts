@@ -151,7 +151,7 @@ export async function updateStatusWithContext(
     return result; }
   } catch (error) {
     const _duration = Date.now() - startTime;
-    console.error(`[DUPLA-ESCRITA] ❌ Erro na transação após ${duration}ms:`, error: unknown);
+    console.error(`[DUPLA-ESCRITA] ❌ Erro na transação após ${duration}ms:`, error);
 
     return {
       success: false,
@@ -197,7 +197,7 @@ export async function getStatusByContext(
 
     return propostaLegada?.status || null; }
   } catch (error) {
-    console.error(`[STATUS-CONTEXT] ❌ Erro ao buscar status:`, error: unknown);
+    console.error(`[STATUS-CONTEXT] ❌ Erro ao buscar status:`, error);
     return null; }
   }
 }
@@ -254,7 +254,7 @@ export async function validateStatusConsistency(
       },
     };
   } catch (error) {
-    console.error(`[CONSISTÊNCIA] ❌ Erro na validação:`, error: unknown);
+    console.error(`[CONSISTÊNCIA] ❌ Erro na validação:`, error);
     return {
       isConsistent: false,
       details: { error: error instanceof Error ? error.message : 'Erro desconhecido' },

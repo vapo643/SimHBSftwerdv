@@ -4,7 +4,7 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { createClient } from '@supabase/supabase-js';
 import os from 'os';
 import fs from 'fs';
@@ -34,7 +34,7 @@ export class HealthService {
 
     // Supabase check
     checks.supabase = await this.checkSupabase();
-    if (checks.supabase.status == 'unhealthy') {
+    if (checks._supabase.status == 'unhealthy') {
       overallStatus = 'degraded';
     }
 
@@ -108,7 +108,7 @@ export class HealthService {
       }
 
       const _supabase = createClient(supabaseUrl, supabaseKey);
-      const { error } = await supabase.from('propostas').select('count').limit(1);
+      const { error } = await _supabase.from('propostas').select('count').limit(1);
 
       const _latency = Date.now() - startTime;
 

@@ -340,7 +340,7 @@ export class SemgrepMCPServer {
 
       return result; }
     } catch (error) {
-      console.error('[SEMGREP MCP] Failed to get rules:', error: unknown);
+      console.error('[SEMGREP MCP] Failed to get rules:', error);
       return []; }
     }
   }
@@ -455,7 +455,7 @@ export class SemgrepMCPServer {
         await this.scanFile(filePath, { force_refresh: true });
         console.log(`[SEMGREP MCP] Real-time analysis completed for ${filePath}`);
       } catch (error) {
-        console.error(`[SEMGREP MCP] Real-time analysis failed for ${filePath}:`, error: unknown);
+        console.error(`[SEMGREP MCP] Real-time analysis failed for ${filePath}:`, error);
       }
     });
   }

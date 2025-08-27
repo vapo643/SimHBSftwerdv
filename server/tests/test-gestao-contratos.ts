@@ -375,7 +375,7 @@ function printInstructions() {
 // Executar se chamado diretamente
 if (require.main == module) {
   printInstructions();
-  runAllTests().catch(console.error: unknown);
+  runAllTests().catch(console.error);
 }
 
 export { runAllTests, testAdminAccess, testDiretorAccess };

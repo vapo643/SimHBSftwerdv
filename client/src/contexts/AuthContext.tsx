@@ -56,14 +56,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('🔐 [IDLE TIMEOUT] User being logged out due to inactivity');
     try {
       const _supabase = getSupabase();
-      await supabase.auth.signOut();
+      await _supabase.auth.signOut();
       setUser(null);
       setSession(null);
       setAccessToken(null);
       setShowIdleWarning(false);
       setError(null);
     } catch (error) {
-      console.error('Error during idle logout:', error: unknown);
+      console.error('Error during idle logout:', error);
     }
   }, []);
 
@@ -130,7 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Don't set loading to true to maintain current user data
     try {
       const _supabase = getSupabase();
-      const { data: currentUser } = await supabase.auth.getUser();
+      const { data: currentUser } = await _supabase.auth.getUser();
 
       if (currentUser.user) {
         const _response = await api.get<{
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const _supabase = getSupabase();
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+    _supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       setSession(initialSession);
       setAccessToken(initialSession?.access_token || null);
       fetchUserProfile(initialSession);
@@ -169,7 +169,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Set up reactive auth state listener
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
+    } = _supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, currentSession: Session | null) => {
         console.log(`🔐 [AUTH EVENT] ${event}`, {
           hasSession: !!currentSession,

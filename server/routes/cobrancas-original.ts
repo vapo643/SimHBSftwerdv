@@ -365,7 +365,7 @@ router.get('/', async (req, res) => {
 
     res.json(propostasFiltradas);
   } catch (error) {
-    console.error('Erro ao buscar propostas de cobrança:', error: unknown);
+    console.error('Erro ao buscar propostas de cobrança:', error);
     res.status(500).json({ message: 'Erro ao buscar propostas de cobrança' });
   }
 });
@@ -433,7 +433,7 @@ router.get('/kpis', async (req, res) => {
       taxaInadimplencia: taxaInadimplencia.toFixed(2),
     });
   } catch (error) {
-    console.error('Erro ao calcular KPIs:', error: unknown);
+    console.error('Erro ao calcular KPIs:', error);
     res.status(500).json({ message: 'Erro ao calcular KPIs' });
   }
 });
@@ -491,7 +491,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
     const [proposta] = result;
 
     if (!proposta) {
-      return res.status(404).json({ message: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // Referências pessoais
@@ -620,7 +620,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
 
     res.json(ficha);
   } catch (error) {
-    console.error('Erro ao buscar ficha do cliente:', error: unknown);
+    console.error('Erro ao buscar ficha do cliente:', error);
     res.status(500).json({ message: 'Erro ao buscar ficha do cliente' });
   }
 });
@@ -651,7 +651,7 @@ router.patch(
         .limit(1);
 
       if (!boletoInter) {
-        return res.status(404).json({ error: 'Parcela não encontrada' }); }
+        return res.*);
       }
 
       // Atualizar status para PAGO
@@ -695,7 +695,7 @@ router.patch(
         numeroParcela: boletoInter.numeroParcela,
       });
     } catch (error) {
-      console.error('[COBRANCAS] Erro ao marcar parcela como paga:', error: unknown);
+      console.error('[COBRANCAS] Erro ao marcar parcela como paga:', error);
       res.status(500).json({ error: 'Erro ao processar solicitação' });
     }
   }
@@ -710,7 +710,7 @@ router.post('/:propostaId/observacao', async (req, res) => {
     const _userName = req.user?.name || 'Sistema';
 
     if (!observacao) {
-      return res.status(400).json({ message: 'Observação é obrigatória' }); }
+      return res.*);
     }
 
     const _novaObservacao = await db
@@ -728,7 +728,7 @@ router.post('/:propostaId/observacao', async (req, res) => {
 
     res.json(novaObservacao[0]);
   } catch (error) {
-    console.error('Erro ao adicionar observação:', error: unknown);
+    console.error('Erro ao adicionar observação:', error);
     res.status(500).json({ message: 'Erro ao adicionar observação' });
   }
 });
@@ -741,7 +741,7 @@ router.get('/inter-sumario', async (req, res) => {
     // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-SUMARIO] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' }); }
+      return res.*);
     }
 
     const { interBankService } = await import('../services/interBankService');
@@ -759,7 +759,7 @@ router.get('/inter-sumario', async (req, res) => {
 
     res.json(sumario);
   } catch (error) {
-    console.error('Erro ao obter sumário do Inter:', error: unknown);
+    console.error('Erro ao obter sumário do Inter:', error);
     res.status(500).json({ message: 'Erro ao obter sumário financeiro' });
   }
 });
@@ -775,11 +775,11 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req, res) => {
     // Verificar se usuário tem permissão
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-SYNC-ALL] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' }); }
+      return res.*);
     }
 
     if (!propostaId) {
-      return res.status(400).json({ message: 'ID da proposta é obrigatório' }); }
+      return res.*);
     }
 
     console.log(`[INTER-SYNC-ALL] Iniciando sincronização para proposta: ${propostaId}`);
@@ -891,7 +891,7 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req, res) => {
   _erros,
     });
   } catch (error) {
-    console.error('[INTER-SYNC-ALL] Erro:', error: unknown);
+    console.error('[INTER-SYNC-ALL] Erro:', error);
     res.status(500).json({ message: 'Erro ao sincronizar boletos' });
   }
 });
@@ -905,7 +905,7 @@ router.get('/inter-status/:codigoSolicitacao', async (req, res) => {
     // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-STATUS] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' }); }
+      return res.*);
     }
 
     const { interBankService } = await import('../services/interBankService');
@@ -1003,7 +1003,7 @@ router.get('/inter-status/:codigoSolicitacao', async (req, res) => {
       codigoBarras: cobranca?.boleto?.codigoBarras,
     });
   } catch (error) {
-    console.error('Erro ao obter status do boleto:', error: unknown);
+    console.error('Erro ao obter status do boleto:', error);
     res.status(500).json({ message: 'Erro ao obter status do boleto' });
   }
 });
@@ -1017,7 +1017,7 @@ router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req, res) => {
     // Verificar permissão
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[SYNC] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' }); }
+      return res.*);
     }
 
     console.log(`[SYNC] Iniciando sincronização para proposta ${propostaId}`);
@@ -1037,7 +1037,7 @@ router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req, res) => {
       erros: result.errors,
     });
   } catch (error) {
-    console.error('[SYNC] Erro ao sincronizar:', error: unknown);
+    console.error('[SYNC] Erro ao sincronizar:', error);
     res.status(500).json({
       success: false,
       message: 'Erro ao sincronizar status dos boletos',
@@ -1114,7 +1114,7 @@ router.get('/exportar/inadimplentes', async (req, res) => {
       dataExportacao: format(new Date(), 'dd/MM/yyyy HH:mm'),
     });
   } catch (error) {
-    console.error('Erro ao exportar inadimplentes:', error: unknown);
+    console.error('Erro ao exportar inadimplentes:', error);
     res.status(500).json({ message: 'Erro ao exportar inadimplentes' });
   }
 });
@@ -1276,7 +1276,7 @@ router.post(
             })
             .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
 
-          console.error(`[PRORROGAR] Erro na execução automática:`, error: unknown);
+          console.error(`[PRORROGAR] Erro na execução automática:`, error);
           return res.status(500).json({
             error: 'Erro na execução',
             message: 'Solicitação aprovada mas houve erro ao executar no Banco Inter',
@@ -1296,7 +1296,7 @@ router.post(
   _novaDataVencimento,
       });
     } catch (error) {
-      console.error('[PRORROGAR] Erro geral:', error: unknown);
+      console.error('[PRORROGAR] Erro geral:', error);
       res.status(500).json({
         error: 'Erro interno',
         message: 'Erro ao criar solicitação de prorrogação',
@@ -1470,7 +1470,7 @@ router.post(
             })
             .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
 
-          console.error(`[DESCONTO] Erro na execução automática:`, error: unknown);
+          console.error(`[DESCONTO] Erro na execução automática:`, error);
           return res.status(500).json({
             error: 'Erro na execução',
             message: 'Solicitação aprovada mas houve erro ao executar no Banco Inter',
@@ -1491,7 +1491,7 @@ router.post(
   _valorDesconto,
       });
     } catch (error) {
-      console.error('[DESCONTO] Erro geral:', error: unknown);
+      console.error('[DESCONTO] Erro geral:', error);
       res.status(500).json({
         error: 'Erro interno',
         message: 'Erro ao criar solicitação de desconto',
@@ -1540,7 +1540,7 @@ router.get('/solicitacoes', jwtAuthMiddleware, async (req, res) => {
 
     res.json(solicitacoes);
   } catch (error) {
-    console.error('[SOLICITAÇÕES] Erro ao buscar:', error: unknown);
+    console.error('[SOLICITAÇÕES] Erro ao buscar:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao buscar solicitações',
@@ -1649,7 +1649,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => 
         })
         .where(eq(solicitacoesModificacao.id, parseInt(id)));
 
-      console.error(`[APROVAR] Erro ao executar:`, error: unknown);
+      console.error(`[APROVAR] Erro ao executar:`, error);
       res.status(500).json({
         error: 'Erro na execução',
         message: 'Solicitação aprovada mas houve erro ao executar no Banco Inter',
@@ -1657,7 +1657,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => 
       });
     }
   } catch (error) {
-    console.error('[APROVAR] Erro geral:', error: unknown);
+    console.error('[APROVAR] Erro geral:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao aprovar solicitação',
@@ -1735,7 +1735,7 @@ router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req, res) =>
   _motivo,
     });
   } catch (error) {
-    console.error('[REJEITAR] Erro:', error: unknown);
+    console.error('[REJEITAR] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao rejeitar solicitação',

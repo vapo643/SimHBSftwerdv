@@ -92,8 +92,8 @@ router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-  _filePath,
-  _publicUrl,
+      _filePath,
+      _publicUrl,
       logs: result.logs,
       stats: {
         totalLogs: result.logs?.length || 0,
@@ -103,7 +103,7 @@ router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('❌ Erro no teste CCB V2:', error: unknown);
+    console.error('❌ Erro no teste CCB V2:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -151,7 +151,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-  _validation,
+      _validation,
       summary: {
         totalFields: validation.totalFields,
         totalPages: Object.keys(validation.pages).length,
@@ -202,7 +202,7 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-  _fieldName,
+      _fieldName,
       original: {
         x: fieldCoord.x,
         y: fieldCoord.y,
@@ -220,7 +220,7 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
         deltaY: adjustedCoord.y - fieldCoord.y,
         sizeChanged: adjustedCoord.size !== fieldCoord.size,
       },
-  _testValue,
+      _testValue,
       label: fieldCoord.label,
       maxWidth: fieldCoord.maxWidth,
     });
@@ -265,7 +265,7 @@ router.get('/comparison', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-  _comparison,
+      _comparison,
     });
   } catch (error) {
     res.status(500).json({

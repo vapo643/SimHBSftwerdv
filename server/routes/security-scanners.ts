@@ -12,7 +12,7 @@ import { AuthenticatedRequest } from '../../shared/types/express';
 const _router = Router();
 
 // Middleware for admin access
-const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next: unknown) => {
+const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -116,7 +116,7 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
       },
     });
   } catch (error) {
-    console.error('[SCA] Error reading dependency check report:', error: unknown);
+    console.error('[SCA] Error reading dependency check report:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao ler relatório de dependências',
@@ -161,10 +161,10 @@ router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => 
         if (stderr) console.error('[SCA] Warnings:', stderr);
       })
       .catch((error) => {
-        console.error('[SCA] Analysis failed:', error: unknown);
+        console.error('[SCA] Analysis failed:', error);
       });
   } catch (error) {
-    console.error('[SCA] Error running dependency check:', error: unknown);
+    console.error('[SCA] Error running dependency check:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao executar análise de dependências',

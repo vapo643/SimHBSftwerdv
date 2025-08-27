@@ -49,7 +49,7 @@ export class SecurityWebSocketManager {
       });
 
       ws.on('error', (error) => {
-        console.error('❌ [Security WS] Erro:', error: unknown);
+        console.error('❌ [Security WS] Erro:', error);
         this.clients.delete(ws);
       });
     });

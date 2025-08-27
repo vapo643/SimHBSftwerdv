@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { jwtAuthMiddleware, type AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
-import { db, supabase } from '../../lib/supabase.js';
+import { db, supabase } from '../../lib/_supabase.js';
 import {
   _propostas,
   _users,
@@ -81,7 +81,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     // Primeiro, vamos debugar para ver quantas propostas existem com cada condição
@@ -516,7 +516,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     res.json(pagamentosFiltrados);
   } catch (error) {
-    console.error('Erro ao buscar pagamentos:', error: unknown);
+    console.error('Erro ao buscar pagamentos:', error);
     res.status(500).json({ error: 'Erro ao buscar pagamentos' });
   }
 });
@@ -530,19 +530,19 @@ router.post('/:id/aprovar', jwtAuthMiddleware, async (req: AuthenticatedRequest,
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     // Verificar se o usuário tem permissão para aprovar
     if (!['ADMINISTRADOR', 'DIRETOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
-      return res.status(403).json({ error: 'Sem permissão para aprovar pagamentos' }); }
+      return res.*);
     }
 
     // Buscar a proposta
     const _proposta = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta.length) {
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
@@ -572,7 +572,7 @@ router.post('/:id/aprovar', jwtAuthMiddleware, async (req: AuthenticatedRequest,
 
     res.json({ message: 'Pagamento aprovado com sucesso' });
   } catch (error) {
-    console.error('Erro ao aprovar pagamento:', error: unknown);
+    console.error('Erro ao aprovar pagamento:', error);
     res.status(500).json({ error: 'Erro ao aprovar pagamento' });
   }
 });
@@ -586,16 +586,16 @@ router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest
     const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     // Verificar se o usuário tem permissão para rejeitar
     if (!['ADMINISTRADOR', 'DIRETOR', 'FINANCEIRO', 'GERENTE'].includes(userRole || '')) {
-      return res.status(403).json({ error: 'Sem permissão para rejeitar pagamentos' }); }
+      return res.*);
     }
 
     if (!motivo) {
-      return res.status(400).json({ error: 'Motivo da rejeição é obrigatório' }); }
+      return res.*);
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
@@ -626,7 +626,7 @@ router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest
 
     res.json({ message: 'Pagamento rejeitado com sucesso' });
   } catch (error) {
-    console.error('Erro ao rejeitar pagamento:', error: unknown);
+    console.error('Erro ao rejeitar pagamento:', error);
     res.status(500).json({ error: 'Erro ao rejeitar pagamento' });
   }
 });
@@ -639,14 +639,14 @@ router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedReques
     const _userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     // Buscar a proposta
     const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // PAM V1.0 - Usar FSM para validação de transição
@@ -686,7 +686,7 @@ router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedReques
 
     res.json({ success: true, message: 'Pagamento processado com sucesso' });
   } catch (error) {
-    console.error('[PAGAMENTOS] Erro ao processar pagamento:', error: unknown);
+    console.error('[PAGAMENTOS] Erro ao processar pagamento:', error);
     res.status(500).json({ error: 'Erro ao processar pagamento' });
   }
 });
@@ -701,7 +701,7 @@ router.get(
       const _userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({ error: 'Usuário não autenticado' }); }
+        return res.*);
       }
 
       // Registrar auditoria de visualização
@@ -713,7 +713,7 @@ router.get(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
       if (!proposta) {
-        return res.status(404).json({ error: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       // Verificar boletos no Inter
@@ -748,7 +748,7 @@ router.get(
 
       res.json(verificacoes);
     } catch (error) {
-      console.error('Erro ao verificar documentos:', error: unknown);
+      console.error('Erro ao verificar documentos:', error);
       res.status(500).json({ error: 'Erro ao verificar documentos' });
     }
   }
@@ -766,12 +766,12 @@ router.post(
       const _userRole = req.user?.role;
 
       if (!userId) {
-        return res.status(401).json({ error: 'Usuário não autenticado' }); }
+        return res.*);
       }
 
       // Verificar permissões - SEGREGAÇÃO DE FUNÇÕES
       if (!['ADMINISTRADOR', 'FINANCEIRO'].includes(userRole || '')) {
-        return res.status(403).json({ error: 'Usuário sem permissão para confirmar desembolsos' }); }
+        return res.*);
       }
 
       // TODO: Implementar verificação de senha/MFA
@@ -780,12 +780,12 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
       if (!proposta) {
-        return res.status(404).json({ error: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       // Verificações críticas
       if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
-        return res.status(400).json({ error: 'CCB não assinada. Desembolso bloqueado.' }); }
+        return res.*);
       }
 
       const _boletos = await db
@@ -794,7 +794,7 @@ router.post(
         .where(eq(interCollections.propostaId, id));
 
       if (boletos.length == 0) {
-        return res.status(400).json({ error: 'Boletos não gerados. Desembolso bloqueado.' }); }
+        return res.*);
       }
 
       // PAM V1.0 - Usar FSM para validação de transição
@@ -860,7 +860,7 @@ router.post(
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error('Erro ao confirmar desembolso:', error: unknown);
+      console.error('Erro ao confirmar desembolso:', error);
       res.status(500).json({ error: 'Erro ao confirmar desembolso' });
     }
   }
@@ -873,7 +873,7 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
     const _userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' }); }
+      return res.*);
     }
 
     console.log(`[PAGAMENTOS] Buscando CCB assinada para proposta: ${id}`);
@@ -882,16 +882,16 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
     const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // Verificar se a CCB foi gerada e assinada
     if (!proposta.ccbGerado) {
-      return res.status(400).json({ error: 'CCB não foi gerada para esta proposta' }); }
+      return res.*);
     }
 
     if (!proposta.assinaturaEletronicaConcluida) {
-      return res.status(400).json({ error: 'CCB ainda não foi assinada eletronicamente' }); }
+      return res.*);
     }
 
     const _filename = `CCB_${proposta.id}_assinada.pdf`;
@@ -904,7 +904,7 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
         );
 
         // Baixar o arquivo do Storage
-        const { data, error } = await supabase.storage
+        const { data, error } = await _supabase.storage
           .from('documents')
           .download(proposta.caminhoCcbAssinado);
 
@@ -927,7 +927,7 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
 
     // ESTRATÉGIA 2: Se não encontrou no Storage, buscar da ClickSign e salvar
     if (!proposta.clicksignDocumentKey) {
-      return res.status(400).json({ error: 'CCB assinada não encontrada' }); }
+      return res.*);
     }
 
     // Importar o serviço ClickSign
@@ -944,7 +944,7 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
       const _storagePath = `ccb/assinadas/${proposta.id}/${filename}`;
 
       console.log(`[PAGAMENTOS] Salvando CCB no Supabase Storage: ${storagePath}`);
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await _supabase.storage
         .from('documents')
         .upload(storagePath, pdfBuffer, {
           contentType: 'application/pdf',
@@ -990,7 +990,7 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
       });
     }
   } catch (error) {
-    console.error('[PAGAMENTOS] Erro ao buscar CCB assinada:', error: unknown);
+    console.error('[PAGAMENTOS] Erro ao buscar CCB assinada:', error);
     res.status(500).json({ error: 'Erro ao buscar CCB assinada' });
   }
 });
@@ -1024,7 +1024,7 @@ router.get('/:id/ccb-storage-status', jwtAuthMiddleware, async (req: Authenticat
       | undefined;
 
     if (!proposta) {
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // Verificar se existe no Storage
@@ -1034,14 +1034,14 @@ router.get('/:id/ccb-storage-status', jwtAuthMiddleware, async (req: Authenticat
     if (proposta.caminhoCcbAssinado) {
       const _pathParts = proposta.caminhoCcbAssinado.split('/');
       const _folderPath = pathParts.slice(0, -1).join('/');
-      const { data: files } = await supabase.storage.from('documents').list(folderPath);
+      const { data: files } = await _supabase.storage.from('documents').list(folderPath);
 
       existsInStorage = files
         ? files.some((f) => proposta.caminhoCcbAssinado?.includes(f.name))
         : false;
 
       if (existsInStorage) {
-        const { data: urlData } = await supabase.storage
+        const { data: urlData } = await _supabase.storage
           .from('documents')
           .createSignedUrl(proposta.caminhoCcbAssinado, 3600);
         storageUrl = urlData?.signedUrl;
@@ -1070,7 +1070,7 @@ router.get('/:id/ccb-storage-status', jwtAuthMiddleware, async (req: Authenticat
           : 'CCB disponível no Storage',
     });
   } catch (error) {
-    console.error('[PAGAMENTOS] Erro ao verificar status da CCB:', error: unknown);
+    console.error('[PAGAMENTOS] Erro ao verificar status da CCB:', error);
     res.status(500).json({ error: 'Erro ao verificar status' });
   }
 });
@@ -1124,7 +1124,7 @@ router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: Authenticat
     const _propostaData = result[0];
 
     if (!propostaData) {
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // Buscar dados relacionados usando SQL direto para evitar problemas de schema
@@ -1219,7 +1219,7 @@ router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: Authenticat
     });
     res.json(respostaCompleta);
   } catch (error) {
-    console.error('[PAGAMENTOS] Erro ao buscar detalhes completos:', error: unknown);
+    console.error('[PAGAMENTOS] Erro ao buscar detalhes completos:', error);
     res.status(500).json({ error: 'Erro ao buscar detalhes da proposta' });
   }
 });
@@ -1237,7 +1237,7 @@ router.post(
 
       // Verificar permissões - apenas ADMIN e FINANCEIRO podem confirmar
       if (userRole !== 'ADMINISTRADOR' && userRole !== 'FINANCEIRO') {
-        return res.status(403).json({ error: 'Sem permissão para confirmar veracidade' }); }
+        return res.*);
       }
 
       console.log(`[PAGAMENTOS] Confirmando veracidade da proposta: ${id} por usuário: ${userId}`);
@@ -1265,7 +1265,7 @@ router.post(
 
       if (!proposta) {
         console.log(`[PAGAMENTOS] ❌ Proposta não encontrada: ${id}`);
-        return res.status(404).json({ error: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       console.log(
@@ -1388,7 +1388,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error('[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:', error: unknown);
+      console.error('[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:', error);
       console.error('[PAGAMENTOS] ❌ Stack trace:', (error as unknown).stack);
       res
         .status(500)
@@ -1425,7 +1425,7 @@ router.post(
 
       if (!proposta) {
         console.log(`[PAGAMENTOS] ❌ [AUDIT] Proposta não encontrada: ${id}`);
-        return res.status(404).json({ error: 'Proposta não encontrada' }); }
+        return res.*);
       }
 
       // Verificar se a proposta está no status correto
@@ -1470,13 +1470,13 @@ router.post(
 
         try {
           // Upload para Supabase Storage
-          const { supabase } = await import('../../lib/supabase.js');
+          const { supabase } = await import('../../lib/_supabase.js');
           const _fileName = `comprovante_${Date.now()}_${req.file.originalname}`;
           const _filePath = `comprovantes/${id}/${fileName}`;
 
           console.log(`[PAGAMENTOS] 📤 [AUDIT] Fazendo upload para Storage - Caminho: ${filePath}`);
 
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await _supabase.storage
             .from('documents')
             .upload(filePath, req.file.buffer, {
               contentType: req.file.mimetype,
@@ -1493,12 +1493,12 @@ router.post(
           }
 
           // Gerar URL pública
-          const { data: urlData } = supabase.storage.from('documents').getPublicUrl(filePath);
+          const { data: urlData } = _supabase.storage.from('documents').getPublicUrl(filePath);
 
           comprovanteUrl = urlData.publicUrl;
           console.log(`[PAGAMENTOS] ✅ [AUDIT] Upload concluído - URL: ${comprovanteUrl}`);
         } catch (error) {
-          console.error(`[PAGAMENTOS] ❌ [AUDIT] Erro no processamento do arquivo:`, error: unknown);
+          console.error(`[PAGAMENTOS] ❌ [AUDIT] Erro no processamento do arquivo:`, error);
           return res.status(500).json({
             error: 'Erro ao processar arquivo de comprovante',
           });
@@ -1594,7 +1594,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error('[PAGAMENTOS] ❌ [AUDIT] Erro ao marcar como pago:', error: unknown);
+      console.error('[PAGAMENTOS] ❌ [AUDIT] Erro ao marcar como pago:', error);
       res.status(500).json({ error: 'Erro ao marcar pagamento como pago' });
     }
   }
@@ -1631,7 +1631,7 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
     if (!proposta) {
       console.log(`[PAGAMENTOS CCB-URL] ❌ Proposta ${id} não encontrada`);
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // Verificar se documento está assinado
@@ -1649,7 +1649,7 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
     // PASSO 3: Verificar se arquivo existe no Storage (CACHE HIT)
     const _folderPath = `ccb/assinadas/${id}`;
-    const { data: files, error: listError } = await supabase.storage
+    const { data: files, error: listError } = await _supabase.storage
       .from('documents')
       .list(folderPath);
 
@@ -1694,7 +1694,7 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
         console.log(`[PAGAMENTOS CCB-URL] 💾 Salvando no Storage: ${storagePath}`);
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await _supabase.storage
           .from('documents')
           .upload(storagePath, pdfBuffer, {
             contentType: 'application/pdf',
@@ -1739,7 +1739,7 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
     // PASSO 5: Gerar URL assinada para visualização
     console.log(`[PAGAMENTOS CCB-URL] 🔗 Gerando URL assinada para: ${actualFilePath}`);
 
-    const { data: urlData, error: urlError } = await supabase.storage
+    const { data: urlData, error: urlError } = await _supabase.storage
       .from('documents')
       .createSignedUrl(actualFilePath, 3600); // Válida por 1 hora
 
@@ -1764,7 +1764,7 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       cached: fileExists,
     });
   } catch (error) {
-    console.error('[PAGAMENTOS CCB-URL] ❌ Erro não tratado:', error: unknown);
+    console.error('[PAGAMENTOS CCB-URL] ❌ Erro não tratado:', error);
     res.status(500).json({
       error: 'Erro ao processar solicitação',
       details: error instanceof Error ? error.message : 'Erro desconhecido',

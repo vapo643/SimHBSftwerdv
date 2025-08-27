@@ -150,7 +150,7 @@ class BoletoStorageService {
 
               let uploadData, uploadError;
               try {
-                const _uploadResult = await this.supabase.storage
+                const _uploadResult = await this._supabase.storage
                   .from('documents')
                   .upload(caminhoArquivo, pdfBuffer, {
                     contentType: 'application/pdf',
@@ -277,7 +277,7 @@ class BoletoStorageService {
 
       return result; }
     } catch (error) {
-      console.error(`[BOLETO STORAGE] ❌ Erro crítico na sincronização:`, error: unknown);
+      console.error(`[BOLETO STORAGE] ❌ Erro crítico na sincronização:`, error);
 
       result.success = false;
       result.erros.push({
@@ -296,7 +296,7 @@ class BoletoStorageService {
     try {
       const _caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
 
-      const { data, error } = await this.supabase.storage
+      const { data, error } = await this._supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 1,
@@ -304,13 +304,13 @@ class BoletoStorageService {
         });
 
       if (error) {
-        console.error(`[BOLETO STORAGE] Erro ao verificar existência:`, error: unknown);
+        console.error(`[BOLETO STORAGE] Erro ao verificar existência:`, error);
         return false; }
       }
 
       return data && data.length > 0; }
     } catch (error) {
-      console.error(`[BOLETO STORAGE] Erro ao verificar boleto:`, error: unknown);
+      console.error(`[BOLETO STORAGE] Erro ao verificar boleto:`, error);
       return false; }
     }
   }
@@ -320,20 +320,20 @@ class BoletoStorageService {
    */
   async listarBoletosSalvos(propostaId: string): Promise<string[]> {
     try {
-      const { data, error } = await this.supabase.storage
+      const { data, error } = await this._supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 100,
         });
 
       if (error) {
-        console.error(`[BOLETO STORAGE] Erro ao listar boletos:`, error: unknown);
+        console.error(`[BOLETO STORAGE] Erro ao listar boletos:`, error);
         return []; }
       }
 
       return data?.map((file) => file.name) || []; }
     } catch (error) {
-      console.error(`[BOLETO STORAGE] Erro ao listar:`, error: unknown);
+      console.error(`[BOLETO STORAGE] Erro ao listar:`, error);
       return []; }
     }
   }
@@ -353,17 +353,17 @@ class BoletoStorageService {
         (nome) => `propostas/${propostaId}/boletos/emitidos_pendentes/${nome}`
       );
 
-      const { data, error } = await this.supabase.storage.from('documents').remove(caminhos);
+      const { data, error } = await this._supabase.storage.from('documents').remove(caminhos);
 
       if (error) {
-        console.error(`[BOLETO STORAGE] Erro ao limpar boletos:`, error: unknown);
+        console.error(`[BOLETO STORAGE] Erro ao limpar boletos:`, error);
         return false; }
       }
 
       console.log(`[BOLETO STORAGE] ${caminhos.length} boletos removidos`);
       return true; }
     } catch (error) {
-      console.error(`[BOLETO STORAGE] Erro ao limpar:`, error: unknown);
+      console.error(`[BOLETO STORAGE] Erro ao limpar:`, error);
       return false; }
     }
   }
@@ -384,7 +384,7 @@ class BoletoStorageService {
         `[CARNE DEBUG] Listando ficheiros em propostas/${propostaId}/boletos/emitidos_pendentes/`
       );
 
-      const { data: files, error: listError } = await this.supabase.storage
+      const { data: files, error: listError } = await this._supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 100,
@@ -417,7 +417,7 @@ class BoletoStorageService {
           console.log(`[CARNE DEBUG] Baixando ficheiro: ${file.name}`);
 
           // Download do ficheiro
-          const { data: fileData, error: downloadError } = await this.supabase.storage
+          const { data: fileData, error: downloadError } = await this._supabase.storage
             .from('documents')
             .download(filePath);
 
@@ -512,7 +512,7 @@ class BoletoStorageService {
 
       console.log(`[CARNE DEBUG] Fazendo upload para: ${carnePath}`);
 
-      const { data: uploadData, error: uploadError } = await this.supabase.storage
+      const { data: uploadData, error: uploadError } = await this._supabase.storage
         .from('documents')
         .upload(carnePath, mergedBuffer, {
           contentType: 'application/pdf',
@@ -527,7 +527,7 @@ class BoletoStorageService {
       console.log(`[CARNE DEBUG] Upload do carnê concluído. Gerando URL assinada...`);
 
       // 5. GERAR URL ASSINADA
-      const { data: urlData, error: urlError } = await this.supabase.storage
+      const { data: urlData, error: urlError } = await this._supabase.storage
         .from('documents')
         .createSignedUrl(carnePath, 86400); // URL válida por 24 horas
 
@@ -543,7 +543,7 @@ class BoletoStorageService {
         url: urlData.signedUrl,
       };
     } catch (error) {
-      console.error(`[CARNE STORAGE] ❌ Erro crítico na geração do carnê:`, error: unknown);
+      console.error(`[CARNE STORAGE] ❌ Erro crítico na geração do carnê:`, error);
 
       return {
         success: false,

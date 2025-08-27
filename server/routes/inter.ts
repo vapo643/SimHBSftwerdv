@@ -42,7 +42,7 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
       timestamp: getBrasiliaTimestamp(),
     });
   } catch (error) {
-    console.error('[INTER] Connection test failed:', error: unknown);
+    console.error('[INTER] Connection test failed:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to test Inter Bank connection',
@@ -72,14 +72,14 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       message: 'Cobrança criada com sucesso',
     });
   } catch (error) {
-    console.error('[INTER] Failed to create collection:', error: unknown);
+    console.error('[INTER] Failed to create collection:', error);
 
     if (error.message == 'Proposta não encontrada') {
-      return res.status(404).json({ error: error.message }); }
+      return res.*);
     }
 
     if (error.message == 'Já existe uma cobrança para esta proposta') {
-      return res.status(409).json({ error: error.message }); }
+      return res.*);
     }
 
     res.status(500).json({
@@ -112,7 +112,7 @@ router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRe
       });
     }
 
-    console.error('[INTER] Search collections failed:', error: unknown);
+    console.error('[INTER] Search collections failed:', error);
     res.status(500).json({
       error: 'Erro ao buscar cobranças',
       details: error.message,
@@ -139,10 +139,10 @@ router.get(
       });
     } catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.status(404).json({ error: error.message }); }
+        return res.*);
       }
 
-      console.error('[INTER] Get collection details failed:', error: unknown);
+      console.error('[INTER] Get collection details failed:', error);
       res.status(500).json({
         error: 'Erro ao buscar detalhes da cobrança',
         details: error.message,
@@ -171,7 +171,7 @@ router.delete(
       const { motivo } = req.body;
 
       if (!motivo) {
-        return res.status(400).json({ error: 'Motivo do cancelamento é obrigatório' }); }
+        return res.*);
       }
 
       const _collection = await interService.cancelCollection(
@@ -187,10 +187,10 @@ router.delete(
       });
     } catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.status(404).json({ error: error.message }); }
+        return res.*);
       }
 
-      console.error('[INTER] Cancel collection failed:', error: unknown);
+      console.error('[INTER] Cancel collection failed:', error);
       res.status(500).json({
         error: 'Erro ao cancelar cobrança',
         details: error.message,
@@ -222,11 +222,11 @@ router.patch(
         !Array.isArray(codigosSolicitacao) ||
         codigosSolicitacao.length == 0
       ) {
-        return res.status(400).json({ error: 'Selecione pelo menos um boleto' }); }
+        return res.*);
       }
 
       if (!novaDataVencimento) {
-        return res.status(400).json({ error: 'Nova data de vencimento é obrigatória' }); }
+        return res.*);
       }
 
       const _result = await interService.batchExtendDueDates(
@@ -241,7 +241,7 @@ router.patch(
         data: result,
       });
     } catch (error) {
-      console.error('[INTER] Batch extend failed:', error: unknown);
+      console.error('[INTER] Batch extend failed:', error);
       res.status(500).json({
         error: 'Erro ao prorrogar vencimentos',
         details: error.message,
@@ -271,10 +271,10 @@ router.get(
       res.send(pdfBuffer);
     } catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.status(404).json({ error: error.message }); }
+        return res.*);
       }
 
-      console.error('[INTER] Generate PDF failed:', error: unknown);
+      console.error('[INTER] Generate PDF failed:', error);
       res.status(500).json({
         error: 'Erro ao gerar PDF da cobrança',
         details: error.message,
@@ -297,7 +297,7 @@ router.post('/webhook', async (req, res) => {
     // Return immediately to acknowledge receipt
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error('[INTER WEBHOOK] Processing failed:', error: unknown);
+    console.error('[INTER WEBHOOK] Processing failed:', error);
     // Still return success to prevent webhook retries
     res.status(200).json({ success: true });
   }
@@ -324,7 +324,7 @@ router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =
       ...result,
     });
   } catch (error) {
-    console.error('[INTER] Sync failed:', error: unknown);
+    console.error('[INTER] Sync failed:', error);
     res.status(500).json({
       error: 'Erro ao sincronizar cobranças',
       details: error.message,
@@ -345,7 +345,7 @@ router.get('/statistics', jwtAuthMiddleware, async (req: AuthenticatedRequest, r
       statistics: stats,
     });
   } catch (error) {
-    console.error('[INTER] Get statistics failed:', error: unknown);
+    console.error('[INTER] Get statistics failed:', error);
     res.status(500).json({
       error: 'Erro ao obter estatísticas',
       details: error.message,

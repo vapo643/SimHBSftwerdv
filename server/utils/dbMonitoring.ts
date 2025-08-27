@@ -24,7 +24,7 @@ export async function getDatabaseStats() {
 
     return stats[0]; }
   } catch (error) {
-    console.error('Erro ao buscar estatísticas do banco:', error: unknown);
+    console.error('Erro ao buscar estatísticas do banco:', error);
     throw error;
   }
 }
@@ -82,7 +82,7 @@ export async function getTableStats() {
 
     return stats; }
   } catch (error) {
-    console.error('Erro ao buscar estatísticas das tabelas:', error: unknown);
+    console.error('Erro ao buscar estatísticas das tabelas:', error);
     throw error;
   }
 }
@@ -108,7 +108,7 @@ export async function getIndexUsage() {
 
     return usage; }
   } catch (error) {
-    console.error('Erro ao buscar uso de índices:', error: unknown);
+    console.error('Erro ao buscar uso de índices:', error);
     throw error;
   }
 }
@@ -143,7 +143,7 @@ export async function getActiveConnections() {
 
     return connections; }
   } catch (error) {
-    console.error('Erro ao buscar conexões ativas:', error: unknown);
+    console.error('Erro ao buscar conexões ativas:', error);
     throw error;
   }
 }
@@ -219,7 +219,7 @@ export async function checkDatabaseHealth() {
 
     return health; }
   } catch (error) {
-    console.error('Erro ao verificar saúde do banco:', error: unknown);
+    console.error('Erro ao verificar saúde do banco:', error);
     return {
       status: 'error',
       issues: ['Erro ao verificar saúde do banco'],
@@ -250,7 +250,7 @@ export async function generateMonitoringReport() {
       health: health,
     };
   } catch (error) {
-    console.error('Erro ao gerar relatório de monitoramento:', error: unknown);
+    console.error('Erro ao gerar relatório de monitoramento:', error);
     throw error;
   }
 }

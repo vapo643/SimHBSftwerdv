@@ -221,7 +221,7 @@ export class AlertasProativosService {
           Date.now() - inicioExecucao
         );
       } catch (error) {
-        console.error(`[ALERTAS PROATIVOS] Erro ao processar regra ${nomeRegra}:`, error: unknown);
+        console.error(`[ALERTAS PROATIVOS] Erro ao processar regra ${nomeRegra}:`, error);
         await this.registrarExecucao(
   _nomeRegra,
           'erro',
@@ -320,7 +320,7 @@ export class AlertasProativosService {
         await db.insert(historicoExecucoesAlertas).values(historico);
       }
     } catch (error) {
-      console.error(`[ALERTAS PROATIVOS] Erro ao registrar histórico:`, error: unknown);
+      console.error(`[ALERTAS PROATIVOS] Erro ao registrar histórico:`, error);
     }
   }
 

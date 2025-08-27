@@ -65,7 +65,7 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
 
     // Verify user's password
     const _supabase = createServerSupabaseClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error: signInError } = await _supabase.auth.signInWithPassword({
       email: currentEmail || '',
   _password,
     });
@@ -142,10 +142,10 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     });
   } catch (error) {
     if (error.name == 'ZodError') {
-      return res.status(400).json({ error: 'Dados inválidos', details: error.errors }); }
+      return res.*);
     }
 
-    console.error('Email change error:', error: unknown);
+    console.error('Email change error:', error);
     res.status(500).json({ error: 'Erro ao processar mudança de email' });
   }
 });
@@ -177,7 +177,7 @@ router.post('/verify-email-change', async (req, res) => {
     const _supabase = createServerSupabaseClient();
 
     // Update user's email in auth
-    const { error: updateAuthError } = await supabase.auth.admin.updateUserById(tokenData.userId, {
+    const { error: updateAuthError } = await _supabase.auth.admin.updateUserById(tokenData.userId, {
       email: tokenData.newEmail,
     });
 
@@ -200,7 +200,7 @@ router.post('/verify-email-change', async (req, res) => {
     if (updateProfileError) {
       console.error('Error updating profile email:', updateProfileError);
       // Try to rollback auth change
-      await supabase.auth.admin.updateUserById(tokenData.userId, { email: tokenData.oldEmail });
+      await _supabase.auth.admin.updateUserById(tokenData.userId, { email: tokenData.oldEmail });
       return res.status(500).json({
         error: 'Erro ao atualizar perfil',
       });
@@ -230,10 +230,10 @@ router.post('/verify-email-change', async (req, res) => {
     });
   } catch (error) {
     if (error.name == 'ZodError') {
-      return res.status(400).json({ error: 'Dados inválidos', details: error.errors }); }
+      return res.*);
     }
 
-    console.error('Email verification error:', error: unknown);
+    console.error('Email verification error:', error);
     res.status(500).json({ error: 'Erro ao verificar mudança de email' });
   }
 });

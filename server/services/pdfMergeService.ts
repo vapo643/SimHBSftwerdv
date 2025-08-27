@@ -139,7 +139,7 @@ export class PdfMergeService {
 
       return mergedBuffer; }
     } catch (error) {
-      console.error(`[PDF MERGE] ❌ Erro ao gerar carnê:`, error: unknown);
+      console.error(`[PDF MERGE] ❌ Erro ao gerar carnê:`, error);
       throw error;
     }
   }
@@ -159,7 +159,7 @@ export class PdfMergeService {
 
       // Upload para o Supabase Storage
       const _supabase = createServerSupabaseAdminClient();
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await _supabase.storage
         .from('documents')
         .upload(fileName, pdfBuffer, {
           contentType: 'application/pdf',
@@ -174,7 +174,7 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] ✅ Upload concluído: ${fileName}`);
 
       // Gerar URL assinada (válida por 1 hora)
-      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
         .from('documents')
         .createSignedUrl(fileName, 3600); // 1 hora
 
@@ -187,7 +187,7 @@ export class PdfMergeService {
 
       return signedUrlData.signedUrl; }
     } catch (error) {
-      console.error(`[PDF MERGE] ❌ Erro ao salvar carnê:`, error: unknown);
+      console.error(`[PDF MERGE] ❌ Erro ao salvar carnê:`, error);
       throw error;
     }
   }

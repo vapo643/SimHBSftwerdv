@@ -5,7 +5,7 @@
  */
 
 import { authRepository } from '../repositories/auth.repository.js';
-import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../lib/_supabase.js';
 import { validatePassword } from '../lib/password-validator.js';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger.js';
 import { invalidateAllUserTokens, trackUserToken } from '../lib/jwt-auth-middleware.js';
@@ -65,10 +65,10 @@ export class AuthService {
       // Check if user already has active sessions
       const {
         data: { user: existingUser },
-      } = await supabase.auth.getUser();
+      } = await _supabase.auth.getUser();
 
       // Attempt login
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await _supabase.auth.signInWithPassword({
   _email,
   _password,
       });
@@ -134,7 +134,7 @@ export class AuthService {
 
       return { success: false, error: 'Login failed' }; }
     } catch (error) {
-      console.error('[AUTH_SERVICE] Login error:', error: unknown);
+      console.error('[AUTH_SERVICE] Login error:', error);
       return { success: false, error: 'Login failed' }; }
     }
   }
@@ -159,7 +159,7 @@ export class AuthService {
       }
 
       const _supabase = createServerSupabaseClient();
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await _supabase.auth.signUp({
   _email,
   _password,
         options: {
@@ -179,7 +179,7 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error('[AUTH_SERVICE] Register error:', error: unknown);
+      console.error('[AUTH_SERVICE] Register error:', error);
       return { success: false, error: 'Registration failed' }; }
     }
   }
@@ -190,7 +190,7 @@ export class AuthService {
   async logout(): Promise<{ success: boolean; error?: string }> {
     try {
       const _supabase = createServerSupabaseClient();
-      const { error } = await supabase.auth.signOut();
+      const { error } = await _supabase.auth.signOut();
 
       if (error) {
         return { success: false, error: error.message }; }
@@ -198,7 +198,7 @@ export class AuthService {
 
       return { success: true }; }
     } catch (error) {
-      console.error('[AUTH_SERVICE] Logout error:', error: unknown);
+      console.error('[AUTH_SERVICE] Logout error:', error);
       return { success: false, error: 'Logout failed' }; }
     }
   }
@@ -231,7 +231,7 @@ export class AuthService {
 
       // Verify current password
       const _supabase = createServerSupabaseClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await _supabase.auth.signInWithPassword({
         email: userEmail,
         password: currentPassword,
       });
@@ -284,7 +284,7 @@ export class AuthService {
         requiresRelogin: true,
       };
     } catch (error) {
-      console.error('[AUTH_SERVICE] Change password error:', error: unknown);
+      console.error('[AUTH_SERVICE] Change password error:', error);
       return { success: false, error: 'Erro ao alterar senha' }; }
     }
   }
@@ -300,7 +300,7 @@ export class AuthService {
       const _supabase = createServerSupabaseClient();
 
       // Always return the same message to prevent user enumeration
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await _supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:5000'}/reset-password`,
       });
 
@@ -325,7 +325,7 @@ export class AuthService {
           'Se o email existe em nosso sistema, você receberá instruções para redefinir sua senha.',
       };
     } catch (error) {
-      console.error('[AUTH_SERVICE] Password reset error:', error: unknown);
+      console.error('[AUTH_SERVICE] Password reset error:', error);
       return {
         success: false,
         message: 'Erro ao processar solicitação',
@@ -355,7 +355,7 @@ export class AuthService {
 
       return { sessions: formattedSessions }; }
     } catch (error) {
-      console.error('[AUTH_SERVICE] Error fetching sessions:', error: unknown);
+      console.error('[AUTH_SERVICE] Error fetching sessions:', error);
       throw new Error('Erro ao buscar sessões');
     }
   }
@@ -399,7 +399,7 @@ export class AuthService {
 
       return { success: deleted }; }
     } catch (error) {
-      console.error('[AUTH_SERVICE] Error deleting session:', error: unknown);
+      console.error('[AUTH_SERVICE] Error deleting session:', error);
       return { success: false, error: 'Erro ao encerrar sessão' }; }
     }
   }
@@ -411,7 +411,7 @@ export class AuthService {
     try {
       return await authRepository.getUserProfile(userId); }
     } catch (error) {
-      console.error('[AUTH_SERVICE] Error getting user profile:', error: unknown);
+      console.error('[AUTH_SERVICE] Error getting user profile:', error);
       throw new Error('Erro ao buscar perfil do usuário');
     }
   }
@@ -423,7 +423,7 @@ export class AuthService {
     try {
       return await authRepository.cleanupExpiredSessions(); }
     } catch (error) {
-      console.error('[AUTH_SERVICE] Error cleaning up sessions:', error: unknown);
+      console.error('[AUTH_SERVICE] Error cleaning up sessions:', error);
       return 0; }
     }
   }

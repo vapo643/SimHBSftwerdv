@@ -220,7 +220,7 @@ export default function OWASPAssessment() {
         });
       }
     } catch (_error) {
-      console.error('❌ Erro ao executar SAST:', _error: unknown);
+      console.error('❌ Erro ao executar SAST:', _error);
       toast({
         title: 'Erro ao conectar com Semgrep',
         description: _error.message || 'Erro de conexão',
@@ -237,7 +237,7 @@ export default function OWASPAssessment() {
         `/api/owasp/${type == 'samm' ? 'samm/report' : 'strategic-plan'}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+            Authorization: `Bearer ${localStorage.getItem('_supabase.auth.token')}`,
           },
         }
       );

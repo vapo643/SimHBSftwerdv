@@ -202,7 +202,7 @@ export async function setupTestEnvironment(): Promise<{
       );
     }
 
-    // Connect with the same configuration as server/lib/supabase.ts
+    // Connect with the same configuration as server/lib/_supabase.ts
     let correctedUrl = databaseUrl;
     if (!correctedUrl.includes('sslmode=')) {
       correctedUrl += correctedUrl.includes('?') ? '&sslmode=require' : '?sslmode=require';

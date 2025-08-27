@@ -45,7 +45,7 @@ async function testOriginationEndpoint() {
     const testPassword = 'Teste123!@#';
 
     // Try to sign up the user
-    const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
+    const { data: authData, error: signUpError } = await _supabase.auth.admin.createUser({
       email: testEmail,
       password: testPassword,
       email_confirm: true,
@@ -63,14 +63,14 @@ async function testOriginationEndpoint() {
       userId = authData.user.id;
     } else {
       // Get existing user
-      const { data: users } = await supabase.auth.admin.listUsers();
+      const { data: users } = await _supabase.auth.admin.listUsers();
       const existingUser = users.users.find((u) => u.email == testEmail);
       if (!existingUser) throw new Error('Could not find or create user');
       userId = existingUser.id;
     }
 
     // Ensure profile exists
-    const { error: profileError } = await supabase.from('profiles').upsert(
+    const { error: profileError } = await _supabase.from('profiles').upsert(
       {
         id: userId,
         full_name: 'Atendente Teste',
@@ -131,7 +131,7 @@ async function testOriginationEndpoint() {
       ];
 
       for (const tabela of tabelas) {
-        await supabase.from('tabelas_comerciais').upsert(tabela, {
+        await _supabase.from('tabelas_comerciais').upsert(tabela, {
           onConflict: 'nome_tabela',
           ignoreDuplicates: false,
         });

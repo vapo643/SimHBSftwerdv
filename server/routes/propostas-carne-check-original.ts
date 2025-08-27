@@ -43,7 +43,7 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
 
     console.log('[CARNE STATUS] Verificando pasta:', carnesPath);
 
-    const { data: files, error: listError } = await supabase.storage
+    const { data: files, error: listError } = await _supabase.storage
       .from('documents')
       .list(carnesPath, {
         limit: 1,
@@ -64,7 +64,7 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
       console.log('[CARNE STATUS] ✅ Carnê encontrado:', carneFile.name);
 
       // Gerar URL assinada para download
-      const { data: signedUrl, error: urlError } = await supabase.storage
+      const { data: signedUrl, error: urlError } = await _supabase.storage
         .from('documents')
         .createSignedUrl(`${carnesPath}/${carneFile.name}`, 3600); // 1 hora de validade
 
@@ -95,7 +95,7 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
       message: 'Carnê ainda não foi gerado',
     });
   } catch (error) {
-    console.error('[CARNE STATUS] Erro inesperado:', error: unknown);
+    console.error('[CARNE STATUS] Erro inesperado:', error);
     return res.status(500).json({
       error: 'Erro ao verificar status do carnê',
       carneExists: false,

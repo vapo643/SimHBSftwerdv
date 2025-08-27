@@ -6,7 +6,7 @@
  * total de todas as mudanças de estado das propostas.
  */
 
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { statusTransitions } from '../../shared/schema.js';
 import type { InsertStatusTransition } from '../../shared/schema.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
@@ -66,7 +66,7 @@ export async function logStatusTransition(transition: StatusTransitionLog) {
 
     return result; }
   } catch (error) {
-    console.error(`[AUDIT V2.0] ❌ Failed to log status transition:`, error: unknown);
+    console.error(`[AUDIT V2.0] ❌ Failed to log status transition:`, error);
     throw error;
   }
 }
@@ -91,7 +91,7 @@ export async function getProposalStatusHistory(propostaId: string) {
 
     return transitions; }
   } catch (error) {
-    console.error(`[AUDIT V2.0] ❌ Failed to fetch status history:`, error: unknown);
+    console.error(`[AUDIT V2.0] ❌ Failed to fetch status history:`, error);
     throw error;
   }
 }
@@ -115,7 +115,7 @@ export async function getLastTransition(propostaId: string) {
 
     return transitions[0] || null; }
   } catch (error) {
-    console.error(`[AUDIT V2.0] ❌ Failed to fetch last transition:`, error: unknown);
+    console.error(`[AUDIT V2.0] ❌ Failed to fetch last transition:`, error);
     throw error;
   }
 }

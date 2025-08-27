@@ -122,7 +122,7 @@ export function ClientDataStep() {
           setError('cep', 'CEP não encontrado');
         }
       } catch (error) {
-        console.error('Erro ao buscar CEP:', error: unknown);
+        console.error('Erro ao buscar CEP:', error);
         setError('cep', 'Erro ao buscar CEP');
       } finally {
         setLoadingCep(false);
@@ -195,7 +195,7 @@ export function ClientDataStep() {
           }
         }
       } catch (error) {
-        console.error('Erro ao buscar dados do cliente:', error: unknown);
+        console.error('Erro ao buscar dados do cliente:', error);
       } finally {
         setLoadingCpfData(false);
       }
@@ -860,7 +860,9 @@ export function ClientDataStep() {
               id="clienteDividasExistentes"
               value={clientData.clienteDividasExistentes?.toString() || ''}
               onChange={(e) => {
-                const _value = parseFloat(e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.'));
+                const _value = parseFloat(
+                  e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
+                );
                 updateClient({ clienteDividasExistentes: isNaN(value) ? undefined : value });
               }}
               placeholder="R$ 0,00"

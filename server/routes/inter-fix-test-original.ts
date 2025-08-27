@@ -26,7 +26,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
       .limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: 'Proposta não encontrada' }); }
+      return res.*);
     }
 
     // Buscar boletos atuais
@@ -122,7 +122,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
 
         novosBoletosGerados.push(novoBoleto);
       } catch (error) {
-        console.error(`❌ [TEST FIX] Erro ao criar boleto ${parcela.numero}:`, error: unknown);
+        console.error(`❌ [TEST FIX] Erro ao criar boleto ${parcela.numero}:`, error);
         errosEncontrados.push({
           parcela: parcela.numero,
           erro: error instanceof Error ? error.message : 'Unknown',
@@ -156,7 +156,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
       totalBoletosCriados: novosBoletosGerados.length,
     });
   } catch (error) {
-    console.error('❌ [TEST FIX] Erro:', error: unknown);
+    console.error('❌ [TEST FIX] Erro:', error);
     res.status(500).json({
       error: 'Erro ao analisar boletos',
       details: error instanceof Error ? error.message : 'Unknown error',

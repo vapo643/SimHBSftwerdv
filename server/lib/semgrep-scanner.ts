@@ -189,7 +189,7 @@ rules:
       await execAsync('pip install semgrep');
       console.log('✅ [SEMGREP] Instalação concluída');
     } catch (error) {
-      console.error('❌ [SEMGREP] Erro na instalação:', error: unknown);
+      console.error('❌ [SEMGREP] Erro na instalação:', error);
       this.emit('error', { type: 'installation', error });
     }
   }
@@ -285,7 +285,7 @@ rules:
 
       return result; }
     } catch (error) {
-      console.error('❌ [SEMGREP] Erro no scan:', error: unknown);
+      console.error('❌ [SEMGREP] Erro no scan:', error);
       this.emit('error', { type: 'scan', error });
       return null; }
     } finally {
@@ -445,7 +445,7 @@ rules:
       try {
         fs.watch(fullPath, { recursive: true }, watchCallback as fs.WatchListener<string>);
       } catch (error) {
-        console.warn(`⚠️ [SEMGREP] Não foi possível monitorar diretório: ${fullPath}`, error: unknown);
+        console.warn(`⚠️ [SEMGREP] Não foi possível monitorar diretório: ${fullPath}`, error);
       }
     });
   }

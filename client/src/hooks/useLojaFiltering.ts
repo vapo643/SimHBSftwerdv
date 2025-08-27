@@ -22,7 +22,7 @@ interface UseLojaFilteringResult {
 
 const LOJA_THRESHOLD = 1000; // Threshold for switching between client-side and server-side filtering
 
-export function useLojaFiltering(selectedParceiroId?: unknown): UseLojaFilteringResult {
+export function useLojaFiltering(selectedParceiroId?): UseLojaFilteringResult {
   const [filteringMode, setFilteringMode] = useState<'client-side' | 'server-side'>('client-side');
 
   // Convert selectedParceiroId to number for consistency

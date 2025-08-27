@@ -68,11 +68,11 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-  _proposal,
+      _proposal,
       timeline: logsResult || [],
     });
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao buscar status:', error: unknown);
+    console.error('❌ [FORMALIZACAO] Erro ao buscar status:', error);
     res.status(500).json({
       error: 'Erro ao buscar status da formalização',
     });
@@ -120,10 +120,10 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
       success: true,
       message: 'CCB gerado com sucesso',
       pdfPath: result.pdfPath,
-  _publicUrl,
+      _publicUrl,
     });
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao gerar CCB:', error: unknown);
+    console.error('❌ [FORMALIZACAO] Erro ao gerar CCB:', error);
     res.status(500).json({
       error: 'Erro interno ao gerar CCB',
     });
@@ -172,7 +172,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       .createSignedUrl(proposal.caminho_ccb as string, 3600);
 
     if (error) {
-      console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada:', error: unknown);
+      console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada:', error);
 
       // 🔄 FALLBACK: Se arquivo não existe, tentar regenerar CCB automaticamente
       if ((error as unknown)?.status == 400 || error.message?.includes('Object not found')) {
@@ -206,7 +206,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       generatedAt: proposal.ccb_gerado_em,
     });
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao buscar CCB:', error: unknown);
+    console.error('❌ [FORMALIZACAO] Erro ao buscar CCB:', error);
     res.status(500).json({
       error: 'Erro ao buscar CCB',
     });
@@ -247,10 +247,10 @@ router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) =
       success: true,
       message: 'CCB regenerado com sucesso',
       pdfPath: result.pdfPath,
-  _publicUrl,
+      _publicUrl,
     });
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao regenerar CCB:', error: unknown);
+    console.error('❌ [FORMALIZACAO] Erro ao regenerar CCB:', error);
     res.status(500).json({
       error: 'Erro ao regenerar CCB',
     });
@@ -283,7 +283,7 @@ router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
       timeline: result || [],
     });
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao buscar timeline:', error: unknown);
+    console.error('❌ [FORMALIZACAO] Erro ao buscar timeline:', error);
     res.status(500).json({
       error: 'Erro ao buscar timeline',
     });
@@ -348,7 +348,7 @@ router.get(
         .createSignedUrl(proposal.caminho_ccb_assinado as string, 3600);
 
       if (error) {
-        console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada para CCB assinada:', error: unknown);
+        console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada para CCB assinada:', error);
         return res.status(500).json({
           error: 'Erro ao gerar URL de acesso para CCB assinada',
           details: error.message,
@@ -367,7 +367,7 @@ router.get(
         status: 'assinado',
       });
     } catch (error) {
-      console.error('❌ [FORMALIZACAO] Erro ao buscar CCB assinada:', error: unknown);
+      console.error('❌ [FORMALIZACAO] Erro ao buscar CCB assinada:', error);
       res.status(500).json({
         error: 'Erro interno ao buscar CCB assinada',
       });

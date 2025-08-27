@@ -137,7 +137,7 @@ export class PreApprovalService {
         reason: `Comprometimento de renda ${percentualComprometimento.toFixed(1)}% dentro do limite permitido`,
       };
     } catch (error) {
-      console.error(`[PRE-APPROVAL] Erro na verificação:`, error: unknown);
+      console.error(`[PRE-APPROVAL] Erro na verificação:`, error);
 
       // Em caso de erro, permitir análise manual
       return {

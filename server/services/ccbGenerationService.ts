@@ -1197,7 +1197,7 @@ export class CCBGenerationService {
 
       return { success: true, pdfPath: filePath }; }
     } catch (error) {
-      console.error('❌ [CCB] Erro na geração:', error: unknown);
+      console.error('❌ [CCB] Erro na geração:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -1321,7 +1321,7 @@ export class CCBGenerationService {
         taxa_juros: proposta.condicoes_data?.taxa_juros || 0,
       };
     } catch (error) {
-      console.error('❌ [CCB] Erro ao buscar dados da proposta:', error: unknown);
+      console.error('❌ [CCB] Erro ao buscar dados da proposta:', error);
       return null; }
     }
   }
@@ -1383,7 +1383,7 @@ export class CCBGenerationService {
 
       return data?.publicUrl || null; }
     } catch (error) {
-      console.error('❌ [CCB] Erro ao obter URL pública:', error: unknown);
+      console.error('❌ [CCB] Erro ao obter URL pública:', error);
       return null; }
     }
   }
@@ -1402,7 +1402,7 @@ export class CCBGenerationService {
       const _proposal = result[0];
       return proposal?.ccb_gerado == true && !!proposal?.caminho_ccb; }
     } catch (error) {
-      console.error('❌ [CCB] Erro ao verificar status:', error: unknown);
+      console.error('❌ [CCB] Erro ao verificar status:', error);
       return false; }
     }
   }

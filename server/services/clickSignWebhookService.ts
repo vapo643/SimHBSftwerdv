@@ -720,7 +720,7 @@ class ClickSignWebhookService {
             );
           }
         } catch (error) {
-          console.error(`[CLICKSIGN → INTER] ❌ Error creating boleto ${i + 1}:`, error: unknown);
+          console.error(`[CLICKSIGN → INTER] ❌ Error creating boleto ${i + 1}:`, error);
           failedBoletos.push(i + 1);
         }
       }
@@ -746,7 +746,7 @@ class ClickSignWebhookService {
         });
       }
     } catch (error) {
-      console.error(`[CLICKSIGN → INTER] ❌ Error generating boletos:`, error: unknown);
+      console.error(`[CLICKSIGN → INTER] ❌ Error generating boletos:`, error);
 
       await storage.createPropostaLog({
         propostaId: proposta.id,

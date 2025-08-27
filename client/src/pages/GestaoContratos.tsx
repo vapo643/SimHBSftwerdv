@@ -106,7 +106,7 @@ export default function GestaoContratos() {
         }
       }
     } catch (error) {
-      console.error('Erro ao abrir CCB:', error: unknown);
+      console.error('Erro ao abrir CCB:', error);
     } finally {
       setLoadingCcb(null);
     }

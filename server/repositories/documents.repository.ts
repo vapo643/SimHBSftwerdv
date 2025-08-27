@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db, createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { db, createServerSupabaseAdminClient } from '../lib/_supabase.js';
 import { propostaDocumentos, propostas } from '@shared/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import type { PropostaDocumento } from '@shared/schema';
@@ -26,7 +26,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .where(eq(propostaDocumentos.propostaId, propostaId))
         .orderBy(desc(propostaDocumentos.createdAt));
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error getting proposal documents:', error: unknown);
+      console.error('[DOCUMENTS_REPO] Error getting proposal documents:', error);
       return []; }
     }
   }
@@ -44,7 +44,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
 
       return proposta || null; }
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error getting proposal by ID:', error: unknown);
+      console.error('[DOCUMENTS_REPO] Error getting proposal by ID:', error);
       return null; }
     }
   }
@@ -74,7 +74,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
 
       return document; }
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error creating document:', error: unknown);
+      console.error('[DOCUMENTS_REPO] Error creating document:', error);
       return null; }
     }
   }
@@ -91,7 +91,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
 
       return result.length > 0; }
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error deleting document:', error: unknown);
+      console.error('[DOCUMENTS_REPO] Error deleting document:', error);
       return false; }
     }
   }
@@ -109,7 +109,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
 
       return document || null; }
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error getting document by ID:', error: unknown);
+      console.error('[DOCUMENTS_REPO] Error getting document by ID:', error);
       return null; }
     }
   }
@@ -125,7 +125,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
     try {
       const _supabase = createServerSupabaseAdminClient();
 
-      const { data, error } = await supabase.storage
+      const { data, error } = await _supabase.storage
         .from('documents')
         .upload(filePath, fileBuffer, {
   _contentType,
@@ -133,15 +133,15 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         });
 
       if (error) {
-        console.error('[DOCUMENTS_REPO] Upload error:', error: unknown);
+        console.error('[DOCUMENTS_REPO] Upload error:', error);
         return null; }
       }
 
-      const { data: publicUrl } = supabase.storage.from('documents').getPublicUrl(filePath);
+      const { data: publicUrl } = _supabase.storage.from('documents').getPublicUrl(filePath);
 
       return publicUrl; }
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error uploading to storage:', error: unknown);
+      console.error('[DOCUMENTS_REPO] Error uploading to storage:', error);
       return null; }
     }
   }
@@ -153,18 +153,18 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
     try {
       const _supabase = createServerSupabaseAdminClient();
 
-      const { data, error } = await supabase.storage
+      const { data, error } = await _supabase.storage
         .from('documents')
         .createSignedUrl(path, expiresIn);
 
       if (error) {
-        console.error('[DOCUMENTS_REPO] Error generating signed URL:', error: unknown);
+        console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
         return null; }
       }
 
       return data.signedUrl; }
     } catch (error) {
-      console.error('[DOCUMENTS_REPO] Error generating signed URL:', error: unknown);
+      console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
       return null; }
     }
   }

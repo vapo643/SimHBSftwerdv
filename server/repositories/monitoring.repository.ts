@@ -4,7 +4,7 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { sql } from 'drizzle-orm';
 
 export class MonitoringRepository {
@@ -22,7 +22,7 @@ export class MonitoringRepository {
       `);
       return result[0]; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching database stats:', error: unknown);
+      console.error('[MONITORING_REPO] Error fetching database stats:', error);
       throw error;
     }
   }
@@ -46,7 +46,7 @@ export class MonitoringRepository {
       `);
       return result; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching table stats:', error: unknown);
+      console.error('[MONITORING_REPO] Error fetching table stats:', error);
       throw error;
     }
   }
@@ -70,7 +70,7 @@ export class MonitoringRepository {
       `);
       return result; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching index usage:', error: unknown);
+      console.error('[MONITORING_REPO] Error fetching index usage:', error);
       throw error;
     }
   }
@@ -96,7 +96,7 @@ export class MonitoringRepository {
       `);
       return result; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching connections:', error: unknown);
+      console.error('[MONITORING_REPO] Error fetching connections:', error);
       throw error;
     }
   }
@@ -136,7 +136,7 @@ export class MonitoringRepository {
 
       return { isHealthy, checks }; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Database health check failed:', error: unknown);
+      console.error('[MONITORING_REPO] Database health check failed:', error);
       return {
         isHealthy: false,
         checks: { error: (error as Error).message },
@@ -166,7 +166,7 @@ export class MonitoringRepository {
   _health,
       };
     } catch (error) {
-      console.error('[MONITORING_REPO] Error generating report:', error: unknown);
+      console.error('[MONITORING_REPO] Error generating report:', error);
       throw error;
     }
   }

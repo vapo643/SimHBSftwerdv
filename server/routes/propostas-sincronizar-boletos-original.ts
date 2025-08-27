@@ -109,8 +109,8 @@ router.post(
 
       return res.json({
         success: true,
-  _boletosProcessados,
-  _erros,
+        _boletosProcessados,
+        _erros,
         total: collections.length,
         message:
           erros > 0
@@ -118,7 +118,7 @@ router.post(
             : `Todos os ${boletosProcessados} boletos foram sincronizados com sucesso`,
       });
     } catch (error) {
-      console.error('[PAM V1.0 SYNC] Erro geral na sincronização:', error: unknown);
+      console.error('[PAM V1.0 SYNC] Erro geral na sincronização:', error);
       return res.status(500).json({
         success: false,
         error: 'Erro ao sincronizar boletos',

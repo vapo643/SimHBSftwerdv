@@ -17,9 +17,9 @@ export class PDFDownloader {
   ): Promise<void> {
     try {
       console.log('[PDF_DOWNLOAD] Starting download via API client:', {
-  _propostaId,
-  _codigoSolicitacao,
-  _numeroParcela,
+        _propostaId,
+        _codigoSolicitacao,
+        _numeroParcela,
       });
 
       // Usar o apiClient que já tem autenticação configurada
@@ -57,7 +57,7 @@ export class PDFDownloader {
 
       console.log('[PDF_DOWNLOAD] ✅ Download completed successfully');
     } catch (error) {
-      console.error('[PDF_DOWNLOAD] ❌ Error in API client download:', error: unknown);
+      console.error('[PDF_DOWNLOAD] ❌ Error in API client download:', error);
       throw error;
     }
   }
@@ -77,8 +77,8 @@ export class PDFDownloader {
     for (let _attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`[PDF_DOWNLOAD] Fetch attempt ${attempt}/${maxRetries}:`, {
-  _propostaId,
-  _codigoSolicitacao,
+          _propostaId,
+          _codigoSolicitacao,
         });
 
         // Importar e obter token fresco a cada tentativa
@@ -208,7 +208,7 @@ export class PDFDownloader {
         return; // Sucesso, sair do loop
       } catch (error) {
         lastError = error as Error;
-        console.error(`[PDF_DOWNLOAD] ❌ Fetch attempt ${attempt} failed:`, error: unknown);
+        console.error(`[PDF_DOWNLOAD] ❌ Fetch attempt ${attempt} failed:`, error);
 
         if (attempt == maxRetries) {
           break; // Última tentativa falhou, sair do loop
@@ -259,7 +259,7 @@ export class PDFDownloader {
         return; // Sucesso, sair da função
       } catch (error) {
         lastError = error as Error;
-        console.error(`[PDF_DOWNLOAD] Strategy "${strategy.name}" failed:`, error: unknown);
+        console.error(`[PDF_DOWNLOAD] Strategy "${strategy.name}" failed:`, error);
         continue; // Tentar próxima estratégia
       }
     }
@@ -350,10 +350,10 @@ export class DownloadDebugger {
         console.log('[DEBUG] ✅ Token is valid for user:', user.id);
       } else {
         const _error = await response.text();
-        console.error('[DEBUG] ❌ Token validation failed:', error: unknown);
+        console.error('[DEBUG] ❌ Token validation failed:', error);
       }
     } catch (error) {
-      console.error('[DEBUG] ❌ Token test failed:', error: unknown);
+      console.error('[DEBUG] ❌ Token test failed:', error);
     }
   }
 
@@ -403,7 +403,7 @@ export class DownloadDebugger {
         console.error('[DEBUG] ❌ PDF endpoint failed:', errorText);
       }
     } catch (error) {
-      console.error('[DEBUG] ❌ PDF endpoint test failed:', error: unknown);
+      console.error('[DEBUG] ❌ PDF endpoint test failed:', error);
     }
   }
 }

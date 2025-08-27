@@ -23,7 +23,7 @@ export async function multiTenantMiddleware(
 ) {
   try {
     if (!req.user?.email) {
-      return res.status(401).json({ message: 'User context not found' }); }
+      return res.*);
     }
 
     // Get user's loja_id from database via gerente_lojas junction table
@@ -41,7 +41,7 @@ export async function multiTenantMiddleware(
       .limit(1);
 
     if (!userRecord.length) {
-      return res.status(401).json({ message: 'User not found in system' }); }
+      return res.*);
     }
 
     const _userData = userRecord[0];
@@ -66,8 +66,8 @@ export async function multiTenantMiddleware(
 
     next();
   } catch (error) {
-    console.error('Multi-tenant middleware error:', error: unknown);
-    return res.status(500).json({ message: 'Failed to establish security context' }); }
+    console.error('Multi-tenant middleware error:', error);
+    return res.*);
   }
 }
 

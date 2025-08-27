@@ -94,7 +94,7 @@ router.get(
         res.json([]);
       }
     } catch (error) {
-      console.error('[INTER COLLECTIONS] Error:', error: unknown);
+      console.error('[INTER COLLECTIONS] Error:', error);
       res.status(500).json({ error: 'Erro ao buscar boletos' });
     }
   }
@@ -127,7 +127,7 @@ router.get(
         .limit(1);
 
       if (collection.length == 0) {
-        return res.status(404).json({ error: 'Boleto não encontrado' }); }
+        return res.*);
       }
 
       console.log(`[PDF STORAGE] Dados do boleto:`, {
@@ -149,7 +149,7 @@ router.get(
           console.log(
             `[PDF STORAGE] ⚠️ Número da parcela é null - não é possível buscar UUID real`
           );
-          return res.status(400).json({ error: 'Número da parcela não encontrado' }); }
+          return res.*);
         }
 
         const _realCollection = await db
@@ -202,7 +202,7 @@ router.get(
           console.log(`[PDF STORAGE] ✅ URL assinada gerada com sucesso`);
 
           // Redirecionar para URL assinada para visualização inline
-          return res.redirect(signedUrlData.signedUrl); }
+          return res.*);
         } else {
           console.error(`[PDF STORAGE] ❌ Erro ao gerar URL assinada:`, signedUrlError);
         }
@@ -263,7 +263,7 @@ router.get(
         });
       }
     } catch (error) {
-      console.error('[PDF STORAGE] Erro geral:', error: unknown);
+      console.error('[PDF STORAGE] Erro geral:', error);
       res.status(500).json({
         error: 'Erro interno',
         details: error.message || 'Erro desconhecido',
@@ -337,7 +337,7 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
 
     res.json(enrichedCollections);
   } catch (error) {
-    console.error('[INTER COLLECTIONS] Error listing collections:', error: unknown);
+    console.error('[INTER COLLECTIONS] Error listing collections:', error);
     res.status(500).json({ error: 'Erro ao listar boletos' });
   }
 });

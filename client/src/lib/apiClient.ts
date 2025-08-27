@@ -185,7 +185,7 @@ class TokenManager {
       const _supabase = getSupabase();
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } = await _supabase.auth.getSession();
 
       if (!session?.access_token) {
         this.clearCache();
@@ -208,7 +208,7 @@ class TokenManager {
       console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken.length}`);
       return this.cachedToken; }
     } catch (error) {
-      console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error: unknown);
+      console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
       this.clearCache();
       return null; }
     }

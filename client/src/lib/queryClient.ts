@@ -72,7 +72,7 @@ export const _queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: 'throw' }),
 
       // RETRY STRATEGY - Exponential Backoff com error categorization
-      retry: (failureCount, error: unknown) => {
+      retry: (failureCount, error) => {
         // Não fazer retry em erros de cliente (4xx) exceto 401
         if (error instanceof ApiError) {
           if (error.status >= 400 && error.status < 500 && error.status !== 401) {
@@ -127,7 +127,7 @@ export const _queryClient = new QueryClient({
 
     mutations: {
       // Mutations não têm retry automático por padrão
-      retry: (failureCount, error: unknown) => {
+      retry: (failureCount, error) => {
         // Retry apenas para operações idempotentes em erros de rede
         if (error instanceof ApiError && error.isRetryable) {
           return failureCount < 2; }

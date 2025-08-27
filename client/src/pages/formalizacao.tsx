@@ -204,7 +204,7 @@ function FormalizacaoList() {
 
   // Debug: log error if any
   if (error) {
-    console.error('Erro na query de formalização:', error: unknown);
+    console.error('Erro na query de formalização:', error);
   }
 
   const _formatCurrency = (value) => {
@@ -537,7 +537,7 @@ export default function Formalizacao() {
         });
       }
     } catch (error) {
-      console.error('Erro ao verificar status do carnê:', error: unknown);
+      console.error('Erro ao verificar status do carnê:', error);
       setCarneStatus({
         exists: false,
         url: null,
@@ -615,7 +615,7 @@ export default function Formalizacao() {
 
       return response; }
     } catch (error) {
-      console.error('[STORAGE STATUS] Erro ao verificar status:', error: unknown);
+      console.error('[STORAGE STATUS] Erro ao verificar status:', error);
       return null; }
     } finally {
       setCheckingStorage(false);
@@ -743,7 +743,7 @@ export default function Formalizacao() {
         refetch();
       }
     } catch (error) {
-      console.error('Erro ao gerar CCB:', error: unknown);
+      console.error('Erro ao gerar CCB:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao gerar CCB. Tente novamente.',
@@ -773,7 +773,7 @@ export default function Formalizacao() {
         window.open(response.publicUrl, '_blank');
       }
     } catch (error) {
-      console.error('Erro ao visualizar CCB:', error: unknown);
+      console.error('Erro ao visualizar CCB:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao visualizar CCB. Tente novamente.',
@@ -805,7 +805,7 @@ export default function Formalizacao() {
         refetch();
       }
     } catch (error) {
-      console.error('Erro ao enviar para ClickSign:', error: unknown);
+      console.error('Erro ao enviar para ClickSign:', error);
       toast({
         title: 'Erro',
         description: error.message || 'Erro ao enviar CCB para ClickSign.',
@@ -825,7 +825,7 @@ export default function Formalizacao() {
       setClickSignData(_response);
       return response; }
     } catch (error) {
-      console.error('❌ [CLICKSIGN] Erro ao consultar status:', error: unknown);
+      console.error('❌ [CLICKSIGN] Erro ao consultar status:', error);
       return null; }
     }
   };
@@ -922,7 +922,7 @@ export default function Formalizacao() {
     // Cleanup ao desmontar o componente
     return () => {
       console.log('🧹 [REALTIME] Removendo canal de escuta');
-      supabase.removeChannel(channel);
+      _supabase.removeChannel(channel);
     };
   }, [propostaId, queryClient, toast]);
 
@@ -1340,7 +1340,7 @@ export default function Formalizacao() {
                                                 'Contrato enviado para ClickSign com sucesso!',
                                             });
                                           } catch (error) {
-                                            console.error('❌ [CLICKSIGN] Erro ao enviar:', error: unknown);
+                                            console.error('❌ [CLICKSIGN] Erro ao enviar:', error);
                                             toast({
                                               title: 'Erro',
                                               description:
@@ -1643,7 +1643,7 @@ export default function Formalizacao() {
                                             }),
                                           ]);
                                         } catch (error) {
-                                          console.error('[INTER] Erro ao gerar boleto:', error: unknown);
+                                          console.error('[INTER] Erro ao gerar boleto:', error);
 
                                           // Verificar se é erro de boleto duplicado
                                           if (
@@ -2229,7 +2229,7 @@ export default function Formalizacao() {
                                                         );
                                                       }
                                                     } catch (error) {
-                                                      console.error('[PDF DOWNLOAD] Erro:', error: unknown);
+                                                      console.error('[PDF DOWNLOAD] Erro:', error);
 
                                                       // SEMPRE informar que o PDF está disponível e pode tentar novamente
                                                       toast({
@@ -2297,7 +2297,7 @@ export default function Formalizacao() {
                                                 });
                                               }
                                             } catch (error) {
-                                              console.error('[REALTIME UPDATE] Erro:', error: unknown);
+                                              console.error('[REALTIME UPDATE] Erro:', error);
                                               toast({
                                                 title: 'Erro',
                                                 description: 'Erro ao atualizar status dos boletos',

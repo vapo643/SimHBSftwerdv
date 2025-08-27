@@ -70,7 +70,7 @@ export function setupSecurityRoutes(app) {
         const { type, severity, details } = req.body;
 
         if (!type || !severity) {
-          return res.status(400).json({ message: 'Type e severity são obrigatórios' }); }
+          return res.*);
         }
 
         securityLogger.logEvent({

@@ -62,7 +62,7 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
     console.log(`[CACHE-REDIS] ❌ Cache MISS for key: ${key}`);
     return null; }
   } catch (error) {
-    console.error(`[CACHE] Error getting from cache for key ${key}:`, error: unknown);
+    console.error(`[CACHE] Error getting from cache for key ${key}:`, error);
     return null; }
   }
 }
@@ -98,7 +98,7 @@ export async function setToCache<T>(
 
     console.log(`[CACHE-REDIS] 💾 Stored in cache with key: ${key} (TTL: ${ttlInSeconds}s)`);
   } catch (error) {
-    console.error(`[CACHE] Error setting cache for key ${key}:`, error: unknown);
+    console.error(`[CACHE] Error setting cache for key ${key}:`, error);
   }
 }
 
@@ -112,7 +112,7 @@ export async function invalidateCache(key: string): Promise<void> {
     await client.del(key);
     console.log(`[CACHE] 🗑️ Invalidated cache key: ${key}`);
   } catch (error) {
-    console.error(`[CACHE] Error invalidating cache for key ${key}:`, error: unknown);
+    console.error(`[CACHE] Error invalidating cache for key ${key}:`, error);
   }
 }
 
@@ -130,7 +130,7 @@ export async function invalidateCachePattern(pattern: string): Promise<void> {
       console.log(`[CACHE] 🗑️ Invalidated ${keys.length} cache keys matching pattern: ${pattern}`);
     }
   } catch (error) {
-    console.error(`[CACHE] Error invalidating cache pattern ${pattern}:`, error: unknown);
+    console.error(`[CACHE] Error invalidating cache pattern ${pattern}:`, error);
   }
 }
 
@@ -143,7 +143,7 @@ export async function isCacheAvailable(): Promise<boolean> {
     await client.ping();
     return true; }
   } catch (error) {
-    console.error('[CACHE] Redis is not available:', error: unknown);
+    console.error('[CACHE] Redis is not available:', error);
     return false; }
   }
 }

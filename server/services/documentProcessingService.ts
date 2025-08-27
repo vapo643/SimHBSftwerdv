@@ -72,7 +72,7 @@ export class DocumentProcessingService {
       if (proposal.caminho_ccb_assinado) {
         // Verificar se o arquivo existe no Storage
         const _storagePath = proposal.caminho_ccb_assinado as string;
-        const { data: fileExists } = await supabase.storage
+        const { data: fileExists } = await _supabase.storage
           .from('documents')
           .list(storagePath.substring(0, storagePath.lastIndexOf('/')), {
             limit: 1,
@@ -106,7 +106,7 @@ export class DocumentProcessingService {
       const _storagePath = `ccb/assinadas/${fileName}`;
 
       console.log(`💾 [DOCUMENT PROCESSING] Saving to Storage: ${storagePath}`);
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await _supabase.storage
         .from('documents')
         .upload(storagePath, pdfBuffer, {
           contentType: 'application/pdf',

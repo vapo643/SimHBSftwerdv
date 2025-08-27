@@ -108,7 +108,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
           <div className="flex h-16 items-center justify-between border-b px-6">
             <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
               <img
-                src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png"
+                src="https://dvglgxrvhmtsixaabxha._supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png"
                 alt="Simpix Logo"
                 className="h-32 w-auto"
               />

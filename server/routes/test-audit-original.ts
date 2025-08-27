@@ -54,12 +54,12 @@ router.post('/test-transition', async (req, res) => {
     res.json({
       success: true,
       message: 'Test transition logged successfully',
-  _transition,
+      _transition,
       totalTransitions: history.length,
       history: history.slice(-5), // Last 5 transitions
     });
   } catch (error) {
-    console.error('[TEST AUDIT] ❌ Test failed:', error: unknown);
+    console.error('[TEST AUDIT] ❌ Test failed:', error);
     res.status(500).json({
       error: 'Failed to test audit service',
       details: (error as Error).message,
@@ -83,15 +83,15 @@ router.post('/validate-transition', async (req, res) => {
     const _isValid = auditService.isValidTransition(fromStatus, toStatus);
 
     res.json({
-  _fromStatus,
-  _toStatus,
-  _isValid,
+      _fromStatus,
+      _toStatus,
+      _isValid,
       message: isValid
         ? 'Transition is valid according to V2.0 workflow'
         : 'Transition is not allowed in V2.0 workflow',
     });
   } catch (error) {
-    console.error('[TEST AUDIT] ❌ Validation failed:', error: unknown);
+    console.error('[TEST AUDIT] ❌ Validation failed:', error);
     res.status(500).json({
       error: 'Failed to validate transition',
       details: (error as Error).message,
@@ -109,12 +109,12 @@ router.get('/history/:propostaId', async (req, res) => {
     const _history = await auditService.getProposalStatusHistory(propostaId);
 
     res.json({
-  _propostaId,
+      _propostaId,
       totalTransitions: history.length,
-  _history,
+      _history,
     });
   } catch (error) {
-    console.error('[TEST AUDIT] ❌ Failed to fetch history:', error: unknown);
+    console.error('[TEST AUDIT] ❌ Failed to fetch history:', error);
     res.status(500).json({
       error: 'Failed to fetch status history',
       details: (error as Error).message,

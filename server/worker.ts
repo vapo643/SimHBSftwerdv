@@ -77,7 +77,7 @@ const _pdfWorker = new Worker(
       }
     } catch (error) {
       const _errorDuration = Date.now() - startTime;
-      console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error: unknown);
+      console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
       throw error; // Re-throw to trigger retry
     }
   },
@@ -188,7 +188,7 @@ const _documentWorker = new Worker(
       }
     } catch (error) {
       const _duration = Date.now() - startTime;
-      console.error(`[WORKER:DOC] ❌ Job ${job.id} failed after ${duration}ms:`, error: unknown);
+      console.error(`[WORKER:DOC] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;
     }
   },
@@ -219,7 +219,7 @@ const _notificationWorker = new Worker(
       }
     } catch (error) {
       const _duration = Date.now() - startTime;
-      console.error(`[WORKER:NOTIFY] ❌ Job ${job.id} failed after ${duration}ms:`, error: unknown);
+      console.error(`[WORKER:NOTIFY] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;
     }
   },

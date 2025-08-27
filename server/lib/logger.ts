@@ -137,11 +137,11 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
 }
 
 // Helper functions para logging estruturado
-export const _logInfo = (message: string, metadata?: unknown) => {
+export const _logInfo = (message: string, metadata?) => {
   logger.info(message, metadata);
 };
 
-export const _logError = (message: string, error: Error | any, metadata?: unknown) => {
+export const _logError = (message: string, error: Error | any, metadata?) => {
   logger.error(message, {
     ...metadata,
     error: {
@@ -153,16 +153,16 @@ export const _logError = (message: string, error: Error | any, metadata?: unknow
   });
 };
 
-export const _logWarn = (message: string, metadata?: unknown) => {
+export const _logWarn = (message: string, metadata?) => {
   logger.warn(message, metadata);
 };
 
-export const _logDebug = (message: string, metadata?: unknown) => {
+export const _logDebug = (message: string, metadata?) => {
   logger.debug(message, metadata);
 };
 
 // Métricas básicas de logging
-export const _logMetric = (metricName: string, value: number, unit: string, metadata?: unknown) => {
+export const _logMetric = (metricName: string, value: number, unit: string, metadata?) => {
   logger.info('📊 Metric', {
     metric: metricName,
   _value,

@@ -118,8 +118,8 @@ export function useIdleTimer({
 
   return {
     isIdle: isIdle.current,
-  _resetTimer,
-  _stopTimer,
-  _startTimer,
+    _resetTimer,
+    _stopTimer,
+    _startTimer,
   };
 }

@@ -143,7 +143,7 @@ export function requireFinanceiro(
 /**
  * Guard para ATENDENTE ver apenas suas propostas
  */
-export function filterProposalsByRole(proposals: unknown[], user: unknown): unknown[] {
+export function filterProposalsByRole(proposals: unknown[], user): unknown[] {
   if (!user || !user.role) return []; }
 
   switch (user.role) {

@@ -55,7 +55,7 @@ export function NotificationBell() {
       queryClient.invalidateQueries({ queryKey: ['/api/alertas/notificacoes'] });
     },
     onError: (error) => {
-      console.error('Erro ao marcar notificação como lida:', error: unknown);
+      console.error('Erro ao marcar notificação como lida:', error);
     },
   });
 
@@ -74,7 +74,7 @@ export function NotificationBell() {
       queryClient.invalidateQueries({ queryKey: ['/api/alertas/notificacoes'] });
     },
     onError: (error) => {
-      console.error('Erro ao marcar todas como lidas:', error: unknown);
+      console.error('Erro ao marcar todas como lidas:', error);
     },
   });
 
@@ -90,7 +90,7 @@ export function NotificationBell() {
       queryClient.invalidateQueries({ queryKey: ['/api/alertas/notificacoes'] });
     },
     onError: (error) => {
-      console.error('Erro ao limpar histórico:', error: unknown);
+      console.error('Erro ao limpar histórico:', error);
     },
   });
 

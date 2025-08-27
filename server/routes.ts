@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Lista de flags relevantes para o frontend
-      const _frontendFlags = [
+      const __frontendFlags = [
         'maintenance-mode',
         'read-only-mode',
         'novo-dashboard',
@@ -178,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       // Verifica todas as flags
-      const _flags = await featureFlagService.checkMultiple(frontendFlags, context);
+      const _flags = await featureFlagService.checkMultiple(_frontendFlags, context);
 
       res.json({
   _flags,
@@ -189,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error('Erro ao buscar feature flags:', error: unknown);
+      console.error(error);
       // Em caso de erro, retorna flags desabilitadas
       res.json({
         flags: {},
@@ -200,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
   app.get('/api/debug-sentry', function mainHandler(req, res) {
-    throw new Error('Meu primeiro erro Sentry do Simpix!');
+    throw new Error("Error");
   });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
@@ -216,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           environment: process.env.NODE_ENV,
         });
 
-        if (!isEnabled) {
+        if (!_isEnabled) {
           console.log(
             '❌ Feature flag nova-api-experimental desabilitada para usuário:',
             req.user?.id
@@ -250,7 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           por_status: analytics.reduce(
             (acc, p) => {
               acc[p.status] = (acc[p.status] || 0) + 1;
-              return acc; }
+              return acc;
             },
             {} as Record<string, number>
           ),
@@ -260,12 +260,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json({
           success: true,
-          data: summary,
+          data: _summary,
           experimental: true,
           message: 'API experimental - dados podem mudar',
         });
       } catch (error) {
-        console.error('Erro na API experimental:', error: unknown);
+        console.error(error);
         res.status(500).json({
           error: 'Internal server error',
           experimental: true,
@@ -434,7 +434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             : '❌ Ainda há campos faltantes - necessário criar nova proposta de teste',
       });
     } catch (error) {
-      console.error('❌ [AUDIT] Erro na auditoria:', error: unknown);
+      console.error(error);
       res.status(500).json({
         RELATORIO_FINAL: '[ERRO]',
         error: 'Falha na execução da auditoria',
@@ -621,7 +621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json(resultado);
       } catch (error) {
-        console.error('Erro no teste de fluxo de dados:', error: unknown);
+        console.error(error);
         res.status(500).json({ error: 'Erro ao testar fluxo de dados' });
       }
     }
@@ -636,7 +636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: getBrasiliaTimestamp(),
       });
     } catch (error) {
-      console.error('Debug endpoint error:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Debug endpoint failed' });
     }
   });
@@ -682,32 +682,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // Build query based on user role
-        let _query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
+        let _query = _supabase.from('propostas').select('*').in('status', formalizationStatuses);
 
         // Apply role-based filtering
         if (userRole == 'ATENDENTE') {
           // ATENDENTE sees only proposals they created
-          query = query.eq('user_id', userId);
-          console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
-        } else if (userRole == 'GERENTE') {
+          _query = _query.eq('user_id', _userId);
+          console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${_userId}`);
+        } else if (_userRole == 'GERENTE') {
           // GERENTE sees all proposals from their store
-          query = query.eq('loja_id', userLojaId);
-          console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
+          _query = _query.eq('loja_id', _userLojaId);
+          console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${_userLojaId}`);
         }
         // For other roles (ADMINISTRADOR, ANALISTA, etc.), no additional filtering
 
-        const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
+        const { data: rawPropostas, error } = await _query.order('created_at', { ascending: false });
 
         if (error) {
-          console.error('🚨 [FORMALIZATION] Supabase error:', error: unknown);
-          return res.status(500).json({ message: 'Erro ao consultar propostas de formalização' }); }
+          console.error(error);
+          return res.status(500).json({error: "Error"});
         }
 
         if (!rawPropostas || rawPropostas.length == 0) {
           console.log(
             `🔐 [FORMALIZATION] No proposals found for user ${userId} with role ${userRole}`
           );
-          return res.json([]); }
+          return res.status(500).json({error: "Error"});
         }
 
         console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${userId}`);
@@ -725,19 +725,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Parse cliente_data se for string
           if (typeof proposta.cliente_data == 'string') {
             try {
-              clienteData = JSON.parse(proposta.cliente_data);
+              _clienteData = JSON.parse(proposta.cliente_data);
             } catch (e) {
               console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
               clienteData = {};
             }
           } else {
-            clienteData = proposta.cliente_data || {};
+            _clienteData = proposta.cliente_data || {};
           }
 
           // Parse condicoes_data se for string
           if (typeof proposta.condicoes_data == 'string') {
             try {
-              condicoesData = JSON.parse(proposta.condicoes_data);
+              _condicoesData = JSON.parse(proposta.condicoes_data);
             } catch (e) {
               console.warn(
                 `Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`,
@@ -746,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               condicoesData = {};
             }
           } else {
-            condicoesData = proposta.condicoes_data || {};
+            _condicoesData = proposta.condicoes_data || {};
           }
 
           return {
@@ -772,7 +772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res.json(formalizacaoPropostas);
       } catch (error) {
-        console.error('Erro ao buscar propostas de formalização:', error: unknown);
+        console.error(error);
         res.status(500).json({
           message: 'Erro ao buscar propostas de formalização',
         });
@@ -800,11 +800,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .single();
 
         if (propostaError || !proposta) {
-          return res.status(404).json({ error: 'Proposta não encontrada' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         if (proposta.status !== 'aprovado') {
-          return res.status(400).json({ error: 'CCB só pode ser gerada para propostas aprovadas' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // Se CCB já foi gerada, retornar sucesso
@@ -824,7 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const _result = await ccbGenerationService.generateCCB(id);
           if (!result.success) {
-            throw new Error(result.error: unknown);
+            throw new Error("Error");
           }
           console.log(`[CCB] CCB gerada com sucesso usando template CORRETO: ${result.pdfPath}`);
           res.json({
@@ -833,11 +833,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             caminho: result.pdfPath,
           });
         } catch (error) {
-          console.error(`[CCB] Erro ao gerar CCB: ${error}`);
-          return res.status(500).json({ error: 'Erro ao gerar CCB' }); }
+          console.error(error);
+          return res.status(500).json({error: "Error"});
         }
       } catch (error) {
-        console.error('[CCB] Erro interno:', error: unknown);
+        console.error(error);
         res.status(500).json({ error: 'Erro interno do servidor' });
       }
     }
@@ -883,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Disposition', 'attachment; filename="teste-simples.pdf"');
         res.send(pdfBuffer);
       } catch (error) {
-        console.error('Erro ao criar PDF teste:', error: unknown);
+        console.error(error);
         res.status(500).json({ error: 'Erro ao criar PDF teste' });
       }
     }
@@ -898,14 +898,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const _supabase = createServerSupabaseAdminClient();
 
-        const { data: files, error } = await supabase.storage.from('documents').list('ccb', {
+        const { data: files, error } = await _supabase.storage.from('documents').list('ccb', {
           limit: 50,
           sortBy: { column: 'created_at', order: 'desc' },
         });
 
         if (error) {
-          console.error('Erro ao listar arquivos:', error: unknown);
-          return res.status(500).json({ error: error.message }); }
+          console.error(error);
+          return res.status(500).json({error: "Error"});
         }
 
         res.json({
@@ -915,7 +915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           count: files?.length || 0,
         });
       } catch (error) {
-        console.error('Erro debug storage:', error: unknown);
+        console.error(error);
         res.status(500).json({ error: 'Erro interno' });
       }
     }
@@ -943,19 +943,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (error || !proposta) {
           console.log(`[CCB URL] ❌ Proposta não encontrada: ${error?.message}`);
-          return res.status(404).json({ message: 'Proposta não encontrada' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         if (!proposta.ccb_gerado) {
           console.log(`[CCB URL] ❌ CCB não foi gerada ainda`);
-          return res.status(404).json({ message: 'CCB não foi gerada para esta proposta' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // ✅ ESTRATÉGIA TRIPLA: Sempre verificar se há versão mais recente no storage
         console.log(`[CCB URL] 💾 Caminho no banco: ${proposta.caminho_ccb || 'nenhum'}`);
 
         // Sempre buscar arquivos no storage para garantir versão mais recente
-        const { data: files } = await supabase.storage
+        const { data: files } = await _supabase.storage
           .from('documents')
           .list(`ccb/${id}`, { sortBy: { column: 'created_at', order: 'desc' } });
 
@@ -983,20 +983,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (!ccbPath) {
           console.log(`[CCB URL] ❌ Nenhum arquivo CCB encontrado`);
-          return res.status(404).json({ message: 'Arquivo CCB não encontrado' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         console.log(`[CCB URL] 🔗 Gerando URL assinada para: ${ccbPath}`);
         console.log(`[CCB URL] 📅 CCB gerado em: ${proposta.ccb_gerado_em}`);
 
         // Gerar URL assinada com cache-busting para forçar atualização
-        const { data: signedUrlData, error: urlError } = await supabase.storage
+        const { data: signedUrlData, error: urlError } = await _supabase.storage
           .from('documents')
           .createSignedUrl(ccbPath, 3600); // 1 hora
 
         if (urlError || !signedUrlData) {
-          console.error('❌ [CCB URL] Erro ao gerar URL assinada:', urlError);
-          console.error('❌ [CCB URL] Caminho tentado:', ccbPath);
+          console.error(error);
+          console.error(error);
 
           // 🔄 FALLBACK: Regenerar CCB se não encontrado (conforme error_docs/storage_errors.md)
           if (
@@ -1009,7 +1009,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const _newCcb = await ccbGenerationService.generateCCB(id);
               if (newCcb.success) {
                 // Tentar novamente com o novo arquivo
-                const { data: newSignedUrl } = await supabase.storage
+                const { data: newSignedUrl } = await _supabase.storage
                   .from('documents')
                   .createSignedUrl(newCcb.pdfPath!, 3600);
 
@@ -1029,7 +1029,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
             } catch (regenError) {
-              console.error('❌ [CCB URL] Erro na regeneração:', regenError);
+              console.error(error);
             }
           }
 
@@ -1049,7 +1049,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType: 'application/pdf',
         });
       } catch (error) {
-        console.error('Erro ao buscar CCB:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao buscar CCB' });
       }
     }
@@ -1162,7 +1162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // DEBUG: Listar arquivos que existem no bucket para esta proposta
-          const { data: bucketFiles, error: listError } = await supabase.storage
+          const { data: bucketFiles, error: listError } = await _supabase.storage
             .from('documents')
             .list(`proposta-${idParam}/`, { limit: 100 });
 
@@ -1216,7 +1216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
                 console.log(`🔍 [ANÁLISE] Caminho extraído para URL assinada: ${filePath}`);
 
-                const { data: signedUrlData, error: urlError } = await supabase.storage
+                const { data: signedUrlData, error: urlError } = await _supabase.storage
                   .from('documents')
                   .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -1297,7 +1297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const _proposta = await storage.getPropostaById(idParam);
 
           if (!proposta) {
-            return res.status(404).json({ message: 'Proposta not found' }); }
+            return res.status(500).json({error: "Error"});
           }
 
           console.log(
@@ -1350,7 +1350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
                 console.log(`🔍 [ANÁLISE-OUTROS] Caminho extraído para URL assinada: ${filePath}`);
 
-                const { data: signedUrlData, error: urlError } = await supabase.storage
+                const { data: signedUrlData, error: urlError } = await _supabase.storage
                   .from('documents')
                   .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -1412,7 +1412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.json(propostaComDocumentos);
         }
       } catch (error) {
-        console.error('Get proposta error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to fetch proposta' });
       }
     }
@@ -1432,7 +1432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { documentos } = req.body;
 
         if (!documentos || !Array.isArray(documentos)) {
-          return res.status(400).json({ message: 'Lista de documentos é obrigatória' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -1446,11 +1446,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const _filePath = `proposta-${propostaId}/${fileName}`;
 
             // Gerar URL assinada para o documento
-            const { data: signedUrlData } = await supabase.storage
+            const { data: signedUrlData } = await _supabase.storage
               .from('documents')
               .createSignedUrl(filePath, 3600); // 1 hora
 
-            const { error: insertError } = await supabase.from('proposta_documentos').insert({
+            const { error: insertError } = await _supabase.from('proposta_documentos').insert({
               proposta_id: propostaId,
               nome_arquivo: fileName.split('-').slice(1).join('-'), // Remove timestamp prefix
               url: signedUrlData?.signedUrl || `documents/${filePath}`,
@@ -1467,14 +1467,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
 
             if (insertError) {
-              console.error(`[ERROR] Falha ao associar documento ${fileName}:`, insertError);
+              console.error(error);
             } else {
               console.log(
                 `[DEBUG] Documento ${fileName} associado com sucesso à proposta ${propostaId}`
               );
             }
           } catch (docError) {
-            console.error(`[ERROR] Erro ao processar documento ${fileName}:`, docError);
+            console.error(error);
           }
         }
 
@@ -1485,10 +1485,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (error) {
         if (error instanceof z.ZodError) {
-          console.error('Validation error:', error.errors);
-          return res.status(400).json({ message: 'Invalid data', errors: error.errors }); }
+          console.error(error);
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Create proposta error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to create proposta' });
       }
     }
@@ -1569,7 +1569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.send(successPage);
       } catch (error) {
-        console.error('Progressive Enhancement form error:', error: unknown);
+        console.error(error);
 
         // Error page for traditional form submission
         const _errorPage = `
@@ -1628,9 +1628,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(proposta);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Invalid data', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Update proposta error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to update proposta' });
       }
     }
@@ -1645,7 +1645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _propostas = await storage.getPropostasByStatus(status);
         res.json(propostas);
       } catch (error) {
-        console.error('Get propostas by status error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to fetch propostas' });
       }
     }
@@ -1680,10 +1680,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const _supabase = createServerSupabaseAdminClient();
 
       // Check existing buckets
-      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      const { data: buckets, error: listError } = await _supabase.storage.listBuckets();
 
       if (listError) {
-        console.error('❌ Erro ao listar buckets:', listError);
+        console.error(error);
         return res
           .status(500)
           .json({ message: 'Erro ao acessar storage', error: listError.message });
@@ -1699,7 +1699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create documents bucket
-      const { data: bucket, error: createError } = await supabase.storage.createBucket(
+      const { data: bucket, error: createError } = await _supabase.storage.createBucket(
         'documents',
         {
           public: true,
@@ -1715,7 +1715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (createError) {
-        console.error('❌ Erro ao criar bucket:', createError);
+        console.error(error);
         return res
           .status(500)
           .json({ message: 'Erro ao criar bucket', error: createError.message });
@@ -1727,7 +1727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allBuckets: buckets.map((b) => b.name).concat(['documents']),
       });
     } catch (error) {
-      console.error('Erro no setup:', error: unknown);
+      console.error(error);
       res.status(500).json({
         message: 'Erro interno',
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -1746,7 +1746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
-          return res.status(400).json({ message: 'Arquivo é obrigatório' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -1761,7 +1761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
 
         // Upload to PRIVATE Supabase Storage bucket
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await _supabase.storage
           .from('documents')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
@@ -1769,14 +1769,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
         if (uploadError) {
-          console.error('[ERROR] Erro no upload:', uploadError);
+          console.error(error);
           return res.status(400).json({
             message: `Erro no upload: ${uploadError.message}`,
           });
         }
 
         // For private bucket, we need to generate a signed URL for viewing
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
           .from('documents')
           .createSignedUrl(filePath, 3600); // 1 hour expiry
 
@@ -1792,7 +1792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: file.mimetype,
         });
       } catch (error) {
-        console.error('[ERROR] Erro no upload de documento:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro interno no upload' });
       }
     }
@@ -1871,7 +1871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(
             `[${getBrasiliaTimestamp()}] Encontradas ${tabelasPersonalizadas.length} tabelas personalizadas`
           );
-          return res.json(tabelasPersonalizadas); }
+          return res.status(500).json({error: "Error"});
         }
 
         console.log(
@@ -1909,7 +1909,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json(resultado);
       } catch (error) {
-        console.error('Erro no endpoint de tabelas comerciais hierárquicas:', error: unknown);
+        console.error(error);
         res.status(500).json({
           message: 'Erro interno do servidor',
         });
@@ -1956,7 +1956,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res.json(tabelasWithProducts);
       } catch (error) {
-        console.error('Erro ao buscar tabelas comerciais:', error: unknown);
+        console.error(error);
         res.status(500).json({
           message: 'Erro ao buscar tabelas comerciais',
         });
@@ -2020,9 +2020,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json(_result);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Erro ao criar tabela comercial:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao criar tabela comercial' });
       }
     }
@@ -2042,7 +2042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const _tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
-          return res.status(400).json({ message: 'ID da tabela inválido' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // Updated validation schema for N:N structure
@@ -2075,7 +2075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .returning();
 
           if (!updatedTabela) {
-            throw new Error('Tabela comercial não encontrada');
+            throw new Error("Error");
           }
 
           // Step 2: Delete existing product associations
@@ -2100,12 +2100,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(_result);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
         if (error instanceof Error && error.message == 'Tabela comercial não encontrada') {
-          return res.status(404).json({ message: error.message }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Erro ao atualizar tabela comercial:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao atualizar tabela comercial' });
       }
     }
@@ -2124,7 +2124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const _tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
-          return res.status(400).json({ message: 'ID da tabela inválido' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // TRANSACTION: Delete table and its associations
@@ -2142,7 +2142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .returning();
 
           if (result.length == 0) {
-            throw new Error('Tabela comercial não encontrada');
+            throw new Error("Error");
           }
         });
 
@@ -2150,9 +2150,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(204).send();
       } catch (error) {
         if (error instanceof Error && error.message == 'Tabela comercial não encontrada') {
-          return res.status(404).json({ message: error.message }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Erro ao deletar tabela comercial:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao deletar tabela comercial' });
       }
     }
@@ -2178,7 +2178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         if (!propostaId) {
-          return res.status(400).json({ message: 'ID da proposta é obrigatório' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // Usar Supabase Admin Client diretamente para evitar problemas do Drizzle
@@ -2208,7 +2208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `[${getBrasiliaTimestamp()}] ❌ Proposta ${propostaId} não encontrada:`,
             propostaError?.message
           );
-          return res.status(404).json({ message: 'Proposta não encontrada' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 3 - Buscando documentos...`);
@@ -2259,7 +2259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               console.log(`🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: ${filePath}`);
 
-              const { data: signedUrlData, error: urlError } = await supabase.storage
+              const { data: signedUrlData, error: urlError } = await _supabase.storage
                 .from('documents')
                 .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -2431,7 +2431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const _allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
       res.json(allParceiros);
     } catch (error) {
-      console.error('Erro ao buscar parceiros:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Erro ao buscar parceiros' });
     }
   });
@@ -2445,18 +2445,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const _parceiroId = parseInt(req.params.id);
       if (isNaN(parceiroId)) {
-        return res.status(400).json({ message: 'ID do parceiro inválido' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       const [parceiro] = await db.select().from(parceiros).where(eq(parceiros.id, parceiroId));
 
       if (!parceiro) {
-        return res.status(404).json({ message: 'Parceiro não encontrado' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       res.json(parceiro);
     } catch (error) {
-      console.error('Erro ao buscar parceiro:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Erro ao buscar parceiro' });
     }
   });
@@ -2478,9 +2478,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json(newParceiro);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Erro ao criar parceiro:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao criar parceiro' });
       }
     }
@@ -2500,7 +2500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const _parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
-          return res.status(400).json({ message: 'ID do parceiro inválido' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         const _validatedData = updateParceiroSchema.parse(req.body);
@@ -2511,15 +2511,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .returning();
 
         if (!updatedParceiro) {
-          return res.status(404).json({ message: 'Parceiro não encontrado' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         res.json(updatedParceiro);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Erro ao atualizar parceiro:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao atualizar parceiro' });
       }
     }
@@ -2538,7 +2538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const _parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
-          return res.status(400).json({ message: 'ID do parceiro inválido' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // Regra de negócio crítica: verificar se existem lojas associadas (excluindo soft-deleted)
@@ -2560,7 +2560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(and(eq(parceiros.id, parceiroId), isNull(parceiros.deletedAt)));
 
         if (!parceiroExistente) {
-          return res.status(404).json({ message: 'Parceiro não encontrado' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // Soft delete - set deleted_at timestamp
@@ -2571,7 +2571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.status(204).send();
       } catch (error) {
-        console.error('Erro ao excluir parceiro:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao excluir parceiro' });
       }
     }
@@ -2583,7 +2583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const _produtos = await buscarTodosProdutos();
       res.json(produtos);
     } catch (error) {
-      console.error('Erro ao buscar produtos:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Erro ao buscar produtos' });
     }
   });
@@ -2595,16 +2595,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[PRODUTOS API] Criando produto com dados:', { nome, status, tacValor, tacTipo });
 
       if (!nome || !status) {
-        return res.status(400).json({ message: 'Nome e status são obrigatórios' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       // Validação opcional dos campos TAC
       if (tacValor !== undefined && tacValor < 0) {
-        return res.status(400).json({ message: 'Valor da TAC não pode ser negativo' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       if (tacTipo !== undefined && !['fixo', 'percentual'].includes(tacTipo)) {
-        return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" }); }
+        return res.status(500).json({error: "Error"});
       }
 
       const _dadosProduto = {
@@ -2622,7 +2622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(novoProduto);
     } catch (error) {
-      console.error('Erro ao criar produto:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Erro ao criar produto' });
     }
   });
@@ -2633,16 +2633,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { nome, status, tacValor, tacTipo } = req.body;
 
       if (!nome || !status) {
-        return res.status(400).json({ message: 'Nome e status são obrigatórios' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       // Validação opcional dos campos TAC
       if (tacValor !== undefined && tacValor < 0) {
-        return res.status(400).json({ message: 'Valor da TAC não pode ser negativo' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       if (tacTipo !== undefined && !['fixo', 'percentual'].includes(tacTipo)) {
-        return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" }); }
+        return res.status(500).json({error: "Error"});
       }
 
       const _produtoAtualizado = await atualizarProduto(id, {
@@ -2653,7 +2653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.json(produtoAtualizado);
     } catch (error) {
-      console.error('Erro ao atualizar produto:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Erro ao atualizar produto' });
     }
   });
@@ -2665,7 +2665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await deletarProduto(id);
       res.status(204).send(); // 204 No Content on successful deletion
     } catch (error) {
-      console.error('Erro ao excluir produto:', error: unknown);
+      console.error(error);
 
       // Check if it's a dependency error
       if (error instanceof Error && error.message.includes('Tabelas Comerciais')) {
@@ -2862,9 +2862,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('======================================');
       }
 
-      return res.json(respostaCompleta); }
+      return res.status(500).json({error: "Error"});
     } catch (error) {
-      console.error('[SIMULAÇÃO] Erro ao processar simulação:', error: unknown);
+      console.error(error);
       return res.status(500).json({
         error: 'Erro ao processar simulação',
         details: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -2895,7 +2895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const _prazoEmMeses = parseInt(prazo as string);
 
     if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
-      return res.status(400).json({ error: 'Parâmetros inválidos.' }); }
+      return res.status(500).json({error: "Error"});
     }
 
     // Correção Crítica: Usa a data do servidor como a "verdade"
@@ -2990,7 +2990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id));
 
         if (!proposta) {
-          return res.status(404).json({ message: 'Proposta não encontrada' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // 🔍 DEBUG: Log proposta info
@@ -3049,12 +3049,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const { ccbGenerationService } = await import('./services/ccbGenerationService');
               const _result = await ccbGenerationService.generateCCB(id);
               if (!result.success) {
-                throw new Error(result.error: unknown);
+                throw new Error("Error");
               }
               updateData.caminhoCcbAssinado = result.pdfPath;
               console.log(`[${getBrasiliaTimestamp()}] CCB gerada com sucesso: ${result.pdfPath}`);
             } catch (error) {
-              console.error(`[${getBrasiliaTimestamp()}] Erro ao gerar CCB:`, error: unknown);
+              console.error(error);
               // Don't fail the entire request if CCB generation fails
             }
           }
@@ -3129,7 +3129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Não retornamos erro 409 aqui pois é uma operação interna após conclusão de etapas
               // O sistema deveria estar em um estado válido para esta transição
             } else {
-              console.error(`[${getBrasiliaTimestamp()}] Erro ao executar transição: ${error}`);
+              console.error(error);
             }
           }
 
@@ -3143,7 +3143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           proposta: updatedProposta,
         });
       } catch (error) {
-        console.error('Erro ao atualizar etapa de formalização:', error: unknown);
+        console.error(error);
         res.status(500).json({
           message: 'Erro ao atualizar etapa de formalização',
         });
@@ -3162,7 +3162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { status, observacao } = req.body;
 
         if (!status) {
-          return res.status(400).json({ message: 'Status é obrigatório' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // Import database and schema dependencies
@@ -3182,7 +3182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(propostas.id, id));
 
           if (!currentProposta) {
-            throw new Error('Proposta não encontrada');
+            throw new Error("Error");
           }
 
           // PAM V1.0 - Usar FSM para validação de transição de status
@@ -3233,9 +3233,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res.json(_result);
       } catch (error) {
-        console.error('Update status error:', error: unknown);
+        console.error(error);
         if (error instanceof Error && error.message == 'Proposta não encontrada') {
-          return res.status(404).json({ message: error.message }); }
+          return res.status(500).json({error: "Error"});
         }
         // Tratar erro 409 de transição inválida
         if (error?.statusCode == 409) {
@@ -3263,7 +3263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(stats);
     } catch (error) {
-      console.error('Get stats error:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Failed to fetch stats' });
     }
   });
@@ -3280,7 +3280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _lojaIds = await storage.getLojasForGerente(gerenteId);
         res.json(lojaIds);
       } catch (error) {
-        console.error('Get lojas for gerente error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to fetch stores for manager' });
       }
     }
@@ -3297,7 +3297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _gerenteIds = await storage.getGerentesForLoja(lojaId);
         res.json(gerenteIds);
       } catch (error) {
-        console.error('Get gerentes for loja error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to fetch managers for store' });
       }
     }
@@ -3315,9 +3315,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(relationship);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Invalid data', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Add gerente to loja error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to add manager to store' });
       }
     }
@@ -3335,7 +3335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.removeGerenteFromLoja(gerenteId, lojaId);
         res.json({ message: 'Manager removed from store successfully' });
       } catch (error) {
-        console.error('Remove gerente from loja error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to remove manager from store' });
       }
     }
@@ -3352,7 +3352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _relationships = await storage.getGerenteLojas(gerenteId);
         res.json(relationships);
       } catch (error) {
-        console.error('Get gerente relationships error:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Failed to fetch manager relationships' });
       }
     }
@@ -3393,7 +3393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json({ totalLojas });
       } catch (error) {
-        console.error('Erro ao buscar metadados do sistema:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao buscar metadados do sistema' });
       }
     }
@@ -3412,14 +3412,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const _parceiroId = parseInt(req.params.parceiroId);
         if (isNaN(parceiroId)) {
-          return res.status(400).json({ message: 'ID do parceiro inválido' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         const _lojasResult = await db.select().from(lojas).where(eq(lojas.parceiroId, parceiroId));
 
         res.json(lojasResult);
       } catch (error) {
-        console.error('Erro ao buscar lojas do parceiro:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao buscar lojas do parceiro' });
       }
     }
@@ -3437,7 +3437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _lojas = await storage.getLojas();
         res.json(lojas);
       } catch (error) {
-        console.error('Erro ao buscar lojas:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao buscar lojas' });
       }
     }
@@ -3448,17 +3448,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const _id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: 'ID da loja inválido' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       const _loja = await storage.getLojaById(id);
       if (!loja) {
-        return res.status(404).json({ message: 'Loja não encontrada' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       res.json(loja);
     } catch (error) {
-      console.error('Erro ao buscar loja:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Erro ao buscar loja' });
     }
   });
@@ -3475,9 +3475,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json(newLoja);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Erro ao criar loja:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao criar loja' });
       }
     }
@@ -3492,22 +3492,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const _id = parseInt(req.params.id);
         if (isNaN(id)) {
-          return res.status(400).json({ message: 'ID da loja inválido' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         const _validatedData = updateLojaSchema.strict().parse(req.body);
         const _updatedLoja = await storage.updateLoja(id, validatedData);
 
         if (!updatedLoja) {
-          return res.status(404).json({ message: 'Loja não encontrada' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         res.json(updatedLoja);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors }); }
+          return res.status(500).json({error: "Error"});
         }
-        console.error('Erro ao atualizar loja:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao atualizar loja' });
       }
     }
@@ -3522,7 +3522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const _id = parseInt(req.params.id);
         if (isNaN(id)) {
-          return res.status(400).json({ message: 'ID da loja inválido' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         // Check for dependencies before soft delete
@@ -3545,7 +3545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.deleteLoja(id);
         res.json({ message: 'Loja desativada com sucesso' });
       } catch (error) {
-        console.error('Erro ao desativar loja:', error: unknown);
+        console.error(error);
         res.status(500).json({ message: 'Erro ao desativar loja' });
       }
     }
@@ -3555,7 +3555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: 'Usuário não autenticado' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       res.json({
@@ -3566,7 +3566,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         loja_id: req.user!.loja_id,
       });
     } catch (error) {
-      console.error('Error fetching user profile:', error: unknown);
+      console.error(error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   });
@@ -3589,7 +3589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error('Storage health check failed:', error: unknown);
+      console.error(error);
       res.status(500).json({
         status: 'unhealthy',
         timestamp: getBrasiliaTimestamp(),
@@ -3609,7 +3609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const table of tables) {
         try {
-          const { data, error } = await supabase.from(table).select('*').limit(1);
+          const { data, error } = await _supabase.from(table).select('*').limit(1);
 
           checks[table] = {
             status: error ? 'error' : 'ok',
@@ -3631,7 +3631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tables: checks,
       });
     } catch (error) {
-      console.error('Schema health check failed:', error: unknown);
+      console.error(error);
       res.status(500).json({
         status: 'unhealthy',
         timestamp: getBrasiliaTimestamp(),
@@ -3659,7 +3659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
-          return res.status(400).json({ message: 'Arquivo é obrigatório' }); }
+          return res.status(500).json({error: "Error"});
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -3674,7 +3674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
 
         // Upload para o Supabase Storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await _supabase.storage
           .from('documents')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
@@ -3682,14 +3682,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
         if (uploadError) {
-          console.error('[ERROR] Erro no upload:', uploadError);
+          console.error(error);
           return res.status(400).json({
             message: `Erro no upload: ${uploadError.message}`,
           });
         }
 
         // Obter URL pública
-        const { data: publicUrl } = supabase.storage.from('documents').getPublicUrl(filePath);
+        const { data: publicUrl } = _supabase.storage.from('documents').getPublicUrl(filePath);
 
         console.log(`[DEBUG] Upload bem-sucedido. Arquivo salvo em: ${publicUrl.publicUrl}`);
 
@@ -3703,7 +3703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: file.mimetype,
         });
       } catch (error) {
-        console.error('[ERROR] Erro no upload de documento:', error: unknown);
+        console.error(error);
         res.status(500).json({
           message: 'Erro interno do servidor no upload',
         });
@@ -3869,7 +3869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pdfPath: result.pdfPath,
       });
     } catch (error) {
-      console.error('❌ [CCB TEST] Error:', error: unknown);
+      console.error(error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -3885,7 +3885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Buscar proposta
       const _proposal = await storage.getPropostaById(id);
       if (!proposal) {
-        return res.status(404).json({ error: 'Proposta não encontrada' }); }
+        return res.status(500).json({error: "Error"});
       }
 
       // Extrair dados de endereço
@@ -3925,10 +3925,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🧪 [CCB DEBUG] Cidade:', debugInfo.expectedRendering.cidade);
       console.log('🧪 [CCB DEBUG] UF:', debugInfo.expectedRendering.uf);
 
-      return res.json(debugInfo); }
+      return res.status(500).json({error: "Error"});
     } catch (error) {
-      console.error('❌ Erro no teste de endereço:', error: unknown);
-      return res.status(500).json({ error: (error as Error).message }); }
+      console.error(error);
+      return res.status(500).json({error: "Error"});
     }
   });
 
@@ -3992,8 +3992,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _data = await fs.readFile(reportPath, 'utf-8');
         reportData = JSON.parse(_data);
       } catch (e) {
-        console.error('❌ [SCA] Erro ao ler relatório:', e);
-        return res.status(500).json({ success: false, error: 'Relatório não encontrado' }); }
+        console.error(error);
+        return res.status(500).json({error: "Error"});
       }
 
       // Processar vulnerabilidades
@@ -4030,7 +4030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error('❌ [SCA] Erro:', error: unknown);
+      console.error(error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -4083,7 +4083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error('❌ [SAST] Erro:', error: unknown);
+      console.error(error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -4141,7 +4141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: health,
       });
     } catch (error) {
-      console.error('[TEST ENDPOINT] ❌ Health check failed:', error: unknown);
+      console.error(error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -4216,7 +4216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           queuesHealth: health,
         });
       } catch (error) {
-        console.error('[TEST ENDPOINT] ❌ Erro ao adicionar job:', error: unknown);
+        console.error(error);
         res.status(500).json({
           success: false,
           error: error instanceof Error ? error.message : 'Erro ao adicionar job à fila',
@@ -4243,7 +4243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           queues: health,
         });
       } catch (error) {
-        console.error('[TEST ENDPOINT] ❌ Erro ao verificar status:', error: unknown);
+        console.error(error);
         res.status(500).json({
           success: false,
           error: error instanceof Error ? error.message : 'Erro ao verificar status das filas',

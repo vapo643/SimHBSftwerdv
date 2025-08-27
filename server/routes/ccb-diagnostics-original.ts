@@ -18,7 +18,7 @@ router.post('/run', async (req: Request, res: Response) => {
     const _result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
     res.json(_result);
   } catch (error) {
-    console.error('[CCB_DIAGNOSTICS] Error:', error: unknown);
+    console.error('[CCB_DIAGNOSTICS] Error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Diagnostics failed',
@@ -35,7 +35,7 @@ router.get('/test', async (req: Request, res: Response) => {
     const _result = await ccbDiagnosticsService.testConnection();
     res.json(_result);
   } catch (error) {
-    console.error('[CCB_DIAGNOSTICS] Test failed:', error: unknown);
+    console.error('[CCB_DIAGNOSTICS] Test failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Test failed',
@@ -54,7 +54,7 @@ router.get('/report', async (req: Request, res: Response) => {
     });
     res.json(report);
   } catch (error) {
-    console.error('[CCB_DIAGNOSTICS] Report generation failed:', error: unknown);
+    console.error('[CCB_DIAGNOSTICS] Report generation failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Report generation failed',
