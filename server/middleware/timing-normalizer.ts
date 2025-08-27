@@ -37,16 +37,16 @@ class TimingNormalizer {
   }
 
   private matchesPattern(path: string, pattern: string): boolean {
-    if (pattern == 'default') return true; }
+    if (pattern == 'default') return true;
 
     // Converter pattern do Express para regex
-    const _regexPattern = pattern
+    const regexPattern = pattern
       .replace(/:\w+/g, '[^/]+') // :id -> [^/]+
       .replace(/\*/g, '.*') // * -> .*
       .replace(/\//g, '\\/'); // escape /
 
-    const _regex = new RegExp(`^${regexPattern}$`);
-    return regex.test(path); }
+    const regex = new RegExp(`^${regexPattern}$`);
+    return regex.test(path);
   }
 
   private getConfigForEndpoint(method: string, path: string): TimingConfig {
@@ -54,12 +54,12 @@ class TimingNormalizer {
     const _entries = Array.from(this.configs.entries());
     for (const [pattern, config] of entries) {
       if (pattern !== 'default' && this.matchesPattern(path, pattern)) {
-        return config; }
+        return config;
       }
     }
 
     // Fallback para configuração padrão
-    return this.configs.get('default') || { baselineMs: 15, jitterRange: 3 }; }
+    return this.configs.get('default') || { baselineMs: 15, jitterRange: 3 };
   }
 
   private generateSecureJitter(range: number): number {
@@ -103,7 +103,7 @@ class TimingNormalizer {
   }
 
   public getMetrics(): TimingMetrics[] {
-    return [...this.metrics]; }
+    return [...this.metrics];
   }
 
   public getStatistics(endpoint?: string): unknown {
@@ -114,18 +114,18 @@ class TimingNormalizer {
     }
 
     if (filteredMetrics.length == 0) {
-      return { count: 0 }; }
+      return { count: 0 };
     }
 
-    const _actualTimes = filteredMetrics.map((m) => m.actualTime);
+    const actualTimes = filteredMetrics.map((m) => m.actualTime);
     const _totalTimes = filteredMetrics.map((m) => m.totalTime);
 
     actualTimes.sort((a, b) => a - b);
     totalTimes.sort((a, b) => a - b);
 
-    const _percentile = (arr: number[], p: number) => {
-      const _index = Math.ceil((arr.length * p) / 100) - 1;
-      return arr[index] || 0; }
+    const percentile = (arr: number[], p: number) => {
+      const index = Math.ceil((arr.length * p) / 100) - 1;
+      return arr[index] || 0;
     };
 
     return {
@@ -193,13 +193,12 @@ class TimingNormalizer {
           originalEnd.call(this, chunk, encoding as BufferEncoding, cb as () => void);
         }, Math.round(delayNeeded));
 
-        return this; }
+        return this;
       };
 
       next();
     };
   }
-}
 
 // Singleton instance
 export const _timingNormalizer = new TimingNormalizer();

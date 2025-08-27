@@ -30,7 +30,7 @@ export class GenericService {
         serviceName: this.serviceName,
       };
 
-      return response; }
+      return response;
     } catch (error) {
       console.error(`[${this.serviceName}] Operation failed:`, error);
       throw new Error(`${this.serviceName} operation failed: ${error.message}`);

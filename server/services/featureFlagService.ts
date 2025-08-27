@@ -178,21 +178,21 @@ class FeatureFlagService {
       if (process.env.NODE_ENV == 'test' || process.env.UNLEASH_DISABLED == 'true') {
         const _fallbackValue = this.fallbackFlags.get(flagName) ?? false;
         logger.debug(`Flag ${flagName} (fallback): ${fallbackValue}`);
-        return fallbackValue; }
+        return fallbackValue;
       }
 
       // Verifica no Unleash (com contexto sanitizado)
-      const _sanitizedContext = {
+      const sanitizedContext = {
         ...fullContext,
         userRole: fullContext.userRole || undefined, // Convert null to undefined
       };
-      const _enabled = unleashIsEnabled(flagName, sanitizedContext);
+      const enabled = unleashIsEnabled(flagName, sanitizedContext);
       logger.debug(`Flag ${flagName}: ${enabled}`, { context: sanitizedContext });
-      return enabled; }
+      return enabled;
     } catch (error) {
       logger.error(`Error checking flag ${flagName}:`, error);
       // Em caso de erro, usa fallback
-      return this.fallbackFlags.get(flagName) ?? false; }
+      return this.fallbackFlags.get(flagName) ?? false;
     }
   }
 
@@ -212,7 +212,7 @@ class FeatureFlagService {
       })
     );
 
-    return results; }
+    return results;
   }
 
   /**
@@ -232,20 +232,20 @@ class FeatureFlagService {
 
     try {
       if (process.env.NODE_ENV == 'test' || process.env.UNLEASH_DISABLED == 'true') {
-        return { name: 'disabled', enabled: false }; }
+        return { name: 'disabled', enabled: false };
       }
 
       // Sanitizar contexto para o Unleash
-      const _sanitizedContext = {
+      const sanitizedContext = {
         ...fullContext,
         userRole: fullContext.userRole || undefined, // Convert null to undefined
       };
-      const _variant = getVariant(flagName, sanitizedContext);
+      const variant = getVariant(flagName, sanitizedContext);
       logger.debug(`Variant for ${flagName}:`, variant);
-      return variant; }
+      return variant;
     } catch (error) {
       logger.error(`Error getting variant for ${flagName}:`, error);
-      return { name: 'disabled', enabled: false }; }
+      return { name: 'disabled', enabled: false };
     }
   }
 
@@ -261,7 +261,7 @@ class FeatureFlagService {
    * Retorna todas as flags disponíveis (para debug/admin)
    */
   getAllFlags(): string[] {
-    return Array.from(this.fallbackFlags.keys()); }
+    return Array.from(this.fallbackFlags.keys());
   }
 
   /**

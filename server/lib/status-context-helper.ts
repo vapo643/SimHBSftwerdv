@@ -148,7 +148,7 @@ export async function updateStatusWithContext(
       };
     });
 
-    return result; }
+    return result;
   } catch (error) {
     const _duration = Date.now() - startTime;
     console.error(`[DUPLA-ESCRITA] ❌ Erro na transação após ${duration}ms:`, error);
@@ -184,7 +184,7 @@ export async function getStatusByContext(
 
     if (statusContextual) {
       console.log(`[STATUS-CONTEXT] ✅ Status contextual encontrado: ${statusContextual.status}`);
-      return statusContextual.status; }
+      return statusContextual.status;
     }
 
     // Fallback para status legado
@@ -195,10 +195,10 @@ export async function getStatusByContext(
       .where(eq(propostas.id, propostaId))
       .limit(1);
 
-    return propostaLegada?.status || null; }
+    return propostaLegada?.status || null;
   } catch (error) {
     console.error(`[STATUS-CONTEXT] ❌ Erro ao buscar status:`, error);
-    return null; }
+    return null;
   }
 }
 

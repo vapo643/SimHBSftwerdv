@@ -253,6 +253,7 @@ class MockQueue extends EventEmitter {
             processingTime: syncDuration,
             requestedPdf: job.data.requestedPdf, // Incluir PDF solicitado se foi fallback
           };
+        }
 
         case 'GENERATE_AND_SYNC_CARNE': {
           console.log(
@@ -280,6 +281,7 @@ class MockQueue extends EventEmitter {
             carneUrl: carneResult.url,
             processingTime: fullDuration,
           };
+        }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
@@ -306,7 +308,7 @@ class MockQueue extends EventEmitter {
       counts[job.status]++;
     });
 
-    return counts; }
+    return counts;
   }
 
   /**
@@ -317,11 +319,11 @@ class MockQueue extends EventEmitter {
     const _mockJob = this.activeJobs.get(jobId);
 
     if (!jobData || !mockJob) {
-      return null; }
+      return null;
     }
 
     // Adicionar propriedades extras para compatibilidade com o endpoint de status
-    const _job = mockJob as unknown;
+    const job = mockJob as unknown;
     job.getState = async () => jobData.status;
     job.progress = jobData.progress;
     job.returnvalue = jobData.status == 'completed' ? (jobData as unknown).result : null;
@@ -330,7 +332,7 @@ class MockQueue extends EventEmitter {
     job.processedOn = jobData.processedAt?.getTime();
     job.finishedOn = jobData.completedAt?.getTime();
 
-    return job; }
+    return job;
   }
 }
 

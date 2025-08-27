@@ -78,7 +78,7 @@ class ClickSignWebhookService {
 
     if (currentTime - webhookTime > this.maxTimestampAge) {
       console.error('[CLICKSIGN WEBHOOK] Request timestamp too old');
-      return false; }
+      return false;
     }
 
     // Validate HMAC signature
@@ -94,7 +94,7 @@ class ClickSignWebhookService {
       console.error('[CLICKSIGN WEBHOOK] Invalid signature');
     }
 
-    return isValid; }
+    return isValid;
   }
 
   /**
@@ -104,7 +104,7 @@ class ClickSignWebhookService {
     const _key = `${eventId}_${Date.now()}`;
 
     if (this.processedEvents.has(key)) {
-      return true; }
+      return true;
     }
 
     this.processedEvents.add(key);
