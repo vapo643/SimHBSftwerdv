@@ -6,7 +6,15 @@
  */
 
 import { Plugin } from 'vite';
-import JavaScriptObfuscator from 'javascript-obfuscator';
+
+// Conditional import to avoid runtime dependency in development
+let JavaScriptObfuscator: any = null;
+try {
+  JavaScriptObfuscator = require('javascript-obfuscator');
+} catch {
+  // Optional dependency - obfuscation will be disabled if not available
+  console.warn('[OBFUSCATOR] javascript-obfuscator not available - skipping obfuscation');
+}
 
 export interface ObfuscatorOptions {
   // Control flow flattening makes code harder to understand
@@ -77,6 +85,11 @@ export function obfuscatorPlugin(options: Partial<ObfuscatorOptions> = {}): Plug
       }
 
       try {
+        // Skip obfuscation if module not available
+        if (!JavaScriptObfuscator) {
+          return null;
+        }
+
         const obfuscationResult = JavaScriptObfuscator.obfuscate(code, {
           compact: true,
           controlFlowFlattening: config.controlFlowFlattening,
@@ -119,32 +132,7 @@ export function obfuscatorPlugin(options: Partial<ObfuscatorOptions> = {}): Plug
       }
     },
 
-    // Additional configuration for production build
-    config() {
-      return {
-        build: {
-          // Minify with terser for additional obfuscation
-          minify: 'terser',
-          terserOptions: {
-            compress: {
-              drop_console: true,
-              drop_debugger: true,
-              pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
-            },
-            mangle: {
-              toplevel: true,
-              properties: {
-                regex: /^_/, // Mangle properties starting with underscore
-              },
-            },
-            format: {
-              comments: false, // Remove all comments
-            },
-          },
-          // Disable source maps in production
-          sourcemap: false,
-        },
-      };
-    },
+    // Note: Additional terser configuration should be done in vite.config.ts
+    // This plugin focuses on obfuscation only
   };
 }
