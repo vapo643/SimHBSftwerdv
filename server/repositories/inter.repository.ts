@@ -124,7 +124,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       updatedAt: timestamp,
     };
 
-    const result = await db.insert(interCollections).values([collectionData]).returning();
+    const result = await db.insert(interCollections).values(collectionData).returning();
 
     return result[0];
   }

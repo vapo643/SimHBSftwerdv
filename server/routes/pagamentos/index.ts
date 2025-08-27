@@ -40,7 +40,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       periodo: periodo as string,
       incluir_pagos: incluir_pagos === 'true',
       userId,
-      userRole,
+      userRole: userRole || undefined,
     });
 
     res.json({

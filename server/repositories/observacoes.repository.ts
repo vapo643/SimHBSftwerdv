@@ -6,6 +6,8 @@
 
 import { BaseRepository } from './base.repository';
 import { db } from '../lib/supabase';
+import { observacoesCobranca, profiles } from '../../shared/schema';
+import { eq, isNull, desc } from 'drizzle-orm';
 
 export interface Observacao {
   id: number;
@@ -26,18 +28,24 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    * Find all observacoes for a specific proposta
    */
   async findByPropostaId(propostaId: number): Promise<Observacao[]> {
-    const { data, error } = await db
-      .from(this.tableName)
-      .select('*, users(full_name, email)')
-      .eq('proposta_id', propostaId)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false });
+    try {
+      const data = await db
+        .select({
+          id: observacoesCobranca.id,
+          proposta_id: observacoesCobranca.propostaId,
+          observacao: observacoesCobranca.observacao,
+          usuario_id: observacoesCobranca.userId,
+          created_at: observacoesCobranca.createdAt,
+        })
+        .from(observacoesCobranca)
+        .leftJoin(profiles, eq(profiles.id, observacoesCobranca.userId))
+        .where(eq(observacoesCobranca.propostaId, String(propostaId)))
+        .orderBy(desc(observacoesCobranca.createdAt));
 
-    if (error) {
-      throw new Error(`Failed to fetch observacoes for proposta ${propostaId}: ${error.message}`);
+      return data as any[];
+    } catch (error) {
+      throw new Error(`Failed to fetch observacoes for proposta ${propostaId}: ${error}`);
     }
-
-    return data as Observacao[];
   }
 
   /**
@@ -48,22 +56,26 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
     observacao: string,
     usuarioId: string
   ): Promise<Observacao> {
-    const { data, error } = await db
-      .from(this.tableName)
-      .insert({
-        proposta_id: propostaId,
-        observacao,
-        usuario_id: usuarioId,
-        created_at: new Date().toISOString(),
-      })
-      .select('*, users(full_name, email)')
-      .single();
+    try {
+      const [data] = await db
+        .insert(observacoesCobranca)
+        .values({
+          propostaId: String(propostaId),
+          observacao,
+          userId: usuarioId,
+          userName: 'Sistema',
+          createdAt: new Date(),
+        })
+        .returning();
 
-    if (error) {
-      throw new Error(`Failed to create observacao: ${error.message}`);
+      if (!data) {
+        throw new Error(`Failed to create observacao: No data returned`);
+      }
+
+      return data as Observacao;
+    } catch (error) {
+      throw new Error(`Failed to create observacao: ${error}`);
     }
-
-    return data as Observacao;
   }
 
   /**

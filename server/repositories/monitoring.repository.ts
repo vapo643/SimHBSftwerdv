@@ -20,7 +20,7 @@ export class MonitoringRepository {
           (SELECT count(*) FROM pg_stat_user_tables) as table_count,
           (SELECT sum(n_live_tup) FROM pg_stat_user_tables) as total_rows
       `);
-      return result.rows[0];
+      return result[0];
     } catch (error) {
       console.error('[MONITORING_REPO] Error fetching database stats:', error);
       throw error;
@@ -44,7 +44,7 @@ export class MonitoringRepository {
         FROM pg_stat_user_tables
         ORDER BY n_live_tup DESC
       `);
-      return result.rows;
+      return result;
     } catch (error) {
       console.error('[MONITORING_REPO] Error fetching table stats:', error);
       throw error;
@@ -68,7 +68,7 @@ export class MonitoringRepository {
         FROM pg_stat_user_indexes
         ORDER BY idx_scan DESC
       `);
-      return result.rows;
+      return result;
     } catch (error) {
       console.error('[MONITORING_REPO] Error fetching index usage:', error);
       throw error;
@@ -94,7 +94,7 @@ export class MonitoringRepository {
         WHERE state != 'idle'
         ORDER BY backend_start DESC
       `);
-      return result.rows;
+      return result;
     } catch (error) {
       console.error('[MONITORING_REPO] Error fetching connections:', error);
       throw error;

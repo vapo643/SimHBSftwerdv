@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { authService } from '../../services/authService.js';
 import { jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
 import { getClientIP } from '../../lib/security-logger.js';
-import { AuthenticatedRequest } from '../../shared/types/express';
+import { AuthenticatedRequest } from '../../../shared/types/express';
 
 const router = Router();
 
