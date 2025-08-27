@@ -25,16 +25,12 @@ import {
   Users,
   Edit,
   UserX,
-  UserCheck,
-  Loader2,
   Shield,
   UserPlus,
   Activity,
   BarChart3,
-  TrendingUp,
   Mail,
   Calendar,
-  Settings,
 } from 'lucide-react';
 import RefreshButton from '@/components/RefreshButton';
 

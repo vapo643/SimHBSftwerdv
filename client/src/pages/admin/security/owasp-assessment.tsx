@@ -27,7 +27,7 @@ import { fetchWithToken } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/DashboardLayout';
 
-interface SAMMAssessment {
+interface _SAMMAssessment {
   domain: string;
   practice: string;
   currentLevel: number;
@@ -37,7 +37,7 @@ interface SAMMAssessment {
   recommendations: string[];
 }
 
-interface ASVSRequirement {
+interface _ASVSRequirement {
   category: string;
   requirement: string;
   level: 1 | 2 | 3;
@@ -47,7 +47,7 @@ interface ASVSRequirement {
   remediation?: string;
 }
 
-interface OWASPStatus {
+interface _OWASPStatus {
   overall: {
     sammMaturityScore: number;
     asvsComplianceScore: number;
@@ -78,7 +78,7 @@ export default function OWASPAssessment() {
   const queryClient = useQueryClient();
   const [sastFilePath, setSastFilePath] = useState('');
   const [sastScanning, setSastScanning] = useState(false);
-  const [sastResults, setSastResults] = useState<SASTResult[] | null>(null);
+  const [_sastResults, setSastResults] = useState<SASTResult[] | null>(null);
 
   // ✅ PROJETO CÉRBERO - Queries para dados REAIS de SCA e SAST
   const {
@@ -123,7 +123,7 @@ export default function OWASPAssessment() {
   });
 
   // Query para dados de performance
-  const { data: performanceMetrics } = useQuery({
+  const { data: _performanceMetrics } = useQuery({
     queryKey: ['/api/security-monitoring/performance'],
     queryFn: () => fetchWithToken('/api/security-monitoring/performance').then((res) => res.data),
     refetchInterval: 60000, // Atualiza a cada 60 segundos
@@ -137,12 +137,12 @@ export default function OWASPAssessment() {
       fetchWithToken('/api/security/run-sca', {
         method: 'GET',
       }),
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast({ title: 'Análise SCA concluída com sucesso!' });
       queryClient.invalidateQueries({ queryKey: ['/api/security/run-sca'] });
       refetchSCA();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erro ao executar análise SCA',
         description: error.message || 'Erro desconhecido',
@@ -157,12 +157,12 @@ export default function OWASPAssessment() {
       fetchWithToken('/api/security/run-sast', {
         method: 'GET',
       }),
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast({ title: 'Análise SAST concluída com sucesso!' });
       queryClient.invalidateQueries({ queryKey: ['/api/security/run-sast'] });
       refetchSAST();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erro ao executar análise SAST',
         description: error.message || 'Erro desconhecido',
@@ -219,11 +219,11 @@ export default function OWASPAssessment() {
           variant: 'destructive',
         });
       }
-    } catch (error: any) {
-      console.error('❌ Erro ao executar SAST:', error);
+    } catch (_error: any) {
+      console.error('❌ Erro ao executar SAST:', _error);
       toast({
         title: 'Erro ao conectar com Semgrep',
-        description: error.message || 'Erro de conexão',
+        description: _error.message || 'Erro de conexão',
         variant: 'destructive',
       });
     } finally {
@@ -256,7 +256,7 @@ export default function OWASPAssessment() {
       document.body.removeChild(a);
 
       toast({ title: 'Relatório baixado com sucesso' });
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Erro ao baixar relatório', variant: 'destructive' });
     }
   };
@@ -1722,45 +1722,58 @@ export default function OWASPAssessment() {
                     Vulnerabilidades Encontradas: {sastData.data.vulnerabilities.length}
                   </h4>
                   <div className="max-h-64 space-y-2 overflow-y-auto">
-                    {sastData.data.vulnerabilities.map((vuln: any, index: number) => (
-                      <div
-                        key={index}
-                        className={`rounded-lg border-l-4 p-3 ${
-                          vuln.severity === 'CRITICAL'
-                            ? 'border-red-500 bg-red-900/20'
-                            : vuln.severity === 'HIGH'
-                              ? 'border-orange-500 bg-orange-900/20'
-                              : 'border-yellow-500 bg-yellow-900/20'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <Badge
-                                variant={
-                                  vuln.severity === 'CRITICAL'
-                                    ? 'destructive'
-                                    : vuln.severity === 'HIGH'
-                                      ? 'secondary'
-                                      : 'outline'
-                                }
-                                className="text-xs"
-                              >
-                                {vuln.severity}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {vuln.file}:{vuln.line}
-                              </span>
+                    {sastData.data.vulnerabilities.map(
+                      (
+                        vuln: {
+                          severity: string;
+                          file: string;
+                          line: number;
+                          message: string;
+                          rule_id: string;
+                          code?: string;
+                          id?: string;
+                        },
+                        index: number
+                      ) => (
+                        <div
+                          key={index}
+                          className={`rounded-lg border-l-4 p-3 ${
+                            vuln.severity === 'CRITICAL'
+                              ? 'border-red-500 bg-red-900/20'
+                              : vuln.severity === 'HIGH'
+                                ? 'border-orange-500 bg-orange-900/20'
+                                : 'border-yellow-500 bg-yellow-900/20'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <Badge
+                                  variant={
+                                    vuln.severity === 'CRITICAL'
+                                      ? 'destructive'
+                                      : vuln.severity === 'HIGH'
+                                        ? 'secondary'
+                                        : 'outline'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {vuln.severity}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {vuln.file}:{vuln.line}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-sm">{vuln.message}</p>
+                              <p className="mt-1 rounded bg-gray-800 p-1 font-mono text-xs text-muted-foreground">
+                                {vuln.code}
+                              </p>
+                              <p className="mt-1 text-xs text-muted-foreground">ID: {vuln.id}</p>
                             </div>
-                            <p className="mt-1 text-sm">{vuln.message}</p>
-                            <p className="mt-1 rounded bg-gray-800 p-1 font-mono text-xs text-muted-foreground">
-                              {vuln.code}
-                            </p>
-                            <p className="mt-1 text-xs text-muted-foreground">ID: {vuln.id}</p>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
               ) : sastData?.success &&

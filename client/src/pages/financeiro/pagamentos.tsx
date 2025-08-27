@@ -56,7 +56,6 @@ import {
   Calendar,
   CreditCard,
   Shield,
-  UserCheck,
   Banknote,
   History,
   Filter,
