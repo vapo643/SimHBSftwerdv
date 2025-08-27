@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AuthService, getAuthService, resetAuthService } from '../auth';
-import { AuthProvider, User, Session } from '../auth-types';
+import { AuthService, getAuthService, resetAuthService } from '../../client/src/lib/auth';
+import { AuthProvider, User, Session } from '../../client/src/lib/auth-types';
 
 // Mock do provider para testes
 class MockAuthProvider implements AuthProvider {

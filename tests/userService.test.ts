@@ -45,6 +45,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'João Silva',
         email: 'joao@exemplo.com',
+        password: 'test123',
         role: 'ATENDENTE',
         lojaId: 123,
         lojaIds: null,
@@ -120,6 +121,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'Maria Gerente',
         email: 'maria@exemplo.com',
+        password: 'test123',
         role: 'GERENTE',
         lojaId: null,
         lojaIds: [101, 102, 103],
@@ -212,6 +214,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'Usuário Duplicado',
         email: 'duplicado@exemplo.com',
+        password: 'test123',
         role: 'ATENDENTE',
         lojaId: 123,
         lojaIds: null,
@@ -245,6 +248,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'Atendente Inválido',
         email: 'invalido@exemplo.com',
+        password: 'test123',
         role: 'ATENDENTE',
         lojaId: null, // Missing required lojaId for ATENDENTE
         lojaIds: null,
@@ -300,6 +304,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'Usuário Rollback',
         email: 'rollback@exemplo.com',
+        password: 'test123',
         role: 'ATENDENTE',
         lojaId: 123,
         lojaIds: null,
@@ -356,6 +361,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'Usuário Auth Falha',
         email: 'authfalha@exemplo.com',
+        password: 'test123',
         role: 'ATENDENTE',
         lojaId: 123,
         lojaIds: null,
@@ -382,6 +388,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'Usuário Sem Auth',
         email: 'semauth@exemplo.com',
+        password: 'test123',
         role: 'ATENDENTE',
         lojaId: 123,
         lojaIds: null,
@@ -408,6 +415,7 @@ describe('userService - createUser', () => {
       const userData: UserData = {
         fullName: 'Gerente Falha Associação',
         email: 'gerentefalha@exemplo.com',
+        password: 'test123',
         role: 'GERENTE',
         lojaId: null,
         lojaIds: [101, 102],
