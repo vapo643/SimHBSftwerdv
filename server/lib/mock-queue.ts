@@ -192,10 +192,12 @@ class MockQueue extends EventEmitter {
             size: pdfBuffer.length,
             processingTime: pdfDuration,
           };
+        }
 
         case 'MERGE_PDFS': {
           console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
-          return { success: true, message: 'PDF merge not yet implemented' }; }
+          return { success: true, message: 'PDF merge not yet implemented' };
+        }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
@@ -216,8 +218,8 @@ class MockQueue extends EventEmitter {
 
     try {
       switch (job.data.type) {
-        case 'SYNC_BOLETOS': {
-        case 'SYNC_PROPOSAL_BOLETOS': // PAM V1.0 - Suporte para fallback assíncrono de PDFs
+        case 'SYNC_BOLETOS':
+        case 'SYNC_PROPOSAL_BOLETOS': {
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
 
           await job.updateProgress(10);
