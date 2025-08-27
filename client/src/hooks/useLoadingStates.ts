@@ -1,4 +1,4 @@
-export const useLoadingStates = () => ({
+export const _useLoadingStates = () => ({
   saving: 'Salvando...',
   loading: 'Carregando...',
   deleting: 'Excluindo...',

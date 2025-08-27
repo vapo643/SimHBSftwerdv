@@ -23,11 +23,11 @@ export async function multiTenantMiddleware(
 ) {
   try {
     if (!req.user?.email) {
-      return res.status(401).json({ message: 'User context not found' });
+      return res.status(401).json({ message: 'User context not found' }); }
     }
 
     // Get user's loja_id from database via gerente_lojas junction table
-    const userRecord = await db
+    const _userRecord = await db
       .select({
         id: users.id,
         email: users.email,
@@ -41,13 +41,13 @@ export async function multiTenantMiddleware(
       .limit(1);
 
     if (!userRecord.length) {
-      return res.status(401).json({ message: 'User not found in system' });
+      return res.status(401).json({ message: 'User not found in system' }); }
     }
 
-    const userData = userRecord[0];
+    const _userData = userRecord[0];
 
     // Handle case where user might not have a loja assigned
-    const lojaId = userData.lojaId || 1; // Default to loja 1 if no assignment
+    const _lojaId = userData.lojaId || 1; // Default to loja 1 if no assignment
 
     // Set database session context for RLS
     await db.execute(`SET LOCAL app.current_user_loja_id = '${lojaId}';`);
@@ -66,8 +66,8 @@ export async function multiTenantMiddleware(
 
     next();
   } catch (error) {
-    console.error('Multi-tenant middleware error:', error);
-    return res.status(500).json({ message: 'Failed to establish security context' });
+    console.error('Multi-tenant middleware error:', error: unknown);
+    return res.status(500).json({ message: 'Failed to establish security context' }); }
   }
 }
 

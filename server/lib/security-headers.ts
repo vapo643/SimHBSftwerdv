@@ -28,7 +28,7 @@ export function setupSecurityHeaders() {
       'https://cdn.inter.co', // Banco Inter
       'https://api.clicksign.com', // ClickSign
       'wss://*.supabase.co', // WebSocket Supabase
-      process.env.NODE_ENV === 'development' ? 'ws://localhost:*' : '',
+      process.env.NODE_ENV == 'development' ? 'ws://localhost:*' : '',
     ].filter(Boolean),
     mediaSrc: ["'none'"],
     objectSrc: ["'none'"],
@@ -39,7 +39,7 @@ export function setupSecurityHeaders() {
   };
 
   // Only add upgradeInsecureRequests in production
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV == 'production') {
     cspDirectives.upgradeInsecureRequests = [];
   }
 
@@ -78,7 +78,7 @@ export function setupSecurityHeaders() {
     hidePoweredBy: true,
 
     // Cross-Origin-Embedder-Policy
-    crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
+    crossOriginEmbedderPolicy: process.env.NODE_ENV == 'production',
 
     // Cross-Origin-Opener-Policy
     crossOriginOpenerPolicy: { policy: 'same-origin' },
@@ -104,14 +104,14 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
   }
 
   // X-Request-ID para rastreamento
-  const requestId = req.headers['x-request-id'] || generateRequestId();
+  const _requestId = req.headers['x-request-id'] || generateRequestId();
   res.setHeader('X-Request-ID', requestId);
 
   // Previne informações de timing
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
 
   // Clear Site Data em logout
-  if (req.path === '/api/auth/logout') {
+  if (req.path == '/api/auth/logout') {
     res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
   }
 
@@ -120,20 +120,20 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
 
 // Gera ID único para rastreamento de requisições
 function generateRequestId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
 }
 
 // Configuração CORS segura
 export function setupCORS() {
   // In development, allow Replit preview URLs and localhost
-  const allowedOrigins =
-    process.env.NODE_ENV === 'production'
+  const _allowedOrigins =
+    process.env.NODE_ENV == 'production'
       ? [process.env.FRONTEND_URL || 'https://simpix.com.br']
       : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'];
 
   // Allow any Replit URL in development
-  const isReplitUrl = (origin: string) => {
-    return origin.includes('.replit.dev') || origin.includes('.repl.co');
+  const _isReplitUrl = (origin: string) => {
+    return origin.includes('.replit.dev') || origin.includes('.repl.co'); }
   };
 
   return {
@@ -143,7 +143,7 @@ export function setupCORS() {
     ) => {
       // Permite requisições sem origin (ex: Postman, apps mobile)
       if (!origin) {
-        return callback(null, true);
+        return callback(null, true); }
       }
 
       // Allow configured origins or any Replit URL in development

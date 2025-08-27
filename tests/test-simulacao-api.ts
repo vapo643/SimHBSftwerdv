@@ -8,9 +8,9 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:5000';
 
 async function testarSimulacao() {
-  console.log('====================================');
+  console.log('========================');
   console.log('TESTE DA API DE SIMULAÇÃO REFATORADA');
-  console.log('====================================\n');
+  console.log('========================\n');
 
   // Cenário 1: Teste com valores padrão (R$ 10.000 em 12 meses)
   console.log('📊 CENÁRIO 1: Simulação R$ 10.000 em 12 meses');
@@ -63,7 +63,7 @@ async function testarSimulacao() {
     console.error('❌ Erro no Cenário 1:', error.response?.data || error.message);
   }
 
-  console.log('\n====================================\n');
+  console.log('\n========================\n');
 
   // Cenário 2: Teste com parceiro sem tabela específica
   console.log('📊 CENÁRIO 2: Simulação com fallback para produto');
@@ -91,7 +91,7 @@ async function testarSimulacao() {
     console.error('❌ Erro no Cenário 2:', error.response?.data || error.message);
   }
 
-  console.log('\n====================================\n');
+  console.log('\n========================\n');
 
   // Cenário 3: Teste de validação (parâmetros inválidos)
   console.log('📊 CENÁRIO 3: Teste de validação de entrada');
@@ -105,7 +105,7 @@ async function testarSimulacao() {
 
     console.log('❌ Deveria ter retornado erro!');
   } catch (error: any) {
-    if (error.response?.status === 400) {
+    if (error.response?.status == 400) {
       console.log('✅ Validação funcionando corretamente!');
       console.log(`  • Erro capturado: ${error.response.data.error}`);
     } else {
@@ -113,9 +113,9 @@ async function testarSimulacao() {
     }
   }
 
-  console.log('\n====================================');
+  console.log('\n========================');
   console.log('TESTE FINALIZADO');
-  console.log('====================================');
+  console.log('========================');
 }
 
 // Executar teste se chamado diretamente

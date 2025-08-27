@@ -29,14 +29,14 @@ interface CCBStatus {
 
 export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const { user } = useAuth(); // PAM V1.0: Obter informações do usuário para verificar role
 
   // Query para buscar status do CCB
   const {
     data: ccbStatus,
-    isLoading,
-    error,
+  _isLoading,
+  _error,
   } = useQuery<CCBStatus>({
     queryKey: [`/api/formalizacao/${proposalId}/ccb`],
     refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
@@ -57,7 +57,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   });
 
   // Mutation para gerar CCB
-  const generateCCBMutation = useMutation({
+  const _generateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
       return apiRequest('/api/formalizacao/generate-ccb', {
@@ -86,9 +86,9 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       }, 500);
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       setIsGenerating(false);
-      const errorMessage =
+      const _errorMessage =
         error instanceof Error ? error.message : 'Ocorreu um erro ao gerar o documento.';
       toast({
         title: 'Erro ao gerar CCB',
@@ -99,7 +99,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   });
 
   // Mutation para regenerar CCB
-  const regenerateCCBMutation = useMutation({
+  const _regenerateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
       return apiRequest(`/api/formalizacao/${proposalId}/regenerate-ccb`, {
@@ -126,9 +126,9 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       }, 500);
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       setIsGenerating(false);
-      const errorMessage =
+      const _errorMessage =
         error instanceof Error ? error.message : 'Ocorreu um erro ao regenerar o documento.';
       toast({
         title: 'Erro ao regenerar CCB',
@@ -138,29 +138,29 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     },
   });
 
-  const handleDownload = () => {
+  const _handleDownload = () => {
     if (ccbStatus?.signedUrl) {
       // Adicionar timestamp para forçar download da versão mais recente
-      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
+      const _urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
       window.open(urlWithTimestamp, '_blank');
     }
   };
 
-  const handleView = () => {
+  const _handleView = () => {
     // Forçar refetch da URL mais recente antes de visualizar
     queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
 
     if (ccbStatus?.signedUrl) {
       // Adicionar timestamp para garantir versão mais recente
-      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
+      const _urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
       window.open(urlWithTimestamp, '_blank');
     }
   };
 
   // PAM V1.0: Nova função para visualizar CCB Assinada (apenas ADMINISTRADOR)
-  const handleViewCCBAssinada = async () => {
+  const _handleViewCCBAssinada = async () => {
     try {
-      const response = (await apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`)) as {
+      const _response = (await apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`)) as {
         publicUrl?: string;
         message?: string;
       };
@@ -175,7 +175,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         });
       }
     } catch (error) {
-      console.error('Erro ao visualizar CCB assinada:', error);
+      console.error('Erro ao visualizar CCB assinada:', error: unknown);
       toast({
         title: 'Erro',
         description: 'Erro ao visualizar CCB assinada. Tente novamente.',
@@ -220,7 +220,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     );
   }
 
-  const hasCCB = ccbStatus && ccbStatus.signedUrl;
+  const _hasCCB = ccbStatus && ccbStatus.signedUrl;
 
   return (
     <Card>
@@ -291,18 +291,18 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                 </Button>
 
                 {/* PAM V1.0: Botão de download CCB assinada - EXCLUSIVO para ADMINISTRADOR */}
-                {proposalData?.caminhoCcbAssinado && user?.role === 'ADMINISTRADOR' && (
+                {proposalData?.caminhoCcbAssinado && user?.role == 'ADMINISTRADOR' && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={async () => {
                       try {
-                        const response = (await apiRequest(
+                        const _response = (await apiRequest(
                           `/api/formalizacao/${proposalId}/ccb-assinada`
                         )) as { publicUrl?: string };
                         if (response.publicUrl) {
                           // Forçar download ao invés de abrir em nova aba
-                          const link = document.createElement('a');
+                          const _link = document.createElement('a');
                           link.href = response.publicUrl;
                           link.download = `CCB_Assinada_${proposalId}.pdf`;
                           link.click();

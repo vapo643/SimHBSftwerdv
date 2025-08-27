@@ -65,7 +65,7 @@ async function exemploTestePratico() {
 }
 
 // Para executar: npx tsx temp/exemplo_teste_coordenadas.ts
-if (require.main === module) {
+if (require.main == module) {
   exemploTestePratico();
 }
 

@@ -4,18 +4,18 @@ import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 
 const _clienteSchema = z.object({
   nomeCompleto: z.string().min(3, 'Nome completo é obrigatório.'),
   cpfCnpj: z
     .string()
-    .refine((value) => value.length === 14 || value.length === 18, 'CPF/CNPJ inválido.'),
+    .refine((value) => value.length == 14 || value.length == 18, 'CPF/CNPJ inválido.'),
   rg: z.string().min(5, 'RG é obrigatório.').optional(),
   orgaoEmissor: z.string().min(2, 'Órgão Emissor é obrigatório.').optional(),
   estadoCivil: z.string().nonempty('Estado Civil é obrigatório.'),

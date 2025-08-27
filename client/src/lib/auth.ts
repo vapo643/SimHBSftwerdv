@@ -6,13 +6,13 @@
 
 import { getAuthProvider } from './auth-config';
 import {
-  User,
-  Session,
-  SignInCredentials,
-  SignInResult,
-  AuthStateChangeCallback,
-  AuthSubscription,
-  AuthProvider,
+  _User,
+  _Session,
+  _SignInCredentials,
+  _SignInResult,
+  _AuthStateChangeCallback,
+  _AuthSubscription,
+  _AuthProvider,
 } from './auth-types';
 
 /**
@@ -30,42 +30,42 @@ export class AuthService {
    * Login com email e senha
    */
   async signIn(credentials: SignInCredentials): Promise<SignInResult> {
-    return this.provider.signIn(credentials);
+    return this.provider.signIn(credentials); }
   }
 
   /**
    * Logout
    */
   async signOut(): Promise<void> {
-    return this.provider.signOut();
+    return this.provider.signOut(); }
   }
 
   /**
    * Obtém sessão atual
    */
   async getSession(): Promise<Session | null> {
-    return this.provider.getSession();
+    return this.provider.getSession(); }
   }
 
   /**
    * Obtém usuário atual
    */
   async getCurrentUser(): Promise<User | null> {
-    return this.provider.getCurrentUser();
+    return this.provider.getCurrentUser(); }
   }
 
   /**
    * Escuta mudanças no estado de autenticação
    */
   onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription {
-    return this.provider.onAuthStateChange(callback);
+    return this.provider.onAuthStateChange(callback); }
   }
 
   /**
    * Obtém token de acesso
    */
   async getAccessToken(): Promise<string | null> {
-    return this.provider.getAccessToken();
+    return this.provider.getAccessToken(); }
   }
 }
 
@@ -79,7 +79,7 @@ export function getAuthService(): AuthService {
   if (!authServiceInstance) {
     authServiceInstance = new AuthService();
   }
-  return authServiceInstance;
+  return authServiceInstance; }
 }
 
 /**
@@ -90,13 +90,13 @@ export function resetAuthService(): void {
 }
 
 // Exports de compatibilidade com a API anterior
-const authService = getAuthService();
+const _authService = getAuthService();
 
 /**
  * @deprecated Use authService.signIn() em vez desta função
  */
 export async function signIn(email: string, password: string) {
-  const result = await authService.signIn({ email, password });
+  const _result = await authService.signIn({ email, password });
   return {
     user: result.user,
     session: result.session,
@@ -107,21 +107,21 @@ export async function signIn(email: string, password: string) {
  * @deprecated Use authService.signOut() em vez desta função
  */
 export async function signOut() {
-  return authService.signOut();
+  return authService.signOut(); }
 }
 
 /**
  * @deprecated Use authService.getSession() em vez desta função
  */
 export async function getSession() {
-  return authService.getSession();
+  return authService.getSession(); }
 }
 
 /**
  * @deprecated Use authService.onAuthStateChange() em vez desta função
  */
 export function onAuthStateChange(callback: (user: User | null) => void) {
-  return authService.onAuthStateChange(callback);
+  return authService.onAuthStateChange(callback); }
 }
 
 // Re-exports das interfaces para compatibilidade

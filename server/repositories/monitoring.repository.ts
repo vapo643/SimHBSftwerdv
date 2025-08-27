@@ -13,16 +13,16 @@ export class MonitoringRepository {
    */
   async getDatabaseStats(): Promise<unknown> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
           pg_database_size(current_database()) as database_size,
           (SELECT count(*) FROM pg_stat_activity) as active_connections,
           (SELECT count(*) FROM pg_stat_user_tables) as table_count,
           (SELECT sum(n_live_tup) FROM pg_stat_user_tables) as total_rows
       `);
-      return result[0];
+      return result[0]; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching database stats:', error);
+      console.error('[MONITORING_REPO] Error fetching database stats:', error: unknown);
       throw error;
     }
   }
@@ -32,10 +32,10 @@ export class MonitoringRepository {
    */
   async getTableStats(): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
-          schemaname,
-          tablename,
+  _schemaname,
+  _tablename,
           n_live_tup as row_count,
           n_dead_tup as dead_rows,
           last_vacuum,
@@ -44,9 +44,9 @@ export class MonitoringRepository {
         FROM pg_stat_user_tables
         ORDER BY n_live_tup DESC
       `);
-      return result;
+      return result; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching table stats:', error);
+      console.error('[MONITORING_REPO] Error fetching table stats:', error: unknown);
       throw error;
     }
   }
@@ -56,11 +56,11 @@ export class MonitoringRepository {
    */
   async getIndexUsage(): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
-          schemaname,
-          tablename,
-          indexname,
+  _schemaname,
+  _tablename,
+  _indexname,
           idx_scan as index_scans,
           idx_tup_read as tuples_read,
           idx_tup_fetch as tuples_fetched,
@@ -68,9 +68,9 @@ export class MonitoringRepository {
         FROM pg_stat_user_indexes
         ORDER BY idx_scan DESC
       `);
-      return result;
+      return result; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching index usage:', error);
+      console.error('[MONITORING_REPO] Error fetching index usage:', error: unknown);
       throw error;
     }
   }
@@ -80,23 +80,23 @@ export class MonitoringRepository {
    */
   async getActiveConnections(): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
-          pid,
-          usename,
+  _pid,
+  _usename,
           application_name,
           client_addr,
           backend_start,
-          state,
+  _state,
           state_change,
           query
         FROM pg_stat_activity
         WHERE state != 'idle'
         ORDER BY backend_start DESC
       `);
-      return result;
+      return result; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Error fetching connections:', error);
+      console.error('[MONITORING_REPO] Error fetching connections:', error: unknown);
       throw error;
     }
   }
@@ -132,11 +132,11 @@ export class MonitoringRepository {
       `);
       checks.writePermission = true;
 
-      const isHealthy = Object.values(checks).every((check) => check === true);
+      const _isHealthy = Object.values(checks).every((check) => check == true);
 
-      return { isHealthy, checks };
+      return { isHealthy, checks }; }
     } catch (error) {
-      console.error('[MONITORING_REPO] Database health check failed:', error);
+      console.error('[MONITORING_REPO] Database health check failed:', error: unknown);
       return {
         isHealthy: false,
         checks: { error: (error as Error).message },
@@ -163,13 +163,13 @@ export class MonitoringRepository {
         tables: tables.slice(0, 10), // Top 10 tables
         indexes: indexes.slice(0, 10), // Top 10 indexes
         activeConnections: connections.length,
-        health,
+  _health,
       };
     } catch (error) {
-      console.error('[MONITORING_REPO] Error generating report:', error);
+      console.error('[MONITORING_REPO] Error generating report:', error: unknown);
       throw error;
     }
   }
 }
 
-export const monitoringRepository = new MonitoringRepository();
+export const _monitoringRepository = new MonitoringRepository();

@@ -64,7 +64,7 @@ async function testOriginationEndpoint() {
     } else {
       // Get existing user
       const { data: users } = await supabase.auth.admin.listUsers();
-      const existingUser = users.users.find((u) => u.email === testEmail);
+      const existingUser = users.users.find((u) => u.email == testEmail);
       if (!existingUser) throw new Error('Could not find or create user');
       userId = existingUser.id;
     }
@@ -177,7 +177,7 @@ async function testOriginationEndpoint() {
     // 4. Display the results
     console.log('✅ Resposta recebida com sucesso!\n');
     console.log('📋 CONTEXTO DE ORIGINAÇÃO:');
-    console.log('============================\n');
+    console.log('===================\n');
 
     console.log('👤 ATENDENTE:');
     console.log(JSON.stringify(contextData.atendente, null, 2));
@@ -186,7 +186,7 @@ async function testOriginationEndpoint() {
     contextData.produtos.forEach((produto: any) => {
       console.log(`\n  ${produto.nome} (ID: ${produto.id})`);
       console.log(
-        `  TAC: ${produto.tacTipo === 'fixo' ? `R$ ${produto.tacValor}` : `${produto.tacValor}%`}`
+        `  TAC: ${produto.tacTipo == 'fixo' ? `R$ ${produto.tacValor}` : `${produto.tacValor}%`}`
       );
       console.log(`  Tabelas disponíveis: ${produto.tabelasDisponiveis.length}`);
       produto.tabelasDisponiveis.forEach((tabela: any) => {

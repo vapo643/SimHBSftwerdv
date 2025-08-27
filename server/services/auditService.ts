@@ -41,7 +41,7 @@ export async function logStatusTransition(transition: StatusTransitionLog) {
     console.log(`[AUDIT V2.0] Triggered by: ${transition.triggeredBy}`);
 
     // Add timestamp to metadata
-    const enrichedMetadata = {
+    const _enrichedMetadata = {
       ...transition.metadata,
       timestamp_brasilia: getBrasiliaTimestamp(),
       source_version: 'V2.0',
@@ -64,9 +64,9 @@ export async function logStatusTransition(transition: StatusTransitionLog) {
 
     console.log(`[AUDIT V2.0] ✅ Transition logged successfully with ID: ${result.id}`);
 
-    return result;
+    return result; }
   } catch (error) {
-    console.error(`[AUDIT V2.0] ❌ Failed to log status transition:`, error);
+    console.error(`[AUDIT V2.0] ❌ Failed to log status transition:`, error: unknown);
     throw error;
   }
 }
@@ -81,7 +81,7 @@ export async function getProposalStatusHistory(propostaId: string) {
   try {
     console.log(`[AUDIT V2.0] 📖 Fetching status history for proposal ${propostaId}`);
 
-    const transitions = await db
+    const _transitions = await db
       .select()
       .from(statusTransitions)
       .where(eq(statusTransitions.propostaId, propostaId))
@@ -89,9 +89,9 @@ export async function getProposalStatusHistory(propostaId: string) {
 
     console.log(`[AUDIT V2.0] Found ${transitions.length} transitions`);
 
-    return transitions;
+    return transitions; }
   } catch (error) {
-    console.error(`[AUDIT V2.0] ❌ Failed to fetch status history:`, error);
+    console.error(`[AUDIT V2.0] ❌ Failed to fetch status history:`, error: unknown);
     throw error;
   }
 }
@@ -104,7 +104,7 @@ export async function getProposalStatusHistory(propostaId: string) {
  */
 export async function getLastTransition(propostaId: string) {
   try {
-    const transitions = await db
+    const _transitions = await db
       .select()
       .from(statusTransitions)
       .where(
@@ -113,9 +113,9 @@ export async function getLastTransition(propostaId: string) {
       .orderBy(desc(statusTransitions.createdAt))
       .limit(1);
 
-    return transitions[0] || null;
+    return transitions[0] || null; }
   } catch (error) {
-    console.error(`[AUDIT V2.0] ❌ Failed to fetch last transition:`, error);
+    console.error(`[AUDIT V2.0] ❌ Failed to fetch last transition:`, error: unknown);
     throw error;
   }
 }
@@ -132,7 +132,7 @@ export async function logFailedTransition(
   console.error(`[AUDIT V2.0] ❌ Logging failed transition for proposal ${transition.propostaId}`);
   console.error(`[AUDIT V2.0] Error: ${transition.errorMessage}`);
 
-  return logStatusTransition(transition);
+  return logStatusTransition(transition); }
 }
 
 /**
@@ -162,24 +162,24 @@ export function isValidTransition(currentStatus: string, targetStatus: string): 
   };
 
   // Special case: unknown status can transition to 'cancelado' or 'suspensa'
-  if (targetStatus === 'cancelado' || targetStatus === 'suspensa') {
-    return true;
+  if (targetStatus == 'cancelado' || targetStatus == 'suspensa') {
+    return true; }
   }
 
-  const allowedTransitions = validTransitions[currentStatus];
-  return allowedTransitions ? allowedTransitions.includes(targetStatus) : false;
+  const _allowedTransitions = validTransitions[currentStatus];
+  return allowedTransitions ? allowedTransitions.includes(targetStatus) : false; }
 }
 
 // Import required functions from drizzle-orm
 import { eq, and, isNull, desc } from 'drizzle-orm';
 
 // Export the service
-export const auditService = {
-  logStatusTransition,
-  getProposalStatusHistory,
-  getLastTransition,
-  logFailedTransition,
-  isValidTransition,
+export const _auditService = {
+  _logStatusTransition,
+  _getProposalStatusHistory,
+  _getLastTransition,
+  _logFailedTransition,
+  _isValidTransition,
 };
 
 export default auditService;

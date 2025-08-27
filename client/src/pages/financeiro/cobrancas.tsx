@@ -8,29 +8,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  _Table,
+  _TableBody,
+  _TableCell,
+  _TableHead,
+  _TableHeader,
+  _TableRow,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  _Dialog,
+  _DialogContent,
+  _DialogDescription,
+  _DialogFooter,
+  _DialogHeader,
+  _DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,42 +38,42 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import {
-  Calendar,
-  Search,
-  Phone,
-  MessageSquare,
-  Eye,
-  EyeOff,
-  Download,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  TrendingUp,
-  Receipt,
-  DollarSign,
-  FileText,
-  Send,
-  Filter,
-  QrCode,
-  Copy,
-  Building2,
-  RefreshCw,
-  Barcode,
-  CalendarPlus,
-  Percent,
-  CheckSquare,
-  XCircle,
-  Bell,
+  _Calendar,
+  _Search,
+  _Phone,
+  _MessageSquare,
+  _Eye,
+  _EyeOff,
+  _Download,
+  _AlertCircle,
+  _CheckCircle2,
+  _Clock,
+  _TrendingUp,
+  _Receipt,
+  _DollarSign,
+  _FileText,
+  _Send,
+  _Filter,
+  _QrCode,
+  _Copy,
+  _Building2,
+  _RefreshCw,
+  _Barcode,
+  _CalendarPlus,
+  _Percent,
+  _CheckSquare,
+  _XCircle,
+  _Bell,
 } from 'lucide-react';
 import {
-  format,
-  addMonths,
-  differenceInDays,
-  isAfter,
-  startOfWeek,
-  startOfMonth,
-  isBefore,
-  addDays,
+  _format,
+  _addMonths,
+  _differenceInDays,
+  _isAfter,
+  _startOfWeek,
+  _startOfMonth,
+  _isBefore,
+  _addDays,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -133,7 +133,7 @@ export default function Cobrancas() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const userRole = user?.role || '';
+  const _userRole = user?.role || '';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
@@ -170,65 +170,65 @@ export default function Cobrancas() {
   const [observacaoSupervisor, setObservacaoSupervisor] = useState('');
 
   // Função para copiar PIX ou linha digitável
-  const copyPaymentCode = (code: string, type: 'pix' | 'barcode') => {
+  const _copyPaymentCode = (code: string, type: 'pix' | 'barcode') => {
     navigator.clipboard.writeText(code);
     toast({
-      title: type === 'pix' ? 'PIX copiado!' : 'Linha digitável copiada!',
+      title: type == 'pix' ? 'PIX copiado!' : 'Linha digitável copiada!',
       description:
-        type === 'pix'
+        type == 'pix'
           ? 'Cole no app do seu banco para pagar'
           : 'Use no internet banking para pagar',
     });
   };
 
   // Função para mascarar CPF/CNPJ (LGPD)
-  const maskDocument = (doc: string) => {
-    if (!doc) return '';
+  const _maskDocument = (doc: string) => {
+    if (!doc) return ''; }
     if (!showCpf) {
       // Mascara mantendo apenas os primeiros 3 e últimos 2 dígitos
-      if (doc.length === 11) {
+      if (doc.length == 11) {
         // CPF
-        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`;
-      } else if (doc.length === 14) {
+        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`; }
+      } else if (doc.length == 14) {
         // CNPJ
-        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`;
+        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`; }
       }
     }
     // Formata o documento completo
-    if (doc.length === 11) {
+    if (doc.length == 11) {
       // CPF
-      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    } else if (doc.length === 14) {
+      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
+    } else if (doc.length == 14) {
       // CNPJ
-      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'); }
     }
-    return doc;
+    return doc; }
   };
 
   // PAM V1.0 Blueprint V2.0 - Mutation para SOLICITAR prorrogação
-  const prorrogarMutation = useMutation({
+  const _prorrogarMutation = useMutation({
     mutationFn: async ({
-      codigoSolicitacao,
-      novaDataVencimento,
-      observacao,
+  _codigoSolicitacao,
+  _novaDataVencimento,
+  _observacao,
     }: {
       codigoSolicitacao: string;
       novaDataVencimento: string;
       observacao?: string;
     }) => {
       console.log('[PAM V1.0 Blueprint V2.0] Solicitando prorrogação:', {
-        codigoSolicitacao,
-        novaDataVencimento,
-        observacao,
+  _codigoSolicitacao,
+  _novaDataVencimento,
+  _observacao,
       });
       return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/solicitar-prorrogacao`, {
         method: 'POST',
         body: JSON.stringify({ novaDataVencimento, observacao }),
       });
     },
-    onSuccess: (data: unknown) => {
-      console.log('[PAM V1.0 Blueprint V2.0] Solicitação de prorrogação enviada:', data);
-      const isAutoApproved = data.autoApproved;
+    onSuccess: (data) => {
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitação de prorrogação enviada:',_data);
+      const _isAutoApproved = data.autoApproved;
       toast({
         title: isAutoApproved ? 'Prorrogação executada' : 'Solicitação enviada',
         description: isAutoApproved
@@ -242,8 +242,8 @@ export default function Cobrancas() {
       setNovaDataVencimento('');
       setObservacaoProrrogacao('');
     },
-    onError: (error: unknown) => {
-      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar prorrogação:', error);
+    onError: (error) => {
+      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar prorrogação:', error: unknown);
       toast({
         title: 'Erro ao solicitar prorrogação',
         description: error.response?.data?.message || 'Não foi possível enviar a solicitação.',
@@ -253,13 +253,13 @@ export default function Cobrancas() {
   });
 
   // PAM V1.0 Blueprint V2.0 - Mutation para SOLICITAR desconto
-  const descontoMutation = useMutation({
+  const _descontoMutation = useMutation({
     mutationFn: async ({
-      codigoSolicitacao,
-      tipoDesconto,
-      valorDesconto,
-      dataLimiteDesconto,
-      observacao,
+  _codigoSolicitacao,
+  _tipoDesconto,
+  _valorDesconto,
+  _dataLimiteDesconto,
+  _observacao,
     }: {
       codigoSolicitacao: string;
       tipoDesconto: 'PERCENTUAL' | 'FIXO';
@@ -268,24 +268,24 @@ export default function Cobrancas() {
       observacao?: string;
     }) => {
       console.log('[PAM V1.0 Blueprint V2.0] Solicitando desconto:', {
-        codigoSolicitacao,
-        tipoDesconto,
-        valorDesconto,
-        dataLimiteDesconto,
-        observacao,
+  _codigoSolicitacao,
+  _tipoDesconto,
+  _valorDesconto,
+  _dataLimiteDesconto,
+  _observacao,
       });
       return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/solicitar-desconto`, {
         method: 'POST',
         body: JSON.stringify({ tipoDesconto, valorDesconto, dataLimiteDesconto, observacao }),
       });
     },
-    onSuccess: (data: unknown) => {
-      console.log('[PAM V1.0 Blueprint V2.0] Solicitação de desconto enviada:', data);
-      const isAutoApproved = data.autoApproved;
+    onSuccess: (data) => {
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitação de desconto enviada:',_data);
+      const _isAutoApproved = data.autoApproved;
       toast({
         title: isAutoApproved ? 'Desconto aplicado' : 'Solicitação enviada',
         description: isAutoApproved
-          ? `Desconto de ${tipoDesconto === 'PERCENTUAL' ? `${valorDesconto}%` : `R$ ${valorDesconto}`} aplicado com sucesso.`
+          ? `Desconto de ${tipoDesconto == 'PERCENTUAL' ? `${valorDesconto}%` : `R$ ${valorDesconto}`} aplicado com sucesso.`
           : 'Sua solicitação foi enviada para aprovação do supervisor.',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
@@ -296,8 +296,8 @@ export default function Cobrancas() {
       setDataLimiteDesconto('');
       setObservacaoDesconto('');
     },
-    onError: (error: unknown) => {
-      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar desconto:', error);
+    onError: (error) => {
+      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar desconto:', error: unknown);
       toast({
         title: 'Erro ao solicitar desconto',
         description: error.response?.data?.message || 'Não foi possível enviar a solicitação.',
@@ -311,15 +311,15 @@ export default function Cobrancas() {
     queryKey: ['/api/cobrancas/solicitacoes'],
     enabled: ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole),
     queryFn: async () => {
-      const response = (await apiRequest('/api/cobrancas/solicitacoes?status=pendente', {
+      const _response = (await apiRequest('/api/cobrancas/solicitacoes?status=pendente', {
         method: 'GET',
       })) as unknown[];
-      return response;
+      return response; }
     },
   });
 
   // PAM V1.0 Blueprint V2.0 - Mutation para aprovar solicitação
-  const aprovarSolicitacaoMutation = useMutation({
+  const _aprovarSolicitacaoMutation = useMutation({
     mutationFn: async ({ id, observacao }: { id: number; observacao?: string }) => {
       return apiRequest(`/api/cobrancas/solicitacoes/${id}/aprovar`, {
         method: 'POST',
@@ -337,7 +337,7 @@ export default function Cobrancas() {
       setSelectedSolicitacao(null);
       setObservacaoSupervisor('');
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao aprovar',
         description: error.response?.data?.message || 'Não foi possível aprovar a solicitação.',
@@ -347,11 +347,11 @@ export default function Cobrancas() {
   });
 
   // PAM V1.0 Blueprint V2.0 - Mutation para rejeitar solicitação
-  const rejeitarSolicitacaoMutation = useMutation({
+  const _rejeitarSolicitacaoMutation = useMutation({
     mutationFn: async ({
-      id,
-      motivo,
-      observacao,
+  _id,
+  _motivo,
+  _observacao,
     }: {
       id: number;
       motivo: string;
@@ -373,7 +373,7 @@ export default function Cobrancas() {
       setMotivoRejeicao('');
       setObservacaoSupervisor('');
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao rejeitar',
         description: error.response?.data?.message || 'Não foi possível rejeitar a solicitação.',
@@ -385,19 +385,19 @@ export default function Cobrancas() {
   // Buscar propostas em cobrança
   const {
     data: propostas,
-    isLoading,
-    refetch,
+  _isLoading,
+  _refetch,
   } = useQuery({
     queryKey: ['/api/cobrancas'],
     queryFn: async () => {
       // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 1
       console.log('[DEBUG-FRONTEND-1] Chamando API de cobranças...');
 
-      const response = (await apiRequest('/api/cobrancas', {
+      const _response = (await apiRequest('/api/cobrancas', {
         method: 'GET',
       })) as PropostaCobranca[];
 
-      return response;
+      return response; }
     },
   });
 
@@ -418,33 +418,33 @@ export default function Cobrancas() {
     enabled: !!propostas,
     refetchInterval: 30000, // Atualiza a cada 30 segundos
     queryFn: async () => {
-      const response = (await apiRequest('/api/cobrancas/inter-sumario', {
+      const _response = (await apiRequest('/api/cobrancas/inter-sumario', {
         method: 'GET',
       })) as unknown;
-      return response;
+      return response; }
     },
   });
 
   // Função para atualizar status do boleto individual
-  const atualizarStatusBoleto = async (codigoSolicitacao: string) => {
+  const _atualizarStatusBoleto = async (codigoSolicitacao: string) => {
     try {
-      const response = await apiRequest(`/api/cobrancas/inter-status/${codigoSolicitacao}`, {
+      const _response = await apiRequest(`/api/cobrancas/inter-status/${codigoSolicitacao}`, {
         method: 'GET',
       });
-      return response;
+      return response; }
     } catch (error) {
-      console.error('Erro ao buscar status do boleto:', error);
-      return null;
+      console.error('Erro ao buscar status do boleto:', error: unknown);
+      return null; }
     }
   };
 
   // Atualizar todos os status do Inter Bank
-  const atualizarTodosStatus = async () => {
+  const _atualizarTodosStatus = async () => {
     if (isRefreshing) return;
 
     setIsRefreshing(true);
-    let totalAtualizados = 0;
-    let totalErros = 0;
+    let _totalAtualizados = 0;
+    let _totalErros = 0;
 
     toast({
       title: 'Sincronizando com Banco Inter...',
@@ -456,7 +456,7 @@ export default function Cobrancas() {
       if (propostas && propostas.length > 0) {
         for (const proposta of propostas) {
           try {
-            const response = (await apiRequest('/api/cobrancas/inter-sync-all', {
+            const _response = (await apiRequest('/api/cobrancas/inter-sync-all', {
               method: 'POST',
               body: JSON.stringify({ propostaId: proposta.id }),
             })) as unknown;
@@ -468,7 +468,7 @@ export default function Cobrancas() {
               totalErros += response.erros;
             }
           } catch (error) {
-            console.error(`Erro ao sincronizar proposta ${proposta.id}:`, error);
+            console.error(`Erro ao sincronizar proposta ${proposta.id}:`, error: unknown);
             totalErros++;
           }
         }
@@ -498,7 +498,7 @@ export default function Cobrancas() {
   };
 
   // Atualizar status das parcelas via API do Banco Inter
-  const atualizarStatusParcelas = async (propostaId: string) => {
+  const _atualizarStatusParcelas = async (propostaId: string) => {
     try {
       await apiRequest(`/api/cobrancas/${propostaId}/atualizar-status`, {
         method: 'POST',
@@ -518,30 +518,30 @@ export default function Cobrancas() {
   };
 
   // Gerar mensagem padrão para contato
-  const gerarMensagemContato = (proposta: PropostaCobranca, parcela?: Parcela) => {
-    const parcelasVencidas = proposta.parcelas.filter((p) => p.status === 'vencido');
-    const valorTotalVencido = parcelasVencidas.reduce((acc, p) => acc + p.valorParcela, 0);
+  const _gerarMensagemContato = (proposta: PropostaCobranca, parcela?: Parcela) => {
+    const _parcelasVencidas = proposta.parcelas.filter((p) => p.status == 'vencido');
+    const _valorTotalVencido = parcelasVencidas.reduce((acc, p) => acc + p.valorParcela, 0);
 
     if (parcela) {
-      return `Olá ${proposta.nomeCliente}!\n\nEste é um lembrete sobre a parcela ${parcela.numero} do seu contrato ${proposta.numeroContrato}.\n\nValor: R$ ${parcela.valorParcela.toFixed(2)}\nVencimento: ${format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}\n${parcela.status === 'vencido' ? `Dias em atraso: ${parcela.diasAtraso}\n` : ''}\n${parcela.linhaDigitavel ? `Linha digitável: ${parcela.linhaDigitavel}\n` : ''}\nPara sua comodidade, você também pode pagar via PIX usando a chave: contato@simpix.com.br\n\nCaso já tenha efetuado o pagamento, favor desconsiderar esta mensagem.\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe Simpix`;
+      return `Olá ${proposta.nomeCliente}!\n\nEste é um lembrete sobre a parcela ${parcela.numero} do seu contrato ${proposta.numeroContrato}.\n\nValor: R$ ${parcela.valorParcela.toFixed(2)}\nVencimento: ${format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}\n${parcela.status == 'vencido' ? `Dias em atraso: ${parcela.diasAtraso}\n` : ''}\n${parcela.linhaDigitavel ? `Linha digitável: ${parcela.linhaDigitavel}\n` : ''}\nPara sua comodidade, você também pode pagar via PIX usando a chave: contato@simpix.com.br\n\nCaso já tenha efetuado o pagamento, favor desconsiderar esta mensagem.\n\nQualquer dúvida, estamos à disposição!\n\nAtenciosamente,\nEquipe Simpix`; }
     } else {
-      return `Olá ${proposta.nomeCliente}!\n\nIdentificamos pendências em seu contrato ${proposta.numeroContrato}.\n\nParcelas vencidas: ${parcelasVencidas.length}\nValor total em atraso: R$ ${valorTotalVencido.toFixed(2)}\n\nPara regularizar sua situação, entre em contato conosco ou acesse sua área do cliente.\n\nEstamos à disposição para negociar as melhores condições de pagamento.\n\nAtenciosamente,\nEquipe Simpix`;
+      return `Olá ${proposta.nomeCliente}!\n\nIdentificamos pendências em seu contrato ${proposta.numeroContrato}.\n\nParcelas vencidas: ${parcelasVencidas.length}\nValor total em atraso: R$ ${valorTotalVencido.toFixed(2)}\n\nPara regularizar sua situação, entre em contato conosco ou acesse sua área do cliente.\n\nEstamos à disposição para negociar as melhores condições de pagamento.\n\nAtenciosamente,\nEquipe Simpix`; }
     }
   };
 
   // Enviar mensagem de contato
-  const enviarContato = async (proposta: PropostaCobranca, tipo: string, mensagem: string) => {
+  const _enviarContato = async (proposta: PropostaCobranca, tipo: string, mensagem: string) => {
     try {
       await apiRequest('/api/cobrancas/contato', {
         method: 'POST',
         body: JSON.stringify({
           propostaId: proposta.id,
-          tipo,
+  _tipo,
           destinatario:
-            tipo === 'whatsapp' || tipo === 'sms'
+            tipo == 'whatsapp' || tipo == 'sms'
               ? proposta.telefoneCliente
               : proposta.emailCliente,
-          mensagem,
+  _mensagem,
         }),
       });
       toast({
@@ -566,12 +566,12 @@ export default function Cobrancas() {
     filtrosAtivos: { searchTerm, statusFilter, dateRange },
   });
 
-  const propostasFiltradas = propostas?.filter((proposta) => {
+  const _propostasFiltradas = propostas?.filter((proposta) => {
     // 🔍 AUDITORIA: Verificar se o campo nomeCliente existe antes de filtrar
-    const nomeCliente = proposta.nomeCliente || '';
-    const numeroContrato = proposta.numeroContrato || '';
-    const cpfCliente = proposta.cpfCliente || '';
-    const id = proposta.id || '';
+    const _nomeCliente = proposta.nomeCliente || '';
+    const _numeroContrato = proposta.numeroContrato || '';
+    const _cpfCliente = proposta.cpfCliente || '';
+    const _id = proposta.id || '';
 
     console.log('🔍 [AUDITORIA FRONTEND] CAMPOS DA PROPOSTA:', {
       id: proposta.id,
@@ -585,50 +585,50 @@ export default function Cobrancas() {
       },
     });
 
-    const matchesSearch =
+    const _matchesSearch =
       nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       numeroContrato.includes(searchTerm) ||
       cpfCliente.includes(searchTerm) ||
       id.includes(searchTerm);
 
-    let matchesStatus = true;
-    if (statusFilter === 'adimplente') {
-      matchesStatus = proposta.status === 'em_dia';
-    } else if (statusFilter === 'atraso_1_15') {
+    let _matchesStatus = true;
+    if (statusFilter == 'adimplente') {
+      matchesStatus = proposta.status == 'em_dia';
+    } else if (statusFilter == 'atraso_1_15') {
       matchesStatus =
-        proposta.status === 'inadimplente' && proposta.diasAtraso >= 1 && proposta.diasAtraso <= 15;
-    } else if (statusFilter === 'atraso_30_mais') {
-      matchesStatus = proposta.status === 'inadimplente' && proposta.diasAtraso > 30;
+        proposta.status == 'inadimplente' && proposta.diasAtraso >= 1 && proposta.diasAtraso <= 15;
+    } else if (statusFilter == 'atraso_30_mais') {
+      matchesStatus = proposta.status == 'inadimplente' && proposta.diasAtraso > 30;
     } else if (statusFilter !== 'todos') {
-      matchesStatus = proposta.status === statusFilter;
+      matchesStatus = proposta.status == statusFilter;
     }
 
-    let matchesDate = true;
+    let _matchesDate = true;
     if (dateRange !== 'todos') {
-      const hoje = new Date();
-      const dataContrato = new Date(proposta.dataContrato);
+      const _hoje = new Date();
+      const _dataContrato = new Date(proposta.dataContrato);
 
-      if (dateRange === 'hoje') {
-        matchesDate = format(dataContrato, 'yyyy-MM-dd') === format(hoje, 'yyyy-MM-dd');
-      } else if (dateRange === 'semana') {
-        const inicioSemana = startOfWeek(hoje, { weekStartsOn: 1 });
+      if (dateRange == 'hoje') {
+        matchesDate = format(dataContrato, 'yyyy-MM-dd') == format(hoje, 'yyyy-MM-dd');
+      } else if (dateRange == 'semana') {
+        const _inicioSemana = startOfWeek(hoje, { weekStartsOn: 1 });
         matchesDate = isAfter(dataContrato, inicioSemana);
-      } else if (dateRange === 'mes') {
-        const inicioMes = startOfMonth(hoje);
+      } else if (dateRange == 'mes') {
+        const _inicioMes = startOfMonth(hoje);
         matchesDate = isAfter(dataContrato, inicioMes);
       }
     }
 
-    const passaFiltro = matchesSearch && matchesStatus && matchesDate;
+    const _passaFiltro = matchesSearch && matchesStatus && matchesDate;
     console.log('🔍 [AUDITORIA FRONTEND] FILTRO RESULTADO:', {
       propostaId: proposta.id,
-      matchesSearch,
-      matchesStatus,
-      matchesDate,
-      passaFiltro,
+  _matchesSearch,
+  _matchesStatus,
+  _matchesDate,
+  _passaFiltro,
     });
 
-    return passaFiltro;
+    return passaFiltro; }
   });
 
   // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 4
@@ -640,44 +640,44 @@ export default function Cobrancas() {
   });
 
   // Estatísticas gerais
-  const estatisticas = {
+  const _estatisticas = {
     totalContratos: propostas?.length || 0,
-    contratosEmDia: propostas?.filter((p) => p.status === 'em_dia').length || 0,
-    contratosInadimplentes: propostas?.filter((p) => p.status === 'inadimplente').length || 0,
-    contratosQuitados: propostas?.filter((p) => p.status === 'quitado').length || 0,
+    contratosEmDia: propostas?.filter((p) => p.status == 'em_dia').length || 0,
+    contratosInadimplentes: propostas?.filter((p) => p.status == 'inadimplente').length || 0,
+    contratosQuitados: propostas?.filter((p) => p.status == 'quitado').length || 0,
     valorTotalCarteira: propostas?.reduce((acc, p) => acc + p.valorTotal, 0) || 0,
     valorTotalRecebido: propostas?.reduce((acc, p) => acc + p.valorTotalPago, 0) || 0,
     valorTotalPendente: propostas?.reduce((acc, p) => acc + p.valorTotalPendente, 0) || 0,
   };
 
-  const taxaInadimplencia =
+  const _taxaInadimplencia =
     estatisticas.totalContratos > 0
       ? ((estatisticas.contratosInadimplentes / estatisticas.totalContratos) * 100).toFixed(1)
       : '0';
 
-  const getStatusColor = (status: string) => {
+  const _getStatusColor = (status: string) => {
     switch (status) {
-      case 'em_dia':
-        return 'bg-green-100 text-green-800';
-      case 'inadimplente':
-        return 'bg-red-100 text-red-800';
-      case 'quitado':
-        return 'bg-blue-100 text-blue-800';
+      case 'em_dia': {
+        return 'bg-green-100 text-green-800'; }
+      case 'inadimplente': {
+        return 'bg-red-100 text-red-800'; }
+      case 'quitado': {
+        return 'bg-blue-100 text-blue-800'; }
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'; }
     }
   };
 
-  const getParcelaStatusColor = (status: string) => {
+  const _getParcelaStatusColor = (status: string) => {
     switch (status) {
-      case 'pago':
-        return 'bg-green-100 text-green-800';
-      case 'vencido':
-        return 'bg-red-100 text-red-800';
-      case 'pendente':
-        return 'bg-yellow-100 text-yellow-800';
+      case 'pago': {
+        return 'bg-green-100 text-green-800'; }
+      case 'vencido': {
+        return 'bg-red-100 text-red-800'; }
+      case 'pendente': {
+        return 'bg-yellow-100 text-yellow-800'; }
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'; }
     }
   };
 
@@ -697,7 +697,7 @@ export default function Cobrancas() {
                   </div>
                   <Badge variant="default" className="bg-orange-600">
                     {solicitacoesPendentes.length}{' '}
-                    {solicitacoesPendentes.length === 1 ? 'solicitação' : 'solicitações'}
+                    {solicitacoesPendentes.length == 1 ? 'solicitação' : 'solicitações'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -944,7 +944,7 @@ export default function Cobrancas() {
                         Carregando...
                       </TableCell>
                     </TableRow>
-                  ) : propostasFiltradas?.length === 0 ? (
+                  ) : propostasFiltradas?.length == 0 ? (
                     <TableRow>
                       <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
                         Nenhum contrato encontrado
@@ -953,27 +953,27 @@ export default function Cobrancas() {
                   ) : (
                     propostasFiltradas?.map((proposta, index) => {
                       // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 5
-                      if (index === 0) {
+                      if (index == 0) {
                         console.log(
                           '[DEBUG-FRONTEND-5] Dados da primeira proposta a serem renderizados:',
                           proposta
                         );
                       }
 
-                      const parcelasPendentes = proposta.parcelas.filter(
-                        (p) => p.status === 'pendente'
+                      const _parcelasPendentes = proposta.parcelas.filter(
+                        (p) => p.status == 'pendente'
                       ).length;
-                      const parcelasEmAtraso = proposta.parcelas.filter(
-                        (p) => p.status === 'vencido'
+                      const _parcelasEmAtraso = proposta.parcelas.filter(
+                        (p) => p.status == 'vencido'
                       ).length;
-                      const valorPendente = proposta.parcelas
-                        .filter((p) => p.status === 'pendente')
+                      const _valorPendente = proposta.parcelas
+                        .filter((p) => p.status == 'pendente')
                         .reduce((acc, p) => acc + p.valorParcela, 0);
-                      const valorEmAtraso = proposta.parcelas
-                        .filter((p) => p.status === 'vencido')
+                      const _valorEmAtraso = proposta.parcelas
+                        .filter((p) => p.status == 'vencido')
                         .reduce((acc, p) => acc + p.valorParcela, 0);
-                      const proximaParcela = proposta.parcelas
-                        .filter((p) => p.status === 'pendente' || p.status === 'vencido')
+                      const _proximaParcela = proposta.parcelas
+                        .filter((p) => p.status == 'pendente' || p.status == 'vencido')
                         .sort(
                           (a, b) =>
                             new Date(a.dataVencimento).getTime() -
@@ -1006,9 +1006,9 @@ export default function Cobrancas() {
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge className={getStatusColor(proposta.status)}>
-                              {proposta.status === 'em_dia'
+                              {proposta.status == 'em_dia'
                                 ? 'Em dia'
-                                : proposta.status === 'inadimplente'
+                                : proposta.status == 'inadimplente'
                                   ? 'Inadimplente'
                                   : 'Quitado'}
                             </Badge>
@@ -1071,7 +1071,7 @@ export default function Cobrancas() {
                                 <div className="text-sm">
                                   {format(new Date(proximaParcela.dataVencimento), 'dd/MM/yyyy')}
                                 </div>
-                                {proximaParcela.status === 'vencido' && (
+                                {proximaParcela.status == 'vencido' && (
                                   <Badge variant="destructive" className="text-xs">
                                     Vencido
                                   </Badge>
@@ -1097,7 +1097,7 @@ export default function Cobrancas() {
                               </Button>
                               {/* PAM V1.0 - Botões de Ação */}
                               {proposta.interCodigoSolicitacao &&
-                                proposta.interSituacao === 'A_RECEBER' && (
+                                proposta.interSituacao == 'A_RECEBER' && (
                                   <>
                                     <Button
                                       size="sm"
@@ -1207,9 +1207,9 @@ export default function Cobrancas() {
                                   Parcela {parcela.numero}/{selectedProposta.quantidadeParcelas}
                                 </span>
                                 <Badge className={getParcelaStatusColor(parcela.status)}>
-                                  {parcela.status === 'pago'
+                                  {parcela.status == 'pago'
                                     ? 'Pago'
-                                    : parcela.status === 'vencido'
+                                    : parcela.status == 'vencido'
                                       ? 'Vencido'
                                       : 'Pendente'}
                                 </Badge>
@@ -1245,12 +1245,12 @@ export default function Cobrancas() {
                                     {parcela.interSituacao && (
                                       <Badge
                                         variant={
-                                          parcela.interSituacao === 'VENCIDO'
+                                          parcela.interSituacao == 'VENCIDO'
                                             ? 'destructive'
                                             : 'secondary'
                                         }
                                         className={
-                                          parcela.interSituacao === 'RECEBIDO'
+                                          parcela.interSituacao == 'RECEBIDO'
                                             ? 'bg-green-600 text-white'
                                             : ''
                                         }
@@ -1304,7 +1304,7 @@ export default function Cobrancas() {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => {
-                                              const codigo =
+                                              const _codigo =
                                                 parcela.linhaDigitavel ||
                                                 parcela.codigoBarras ||
                                                 '';
@@ -1336,8 +1336,8 @@ export default function Cobrancas() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    const mensagem = gerarMensagemContato(
-                                      selectedProposta,
+                                    const _mensagem = gerarMensagemContato(
+  _selectedProposta,
                                       parcela
                                     );
                                     navigator.clipboard.writeText(mensagem);
@@ -1517,7 +1517,7 @@ export default function Cobrancas() {
                 <label className="text-sm font-medium">Canal de Contato</label>
                 <Select
                   value={contactType}
-                  onValueChange={(value: unknown) => setContactType(value)}
+                  onValueChange={(value) => setContactType(value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -1544,7 +1544,7 @@ export default function Cobrancas() {
                 </Button>
                 <Button
                   onClick={() => {
-                    const textarea = document.querySelector('textarea');
+                    const _textarea = document.querySelector('textarea');
                     if (textarea) {
                       enviarContato(selectedProposta, contactType, textarea.value);
                     }
@@ -1591,9 +1591,9 @@ export default function Cobrancas() {
                               }).format(parcela.valorParcela)}
                             </p>
                             <Badge className={getParcelaStatusColor(parcela.status)}>
-                              {parcela.status === 'pago'
+                              {parcela.status == 'pago'
                                 ? 'Pago'
-                                : parcela.status === 'vencido'
+                                : parcela.status == 'vencido'
                                   ? 'Vencido'
                                   : 'Pendente'}
                             </Badge>
@@ -1637,7 +1637,7 @@ export default function Cobrancas() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  const codigo =
+                                  const _codigo =
                                     parcela.linhaDigitavel || parcela.codigoBarras || '';
                                   copyPaymentCode(codigo, 'barcode');
                                 }}
@@ -1654,7 +1654,7 @@ export default function Cobrancas() {
                             <span className="text-muted-foreground">Status Inter:</span>
                             <Badge
                               variant={
-                                parcela.interSituacao === 'RECEBIDO' ? 'default' : 'secondary'
+                                parcela.interSituacao == 'RECEBIDO' ? 'default' : 'secondary'
                               }
                             >
                               {parcela.interSituacao}
@@ -1730,7 +1730,7 @@ export default function Cobrancas() {
               <Button
                 onClick={() => {
                   if (selectedBoleto && novaDataVencimento) {
-                    const needsObservation = !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(
+                    const _needsObservation = !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(
                       userRole
                     );
                     if (needsObservation && !observacaoProrrogacao.trim()) {
@@ -1743,7 +1743,7 @@ export default function Cobrancas() {
                     }
                     prorrogarMutation.mutate({
                       codigoSolicitacao: selectedBoleto.codigoSolicitacao,
-                      novaDataVencimento,
+  _novaDataVencimento,
                       observacao: observacaoProrrogacao || undefined,
                     });
                   }
@@ -1793,17 +1793,17 @@ export default function Cobrancas() {
               </div>
               <div>
                 <Label htmlFor="valor-desconto">
-                  {tipoDesconto === 'PERCENTUAL' ? 'Percentual de Desconto' : 'Valor do Desconto'}
+                  {tipoDesconto == 'PERCENTUAL' ? 'Percentual de Desconto' : 'Valor do Desconto'}
                 </Label>
                 <Input
                   id="valor-desconto"
                   type="number"
                   min="0"
-                  max={tipoDesconto === 'PERCENTUAL' ? '100' : undefined}
-                  step={tipoDesconto === 'PERCENTUAL' ? '0.01' : '0.01'}
+                  max={tipoDesconto == 'PERCENTUAL' ? '100' : undefined}
+                  step={tipoDesconto == 'PERCENTUAL' ? '0.01' : '0.01'}
                   value={valorDesconto}
                   onChange={(e) => setValorDesconto(e.target.value)}
-                  placeholder={tipoDesconto === 'PERCENTUAL' ? 'Ex: 10' : 'Ex: 50.00'}
+                  placeholder={tipoDesconto == 'PERCENTUAL' ? 'Ex: 10' : 'Ex: 50.00'}
                 />
               </div>
               <div>
@@ -1843,7 +1843,7 @@ export default function Cobrancas() {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Desconto:{' '}
-                    {tipoDesconto === 'PERCENTUAL'
+                    {tipoDesconto == 'PERCENTUAL'
                       ? `${valorDesconto}%`
                       : new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
@@ -1856,7 +1856,7 @@ export default function Cobrancas() {
                       style: 'currency',
                       currency: 'BRL',
                     }).format(
-                      tipoDesconto === 'PERCENTUAL'
+                      tipoDesconto == 'PERCENTUAL'
                         ? selectedBoleto.valorNominal * (1 - Number(valorDesconto) / 100)
                         : selectedBoleto.valorNominal - Number(valorDesconto)
                     )}
@@ -1871,7 +1871,7 @@ export default function Cobrancas() {
               <Button
                 onClick={() => {
                   if (selectedBoleto && valorDesconto) {
-                    const needsObservation = !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(
+                    const _needsObservation = !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(
                       userRole
                     );
                     if (needsObservation && !observacaoDesconto.trim()) {
@@ -1884,7 +1884,7 @@ export default function Cobrancas() {
                     }
                     descontoMutation.mutate({
                       codigoSolicitacao: selectedBoleto.codigoSolicitacao,
-                      tipoDesconto,
+  _tipoDesconto,
                       valorDesconto: Number(valorDesconto),
                       dataLimiteDesconto: dataLimiteDesconto || undefined,
                       observacao: observacaoDesconto || undefined,
@@ -1916,17 +1916,17 @@ export default function Cobrancas() {
 
               <div className="space-y-4 py-4">
                 {solicitacoesPendentes && solicitacoesPendentes.length > 0 ? (
-                  solicitacoesPendentes.map((solicitacao: unknown) => (
+                  solicitacoesPendentes.map((solicitacao) => (
                     <Card key={solicitacao.id} className="p-4">
                       <div className="space-y-3">
                         <div className="flex justify-between items-start">
                           <div>
                             <Badge
                               className={
-                                solicitacao.tipo === 'PRORROGACAO' ? 'bg-blue-500' : 'bg-green-500'
+                                solicitacao.tipo == 'PRORROGACAO' ? 'bg-blue-500' : 'bg-green-500'
                               }
                             >
-                              {solicitacao.tipo === 'PRORROGACAO' ? 'Prorrogação' : 'Desconto'}
+                              {solicitacao.tipo == 'PRORROGACAO' ? 'Prorrogação' : 'Desconto'}
                             </Badge>
                             <p className="text-sm text-muted-foreground mt-1">
                               Solicitado por: {solicitacao.solicitadoPor}
@@ -1941,7 +1941,7 @@ export default function Cobrancas() {
 
                         <div className="border-t pt-3">
                           <p className="text-sm font-medium">Detalhes da Solicitação:</p>
-                          {solicitacao.tipo === 'PRORROGACAO' ? (
+                          {solicitacao.tipo == 'PRORROGACAO' ? (
                             <div className="text-sm text-muted-foreground">
                               <p>
                                 Nova Data:{' '}
@@ -1957,7 +1957,7 @@ export default function Cobrancas() {
                               <p>Tipo: {solicitacao.dadosSolicitacao.tipoDesconto}</p>
                               <p>
                                 Valor:{' '}
-                                {solicitacao.dadosSolicitacao.tipoDesconto === 'PERCENTUAL'
+                                {solicitacao.dadosSolicitacao.tipoDesconto == 'PERCENTUAL'
                                   ? `${solicitacao.dadosSolicitacao.valorDesconto}%`
                                   : `R$ ${solicitacao.dadosSolicitacao.valorDesconto}`}
                               </p>
@@ -1984,7 +1984,7 @@ export default function Cobrancas() {
                           </div>
                         )}
 
-                        {selectedSolicitacao?.id === solicitacao.id ? (
+                        {selectedSolicitacao?.id == solicitacao.id ? (
                           <div className="border-t pt-3 space-y-3">
                             <div>
                               <Label htmlFor={`obs-supervisor-${solicitacao.id}`}>
@@ -2016,11 +2016,11 @@ export default function Cobrancas() {
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => {
-                                  const motivo = prompt('Motivo da rejeição:');
+                                  const _motivo = prompt('Motivo da rejeição:');
                                   if (motivo) {
                                     rejeitarSolicitacaoMutation.mutate({
                                       id: solicitacao.id,
-                                      motivo,
+  _motivo,
                                       observacao: observacaoSupervisor || undefined,
                                     });
                                   }

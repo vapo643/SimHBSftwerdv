@@ -3,24 +3,24 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  _Table,
+  _TableBody,
+  _TableCell,
+  _TableHead,
+  _TableHeader,
+  _TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+  _Pagination,
+  _PaginationContent,
+  _PaginationItem,
+  _PaginationLink,
+  _PaginationNext,
+  _PaginationPrevious,
 } from '@/components/ui/pagination';
 import { ExternalLink, FileText, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
@@ -71,7 +71,7 @@ export default function GestaoContratos() {
   const [loadingCcb, setLoadingCcb] = useState<string | null>(null);
 
   // Verificar permissão de acesso
-  const hasPermission = user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR';
+  const _hasPermission = user?.role == 'ADMINISTRADOR' || user?.role == 'DIRETOR';
 
   // Buscar contratos
   const { data, isLoading, error } = useQuery<ContratosResponse>({
@@ -82,7 +82,7 @@ export default function GestaoContratos() {
   });
 
   // Função para visualizar CCB assinado
-  const handleVisualizarCcb = async (contrato: Contrato) => {
+  const _handleVisualizarCcb = async (contrato: Contrato) => {
     try {
       setLoadingCcb(contrato.id);
 
@@ -94,11 +94,11 @@ export default function GestaoContratos() {
 
       // Caso contrário, buscar URL segura do backend
       if (contrato.caminhoCcbAssinado) {
-        const response = await apiRequest(`/api/formalizacao/${contrato.id}/ccb-url`, {
+        const _response = await apiRequest(`/api/formalizacao/${contrato.id}/ccb-url`, {
           method: 'POST',
         });
 
-        const typedResponse = response as { url?: string };
+        const _typedResponse = response as { url?: string };
         if (typedResponse.url) {
           window.open(typedResponse.url, '_blank');
         } else {
@@ -106,7 +106,7 @@ export default function GestaoContratos() {
         }
       }
     } catch (error) {
-      console.error('Erro ao abrir CCB:', error);
+      console.error('Erro ao abrir CCB:', error: unknown);
     } finally {
       setLoadingCcb(null);
     }
@@ -187,17 +187,17 @@ export default function GestaoContratos() {
     );
   }
 
-  const contratos = data?.contratos || [];
-  const estatisticas = data?.estatisticas;
+  const _contratos = data?.contratos || [];
+  const _estatisticas = data?.estatisticas;
 
   // Paginação
-  const totalPages = Math.ceil(contratos.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentContratos = contratos.slice(startIndex, endIndex);
+  const _totalPages = Math.ceil(contratos.length / ITEMS_PER_PAGE);
+  const _startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const _endIndex = startIndex + ITEMS_PER_PAGE;
+  const _currentContratos = contratos.slice(startIndex, endIndex);
 
   // Estado vazio
-  if (contratos.length === 0) {
+  if (contratos.length == 0) {
     return (
       <DashboardLayout title="Gestão de Contratos">
         <div className="container mx-auto py-8">
@@ -283,7 +283,7 @@ export default function GestaoContratos() {
                       </TableCell>
                       <TableCell className="font-medium">{contrato.clienteNome}</TableCell>
                       <TableCell>
-                        {contrato.tipoPessoa === 'PF'
+                        {contrato.tipoPessoa == 'PF'
                           ? formatCpf(contrato.clienteCpf || '')
                           : formatCnpj(contrato.clienteCnpj || '')}
                       </TableCell>
@@ -303,10 +303,10 @@ export default function GestaoContratos() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleVisualizarCcb(contrato)}
-                          disabled={!contrato.caminhoCcbAssinado || loadingCcb === contrato.id}
+                          disabled={!contrato.caminhoCcbAssinado || loadingCcb == contrato.id}
                           data-testid={`button-view-ccb-${contrato.id}`}
                         >
-                          {loadingCcb === contrato.id ? (
+                          {loadingCcb == contrato.id ? (
                             <>Carregando...</>
                           ) : (
                             <>
@@ -330,7 +330,7 @@ export default function GestaoContratos() {
                       <PaginationPrevious
                         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                         className={
-                          currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                          currentPage == 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
                         }
                       />
                     </PaginationItem>
@@ -339,7 +339,7 @@ export default function GestaoContratos() {
                       <PaginationItem key={i}>
                         <PaginationLink
                           onClick={() => setCurrentPage(i + 1)}
-                          isActive={currentPage === i + 1}
+                          isActive={currentPage == i + 1}
                           className="cursor-pointer"
                         >
                           {i + 1}
@@ -351,7 +351,7 @@ export default function GestaoContratos() {
                       <PaginationNext
                         onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                         className={
-                          currentPage === totalPages
+                          currentPage == totalPages
                             ? 'pointer-events-none opacity-50'
                             : 'cursor-pointer'
                         }
@@ -370,7 +370,7 @@ export default function GestaoContratos() {
 
 // Componente para badge de status
 function StatusBadge({ status }: { status?: string }) {
-  const statusConfig = {
+  const _statusConfig = {
     PENDENTE_GERACAO: { label: 'Pendente', className: 'bg-gray-100 text-gray-800' },
     AGUARDANDO_ASSINATURA: {
       label: 'Aguardando Assinatura',
@@ -384,31 +384,31 @@ function StatusBadge({ status }: { status?: string }) {
     EM_PROCESSAMENTO: { label: 'Em Processamento', className: 'bg-blue-100 text-blue-800' },
   };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || {
+  const _config = statusConfig[status as keyof typeof statusConfig] || {
     label: status || 'Desconhecido',
     className: 'bg-gray-100 text-gray-800',
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.className}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${_config.className}`}
     >
-      {config.label}
+      {_config.label}
     </span>
   );
 }
 
 // Funções auxiliares de formatação
 function formatCpf(cpf: string): string {
-  if (!cpf) return '-';
-  const cleaned = cpf.replace(/\D/g, '');
-  if (cleaned.length !== 11) return cpf;
-  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  if (!cpf) return '-'; }
+  const _cleaned = cpf.replace(/\D/g, '');
+  if (cleaned.length !== 11) return cpf; }
+  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
 }
 
 function formatCnpj(cnpj: string): string {
-  if (!cnpj) return '-';
-  const cleaned = cnpj.replace(/\D/g, '');
-  if (cleaned.length !== 14) return cnpj;
-  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  if (!cnpj) return '-'; }
+  const _cleaned = cnpj.replace(/\D/g, '');
+  if (cleaned.length !== 14) return cnpj; }
+  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'); }
 }

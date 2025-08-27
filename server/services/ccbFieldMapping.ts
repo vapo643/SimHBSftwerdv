@@ -36,7 +36,7 @@ interface CCBFieldMapping {
  * Devem ser refinadas com base no feedback visual do PDF gerado
  */
 export const SIMPIX_CCB_MAPPING: CCBFieldMapping = {
-  // === SEÇÃO SUPERIOR - DADOS DO DEVEDOR ===
+  // == SEÇÃO SUPERIOR - DADOS DO DEVEDOR ==
   nomeCliente: {
     x: 120, // Após o texto "Nome:"
     y: 680, // Parte superior do documento
@@ -63,7 +63,7 @@ export const SIMPIX_CCB_MAPPING: CCBFieldMapping = {
     maxWidth: 450,
   },
 
-  // === SEÇÃO CENTRAL - DADOS DO EMPRÉSTIMO ===
+  // == SEÇÃO CENTRAL - DADOS DO EMPRÉSTIMO ==
   valorEmprestimo: {
     x: 200, // Após "Valor do empréstimo: R$"
     y: 580, // Centro do documento
@@ -88,7 +88,7 @@ export const SIMPIX_CCB_MAPPING: CCBFieldMapping = {
     size: 11,
   },
 
-  // === SEÇÃO INFERIOR - DADOS DA EMPRESA ===
+  // == SEÇÃO INFERIOR - DADOS DA EMPRESA ==
   nomeEmpresa: {
     x: 120, // Após "Credor:"
     y: 450, // Seção inferior
@@ -102,7 +102,7 @@ export const SIMPIX_CCB_MAPPING: CCBFieldMapping = {
     size: 11,
   },
 
-  // === SEÇÃO DE RODAPÉ - DATAS ===
+  // == SEÇÃO DE RODAPÉ - DATAS ==
   dataEmissao: {
     x: 100, // Local da data
     y: 150, // Parte inferior
@@ -142,7 +142,7 @@ export const TEST_COORDINATES = {
  * @param yFromTop Distância do topo da página
  */
 export function yFromTop(pageHeight: number, yFromTop: number): number {
-  return pageHeight - yFromTop;
+  return pageHeight - yFromTop; }
 }
 
 /**
@@ -151,11 +151,11 @@ export function yFromTop(pageHeight: number, yFromTop: number): number {
  * @param maxWidth Largura máxima em caracteres (aproximado)
  */
 export function formatTextWithLineBreaks(text: string, maxWidth: number = 50): string {
-  if (text.length <= maxWidth) return text;
+  if (text.length <= maxWidth) return text; }
 
-  const words = text.split(' ');
+  const _words = text.split(' ');
   const lines: string[] = [];
-  let currentLine = '';
+  let _currentLine = '';
 
   for (const word of words) {
     if ((currentLine + ' ' + word).length <= maxWidth) {
@@ -167,5 +167,5 @@ export function formatTextWithLineBreaks(text: string, maxWidth: number = 50): s
   }
 
   if (currentLine) lines.push(currentLine);
-  return lines.join('\n');
+  return lines.join('\n'); }
 }

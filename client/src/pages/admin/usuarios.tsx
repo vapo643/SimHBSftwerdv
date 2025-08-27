@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
+  _Table,
+  _TableHeader,
+  _TableBody,
+  _TableHead,
+  _TableRow,
+  _TableCell,
 } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,15 +22,15 @@ import { api } from '@/lib/apiClient';
 import { queryKeys, invalidationPatterns } from '@/hooks/queries/queryKeys';
 import type { User } from '@shared/schema';
 import {
-  Users,
-  Edit,
-  UserX,
-  Shield,
-  UserPlus,
-  Activity,
-  BarChart3,
-  Mail,
-  Calendar,
+  _Users,
+  _Edit,
+  _UserX,
+  _Shield,
+  _UserPlus,
+  _Activity,
+  _BarChart3,
+  _Mail,
+  _Calendar,
 } from 'lucide-react';
 import RefreshButton from '@/components/RefreshButton';
 
@@ -39,7 +39,7 @@ const UsuariosPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   // Fetch users with comprehensive details using isolated query keys
   const {
@@ -49,9 +49,9 @@ const UsuariosPage: React.FC = () => {
   } = useQuery<User[]>({
     queryKey: queryKeys.users.withDetails(),
     queryFn: async () => {
-      const response = await api.get('/api/admin/users');
-      const data = response.data;
-      return Array.isArray(data)
+      const _response = await api.get('/api/admin/users');
+      const _data = response.data;
+      return Array.isArray(_data)
         ? data
         : Array.isArray((data as unknown)?.data)
           ? (data as unknown)?.data
@@ -62,24 +62,24 @@ const UsuariosPage: React.FC = () => {
   });
 
   // Mutation for creating new users
-  const createUserMutation = useMutation({
-    mutationFn: async (userData: unknown) => {
-      const apiData = {
+  const _createUserMutation = useMutation({
+    mutationFn: async (userData) => {
+      const _apiData = {
         fullName: userData.nome,
         email: userData.email,
         password: userData.senha,
         role: userData.perfil,
         lojaId:
-          userData.perfil === 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
+          userData.perfil == 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
         lojaIds:
-          userData.perfil === 'GERENTE' && userData.lojaIds
+          userData.perfil == 'GERENTE' && userData.lojaIds
             ? userData.lojaIds.map((id: string) => parseInt(id))
             : null,
       };
 
       console.log('🔍 [USER CREATE] Sending data:', JSON.stringify(apiData, null, 2));
 
-      const response = await api.post('/api/admin/users', apiData);
+      const _response = await api.post('/api/admin/users', apiData);
       return response.data; // Retorna o corpo da resposta da API
     },
     onSuccess: () => {
@@ -95,14 +95,14 @@ const UsuariosPage: React.FC = () => {
       setIsModalOpen(false);
       setSelectedUser(null);
     },
-    onError: (error: unknown) => {
-      console.error('❌ [USER CREATE ERROR]:', error);
+    onError: (error) => {
+      console.error('❌ [USER CREATE ERROR]:', error: unknown);
       console.error('❌ [ERROR DATA]:', error.data);
 
       // Handle password validation errors specifically - use error.data from ApiError
       if (error.data?.errors?.fieldErrors?.password) {
-        const passwordErrors = error.data.errors.fieldErrors.password;
-        let description = 'Problema com a senha:\n';
+        const _passwordErrors = error.data.errors.fieldErrors.password;
+        let _description = 'Problema com a senha:\n';
 
         if (passwordErrors.includes('This is a top-10 common password')) {
           description += '• Senha muito comum/simples\n';
@@ -144,7 +144,7 @@ const UsuariosPage: React.FC = () => {
     },
   });
 
-  const handleCreateOrEdit = (userData: unknown) => {
+  const _handleCreateOrEdit = (userData) => {
     if (selectedUser) {
       // TODO: Implement edit functionality when needed
       toast({
@@ -157,17 +157,17 @@ const UsuariosPage: React.FC = () => {
     }
   };
 
-  const openEditModal = (user: User) => {
+  const _openEditModal = (user: User) => {
     setSelectedUser(user);
     setIsModalOpen(true);
   };
 
-  const openNewModal = () => {
+  const _openNewModal = () => {
     setSelectedUser(null);
     setIsModalOpen(true);
   };
 
-  const toggleUserStatus = (userId: number) => {
+  const _toggleUserStatus = (userId: number) => {
     // TODO: Implement user status toggle when API is ready
     toast({
       title: 'Info',
@@ -175,7 +175,7 @@ const UsuariosPage: React.FC = () => {
     });
   };
 
-  const handleRefresh = () => {
+  const _handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.users.list() });
   };
 
@@ -311,15 +311,15 @@ const UsuariosPage: React.FC = () => {
   }
 
   // Calcular estatísticas dos usuários
-  const userStats = {
+  const _userStats = {
     total: users.length,
     administradores: Array.isArray(users)
-      ? users.filter((u) => u.role === 'ADMINISTRADOR').length
+      ? users.filter((u) => u.role == 'ADMINISTRADOR').length
       : 0,
-    analistas: Array.isArray(users) ? users.filter((u) => u.role === 'ANALISTA').length : 0,
-    atendentes: Array.isArray(users) ? users.filter((u) => u.role === 'ATENDENTE').length : 0,
-    gerentes: Array.isArray(users) ? users.filter((u) => u.role === 'GERENTE').length : 0,
-    financeiro: Array.isArray(users) ? users.filter((u) => u.role === 'FINANCEIRO').length : 0,
+    analistas: Array.isArray(users) ? users.filter((u) => u.role == 'ANALISTA').length : 0,
+    atendentes: Array.isArray(users) ? users.filter((u) => u.role == 'ATENDENTE').length : 0,
+    gerentes: Array.isArray(users) ? users.filter((u) => u.role == 'GERENTE').length : 0,
+    financeiro: Array.isArray(users) ? users.filter((u) => u.role == 'FINANCEIRO').length : 0,
     ativosPercentual:
       users.length > 0 ? ((users.length / (users.length + 0)) * 100).toFixed(1) : '0',
   };
@@ -433,7 +433,7 @@ const UsuariosPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {Array.isArray(users) && users.length === 0 ? (
+            {Array.isArray(users) && users.length == 0 ? (
               <div className="py-12 text-center">
                 <Users className="mx-auto mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
@@ -468,13 +468,13 @@ const UsuariosPage: React.FC = () => {
                   <TableBody>
                     {Array.isArray(users) &&
                       users.map((user) => {
-                        const initials = user.name
+                        const _initials = user.name
                           .split(' ')
                           .map((n) => n[0])
                           .join('')
                           .toUpperCase()
                           .slice(0, 2);
-                        const roleColor =
+                        const _roleColor =
                           {
                             ADMINISTRADOR:
                               'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200',

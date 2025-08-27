@@ -23,7 +23,7 @@ export async function createApp() {
   // FASE 0 - Initialize Sentry BEFORE creating app (conforme PAM V1.0)
   initializeSentry();
 
-  const app = express();
+  const _app = express();
 
   // FASE 0 - Initialize Sentry error tracking (legacy compatibility)
   initSentry(app);
@@ -40,10 +40,10 @@ export async function createApp() {
   app.disable('x-powered-by');
 
   // Configure trust proxy for rate limiting
-  app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : ['127.0.0.1', '::1']);
+  app.set('trust proxy', process.env.NODE_ENV == 'production' ? 1 : ['127.0.0.1', '::1']);
 
   // Configure CORS - OWASP ASVS V13.2.1
-  const corsOptions = setupCORS();
+  const _corsOptions = setupCORS();
   app.use(cors(corsOptions));
   log('🔒 [SECURITY] CORS protection configured - ASVS V13.2.1');
 
@@ -55,7 +55,7 @@ export async function createApp() {
   app.use(express.urlencoded({ extended: true }));
 
   // Enhanced OWASP Security Headers
-  if (config.security.enableHelmet) {
+  if (_config.security.enableHelmet) {
     app.use(setupSecurityHeaders());
     app.use(additionalSecurityHeaders);
     // Apply appropriate CSP based on environment
@@ -83,9 +83,9 @@ export async function createApp() {
   // Rate Limiting - Configuração por ambiente
   if (process.env.NODE_ENV !== 'test') {
     // Configurações diferentes por ambiente
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    const _isDevelopment = process.env.NODE_ENV == 'development';
 
-    const generalApiLimiter = rateLimit({
+    const _generalApiLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
       max: isDevelopment ? 10000 : 1000, // 10k dev, 1k prod (muito mais permissivo)
       message: {
@@ -119,7 +119,7 @@ export async function createApp() {
       },
     });
 
-    const authLimiter = rateLimit({
+    const _authLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
       max: isDevelopment ? 1000 : 20, // 1000 dev, 20 prod (muito mais permissivo)
       skipSuccessfulRequests: true,
@@ -168,11 +168,11 @@ export async function createApp() {
   app.use(express.json());
 
   // Error handling
-  app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
+  app.use((err, req: Request, res: Response, next: NextFunction) => {
+    const _status = err.status || err.statusCode || 500;
+    const _message = err.message || 'Internal Server Error';
 
-    if (status === 500) {
+    if (status == 500) {
       console.error(`[express] Error:`, err);
     }
 

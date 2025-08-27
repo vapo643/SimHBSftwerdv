@@ -69,7 +69,7 @@ export class CCBSyncService {
    * Acts as a safety net for webhook failures
    */
   async syncPendingCCBs() {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       console.log('[CCB SYNC] 🔍 Running fallback check for missed documents...');
@@ -80,7 +80,7 @@ export class CCBSyncService {
       // 1. Have been waiting for signature for more than 3 hours
       // 2. Are marked as signed but haven't been processed
       // 3. Don't have a stored CCB file
-      const pendingProposals = await db.execute(sql`
+      const _pendingProposals = await db.execute(sql`
         SELECT 
           p.id,
           p.clicksign_document_id,
@@ -106,30 +106,30 @@ export class CCBSyncService {
         LIMIT 10
       `);
 
-      if (!pendingProposals || pendingProposals.length === 0) {
+      if (!pendingProposals || pendingProposals.length == 0) {
         console.log('[CCB SYNC] ✅ No missed documents found (webhook system working correctly)');
         return;
       }
 
-      const proposals = pendingProposals;
+      const _proposals = pendingProposals;
       console.warn(
         `[CCB SYNC] ⚠️ Found ${proposals.length} potentially missed documents (older than 3 hours)`
       );
 
       // Process in batch
-      const processingTasks = proposals.map((proposal: unknown) => ({
+      const _processingTasks = proposals.map((proposal) => ({
         id: proposal.id as string,
         documentKey: (proposal.clicksign_document_id || proposal.clicksign_envelope_id) as string,
       }));
 
-      const results = await documentProcessingService.processBatch(
-        processingTasks,
+      const _results = await documentProcessingService.processBatch(
+  _processingTasks,
         ProcessingSource.POLLING
       );
 
       // Count successes
-      const successCount = results.filter((r) => r.success).length;
-      const failureCount = results.filter((r) => !r.success).length;
+      const _successCount = results.filter((r) => r.success).length;
+      const _failureCount = results.filter((r) => !r.success).length;
 
       this.syncStats.documentsProcessed += successCount;
       this.syncStats.failedAttempts += failureCount;
@@ -146,7 +146,7 @@ export class CCBSyncService {
       }
 
       // Log sync statistics
-      const processingTime = Date.now() - startTime;
+      const _processingTime = Date.now() - startTime;
       console.log(`[CCB SYNC] 📊 Fallback sync completed in ${processingTime}ms`);
       console.log(`[CCB SYNC] 📈 Stats:`, {
         totalSyncs: this.syncStats.totalSyncs,
@@ -164,10 +164,10 @@ export class CCBSyncService {
         // Log alert for monitoring
         await db.execute(sql`
           INSERT INTO system_alerts (
-            type,
-            severity,
-            message,
-            details,
+  _type,
+  _severity,
+  _message,
+  _details,
             created_at
           ) VALUES (
             ${'webhook_failure_suspected'},
@@ -183,7 +183,7 @@ export class CCBSyncService {
         `);
       }
     } catch (error) {
-      console.error('[CCB SYNC] ❌ Error during fallback sync:', error);
+      console.error('[CCB SYNC] ❌ Error during fallback sync:', error: unknown);
       this.syncStats.failedAttempts++;
     }
   }
@@ -207,18 +207,18 @@ export class CCBSyncService {
     try {
       console.log(`[CCB SYNC] 🔧 Manual sync triggered for proposal ${proposalId}`);
 
-      const result = await documentProcessingService.processSignedDocument(
-        proposalId,
+      const _result = await documentProcessingService.processSignedDocument(
+  _proposalId,
         ProcessingSource.MANUAL
       );
 
-      return result.success;
+      return result.success; }
     } catch (error) {
-      console.error(`[CCB SYNC] ❌ Manual sync failed for ${proposalId}:`, error);
-      return false;
+      console.error(`[CCB SYNC] ❌ Manual sync failed for ${proposalId}:`, error: unknown);
+      return false; }
     }
   }
 }
 
 // Export singleton instance
-export const ccbSyncService = new CCBSyncService();
+export const _ccbSyncService = new CCBSyncService();

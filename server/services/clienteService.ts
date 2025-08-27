@@ -17,7 +17,7 @@ export class ClienteService {
     message?: string;
   }> {
     try {
-      const cleanCPF = cpf.replace(/\D/g, '');
+      const _cleanCPF = cpf.replace(/\D/g, '');
 
       if (!cleanCPF || cleanCPF.length !== 11) {
         return {
@@ -29,7 +29,7 @@ export class ClienteService {
       console.log(`[CLIENTE_SERVICE] Searching for CPF: ${cleanCPF}`);
 
       // Check for demonstration CPF
-      if (cleanCPF === '12345678901') {
+      if (cleanCPF == '12345678901') {
         console.log(`[CLIENTE_SERVICE] Demo data for CPF: ${cleanCPF}`);
 
         return {
@@ -71,7 +71,7 @@ export class ClienteService {
       }
 
       // Search in database
-      const clientData = await clienteRepository.findByCPF(cleanCPF);
+      const _clientData = await clienteRepository.findByCPF(cleanCPF);
 
       if (!clientData) {
         console.log(`[CLIENTE_SERVICE] No client found for CPF: ${cleanCPF}`);
@@ -82,7 +82,7 @@ export class ClienteService {
       }
 
       // Apply PII masking
-      const maskedData = {
+      const _maskedData = {
         ...clientData,
         cpf: maskCPF(clientData.cpf),
         email: clientData.email ? maskEmail(clientData.email) : '',
@@ -102,7 +102,7 @@ export class ClienteService {
         data: maskedData,
       };
     } catch (error) {
-      console.error('[CLIENTE_SERVICE] Error getting client by CPF:', error);
+      console.error('[CLIENTE_SERVICE] Error getting client by CPF:', error: unknown);
       throw new Error('Erro ao buscar dados do cliente');
     }
   }
@@ -112,14 +112,14 @@ export class ClienteService {
    */
   async getAddressByCEP(cep: string): Promise<unknown> {
     try {
-      const cleanCep = cep.replace(/\D/g, '');
+      const _cleanCep = cep.replace(/\D/g, '');
 
       if (cleanCep.length !== 8) {
         throw new Error('CEP inválido');
       }
 
       // Try multiple CEP APIs
-      const apis = [
+      const _apis = [
         `https://viacep.com.br/ws/${cleanCep}/json/`,
         `https://brasilapi.com.br/api/cep/v2/${cleanCep}`,
         `https://cep.awesomeapi.com.br/json/${cleanCep}`,
@@ -127,9 +127,9 @@ export class ClienteService {
 
       for (const apiUrl of apis) {
         try {
-          const response = await fetch(apiUrl);
+          const _response = await fetch(apiUrl);
           if (response.ok) {
-            const data = await response.json();
+            const _data = await response.json();
 
             // Normalize response from different APIs
             if (apiUrl.includes('viacep')) {
@@ -167,11 +167,11 @@ export class ClienteService {
       }
 
       throw new Error('CEP não encontrado');
-    } catch (error: unknown) {
-      console.error('[CLIENTE_SERVICE] Error fetching CEP:', error);
+    } catch (error) {
+      console.error('[CLIENTE_SERVICE] Error fetching CEP:', error: unknown);
       throw error;
     }
   }
 }
 
-export const clienteService = new ClienteService();
+export const _clienteService = new ClienteService();

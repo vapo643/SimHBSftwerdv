@@ -29,7 +29,7 @@ if (process.env.TEST_DATABASE_URL) {
 process.env.NODE_ENV = 'test';
 
 // Security validation: Ensure we're using TEST_DATABASE_URL in test environment
-if (process.env.NODE_ENV === 'test' && !process.env.TEST_DATABASE_URL) {
+if (process.env.NODE_ENV == 'test' && !process.env.TEST_DATABASE_URL) {
   console.error('[TEST SETUP] 🔴 SECURITY ALERT: TEST_DATABASE_URL not configured');
   console.error('[TEST SETUP] 🔴 This could indicate incorrect test configuration');
   throw new Error('FATAL: TEST_DATABASE_URL must be configured for test environment');

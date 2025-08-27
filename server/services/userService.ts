@@ -7,7 +7,7 @@ import { UserDataSchema, UserData } from '../../shared/types/user';
 export { UserData };
 
 export async function createUser(userData: UserData) {
-  const supabase = createServerSupabaseAdminClient();
+  const _supabase = createServerSupabaseAdminClient();
   let createdAuthUser: unknown = null;
   let createdProfile: unknown = null;
 
@@ -18,9 +18,9 @@ export async function createUser(userData: UserData) {
       throw new Error(`Erro ao verificar email: ${checkError.message}`);
     }
 
-    const existingUser = existingUsers.users.find((user) => user.email === userData.email);
+    const _existingUser = existingUsers.users.find((user) => user.email == userData.email);
     if (existingUser) {
-      const conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
+      const _conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
       conflictError.name = 'ConflictError';
       throw conflictError;
     }
@@ -35,11 +35,11 @@ export async function createUser(userData: UserData) {
     if (!authData.user) throw new Error('Falha crítica ao criar usuário no Auth.');
     createdAuthUser = authData.user;
 
-    const profilePayload = {
+    const _profilePayload = {
       id: createdAuthUser.id,
       role: userData.role,
       full_name: userData.fullName,
-      loja_id: userData.role === 'ATENDENTE' ? userData.lojaId : null,
+      loja_id: userData.role == 'ATENDENTE' ? userData.lojaId : null,
     };
 
     const { data: profileResult, error: profileError } = await supabase
@@ -50,8 +50,8 @@ export async function createUser(userData: UserData) {
     if (profileError) throw new Error(`Erro ao criar perfil: ${profileError.message}`);
     createdProfile = profileResult;
 
-    if (userData.role === 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
-      const gerenteLojaInserts = userData.lojaIds.map((lojaId) => ({
+    if (userData.role == 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
+      const _gerenteLojaInserts = userData.lojaIds.map((lojaId) => ({
         gerente_id: createdAuthUser.id,
         loja_id: lojaId,
       }));

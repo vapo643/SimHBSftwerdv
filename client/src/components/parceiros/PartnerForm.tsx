@@ -9,7 +9,7 @@ import { Save, X, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 
 // Simplified schema with only essential fields
-const simplifiedPartnerSchema = z.object({
+const _simplifiedPartnerSchema = z.object({
   razaoSocial: z.string().min(1, 'Razão Social é obrigatória'),
   cnpj: z.string().min(1, 'CNPJ é obrigatório'),
 });
@@ -24,14 +24,14 @@ interface PartnerFormProps {
 }
 
 const PartnerForm: React.FC<PartnerFormProps> = ({
-  initialData,
-  onSubmit,
-  onCancel,
+  _initialData,
+  _onSubmit,
+  _onCancel,
   isLoading = false,
 }) => {
   const {
-    register,
-    handleSubmit,
+  _register,
+  _handleSubmit,
     formState: { errors },
   } = useForm<SimplifiedPartnerData>({
     resolver: zodResolver(simplifiedPartnerSchema),

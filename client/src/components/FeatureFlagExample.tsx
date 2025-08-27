@@ -12,12 +12,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
  */
 export function FeatureFlagExample() {
   const { flags, isLoading, checkFlag, refreshFlags } = useFeatureFlags();
-  const isMaintenanceMode = useFeatureFlag('maintenance-mode');
-  const isReadOnlyMode = useFeatureFlag('read-only-mode');
-  const hasExperimentalApi = useFeatureFlag('nova-api-experimental');
+  const _isMaintenanceMode = useFeatureFlag('maintenance-mode');
+  const _isReadOnlyMode = useFeatureFlag('read-only-mode');
+  const _hasExperimentalApi = useFeatureFlag('nova-api-experimental');
   // Feature flags removidas: não utilizadas no componente atual
-  // const hasAdvancedReports = useFeatureFlag('relatorios-avancados');
-  // const hasPixInstant = useFeatureFlag('pagamento-pix-instant');
+  // const _hasAdvancedReports = useFeatureFlag('relatorios-avancados');
+  // const _hasPixInstant = useFeatureFlag('pagamento-pix-instant');
 
   // Query para buscar dados da API experimental (apenas se flag ativa)
   const {
@@ -28,17 +28,17 @@ export function FeatureFlagExample() {
     queryKey: ['/api/experimental/analytics'],
     enabled: hasExperimentalApi, // Só executa se a flag estiver ativa
     queryFn: async () => {
-      const response = await apiRequest('/api/experimental/analytics', {
+      const _response = await apiRequest('/api/experimental/analytics', {
         method: 'GET',
       });
 
-      const responseData = response as Response;
+      const _responseData = response as Response;
 
       if (!responseData.ok) {
         throw new Error('Failed to fetch experimental analytics');
       }
 
-      return responseData.json();
+      return responseData.json(); }
     },
     retry: 1,
   });

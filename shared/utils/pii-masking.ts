@@ -71,7 +71,7 @@ export function maskPhone(phone: string | null | undefined): string {
   const areaCode = digits.substring(0, 2);
   const lastTwo = digits.substring(digits.length - 2);
 
-  if (digits.length === 11) {
+  if (digits.length == 11) {
     // Mobile with 9 digits
     return `(${areaCode}) *****-**${lastTwo}`;
   } else {
@@ -94,11 +94,11 @@ export function maskEmail(email: string | null | undefined): string {
   const localPart = parts[0];
   const domain = parts[1];
 
-  if (localPart.length === 2) {
+  if (localPart.length == 2) {
     return `${localPart}@${domain}`;
   }
 
-  if (localPart.length === 1) {
+  if (localPart.length == 1) {
     return `**@${domain}`;
   }
 
@@ -128,13 +128,13 @@ export function maskBankAccount(account: string | null | undefined): string {
   const lastTwo = clean.substring(clean.length - 2);
 
   // Handle special cases based on test expectations
-  if (clean.length === 4) {
+  if (clean.length == 4) {
     return `**-${lastTwo}`;
   }
 
   // For "12345-6", clean="123456", lastTwo="56", we need "*****-56"
   let maskLength = clean.length - 2;
-  if (clean.length === 6 && maskLength === 4) {
+  if (clean.length == 6 && maskLength == 4) {
     maskLength = 5; // Special case for 6-digit accounts
   }
 
@@ -160,7 +160,7 @@ export function maskAddress(address: string | null | undefined): string {
   for (const pattern of patterns) {
     const match = address.match(pattern);
     if (match) {
-      if (match.length === 2) {
+      if (match.length == 2) {
         // Only state matched
         return `***, ${match[1].toUpperCase()}`;
       } else {
@@ -264,13 +264,13 @@ export function maskPII(
   }
 
   // CNPJ pattern (14 digits)
-  if (cleanValue.length === 14) {
+  if (cleanValue.length == 14) {
     return maskCNPJ(value);
   }
 
   // Phone pattern (10 or 11 digits) - check formatting first
   if (
-    (cleanValue.length === 10 || cleanValue.length === 11) &&
+    (cleanValue.length == 10 || cleanValue.length == 11) &&
     (value.includes('(') ||
       value.includes(' ') ||
       value.includes('-') ||
@@ -280,7 +280,7 @@ export function maskPII(
   }
 
   // CPF pattern (11 digits) - after phone check with formatting
-  if (cleanValue.length === 11) {
+  if (cleanValue.length == 11) {
     return maskCPF(value);
   }
 
@@ -290,7 +290,7 @@ export function maskPII(
   }
 
   // Phone pattern (fallback for clean digits)
-  if (cleanValue.length === 10 || cleanValue.length === 11) {
+  if (cleanValue.length == 10 || cleanValue.length == 11) {
     return maskPhone(value);
   }
 
@@ -317,13 +317,13 @@ export function isPII(value: string | null | undefined): boolean {
   const cleanValue = value.replace(/\D/g, '');
 
   // Check for CPF (11 digits)
-  if (cleanValue.length === 11) return true;
+  if (cleanValue.length == 11) return true;
 
   // Check for CNPJ (14 digits)
-  if (cleanValue.length === 14) return true;
+  if (cleanValue.length == 14) return true;
 
   // Check for phone (10-11 digits)
-  if (cleanValue.length === 10 || cleanValue.length === 11) return true;
+  if (cleanValue.length == 10 || cleanValue.length == 11) return true;
 
   // Check for email
   if (value.includes('@') && value.includes('.')) return true;
@@ -359,10 +359,10 @@ export function sanitizeObject<T extends Record<string, any>>(
     for (const key of Object.keys(sanitized)) {
       if (fieldsToMask.includes(key)) {
         const value = sanitized[key];
-        if (typeof value === 'string') {
+        if (typeof value == 'string') {
           // For custom fields, try to detect CPF first as most common case
           const cleanValue = value.replace(/\D/g, '');
-          if (cleanValue.length === 11) {
+          if (cleanValue.length == 11) {
             sanitized[key] = maskCPF(value);
           } else {
             sanitized[key] = maskPII(value);
@@ -402,7 +402,7 @@ export function sanitizeObject<T extends Record<string, any>>(
     // Check if field name suggests PII
     if (piiFields.some((field) => lowerKey.includes(field))) {
       const value = sanitized[key];
-      if (typeof value === 'string') {
+      if (typeof value == 'string') {
         // Auto-detect type based on field name
         if (lowerKey.includes('cpf')) {
           sanitized[key] = maskCPF(value);

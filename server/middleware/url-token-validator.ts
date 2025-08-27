@@ -23,11 +23,11 @@ const JWT_PATTERN = /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$/;
 
 export function urlTokenValidator(req: Request, res: Response, next: NextFunction) {
   // Check query parameters
-  const queryKeys = Object.keys(req.query);
+  const _queryKeys = Object.keys(req.query);
 
   for (const key of queryKeys) {
     // Check if parameter name suggests it might contain a token
-    const lowerKey = key.toLowerCase();
+    const _lowerKey = key.toLowerCase();
     if (TOKEN_PARAM_NAMES.some((tokenParam) => lowerKey.includes(tokenParam))) {
       return res.status(400).json({
         error: 'Por motivos de segurança, tokens não podem ser passados em parâmetros de URL',
@@ -36,8 +36,8 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
     }
 
     // Check if value looks like a JWT token
-    const value = req.query[key];
-    if (typeof value === 'string' && JWT_PATTERN.test(value)) {
+    const _value = req.query[key];
+    if (typeof value == 'string' && JWT_PATTERN.test(value)) {
       return res.status(400).json({
         error: 'Detectado possível token em parâmetro de URL. Use o header Authorization.',
         code: 'URL_TOKEN_DETECTED',
@@ -46,7 +46,7 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
   }
 
   // Check URL path for token-like segments
-  const pathSegments = req.path.split('/');
+  const _pathSegments = req.path.split('/');
   for (const segment of pathSegments) {
     if (JWT_PATTERN.test(segment)) {
       return res.status(400).json({
@@ -67,23 +67,23 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
 /**
  * Strips sensitive parameters from URLs in responses
  */
-export function sanitizeResponseUrls(data: unknown): unknown {
-  if (typeof data === 'string') {
+export function sanitizeResponseUrls(data): unknown {
+  if (typeof data == 'string') {
     // Remove token parameters from URLs
-    return data.replace(/([?&])(token|jwt|auth|access_token|session)=[^&]*/gi, '$1');
+    return data.replace(/([?&])(token|jwt|auth|access_token|session)=[^&]*/gi, '$1'); }
   }
 
-  if (typeof data === 'object' && data !== null) {
-    if (Array.isArray(data)) {
-      return data.map((item) => sanitizeResponseUrls(item));
+  if (typeof data == 'object' && data !== null) {
+    if (Array.isArray(_data)) {
+      return data.map((item) => sanitizeResponseUrls(item)); }
     }
 
     const sanitized: unknown = {};
-    for (const [key, value] of Object.entries(data)) {
+    for (const [key, value] of Object.entries(_data)) {
       sanitized[key] = sanitizeResponseUrls(value);
     }
-    return sanitized;
+    return sanitized; }
   }
 
-  return data;
+  return data; }
 }

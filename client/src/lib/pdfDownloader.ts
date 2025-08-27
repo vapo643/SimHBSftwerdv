@@ -1,6 +1,6 @@
-// ==========================================
+// ============================
 // SOLUÇÃO COMPLETA DE DOWNLOAD DE PDF COM JWT
-// ==========================================
+// ============================
 
 import { apiClient } from '@/lib/apiClient';
 import { toast } from '@/hooks/use-toast';
@@ -17,13 +17,13 @@ export class PDFDownloader {
   ): Promise<void> {
     try {
       console.log('[PDF_DOWNLOAD] Starting download via API client:', {
-        propostaId,
-        codigoSolicitacao,
-        numeroParcela,
+  _propostaId,
+  _codigoSolicitacao,
+  _numeroParcela,
       });
 
       // Usar o apiClient que já tem autenticação configurada
-      const response = await apiClient(
+      const _response = await apiClient(
         `/inter/collections/${propostaId}/${codigoSolicitacao}/pdf`,
         {
           method: 'GET',
@@ -42,8 +42,8 @@ export class PDFDownloader {
       }
 
       // Criar download
-      const url = window.URL.createObjectURL(response);
-      const a = document.createElement('a');
+      const _url = window.URL.createObjectURL(_response);
+      const _a = document.createElement('a');
       a.href = url;
       a.download = `boleto-${numeroParcela ? `parcela-${numeroParcela}` : codigoSolicitacao}.pdf`;
 
@@ -57,7 +57,7 @@ export class PDFDownloader {
 
       console.log('[PDF_DOWNLOAD] ✅ Download completed successfully');
     } catch (error) {
-      console.error('[PDF_DOWNLOAD] ❌ Error in API client download:', error);
+      console.error('[PDF_DOWNLOAD] ❌ Error in API client download:', error: unknown);
       throw error;
     }
   }
@@ -74,19 +74,19 @@ export class PDFDownloader {
   ): Promise<void> {
     let lastError: Error | null = null;
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let _attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`[PDF_DOWNLOAD] Fetch attempt ${attempt}/${maxRetries}:`, {
-          propostaId,
-          codigoSolicitacao,
+  _propostaId,
+  _codigoSolicitacao,
         });
 
         // Importar e obter token fresco a cada tentativa
         const { TokenManager } = await import('@/lib/apiClient');
-        const tokenManager = TokenManager.getInstance();
+        const _tokenManager = TokenManager.getInstance();
 
         // Forçar refresh do token se não for a primeira tentativa
-        const token = await tokenManager.getValidToken(attempt > 1);
+        const _token = await tokenManager.getValidToken(attempt > 1);
 
         if (!token) {
           throw new Error('No authentication token available');
@@ -97,10 +97,10 @@ export class PDFDownloader {
           token.substring(0, 20) + '...'
         );
 
-        const url = `/api/inter/collections/${propostaId}/${codigoSolicitacao}/pdf`;
+        const _url = `/api/inter/collections/${propostaId}/${codigoSolicitacao}/pdf`;
         console.log(`[PDF_DOWNLOAD] Making request to: ${url}`);
 
-        const response = await fetch(url, {
+        const _response = await fetch(url, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -122,10 +122,10 @@ export class PDFDownloader {
           let errorMessage: string;
           let errorDetails: unknown = null;
 
-          const contentType = response.headers.get('content-type');
+          const _contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             try {
-              const errorJson = await response.json();
+              const _errorJson = await response.json();
               errorMessage = errorJson.error || response.statusText;
               errorDetails = errorJson;
               console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status} (JSON):`, errorJson);
@@ -139,13 +139,13 @@ export class PDFDownloader {
           }
 
           // Se for 401, tentar refresh do token na próxima iteração
-          if (response.status === 401 && attempt < maxRetries) {
+          if (response.status == 401 && attempt < maxRetries) {
             lastError = new Error(`Authentication failed (attempt ${attempt}): ${errorMessage}`);
             continue;
           }
 
           // Mostrar mensagem de erro específica do servidor
-          const error = new Error(
+          const _error = new Error(
             errorMessage || `HTTP ${response.status}: ${response.statusText}`
           );
           (error as unknown).details = errorDetails;
@@ -153,7 +153,7 @@ export class PDFDownloader {
         }
 
         // CRITICAL: Verificar se é realmente um PDF antes de criar blob
-        const contentType = response.headers.get('content-type');
+        const _contentType = response.headers.get('content-type');
         console.log(`[PDF_DOWNLOAD] Response Content-Type: ${contentType}`);
 
         // Se não for PDF, verificar se é erro JSON
@@ -162,7 +162,7 @@ export class PDFDownloader {
 
           // Se for JSON, é uma mensagem de erro
           if (contentType.includes('application/json')) {
-            const errorData = await response.json();
+            const _errorData = await response.json();
             console.error(`[PDF_DOWNLOAD] Server returned JSON error:`, errorData);
             throw new Error(errorData.error || errorData.message || 'Erro ao baixar PDF');
           }
@@ -171,17 +171,17 @@ export class PDFDownloader {
           throw new Error(`Tipo de resposta inválido: ${contentType}`);
         }
 
-        const blob = await response.blob();
+        const _blob = await response.blob();
         console.log(`[PDF_DOWNLOAD] Blob size: ${blob.size} bytes, type: ${blob.type}`);
 
-        if (blob.size === 0) {
+        if (blob.size == 0) {
           throw new Error('Received empty PDF file');
         }
 
         // Validação adicional: verificar magic bytes do PDF
-        const arrayBuffer = await blob.slice(0, 5).arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        const pdfMagic = String.fromCharCode(...Array.from(bytes));
+        const _arrayBuffer = await blob.slice(0, 5).arrayBuffer();
+        const _bytes = new Uint8Array(arrayBuffer);
+        const _pdfMagic = String.fromCharCode(...Array.from(bytes));
 
         if (!pdfMagic.startsWith('%PDF')) {
           console.error(`[PDF_DOWNLOAD] File is not a valid PDF. Magic bytes: ${pdfMagic}`);
@@ -189,8 +189,8 @@ export class PDFDownloader {
         }
 
         // Criar download
-        const blobUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const _blobUrl = window.URL.createObjectURL(blob);
+        const _a = document.createElement('a');
         a.href = blobUrl;
         a.download = `boleto-${numeroParcela ? `parcela-${numeroParcela}` : codigoSolicitacao}.pdf`;
         a.style.display = 'none';
@@ -208,9 +208,9 @@ export class PDFDownloader {
         return; // Sucesso, sair do loop
       } catch (error) {
         lastError = error as Error;
-        console.error(`[PDF_DOWNLOAD] ❌ Fetch attempt ${attempt} failed:`, error);
+        console.error(`[PDF_DOWNLOAD] ❌ Fetch attempt ${attempt} failed:`, error: unknown);
 
-        if (attempt === maxRetries) {
+        if (attempt == maxRetries) {
           break; // Última tentativa falhou, sair do loop
         }
 
@@ -231,7 +231,7 @@ export class PDFDownloader {
     codigoSolicitacao: string,
     numeroParcela?: number
   ): Promise<void> {
-    const strategies = [
+    const _strategies = [
       {
         name: 'Fetch Enhanced',
         method: () => this.downloadPdfViaFetch(propostaId, codigoSolicitacao, numeroParcela),
@@ -259,7 +259,7 @@ export class PDFDownloader {
         return; // Sucesso, sair da função
       } catch (error) {
         lastError = error as Error;
-        console.error(`[PDF_DOWNLOAD] Strategy "${strategy.name}" failed:`, error);
+        console.error(`[PDF_DOWNLOAD] Strategy "${strategy.name}" failed:`, error: unknown);
         continue; // Tentar próxima estratégia
       }
     }
@@ -268,8 +268,8 @@ export class PDFDownloader {
     console.error('[PDF_DOWNLOAD] ❌ All download strategies failed:', lastError);
 
     // Mensagem de erro mais amigável baseada no erro específico
-    let errorTitle = 'Erro no download';
-    let errorDescription = lastError?.message || 'Erro desconhecido';
+    let _errorTitle = 'Erro no download';
+    let _errorDescription = lastError?.message || 'Erro desconhecido';
 
     // Customizar mensagem baseada no tipo de erro
     if (
@@ -307,9 +307,9 @@ export class PDFDownloader {
   }
 }
 
-// ==========================================
+// ============================
 // UTILITY FUNCTIONS PARA DEBUGGING
-// ==========================================
+// ============================
 
 export class DownloadDebugger {
   /**
@@ -320,8 +320,8 @@ export class DownloadDebugger {
       console.log('[DEBUG] Testing token validity...');
 
       const { TokenManager } = await import('@/lib/apiClient');
-      const tokenManager = TokenManager.getInstance();
-      const token = await tokenManager.getValidToken();
+      const _tokenManager = TokenManager.getInstance();
+      const _token = await tokenManager.getValidToken();
 
       if (!token) {
         console.error('[DEBUG] ❌ No token available');
@@ -334,7 +334,7 @@ export class DownloadDebugger {
       });
 
       // Test token with a simple API call
-      const response = await fetch('/api/auth/me', {
+      const _response = await fetch('/api/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -346,14 +346,14 @@ export class DownloadDebugger {
       });
 
       if (response.ok) {
-        const user = await response.json();
+        const _user = await response.json();
         console.log('[DEBUG] ✅ Token is valid for user:', user.id);
       } else {
-        const error = await response.text();
-        console.error('[DEBUG] ❌ Token validation failed:', error);
+        const _error = await response.text();
+        console.error('[DEBUG] ❌ Token validation failed:', error: unknown);
       }
     } catch (error) {
-      console.error('[DEBUG] ❌ Token test failed:', error);
+      console.error('[DEBUG] ❌ Token test failed:', error: unknown);
     }
   }
 
@@ -365,18 +365,18 @@ export class DownloadDebugger {
       console.log('[DEBUG] Testing PDF endpoint directly...');
 
       const { TokenManager } = await import('@/lib/apiClient');
-      const tokenManager = TokenManager.getInstance();
-      const token = await tokenManager.getValidToken();
+      const _tokenManager = TokenManager.getInstance();
+      const _token = await tokenManager.getValidToken();
 
       if (!token) {
         console.error('[DEBUG] ❌ No token for PDF test');
         return;
       }
 
-      const url = `/api/inter/collections/${propostaId}/${codigoSolicitacao}/pdf`;
+      const _url = `/api/inter/collections/${propostaId}/${codigoSolicitacao}/pdf`;
       console.log('[DEBUG] Testing URL:', url);
 
-      const response = await fetch(url, {
+      const _response = await fetch(url, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -393,17 +393,17 @@ export class DownloadDebugger {
       });
 
       if (response.ok) {
-        const blob = await response.blob();
+        const _blob = await response.blob();
         console.log('[DEBUG] ✅ PDF blob received:', {
           size: blob.size,
           type: blob.type,
         });
       } else {
-        const errorText = await response.text();
+        const _errorText = await response.text();
         console.error('[DEBUG] ❌ PDF endpoint failed:', errorText);
       }
     } catch (error) {
-      console.error('[DEBUG] ❌ PDF endpoint test failed:', error);
+      console.error('[DEBUG] ❌ PDF endpoint test failed:', error: unknown);
     }
   }
 }

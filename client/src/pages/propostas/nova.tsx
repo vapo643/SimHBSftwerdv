@@ -31,10 +31,10 @@ function ProposalForm() {
   } = useQuery({
     queryKey: ['/api/origination/context'],
     queryFn: async () => {
-      const response = await apiRequest('/api/origination/context', {
+      const _response = await apiRequest('/api/origination/context', {
         method: 'GET',
       });
-      return response;
+      return response; }
     },
   });
 
@@ -61,12 +61,12 @@ function ProposalForm() {
   }, [contextError, toast]); // Removed setLoading from dependencies
 
   // Submit mutation
-  const submitProposal = useMutation({
+  const _submitProposal = useMutation({
     mutationFn: async () => {
       // NOVO FLUXO: Criar proposta primeiro, depois upload com ID real
       // 1. PRIMEIRO: Criar a proposta sem documentos
-      const proposalData = {
-        // ===== TIPO DE PESSOA E DADOS BÁSICOS =====
+      const _proposalData = {
+        // ==== TIPO DE PESSOA E DADOS BÁSICOS ====
         tipoPessoa: state.clientData.tipoPessoa, // PF ou PJ
 
         // Dados Pessoa Física
@@ -77,13 +77,13 @@ function ProposalForm() {
         clienteRazaoSocial: state.clientData.razaoSocial || null,
         clienteCnpj: state.clientData.cnpj || null,
 
-        // ===== DOCUMENTAÇÃO COMPLETA (RG) =====
+        // ==== DOCUMENTAÇÃO COMPLETA (RG) ====
         clienteRg: state.clientData.rg,
         clienteOrgaoEmissor: state.clientData.orgaoEmissor,
         clienteRgUf: state.clientData.rgUf, // NOVO: UF de emissão do RG
         clienteRgDataEmissao: state.clientData.rgDataEmissao, // NOVO: Data de emissão do RG
 
-        // ===== DADOS PESSOAIS =====
+        // ==== DADOS PESSOAIS ====
         clienteEmail: state.clientData.email,
         clienteTelefone: state.clientData.telefone,
         clienteDataNascimento: state.clientData.dataNascimento,
@@ -91,7 +91,7 @@ function ProposalForm() {
         clienteEstadoCivil: state.clientData.estadoCivil,
         clienteNacionalidade: state.clientData.nacionalidade,
 
-        // ===== ENDEREÇO DETALHADO =====
+        // ==== ENDEREÇO DETALHADO ====
         clienteCep: state.clientData.cep,
         clienteLogradouro: state.clientData.logradouro, // NOVO: Rua/Avenida separado
         clienteNumero: state.clientData.numero, // NOVO: Número do imóvel
@@ -104,12 +104,12 @@ function ProposalForm() {
         clienteEndereco:
           `${state.clientData.logradouro || ''}, ${state.clientData.numero || ''}${state.clientData.complemento ? ', ' + state.clientData.complemento : ''}, ${state.clientData.bairro || ''}, ${state.clientData.cidade || ''}/${state.clientData.estado || ''} - CEP: ${state.clientData.cep || ''}`.trim(),
 
-        // ===== DADOS PROFISSIONAIS =====
+        // ==== DADOS PROFISSIONAIS ====
         clienteOcupacao: state.clientData.ocupacao,
         clienteRenda: state.clientData.rendaMensal,
         clienteTelefoneEmpresa: state.clientData.telefoneEmpresa,
 
-        // ===== MÉTODO DE PAGAMENTO =====
+        // ==== MÉTODO DE PAGAMENTO ====
         metodoPagamento: state.clientData.metodoPagamento, // 'conta_bancaria' ou 'pix'
 
         // Dados bancários (quando conta_bancaria)
@@ -125,10 +125,10 @@ function ProposalForm() {
         dadosPagamentoPixNomeTitular: state.clientData.dadosPagamentoPixNomeTitular || null,
         dadosPagamentoPixCpfTitular: state.clientData.dadosPagamentoPixCpfTitular || null,
 
-        // ===== REFERÊNCIAS PESSOAIS =====
+        // ==== REFERÊNCIAS PESSOAIS ====
         referenciaPessoal: state.personalReferences,
 
-        // ===== DADOS DO EMPRÉSTIMO =====
+        // ==== DADOS DO EMPRÉSTIMO ====
         produtoId: state.loanData.produtoId,
         tabelaComercialId: state.loanData.tabelaComercialId,
         valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
@@ -145,13 +145,13 @@ function ProposalForm() {
         dataCarencia: state.loanData.dataCarencia || null,
         incluirTac: state.loanData.incluirTac,
 
-        // ===== DADOS ADMINISTRATIVOS =====
+        // ==== DADOS ADMINISTRATIVOS ====
         status: 'aguardando_analise',
         lojaId: state.context?.atendente?.loja?.id,
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
 
-        // ===== CAMPOS OPCIONAIS PARA CCB =====
+        // ==== CAMPOS OPCIONAIS PARA CCB ====
         // Estes podem ser preenchidos posteriormente ou com valores padrão
         formaLiberacao: 'deposito', // Como será liberado: deposito, ted, pix
         formaPagamento: 'boleto', // Como cliente pagará: boleto, pix, debito
@@ -159,12 +159,12 @@ function ProposalForm() {
       };
 
       console.log(`[DEBUG] Criando proposta primeiro...`);
-      const propostaResponse = await apiRequest('/api/propostas', {
+      const _propostaResponse = await apiRequest('/api/propostas', {
         method: 'POST',
         body: proposalData,
       });
 
-      const propostaId = (propostaResponse as unknown).id;
+      const _propostaId = (propostaResponse as unknown).id;
       console.log(`[DEBUG] Proposta criada com ID: ${propostaId}`);
 
       // 2. SEGUNDO: Upload dos documentos com ID real da proposta
@@ -177,16 +177,16 @@ function ProposalForm() {
 
         for (const doc of state.documents) {
           try {
-            const timestamp = Date.now();
-            const fileName = `${timestamp}-${doc.name}`;
+            const _timestamp = Date.now();
+            const _fileName = `${timestamp}-${doc.name}`;
 
             // Upload usando apiRequest com FormData
-            const formData = new FormData();
+            const _formData = new FormData();
             formData.append('file', doc.file);
             formData.append('filename', fileName);
             formData.append('proposalId', propostaId); // Usar ID real da proposta
 
-            const uploadResponse = await apiRequest('/api/upload', {
+            const _uploadResponse = await apiRequest('/api/upload', {
               method: 'POST',
               body: formData,
             });
@@ -218,9 +218,9 @@ function ProposalForm() {
         }
       }
 
-      return propostaResponse;
+      return propostaResponse; }
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast({
         title: 'Proposta criada com sucesso!',
         description: `Proposta ${(data as unknown).id} foi encaminhada para análise com ${state.documents.length} documento(s) anexado(s).`,
@@ -261,7 +261,7 @@ function ProposalForm() {
     );
   }
 
-  const handleStepChange = (value: string) => {
+  const _handleStepChange = (value: string) => {
     const stepMap: Record<string, number> = {
       'dados-cliente': 0,
       'referencias-pessoais': 1,
@@ -271,7 +271,7 @@ function ProposalForm() {
     setStep(stepMap[value] || 0);
   };
 
-  const currentTabValue = [
+  const _currentTabValue = [
     'dados-cliente',
     'referencias-pessoais',
     'condicoes-emprestimo',
@@ -322,7 +322,7 @@ function ProposalForm() {
           type="button"
           variant="outline"
           onClick={() => setStep(Math.max(0, state.currentStep - 1))}
-          disabled={state.currentStep === 0}
+          disabled={state.currentStep == 0}
         >
           Voltar
         </Button>

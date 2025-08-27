@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { ccbCalibrationService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb-calibration/calibrate
@@ -15,10 +15,10 @@ const router = Router();
  */
 router.post('/calibrate', async (req: Request, res: Response) => {
   try {
-    const result = await ccbCalibrationService.executeOperation('calibrate', req.body);
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[CCB_CALIBRATION] Error:', error);
+    const _result = await ccbCalibrationService.executeOperation('calibrate', req.body);
+    res.json(_result);
+  } catch (error) {
+    console.error('[CCB_CALIBRATION] Error:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Calibration failed',
@@ -32,10 +32,10 @@ router.post('/calibrate', async (req: Request, res: Response) => {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const result = await ccbCalibrationService.testConnection();
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[CCB_CALIBRATION] Test failed:', error);
+    const _result = await ccbCalibrationService.testConnection();
+    res.json(_result);
+  } catch (error) {
+    console.error('[CCB_CALIBRATION] Test failed:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Test failed',
@@ -49,10 +49,10 @@ router.get('/test', async (req: Request, res: Response) => {
  */
 router.get('/status', async (req: Request, res: Response) => {
   try {
-    const status = await ccbCalibrationService.getStatus();
+    const _status = await ccbCalibrationService.getStatus();
     res.json(status);
-  } catch (error: unknown) {
-    console.error('[CCB_CALIBRATION] Status check failed:', error);
+  } catch (error) {
+    console.error('[CCB_CALIBRATION] Status check failed:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Status check failed',

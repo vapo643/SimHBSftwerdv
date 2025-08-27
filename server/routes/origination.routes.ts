@@ -4,16 +4,16 @@ import { AuthenticatedRequest } from '../../shared/types/express';
 import { db } from '../lib/supabase';
 import { eq, and, isNull } from 'drizzle-orm';
 import {
-  produtos,
-  tabelasComerciais,
-  lojas,
-  parceiros,
-  users,
-  produtoTabelaComercial,
+  _produtos,
+  _tabelasComerciais,
+  _lojas,
+  _parceiros,
+  _users,
+  _produtoTabelaComercial,
 } from '@shared/schema';
 import { getFromCache, setToCache } from '../services/cacheService';
 
-const router = Router();
+const _router = Router();
 
 interface OriginationContext {
   atendente: {
@@ -29,12 +29,12 @@ interface OriginationContext {
       };
     };
   };
-  produtos: Array<{
+  produtos: Record<string, unknown>[]>{
     id: number;
     nome: string;
     tacValor: string;
     tacTipo: string;
-    tabelasDisponiveis: Array<{
+    tabelasDisponiveis: Record<string, unknown>[]>{
       id: number;
       nomeTabela: string;
       taxaJuros: string;
@@ -56,14 +56,14 @@ interface OriginationContext {
 router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // 1. Get authenticated user with their store and partner data
-    const userId = req.user?.id;
+    const _userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({ message: 'Usuário não autenticado' });
+      return res.status(401).json({ message: 'Usuário não autenticado' }); }
     }
 
     // Fetch user profile with store and partner information using Supabase client
     const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const _supabase = createServerSupabaseAdminClient();
 
     // First, get the profile
     const { data: profileData, error: profileError } = await supabase
@@ -74,7 +74,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
     if (profileError || !profileData) {
       console.error('Profile fetch error:', profileError);
-      return res.status(404).json({ message: 'Perfil do usuário não encontrado' });
+      return res.status(404).json({ message: 'Perfil do usuário não encontrado' }); }
     }
 
     // CRITICAL FIX: Handle users without stores gracefully (e.g. ANALISTA role)
@@ -102,11 +102,11 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       .from('lojas')
       .select(
         `
-        id,
+  _id,
         nome_loja,
         parceiro_id,
         parceiros (
-          id,
+  _id,
           razao_social,
           cnpj
         )
@@ -117,13 +117,13 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
     if (lojaError || !lojaData) {
       console.error('Loja fetch error:', lojaError);
-      return res.status(404).json({ message: 'Loja não encontrada' });
+      return res.status(404).json({ message: 'Loja não encontrada' }); }
     }
 
     // Fix: parceiros should be a single object, not an array
-    const parceiro = lojaData.parceiros as unknown;
+    const _parceiro = lojaData.parceiros as unknown;
 
-    const userProfile = {
+    const _userProfile = {
       id: profileData.id,
       nome: profileData.full_name,
       loja_id: profileData.loja_id,
@@ -133,20 +133,20 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       cnpj: parceiro?.cnpj,
     };
 
-    const parceiroId = userProfile.parceiro_id;
+    const _parceiroId = userProfile.parceiro_id;
 
     // 2. Fetch all active products
-    const produtosAtivos = await db.select().from(produtos).where(eq(produtos.isActive, true));
+    const _produtosAtivos = await db.select().from(produtos).where(eq(produtos.isActive, true));
 
     // 3. For each product, fetch available commercial tables
-    const produtosComTabelas = await Promise.all(
+    const _produtosComTabelas = await Promise.all(
       produtosAtivos.map(async (produto) => {
         // Gerar chave de cache única e determinística
-        const cacheKey = `tabelas-comerciais:produtoId:${produto.id}:parceiroId:${parceiroId}`;
+        const _cacheKey = `tabelas-comerciais:produtoId:${produto.id}:parceiroId:${parceiroId}`;
 
         // Tentar buscar do cache primeiro
-        const cachedTabelas = await getFromCache<
-          Array<{
+        const _cachedTabelas = await getFromCache<
+          Record<string, unknown>[]>{
             id: number;
             nomeTabela: string;
             taxaJuros: string;
@@ -169,7 +169,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
         // Cache miss - buscar do banco de dados
         // First, fetch personalized tables for this partner using N:N relationship
-        const tabelasPersonalizadas = await db
+        const _tabelasPersonalizadas = await db
           .select({
             id: tabelasComerciais.id,
             nomeTabela: tabelasComerciais.nomeTabela,
@@ -179,7 +179,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
           })
           .from(tabelasComerciais)
           .innerJoin(
-            produtoTabelaComercial,
+  _produtoTabelaComercial,
             eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
           )
           .where(
@@ -189,7 +189,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             )
           );
 
-        let tabelasDisponiveis: Array<{
+        let tabelasDisponiveis: Record<string, unknown>[]>{
           id: number;
           nomeTabela: string;
           taxaJuros: string;
@@ -206,8 +206,8 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
         }));
 
         // If no personalized tables, fetch general tables using N:N relationship
-        if (tabelasPersonalizadas.length === 0) {
-          const tabelasGerais = await db
+        if (tabelasPersonalizadas.length == 0) {
+          const _tabelasGerais = await db
             .select({
               id: tabelasComerciais.id,
               nomeTabela: tabelasComerciais.nomeTabela,
@@ -217,7 +217,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             })
             .from(tabelasComerciais)
             .innerJoin(
-              produtoTabelaComercial,
+  _produtoTabelaComercial,
               eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
             )
             .where(
@@ -245,7 +245,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
           nome: produto.nomeProduto,
           tacValor: produto.tacValor || '0',
           tacTipo: produto.tacTipo || 'fixo',
-          tabelasDisponiveis,
+  _tabelasDisponiveis,
         };
       })
     );
@@ -286,11 +286,11 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     );
     res.json(context);
   } catch (error) {
-    console.error('Erro ao buscar contexto de originação:', error);
+    console.error('Erro ao buscar contexto de originação:', error: unknown);
     res.status(500).json({
       message: 'Erro ao buscar dados de originação',
       error:
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV == 'development'
           ? error instanceof Error
             ? error.message
             : String(error)

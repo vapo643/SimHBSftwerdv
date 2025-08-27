@@ -1,10 +1,10 @@
 import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
+  _createContext,
+  _useContext,
+  _useEffect,
+  _useState,
+  _ReactNode,
+  _useCallback,
 } from 'react';
 import { getSupabase } from '@/lib/supabase';
 import { api } from '@/lib/apiClient';
@@ -30,7 +30,7 @@ interface AuthContextType {
   resetIdleTimer: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const _AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -52,10 +52,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const WARNING_TIME = IDLE_TIMEOUT - WARNING_TIMEOUT; // 28 minutos
 
   // Função para logout por inatividade
-  const handleIdleLogout = useCallback(async () => {
+  const _handleIdleLogout = useCallback(async () => {
     console.log('🔐 [IDLE TIMEOUT] User being logged out due to inactivity');
     try {
-      const supabase = getSupabase();
+      const _supabase = getSupabase();
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
@@ -63,18 +63,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setShowIdleWarning(false);
       setError(null);
     } catch (error) {
-      console.error('Error during idle logout:', error);
+      console.error('Error during idle logout:', error: unknown);
     }
   }, []);
 
   // Função para mostrar aviso de inatividade
-  const handleIdleWarning = useCallback(() => {
+  const _handleIdleWarning = useCallback(() => {
     console.log('⚠️ [IDLE WARNING] Showing inactivity warning to user (2 minutes left)');
     setShowIdleWarning(true);
   }, []);
 
   // Função para continuar a sessão (resetar timer)
-  const handleContinueSession = useCallback(() => {
+  const _handleContinueSession = useCallback(() => {
     console.log('🔄 [IDLE RESET] User chose to continue session');
     setShowIdleWarning(false);
     // O resetTimer será chamado automaticamente pelo useIdleTimer quando esta função executar
@@ -87,19 +87,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     throttle: 1000, // Reduz a frequência de eventos para performance
   });
 
-  const fetchUserProfile = async (currentSession: Session | null) => {
+  const _fetchUserProfile = async (currentSession: Session | null) => {
     try {
       if (currentSession?.user) {
         try {
           // Fetch complete user profile from debug endpoint
-          const response = await api.get<{
+          const _response = await api.get<{
             message: string;
             user: User;
             timestamp: string;
           }>('/api/debug/me');
 
           // Handle both ApiResponse<T> and direct T response types
-          const userData = 'data' in response ? response.data : response;
+          const _userData = 'data' in response ? response.data : response;
           if (userData?.user) {
             console.log('🔐 [AUTH RESTORED] User profile loaded with valid token');
             setUser(userData.user);
@@ -126,21 +126,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Conservative refetch strategy: maintain old data while fetching new
-  const refetchUser = async () => {
+  const _refetchUser = async () => {
     // Don't set loading to true to maintain current user data
     try {
-      const supabase = getSupabase();
+      const _supabase = getSupabase();
       const { data: currentUser } = await supabase.auth.getUser();
 
       if (currentUser.user) {
-        const response = await api.get<{
+        const _response = await api.get<{
           message: string;
           user: User;
           timestamp: string;
         }>('/api/debug/me');
 
         // Handle both ApiResponse<T> and direct T response types
-        const userData = 'data' in response ? response.data : response;
+        const _userData = 'data' in response ? response.data : response;
         if (userData?.user) {
           setUser(userData.user);
           setError(null);
@@ -157,7 +157,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
-    const supabase = getSupabase();
+    const _supabase = getSupabase();
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
@@ -179,9 +179,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setSession(currentSession);
         setAccessToken(currentSession?.access_token || null);
 
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (event == 'SIGNED_IN' || event == 'TOKEN_REFRESHED') {
           fetchUserProfile(currentSession);
-        } else if (event === 'SIGNED_OUT') {
+        } else if (event == 'SIGNED_OUT') {
           setUser(null);
           setError(null);
           setIsLoading(false);
@@ -194,13 +194,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
-  const value = {
-    user,
-    session,
-    accessToken,
-    isLoading,
-    error,
-    refetchUser,
+  const _value = {
+  _user,
+  _session,
+  _accessToken,
+  _isLoading,
+  _error,
+  _refetchUser,
     resetIdleTimer: resetTimer,
   };
 
@@ -221,9 +221,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
+  const _context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+  return context; }
 }

@@ -26,10 +26,10 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(propostas.createdAt))
         .limit(1);
 
-      return proposta || null;
+      return proposta || null; }
     } catch (error) {
-      console.error('[CLIENTE_REPO] Error finding client by CPF:', error);
-      return null;
+      console.error('[CLIENTE_REPO] Error finding client by CPF:', error: unknown);
+      return null; }
     }
   }
 
@@ -44,8 +44,8 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
         .where(eq(propostas.clienteCpf, cpf))
         .orderBy(desc(propostas.createdAt));
     } catch (error) {
-      console.error('[CLIENTE_REPO] Error getting proposals by CPF:', error);
-      return [];
+      console.error('[CLIENTE_REPO] Error getting proposals by CPF:', error: unknown);
+      return []; }
     }
   }
 
@@ -54,17 +54,17 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
    */
   async clientExists(cpf: string): Promise<boolean> {
     try {
-      const result = await db
+      const _result = await db
         .select({ count: sql<number>`count(*)` })
         .from(propostas)
         .where(eq(propostas.clienteCpf, cpf));
 
-      return (result[0]?.count || 0) > 0;
+      return (result[0]?.count || 0) > 0; }
     } catch (error) {
-      console.error('[CLIENTE_REPO] Error checking client existence:', error);
-      return false;
+      console.error('[CLIENTE_REPO] Error checking client existence:', error: unknown);
+      return false; }
     }
   }
 }
 
-export const clienteRepository = new ClienteRepository();
+export const _clienteRepository = new ClienteRepository();

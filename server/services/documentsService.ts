@@ -17,13 +17,13 @@ export class DocumentsService {
   }> {
     try {
       // Get proposal to check CCB document
-      const proposta = await documentsRepository.getProposalById(propostaId);
+      const _proposta = await documentsRepository.getProposalById(propostaId);
 
       if (!proposta) {
         throw new Error('Proposta não encontrada');
       }
 
-      const documents = [];
+      const _documents = [];
 
       // Add CCB if exists
       if (proposta.ccb_documento_url) {
@@ -38,26 +38,26 @@ export class DocumentsService {
       }
 
       // Get other documents
-      const propostaDocuments = await documentsRepository.getProposalDocuments(propostaId);
+      const _propostaDocuments = await documentsRepository.getProposalDocuments(propostaId);
 
       for (const doc of propostaDocuments) {
         try {
           // Extract file path from URL
-          const documentsIndex = doc.url.indexOf('/documents/');
+          const _documentsIndex = doc.url.indexOf('/documents/');
           let filePath;
 
           if (documentsIndex !== -1) {
             filePath = doc.url.substring(documentsIndex + '/documents/'.length);
           } else {
-            const urlParts = doc.url.split('/');
-            const fileName = urlParts[urlParts.length - 1];
+            const _urlParts = doc.url.split('/');
+            const _fileName = urlParts[urlParts.length - 1];
             filePath = `proposta-${propostaId}/${fileName}`;
           }
 
           console.log(`[DOCUMENTS_SERVICE] Generating signed URL for: ${filePath}`);
 
           // Generate signed URL
-          const signedUrl = await documentsRepository.generateSignedUrl(filePath, 3600);
+          const _signedUrl = await documentsRepository.generateSignedUrl(filePath, 3600);
 
           documents.push({
             name: doc.nomeArquivo,
@@ -85,12 +85,12 @@ export class DocumentsService {
       }
 
       return {
-        propostaId,
+  _propostaId,
         totalDocuments: documents.length,
-        documents,
+  _documents,
       };
-    } catch (error: unknown) {
-      console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error);
+    } catch (error) {
+      console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error: unknown);
       throw error;
     }
   }
@@ -108,7 +108,7 @@ export class DocumentsService {
   }> {
     try {
       // Verify proposal exists
-      const proposta = await documentsRepository.getProposalById(propostaId);
+      const _proposta = await documentsRepository.getProposalById(propostaId);
 
       if (!proposta) {
         return {
@@ -118,13 +118,13 @@ export class DocumentsService {
       }
 
       // Generate unique file name
-      const timestamp = Date.now();
-      const fileName = `${timestamp}-${file.originalname}`;
-      const filePath = `proposta-${propostaId}/${fileName}`;
+      const _timestamp = Date.now();
+      const _fileName = `${timestamp}-${file.originalname}`;
+      const _filePath = `proposta-${propostaId}/${fileName}`;
 
       // Upload to storage
-      const uploadResult = await documentsRepository.uploadToStorage(
-        filePath,
+      const _uploadResult = await documentsRepository.uploadToStorage(
+  _filePath,
         file.buffer,
         file.mimetype
       );
@@ -137,7 +137,7 @@ export class DocumentsService {
       }
 
       // Save document record
-      const document = await documentsRepository.createDocument({
+      const _document = await documentsRepository.createDocument({
         proposta_id: propostaId,
         nome_arquivo: file.originalname,
         url: uploadResult.publicUrl,
@@ -157,8 +157,8 @@ export class DocumentsService {
           category: 'supporting',
         },
       };
-    } catch (error: unknown) {
-      console.error('[DOCUMENTS_SERVICE] Error uploading document:', error);
+    } catch (error) {
+      console.error('[DOCUMENTS_SERVICE] Error uploading document:', error: unknown);
       return {
         success: false,
         error: error.message || 'Erro interno do servidor no upload',
@@ -179,10 +179,10 @@ export class DocumentsService {
     try {
       console.log(`[DOCUMENTS_SERVICE] Downloading document: ${path}`);
 
-      const signedUrl = await documentsRepository.generateSignedUrl(path, 3600);
+      const _signedUrl = await documentsRepository.generateSignedUrl(path, 3600);
 
       if (!signedUrl) {
-        const isNotFound = path.includes('not-found');
+        const _isNotFound = path.includes('not-found');
         return {
           success: false,
           error: isNotFound ? 'Documento não encontrado' : 'Erro ao acessar documento',
@@ -197,8 +197,8 @@ export class DocumentsService {
         filename: `documento-${path.split('/').pop()}`,
         contentType: 'application/pdf',
       };
-    } catch (error: unknown) {
-      console.error('[DOCUMENTS_SERVICE] Error downloading document:', error);
+    } catch (error) {
+      console.error('[DOCUMENTS_SERVICE] Error downloading document:', error: unknown);
       return {
         success: false,
         error: error.message || 'Erro interno do servidor',
@@ -207,4 +207,4 @@ export class DocumentsService {
   }
 }
 
-export const documentsService = new DocumentsService();
+export const _documentsService = new DocumentsService();

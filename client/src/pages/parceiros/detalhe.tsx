@@ -11,16 +11,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStoresByPartner } from '@/hooks/queries/useUserFormData';
 import { api } from '@/lib/apiClient';
 import {
-  Building2,
-  Store,
-  ArrowLeft,
-  Plus,
-  MapPin,
-  Phone,
-  Mail,
-  Activity,
-  Settings,
-  BarChart3,
+  _Building2,
+  _Store,
+  _ArrowLeft,
+  _Plus,
+  _MapPin,
+  _Phone,
+  _Mail,
+  _Activity,
+  _Settings,
+  _BarChart3,
 } from 'lucide-react';
 
 interface Partner {
@@ -42,7 +42,7 @@ interface Store {
 
 const PartnerDetailPage: React.FC = () => {
   const [match, params] = useRoute('/parceiros/detalhe/:id');
-  const partnerId = params ? parseInt(params.id) : null;
+  const _partnerId = params ? parseInt(params.id) : null;
 
   const [isLojaModalOpen, setIsLojaModalOpen] = useState(false);
 
@@ -55,8 +55,8 @@ const PartnerDetailPage: React.FC = () => {
     queryKey: ['partner', partnerId],
     queryFn: async () => {
       if (!partnerId) throw new Error('Partner ID is required');
-      const response = await api.get<Partner>(`/api/parceiros/${partnerId}`);
-      return (response as unknown).data || response;
+      const _response = await api.get<Partner>(`/api/parceiros/${partnerId}`);
+      return (response as unknown).data || response; }
     },
     enabled: !!partnerId,
   });
@@ -68,8 +68,8 @@ const PartnerDetailPage: React.FC = () => {
     error: storesError,
   } = useStoresByPartner(partnerId, !!partnerId);
 
-  const handleAddStore = (data: unknown) => {
-    console.log('Nova Loja Adicionada:', data);
+  const _handleAddStore = (data) => {
+    console.log('Nova Loja Adicionada:',_data);
     // Lógica para adicionar a loja ao parceiro no estado/backend será implementada na Fase 2
     setIsLojaModalOpen(false);
   };
@@ -103,7 +103,7 @@ const PartnerDetailPage: React.FC = () => {
   }
 
   // Calcular estatísticas das lojas
-  const storeStats = {
+  const _storeStats = {
     total: stores.length,
     ativos: stores.length, // Assumindo que todas as lojas retornadas estão ativas
     inativos: 0,
@@ -243,7 +243,7 @@ const PartnerDetailPage: React.FC = () => {
                 <h3 className="mb-2 text-lg font-medium text-red-600">Erro ao carregar lojas</h3>
                 <p className="mb-6 text-red-500">{storesError.message}</p>
               </div>
-            ) : stores.length === 0 ? (
+            ) : stores.length == 0 ? (
               <div className="py-12 text-center">
                 <Store className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">

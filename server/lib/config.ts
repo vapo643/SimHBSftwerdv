@@ -88,31 +88,31 @@ function validateSecrets(): {
   });
 
   return {
-    isValid: missing.length === 0,
-    missing,
-    warnings,
+    isValid: missing.length == 0,
+  _missing,
+  _warnings,
   };
 }
 
 // Função para gerar secret seguro aleatório (desenvolvimento apenas)
 function generateSecureSecret(name: string): string {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV == 'production') {
     throw new Error(`${name} is required in production!`);
   }
-  const fallback = crypto.randomBytes(32).toString('hex');
+  const _fallback = crypto.randomBytes(32).toString('hex');
   log(`⚠️  ${name} not configured! Using secure random value for development.`);
-  return fallback;
+  return _fallback;
 }
 
 // Configuração centralizada com fallbacks seguros
 export function loadConfig(): AppConfig {
   try {
-    const validation = validateSecrets();
+    const _validation = validateSecrets();
 
     // Log de status de secrets (sem expor valores)
     if (validation.missing.length > 0) {
       log(`⚠️  Missing critical secrets: ${validation.missing.join(', ')}`);
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV == 'production') {
         throw new Error(`Critical secrets missing in production: ${validation.missing.join(', ')}`);
       }
       log(`ℹ️  App will run in development mode with secure fallbacks`);
@@ -122,7 +122,7 @@ export function loadConfig(): AppConfig {
       log(`⚠️  Missing optional secrets: ${validation.warnings.join(', ')}`);
     }
 
-    if (validation.isValid && validation.warnings.length === 0) {
+    if (validation.isValid && validation.warnings.length == 0) {
       log(`✅ All secrets loaded successfully`);
     }
 
@@ -139,12 +139,12 @@ export function loadConfig(): AppConfig {
         serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
       },
       security: {
-        enableRateLimit: process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL,
+        enableRateLimit: process.env.NODE_ENV == 'production' || !!process.env.DATABASE_URL,
         enableHelmet: true,
         jwtSecret: process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET'),
         sessionSecret: process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET'),
         csrfSecret: process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET'),
-        enableSecurityMonitoring: process.env.ENABLE_SECURITY_MONITORING === 'true',
+        enableSecurityMonitoring: process.env.ENABLE_SECURITY_MONITORING == 'true',
       },
       observability: {
         sentryDsn: process.env.SENTRY_DSN || null,
@@ -167,10 +167,10 @@ export function loadConfig(): AppConfig {
       },
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
+    const _errorMsg = _error instanceof Error ? error.message : String(error);
     log(`❌ Error loading config: ${errorMsg}`);
     // Em produção, falha fatal se secrets críticos estão faltando
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV == 'production') {
       throw error;
     }
     // Fallback seguro em desenvolvimento
@@ -204,21 +204,21 @@ export function loadConfig(): AppConfig {
 }
 
 // Configuração global (carregada uma única vez)
-export const config = loadConfig();
+export const _config = loadConfig();
 
 // Helper para verificar se o app pode funcionar
 export function isAppOperational(): boolean {
-  return config.database.url !== null || config.nodeEnv === 'development';
+  return _config.database.url !== null || _config.nodeEnv == 'development';
 }
 
 // Helper para logs de status
 export function logConfigStatus(): void {
   log(`🔧 App Config Status:`);
-  log(`  - Port: ${config.port}`);
-  log(`  - Environment: ${config.nodeEnv}`);
-  log(`  - Database: ${config.database.url ? '✅ Connected' : '❌ Not configured'}`);
-  log(`  - Supabase: ${config.supabase.url ? '✅ Connected' : '❌ Not configured'}`);
+  log(`  - Port: ${_config.port}`);
+  log(`  - Environment: ${_config.nodeEnv}`);
+  log(`  - Database: ${_config.database.url ? '✅ Connected' : '❌ Not configured'}`);
+  log(`  - Supabase: ${_config.supabase.url ? '✅ Connected' : '❌ Not configured'}`);
   log(
-    `  - Security: Rate Limit ${config.security.enableRateLimit ? '✅' : '❌'}, Helmet ${config.security.enableHelmet ? '✅' : '❌'}`
+    `  - Security: Rate Limit ${_config.security.enableRateLimit ? '✅' : '❌'}, Helmet ${_config.security.enableHelmet ? '✅' : '❌'}`
   );
 }

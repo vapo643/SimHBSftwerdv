@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Request, Response, NextFunction } from 'express';
 
 // Configuração do Winston Logger
-const logger = winston.createLogger({
+const _logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -24,16 +24,16 @@ const logger = winston.createLogger({
     // Console output com formato legível para desenvolvimento
     new winston.transports.Console({
       format:
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV == 'development'
           ? winston.format.combine(
               winston.format.colorize(),
               winston.format.simple(),
               winston.format.printf(({ level, message, timestamp, ...metadata }) => {
-                let msg = `${timestamp} [${level}]: ${message}`;
+                let _msg = `${timestamp} [${level}]: ${message}`;
                 if (Object.keys(metadata).length > 0) {
                   msg += ` ${JSON.stringify(metadata)}`;
                 }
-                return msg;
+                return msg; }
               })
             )
           : winston.format.json(),
@@ -58,7 +58,7 @@ const logger = winston.createLogger({
 import fs from 'fs';
 import path from 'path';
 
-const logDir = path.join(process.cwd(), 'logs');
+const _logDir = path.join(process.cwd(), 'logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
   logger.info('📁 Created logs directory');
@@ -77,13 +77,13 @@ declare global {
 // Middleware para logging de requisições
 export function requestLoggingMiddleware(req: Request, res: Response, next: NextFunction) {
   // Adicionar correlation ID
-  const correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
+  const _correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
   req.correlationId = correlationId;
   req.startTime = Date.now();
 
   // Log inicial da requisição
   logger.info('📥 Request received', {
-    correlationId,
+  _correlationId,
     method: req.method,
     url: req.url,
     path: req.path,
@@ -94,26 +94,26 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
   });
 
   // Interceptar o response para log final
-  const originalSend = res.send;
-  res.send = function (data) {
-    const duration = Date.now() - (req.startTime || Date.now());
+  const _originalSend = res.send;
+  res.send = function (_data) {
+    const _duration = Date.now() - (req.startTime || Date.now());
 
     // Log do response
     logger.info('📤 Request completed', {
-      correlationId,
+  _correlationId,
       method: req.method,
       url: req.url,
       statusCode: res.statusCode,
-      duration,
-      responseSize: Buffer.byteLength(JSON.stringify(data)),
+  _duration,
+      responseSize: Buffer.byteLength(JSON.stringify(_data)),
     });
 
     // Alertar para requisições lentas
     if (duration > 1000) {
       logger.warn('⚠️ Slow request detected', {
-        correlationId,
+  _correlationId,
         url: req.url,
-        duration,
+  _duration,
         threshold: 1000,
       });
     }
@@ -121,27 +121,27 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
     // Alertar para erros
     if (res.statusCode >= 400) {
       logger.error('❌ Request error', {
-        correlationId,
+  _correlationId,
         method: req.method,
         url: req.url,
         statusCode: res.statusCode,
-        duration,
+  _duration,
         error: data,
       });
     }
 
-    return originalSend.call(this, data);
+    return originalSend.call(this,_data); }
   };
 
   next();
 }
 
 // Helper functions para logging estruturado
-export const logInfo = (message: string, metadata?: unknown) => {
+export const _logInfo = (message: string, metadata?: unknown) => {
   logger.info(message, metadata);
 };
 
-export const logError = (message: string, error: Error | any, metadata?: unknown) => {
+export const _logError = (message: string, error: Error | any, metadata?: unknown) => {
   logger.error(message, {
     ...metadata,
     error: {
@@ -153,50 +153,50 @@ export const logError = (message: string, error: Error | any, metadata?: unknown
   });
 };
 
-export const logWarn = (message: string, metadata?: unknown) => {
+export const _logWarn = (message: string, metadata?: unknown) => {
   logger.warn(message, metadata);
 };
 
-export const logDebug = (message: string, metadata?: unknown) => {
+export const _logDebug = (message: string, metadata?: unknown) => {
   logger.debug(message, metadata);
 };
 
 // Métricas básicas de logging
-export const logMetric = (metricName: string, value: number, unit: string, metadata?: unknown) => {
+export const _logMetric = (metricName: string, value: number, unit: string, metadata?: unknown) => {
   logger.info('📊 Metric', {
     metric: metricName,
-    value,
-    unit,
+  _value,
+  _unit,
     timestamp: new Date().toISOString(),
     ...metadata,
   });
 };
 
 // Log de segurança
-export const logSecurity = (
+export const _logSecurity = (
   event: string,
   severity: 'low' | 'medium' | 'high' | 'critical',
   metadata?: unknown
 ) => {
   logger.warn(`🔒 Security Event: ${event}`, {
-    severity,
-    event,
+  _severity,
+  _event,
     timestamp: new Date().toISOString(),
     ...metadata,
   });
 };
 
 // Log de auditoria
-export const logAudit = (
+export const _logAudit = (
   action: string,
   userId: string | null,
   resource: string,
   metadata?: unknown
 ) => {
   logger.info('📝 Audit Log', {
-    action,
-    userId,
-    resource,
+  _action,
+  _userId,
+  _resource,
     timestamp: new Date().toISOString(),
     ...metadata,
   });

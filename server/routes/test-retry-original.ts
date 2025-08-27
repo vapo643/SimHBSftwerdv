@@ -7,7 +7,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/test/retry
@@ -17,7 +17,7 @@ router.post('/retry', async (req: Request, res: Response) => {
   try {
     console.log('[TEST RETRY] 🧪 Iniciando teste de retry mechanism');
 
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    const _isDevelopment = process.env.NODE_ENV == 'development';
 
     if (isDevelopment) {
       // Usar mock queue em desenvolvimento
@@ -26,21 +26,21 @@ router.post('/retry', async (req: Request, res: Response) => {
       // Criar uma fila de teste se não existir
       if (!(queues as unknown).testRetry) {
         console.log('[TEST RETRY] 📦 Criando fila test-retry');
-        const mockQueue = await import('../lib/mock-queue');
+        const _mockQueue = await import('../lib/mock-queue');
         // @ts-ignore
         (queues as unknown).testRetry = new (mockQueue as unknown).MockQueue('test-retry');
       }
 
-      const queue = (queues as unknown).testRetry;
+      const _queue = (queues as unknown).testRetry;
 
-      const testData = {
+      const _testData = {
         type: 'TEST_RETRY_FAILURE',
         timestamp: new Date().toISOString(),
         message: 'Este job sempre falha para testar retry',
         testId: Date.now(),
       };
 
-      const job = await queue.add('test-retry-job', testData);
+      const _job = await queue.add('test-retry-job', testData);
 
       console.log(`[TEST RETRY] ✅ Job ${job.id} adicionado à fila test-retry`);
 
@@ -58,7 +58,7 @@ router.post('/retry', async (req: Request, res: Response) => {
       const { Queue } = await import('bullmq');
       const { Redis } = await import('ioredis');
 
-      const connection = new Redis({
+      const _connection = new Redis({
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT || '6379'),
         password: process.env.REDIS_PASSWORD,
@@ -66,8 +66,8 @@ router.post('/retry', async (req: Request, res: Response) => {
         enableReadyCheck: false,
       });
 
-      const testRetryQueue = new Queue('test-retry', {
-        connection,
+      const _testRetryQueue = new Queue('test-retry', {
+  _connection,
         defaultJobOptions: {
           attempts: 5,
           backoff: {
@@ -79,14 +79,14 @@ router.post('/retry', async (req: Request, res: Response) => {
         },
       });
 
-      const testData = {
+      const _testData = {
         type: 'TEST_RETRY_FAILURE',
         timestamp: new Date().toISOString(),
         message: 'Este job sempre falha para testar retry',
         testId: Date.now(),
       };
 
-      const job = await testRetryQueue.add('test-retry-job', testData);
+      const _job = await testRetryQueue.add('test-retry-job', testData);
 
       console.log(
         `[TEST RETRY] ✅ Job ${job.id} adicionado à fila test-retry com retry configurado`
@@ -107,8 +107,8 @@ router.post('/retry', async (req: Request, res: Response) => {
         hint: 'Observe os logs do worker para ver as tentativas de retry com backoff exponencial',
       });
     }
-  } catch (error: unknown) {
-    console.error('[TEST RETRY] ❌ Erro ao adicionar job de teste:', error);
+  } catch (error) {
+    console.error('[TEST RETRY] ❌ Erro ao adicionar job de teste:', error: unknown);
 
     return res.status(500).json({
       success: false,
@@ -124,7 +124,7 @@ router.post('/retry', async (req: Request, res: Response) => {
  */
 router.get('/retry/status', async (req: Request, res: Response) => {
   try {
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    const _isDevelopment = process.env.NODE_ENV == 'development';
 
     return res.json({
       success: true,
@@ -134,7 +134,7 @@ router.get('/retry/status', async (req: Request, res: Response) => {
       message: 'Fila de teste de retry operacional',
       retryInfo: 'Jobs nesta fila sempre falham para demonstrar o mecanismo de retry',
     });
-  } catch (error: unknown) {
+  } catch (error) {
     return res.status(500).json({
       success: false,
       error: 'Erro ao verificar status',

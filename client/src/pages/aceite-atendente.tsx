@@ -6,15 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  ChevronLeft,
-  CheckCircle,
-  XCircle,
-  FileText,
-  User,
-  Phone,
-  Mail,
-  DollarSign,
-  Clock,
+  _ChevronLeft,
+  _CheckCircle,
+  _XCircle,
+  _FileText,
+  _User,
+  _Phone,
+  _Mail,
+  _DollarSign,
+  _Clock,
 } from 'lucide-react';
 import { useState } from 'react';
 // Remove formatCurrency from utils import
@@ -46,7 +46,7 @@ interface PropostaAceite {
 export default function AceiteAtendente() {
   const [observacoes, setObservacoes] = useState<Record<string, string>>({});
 
-  const formatCurrency = (value: number) => {
+  const _formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -56,16 +56,16 @@ export default function AceiteAtendente() {
   const { data: propostas, isLoading } = useQuery<PropostaAceite[]>({
     queryKey: ['/api/propostas/aguardando-aceite'],
     queryFn: async () => {
-      const response = await apiRequest('/api/propostas?status=aguardando_aceite_atendente');
-      return response as PropostaAceite[];
+      const _response = await apiRequest('/api/propostas?status=aguardando_aceite_atendente');
+      return response as PropostaAceite[]; }
     },
   });
 
-  const updateStatusMutation = useMutation({
+  const _updateStatusMutation = useMutation({
     mutationFn: async ({
-      id,
-      status,
-      observacao,
+  _id,
+  _status,
+  _observacao,
     }: {
       id: string;
       status: string;
@@ -79,16 +79,16 @@ export default function AceiteAtendente() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/aguardando-aceite'] });
       toast({
-        title: variables.status === 'aceito_atendente' ? 'Proposta aceita' : 'Proposta cancelada',
+        title: variables.status == 'aceito_atendente' ? 'Proposta aceita' : 'Proposta cancelada',
         description:
-          variables.status === 'aceito_atendente'
+          variables.status == 'aceito_atendente'
             ? 'A proposta foi aceita e está pronta para formalização'
             : 'A proposta foi cancelada',
       });
       setObservacoes((prev) => {
-        const updated = { ...prev };
+        const _updated = { ...prev };
         delete updated[variables.id];
-        return updated;
+        return updated; }
       });
     },
     onError: () => {
@@ -100,14 +100,14 @@ export default function AceiteAtendente() {
     },
   });
 
-  const handleAccept = (id: string) => {
-    const observacao = observacoes[id] || 'Proposta aceita pelo atendente para formalização';
+  const _handleAccept = (id: string) => {
+    const _observacao = observacoes[id] || 'Proposta aceita pelo atendente para formalização';
     updateStatusMutation.mutate({ id, status: 'aceito_atendente', observacao });
   };
 
-  const handleReject = (id: string) => {
-    const observacao = observacoes[id];
-    if (!observacao || observacao.trim() === '') {
+  const _handleReject = (id: string) => {
+    const _observacao = observacoes[id];
+    if (!observacao || observacao.trim() == '') {
       toast({
         title: 'Observação obrigatória',
         description: 'Por favor, informe o motivo do cancelamento',
@@ -148,7 +148,7 @@ export default function AceiteAtendente() {
           </div>
         </div>
 
-        {!propostas || propostas.length === 0 ? (
+        {!propostas || propostas.length == 0 ? (
           <Card className="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
             <CardContent className="p-12 text-center">
               <FileText className="mx-auto mb-4 h-16 w-16 text-gray-400" />

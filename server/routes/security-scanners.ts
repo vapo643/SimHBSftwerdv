@@ -9,10 +9,10 @@ import { join } from 'path';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const router = Router();
+const _router = Router();
 
 // Middleware for admin access
-const requireAdmin = (req: AuthenticatedRequest, res: unknown, next: unknown) => {
+const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next: unknown) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -32,24 +32,24 @@ router.use(jwtAuthMiddleware);
 router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Common paths where dependency-check reports might be stored
-    const reportPaths = [
+    const _reportPaths = [
       'dependency-check-report.json',
       '.security/dependency-check-report.json',
       'reports/dependency-check-report.json',
       'target/dependency-check-report.json',
     ];
 
-    let reportData = null;
-    let reportPath = null;
+    let _reportData = null;
+    let _reportPath = null;
 
     // Try to find the report in common locations
     for (const path of reportPaths) {
       try {
-        const fullPath = join(process.cwd(), path);
-        const data = await fs.readFile(fullPath, 'utf-8');
-        reportData = JSON.parse(data);
+        const _fullPath = join(process.cwd(), path);
+        const _data = await fs.readFile(fullPath, 'utf-8');
+        reportData = JSON.parse(_data);
         reportPath = path;
-        break;
+        break; }
       } catch (e) {
         // Continue trying other paths
       }
@@ -75,7 +75,7 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
     }
 
     // Parse vulnerability counts from report
-    const vulnerabilities = {
+    const _vulnerabilities = {
       critical: 0,
       high: 0,
       medium: 0,
@@ -85,9 +85,9 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
 
     // Process dependencies if they exist
     if (reportData.dependencies && Array.isArray(reportData.dependencies)) {
-      reportData.dependencies.forEach((dep: unknown) => {
+      reportData.dependencies.forEach((dep) => {
         if (dep.vulnerabilities && Array.isArray(dep.vulnerabilities)) {
-          dep.vulnerabilities.forEach((vuln: unknown) => {
+          dep.vulnerabilities.forEach((vuln) => {
             vulnerabilities.total++;
 
             // Check CVSS score or severity
@@ -109,14 +109,14 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
       success: true,
       data: {
         reportFound: true,
-        vulnerabilities,
+  _vulnerabilities,
         lastScan: reportData.reportDate || new Date().toISOString(),
         projectInfo: reportData.projectInfo || {},
-        reportPath,
+  _reportPath,
       },
     });
   } catch (error) {
-    console.error('[SCA] Error reading dependency check report:', error);
+    console.error('[SCA] Error reading dependency check report:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao ler relatório de dependências',
@@ -131,7 +131,7 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
 router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Check if script exists first
-    const scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
+    const _scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
 
     try {
       await fs.access(scriptPath);
@@ -144,7 +144,7 @@ router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => 
 
     const { exec } = await import('child_process');
     const { promisify } = await import('util');
-    const execAsync = promisify(exec);
+    const _execAsync = promisify(exec);
 
     // Send immediate response
     res.json({
@@ -161,10 +161,10 @@ router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => 
         if (stderr) console.error('[SCA] Warnings:', stderr);
       })
       .catch((error) => {
-        console.error('[SCA] Analysis failed:', error);
+        console.error('[SCA] Analysis failed:', error: unknown);
       });
   } catch (error) {
-    console.error('[SCA] Error running dependency check:', error);
+    console.error('[SCA] Error running dependency check:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao executar análise de dependências',

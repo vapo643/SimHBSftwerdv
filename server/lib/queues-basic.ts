@@ -6,7 +6,7 @@
 import { Queue } from 'bullmq';
 
 // Configuração básica da fila conforme especificado no PAM
-export const pdfQueue = new Queue('pdf-processing', {
+export const _pdfQueue = new Queue('pdf-processing', {
   connection: {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),

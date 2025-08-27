@@ -3,14 +3,14 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  _AlertDialog,
+  _AlertDialogAction,
+  _AlertDialogCancel,
+  _AlertDialogContent,
+  _AlertDialogDescription,
+  _AlertDialogFooter,
+  _AlertDialogHeader,
+  _AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Monitor, Smartphone, Tablet, Trash2, Shield } from 'lucide-react';
@@ -39,28 +39,28 @@ export default function SessoesAtivas() {
   const { data: sessions, isLoading } = useQuery({
     queryKey: ['/api/auth/sessions'],
     queryFn: async () => {
-      const response = await fetch('/api/auth/sessions', {
+      const _response = await fetch('/api/auth/sessions', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
         },
       });
       if (!response.ok) throw new Error('Erro ao buscar sessões');
-      const data = await response.json();
-      return data.sessions as Session[];
+      const _data = await response.json();
+      return data.sessions as Session[]; }
     },
   });
 
   // Mutation para deletar sessão
-  const deleteSessionMutation = useMutation({
+  const _deleteSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      const response = await fetch(`/api/auth/sessions/${sessionId}`, {
+      const _response = await fetch(`/api/auth/sessions/${sessionId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
         },
       });
       if (!response.ok) throw new Error('Erro ao encerrar sessão');
-      return response.json();
+      return response.json(); }
     },
     onSuccess: () => {
       toast({
@@ -79,18 +79,18 @@ export default function SessoesAtivas() {
     },
   });
 
-  const getDeviceIcon = (device: string) => {
+  const _getDeviceIcon = (device: string) => {
     if (
       device.toLowerCase().includes('mobile') ||
       device.toLowerCase().includes('android') ||
       device.toLowerCase().includes('iphone')
     ) {
-      return <Smartphone className="h-5 w-5" />;
+      return <Smartphone className="h-5 w-5" />; }
     }
     if (device.toLowerCase().includes('ipad') || device.toLowerCase().includes('tablet')) {
-      return <Tablet className="h-5 w-5" />;
+      return <Tablet className="h-5 w-5" />; }
     }
-    return <Monitor className="h-5 w-5" />;
+    return <Monitor className="h-5 w-5" />; }
   };
 
   return (
@@ -108,7 +108,7 @@ export default function SessoesAtivas() {
         <CardContent className="space-y-4">
           {isLoading ? (
             <div className="py-8 text-center text-muted-foreground">Carregando sessões...</div>
-          ) : sessions?.length === 0 ? (
+          ) : sessions?.length == 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               Nenhuma sessão ativa encontrada.
             </div>

@@ -18,27 +18,27 @@ import HistoricoCompartilhado from '@/components/HistoricoCompartilhado';
 // Componente separado para documentos
 const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   const { data: documentos, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/documents`],
     queryFn: async () => {
-      const response = await api.get(`/api/propostas/${propostaId}/documents`);
-      return response.data;
+      const _response = await api.get(`/api/propostas/${propostaId}/documents`);
+      return response.data; }
     },
     enabled: !!propostaId && propostaId.trim() !== '' && propostaId !== 'undefined',
   });
 
   // Mutation para upload de arquivo
-  const uploadMutation = useMutation({
+  const _uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       // Usar o endpoint existente que faz upload e associa à proposta
-      const formData = new FormData();
+      const _formData = new FormData();
       formData.append('file', file);
 
-      const response = await api.post(`/api/propostas/${propostaId}/documents`, formData);
+      const _response = await api.post(`/api/propostas/${propostaId}/documents`, formData);
 
-      return response.data;
+      return response.data; }
     },
     onSuccess: () => {
       toast({
@@ -48,7 +48,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
       // Invalidar a query para recarregar a lista de documentos
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/documents`] });
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao enviar documento',
         description: error.message || 'Tente novamente em alguns instantes.',
@@ -57,8 +57,8 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
     },
   });
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+  const _handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const _files = event.target.files;
     if (files && files.length > 0) {
       Array.from(files).forEach((file) => {
         uploadMutation.mutate(file);
@@ -67,7 +67,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   };
 
   if (isLoading) {
-    return <div className="py-8 text-center text-gray-400">Carregando documentos...</div>;
+    return <div className="py-8 text-center text-gray-400">Carregando documentos...</div>; }
   }
 
   return (
@@ -76,7 +76,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
 
       {documentos?.documents && documentos.documents.length > 0 ? (
         <div className="space-y-3">
-          {documentos.documents.map((doc: unknown, index: number) => (
+          {documentos.documents.map((doc, index: number) => (
             <div
               key={index}
               className="flex items-center justify-between rounded-lg bg-gray-800 p-3"
@@ -170,12 +170,12 @@ const EditarPropostaPendenciada: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   console.log('🔍 COMPONENTE INICIADO com ID:', id);
 
   // Validação early return para IDs inválidos - DEVE estar antes de qualquer hook
-  if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
+  if (!id || id.trim() == '' || id == 'undefined' || id == 'null') {
     console.log('🔍 ID INVÁLIDO DETECTADO:', id, ' - redirecionando para dashboard');
     return (
       <DashboardLayout title="Erro">
@@ -199,19 +199,19 @@ const EditarPropostaPendenciada: React.FC = () => {
   // Buscar dados da proposta - APENAS reativa (sem polling)
   const {
     data: proposta,
-    isLoading,
-    error,
+  _isLoading,
+  _error,
   } = useQuery({
     queryKey: [`/api/propostas/${id}`],
     queryFn: async () => {
       try {
         console.log('🔍 INICIANDO QUERY para:', `/api/propostas/${id}`);
-        const response = await api.get(`/api/propostas/${id}`);
-        console.log('🔍 RESPOSTA DA API:', response);
+        const _response = await api.get(`/api/propostas/${id}`);
+        console.log('🔍 RESPOSTA DA API:',_response);
         console.log('🔍 DADOS EXTRAÍDOS:', response.data);
-        return response.data as PropostaData;
+        return response.data as PropostaData; }
       } catch (error) {
-        console.error('🔍 ERRO NA QUERY:', error);
+        console.error('🔍 ERRO NA QUERY:', error: unknown);
         throw error;
       }
     },
@@ -228,8 +228,8 @@ const EditarPropostaPendenciada: React.FC = () => {
         clienteData: proposta.clienteData,
         ocupacao_atual: proposta.clienteData?.ocupacao,
         renda_atual: proposta.clienteData?.renda,
-        ocupacao_vazia: proposta.clienteData?.ocupacao === '',
-        renda_vazia: proposta.clienteData?.renda === '',
+        ocupacao_vazia: proposta.clienteData?.ocupacao == '',
+        renda_vazia: proposta.clienteData?.renda == '',
       });
       setFormData({
         clienteData: proposta.clienteData || {},
@@ -239,11 +239,11 @@ const EditarPropostaPendenciada: React.FC = () => {
   }, [proposta]);
 
   // Mutation para salvar alterações (dados da proposta)
-  const updateMutation = useMutation({
-    mutationFn: async (data: unknown) => {
-      console.log('🔍 SALVANDO ALTERAÇÕES:', data);
-      const response = await api.put(`/api/propostas/${id}`, data);
-      return response.data;
+  const _updateMutation = useMutation({
+    mutationFn: async (data) => {
+      console.log('🔍 SALVANDO ALTERAÇÕES:',_data);
+      const _response = await api.put(`/api/propostas/${id}`,_data);
+      return response.data; }
     },
     onSuccess: () => {
       toast({
@@ -255,11 +255,11 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
-    onError: (error: unknown) => {
-      const errorMessage =
+    onError: (error) => {
+      const _errorMessage =
         error?.message ||
         error?.response?.data?.message ||
-        (typeof error === 'object' ? JSON.stringify(error) : String(error)) ||
+        (typeof error == 'object' ? JSON.stringify(error) : String(error)) ||
         'Erro desconhecido';
       console.error('🔍 ERRO AO SALVAR:', { error, errorMessage });
       toast({
@@ -271,7 +271,7 @@ const EditarPropostaPendenciada: React.FC = () => {
   });
 
   // Mutation para reenviar proposta (mudança de status)
-  const resubmitMutation = useMutation({
+  const _resubmitMutation = useMutation({
     mutationFn: async () => {
       console.log('🔍 REENVIANDO PROPOSTA para análise');
       // Primeiro salva as alterações se houver
@@ -288,11 +288,11 @@ const EditarPropostaPendenciada: React.FC = () => {
 
       // Depois muda o status para aguardando_analise
       console.log('🔍 MUDANDO STATUS para aguardando_analise');
-      const response = await api.put(`/api/propostas/${id}/status`, {
+      const _response = await api.put(`/api/propostas/${id}/status`, {
         status: 'aguardando_analise',
         observacao: 'Proposta corrigida e reenviada pelo atendente',
       });
-      return response.data;
+      return response.data; }
     },
     onSuccess: () => {
       toast({
@@ -306,11 +306,11 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['proposta'] });
       setLocation('/dashboard');
     },
-    onError: (error: unknown) => {
-      const errorMessage =
+    onError: (error) => {
+      const _errorMessage =
         error?.message ||
         error?.response?.data?.message ||
-        (typeof error === 'object' ? JSON.stringify(error) : String(error)) ||
+        (typeof error == 'object' ? JSON.stringify(error) : String(error)) ||
         'Erro desconhecido';
       console.error('🔍 ERRO AO REENVIAR:', { error, errorMessage });
       toast({
@@ -332,9 +332,9 @@ const EditarPropostaPendenciada: React.FC = () => {
   }
 
   if (error || !proposta) {
-    const errorMessage =
+    const _errorMessage =
       error?.message ||
-      (typeof error === 'object' ? JSON.stringify(error) : String(error)) ||
+      (typeof error == 'object' ? JSON.stringify(error) : String(error)) ||
       'Proposta não encontrada';
     console.log('🔍 ERRO OU PROPOSTA VAZIA:', { error, proposta, errorMessage });
     return (
@@ -362,13 +362,13 @@ const EditarPropostaPendenciada: React.FC = () => {
     statusType: typeof proposta.status,
     statusLength: proposta.status?.length,
     expectedStatus: 'pendenciado',
-    isEqual: proposta.status === 'pendenciado',
+    isEqual: proposta.status == 'pendenciado',
     statusAsString: String(proposta.status),
     propostaCompleta: proposta,
   });
 
   // Verificar se a proposta está pendenciada (tratamento universal de tipos)
-  const statusString = String(proposta.status || '').trim();
+  const _statusString = String(proposta.status || '').trim();
   if (statusString !== 'pendenciado') {
     return (
       <DashboardLayout title="Editar Proposta">
@@ -412,7 +412,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     );
   }
 
-  const handleClientChange = (field: string, value: unknown) => {
+  const _handleClientChange = (field: string, value: unknown) => {
     setFormData((prev) => ({
       ...prev,
       clienteData: {
@@ -422,7 +422,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
-  const handleCondicoesChange = (field: string, value: unknown) => {
+  const _handleCondicoesChange = (field: string, value: unknown) => {
     setFormData((prev) => ({
       ...prev,
       condicoesData: {
@@ -432,14 +432,14 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
-  const handleSave = () => {
+  const _handleSave = () => {
     updateMutation.mutate({
       cliente_data: formData.clienteData,
       condicoes_data: formData.condicoesData,
     });
   };
 
-  const handleResubmit = () => {
+  const _handleResubmit = () => {
     // Primeiro salvar, depois reenviar
     handleSave();
     setTimeout(() => {

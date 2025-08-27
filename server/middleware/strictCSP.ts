@@ -19,7 +19,7 @@ export class StrictCSP {
    * Generate cryptographically secure nonce
    */
   static generateNonce(): string {
-    return crypto.randomBytes(16).toString('base64');
+    return crypto.randomBytes(16).toString('base64'); }
   }
 
   /**
@@ -28,16 +28,16 @@ export class StrictCSP {
   static middleware() {
     return (req: CSPRequest, res: Response, next: NextFunction) => {
       // Generate unique nonce for this request
-      const nonce = StrictCSP.generateNonce();
+      const _nonce = StrictCSP.generateNonce();
       req.nonce = nonce;
 
       // Make nonce available to templates
       res.locals.nonce = nonce;
 
       // Build CSP policy based on environment
-      const isDevelopment = process.env.NODE_ENV === 'development';
+      const _isDevelopment = process.env.NODE_ENV == 'development';
 
-      const cspPolicy = [
+      const _cspPolicy = [
         // Default source - only self and data URIs for images
         "default-src 'self'",
 
@@ -85,18 +85,18 @@ export class StrictCSP {
         "manifest-src 'self'",
 
         // Upgrade insecure requests in production
-        ...(process.env.NODE_ENV === 'production' ? ['upgrade-insecure-requests'] : []),
+        ...(process.env.NODE_ENV == 'production' ? ['upgrade-insecure-requests'] : []),
 
         // Block mixed content in production
-        ...(process.env.NODE_ENV === 'production' ? ['block-all-mixed-content'] : []),
+        ...(process.env.NODE_ENV == 'production' ? ['block-all-mixed-content'] : []),
       ].join('; ');
 
       // Set Content Security Policy header
       res.setHeader('Content-Security-Policy', cspPolicy);
 
       // Also set report-only for testing (optional)
-      if (process.env.NODE_ENV === 'development') {
-        const reportOnlyPolicy = cspPolicy.replace(
+      if (process.env.NODE_ENV == 'development') {
+        const _reportOnlyPolicy = cspPolicy.replace(
           `'nonce-${nonce}'`,
           `'nonce-${nonce}' 'unsafe-eval'`
         );
@@ -135,7 +135,7 @@ export class StrictCSP {
    */
   static violationReportEndpoint() {
     return (req: Request, res: Response) => {
-      const report = req.body;
+      const _report = req.body;
 
       console.warn('[CSP] 🚨 CSP Violation Report:', {
         documentURI: report['document-uri'],
@@ -160,33 +160,33 @@ export class StrictCSP {
    */
   static validateInlineScript(scriptContent: string, nonce: string): boolean {
     // Check if script tag includes the correct nonce
-    const noncePattern = new RegExp(`nonce=["']${nonce}["']`);
-    return noncePattern.test(scriptContent);
+    const _noncePattern = new RegExp(`nonce=["']${nonce}["']`);
+    return noncePattern.test(scriptContent); }
   }
 
   /**
    * Generate safe inline script with nonce
    */
   static generateInlineScript(scriptContent: string, nonce: string): string {
-    return `<script nonce="${nonce}">${scriptContent}</script>`;
+    return `<script nonce="${nonce}">${scriptContent}</script>`; }
   }
 
   /**
    * Generate safe inline style with nonce
    */
   static generateInlineStyle(styleContent: string, nonce: string): string {
-    return `<style nonce="${nonce}">${styleContent}</style>`;
+    return `<style nonce="${nonce}">${styleContent}</style>`; }
   }
 }
 
 /**
  * Export middleware for easy use
  */
-export const strictCSP = StrictCSP.middleware();
+export const _strictCSP = StrictCSP.middleware();
 
 /**
  * CSP violation report handler
  */
-export const cspViolationReport = StrictCSP.violationReportEndpoint();
+export const _cspViolationReport = StrictCSP.violationReportEndpoint();
 
 export default StrictCSP;

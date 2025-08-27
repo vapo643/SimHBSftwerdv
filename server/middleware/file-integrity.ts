@@ -26,17 +26,17 @@ export function fileIntegrityMiddleware(
   next: NextFunction
 ) {
   // Store original send methods
-  const originalSend = res.send;
-  const originalJson = res.json;
+  const _originalSend = res.send;
+  const _originalJson = res.json;
 
   // Override send method to add integrity headers
-  res.send = function (data: unknown) {
+  res.send = function (data) {
     if (
-      Buffer.isBuffer(data) &&
+      Buffer.isBuffer(_data) &&
       res.getHeader('Content-Type')?.toString().includes('application/pdf')
     ) {
       // Generate hashes for file content
-      const integrity = generateFileHashes(data);
+      const _integrity = generateFileHashes(_data);
 
       // Add integrity headers
       res.setHeader('X-Content-SHA256', integrity.sha256);
@@ -71,21 +71,21 @@ export function fileIntegrityMiddleware(
       });
     }
 
-    return originalSend.call(this, data);
+    return originalSend.call(this,_data); }
   };
 
   // Override json method to add integrity for JSON downloads
-  res.json = function (data: unknown) {
-    if (req.query.download === 'true' || req.headers['x-download-request'] === 'true') {
-      const jsonString = JSON.stringify(data);
-      const buffer = Buffer.from(jsonString, 'utf-8');
-      const integrity = generateFileHashes(buffer);
+  res.json = function (data) {
+    if (req.query.download == 'true' || req.headers['x-download-request'] == 'true') {
+      const _jsonString = JSON.stringify(_data);
+      const _buffer = Buffer.from(jsonString, 'utf-8');
+      const _integrity = generateFileHashes(buffer);
 
       res.setHeader('X-Content-SHA256', integrity.sha256);
       res.setHeader('X-Content-Size', integrity.size.toString());
     }
 
-    return originalJson.call(this, data);
+    return originalJson.call(this,_data); }
   };
 
   next();
@@ -105,7 +105,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
     }
 
     // Get stored integrity info
-    const storedIntegrity = getFileIntegrity(fileId);
+    const _storedIntegrity = getFileIntegrity(fileId);
 
     if (!storedIntegrity) {
       return res.status(404).json({
@@ -114,7 +114,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
     }
 
     // Verify provided hashes
-    const verification = {
+    const _verification = {
       valid: true,
       errors: [] as string[],
     };
@@ -149,8 +149,8 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       endpoint: req.originalUrl,
       success: verification.valid,
       details: {
-        fileId,
-        verification,
+  _fileId,
+  _verification,
       },
     });
 
@@ -159,7 +159,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       errors: verification.errors,
       storedAt: storedIntegrity.generatedAt,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     res.status(500).json({
       error: 'Erro ao verificar integridade do arquivo',
       message: error.message,

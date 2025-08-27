@@ -6,34 +6,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Loader2,
-  FileText,
-  Clock,
-  Calendar,
-  TrendingUp,
-  AlertCircle,
-  Edit,
-  Search,
-  Filter,
-  Eye,
-  Users,
-  DollarSign,
-  BarChart3,
-  Briefcase,
-  PlusCircle,
-  RefreshCw,
-  CheckCircle2,
-  XCircle,
-  Banknote,
+  _Loader2,
+  _FileText,
+  _Clock,
+  _Calendar,
+  _TrendingUp,
+  _AlertCircle,
+  _Edit,
+  _Search,
+  _Filter,
+  _Eye,
+  _Users,
+  _DollarSign,
+  _BarChart3,
+  _Briefcase,
+  _PlusCircle,
+  _RefreshCw,
+  _CheckCircle2,
+  _XCircle,
+  _Banknote,
 } from 'lucide-react';
 import RefreshButton from '@/components/RefreshButton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -43,103 +43,103 @@ import { ptBR } from 'date-fns/locale';
 import { FeatureFlagExample } from '@/components/FeatureFlagExample';
 import { useFeatureFlag } from '@/contexts/FeatureFlagContext';
 
-const getStatusColor = (status: string) => {
+const _getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
-    case 'CCB_GERADA':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'AGUARDANDO_ASSINATURA':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'ASSINATURA_CONCLUIDA':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'BOLETOS_EMITIDOS':
-      return 'bg-purple-100 text-purple-800 border-purple-200';
+    case 'CCB_GERADA': {
+      return 'bg-blue-100 text-blue-800 border-blue-200'; }
+    case 'AGUARDANDO_ASSINATURA': {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200'; }
+    case 'ASSINATURA_CONCLUIDA': {
+      return 'bg-green-100 text-green-800 border-green-200'; }
+    case 'BOLETOS_EMITIDOS': {
+      return 'bg-purple-100 text-purple-800 border-purple-200'; }
     // Status antigos mantidos para compatibilidade
-    case 'APROVADO':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'EM_ANALISE':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'AGUARDANDO_ANALISE':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'PENDENCIADO':
-      return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'REJEITADO':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'PAGO':
-      return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    case 'PRONTO_PAGAMENTO':
-      return 'bg-purple-100 text-purple-800 border-purple-200';
-    case 'RASCUNHO':
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-    case 'CANCELADO':
-      return 'bg-slate-100 text-slate-800 border-slate-200';
+    case 'APROVADO': {
+      return 'bg-green-100 text-green-800 border-green-200'; }
+    case 'EM_ANALISE': {
+      return 'bg-blue-100 text-blue-800 border-blue-200'; }
+    case 'AGUARDANDO_ANALISE': {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200'; }
+    case 'PENDENCIADO': {
+      return 'bg-orange-100 text-orange-800 border-orange-200'; }
+    case 'REJEITADO': {
+      return 'bg-red-100 text-red-800 border-red-200'; }
+    case 'PAGO': {
+      return 'bg-emerald-100 text-emerald-800 border-emerald-200'; }
+    case 'PRONTO_PAGAMENTO': {
+      return 'bg-purple-100 text-purple-800 border-purple-200'; }
+    case 'RASCUNHO': {
+      return 'bg-gray-100 text-gray-800 border-gray-200'; }
+    case 'CANCELADO': {
+      return 'bg-slate-100 text-slate-800 border-slate-200'; }
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-gray-100 text-gray-800 border-gray-200'; }
   }
 };
 
-const getStatusText = (status: string) => {
+const _getStatusText = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
-    case 'CCB_GERADA':
-      return 'CCB Gerada';
-    case 'AGUARDANDO_ASSINATURA':
-      return 'Aguardando Assinatura';
-    case 'ASSINATURA_CONCLUIDA':
-      return 'Assinatura Concluída';
-    case 'BOLETOS_EMITIDOS':
-      return 'Boletos Emitidos';
+    case 'CCB_GERADA': {
+      return 'CCB Gerada'; }
+    case 'AGUARDANDO_ASSINATURA': {
+      return 'Aguardando Assinatura'; }
+    case 'ASSINATURA_CONCLUIDA': {
+      return 'Assinatura Concluída'; }
+    case 'BOLETOS_EMITIDOS': {
+      return 'Boletos Emitidos'; }
     // Status antigos mantidos para compatibilidade
-    case 'AGUARDANDO_ANALISE':
-      return 'Aguardando Análise';
-    case 'EM_ANALISE':
-      return 'Em Análise';
-    case 'PRONTO_PAGAMENTO':
-      return 'Pronto para Pagamento';
-    case 'APROVADO':
-      return 'Aprovado';
-    case 'REJEITADO':
-      return 'Rejeitado';
-    case 'PENDENCIADO':
-      return 'Pendenciado';
-    case 'PAGO':
-      return 'Pago';
-    case 'CANCELADO':
-      return 'Cancelado';
+    case 'AGUARDANDO_ANALISE': {
+      return 'Aguardando Análise'; }
+    case 'EM_ANALISE': {
+      return 'Em Análise'; }
+    case 'PRONTO_PAGAMENTO': {
+      return 'Pronto para Pagamento'; }
+    case 'APROVADO': {
+      return 'Aprovado'; }
+    case 'REJEITADO': {
+      return 'Rejeitado'; }
+    case 'PENDENCIADO': {
+      return 'Pendenciado'; }
+    case 'PAGO': {
+      return 'Pago'; }
+    case 'CANCELADO': {
+      return 'Cancelado'; }
     default:
-      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase());
+      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase()); }
   }
 };
 
-const getStatusIcon = (status: string) => {
+const _getStatusIcon = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
-    case 'CCB_GERADA':
-      return <FileText className="h-4 w-4" />;
-    case 'AGUARDANDO_ASSINATURA':
-      return <Clock className="h-4 w-4" />;
-    case 'ASSINATURA_CONCLUIDA':
-      return <CheckCircle2 className="h-4 w-4" />;
-    case 'BOLETOS_EMITIDOS':
-      return <Banknote className="h-4 w-4" />;
+    case 'CCB_GERADA': {
+      return <FileText className="h-4 w-4" />; }
+    case 'AGUARDANDO_ASSINATURA': {
+      return <Clock className="h-4 w-4" />; }
+    case 'ASSINATURA_CONCLUIDA': {
+      return <CheckCircle2 className="h-4 w-4" />; }
+    case 'BOLETOS_EMITIDOS': {
+      return <Banknote className="h-4 w-4" />; }
     // Status antigos mantidos para compatibilidade
-    case 'APROVADO':
-      return <CheckCircle2 className="h-4 w-4" />;
-    case 'REJEITADO':
-      return <XCircle className="h-4 w-4" />;
-    case 'EM_ANALISE':
-    case 'AGUARDANDO_ANALISE':
-      return <Clock className="h-4 w-4" />;
-    case 'PENDENCIADO':
-      return <AlertCircle className="h-4 w-4" />;
-    case 'PAGO':
-      return <Banknote className="h-4 w-4" />;
+    case 'APROVADO': {
+      return <CheckCircle2 className="h-4 w-4" />; }
+    case 'REJEITADO': {
+      return <XCircle className="h-4 w-4" />; }
+    case 'EM_ANALISE': {
+    case 'AGUARDANDO_ANALISE': {
+      return <Clock className="h-4 w-4" />; }
+    case 'PENDENCIADO': {
+      return <AlertCircle className="h-4 w-4" />; }
+    case 'PAGO': {
+      return <Banknote className="h-4 w-4" />; }
     default:
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-4 w-4" />; }
   }
 };
 
-const formatCurrency = (value: number) => {
+const _formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -149,7 +149,7 @@ const formatCurrency = (value: number) => {
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [parceiroFilter, setParceiroFilter] = useState<string>('todos');
@@ -158,9 +158,9 @@ const Dashboard: React.FC = () => {
   // Fetch real proposals data - only when authenticated
   const {
     data: propostasResponse,
-    isLoading,
-    error,
-    refetch,
+  _isLoading,
+  _error,
+  _refetch,
   } = useQuery<{ success: boolean; data: unknown[]; total: number }>({
     queryKey: ['/api/propostas'],
     enabled: !!user, // Only fetch when user is authenticated
@@ -170,15 +170,15 @@ const Dashboard: React.FC = () => {
   console.log('[Dashboard] Query state:', {
     user: !!user,
     userRole: user?.role,
-    isLoading,
-    error,
+  _isLoading,
+  _error,
     data: propostasResponse,
   });
 
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   // The apiClient automatically adds camelCase aliases for all snake_case keys
-  const propostas = Array.isArray(propostasResponse?.data)
-    ? propostasResponse.data.map((p: unknown) => {
+  const _propostas = Array.isArray(propostasResponse?.data)
+    ? propostasResponse.data.map((p) => {
         console.log('[Dashboard] Processing proposal:', p);
         return {
           id: p.id,
@@ -207,55 +207,55 @@ const Dashboard: React.FC = () => {
     mes: number;
   }>({
     queryKey: ['/api/propostas/metricas'],
-    enabled: user?.role === 'ATENDENTE',
+    enabled: user?.role == 'ATENDENTE',
   });
 
   // Redirect ANALISTA to analysis queue
   useEffect(() => {
-    if (user?.role === 'ANALISTA') {
+    if (user?.role == 'ANALISTA') {
       setLocation('/credito/fila');
     }
   }, [user?.role, setLocation]);
 
   // IMPORTANTE: Sempre definir dados e hooks ANTES dos returns condicionais
-  const propostasData = propostas || [];
+  const _propostasData = propostas || [];
 
   // Filtrar propostas - HOOK SEMPRE EXECUTADO
-  const propostasFiltradas = useMemo(() => {
+  const _propostasFiltradas = useMemo(() => {
     return Array.isArray(propostasData)
       ? propostasData.filter((proposta) => {
-          const matchesSearch =
+          const _matchesSearch =
             proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             proposta.id.includes(searchTerm) ||
             proposta.cpfCliente?.includes(searchTerm);
 
           // PAM V1.0 - Usar status contextual com fallback
-          const statusFinal = proposta.statusContextual || proposta.status;
-          const matchesStatus = statusFilter === 'todos' || statusFinal === statusFilter;
+          const _statusFinal = proposta.statusContextual || proposta.status;
+          const _matchesStatus = statusFilter == 'todos' || statusFinal == statusFilter;
 
-          const matchesParceiro =
-            parceiroFilter === 'todos' || proposta.parceiro?.razaoSocial === parceiroFilter;
+          const _matchesParceiro =
+            parceiroFilter == 'todos' || proposta.parceiro?.razaoSocial == parceiroFilter;
 
-          return matchesSearch && matchesStatus && matchesParceiro;
+          return matchesSearch && matchesStatus && matchesParceiro; }
         })
       : [];
   }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
 
   // Estatísticas computadas - HOOK SEMPRE EXECUTADO
-  const estatisticas = useMemo(() => {
-    const total = propostasData.length;
-    const aprovadas = Array.isArray(propostasData)
-      ? propostasData.filter((p) => p.status === 'aprovado').length
+  const _estatisticas = useMemo(() => {
+    const _total = propostasData.length;
+    const _aprovadas = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status == 'aprovado').length
       : 0;
-    const pendentes = Array.isArray(propostasData)
-      ? propostasData.filter((p) => p.status === 'aguardando_analise' || p.status === 'em_analise')
+    const _pendentes = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status == 'aguardando_analise' || p.status == 'em_analise')
           .length
       : 0;
-    const rejeitadas = Array.isArray(propostasData)
-      ? propostasData.filter((p) => p.status === 'rejeitado').length
+    const _rejeitadas = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status == 'rejeitado').length
       : 0;
-    const pendenciadas = Array.isArray(propostasData)
-      ? propostasData.filter((p) => p.status === 'pendenciado').length
+    const _pendenciadas = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status == 'pendenciado').length
       : 0;
     // Debug: log first few values to understand the data structure
     console.log(
@@ -268,46 +268,46 @@ const Dashboard: React.FC = () => {
     );
 
     // Convert to numbers safely and filter out invalid values
-    const valorTotal = propostasData.reduce((acc, p) => {
-      const valor =
-        typeof p.valorSolicitado === 'string'
+    const _valorTotal = propostasData.reduce((acc, p) => {
+      const _valor =
+        typeof p.valorSolicitado == 'string'
           ? parseFloat(p.valorSolicitado.replace(/[^\d,.-]/g, '').replace(',', '.'))
           : Number(p.valorSolicitado) || 0;
-      return acc + valor;
+      return acc + valor; }
     }, 0);
-    const valorMedio = total > 0 ? valorTotal / total : 0;
+    const _valorMedio = total > 0 ? valorTotal / total : 0;
 
     // Status distribution
-    const statusCounts = propostasData.reduce(
+    const _statusCounts = propostasData.reduce(
       (acc, p) => {
         acc[p.status] = (acc[p.status] || 0) + 1;
-        return acc;
+        return acc; }
       },
       {} as Record<string, number>
     );
 
     // Unique partners
-    const parceiros = Array.from(
+    const _parceiros = Array.from(
       new Set(propostasData.map((p) => p.parceiro?.razaoSocial).filter(Boolean))
     );
 
     return {
-      total,
-      aprovadas,
-      pendentes,
-      rejeitadas,
-      pendenciadas,
-      valorTotal,
-      valorMedio,
-      statusCounts,
-      parceiros,
+  _total,
+  _aprovadas,
+  _pendentes,
+  _rejeitadas,
+  _pendenciadas,
+  _valorTotal,
+  _valorMedio,
+  _statusCounts,
+  _parceiros,
       taxaAprovacao: total > 0 ? ((aprovadas / total) * 100).toFixed(1) : '0',
     };
   }, [propostasData]);
 
-  const handleRefresh = () => {
+  const _handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
-    if (user?.role === 'ATENDENTE') {
+    if (user?.role == 'ATENDENTE') {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
     }
   };
@@ -397,10 +397,10 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Demonstração de Feature Flags (Apenas para Admins) */}
-        {user?.role === 'ADMIN' && <FeatureFlagExample />}
+        {user?.role == 'ADMIN' && <FeatureFlagExample />}
 
         {/* Métricas de Performance para Atendentes */}
-        {user?.role === 'ATENDENTE' && metricas && (
+        {user?.role == 'ATENDENTE' && metricas && (
           <Card>
             <CardHeader>
               <CardTitle>Suas Métricas</CardTitle>
@@ -440,7 +440,7 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>
-                  {user?.role === 'ATENDENTE' ? 'Minhas Propostas' : 'Propostas'}
+                  {user?.role == 'ATENDENTE' ? 'Minhas Propostas' : 'Propostas'}
                 </CardTitle>
                 <CardDescription>
                   Gerencie e acompanhe todas as propostas de crédito
@@ -453,7 +453,7 @@ const Dashboard: React.FC = () => {
                     Nova Proposta
                   </Button>
                 </Link>
-                {user?.role === 'ATENDENTE' && (
+                {user?.role == 'ATENDENTE' && (
                   <Link to="/aceite-atendente">
                     <Button variant="outline">
                       <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -522,7 +522,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          ) : propostasFiltradas.length === 0 ? (
+          ) : propostasFiltradas.length == 0 ? (
             <Card>
               <CardContent className="p-6">
                 <div className="text-center text-muted-foreground">
@@ -533,7 +533,7 @@ const Dashboard: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            propostasFiltradas.map((proposta: unknown) => (
+            propostasFiltradas.map((proposta) => (
               <Card key={proposta.id} className="overflow-hidden transition-shadow hover:shadow-md">
                 <CardContent className="p-0">
                   <div className="flex items-center justify-between p-6">
@@ -551,7 +551,7 @@ const Dashboard: React.FC = () => {
                           >
                             {getStatusText(proposta.statusContextual || proposta.status)}
                           </Badge>
-                          {proposta.status === 'pendenciado' && (
+                          {proposta.status == 'pendenciado' && (
                             <Badge
                               variant="outline"
                               className="gap-1 border-orange-200 text-orange-700"
@@ -576,7 +576,7 @@ const Dashboard: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        {proposta.status === 'pendenciado' && proposta.motivo_pendencia && (
+                        {proposta.status == 'pendenciado' && proposta.motivo_pendencia && (
                           <div className="mt-2 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-2">
                             <AlertCircle className="h-4 w-4 text-orange-600" />
                             <span className="text-sm text-orange-700">
@@ -592,7 +592,7 @@ const Dashboard: React.FC = () => {
                         {formatCurrency(proposta.valorSolicitado || 0)}
                       </div>
                       <div className="flex justify-end gap-2">
-                        {proposta.status === 'pendenciado' ? (
+                        {proposta.status == 'pendenciado' ? (
                           <Link to={`/propostas/editar/${proposta.id}`}>
                             <Button size="sm" variant="outline" className="flex items-center gap-1">
                               <Edit className="h-4 w-4" />

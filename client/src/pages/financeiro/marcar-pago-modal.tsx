@@ -3,12 +3,12 @@ import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  _Dialog,
+  _DialogContent,
+  _DialogDescription,
+  _DialogFooter,
+  _DialogHeader,
+  _DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -18,15 +18,15 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
-  CheckCircle,
-  Upload,
-  File,
-  AlertTriangle,
-  Banknote,
-  Loader2,
-  FileText,
+  _CheckCircle,
+  _Upload,
+  _File,
+  _AlertTriangle,
+  _Banknote,
+  _Loader2,
+  _FileText,
   Image as ImageIcon,
-  X,
+  _X,
 } from 'lucide-react';
 
 interface MarcarPagoModalProps {
@@ -37,10 +37,10 @@ interface MarcarPagoModalProps {
 }
 
 export default function MarcarPagoModal({
-  isOpen,
-  onClose,
-  proposta,
-  onConfirm,
+  _isOpen,
+  _onClose,
+  _proposta,
+  _onConfirm,
 }: MarcarPagoModalProps) {
   const { toast } = useToast();
   const [observacoes, setObservacoes] = useState('');
@@ -48,25 +48,25 @@ export default function MarcarPagoModal({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Mutation para marcar como pago
-  const marcarPagoMutation = useMutation({
+  const _marcarPagoMutation = useMutation({
     mutationFn: async () => {
       // BUG CORRIGIDO: Usar endpoint e parâmetros corretos do backend
       // Backend espera: PATCH /api/cobrancas/parcelas/:codigoSolicitacao/marcar-pago
       // Buscar codigoSolicitacao da primeira parcela não paga
-      const parcelaNaoPaga = proposta.parcelas?.find((p: unknown) => p.status !== 'pago');
+      const _parcelaNaoPaga = proposta.parcelas?.find((p) => p.status !== 'pago');
 
       if (!parcelaNaoPaga?.codigoSolicitacao) {
         throw new Error('Nenhuma parcela elegível encontrada para marcação como paga');
       }
 
-      const formData = new FormData();
+      const _formData = new FormData();
       formData.append('observacoes', observacoes);
 
       if (arquivo) {
         formData.append('comprovante', arquivo);
       }
 
-      const response = await fetch(
+      const _response = await fetch(
         `/api/cobrancas/parcelas/${parcelaNaoPaga.codigoSolicitacao}/marcar-pago`,
         {
           method: 'PATCH',
@@ -76,13 +76,13 @@ export default function MarcarPagoModal({
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const _errorData = await response.json();
         throw new Error(errorData.error || 'Erro ao marcar como pago');
       }
 
-      return response.json();
+      return response.json(); }
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast({
         title: '✅ Pagamento Confirmado',
         description: 'A proposta foi marcada como paga com sucesso.',
@@ -100,7 +100,7 @@ export default function MarcarPagoModal({
       queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
       onConfirm();
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao marcar como pago',
         description: error.message || 'Não foi possível marcar a proposta como paga.',
@@ -109,11 +109,11 @@ export default function MarcarPagoModal({
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const _handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const _file = event.target.files?.[0];
     if (file) {
       // Validar tipo de arquivo
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      const _allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
       if (!allowedTypes.includes(file.type)) {
         toast({
           title: 'Tipo de arquivo inválido',
@@ -124,7 +124,7 @@ export default function MarcarPagoModal({
       }
 
       // Validar tamanho (máximo 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const _maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
         toast({
           title: 'Arquivo muito grande',
@@ -138,33 +138,33 @@ export default function MarcarPagoModal({
     }
   };
 
-  const removeFile = () => {
+  const _removeFile = () => {
     setArquivo(null);
     // Reset input
-    const input = document.getElementById('comprovante-input') as HTMLInputElement;
+    const _input = document.getElementById('comprovante-input') as HTMLInputElement;
     if (input) input.value = '';
   };
 
-  const formatCurrency = (value: number) => {
+  const _formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(value);
   };
 
-  const formatCPF = (cpf: string) => {
-    if (!cpf) return '';
-    const cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  const _formatCPF = (cpf: string) => {
+    if (!cpf) return ''; }
+    const _cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
   };
 
-  const getFileIcon = (type: string) => {
-    if (type === 'application/pdf') return <FileText className="h-6 w-6 text-red-500" />;
-    if (type.startsWith('image/')) return <ImageIcon className="h-6 w-6 text-blue-500" />;
-    return <File className="h-6 w-6 text-gray-500" />;
+  const _getFileIcon = (type: string) => {
+    if (type == 'application/pdf') return <FileText className="h-6 w-6 text-red-500" />; }
+    if (type.startsWith('image/')) return <ImageIcon className="h-6 w-6 text-blue-500" />; }
+    return <File className="h-6 w-6 text-gray-500" />; }
   };
 
-  if (!proposta) return null;
+  if (!proposta) return null; }
 
   return (
     <>
@@ -364,7 +364,7 @@ export default function MarcarPagoModal({
               ) : (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Sim, Confirmar Pagamento
+  _Sim, Confirmar Pagamento
                 </>
               )}
             </Button>

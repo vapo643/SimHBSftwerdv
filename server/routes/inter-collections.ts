@@ -8,7 +8,7 @@ import { interCollections, propostas } from '@shared/schema';
 import { eq, and, not, like } from 'drizzle-orm';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
-const router = Router();
+const _router = Router();
 
 /**
  * Listar boletos gerados para uma proposta
@@ -16,8 +16,8 @@ const router = Router();
  */
 router.get(
   '/:propostaId',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
@@ -25,7 +25,7 @@ router.get(
       console.log(`[INTER COLLECTIONS] Fetching collections for proposal: ${propostaId}`);
 
       // Buscar collections ATIVAS da proposta no banco (apenas com número de parcela preenchido)
-      const collections = await db
+      const _collections = await db
         .select()
         .from(interCollections)
         .where(
@@ -35,12 +35,12 @@ router.get(
 
       // Se tiver collections, buscar detalhes atualizados na API do Inter
       if (collections.length > 0) {
-        const interService = interBankService;
+        const _interService = interBankService;
 
-        const updatedCollections = await Promise.all(
+        const _updatedCollections = await Promise.all(
           collections.map(async (collection) => {
             try {
-              const details = await interService.recuperarCobranca(collection.codigoSolicitacao);
+              const _details = await interService.recuperarCobranca(collection.codigoSolicitacao);
 
               // Atualizar situacao no banco se mudou
               if (details.situacao !== collection.situacao) {
@@ -61,7 +61,7 @@ router.get(
                 numeroParcela: collection.numeroParcela,
                 totalParcelas: collection.totalParcelas,
               };
-            } catch (error: unknown) {
+            } catch (error) {
               console.error(
                 `[INTER COLLECTIONS] Error fetching details for ${collection.codigoSolicitacao}:`,
                 error
@@ -94,7 +94,7 @@ router.get(
         res.json([]);
       }
     } catch (error) {
-      console.error('[INTER COLLECTIONS] Error:', error);
+      console.error('[INTER COLLECTIONS] Error:', error: unknown);
       res.status(500).json({ error: 'Erro ao buscar boletos' });
     }
   }
@@ -106,8 +106,8 @@ router.get(
  */
 router.get(
   '/:propostaId/:codigoSolicitacao/pdf',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId, codigoSolicitacao } = req.params;
@@ -115,7 +115,7 @@ router.get(
       console.log(`[PDF STORAGE] Buscando PDF no storage para: ${codigoSolicitacao}`);
 
       // STEP 1: Verificar se collection pertence à proposta
-      const collection = await db
+      const _collection = await db
         .select()
         .from(interCollections)
         .where(
@@ -126,8 +126,8 @@ router.get(
         )
         .limit(1);
 
-      if (collection.length === 0) {
-        return res.status(404).json({ error: 'Boleto não encontrado' });
+      if (collection.length == 0) {
+        return res.status(404).json({ error: 'Boleto não encontrado' }); }
       }
 
       console.log(`[PDF STORAGE] Dados do boleto:`, {
@@ -137,22 +137,22 @@ router.get(
       });
 
       // STEP 2: Identificar UUID real para busca no storage
-      let realCodigoSolicitacao = codigoSolicitacao;
+      let _realCodigoSolicitacao = codigoSolicitacao;
 
       // Se o código é customizado (CORRETO-), buscar UUID real correspondente
       if (codigoSolicitacao.startsWith('CORRETO-')) {
         console.log(`[PDF STORAGE] Código customizado detectado: ${codigoSolicitacao}`);
 
         // Buscar boleto com UUID real para a mesma parcela
-        const numeroParcela = collection[0].numeroParcela;
+        const _numeroParcela = collection[0].numeroParcela;
         if (numeroParcela === null) {
           console.log(
             `[PDF STORAGE] ⚠️ Número da parcela é null - não é possível buscar UUID real`
           );
-          return res.status(400).json({ error: 'Número da parcela não encontrado' });
+          return res.status(400).json({ error: 'Número da parcela não encontrado' }); }
         }
 
-        const realCollection = await db
+        const _realCollection = await db
           .select()
           .from(interCollections)
           .where(
@@ -176,10 +176,10 @@ router.get(
 
       // STEP 3: Buscar PDF no Supabase Storage com UUID real
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const supabaseAdmin = createServerSupabaseAdminClient();
+      const _supabaseAdmin = createServerSupabaseAdminClient();
 
       // Caminho do PDF no storage usando UUID real
-      const storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${realCodigoSolicitacao}.pdf`;
+      const _storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${realCodigoSolicitacao}.pdf`;
 
       console.log(`[PDF STORAGE] Verificando arquivo com UUID real: ${storagePath}`);
 
@@ -202,7 +202,7 @@ router.get(
           console.log(`[PDF STORAGE] ✅ URL assinada gerada com sucesso`);
 
           // Redirecionar para URL assinada para visualização inline
-          return res.redirect(signedUrlData.signedUrl);
+          return res.redirect(signedUrlData.signedUrl); }
         } else {
           console.error(`[PDF STORAGE] ❌ Erro ao gerar URL assinada:`, signedUrlError);
         }
@@ -217,10 +217,10 @@ router.get(
       console.log(`[PDF STORAGE] Tentando fallback para API do Banco Inter com UUID real...`);
 
       try {
-        const interService = interBankService;
-        const pdfBuffer = await interService.obterPdfCobranca(realCodigoSolicitacao);
+        const _interService = interBankService;
+        const _pdfBuffer = await interService.obterPdfCobranca(realCodigoSolicitacao);
 
-        if (!pdfBuffer || pdfBuffer.length === 0) {
+        if (!pdfBuffer || pdfBuffer.length == 0) {
           return res.status(404).json({
             error: 'PDF não sincronizado',
             message: "PDF ainda não foi sincronizado. Tente usar 'Atualizar Status' primeiro.",
@@ -228,7 +228,7 @@ router.get(
         }
 
         // Validar PDF
-        const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+        const _pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
         if (!pdfMagic.startsWith('%PDF')) {
           return res.status(422).json({
             error: 'PDF inválido',
@@ -245,7 +245,7 @@ router.get(
 
         console.log(`[PDF STORAGE] ✅ Retornando PDF da API (${pdfBuffer.length} bytes)`);
         res.send(pdfBuffer);
-      } catch (apiError: unknown) {
+      } catch (apiError) {
         console.error(`[PDF STORAGE] ❌ Fallback API também falhou:`, apiError.message);
 
         if (apiError.message?.includes('circuit breaker')) {
@@ -262,8 +262,8 @@ router.get(
             "PDF não encontrado no storage nem na API. Use 'Atualizar Status' para sincronizar.",
         });
       }
-    } catch (error: unknown) {
-      console.error('[PDF STORAGE] Erro geral:', error);
+    } catch (error) {
+      console.error('[PDF STORAGE] Erro geral:', error: unknown);
       res.status(500).json({
         error: 'Erro interno',
         details: error.message || 'Erro desconhecido',
@@ -281,12 +281,12 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
     const { status, dataInicial, dataFinal } = req.query;
 
     console.log('[INTER COLLECTIONS] Listing all collections with filters:', {
-      status,
-      dataInicial,
-      dataFinal,
+  _status,
+  _dataInicial,
+  _dataFinal,
     });
 
-    const interService = interBankService;
+    const _interService = interBankService;
 
     // Buscar collections na API do Inter
     const filters: unknown = {};
@@ -294,7 +294,7 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
     if (dataInicial) filters.dataInicial = dataInicial as string;
     if (dataFinal) filters.dataFinal = dataFinal as string;
 
-    const collections = await interService.pesquisarCobrancas({
+    const _collections = await interService.pesquisarCobrancas({
       dataInicial:
         filters.dataInicial ||
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -303,14 +303,14 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
     });
 
     // Enriquecer com dados das propostas
-    const enrichedCollections = await Promise.all(
-      collections.map(async (collection: unknown) => {
+    const _enrichedCollections = await Promise.all(
+      collections.map(async (collection) => {
         // Extrair propostaId do codigoSolicitacao (formato: SIMPIX-{propostaId}-{parcela})
-        const parts = collection.codigoSolicitacao?.split('-');
-        if (parts && parts.length >= 2 && parts[0] === 'SIMPIX') {
-          const propostaId = parts[1];
+        const _parts = collection.codigoSolicitacao?.split('-');
+        if (parts && parts.length >= 2 && parts[0] == 'SIMPIX') {
+          const _propostaId = parts[1];
 
-          const proposta = await db
+          const _proposta = await db
             .select()
             .from(propostas)
             .where(eq(propostas.id, propostaId))
@@ -331,13 +331,13 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
           }
         }
 
-        return collection;
+        return collection; }
       })
     );
 
     res.json(enrichedCollections);
   } catch (error) {
-    console.error('[INTER COLLECTIONS] Error listing collections:', error);
+    console.error('[INTER COLLECTIONS] Error listing collections:', error: unknown);
     res.status(500).json({ error: 'Erro ao listar boletos' });
   }
 });

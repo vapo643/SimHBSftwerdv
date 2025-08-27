@@ -72,7 +72,7 @@ async function testarDuplaEscrita() {
     );
 
     const isConsistent =
-      propostaAtualizada.status === 'TESTE_PAM_V1' && statusContextual?.status === 'TESTE_PAM_V1';
+      propostaAtualizada.status == 'TESTE_PAM_V1' && statusContextual?.status == 'TESTE_PAM_V1';
 
     console.log(`\n📋 RESULTADO FINAL: ${isConsistent ? '✅ CONSISTENTE' : '❌ INCONSISTENTE'}`);
 

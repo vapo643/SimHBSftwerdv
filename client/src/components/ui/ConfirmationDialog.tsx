@@ -1,13 +1,13 @@
 import React from 'react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  _AlertDialog,
+  _AlertDialogAction,
+  _AlertDialogCancel,
+  _AlertDialogContent,
+  _AlertDialogDescription,
+  _AlertDialogFooter,
+  _AlertDialogHeader,
+  _AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertTriangle } from 'lucide-react';
 
@@ -24,11 +24,11 @@ interface ConfirmationDialogProps {
 }
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  description,
+  _isOpen,
+  _onClose,
+  _onConfirm,
+  _title,
+  _description,
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
   variant = 'default',
@@ -39,7 +39,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            {variant === 'destructive' && <AlertTriangle className="h-5 w-5 text-red-500" />}
+            {variant == 'destructive' && <AlertTriangle className="h-5 w-5 text-red-500" />}
             {title}
           </AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
@@ -50,7 +50,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
             onClick={onConfirm}
             disabled={isLoading}
             className={
-              variant === 'destructive' ? 'bg-red-600 hover:bg-red-700 focus:ring-red-600' : ''
+              variant == 'destructive' ? 'bg-red-600 hover:bg-red-700 focus:ring-red-600' : ''
             }
           >
             {isLoading ? 'Processando...' : confirmText}

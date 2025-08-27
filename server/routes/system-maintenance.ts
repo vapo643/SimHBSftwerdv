@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { adminService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/maintenance', async (req, res) => {
   try {
-    const result = await adminService.executeOperation('system_maintenance', req.body);
-    res.json(result);
-  } catch (error: unknown) {
+    const _result = await adminService.executeOperation('system_maintenance', req.body);
+    res.json(_result);
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

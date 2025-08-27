@@ -6,7 +6,7 @@ import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 
-const router = Router();
+const _router = Router();
 
 /**
  * ENDPOINT DE CORREÇÃO: Regenerar boletos com códigos REAIS do Inter
@@ -14,8 +14,8 @@ const router = Router();
  */
 router.post(
   '/regenerate/:propostaId',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
@@ -23,18 +23,18 @@ router.post(
       console.log(`[INTER FIX] 🔧 INICIANDO REGENERAÇÃO DE BOLETOS PARA: ${propostaId}`);
 
       // 1. Buscar proposta usando queryClient
-      const queryResult = await db.execute(`SELECT * FROM propostas WHERE id = $1 LIMIT 1`);
+      const _queryResult = await db.execute(`SELECT * FROM propostas WHERE id = $1 LIMIT 1`);
 
-      const proposta = queryResult[0];
+      const _proposta = queryResult[0];
 
       if (!proposta) {
-        return res.status(404).json({ error: 'Proposta não encontrada' });
+        return res.status(404).json({ error: 'Proposta não encontrada' }); }
       }
 
       console.log(`[INTER FIX] ✅ Proposta encontrada`);
 
       // 2. Buscar boletos existentes (com códigos inválidos)
-      const boletosInvalidos = await db
+      const _boletosInvalidos = await db
         .select()
         .from(interCollections)
         .where(
@@ -44,9 +44,9 @@ router.post(
 
       console.log(`[INTER FIX] 📋 Encontrados ${boletosInvalidos.length} boletos para regenerar`);
 
-      const results = [];
-      let successCount = 0;
-      let failCount = 0;
+      const _results = [];
+      let _successCount = 0;
+      let _failCount = 0;
 
       // 3. Para cada boleto, criar um REAL no Inter
       for (const boleto of boletosInvalidos) {
@@ -56,18 +56,18 @@ router.post(
           );
 
           // Extrair dados do cliente
-          const clienteData =
-            typeof proposta.clienteData === 'string'
+          const _clienteData =
+            typeof proposta.clienteData == 'string'
               ? JSON.parse(proposta.clienteData)
               : proposta.clienteData;
 
           // Calcular data de vencimento (30 dias entre parcelas)
-          const dataBase = new Date();
-          const dataVencimento = new Date(dataBase);
+          const _dataBase = new Date();
+          const _dataVencimento = new Date(dataBase);
           dataVencimento.setDate(dataBase.getDate() + (boleto.numeroParcela || 1) * 30);
 
           // Preparar dados completos para o Inter
-          const dadosCobranca = {
+          const _dadosCobranca = {
             id: `${propostaId}-${String(boleto.numeroParcela).padStart(3, '0')}`,
             valorTotal: parseFloat(boleto.valorNominal),
             dataVencimento: dataVencimento.toISOString().split('T')[0],
@@ -89,7 +89,7 @@ router.post(
           console.log(`[INTER FIX] 📤 Criando boleto no Inter API...`);
 
           // CRIAR BOLETO REAL NO INTER
-          const response = await interBankService.criarCobrancaParaProposta(dadosCobranca);
+          const _response = await interBankService.criarCobrancaParaProposta(dadosCobranca);
 
           if (!response.codigoSolicitacao) {
             throw new Error('Inter não retornou código de solicitação');
@@ -98,7 +98,7 @@ router.post(
           console.log(`[INTER FIX] ✅ Boleto criado! Código REAL: ${response.codigoSolicitacao}`);
 
           // 4. Buscar detalhes completos do boleto criado
-          const detalhes = await interBankService.recuperarCobranca(response.codigoSolicitacao);
+          const _detalhes = await interBankService.recuperarCobranca(response.codigoSolicitacao);
 
           // 5. Atualizar banco com dados REAIS
           await db
@@ -124,7 +124,7 @@ router.post(
           });
 
           successCount++;
-        } catch (error: unknown) {
+        } catch (error) {
           console.error(`[INTER FIX] ❌ Erro na parcela ${boleto.numeroParcela}:`, error.message);
 
           results.push({
@@ -146,12 +146,12 @@ router.post(
         success: true,
         message: `Regeneração concluída: ${successCount} boletos criados com sucesso`,
         total: boletosInvalidos.length,
-        successCount,
-        failCount,
+  _successCount,
+  _failCount,
         detalhes: results,
       });
-    } catch (error: unknown) {
-      console.error('[INTER FIX] ❌ Erro fatal:', error);
+    } catch (error) {
+      console.error('[INTER FIX] ❌ Erro fatal:', error: unknown);
       return res.status(500).json({
         error: 'Erro ao regenerar boletos',
         message: error.message,

@@ -29,7 +29,7 @@ export class ProposalController {
    */
   async create(req: Request, res: Response): Promise<Response> {
     try {
-      const useCase = new CreateProposalUseCase(this.repository);
+      const _useCase = new CreateProposalUseCase(this.repository);
 
       // DEBUG: Log request body for troubleshooting
       console.log(
@@ -39,7 +39,7 @@ export class ProposalController {
       console.log('[ProposalController.create] User context:', (req as unknown).user);
 
       // Mapear body da requisição para DTO do caso de uso
-      const dto = {
+      const _dto = {
         clienteNome: req.body.clienteNome,
         clienteCpf: req.body.clienteCpf,
         clienteRg: req.body.clienteRg,
@@ -66,14 +66,14 @@ export class ProposalController {
 
       console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));
 
-      const result = await useCase.execute(dto);
+      const _result = await useCase.execute(dto);
 
       return res.status(201).json({
         success: true,
         data: result,
       });
-    } catch (error: unknown) {
-      console.error('[ProposalController.create] Error:', error);
+    } catch (error) {
+      console.error('[ProposalController.create] Error:', error: unknown);
 
       // Tratar erros de validação do domínio
       if (
@@ -101,9 +101,9 @@ export class ProposalController {
   async getById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const useCase = new GetProposalByIdUseCase(this.repository);
+      const _useCase = new GetProposalByIdUseCase(this.repository);
 
-      const proposal = await useCase.execute(id);
+      const _proposal = await useCase.execute(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -113,7 +113,7 @@ export class ProposalController {
       }
 
       // Serializar agregado para resposta
-      const data = {
+      const _data = {
         id: proposal.id,
         status: proposal.status,
         cliente_data: proposal.clienteData,
@@ -136,10 +136,10 @@ export class ProposalController {
 
       return res.json({
         success: true,
-        data,
+  _data,
       });
-    } catch (error: unknown) {
-      console.error('[ProposalController.getById] Error:', error);
+    } catch (error) {
+      console.error('[ProposalController.getById] Error:', error: unknown);
 
       return res.status(500).json({
         success: false,
@@ -156,7 +156,7 @@ export class ProposalController {
       const { status, loja_id, atendente_id, cpf } = req.query;
 
       // Aplicar filtros baseados no role do usuário
-      const user = (req as unknown).user;
+      const _user = (req as unknown).user;
       let criteria: unknown = {};
 
       if (status) criteria.status = status as string;
@@ -164,16 +164,16 @@ export class ProposalController {
       if (cpf) criteria.cpf = cpf as string;
 
       // Se for ATENDENTE, filtrar apenas suas propostas
-      if (user?.role === 'ATENDENTE') {
+      if (user?.role == 'ATENDENTE') {
         criteria.atendenteId = user.id;
       } else if (atendente_id) {
         criteria.atendenteId = atendente_id as string;
       }
 
-      const proposals = await this.repository.findByCriteria(criteria);
+      const _proposals = await this.repository.findByCriteria(criteria);
 
       // Serializar lista de agregados
-      const data = proposals.map((proposal) => ({
+      const _data = proposals.map((proposal) => ({
         id: proposal.id,
         status: proposal.status,
         cliente_nome: proposal.clienteData.nome,
@@ -191,11 +191,11 @@ export class ProposalController {
 
       return res.json({
         success: true,
-        data,
+  _data,
         total: data.length,
       });
-    } catch (error: unknown) {
-      console.error('[ProposalController.list] Error:', error);
+    } catch (error) {
+      console.error('[ProposalController.list] Error:', error: unknown);
 
       return res.status(500).json({
         success: false,
@@ -211,7 +211,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
       const { observacoes } = req.body;
-      const analistaId = (req as unknown).user?.id;
+      const _analistaId = (req as unknown).user?.id;
 
       if (!analistaId) {
         return res.status(401).json({
@@ -220,20 +220,20 @@ export class ProposalController {
         });
       }
 
-      const useCase = new ApproveProposalUseCase(this.repository);
+      const _useCase = new ApproveProposalUseCase(this.repository);
 
       await useCase.execute({
         proposalId: id,
-        analistaId,
-        observacoes,
+  _analistaId,
+  _observacoes,
       });
 
       return res.json({
         success: true,
         message: 'Proposta aprovada com sucesso',
       });
-    } catch (error: unknown) {
-      console.error('[ProposalController.approve] Error:', error);
+    } catch (error) {
+      console.error('[ProposalController.approve] Error:', error: unknown);
 
       if (error.message.includes('não encontrada')) {
         return res.status(404).json({
@@ -266,7 +266,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
       const { motivo } = req.body;
-      const analistaId = (req as unknown).user?.id;
+      const _analistaId = (req as unknown).user?.id;
 
       if (!analistaId) {
         return res.status(401).json({
@@ -282,20 +282,20 @@ export class ProposalController {
         });
       }
 
-      const useCase = new RejectProposalUseCase(this.repository);
+      const _useCase = new RejectProposalUseCase(this.repository);
 
       await useCase.execute({
         proposalId: id,
-        analistaId,
-        motivo,
+  _analistaId,
+  _motivo,
       });
 
       return res.json({
         success: true,
         message: 'Proposta rejeitada',
       });
-    } catch (error: unknown) {
-      console.error('[ProposalController.reject] Error:', error);
+    } catch (error) {
+      console.error('[ProposalController.reject] Error:', error: unknown);
 
       if (error.message.includes('não encontrada')) {
         return res.status(404).json({
@@ -335,9 +335,9 @@ export class ProposalController {
         });
       }
 
-      const proposals = await this.repository.findByCPF(cpf);
+      const _proposals = await this.repository.findByCPF(cpf);
 
-      if (!proposals || proposals.length === 0) {
+      if (!proposals || proposals.length == 0) {
         return res.json({
           success: true,
           data: null,
@@ -345,7 +345,7 @@ export class ProposalController {
       }
 
       // Retornar a proposta mais recente
-      const latestProposal = proposals.sort(
+      const _latestProposal = proposals.sort(
         (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
       )[0];
 
@@ -355,8 +355,8 @@ export class ProposalController {
           cliente_data: latestProposal.clienteData,
         },
       });
-    } catch (error: unknown) {
-      console.error('[ProposalController.getByCpf] Error:', error);
+    } catch (error) {
+      console.error('[ProposalController.getByCpf] Error:', error: unknown);
 
       return res.status(500).json({
         success: false,
@@ -372,7 +372,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const proposal = await this.repository.findById(id);
+      const _proposal = await this.repository.findById(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -391,8 +391,8 @@ export class ProposalController {
         success: true,
         message: 'Proposta submetida para análise',
       });
-    } catch (error: unknown) {
-      console.error('[ProposalController.submitForAnalysis] Error:', error);
+    } catch (error) {
+      console.error('[ProposalController.submitForAnalysis] Error:', error: unknown);
 
       if (error.message.includes('Apenas propostas em rascunho')) {
         return res.status(400).json({

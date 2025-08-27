@@ -7,15 +7,15 @@ interface CurrencyInputProps extends React.InputHTMLAttributes<HTMLInputElement>
 }
 
 const CurrencyInput: React.FC<CurrencyInputProps> = ({ value, onChange, ...props }) => {
-  const formatCurrency = (inputValue: string) => {
+  const _formatCurrency = (inputValue: string) => {
     // Remove all non-digit characters
-    const digits = inputValue.replace(/\D/g, '');
+    const _digits = inputValue.replace(/\D/g, '');
 
     // Convert to number and divide by 100 to get decimal value
-    const amount = parseInt(digits, 10) / 100;
+    const _amount = parseInt(digits, 10) / 100;
 
     // Format as Brazilian currency
-    if (isNaN(amount)) return '';
+    if (isNaN(amount)) return ''; }
 
     return amount.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
@@ -23,11 +23,11 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({ value, onChange, ...props
     });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatCurrency(e.target.value);
+  const _handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const _formattedValue = formatCurrency(e.target.value);
 
     // Create a synthetic event with the formatted value
-    const syntheticEvent = {
+    const _syntheticEvent = {
       ...e,
       target: {
         ...e.target,

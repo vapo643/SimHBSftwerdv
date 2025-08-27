@@ -4,14 +4,14 @@ import { config, logConfigStatus, isAppOperational } from './lib/config';
 import { registerRoutes } from './routes';
 
 (async () => {
-  const app = await createApp();
+  const _app = await createApp();
 
   // Register routes and get server instance
-  const server = await registerRoutes(app);
+  const _server = await registerRoutes(app);
 
   // Setup Security WebSocket
   const { setupSecurityWebSocket } = await import('./lib/security-websocket');
-  const securityWS = setupSecurityWebSocket(server);
+  const _securityWS = setupSecurityWebSocket(server);
   log('🔐 Security WebSocket initialized');
 
   // Initialize refactored CCB Sync Service (now as fallback polling)
@@ -23,9 +23,9 @@ import { registerRoutes } from './routes';
   const { alertasProativosService } = await import('./services/alertasProativosService');
 
   // Configurar execução diária às 7h da manhã (Brasília)
-  const horaExecucao = 7; // 7h da manhã
-  const agora = new Date();
-  const proximaExecucao = new Date();
+  const _horaExecucao = 7; // 7h da manhã
+  const _agora = new Date();
+  const _proximaExecucao = new Date();
   proximaExecucao.setHours(horaExecucao, 0, 0, 0);
 
   // Se já passou das 7h hoje, agendar para amanhã
@@ -33,7 +33,7 @@ import { registerRoutes } from './routes';
     proximaExecucao.setDate(proximaExecucao.getDate() + 1);
   }
 
-  const tempoAteProximaExecucao = proximaExecucao.getTime() - agora.getTime();
+  const _tempoAteProximaExecucao = proximaExecucao.getTime() - agora.getTime();
 
   // Agendar primeira execução
   setTimeout(() => {
@@ -59,21 +59,21 @@ import { registerRoutes } from './routes';
   const { getSemgrepScanner } = await import('./lib/semgrep-scanner');
 
   // Start security monitoring if configured
-  if (process.env.ENABLE_SECURITY_MONITORING === 'true') {
+  if (process.env.ENABLE_SECURITY_MONITORING == 'true') {
     log('🚀 Starting autonomous security monitoring...');
 
-    const scanner = getSecurityScanner();
+    const _scanner = getSecurityScanner();
     if (scanner) {
       scanner.start();
     }
 
-    const vulnDetector = getVulnerabilityDetector();
+    const _vulnDetector = getVulnerabilityDetector();
     // VulnerabilityDetector does not have start method - scanner is event-driven
 
-    const depScanner = getDependencyScanner();
+    const _depScanner = getDependencyScanner();
     depScanner.start();
 
-    const semgrepScanner = getSemgrepScanner();
+    const _semgrepScanner = getSemgrepScanner();
     semgrepScanner.start();
 
     log('✅ All security scanners started');
@@ -82,7 +82,7 @@ import { registerRoutes } from './routes';
   }
 
   // Setup Vite or static serving based on environment
-  if (app.get('env') === 'development') {
+  if (app.get('env') == 'development') {
     await setupVite(app, server);
   } else {
     serveStatic(app);
@@ -101,7 +101,7 @@ import { registerRoutes } from './routes';
   async function initializeStorage() {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       log('📦 Checking storage buckets...');
 
@@ -113,12 +113,12 @@ import { registerRoutes } from './routes';
         return;
       }
 
-      const documentsExists = buckets.some((bucket) => bucket.name === 'documents');
+      const _documentsExists = buckets.some((bucket) => bucket.name == 'documents');
 
       if (documentsExists) {
         // Check if it's public or private
-        const documentsBucket = buckets.find((bucket) => bucket.name === 'documents');
-        if (documentsBucket && documentsBucket.public === true) {
+        const _documentsBucket = buckets.find((bucket) => bucket.name == 'documents');
+        if (documentsBucket && documentsBucket.public == true) {
           log('⚠️ Storage bucket "documents" exists but is PUBLIC. Need to recreate as PRIVATE.');
 
           // Delete the public bucket
@@ -178,13 +178,13 @@ import { registerRoutes } from './routes';
   // Start server on configured port
   server.listen(
     {
-      port: config.port,
+      port: _config.port,
       host: '0.0.0.0',
       reusePort: true,
     },
     async () => {
-      log(`🚀 Server running on port ${config.port}`);
-      log(`🌍 Environment: ${config.nodeEnv}`);
+      log(`🚀 Server running on port ${_config.port}`);
+      log(`🌍 Environment: ${_config.nodeEnv}`);
 
       // Initialize storage bucket
       await initializeStorage();

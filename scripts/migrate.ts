@@ -212,7 +212,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 // Confirmar execução em produção
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV == 'production') {
   logger.warn('⚠️ ATENÇÃO: Você está prestes a executar migração em PRODUÇÃO!');
   logger.warn('Certifique-se de ter um backup recente antes de continuar.');
   // Em produção real, adicionar prompt de confirmação aqui

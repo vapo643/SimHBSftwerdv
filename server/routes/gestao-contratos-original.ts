@@ -12,12 +12,12 @@ import { requireRoles } from '../lib/role-guards';
 import { storage } from '../storage';
 import { db } from '../lib/supabase';
 import {
-  propostas,
-  parceiros,
-  lojas,
-  produtos,
-  propostaLogs,
-  statusContextuais,
+  _propostas,
+  _parceiros,
+  _lojas,
+  _produtos,
+  _propostaLogs,
+  _statusContextuais,
 } from '@shared/schema';
 import { gte, lte } from 'drizzle-orm';
 import { eq, and, isNotNull, isNull, desc } from 'drizzle-orm';
@@ -25,7 +25,7 @@ import { createServerSupabaseAdminClient } from '../lib/supabase';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
 import { maskCPF, maskEmail, maskRG, maskTelefone } from '../utils/masking';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/contratos
@@ -43,7 +43,7 @@ const router = Router();
  */
 router.get(
   '/contratos',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   requireRoles(['ADMINISTRADOR', 'DIRETOR']), // Apenas ADMIN e DIRETOR
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -73,7 +73,7 @@ router.get(
       });
 
       // Construir query base - apenas propostas com CCB assinado
-      let query = db
+      let _query = db
         .select({
           // Dados da proposta
           id: propostas.id,
@@ -134,7 +134,7 @@ router.get(
         .from(propostas)
         // PAM V1.0 - LEFT JOIN com status contextual para contratos
         .leftJoin(
-          statusContextuais,
+  _statusContextuais,
           and(
             eq(propostas.id, statusContextuais.propostaId),
             eq(statusContextuais.contexto, 'contratos')
@@ -160,42 +160,42 @@ router.get(
         .limit(parseInt(limite as string));
 
       // Aplicar filtros adicionais se fornecidos
-      const conditions = [];
+      const _conditions = [];
 
       // Filtro por status
-      if (status && typeof status === 'string') {
+      if (status && typeof status == 'string') {
         conditions.push(eq(propostas.status, status));
       }
 
       // Filtro por loja (apenas para não-administradores com loja específica)
-      if (lojaId && typeof lojaId === 'string') {
+      if (lojaId && typeof lojaId == 'string') {
         conditions.push(eq(propostas.lojaId, parseInt(lojaId)));
       }
 
       // Filtro por período de assinatura
-      if (dataInicio && typeof dataInicio === 'string') {
-        const startDate = new Date(dataInicio);
+      if (dataInicio && typeof dataInicio == 'string') {
+        const _startDate = new Date(dataInicio);
         startDate.setHours(0, 0, 0, 0);
         conditions.push(gte(propostas.dataAssinatura, startDate));
       }
 
-      if (dataFim && typeof dataFim === 'string') {
-        const endDate = new Date(dataFim);
+      if (dataFim && typeof dataFim == 'string') {
+        const _endDate = new Date(dataFim);
         endDate.setHours(23, 59, 59, 999);
         conditions.push(lte(propostas.dataAssinatura, endDate));
       }
 
       // Executar query
-      const contratos = await query;
+      const _contratos = await query;
 
       console.log(`[CONTRATOS] ${contratos.length} contratos encontrados`);
 
       // Gerar URLs dos documentos assinados
-      const supabaseAdmin = createServerSupabaseAdminClient();
-      const contratosComUrls = await Promise.all(
-        contratos.map(async (contrato: unknown) => {
-          let urlCcbAssinado = null;
-          let urlComprovantePagamento = null;
+      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const _contratosComUrls = await Promise.all(
+        contratos.map(async (contrato) => {
+          let _urlCcbAssinado = null;
+          let _urlComprovantePagamento = null;
 
           // Gerar URL do CCB assinado
           if (contrato.caminhoCcbAssinado) {
@@ -209,7 +209,7 @@ router.get(
           // Verificar se há comprovante de pagamento
           if (contrato.dataPagamento) {
             // Assumindo que o comprovante está em formato padrão
-            const comprovantePath = `comprovantes/${contrato.id}/comprovante.pdf`;
+            const _comprovantePath = `comprovantes/${contrato.id}/comprovante.pdf`;
             const { data: comprovanteUrl } = supabaseAdmin.storage
               .from('documents')
               .getPublicUrl(comprovantePath);
@@ -226,8 +226,8 @@ router.get(
 
           return {
             ...contrato,
-            urlCcbAssinado,
-            urlComprovantePagamento,
+  _urlCcbAssinado,
+  _urlComprovantePagamento,
 
             // Adicionar indicadores úteis
             diasDesdeAssinatura: contrato.dataAssinatura
@@ -245,17 +245,17 @@ router.get(
       );
 
       // Estatísticas gerais (útil para dashboard)
-      const estatisticas = {
+      const _estatisticas = {
         totalContratos: contratosComUrls.length,
-        aguardandoPagamento: contratosComUrls.filter((c: unknown) => c.aguardandoPagamento).length,
-        pagos: contratosComUrls.filter((c: unknown) => c.dataPagamento).length,
+        aguardandoPagamento: contratosComUrls.filter((c) => c.aguardandoPagamento).length,
+        pagos: contratosComUrls.filter((c) => c.dataPagamento).length,
         valorTotalContratado: contratosComUrls.reduce((sum: number, c: unknown) => {
-          const valor = parseFloat(c.valor || '0');
-          return sum + valor;
+          const _valor = parseFloat(c.valor || '0');
+          return sum + valor; }
         }, 0),
         valorTotalLiberado: contratosComUrls.reduce((sum: number, c: unknown) => {
-          const valor = parseFloat(c.valorLiquidoLiberado || '0');
-          return sum + (c.dataPagamento ? valor : 0);
+          const _valor = parseFloat(c.valorLiquidoLiberado || '0');
+          return sum + (c.dataPagamento ? valor : 0); }
         }, 0),
       };
 
@@ -263,17 +263,17 @@ router.get(
       res.json({
         success: true,
         contratos: contratosComUrls,
-        estatisticas,
+  _estatisticas,
         filtrosAplicados: {
-          status,
-          lojaId,
-          dataInicio,
-          dataFim,
+  _status,
+  _lojaId,
+  _dataInicio,
+  _dataFim,
           limite: parseInt(limite as string),
         },
       });
     } catch (error) {
-      console.error('[CONTRATOS] Erro ao buscar contratos:', error);
+      console.error('[CONTRATOS] Erro ao buscar contratos:', error: unknown);
 
       // Log de erro
       securityLogger.logEvent({
@@ -295,7 +295,7 @@ router.get(
         success: false,
         message: 'Erro ao buscar contratos',
         error:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV == 'development'
             ? error instanceof Error
               ? error.message
               : 'Unknown error'
@@ -314,7 +314,7 @@ router.get(
  */
 router.get(
   '/contratos/:id',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   requireRoles(['ADMINISTRADOR', 'DIRETOR']),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -323,7 +323,7 @@ router.get(
       console.log('[CONTRATOS] Buscando detalhes do contrato:', id);
 
       // Buscar contrato com todos os relacionamentos
-      const contrato = await db
+      const _contrato = await db
         .select()
         .from(propostas)
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
@@ -339,7 +339,7 @@ router.get(
         )
         .limit(1);
 
-      if (!contrato || contrato.length === 0) {
+      if (!contrato || contrato.length == 0) {
         return res.status(404).json({
           success: false,
           message: 'Contrato não encontrado ou não está assinado',
@@ -347,19 +347,19 @@ router.get(
       }
 
       // Buscar histórico de logs da proposta
-      const historico = await db
+      const _historico = await db
         .select()
         .from(propostaLogs)
         .where(eq(propostaLogs.propostaId, id))
         .orderBy(desc(propostaLogs.createdAt));
 
       // Gerar URLs dos documentos
-      const supabaseAdmin = createServerSupabaseAdminClient();
-      const contratoData = contrato[0].propostas;
+      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const _contratoData = contrato[0].propostas;
 
-      let urlCcbAssinado = null;
-      let urlCcbOriginal = null;
-      let documentosAdicionais: Array<{ path: string; url: string | null; nome: string }> = [];
+      let _urlCcbAssinado = null;
+      let _urlCcbOriginal = null;
+      let documentosAdicionais: Record<string, unknown>[]>{ path: string; url: string | null; nome: string }> = [];
 
       if (contratoData.caminhoCcbAssinado) {
         const { data: ccbUrl } = supabaseAdmin.storage
@@ -394,21 +394,21 @@ router.get(
         success: true,
         contrato: {
           ...contrato[0],
-          urlCcbAssinado,
-          urlCcbOriginal,
-          documentosAdicionais,
-          historico,
+  _urlCcbAssinado,
+  _urlCcbOriginal,
+  _documentosAdicionais,
+  _historico,
           statusFormalizacao: determinarStatusFormalizacao(contratoData),
         },
       });
     } catch (error) {
-      console.error('[CONTRATOS] Erro ao buscar detalhes do contrato:', error);
+      console.error('[CONTRATOS] Erro ao buscar detalhes do contrato:', error: unknown);
 
       res.status(500).json({
         success: false,
         message: 'Erro ao buscar detalhes do contrato',
         error:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV == 'development'
             ? error instanceof Error
               ? error.message
               : 'Unknown error'
@@ -421,24 +421,24 @@ router.get(
 /**
  * Função auxiliar para determinar o status de formalização
  */
-function determinarStatusFormalizacao(proposta: unknown): string {
+function determinarStatusFormalizacao(proposta): string {
   if (!proposta.ccbGerado) {
-    return 'PENDENTE_GERACAO';
+    return 'PENDENTE_GERACAO'; }
   }
 
   if (!proposta.assinaturaEletronicaConcluida) {
-    return 'AGUARDANDO_ASSINATURA';
+    return 'AGUARDANDO_ASSINATURA'; }
   }
 
   if (!proposta.dataPagamento) {
-    return 'AGUARDANDO_PAGAMENTO';
+    return 'AGUARDANDO_PAGAMENTO'; }
   }
 
-  if (proposta.status === 'pago') {
-    return 'CONCLUIDO';
+  if (proposta.status == 'pago') {
+    return 'CONCLUIDO'; }
   }
 
-  return 'EM_PROCESSAMENTO';
+  return 'EM_PROCESSAMENTO'; }
 }
 
 export default router;

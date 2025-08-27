@@ -60,7 +60,7 @@ const ALERT_THRESHOLDS = {
 };
 
 // In-memory alert store (use Redis or database in production)
-const activeAlerts = new Map<string, SecurityAlert>();
+const _activeAlerts = new Map<string, SecurityAlert>();
 const alertHistory: SecurityAlert[] = [];
 
 /**
@@ -109,7 +109,7 @@ export class SecurityMonitor {
         this.checkAuthenticationAnomalies(),
       ]);
     } catch (error) {
-      console.error('[SECURITY MONITOR] Error running checks:', error);
+      console.error('[SECURITY MONITOR] Error running checks:', error: unknown);
     }
   }
 
@@ -117,10 +117,10 @@ export class SecurityMonitor {
    * Check for brute force attempts
    */
   private async checkBruteForceAttempts(): Promise<void> {
-    const oneHourAgo = new Date(Date.now() - 3600000);
+    const _oneHourAgo = new Date(Date.now() - 3600000);
 
     // Check failed logins per IP
-    const failedLoginsByIp = await db
+    const _failedLoginsByIp = await db
       .select({
         ip_address: securityLogs.ip_address,
         count: sql<number>`count(*)::int`,
@@ -152,9 +152,9 @@ export class SecurityMonitor {
    * Check for rate limit abuse
    */
   private async checkRateLimitAbuse(): Promise<void> {
-    const oneHourAgo = new Date(Date.now() - 3600000);
+    const _oneHourAgo = new Date(Date.now() - 3600000);
 
-    const rateLimitViolations = await db
+    const _rateLimitViolations = await db
       .select({
         ip_address: securityLogs.ip_address,
         count: sql<number>`count(*)::int`,
@@ -189,16 +189,16 @@ export class SecurityMonitor {
    * Check for unusual access patterns
    */
   private async checkUnusualAccessPatterns(): Promise<void> {
-    const currentHour = new Date().getHours();
+    const _currentHour = new Date().getHours();
 
     // Check for access during unusual hours
     if (
       currentHour >= ALERT_THRESHOLDS.UNUSUAL_HOUR_START &&
       currentHour < ALERT_THRESHOLDS.UNUSUAL_HOUR_END
     ) {
-      const fiveMinutesAgo = new Date(Date.now() - 300000);
+      const _fiveMinutesAgo = new Date(Date.now() - 300000);
 
-      const recentAccess = await db
+      const _recentAccess = await db
         .select({
           user_id: securityLogs.user_id,
           user_email: securityLogs.user_id,
@@ -237,9 +237,9 @@ export class SecurityMonitor {
    * Check for potential data exfiltration
    */
   private async checkDataExfiltration(): Promise<void> {
-    const oneHourAgo = new Date(Date.now() - 3600000);
+    const _oneHourAgo = new Date(Date.now() - 3600000);
 
-    const largeDataRequests = await db
+    const _largeDataRequests = await db
       .select({
         user_id: securityLogs.user_id,
         user_email: securityLogs.user_id,
@@ -256,7 +256,7 @@ export class SecurityMonitor {
       .groupBy(securityLogs.user_id, securityLogs.user_id);
 
     for (const record of largeDataRequests) {
-      const sizeMB = record.total_size / (1024 * 1024);
+      const _sizeMB = record.total_size / (1024 * 1024);
       if (sizeMB > ALERT_THRESHOLDS.LARGE_DATA_EXPORT_SIZE_MB) {
         this.createAlert({
           type: AlertType.DATA_EXFILTRATION,
@@ -279,7 +279,7 @@ export class SecurityMonitor {
    */
   private async checkAuthenticationAnomalies(): Promise<void> {
     // Check for multiple concurrent sessions
-    const activeSessions = await db
+    const _activeSessions = await db
       .select({
         user_id: securityLogs.user_id,
         user_email: securityLogs.user_id,
@@ -315,13 +315,13 @@ export class SecurityMonitor {
    * Create a new security alert
    */
   private createAlert(data: Omit<SecurityAlert, 'id' | 'detectedAt' | 'resolved'>): void {
-    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const _alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Check if similar alert already exists
-    const existingAlert = Array.from(activeAlerts.values()).find(
+    const _existingAlert = Array.from(activeAlerts.values()).find(
       (alert) =>
-        alert.type === data.type &&
-        JSON.stringify(alert.metadata) === JSON.stringify(data.metadata) &&
+        alert.type == data.type &&
+        JSON.stringify(alert.metadata) == JSON.stringify(data.metadata) &&
         !alert.resolved
     );
 
@@ -347,7 +347,7 @@ export class SecurityMonitor {
       success: true,
       details: {
         alertType: data.type,
-        alertId,
+  _alertId,
         ...data.metadata,
       },
     });
@@ -375,35 +375,35 @@ export class SecurityMonitor {
    * Get active alerts
    */
   getActiveAlerts(): SecurityAlert[] {
-    return Array.from(activeAlerts.values()).filter((alert) => !alert.resolved);
+    return Array.from(activeAlerts.values()).filter((alert) => !alert.resolved); }
   }
 
   /**
    * Get alert history
    */
   getAlertHistory(limit: number = 100): SecurityAlert[] {
-    return alertHistory.slice(-limit);
+    return alertHistory.slice(-limit); }
   }
 
   /**
    * Resolve an alert
    */
   resolveAlert(alertId: string, resolvedBy: string): boolean {
-    const alert = activeAlerts.get(alertId);
+    const _alert = activeAlerts.get(alertId);
     if (!alert) {
-      return false;
+      return false; }
     }
 
     alert.resolved = true;
     alert.resolvedAt = new Date();
     alert.resolvedBy = resolvedBy;
 
-    return true;
+    return true; }
   }
 }
 
 // Create singleton instance
-export const securityMonitor = new SecurityMonitor();
+export const _securityMonitor = new SecurityMonitor();
 
 // Auto-start monitoring in non-test environments
 if (process.env.NODE_ENV !== 'test') {

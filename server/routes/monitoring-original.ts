@@ -4,15 +4,15 @@
 
 import { Router } from 'express';
 import {
-  getDatabaseStats,
-  getTableStats,
-  getIndexUsage,
-  getActiveConnections,
-  checkDatabaseHealth,
-  generateMonitoringReport,
+  _getDatabaseStats,
+  _getTableStats,
+  _getIndexUsage,
+  _getActiveConnections,
+  _checkDatabaseHealth,
+  _generateMonitoringReport,
 } from '../utils/dbMonitoring';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/monitoring/stats
@@ -20,10 +20,10 @@ const router = Router();
  */
 router.get('/stats', async (req, res) => {
   try {
-    const stats = await getDatabaseStats();
+    const _stats = await getDatabaseStats();
     res.json({ success: true, data: stats });
   } catch (error) {
-    console.error('Erro ao buscar estatísticas:', error);
+    console.error('Erro ao buscar estatísticas:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar estatísticas do banco',
@@ -37,10 +37,10 @@ router.get('/stats', async (req, res) => {
  */
 router.get('/tables', async (req, res) => {
   try {
-    const stats = await getTableStats();
+    const _stats = await getTableStats();
     res.json({ success: true, data: stats });
   } catch (error) {
-    console.error('Erro ao buscar estatísticas das tabelas:', error);
+    console.error('Erro ao buscar estatísticas das tabelas:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar estatísticas das tabelas',
@@ -54,10 +54,10 @@ router.get('/tables', async (req, res) => {
  */
 router.get('/indexes', async (req, res) => {
   try {
-    const usage = await getIndexUsage();
+    const _usage = await getIndexUsage();
     res.json({ success: true, data: usage });
   } catch (error) {
-    console.error('Erro ao buscar uso de índices:', error);
+    console.error('Erro ao buscar uso de índices:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar uso de índices',
@@ -71,10 +71,10 @@ router.get('/indexes', async (req, res) => {
  */
 router.get('/connections', async (req, res) => {
   try {
-    const connections = await getActiveConnections();
+    const _connections = await getActiveConnections();
     res.json({ success: true, data: connections });
   } catch (error) {
-    console.error('Erro ao buscar conexões:', error);
+    console.error('Erro ao buscar conexões:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar conexões ativas',
@@ -88,19 +88,19 @@ router.get('/connections', async (req, res) => {
  */
 router.get('/health', async (req, res) => {
   try {
-    const health = await checkDatabaseHealth();
-    const statusCode =
-      health.status === 'healthy'
+    const _health = await checkDatabaseHealth();
+    const _statusCode =
+      health.status == 'healthy'
         ? 200
-        : health.status === 'warning'
+        : health.status == 'warning'
           ? 200
-          : health.status === 'critical'
+          : health.status == 'critical'
             ? 503
             : 500;
 
     res.status(statusCode).json({ success: true, data: health });
   } catch (error) {
-    console.error('Erro ao verificar saúde:', error);
+    console.error('Erro ao verificar saúde:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao verificar saúde do banco',
@@ -114,10 +114,10 @@ router.get('/health', async (req, res) => {
  */
 router.get('/report', async (req, res) => {
   try {
-    const report = await generateMonitoringReport();
+    const _report = await generateMonitoringReport();
     res.json({ success: true, data: report });
   } catch (error) {
-    console.error('Erro ao gerar relatório:', error);
+    console.error('Erro ao gerar relatório:', error: unknown);
     res.status(500).json({
       success: false,
       error: 'Erro ao gerar relatório de monitoramento',

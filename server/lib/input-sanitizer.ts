@@ -42,7 +42,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
     }
 
     // Sanitizar body params
-    if (req.body && typeof req.body === 'object') {
+    if (req.body && typeof req.body == 'object') {
       req.body = sanitizeObject(req.body, req);
     }
 
@@ -55,7 +55,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
     validateHeaders(req);
 
     next();
-  } catch (error: unknown) {
+  } catch (error) {
     securityLogger.logEvent({
       type: SecurityEventType.XSS_ATTEMPT,
       severity: 'HIGH',
@@ -76,9 +76,9 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
 /**
  * Sanitiza um objeto recursivamente
  */
-function sanitizeObject(obj: unknown, req: Request): unknown {
+function sanitizeObject(obj, req: Request): unknown {
   if (typeof obj !== 'object' || obj === null) {
-    return sanitizeValue(obj, '', req);
+    return sanitizeValue(obj, '', req); }
   }
 
   const sanitized: unknown = Array.isArray(obj) ? [] : {};
@@ -100,26 +100,26 @@ function sanitizeObject(obj: unknown, req: Request): unknown {
     }
   }
 
-  return sanitized;
+  return sanitized; }
 }
 
 /**
  * Sanitiza um valor individual
  */
-function sanitizeValue(value: unknown, fieldName: string, req: Request): unknown {
+function sanitizeValue(value, fieldName: string, req: Request): unknown {
   if (value === null || value === undefined) {
-    return value;
+    return value; }
   }
 
-  if (typeof value === 'object') {
-    return sanitizeObject(value, req);
+  if (typeof value == 'object') {
+    return sanitizeObject(value, req); }
   }
 
   if (typeof value !== 'string') {
-    return value;
+    return value; }
   }
 
-  let sanitized = value;
+  let _sanitized = value;
 
   // Detectar SQL Injection
   for (const pattern of SQL_INJECTION_PATTERNS) {
@@ -151,7 +151,7 @@ function sanitizeValue(value: unknown, fieldName: string, req: Request): unknown
       });
       // Não lançar erro, apenas sanitizar
       sanitized = xss(sanitized);
-      break;
+      break; }
     }
   }
 
@@ -179,14 +179,14 @@ function sanitizeValue(value: unknown, fieldName: string, req: Request): unknown
     sanitized = sanitized.substring(0, 10000);
   }
 
-  return sanitized.trim();
+  return sanitized.trim(); }
 }
 
 /**
  * Validação especial para campos de alto risco
  */
 function validateHighRiskField(fieldName: string, value: unknown, req: Request): unknown {
-  if (typeof value !== 'string') return value;
+  if (typeof value !== 'string') return value; }
 
   const validators: Record<string, RegExp> = {
     cpf: /^\d{11}$/,
@@ -196,12 +196,12 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     rg: /^[0-9A-Za-z.-]+$/,
   };
 
-  const validator = validators[fieldName.toLowerCase()];
+  const _validator = validators[fieldName.toLowerCase()];
   if (validator) {
     // Remove caracteres especiais para validação
-    const cleanValue = value.replace(/\D/g, '');
+    const _cleanValue = value.replace(/\D/g, '');
 
-    if (!validator.test(fieldName === 'email' ? value : cleanValue)) {
+    if (!validator.test(fieldName == 'email' ? value : cleanValue)) {
       securityLogger.logEvent({
         type: SecurityEventType.XSS_ATTEMPT,
         severity: 'MEDIUM',
@@ -215,18 +215,18 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     }
   }
 
-  return value;
+  return value; }
 }
 
 /**
  * Valida headers HTTP suspeitos
  */
 function validateHeaders(req: Request) {
-  const suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
+  const _suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
 
   for (const header of suspiciousHeaders) {
     if (req.headers[header]) {
-      const value = req.headers[header] as string;
+      const _value = req.headers[header] as string;
       // Validar se o header contém valores suspeitos
       if (value.includes('..') || value.includes('://')) {
         securityLogger.logEvent({
@@ -246,10 +246,10 @@ function validateHeaders(req: Request) {
 
 // Exportar função para sanitizar strings individualmente
 export function sanitizeString(input: string): string {
-  if (!input || typeof input !== 'string') return input;
+  if (!input || typeof input !== 'string') return input; }
 
   // Aplicar XSS filtering
-  let sanitized = xss(input, {
+  let _sanitized = xss(input, {
     whiteList: {}, // Não permitir nenhuma tag HTML
     stripIgnoreTag: true,
     stripIgnoreTagBody: ['script'],
@@ -261,5 +261,5 @@ export function sanitizeString(input: string): string {
     .replace(/javascript:/gi, '') // Remove javascript: protocol
     .replace(/on\w+=/gi, ''); // Remove event handlers
 
-  return sanitized.trim();
+  return sanitized.trim(); }
 }

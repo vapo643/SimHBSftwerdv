@@ -124,7 +124,7 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
       expect(response.body.message).toBe('Email de verificação enviado para o novo endereço');
 
       // In development, we get a debug token
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV == 'development') {
         expect(response.body.debugToken).toBeDefined();
       }
     });
@@ -208,12 +208,12 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
         .get('/api/admin/security/logs?type=EMAIL_CHANGE_REQUESTED')
         .set('Authorization', `Bearer ${authToken}`);
 
-      if (logsResponse.status === 200) {
+      if (logsResponse.status == 200) {
         const logs = logsResponse.body.logs || [];
         const recentLog = logs.find(
           (log: any) =>
-            log.type === 'EMAIL_CHANGE_REQUESTED' &&
-            log.details?.newEmail === 'another-new@example.com'
+            log.type == 'EMAIL_CHANGE_REQUESTED' &&
+            log.details?.newEmail == 'another-new@example.com'
         );
         expect(recentLog).toBeDefined();
       }
@@ -233,12 +233,12 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
         .get('/api/admin/security/logs?type=INVALID_CREDENTIALS')
         .set('Authorization', `Bearer ${authToken}`);
 
-      if (logsResponse.status === 200) {
+      if (logsResponse.status == 200) {
         const logs = logsResponse.body.logs || [];
         const recentLog = logs.find(
           (log: any) =>
-            log.type === 'INVALID_CREDENTIALS' &&
-            log.details?.reason === 'Invalid password for email change'
+            log.type == 'INVALID_CREDENTIALS' &&
+            log.details?.reason == 'Invalid password for email change'
         );
         expect(recentLog).toBeDefined();
       }

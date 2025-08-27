@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  _Form,
+  _FormControl,
+  _FormField,
+  _FormItem,
+  _FormLabel,
+  _FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -21,7 +21,7 @@ import { Mail, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/queryClient';
 
-const emailChangeSchema = z.object({
+const _emailChangeSchema = z.object({
   newEmail: z.string().email('Email inválido'),
   password: z.string().min(1, 'Senha é obrigatória'),
 });
@@ -45,7 +45,7 @@ export default function AlterarEmail() {
   const [verificationToken, setVerificationToken] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
-  const form = useForm<EmailChangeFormData>({
+  const _form = useForm<EmailChangeFormData>({
     resolver: zodResolver(emailChangeSchema),
     defaultValues: {
       newEmail: '',
@@ -60,15 +60,15 @@ export default function AlterarEmail() {
   });
 
   // Request email change mutation
-  const changeEmailMutation = useMutation({
+  const _changeEmailMutation = useMutation({
     mutationFn: async (data: EmailChangeFormData) => {
-      const response = (await apiRequest('/api/auth/change-email', {
+      const _response = (await apiRequest('/api/auth/change-email', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(_data),
       })) as EmailChangeResponse;
-      return response;
+      return response; }
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast({
         title: 'Email de verificação enviado',
         description: 'Verifique seu novo email para confirmar a alteração.',
@@ -82,7 +82,7 @@ export default function AlterarEmail() {
       setPendingEmail(form.getValues('newEmail'));
       form.reset();
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao alterar email',
         description: error.message || 'Ocorreu um erro ao processar sua solicitação',
@@ -92,13 +92,13 @@ export default function AlterarEmail() {
   });
 
   // Verify email change mutation
-  const verifyEmailMutation = useMutation({
+  const _verifyEmailMutation = useMutation({
     mutationFn: async (token: string) => {
-      const response = await apiRequest('/api/auth/verify-email-change', {
+      const _response = await apiRequest('/api/auth/verify-email-change', {
         method: 'POST',
         body: JSON.stringify({ token }),
       });
-      return response;
+      return response; }
     },
     onSuccess: () => {
       toast({
@@ -111,7 +111,7 @@ export default function AlterarEmail() {
         window.location.href = '/login';
       }, 2000);
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao verificar email',
         description: error.message || 'Token inválido ou expirado',
@@ -121,11 +121,11 @@ export default function AlterarEmail() {
     },
   });
 
-  const onSubmit = (data: EmailChangeFormData) => {
-    changeEmailMutation.mutate(data);
+  const _onSubmit = (data: EmailChangeFormData) => {
+    changeEmailMutation.mutate(_data);
   };
 
-  const handleVerifyToken = () => {
+  const _handleVerifyToken = () => {
     if (verificationToken) {
       verifyEmailMutation.mutate(verificationToken);
     }

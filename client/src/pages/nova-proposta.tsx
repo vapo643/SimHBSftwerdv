@@ -15,16 +15,16 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Upload, Search } from 'lucide-react';
 import { MaskedInput } from '@/components/ui/MaskedInput';
 
-const clienteSchema = z.object({
+const _clienteSchema = z.object({
   clienteNome: z
     .string()
     .min(1, 'Nome é obrigatório')
@@ -62,24 +62,24 @@ const clienteSchema = z.object({
   clienteUf: z.string().length(2, 'UF deve ter 2 caracteres').optional(),
 });
 
-const emprestimoSchema = z.object({
+const _emprestimoSchema = z.object({
   valor: z
     .string()
     .min(1, 'Valor é obrigatório')
     .transform((val) => {
-      const num = parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'));
+      const _num = parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'));
       if (isNaN(num) || num < 100) throw new Error('Valor mínimo é R$ 100,00');
       if (num > 1000000) throw new Error('Valor máximo é R$ 1.000.000,00');
-      return num;
+      return num; }
     }),
   prazo: z
     .string()
     .min(1, 'Prazo é obrigatório')
     .transform((val) => {
-      const num = parseInt(val);
+      const _num = parseInt(val);
       if (isNaN(num) || num < 1) throw new Error('Prazo mínimo é 1 mês');
       if (num > 120) throw new Error('Prazo máximo é 120 meses');
-      return num;
+      return num; }
     }),
   finalidade: z.string().min(1, 'Finalidade é obrigatória'),
   garantia: z.string().min(1, 'Garantia é obrigatória'),
@@ -92,11 +92,11 @@ const emprestimoSchema = z.object({
   dadosPagamentoDigito: z.string().optional(),
 });
 
-const documentosSchema = z.object({
+const _documentosSchema = z.object({
   documentos: z.array(z.string()).optional(),
 });
 
-const fullSchema = clienteSchema.merge(emprestimoSchema).merge(documentosSchema);
+const _fullSchema = clienteSchema.merge(emprestimoSchema).merge(documentosSchema);
 
 type PropostaForm = z.infer<typeof fullSchema>;
 
@@ -104,19 +104,19 @@ export default function NovaProposta() {
   const [currentStep, setCurrentStep] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const [isSearchingCpf, setIsSearchingCpf] = useState(false);
 
   const {
-    register,
-    handleSubmit,
+  _register,
+  _handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
-    getValues,
-    reset,
-    setError,
-    clearErrors,
+  _watch,
+  _setValue,
+  _getValues,
+  _reset,
+  _setError,
+  _clearErrors,
   } = useForm<PropostaForm>({
     resolver: zodResolver(fullSchema),
     defaultValues: {
@@ -128,12 +128,12 @@ export default function NovaProposta() {
   // AUTO-SAVE: Salvar dados temporariamente enquanto preenche
   useEffect(() => {
     // Recuperar dados salvos temporariamente ao carregar a página
-    const savedData = localStorage.getItem('proposta_temp');
+    const _savedData = localStorage.getItem('proposta_temp');
     if (savedData) {
       try {
-        const parsed = JSON.parse(savedData);
+        const _parsed = JSON.parse(savedData);
         // IMPORTANTE: Limpa sempre se já foi enviada
-        if (parsed.enviada === true) {
+        if (parsed.enviada == true) {
           localStorage.removeItem('proposta_temp');
           // NÃO restaura dados se já foi enviada
           return;
@@ -148,7 +148,7 @@ export default function NovaProposta() {
           });
         }
       } catch (error) {
-        console.error('Erro ao recuperar dados:', error);
+        console.error('Erro ao recuperar dados:', error: unknown);
         // Em caso de erro, limpa o localStorage corrompido
         localStorage.removeItem('proposta_temp');
       }
@@ -158,41 +158,41 @@ export default function NovaProposta() {
   // Auto-save a cada mudança (com debounce)
   useEffect(() => {
     // Verifica se já foi enviada antes de salvar
-    const checkIfSent = () => {
-      const saved = localStorage.getItem('proposta_temp');
+    const _checkIfSent = () => {
+      const _saved = localStorage.getItem('proposta_temp');
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          return parsed.enviada === true;
+          const _parsed = JSON.parse(saved);
+          return parsed.enviada == true; }
         } catch {
-          return false;
+          return false; }
         }
       }
-      return false;
+      return false; }
     };
 
-    const subscription = watch((data) => {
+    const _subscription = watch((_data) => {
       // NÃO salva se já foi enviada
       if (checkIfSent()) {
         return;
       }
 
       // Salva os dados temporariamente
-      const tempData = {
+      const _tempData = {
         data: data,
         timestamp: new Date().toISOString(),
         enviada: false,
       };
       localStorage.setItem('proposta_temp', JSON.stringify(tempData));
     });
-    return () => subscription.unsubscribe();
+    return () => subscription.unsubscribe(); }
   }, [watch]);
 
   // BUSCA POR CPF: Buscar dados de propostas anteriores do mesmo CPF
-  const buscarDadosPorCpf = useCallback(
+  const _buscarDadosPorCpf = useCallback(
     async (cpf: string) => {
       // Remove formatação do CPF
-      const cpfLimpo = cpf.replace(/\D/g, '');
+      const _cpfLimpo = cpf.replace(/\D/g, '');
 
       if (cpfLimpo.length !== 11) return;
 
@@ -204,7 +204,7 @@ export default function NovaProposta() {
 
         if (response && response.data) {
           // Preenche os campos com os dados encontrados
-          const dadosCliente = response.data.cliente_data || {};
+          const _dadosCliente = response.data.cliente_data || {};
 
           // Preenche todos os campos do cliente
           setValue('clienteNome', dadosCliente.nome || '');
@@ -245,13 +245,13 @@ export default function NovaProposta() {
     [setValue, toast]
   );
 
-  const createProposta = useMutation({
+  const _createProposta = useMutation({
     mutationFn: async (data: PropostaForm) => {
       // Clear previous errors
       clearErrors();
 
       // Map frontend data to backend schema format - STRICT MAPPING
-      const backendData = {
+      const _backendData = {
         // Required fields from createPropostaValidationSchema
         lojaId: Number(JSON.parse(localStorage.getItem('user_context') || '{}').lojaId) || 1,
         clienteNome: data.clienteNome?.trim() || '',
@@ -302,7 +302,7 @@ export default function NovaProposta() {
     },
     onSuccess: () => {
       // MARCA COMO ENVIADA antes de limpar
-      const tempData = {
+      const _tempData = {
         data: {},
         timestamp: new Date().toISOString(),
         enviada: true, // Marca que foi enviada com sucesso
@@ -361,16 +361,16 @@ export default function NovaProposta() {
         setLocation('/dashboard');
       }, 1500);
     },
-    onError: (error: unknown) => {
-      console.error('[VALIDATION ERROR]', error);
+    onError: (error) => {
+      console.error('[VALIDATION ERROR]', error: unknown);
 
       // Se houver erros de validação específicos, destacar os campos
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
-        const validationErrors = error.response.data.errors;
+        const _validationErrors = error.response.data.errors;
 
-        validationErrors.forEach((err: unknown) => {
+        validationErrors.forEach((err) => {
           if (err.path && err.path.length > 0) {
-            const fieldName = err.path[0];
+            const _fieldName = err.path[0];
             console.log(`[FIELD ERROR] ${fieldName}: ${err.message}`);
 
             // Mapear para os campos do formulário e definir erro específico
@@ -402,16 +402,16 @@ export default function NovaProposta() {
     },
   });
 
-  const uploadFile = useMutation({
+  const _uploadFile = useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData();
+      const _formData = new FormData();
       formData.append('file', file);
 
-      const response = await api.post('/api/upload', formData);
-      return response.data;
+      const _response = await api.post('/api/upload', formData);
+      return response.data; }
     },
-    onSuccess: (data) => {
-      const currentDocs = watch('documentos') || [];
+    onSuccess: (_data) => {
+      const _currentDocs = watch('documentos') || [];
       setValue('documentos', [...currentDocs, data.fileName]);
       toast({
         title: 'Documento enviado com sucesso!',
@@ -427,30 +427,30 @@ export default function NovaProposta() {
     },
   });
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const _handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const _file = event.target.files?.[0];
     if (file) {
       uploadFile.mutate(file);
     }
   };
 
-  const nextStep = () => {
+  const _nextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
   };
 
-  const prevStep = () => {
+  const _prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
-  const onSubmit = (data: PropostaForm) => {
-    createProposta.mutate(data);
+  const _onSubmit = (data: PropostaForm) => {
+    createProposta.mutate(_data);
   };
 
-  const steps = [
+  const _steps = [
     { number: 1, title: 'Dados do Cliente' },
     { number: 2, title: 'Condições' },
     { number: 3, title: 'Documentos' },
@@ -500,7 +500,7 @@ export default function NovaProposta() {
               className="progressive-enhancement-form"
             >
               {/* Step 1: Cliente Data */}
-              {currentStep === 1 && (
+              {currentStep == 1 && (
                 <div className="space-y-6">
                   <h3 className="mb-4 text-lg font-semibold text-gray-900">Dados do Cliente</h3>
 
@@ -532,7 +532,7 @@ export default function NovaProposta() {
                           onChange={(value) => {
                             setValue('clienteCpf', value);
                             // Buscar dados quando CPF estiver completo
-                            if (value.replace(/\D/g, '').length === 11) {
+                            if (value.replace(/\D/g, '').length == 11) {
                               buscarDadosPorCpf(value);
                             }
                           }}
@@ -816,7 +816,7 @@ export default function NovaProposta() {
               )}
 
               {/* Step 2: Loan Conditions */}
-              {currentStep === 2 && (
+              {currentStep == 2 && (
                 <div className="space-y-6">
                   <h3 className="mb-4 text-lg font-semibold text-gray-900">
                     Condições do Empréstimo
@@ -952,7 +952,7 @@ export default function NovaProposta() {
                       </div>
                     </div>
 
-                    {watch('dadosPagamentoTipo') === 'pix' && (
+                    {watch('dadosPagamentoTipo') == 'pix' && (
                       <div>
                         <Label htmlFor="dadosPagamentoPix">Chave PIX</Label>
                         <Input
@@ -963,7 +963,7 @@ export default function NovaProposta() {
                       </div>
                     )}
 
-                    {watch('dadosPagamentoTipo') === 'conta_bancaria' && (
+                    {watch('dadosPagamentoTipo') == 'conta_bancaria' && (
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                           <Label htmlFor="dadosPagamentoBanco">Banco</Label>
@@ -1005,7 +1005,7 @@ export default function NovaProposta() {
               )}
 
               {/* Step 3: Documents */}
-              {currentStep === 3 && (
+              {currentStep == 3 && (
                 <div className="space-y-6">
                   <h3 className="mb-4 text-lg font-semibold text-gray-900">Anexo de Documentos</h3>
 
@@ -1054,7 +1054,7 @@ export default function NovaProposta() {
                   type="button"
                   variant="outline"
                   onClick={prevStep}
-                  disabled={currentStep === 1}
+                  disabled={currentStep == 1}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar

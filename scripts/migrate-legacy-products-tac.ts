@@ -35,7 +35,7 @@ async function migrateLegacyProductsTac() {
       `📊 [MIGRAÇÃO TAC] Encontrados ${productsToUpdate.length} produtos sem configuração de TAC`
     );
 
-    if (productsToUpdate.length === 0) {
+    if (productsToUpdate.length == 0) {
       console.log('✅ [MIGRAÇÃO TAC] Nenhum produto precisa de atualização!');
       return;
     }

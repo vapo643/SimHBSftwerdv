@@ -8,20 +8,20 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import {
-  Download,
-  Shield,
-  Target,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Users,
-  FileText,
-  Activity,
-  AlertCircle,
-  RefreshCw,
-  Search,
-  Package,
-  Code,
+  _Download,
+  _Shield,
+  _Target,
+  _CheckCircle2,
+  _AlertTriangle,
+  _Clock,
+  _Users,
+  _FileText,
+  _Activity,
+  _AlertCircle,
+  _RefreshCw,
+  _Search,
+  _Package,
+  _Code,
 } from 'lucide-react';
 import { fetchWithToken } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
@@ -75,7 +75,7 @@ interface SASTResult {
 
 export default function OWASPAssessment() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const [sastFilePath, setSastFilePath] = useState('');
   const [sastScanning, setSastScanning] = useState(false);
   const [_sastResults, setSastResults] = useState<SASTResult[] | null>(null);
@@ -132,7 +132,7 @@ export default function OWASPAssessment() {
   // REMOVIDO: declaração duplicada - agora usando dados reais dos endpoints Cérbero
 
   // ✅ Mutation para rodar análise SCA com dados reais
-  const runSCAMutation = useMutation({
+  const _runSCAMutation = useMutation({
     mutationFn: () =>
       fetchWithToken('/api/security/run-sca', {
         method: 'GET',
@@ -152,7 +152,7 @@ export default function OWASPAssessment() {
   });
 
   // ✅ Mutation para rodar análise SAST com dados reais
-  const runSASTMutation = useMutation({
+  const _runSASTMutation = useMutation({
     mutationFn: () =>
       fetchWithToken('/api/security/run-sast', {
         method: 'GET',
@@ -172,7 +172,7 @@ export default function OWASPAssessment() {
   });
 
   // Função para escanear arquivo com SAST
-  const scanWithSAST = async () => {
+  const _scanWithSAST = async () => {
     if (!sastFilePath.trim()) {
       toast({ title: 'Por favor, insira o caminho do arquivo', variant: 'destructive' });
       return;
@@ -184,16 +184,16 @@ export default function OWASPAssessment() {
     try {
       console.log(`🔍 Iniciando scan SAST para: ${sastFilePath}`);
 
-      const response = await fetchWithToken(
+      const _response = await fetchWithToken(
         `/api/security/mcp/scan/${encodeURIComponent(sastFilePath)}`
       );
 
-      console.log('📊 Resposta do scan SAST:', response);
+      console.log('📊 Resposta do scan SAST:',_response);
 
       if (response && (response as unknown).success && (response as unknown).analysis) {
         // Adaptar o formato da resposta
-        const findings = (response as unknown).analysis.findings || [];
-        const formattedResults = findings.map((finding: unknown) => ({
+        const _findings = (response as unknown).analysis.findings || [];
+        const _formattedResults = findings.map((finding) => ({
           file: sastFilePath,
           line: finding.location?.start?.line || 0,
           column: finding.location?.start?.column || 0,
@@ -212,15 +212,15 @@ export default function OWASPAssessment() {
 
         console.log(`✅ SAST concluído: ${formattedResults.length} problemas encontrados`);
       } else {
-        console.error('❌ Erro na resposta SAST:', response);
+        console.error('❌ Erro na resposta SAST:',_response);
         toast({
           title: 'Erro na análise',
           description: (response as unknown).error || 'Nenhum resultado retornado',
           variant: 'destructive',
         });
       }
-    } catch (_error: unknown) {
-      console.error('❌ Erro ao executar SAST:', _error);
+    } catch (_error) {
+      console.error('❌ Erro ao executar SAST:', _error: unknown);
       toast({
         title: 'Erro ao conectar com Semgrep',
         description: _error.message || 'Erro de conexão',
@@ -231,10 +231,10 @@ export default function OWASPAssessment() {
     }
   };
 
-  const downloadReport = async (type: 'samm' | 'strategic-plan') => {
+  const _downloadReport = async (type: 'samm' | 'strategic-plan') => {
     try {
-      const response = await fetch(
-        `/api/owasp/${type === 'samm' ? 'samm/report' : 'strategic-plan'}`,
+      const _response = await fetch(
+        `/api/owasp/${type == 'samm' ? 'samm/report' : 'strategic-plan'}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('supabase.auth.token')}`,
@@ -244,12 +244,12 @@ export default function OWASPAssessment() {
 
       if (!response.ok) throw new Error('Erro ao baixar relatório');
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const _blob = await response.blob();
+      const _url = window.URL.createObjectURL(blob);
+      const _a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = type === 'samm' ? 'samm_maturity_report.md' : 'owasp_strategic_plan.md';
+      a.download = type == 'samm' ? 'samm_maturity_report.md' : 'owasp_strategic_plan.md';
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -261,31 +261,31 @@ export default function OWASPAssessment() {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const _getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'destructive';
-      case 'MEDIUM':
-        return 'secondary';
-      case 'LOW':
-        return 'outline';
+      case 'HIGH': {
+        return 'destructive'; }
+      case 'MEDIUM': {
+        return 'secondary'; }
+      case 'LOW': {
+        return 'outline'; }
       default:
-        return 'outline';
+        return 'outline'; }
     }
   };
 
-  const getComplianceColor = (compliance: string) => {
+  const _getComplianceColor = (compliance: string) => {
     switch (compliance) {
-      case 'COMPLIANT':
-        return 'default';
-      case 'PARTIAL':
-        return 'secondary';
-      case 'NON_COMPLIANT':
-        return 'destructive';
-      case 'NOT_APPLICABLE':
-        return 'outline';
+      case 'COMPLIANT': {
+        return 'default'; }
+      case 'PARTIAL': {
+        return 'secondary'; }
+      case 'NON_COMPLIANT': {
+        return 'destructive'; }
+      case 'NOT_APPLICABLE': {
+        return 'outline'; }
       default:
-        return 'outline';
+        return 'outline'; }
     }
   };
 
@@ -1407,7 +1407,7 @@ export default function OWASPAssessment() {
                       <div key={domain} className="space-y-2">
                         <h3 className="text-lg font-semibold">{domain}</h3>
                         {sammAssessment
-                          .filter((a) => a.domain === domain)
+                          .filter((a) => a.domain == domain)
                           .map((assessment, index) => (
                             <Card key={index} className="p-4">
                               <div className="mb-2 flex items-center justify-between">
@@ -1668,7 +1668,7 @@ export default function OWASPAssessment() {
                   placeholder="Digite o caminho do arquivo (ex: server/routes.ts)"
                   value={sastFilePath}
                   onChange={(e) => setSastFilePath(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && scanWithSAST()}
+                  onKeyPress={(e) => e.key == 'Enter' && scanWithSAST()}
                   className="flex-1"
                 />
                 <Button onClick={scanWithSAST} disabled={sastScanning}>
@@ -1738,9 +1738,9 @@ export default function OWASPAssessment() {
                         <div
                           key={index}
                           className={`rounded-lg border-l-4 p-3 ${
-                            vuln.severity === 'CRITICAL'
+                            vuln.severity == 'CRITICAL'
                               ? 'border-red-500 bg-red-900/20'
-                              : vuln.severity === 'HIGH'
+                              : vuln.severity == 'HIGH'
                                 ? 'border-orange-500 bg-orange-900/20'
                                 : 'border-yellow-500 bg-yellow-900/20'
                           }`}
@@ -1750,9 +1750,9 @@ export default function OWASPAssessment() {
                               <div className="flex items-center space-x-2">
                                 <Badge
                                   variant={
-                                    vuln.severity === 'CRITICAL'
+                                    vuln.severity == 'CRITICAL'
                                       ? 'destructive'
-                                      : vuln.severity === 'HIGH'
+                                      : vuln.severity == 'HIGH'
                                         ? 'secondary'
                                         : 'outline'
                                   }
@@ -1777,7 +1777,7 @@ export default function OWASPAssessment() {
                   </div>
                 </div>
               ) : sastData?.success &&
-                (!sastData.data?.vulnerabilities || sastData.data.vulnerabilities.length === 0) ? (
+                (!sastData.data?.vulnerabilities || sastData.data.vulnerabilities.length == 0) ? (
                 <Alert className="mt-4">
                   <CheckCircle2 className="h-4 w-4" />
                   <AlertDescription>

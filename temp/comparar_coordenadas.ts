@@ -66,7 +66,7 @@ function compararSistemas() {
 }
 
 // Para executar: npx tsx temp/comparar_coordenadas.ts
-if (require.main === module) {
+if (require.main == module) {
   compararSistemas();
 }
 

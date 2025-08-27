@@ -26,7 +26,7 @@ interface Notificacao {
 
 export function NotificationBell() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   // Buscar notificações a cada 60 segundos
   const { data, isLoading } = useQuery({
@@ -41,11 +41,11 @@ export function NotificationBell() {
     totalNaoLidas: number;
   }
 
-  const notificacoes = (data as NotificationApiResponse)?.notificacoes || [];
-  const totalNaoLidas = (data as NotificationApiResponse)?.totalNaoLidas || 0;
+  const _notificacoes = (data as NotificationApiResponse)?.notificacoes || [];
+  const _totalNaoLidas = (data as NotificationApiResponse)?.totalNaoLidas || 0;
 
   // Mutação para marcar notificação como lida
-  const marcarComoLidaMutation = useMutation({
+  const _marcarComoLidaMutation = useMutation({
     mutationFn: async (id: number) => {
       return await apiRequest(`/api/alertas/notificacoes/${id}/marcar-lida`, {
         method: 'POST',
@@ -55,16 +55,16 @@ export function NotificationBell() {
       queryClient.invalidateQueries({ queryKey: ['/api/alertas/notificacoes'] });
     },
     onError: (error) => {
-      console.error('Erro ao marcar notificação como lida:', error);
+      console.error('Erro ao marcar notificação como lida:', error: unknown);
     },
   });
 
-  const marcarComoLida = (id: number) => {
+  const _marcarComoLida = (id: number) => {
     marcarComoLidaMutation.mutate(id);
   };
 
   // Mutação para marcar todas como lidas
-  const marcarTodasComoLidasMutation = useMutation({
+  const _marcarTodasComoLidasMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('/api/alertas/notificacoes/marcar-todas-lidas', {
         method: 'POST',
@@ -74,12 +74,12 @@ export function NotificationBell() {
       queryClient.invalidateQueries({ queryKey: ['/api/alertas/notificacoes'] });
     },
     onError: (error) => {
-      console.error('Erro ao marcar todas como lidas:', error);
+      console.error('Erro ao marcar todas como lidas:', error: unknown);
     },
   });
 
   // Mutação para limpar histórico (arquivar todas)
-  const limparHistoricoMutation = useMutation({
+  const _limparHistoricoMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('/api/alertas/notificacoes/all', {
         method: 'DELETE',
@@ -90,15 +90,15 @@ export function NotificationBell() {
       queryClient.invalidateQueries({ queryKey: ['/api/alertas/notificacoes'] });
     },
     onError: (error) => {
-      console.error('Erro ao limpar histórico:', error);
+      console.error('Erro ao limpar histórico:', error: unknown);
     },
   });
 
-  const marcarTodasComoLidas = () => {
+  const _marcarTodasComoLidas = () => {
     marcarTodasComoLidasMutation.mutate();
   };
 
-  const limparHistorico = () => {
+  const _limparHistorico = () => {
     limparHistoricoMutation.mutate();
   };
 
@@ -131,7 +131,7 @@ export function NotificationBell() {
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsDropdownOpen(false)}
-            onKeyDown={(e) => e.key === 'Escape' && setIsDropdownOpen(false)}
+            onKeyDown={(e) => e.key == 'Escape' && setIsDropdownOpen(false)}
             role="button"
             tabIndex={0}
             aria-label="Fechar notificações"

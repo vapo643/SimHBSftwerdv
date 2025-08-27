@@ -8,27 +8,27 @@ import { Router, Request, Response } from 'express';
 import { healthService } from '../services/healthService.js';
 import { logInfo, logError, logMetric } from '../lib/logger.js';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/health
  * Comprehensive health check
  */
 router.get('/health', async (req: Request, res: Response) => {
-  const startTime = Date.now();
+  const _startTime = Date.now();
 
   try {
-    const health = await healthService.performHealthCheck();
-    const duration = Date.now() - startTime;
+    const _health = await healthService.performHealthCheck();
+    const _duration = Date.now() - startTime;
 
     logMetric('health_check_duration', duration, 'ms');
     logInfo(`Health check completed: ${health.status}`, { health });
 
-    const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 503 : 500;
+    const _statusCode = health.status == 'healthy' ? 200 : health.status == 'degraded' ? 503 : 500;
 
     res.status(statusCode).json(health);
-  } catch (error: unknown) {
-    const duration = Date.now() - startTime;
+  } catch (error) {
+    const _duration = Date.now() - startTime;
     logError('Health check failed', { error: error.message, duration });
 
     res.status(500).json({
@@ -45,9 +45,9 @@ router.get('/health', async (req: Request, res: Response) => {
  */
 router.get('/health/live', async (req: Request, res: Response) => {
   try {
-    const liveness = await healthService.getLiveness();
+    const _liveness = await healthService.getLiveness();
     res.status(200).json(liveness);
-  } catch (error: unknown) {
+  } catch (error) {
     res.status(500).json({
       status: 'dead',
       timestamp: new Date().toISOString(),
@@ -62,11 +62,11 @@ router.get('/health/live', async (req: Request, res: Response) => {
  */
 router.get('/health/ready', async (req: Request, res: Response) => {
   try {
-    const readiness = await healthService.getReadiness();
-    const statusCode = readiness.ready ? 200 : 503;
+    const _readiness = await healthService.getReadiness();
+    const _statusCode = readiness.ready ? 200 : 503;
 
     res.status(statusCode).json(readiness);
-  } catch (error: unknown) {
+  } catch (error) {
     res.status(503).json({
       ready: false,
       timestamp: new Date().toISOString(),

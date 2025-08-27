@@ -9,7 +9,7 @@ import { db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb-test-v2/generate/:propostaId
@@ -63,8 +63,8 @@ router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
     }
 
     // Gerar CCB com sistema inteligente
-    const service = new CCBGenerationServiceV2();
-    const result = await service.generateCCB(propostaData);
+    const _service = new CCBGenerationServiceV2();
+    const _result = await service.generateCCB(propostaData);
 
     if (!result.success || !result.pdfBytes) {
       return res.status(500).json({
@@ -75,7 +75,7 @@ router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
     }
 
     // Salvar no storage
-    const filePath = await service.saveCCBToStorage(result.pdfBytes, propostaId);
+    const _filePath = await service.saveCCBToStorage(result.pdfBytes, propostaId);
 
     if (!filePath) {
       return res.status(500).json({
@@ -86,14 +86,14 @@ router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
     }
 
     // Gerar URL temporária
-    const publicUrl = await service.getCCBPublicUrl(filePath);
+    const _publicUrl = await service.getCCBPublicUrl(filePath);
 
     console.log(`✅ Teste CCB V2: Sucesso para proposta ${propostaId}`);
 
     res.json({
       success: true,
-      filePath,
-      publicUrl,
+  _filePath,
+  _publicUrl,
       logs: result.logs,
       stats: {
         totalLogs: result.logs?.length || 0,
@@ -103,7 +103,7 @@ router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('❌ Erro no teste CCB V2:', error);
+    console.error('❌ Erro no teste CCB V2:', error: unknown);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -119,7 +119,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
   try {
     const { CCB_FIELD_MAPPING_V2 } = await import('../services/ccbFieldMappingV2');
 
-    const validation = {
+    const _validation = {
       totalFields: Object.keys(CCB_FIELD_MAPPING_V2).length,
       pages: {} as unknown,
       fields: [] as unknown[],
@@ -127,7 +127,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
 
     // Agrupar campos por página
     for (const [fieldName, coord] of Object.entries(CCB_FIELD_MAPPING_V2)) {
-      const pageNum = coord.page;
+      const _pageNum = coord.page;
 
       if (!validation.pages[pageNum]) {
         validation.pages[pageNum] = {
@@ -151,7 +151,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      validation,
+  _validation,
       summary: {
         totalFields: validation.totalFields,
         totalPages: Object.keys(validation.pages).length,
@@ -188,7 +188,7 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
       '../services/ccbFieldMappingV2'
     );
 
-    const fieldCoord = CCB_FIELD_MAPPING_V2[fieldName];
+    const _fieldCoord = CCB_FIELD_MAPPING_V2[fieldName];
 
     if (!fieldCoord) {
       return res.status(404).json({
@@ -198,11 +198,11 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
     }
 
     // Simular ajuste inteligente
-    const adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, fieldCoord);
+    const _adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, fieldCoord);
 
     res.json({
       success: true,
-      fieldName,
+  _fieldName,
       original: {
         x: fieldCoord.x,
         y: fieldCoord.y,
@@ -220,7 +220,7 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
         deltaY: adjustedCoord.y - fieldCoord.y,
         sizeChanged: adjustedCoord.size !== fieldCoord.size,
       },
-      testValue,
+  _testValue,
       label: fieldCoord.label,
       maxWidth: fieldCoord.maxWidth,
     });
@@ -238,7 +238,7 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
  */
 router.get('/comparison', jwtAuthMiddleware, async (req, res) => {
   try {
-    const comparison = {
+    const _comparison = {
       v1: {
         description: 'Sistema original com coordenadas fixas',
         pros: ['Simples e direto', 'Rápido para casos padrão'],
@@ -265,7 +265,7 @@ router.get('/comparison', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      comparison,
+  _comparison,
     });
   } catch (error) {
     res.status(500).json({

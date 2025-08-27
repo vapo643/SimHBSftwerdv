@@ -36,7 +36,7 @@ export class CCBGenerationService {
   async generateCCB(
     proposalId: string
   ): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
-    return this.generateCCBWithAdjustments(proposalId, []);
+    return this.generateCCBWithAdjustments(proposalId, []); }
   }
 
   /**
@@ -51,9 +51,9 @@ export class CCBGenerationService {
       console.log(`📄 [CCB] Template path: ${this.templatePath}`);
 
       // 1. Buscar dados da proposta
-      const proposalData = await this.getProposalData(proposalId);
+      const _proposalData = await this.getProposalData(proposalId);
       if (!proposalData) {
-        return { success: false, error: 'Proposta não encontrada ou dados incompletos' };
+        return { success: false, error: 'Proposta não encontrada ou dados incompletos' }; }
       }
 
       console.log('📄 [CCB] Dados da proposta carregados:', {
@@ -64,19 +64,19 @@ export class CCBGenerationService {
 
       // 2. CARREGAR TEMPLATE PDF EXISTENTE (NÃO criar novo!)
       console.log('📄 [CCB] Carregando template PDF existente...');
-      const templateBytes = await fs.readFile(this.templatePath);
+      const _templateBytes = await fs.readFile(this.templatePath);
       console.log(`📄 [CCB] Template carregado: ${templateBytes.length} bytes`);
-      const pdfDoc = await PDFDocument.load(templateBytes);
+      const _pdfDoc = await PDFDocument.load(templateBytes);
       console.log(`📄 [CCB] PDF carregado: ${pdfDoc.getPageCount()} páginas`);
 
       // 3. Preparar fonte para desenhar texto
-      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const _helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
       // 4. Obter todas as páginas do template
-      const pages = pdfDoc.getPages();
-      const firstPage = pages[0];
-      const secondPage = pages[1] || null;
-      const thirdPage = pages[2] || null;
+      const _pages = pdfDoc.getPages();
+      const _firstPage = pages[0];
+      const _secondPage = pages[1] || null;
+      const _thirdPage = pages[2] || null;
       const { width, height } = firstPage.getSize();
 
       console.log(`📄 [CCB] Dimensões da página: ${width}x${height}`);
@@ -87,11 +87,11 @@ export class CCBGenerationService {
       console.log(`📄 [CCB] Total de campos mapeados: ${Object.keys(USER_CCB_COORDINATES).length}`);
 
       // MAPEAMENTO COMPLETO: CAMPOS CCB → ORIGEM DOS DADOS
-      console.log('📊 [CCB] ========== MAPEAMENTO DE DADOS PARA CCB ==========');
+      console.log('📊 [CCB] ======= MAPEAMENTO DE DADOS PARA CCB =======');
 
       // DADOS PRINCIPAIS (usar campos diretos da tabela propostas)
       // CORREÇÃO 1: Extrair campos de endereço da string concatenada
-      let enderecoParseado = {
+      let _enderecoParseado = {
         logradouro: '',
         numero: '',
         complemento: '',
@@ -102,10 +102,10 @@ export class CCBGenerationService {
       };
 
       // Parse do endereço concatenado se existir
-      const enderecoCompleto = proposalData.cliente_data?.endereco || '';
+      const _enderecoCompleto = proposalData.cliente_data?.endereco || '';
       if (enderecoCompleto) {
         // Exemplo: "Rua Miguel Angelo, 675, Casa, Parque Residencial Laranjeiras, Serra/ES - CEP: 29165-460"
-        const partes = enderecoCompleto.split(',').map((s: string) => s.trim());
+        const _partes = enderecoCompleto.split(',').map((s: string) => s.trim());
 
         if (partes.length >= 4) {
           enderecoParseado.logradouro = partes[0] || ''; // "Rua Miguel Angelo"
@@ -114,8 +114,8 @@ export class CCBGenerationService {
           enderecoParseado.bairro = partes[3] || ''; // "Parque Residencial Laranjeiras"
 
           // Extrair cidade/estado do último elemento
-          const ultimaParte = partes[partes.length - 1] || '';
-          const cidadeEstadoMatch = ultimaParte.match(/([^\/]+)\/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
+          const _ultimaParte = partes[partes.length - 1] || '';
+          const _cidadeEstadoMatch = ultimaParte.match(/([^\/]+)\/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
           if (cidadeEstadoMatch) {
             enderecoParseado.cidade = cidadeEstadoMatch[1].trim();
             enderecoParseado.estado = cidadeEstadoMatch[2].trim();
@@ -123,7 +123,7 @@ export class CCBGenerationService {
           } else if (ultimaParte.includes('/')) {
             const [cidade, resto] = ultimaParte.split('/');
             enderecoParseado.cidade = cidade.trim();
-            const estadoCepMatch = resto.match(/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
+            const _estadoCepMatch = resto.match(/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
             if (estadoCepMatch) {
               enderecoParseado.estado = estadoCepMatch[1].trim();
               enderecoParseado.cep = estadoCepMatch[2].trim();
@@ -134,10 +134,10 @@ export class CCBGenerationService {
 
       // REFATORADO: Remover fallbacks e exigir dados reais
       // Validação de campos obrigatórios
-      const nomeCliente = proposalData.cliente_nome || proposalData.cliente_data?.nome;
-      const cpfCliente = proposalData.cliente_cpf || proposalData.cliente_data?.cpf;
-      const rgCliente = proposalData.cliente_rg || proposalData.cliente_data?.rg;
-      const enderecoCliente = proposalData.cliente_endereco || proposalData.cliente_data?.endereco;
+      const _nomeCliente = proposalData.cliente_nome || proposalData.cliente_data?.nome;
+      const _cpfCliente = proposalData.cliente_cpf || proposalData.cliente_data?.cpf;
+      const _rgCliente = proposalData.cliente_rg || proposalData.cliente_data?.rg;
+      const _enderecoCliente = proposalData.cliente_endereco || proposalData.cliente_data?.endereco;
 
       // Lançar erro se dados críticos estão faltando
       if (!nomeCliente) {
@@ -158,7 +158,7 @@ export class CCBGenerationService {
         );
       }
 
-      const dadosCliente = {
+      const _dadosCliente = {
         // Dados diretos da tabela propostas - sem fallbacks
         nome: nomeCliente,
         cpf: cpfCliente || '',
@@ -207,12 +207,12 @@ export class CCBGenerationService {
         parseado: enderecoParseado,
       });
 
-      // ========================================
+      // ===========================
       // DETECÇÃO INTELIGENTE DO TIPO DE CLIENTE
-      // ========================================
-      const isPJ = !!(proposalData.cliente_data?.razaoSocial || proposalData.cliente_data?.cnpj);
-      const isPF = !isPJ;
-      const tipoCliente = isPJ ? 'PJ' : 'PF';
+      // ===========================
+      const _isPJ = !!(proposalData.cliente_data?.razaoSocial || proposalData.cliente_data?.cnpj);
+      const _isPF = !isPJ;
+      const _tipoCliente = isPJ ? 'PJ' : 'PF';
 
       console.log(`🔍 [CCB] Tipo de Cliente Detectado: ${tipoCliente}`);
       console.log(`🔍 [CCB] isPF: ${isPF}, isPJ: ${isPJ}`);
@@ -225,7 +225,7 @@ export class CCBGenerationService {
       }
 
       // CONDIÇÕES FINANCEIRAS
-      const condicoesFinanceiras = {
+      const _condicoesFinanceiras = {
         valor:
           proposalData.valor ||
           proposalData.valor_aprovado ||
@@ -241,7 +241,7 @@ export class CCBGenerationService {
       };
 
       // REFATORADO: Buscar dados bancários sem fallbacks hardcoded
-      const dadosPagamento = {
+      const _dadosPagamento = {
         codigoBanco:
           proposalData.dados_pagamento_codigo_banco || proposalData.cliente_data?.banco || '',
         banco: proposalData.dados_pagamento_banco || proposalData.cliente_data?.banco || '',
@@ -278,7 +278,7 @@ export class CCBGenerationService {
 
       // DADOS FIXOS DA SIMPIX PARA SEÇÃO II.CREDOR ORIGINÁRIO
       // REGRA DE NEGÓCIO: SEMPRE usar dados da SIMPIX, NUNCA do parceiro
-      const dadosCredorOriginario = {
+      const _dadosCredorOriginario = {
         razaoSocial: 'SIMPIX SOLUCOES E INTERMEDIACOES LTDA',
         cnpj: '42.162.929/0001-67',
         endereco: 'AV PAULO PEREIRA GOMES, 1156',
@@ -297,7 +297,7 @@ export class CCBGenerationService {
       // CORREÇÃO 3: Gerar parcelas se não existirem
       let parcelas: unknown[] = [];
       try {
-        const parcelasResult = await db.execute(sql`
+        const _parcelasResult = await db.execute(sql`
           SELECT 
             numero_parcela,
             data_vencimento,
@@ -311,15 +311,15 @@ export class CCBGenerationService {
         console.log('📊 [CCB] Parcelas encontradas na tabela:', parcelas.length);
 
         // Se não há parcelas, gerar baseado nas condições financeiras
-        if (parcelas.length === 0 && condicoesFinanceiras.prazo > 0) {
+        if (parcelas.length == 0 && condicoesFinanceiras.prazo > 0) {
           console.log('📊 [CCB] Gerando parcelas automaticamente...');
-          const valorParcela =
+          const _valorParcela =
             (condicoesFinanceiras.valorTotalFinanciado || condicoesFinanceiras.valor) /
             condicoesFinanceiras.prazo;
-          const dataBase = new Date();
+          const _dataBase = new Date();
 
-          for (let i = 0; i < condicoesFinanceiras.prazo; i++) {
-            const dataVencimento = new Date(dataBase);
+          for (let _i = 0; i < condicoesFinanceiras.prazo; i++) {
+            const _dataVencimento = new Date(dataBase);
             dataVencimento.setMonth(dataVencimento.getMonth() + i + 1);
 
             parcelas.push({
@@ -338,13 +338,13 @@ export class CCBGenerationService {
         parcelas = [];
       }
 
-      // ========================================
+      // ===========================
       // PÁGINA 1 - DADOS PRINCIPAIS
-      // ========================================
+      // ===========================
 
       // IDENTIFICAÇÃO DA CCB - SOMENTE O NÚMERO SEQUENCIAL (300001, 300002, etc.)
       if (USER_CCB_COORDINATES.numeroCedula) {
-        const numeroCCB = String(proposalData.numero_proposta); // Número sequencial: 300001, 300002, etc.
+        const _numeroCCB = String(proposalData.numero_proposta); // Número sequencial: 300001, 300002, etc.
         firstPage.drawText(numeroCCB, {
           x: USER_CCB_COORDINATES.numeroCedula.x,
           y: USER_CCB_COORDINATES.numeroCedula.y,
@@ -355,8 +355,8 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.dataEmissao) {
-        const dataEmissao = proposalData.ccb_gerado_em || proposalData.created_at;
-        const dataFormatada = format(new Date(dataEmissao), 'dd/MM/yyyy');
+        const _dataEmissao = proposalData.ccb_gerado_em || proposalData.created_at;
+        const _dataFormatada = format(new Date(dataEmissao), 'dd/MM/yyyy');
         firstPage.drawText(dataFormatada, {
           x: USER_CCB_COORDINATES.dataEmissao.x,
           y: USER_CCB_COORDINATES.dataEmissao.y,
@@ -367,7 +367,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.finalidadeOperacao) {
-        const finalidade = proposalData.condicoes_data?.finalidade || 'Empréstimo pessoal';
+        const _finalidade = proposalData.condicoes_data?.finalidade || 'Empréstimo pessoal';
         firstPage.drawText(finalidade, {
           x: USER_CCB_COORDINATES.finalidadeOperacao.x,
           y: USER_CCB_COORDINATES.finalidadeOperacao.y,
@@ -377,10 +377,10 @@ export class CCBGenerationService {
         });
       }
 
-      // ========================================
+      // ===========================
       // CAMPOS ESPECÍFICOS DE PESSOA FÍSICA (PF)
       // Só renderizar se o cliente for PF
-      // ========================================
+      // ===========================
       if (isPF) {
         console.log('📝 [CCB] Renderizando campos específicos de PF...');
 
@@ -461,7 +461,7 @@ export class CCBGenerationService {
           dadosCliente.rgDataEmissao &&
           dadosCliente.rgDataEmissao !== 'NÃO INFORMADO'
         ) {
-          const dataRg = format(new Date(dadosCliente.rgDataEmissao), 'dd/MM/yyyy');
+          const _dataRg = format(new Date(dadosCliente.rgDataEmissao), 'dd/MM/yyyy');
           firstPage.drawText(dataRg, {
             x: USER_CCB_COORDINATES.rgEmissao.x,
             y: USER_CCB_COORDINATES.rgEmissao.y,
@@ -513,10 +513,10 @@ export class CCBGenerationService {
           });
         }
       } else if (isPJ) {
-        // ========================================
+        // ===========================
         // CAMPOS ESPECÍFICOS DE PESSOA JURÍDICA (PJ)
         // Só renderizar se o cliente for PJ
-        // ========================================
+        // ===========================
         console.log('🏢 [CCB] Renderizando campos específicos de PJ...');
 
         // RAZÃO SOCIAL E CNPJ - APENAS PARA PJ (usando as mesmas coordenadas de nome/CPF)
@@ -547,7 +547,7 @@ export class CCBGenerationService {
 
       // ENDEREÇO CLIENTE - APENAS LOGRADOURO + NÚMERO + COMPLEMENTO
       if (USER_CCB_COORDINATES.enderecoCliente) {
-        let enderecoBasico = '';
+        let _enderecoBasico = '';
 
         // USAR ENDEREÇO PARSEADO para extrair apenas a parte básica
         if (enderecoParseado?.logradouro) {
@@ -581,7 +581,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] Endereço básico renderizado:',
-          enderecoBasico,
+  _enderecoBasico,
           'em X:',
           USER_CCB_COORDINATES.enderecoCliente.x,
           'Y:',
@@ -591,7 +591,7 @@ export class CCBGenerationService {
 
       // CEP - Renderizar apenas se existir
       if (USER_CCB_COORDINATES.cepCliente && dadosCliente.cep) {
-        const cepFormatado = this.formatCEP(dadosCliente.cep);
+        const _cepFormatado = this.formatCEP(dadosCliente.cep);
 
         firstPage.drawText(cepFormatado, {
           x: USER_CCB_COORDINATES.cepCliente.x,
@@ -602,7 +602,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] CEP renderizado:',
-          cepFormatado,
+  _cepFormatado,
           'em X:',
           USER_CCB_COORDINATES.cepCliente.x,
           'Y:',
@@ -612,7 +612,7 @@ export class CCBGenerationService {
 
       // CIDADE - Renderizar apenas se existir
       if (USER_CCB_COORDINATES.cidadeCliente && dadosCliente.cidade) {
-        const cidadeValue = dadosCliente.cidade;
+        const _cidadeValue = dadosCliente.cidade;
 
         firstPage.drawText(cidadeValue, {
           x: USER_CCB_COORDINATES.cidadeCliente.x,
@@ -623,7 +623,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] Cidade renderizada:',
-          cidadeValue,
+  _cidadeValue,
           'em X:',
           USER_CCB_COORDINATES.cidadeCliente.x,
           'Y:',
@@ -633,7 +633,7 @@ export class CCBGenerationService {
 
       // UF - Renderizar apenas se existir
       if (USER_CCB_COORDINATES.ufCliente && (dadosCliente.estado || dadosCliente.uf)) {
-        const ufValue = dadosCliente.estado || dadosCliente.uf || '';
+        const _ufValue = dadosCliente.estado || dadosCliente.uf || '';
 
         firstPage.drawText(ufValue, {
           x: USER_CCB_COORDINATES.ufCliente.x,
@@ -644,7 +644,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] UF renderizada:',
-          ufValue,
+  _ufValue,
           'em X:',
           USER_CCB_COORDINATES.ufCliente.x,
           'Y:',
@@ -738,7 +738,7 @@ export class CCBGenerationService {
 
       // CONDIÇÕES FINANCEIRAS
       if (USER_CCB_COORDINATES.valorPrincipal) {
-        const valor = condicoesFinanceiras.valor || 0;
+        const _valor = condicoesFinanceiras.valor || 0;
         firstPage.drawText(this.formatCurrency(valor), {
           x: USER_CCB_COORDINATES.valorPrincipal.x,
           y: USER_CCB_COORDINATES.valorPrincipal.y,
@@ -749,7 +749,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.dataEmissaoCond) {
-        const dataEmissao = format(new Date(), 'dd/MM/yyyy');
+        const _dataEmissao = format(new Date(), 'dd/MM/yyyy');
         firstPage.drawText(dataEmissao, {
           x: USER_CCB_COORDINATES.dataEmissaoCond.x,
           y: USER_CCB_COORDINATES.dataEmissaoCond.y,
@@ -760,7 +760,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.vencimentoParcela && parcelas.length > 0) {
-        const primeiroVenc = format(
+        const _primeiroVenc = format(
           new Date(parcelas[0].data_vencimento || parcelas[0].vencimento),
           'dd/MM/yyyy'
         );
@@ -774,7 +774,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.vencimentoUltimaParcela && parcelas.length > 0) {
-        const ultimoVenc = format(
+        const _ultimoVenc = format(
           new Date(
             parcelas[parcelas.length - 1].data_vencimento ||
               parcelas[parcelas.length - 1].vencimento
@@ -791,7 +791,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.prazoAmortizacao) {
-        const prazo = condicoesFinanceiras.prazo || 12;
+        const _prazo = condicoesFinanceiras.prazo || 12;
         firstPage.drawText(`${prazo} meses`, {
           x: USER_CCB_COORDINATES.prazoAmortizacao.x,
           y: USER_CCB_COORDINATES.prazoAmortizacao.y,
@@ -802,7 +802,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.percentualIndice) {
-        const taxa = condicoesFinanceiras.taxaJuros || 0;
+        const _taxa = condicoesFinanceiras.taxaJuros || 0;
         firstPage.drawText(`${taxa}%`, {
           x: USER_CCB_COORDINATES.percentualIndice.x,
           y: USER_CCB_COORDINATES.percentualIndice.y,
@@ -814,7 +814,7 @@ export class CCBGenerationService {
 
       // TAXAS E ENCARGOS
       if (USER_CCB_COORDINATES.taxaJurosEfetivaMensal) {
-        const taxaMensal = condicoesFinanceiras.taxaJuros || 0;
+        const _taxaMensal = condicoesFinanceiras.taxaJuros || 0;
         firstPage.drawText(`${taxaMensal}% a.m.`, {
           x: USER_CCB_COORDINATES.taxaJurosEfetivaMensal.x,
           y: USER_CCB_COORDINATES.taxaJurosEfetivaMensal.y,
@@ -825,7 +825,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.taxaJurosEfetivaAnual) {
-        const taxaAnual = ((1 + (condicoesFinanceiras.taxaJuros || 0) / 100) ** 12 - 1) * 100;
+        const _taxaAnual = ((1 + (condicoesFinanceiras.taxaJuros || 0) / 100) ** 12 - 1) * 100;
         firstPage.drawText(`${taxaAnual.toFixed(2)}% a.a.`, {
           x: USER_CCB_COORDINATES.taxaJurosEfetivaAnual.x,
           y: USER_CCB_COORDINATES.taxaJurosEfetivaAnual.y,
@@ -836,7 +836,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.iof) {
-        const iof = condicoesFinanceiras.valorIof || 0;
+        const _iof = condicoesFinanceiras.valorIof || 0;
         firstPage.drawText(this.formatCurrency(iof), {
           x: USER_CCB_COORDINATES.iof.x,
           y: USER_CCB_COORDINATES.iof.y,
@@ -847,7 +847,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.pracaPagamento) {
-        const praca = proposalData.cidade_emissao || dadosCliente.cidade || 'São Paulo';
+        const _praca = proposalData.cidade_emissao || dadosCliente.cidade || 'São Paulo';
         firstPage.drawText(praca, {
           x: USER_CCB_COORDINATES.pracaPagamento.x,
           y: USER_CCB_COORDINATES.pracaPagamento.y,
@@ -868,7 +868,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.tac) {
-        const tac = condicoesFinanceiras.valorTac || 0;
+        const _tac = condicoesFinanceiras.valorTac || 0;
         firstPage.drawText(this.formatCurrency(tac), {
           x: USER_CCB_COORDINATES.tac.x,
           y: USER_CCB_COORDINATES.tac.y,
@@ -889,7 +889,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.custoEfetivoTotal) {
-        const cet = condicoesFinanceiras.cet || 0;
+        const _cet = condicoesFinanceiras.cet || 0;
         firstPage.drawText(`${cet}%`, {
           x: USER_CCB_COORDINATES.custoEfetivoTotal.x,
           y: USER_CCB_COORDINATES.custoEfetivoTotal.y,
@@ -900,7 +900,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.dataLiberacaoRecurso) {
-        const dataLib = format(new Date(), 'dd/MM/yyyy');
+        const _dataLib = format(new Date(), 'dd/MM/yyyy');
         firstPage.drawText(dataLib, {
           x: USER_CCB_COORDINATES.dataLiberacaoRecurso.x,
           y: USER_CCB_COORDINATES.dataLiberacaoRecurso.y,
@@ -911,10 +911,10 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.valorLiquidoLiberado) {
-        const valor = condicoesFinanceiras.valor || 0;
-        const iof = condicoesFinanceiras.valorIof || 0;
-        const tac = condicoesFinanceiras.valorTac || 0;
-        const liquido = valor - iof - tac;
+        const _valor = condicoesFinanceiras.valor || 0;
+        const _iof = condicoesFinanceiras.valorIof || 0;
+        const _tac = condicoesFinanceiras.valorTac || 0;
+        const _liquido = valor - iof - tac;
         firstPage.drawText(this.formatCurrency(liquido), {
           x: USER_CCB_COORDINATES.valorLiquidoLiberado.x,
           y: USER_CCB_COORDINATES.valorLiquidoLiberado.y,
@@ -925,10 +925,10 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.valorLiquidoEmissor) {
-        const valor = condicoesFinanceiras.valor || 0;
-        const iof = condicoesFinanceiras.valorIof || 0;
-        const tac = condicoesFinanceiras.valorTac || 0;
-        const liquido = valor - iof - tac - 10; // menos TED
+        const _valor = condicoesFinanceiras.valor || 0;
+        const _iof = condicoesFinanceiras.valorIof || 0;
+        const _tac = condicoesFinanceiras.valorTac || 0;
+        const _liquido = valor - iof - tac - 10; // menos TED
         firstPage.drawText(this.formatCurrency(liquido), {
           x: USER_CCB_COORDINATES.valorLiquidoEmissor.x,
           y: USER_CCB_COORDINATES.valorLiquidoEmissor.y,
@@ -938,13 +938,13 @@ export class CCBGenerationService {
         });
       }
 
-      // ========================================
+      // ===========================
       // PÁGINA 2 - DADOS BANCÁRIOS E PARCELAS
-      // ========================================
+      // ===========================
       if (secondPage) {
-        // ========================================
+        // ===========================
         // DADOS BANCÁRIOS CONDICIONAIS PF/PJ
-        // ========================================
+        // ===========================
         if (isPF) {
           // DADOS BANCÁRIOS PESSOA FÍSICA
           console.log('💳 [CCB] Renderizando dados bancários de PF...');
@@ -1076,19 +1076,19 @@ export class CCBGenerationService {
         // IMPLEMENTAÇÃO CRÍTICA: LOOP PARA AS PARCELAS
         console.log(`📄 [CCB] Iniciando preenchimento de ${parcelas.length} parcelas`);
 
-        for (let i = 0; i < Math.min(parcelas.length, 24); i++) {
-          const parcela = parcelas[i];
-          const parcelaNum = i + 1;
+        for (let _i = 0; i < Math.min(parcelas.length, 24); i++) {
+          const _parcela = parcelas[i];
+          const _parcelaNum = i + 1;
 
           // Determinar qual página usar (1-21 na página 2, 22-24 na página 3)
-          const currentPage = parcelaNum <= 21 ? secondPage : thirdPage;
+          const _currentPage = parcelaNum <= 21 ? secondPage : thirdPage;
 
           if (!currentPage) continue;
 
           // Buscar coordenadas específicas da parcela
-          const numeroKey = `parcela${parcelaNum}Numero`;
-          const vencimentoKey = `parcela${parcelaNum}Vencimento`;
-          const valorKey = `parcela${parcelaNum}Valor`;
+          const _numeroKey = `parcela${parcelaNum}Numero`;
+          const _vencimentoKey = `parcela${parcelaNum}Vencimento`;
+          const _valorKey = `parcela${parcelaNum}Valor`;
 
           // Número da parcela
           if (USER_CCB_COORDINATES[numeroKey]) {
@@ -1106,7 +1106,7 @@ export class CCBGenerationService {
             USER_CCB_COORDINATES[vencimentoKey] &&
             (parcela.data_vencimento || parcela.vencimento)
           ) {
-            const vencFormatado = format(
+            const _vencFormatado = format(
               new Date(parcela.data_vencimento || parcela.vencimento),
               'dd/MM/yyyy'
             );
@@ -1143,14 +1143,14 @@ export class CCBGenerationService {
       console.log(`📄 [CCB] Template Simpix aplicado com sucesso - dados posicionados`);
 
       // 6. Salvar PDF com dados preenchidos
-      const pdfBytes = await pdfDoc.save();
+      const _pdfBytes = await pdfDoc.save();
       console.log('📄 [CCB] PDF preenchido gerado com sucesso');
 
       // 7. Upload para Supabase Storage
-      const fileName = `ccb_${proposalId}_${Date.now()}.pdf`;
-      const filePath = `ccb/${proposalId}/${fileName}`;
+      const _fileName = `ccb_${proposalId}_${Date.now()}.pdf`;
+      const _filePath = `ccb/${proposalId}/${fileName}`;
 
-      const supabaseAdmin = createServerSupabaseAdminClient();
+      const _supabaseAdmin = createServerSupabaseAdminClient();
       const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
         .from('documents')
         .upload(filePath, pdfBytes, {
@@ -1160,7 +1160,7 @@ export class CCBGenerationService {
 
       if (uploadError) {
         console.error('❌ [CCB] Erro no upload:', uploadError);
-        return { success: false, error: 'Erro ao fazer upload do PDF' };
+        return { success: false, error: 'Erro ao fazer upload do PDF' }; }
       }
 
       // 8. Atualizar banco de dados
@@ -1195,9 +1195,9 @@ export class CCBGenerationService {
       console.log(`✅ [CCB] Dados preenchidos: Nome, CPF e Valor`);
       console.log(`✅ [CCB] Próximo passo: Ajustar coordenadas conforme feedback visual`);
 
-      return { success: true, pdfPath: filePath };
+      return { success: true, pdfPath: filePath }; }
     } catch (error) {
-      console.error('❌ [CCB] Erro na geração:', error);
+      console.error('❌ [CCB] Erro na geração:', error: unknown);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -1210,7 +1210,7 @@ export class CCBGenerationService {
    */
   private async getProposalData(proposalId: string): Promise<any | null> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
           p.id,
           p.numero_proposta,
@@ -1264,15 +1264,15 @@ export class CCBGenerationService {
         WHERE p.id = ${proposalId}
       `);
 
-      if (!result || result.length === 0) {
+      if (!result || result.length == 0) {
         console.error('❌ [CCB] Proposta não encontrada');
-        return null;
+        return null; }
       }
 
-      const proposta = result[0] as unknown;
+      const _proposta = result[0] as unknown;
 
       // AUDITORIA COMPLETA DOS DADOS
-      console.log('📊 [CCB] ========== AUDITORIA COMPLETA DE DADOS ==========');
+      console.log('📊 [CCB] ======= AUDITORIA COMPLETA DE DADOS =======');
       console.log('📊 [CCB] ID da Proposta (UUID):', proposta.id);
       console.log('📊 [CCB] Número da Proposta (Sequencial):', proposta.numero_proposta);
       console.log('📊 [CCB] Cliente Nome (direto):', proposta.cliente_nome);
@@ -1298,12 +1298,12 @@ export class CCBGenerationService {
         );
       }
 
-      console.log('📊 [CCB] ========== FIM DA AUDITORIA ==========');
+      console.log('📊 [CCB] ======= FIM DA AUDITORIA =======');
 
       // Validar dados obrigatórios
       if (!proposta.cliente_data || !proposta.condicoes_data) {
         console.error('❌ [CCB] Dados incompletos: cliente_data ou condicoes_data ausentes');
-        return null;
+        return null; }
       }
 
       // Retornar TODOS os dados para uso na geração
@@ -1321,8 +1321,8 @@ export class CCBGenerationService {
         taxa_juros: proposta.condicoes_data?.taxa_juros || 0,
       };
     } catch (error) {
-      console.error('❌ [CCB] Erro ao buscar dados da proposta:', error);
-      return null;
+      console.error('❌ [CCB] Erro ao buscar dados da proposta:', error: unknown);
+      return null; }
     }
   }
 
@@ -1330,37 +1330,37 @@ export class CCBGenerationService {
    * Formata CPF
    */
   private formatCPF(cpf?: string): string {
-    if (!cpf) return '';
-    const cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    if (!cpf) return ''; }
+    const _cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
   }
 
   /**
    * Formata CNPJ
    */
   private formatCNPJ(cnpj?: string): string {
-    if (!cnpj) return '';
-    const cleaned = cnpj.replace(/\D/g, '');
-    return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    if (!cnpj) return ''; }
+    const _cleaned = cnpj.replace(/\D/g, '');
+    return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'); }
   }
 
   /**
    * Formata tipo de conta
    */
   private formatTipoConta(tipo?: string): string {
-    if (!tipo) return 'Corrente';
-    if (tipo === 'conta_corrente') return 'Corrente';
-    if (tipo === 'conta_poupanca') return 'Poupança';
-    return tipo;
+    if (!tipo) return 'Corrente'; }
+    if (tipo == 'conta_corrente') return 'Corrente'; }
+    if (tipo == 'conta_poupanca') return 'Poupança'; }
+    return tipo; }
   }
 
   /**
    * Formata CEP
    */
   private formatCEP(cep?: string): string {
-    if (!cep) return '';
-    const cleaned = cep.replace(/\D/g, '');
-    return cleaned.replace(/(\d{5})(\d{3})/, '$1-$2');
+    if (!cep) return ''; }
+    const _cleaned = cep.replace(/\D/g, '');
+    return cleaned.replace(/(\d{5})(\d{3})/, '$1-$2'); }
   }
 
   /**
@@ -1378,13 +1378,13 @@ export class CCBGenerationService {
    */
   async getPublicUrl(filePath: string): Promise<string | null> {
     try {
-      const supabaseAdmin = createServerSupabaseAdminClient();
+      const _supabaseAdmin = createServerSupabaseAdminClient();
       const { data } = supabaseAdmin.storage.from('documents').getPublicUrl(filePath);
 
-      return data?.publicUrl || null;
+      return data?.publicUrl || null; }
     } catch (error) {
-      console.error('❌ [CCB] Erro ao obter URL pública:', error);
-      return null;
+      console.error('❌ [CCB] Erro ao obter URL pública:', error: unknown);
+      return null; }
     }
   }
 
@@ -1393,20 +1393,20 @@ export class CCBGenerationService {
    */
   async isCCBGenerated(proposalId: string): Promise<boolean> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT ccb_gerado, caminho_ccb
         FROM propostas
         WHERE id = ${proposalId}
       `);
 
-      const proposal = result[0];
-      return proposal?.ccb_gerado === true && !!proposal?.caminho_ccb;
+      const _proposal = result[0];
+      return proposal?.ccb_gerado == true && !!proposal?.caminho_ccb; }
     } catch (error) {
-      console.error('❌ [CCB] Erro ao verificar status:', error);
-      return false;
+      console.error('❌ [CCB] Erro ao verificar status:', error: unknown);
+      return false; }
     }
   }
 }
 
 // Export singleton instance
-export const ccbGenerationService = new CCBGenerationService();
+export const _ccbGenerationService = new CCBGenerationService();

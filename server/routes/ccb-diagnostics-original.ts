@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { ccbDiagnosticsService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb-diagnostics/run
@@ -15,10 +15,10 @@ const router = Router();
  */
 router.post('/run', async (req: Request, res: Response) => {
   try {
-    const result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[CCB_DIAGNOSTICS] Error:', error);
+    const _result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
+    res.json(_result);
+  } catch (error) {
+    console.error('[CCB_DIAGNOSTICS] Error:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Diagnostics failed',
@@ -32,10 +32,10 @@ router.post('/run', async (req: Request, res: Response) => {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const result = await ccbDiagnosticsService.testConnection();
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[CCB_DIAGNOSTICS] Test failed:', error);
+    const _result = await ccbDiagnosticsService.testConnection();
+    res.json(_result);
+  } catch (error) {
+    console.error('[CCB_DIAGNOSTICS] Test failed:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Test failed',
@@ -49,12 +49,12 @@ router.get('/test', async (req: Request, res: Response) => {
  */
 router.get('/report', async (req: Request, res: Response) => {
   try {
-    const report = await ccbDiagnosticsService.executeOperation('generate_report', {
+    const _report = await ccbDiagnosticsService.executeOperation('generate_report', {
       timestamp: new Date().toISOString(),
     });
     res.json(report);
-  } catch (error: unknown) {
-    console.error('[CCB_DIAGNOSTICS] Report generation failed:', error);
+  } catch (error) {
+    console.error('[CCB_DIAGNOSTICS] Report generation failed:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Report generation failed',

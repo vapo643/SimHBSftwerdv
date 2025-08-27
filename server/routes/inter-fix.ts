@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { interFixService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/inter-fix/execute
@@ -15,10 +15,10 @@ const router = Router();
  */
 router.post('/execute', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation('execute_fix', req.body);
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[INTER_FIX] Error:', error);
+    const _result = await interFixService.executeOperation('execute_fix', req.body);
+    res.json(_result);
+  } catch (error) {
+    console.error('[INTER_FIX] Error:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Fix execution failed',
@@ -32,10 +32,10 @@ router.post('/execute', async (req: Request, res: Response) => {
  */
 router.post('/boletos', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation('fix_boletos', req.body);
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[INTER_FIX] Boletos fix failed:', error);
+    const _result = await interFixService.executeOperation('fix_boletos', req.body);
+    res.json(_result);
+  } catch (error) {
+    console.error('[INTER_FIX] Boletos fix failed:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Boletos fix failed',
@@ -49,10 +49,10 @@ router.post('/boletos', async (req: Request, res: Response) => {
  */
 router.post('/collections', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation('fix_collections', req.body);
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[INTER_FIX] Collections fix failed:', error);
+    const _result = await interFixService.executeOperation('fix_collections', req.body);
+    res.json(_result);
+  } catch (error) {
+    console.error('[INTER_FIX] Collections fix failed:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Collections fix failed',
@@ -66,10 +66,10 @@ router.post('/collections', async (req: Request, res: Response) => {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.testConnection();
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[INTER_FIX] Test failed:', error);
+    const _result = await interFixService.testConnection();
+    res.json(_result);
+  } catch (error) {
+    console.error('[INTER_FIX] Test failed:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Test failed',

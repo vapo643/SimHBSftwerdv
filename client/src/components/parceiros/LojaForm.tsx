@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const lojaSchema = z.object({
+const _lojaSchema = z.object({
   nome: z.string().min(3, 'Nome da loja é obrigatório.'),
   endereco: z.string().min(10, 'Endereço é obrigatório.'),
 });
@@ -20,8 +20,8 @@ interface LojaFormProps {
 
 const LojaForm: React.FC<LojaFormProps> = ({ onSubmit, onCancel }) => {
   const {
-    register,
-    handleSubmit,
+  _register,
+  _handleSubmit,
     formState: { errors },
   } = useForm<LojaFormData>({
     resolver: zodResolver(lojaSchema),

@@ -1,30 +1,30 @@
 import { Router } from 'express';
 import { db } from '../lib/supabase';
 import {
-  propostas,
-  parcelas,
-  observacoesCobranca,
-  historicoObservacoesCobranca,
-  interCollections,
-  profiles,
-  solicitacoesModificacao,
-  propostaLogs,
-  statusContextuais, // PAM V1.0 - Importar tabela de status contextuais
+  _propostas,
+  _parcelas,
+  _observacoesCobranca,
+  _historicoObservacoesCobranca,
+  _interCollections,
+  _profiles,
+  _solicitacoesModificacao,
+  _propostaLogs,
+  _statusContextuais, // PAM V1.0 - Importar tabela de status contextuais
 } from '@shared/schema';
 import { eq, and, sql, desc, gte, lte, inArray, or, not } from 'drizzle-orm';
 import { format, parseISO, differenceInDays, isAfter } from 'date-fns';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { maskCPF, maskEmail, maskRG, maskTelefone } from '../utils/masking';
 
-const router = Router();
+const _router = Router();
 
 // GET /api/cobrancas - Lista todas as propostas com informações de cobrança
-router.get('/', async (req: unknown, res) => {
+router.get('/', async (req, res) => {
   try {
     const { status, atraso } = req.query;
-    const userRole = req.user?.role || '';
+    const _userRole = req.user?.role || '';
 
-    console.log('🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======');
+    console.log('🔍 [COBRANÇAS] ==== INÍCIO DA BUSCA DE PROPOSTAS ====');
     console.log('🔍 [COBRANÇAS] Filtros aplicados:', { status, atraso });
 
     // PAM V1.0 REFATORADO: Usar STATUS como fonte da verdade (Blueprint de Negócio V1.0)
@@ -32,7 +32,7 @@ router.get('/', async (req: unknown, res) => {
 
     // REGRA CORRIGIDA: Filtrar por STATUS da proposta, não por EXISTS em inter_collections
     // Status elegíveis para cobrança (após boletos emitidos)
-    const statusElegiveis = [
+    const _statusElegiveis = [
       'BOLETOS_EMITIDOS', // Principal status para cobranças
       'PAGAMENTO_PENDENTE', // Aguardando pagamento
       'PAGAMENTO_PARCIAL', // Pagamento parcial recebido
@@ -41,21 +41,21 @@ router.get('/', async (req: unknown, res) => {
       'pronto_pagamento', // Antigo BOLETOS_EMITIDOS
     ];
 
-    let whereConditions = and(
+    let _whereConditions = and(
       sql`${propostas.deletedAt} IS NULL`,
       inArray(propostas.status, statusElegiveis)
     );
 
     // 🔧 PAM V1.0 - INSTRUMENTAÇÃO BACKEND PONTO 1
     console.log('[DEBUG-BACKEND-1] Iniciando query de cobranças com os seguintes filtros:', {
-      statusElegiveis,
+  _statusElegiveis,
       whereConditions: whereConditions?.toString(),
-      userRole,
+  _userRole,
       queryParams: { status, atraso },
     });
 
     // 🔧 PAM V1.0 - REFATORAÇÃO: Query com JOIN para status contextuais
-    const propostasData = await db
+    const _propostasData = await db
       .select({
         // Campos essenciais da proposta
         id: propostas.id,
@@ -125,7 +125,7 @@ router.get('/', async (req: unknown, res) => {
       .from(propostas)
       // PAM V1.0 - LEFT JOIN com status_contextuais para contexto de cobranças
       .leftJoin(
-        statusContextuais,
+  _statusContextuais,
         and(
           eq(propostas.id, statusContextuais.propostaId),
           eq(statusContextuais.contexto, 'cobrancas')
@@ -183,41 +183,41 @@ router.get('/', async (req: unknown, res) => {
     );
 
     // Para cada proposta, buscar suas parcelas e calcular status de cobrança
-    const propostasComCobranca = await Promise.all(
+    const _propostasComCobranca = await Promise.all(
       propostasData.map(async (proposta) => {
         // Buscar parcelas da proposta
-        const parcelasData = await db
+        const _parcelasData = await db
           .select()
           .from(parcelas)
           .where(eq(parcelas.propostaId, proposta.id))
           .orderBy(parcelas.numeroParcela);
 
         // Buscar TODOS os boletos do Inter Bank para análise (incluindo cancelados)
-        const todosBoletosInter = await db
+        const _todosBoletosInter = await db
           .select()
           .from(interCollections)
           .where(eq(interCollections.propostaId, proposta.id));
 
         // Calcular estatísticas
-        const hoje = new Date();
-        let parcelasVencidas = 0;
-        let parcelasPagas = 0;
-        let parcelasPendentes = 0;
-        let valorTotalPago = 0;
-        let valorTotalPendente = 0;
-        let valorTotalVencido = 0;
-        let diasAtrasoMaximo = 0;
+        const _hoje = new Date();
+        let _parcelasVencidas = 0;
+        let _parcelasPagas = 0;
+        let _parcelasPendentes = 0;
+        let _valorTotalPago = 0;
+        let _valorTotalPendente = 0;
+        let _valorTotalVencido = 0;
+        let _diasAtrasoMaximo = 0;
 
-        const parcelasCompletas = parcelasData.map((parcela) => {
-          const dataVencimento = parseISO(parcela.dataVencimento);
-          const vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
-          const diasAtraso = vencida ? differenceInDays(hoje, dataVencimento) : 0;
+        const _parcelasCompletas = parcelasData.map((parcela) => {
+          const _dataVencimento = parseISO(parcela.dataVencimento);
+          const _vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
+          const _diasAtraso = vencida ? differenceInDays(hoje, dataVencimento) : 0;
 
           if (diasAtraso > diasAtrasoMaximo) {
             diasAtrasoMaximo = diasAtraso;
           }
 
-          if (parcela.status === 'pago') {
+          if (parcela.status == 'pago') {
             parcelasPagas++;
             valorTotalPago += Number(parcela.valorParcela);
           } else if (vencida) {
@@ -229,14 +229,14 @@ router.get('/', async (req: unknown, res) => {
           }
 
           // Adicionar dados do boleto Inter se existir
-          const boletoInter = todosBoletosInter.find(
-            (b) => b.numeroParcela === parcela.numeroParcela
+          const _boletoInter = todosBoletosInter.find(
+            (b) => b.numeroParcela == parcela.numeroParcela
           );
 
           return {
             ...parcela,
-            diasAtraso,
-            vencida,
+  _diasAtraso,
+  _vencida,
             // Dados do Inter Bank
             interPixCopiaECola: boletoInter?.pixCopiaECola,
             interLinhaDigitavel: boletoInter?.linhaDigitavel,
@@ -246,18 +246,18 @@ router.get('/', async (req: unknown, res) => {
         });
 
         // Determinar status geral - só marcar como quitado se todas as parcelas foram pagas
-        let statusCobranca = 'em_dia';
-        if (parcelasPagas === parcelasData.length && parcelasData.length > 0) {
+        let _statusCobranca = 'em_dia';
+        if (parcelasPagas == parcelasData.length && parcelasData.length > 0) {
           statusCobranca = 'quitado';
         } else if (parcelasVencidas > 0) {
           statusCobranca = 'inadimplente';
         }
 
         // Pegar o primeiro boleto Inter ATIVO para mostrar na tabela principal
-        const boletosAtivos = todosBoletosInter.filter(
+        const _boletosAtivos = todosBoletosInter.filter(
           (b) => b.situacao !== 'CANCELADO' && b.situacao !== 'EXPIRADO' && b.isActive
         );
-        const primeiroBoletoPendente =
+        const _primeiroBoletoPendente =
           boletosAtivos.find((b) =>
             ['A_RECEBER', 'ATRASADO', 'EM_PROCESSAMENTO'].includes(b.situacao || '')
           ) || boletosAtivos[0];
@@ -274,12 +274,12 @@ router.get('/', async (req: unknown, res) => {
           valorTotal: Number(proposta.valorTotalFinanciado) || 0,
           valorFinanciado: Number(proposta.valor) || 0,
           quantidadeParcelas: parcelasData.length,
-          parcelasPagas,
-          parcelasPendentes,
-          parcelasVencidas,
-          valorTotalPago,
-          valorTotalPendente,
-          valorTotalVencido,
+  _parcelasPagas,
+  _parcelasPendentes,
+  _parcelasVencidas,
+  _valorTotalPago,
+  _valorTotalPendente,
+  _valorTotalVencido,
           diasAtraso: diasAtrasoMaximo,
           status: statusCobranca,
           dataContrato: proposta.dataAprovacao || proposta.createdAt,
@@ -304,51 +304,51 @@ router.get('/', async (req: unknown, res) => {
 
     // PAM V1.0 REFATORADO: Todas as propostas já foram filtradas por STATUS na query principal
     // Não precisamos mais da lógica de elegibilidade baseada em EXISTS
-    let propostasFiltradas = propostasComCobranca;
+    let _propostasFiltradas = propostasComCobranca;
 
     // FILTRO AUTOMÁTICO PARA USUÁRIOS DE COBRANÇA
     // Usuários com role "COBRANÇA" veem apenas: inadimplentes, em atraso ou que vencem em 3 dias
-    if (userRole === 'COBRANÇA') {
-      const hoje = new Date();
-      const em3Dias = new Date();
+    if (userRole == 'COBRANÇA') {
+      const _hoje = new Date();
+      const _em3Dias = new Date();
       em3Dias.setDate(hoje.getDate() + 3);
 
-      propostasFiltradas = propostasFiltradas.filter((p: unknown) => {
+      propostasFiltradas = propostasFiltradas.filter((p) => {
         // Inadimplentes ou em atraso
-        if (p.status === 'inadimplente' || p.diasAtraso > 0) {
-          return true;
+        if (p.status == 'inadimplente' || p.diasAtraso > 0) {
+          return true; }
         }
 
         // Parcelas que vencem nos próximos 3 dias
-        const temParcelaVencendoEm3Dias = p.parcelas.some((parcela: unknown) => {
-          if (parcela.status === 'pago') return false;
-          const dataVencimento = parseISO(parcela.dataVencimento);
-          return dataVencimento <= em3Dias && dataVencimento >= hoje;
+        const _temParcelaVencendoEm3Dias = p.parcelas.some((parcela) => {
+          if (parcela.status == 'pago') return false; }
+          const _dataVencimento = parseISO(parcela.dataVencimento);
+          return dataVencimento <= em3Dias && dataVencimento >= hoje; }
         });
 
-        return temParcelaVencendoEm3Dias;
+        return temParcelaVencendoEm3Dias; }
       });
     }
 
     // Aplicar filtros manuais da interface (se não for usuário de cobrança ou se for filtro adicional)
-    if (status === 'inadimplente') {
-      propostasFiltradas = propostasFiltradas.filter((p) => p.status === 'inadimplente');
-    } else if (status === 'em_dia') {
-      propostasFiltradas = propostasFiltradas.filter((p) => p.status === 'em_dia');
-    } else if (status === 'quitado') {
-      propostasFiltradas = propostasFiltradas.filter((p) => p.status === 'quitado');
+    if (status == 'inadimplente') {
+      propostasFiltradas = propostasFiltradas.filter((p) => p.status == 'inadimplente');
+    } else if (status == 'em_dia') {
+      propostasFiltradas = propostasFiltradas.filter((p) => p.status == 'em_dia');
+    } else if (status == 'quitado') {
+      propostasFiltradas = propostasFiltradas.filter((p) => p.status == 'quitado');
     }
 
-    if (atraso === '1-15') {
+    if (atraso == '1-15') {
       propostasFiltradas = propostasFiltradas.filter(
         (p) => p.diasAtraso >= 1 && p.diasAtraso <= 15
       );
-    } else if (atraso === '30+') {
+    } else if (atraso == '30+') {
       propostasFiltradas = propostasFiltradas.filter((p) => p.diasAtraso > 30);
     }
 
     console.log(`🔍 [COBRANÇAS] Total de propostas após filtros: ${propostasFiltradas.length}`);
-    console.log('🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======');
+    console.log('🔍 [COBRANÇAS] ==== FIM DA BUSCA DE PROPOSTAS ====');
 
     // 🔧 PAM V1.0 - INSTRUMENTAÇÃO BACKEND PONTO 3
     console.log('[DEBUG-BACKEND-3] Payload FINAL enviado para o Frontend:', {
@@ -365,7 +365,7 @@ router.get('/', async (req: unknown, res) => {
 
     res.json(propostasFiltradas);
   } catch (error) {
-    console.error('Erro ao buscar propostas de cobrança:', error);
+    console.error('Erro ao buscar propostas de cobrança:', error: unknown);
     res.status(500).json({ message: 'Erro ao buscar propostas de cobrança' });
   }
 });
@@ -374,7 +374,7 @@ router.get('/', async (req: unknown, res) => {
 router.get('/kpis', async (req, res) => {
   try {
     // PAM V1.0 REFATORADO: Usar STATUS para KPIs também
-    const statusElegiveis = [
+    const _statusElegiveis = [
       'BOLETOS_EMITIDOS',
       'PAGAMENTO_PENDENTE',
       'PAGAMENTO_PARCIAL',
@@ -382,32 +382,32 @@ router.get('/kpis', async (req, res) => {
       'pronto_pagamento',
     ];
 
-    const propostasData = await db
+    const _propostasData = await db
       .select()
       .from(propostas)
       .where(and(sql`${propostas.deletedAt} IS NULL`, inArray(propostas.status, statusElegiveis)));
 
-    let valorTotalEmAtraso = 0;
-    let quantidadeContratosEmAtraso = 0;
-    let valorTotalCarteira = 0;
-    let quantidadeTotalContratos = propostasData.length;
+    let _valorTotalEmAtraso = 0;
+    let _quantidadeContratosEmAtraso = 0;
+    let _valorTotalCarteira = 0;
+    let _quantidadeTotalContratos = propostasData.length;
 
-    const hoje = new Date();
+    const _hoje = new Date();
 
     // Calcular valores em atraso
     for (const proposta of propostasData) {
       valorTotalCarteira += Number(proposta.valorTotalFinanciado) || 0;
 
-      const parcelasData = await db
+      const _parcelasData = await db
         .select()
         .from(parcelas)
         .where(eq(parcelas.propostaId, proposta.id));
 
-      let temParcelaVencida = false;
+      let _temParcelaVencida = false;
 
       for (const parcela of parcelasData) {
-        const dataVencimento = parseISO(parcela.dataVencimento);
-        const vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
+        const _dataVencimento = parseISO(parcela.dataVencimento);
+        const _vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
 
         if (vencida) {
           valorTotalEmAtraso += Number(parcela.valorParcela);
@@ -420,20 +420,20 @@ router.get('/kpis', async (req, res) => {
       }
     }
 
-    const taxaInadimplencia =
+    const _taxaInadimplencia =
       quantidadeTotalContratos > 0
         ? (quantidadeContratosEmAtraso / quantidadeTotalContratos) * 100
         : 0;
 
     res.json({
-      valorTotalEmAtraso,
-      quantidadeContratosEmAtraso,
-      valorTotalCarteira,
-      quantidadeTotalContratos,
+  _valorTotalEmAtraso,
+  _quantidadeContratosEmAtraso,
+  _valorTotalCarteira,
+  _quantidadeTotalContratos,
       taxaInadimplencia: taxaInadimplencia.toFixed(2),
     });
   } catch (error) {
-    console.error('Erro ao calcular KPIs:', error);
+    console.error('Erro ao calcular KPIs:', error: unknown);
     res.status(500).json({ message: 'Erro ao calcular KPIs' });
   }
 });
@@ -444,7 +444,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
     const { propostaId } = req.params;
 
     // Buscar dados da proposta com status contextual
-    const result = await db
+    const _result = await db
       .select({
         // Seleção específica de campos (não spread)
         id: propostas.id,
@@ -479,7 +479,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
       .from(propostas)
       // PAM V1.0 - LEFT JOIN com status_contextuais para contexto de cobranças
       .leftJoin(
-        statusContextuais,
+  _statusContextuais,
         and(
           eq(propostas.id, statusContextuais.propostaId),
           eq(statusContextuais.contexto, 'cobrancas')
@@ -491,21 +491,21 @@ router.get('/:propostaId/ficha', async (req, res) => {
     const [proposta] = result;
 
     if (!proposta) {
-      return res.status(404).json({ message: 'Proposta não encontrada' });
+      return res.status(404).json({ message: 'Proposta não encontrada' }); }
     }
 
     // Referências pessoais
     const referencias: unknown[] = [];
 
     // Buscar observações/histórico
-    const observacoesRaw = await db
+    const _observacoesRaw = await db
       .select()
       .from(historicoObservacoesCobranca)
       .where(eq(historicoObservacoesCobranca.propostaId, propostaId))
       .orderBy(desc(historicoObservacoesCobranca.createdAt));
 
     // Mapear observações para o formato esperado pelo frontend
-    const observacoes = observacoesRaw.map((obs) => ({
+    const _observacoes = observacoesRaw.map((obs) => ({
       id: obs.id,
       observacao: obs.mensagem,
       userName: obs.criadoPor,
@@ -516,13 +516,13 @@ router.get('/:propostaId/ficha', async (req, res) => {
     }));
 
     // Buscar parcelas e boletos
-    const parcelasData = await db
+    const _parcelasData = await db
       .select()
       .from(parcelas)
       .where(eq(parcelas.propostaId, propostaId))
       .orderBy(parcelas.numeroParcela);
 
-    const boletosInter = await db
+    const _boletosInter = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
@@ -530,27 +530,27 @@ router.get('/:propostaId/ficha', async (req, res) => {
     // **PAM V1.0 - FASE 3 REFATORADO:** Removida sincronização em tempo real - usar dados do banco
 
     // Calcular estatísticas
-    const hoje = new Date();
-    const parcelasDetalhadas = parcelasData.map((parcela) => {
-      const dataVencimento = parseISO(parcela.dataVencimento);
-      const vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
-      const diasAtraso = vencida ? differenceInDays(hoje, dataVencimento) : 0;
+    const _hoje = new Date();
+    const _parcelasDetalhadas = parcelasData.map((parcela) => {
+      const _dataVencimento = parseISO(parcela.dataVencimento);
+      const _vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
+      const _diasAtraso = vencida ? differenceInDays(hoje, dataVencimento) : 0;
 
-      const boletoInter = boletosInter.find((b) => b.numeroParcela === parcela.numeroParcela);
+      const _boletoInter = boletosInter.find((b) => b.numeroParcela == parcela.numeroParcela);
 
       // **PAM V1.0 - FASE 4 CORRIGIDO:** Usar parcela.status como fonte da verdade primária
       // BUG CORRIGIDO: Priorizar status da tabela parcelas sobre inter_collections
-      const statusParcela = parcela.status; // Fonte da verdade primária
-      const situacaoInter = boletoInter?.situacao || 'EM_PROCESSAMENTO';
+      const _statusParcela = parcela.status; // Fonte da verdade primária
+      const _situacaoInter = boletoInter?.situacao || 'EM_PROCESSAMENTO';
 
       // Mapear status da parcela para exibição consistente
-      const statusExibicao = statusParcela === 'pago' ? 'PAGO' : situacaoInter;
+      const _statusExibicao = statusParcela == 'pago' ? 'PAGO' : situacaoInter;
 
       // PAM V1.0 - FASE 1: Correção do mapeamento de campos
       return {
         ...parcela,
-        diasAtraso,
-        vencida,
+  _diasAtraso,
+  _vencida,
         // Campos corrigidos para match com frontend
         pixCopiaECola: boletoInter?.pixCopiaECola,
         linhaDigitavel: boletoInter?.linhaDigitavel,
@@ -561,7 +561,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
       };
     });
 
-    const ficha = {
+    const _ficha = {
       // Dados do cliente - COM MASCARAMENTO PII
       cliente: {
         nome: proposta.clienteNome,
@@ -584,7 +584,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
         titular: proposta.dadosPagamentoNomeTitular,
       },
       // Referências
-      referencias,
+  _referencias,
       // Dados do contrato
       contrato: {
         numeroContrato: propostaId.slice(0, 8).toUpperCase(),
@@ -599,15 +599,15 @@ router.get('/:propostaId/ficha', async (req, res) => {
       // Parcelas
       parcelas: parcelasDetalhadas,
       // Observações/Histórico
-      observacoes,
+  _observacoes,
       // Resumo financeiro
       resumoFinanceiro: {
         totalParcelas: parcelasData.length,
-        parcelasPagas: parcelasData.filter((p) => p.status === 'pago').length,
+        parcelasPagas: parcelasData.filter((p) => p.status == 'pago').length,
         parcelasVencidas: parcelasDetalhadas.filter((p) => p.vencida).length,
-        parcelasPendentes: parcelasData.filter((p) => p.status === 'pendente').length,
+        parcelasPendentes: parcelasData.filter((p) => p.status == 'pendente').length,
         valorTotalPago: parcelasData
-          .filter((p) => p.status === 'pago')
+          .filter((p) => p.status == 'pago')
           .reduce((acc, p) => acc + Number(p.valorParcela), 0),
         valorTotalVencido: parcelasDetalhadas
           .filter((p) => p.vencida)
@@ -620,7 +620,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
 
     res.json(ficha);
   } catch (error) {
-    console.error('Erro ao buscar ficha do cliente:', error);
+    console.error('Erro ao buscar ficha do cliente:', error: unknown);
     res.status(500).json({ message: 'Erro ao buscar ficha do cliente' });
   }
 });
@@ -628,13 +628,13 @@ router.get('/:propostaId/ficha', async (req, res) => {
 // PAM V1.0 - FASE 3: Endpoint para marcar parcela como paga manualmente
 router.patch(
   '/parcelas/:codigoSolicitacao/marcar-pago',
-  jwtAuthMiddleware,
-  async (req: unknown, res) => {
+  _jwtAuthMiddleware,
+  async (req, res) => {
     try {
       const { codigoSolicitacao } = req.params;
-      const userId = req.user?.id;
-      const userRole = req.user?.role;
-      const userName = req.user?.name || 'Sistema';
+      const _userId = req.user?.id;
+      const _userRole = req.user?.role;
+      const _userName = req.user?.name || 'Sistema';
 
       // Verificar permissões - apenas ADMINISTRADOR, FINANCEIRO ou COBRADOR
       if (!['ADMINISTRADOR', 'FINANCEIRO', 'COBRADOR'].includes(userRole || '')) {
@@ -651,7 +651,7 @@ router.patch(
         .limit(1);
 
       if (!boletoInter) {
-        return res.status(404).json({ error: 'Parcela não encontrada' });
+        return res.status(404).json({ error: 'Parcela não encontrada' }); }
       }
 
       // Atualizar status para PAGO
@@ -691,67 +691,67 @@ router.patch(
       res.json({
         success: true,
         message: 'Parcela marcada como paga com sucesso',
-        codigoSolicitacao,
+  _codigoSolicitacao,
         numeroParcela: boletoInter.numeroParcela,
       });
     } catch (error) {
-      console.error('[COBRANCAS] Erro ao marcar parcela como paga:', error);
+      console.error('[COBRANCAS] Erro ao marcar parcela como paga:', error: unknown);
       res.status(500).json({ error: 'Erro ao processar solicitação' });
     }
   }
 );
 
 // POST /api/cobrancas/:propostaId/observacao - Adicionar observação
-router.post('/:propostaId/observacao', async (req: unknown, res) => {
+router.post('/:propostaId/observacao', async (req, res) => {
   try {
     const { propostaId } = req.params;
     const { observacao, tipoContato, statusPromessa, dataPromessaPagamento } = req.body;
-    const userId = req.user?.id;
-    const userName = req.user?.name || 'Sistema';
+    const _userId = req.user?.id;
+    const _userName = req.user?.name || 'Sistema';
 
     if (!observacao) {
-      return res.status(400).json({ message: 'Observação é obrigatória' });
+      return res.status(400).json({ message: 'Observação é obrigatória' }); }
     }
 
-    const novaObservacao = await db
+    const _novaObservacao = await db
       .insert(observacoesCobranca)
       .values({
-        propostaId,
+  _propostaId,
         userId: userId || '00000000-0000-0000-0000-000000000000',
-        userName,
-        observacao,
-        tipoContato,
-        statusPromessa,
+  _userName,
+  _observacao,
+  _tipoContato,
+  _statusPromessa,
         dataPromessaPagamento: dataPromessaPagamento ? new Date(dataPromessaPagamento) : null,
       })
       .returning();
 
     res.json(novaObservacao[0]);
   } catch (error) {
-    console.error('Erro ao adicionar observação:', error);
+    console.error('Erro ao adicionar observação:', error: unknown);
     res.status(500).json({ message: 'Erro ao adicionar observação' });
   }
 });
 
 // GET /api/cobrancas/inter-sumario - Obter sumário financeiro do Banco Inter
-router.get('/inter-sumario', async (req: unknown, res) => {
+router.get('/inter-sumario', async (req, res) => {
   try {
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-SUMARIO] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' });
+      return res.status(403).json({ message: 'Acesso negado' }); }
     }
 
     const { interBankService } = await import('../services/interBankService');
 
     // Calcular período de 30 dias
-    const dataFinal = new Date();
-    const dataInicial = new Date();
+    const _dataFinal = new Date();
+    const _dataInicial = new Date();
     dataInicial.setDate(dataInicial.getDate() - 30);
 
-    const sumario = await interBankService.obterSumarioCobrancas({
+    const _sumario = await interBankService.obterSumarioCobrancas({
       dataInicial: dataInicial.toISOString().split('T')[0],
       dataFinal: dataFinal.toISOString().split('T')[0],
       filtrarDataPor: 'VENCIMENTO',
@@ -759,33 +759,33 @@ router.get('/inter-sumario', async (req: unknown, res) => {
 
     res.json(sumario);
   } catch (error) {
-    console.error('Erro ao obter sumário do Inter:', error);
+    console.error('Erro ao obter sumário do Inter:', error: unknown);
     res.status(500).json({ message: 'Erro ao obter sumário financeiro' });
   }
 });
 
 // POST /api/cobrancas/inter-sync-all - Sincronizar todos os boletos de uma proposta com Banco Inter
-router.post('/inter-sync-all', jwtAuthMiddleware, async (req: unknown, res) => {
+router.post('/inter-sync-all', jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.body;
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     console.log(`[INTER-SYNC-ALL] Usuario: ${req.user?.id}, Role: ${userRole}`);
 
     // Verificar se usuário tem permissão
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-SYNC-ALL] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' });
+      return res.status(403).json({ message: 'Acesso negado' }); }
     }
 
     if (!propostaId) {
-      return res.status(400).json({ message: 'ID da proposta é obrigatório' });
+      return res.status(400).json({ message: 'ID da proposta é obrigatório' }); }
     }
 
     console.log(`[INTER-SYNC-ALL] Iniciando sincronização para proposta: ${propostaId}`);
 
     // Buscar todos os boletos da proposta
-    const boletos = await db
+    const _boletos = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
@@ -793,8 +793,8 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req: unknown, res) => {
     console.log(`[INTER-SYNC-ALL] Encontrados ${boletos.length} boletos para sincronizar`);
 
     const { interBankService } = await import('../services/interBankService');
-    let atualizados = 0;
-    let erros = 0;
+    let _atualizados = 0;
+    let _erros = 0;
 
     // Atualizar cada boleto
     for (const boleto of boletos) {
@@ -804,10 +804,10 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req: unknown, res) => {
         console.log(`[INTER-SYNC-ALL] Sincronizando boleto: ${boleto.codigoSolicitacao}`);
 
         // Buscar status atualizado no Inter
-        const cobranca = await interBankService.recuperarCobranca(boleto.codigoSolicitacao);
+        const _cobranca = await interBankService.recuperarCobranca(boleto.codigoSolicitacao);
 
         if (cobranca && cobranca.cobranca) {
-          const novoStatus = cobranca.cobranca.situacao;
+          const _novoStatus = cobranca.cobranca.situacao;
 
           console.log(
             `[INTER-SYNC-ALL] Boleto ${boleto.codigoSolicitacao}: ${boleto.situacao} → ${novoStatus}`
@@ -831,21 +831,21 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req: unknown, res) => {
               case 'RECEBIDO': // Pagamento confirmado
               case 'MARCADO_RECEBIDO': // Marcado como recebido manualmente
                 novoStatusParcela = 'pago';
-                break;
+                break; }
               case 'CANCELADO': // Boleto cancelado
               case 'EXPIRADO': // Boleto expirado
               case 'FALHA_EMISSAO': // Falha na emissão
                 novoStatusParcela = 'cancelado';
-                break;
+                break; }
               case 'ATRASADO': // Vencido e em atraso
               case 'PROTESTO': // Em protesto
                 novoStatusParcela = 'vencido';
-                break;
+                break; }
               case 'A_RECEBER': // Aguardando pagamento
               case 'EM_PROCESSAMENTO': // Processando
               default:
                 novoStatusParcela = 'pendente';
-                break;
+                break; }
             }
 
             const updateData: unknown = {
@@ -853,7 +853,7 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req: unknown, res) => {
               updatedAt: new Date(),
             };
 
-            if (novoStatusParcela === 'pago' && cobranca.cobranca.dataSituacao) {
+            if (novoStatusParcela == 'pago' && cobranca.cobranca.dataSituacao) {
               updateData.dataPagamento = cobranca.cobranca.dataSituacao;
             }
 
@@ -887,25 +887,25 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req: unknown, res) => {
       success: true,
       message: `Sincronização concluída: ${atualizados} boletos atualizados`,
       totalBoletos: boletos.length,
-      atualizados,
-      erros,
+  _atualizados,
+  _erros,
     });
   } catch (error) {
-    console.error('[INTER-SYNC-ALL] Erro:', error);
+    console.error('[INTER-SYNC-ALL] Erro:', error: unknown);
     res.status(500).json({ message: 'Erro ao sincronizar boletos' });
   }
 });
 
 // GET /api/cobrancas/inter-status/:codigoSolicitacao - Obter status individual do boleto no Banco Inter
-router.get('/inter-status/:codigoSolicitacao', async (req: unknown, res) => {
+router.get('/inter-status/:codigoSolicitacao', async (req, res) => {
   try {
     const { codigoSolicitacao } = req.params;
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[INTER-STATUS] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' });
+      return res.status(403).json({ message: 'Acesso negado' }); }
     }
 
     const { interBankService } = await import('../services/interBankService');
@@ -913,13 +913,13 @@ router.get('/inter-status/:codigoSolicitacao', async (req: unknown, res) => {
     console.log(`[INTER-STATUS] Buscando status para boleto: ${codigoSolicitacao}`);
 
     // Buscar dados atualizados da cobrança no Inter
-    const cobranca = await interBankService.recuperarCobranca(codigoSolicitacao);
+    const _cobranca = await interBankService.recuperarCobranca(codigoSolicitacao);
 
     console.log(`[INTER-STATUS] Status recebido do Inter: ${cobranca?.cobranca?.situacao}`);
 
     // Atualizar status no banco local
     if (cobranca && cobranca.cobranca) {
-      const novoStatus = cobranca.cobranca.situacao;
+      const _novoStatus = cobranca.cobranca.situacao;
 
       // Atualizar inter_collections
       await db
@@ -945,25 +945,25 @@ router.get('/inter-status/:codigoSolicitacao', async (req: unknown, res) => {
 
         // Mapear status do Inter para status da parcela
         switch (novoStatus) {
-          case 'RECEBIDO':
-          case 'MARCADO_RECEBIDO':
+          case 'RECEBIDO': {
+          case 'MARCADO_RECEBIDO': {
             novoStatusParcela = 'pago';
-            break;
-          case 'CANCELADO':
-          case 'EXPIRADO':
-          case 'FALHA_EMISSAO':
+            break; }
+          case 'CANCELADO': {
+          case 'EXPIRADO': {
+          case 'FALHA_EMISSAO': {
             novoStatusParcela = 'cancelado';
-            break;
-          case 'VENCIDO':
-          case 'ATRASADO':
-          case 'PROTESTO':
+            break; }
+          case 'VENCIDO': {
+          case 'ATRASADO': {
+          case 'PROTESTO': {
             novoStatusParcela = 'vencido';
-            break;
-          case 'A_RECEBER':
-          case 'EM_PROCESSAMENTO':
+            break; }
+          case 'A_RECEBER': {
+          case 'EM_PROCESSAMENTO': {
           default:
             novoStatusParcela = 'pendente';
-            break;
+            break; }
         }
 
         console.log(
@@ -976,7 +976,7 @@ router.get('/inter-status/:codigoSolicitacao', async (req: unknown, res) => {
         };
 
         // Se foi pago, adicionar data de pagamento
-        if (novoStatusParcela === 'pago' && cobranca.cobranca.dataSituacao) {
+        if (novoStatusParcela == 'pago' && cobranca.cobranca.dataSituacao) {
           updateData.dataPagamento = cobranca.cobranca.dataSituacao;
         }
 
@@ -993,7 +993,7 @@ router.get('/inter-status/:codigoSolicitacao', async (req: unknown, res) => {
     }
 
     res.json({
-      codigoSolicitacao,
+  _codigoSolicitacao,
       situacao: cobranca?.cobranca?.situacao || 'DESCONHECIDO',
       valorNominal: cobranca?.cobranca?.valorNominal,
       valorTotalRecebido: cobranca?.cobranca?.valorTotalRecebido,
@@ -1003,21 +1003,21 @@ router.get('/inter-status/:codigoSolicitacao', async (req: unknown, res) => {
       codigoBarras: cobranca?.boleto?.codigoBarras,
     });
   } catch (error) {
-    console.error('Erro ao obter status do boleto:', error);
+    console.error('Erro ao obter status do boleto:', error: unknown);
     res.status(500).json({ message: 'Erro ao obter status do boleto' });
   }
 });
 
 // POST /api/cobrancas/sincronizar/:propostaId - Sincronizar status de todos os boletos de uma proposta
-router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req: unknown, res) => {
+router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     // Verificar permissão
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
       console.log('[SYNC] Acesso negado - Role:', userRole);
-      return res.status(403).json({ message: 'Acesso negado' });
+      return res.status(403).json({ message: 'Acesso negado' }); }
     }
 
     console.log(`[SYNC] Iniciando sincronização para proposta ${propostaId}`);
@@ -1026,9 +1026,9 @@ router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req: unknown, 
     const { boletoStatusService } = await import('../services/boletoStatusService');
 
     // Executar sincronização
-    const result = await boletoStatusService.sincronizarStatusParcelas(propostaId);
+    const _result = await boletoStatusService.sincronizarStatusParcelas(propostaId);
 
-    console.log(`[SYNC] Resultado:`, result);
+    console.log(`[SYNC] Resultado:`,_result);
 
     res.json({
       success: result.success,
@@ -1037,7 +1037,7 @@ router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req: unknown, 
       erros: result.errors,
     });
   } catch (error) {
-    console.error('[SYNC] Erro ao sincronizar:', error);
+    console.error('[SYNC] Erro ao sincronizar:', error: unknown);
     res.status(500).json({
       success: false,
       message: 'Erro ao sincronizar status dos boletos',
@@ -1049,7 +1049,7 @@ router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req: unknown, 
 router.get('/exportar/inadimplentes', async (req, res) => {
   try {
     // PAM V1.0: Buscar apenas propostas inadimplentes com boletos (regra consistente)
-    const propostasData = await db
+    const _propostasData = await db
       .select()
       .from(propostas)
       .where(
@@ -1064,27 +1064,27 @@ router.get('/exportar/inadimplentes', async (req, res) => {
         )
       );
 
-    const inadimplentes = [];
-    const hoje = new Date();
+    const _inadimplentes = [];
+    const _hoje = new Date();
 
     for (const proposta of propostasData) {
-      const parcelasData = await db
+      const _parcelasData = await db
         .select()
         .from(parcelas)
         .where(eq(parcelas.propostaId, proposta.id))
         .orderBy(parcelas.numeroParcela);
 
       // Encontrar parcelas vencidas
-      const parcelasVencidas = parcelasData.filter((parcela) => {
-        const dataVencimento = parseISO(parcela.dataVencimento);
-        return isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
+      const _parcelasVencidas = parcelasData.filter((parcela) => {
+        const _dataVencimento = parseISO(parcela.dataVencimento);
+        return isAfter(hoje, dataVencimento) && parcela.status !== 'pago'; }
       });
 
       if (parcelasVencidas.length > 0) {
         // Pegar a parcela mais antiga vencida
-        const parcelaMaisAntiga = parcelasVencidas[0];
-        const dataVencimento = parseISO(parcelaMaisAntiga.dataVencimento);
-        const diasAtraso = differenceInDays(hoje, dataVencimento);
+        const _parcelaMaisAntiga = parcelasVencidas[0];
+        const _dataVencimento = parseISO(parcelaMaisAntiga.dataVencimento);
+        const _diasAtraso = differenceInDays(hoje, dataVencimento);
 
         inadimplentes.push({
           Nome: proposta.clienteNome || '',
@@ -1109,12 +1109,12 @@ router.get('/exportar/inadimplentes', async (req, res) => {
 
     // Retornar dados em JSON para o frontend processar
     res.json({
-      inadimplentes,
+  _inadimplentes,
       total: inadimplentes.length,
       dataExportacao: format(new Date(), 'dd/MM/yyyy HH:mm'),
     });
   } catch (error) {
-    console.error('Erro ao exportar inadimplentes:', error);
+    console.error('Erro ao exportar inadimplentes:', error: unknown);
     res.status(500).json({ message: 'Erro ao exportar inadimplentes' });
   }
 });
@@ -1127,14 +1127,14 @@ router.get('/exportar/inadimplentes', async (req, res) => {
  */
 router.post(
   '/boletos/:codigoSolicitacao/solicitar-prorrogacao',
-  jwtAuthMiddleware,
-  async (req: unknown, res) => {
+  _jwtAuthMiddleware,
+  async (req, res) => {
     try {
       const { codigoSolicitacao } = req.params;
       const { novaDataVencimento, observacao } = req.body;
-      const userRole = req.user?.role;
-      const userId = req.user?.id;
-      const userName = req.user?.fullName || req.user?.email;
+      const _userRole = req.user?.role;
+      const _userId = req.user?.id;
+      const _userName = req.user?.fullName || req.user?.email;
 
       // Blueprint V2.0: Apenas COBRANCA e ADMINISTRADOR podem solicitar
       if (!userRole || !['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA'].includes(userRole)) {
@@ -1154,7 +1154,7 @@ router.post(
       }
 
       // Validar formato da data
-      const dataVencimento = new Date(novaDataVencimento);
+      const _dataVencimento = new Date(novaDataVencimento);
       if (isNaN(dataVencimento.getTime())) {
         return res.status(400).json({
           error: 'Data inválida',
@@ -1163,7 +1163,7 @@ router.post(
       }
 
       // Data não pode ser no passado
-      const hoje = new Date();
+      const _hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
       if (dataVencimento < hoje) {
         return res.status(400).json({
@@ -1199,7 +1199,7 @@ router.post(
       }
 
       // Blueprint V2.0: Se for ADMINISTRADOR ou SUPERVISOR_COBRANCA, aprova automaticamente
-      const isAutoApproved = ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole);
+      const _isAutoApproved = ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole);
 
       // Criar solicitação de modificação
       const [novaSolicitacao] = await db
@@ -1263,10 +1263,10 @@ router.post(
             message: 'Prorrogação executada com sucesso',
             solicitacaoId: novaSolicitacao.id,
             autoApproved: true,
-            codigoSolicitacao,
-            novaDataVencimento,
+  _codigoSolicitacao,
+  _novaDataVencimento,
           });
-        } catch (error: unknown) {
+        } catch (error) {
           // Se falhar, atualizar com erro
           await db
             .update(solicitacoesModificacao)
@@ -1276,7 +1276,7 @@ router.post(
             })
             .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
 
-          console.error(`[PRORROGAR] Erro na execução automática:`, error);
+          console.error(`[PRORROGAR] Erro na execução automática:`, error: unknown);
           return res.status(500).json({
             error: 'Erro na execução',
             message: 'Solicitação aprovada mas houve erro ao executar no Banco Inter',
@@ -1292,11 +1292,11 @@ router.post(
         message: 'Solicitação de prorrogação criada e aguardando aprovação do supervisor',
         solicitacaoId: novaSolicitacao.id,
         status: 'pendente',
-        codigoSolicitacao,
-        novaDataVencimento,
+  _codigoSolicitacao,
+  _novaDataVencimento,
       });
     } catch (error) {
-      console.error('[PRORROGAR] Erro geral:', error);
+      console.error('[PRORROGAR] Erro geral:', error: unknown);
       res.status(500).json({
         error: 'Erro interno',
         message: 'Erro ao criar solicitação de prorrogação',
@@ -1311,14 +1311,14 @@ router.post(
  */
 router.post(
   '/boletos/:codigoSolicitacao/solicitar-desconto',
-  jwtAuthMiddleware,
-  async (req: unknown, res) => {
+  _jwtAuthMiddleware,
+  async (req, res) => {
     try {
       const { codigoSolicitacao } = req.params;
       const { tipoDesconto, valorDesconto, dataLimiteDesconto, observacao } = req.body;
-      const userRole = req.user?.role;
-      const userId = req.user?.id;
-      const userName = req.user?.fullName || req.user?.email;
+      const _userRole = req.user?.role;
+      const _userId = req.user?.id;
+      const _userName = req.user?.fullName || req.user?.email;
 
       // Blueprint V2.0: Apenas COBRANCA e ADMINISTRADOR podem solicitar
       if (!userRole || !['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA'].includes(userRole)) {
@@ -1346,7 +1346,7 @@ router.post(
       }
 
       // Validar valor do desconto
-      const valorDescontoNum = Number(valorDesconto);
+      const _valorDescontoNum = Number(valorDesconto);
       if (isNaN(valorDescontoNum) || valorDescontoNum <= 0) {
         return res.status(400).json({
           error: 'Valor inválido',
@@ -1355,7 +1355,7 @@ router.post(
       }
 
       // Se percentual, não pode ser maior que 100%
-      if (tipoDesconto === 'PERCENTUAL' && valorDescontoNum > 100) {
+      if (tipoDesconto == 'PERCENTUAL' && valorDescontoNum > 100) {
         return res.status(400).json({
           error: 'Valor inválido',
           message: 'Desconto percentual não pode ser maior que 100%',
@@ -1389,7 +1389,7 @@ router.post(
       }
 
       // Blueprint V2.0: Se for ADMINISTRADOR ou SUPERVISOR_COBRANCA, aprova automaticamente
-      const isAutoApproved = ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole);
+      const _isAutoApproved = ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole);
 
       // Criar solicitação de modificação
       const [novaSolicitacao] = await db
@@ -1427,8 +1427,8 @@ router.post(
           // Preparar payload para o Inter
           const descontoPayload: unknown = {
             codigoDesconto: 'DESCONTO1',
-            taxa: tipoDesconto === 'PERCENTUAL' ? valorDescontoNum : 0,
-            valor: tipoDesconto === 'FIXO' ? valorDescontoNum : 0,
+            taxa: tipoDesconto == 'PERCENTUAL' ? valorDescontoNum : 0,
+            valor: tipoDesconto == 'FIXO' ? valorDescontoNum : 0,
           };
 
           if (dataLimiteDesconto) {
@@ -1456,11 +1456,11 @@ router.post(
             message: 'Desconto aplicado com sucesso',
             solicitacaoId: novaSolicitacao.id,
             autoApproved: true,
-            codigoSolicitacao,
-            tipoDesconto,
-            valorDesconto,
+  _codigoSolicitacao,
+  _tipoDesconto,
+  _valorDesconto,
           });
-        } catch (error: unknown) {
+        } catch (error) {
           // Se falhar, atualizar com erro
           await db
             .update(solicitacoesModificacao)
@@ -1470,7 +1470,7 @@ router.post(
             })
             .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
 
-          console.error(`[DESCONTO] Erro na execução automática:`, error);
+          console.error(`[DESCONTO] Erro na execução automática:`, error: unknown);
           return res.status(500).json({
             error: 'Erro na execução',
             message: 'Solicitação aprovada mas houve erro ao executar no Banco Inter',
@@ -1486,12 +1486,12 @@ router.post(
         message: 'Solicitação de desconto criada e aguardando aprovação do supervisor',
         solicitacaoId: novaSolicitacao.id,
         status: 'pendente',
-        codigoSolicitacao,
-        tipoDesconto,
-        valorDesconto,
+  _codigoSolicitacao,
+  _tipoDesconto,
+  _valorDesconto,
       });
     } catch (error) {
-      console.error('[DESCONTO] Erro geral:', error);
+      console.error('[DESCONTO] Erro geral:', error: unknown);
       res.status(500).json({
         error: 'Erro interno',
         message: 'Erro ao criar solicitação de desconto',
@@ -1506,10 +1506,10 @@ router.post(
  * GET /api/cobrancas/solicitacoes
  * Lista todas as solicitações pendentes de aprovação (apenas SUPERVISOR_COBRANCA e ADMINISTRADOR)
  */
-router.get('/solicitacoes', jwtAuthMiddleware, async (req: unknown, res) => {
+router.get('/solicitacoes', jwtAuthMiddleware, async (req, res) => {
   try {
-    const userRole = req.user?.role;
-    const userId = req.user?.id;
+    const _userRole = req.user?.role;
+    const _userId = req.user?.id;
     const { status = 'pendente' } = req.query;
 
     // Apenas SUPERVISOR_COBRANCA e ADMINISTRADOR podem ver solicitações
@@ -1521,7 +1521,7 @@ router.get('/solicitacoes', jwtAuthMiddleware, async (req: unknown, res) => {
       });
     }
 
-    const solicitacoes = await db
+    const _solicitacoes = await db
       .select({
         id: solicitacoesModificacao.id,
         propostaId: solicitacoesModificacao.propostaId,
@@ -1540,7 +1540,7 @@ router.get('/solicitacoes', jwtAuthMiddleware, async (req: unknown, res) => {
 
     res.json(solicitacoes);
   } catch (error) {
-    console.error('[SOLICITAÇÕES] Erro ao buscar:', error);
+    console.error('[SOLICITAÇÕES] Erro ao buscar:', error: unknown);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao buscar solicitações',
@@ -1552,13 +1552,13 @@ router.get('/solicitacoes', jwtAuthMiddleware, async (req: unknown, res) => {
  * POST /api/cobrancas/solicitacoes/:id/aprovar
  * Aprova uma solicitação e executa a ação no Banco Inter
  */
-router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: unknown, res) => {
+router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { observacao } = req.body;
-    const userRole = req.user?.role;
-    const userId = req.user?.id;
-    const userName = req.user?.fullName || req.user?.email;
+    const _userRole = req.user?.role;
+    const _userId = req.user?.id;
+    const _userName = req.user?.fullName || req.user?.email;
 
     // Apenas SUPERVISOR_COBRANCA e ADMINISTRADOR podem aprovar
     if (!userRole || !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)) {
@@ -1606,17 +1606,17 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: unknown,
     // Executar ação no Banco Inter
     try {
       const { interBankService } = await import('../services/interBankService');
-      const dados = solicitacao.dadosSolicitacao as unknown;
+      const _dados = solicitacao.dadosSolicitacao as unknown;
 
-      if (solicitacao.tipoSolicitacao === 'prorrogacao') {
+      if (solicitacao.tipoSolicitacao == 'prorrogacao') {
         await interBankService.editarCobranca(solicitacao.codigoSolicitacao!, {
           dataVencimento: dados.novaDataVencimento,
         });
-      } else if (solicitacao.tipoSolicitacao === 'desconto') {
+      } else if (solicitacao.tipoSolicitacao == 'desconto') {
         const descontoPayload: unknown = {
           codigoDesconto: 'DESCONTO1',
-          taxa: dados.tipoDesconto === 'PERCENTUAL' ? Number(dados.valorDesconto) : 0,
-          valor: dados.tipoDesconto === 'FIXO' ? Number(dados.valorDesconto) : 0,
+          taxa: dados.tipoDesconto == 'PERCENTUAL' ? Number(dados.valorDesconto) : 0,
+          valor: dados.tipoDesconto == 'FIXO' ? Number(dados.valorDesconto) : 0,
         };
         if (dados.dataLimiteDesconto) {
           descontoPayload.dataDesconto = dados.dataLimiteDesconto;
@@ -1640,7 +1640,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: unknown,
         message: `Solicitação aprovada e ${solicitacao.tipoSolicitacao} executada com sucesso`,
         solicitacaoId: id,
       });
-    } catch (error: unknown) {
+    } catch (error) {
       // Se falhar ao executar, manter como aprovado mas com erro
       await db
         .update(solicitacoesModificacao)
@@ -1649,7 +1649,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: unknown,
         })
         .where(eq(solicitacoesModificacao.id, parseInt(id)));
 
-      console.error(`[APROVAR] Erro ao executar:`, error);
+      console.error(`[APROVAR] Erro ao executar:`, error: unknown);
       res.status(500).json({
         error: 'Erro na execução',
         message: 'Solicitação aprovada mas houve erro ao executar no Banco Inter',
@@ -1657,7 +1657,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: unknown,
       });
     }
   } catch (error) {
-    console.error('[APROVAR] Erro geral:', error);
+    console.error('[APROVAR] Erro geral:', error: unknown);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao aprovar solicitação',
@@ -1669,13 +1669,13 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: unknown,
  * POST /api/cobrancas/solicitacoes/:id/rejeitar
  * Rejeita uma solicitação
  */
-router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req: unknown, res) => {
+router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { motivo, observacao } = req.body;
-    const userRole = req.user?.role;
-    const userId = req.user?.id;
-    const userName = req.user?.fullName || req.user?.email;
+    const _userRole = req.user?.role;
+    const _userId = req.user?.id;
+    const _userName = req.user?.fullName || req.user?.email;
 
     // Apenas SUPERVISOR_COBRANCA e ADMINISTRADOR podem rejeitar
     if (!userRole || !['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'].includes(userRole)) {
@@ -1732,10 +1732,10 @@ router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req: unknown
       success: true,
       message: 'Solicitação rejeitada',
       solicitacaoId: id,
-      motivo,
+  _motivo,
     });
   } catch (error) {
-    console.error('[REJEITAR] Erro:', error);
+    console.error('[REJEITAR] Erro:', error: unknown);
     res.status(500).json({
       error: 'Erro interno',
       message: 'Erro ao rejeitar solicitação',

@@ -16,16 +16,16 @@ import { z } from 'zod';
 import xss from 'xss';
 
 // Validation schemas following OWASP guidelines
-const CPFSchema = z.string().regex(/^\d{11}$/, 'CPF must be 11 digits without formatting');
-const EmailSchema = z.string().email().max(255);
-const NameSchema = z
+const _CPFSchema = z.string().regex(/^\d{11}$/, 'CPF must be 11 digits without formatting');
+const _EmailSchema = z.string().email().max(255);
+const _NameSchema = z
   .string()
   .min(3)
   .max(255)
   .transform((val) => xss(val));
-const PhoneSchema = z.string().regex(/^\d{10,11}$/, 'Phone must be 10-11 digits');
+const _PhoneSchema = z.string().regex(/^\d{10,11}$/, 'Phone must be 10-11 digits');
 
-const ClientDataSchema = z.object({
+const _ClientDataSchema = z.object({
   name: NameSchema,
   email: EmailSchema,
   cpf: CPFSchema,
@@ -36,14 +36,14 @@ const ClientDataSchema = z.object({
     .optional(),
 });
 
-const PDFValidationSchema = z.object({
+const _PDFValidationSchema = z.object({
   size: z.number().max(20 * 1024 * 1024, 'PDF size must be under 20MB'),
   type: z.literal('application/pdf'),
   content: z.instanceof(Buffer),
 });
 
 // Webhook validation schemas (v1/v2 format)
-const WebhookEventSchema = z.object({
+const _WebhookEventSchema = z.object({
   event: z.string(),
   data: z.object({
     document: z
@@ -96,7 +96,7 @@ class ClickSignSecurityService {
   /**
    * Validate and sanitize client data
    */
-  validateClientData(data: unknown): z.infer<typeof ClientDataSchema> {
+  validateClientData(data): z.infer<typeof ClientDataSchema> {
     try {
       // Remove formatting from CPF
       if (data.cpf) {
@@ -108,10 +108,10 @@ class ClickSignSecurityService {
         data.phone = data.phone.replace(/\D/g, '');
       }
 
-      return ClientDataSchema.parse(data);
+      return ClientDataSchema.parse(_data); }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const issues = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+        const _issues = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
         throw new Error(`Invalid client data: ${issues}`);
       }
       throw error;
@@ -122,7 +122,7 @@ class ClickSignSecurityService {
    * Validate PDF document
    */
   validatePDF(buffer: Buffer, filename: string): void {
-    const validation = PDFValidationSchema.safeParse({
+    const _validation = PDFValidationSchema.safeParse({
       size: buffer.length,
       type: 'application/pdf',
       content: buffer,
@@ -133,7 +133,7 @@ class ClickSignSecurityService {
     }
 
     // Check PDF magic number
-    const pdfHeader = buffer.slice(0, 5).toString();
+    const _pdfHeader = buffer.slice(0, 5).toString();
     if (!pdfHeader.startsWith('%PDF-')) {
       throw new Error('Invalid PDF file format');
     }
@@ -148,28 +148,28 @@ class ClickSignSecurityService {
    * Validate webhook IP origin
    */
   validateWebhookIP(ip: string): boolean {
-    if (this.config.allowedIPs.length === 0) {
+    if (this._config.allowedIPs.length == 0) {
       // No IP restriction configured
-      return true;
+      return true; }
     }
 
-    const normalizedIP = ip.replace(/^::ffff:/, ''); // Remove IPv6 prefix
-    return this.config.allowedIPs.includes(normalizedIP);
+    const _normalizedIP = ip.replace(/^::ffff:/, ''); // Remove IPv6 prefix
+    return this._config.allowedIPs.includes(normalizedIP); }
   }
 
   /**
    * Check webhook rate limit
    */
   checkWebhookRateLimit(ip: string): boolean {
-    const now = Date.now();
-    const minute = 60 * 1000;
-    const attempts = this.webhookAttempts.get(ip) || [];
+    const _now = Date.now();
+    const _minute = 60 * 1000;
+    const _attempts = this.webhookAttempts.get(ip) || [];
 
     // Remove old attempts
-    const recentAttempts = attempts.filter((time) => now - time < minute);
+    const _recentAttempts = attempts.filter((time) => now - time < minute);
 
-    if (recentAttempts.length >= this.config.webhookRateLimit) {
-      return false;
+    if (recentAttempts.length >= this._config.webhookRateLimit) {
+      return false; }
     }
 
     recentAttempts.push(now);
@@ -177,116 +177,116 @@ class ClickSignSecurityService {
 
     // Clean up old IPs
     if (this.webhookAttempts.size > 1000) {
-      const oldestIP = Array.from(this.webhookAttempts.entries()).sort(
+      const _oldestIP = Array.from(this.webhookAttempts.entries()).sort(
         (a, b) => Math.max(...a[1]) - Math.max(...b[1])
       )[0][0];
       this.webhookAttempts.delete(oldestIP);
     }
 
-    return true;
+    return true; }
   }
 
   /**
    * Validate webhook event structure
    */
-  validateWebhookEvent(event: unknown): z.infer<typeof WebhookEventSchema> {
-    return WebhookEventSchema.parse(event);
+  validateWebhookEvent(event): z.infer<typeof WebhookEventSchema> {
+    return WebhookEventSchema.parse(event); }
   }
 
   /**
    * Encrypt sensitive data for storage
    */
   encryptSensitiveData(data: string): string {
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(
+    const _iv = crypto.randomBytes(16);
+    const _cipher = crypto.createCipheriv(
       'aes-256-gcm',
-      Buffer.from(this.config.encryptionKey, 'hex'),
+      Buffer.from(this._config.encryptionKey, 'hex'),
       iv
     );
 
-    let encrypted = cipher.update(data, 'utf8', 'hex');
+    let _encrypted = cipher.update(_data, 'utf8', 'hex');
     encrypted += cipher.final('hex');
 
-    const authTag = cipher.getAuthTag();
+    const _authTag = cipher.getAuthTag();
 
-    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted; }
   }
 
   /**
    * Decrypt sensitive data
    */
   decryptSensitiveData(encryptedData: string): string {
-    const parts = encryptedData.split(':');
-    const iv = Buffer.from(parts[0], 'hex');
-    const authTag = Buffer.from(parts[1], 'hex');
-    const encrypted = parts[2];
+    const _parts = encryptedData.split(':');
+    const _iv = Buffer.from(parts[0], 'hex');
+    const _authTag = Buffer.from(parts[1], 'hex');
+    const _encrypted = parts[2];
 
-    const decipher = crypto.createDecipheriv(
+    const _decipher = crypto.createDecipheriv(
       'aes-256-gcm',
-      Buffer.from(this.config.encryptionKey, 'hex'),
+      Buffer.from(this._config.encryptionKey, 'hex'),
       iv
     );
 
     decipher.setAuthTag(authTag);
 
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    let _decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
 
-    return decrypted;
+    return decrypted; }
   }
 
   /**
    * Sanitize data for secure logging
    */
-  sanitizeForLogging(data: unknown): unknown {
-    if (!data) return data;
+  sanitizeForLogging(data): unknown {
+    if (!data) return data; }
 
-    const sanitized = JSON.parse(JSON.stringify(data));
+    const _sanitized = JSON.parse(JSON.stringify(_data));
 
-    const sanitizeObject = (obj: unknown) => {
+    const _sanitizeObject = (obj) => {
       for (const key in obj) {
-        if (this.config.sensitiveFields.includes(key.toLowerCase())) {
+        if (this._config.sensitiveFields.includes(key.toLowerCase())) {
           obj[key] = this.maskSensitiveValue(obj[key]);
-        } else if (typeof obj[key] === 'object') {
+        } else if (typeof obj[key] == 'object') {
           sanitizeObject(obj[key]);
         }
       }
     };
 
     sanitizeObject(sanitized);
-    return sanitized;
+    return sanitized; }
   }
 
   /**
    * Mask sensitive values
    */
-  private maskSensitiveValue(value: unknown): string {
-    if (!value) return '[EMPTY]';
+  private maskSensitiveValue(value): string {
+    if (!value) return '[EMPTY]'; }
 
-    const str = String(value);
-    if (str.length <= 4) return '[REDACTED]';
+    const _str = String(value);
+    if (str.length <= 4) return '[REDACTED]'; }
 
-    return str.slice(0, 2) + '*'.repeat(str.length - 4) + str.slice(-2);
+    return str.slice(0, 2) + '*'.repeat(str.length - 4) + str.slice(-2); }
   }
 
   /**
    * Generate secure request ID for tracking
    */
   generateRequestId(): string {
-    return crypto.randomBytes(16).toString('hex');
+    return crypto.randomBytes(16).toString('hex'); }
   }
 
   /**
    * Validate ClickSign response
    */
-  validateResponse(response: unknown): void {
+  validateResponse(response): void {
     if (!response || typeof response !== 'object') {
       throw new Error('Invalid ClickSign response format');
     }
 
     // Check for error responses
     if (response.errors && Array.isArray(response.errors)) {
-      const errors = response.errors.map((e: unknown) => e.message || e.error).join(', ');
+      const _errors = response.errors.map((e) => e.message || e.error: unknown).join(', ');
       throw new Error(`ClickSign API errors: ${errors}`);
     }
   }
@@ -297,14 +297,14 @@ class ClickSignSecurityService {
   createAuditLog(action: string, data: unknown, userId?: string): unknown {
     return {
       timestamp: new Date().toISOString(),
-      action,
+  _action,
       userId: userId || 'system',
       requestId: this.generateRequestId(),
       environment: process.env.NODE_ENV,
-      data: this.sanitizeForLogging(data),
+      data: this.sanitizeForLogging(_data),
     };
   }
 }
 
 // Export singleton instance
-export const clickSignSecurityService = new ClickSignSecurityService();
+export const _clickSignSecurityService = new ClickSignSecurityService();

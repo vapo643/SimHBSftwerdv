@@ -4,7 +4,7 @@ import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const router = Router();
+const _router = Router();
 
 /**
  * ENDPOINT DE TESTE: Regenerar boletos com códigos válidos da API Inter (SEM AUTH)
@@ -26,11 +26,11 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
       .limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: 'Proposta não encontrada' });
+      return res.status(404).json({ error: 'Proposta não encontrada' }); }
     }
 
     // Buscar boletos atuais
-    const boletoesAtuais = await db
+    const _boletoesAtuais = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
@@ -38,14 +38,14 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
     console.log(`🔍 [TEST FIX] Encontrados ${boletoesAtuais.length} boletos atuais`);
 
     // Verificar códigos inválidos
-    const codigosInvalidos = boletoesAtuais.filter(
+    const _codigosInvalidos = boletoesAtuais.filter(
       (b) =>
         !b.codigoSolicitacao.match(
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         )
     );
 
-    if (codigosInvalidos.length === 0) {
+    if (codigosInvalidos.length == 0) {
       return res.json({
         message: 'Todos os boletos já possuem códigos válidos',
         totalBoletos: boletoesAtuais.length,
@@ -56,9 +56,9 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
 
     console.log(`⚠️ [TEST FIX] ${codigosInvalidos.length} boletos com códigos inválidos`);
 
-    // ===============================
+    // =====================
     // EXECUTAR REGENERAÇÃO REAL
-    // ===============================
+    // =====================
 
     console.log(`🔄 [TEST FIX] EXECUTANDO regeneração de ${codigosInvalidos.length} boletos...`);
 
@@ -71,7 +71,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
     console.log(`✅ [TEST FIX] ${codigosInvalidos.length} boletos antigos desativados`);
 
     // 2. Preparar dados para regeneração
-    const parcelas = boletoesAtuais
+    const _parcelas = boletoesAtuais
       .map((boleto) => ({
         numero: boleto.numeroParcela || 1,
         valor: parseFloat(boleto.valorNominal.toString()),
@@ -81,23 +81,23 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
 
     console.log(`📋 [TEST FIX] ${parcelas.length} parcelas preparadas para regeneração`);
 
-    const novosBoletosGerados = [];
-    const errosEncontrados = [];
+    const _novosBoletosGerados = [];
+    const _errosEncontrados = [];
 
     // 3. Gerar novos boletos com API Inter
-    for (let i = 0; i < Math.min(parcelas.length, 3); i++) {
+    for (let _i = 0; i < Math.min(parcelas.length, 3); i++) {
       // Limitar a 3 para teste
-      const parcela = parcelas[i];
+      const _parcela = parcelas[i];
 
       try {
-        const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
+        const _seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
 
         console.log(
           `📄 [TEST FIX] Criando boleto ${i + 1}/${Math.min(parcelas.length, 3)} - Parcela ${parcela.numero}`
         );
 
         // Simular resposta da API Inter (para teste)
-        const mockApiResponse = {
+        const _mockApiResponse = {
           codigoSolicitacao: `${Math.random().toString(36).slice(2, 10)}-${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 14)}`,
           situacao: 'EM_PROCESSAMENTO',
         };
@@ -108,9 +108,9 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
         const [novoBoleto] = await db
           .insert(interCollections)
           .values({
-            propostaId,
+  _propostaId,
             codigoSolicitacao: mockApiResponse.codigoSolicitacao, // UUID simulado
-            seuNumero,
+  _seuNumero,
             valorNominal: parcela.valor.toString(),
             dataVencimento: parcela.vencimento,
             situacao: 'A_RECEBER', // PAM V1.0: Estado Inicial Forçado - nunca confiar na API
@@ -122,7 +122,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
 
         novosBoletosGerados.push(novoBoleto);
       } catch (error) {
-        console.error(`❌ [TEST FIX] Erro ao criar boleto ${parcela.numero}:`, error);
+        console.error(`❌ [TEST FIX] Erro ao criar boleto ${parcela.numero}:`, error: unknown);
         errosEncontrados.push({
           parcela: parcela.numero,
           erro: error instanceof Error ? error.message : 'Unknown',
@@ -152,11 +152,11 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
           ? 'UUID_VALIDO'
           : 'FORMATO_INVALIDO',
       })),
-      errosEncontrados,
+  _errosEncontrados,
       totalBoletosCriados: novosBoletosGerados.length,
     });
   } catch (error) {
-    console.error('❌ [TEST FIX] Erro:', error);
+    console.error('❌ [TEST FIX] Erro:', error: unknown);
     res.status(500).json({
       error: 'Erro ao analisar boletos',
       details: error instanceof Error ? error.message : 'Unknown error',

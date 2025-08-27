@@ -30,7 +30,7 @@ async function cleanupNullProposals() {
 
     console.log(`🔍 [LIMPEZA] Encontradas ${corruptedProposals.length} propostas corrompidas`);
 
-    if (corruptedProposals.length === 0) {
+    if (corruptedProposals.length == 0) {
       console.log('✅ [LIMPEZA] Nenhuma proposta corrompida encontrada. Sistema íntegro!');
       return;
     }
@@ -70,7 +70,7 @@ async function cleanupNullProposals() {
 
     console.log(`\n🔍 [VERIFICAÇÃO] Propostas corrompidas restantes: ${remainingCorrupted.length}`);
 
-    if (remainingCorrupted.length === 0) {
+    if (remainingCorrupted.length == 0) {
       console.log('🎉 [SUCESSO] Limpeza concluída! Sistema restaurado à integridade total.');
     } else {
       console.log('⚠️ [ATENÇÃO] Ainda existem propostas corrompidas no sistema:');
@@ -108,7 +108,7 @@ async function verifyDataIntegrity() {
 }
 
 // Executar se chamado diretamente
-const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+const isMainModule = import.meta.url == `file://${process.argv[1]}`;
 if (isMainModule) {
   console.log('🔒 PAM V1.0 - LIMPEZA DE INTEGRIDADE DE DADOS');
   console.log('='.repeat(60));

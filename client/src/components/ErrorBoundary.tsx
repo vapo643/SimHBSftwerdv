@@ -16,12 +16,12 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error }; }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Ignore common browser extension and HMR errors
-    const ignoredErrors = [
+    const _ignoredErrors = [
       'The message port closed before a response was received',
       'mce-autosize-textarea',
       'custom element',
@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
       'Non-Error promise rejection captured',
     ];
 
-    const shouldIgnore = ignoredErrors.some(
+    const _shouldIgnore = ignoredErrors.some(
       (ignored) =>
         error.message?.includes(ignored) ||
         error.stack?.includes(ignored) ||
@@ -44,14 +44,14 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       // Check if it's a critical error or ignorable
-      const isIgnorable =
+      const _isIgnorable =
         this.state.error?.message?.includes('mce-autosize-textarea') ||
         this.state.error?.message?.includes('message port closed');
 
       if (isIgnorable) {
         // Reset error state for ignorable errors
         this.setState({ hasError: false, error: undefined });
-        return this.props.children;
+        return this.props.children; }
       }
 
       return (
@@ -72,11 +72,11 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return this.props.children; }
   }
 }
 
 // Alias for backward compatibility
-export const UserFormErrorBoundary = ErrorBoundary;
+export const _UserFormErrorBoundary = ErrorBoundary;
 
 export default ErrorBoundary;

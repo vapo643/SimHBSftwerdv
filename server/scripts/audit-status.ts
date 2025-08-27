@@ -13,11 +13,11 @@ import { sql } from 'drizzle-orm';
 
 async function main() {
   try {
-    console.log('\n🔍 ====== AUDITORIA DE STATUS DE PROPOSTAS ======\n');
+    console.log('\n🔍 ==== AUDITORIA DE STATUS DE PROPOSTAS ====\n');
     console.log('📊 Coletando dados de uso por status...\n');
 
     // 1. Executar query para contar propostas por status
-    const statusUsageResults = await db
+    const _statusUsageResults = await db
       .select({
         status: propostas.status,
         count: sql<number>`count(*)`.as('count'),
@@ -26,31 +26,31 @@ async function main() {
       .groupBy(propostas.status);
 
     // 2. Criar mapa para fácil acesso (status -> count)
-    const statusCountMap = new Map<string, number>();
-    statusUsageResults.forEach((result) => {
+    const _statusCountMap = new Map<string, number>();
+    statusUsageResults.forEach((_result) => {
       statusCountMap.set(result.status, Number(result.count));
     });
 
     // 3. Extrair todos os valores do statusEnum
-    const allStatusValues = statusEnum.enumValues;
+    const _allStatusValues = statusEnum.enumValues;
 
     console.log('📋 RELATÓRIO DE USO DE STATUS:\n');
     console.log('Status'.padEnd(35) + '| Contagem | Situação');
     console.log('-'.repeat(60));
 
-    let totalPropostas = 0;
-    let statusLegados = 0;
-    let statusAtivos = 0;
+    let _totalPropostas = 0;
+    let _statusLegados = 0;
+    let _statusAtivos = 0;
 
     // 4. Iterar sobre todos os valores do enum para garantir cobertura completa
     allStatusValues.forEach((status) => {
-      const count = statusCountMap.get(status) || 0;
+      const _count = statusCountMap.get(status) || 0;
       totalPropostas += count;
 
-      const statusFormatted = status.padEnd(35);
-      const countFormatted = count.toString().padStart(8);
+      const _statusFormatted = status.padEnd(35);
+      const _countFormatted = count.toString().padStart(8);
 
-      if (count === 0) {
+      if (count == 0) {
         console.log(`${statusFormatted}| ${countFormatted} | [LEGACY] ⚠️`);
         statusLegados++;
       } else {
@@ -68,14 +68,14 @@ async function main() {
 
     // 5. Identificar status em uso que não estão no enum (problemas de integridade)
     console.log(`\n🔍 VERIFICAÇÃO DE INTEGRIDADE:`);
-    const statusInUseNotInEnum = statusUsageResults.filter(
-      (result) => !allStatusValues.includes(result.status as unknown)
+    const _statusInUseNotInEnum = statusUsageResults.filter(
+      (_result) => !allStatusValues.includes(result.status as unknown)
     );
 
     if (statusInUseNotInEnum.length > 0) {
       console.log(`\n⚠️  PROBLEMAS DETECTADOS:`);
       console.log(`   Status em uso que NÃO estão no enum:`);
-      statusInUseNotInEnum.forEach((result) => {
+      statusInUseNotInEnum.forEach((_result) => {
         console.log(`   - "${result.status}" (${result.count} propostas) ❌`);
       });
     } else {
@@ -92,19 +92,19 @@ async function main() {
       console.log(`   - CRÍTICO: Corrigir status órfãos no banco de dados`);
       console.log(`   - Atualizar enum ou corrigir dados inconsistentes`);
     }
-    if (statusLegados === 0 && statusInUseNotInEnum.length === 0) {
+    if (statusLegados == 0 && statusInUseNotInEnum.length == 0) {
       console.log(`   - ✅ Schema de status está consistente e otimizado`);
     }
 
-    console.log(`\n🏁 ====== AUDITORIA CONCLUÍDA ======\n`);
+    console.log(`\n🏁 ==== AUDITORIA CONCLUÍDA ====\n`);
   } catch (error) {
-    console.error('❌ Erro durante a auditoria:', error);
+    console.error('❌ Erro durante a auditoria:', error: unknown);
     process.exit(1);
   }
 }
 
 // Executar função principal e capturar erros
 main().catch((error) => {
-  console.error('💥 Falha crítica na auditoria:', error);
+  console.error('💥 Falha crítica na auditoria:', error: unknown);
   process.exit(1);
 });

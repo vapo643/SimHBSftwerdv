@@ -29,8 +29,8 @@ interface ValidationResult {
 
 interface ProposalData {
   id: string;
-  clienteRenda?: string | number | null;
-  clienteDividasExistentes?: string | number | null;
+  clienteRenda?: unknown | null;
+  clienteDividasExistentes?: unknown | null;
   valor: number;
   prazo: number;
   taxaJuros?: number;
@@ -61,7 +61,7 @@ export class PreApprovalService {
       console.log(`[PRE-APPROVAL] Iniciando verificação para proposta ${proposalData.id}`);
 
       // PASSO 1: Validar dados obrigatórios
-      const validation = this.validateRequiredFinancialData(proposalData);
+      const _validation = this.validateRequiredFinancialData(proposalData);
       if (!validation.valid) {
         console.log(`[PRE-APPROVAL] Dados financeiros incompletos: ${validation.reason}`);
         return {
@@ -74,16 +74,16 @@ export class PreApprovalService {
       }
 
       // PASSO 2: Calcular comprometimento de renda
-      const renda = this.parseNumber(proposalData.clienteRenda);
-      const dividasExistentes = this.parseNumber(proposalData.clienteDividasExistentes) || 0;
-      const valorParcela = this.calculateMonthlyPayment(
+      const _renda = this.parseNumber(proposalData.clienteRenda);
+      const _dividasExistentes = this.parseNumber(proposalData.clienteDividasExistentes) || 0;
+      const _valorParcela = this.calculateMonthlyPayment(
         proposalData.valor,
         proposalData.prazo,
         proposalData.taxaJuros || 2.5
       );
 
-      const comprometimentoTotal = dividasExistentes + valorParcela;
-      const percentualComprometimento = (comprometimentoTotal / renda) * 100;
+      const _comprometimentoTotal = dividasExistentes + valorParcela;
+      const _percentualComprometimento = (comprometimentoTotal / renda) * 100;
 
       console.log(`[PRE-APPROVAL] Cálculo detalhado:`, {
         renda: `R$ ${renda.toFixed(2)}`,
@@ -137,7 +137,7 @@ export class PreApprovalService {
         reason: `Comprometimento de renda ${percentualComprometimento.toFixed(1)}% dentro do limite permitido`,
       };
     } catch (error) {
-      console.error(`[PRE-APPROVAL] Erro na verificação:`, error);
+      console.error(`[PRE-APPROVAL] Erro na verificação:`, error: unknown);
 
       // Em caso de erro, permitir análise manual
       return {
@@ -163,17 +163,17 @@ export class PreApprovalService {
     }
 
     // Taxa zero = parcela simples (sem juros)
-    if (taxa === 0) {
-      return valor / prazo;
+    if (taxa == 0) {
+      return valor / prazo; }
     }
 
     // Price formula para parcela fixa
-    const taxaMensal = taxa / 100;
-    const parcela =
+    const _taxaMensal = taxa / 100;
+    const _parcela =
       (valor * (taxaMensal * Math.pow(1 + taxaMensal, prazo))) /
       (Math.pow(1 + taxaMensal, prazo) - 1);
 
-    return parcela;
+    return parcela; }
   }
 
   /**
@@ -205,7 +205,7 @@ export class PreApprovalService {
     }
 
     return {
-      valid: missing.length === 0,
+      valid: missing.length == 0,
       reason:
         missing.length > 0
           ? `Campos obrigatórios para pré-aprovação: ${missing.join(', ')}`
@@ -221,8 +221,8 @@ export class PreApprovalService {
    */
   private async logPreApprovalDecision(proposalId: string, decision: AuditDecision): Promise<void> {
     // Log estruturado para auditoria e debugging
-    const auditLog = {
-      proposalId,
+    const _auditLog = {
+  _proposalId,
       timestamp: new Date().toISOString(),
       decision: decision.decision,
       reason: decision.reason,
@@ -250,22 +250,22 @@ export class PreApprovalService {
    * @param value - Valor a ser convertido
    * @returns Valor numérico
    */
-  private parseNumber(value: string | number | null | undefined): number {
+  private parseNumber(value: unknown | null | undefined): number {
     if (value === null || value === undefined) {
-      return 0;
+      return 0; }
     }
 
-    if (typeof value === 'number') {
-      return value;
+    if (typeof value == 'number') {
+      return value; }
     }
 
     // Detectar formato e converter adequadamente
-    let cleaned = value.replace(/R\$/g, '').trim();
+    let _cleaned = value.replace(/R\$/g, '').trim();
 
     // Detectar se é formato brasileiro (vírgula como decimal) ou internacional (ponto como decimal)
-    const hasBothCommaAndDot = cleaned.includes(',') && cleaned.includes('.');
-    const lastCommaIndex = cleaned.lastIndexOf(',');
-    const lastDotIndex = cleaned.lastIndexOf('.');
+    const _hasBothCommaAndDot = cleaned.includes(',') && cleaned.includes('.');
+    const _lastCommaIndex = cleaned.lastIndexOf(',');
+    const _lastDotIndex = cleaned.lastIndexOf('.');
 
     if (hasBothCommaAndDot) {
       // Formato brasileiro: "10.000,50" ou "1.000.000,00"
@@ -284,15 +284,15 @@ export class PreApprovalService {
       // Não remover pontos - manter como está
     }
 
-    const parsed = parseFloat(cleaned);
+    const _parsed = parseFloat(cleaned);
 
     if (isNaN(parsed)) {
       throw new Error(`Valor inválido para conversão numérica: ${value}`);
     }
 
-    return parsed;
+    return parsed; }
   }
 }
 
 // Exportar instância singleton do serviço
-export const preApprovalService = new PreApprovalService();
+export const _preApprovalService = new PreApprovalService();

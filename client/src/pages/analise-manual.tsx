@@ -16,34 +16,34 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 import {
-  CheckCircle,
-  AlertTriangle,
-  Percent,
-  FileText,
-  User,
-  CreditCard,
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-  DollarSign,
-  Eye,
-  Download,
-  ArrowLeft,
-  Shield,
-  AlertCircle,
-  Clock,
-  Calculator,
+  _CheckCircle,
+  _AlertTriangle,
+  _Percent,
+  _FileText,
+  _User,
+  _CreditCard,
+  _TrendingUp,
+  _TrendingDown,
+  _Calendar,
+  _DollarSign,
+  _Eye,
+  _Download,
+  _ArrowLeft,
+  _Shield,
+  _AlertCircle,
+  _Clock,
+  _Calculator,
 } from 'lucide-react';
 import RefreshButton from '@/components/RefreshButton';
 
-const decisionSchema = z.object({
+const _decisionSchema = z.object({
   status: z.enum(['aprovado', 'rejeitado', 'solicitar_info']),
   valorAprovado: z.string().optional(),
   taxaJuros: z.string().optional(),
@@ -53,7 +53,7 @@ const decisionSchema = z.object({
 type DecisionForm = z.infer<typeof decisionSchema>;
 
 interface Proposta {
-  id: string | number;
+  id: unknown;
   clienteNome: string;
   clienteCpf: string;
   clienteEmail: string;
@@ -76,44 +76,44 @@ interface Proposta {
 export default function AnaliseManual() {
   const [, params] = useRoute('/credito/analise/:id');
   const [, setLocation] = useLocation();
-  const propostaId = params?.id;
+  const _propostaId = params?.id;
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const [analysisStarted, setAnalysisStarted] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
 
   const {
     data: proposta,
-    isLoading,
-    error,
-    isError,
+  _isLoading,
+  _error,
+  _isError,
   } = useQuery({
     queryKey: ['/api/propostas', propostaId],
     enabled: !!propostaId,
-    retry: (failureCount, error) => {
+    retry: (failureCount, error: unknown) => {
       // Only retry on network errors, not on 404s
       if (error instanceof Error && error.message.includes('404')) {
-        return false;
+        return false; }
       }
-      return failureCount < 2;
+      return failureCount < 2; }
     },
   }) as { data: Proposta | undefined; isLoading: boolean; error: unknown; isError: boolean };
 
   const {
-    register,
-    handleSubmit,
+  _register,
+  _handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
+  _setValue,
+  _watch,
   } = useForm<DecisionForm>({
     resolver: zodResolver(decisionSchema),
   });
 
-  const updateProposta = useMutation({
+  const _updateProposta = useMutation({
     mutationFn: async (data: DecisionForm) => {
       return await apiRequest(`/api/propostas/${propostaId}`, {
         method: 'PATCH',
-        body: JSON.stringify(data),
+        body: JSON.stringify(_data),
       });
     },
     onSuccess: () => {
@@ -123,7 +123,7 @@ export default function AnaliseManual() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao salvar decisão',
         description: error.message || 'Tente novamente em alguns instantes.',
@@ -132,57 +132,57 @@ export default function AnaliseManual() {
     },
   });
 
-  const onSubmit = (data: DecisionForm) => {
-    updateProposta.mutate(data);
+  const _onSubmit = (data: DecisionForm) => {
+    updateProposta.mutate(_data);
   };
 
-  const handleRefresh = () => {
+  const _handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId] });
   };
 
-  const formatCurrency = (value: string) => {
+  const _formatCurrency = (value: string) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(parseFloat(value));
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+  const _formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR'); }
   };
 
   // Enhanced credit analysis logic
-  const getCreditAnalysis = (proposta: Proposta) => {
-    const renda = parseFloat(proposta.clienteRenda.replace(/[^\d,]/g, '').replace(',', '.'));
-    const valor = parseFloat(proposta.valor);
-    const idade = new Date().getFullYear() - new Date(proposta.clienteDataNascimento).getFullYear();
+  const _getCreditAnalysis = (proposta: Proposta) => {
+    const _renda = parseFloat(proposta.clienteRenda.replace(/[^\d,]/g, '').replace(',', '.'));
+    const _valor = parseFloat(proposta.valor);
+    const _idade = new Date().getFullYear() - new Date(proposta.clienteDataNascimento).getFullYear();
 
     // Score calculation based on multiple factors
-    let score = 600; // Base score
+    let _score = 600; // Base score
 
     // Age factor
     if (idade >= 25 && idade <= 55) score += 50;
     else if (idade >= 18 && idade <= 65) score += 20;
 
     // Income to loan ratio
-    const incomeRatio = valor / renda;
+    const _incomeRatio = valor / renda;
     if (incomeRatio <= 5) score += 100;
     else if (incomeRatio <= 10) score += 50;
     else if (incomeRatio <= 20) score += 20;
 
     // Loan purpose
-    if (proposta.finalidade === 'investimento') score += 30;
-    else if (proposta.finalidade === 'capital_giro') score += 20;
+    if (proposta.finalidade == 'investimento') score += 30;
+    else if (proposta.finalidade == 'capital_giro') score += 20;
 
     // Collateral
-    if (proposta.garantia === 'imovel') score += 80;
-    else if (proposta.garantia === 'veiculo') score += 40;
-    else if (proposta.garantia === 'aval') score += 30;
+    if (proposta.garantia == 'imovel') score += 80;
+    else if (proposta.garantia == 'veiculo') score += 40;
+    else if (proposta.garantia == 'aval') score += 30;
 
     // Risk assessment
-    let risco = 'Baixo';
-    let riscoColor = 'green';
-    let taxaSugerida = 1.8;
+    let _risco = 'Baixo';
+    let _riscoColor = 'green';
+    let _taxaSugerida = 1.8;
 
     if (score >= 750) {
       risco = 'Baixo';
@@ -204,11 +204,11 @@ export default function AnaliseManual() {
 
     return {
       score: Math.min(850, Math.max(300, score)),
-      risco,
-      riscoColor,
-      taxaSugerida,
-      incomeRatio,
-      idade,
+  _risco,
+  _riscoColor,
+  _taxaSugerida,
+  _incomeRatio,
+  _idade,
       recommendation:
         score >= 650
           ? 'Aprovação recomendada'
@@ -218,19 +218,19 @@ export default function AnaliseManual() {
     };
   };
 
-  const creditAnalysis = proposta ? getCreditAnalysis(proposta) : null;
+  const _creditAnalysis = proposta ? getCreditAnalysis(proposta) : null;
 
   // Simulate analysis progress
   useEffect(() => {
     if (analysisStarted && analysisProgress < 100) {
-      const timer = setTimeout(() => {
+      const _timer = setTimeout(() => {
         setAnalysisProgress((prev) => Math.min(100, prev + 10));
       }, 200);
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer); }
     }
   }, [analysisStarted, analysisProgress]);
 
-  const startAnalysis = () => {
+  const _startAnalysis = () => {
     setAnalysisStarted(true);
     setAnalysisProgress(0);
   };
@@ -330,18 +330,18 @@ export default function AnaliseManual() {
           <div className="flex items-center gap-2">
             <Badge
               variant={
-                (proposta.statusContextual || proposta.status) === 'aguardando_analise'
+                (proposta.statusContextual || proposta.status) == 'aguardando_analise'
                   ? 'secondary'
                   : 'default'
               }
             >
-              {(proposta.statusContextual || proposta.status) === 'aguardando_analise'
+              {(proposta.statusContextual || proposta.status) == 'aguardando_analise'
                 ? 'Aguardando Análise'
-                : (proposta.statusContextual || proposta.status) === 'em_analise'
+                : (proposta.statusContextual || proposta.status) == 'em_analise'
                   ? 'Em Análise'
-                  : (proposta.statusContextual || proposta.status) === 'aprovado'
+                  : (proposta.statusContextual || proposta.status) == 'aprovado'
                     ? 'Aprovado'
-                    : (proposta.statusContextual || proposta.status) === 'rejeitado'
+                    : (proposta.statusContextual || proposta.status) == 'rejeitado'
                       ? 'Rejeitado'
                       : proposta.statusContextual || proposta.status}
             </Badge>
@@ -523,22 +523,22 @@ export default function AnaliseManual() {
                     <div className="text-center">
                       <div
                         className={`mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full ${
-                          creditAnalysis.riscoColor === 'green'
+                          creditAnalysis.riscoColor == 'green'
                             ? 'bg-green-100'
-                            : creditAnalysis.riscoColor === 'yellow'
+                            : creditAnalysis.riscoColor == 'yellow'
                               ? 'bg-yellow-100'
-                              : creditAnalysis.riscoColor === 'orange'
+                              : creditAnalysis.riscoColor == 'orange'
                                 ? 'bg-orange-100'
                                 : 'bg-red-100'
                         }`}
                       >
                         <AlertTriangle
                           className={`h-8 w-8 ${
-                            creditAnalysis.riscoColor === 'green'
+                            creditAnalysis.riscoColor == 'green'
                               ? 'text-green-600'
-                              : creditAnalysis.riscoColor === 'yellow'
+                              : creditAnalysis.riscoColor == 'yellow'
                                 ? 'text-yellow-600'
-                                : creditAnalysis.riscoColor === 'orange'
+                                : creditAnalysis.riscoColor == 'orange'
                                   ? 'text-orange-600'
                                   : 'text-red-600'
                           }`}
@@ -547,11 +547,11 @@ export default function AnaliseManual() {
                       <p className="text-sm font-medium text-gray-700">Nível de Risco</p>
                       <p
                         className={`text-2xl font-bold ${
-                          creditAnalysis.riscoColor === 'green'
+                          creditAnalysis.riscoColor == 'green'
                             ? 'text-green-600'
-                            : creditAnalysis.riscoColor === 'yellow'
+                            : creditAnalysis.riscoColor == 'yellow'
                               ? 'text-yellow-600'
-                              : creditAnalysis.riscoColor === 'orange'
+                              : creditAnalysis.riscoColor == 'orange'
                                 ? 'text-orange-600'
                                 : 'text-red-600'
                         }`}

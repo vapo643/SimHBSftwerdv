@@ -16,11 +16,11 @@ export abstract class Entity<T> {
   }
 
   equals(entity?: Entity<T>): boolean {
-    if (entity === null || entity === undefined) {
+    if (entity == null || entity == undefined) {
       return false;
     }
 
-    if (this === entity) {
+    if (this == entity) {
       return true;
     }
 
@@ -28,6 +28,6 @@ export abstract class Entity<T> {
       return false;
     }
 
-    return this._id === entity._id;
+    return this._id == entity._id;
   }
 }

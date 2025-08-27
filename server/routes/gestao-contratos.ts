@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { proposalService } from '../services/proposalService.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/gestao-contratos
@@ -16,9 +16,9 @@ const router = Router();
  */
 router.get('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const result = await proposalService.executeOperation('list_contracts', req.query);
-    res.json(result);
-  } catch (error: unknown) {
+    const _result = await proposalService.executeOperation('list_contracts', req.query);
+    res.json(_result);
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to list contracts',
@@ -32,12 +32,12 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
  */
 router.post('/:id/update', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const result = await proposalService.executeOperation('update_contract', {
+    const _result = await proposalService.executeOperation('update_contract', {
       id: req.params.id,
       ...req.body,
     });
-    res.json(result);
-  } catch (error: unknown) {
+    res.json(_result);
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Contract update failed',

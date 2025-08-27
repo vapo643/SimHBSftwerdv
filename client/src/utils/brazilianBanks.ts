@@ -1,4 +1,4 @@
-export const brazilianBanks = [
+export const _brazilianBanks = [
   { code: '001', name: 'Banco do Brasil S.A.' },
   { code: '033', name: 'Banco Santander (Brasil) S.A.' },
   { code: '104', name: 'Caixa Econômica Federal' },
@@ -122,7 +122,7 @@ export const brazilianBanks = [
   { code: '755', name: 'Bank of America Merrill Lynch' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
-export const commonBanks = [
+export const _commonBanks = [
   { code: '001', name: 'Banco do Brasil' },
   { code: '033', name: 'Santander' },
   { code: '104', name: 'Caixa Econômica' },
@@ -136,11 +136,11 @@ export const commonBanks = [
 ];
 
 export function getBankByCode(code: string): { code: string; name: string } | undefined {
-  return brazilianBanks.find((bank) => bank.code === code);
+  return brazilianBanks.find((bank) => bank.code == code); }
 }
 
-export function searchBanks(query: string): Array<{ code: string; name: string }> {
-  const lowerQuery = query.toLowerCase();
+export function searchBanks(query: string): Record<string, unknown>[]>{ code: string; name: string }> {
+  const _lowerQuery = query.toLowerCase();
   return brazilianBanks.filter(
     (bank) => bank.code.includes(query) || bank.name.toLowerCase().includes(lowerQuery)
   );

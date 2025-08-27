@@ -6,18 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X, Info } from 'lucide-react';
 import { useUserFormData, useStoresByPartner } from '@/hooks/queries/useUserFormData';
 import { AlertTriangle } from 'lucide-react';
 
-const userSchema = z
+const _userSchema = z
   .object({
     nome: z.string().min(3, 'Nome é obrigatório.'),
     email: z.string().email('Formato de e-mail inválido.'),
@@ -37,21 +37,21 @@ const userSchema = z
     lojaIds: z.array(z.string()).optional(), // For GERENTE (multiple stores)
   })
   .refine(
-    (data) => {
-      if (data.perfil === 'ATENDENTE' && !data.lojaId) {
-        return false;
+    (_data) => {
+      if (data.perfil == 'ATENDENTE' && !data.lojaId) {
+        return false; }
       }
-      if (data.perfil === 'GERENTE' && (!data.lojaIds || data.lojaIds.length === 0)) {
-        return false;
+      if (data.perfil == 'GERENTE' && (!data.lojaIds || data.lojaIds.length == 0)) {
+        return false; }
       }
-      return true;
+      return true; }
     },
     {
       message: 'Loja(s) Associada(s) é obrigatória para este perfil.',
       path: ['lojaId', 'lojaIds'],
     }
   )
-  .refine((data) => data.senha === data.confirmarSenha, {
+  .refine((_data) => data.senha == data.confirmarSenha, {
     message: 'As senhas não coincidem.',
     path: ['confirmarSenha'],
   });
@@ -66,34 +66,34 @@ interface UserFormProps {
 }
 
 const UserForm: React.FC<UserFormProps> = ({
-  initialData,
-  onSubmit,
-  onCancel,
+  _initialData,
+  _onSubmit,
+  _onCancel,
   isLoading = false,
 }) => {
   const {
-    register,
-    handleSubmit,
+  _register,
+  _handleSubmit,
     formState: { errors },
-    control,
-    watch,
-    setValue,
+  _control,
+  _watch,
+  _setValue,
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: initialData || {},
   });
 
-  const selectedPerfil = watch('perfil');
-  const selectedParceiroId = watch('parceiroId');
+  const _selectedPerfil = watch('perfil');
+  const _selectedParceiroId = watch('parceiroId');
 
   // Use the new comprehensive data hook
   const {
-    partners,
+  _partners,
     isLoading: isFormDataLoading,
     error: formDataError,
-    getStoresByPartner,
-    canFilterClientSide,
-    filteringStrategy,
+  _getStoresByPartner,
+  _canFilterClientSide,
+  _filteringStrategy,
   } = useUserFormData();
 
   // Use server-side store fetching when needed
@@ -110,20 +110,20 @@ const UserForm: React.FC<UserFormProps> = ({
   const [selectedLojas, setSelectedLojas] = useState<string[]>(initialData?.lojaIds || []);
 
   // Get available stores based on filtering strategy
-  const getAvailableStores = () => {
-    if (!selectedParceiroId) return [];
+  const _getAvailableStores = () => {
+    if (!selectedParceiroId) return []; }
 
     if (canFilterClientSide) {
       // Client-side filtering: use pre-loaded data
-      return getStoresByPartner(parseInt(selectedParceiroId));
+      return getStoresByPartner(parseInt(selectedParceiroId)); }
     } else {
       // Server-side filtering: use on-demand data
-      return serverStores;
+      return serverStores; }
     }
   };
 
-  const availableStores = getAvailableStores();
-  const isStoresLoading = canFilterClientSide ? false : isServerStoresLoading;
+  const _availableStores = getAvailableStores();
+  const _isStoresLoading = canFilterClientSide ? false : isServerStoresLoading;
 
   useEffect(() => {
     // Set initial form values if editing existing user
@@ -136,7 +136,7 @@ const UserForm: React.FC<UserFormProps> = ({
 
   // Update form values when selected stores change for GERENTE
   useEffect(() => {
-    if (selectedPerfil === 'GERENTE') {
+    if (selectedPerfil == 'GERENTE') {
       setValue('lojaIds', selectedLojas);
     }
   }, [selectedLojas, selectedPerfil, setValue]);
@@ -152,19 +152,19 @@ const UserForm: React.FC<UserFormProps> = ({
     }
   }, [selectedPerfil, setValue]);
 
-  const handleAddLoja = (lojaId: string) => {
+  const _handleAddLoja = (lojaId: string) => {
     if (!selectedLojas.includes(lojaId)) {
       setSelectedLojas([...selectedLojas, lojaId]);
     }
   };
 
-  const handleRemoveLoja = (lojaId: string) => {
+  const _handleRemoveLoja = (lojaId: string) => {
     setSelectedLojas(selectedLojas.filter((id) => id !== lojaId));
   };
 
-  const getLojaName = (lojaId: string) => {
-    const loja = availableStores.find((l: unknown) => l.id.toString() === lojaId);
-    return loja ? loja.nomeLoja : 'Loja não encontrada';
+  const _getLojaName = (lojaId: string) => {
+    const _loja = availableStores.find((l) => l.id.toString() == lojaId);
+    return loja ? loja.nomeLoja : 'Loja não encontrada'; }
   };
 
   // Handle errors and loading states
@@ -247,7 +247,7 @@ const UserForm: React.FC<UserFormProps> = ({
         {errors.perfil && <p className="mt-1 text-sm text-red-500">{errors.perfil.message}</p>}
       </div>
 
-      {(selectedPerfil === 'GERENTE' || selectedPerfil === 'ATENDENTE') && (
+      {(selectedPerfil == 'GERENTE' || selectedPerfil == 'ATENDENTE') && (
         <div className="space-y-4">
           <div>
             <Label htmlFor="parceiroId">Parceiro</Label>
@@ -268,7 +268,7 @@ const UserForm: React.FC<UserFormProps> = ({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {partners.map((parceiro: unknown) => (
+                    {partners.map((parceiro) => (
                       <SelectItem key={parceiro.id} value={parceiro.id.toString()}>
                         {parceiro.razaoSocial}
                       </SelectItem>
@@ -283,7 +283,7 @@ const UserForm: React.FC<UserFormProps> = ({
           </div>
 
           {/* Single Store Selection for ATENDENTE */}
-          {selectedPerfil === 'ATENDENTE' && (
+          {selectedPerfil == 'ATENDENTE' && (
             <div>
               <div className="flex items-center gap-2">
                 <Label>Loja Associada</Label>
@@ -293,7 +293,7 @@ const UserForm: React.FC<UserFormProps> = ({
                     Erro ao carregar lojas
                   </span>
                 )}
-                {filteringStrategy === 'server-side' && (
+                {filteringStrategy == 'server-side' && (
                   <span className="flex items-center gap-1 text-xs text-blue-500">
                     <Info className="h-3 w-3" />
                     Modo otimizado ativo
@@ -317,7 +317,7 @@ const UserForm: React.FC<UserFormProps> = ({
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableStores.map((l: unknown) => (
+                      {availableStores.map((l) => (
                         <SelectItem key={l.id} value={l.id.toString()}>
                           {l.nomeLoja}
                         </SelectItem>
@@ -333,7 +333,7 @@ const UserForm: React.FC<UserFormProps> = ({
           )}
 
           {/* Multiple Store Selection for GERENTE */}
-          {selectedPerfil === 'GERENTE' && (
+          {selectedPerfil == 'GERENTE' && (
             <div>
               <div className="flex items-center gap-2">
                 <Label>Lojas Associadas (Múltipla Seleção)</Label>
@@ -343,7 +343,7 @@ const UserForm: React.FC<UserFormProps> = ({
                     Erro ao carregar lojas
                   </span>
                 )}
-                {filteringStrategy === 'server-side' && (
+                {filteringStrategy == 'server-side' && (
                   <span className="flex items-center gap-1 text-xs text-blue-500">
                     <Info className="h-3 w-3" />
                     Modo otimizado ativo
@@ -366,8 +366,8 @@ const UserForm: React.FC<UserFormProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {availableStores
-                      .filter((l: unknown) => !selectedLojas.includes(l.id.toString()))
-                      .map((l: unknown) => (
+                      .filter((l) => !selectedLojas.includes(l.id.toString()))
+                      .map((l) => (
                         <SelectItem key={l.id} value={l.id.toString()}>
                           {l.nomeLoja}
                         </SelectItem>

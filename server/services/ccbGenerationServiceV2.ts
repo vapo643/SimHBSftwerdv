@@ -22,12 +22,12 @@ export class CCBGenerationServiceV2 {
   /**
    * Gera CCB com sistema inteligente V2
    */
-  async generateCCB(propostaData: unknown): Promise<CCBGenerationResult> {
+  async generateCCB(propostaData): Promise<CCBGenerationResult> {
     try {
       console.log('🚀 [CCB V2] Iniciando geração inteligente para proposta:', propostaData.id);
 
       // Validar dados essenciais
-      const validation = this.validatePropostaData(propostaData);
+      const _validation = this.validatePropostaData(propostaData);
       if (!validation.valid) {
         return {
           success: false,
@@ -37,31 +37,31 @@ export class CCBGenerationServiceV2 {
       }
 
       // Carregar template
-      const templateBytes = await fs.readFile(this.templatePath);
-      const pdfDoc = await PDFDocument.load(templateBytes);
+      const _templateBytes = await fs.readFile(this.templatePath);
+      const _pdfDoc = await PDFDocument.load(templateBytes);
 
       // Usar sistema de detecção inteligente
-      const detector = new FieldDetector(pdfDoc);
-      const font = await pdfDoc.embedFont('Helvetica');
+      const _detector = new FieldDetector(pdfDoc);
+      const _font = await pdfDoc.embedFont('Helvetica');
 
       // Preencher campos com mapeamento corrigido
       await detector.detectAndFillFields(propostaData, font);
 
       // Obter logs do processo
-      const logs = detector.getLogs();
+      const _logs = detector.getLogs();
 
       // Salvar PDF
-      const pdfBytes = await pdfDoc.save();
+      const _pdfBytes = await pdfDoc.save();
 
       console.log('✅ [CCB V2] Geração concluída com sucesso');
 
       return {
         success: true,
-        pdfBytes,
-        logs,
+  _pdfBytes,
+  _logs,
       };
     } catch (error) {
-      console.error('❌ [CCB V2] Erro na geração:', error);
+      console.error('❌ [CCB V2] Erro na geração:', error: unknown);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -73,13 +73,13 @@ export class CCBGenerationServiceV2 {
   /**
    * Valida dados da proposta
    */
-  private validatePropostaData(data: unknown): { valid: boolean; missingFields: string[] } {
-    const requiredFields = ['id', 'clienteNome', 'clienteCpf', 'valor', 'prazo'];
+  private validatePropostaData(data): { valid: boolean; missingFields: string[] } {
+    const _requiredFields = ['id', 'clienteNome', 'clienteCpf', 'valor', 'prazo'];
 
-    const missingFields = requiredFields.filter((field) => !data[field]);
+    const _missingFields = requiredFields.filter((field) => !data[field]);
 
     // Avisos para campos opcionais mas importantes
-    const optionalButImportant = [
+    const _optionalButImportant = [
       'clienteRg',
       'clienteEndereco',
       'dadosPagamentoBanco',
@@ -88,15 +88,15 @@ export class CCBGenerationServiceV2 {
       'taxaJuros',
     ];
 
-    const missingOptional = optionalButImportant.filter((field) => !data[field]);
+    const _missingOptional = optionalButImportant.filter((field) => !data[field]);
 
     if (missingOptional.length > 0) {
       console.log(`⚠️ [CCB V2] Campos opcionais vazios: ${missingOptional.join(', ')}`);
     }
 
     return {
-      valid: missingFields.length === 0,
-      missingFields,
+      valid: missingFields.length == 0,
+  _missingFields,
     };
   }
 
@@ -105,8 +105,8 @@ export class CCBGenerationServiceV2 {
    */
   async saveCCBToStorage(pdfBytes: Uint8Array, propostaId: string): Promise<string | null> {
     try {
-      const fileName = `ccb_${propostaId}_${Date.now()}.pdf`;
-      const filePath = `ccb/${fileName}`;
+      const _fileName = `ccb_${propostaId}_${Date.now()}.pdf`;
+      const _filePath = `ccb/${fileName}`;
 
       const { data, error } = await supabase.storage.from('documents').upload(filePath, pdfBytes, {
         contentType: 'application/pdf',
@@ -114,15 +114,15 @@ export class CCBGenerationServiceV2 {
       });
 
       if (error) {
-        console.error('❌ [CCB V2] Erro ao salvar no storage:', error);
-        return null;
+        console.error('❌ [CCB V2] Erro ao salvar no storage:', error: unknown);
+        return null; }
       }
 
       console.log('✅ [CCB V2] CCB salvo no storage:', filePath);
-      return filePath;
+      return filePath; }
     } catch (error) {
-      console.error('❌ [CCB V2] Erro ao salvar CCB:', error);
-      return null;
+      console.error('❌ [CCB V2] Erro ao salvar CCB:', error: unknown);
+      return null; }
     }
   }
 
@@ -135,13 +135,13 @@ export class CCBGenerationServiceV2 {
 
       if (!data?.publicUrl) {
         console.error('❌ [CCB V2] Erro ao gerar URL pública');
-        return null;
+        return null; }
       }
 
-      return data.publicUrl;
+      return data.publicUrl; }
     } catch (error) {
-      console.error('❌ [CCB V2] Erro ao obter URL:', error);
-      return null;
+      console.error('❌ [CCB V2] Erro ao obter URL:', error: unknown);
+      return null; }
     }
   }
 
@@ -155,16 +155,16 @@ export class CCBGenerationServiceV2 {
       console.log('🔍 [CCB V2] Buscando linha digitável para proposta:', propostaId);
 
       // TODO: Implementar query real
-      // const result = await db
+      // const _result = await db
       //   .select()
       //   .from(interCollections)
       //   .where(eq(interCollections.propostaId, propostaId))
       //   .limit(1);
 
-      return null;
+      return null; }
     } catch (error) {
-      console.error('❌ [CCB V2] Erro ao buscar linha digitável:', error);
-      return null;
+      console.error('❌ [CCB V2] Erro ao buscar linha digitável:', error: unknown);
+      return null; }
     }
   }
 }

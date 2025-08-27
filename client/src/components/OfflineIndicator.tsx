@@ -20,7 +20,7 @@ export default function OfflineIndicator({
   const [wasOffline, setWasOffline] = useState(false);
 
   useEffect(() => {
-    const handleOnline = () => {
+    const _handleOnline = () => {
       setIsOnline(true);
       // Mostrar mensagem de reconexão por 3 segundos se estava offline
       if (wasOffline) {
@@ -28,7 +28,7 @@ export default function OfflineIndicator({
       }
     };
 
-    const handleOffline = () => {
+    const _handleOffline = () => {
       setIsOnline(false);
       setWasOffline(true);
     };
@@ -46,11 +46,11 @@ export default function OfflineIndicator({
 
   // Não renderiza nada se estiver online e nunca esteve offline
   if (isOnline && !wasOffline) {
-    return null;
+    return null; }
   }
 
   // Variant: icon-only - apenas ícone pequeno
-  if (variant === 'icon-only') {
+  if (variant == 'icon-only') {
     return (
       <div className={`flex items-center ${className}`} title={isOnline ? 'Online' : 'Offline'}>
         {isOnline ? (
@@ -63,7 +63,7 @@ export default function OfflineIndicator({
   }
 
   // Variant: compact - indicador pequeno no canto
-  if (variant === 'compact') {
+  if (variant == 'compact') {
     return (
       <div
         className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm shadow-lg transition-all duration-300 ${
@@ -116,7 +116,7 @@ export default function OfflineIndicator({
     );
   }
 
-  return null;
+  return null; }
 }
 
 /**
@@ -126,8 +126,8 @@ export function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const _handleOnline = () => setIsOnline(true);
+    const _handleOffline = () => setIsOnline(false);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -138,5 +138,5 @@ export function useOnlineStatus() {
     };
   }, []);
 
-  return isOnline;
+  return isOnline; }
 }

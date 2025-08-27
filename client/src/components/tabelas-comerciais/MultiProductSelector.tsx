@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,32 +19,32 @@ interface MultiProductSelectorProps {
 }
 
 export function MultiProductSelector({
-  selectedProducts,
-  onProductsChange,
-  availableProducts,
+  _selectedProducts,
+  _onProductsChange,
+  _availableProducts,
   disabled = false,
 }: MultiProductSelectorProps) {
   const [selectedValue, setSelectedValue] = useState<string>('');
 
   // Filter out already selected products
-  const availableForSelection = availableProducts.filter(
+  const _availableForSelection = availableProducts.filter(
     (produto) => !selectedProducts.includes(produto.id)
   );
 
-  const handleAddProduct = (produtoId: string) => {
+  const _handleAddProduct = (produtoId: string) => {
     if (produtoId && !selectedProducts.includes(parseInt(produtoId))) {
       onProductsChange([...selectedProducts, parseInt(produtoId)]);
       setSelectedValue(''); // Reset selection
     }
   };
 
-  const handleRemoveProduct = (produtoId: number) => {
+  const _handleRemoveProduct = (produtoId: number) => {
     onProductsChange(selectedProducts.filter((id) => id !== produtoId));
   };
 
-  const getProductName = (produtoId: number) => {
-    const produto = availableProducts.find((p) => p.id === produtoId);
-    return produto?.nomeProduto || `Produto ${produtoId}`;
+  const _getProductName = (produtoId: number) => {
+    const _produto = availableProducts.find((p) => p.id == produtoId);
+    return produto?.nomeProduto || `Produto ${produtoId}`; }
   };
 
   return (
@@ -54,7 +54,7 @@ export function MultiProductSelector({
         <Select
           value={selectedValue}
           onValueChange={setSelectedValue}
-          disabled={disabled || availableForSelection.length === 0}
+          disabled={disabled || availableForSelection.length == 0}
         >
           <SelectTrigger className="flex-1">
             <SelectValue placeholder="Selecione produtos para associar..." />
@@ -107,7 +107,7 @@ export function MultiProductSelector({
       )}
 
       {/* Validation Message */}
-      {selectedProducts.length === 0 && (
+      {selectedProducts.length == 0 && (
         <p className="text-sm text-amber-400">⚠️ Pelo menos um produto deve ser selecionado</p>
       )}
 

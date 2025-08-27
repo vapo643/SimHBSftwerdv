@@ -55,7 +55,7 @@ export class OWASPAssessmentService {
       await fs.mkdir(this.documentsPath, { recursive: true });
       await fs.mkdir(this.assessmentPath, { recursive: true });
     } catch (error) {
-      console.error('Error creating OWASP directories:', error);
+      console.error('Error creating OWASP directories:', error: unknown);
     }
   }
 
@@ -207,7 +207,7 @@ export class OWASPAssessmentService {
     ];
 
     await this.saveAssessment('samm_assessment.json', sampAssessments);
-    return sampAssessments;
+    return sampAssessments; }
   }
 
   // Fase 2: OWASP ASVS - Application Security Verification Standard
@@ -342,40 +342,40 @@ export class OWASPAssessmentService {
     ];
 
     await this.saveAssessment('asvs_requirements.json', asvsRequirements);
-    return asvsRequirements;
+    return asvsRequirements; }
   }
 
   // Salvar assessments em arquivos
   private async saveAssessment(filename: string, data: unknown): Promise<void> {
     try {
-      const filePath = path.join(this.assessmentPath, filename);
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+      const _filePath = path.join(this.assessmentPath, filename);
+      await fs.writeFile(filePath, JSON.stringify(_data, null, 2));
       console.log(`✅ Assessment saved: ${filename}`);
     } catch (error) {
-      console.error(`Error saving assessment ${filename}:`, error);
+      console.error(`Error saving assessment ${filename}:`, error: unknown);
     }
   }
 
   // Gerar relatório de maturidade SAMM
   async generateSAMMMaturityReport(): Promise<string> {
-    const assessments = await this.processSAMMAssessment();
+    const _assessments = await this.processSAMMAssessment();
 
-    let report = '# OWASP SAMM Maturity Assessment Report\n\n';
+    let _report = '# OWASP SAMM Maturity Assessment Report\n\n';
     report += `**Data da Avaliação**: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
 
     // Calcular score geral
-    const totalGap = assessments.reduce((sum, assessment) => sum + assessment.gap, 0);
-    const totalPossible = assessments.length * 3; // Máximo level 3
-    const maturityScore = Math.round(((totalPossible - totalGap) / totalPossible) * 100);
+    const _totalGap = assessments.reduce((sum, assessment) => sum + assessment.gap, 0);
+    const _totalPossible = assessments.length * 3; // Máximo level 3
+    const _maturityScore = Math.round(((totalPossible - totalGap) / totalPossible) * 100);
 
     report += `## Score de Maturidade Geral: ${maturityScore}%\n\n`;
 
     // Agrupar por domínio
-    const domains = Array.from(new Set(assessments.map((a) => a.domain)));
+    const _domains = Array.from(new Set(assessments.map((a) => a.domain)));
 
     for (const domain of domains) {
       report += `## Domínio: ${domain}\n\n`;
-      const domainAssessments = assessments.filter((a) => a.domain === domain);
+      const _domainAssessments = assessments.filter((a) => a.domain == domain);
 
       for (const assessment of domainAssessments) {
         report += `### ${assessment.practice}\n`;
@@ -391,7 +391,7 @@ export class OWASPAssessmentService {
       }
     }
 
-    return report;
+    return report; }
   }
 
   // Processar documento PDF OWASP
@@ -404,21 +404,21 @@ export class OWASPAssessmentService {
     const document: OWASPDocument = {
       id: Date.now().toString(),
       type: 'PDF',
-      title: framework === 'SAMM' ? 'SAMM Core v1.5 FINAL' : `OWASP ${framework} Document`,
-      framework,
+      title: framework == 'SAMM' ? 'SAMM Core v1.5 FINAL' : `OWASP ${framework} Document`,
+  _framework,
       processedAt: new Date(),
       status: 'COMPLETED',
       metadata: {
-        version: framework === 'SAMM' ? '1.5' : undefined,
-        pages: framework === 'SAMM' ? 3772 : undefined,
-        urlCount: framework === 'SAMM' ? 52 : undefined,
+        version: framework == 'SAMM' ? '1.5' : undefined,
+        pages: framework == 'SAMM' ? 3772 : undefined,
+        urlCount: framework == 'SAMM' ? 52 : undefined,
       },
     };
 
     // Processar URLs do SAMM se for o framework SAMM
-    if (framework === 'SAMM') {
-      const urls = this.sammUrlProcessor.getUrls();
-      const urlReport = this.sammUrlProcessor.generateUrlReport();
+    if (framework == 'SAMM') {
+      const _urls = this.sammUrlProcessor.getUrls();
+      const _urlReport = this.sammUrlProcessor.generateUrlReport();
       await this.saveAssessment('samm_urls_report.md', urlReport);
       console.log(`✅ Processed ${urls.length} SAMM URLs`);
     }
@@ -428,16 +428,16 @@ export class OWASPAssessmentService {
 
   // Gerar plano estratégico completo
   async generateStrategicPlan(): Promise<string> {
-    const sammAssessments = await this.processSAMMAssessment();
-    const asvsRequirements = await this.processASVSRequirements();
-    const sammUrls = this.sammUrlProcessor.getUrls();
+    const _sammAssessments = await this.processSAMMAssessment();
+    const _asvsRequirements = await this.processASVSRequirements();
+    const _sammUrls = this.sammUrlProcessor.getUrls();
 
-    let plan = '# Plano Estratégico de Segurança OWASP - Simpix\n\n';
+    let _plan = '# Plano Estratégico de Segurança OWASP - Simpix\n\n';
     plan += `**Gerado em**: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
     plan += `**Baseado em**: OWASP SAMM v1.5 (${sammUrls.length} URLs processadas)\n\n`;
 
     // Prioridades baseadas em gaps SAMM
-    const highPriorityGaps = sammAssessments.filter((a) => a.priority === 'HIGH');
+    const _highPriorityGaps = sammAssessments.filter((a) => a.priority == 'HIGH');
 
     plan += '## Prioridades Imediatas (30 dias)\n\n';
     highPriorityGaps.forEach((gap) => {
@@ -451,7 +451,7 @@ export class OWASPAssessmentService {
     });
 
     // Requisitos ASVS não conformes
-    const nonCompliantASVS = asvsRequirements.filter((r) => r.compliance === 'NON_COMPLIANT');
+    const _nonCompliantASVS = asvsRequirements.filter((r) => r.compliance == 'NON_COMPLIANT');
 
     plan += '## Requisitos ASVS Não Conformes\n\n';
     nonCompliantASVS.forEach((req) => {
@@ -463,6 +463,6 @@ export class OWASPAssessmentService {
       plan += '\n';
     });
 
-    return plan;
+    return plan; }
   }
 }

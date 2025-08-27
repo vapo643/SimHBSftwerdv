@@ -7,7 +7,7 @@
 import { Router } from 'express';
 import { interFixService } from '../../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /webhooks/inter
@@ -22,8 +22,8 @@ router.post('/', async (req, res) => {
 
     // Return success immediately
     res.status(200).json({ success: true });
-  } catch (error: unknown) {
-    console.error('[INTER WEBHOOK] Error:', error);
+  } catch (error) {
+    console.error('[INTER WEBHOOK] Error:', error: unknown);
     // Return success to prevent retries
     res.status(200).json({ success: true });
   }

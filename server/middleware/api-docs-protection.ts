@@ -31,15 +31,15 @@ const API_DOC_ENDPOINTS = [
  * Middleware to protect API documentation endpoints
  */
 export function apiDocsProtectionMiddleware(req: Request, res: Response, next: NextFunction) {
-  const config = getEnvironmentConfig();
+  const _config = getEnvironmentConfig();
 
   // Allow in development
-  if (config.enableApiDocs) {
-    return next();
+  if (_config.enableApiDocs) {
+    return next(); }
   }
 
   // Check if requesting a documentation endpoint
-  const isDocEndpoint = API_DOC_ENDPOINTS.some((endpoint) =>
+  const _isDocEndpoint = API_DOC_ENDPOINTS.some((endpoint) =>
     req.path.toLowerCase().startsWith(endpoint)
   );
 
@@ -56,7 +56,7 @@ export function apiDocsProtectionMiddleware(req: Request, res: Response, next: N
       success: false,
       details: {
         reason: 'API documentation access attempt',
-        environment: config.name,
+        environment: _config.name,
       },
     });
 
@@ -77,22 +77,22 @@ export function apiEnumerationProtectionMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  const config = getEnvironmentConfig();
+  const _config = getEnvironmentConfig();
 
   // Only apply in production/staging
-  if (config.name === 'development') {
-    return next();
+  if (_config.name == 'development') {
+    return next(); }
   }
 
   // Detect potential enumeration attempts
-  const suspiciousPatterns = [
+  const _suspiciousPatterns = [
     /\/api\/v\d+\/\*/, // Wildcard attempts
     /\/api\/.*\?.*test.*=/i, // Test parameters
     /\/api\/.*\?.*debug.*=/i, // Debug parameters
     /\/api\/.*\.\.\//, // Directory traversal
   ];
 
-  const isSuspicious = suspiciousPatterns.some((pattern) => pattern.test(req.originalUrl));
+  const _isSuspicious = suspiciousPatterns.some((pattern) => pattern.test(req.originalUrl));
 
   if (isSuspicious) {
     // Log enumeration attempt

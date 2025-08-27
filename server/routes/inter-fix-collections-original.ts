@@ -6,7 +6,7 @@ import { interCollections, propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { storage } from '../storage';
 
-const router = Router();
+const _router = Router();
 
 /**
  * ENDPOINT EMERGENCIAL: Regenerar boletos com códigos válidos da API Inter
@@ -14,7 +14,7 @@ const router = Router();
  */
 router.post(
   '/fix-collections/:propostaId',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
@@ -36,11 +36,11 @@ router.post(
         .limit(1);
 
       if (!proposta) {
-        return res.status(404).json({ error: 'Proposta não encontrada' });
+        return res.status(404).json({ error: 'Proposta não encontrada' }); }
       }
 
       // Buscar boletos atuais (possivelmente com códigos inválidos)
-      const boletoesAtuais = await db
+      const _boletoesAtuais = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, propostaId));
@@ -48,14 +48,14 @@ router.post(
       console.log(`🔍 [FIX COLLECTIONS] Encontrados ${boletoesAtuais.length} boletos atuais`);
 
       // Verificar se são códigos inválidos
-      const codigosInvalidos = boletoesAtuais.filter(
+      const _codigosInvalidos = boletoesAtuais.filter(
         (b) =>
           !b.codigoSolicitacao.match(
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
           )
       );
 
-      if (codigosInvalidos.length === 0) {
+      if (codigosInvalidos.length == 0) {
         return res.json({
           message: 'Todos os boletos já possuem códigos válidos',
           totalBoletos: boletoesAtuais.length,
@@ -73,7 +73,7 @@ router.post(
         .where(eq(interCollections.propostaId, propostaId));
 
       // Preparar dados para criação de novos boletos
-      const parcelas = boletoesAtuais
+      const _parcelas = boletoesAtuais
         .map((boleto) => ({
           numero: boleto.numeroParcela || 1,
           valor: parseFloat(boleto.valorNominal.toString()),
@@ -83,21 +83,21 @@ router.post(
 
       console.log(`🔄 [FIX COLLECTIONS] Criando ${parcelas.length} novos boletos na API Inter...`);
 
-      const novosBoletosGerados = [];
+      const _novosBoletosGerados = [];
 
-      for (let i = 0; i < parcelas.length; i++) {
-        const parcela = parcelas[i];
+      for (let _i = 0; i < parcelas.length; i++) {
+        const _parcela = parcelas[i];
 
         try {
-          const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
+          const _seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
 
           console.log(
             `📄 [FIX COLLECTIONS] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`
           );
 
           // Criar cobrança na API Inter
-          const collectionData = await interBankService.emitirCobranca({
-            seuNumero,
+          const _collectionData = await interBankService.emitirCobranca({
+  _seuNumero,
             valorNominal: parcela.valor,
             dataVencimento: parcela.vencimento,
             numDiasAgenda: 1,
@@ -121,12 +121,12 @@ router.post(
           );
 
           // Salvar no banco com código válido
-          const novoBoleto = await db
+          const _novoBoleto = await db
             .insert(interCollections)
             .values({
-              propostaId,
+  _propostaId,
               codigoSolicitacao: collectionData.codigoSolicitacao, // UUID válido da API Inter
-              seuNumero,
+  _seuNumero,
               valorNominal: parcela.valor.toString(),
               dataVencimento: parcela.vencimento,
               situacao: 'A_RECEBER', // PAM V1.0: Estado Inicial Forçado - nunca confiar na API
@@ -138,7 +138,7 @@ router.post(
 
           novosBoletosGerados.push(novoBoleto[0]);
         } catch (error) {
-          console.error(`❌ [FIX COLLECTIONS] Erro ao criar boleto ${parcela.numero}:`, error);
+          console.error(`❌ [FIX COLLECTIONS] Erro ao criar boleto ${parcela.numero}:`, error: unknown);
         }
       }
 
@@ -167,7 +167,7 @@ router.post(
         })),
       });
     } catch (error) {
-      console.error('❌ [FIX COLLECTIONS] Erro geral:', error);
+      console.error('❌ [FIX COLLECTIONS] Erro geral:', error: unknown);
       res.status(500).json({
         error: 'Erro ao regenerar boletos',
         details: error instanceof Error ? error.message : 'Unknown error',

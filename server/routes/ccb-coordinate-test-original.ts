@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { ccbTestService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb-coordinate-test/run
@@ -15,10 +15,10 @@ const router = Router();
  */
 router.post('/run', async (req: Request, res: Response) => {
   try {
-    const result = await ccbTestService.executeOperation('coordinate_test', req.body);
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[CCB_COORDINATE_TEST] Error:', error);
+    const _result = await ccbTestService.executeOperation('coordinate_test', req.body);
+    res.json(_result);
+  } catch (error) {
+    console.error('[CCB_COORDINATE_TEST] Error:', error: unknown);
     res.status(500).json({
       success: false,
       error: error.message || 'Coordinate test failed',

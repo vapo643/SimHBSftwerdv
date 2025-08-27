@@ -13,13 +13,13 @@ import path from 'path';
  */
 export async function diagnoseAcroForms() {
   console.log('🔍 Iniciando diagnóstico de AcroForms no template CCB...');
-  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const _templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
 
   try {
-    const templateBytes = await fs.readFile(templatePath);
-    const pdfDoc = await PDFDocument.load(templateBytes);
+    const _templateBytes = await fs.readFile(templatePath);
+    const _pdfDoc = await PDFDocument.load(templateBytes);
 
-    const form = pdfDoc.getForm();
+    const _form = pdfDoc.getForm();
 
     if (form && form.getFields().length > 0) {
       console.log('✅✅✅ SUCESSO! AcroForms detectados. ✅✅✅');
@@ -27,22 +27,22 @@ export async function diagnoseAcroForms() {
 
       const fields: string[] = [];
       form.getFields().forEach((field) => {
-        const fieldName = field.getName();
+        const _fieldName = field.getName();
         console.log(`- Nome do Campo: ${fieldName}`);
         fields.push(fieldName);
       });
 
-      return { hasAcroForms: true, fields };
+      return { hasAcroForms: true, fields }; }
     } else {
       console.log('❌ NENHUM AcroForm detectado. Prossiga para a FASE 2 (Mapeamento Manual).');
-      return { hasAcroForms: false, fields: [] };
+      return { hasAcroForms: false, fields: [] }; }
     }
   } catch (error) {
     console.error(
       '⚠️ Erro ao analisar o PDF (pode ser XFA ou protegido). Prossiga para a FASE 2.',
       error
     );
-    return { hasAcroForms: false, fields: [], error };
+    return { hasAcroForms: false, fields: [], error }; }
   }
 }
 
@@ -51,24 +51,24 @@ export async function diagnoseAcroForms() {
  * Para identificar visualmente onde colocar cada campo
  */
 export async function generateCoordinateGridPDF() {
-  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
-  const outputPath = path.resolve(process.cwd(), 'template_ccb_DEBUG_GRID.pdf');
+  const _templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const _outputPath = path.resolve(process.cwd(), 'template_ccb_DEBUG_GRID.pdf');
 
   console.log('📐 Gerando PDF com grade de coordenadas...');
 
-  const templateBytes = await fs.readFile(templatePath);
-  const pdfDoc = await PDFDocument.load(templateBytes);
-  const diagnosticFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const _templateBytes = await fs.readFile(templatePath);
+  const _pdfDoc = await PDFDocument.load(templateBytes);
+  const _diagnosticFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   // Configurações da Grade para Máxima Precisão
-  const majorGridSpacing = 50; // Linhas principais a cada 50 pontos
-  const minorGridSpacing = 10; // Linhas secundárias a cada 10 pontos
-  const gridColor = rgb(0.1, 0.7, 0.9); // Azul claro
-  const textColor = rgb(0.8, 0, 0); // Vermelho
+  const _majorGridSpacing = 50; // Linhas principais a cada 50 pontos
+  const _minorGridSpacing = 10; // Linhas secundárias a cada 10 pontos
+  const _gridColor = rgb(0.1, 0.7, 0.9); // Azul claro
+  const _textColor = rgb(0.8, 0, 0); // Vermelho
 
-  const pages = pdfDoc.getPages();
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i];
+  const _pages = pdfDoc.getPages();
+  for (let _i = 0; i < pages.length; i++) {
+    const _page = pages[i];
     const { width, height } = page.getSize();
 
     // Título de Diagnóstico
@@ -82,8 +82,8 @@ export async function generateCoordinateGridPDF() {
     });
 
     // Linhas Verticais (X)
-    for (let x = 0; x < width; x += minorGridSpacing) {
-      const isMajor = x % majorGridSpacing === 0;
+    for (let _x = 0; x < width; x += minorGridSpacing) {
+      const _isMajor = x % majorGridSpacing == 0;
       page.drawLine({
         start: { x: x, y: 0 },
         end: { x: x, y: height },
@@ -113,8 +113,8 @@ export async function generateCoordinateGridPDF() {
     }
 
     // Linhas Horizontais (Y)
-    for (let y = 0; y < height; y += minorGridSpacing) {
-      const isMajor = y % majorGridSpacing === 0;
+    for (let _y = 0; y < height; y += minorGridSpacing) {
+      const _isMajor = y % majorGridSpacing == 0;
       page.drawLine({
         start: { x: 0, y: y },
         end: { x: width, y: y },
@@ -144,7 +144,7 @@ export async function generateCoordinateGridPDF() {
     }
 
     // Adicionar pontos de referência importantes
-    const referencePoints = [
+    const _referencePoints = [
       { name: 'Centro', x: width / 2, y: height / 2 },
       { name: 'TopLeft', x: 0, y: height },
       { name: 'TopRight', x: width, y: height },
@@ -172,7 +172,7 @@ export async function generateCoordinateGridPDF() {
     }
   }
 
-  const pdfBytes = await pdfDoc.save();
+  const _pdfBytes = await pdfDoc.save();
   await fs.writeFile(outputPath, pdfBytes);
   console.log(`✅ PDF de Debug gerado: ${outputPath}`);
   console.log(`📋 Instruções:`);
@@ -181,7 +181,7 @@ export async function generateCoordinateGridPDF() {
   console.log(`   3. Use o zoom para identificar as coordenadas exatas de cada campo`);
   console.log(`   4. Anote as coordenadas X,Y onde cada texto deve ser inserido`);
 
-  return outputPath;
+  return outputPath; }
 }
 
 /**
@@ -195,8 +195,8 @@ export function drawTextRightAligned(
   size: number,
   font: PDFFont
 ) {
-  const textWidth = font.widthOfTextAtSize(text, size);
-  const x = rightX - textWidth; // Calcula o ponto de início X
+  const _textWidth = font.widthOfTextAtSize(text, size);
+  const _x = rightX - textWidth; // Calcula o ponto de início X
 
   page.drawText(text, {
     x: x,
@@ -218,8 +218,8 @@ export function drawTextCentered(
   size: number,
   font: PDFFont
 ) {
-  const textWidth = font.widthOfTextAtSize(text, size);
-  const x = centerX - textWidth / 2;
+  const _textWidth = font.widthOfTextAtSize(text, size);
+  const _x = centerX - textWidth / 2;
 
   page.drawText(text, {
     x: x,
@@ -235,24 +235,24 @@ export function drawTextCentered(
  * Útil para ajuste fino
  */
 export async function testCoordinateMapping() {
-  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
-  const outputPath = path.resolve(process.cwd(), 'template_ccb_TEST_FILL.pdf');
+  const _templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const _outputPath = path.resolve(process.cwd(), 'template_ccb_TEST_FILL.pdf');
 
   console.log('🧪 Testando preenchimento de campos...');
 
-  const templateBytes = await fs.readFile(templatePath);
-  const pdfDoc = await PDFDocument.load(templateBytes);
+  const _templateBytes = await fs.readFile(templatePath);
+  const _pdfDoc = await PDFDocument.load(templateBytes);
 
-  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const _fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const _fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  const pages = pdfDoc.getPages();
+  const _pages = pdfDoc.getPages();
 
   // Teste na primeira página
-  const firstPage = pages[0];
+  const _firstPage = pages[0];
 
   // Adicionar textos de teste em várias posições
-  const testFields = [
+  const _testFields = [
     { text: 'TESTE TOPO', x: 100, y: 750, bold: true },
     { text: 'TESTE CENTRO', x: 250, y: 400, bold: false },
     { text: 'TESTE BAIXO', x: 100, y: 100, bold: false },
@@ -279,9 +279,9 @@ export async function testCoordinateMapping() {
     });
   }
 
-  const pdfBytes = await pdfDoc.save();
+  const _pdfBytes = await pdfDoc.save();
   await fs.writeFile(outputPath, pdfBytes);
   console.log(`✅ PDF de teste gerado: ${outputPath}`);
 
-  return outputPath;
+  return outputPath; }
 }

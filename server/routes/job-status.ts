@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { testQueueService } from '../services/testService.js';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/job-status/:id
@@ -15,11 +15,11 @@ const router = Router();
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const result = await testQueueService.executeOperation('get_job_status', {
+    const _result = await testQueueService.executeOperation('get_job_status', {
       jobId: req.params.id,
     });
-    res.json(result);
-  } catch (error: unknown) {
+    res.json(_result);
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Job status check failed',
@@ -33,9 +33,9 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await testQueueService.executeOperation('list_jobs', req.query);
-    res.json(result);
-  } catch (error: unknown) {
+    const _result = await testQueueService.executeOperation('list_jobs', req.query);
+    res.json(_result);
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Job listing failed',

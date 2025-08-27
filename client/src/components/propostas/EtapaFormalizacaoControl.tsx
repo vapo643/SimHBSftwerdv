@@ -18,24 +18,24 @@ interface EtapaFormalizacaoControlProps {
 }
 
 export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> = ({
-  propostaId,
-  etapa,
-  titulo,
-  descricao,
-  concluida,
-  habilitada,
-  onUpdate,
+  _propostaId,
+  _etapa,
+  _titulo,
+  _descricao,
+  _concluida,
+  _habilitada,
+  _onUpdate,
 }) => {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
-  const updateEtapa = useMutation({
+  const _updateEtapa = useMutation({
     mutationFn: async (novaConcluida: boolean) => {
-      const response = await api.patch(`/api/propostas/${propostaId}/etapa-formalizacao`, {
-        etapa,
+      const _response = await api.patch(`/api/propostas/${propostaId}/etapa-formalizacao`, {
+  _etapa,
         concluida: novaConcluida,
       });
-      return response;
+      return response; }
     },
     onSuccess: () => {
       toast({
@@ -51,8 +51,8 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
         onUpdate();
       }
     },
-    onError: (error: unknown) => {
-      const errorMessage =
+    onError: (error) => {
+      const _errorMessage =
         error instanceof Error ? error.message : 'Ocorreu um erro ao atualizar a etapa';
       toast({
         title: 'Erro ao atualizar etapa',
@@ -62,7 +62,7 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
     },
   });
 
-  const handleToggle = () => {
+  const _handleToggle = () => {
     if (habilitada) {
       updateEtapa.mutate(!concluida);
     }
@@ -118,7 +118,7 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
       </div>
 
       {/* Additional info for specific steps */}
-      {etapa === 'ccb_gerado' && concluida && (
+      {etapa == 'ccb_gerado' && concluida && (
         <div className="mt-3 rounded-md border border-blue-700 bg-blue-900/20 p-3">
           <p className="text-xs text-blue-300">
             ✓ CCB gerada automaticamente. O documento será enviado para assinatura eletrônica.
@@ -126,7 +126,7 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
         </div>
       )}
 
-      {etapa === 'assinatura_eletronica' && concluida && (
+      {etapa == 'assinatura_eletronica' && concluida && (
         <div className="mt-3 rounded-md border border-purple-700 bg-purple-900/20 p-3">
           <p className="text-xs text-purple-300">
             ✓ Documento enviado para ClickSign. Aguardando assinatura do cliente.
@@ -134,7 +134,7 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
         </div>
       )}
 
-      {etapa === 'biometria' && concluida && (
+      {etapa == 'biometria' && concluida && (
         <div className="mt-3 rounded-md border border-green-700 bg-green-900/20 p-3">
           <p className="text-xs text-green-300">
             ✓ Biometria validada. Boletos gerados para pagamento.

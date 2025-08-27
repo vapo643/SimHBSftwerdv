@@ -12,7 +12,7 @@ import { AuthenticatedRequest } from '../../shared/types/express';
  * GET /api/propostas/:id/documents
  * Get all documents for a proposal
  */
-export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Response) => {
+export const _getPropostaDocuments = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
@@ -22,12 +22,12 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
       });
     }
 
-    const result = await documentsService.getProposalDocuments(String(propostaId));
-    res.json(result);
-  } catch (error: unknown) {
-    console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error);
+    const _result = await documentsService.getProposalDocuments(String(propostaId));
+    res.json(_result);
+  } catch (error) {
+    console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error: unknown);
 
-    const statusCode = error.message === 'Proposta não encontrada' ? 404 : 500;
+    const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
     res.status(statusCode).json({
       message: error.message || 'Erro interno do servidor ao buscar documentos',
     });
@@ -38,10 +38,10 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
  * POST /api/propostas/:id/documents
  * Upload a document for a proposal
  */
-export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
+export const _uploadPropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
-    const file = req.file;
+    const _file = req.file;
 
     if (!propostaId) {
       return res.status(400).json({
@@ -55,7 +55,7 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
       });
     }
 
-    const result = await documentsService.uploadDocument(String(propostaId), file);
+    const _result = await documentsService.uploadDocument(String(propostaId), file);
 
     if (result.success) {
       res.json({
@@ -63,13 +63,13 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
         document: result.document,
       });
     } else {
-      const statusCode = result.error === 'Proposta não encontrada' ? 404 : 400;
+      const _statusCode = result.error == 'Proposta não encontrada' ? 404 : 400;
       res.status(statusCode).json({
         message: result.error || 'Erro no upload',
       });
     }
-  } catch (error: unknown) {
-    console.error('[DOCUMENTS_CONTROLLER] Error uploading document:', error);
+  } catch (error) {
+    console.error('[DOCUMENTS_CONTROLLER] Error uploading document:', error: unknown);
     res.status(500).json({
       message: 'Erro interno do servidor no upload',
     });
@@ -80,7 +80,7 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
  * DELETE /api/propostas/:propostaId/documents/:documentId
  * Delete a specific document
  */
-export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
+export const _deletePropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { propostaId, documentId } = req.params;
 
@@ -95,8 +95,8 @@ export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Res
     res.status(501).json({
       message: 'Funcionalidade de exclusão não implementada',
     });
-  } catch (error: unknown) {
-    console.error('[DOCUMENTS_CONTROLLER] Error deleting document:', error);
+  } catch (error) {
+    console.error('[DOCUMENTS_CONTROLLER] Error deleting document:', error: unknown);
     res.status(500).json({
       message: 'Erro interno do servidor ao deletar documento',
     });
@@ -107,7 +107,7 @@ export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Res
  * GET /api/propostas/:id/documents/:documentId
  * Get a specific document details
  */
-export const getPropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
+export const _getPropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { propostaId, documentId } = req.params;
 
@@ -122,8 +122,8 @@ export const getPropostaDocument = async (req: AuthenticatedRequest, res: Respon
     res.status(501).json({
       message: 'Funcionalidade não implementada',
     });
-  } catch (error: unknown) {
-    console.error('[DOCUMENTS_CONTROLLER] Error fetching document:', error);
+  } catch (error) {
+    console.error('[DOCUMENTS_CONTROLLER] Error fetching document:', error: unknown);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar documento',
     });

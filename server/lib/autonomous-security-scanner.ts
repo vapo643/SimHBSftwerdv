@@ -90,10 +90,10 @@ export class AutonomousSecurityScanner {
     const routes: unknown[] = [];
 
     // Extrair todas as rotas do Express
-    this.app._router.stack.forEach((middleware: unknown) => {
+    this.app._router.stack.forEach((middleware) => {
       if (middleware.route) {
         // Rota direta
-        const methods = Object.keys(middleware.route.methods);
+        const _methods = Object.keys(middleware.route.methods);
         methods.forEach((method) => {
           routes.push({
             path: middleware.route.path,
@@ -101,11 +101,11 @@ export class AutonomousSecurityScanner {
             middleware: [],
           });
         });
-      } else if (middleware.name === 'router') {
+      } else if (middleware.name == 'router') {
         // Sub-router
-        middleware.handle.stack.forEach((handler: unknown) => {
+        middleware.handle.stack.forEach((handler) => {
           if (handler.route) {
-            const methods = Object.keys(handler.route.methods);
+            const _methods = Object.keys(handler.route.methods);
             methods.forEach((method) => {
               routes.push({
                 path: handler.route.path,
@@ -120,7 +120,7 @@ export class AutonomousSecurityScanner {
 
     // Criar perfil para cada endpoint
     routes.forEach((route) => {
-      const key = `${route.method}:${route.path}`;
+      const _key = `${route.method}:${route.path}`;
       this.endpoints.set(key, {
         method: route.method,
         path: route.path,
@@ -147,7 +147,7 @@ export class AutonomousSecurityScanner {
     console.log('📊 [AUTONOMOUS SECURITY] Estabelecendo baseline...');
 
     // Analisar logs históricos
-    const logs = await db
+    const _logs = await db
       .select()
       .from(security_logs)
       .where(sql`created_at > NOW() - INTERVAL '7 days'`)
@@ -168,22 +168,22 @@ export class AutonomousSecurityScanner {
   private startContinuousMonitoring() {
     // Interceptar TODAS as requisições
     this.app.use((req: Request, res: Response, next: unknown) => {
-      const startTime = Date.now();
-      const reqData = this.captureRequestData(req);
+      const _startTime = Date.now();
+      const _reqData = this.captureRequestData(req);
 
       // Interceptar response
-      const originalSend = res.send;
-      const self = this;
-      res.send = function (data: unknown) {
+      const _originalSend = res.send;
+      const _self = this;
+      res.send = function (data) {
         res.locals.responseTime = Date.now() - startTime;
-        res.locals.responseSize = Buffer.byteLength(data);
+        res.locals.responseSize = Buffer.byteLength(_data);
 
         // Analisar requisição/resposta
         setImmediate(() => {
           self.analyzeRequestResponse(req, res, reqData);
         });
 
-        return originalSend.call(this, data);
+        return originalSend.call(this,_data); }
       };
 
       next();
@@ -218,20 +218,20 @@ export class AutonomousSecurityScanner {
    * Analisar requisição/resposta em tempo real
    */
   private async analyzeRequestResponse(req: Request, res: Response, reqData: unknown) {
-    const responseTime = res.locals.responseTime;
-    const responseSize = res.locals.responseSize;
-    const statusCode = res.statusCode;
+    const _responseTime = res.locals.responseTime;
+    const _responseSize = res.locals.responseSize;
+    const _statusCode = res.statusCode;
 
     // 1. Detecção de anomalias por endpoint
-    const endpointKey = `${req.method}:${req.path}`;
-    const endpoint = this.endpoints.get(endpointKey);
+    const _endpointKey = `${req.method}:${req.path}`;
+    const _endpoint = this.endpoints.get(endpointKey);
 
     if (endpoint) {
-      const anomalies = this.detectAnomalies({
-        endpoint,
-        responseTime,
-        responseSize,
-        statusCode,
+      const _anomalies = this.detectAnomalies({
+  _endpoint,
+  _responseTime,
+  _responseSize,
+  _statusCode,
         headers: reqData.headers,
         params: { ...reqData.query, ...reqData.body },
       });
@@ -242,7 +242,7 @@ export class AutonomousSecurityScanner {
     }
 
     // 2. Detecção de padrões de ataque
-    const attacks = this.detectAttackPatterns(reqData);
+    const _attacks = this.detectAttackPatterns(reqData);
     if (attacks.length > 0) {
       this.handleAttacks(attacks, reqData);
     }
@@ -257,14 +257,14 @@ export class AutonomousSecurityScanner {
   /**
    * Detectar anomalias baseado no comportamento normal
    */
-  private detectAnomalies(data: unknown): string[] {
+  private detectAnomalies(data): string[] {
     const anomalies: string[] = [];
-    const endpoint = data.endpoint;
-    const normal = endpoint.normalBehavior;
+    const _endpoint = data.endpoint;
+    const _normal = endpoint.normalBehavior;
 
     // Tempo de resposta anormal
     if (normal.avgResponseTime > 0) {
-      const deviation = Math.abs(data.responseTime - normal.avgResponseTime);
+      const _deviation = Math.abs(data.responseTime - normal.avgResponseTime);
       if (deviation > normal.avgResponseTime * 3) {
         // 3x desvio
         anomalies.push('response_time_anomaly');
@@ -278,7 +278,7 @@ export class AutonomousSecurityScanner {
     }
 
     // Headers suspeitos
-    const suspiciousHeaders = [
+    const _suspiciousHeaders = [
       'x-forwarded-host',
       'x-original-url',
       'x-rewrite-url',
@@ -294,8 +294,8 @@ export class AutonomousSecurityScanner {
     }
 
     // Parâmetros não esperados
-    const paramKeys = Object.keys(data.params);
-    const unexpectedParams = paramKeys.filter(
+    const _paramKeys = Object.keys(data.params);
+    const _unexpectedParams = paramKeys.filter(
       (key) => !normal.commonParams.has(key) && !this.learningMode
     );
 
@@ -303,17 +303,17 @@ export class AutonomousSecurityScanner {
       anomalies.push('unexpected_parameters');
     }
 
-    return anomalies;
+    return anomalies; }
   }
 
   /**
    * Detectar padrões de ataque conhecidos e desconhecidos
    */
-  private detectAttackPatterns(reqData: unknown): AttackPattern[] {
+  private detectAttackPatterns(reqData): AttackPattern[] {
     const detectedAttacks: AttackPattern[] = [];
 
     // Converter todos os dados em string para análise
-    const dataString = JSON.stringify({
+    const _dataString = JSON.stringify({
       path: reqData.path,
       query: reqData.query,
       body: reqData.body,
@@ -321,7 +321,7 @@ export class AutonomousSecurityScanner {
     }).toLowerCase();
 
     // 1. SQL Injection
-    const sqlPatterns = [
+    const _sqlPatterns = [
       /(\b(union|select|insert|update|delete|drop|create|alter|exec|execute)\b.*\b(from|where|table|database)\b)/i,
       /(\b(or|and)\b\s*\d+\s*=\s*\d+)/i,
       /(\'|\")\s*(or|and)\s*(\'|\")\s*=\s*(\'|\")/i,
@@ -337,12 +337,12 @@ export class AutonomousSecurityScanner {
           confidence: 0.9,
           severity: 'CRITICAL',
         });
-        break;
+        break; }
       }
     }
 
     // 2. XSS
-    const xssPatterns = [
+    const _xssPatterns = [
       /<script[^>]*>[\s\S]*?<\/script>/gi,
       /javascript:\s*[^"']+/gi,
       /on\w+\s*=\s*["'][^"']+["']/gi,
@@ -360,12 +360,12 @@ export class AutonomousSecurityScanner {
           confidence: 0.85,
           severity: 'HIGH',
         });
-        break;
+        break; }
       }
     }
 
     // 3. Command Injection
-    const cmdPatterns = [
+    const _cmdPatterns = [
       /(\||;|&|`|\$\(|\${).*?(ls|cat|grep|find|wget|curl|nc|bash|sh|cmd|powershell)/i,
       /\b(system|exec|popen|proc_open|shell_exec|passthru)\s*\(/i,
     ];
@@ -378,12 +378,12 @@ export class AutonomousSecurityScanner {
           confidence: 0.9,
           severity: 'CRITICAL',
         });
-        break;
+        break; }
       }
     }
 
     // 4. Path Traversal
-    const pathPatterns = [/\.\.[\/\\]/, /%2e%2e[\/\\]/i, /\.\.%2f/i, /\.\.%5c/i];
+    const _pathPatterns = [/\.\.[\/\\]/, /%2e%2e[\/\\]/i, /\.\.%2f/i, /\.\.%5c/i];
 
     for (const pattern of pathPatterns) {
       if (pattern.test(dataString)) {
@@ -393,16 +393,16 @@ export class AutonomousSecurityScanner {
           confidence: 0.95,
           severity: 'HIGH',
         });
-        break;
+        break; }
       }
     }
 
     // 5. LDAP Injection
-    const ldapPatterns = [/[()&|*]/, /\b(objectClass|cn|sn|uid|mail)\s*=/i];
+    const _ldapPatterns = [/[()&|*]/, /\b(objectClass|cn|sn|uid|mail)\s*=/i];
 
     // 6. XML/XXE Injection
     if (reqData.contentType?.includes('xml')) {
-      const xxePatterns = [
+      const _xxePatterns = [
         /<!ENTITY/i,
         /SYSTEM\s+["'](file:|http:|https:|ftp:|php:|zlib:|data:|glob:|phar:|ssh2:|rar:|ogg:|expect:)/i,
       ];
@@ -415,22 +415,22 @@ export class AutonomousSecurityScanner {
             confidence: 0.9,
             severity: 'HIGH',
           });
-          break;
+          break; }
         }
       }
     }
 
     // 7. NoSQL Injection
-    const noSqlPatterns = [/\$where/, /\$ne/, /\$gt/, /\$regex/, /\$exists/];
+    const _noSqlPatterns = [/\$where/, /\$ne/, /\$gt/, /\$regex/, /\$exists/];
 
     // 8. SSRF Patterns
-    const ssrfPatterns = [
+    const _ssrfPatterns = [
       /localhost|127\.0\.0\.1|0\.0\.0\.0|::1/,
       /169\.254\.\d+\.\d+/, // Link-local
       /10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+/, // Private IPs
     ];
 
-    return detectedAttacks;
+    return detectedAttacks; }
   }
 
   /**
@@ -449,7 +449,7 @@ export class AutonomousSecurityScanner {
       });
     }
 
-    const profile = this.ipProfiles.get(ip)!;
+    const _profile = this.ipProfiles.get(ip)!;
     profile.lastSeen = new Date();
     profile.requestCount++;
     profile.endpoints.add(`${reqData.method}:${reqData.path}`);
@@ -481,11 +481,11 @@ export class AutonomousSecurityScanner {
   /**
    * Scanner de vulnerabilidades ativo
    */
-  private async scanForVulnerabilities(reqData: unknown, statusCode: number) {
+  private async scanForVulnerabilities(reqData, statusCode: number) {
     const vulnerabilities: VulnerabilityReport[] = [];
 
     // 1. Information Disclosure
-    if (statusCode === 500 && reqData.body?.stack) {
+    if (statusCode == 500 && reqData.body?.stack) {
       vulnerabilities.push({
         id: this.generateVulnId(),
         type: 'INFORMATION_DISCLOSURE',
@@ -502,10 +502,10 @@ export class AutonomousSecurityScanner {
     }
 
     // 2. Insecure Direct Object Reference (IDOR)
-    const idPattern = /\/(users?|accounts?|orders?|documents?|files?)\/(\d+|[a-f0-9-]{36})/i;
+    const _idPattern = /\/(users?|accounts?|orders?|documents?|files?)\/(\d+|[a-f0-9-]{36})/i;
     if (idPattern.test(reqData.path)) {
       // Verificar se há validação de autorização
-      const hasAuthHeader = !!reqData.headers.authorization;
+      const _hasAuthHeader = !!reqData.headers.authorization;
       if (!hasAuthHeader) {
         vulnerabilities.push({
           id: this.generateVulnId(),
@@ -524,7 +524,7 @@ export class AutonomousSecurityScanner {
     }
 
     // 3. Missing Security Headers
-    const securityHeaders = [
+    const _securityHeaders = [
       'x-frame-options',
       'x-content-type-options',
       'strict-transport-security',
@@ -532,7 +532,7 @@ export class AutonomousSecurityScanner {
       'x-xss-protection',
     ];
 
-    const missingHeaders = securityHeaders.filter((h) => !reqData.headers[h]);
+    const _missingHeaders = securityHeaders.filter((h) => !reqData.headers[h]);
     if (missingHeaders.length > 0) {
       vulnerabilities.push({
         id: this.generateVulnId(),
@@ -597,14 +597,14 @@ export class AutonomousSecurityScanner {
     // Simular aprendizado de máquina básico
     setInterval(async () => {
       // Analisar logs recentes para novos padrões
-      const recentLogs = await db
+      const _recentLogs = await db
         .select()
         .from(security_logs)
         .where(sql`created_at > NOW() - INTERVAL '1 hour'`)
         .limit(1000);
 
       // Agrupar por padrões similares
-      const patterns = this.extractPatterns(recentLogs);
+      const _patterns = this.extractPatterns(recentLogs);
 
       // Adicionar novos padrões detectados
       for (const pattern of patterns) {
@@ -644,16 +644,16 @@ export class AutonomousSecurityScanner {
    * Gerar relatório automático
    */
   private async generateSecurityReport() {
-    const report = {
+    const _report = {
       timestamp: new Date(),
       summary: {
         totalVulnerabilities: this.vulnerabilities.size,
-        critical: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'CRITICAL')
+        critical: Array.from(this.vulnerabilities.values()).filter((v) => v.severity == 'CRITICAL')
           .length,
-        high: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'HIGH').length,
-        medium: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'MEDIUM')
+        high: Array.from(this.vulnerabilities.values()).filter((v) => v.severity == 'HIGH').length,
+        medium: Array.from(this.vulnerabilities.values()).filter((v) => v.severity == 'MEDIUM')
           .length,
-        low: Array.from(this.vulnerabilities.values()).filter((v) => v.severity === 'LOW').length,
+        low: Array.from(this.vulnerabilities.values()).filter((v) => v.severity == 'LOW').length,
       },
       topVulnerabilities: Array.from(this.vulnerabilities.values())
         .sort((a, b) => this.getSeverityScore(b.severity) - this.getSeverityScore(a.severity))
@@ -673,12 +673,12 @@ export class AutonomousSecurityScanner {
 
   // Métodos auxiliares
   private generateVulnId(): string {
-    return `VULN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `VULN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
   }
 
   private getSeverityScore(severity: string): number {
-    const scores = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-    return scores[severity as keyof typeof scores] || 0;
+    const _scores = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+    return scores[severity as keyof typeof scores] || 0; }
   }
 
   private async calculateSecurityMetrics(): Promise<SecurityMetrics> {
@@ -698,31 +698,31 @@ export class AutonomousSecurityScanner {
     const recommendations: string[] = [];
 
     // Baseado nas vulnerabilidades encontradas
-    const vulns = Array.from(this.vulnerabilities.values());
+    const _vulns = Array.from(this.vulnerabilities.values());
 
-    if (vulns.some((v) => v.type === 'SQL_INJECTION')) {
+    if (vulns.some((v) => v.type == 'SQL_INJECTION')) {
       recommendations.push('Implementar prepared statements em todas as queries');
     }
 
-    if (vulns.some((v) => v.type === 'XSS')) {
+    if (vulns.some((v) => v.type == 'XSS')) {
       recommendations.push('Implementar Content Security Policy (CSP) restritiva');
     }
 
-    if (vulns.some((v) => v.type === 'WEAK_PASSWORD_POLICY')) {
+    if (vulns.some((v) => v.type == 'WEAK_PASSWORD_POLICY')) {
       recommendations.push('Aumentar requisitos mínimos de senha');
     }
 
-    return recommendations;
+    return recommendations; }
   }
 
   // Stubs para métodos complexos
   private initializeAttackPatterns() {}
-  private processLogForBaseline(log: unknown) {}
+  private processLogForBaseline(log) {}
   private handleAnomalies(anomalies: string[], reqData: unknown) {}
   private handleAttacks(attacks: AttackPattern[], reqData: unknown) {}
   private blockIP(ip: string) {}
   private extractPatterns(logs: unknown[]): AttackPattern[] {
-    return [];
+    return []; }
   }
   private async scanSecurityConfiguration() {}
   private async scanDependencies() {}
@@ -773,9 +773,9 @@ export function initializeAutonomousScanner(app: Application) {
     scanner = new AutonomousSecurityScanner(app);
     scanner.start();
   }
-  return scanner;
+  return scanner; }
 }
 
 export function getSecurityScanner(): AutonomousSecurityScanner | null {
-  return scanner;
+  return scanner; }
 }

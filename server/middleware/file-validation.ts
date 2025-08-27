@@ -54,24 +54,24 @@ export class SecureFileValidator {
    * Validate file extension against allowed types
    */
   private static validateExtension(filename: string): string | null {
-    const ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0];
+    const _ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0];
     if (!ext || !(ext in ALLOWED_FILE_TYPES)) {
-      return null;
+      return null; }
     }
-    return ALLOWED_FILE_TYPES[ext as keyof typeof ALLOWED_FILE_TYPES];
+    return ALLOWED_FILE_TYPES[ext as keyof typeof ALLOWED_FILE_TYPES]; }
   }
 
   /**
    * Validate magic numbers (file signatures)
    */
   private static validateMagicNumbers(buffer: Buffer, expectedMimeType: string): boolean {
-    const signatures = FILE_SIGNATURES[expectedMimeType as keyof typeof FILE_SIGNATURES];
-    if (!signatures) return false;
+    const _signatures = FILE_SIGNATURES[expectedMimeType as keyof typeof FILE_SIGNATURES];
+    if (!signatures) return false; }
 
     return signatures.some((signature) => {
-      if (buffer.length < signature.length) return false;
+      if (buffer.length < signature.length) return false; }
 
-      return signature.every((byte, index) => buffer[index] === byte);
+      return signature.every((byte, index) => buffer[index] == byte); }
     });
   }
 
@@ -80,11 +80,11 @@ export class SecureFileValidator {
    */
   private static scanForMaliciousContent(buffer: Buffer, filename: string): string[] {
     const warnings: string[] = [];
-    const scanBuffer = buffer.subarray(0, this.SCAN_BUFFER_SIZE);
-    const content = scanBuffer.toString('binary');
+    const _scanBuffer = buffer.subarray(0, this.SCAN_BUFFER_SIZE);
+    const _content = scanBuffer.toString('binary');
 
     // Check for embedded scripts or suspicious patterns
-    const maliciousPatterns = [
+    const _maliciousPatterns = [
       /javascript:/gi,
       /<script[\s\S]*?>/gi,
       /<iframe[\s\S]*?>/gi,
@@ -106,7 +106,7 @@ export class SecureFileValidator {
     });
 
     // Check for double extensions (e.g., file.pdf.exe)
-    const extensionCount = (filename.match(/\./g) || []).length;
+    const _extensionCount = (filename.match(/\./g) || []).length;
     if (extensionCount > 1) {
       warnings.push('Multiple file extensions detected');
     }
@@ -116,7 +116,7 @@ export class SecureFileValidator {
       warnings.push('Executable file extension detected');
     }
 
-    return warnings;
+    return _warnings; }
   }
 
   /**
@@ -135,7 +135,7 @@ export class SecureFileValidator {
     }
 
     // 2. Extension validation
-    const expectedMimeType = this.validateExtension(originalname);
+    const _expectedMimeType = this.validateExtension(originalname);
     if (!expectedMimeType) {
       return {
         type: 'INVALID_EXTENSION',
@@ -168,7 +168,7 @@ export class SecureFileValidator {
     }
 
     // 5. Malicious content scanning
-    const maliciousWarnings = this.scanForMaliciousContent(buffer, originalname);
+    const _maliciousWarnings = this.scanForMaliciousContent(buffer, originalname);
     if (maliciousWarnings.length > 0) {
       return {
         type: 'MALICIOUS_CONTENT',
@@ -184,7 +184,7 @@ export class SecureFileValidator {
 /**
  * Express middleware for secure file validation
  */
-export const secureFileValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const _secureFileValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
   if (!req.file) {
     return res.status(400).json({
       error: 'No file uploaded',
@@ -192,7 +192,7 @@ export const secureFileValidationMiddleware = (req: Request, res: Response, next
     });
   }
 
-  const validationError = SecureFileValidator.validateFile(req.file);
+  const _validationError = SecureFileValidator.validateFile(req.file);
 
   if (validationError) {
     console.error(`🚨 [SECURITY] File validation failed:`, {

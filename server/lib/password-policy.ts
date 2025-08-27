@@ -53,7 +53,7 @@ export function validatePasswordPolicy(
   personalInfo: string[] = [],
   zxcvbnScore: number = 0
 ): PasswordPolicyResult {
-  const requirements = {
+  const _requirements = {
     minLength: password.length >= 12, // NIST recommends minimum 8, we use 12
     maxLength: password.length <= 128, // NIST recommends max 64+, we use 128
     noCommonPatterns: true,
@@ -78,12 +78,12 @@ export function validatePasswordPolicy(
     if (pattern.test(password)) {
       requirements.noCommonPatterns = false;
       suggestions.push('Evite padrões comuns como "password" ou "123456"');
-      break;
+      break; }
     }
   }
 
   // Check keyboard patterns
-  const lowerPassword = password.toLowerCase();
+  const _lowerPassword = password.toLowerCase();
   for (const pattern of KEYBOARD_PATTERNS) {
     if (
       lowerPassword.includes(pattern) ||
@@ -93,7 +93,7 @@ export function validatePasswordPolicy(
       if (!suggestions.includes('Evite sequências do teclado como "qwerty"')) {
         suggestions.push('Evite sequências do teclado como "qwerty"');
       }
-      break;
+      break; }
     }
   }
 
@@ -102,7 +102,7 @@ export function validatePasswordPolicy(
     if (info && info.length > 2 && password.toLowerCase().includes(info.toLowerCase())) {
       requirements.noPersonalInfo = false;
       suggestions.push('Não use informações pessoais na senha');
-      break;
+      break; }
     }
   }
 
@@ -113,17 +113,17 @@ export function validatePasswordPolicy(
   }
 
   // Check sequential characters
-  const hasSequential = checkSequentialChars(password);
+  const _hasSequential = checkSequentialChars(password);
   if (hasSequential) {
     requirements.noSequentialChars = false;
     suggestions.push('Evite sequências como "abc" ou "123"');
   }
 
   // Calculate if valid
-  const isValid = Object.values(requirements).every((req) => req);
+  const _isValid = Object.values(requirements).every((req) => req);
 
   // Generate message
-  let message = '';
+  let _message = '';
   if (isValid) {
     message = 'Senha forte e segura';
   } else {
@@ -131,11 +131,11 @@ export function validatePasswordPolicy(
   }
 
   return {
-    isValid,
+  _isValid,
     score: zxcvbnScore,
-    message,
-    requirements,
-    suggestions,
+  _message,
+  _requirements,
+  _suggestions,
   };
 }
 
@@ -143,23 +143,23 @@ export function validatePasswordPolicy(
  * Check for sequential characters
  */
 function checkSequentialChars(password: string): boolean {
-  const chars = password.toLowerCase().split('');
+  const _chars = password.toLowerCase().split('');
 
-  for (let i = 0; i < chars.length - 2; i++) {
-    const char1 = chars[i].charCodeAt(0);
-    const char2 = chars[i + 1].charCodeAt(0);
-    const char3 = chars[i + 2].charCodeAt(0);
+  for (let _i = 0; i < chars.length - 2; i++) {
+    const _char1 = chars[i].charCodeAt(0);
+    const _char2 = chars[i + 1].charCodeAt(0);
+    const _char3 = chars[i + 2].charCodeAt(0);
 
     // Check ascending or descending sequences
     if (
-      (char2 === char1 + 1 && char3 === char2 + 1) ||
-      (char2 === char1 - 1 && char3 === char2 - 1)
+      (char2 == char1 + 1 && char3 == char2 + 1) ||
+      (char2 == char1 - 1 && char3 == char2 - 1)
     ) {
-      return true;
+      return true; }
     }
   }
 
-  return false;
+  return false; }
 }
 
 /**
@@ -174,14 +174,14 @@ export function logPasswordPolicyViolation(
   securityLogger.logEvent({
     type: SecurityEventType.LOGIN_FAILURE,
     severity: 'LOW',
-    userId,
+  _userId,
     userEmail: email,
-    ipAddress,
+  _ipAddress,
     endpoint: '/api/auth/register',
     success: false,
     details: {
       reason: 'Password policy violations',
-      violations,
+  _violations,
     },
   });
 }
@@ -191,16 +191,16 @@ export function logPasswordPolicyViolation(
  */
 export function getPasswordStrengthMessage(score: number): string {
   switch (score) {
-    case 0:
-    case 1:
-      return 'Senha muito fraca - facilmente adivinhável';
-    case 2:
-      return 'Senha fraca - precisa ser mais complexa';
-    case 3:
-      return 'Senha razoável - pode ser melhorada';
-    case 4:
-      return 'Senha forte - boa escolha!';
+    case 0: {
+    case 1: {
+      return 'Senha muito fraca - facilmente adivinhável'; }
+    case 2: {
+      return 'Senha fraca - precisa ser mais complexa'; }
+    case 3: {
+      return 'Senha razoável - pode ser melhorada'; }
+    case 4: {
+      return 'Senha forte - boa escolha!'; }
     default:
-      return 'Força da senha desconhecida';
+      return 'Força da senha desconhecida'; }
   }
 }

@@ -12,7 +12,7 @@ export class MonitoringService {
    */
   async getDatabaseStats(): Promise<unknown> {
     try {
-      const stats = await monitoringRepository.getDatabaseStats();
+      const _stats = await monitoringRepository.getDatabaseStats();
 
       return {
         databaseSize: this.formatBytes(stats.database_size),
@@ -21,8 +21,8 @@ export class MonitoringService {
         totalRows: parseInt(stats.total_rows),
         timestamp: new Date().toISOString(),
       };
-    } catch (error: unknown) {
-      console.error('[MONITORING_SERVICE] Error fetching database stats:', error);
+    } catch (error) {
+      console.error('[MONITORING_SERVICE] Error fetching database stats:', error: unknown);
       throw new Error('Failed to fetch database statistics');
     }
   }
@@ -32,7 +32,7 @@ export class MonitoringService {
    */
   async getTableStats(): Promise<any[]> {
     try {
-      const tables = await monitoringRepository.getTableStats();
+      const _tables = await monitoringRepository.getTableStats();
 
       return tables.map((table) => ({
         schema: table.schemaname,
@@ -44,8 +44,8 @@ export class MonitoringService {
         totalSize: table.total_size,
         needsVacuum: parseInt(table.dead_rows || 0) > parseInt(table.row_count || 0) * 0.1,
       }));
-    } catch (error: unknown) {
-      console.error('[MONITORING_SERVICE] Error fetching table stats:', error);
+    } catch (error) {
+      console.error('[MONITORING_SERVICE] Error fetching table stats:', error: unknown);
       throw new Error('Failed to fetch table statistics');
     }
   }
@@ -55,7 +55,7 @@ export class MonitoringService {
    */
   async getIndexUsage(): Promise<any[]> {
     try {
-      const indexes = await monitoringRepository.getIndexUsage();
+      const _indexes = await monitoringRepository.getIndexUsage();
 
       return indexes.map((index) => ({
         schema: index.schemaname,
@@ -67,8 +67,8 @@ export class MonitoringService {
         size: index.index_size,
         efficiency: this.calculateIndexEfficiency(index),
       }));
-    } catch (error: unknown) {
-      console.error('[MONITORING_SERVICE] Error fetching index usage:', error);
+    } catch (error) {
+      console.error('[MONITORING_SERVICE] Error fetching index usage:', error: unknown);
       throw new Error('Failed to fetch index usage');
     }
   }
@@ -83,19 +83,19 @@ export class MonitoringService {
     byApplication: unknown;
   }> {
     try {
-      const connections = await monitoringRepository.getActiveConnections();
+      const _connections = await monitoringRepository.getActiveConnections();
 
       // Categorize by state
-      const byState = connections.reduce((acc, conn) => {
+      const _byState = connections.reduce((acc, conn) => {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
-        return acc;
+        return acc; }
       }, {} as unknown);
 
       // Categorize by application
-      const byApplication = connections.reduce((acc, conn) => {
-        const app = conn.application_name || 'unknown';
+      const _byApplication = connections.reduce((acc, conn) => {
+        const _app = conn.application_name || 'unknown';
         acc[app] = (acc[app] || 0) + 1;
-        return acc;
+        return acc; }
       }, {} as unknown);
 
       return {
@@ -110,11 +110,11 @@ export class MonitoringService {
           stateChangeTime: conn.state_change,
           currentQuery: conn.query?.substring(0, 100), // Truncate for safety
         })),
-        byState,
-        byApplication,
+  _byState,
+  _byApplication,
       };
-    } catch (error: unknown) {
-      console.error('[MONITORING_SERVICE] Error fetching connections:', error);
+    } catch (error) {
+      console.error('[MONITORING_SERVICE] Error fetching connections:', error: unknown);
       throw new Error('Failed to fetch active connections');
     }
   }
@@ -128,8 +128,8 @@ export class MonitoringService {
     recommendations: string[];
   }> {
     try {
-      const health = await monitoringRepository.checkDatabaseHealth();
-      const stats = await monitoringRepository.getDatabaseStats();
+      const _health = await monitoringRepository.checkDatabaseHealth();
+      const _stats = await monitoringRepository.getDatabaseStats();
 
       const recommendations: string[] = [];
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
@@ -151,12 +151,12 @@ export class MonitoringService {
       }
 
       return {
-        status,
+  _status,
         checks: health.checks,
-        recommendations,
+  _recommendations,
       };
-    } catch (error: unknown) {
-      console.error('[MONITORING_SERVICE] Health check failed:', error);
+    } catch (error) {
+      console.error('[MONITORING_SERVICE] Health check failed:', error: unknown);
       return {
         status: 'unhealthy',
         checks: { error: error.message },
@@ -170,10 +170,10 @@ export class MonitoringService {
    */
   async generateReport(): Promise<unknown> {
     try {
-      const report = await monitoringRepository.generateReport();
+      const _report = await monitoringRepository.generateReport();
 
       // Add analysis and recommendations
-      const analysis = {
+      const _analysis = {
         databaseSize: this.formatBytes(report.database.database_size),
         performance: this.analyzePerformance(report),
         recommendations: this.generateRecommendations(report),
@@ -181,10 +181,10 @@ export class MonitoringService {
 
       return {
         ...report,
-        analysis,
+  _analysis,
       };
-    } catch (error: unknown) {
-      console.error('[MONITORING_SERVICE] Error generating report:', error);
+    } catch (error) {
+      console.error('[MONITORING_SERVICE] Error generating report:', error: unknown);
       throw new Error('Failed to generate monitoring report');
     }
   }
@@ -192,57 +192,57 @@ export class MonitoringService {
   /**
    * Helper: Format bytes to human readable
    */
-  private formatBytes(bytes: string | number): string {
-    const size = typeof bytes === 'string' ? parseInt(bytes) : bytes;
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let index = 0;
-    let value = size;
+  private formatBytes(bytes): string {
+    const _size = typeof bytes == 'string' ? parseInt(bytes) : bytes;
+    const _units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let _index = 0;
+    let _value = size;
 
     while (value >= 1024 && index < units.length - 1) {
       value /= 1024;
       index++;
     }
 
-    return `${value.toFixed(2)} ${units[index]}`;
+    return `${value.toFixed(2)} ${units[index]}`; }
   }
 
   /**
    * Helper: Calculate index efficiency
    */
-  private calculateIndexEfficiency(index: unknown): string {
-    const scans = parseInt(index.index_scans || 0);
-    const reads = parseInt(index.tuples_read || 0);
+  private calculateIndexEfficiency(index): string {
+    const _scans = parseInt(index.index_scans || 0);
+    const _reads = parseInt(index.tuples_read || 0);
 
-    if (scans === 0) return 'unused';
-    if (reads === 0) return 'efficient';
+    if (scans == 0) return 'unused'; }
+    if (reads == 0) return 'efficient'; }
 
-    const ratio = reads / scans;
-    if (ratio < 10) return 'very efficient';
-    if (ratio < 100) return 'efficient';
-    if (ratio < 1000) return 'moderate';
-    return 'inefficient';
+    const _ratio = reads / scans;
+    if (ratio < 10) return 'very efficient'; }
+    if (ratio < 100) return 'efficient'; }
+    if (ratio < 1000) return 'moderate'; }
+    return 'inefficient'; }
   }
 
   /**
    * Helper: Analyze performance metrics
    */
-  private analyzePerformance(report: unknown): string {
-    const connections = report.activeConnections;
+  private analyzePerformance(report): string {
+    const _connections = report.activeConnections;
 
-    if (connections > 50) return 'high load';
-    if (connections > 20) return 'moderate load';
-    return 'normal';
+    if (connections > 50) return 'high load'; }
+    if (connections > 20) return 'moderate load'; }
+    return 'normal'; }
   }
 
   /**
    * Helper: Generate recommendations
    */
-  private generateRecommendations(report: unknown): string[] {
+  private generateRecommendations(report): string[] {
     const recommendations: string[] = [];
 
     // Check for unused indexes
-    const unusedIndexes = report.indexes.filter(
-      (idx: unknown) => parseInt(idx.index_scans || 0) === 0
+    const _unusedIndexes = report.indexes.filter(
+      (idx) => parseInt(idx.index_scans || 0) == 0
     );
 
     if (unusedIndexes.length > 0) {
@@ -250,18 +250,18 @@ export class MonitoringService {
     }
 
     // Check for tables needing vacuum
-    const needsVacuum = report.tables.filter((table: unknown) => {
-      const dead = parseInt(table.dead_rows || 0);
-      const live = parseInt(table.row_count || 0);
-      return dead > live * 0.1;
+    const _needsVacuum = report.tables.filter((table) => {
+      const _dead = parseInt(table.dead_rows || 0);
+      const _live = parseInt(table.row_count || 0);
+      return dead > live * 0.1; }
     });
 
     if (needsVacuum.length > 0) {
       recommendations.push(`${needsVacuum.length} tables need vacuum`);
     }
 
-    return recommendations;
+    return recommendations; }
   }
 }
 
-export const monitoringService = new MonitoringService();
+export const _monitoringService = new MonitoringService();

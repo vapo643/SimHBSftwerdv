@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { propostasStatusService } from '../services/proposalService.js';
-const router = Router();
+const _router = Router();
 router.get('/:id/status', async (req, res) => {
   try {
-    const result = await propostasStatusService.executeOperation('carne_status', {
+    const _result = await propostasStatusService.executeOperation('carne_status', {
       id: req.params.id,
     });
-    res.json(result);
-  } catch (error: unknown) {
+    res.json(_result);
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

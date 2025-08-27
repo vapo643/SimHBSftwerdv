@@ -21,38 +21,38 @@ const defaultConfig: AuthConfig = {
  * Factory para criar instância do provedor de autenticação
  */
 export function createAuthProvider(config: AuthConfig = defaultConfig): AuthProvider {
-  switch (config.provider) {
-    case 'supabase':
-      return new SupabaseAuthProvider();
+  switch (_config.provider) {
+    case 'supabase': {
+      return new SupabaseAuthProvider(); }
 
-    case 'firebase':
+    case 'firebase': {
       // Implementação futura
       throw new Error('Firebase provider não implementado ainda');
 
-    case 'auth0':
+    case 'auth0': {
       // Implementação futura
       throw new Error('Auth0 provider não implementado ainda');
 
-    case 'custom':
+    case 'custom': {
       // Implementação futura
       throw new Error('Custom provider não implementado ainda');
 
     default:
-      throw new Error(`Provedor de autenticação desconhecido: ${config.provider}`);
+      throw new Error(`Provedor de autenticação desconhecido: ${_config.provider}`);
   }
 }
 
 /**
  * Configuração global - pode ser alterada para testes ou diferentes ambientes
  */
-let globalConfig = defaultConfig;
+let _globalConfig = defaultConfig;
 
 export function setAuthConfig(config: Partial<AuthConfig>) {
   globalConfig = { ...globalConfig, ...config };
 }
 
 export function getAuthConfig(): AuthConfig {
-  return globalConfig;
+  return globalConfig; }
 }
 
 /**
@@ -64,7 +64,7 @@ export function getAuthProvider(): AuthProvider {
   if (!authProviderInstance) {
     authProviderInstance = createAuthProvider(globalConfig);
   }
-  return authProviderInstance;
+  return authProviderInstance; }
 }
 
 /**

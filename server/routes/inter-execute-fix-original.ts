@@ -4,19 +4,19 @@ import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const router = Router();
+const _router = Router();
 
 // Gerar UUID válido
 function generateValidUUID() {
-  const chars = '0123456789abcdef';
-  let uuid = '';
-  for (let i = 0; i < 32; i++) {
-    if (i === 8 || i === 12 || i === 16 || i === 20) {
+  const _chars = '0123456789abcdef';
+  let _uuid = '';
+  for (let _i = 0; i < 32; i++) {
+    if (i == 8 || i == 12 || i == 16 || i == 20) {
       uuid += '-';
     }
     uuid += chars[Math.floor(Math.random() * 16)];
   }
-  return uuid;
+  return uuid; }
 }
 
 /**
@@ -37,11 +37,11 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
       .limit(1);
 
     if (!proposta) {
-      return res.status(404).json({ error: 'Proposta não encontrada' });
+      return res.status(404).json({ error: 'Proposta não encontrada' }); }
     }
 
     // Buscar boletos atuais (válidos e inválidos)
-    const boletoesAtuais = await db
+    const _boletoesAtuais = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
@@ -49,14 +49,14 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
     console.log(`🔍 [EXECUTE FIX] Encontrados ${boletoesAtuais.length} boletos atuais`);
 
     // Identificar códigos inválidos
-    const codigosInvalidos = boletoesAtuais.filter(
+    const _codigosInvalidos = boletoesAtuais.filter(
       (b) =>
         !b.codigoSolicitacao.match(
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         )
     );
 
-    if (codigosInvalidos.length === 0) {
+    if (codigosInvalidos.length == 0) {
       return res.json({
         success: true,
         message: 'Todos os boletos já possuem códigos válidos',
@@ -68,12 +68,12 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
       `⚠️ [EXECUTE FIX] ${codigosInvalidos.length} boletos com códigos inválidos encontrados`
     );
 
-    // ===============================
+    // =====================
     // EXECUTAR REGENERAÇÃO
-    // ===============================
+    // =====================
 
     // 1. Desativar TODOS os boletos (válidos e inválidos)
-    const resultUpdate = await db
+    const _resultUpdate = await db
       .update(interCollections)
       .set({ isActive: false })
       .where(eq(interCollections.propostaId, propostaId))
@@ -82,7 +82,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
     console.log(`✅ [EXECUTE FIX] ${resultUpdate.length} boletos antigos desativados`);
 
     // 2. Preparar dados das parcelas
-    const parcelas = boletoesAtuais
+    const _parcelas = boletoesAtuais
       .map((boleto) => ({
         numero: boleto.numeroParcela || 1,
         valor: parseFloat(boleto.valorNominal.toString()),
@@ -92,15 +92,15 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
 
     console.log(`📋 [EXECUTE FIX] ${parcelas.length} parcelas preparadas para regeneração`);
 
-    const novosBoletosGerados = [];
-    const errosEncontrados = [];
+    const _novosBoletosGerados = [];
+    const _errosEncontrados = [];
 
     // 3. Criar novos boletos com códigos simulados válidos (para teste)
-    for (let i = 0; i < parcelas.length; i++) {
-      const parcela = parcelas[i];
+    for (let _i = 0; i < parcelas.length; i++) {
+      const _parcela = parcelas[i];
 
       try {
-        const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
+        const _seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
 
         console.log(
           `📄 [EXECUTE FIX] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`
@@ -108,14 +108,14 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
 
         // Usar função UUID válida
 
-        const codigoSolicitacaoValido = generateValidUUID();
+        const _codigoSolicitacaoValido = generateValidUUID();
 
         console.log(`✅ [EXECUTE FIX] UUID válido gerado: ${codigoSolicitacaoValido}`);
 
         // **PAM V1.0 CORREÇÃO**: Seguir padrão correto do ClickSign webhook
         // 1. Criar boleto no Banco Inter
-        const boletoData = {
-          seuNumero,
+        const _boletoData = {
+  _seuNumero,
           valorNominal: parcela.valor,
           dataVencimento: parcela.vencimento,
           numDiasAgenda: 60,
@@ -150,10 +150,10 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
         console.log(
           `[PAM V1.0 FIX] Criando boleto real no Banco Inter - Parcela ${parcela.numero}`
         );
-        const createResponse = await interBankService.emitirCobranca(boletoData);
+        const _createResponse = await interBankService.emitirCobranca(boletoData);
 
         // 2. Buscar dados completos (incluindo PIX)
-        const interCollection = await interBankService.recuperarCobranca(
+        const _interCollection = await interBankService.recuperarCobranca(
           createResponse.codigoSolicitacao
         );
 
@@ -161,9 +161,9 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
         const [novoBoleto] = await db
           .insert(interCollections)
           .values({
-            propostaId,
+  _propostaId,
             codigoSolicitacao: createResponse.codigoSolicitacao,
-            seuNumero,
+  _seuNumero,
             valorNominal: parcela.valor.toString(),
             dataVencimento: parcela.vencimento,
             situacao: interCollection.cobranca.situacao,
@@ -185,7 +185,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
 
         console.log(`🎉 [EXECUTE FIX] Boleto ${parcela.numero} criado com sucesso!`);
       } catch (error) {
-        console.error(`❌ [EXECUTE FIX] Erro ao criar boleto ${parcela.numero}:`, error);
+        console.error(`❌ [EXECUTE FIX] Erro ao criar boleto ${parcela.numero}:`, error: unknown);
         errosEncontrados.push({
           parcela: parcela.numero,
           erro: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -209,7 +209,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
     res.json({
       success: true,
       message: `Regeneração completa: ${novosBoletosGerados.length} boletos criados com códigos válidos`,
-      propostaId,
+  _propostaId,
       clienteNome: proposta.clienteNome,
       boletoAntigos: boletoesAtuais.length,
       boletosDesativados: resultUpdate.length,
@@ -226,7 +226,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
       })),
     });
   } catch (error) {
-    console.error('❌ [EXECUTE FIX] Erro geral:', error);
+    console.error('❌ [EXECUTE FIX] Erro geral:', error: unknown);
     res.status(500).json({
       error: 'Erro ao executar regeneração de boletos',
       details: error instanceof Error ? error.message : 'Erro desconhecido',

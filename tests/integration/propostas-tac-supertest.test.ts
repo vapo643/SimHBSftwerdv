@@ -108,7 +108,7 @@ describe('TAC Integration Tests - Supertest (Infraestrutura Corrigida)', () => {
       // VALIDAÇÃO PRINCIPAL: App funciona sem erro TextEncoder
       expect(response.status).toBeTypeOf('number');
 
-      if (response.status === 201) {
+      if (response.status == 201) {
         // Sucesso completo
         console.log('[SUPERTEST TAC] 🎉 SUCESSO TOTAL - createApp + HTTP + TAC funcionando');
       } else {
@@ -121,7 +121,7 @@ describe('TAC Integration Tests - Supertest (Infraestrutura Corrigida)', () => {
       console.log('[SUPERTEST TAC] 🚀 POST /api/propostas executado com sucesso');
 
       // VALIDAÇÃO CRÍTICA: Infraestrutura funcionando (não TextEncoder error)
-      if (response.status === 201) {
+      if (response.status == 201) {
         expect(response.body).toHaveProperty('data');
         const valorTacRetornado = parseFloat(response.body.data.valorTac || '0');
         console.log(`[SUPERTEST TAC] 💰 TAC via HTTP API: R$ ${valorTacRetornado.toFixed(2)}`);

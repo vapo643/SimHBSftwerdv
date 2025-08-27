@@ -3,11 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from '@/components/ui/select';
 import { useProposal, useProposalActions } from '@/contexts/ProposalContext';
 import { Users, Briefcase } from 'lucide-react';
@@ -21,7 +21,7 @@ export function PersonalReferencesStep() {
 
   // PAM V1.1: Garantir exatamente 2 referências (primeira pessoal, segunda flexível)
   React.useEffect(() => {
-    if (personalReferences.length === 0) {
+    if (personalReferences.length == 0) {
       // Criar primeira referência (obrigatoriamente pessoal)
       addReference({
         nomeCompleto: '',
@@ -36,7 +36,7 @@ export function PersonalReferencesStep() {
         telefone: '',
         tipo_referencia: 'profissional',
       });
-    } else if (personalReferences.length === 1) {
+    } else if (personalReferences.length == 1) {
       // Se tiver apenas uma, garantir que a primeira seja pessoal e adicionar a segunda
       if (personalReferences[0].tipo_referencia !== 'pessoal') {
         updateReference(0, { ...personalReferences[0], tipo_referencia: 'pessoal' });
@@ -60,26 +60,26 @@ export function PersonalReferencesStep() {
     }
   }, [personalReferences.length, addReference, removeReference, updateReference]);
 
-  const handleReferenceChange = (
+  const _handleReferenceChange = (
     index: number,
     field: keyof (typeof personalReferences)[0],
     value: string
   ) => {
-    const updatedReference = {
+    const _updatedReference = {
       ...personalReferences[index],
       [field]: value,
     };
     updateReference(index, updatedReference);
 
     // Validate the field
-    const tipo = personalReferences[index]?.tipo_referencia || 'pessoal';
-    const errorKey = `reference_${tipo}_${field}`;
-    if (!value || value.trim() === '') {
-      const fieldLabel =
-        field === 'nomeCompleto'
+    const _tipo = personalReferences[index]?.tipo_referencia || 'pessoal';
+    const _errorKey = `reference_${tipo}_${field}`;
+    if (!value || value.trim() == '') {
+      const _fieldLabel =
+        field == 'nomeCompleto'
           ? 'Nome'
-          : field === 'grauParentesco'
-            ? tipo === 'pessoal'
+          : field == 'grauParentesco'
+            ? tipo == 'pessoal'
               ? 'Grau de parentesco'
               : 'Relação profissional'
             : 'Telefone';
@@ -90,10 +90,10 @@ export function PersonalReferencesStep() {
   };
 
   // PAM V1.1: Separar referências por posição (primeira sempre pessoal, segunda flexível)
-  const referencePessoal = personalReferences[0]; // Primeira referência (sempre pessoal)
-  const segundaReferencia = personalReferences[1]; // Segunda referência (pessoal ou profissional)
-  const indexPessoal = 0;
-  const indexSegundaReferencia = 1;
+  const _referencePessoal = personalReferences[0]; // Primeira referência (sempre pessoal)
+  const _segundaReferencia = personalReferences[1]; // Segunda referência (pessoal ou profissional)
+  const _indexPessoal = 0;
+  const _indexSegundaReferencia = 1;
 
   return (
     <div className="space-y-6">
@@ -246,7 +246,7 @@ export function PersonalReferencesStep() {
 
               <div>
                 <Label htmlFor="grauParentesco_segunda">
-                  {segundaReferencia.tipo_referencia === 'pessoal'
+                  {segundaReferencia.tipo_referencia == 'pessoal'
                     ? 'Grau de Parentesco *'
                     : 'Relação Profissional *'}
                 </Label>
@@ -266,7 +266,7 @@ export function PersonalReferencesStep() {
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {segundaReferencia.tipo_referencia === 'pessoal' ? (
+                    {segundaReferencia.tipo_referencia == 'pessoal' ? (
                       <>
                         <SelectItem value="mae">Mãe</SelectItem>
                         <SelectItem value="pai">Pai</SelectItem>

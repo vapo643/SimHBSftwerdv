@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import { queues } from '../lib/mock-queue';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/test-mock-queue-worker
@@ -14,18 +14,18 @@ const router = Router();
  */
 router.get('/verify-worker-execution', async (req, res) => {
   try {
-    console.log('\n================[ TESTE MOCK QUEUE → WORKER ]================');
+    console.log('\n===========[ TESTE MOCK QUEUE → WORKER ]===========');
     console.log('📋 Verificando se Mock Queue executa a lógica real do Worker');
-    console.log('==============================================================\n');
+    console.log('==========================================\n');
 
     // Usar proposta conhecida com dados reais
-    const propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
+    const _propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
 
     console.log(`📌 Testando com proposta: ${propostaId}`);
     console.log('📌 Esta proposta tem 24 boletos no sistema');
 
     // Adicionar job à fila
-    const job = await queues.pdfProcessing.add('GENERATE_CARNE', {
+    const _job = await queues.pdfProcessing.add('GENERATE_CARNE', {
       type: 'GENERATE_CARNE',
       propostaId: propostaId,
       userId: 'test-user',
@@ -51,8 +51,8 @@ router.get('/verify-worker-execution', async (req, res) => {
       ],
       note: 'Se você vir os logs [WORKER:PDF], a refatoração funcionou!',
     });
-  } catch (error: unknown) {
-    console.error('❌ Erro no teste:', error);
+  } catch (error) {
+    console.error('❌ Erro no teste:', error: unknown);
     res.status(500).json({
       error: 'Erro no teste',
       message: error.message,
@@ -68,14 +68,14 @@ router.get('/status/:jobId', async (req, res) => {
   try {
     const { jobId } = req.params;
 
-    const counts = await queues.pdfProcessing.getJobCounts();
+    const _counts = await queues.pdfProcessing.getJobCounts();
 
     res.json({
-      jobId,
+  _jobId,
       queueStatus: counts,
       message: 'Verifique os logs do servidor para confirmar execução do Worker',
     });
-  } catch (error: unknown) {
+  } catch (error) {
     res.status(500).json({
       error: 'Erro ao verificar status',
       message: error.message,

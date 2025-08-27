@@ -13,10 +13,10 @@ import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposal
 
 export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
-    const data = proposal.toPersistence();
+    const _data = proposal.toPersistence();
 
     // Verificar se é create ou update
-    const exists = await this.exists(proposal.id);
+    const _exists = await this.exists(proposal.id);
 
     if (exists) {
       // Update
@@ -44,8 +44,8 @@ export class ProposalRepository implements IProposalRepository {
         .where(eq(propostas.id, data.id));
     } else {
       // Create - gerar IDs sequenciais
-      const sequentialId = await this.getNextSequentialId();
-      const numeroProposta = await this.getNextNumeroProposta();
+      const _sequentialId = await this.getNextSequentialId();
+      const _numeroProposta = await this.getNextNumeroProposta();
 
       await db.insert(propostas).values([
         {
@@ -77,7 +77,7 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     // Processar eventos de domínio
-    const events = proposal.getUncommittedEvents();
+    const _events = proposal.getUncommittedEvents();
     for (const event of events) {
       // Aqui poderíamos publicar os eventos para um event bus
       // Por enquanto, apenas logamos
@@ -87,21 +87,21 @@ export class ProposalRepository implements IProposalRepository {
   }
 
   async findById(id: string): Promise<Proposal | null> {
-    const result = await db
+    const _result = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)))
       .limit(1);
 
-    if (!result || result.length === 0) {
-      return null;
+    if (!result || result.length == 0) {
+      return null; }
     }
 
-    return this.mapToDomain(result[0]);
+    return this.mapToDomain(result[0]); }
   }
 
   async findByCriteria(criteria: ProposalSearchCriteria): Promise<Proposal[]> {
-    const conditions = [isNull(propostas.deletedAt)];
+    const _conditions = [isNull(propostas.deletedAt)];
 
     if (criteria.status) {
       conditions.push(eq(propostas.status, criteria.status));
@@ -116,7 +116,7 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     if (criteria.cpf) {
-      const cleanCPF = criteria.cpf.replace(/\D/g, '');
+      const _cleanCPF = criteria.cpf.replace(/\D/g, '');
       conditions.push(eq(propostas.clienteCpf, cleanCPF));
     }
 
@@ -128,69 +128,69 @@ export class ProposalRepository implements IProposalRepository {
       conditions.push(lte(propostas.createdAt, criteria.dateTo));
     }
 
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(and(...conditions));
 
-    return results.map((row) => this.mapToDomain(row));
+    return results.map((row) => this.mapToDomain(row)); }
   }
 
   async findAll(): Promise<Proposal[]> {
-    const results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
+    const _results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
 
-    return results.map((row) => this.mapToDomain(row));
+    return results.map((row) => this.mapToDomain(row)); }
   }
 
   async findByStatus(status: string): Promise<Proposal[]> {
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.status, status), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return results.map((row) => this.mapToDomain(row)); }
   }
 
   async findByCPF(cpf: string): Promise<Proposal[]> {
-    const cleanCPF = cpf.replace(/\D/g, '');
+    const _cleanCPF = cpf.replace(/\D/g, '');
 
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.clienteCpf, cleanCPF), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return results.map((row) => this.mapToDomain(row)); }
   }
 
   async findByLojaId(lojaId: number): Promise<Proposal[]> {
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.lojaId, lojaId), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return results.map((row) => this.mapToDomain(row)); }
   }
 
   async findByAtendenteId(atendenteId: string): Promise<Proposal[]> {
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.analistaId, atendenteId), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row));
+    return results.map((row) => this.mapToDomain(row)); }
   }
 
   async exists(id: string): Promise<boolean> {
-    const result = await db
+    const _result = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)));
 
-    return result[0].count > 0;
+    return result[0].count > 0; }
   }
 
   async delete(id: string): Promise<void> {
-    const now = new Date();
+    const _now = new Date();
 
     await db.update(propostas).set({ deletedAt: now }).where(eq(propostas.id, id));
   }
@@ -198,36 +198,36 @@ export class ProposalRepository implements IProposalRepository {
   async getNextSequentialId(): Promise<number> {
     // Buscar o maior ID atual e incrementar
     // Como o ID é string no banco, precisamos converter
-    const result = await db
+    const _result = await db
       .select({ maxId: sql<number>`COALESCE(MAX(CAST(id AS INTEGER)), 300000)` })
       .from(propostas);
 
-    return result[0].maxId + 1;
+    return result[0].maxId + 1; }
   }
 
   async getNextNumeroProposta(): Promise<number> {
     // Buscar o maior numero_proposta e incrementar
     // Inicia em 300001 se não houver propostas
-    const result = await db
+    const _result = await db
       .select({ maxNumero: sql<number>`COALESCE(MAX(numero_proposta), 300000)` })
       .from(propostas);
 
-    return result[0].maxNumero + 1;
+    return result[0].maxNumero + 1; }
   }
 
   /**
    * Mapeia dados do banco para o agregado Proposal
    */
-  private mapToDomain(row: unknown): Proposal {
+  private mapToDomain(row): Proposal {
     // ID já é string no banco
-    const aggregateId = row.id;
+    const _aggregateId = row.id;
 
     // Parse cliente_data from JSON string if it exists
     let clienteData;
     if (row.clienteData) {
       try {
         clienteData =
-          typeof row.clienteData === 'string' ? JSON.parse(row.clienteData) : row.clienteData;
+          typeof row.clienteData == 'string' ? JSON.parse(row.clienteData) : row.clienteData;
       } catch {
         clienteData = {
           nome: row.clienteNome,

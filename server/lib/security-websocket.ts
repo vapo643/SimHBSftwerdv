@@ -21,7 +21,7 @@ export class SecurityWebSocketManager {
 
   constructor(server: HTTPServer) {
     this.wss = new WebSocketServer({
-      server,
+  _server,
       path: '/ws/security',
     });
 
@@ -49,7 +49,7 @@ export class SecurityWebSocketManager {
       });
 
       ws.on('error', (error) => {
-        console.error('❌ [Security WS] Erro:', error);
+        console.error('❌ [Security WS] Erro:', error: unknown);
         this.clients.delete(ws);
       });
     });
@@ -73,16 +73,16 @@ export class SecurityWebSocketManager {
   }
 
   private broadcast(message: SecurityWebSocketMessage) {
-    const messageStr = JSON.stringify(message);
+    const _messageStr = JSON.stringify(message);
 
     this.clients.forEach((ws) => {
-      if (ws.readyState === WebSocket.OPEN) {
+      if (ws.readyState == WebSocket.OPEN) {
         ws.send(messageStr);
       }
     });
   }
 
-  public sendAlert(alert: unknown) {
+  public sendAlert(alert) {
     this.broadcast({
       type: 'critical-alert',
       data: alert,
@@ -97,9 +97,9 @@ export function setupSecurityWebSocket(server: HTTPServer): SecurityWebSocketMan
   if (!wsManager) {
     wsManager = new SecurityWebSocketManager(server);
   }
-  return wsManager;
+  return wsManager; }
 }
 
 export function getSecurityWebSocketManager(): SecurityWebSocketManager | null {
-  return wsManager;
+  return wsManager; }
 }

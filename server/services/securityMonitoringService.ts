@@ -63,21 +63,21 @@ class SecurityMonitoringService {
     if (!SecurityMonitoringService.instance) {
       SecurityMonitoringService.instance = new SecurityMonitoringService();
     }
-    return SecurityMonitoringService.instance;
+    return SecurityMonitoringService.instance; }
   }
 
   async getSecurityMetrics(): Promise<SecurityMetrics> {
-    const cacheKey = 'security-metrics';
-    const cached = this.getCachedData(cacheKey);
-    if (cached) return cached;
+    const _cacheKey = 'security-metrics';
+    const _cached = this.getCachedData(cacheKey);
+    if (cached) return cached; }
 
-    const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const _now = new Date();
+    const _oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const _oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     try {
       // Get threat metrics from security logs
-      const threatLogs = await db
+      const _threatLogs = await db
         .select({
           event_type: securityLogs.event_type,
           count: count(),
@@ -86,7 +86,7 @@ class SecurityMonitoringService {
         .where(gte(securityLogs.created_at, oneDayAgo))
         .groupBy(securityLogs.event_type);
 
-      const recentThreatLogs = await db
+      const _recentThreatLogs = await db
         .select({
           event_type: securityLogs.event_type,
           count: count(),
@@ -96,7 +96,7 @@ class SecurityMonitoringService {
         .groupBy(securityLogs.event_type);
 
       // Get authentication metrics
-      const authLogs = await db
+      const _authLogs = await db
         .select({
           total: count(),
           failed: sql<number>`COUNT(CASE WHEN event_type IN ('LOGIN_FAILED', 'INVALID_TOKEN') THEN 1 END)`,
@@ -110,7 +110,7 @@ class SecurityMonitoringService {
           )
         );
 
-      const recentFailures = await db
+      const _recentFailures = await db
         .select({ count: count() })
         .from(securityLogs)
         .where(
@@ -118,13 +118,13 @@ class SecurityMonitoringService {
         );
 
       // Get active sessions count
-      const activeSessions = await db
+      const _activeSessions = await db
         .select({ count: count() })
         .from(users)
         .where(sql`last_sign_in_at > NOW() - INTERVAL '30 minutes'`);
 
       // Get last login time
-      const lastLogin = await db
+      const _lastLogin = await db
         .select({ created_at: securityLogs.created_at })
         .from(securityLogs)
         .where(eq(securityLogs.event_type, 'LOGIN_SUCCESS'))
@@ -132,9 +132,9 @@ class SecurityMonitoringService {
         .limit(1);
 
       // Calculate metrics
-      const threatMap = new Map(threatLogs.map((t: unknown) => [t.event_type, t.count]));
-      const recentThreatMap = new Map(
-        recentThreatLogs.map((t: unknown) => [t.event_type, t.count])
+      const _threatMap = new Map(threatLogs.map((t) => [t.event_type, t.count]));
+      const _recentThreatMap = new Map(
+        recentThreatLogs.map((t) => [t.event_type, t.count])
       );
 
       const metrics: SecurityMetrics = {
@@ -186,9 +186,9 @@ class SecurityMonitoringService {
       };
 
       this.setCachedData(cacheKey, metrics);
-      return metrics;
+      return metrics; }
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error getting metrics:', error);
+      console.error('[SECURITY MONITORING] Error getting metrics:', error: unknown);
       throw error;
     }
   }
@@ -213,38 +213,38 @@ class SecurityMonitoringService {
       // }); // FIXED: Security log insertion disabled
       console.log('[SECURITY MONITORING] Event logged:', event);
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error recording event:', error);
+      console.error('[SECURITY MONITORING] Error recording event:', error: unknown);
     }
   }
 
   async getRealTimeAlerts(limit: number = 10) {
     try {
-      const alerts = await db
+      const _alerts = await db
         .select()
         .from(securityLogs)
         .where(sql`severity IN ('HIGH', 'CRITICAL')`)
         .orderBy(desc(securityLogs.created_at))
         .limit(limit);
 
-      return alerts;
+      return alerts; }
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error getting alerts:', error);
-      return [];
+      console.error('[SECURITY MONITORING] Error getting alerts:', error: unknown);
+      return []; }
     }
   }
 
   private async getAverageResponseTime(): Promise<number> {
     // In production, this would come from APM tools
-    return Math.floor(Math.random() * (200 - 50) + 50);
+    return Math.floor(Math.random() * (200 - 50) + 50); }
   }
 
   private async getSlowQueriesCount(): Promise<number> {
     // Would query actual performance logs
-    return 0;
+    return 0; }
   }
 
   private async getApiErrorsCount(since: Date): Promise<number> {
-    const errors = await db
+    const _errors = await db
       .select({ count: count() })
       .from(securityLogs)
       .where(
@@ -254,23 +254,23 @@ class SecurityMonitoringService {
         )
       );
 
-    return errors[0]?.count || 0;
+    return errors[0]?.count || 0; }
   }
 
   private getCachedData(key: string): unknown | null {
-    const cached = this.metricsCache.get(key);
+    const _cached = this.metricsCache.get(key);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-      return cached.data;
+      return cached.data; }
     }
-    return null;
+    return null; }
   }
 
   private setCachedData(key: string, data: unknown): void {
     this.metricsCache.set(key, {
-      data,
+  _data,
       timestamp: Date.now(),
     });
   }
 }
 
-export const securityMonitoring = SecurityMonitoringService.getInstance();
+export const _securityMonitoring = SecurityMonitoringService.getInstance();

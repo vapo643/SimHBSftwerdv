@@ -7,15 +7,15 @@
 import { BaseRepository } from './base.repository.js';
 import { db } from '../lib/supabase.js';
 import {
-  propostas,
-  parcelas,
-  observacoesCobranca,
-  historicoObservacoesCobranca,
-  interCollections,
-  profiles,
-  solicitacoesModificacao,
-  propostaLogs,
-  statusContextuais,
+  _propostas,
+  _parcelas,
+  _observacoesCobranca,
+  _historicoObservacoesCobranca,
+  _interCollections,
+  _profiles,
+  _solicitacoesModificacao,
+  _propostaLogs,
+  _statusContextuais,
 } from '@shared/schema';
 import { eq, and, sql, desc, gte, lte, inArray, or, not, isNotNull, isNull } from 'drizzle-orm';
 
@@ -29,7 +29,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
    */
   async getPropostasCobranca(filters: { status?: string; atraso?: string }): Promise<any[]> {
     try {
-      const statusElegiveis = [
+      const _statusElegiveis = [
         'BOLETOS_EMITIDOS',
         'PAGAMENTO_PENDENTE',
         'PAGAMENTO_PARCIAL',
@@ -37,16 +37,16 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         'pronto_pagamento', // Legacy
       ];
 
-      let whereConditions = and(
+      let _whereConditions = and(
         isNull(propostas.deletedAt),
         inArray(propostas.status, statusElegiveis)
       );
 
-      const result = await db
+      const _result = await db
         .select()
         .from(propostas)
         .leftJoin(
-          statusContextuais,
+  _statusContextuais,
           and(
             eq(statusContextuais.propostaId, propostas.id),
             eq(statusContextuais.contexto, 'cobranca')
@@ -54,10 +54,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         )
         .where(whereConditions);
 
-      return result;
+      return result; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching proposals:', error);
-      return [];
+      console.error('[COBRANCAS_REPO] Error fetching proposals:', error: unknown);
+      return []; }
     }
   }
 
@@ -72,8 +72,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(parcelas.propostaId, String(propostaId)))
         .orderBy(parcelas.numeroParcela);
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching installments:', error);
-      return [];
+      console.error('[COBRANCAS_REPO] Error fetching installments:', error: unknown);
+      return []; }
     }
   }
 
@@ -88,8 +88,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(interCollections.propostaId, String(propostaId)))
         .orderBy(desc(interCollections.createdAt));
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error);
-      return [];
+      console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error: unknown);
+      return []; }
     }
   }
 
@@ -114,8 +114,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(observacoesCobranca.propostaId, String(propostaId)))
         .orderBy(desc(observacoesCobranca.createdAt));
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching observations:', error);
-      return [];
+      console.error('[COBRANCAS_REPO] Error fetching observations:', error: unknown);
+      return []; }
     }
   }
 
@@ -140,10 +140,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         })
         .returning();
 
-      return observation;
+      return observation; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error creating observation:', error);
-      return null;
+      console.error('[COBRANCAS_REPO] Error creating observation:', error: unknown);
+      return null; }
     }
   }
 
@@ -165,16 +165,16 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         Object.assign(updates, updateData);
       }
 
-      const result = await db
+      const _result = await db
         .update(parcelas)
         .set(updates)
         .where(eq(parcelas.id, parcelaId))
         .returning();
 
-      return result.length > 0;
+      return result.length > 0; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error updating installment:', error);
-      return false;
+      console.error('[COBRANCAS_REPO] Error updating installment:', error: unknown);
+      return false; }
     }
   }
 
@@ -189,8 +189,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(solicitacoesModificacao.propostaId, String(propostaId)))
         .orderBy(desc(solicitacoesModificacao.createdAt));
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching modification requests:', error);
-      return [];
+      console.error('[COBRANCAS_REPO] Error fetching modification requests:', error: unknown);
+      return []; }
     }
   }
 
@@ -219,10 +219,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         })
         .returning();
 
-      return request;
+      return request; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error creating modification request:', error);
-      return null;
+      console.error('[COBRANCAS_REPO] Error creating modification request:', error: unknown);
+      return null; }
     }
   }
 
@@ -238,8 +238,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(propostaLogs.createdAt))
         .limit(50); // Limit recent logs
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error fetching logs:', error);
-      return [];
+      console.error('[COBRANCAS_REPO] Error fetching logs:', error: unknown);
+      return []; }
     }
   }
 
@@ -248,7 +248,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
    */
   async getOverdueCount(): Promise<number> {
     try {
-      const result = await db
+      const _result = await db
         .select({ count: sql<number>`count(*)` })
         .from(propostas)
         .innerJoin(parcelas, eq(parcelas.propostaId, propostas.id))
@@ -261,10 +261,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
           )
         );
 
-      return result[0]?.count || 0;
+      return result[0]?.count || 0; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error counting overdue:', error);
-      return 0;
+      console.error('[COBRANCAS_REPO] Error counting overdue:', error: unknown);
+      return 0; }
     }
   }
 
@@ -278,7 +278,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   ): Promise<boolean> {
     try {
       const updates: unknown = {
-        status,
+  _status,
         updatedAt: new Date(),
       };
 
@@ -286,18 +286,18 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         Object.assign(updates, additionalData);
       }
 
-      const result = await db
+      const _result = await db
         .update(propostas)
         .set(updates)
         .where(eq(propostas.id, String(propostaId)))
         .returning();
 
-      return result.length > 0;
+      return result.length > 0; }
     } catch (error) {
-      console.error('[COBRANCAS_REPO] Error updating proposal status:', error);
-      return false;
+      console.error('[COBRANCAS_REPO] Error updating proposal status:', error: unknown);
+      return false; }
     }
   }
 }
 
-export const cobrancasRepository = new CobrancasRepository();
+export const _cobrancasRepository = new CobrancasRepository();

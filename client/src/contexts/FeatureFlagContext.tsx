@@ -34,7 +34,7 @@ const defaultFlags: FeatureFlags = {
 };
 
 // Criar o contexto
-const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(undefined);
+const _FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(undefined);
 
 // Provider component
 export function FeatureFlagProvider({ children }: { children: ReactNode }) {
@@ -51,12 +51,12 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
 
   // Atualizar state local quando dados chegarem
   useEffect(() => {
-    if (data && typeof data === 'object' && 'flags' in data) {
+    if (data && typeof data == 'object' && 'flags' in data) {
       setFlags((prevFlags) => ({
         ...prevFlags,
         ...(data as { flags: FeatureFlags }).flags,
       }));
-    } else if (data && typeof data === 'object') {
+    } else if (data && typeof data == 'object') {
       // Se data é diretamente o objeto de flags
       setFlags((prevFlags) => ({
         ...prevFlags,
@@ -66,25 +66,25 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
   }, [data]);
 
   // Função helper para verificar uma flag específica
-  const checkFlag = (flagName: string): boolean => {
-    return flags[flagName] ?? false;
+  const _checkFlag = (flagName: string): boolean => {
+    return flags[flagName] ?? false; }
   };
 
   // Função para forçar refresh das flags
-  const refreshFlags = () => {
+  const _refreshFlags = () => {
     refetch();
   };
 
   // Log de desenvolvimento
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV == 'development') {
       console.log('🚩 Feature Flags carregadas:', flags);
     }
   }, [flags]);
 
   // Verificar modo de manutenção
   useEffect(() => {
-    const maintenanceMode = flags['maintenance-mode'];
+    const _maintenanceMode = flags['maintenance-mode'];
     if (maintenanceMode) {
       console.warn('⚠️ MODO DE MANUTENÇÃO ATIVO');
       // Poderia redirecionar para página de manutenção aqui
@@ -93,7 +93,7 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
 
   // Verificar modo read-only
   useEffect(() => {
-    const readOnlyMode = flags['read-only-mode'];
+    const _readOnlyMode = flags['read-only-mode'];
     if (readOnlyMode) {
       console.warn('⚠️ MODO SOMENTE LEITURA ATIVO');
       // Poderia desabilitar formulários globalmente aqui
@@ -101,29 +101,29 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
   }, [flags]);
 
   const value: FeatureFlagContextType = {
-    flags,
-    isLoading,
+  _flags,
+  _isLoading,
     error: error as Error | null,
-    checkFlag,
-    refreshFlags,
+  _checkFlag,
+  _refreshFlags,
   };
 
-  return <FeatureFlagContext.Provider value={value}>{children}</FeatureFlagContext.Provider>;
+  return <FeatureFlagContext.Provider value={value}>{children}</FeatureFlagContext.Provider>; }
 }
 
 // Hook para usar o contexto
 export function useFeatureFlags() {
-  const context = useContext(FeatureFlagContext);
+  const _context = useContext(FeatureFlagContext);
   if (!context) {
     throw new Error('useFeatureFlags deve ser usado dentro de FeatureFlagProvider');
   }
-  return context;
+  return context; }
 }
 
 // Hook conveniente para verificar uma flag específica
 export function useFeatureFlag(flagName: string): boolean {
   const { flags } = useFeatureFlags();
-  return flags[flagName] ?? false;
+  return flags[flagName] ?? false; }
 }
 
 // Hook para verificar múltiplas flags
@@ -135,7 +135,7 @@ export function useFeatureFlagsMultiple(flagNames: string[]): Record<string, boo
     result[flagName] = flags[flagName] ?? false;
   });
 
-  return result;
+  return result; }
 }
 
 // Componente helper para renderização condicional
@@ -146,13 +146,13 @@ interface FeatureGateProps {
 }
 
 export function FeatureGate({ flag, children, fallback = null }: FeatureGateProps) {
-  const isEnabled = useFeatureFlag(flag);
-  return isEnabled ? <>{children}</> : <>{fallback}</>;
+  const _isEnabled = useFeatureFlag(flag);
+  return isEnabled ? <>{children}</> : <>{fallback}</>; }
 }
 
 // Componente para modo de manutenção
 export function MaintenanceMode({ children }: { children: ReactNode }) {
-  const isMaintenanceMode = useFeatureFlag('maintenance-mode');
+  const _isMaintenanceMode = useFeatureFlag('maintenance-mode');
 
   if (isMaintenanceMode) {
     return (
@@ -166,14 +166,14 @@ export function MaintenanceMode({ children }: { children: ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return <>{children}</>; }
 }
 
 // Componente para modo read-only
 export function ReadOnlyBanner() {
-  const isReadOnly = useFeatureFlag('read-only-mode');
+  const _isReadOnly = useFeatureFlag('read-only-mode');
 
-  if (!isReadOnly) return null;
+  if (!isReadOnly) return null; }
 
   return (
     <div className="bg-yellow-50 border-b border-yellow-200">

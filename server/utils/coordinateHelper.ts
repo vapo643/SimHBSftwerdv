@@ -10,21 +10,21 @@ import path from 'path';
  * Converte coordenadas do topo da página para o sistema de coordenadas PDF (base)
  */
 export function yFromTop(pageHeight: number, pixelsFromTop: number): number {
-  return pageHeight - pixelsFromTop;
+  return pageHeight - pixelsFromTop; }
 }
 
 /**
  * Converte polegadas para pontos
  */
 export function inchesToPoints(inches: number): number {
-  return inches * 72;
+  return inches * 72; }
 }
 
 /**
  * Converte pontos para polegadas
  */
 export function pointsToInches(points: number): number {
-  return points / 72;
+  return points / 72; }
 }
 
 /**
@@ -64,7 +64,7 @@ export function addCoordinateLabel(
   font: PDFFont,
   label?: string
 ) {
-  const text = label || `(${x.toFixed(0)}, ${y.toFixed(0)})`;
+  const _text = label || `(${x.toFixed(0)}, ${y.toFixed(0)})`;
 
   page.drawText(text, {
     x: x + 15,
@@ -79,7 +79,7 @@ export function addCoordinateLabel(
  * Calcula a largura de um texto com uma fonte específica
  */
 export function getTextWidth(text: string, font: PDFFont, fontSize: number): number {
-  return font.widthOfTextAtSize(text, fontSize);
+  return font.widthOfTextAtSize(text, fontSize); }
 }
 
 /**
@@ -91,8 +91,8 @@ export function getCenteredX(
   fontSize: number,
   pageWidth: number
 ): number {
-  const textWidth = getTextWidth(text, font, fontSize);
-  return (pageWidth - textWidth) / 2;
+  const _textWidth = getTextWidth(text, font, fontSize);
+  return (pageWidth - textWidth) / 2; }
 }
 
 /**
@@ -104,15 +104,15 @@ export function getRightAlignedX(
   fontSize: number,
   rightMargin: number
 ): number {
-  const textWidth = getTextWidth(text, font, fontSize);
-  return rightMargin - textWidth;
+  const _textWidth = getTextWidth(text, font, fontSize);
+  return rightMargin - textWidth; }
 }
 
 /**
  * Gera um PDF de teste com coordenadas específicas marcadas
  */
 export async function generateTestCoordinatesPDF(
-  coordinates: Array<{
+  coordinates: Record<string, unknown>[]>{
     page: number;
     x: number;
     y: number;
@@ -122,20 +122,20 @@ export async function generateTestCoordinatesPDF(
     bold?: boolean;
   }>
 ) {
-  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
-  const outputPath = path.resolve(process.cwd(), 'template_ccb_COORDINATE_TEST.pdf');
+  const _templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const _outputPath = path.resolve(process.cwd(), 'template_ccb_COORDINATE_TEST.pdf');
 
-  const templateBytes = await fs.readFile(templatePath);
-  const pdfDoc = await PDFDocument.load(templateBytes);
+  const _templateBytes = await fs.readFile(templatePath);
+  const _pdfDoc = await PDFDocument.load(templateBytes);
 
-  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const _fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const _fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  const pages = pdfDoc.getPages();
+  const _pages = pdfDoc.getPages();
 
   for (const coord of coordinates) {
     if (coord.page > 0 && coord.page <= pages.length) {
-      const page = pages[coord.page - 1];
+      const _page = pages[coord.page - 1];
 
       // Desenhar cruz de referência
       drawCrosshair(page, coord.x, coord.y, 8, rgb(1, 0, 0));
@@ -145,8 +145,8 @@ export async function generateTestCoordinatesPDF(
 
       // Adicionar texto de teste se fornecido
       if (coord.text) {
-        const font = coord.bold ? fontBold : fontRegular;
-        const fontSize = coord.fontSize || 10;
+        const _font = coord.bold ? fontBold : fontRegular;
+        const _fontSize = coord.fontSize || 10;
 
         page.drawText(coord.text, {
           x: coord.x,
@@ -159,11 +159,11 @@ export async function generateTestCoordinatesPDF(
     }
   }
 
-  const pdfBytes = await pdfDoc.save();
+  const _pdfBytes = await pdfDoc.save();
   await fs.writeFile(outputPath, pdfBytes);
 
   console.log(`✅ PDF de teste de coordenadas gerado: ${outputPath}`);
-  return outputPath;
+  return outputPath; }
 }
 
 /**
@@ -175,7 +175,7 @@ export function validateCoordinates(
   pageWidth: number,
   pageHeight: number
 ): boolean {
-  return x >= 0 && x <= pageWidth && y >= 0 && y <= pageHeight;
+  return x >= 0 && x <= pageWidth && y >= 0 && y <= pageHeight; }
 }
 
 /**
@@ -206,7 +206,7 @@ export const COORDINATE_REGIONS = {
  * Útil se você está medindo em uma tela com DPI específico
  */
 export function screenPixelsToPoints(pixels: number, screenDPI: number = 96): number {
-  return (pixels / screenDPI) * 72;
+  return (pixels / screenDPI) * 72; }
 }
 
 /**
@@ -221,8 +221,8 @@ export function adjustCoordinatesForMargins(
   pageHeight: number,
   margin: number = 20
 ): { x: number; y: number } {
-  let adjustedX = Math.max(margin, Math.min(x, pageWidth - textWidth - margin));
-  let adjustedY = Math.max(margin, Math.min(y, pageHeight - textHeight - margin));
+  let _adjustedX = Math.max(margin, Math.min(x, pageWidth - textWidth - margin));
+  let _adjustedY = Math.max(margin, Math.min(y, pageHeight - textHeight - margin));
 
-  return { x: adjustedX, y: adjustedY };
+  return { x: adjustedX, y: adjustedY }; }
 }

@@ -13,7 +13,7 @@ export class ObservacoesService {
    */
   async getObservacoesByProposta(propostaId: number): Promise<Observacao[]> {
     try {
-      return await observacoesRepository.findByPropostaId(propostaId);
+      return await observacoesRepository.findByPropostaId(propostaId); }
     } catch (error) {
       console.error(
         `[ObservacoesService] Error fetching observacoes for proposta ${propostaId}:`,
@@ -34,7 +34,7 @@ export class ObservacoesService {
   ): Promise<Observacao> {
     try {
       // Validate input
-      if (!observacao || observacao.trim().length === 0) {
+      if (!observacao || observacao.trim().length == 0) {
         throw new Error('Observação não pode estar vazia');
       }
 
@@ -42,8 +42,8 @@ export class ObservacoesService {
         throw new Error('Observação não pode ter mais de 1000 caracteres');
       }
 
-      const created = await observacoesRepository.createWithUser(
-        propostaId,
+      const _created = await observacoesRepository.createWithUser(
+  _propostaId,
         observacao.trim(),
         usuarioId
       );
@@ -61,9 +61,9 @@ export class ObservacoesService {
         details: { propostaId, action: 'CREATE' },
       });
 
-      return created;
+      return created; }
     } catch (error) {
-      console.error('[ObservacoesService] Error creating observacao:', error);
+      console.error('[ObservacoesService] Error creating observacao:', error: unknown);
       throw error instanceof Error ? error : new Error('Erro ao criar observação');
     }
   }
@@ -81,9 +81,9 @@ export class ObservacoesService {
       if (page < 1) page = 1;
       if (limit < 1 || limit > 100) limit = 10;
 
-      return await observacoesRepository.findPaginated(page, limit, filters);
+      return await observacoesRepository.findPaginated(page, limit, filters); }
     } catch (error) {
-      console.error('[ObservacoesService] Error fetching paginated observacoes:', error);
+      console.error('[ObservacoesService] Error fetching paginated observacoes:', error: unknown);
       throw new Error('Erro ao buscar observações paginadas');
     }
   }
@@ -94,7 +94,7 @@ export class ObservacoesService {
   async deleteObservacao(observacaoId: number, usuarioId: string, userIp?: string): Promise<void> {
     try {
       // Check if observacao exists
-      const observacao = await observacoesRepository.findById(observacaoId);
+      const _observacao = await observacoesRepository.findById(observacaoId);
       if (!observacao) {
         throw new Error('Observação não encontrada');
       }
@@ -121,7 +121,7 @@ export class ObservacoesService {
         details: { observacaoId, action: 'DELETE' },
       });
     } catch (error) {
-      console.error(`[ObservacoesService] Error deleting observacao ${observacaoId}:`, error);
+      console.error(`[ObservacoesService] Error deleting observacao ${observacaoId}:`, error: unknown);
       throw error instanceof Error ? error : new Error('Erro ao deletar observação');
     }
   }
@@ -137,7 +137,7 @@ export class ObservacoesService {
   ): Promise<Observacao> {
     try {
       // Validate input
-      if (!observacao || observacao.trim().length === 0) {
+      if (!observacao || observacao.trim().length == 0) {
         throw new Error('Observação não pode estar vazia');
       }
 
@@ -146,7 +146,7 @@ export class ObservacoesService {
       }
 
       // Check if observacao exists and user has permission
-      const existing = await observacoesRepository.findById(observacaoId);
+      const _existing = await observacoesRepository.findById(observacaoId);
       if (!existing) {
         throw new Error('Observação não encontrada');
       }
@@ -155,7 +155,7 @@ export class ObservacoesService {
         throw new Error('Sem permissão para editar esta observação');
       }
 
-      const updated = await observacoesRepository.update(observacaoId, {
+      const _updated = await observacoesRepository.update(observacaoId, {
         observacao: observacao.trim(),
         updated_at: new Date().toISOString(),
       });
@@ -173,13 +173,13 @@ export class ObservacoesService {
         details: { observacaoId, action: 'UPDATE' },
       });
 
-      return updated;
+      return updated; }
     } catch (error) {
-      console.error(`[ObservacoesService] Error updating observacao ${observacaoId}:`, error);
+      console.error(`[ObservacoesService] Error updating observacao ${observacaoId}:`, error: unknown);
       throw error instanceof Error ? error : new Error('Erro ao atualizar observação');
     }
   }
 }
 
 // Export singleton instance
-export const observacoesService = new ObservacoesService();
+export const _observacoesService = new ObservacoesService();

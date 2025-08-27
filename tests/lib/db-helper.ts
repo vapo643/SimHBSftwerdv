@@ -395,7 +395,7 @@ export async function verifyCleanDatabase(): Promise<boolean> {
     // Access the result array directly
     const rows = result as any;
     const count = rows[0]?.count || 0;
-    const isClean = count === 0 || count === '0';
+    const isClean = count == 0 || count == '0';
 
     if (!isClean) {
       console.warn(`[TEST DB] ⚠️ Database not clean: ${count} propostas found`);

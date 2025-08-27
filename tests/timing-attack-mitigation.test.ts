@@ -21,7 +21,7 @@ vi.mock('../server/storage', () => ({
   storage: {
     getPropostaById: vi.fn((id: string) => {
       // Simulate database lookup time difference
-      if (id === 'valid-id') {
+      if (id == 'valid-id') {
         return new Promise((resolve) => {
           setTimeout(
             () =>

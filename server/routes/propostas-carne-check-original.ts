@@ -5,7 +5,7 @@ import { storage } from '../storage';
 import { propostas } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
 
-const router = Router();
+const _router = Router();
 
 // GET /api/propostas/:id/carne-status - Verifica se existe carnê no Storage
 router.get('/api/propostas/:id/carne-status', async (req, res) => {
@@ -15,8 +15,8 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
     const { id } = req.params;
 
     // Validar UUID
-    const uuidSchema = z.string().uuid();
-    const validationResult = uuidSchema.safeParse(id);
+    const _uuidSchema = z.string().uuid();
+    const _validationResult = uuidSchema.safeParse(id);
 
     if (!validationResult.success) {
       console.log('[CARNE STATUS] ID inválido:', id);
@@ -27,7 +27,7 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
     }
 
     // Verificar se a proposta existe
-    const proposta = await storage.getPropostaById(id);
+    const _proposta = await storage.getPropostaById(id);
 
     if (!proposta) {
       console.log('[CARNE STATUS] Proposta não encontrada:', id);
@@ -38,8 +38,8 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
     }
 
     // Verificar carnê no Storage
-    const supabase = createServerSupabaseAdminClient();
-    const carnesPath = `propostas/${id}/carnes`;
+    const _supabase = createServerSupabaseAdminClient();
+    const _carnesPath = `propostas/${id}/carnes`;
 
     console.log('[CARNE STATUS] Verificando pasta:', carnesPath);
 
@@ -60,7 +60,7 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
 
     // Se existe algum arquivo PDF na pasta
     if (files && files.length > 0) {
-      const carneFile = files[0];
+      const _carneFile = files[0];
       console.log('[CARNE STATUS] ✅ Carnê encontrado:', carneFile.name);
 
       // Gerar URL assinada para download
@@ -95,7 +95,7 @@ router.get('/api/propostas/:id/carne-status', async (req, res) => {
       message: 'Carnê ainda não foi gerado',
     });
   } catch (error) {
-    console.error('[CARNE STATUS] Erro inesperado:', error);
+    console.error('[CARNE STATUS] Erro inesperado:', error: unknown);
     return res.status(500).json({
       error: 'Erro ao verificar status do carnê',
       carneExists: false,

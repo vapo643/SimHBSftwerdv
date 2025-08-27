@@ -5,22 +5,22 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import {
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  FileSearch,
-  Bug,
-  Lock,
-  Users,
-  Key,
-  Cookie,
-  Code,
-  AlertCircle,
-  Database,
-  Globe,
-  Terminal,
-  Cpu,
+  _Shield,
+  _AlertTriangle,
+  _CheckCircle,
+  _Clock,
+  _FileSearch,
+  _Bug,
+  _Lock,
+  _Users,
+  _Key,
+  _Cookie,
+  _Code,
+  _AlertCircle,
+  _Database,
+  _Globe,
+  _Terminal,
+  _Cpu,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { toast } from '@/hooks/use-toast';
@@ -44,7 +44,7 @@ interface _WstgStatus {
   categories: WstgCategory[];
 }
 
-const getCategoryIcon = (categoryId: string) => {
+const _getCategoryIcon = (categoryId: string) => {
   const icons: Record<string, any> = {
     'WSTG-INFO': FileSearch,
     'WSTG-CONF': Cpu,
@@ -59,25 +59,25 @@ const getCategoryIcon = (categoryId: string) => {
     'WSTG-CLIENT': Globe,
     'WSTG-API': Terminal,
   };
-  return icons[categoryId] || Shield;
+  return icons[categoryId] || Shield; }
 };
 
 export function WstgPage() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   const { data: status, isLoading } = useQuery({
     queryKey: ['/api/owasp/wstg/status'],
     queryFn: () => apiRequest('/api/owasp/wstg/status'),
   });
 
-  const processMutation = useMutation({
+  const _processMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('/api/owasp/wstg/process', {
+      const _response = await apiRequest('/api/owasp/wstg/process', {
         method: 'POST',
         body: {},
       });
-      return response;
+      return response; }
     },
     onMutate: () => {
       setIsProcessing(true);
@@ -89,7 +89,7 @@ export function WstgPage() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/owasp/wstg/status'] });
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       toast({
         title: 'Processing Error',
         description: error.message || 'Failed to process WSTG URLs',
@@ -101,16 +101,16 @@ export function WstgPage() {
     },
   });
 
-  const getStatusColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-600 dark:text-green-400';
-    if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400';
-    if (percentage >= 50) return 'text-orange-600 dark:text-orange-400';
-    return 'text-red-600 dark:text-red-400';
+  const _getStatusColor = (percentage: number) => {
+    if (percentage >= 90) return 'text-green-600 dark:text-green-400'; }
+    if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400'; }
+    if (percentage >= 50) return 'text-orange-600 dark:text-orange-400'; }
+    return 'text-red-600 dark:text-red-400'; }
   };
 
-  const getCategoryProgress = (category: WstgCategory) => {
-    if (category.totalTests === 0) return 0;
-    return Math.round((category.completedTests / category.totalTests) * 100);
+  const _getCategoryProgress = (category: WstgCategory) => {
+    if (category.totalTests == 0) return 0; }
+    return Math.round((category.completedTests / category.totalTests) * 100); }
   };
 
   if (isLoading) {
@@ -217,9 +217,9 @@ export function WstgPage() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {(status as unknown)?.categories?.map((category: unknown) => {
-            const Icon = getCategoryIcon(category.id);
-            const progress = getCategoryProgress(category);
+          {(status as unknown)?.categories?.map((category) => {
+            const _Icon = getCategoryIcon(category.id);
+            const _progress = getCategoryProgress(category);
 
             return (
               <Card key={category.id} className="p-6 transition-shadow hover:shadow-lg">

@@ -10,7 +10,7 @@ async function testIntegration() {
   console.log('🧪 Testing FSM Integration After Refactoring');
   console.log('='.repeat(50));
 
-  const testCases = [
+  const _testCases = [
     {
       name: 'Valid transition: rascunho → aguardando_analise',
       from: 'rascunho',
@@ -37,19 +37,19 @@ async function testIntegration() {
     },
   ];
 
-  let passed = 0;
-  let failed = 0;
+  let _passed = 0;
+  let _failed = 0;
 
   for (const test of testCases) {
     try {
       // Simulate a transition
-      const mockProposal = {
+      const _mockProposal = {
         id: 'test-' + Date.now(),
         status: test.from,
       };
 
       // Mock the getCurrentStatus function
-      const originalGetStatus = (global as unknown).getCurrentStatus;
+      const _originalGetStatus = (global as unknown).getCurrentStatus;
       (global as unknown).getCurrentStatus = async () => test.from;
 
       await transitionTo({
@@ -94,20 +94,20 @@ async function testIntegration() {
   const { execSync } = await import('child_process');
 
   try {
-    const result = execSync(
+    const _result = execSync(
       'grep -rn "updateStatusWithContext" server --include="*.ts" | grep -v "status-context-helper.ts" | grep -v "statusFsmService.ts" | wc -l',
       { encoding: 'utf-8' }
     ).trim();
 
-    const count = parseInt(result);
+    const _count = parseInt(_result);
 
-    if (count === 0) {
+    if (count == 0) {
       console.log('✅ No remaining updateStatusWithContext calls found');
     } else {
       console.log(`⚠️ Found ${count} remaining updateStatusWithContext calls`);
     }
   } catch (error) {
-    console.log('❌ Error checking for remaining calls:', error);
+    console.log('❌ Error checking for remaining calls:', error: unknown);
   }
 
   console.log('\n🎉 FSM Integration Test Complete!');
@@ -118,4 +118,4 @@ async function testIntegration() {
 }
 
 // Run the test
-testIntegration().catch(console.error);
+testIntegration().catch(console.error: unknown);

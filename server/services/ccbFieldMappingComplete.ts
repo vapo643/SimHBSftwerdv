@@ -22,9 +22,9 @@ export interface FieldPosition {
  * Organizados por seções conforme layout real do template
  */
 export const CCB_COMPLETE_MAPPING = {
-  // =====================================================
+  // ====================================
   // SEÇÃO 1: CABEÇALHO E IDENTIFICAÇÃO DO DOCUMENTO
-  // =====================================================
+  // ====================================
   numeroCcb: {
     x: 450,
     y: 750,
@@ -40,9 +40,9 @@ export const CCB_COMPLETE_MAPPING = {
     alignment: 'right' as const,
   },
 
-  // =====================================================
+  // ====================================
   // SEÇÃO 2: DADOS DO DEVEDOR (PESSOA FÍSICA/JURÍDICA)
-  // =====================================================
+  // ====================================
 
   // --- Pessoa Física ---
   devedorNome: {
@@ -167,9 +167,9 @@ export const CCB_COMPLETE_MAPPING = {
     fontSize: 10,
   },
 
-  // =====================================================
+  // ====================================
   // SEÇÃO 3: DADOS DO CRÉDITO E CONDIÇÕES FINANCEIRAS
-  // =====================================================
+  // ====================================
 
   valorPrincipal: {
     x: 200,
@@ -264,9 +264,9 @@ export const CCB_COMPLETE_MAPPING = {
     maxWidth: 400,
   },
 
-  // =====================================================
+  // ====================================
   // SEÇÃO 4: DADOS BANCÁRIOS (PIX ou Conta Bancária)
-  // =====================================================
+  // ====================================
 
   // --- PIX ---
   pixChave: {
@@ -309,9 +309,9 @@ export const CCB_COMPLETE_MAPPING = {
     maxWidth: 300,
   },
 
-  // =====================================================
+  // ====================================
   // SEÇÃO 5: DADOS DO CREDOR
-  // =====================================================
+  // ====================================
 
   credorNome: {
     x: 120,
@@ -334,9 +334,9 @@ export const CCB_COMPLETE_MAPPING = {
     maxWidth: 200,
   },
 
-  // =====================================================
+  // ====================================
   // SEÇÃO 6: ASSINATURAS E TESTEMUNHAS
-  // =====================================================
+  // ====================================
 
   localAssinatura: {
     x: 120,
@@ -374,9 +374,9 @@ export const CCB_COMPLETE_MAPPING = {
     fontSize: 9,
   },
 
-  // =====================================================
+  // ====================================
   // SEÇÃO 7: OBSERVAÇÕES E CLÁUSULAS ESPECIAIS
-  // =====================================================
+  // ====================================
 
   observacoes: {
     x: 120,
@@ -396,7 +396,7 @@ export const CCB_COMPLETE_MAPPING = {
  * (mais intuitivo para posicionamento visual)
  */
 export function yFromTop(pageHeight: number, pixelsFromTop: number): number {
-  return pageHeight - pixelsFromTop;
+  return pageHeight - pixelsFromTop; }
 }
 
 /**
@@ -444,8 +444,8 @@ export function formatCurrency(value: number): string {
  */
 export function numberToWords(value: number): string {
   // Implementação básica - pode ser expandida com biblioteca específica
-  const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
-  const dezenas = [
+  const _unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+  const _dezenas = [
     '',
     '',
     'vinte',
@@ -457,7 +457,7 @@ export function numberToWords(value: number): string {
     'oitenta',
     'noventa',
   ];
-  const centenas = [
+  const _centenas = [
     '',
     'cem',
     'duzentos',
@@ -472,7 +472,7 @@ export function numberToWords(value: number): string {
 
   // Implementação simplificada - retorna apenas o valor formatado
   // Em produção, usar biblioteca como 'extenso' ou similar
-  return `${formatCurrency(value)} (${Math.floor(value)} reais)`;
+  return `${formatCurrency(value)} (${Math.floor(value)} reais)`; }
 }
 
 /**

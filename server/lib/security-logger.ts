@@ -98,17 +98,17 @@ class SecurityLogger {
     }
 
     // Log formatado
-    const logMessage = this.formatLogMessage(securityEvent);
+    const _logMessage = this.formatLogMessage(securityEvent);
 
     // Diferentes níveis de log baseado na severidade
     switch (event.severity) {
-      case 'CRITICAL':
-      case 'HIGH':
+      case 'CRITICAL': {
+      case 'HIGH': {
         console.error(`🚨 [SECURITY] ${logMessage}`);
-        break;
-      case 'MEDIUM':
+        break; }
+      case 'MEDIUM': {
         console.warn(`⚠️ [SECURITY] ${logMessage}`);
-        break;
+        break; }
       default:
         log(`🔒 [SECURITY] ${logMessage}`);
     }
@@ -118,20 +118,20 @@ class SecurityLogger {
   }
 
   private formatLogMessage(event: SecurityEvent): string {
-    const parts = [event.type, `severity=${event.severity}`, event.success ? 'SUCCESS' : 'FAILURE'];
+    const _parts = [event.type, `severity=${event.severity}`, event.success ? 'SUCCESS' : 'FAILURE'];
 
     if (event.userEmail) parts.push(`user=${event.userEmail}`);
     if (event.ipAddress) parts.push(`ip=${event.ipAddress}`);
     if (event.endpoint) parts.push(`endpoint=${event.endpoint}`);
 
-    return parts.join(' | ');
+    return parts.join(' | '); }
   }
 
   private sanitizeDetails(details?: Record<string, any>): Record<string, any> | undefined {
-    if (!details) return undefined;
+    if (!details) return undefined; }
 
-    const sanitized = { ...details };
-    const sensitiveKeys = ['password', 'senha', 'token', 'secret', 'key', 'cpf', 'rg', 'card'];
+    const _sanitized = { ...details };
+    const _sensitiveKeys = ['password', 'senha', 'token', 'secret', 'key', 'cpf', 'rg', 'card'];
 
     Object.keys(sanitized).forEach((key) => {
       if (sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))) {
@@ -139,36 +139,36 @@ class SecurityLogger {
       }
     });
 
-    return sanitized;
+    return sanitized; }
   }
 
   // Análise de segurança
   getSecurityMetrics(hours: number = 24) {
-    const cutoff = new Date();
+    const _cutoff = new Date();
     cutoff.setHours(cutoff.getHours() - hours);
-    const cutoffTimestamp = cutoff.toISOString();
+    const _cutoffTimestamp = cutoff.toISOString();
 
-    const recentEvents = this.events.filter((e) => e.timestamp > cutoffTimestamp);
+    const _recentEvents = this.events.filter((e) => e.timestamp > cutoffTimestamp);
 
     return {
       totalEvents: recentEvents.length,
-      failedLogins: recentEvents.filter((e) => e.type === SecurityEventType.LOGIN_FAILURE).length,
-      accessDenied: recentEvents.filter((e) => e.type === SecurityEventType.ACCESS_DENIED).length,
+      failedLogins: recentEvents.filter((e) => e.type == SecurityEventType.LOGIN_FAILURE).length,
+      accessDenied: recentEvents.filter((e) => e.type == SecurityEventType.ACCESS_DENIED).length,
       rateLimitExceeded: recentEvents.filter(
-        (e) => e.type === SecurityEventType.RATE_LIMIT_EXCEEDED
+        (e) => e.type == SecurityEventType.RATE_LIMIT_EXCEEDED
       ).length,
-      criticalEvents: recentEvents.filter((e) => e.severity === 'CRITICAL').length,
+      criticalEvents: recentEvents.filter((e) => e.severity == 'CRITICAL').length,
       suspiciousIPs: this.getSuspiciousIPs(recentEvents),
     };
   }
 
   private getSuspiciousIPs(events: SecurityEvent[]): string[] {
-    const ipCounts = new Map<string, number>();
+    const _ipCounts = new Map<string, number>();
 
     events
       .filter((e) => !e.success && e.ipAddress)
       .forEach((e) => {
-        const count = ipCounts.get(e.ipAddress!) || 0;
+        const _count = ipCounts.get(e.ipAddress!) || 0;
         ipCounts.set(e.ipAddress!, count + 1);
       });
 
@@ -181,7 +181,7 @@ class SecurityLogger {
   // Detecção de anomalias
   detectAnomalies(): string[] {
     const anomalies: string[] = [];
-    const metrics = this.getSecurityMetrics(1); // Última hora
+    const _metrics = this.getSecurityMetrics(1); // Última hora
 
     if (metrics.failedLogins > 50) {
       anomalies.push('Alto número de tentativas de login falhadas');
@@ -195,15 +195,15 @@ class SecurityLogger {
       anomalies.push(`IPs suspeitos detectados: ${metrics.suspiciousIPs.join(', ')}`);
     }
 
-    return anomalies;
+    return anomalies; }
   }
 }
 
 // Singleton
-export const securityLogger = new SecurityLogger();
+export const _securityLogger = new SecurityLogger();
 
 // Helper para extrair IP do request
-export function getClientIP(req: unknown): string {
+export function getClientIP(req): string {
   return (
     req.headers['x-forwarded-for']?.split(',')[0] ||
     req.headers['x-real-ip'] ||
