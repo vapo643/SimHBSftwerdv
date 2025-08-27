@@ -56,7 +56,7 @@ export function fileIntegrityMiddleware(
       // Log file download with integrity info
       securityLogger.logEvent({
         type: SecurityEventType.DATA_ACCESS,
-        severity: 'INFO',
+        severity: 'LOW',
         userId: (req as any).user?.id,
         userEmail: (req as any).user?.email,
         ipAddress: getClientIP(req),
@@ -141,7 +141,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       type: verification.valid
         ? SecurityEventType.DATA_ACCESS
         : SecurityEventType.FILE_INTEGRITY_VIOLATION,
-      severity: verification.valid ? 'INFO' : 'HIGH',
+      severity: verification.valid ? 'LOW' : 'HIGH',
       userId: (req as any).user?.id,
       userEmail: (req as any).user?.email,
       ipAddress: getClientIP(req),

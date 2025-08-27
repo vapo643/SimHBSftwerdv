@@ -59,6 +59,11 @@ export enum SecurityEventType {
   // User Events
   USER_CREATED = 'USER_CREATED',
   DATA_ACCESS = 'DATA_ACCESS',
+
+  // Security Monitoring
+  SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
+  AUTOMATED_ATTACK = 'AUTOMATED_ATTACK',
+  FILE_INTEGRITY_VIOLATION = 'FILE_INTEGRITY_VIOLATION',
 }
 
 export interface SecurityEvent {

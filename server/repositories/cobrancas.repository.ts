@@ -85,7 +85,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(interCollections)
-        .where(eq(interCollections.propostaId, propostaId))
+        .where(eq(interCollections.propostaId, String(propostaId)))
         .orderBy(desc(interCollections.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error);
@@ -105,12 +105,12 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
           observacao: observacoesCobranca.observacao,
           tipo: observacoesCobranca.observacao,
           created_at: observacoesCobranca.createdAt,
-          created_by: observacoesCobranca.createdBy,
-          userName: profiles.full_name,
-          userEmail: profiles.email,
+          created_by: observacoesCobranca.userId,
+          userName: profiles.fullName,
+          userEmail: observacoesCobranca.userName,
         })
         .from(observacoesCobranca)
-        .leftJoin(profiles, eq(profiles.id, observacoesCobranca.createdBy))
+        .leftJoin(profiles, eq(profiles.id, observacoesCobranca.userId))
         .where(eq(observacoesCobranca.propostaId, String(propostaId)))
         .orderBy(desc(observacoesCobranca.createdAt));
     } catch (error) {
@@ -134,7 +134,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .values({
           propostaId: String(data.proposta_id),
           observacao: data.observacao,
-          createdBy: data.created_by,
+          userId: data.created_by,
+          userName: 'Sistema', // Default value since not provided in data
           createdAt: new Date(),
         })
         .returning();
@@ -152,7 +153,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   async updateParcelaStatus(parcelaId: number, status: string, updateData?: any): Promise<boolean> {
     try {
       const updates: any = {
-        statusPagamento: status,
+        status: status,
         updatedAt: new Date(),
       };
 
@@ -204,10 +205,11 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .insert(solicitacoesModificacao)
         .values({
           propostaId: String(data.proposta_id),
-          tipo: data.tipo,
-          motivo: data.motivo,
-          detalhes: data.detalhes,
-          solicitadoPor: data.solicitado_por,
+          tipoSolicitacao: data.tipo,
+          dadosSolicitacao: { motivo: data.motivo, detalhes: data.detalhes },
+          solicitadoPorId: data.solicitado_por,
+          solicitadoPorNome: 'Sistema', // Default value
+          solicitadoPorRole: 'system', // Default value  
           status: 'pendente',
           createdAt: new Date(),
         })
@@ -250,8 +252,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
           and(
             isNull(propostas.deletedAt),
             inArray(propostas.status, ['BOLETOS_EMITIDOS', 'PAGAMENTO_PENDENTE']),
-            lte(parcelas.dataVencimento, new Date()),
-            eq(parcelas.statusPagamento, 'pendente')
+            lte(parcelas.dataVencimento, new Date().toISOString().split('T')[0]),
+            eq(parcelas.status, 'pendente')
           )
         );
 
