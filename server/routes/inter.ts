@@ -75,11 +75,11 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
     console.error('[INTER] Failed to create collection:', error);
 
     if (error.message == 'Proposta não encontrada') {
-      return res.*);
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     if (error.message == 'Já existe uma cobrança para esta proposta') {
-      return res.*);
+      return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
     }
 
     res.status(500).json({
@@ -139,7 +139,7 @@ router.get(
       });
     } catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.*);
+        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
       }
 
       console.error('[INTER] Get collection details failed:', error);
@@ -171,7 +171,7 @@ router.delete(
       const { motivo } = req.body;
 
       if (!motivo) {
-        return res.*);
+        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
       }
 
       const _collection = await interService.cancelCollection(
@@ -187,7 +187,7 @@ router.delete(
       });
     } catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.*);
+        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
       }
 
       console.error('[INTER] Cancel collection failed:', error);
@@ -222,11 +222,11 @@ router.patch(
         !Array.isArray(codigosSolicitacao) ||
         codigosSolicitacao.length == 0
       ) {
-        return res.*);
+        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
       }
 
       if (!novaDataVencimento) {
-        return res.*);
+        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
       }
 
       const _result = await interService.batchExtendDueDates(
@@ -271,7 +271,7 @@ router.get(
       res.send(pdfBuffer);
     } catch (error) {
       if (error.message == 'Cobrança não encontrada') {
-        return res.*);
+        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
       }
 
       console.error('[INTER] Generate PDF failed:', error);

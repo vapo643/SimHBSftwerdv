@@ -114,7 +114,8 @@ export interface IStorage {
     userAgent?: string;
     expiresAt: Date;
   }): Promise<void>;
-  getUserSessions(userId: string): Promise<Array<{
+  getUserSessions(userId: string): Promise<
+    Array<{
       id: string;
       userId: string;
       ipAddress: string | null;
@@ -123,7 +124,8 @@ export interface IStorage {
       expiresAt: Date;
       lastActivityAt: Date;
       isActive: boolean;
-    }>>;
+    }>
+  >;
   deleteSession(sessionId: string): Promise<void>;
   deleteAllUserSessions(userId: string, exceptSessionId?: string): Promise<void>;
   updateSessionActivity(sessionId: string): Promise<void>;
@@ -217,7 +219,7 @@ export class DatabaseStorage implements IStorage {
       // Debug: log raw data for first few proposals
       if (data && data.indexOf(p) < 3) {
         console.log(`[DEBUG] Proposta ${p.id}:`, {
-  _condicoesData,
+          _condicoesData,
           valorRaw: condicoesData.valor,
           valorParsed: parseFloat(condicoesData.valor) || 0,
         });
@@ -538,10 +540,10 @@ export class DatabaseStorage implements IStorage {
 
       try {
         await transitionTo({
-  _propostaId,
+          _propostaId,
           novoStatus: proposta.status,
           userId: 'storage-service',
-  _contexto,
+          _contexto,
           observacoes: 'Atualização via storage.updateProposta',
           metadata: { origem: 'storage-service' },
         });
@@ -858,12 +860,12 @@ export class DatabaseStorage implements IStorage {
     id: number,
     updates: Partial<InsertInterWebhook>
   ): Promise<InterWebhook> {
-    const _result = await db
+    const result = await db
       .update(interWebhooks)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interWebhooks.id, id))
       .returning();
-    return result[0]; }
+    return result[0];
   }
 
   async deleteInterWebhook(id: number): Promise<void> {
@@ -872,8 +874,8 @@ export class DatabaseStorage implements IStorage {
 
   // Inter Bank Callbacks
   async createInterCallback(callback: InsertInterCallback): Promise<InterCallback> {
-    const _result = await db.insert(interCallbacks).values(callback).returning();
-    return result[0]; }
+    const result = await db.insert(interCallbacks).values(callback).returning();
+    return result[0];
   }
 
   async getUnprocessedInterCallbacks(): Promise<InterCallback[]> {
@@ -919,7 +921,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSessions(userId: string): Promise<
-    Record<string, unknown>[]>{
+    Array<{
       id: string;
       userId: string;
       token: string;
@@ -932,13 +934,13 @@ export class DatabaseStorage implements IStorage {
       isActive: boolean;
     }>
   > {
-    const _sessions = await db
+    const sessions = await db
       .select()
       .from(userSessions)
       .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)))
       .orderBy(desc(userSessions.lastActivityAt));
 
-    return sessions; }
+    return sessions;
   }
 
   async deleteSession(sessionId: string): Promise<void> {

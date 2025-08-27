@@ -63,7 +63,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
     // Fetch user profile with store and partner information using Supabase client
     const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-    const _supabase = createServerSupabaseAdminClient();
+    const supabase = createServerSupabaseAdminClient();
 
     // First, get the profile
     const { data: profileData, error: profileError } = await supabase
@@ -74,7 +74,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
     if (profileError || !profileData) {
       console.error('Profile fetch error:', profileError);
-      return res.*);
+      return res.status(500).json({ error: 'Failed to fetch user profile' });
     }
 
     // CRITICAL FIX: Handle users without stores gracefully (e.g. ANALISTA role)
@@ -117,7 +117,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
     if (lojaError || !lojaData) {
       console.error('Loja fetch error:', lojaError);
-      return res.*);
+      return res.status(500).json({ error: 'Failed to fetch store data' });
     }
 
     // Fix: parceiros should be a single object, not an array
@@ -145,16 +145,14 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
         const _cacheKey = `tabelas-comerciais:produtoId:${produto.id}:parceiroId:${parceiroId}`;
 
         // Tentar buscar do cache primeiro
-        const _cachedTabelas = await getFromCache<
-          Record<string, unknown>[]>{
+        const cachedTabelas = await getFromCache<Array<{
             id: number;
             nomeTabela: string;
             taxaJuros: string;
             prazos: number[];
             comissao: string;
             tipo: 'personalizada' | 'geral';
-          }>
-        >(cacheKey);
+          }>>(cacheKey);
 
         if (cachedTabelas) {
           // Cache hit - retornar dados do cache
@@ -189,7 +187,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             )
           );
 
-        let tabelasDisponiveis: Record<string, unknown>[]>{
+        let tabelasDisponiveis: Array<{
           id: number;
           nomeTabela: string;
           taxaJuros: string;

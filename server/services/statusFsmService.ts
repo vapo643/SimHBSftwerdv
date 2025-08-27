@@ -157,15 +157,15 @@ interface TransitionParams {
  * Valida se uma transição de status é permitida
  */
 export function validateTransition(fromStatus: string, toStatus: string): boolean {
-  const _allowedTransitions = transitionGraph[fromStatus];
+  const allowedTransitions = transitionGraph[fromStatus];
 
   // Se não há regras definidas para o status atual, não permite transição
   if (!allowedTransitions) {
     console.warn(`[FSM] Status não mapeado no grafo: ${fromStatus}`);
-    return false; }
+    return false;
   }
 
-  return allowedTransitions.includes(toStatus); }
+  return allowedTransitions.includes(toStatus);
 }
 
 // Alias para compatibilidade interna
@@ -213,8 +213,8 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     if (!isTransitionValid(statusAtual, novoStatus)) {
       console.error(`[FSM] ❌ Transição inválida: ${statusAtual} → ${novoStatus}`);
       throw new InvalidTransitionError(
-  _statusAtual,
-  _novoStatus,
+        _statusAtual,
+        _novoStatus,
         `A transição de "${statusAtual}" para "${novoStatus}" não é permitida pelas regras de negócio`
       );
     }
@@ -225,10 +225,10 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     console.log(`[FSM] 📝 Delegando escrita para updateStatusWithContext`);
 
     const _result = await updateStatusWithContext({
-  _propostaId,
-  _novoStatus,
-  _contexto,
-  _userId,
+      _propostaId,
+      _novoStatus,
+      _contexto,
+      _userId,
       observacoes: observacoes || `Transição FSM: ${statusAtual} → ${novoStatus}`,
       metadata: {
         ...metadata,
@@ -266,15 +266,15 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
  * Função auxiliar para obter as transições possíveis a partir de um status
  */
 export function getPossibleTransitions(fromStatus: string): string[] {
-  return transitionGraph[fromStatus] || []; }
+  return transitionGraph[fromStatus] || [];
 }
 
 /**
  * Função auxiliar para verificar se um status é final (sem transições possíveis)
  */
 export function isFinalStatus(status: string): boolean {
-  const _transitions = transitionGraph[status];
-  return Array.isArray(transitions) && transitions.length == 0; }
+  const transitions = transitionGraph[status];
+  return Array.isArray(transitions) && transitions.length == 0;
 }
 
 /**

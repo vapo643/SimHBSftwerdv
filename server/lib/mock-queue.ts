@@ -80,7 +80,7 @@ class MockQueue extends EventEmitter {
       this.processJob(jobId);
     }, 100);
 
-    return job; }
+    return job;
   }
 
   private async processJob(jobId: string) {
