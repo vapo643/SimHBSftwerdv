@@ -1987,10 +1987,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero').default(0),
         });
 
-        const _validatedData = createTabelaSchema.parse(req.body);
+        const validatedData = _createTabelaSchema.parse(req.body);
 
         // TRANSACTION: Create table and associate products
-        const _result = await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Insert new commercial table
           const [newTabela] = await tx
             .insert(tabelasComerciais)
@@ -2004,20 +2004,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .returning();
 
           // Step 2: Associate products via junction table
-          const _associations = validatedData.produtoIds.map((produtoId) => ({
-  _produtoId,
+          const associations = validatedData.produtoIds.map((produtoId) => ({
+            produtoId: produtoId,
             tabelaComercialId: newTabela.id,
           }));
 
           await tx.insert(produtoTabelaComercial).values(associations);
 
-          return newTabela; }
+          return newTabela;
         });
 
         console.log(
           `[${getBrasiliaTimestamp()}] Nova tabela comercial criada com ${validatedData.produtoIds.length} produtos: ${result.id}`
         );
-        res.status(201).json(_result);
+        res.status(201).json(result);
       } catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
@@ -2040,13 +2040,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { z } = await import('zod');
         const { eq } = await import('drizzle-orm');
 
-        const _tabelaId = parseInt(req.params.id);
+        const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
           return res.status(500).json({error: "Error"});
         }
 
         // Updated validation schema for N:N structure
-        const _updateTabelaSchema = z.object({
+        const updateTabelaSchema = z.object({
           nomeTabela: z.string().min(3, 'Nome da tabela deve ter pelo menos 3 caracteres'),
           taxaJuros: z.number().positive('Taxa de juros deve ser positiva'),
           prazos: z.array(z.number().positive()).min(1, 'Deve ter pelo menos um prazo'),
@@ -2057,10 +2057,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero').default(0),
         });
 
-        const _validatedData = updateTabelaSchema.parse(req.body);
+        const validatedData = updateTabelaSchema.parse(req.body);
 
         // TRANSACTION: Update table and reassociate products
-        const _result = await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Update the commercial table
           const [updatedTabela] = await tx
             .update(tabelasComerciais)
@@ -2084,20 +2084,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
 
           // Step 3: Create new product associations
-          const _associations = validatedData.produtoIds.map((produtoId) => ({
-  _produtoId,
+          const associations = validatedData.produtoIds.map((produtoId) => ({
+            produtoId: produtoId,
             tabelaComercialId: tabelaId,
           }));
 
           await tx.insert(produtoTabelaComercial).values(associations);
 
-          return updatedTabela; }
+          return updatedTabela;
         });
 
         console.log(
           `[${getBrasiliaTimestamp()}] Tabela comercial atualizada com ${validatedData.produtoIds.length} produtos: ${result.id}`
         );
-        res.json(_result);
+        res.json(result);
       } catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
@@ -2122,7 +2122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
 
-        const _tabelaId = parseInt(req.params.id);
+        const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
           return res.status(500).json({error: "Error"});
         }
@@ -2684,18 +2684,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Função para calcular o valor da parcela usando a fórmula da Tabela Price
-  const _calcularParcela = (
+  const calcularParcela = (
     valorSolicitado: number,
     prazoEmMeses: number,
     taxaDeJurosMensal: number
   ): number => {
     if (taxaDeJurosMensal <= 0) {
-      return valorSolicitado / prazoEmMeses; }
+      return valorSolicitado / prazoEmMeses;
     }
-    const _i = taxaDeJurosMensal / 100; // Convertendo a taxa percentual para decimal
-    const _pmt =
+    const i = taxaDeJurosMensal / 100; // Convertendo a taxa percentual para decimal
+    const pmt =
       (valorSolicitado * (i * Math.pow(1 + i, prazoEmMeses))) / (Math.pow(1 + i, prazoEmMeses) - 1);
-    return parseFloat(pmt.toFixed(2)); }
+    return parseFloat(pmt.toFixed(2));
   };
 
   // Rota para simular crédito COM DADOS REAIS DO BANCO
@@ -2718,10 +2718,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('[SIMULAÇÃO] Iniciando simulação:', {
-  _valorEmprestimo,
-  _prazoMeses,
-  _parceiroId,
-  _produtoId,
+        valorEmprestimo,
+        prazoMeses,
+        parceiroId,
+        produtoId,
       });
 
       // PASSO 1: Buscar parâmetros financeiros do banco de dados
@@ -3171,7 +3171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { eq } = await import('drizzle-orm');
 
         // Execute transaction for atomic updates
-        const _result = await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Get current proposal for audit trail
           const [currentProposta] = await tx
             .select({
@@ -3197,7 +3197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               propostaId: id,
               novoStatus: status,
               userId: req.user?.id || 'sistema',
-  _contexto,
+              contexto,
               observacoes: observacao || `Status alterado para ${status}`,
               metadata: {
                 tipoAcao: 'STATUS_UPDATE_MANUAL',
@@ -3225,13 +3225,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Skip comunicacaoLogs for now - focus on propostaLogs for audit
           // This will be implemented later for client communication tracking
 
-          return updatedProposta; }
+          return updatedProposta;
         });
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`
+          `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado para ${status}`
         );
-        res.json(_result);
+        res.json(result);
       } catch (error) {
         console.error(error);
         if (error instanceof Error && error.message == 'Proposta não encontrada') {
@@ -4235,7 +4235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         console.log('[TEST ENDPOINT] 📊 Verificando status das filas');
 
-        const _health = await checkQueuesHealth();
+        const health = await checkQueuesHealth();
 
         res.json({
           success: true,
@@ -4253,6 +4253,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
   // ================ END JOB QUEUE TEST ================
 
-  const _httpServer = createServer(app);
-  return httpServer; }
+  const httpServer = createServer(app);
+  return httpServer;
 }

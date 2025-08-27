@@ -78,7 +78,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
  */
 function sanitizeObject(obj, req: Request): unknown {
   if (typeof obj !== 'object' || obj === null) {
-    return sanitizeValue(obj, '', req); }
+    return sanitizeValue(obj, '', req);
   }
 
   const sanitized: unknown = Array.isArray(obj) ? [] : {};
@@ -100,7 +100,7 @@ function sanitizeObject(obj, req: Request): unknown {
     }
   }
 
-  return sanitized; }
+  return sanitized;
 }
 
 /**
@@ -108,18 +108,18 @@ function sanitizeObject(obj, req: Request): unknown {
  */
 function sanitizeValue(value, fieldName: string, req: Request): unknown {
   if (value === null || value === undefined) {
-    return value; }
+    return value;
   }
 
   if (typeof value == 'object') {
-    return sanitizeObject(value, req); }
+    return sanitizeObject(value, req);
   }
 
   if (typeof value !== 'string') {
-    return value; }
+    return value;
   }
 
-  let _sanitized = value;
+  let sanitized = value;
 
   // Detectar SQL Injection
   for (const pattern of SQL_INJECTION_PATTERNS) {
@@ -179,14 +179,14 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
     sanitized = sanitized.substring(0, 10000);
   }
 
-  return sanitized.trim(); }
+  return sanitized.trim();
 }
 
 /**
  * Validação especial para campos de alto risco
  */
 function validateHighRiskField(fieldName: string, value: unknown, req: Request): unknown {
-  if (typeof value !== 'string') return value; }
+  if (typeof value !== 'string') return value;
 
   const validators: Record<string, RegExp> = {
     cpf: /^\d{11}$/,
@@ -196,10 +196,10 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     rg: /^[0-9A-Za-z.-]+$/,
   };
 
-  const _validator = validators[fieldName.toLowerCase()];
+  const validator = validators[fieldName.toLowerCase()];
   if (validator) {
     // Remove caracteres especiais para validação
-    const _cleanValue = value.replace(/\D/g, '');
+    const cleanValue = value.replace(/\D/g, '');
 
     if (!validator.test(fieldName == 'email' ? value : cleanValue)) {
       securityLogger.logEvent({

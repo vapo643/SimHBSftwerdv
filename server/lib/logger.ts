@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Request, Response, NextFunction } from 'express';
 
 // Configuração do Winston Logger
-const _logger = winston.createLogger({
+const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -29,11 +29,11 @@ const _logger = winston.createLogger({
               winston.format.colorize(),
               winston.format.simple(),
               winston.format.printf(({ level, message, timestamp, ...metadata }) => {
-                let _msg = `${timestamp} [${level}]: ${message}`;
+                let msg = `${timestamp} [${level}]: ${message}`;
                 if (Object.keys(metadata).length > 0) {
                   msg += ` ${JSON.stringify(metadata)}`;
                 }
-                return msg; }
+                return msg;
               })
             )
           : winston.format.json(),
@@ -58,7 +58,7 @@ const _logger = winston.createLogger({
 import fs from 'fs';
 import path from 'path';
 
-const _logDir = path.join(process.cwd(), 'logs');
+const logDir = path.join(process.cwd(), 'logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
   logger.info('📁 Created logs directory');
