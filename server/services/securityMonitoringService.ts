@@ -202,7 +202,7 @@ class SecurityMonitoringService {
     try {
       await db.insert(securityLogs).values({
         ...event,
-        created_at: getBrasiliaTimestamp(),
+        created_at: new Date(getBrasiliaTimestamp()),
       });
     } catch (error) {
       console.error('[SECURITY MONITORING] Error recording event:', error);

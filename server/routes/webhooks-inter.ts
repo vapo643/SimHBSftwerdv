@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { webhookService } from '../services/webhookService.js';
+import webhookService from '../services/webhookService.js';
 const router = Router();
 router.post('/inter', async (req, res) => {
   try {

@@ -136,7 +136,7 @@ export class PagamentoService {
     try {
       await transitionTo({
         propostaId: validated.propostaId,
-        targetStatus: 'processando_pagamento',
+        novoStatus: 'processando_pagamento',
         userId,
         observacoes: 'Pagamento criado e enviado para processamento',
       });
@@ -213,7 +213,7 @@ export class PagamentoService {
       try {
         await transitionTo({
           propostaId: proposalId,
-          targetStatus: 'pago',
+          novoStatus: 'pago',
           userId,
           observacoes: 'Pagamento confirmado e processado com sucesso',
         });
@@ -228,7 +228,7 @@ export class PagamentoService {
       try {
         await transitionTo({
           propostaId: proposalId,
-          targetStatus: 'pagamento_rejeitado',
+          novoStatus: 'pagamento_rejeitado',
           userId,
           observacoes: observacoes || 'Pagamento rejeitado',
         });

@@ -236,7 +236,6 @@ router.patch(
       );
 
       res.json({
-        success: true,
         message: `${result.success.length} vencimentos prorrogados com sucesso`,
         ...result,
       });
