@@ -8,15 +8,15 @@ export function useProposalEffects() {
   const { state } = useProposal();
   const { setSimulationResult, clearSimulation, setError, clearErrors } = useProposalActions();
   const { toast } = useToast();
-  const _lastSimulationRef = useRef<string>('');
+  const lastSimulationRef = useRef<string>('');
 
   // Debounce loan values to avoid excessive API calls
-  const _debouncedValorSolicitado = useDebounce(state.loanData.valorSolicitado, 800);
-  const _debouncedPrazo = useDebounce(state.loanData.prazo, 800);
+  const debouncedValorSolicitado = useDebounce(state.loanData.valorSolicitado, 800);
+  const debouncedPrazo = useDebounce(state.loanData.prazo, 800);
 
   // Auto-simulation effect
   useEffect(() => {
-    const _canSimulate =
+    const canSimulate =
       state.loanData.produtoId &&
       state.loanData.tabelaComercialId &&
       debouncedValorSolicitado &&
@@ -30,18 +30,18 @@ export function useProposalEffects() {
     }
 
     // Create simulation key to avoid duplicate requests
-    const _simulationKey = `${state.loanData.produtoId}-${state.loanData.tabelaComercialId}-${debouncedValorSolicitado}-${debouncedPrazo}-${state.loanData.incluirTac}-${state.loanData.dataCarencia || ''}`;
+    const simulationKey = `${state.loanData.produtoId}-${state.loanData.tabelaComercialId}-${debouncedValorSolicitado}-${debouncedPrazo}-${state.loanData.incluirTac}-${state.loanData.dataCarencia || ''}`;
 
-    if (simulationKey == lastSimulationRef.current) {
+    if (simulationKey === lastSimulationRef.current) {
       return;
     }
 
     lastSimulationRef.current = simulationKey;
 
     // Find selected product and table
-    const _selectedProduct = state.context?.produtos.find((p) => p.id == state.loanData.produtoId);
-    const _selectedTable = selectedProduct?.tabelasDisponiveis.find(
-      (t) => t.id == state.loanData.tabelaComercialId
+    const selectedProduct = state.context?.produtos.find((p) => p.id === state.loanData.produtoId);
+    const selectedTable = selectedProduct?.tabelasDisponiveis.find(
+      (t) => t.id === state.loanData.tabelaComercialId
     );
 
     if (!selectedTable) {
@@ -49,43 +49,43 @@ export function useProposalEffects() {
     }
 
     // Perform simulation
-    const _performSimulation = async () => {
+    const performSimulation = async () => {
       try {
         clearErrors();
 
         // Convert currency string to number
-        const _valorEmprestimo = parseFloat(
+        const valorEmprestimo = parseFloat(
           debouncedValorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')
         );
 
         // Calculate grace period days if specified
-        let _diasCarencia = 0;
+        let diasCarencia = 0;
         if (state.loanData.dataCarencia) {
-          const _dataCarenciaObj = new Date(state.loanData.dataCarencia);
-          const _hoje = new Date();
+          const dataCarenciaObj = new Date(state.loanData.dataCarencia);
+          const hoje = new Date();
           diasCarencia = Math.ceil(
             (dataCarenciaObj.getTime() - hoje.getTime()) / (1000 * 3600 * 24)
           );
         }
 
         // Prepare payload for new API
-        const _payload = {
-          _valorEmprestimo,
+        const payload = {
+          valorEmprestimo,
           prazoMeses: debouncedPrazo,
           produtoId: state.loanData.produtoId,
           parceiroId: state.context?.atendente?.loja?.parceiro?.id || null,
-          _diasCarencia, // Pass grace period to API for proper calculation
+          diasCarencia, // Pass grace period to API for proper calculation
         };
 
         console.log('[FRONTEND] Enviando simulação para nova API:', payload);
 
         // Use new POST API endpoint
-        const _response = (await apiRequest('/api/simular', {
+        const response = (await apiRequest('/api/simular', {
           method: 'POST',
           body: JSON.stringify(payload),
-        })) as unknown; // Type assertion for now
+        })) as any; // Type assertion for now
 
-        console.log('[FRONTEND] Resposta da nova API:', _response);
+        console.log('[FRONTEND] Resposta da nova API:', response);
 
         // Map new API response to frontend state
         setSimulationResult({
@@ -110,7 +110,7 @@ export function useProposalEffects() {
             diasCarencia > 0
               ? String(valorEmprestimo * (response.taxaJurosMensal / 100 / 30) * diasCarencia)
               : '0',
-          _diasCarencia,
+          diasCarencia,
           parametrosUtilizados: response.parametrosUtilizados,
         });
       } catch (error) {
@@ -137,12 +137,12 @@ export function useProposalEffects() {
   }, [
     state.loanData.produtoId,
     state.loanData.tabelaComercialId,
-    _debouncedValorSolicitado,
-    _debouncedPrazo,
+    debouncedValorSolicitado,
+    debouncedPrazo,
     state.loanData.incluirTac,
     state.loanData.dataCarencia,
     state.context,
-    _toast,
+    toast,
   ]);
 
   // Validation effect for limits
@@ -151,7 +151,7 @@ export function useProposalEffects() {
       return;
     }
 
-    const _valor = parseFloat(
+    const valor = parseFloat(
       state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')
     );
     const { valorMinimo, valorMaximo } = state.context.limites;

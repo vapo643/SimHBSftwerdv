@@ -15,7 +15,7 @@ import { AuthenticatedRequest } from '../../shared/types/express';
 // STATUS V2.0: Import do serviço de auditoria
 import { logStatusTransition } from '../services/auditService.js';
 // PAM V1.0: Import para status contextual
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { statusContextuais } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 
@@ -34,7 +34,7 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
     // 1. Get proposal data
     const proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     // Validate proposal is approved and CCB is generated
@@ -45,7 +45,7 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
     }
 
     if (!proposta.ccbGerado) {
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(400).json({ error: 'CCB deve estar gerado antes do envio ao ClickSign' });
     }
 
     // Check if already sent to ClickSign
@@ -60,7 +60,7 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
     // 2. Get CCB file from Supabase Storage
     const ccbUrl = await storage.getCcbUrl(propostaId);
     if (!ccbUrl) {
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(404).json({ error: 'CCB não encontrado no storage' });
     }
 
     // Download CCB as buffer
@@ -115,8 +115,8 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
 
     // 4. Send to ClickSign
     const clickSignResult = await clickSignService.sendCCBForSignature(
-  _ccbBuffer,
-  _filename,
+      ccbBuffer,
+      filename,
       clientData
     );
 
@@ -178,7 +178,7 @@ router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
 
     const proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(404).json({ error: 'Proposta não encontrada' });
     }
 
     if (!proposta.clicksignDocumentKey) {
@@ -189,7 +189,7 @@ router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
     }
 
     // Get current status from ClickSign
-    let _clickSignStatus = null;
+    let clickSignStatus = null;
     try {
       clickSignStatus = await clickSignService.getDocumentStatus(proposta.clicksignDocumentKey);
     } catch (error) {
@@ -197,7 +197,7 @@ router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
     }
 
     res.json({
-  _propostaId,
+      propostaId,
       clickSignData: {
         documentKey: proposta.clicksignDocumentKey,
         signerKey: proposta.clicksignSignerKey,
@@ -234,12 +234,12 @@ router.post('/webhook', async (req, res) => {
 
     if (!clickSignSecurityService.validateWebhookIP(clientIP)) {
       console.error('[CLICKSIGN WEBHOOK] Blocked request from unauthorized IP:', clientIP);
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     if (!clickSignSecurityService.checkWebhookRateLimit(clientIP)) {
       console.error('[CLICKSIGN WEBHOOK] Rate limit exceeded for IP:', clientIP);
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(429).json({ error: 'Too many requests' });
     }
 
     // Security: Validate event structure
@@ -248,13 +248,13 @@ router.post('/webhook', async (req, res) => {
       validatedEvent = clickSignSecurityService.validateWebhookEvent(req.body);
     } catch (error) {
       console.error('[CLICKSIGN WEBHOOK] Invalid event structure:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(400).json({ error: 'Invalid webhook format' });
     }
 
     // Security: Log sanitized event
     const auditLog = clickSignSecurityService.createAuditLog(
       'CLICKSIGN_WEBHOOK_RECEIVED',
-  _validatedEvent,
+      validatedEvent,
       'webhook'
     );
     console.log('[CLICKSIGN WEBHOOK AUDIT]', auditLog);
@@ -269,7 +269,7 @@ router.post('/webhook', async (req, res) => {
 
       if (!isValid) {
         console.error('[CLICKSIGN WEBHOOK] ❌ Invalid signature or expired timestamp');
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(401).json({ error: 'Invalid webhook signature' });
       }
     }
 
@@ -277,14 +277,14 @@ router.post('/webhook', async (req, res) => {
     const eventData = validatedEvent;
 
     if (!eventData.event || !eventData.data) {
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(400).json({ error: 'Invalid webhook payload' });
     }
 
     // Check for duplicate events
     const eventId = `${eventData.event}_${eventData.data.document?.key || eventData.data.list?.key || ''}_${eventData.occurred_at || Date.now()}`;
     if (clickSignWebhookService.isDuplicateEvent(eventId)) {
       console.log('[CLICKSIGN WEBHOOK] Duplicate event detected, skipping');
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.json({ success: true, message: 'Duplicate event skipped' });
     }
 
     // Process event using webhook service
@@ -292,10 +292,10 @@ router.post('/webhook', async (req, res) => {
 
     if (!result.processed) {
       console.log(`[CLICKSIGN WEBHOOK] Event not processed: ${result.reason}`);
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(404).json({ error: result.reason });
     }
 
-    console.log(`[CLICKSIGN WEBHOOK] ✅ Event ${eventData.event} processed successfully:`,_result);
+    console.log(`[CLICKSIGN WEBHOOK] ✅ Event ${eventData.event} processed successfully:`, result);
     res.json({ success: true, message: 'Webhook processed successfully', result });
   } catch (error) {
     console.error(`[CLICKSIGN WEBHOOK] ❌ Error processing webhook:`, error);
@@ -311,8 +311,8 @@ router.post('/webhook', async (req, res) => {
  * POST /api/clicksign/webhook-test
  */
 router.post('/webhook-test', async (req, res) => {
-  if (process.env.NODE_ENV == 'production') {
-    return res.status(500).json({ error: 'Internal server error' });
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
   }
 
   try {
@@ -323,10 +323,10 @@ router.post('/webhook-test', async (req, res) => {
 
     if (!result.processed) {
       console.log(`[CLICKSIGN WEBHOOK TEST] Event not processed: ${result.reason}`);
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(404).json({ error: result.reason });
     }
 
-    console.log(`[CLICKSIGN WEBHOOK TEST] ✅ Event processed successfully:`,_result);
+    console.log(`[CLICKSIGN WEBHOOK TEST] ✅ Event processed successfully:`, result);
     res.json({ success: true, message: 'Webhook processed successfully', result });
   } catch (error) {
     console.error(`[CLICKSIGN WEBHOOK TEST] ❌ Error:`, error);
@@ -347,7 +347,7 @@ router.get('/test', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       connected: isConnected,
-      environment: process.env.NODE_ENV == 'production' ? 'production' : 'sandbox',
+      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
       message: isConnected ? 'ClickSign conectado com sucesso' : 'Falha na conexão com ClickSign',
     });
   } catch (error) {

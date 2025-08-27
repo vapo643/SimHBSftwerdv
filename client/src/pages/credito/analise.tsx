@@ -8,11 +8,11 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -25,13 +25,13 @@ import RefreshButton from '@/components/RefreshButton';
 
 import { api } from '@/lib/apiClient';
 
-const _fetchProposta = async (id: string | undefined) => {
+const fetchProposta = async (id: string | undefined) => {
   if (!id) throw new Error('ID da proposta não fornecido.');
   try {
-    const _response = await api.get(`/api/propostas/${id}`);
+    const response = await api.get(`/api/propostas/${id}`);
     console.log('[Análise] Proposta carregada:', response.data);
     // A API retorna {success: true, data: {...}}, precisamos apenas do data
-    return response.data?.data || response.data; }
+    return response.data?.data || response.data;
   } catch (error) {
     console.error('[Análise] Erro ao carregar proposta:', error);
     throw new Error('Proposta não encontrada');
@@ -40,11 +40,11 @@ const _fetchProposta = async (id: string | undefined) => {
 
 // Removido - documentos agora vêm incluídos na proposta
 
-const _updatePropostaStatus = async ({
-  _id,
-  _status,
-  _observacao,
-  _motivoPendencia,
+const updatePropostaStatus = async ({
+  id,
+  status,
+  observacao,
+  motivoPendencia,
 }: {
   id: string;
   status: string;
@@ -52,30 +52,30 @@ const _updatePropostaStatus = async ({
   motivoPendencia?: string;
 }) => {
   try {
-    const _response = await api.put(`/api/propostas/${id}/status`, {
-  _status,
-  _observacao,
-  _motivoPendencia,
+    const response = await api.put(`/api/propostas/${id}/status`, {
+      status,
+      observacao,
+      motivoPendencia,
     });
-    return response.data; }
-  } catch (error) {
+    return response.data;
+  } catch (error: any) {
     throw new Error(error.message || 'Falha ao atualizar status');
   }
 };
 
-const _decisionSchema = z
+const decisionSchema = z
   .object({
     status: z.enum(['aprovado', 'rejeitado', 'pendenciado']),
     observacao: z.string().optional(),
   })
   .refine(
-    (_data) => {
+    (data) => {
       // Observação é obrigatória APENAS quando o status é "pendenciado"
-      if (data.status == 'pendenciado') {
-        return data.observacao && data.observacao.trim().length > 0; }
+      if (data.status === 'pendenciado') {
+        return data.observacao && data.observacao.trim().length > 0;
       }
       // Para "aprovado" e "rejeitado", observação é opcional
-      return true; }
+      return true;
     },
     {
       message: 'Observação é obrigatória quando a proposta é pendenciada',
@@ -87,15 +87,15 @@ type DecisionFormData = z.infer<typeof decisionSchema>;
 
 const AnaliseManualPage: React.FC = () => {
   const [match, params] = useRoute('/credito/analise/:id');
-  const _propostaId = params?.id;
+  const propostaId = params?.id;
   const { toast } = useToast();
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const {
     data: proposta,
-  _isLoading,
-  _isError,
+    isLoading,
+    isError,
   } = useQuery({
     queryKey: ['proposta', propostaId],
     queryFn: () => fetchProposta(propostaId),
@@ -111,7 +111,7 @@ const AnaliseManualPage: React.FC = () => {
     resolver: zodResolver(decisionSchema),
   });
 
-  const _mutation = useMutation({
+  const mutation = useMutation({
     mutationFn: updatePropostaStatus,
     onSuccess: () => {
       toast({ title: 'Sucesso!', description: 'O status da proposta foi atualizado.' });
@@ -127,15 +127,15 @@ const AnaliseManualPage: React.FC = () => {
     },
   });
 
-  const _onSubmit = (data: DecisionFormData) => {
+  const onSubmit = (data: DecisionFormData) => {
     if (!propostaId) return;
 
     // For pendenciado status, send observacao as motivoPendencia
-    const _payload = {
+    const payload = {
       id: propostaId,
       status: data.status,
       observacao: data.observacao,
-      ...(data.status == 'pendenciado' && { motivoPendencia: data.observacao }),
+      ...(data.status === 'pendenciado' && { motivoPendencia: data.observacao }),
     };
 
     mutation.mutate(payload);
@@ -159,7 +159,7 @@ const AnaliseManualPage: React.FC = () => {
       </DashboardLayout>
     );
 
-  const _handleRefresh = () => {
+  const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
     queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
     queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
@@ -360,7 +360,7 @@ const AnaliseManualPage: React.FC = () => {
           />
 
           {/* Renderização condicional - Painel de Decisão apenas para ANALISTA e ADMINISTRADOR */}
-          {user && (user.role == 'ANALISTA' || user.role == 'ADMINISTRADOR') ? (
+          {user && (user.role === 'ANALISTA' || user.role === 'ADMINISTRADOR') ? (
             <Card>
               <CardHeader>
                 <CardTitle>Painel de Decisão</CardTitle>

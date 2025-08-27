@@ -1,51 +1,51 @@
 import { Router } from 'express';
 import {
-  _jwtAuthMiddleware,
+  jwtAuthMiddleware,
   type AuthenticatedRequest,
-  _invalidateAllUserTokens,
-  _trackUserToken,
+  invalidateAllUserTokens,
+  trackUserToken,
 } from '../../lib/jwt-auth-middleware.js';
-import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../../lib/_supabase.js';
+import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../../lib/supabase.js';
 import { validatePassword } from '../../lib/password-validator.js';
 import { securityLogger, SecurityEventType, getClientIP } from '../../lib/security-logger.js';
 import { storage } from '../../storage.js';
 
-const _router = Router();
+const router = Router();
 
 // Helper function to parse user agent for better display
 function parseUserAgent(userAgent: string): string {
-  if (!userAgent) return 'Dispositivo desconhecido'; }
+  if (!userAgent) return 'Dispositivo desconhecido';
 
   // Check for mobile devices first
   if (/mobile/i.test(userAgent)) {
-    if (/android/i.test(userAgent)) return 'Android Device'; }
-    if (/iphone/i.test(userAgent)) return 'iPhone'; }
-    if (/ipad/i.test(userAgent)) return 'iPad'; }
-    return 'Mobile Device'; }
+    if (/android/i.test(userAgent)) return 'Android Device';
+    if (/iphone/i.test(userAgent)) return 'iPhone';
+    if (/ipad/i.test(userAgent)) return 'iPad';
+    return 'Mobile Device';
   }
 
   // Check for desktop browsers
   if (/windows/i.test(userAgent)) {
-    if (/edge/i.test(userAgent)) return 'Windows - Edge'; }
-    if (/chrome/i.test(userAgent)) return 'Windows - Chrome'; }
-    if (/firefox/i.test(userAgent)) return 'Windows - Firefox'; }
-    return 'Windows PC'; }
+    if (/edge/i.test(userAgent)) return 'Windows - Edge';
+    if (/chrome/i.test(userAgent)) return 'Windows - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Windows - Firefox';
+    return 'Windows PC';
   }
 
   if (/macintosh/i.test(userAgent)) {
-    if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari'; }
-    if (/chrome/i.test(userAgent)) return 'Mac - Chrome'; }
-    if (/firefox/i.test(userAgent)) return 'Mac - Firefox'; }
-    return 'Mac'; }
+    if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari';
+    if (/chrome/i.test(userAgent)) return 'Mac - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Mac - Firefox';
+    return 'Mac';
   }
 
   if (/linux/i.test(userAgent)) {
-    if (/chrome/i.test(userAgent)) return 'Linux - Chrome'; }
-    if (/firefox/i.test(userAgent)) return 'Linux - Firefox'; }
-    return 'Linux'; }
+    if (/chrome/i.test(userAgent)) return 'Linux - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Linux - Firefox';
+    return 'Linux';
   }
 
-  return 'Dispositivo desconhecido'; }
+  return 'Dispositivo desconhecido';
 }
 
 // POST /api/auth/login
@@ -53,17 +53,17 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
 
     // PASSO 1 - ASVS 7.1.3: Token Rotation on Re-authentication
     // First, check if user already has active sessions
     const {
       data: { user: existingUser },
-    } = await _supabase.auth.getUser();
+    } = await supabase.auth.getUser();
 
-    const { data, error } = await _supabase.auth.signInWithPassword({
-  _email,
-  _password,
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
     if (error) {
@@ -77,7 +77,7 @@ router.post('/login', async (req, res) => {
         success: false,
         details: { reason: error.message },
       });
-      return res.*);
+      return res.status(401).json({ message: error.message });
     }
 
     // Invalidate all previous tokens for this user
@@ -90,20 +90,20 @@ router.post('/login', async (req, res) => {
 
         // ASVS 7.4.3 - Create session record for active session management
         try {
-          const _ipAddress = getClientIP(req);
-          const _userAgent = req.headers['user-agent'] || 'Unknown';
+          const ipAddress = getClientIP(req);
+          const userAgent = req.headers['user-agent'] || 'Unknown';
 
           // Session expires when JWT expires (1 hour from now)
-          const _expiresAt = new Date();
+          const expiresAt = new Date();
           expiresAt.setHours(expiresAt.getHours() + 1);
 
           await storage.createSession({
             id: data.session.access_token,
             userId: data.user.id,
             token: data.session.access_token,
-  _ipAddress,
-  _userAgent,
-  _expiresAt,
+            ipAddress,
+            userAgent,
+            expiresAt,
           });
         } catch (sessionError) {
           console.error('Failed to create session record:', sessionError);
@@ -143,7 +143,7 @@ router.post('/register', async (req, res) => {
     const { email, password, name } = req.body;
 
     // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
-    const _passwordValidation = validatePassword(password, [email, name || '']);
+    const passwordValidation = validatePassword(password, [email, name || '']);
     if (!passwordValidation.isValid) {
       return res.status(400).json({
         message: passwordValidation.message,
@@ -151,19 +151,19 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    const _supabase = createServerSupabaseClient();
-    const { data, error } = await _supabase.auth.signUp({
-  _email,
-  _password,
+    const supabase = createServerSupabaseClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
       options: {
         data: {
-  _name,
+          name,
         },
       },
     });
 
     if (error) {
-      return res.*);
+      return res.status(400).json({ message: error.message });
     }
 
     res.json({
@@ -179,11 +179,11 @@ router.post('/register', async (req, res) => {
 // POST /api/auth/logout
 router.post('/logout', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _supabase = createServerSupabaseClient();
-    const { error } = await _supabase.auth.signOut();
+    const supabase = createServerSupabaseClient();
+    const { error } = await supabase.auth.signOut();
 
     if (error) {
-      return res.*);
+      return res.status(400).json({ message: error.message });
     }
 
     res.json({ message: 'Logged out successfully' });
@@ -213,7 +213,7 @@ router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequ
     }
 
     // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
-    const _passwordValidation = validatePassword(newPassword, [
+    const passwordValidation = validatePassword(newPassword, [
       req.user?.email || '',
       req.user?.full_name || '',
     ]);
@@ -231,8 +231,8 @@ router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequ
     }
 
     // Step 1: Verify current password
-    const _supabase = createServerSupabaseClient();
-    const { error: signInError } = await _supabase.auth.signInWithPassword({
+    const supabase = createServerSupabaseClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email: req.user.email,
       password: currentPassword,
     });
@@ -255,7 +255,7 @@ router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequ
     }
 
     // Step 2: Update password using admin client
-    const _supabaseAdmin = createServerSupabaseAdminClient();
+    const supabaseAdmin = createServerSupabaseAdminClient();
 
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(req.user.id, {
       password: newPassword,
@@ -307,11 +307,11 @@ router.post('/forgot-password', async (req, res) => {
       });
     }
 
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
 
     // Always return the same message regardless of whether the email exists
     // This prevents user enumeration attacks
-    const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:5000'}/reset-password`,
     });
 
@@ -345,13 +345,13 @@ router.post('/forgot-password', async (req, res) => {
 router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
-      return res.*);
+      return res.status(401).json({ message: 'Usuário não autenticado' });
     }
 
-    const _sessions = await storage.getUserSessions(req.user.id);
+    const sessions = await storage.getUserSessions(req.user.id);
 
     // Format sessions for frontend display
-    const _formattedSessions = sessions.map((session) => ({
+    const formattedSessions = sessions.map((session) => ({
       id: session.id,
       ipAddress: session.ipAddress || 'Desconhecido',
       userAgent: session.userAgent || 'Desconhecido',
@@ -361,7 +361,7 @@ router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res
       isActive: session.isActive,
       // Parse user agent for better display
       device: parseUserAgent(session.userAgent || ''),
-      isCurrent: session.id == req.headers.authorization?.replace('Bearer ', ''),
+      isCurrent: session.id === req.headers.authorization?.replace('Bearer ', ''),
     }));
 
     res.json({ sessions: formattedSessions });
@@ -376,24 +376,24 @@ router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
-      return res.*);
+      return res.status(401).json({ message: 'Usuário não autenticado' });
     }
 
     const { sessionId } = req.params;
 
     // First verify the session belongs to the current user
-    const _sessions = await storage.getUserSessions(req.user.id);
-    const _sessionToDelete = sessions.find((s) => s.id == sessionId);
+    const sessions = await storage.getUserSessions(req.user.id);
+    const sessionToDelete = sessions.find((s) => s.id === sessionId);
 
     if (!sessionToDelete) {
-      return res.*);
+      return res.status(404).json({ message: 'Sessão não encontrada' });
     }
 
     // Delete the session
     await storage.deleteSession(sessionId);
 
     // Also invalidate the token if it's not the current session
-    const _currentToken = req.headers.authorization?.replace('Bearer ', '');
+    const currentToken = req.headers.authorization?.replace('Bearer ', '');
     if (sessionId !== currentToken) {
       // Token will be invalidated when session is deleted
       // invalidateToken is not available, sessions are managed via storage
@@ -409,7 +409,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Authenticat
       endpoint: req.originalUrl,
       success: true,
       details: {
-  _sessionId,
+        sessionId,
         terminatedByUser: true,
       },
     });
@@ -426,7 +426,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Authenticat
 router.get('/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user) {
-      return res.*);
+      return res.status(401).json({ message: 'Usuário não autenticado' });
     }
 
     res.json({

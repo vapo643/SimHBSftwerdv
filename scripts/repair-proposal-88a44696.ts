@@ -38,7 +38,7 @@ async function repairProposal() {
       .where(eq(propostas.id, PROPOSTA_ID))
       .limit(1);
 
-    if (propostaCorrupta.length == 0) {
+    if (propostaCorrupta.length === 0) {
       console.error('❌ ERRO: Proposta não encontrada no banco de dados');
       process.exit(1);
     }
@@ -142,7 +142,7 @@ async function repairProposal() {
       .where(eq(propostas.id, PROPOSTA_ID))
       .returning();
 
-    if (updateResult.length == 0) {
+    if (updateResult.length === 0) {
       console.error('❌ ERRO: Falha no UPDATE - nenhuma linha afetada');
       process.exit(1);
     }

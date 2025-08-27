@@ -18,7 +18,7 @@ export abstract class BaseRepository<T> {
    * Find all records with optional filters
    */
   async findAll(filters?: Record<string, any>): Promise<T[]> {
-    let _query = _supabase.from(this.tableName).select('*');
+    let query = supabase.from(this.tableName).select('*');
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -34,47 +34,43 @@ export abstract class BaseRepository<T> {
       throw new Error(`Failed to fetch from ${this.tableName}: ${error.message}`);
     }
 
-    return data as T[]; }
+    return data as T[];
   }
 
   /**
    * Find one record by ID
    */
-  async findById(id): Promise<T | null> {
-    const { data, error } = await _supabase.from(this.tableName).select('*').eq('id', id).single();
+  async findById(id: string | number): Promise<T | null> {
+    const { data, error } = await supabase.from(this.tableName).select('*').eq('id', id).single();
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = not found
       throw new Error(`Failed to fetch ${this.tableName} by id ${id}: ${error.message}`);
     }
 
-    return data as T | null; }
+    return data as T | null;
   }
 
   /**
    * Create a new record
    */
   async create(data: Partial<T>): Promise<T> {
-    const { data: created, error } = await supabase
-      .from(this.tableName)
-      .insert(_data)
-      .select()
-      .single();
+    const { data: created, error } = await supabase.from(this.tableName).insert(data).select().single();
 
     if (error) {
       throw new Error(`Failed to create ${this.tableName}: ${error.message}`);
     }
 
-    return created as T; }
+    return created as T;
   }
 
   /**
    * Update a record by ID
    */
-  async update(id, data: Partial<T>): Promise<T> {
+  async update(id: string | number, data: Partial<T>): Promise<T> {
     const { data: updated, error } = await supabase
       .from(this.tableName)
-      .update(_data)
+      .update(data)
       .eq('id', id)
       .select()
       .single();
@@ -83,13 +79,13 @@ export abstract class BaseRepository<T> {
       throw new Error(`Failed to update ${this.tableName} with id ${id}: ${error.message}`);
     }
 
-    return updated as T; }
+    return updated as T;
   }
 
   /**
    * Delete a record by ID (soft delete if applicable)
    */
-  async delete(id): Promise<void> {
+  async delete(id: string | number): Promise<void> {
     const { error } = await supabase
       .from(this.tableName)
       .update({ deleted_at: new Date().toISOString() })
@@ -111,7 +107,7 @@ export abstract class BaseRepository<T> {
       throw new Error(`Query failed: ${error.message}`);
     }
 
-    return data; }
+    return data;
   }
 
   /**
@@ -119,6 +115,6 @@ export abstract class BaseRepository<T> {
    * Repositories handling file uploads need this
    */
   protected getStorageClient() {
-    return _supabase.storage; }
+    return supabase.storage;
   }
 }

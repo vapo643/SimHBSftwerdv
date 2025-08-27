@@ -17,7 +17,7 @@ export class RejectProposalUseCase {
 
   async execute(dto: RejectProposalDTO): Promise<void> {
     // Buscar agregado
-    const _proposal = await this.proposalRepository.findById(dto.proposalId);
+    const proposal = await this.proposalRepository.findById(dto.proposalId);
 
     if (!proposal) {
       throw new Error(`Proposta ${dto.proposalId} não encontrada`);

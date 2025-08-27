@@ -24,7 +24,7 @@ const logger = winston.createLogger({
     // Console output com formato legível para desenvolvimento
     new winston.transports.Console({
       format:
-        process.env.NODE_ENV == 'development'
+        process.env.NODE_ENV === 'development'
           ? winston.format.combine(
               winston.format.colorize(),
               winston.format.simple(),
@@ -173,30 +173,30 @@ export const logMetric = (metricName: string, value: number, unit: string, metad
 };
 
 // Log de segurança
-export const _logSecurity = (
+export const logSecurity = (
   event: string,
   severity: 'low' | 'medium' | 'high' | 'critical',
-  metadata?: unknown
+  metadata?: any
 ) => {
   logger.warn(`🔒 Security Event: ${event}`, {
-    _severity,
-    _event,
+    severity,
+    event,
     timestamp: new Date().toISOString(),
     ...metadata,
   });
 };
 
 // Log de auditoria
-export const _logAudit = (
+export const logAudit = (
   action: string,
   userId: string | null,
   resource: string,
-  metadata?: unknown
+  metadata?: any
 ) => {
   logger.info('📝 Audit Log', {
-    _action,
-    _userId,
-    _resource,
+    action,
+    userId,
+    resource,
     timestamp: new Date().toISOString(),
     ...metadata,
   });

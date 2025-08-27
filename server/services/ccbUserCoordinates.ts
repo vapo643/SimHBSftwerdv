@@ -21,9 +21,9 @@ export interface CCBUserMapping {
  * Todos os campos que o sistema possui alinhados com as coordenadas manuais
  */
 export const USER_CCB_COORDINATES: CCBUserMapping = {
-  // ============================
+  // ==========================================
   // PÁGINA 1 - IDENTIFICAÇÃO DA CCB
-  // ============================
+  // ==========================================
 
   // 🆔 IDENTIFICAÇÃO DA CCB (Y:735)
   numeroCedula: { x: 55, y: 735, fontSize: 11, page: 1 }, // ID da proposta formatado
@@ -80,9 +80,9 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   valorLiquidoLiberado: { x: 410, y: 166, fontSize: 9, page: 1 }, // 20. Valor líquido liberado
   valorLiquidoEmissor: { x: 475, y: 152, fontSize: 9, page: 1 }, // 20.a Valor Líquido Liberado ao Emissor
 
-  // ============================
+  // ==========================================
   // PÁGINA 2 - DADOS BANCÁRIOS E PARCELAS
-  // ============================
+  // ==========================================
 
   // 🏦 DADOS BANCÁRIOS PESSOA FÍSICA (Seção 22)
   bancoEmitente: { x: 170, y: 660, fontSize: 10, page: 2 }, // dados_pagamento_codigo_banco
@@ -205,9 +205,9 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   parcela21Vencimento: { x: 270, y: 60, fontSize: 10, page: 2 },
   parcela21Valor: { x: 470, y: 60, fontSize: 10, page: 2 },
 
-  // ============================
+  // ==========================================
   // PÁGINA 3 - CONTINUAÇÃO PARCELAS
-  // ============================
+  // ==========================================
 
   // Parcela 22
   parcela22Numero: { x: 110, y: 770, fontSize: 10, page: 3 },
@@ -274,10 +274,10 @@ export const SYSTEM_TO_CCB_MAPPING = {
  * Função helper para obter coordenada por campo do sistema
  */
 export function getCoordinateForSystemField(systemField: string): CCBCoordinate | null {
-  const _ccbField = SYSTEM_TO_CCB_MAPPING[systemField as keyof typeof SYSTEM_TO_CCB_MAPPING];
-  if (!ccbField) return null; }
+  const ccbField = SYSTEM_TO_CCB_MAPPING[systemField as keyof typeof SYSTEM_TO_CCB_MAPPING];
+  if (!ccbField) return null;
 
-  return USER_CCB_COORDINATES[ccbField] || null; }
+  return USER_CCB_COORDINATES[ccbField] || null;
 }
 
 /**
@@ -287,10 +287,10 @@ export function getCoordinatesForPage(pageNumber: number): { [key: string]: CCBC
   const pageCoords: { [key: string]: CCBCoordinate } = {};
 
   Object.entries(USER_CCB_COORDINATES).forEach(([field, coord]) => {
-    if ((coord.page || 1) == pageNumber) {
+    if ((coord.page || 1) === pageNumber) {
       pageCoords[field] = coord;
     }
   });
 
-  return pageCoords; }
+  return pageCoords;
 }

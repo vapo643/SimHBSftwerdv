@@ -23,35 +23,35 @@ const defaultConfig: ServerAuthConfig = {
 export function createServerAuthProvider(
   config: ServerAuthConfig = defaultConfig
 ): ServerAuthProvider {
-  switch (_config.provider) {
-    case 'supabase': {
-      return new SupabaseServerAuthProvider(); }
+  switch (config.provider) {
+    case 'supabase':
+      return new SupabaseServerAuthProvider();
 
-    case 'firebase': {
+    case 'firebase':
       throw new Error('Firebase server provider não implementado ainda');
 
-    case 'auth0': {
+    case 'auth0':
       throw new Error('Auth0 server provider não implementado ainda');
 
-    case 'custom': {
+    case 'custom':
       throw new Error('Custom server provider não implementado ainda');
 
     default:
-      throw new Error(`Provedor de autenticação de servidor desconhecido: ${_config.provider}`);
+      throw new Error(`Provedor de autenticação de servidor desconhecido: ${config.provider}`);
   }
 }
 
 /**
  * Configuração global do servidor
  */
-let _globalConfig = defaultConfig;
+let globalConfig = defaultConfig;
 
 export function setServerAuthConfig(config: Partial<ServerAuthConfig>) {
   globalConfig = { ...globalConfig, ...config };
 }
 
 export function getServerAuthConfig(): ServerAuthConfig {
-  return globalConfig; }
+  return globalConfig;
 }
 
 /**
@@ -63,7 +63,7 @@ export function getServerAuthProvider(): ServerAuthProvider {
   if (!serverAuthProviderInstance) {
     serverAuthProviderInstance = createServerAuthProvider(globalConfig);
   }
-  return serverAuthProviderInstance; }
+  return serverAuthProviderInstance;
 }
 
 /**

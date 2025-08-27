@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
-  _Table,
-  _TableHeader,
-  _TableBody,
-  _TableHead,
-  _TableRow,
-  _TableCell,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
 } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,15 +22,19 @@ import { api } from '@/lib/apiClient';
 import { queryKeys, invalidationPatterns } from '@/hooks/queries/queryKeys';
 import type { User } from '@shared/schema';
 import {
-  _Users,
-  _Edit,
-  _UserX,
-  _Shield,
-  _UserPlus,
-  _Activity,
-  _BarChart3,
-  _Mail,
-  _Calendar,
+  Users,
+  Edit,
+  UserX,
+  UserCheck,
+  Loader2,
+  Shield,
+  UserPlus,
+  Activity,
+  BarChart3,
+  TrendingUp,
+  Mail,
+  Calendar,
+  Settings,
 } from 'lucide-react';
 import RefreshButton from '@/components/RefreshButton';
 
@@ -39,7 +43,7 @@ const UsuariosPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const { toast } = useToast();
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   // Fetch users with comprehensive details using isolated query keys
   const {
@@ -49,37 +53,33 @@ const UsuariosPage: React.FC = () => {
   } = useQuery<User[]>({
     queryKey: queryKeys.users.withDetails(),
     queryFn: async () => {
-      const _response = await api.get('/api/admin/users');
-      const _data = response.data;
-      return Array.isArray(_data)
-        ? data
-        : Array.isArray((data as unknown)?.data)
-          ? (data as unknown)?.data
-          : [];
+      const response = await api.get('/api/admin/users');
+      const data = response.data;
+      return Array.isArray(data) ? data : Array.isArray((data as any)?.data) ? (data as any)?.data : [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   // Mutation for creating new users
-  const _createUserMutation = useMutation({
-    mutationFn: async (userData) => {
-      const _apiData = {
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const apiData = {
         fullName: userData.nome,
         email: userData.email,
         password: userData.senha,
         role: userData.perfil,
         lojaId:
-          userData.perfil == 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
+          userData.perfil === 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
         lojaIds:
-          userData.perfil == 'GERENTE' && userData.lojaIds
+          userData.perfil === 'GERENTE' && userData.lojaIds
             ? userData.lojaIds.map((id: string) => parseInt(id))
             : null,
       };
 
       console.log('🔍 [USER CREATE] Sending data:', JSON.stringify(apiData, null, 2));
 
-      const _response = await api.post('/api/admin/users', apiData);
+      const response = await api.post('/api/admin/users', apiData);
       return response.data; // Retorna o corpo da resposta da API
     },
     onSuccess: () => {
@@ -95,14 +95,14 @@ const UsuariosPage: React.FC = () => {
       setIsModalOpen(false);
       setSelectedUser(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('❌ [USER CREATE ERROR]:', error);
       console.error('❌ [ERROR DATA]:', error.data);
 
       // Handle password validation errors specifically - use error.data from ApiError
       if (error.data?.errors?.fieldErrors?.password) {
-        const _passwordErrors = error.data.errors.fieldErrors.password;
-        let _description = 'Problema com a senha:\n';
+        const passwordErrors = error.data.errors.fieldErrors.password;
+        let description = 'Problema com a senha:\n';
 
         if (passwordErrors.includes('This is a top-10 common password')) {
           description += '• Senha muito comum/simples\n';
@@ -144,7 +144,7 @@ const UsuariosPage: React.FC = () => {
     },
   });
 
-  const _handleCreateOrEdit = (userData) => {
+  const handleCreateOrEdit = (userData: any) => {
     if (selectedUser) {
       // TODO: Implement edit functionality when needed
       toast({
@@ -157,17 +157,17 @@ const UsuariosPage: React.FC = () => {
     }
   };
 
-  const _openEditModal = (user: User) => {
+  const openEditModal = (user: User) => {
     setSelectedUser(user);
     setIsModalOpen(true);
   };
 
-  const _openNewModal = () => {
+  const openNewModal = () => {
     setSelectedUser(null);
     setIsModalOpen(true);
   };
 
-  const _toggleUserStatus = (userId: number) => {
+  const toggleUserStatus = (userId: number) => {
     // TODO: Implement user status toggle when API is ready
     toast({
       title: 'Info',
@@ -175,7 +175,7 @@ const UsuariosPage: React.FC = () => {
     });
   };
 
-  const _handleRefresh = () => {
+  const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.users.list() });
   };
 
@@ -311,15 +311,13 @@ const UsuariosPage: React.FC = () => {
   }
 
   // Calcular estatísticas dos usuários
-  const _userStats = {
+  const userStats = {
     total: users.length,
-    administradores: Array.isArray(users)
-      ? users.filter((u) => u.role == 'ADMINISTRADOR').length
-      : 0,
-    analistas: Array.isArray(users) ? users.filter((u) => u.role == 'ANALISTA').length : 0,
-    atendentes: Array.isArray(users) ? users.filter((u) => u.role == 'ATENDENTE').length : 0,
-    gerentes: Array.isArray(users) ? users.filter((u) => u.role == 'GERENTE').length : 0,
-    financeiro: Array.isArray(users) ? users.filter((u) => u.role == 'FINANCEIRO').length : 0,
+    administradores: Array.isArray(users) ? users.filter((u) => u.role === 'ADMINISTRADOR').length : 0,
+    analistas: Array.isArray(users) ? users.filter((u) => u.role === 'ANALISTA').length : 0,
+    atendentes: Array.isArray(users) ? users.filter((u) => u.role === 'ATENDENTE').length : 0,
+    gerentes: Array.isArray(users) ? users.filter((u) => u.role === 'GERENTE').length : 0,
+    financeiro: Array.isArray(users) ? users.filter((u) => u.role === 'FINANCEIRO').length : 0,
     ativosPercentual:
       users.length > 0 ? ((users.length / (users.length + 0)) * 100).toFixed(1) : '0',
   };
@@ -433,7 +431,7 @@ const UsuariosPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {Array.isArray(users) && users.length == 0 ? (
+            {Array.isArray(users) && users.length === 0 ? (
               <div className="py-12 text-center">
                 <Users className="mx-auto mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
@@ -466,105 +464,102 @@ const UsuariosPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(users) &&
-                      users.map((user) => {
-                        const _initials = user.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')
-                          .toUpperCase()
-                          .slice(0, 2);
-                        const _roleColor =
-                          {
-                            ADMINISTRADOR:
-                              'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200',
-                            ANALISTA:
-                              'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200',
-                            ATENDENTE:
-                              'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200',
-                            GERENTE:
-                              'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200',
-                            FINANCEIRO:
-                              'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200',
-                            DIRETOR:
-                              'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200',
-                          }[user.role] ||
-                          'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900 dark:text-gray-200';
+                    {Array.isArray(users) && users.map((user) => {
+                      const initials = user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2);
+                      const roleColor =
+                        {
+                          ADMINISTRADOR:
+                            'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200',
+                          ANALISTA:
+                            'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200',
+                          ATENDENTE:
+                            'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200',
+                          GERENTE:
+                            'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200',
+                          FINANCEIRO:
+                            'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200',
+                          DIRETOR:
+                            'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200',
+                        }[user.role] ||
+                        'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900 dark:text-gray-200';
 
-                        return (
-                          <TableRow
-                            key={user.id}
-                            className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
-                          >
-                            <TableCell className="py-4">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10 border-2 border-white shadow-md dark:border-gray-700">
-                                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
-                                    {initials}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <div className="font-semibold text-gray-900 dark:text-white">
-                                    {user.name}
-                                  </div>
-                                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                                    <Calendar className="h-3 w-3" />
-                                    Criado em{' '}
-                                    {new Date(user.createdAt || Date.now()).toLocaleDateString(
-                                      'pt-BR'
-                                    )}
-                                  </div>
+                      return (
+                        <TableRow
+                          key={user.id}
+                          className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
+                        >
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 border-2 border-white shadow-md dark:border-gray-700">
+                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
+                                  {initials}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {user.name}
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                  <Calendar className="h-3 w-3" />
+                                  Criado em{' '}
+                                  {new Date(user.createdAt || Date.now()).toLocaleDateString(
+                                    'pt-BR'
+                                  )}
                                 </div>
                               </div>
-                            </TableCell>
-                            <TableCell className="py-4">
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-gray-400" />
-                                <span className="text-gray-600 dark:text-gray-300">
-                                  {user.email}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-4">
-                              <Badge
-                                className={`border px-3 py-1 text-xs font-semibold ${roleColor}`}
-                              >
-                                {user.role}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-gray-400" />
+                              <span className="text-gray-600 dark:text-gray-300">{user.email}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Badge
+                              className={`border px-3 py-1 text-xs font-semibold ${roleColor}`}
+                            >
+                              {user.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+                              <Badge className="border-green-200 bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Ativo
                               </Badge>
-                            </TableCell>
-                            <TableCell className="py-4">
-                              <div className="flex items-center gap-2">
-                                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-                                <Badge className="border-green-200 bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200">
-                                  Ativo
-                                </Badge>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-4">
-                              <div className="flex items-center justify-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openEditModal(user)}
-                                  className="h-9 w-9 border-blue-200 p-0 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
-                                  title="Editar usuário"
-                                >
-                                  <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => toggleUserStatus(user.id)}
-                                  className="h-9 w-9 border-red-200 p-0 hover:border-red-300 hover:bg-red-50 dark:border-red-700 dark:hover:bg-red-900/20"
-                                  title="Desativar usuário"
-                                >
-                                  <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditModal(user)}
+                                className="h-9 w-9 border-blue-200 p-0 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
+                                title="Editar usuário"
+                              >
+                                <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleUserStatus(user.id)}
+                                className="h-9 w-9 border-red-200 p-0 hover:border-red-300 hover:bg-red-50 dark:border-red-700 dark:hover:bg-red-900/20"
+                                title="Desativar usuário"
+                              >
+                                <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>

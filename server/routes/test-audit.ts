@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { testAuditService } from '../services/testService.js';
-const _router = Router();
+const router = Router();
 router.get('/audit', async (req, res) => {
   try {
-    const _result = await testAuditService.executeOperation('audit', req.query);
-    res.json(_result);
-  } catch (error) {
+    const result = await testAuditService.executeOperation('audit', req.query);
+    res.json(result);
+  } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

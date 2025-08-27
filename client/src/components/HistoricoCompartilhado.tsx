@@ -2,13 +2,13 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
-  _AlertCircle,
-  _MessageCircle,
-  _Clock,
-  _CheckCircle,
-  _XCircle,
-  _AlertTriangle,
-  _Send,
+  AlertCircle,
+  MessageCircle,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Send,
 } from 'lucide-react';
 import { api } from '@/lib/apiClient';
 
@@ -22,8 +22,8 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
   const { data: proposta, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}`],
     queryFn: async () => {
-      const _response = await api.get(`/api/propostas/${propostaId}`);
-      return response.data; }
+      const response = await api.get(`/api/propostas/${propostaId}`);
+      return response.data;
     },
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
@@ -36,11 +36,11 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
     queryKey: [`/api/propostas/${propostaId}/observacoes`],
     queryFn: async () => {
       try {
-        const _response = await api.get(`/api/propostas/${propostaId}/observacoes`);
-        return response.data; }
+        const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
+        return response.data;
       } catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
-        return { logs: [] }; }
+        return { logs: [] };
       }
     },
     enabled: !!propostaId,
@@ -66,7 +66,7 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
   }
 
   // Processar logs para extrair eventos significativos
-  const _logs = auditLogs?.logs || [];
+  const logs = auditLogs?.logs || [];
 
   return (
     <Card>
@@ -115,23 +115,23 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                 },
                 index: number
               ) => {
-                const _isPendency = log.status_novo == 'pendenciado';
-                const _isResubmit =
-                  log.status_novo == 'aguardando_analise' && log.status_anterior == 'pendenciado';
-                const _isApproval = log.status_novo == 'aprovado';
-                const _isRejection = log.status_novo == 'rejeitado';
+                const isPendency = log.status_novo === 'pendenciado';
+                const isResubmit =
+                  log.status_novo === 'aguardando_analise' && log.status_anterior === 'pendenciado';
+                const isApproval = log.status_novo === 'aprovado';
+                const isRejection = log.status_novo === 'rejeitado';
 
                 // Verificar autoria baseada no role do perfil do autor
-                const _autorRole = log.profiles?.role;
-                const _isAtendente = autorRole == 'ATENDENTE';
-                const _isAnalista = autorRole == 'ANALISTA';
+                const autorRole = log.profiles?.role;
+                const isAtendente = autorRole === 'ATENDENTE';
+                const isAnalista = autorRole === 'ANALISTA';
 
                 // Definir cores e ícones baseado no tipo
-                let _bgColor = 'bg-gray-800';
-                let _borderColor = '';
-                let _textColor = 'text-gray-300';
-                let _dotColor = 'bg-gray-500';
-                let _icon = <Clock className="mr-1 inline h-4 w-4" />;
+                let bgColor = 'bg-gray-800';
+                let borderColor = '';
+                let textColor = 'text-gray-300';
+                let dotColor = 'bg-gray-500';
+                let icon = <Clock className="mr-1 inline h-4 w-4" />;
 
                 if (isPendency) {
                   bgColor = 'bg-yellow-900/20';

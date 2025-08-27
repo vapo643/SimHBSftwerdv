@@ -58,16 +58,16 @@ const httpCodeToErrorCode: Record<number, string> = {
  * Handler centralizado para erros da API
  * Converte erros técnicos em mensagens amigáveis ao usuário
  */
-export const _handleApiError = (error) => {
+export const handleApiError = (error: any) => {
   // Log técnico para desenvolvedores (apenas em desenvolvimento)
-  if (process.env.NODE_ENV == 'development') {
+  if (process.env.NODE_ENV === 'development') {
     console.error('Technical Error Details:', error);
   }
 
   // Extrair informações do erro
-  let _errorCode = 'DEFAULT';
-  let _technicalMessage = '';
-  let _userMessage = '';
+  let errorCode = 'DEFAULT';
+  let technicalMessage = '';
+  let userMessage = '';
 
   // Tentar extrair código de erro da resposta
   if (error.response) {
@@ -92,7 +92,7 @@ export const _handleApiError = (error) => {
     }
   } else if (error.code) {
     // Erro de rede ou outro erro com código
-    errorCode = error.code == 'ERR_NETWORK' ? 'NETWORK_ERROR' : error.code;
+    errorCode = error.code === 'ERR_NETWORK' ? 'NETWORK_ERROR' : error.code;
     technicalMessage = error.message;
   } else if (error.message) {
     // Erro genérico com mensagem
@@ -100,7 +100,7 @@ export const _handleApiError = (error) => {
   }
 
   // Determinar mensagem final para o usuário
-  const _finalUserMessage = userMessage || errorMessages[errorCode] || errorMessages.DEFAULT;
+  const finalUserMessage = userMessage || errorMessages[errorCode] || errorMessages.DEFAULT;
 
   // Mostrar toast com mensagem amigável
   toast({
@@ -113,7 +113,7 @@ export const _handleApiError = (error) => {
   return {
     code: errorCode,
     userMessage: finalUserMessage,
-  _technicalMessage,
+    technicalMessage,
     originalError: error,
   };
 };
@@ -121,17 +121,17 @@ export const _handleApiError = (error) => {
 /**
  * Helper para validar resposta da API
  */
-export const _validateApiResponse = (response) => {
-  if (!response || (response as unknown).error) {
-    throw new Error((response as unknown)?.error?.message || 'Resposta inválida da API');
+export const validateApiResponse = (response: unknown) => {
+  if (!response || (response as any).error) {
+    throw new Error((response as any)?.error?.message || 'Resposta inválida da API');
   }
-  return response; }
+  return response;
 };
 
 /**
  * Helper para criar mensagem de sucesso padronizada
  */
-export const _showSuccessMessage = (action: string, entity?: string) => {
+export const showSuccessMessage = (action: string, entity?: string) => {
   const messages: Record<string, string> = {
     create: `${entity || 'Registro'} criado com sucesso!`,
     update: `${entity || 'Registro'} atualizado com sucesso!`,

@@ -2,7 +2,7 @@ import { db } from '../lib/supabase';
 import { produtos, tabelasComerciais, produtoTabelaComercial } from '../../shared/schema';
 import { eq, desc } from 'drizzle-orm';
 
-export const _buscarTodosProdutos = async () => {
+export const buscarTodosProdutos = async () => {
   const { isNull } = await import('drizzle-orm');
   return await db.query.produtos.findMany({
     where: isNull(produtos.deletedAt),
@@ -10,7 +10,7 @@ export const _buscarTodosProdutos = async () => {
   });
 };
 
-export const _criarProduto = async (data: {
+export const criarProduto = async (data: {
   nome: string;
   status: 'Ativo' | 'Inativo';
   tacValor?: number;
@@ -20,15 +20,15 @@ export const _criarProduto = async (data: {
     .insert(produtos)
     .values({
       nomeProduto: data.nome,
-      isActive: data.status == 'Ativo',
+      isActive: data.status === 'Ativo',
       tacValor: data.tacValor !== undefined ? data.tacValor.toString() : '0',
       tacTipo: data.tacTipo || 'fixo',
     })
     .returning();
-  return novoProduto; }
+  return novoProduto;
 };
 
-export const _atualizarProduto = async (
+export const atualizarProduto = async (
   id: string,
   data: {
     nome: string;
@@ -41,31 +41,31 @@ export const _atualizarProduto = async (
     .update(produtos)
     .set({
       nomeProduto: data.nome,
-      isActive: data.status == 'Ativo',
+      isActive: data.status === 'Ativo',
       tacValor: data.tacValor !== undefined ? data.tacValor.toString() : '0',
       tacTipo: data.tacTipo || 'fixo',
     })
     .where(eq(produtos.id, parseInt(id)))
     .returning();
-  return produtoAtualizado; }
+  return produtoAtualizado;
 };
 
-export const _verificarProdutoEmUso = async (id: string) => {
-  const _produtoId = parseInt(id);
+export const verificarProdutoEmUso = async (id: string) => {
+  const produtoId = parseInt(id);
 
   // Check if product is referenced in produto_tabela_comercial junction table
-  const _dependencias = await db.query.produtoTabelaComercial.findMany({
+  const dependencias = await db.query.produtoTabelaComercial.findMany({
     where: eq(produtoTabelaComercial.produtoId, produtoId),
   });
 
-  return dependencias.length > 0; }
+  return dependencias.length > 0;
 };
 
-export const _deletarProduto = async (id: string, deletedBy?: string) => {
-  const _produtoId = parseInt(id);
+export const deletarProduto = async (id: string, deletedBy?: string) => {
+  const produtoId = parseInt(id);
 
   // Check for dependencies first
-  const _emUso = await verificarProdutoEmUso(id);
+  const emUso = await verificarProdutoEmUso(id);
   if (emUso) {
     throw new Error(
       'Este produto não pode ser excluído pois está a ser utilizado por uma ou mais Tabelas Comerciais.'

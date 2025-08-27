@@ -39,7 +39,7 @@ async function testFileAnalysis() {
       console.log(`  - Tempo de scan: ${data.analysis.metadata.scan_duration_ms}ms`);
 
       // Mostrar findings críticos
-      const criticalFindings = data.analysis.findings.filter((f) => f.severity == 'ERROR');
+      const criticalFindings = data.analysis.findings.filter((f) => f.severity === 'ERROR');
       if (criticalFindings.length > 0) {
         console.log('\n⚠️  Findings Críticos:');
         criticalFindings.forEach((finding) => {
@@ -170,7 +170,7 @@ async function testActiveRules() {
 
 async function runAllTests() {
   console.log('🚀 Iniciando testes do Semgrep MCP Server...');
-  console.log('================================\n');
+  console.log('================================================\n');
 
   await testHealthCheck();
   await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -186,12 +186,12 @@ async function runAllTests() {
 
   await testActiveRules();
 
-  console.log('\n================================');
+  console.log('\n================================================');
   console.log('✅ Testes concluídos!');
 }
 
 // Executar testes se rodado diretamente
-if (require.main == module) {
+if (require.main === module) {
   runAllTests().catch(console.error);
 }
 

@@ -26,11 +26,11 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
     const supabase = createServerSupabaseClient();
 
     // Clean up any existing test users
-    await _supabase.auth.admin.deleteUser(testEmail).catch(() => {});
-    await _supabase.auth.admin.deleteUser(newTestEmail).catch(() => {});
+    await supabase.auth.admin.deleteUser(testEmail).catch(() => {});
+    await supabase.auth.admin.deleteUser(newTestEmail).catch(() => {});
 
     // Create test user
-    const { data: userData, error: createError } = await _supabase.auth.admin.createUser({
+    const { data: userData, error: createError } = await supabase.auth.admin.createUser({
       email: testEmail,
       password: testPassword,
       email_confirm: true,
@@ -43,7 +43,7 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
     userId = userData.user.id;
 
     // Sign in to get token
-    const { data: signInData, error: signInError } = await _supabase.auth.signInWithPassword({
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email: testEmail,
       password: testPassword,
     });
@@ -58,8 +58,8 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
   afterAll(async () => {
     // Clean up test users
     const supabase = createServerSupabaseClient();
-    await _supabase.auth.admin.deleteUser(userId).catch(() => {});
-    await _supabase.auth.admin.deleteUser(newTestEmail).catch(() => {});
+    await supabase.auth.admin.deleteUser(userId).catch(() => {});
+    await supabase.auth.admin.deleteUser(newTestEmail).catch(() => {});
   });
 
   describe('POST /api/auth/change-email', () => {
@@ -124,7 +124,7 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
       expect(response.body.message).toBe('Email de verificação enviado para o novo endereço');
 
       // In development, we get a debug token
-      if (process.env.NODE_ENV == 'development') {
+      if (process.env.NODE_ENV === 'development') {
         expect(response.body.debugToken).toBeDefined();
       }
     });
@@ -208,12 +208,12 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
         .get('/api/admin/security/logs?type=EMAIL_CHANGE_REQUESTED')
         .set('Authorization', `Bearer ${authToken}`);
 
-      if (logsResponse.status == 200) {
+      if (logsResponse.status === 200) {
         const logs = logsResponse.body.logs || [];
         const recentLog = logs.find(
           (log: any) =>
-            log.type == 'EMAIL_CHANGE_REQUESTED' &&
-            log.details?.newEmail == 'another-new@example.com'
+            log.type === 'EMAIL_CHANGE_REQUESTED' &&
+            log.details?.newEmail === 'another-new@example.com'
         );
         expect(recentLog).toBeDefined();
       }
@@ -233,12 +233,12 @@ describe('OWASP ASVS V6.1.3 - Email Change Functionality', () => {
         .get('/api/admin/security/logs?type=INVALID_CREDENTIALS')
         .set('Authorization', `Bearer ${authToken}`);
 
-      if (logsResponse.status == 200) {
+      if (logsResponse.status === 200) {
         const logs = logsResponse.body.logs || [];
         const recentLog = logs.find(
           (log: any) =>
-            log.type == 'INVALID_CREDENTIALS' &&
-            log.details?.reason == 'Invalid password for email change'
+            log.type === 'INVALID_CREDENTIALS' &&
+            log.details?.reason === 'Invalid password for email change'
         );
         expect(recentLog).toBeDefined();
       }

@@ -42,7 +42,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
     }
 
     // Sanitizar body params
-    if (req.body && typeof req.body == 'object') {
+    if (req.body && typeof req.body === 'object') {
       req.body = sanitizeObject(req.body, req);
     }
 
@@ -55,7 +55,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
     validateHeaders(req);
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     securityLogger.logEvent({
       type: SecurityEventType.XSS_ATTEMPT,
       severity: 'HIGH',
@@ -76,12 +76,12 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
 /**
  * Sanitiza um objeto recursivamente
  */
-function sanitizeObject(obj, req: Request): unknown {
+function sanitizeObject(obj: any, req: Request): any {
   if (typeof obj !== 'object' || obj === null) {
     return sanitizeValue(obj, '', req);
   }
 
-  const sanitized: unknown = Array.isArray(obj) ? [] : {};
+  const sanitized: any = Array.isArray(obj) ? [] : {};
 
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
@@ -106,12 +106,12 @@ function sanitizeObject(obj, req: Request): unknown {
 /**
  * Sanitiza um valor individual
  */
-function sanitizeValue(value, fieldName: string, req: Request): unknown {
+function sanitizeValue(value: any, fieldName: string, req: Request): any {
   if (value === null || value === undefined) {
     return value;
   }
 
-  if (typeof value == 'object') {
+  if (typeof value === 'object') {
     return sanitizeObject(value, req);
   }
 
@@ -185,7 +185,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
 /**
  * Validação especial para campos de alto risco
  */
-function validateHighRiskField(fieldName: string, value: unknown, req: Request): unknown {
+function validateHighRiskField(fieldName: string, value: any, req: Request): any {
   if (typeof value !== 'string') return value;
 
   const validators: Record<string, RegExp> = {
@@ -201,7 +201,7 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     // Remove caracteres especiais para validação
     const cleanValue = value.replace(/\D/g, '');
 
-    if (!validator.test(fieldName == 'email' ? value : cleanValue)) {
+    if (!validator.test(fieldName === 'email' ? value : cleanValue)) {
       securityLogger.logEvent({
         type: SecurityEventType.XSS_ATTEMPT,
         severity: 'MEDIUM',

@@ -92,7 +92,7 @@ export async function jwtAuthMiddleware(
 ) {
   try {
     // Log detalhado para TODAS as rotas (diagnóstico completo)
-    console.log('[JWT DEBUG] === INÍCIO DA VALIDAÇÃO JWT ===');
+    console.log('[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====');
     console.log('[JWT DEBUG] Rota acessada:', req.path);
     console.log('[JWT DEBUG] Método:', req.method);
     console.log('[JWT DEBUG] User-Agent:', req.headers['user-agent']);
@@ -127,7 +127,7 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: 'Missing or invalid authorization header' },
       });
-      return res.status(401).json({ error: 'Missing or invalid authorization header' });
+      return res.status(401).json({ message: 'Token de acesso requerido' });
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
@@ -152,19 +152,19 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: 'Token is blacklisted' },
       });
-      return res.status(401).json({ error: 'Token is blacklisted' });
+      return res.status(401).json({ message: 'Token inválido' });
     }
 
     let userId: string | undefined;
     let userEmail: string | undefined;
-    let data: unknown = null;
-    let error: unknown = null;
+    let data: any = null;
+    let error: any = null;
 
     // Auto-detect token type by checking JWT header
     let tokenType: 'supabase' | 'local' = 'local';
     try {
       const tokenParts = token.split('.');
-      if (tokenParts.length == 3) {
+      if (tokenParts.length === 3) {
         const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
         // Supabase tokens have 'kid' (Key ID) in header
         if (header.kid) {
@@ -178,7 +178,7 @@ export async function jwtAuthMiddleware(
 
     console.log('[JWT DEBUG] Auto-detected token type:', tokenType);
 
-    if (tokenType == 'supabase') {
+    if (tokenType === 'supabase') {
       // Use Supabase validation for Supabase tokens
       try {
         console.log('[JWT DEBUG] Using Supabase token validation');
@@ -193,7 +193,7 @@ export async function jwtAuthMiddleware(
           userId = data.user.id;
           userEmail = data.user.email || '';
         }
-      } catch (supabaseError) {
+      } catch (supabaseError: any) {
         console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
         error = { message: supabaseError.message };
         data = null;
@@ -202,10 +202,10 @@ export async function jwtAuthMiddleware(
       // Use local JWT validation for local tokens
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
-        const _jwt = await import('jsonwebtoken');
+        const jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
 
-        const _decoded = jwt.default.verify(token, JWT_SECRET) as unknown;
+        const decoded = jwt.default.verify(token, JWT_SECRET) as any;
         console.log('[JWT DEBUG] JWT decoded successfully:', {
           userId: decoded.userId,
           email: decoded.email,
@@ -218,7 +218,7 @@ export async function jwtAuthMiddleware(
         // Create mock data object for consistency
         data = { user: { id: userId, email: userEmail } };
         error = null;
-      } catch (jwtError) {
+      } catch (jwtError: any) {
         console.error('[JWT DEBUG] Local JWT verification failed:', jwtError.message);
         error = { message: jwtError.message };
         data = null;
@@ -235,7 +235,7 @@ export async function jwtAuthMiddleware(
     }
 
     // Security-aware logging - OWASP ASVS V7.1.1
-    if (process.env.NODE_ENV == 'development') {
+    if (process.env.NODE_ENV === 'development') {
       console.log('🔐 JWT VALIDATION:', {
         hasError: !!error,
         errorType: error?.message || null,
@@ -247,7 +247,7 @@ export async function jwtAuthMiddleware(
     }
 
     if (error || !data?.user || !userId || !userEmail) {
-      console.error('[JWT DEBUG] === FIM DA VALIDAÇÃO JWT (FALHA) ===');
+      console.error('[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====');
       securityLogger.logEvent({
         type: error?.message?.includes('expired')
           ? SecurityEventType.TOKEN_EXPIRED
@@ -259,7 +259,7 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: error?.message || 'Invalid token' },
       });
-      return res.status(401).json({ error: error?.message || 'Invalid token' });
+      return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
     // Step c: Query profiles table using direct DB connection (bypasses RLS)
@@ -298,7 +298,7 @@ export async function jwtAuthMiddleware(
       });
     }
 
-    const _profile = profileResult[0];
+    const profile = profileResult[0];
 
     // Track the current token for this user (for token rotation)
     trackUserToken(userId, token);

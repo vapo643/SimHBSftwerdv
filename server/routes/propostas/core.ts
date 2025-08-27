@@ -9,7 +9,7 @@ import { Router } from 'express';
 import { ProposalController } from '../../contexts/proposal/presentation/proposalController.js';
 
 // Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
-const _auth = async (req, res: unknown, next) => {
+const auth = async (req: any, res: any, next: any) => {
   try {
     // Import dinâmico do middleware RLS - RETURN Promise não await
     const { rlsAuthMiddleware } = await import('../../lib/rls-setup.js');
@@ -20,51 +20,47 @@ const _auth = async (req, res: unknown, next) => {
   }
 };
 
-const _router = Router();
-const _controller = new ProposalController();
+const router = Router();
+const controller = new ProposalController();
 
-// ==== ROTAS PRINCIPAIS ====
+// ===== ROTAS PRINCIPAIS =====
 
 // GET /api/propostas - Listar propostas
-router.get('/', auth, (req, res) => controller.list(req, res));
+router.get('/', auth, (req: any, res: any) => controller.list(req, res));
 
 // GET /api/propostas/buscar-por-cpf/:cpf - Buscar por CPF (antes do /:id para evitar conflito)
-router.get('/buscar-por-cpf/:cpf', auth, (req, res) =>
-  controller.getByCpf(req, res)
-);
+router.get('/buscar-por-cpf/:cpf', auth, (req: any, res: any) => controller.getByCpf(req, res));
 
 // GET /api/propostas/:id - Buscar proposta por ID
-router.get('/:id', auth, (req, res) => controller.getById(req, res));
+router.get('/:id', auth, (req: any, res: any) => controller.getById(req, res));
 
 // POST /api/propostas - Criar nova proposta
-router.post('/', auth, (req, res) => controller.create(req, res));
+router.post('/', auth, (req: any, res: any) => controller.create(req, res));
 
 // PUT /api/propostas/:id/submit - Submeter para análise
-router.put('/:id/submit', auth, (req, res) =>
-  controller.submitForAnalysis(req, res)
-);
+router.put('/:id/submit', auth, (req: any, res: any) => controller.submitForAnalysis(req, res));
 
 // PUT /api/propostas/:id/approve - Aprovar proposta
-router.put('/:id/approve', auth, (req, res) => controller.approve(req, res));
+router.put('/:id/approve', auth, (req: any, res: any) => controller.approve(req, res));
 
 // PUT /api/propostas/:id/reject - Rejeitar proposta
-router.put('/:id/reject', auth, (req, res) => controller.reject(req, res));
+router.put('/:id/reject', auth, (req: any, res: any) => controller.reject(req, res));
 
-// ==== ROTAS LEGACY (mantidas temporariamente para compatibilidade) ====
+// ===== ROTAS LEGACY (mantidas temporariamente para compatibilidade) =====
 
 // GET /:id/observacoes - Logs de auditoria (manter original por enquanto)
-router.get('/:id/observacoes', auth, async (req, res) => {
+router.get('/:id/observacoes', auth, async (req: any, res: any) => {
   try {
-    const _propostaId = req.params.id;
-    const { createServerSupabaseAdminClient } = await import('../../lib/_supabase.js');
-    const _supabase = createServerSupabaseAdminClient();
+    const propostaId = req.params.id;
+    const { createServerSupabaseAdminClient } = await import('../../lib/supabase.js');
+    const supabase = createServerSupabaseAdminClient();
 
     const { data: logs, error } = await supabase
       .from('proposta_logs')
       .select(
         `
-  _id,
-  _observacao,
+        id,
+        observacao,
         status_anterior,
         status_novo,
         created_at,
@@ -80,14 +76,14 @@ router.get('/:id/observacoes', auth, async (req, res) => {
 
     if (error) {
       console.warn('Erro ao buscar logs de auditoria:', error);
-      return res.*);
+      return res.json({ logs: [] });
     }
 
-    const _transformedLogs =
+    const transformedLogs =
       logs?.map((log) => ({
         id: log.id,
         acao:
-          log.status_novo == 'aguardando_analise'
+          log.status_novo === 'aguardando_analise'
             ? 'reenvio_atendente'
             : `mudanca_status_${log.status_novo}`,
         detalhes: log.observacao,
@@ -111,16 +107,16 @@ router.get('/:id/observacoes', auth, async (req, res) => {
 });
 
 // PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
-router.put('/:id/status', auth, async (req, res) => {
+router.put('/:id/status', auth, async (req: any, res: any) => {
   const { status } = req.body;
 
   // Mapear para os novos endpoints baseado no status
-  if (status == 'aprovado') {
-    return controller.approve(req, res); }
-  } else if (status == 'rejeitado') {
-    return controller.reject(req, res); }
-  } else if (status == 'aguardando_analise') {
-    return controller.submitForAnalysis(req, res); }
+  if (status === 'aprovado') {
+    return controller.approve(req, res);
+  } else if (status === 'rejeitado') {
+    return controller.reject(req, res);
+  } else if (status === 'aguardando_analise') {
+    return controller.submitForAnalysis(req, res);
   }
 
   // Para outros status, retornar erro por enquanto

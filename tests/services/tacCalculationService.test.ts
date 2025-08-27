@@ -13,14 +13,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TacCalculationService } from '../../server/services/tacCalculationService';
 
 // Mock do módulo de database
-vi.mock('../../server/lib/_supabase.js', () => ({
+vi.mock('../../server/lib/supabase.js', () => ({
   db: {
     select: vi.fn(),
   },
 }));
 
 // Import do mock após declaração
-import { db } from '../../server/lib/_supabase.js';
+import { db } from '../../server/lib/supabase.js';
 
 describe('TacCalculationService', () => {
   // Mock setup - cria chain de métodos para simular Drizzle query builder

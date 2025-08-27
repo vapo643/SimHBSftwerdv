@@ -13,7 +13,7 @@ import { Queue, QueueOptions } from 'bullmq';
 import { Redis } from 'ioredis';
 
 // Redis connection configuration
-const _redisConnection = new Redis({
+const redisConnection = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
@@ -50,16 +50,16 @@ const defaultQueueOptions: QueueOptions = {
 };
 
 // PDF Processing Queue - for carnê generation and PDF merging
-export const _pdfProcessingQueue = new Queue('pdf-processing', defaultQueueOptions);
+export const pdfProcessingQueue = new Queue('pdf-processing', defaultQueueOptions);
 
 // Boleto Sync Queue - for synchronizing boletos from Banco Inter
-export const _boletoSyncQueue = new Queue('boleto-sync', defaultQueueOptions);
+export const boletoSyncQueue = new Queue('boleto-sync', defaultQueueOptions);
 
 // Document Processing Queue - for ClickSign and other document operations
-export const _documentQueue = new Queue('document-processing', defaultQueueOptions);
+export const documentQueue = new Queue('document-processing', defaultQueueOptions);
 
 // Notification Queue - for sending emails, webhooks, etc.
-export const _notificationQueue = new Queue('notifications', defaultQueueOptions);
+export const notificationQueue = new Queue('notifications', defaultQueueOptions);
 
 // Queue event logging
 pdfProcessingQueue.on('waiting', (job) => {
@@ -71,7 +71,7 @@ boletoSyncQueue.on('waiting', (job) => {
 });
 
 // Export all queues
-export const _queues = {
+export const queues = {
   pdfProcessing: pdfProcessingQueue,
   boletoSync: boletoSyncQueue,
   document: documentQueue,
@@ -81,7 +81,7 @@ export const _queues = {
 // Health check function
 export async function checkQueuesHealth() {
   try {
-    const _results = await Promise.all([
+    const results = await Promise.all([
       pdfProcessingQueue.getJobCounts(),
       boletoSyncQueue.getJobCounts(),
       documentQueue.getJobCounts(),

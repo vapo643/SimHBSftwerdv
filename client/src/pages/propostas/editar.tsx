@@ -18,27 +18,27 @@ import HistoricoCompartilhado from '@/components/HistoricoCompartilhado';
 // Componente separado para documentos
 const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   const { toast } = useToast();
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const { data: documentos, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/documents`],
     queryFn: async () => {
-      const _response = await api.get(`/api/propostas/${propostaId}/documents`);
-      return response.data; }
+      const response = await api.get(`/api/propostas/${propostaId}/documents`);
+      return response.data;
     },
     enabled: !!propostaId && propostaId.trim() !== '' && propostaId !== 'undefined',
   });
 
   // Mutation para upload de arquivo
-  const _uploadMutation = useMutation({
+  const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       // Usar o endpoint existente que faz upload e associa à proposta
-      const _formData = new FormData();
+      const formData = new FormData();
       formData.append('file', file);
 
-      const _response = await api.post(`/api/propostas/${propostaId}/documents`, formData);
+      const response = await api.post(`/api/propostas/${propostaId}/documents`, formData);
 
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -48,7 +48,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
       // Invalidar a query para recarregar a lista de documentos
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/documents`] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro ao enviar documento',
         description: error.message || 'Tente novamente em alguns instantes.',
@@ -57,8 +57,8 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
     },
   });
 
-  const _handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const _files = event.target.files;
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
     if (files && files.length > 0) {
       Array.from(files).forEach((file) => {
         uploadMutation.mutate(file);
@@ -67,7 +67,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   };
 
   if (isLoading) {
-    return <div className="py-8 text-center text-gray-400">Carregando documentos...</div>; }
+    return <div className="py-8 text-center text-gray-400">Carregando documentos...</div>;
   }
 
   return (
@@ -76,7 +76,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
 
       {documentos?.documents && documentos.documents.length > 0 ? (
         <div className="space-y-3">
-          {documentos.documents.map((doc, index: number) => (
+          {documentos.documents.map((doc: any, index: number) => (
             <div
               key={index}
               className="flex items-center justify-between rounded-lg bg-gray-800 p-3"
@@ -146,9 +146,9 @@ interface PropostaData {
   id: string;
   status: string;
   motivoPendencia?: string;
-  clienteData?: unknown;
-  condicoesData?: unknown;
-  documentosAnexados?: unknown[];
+  clienteData?: any;
+  condicoesData?: any;
+  documentosAnexados?: any[];
   // Related entities
   loja?: { id: number; nomeLoja: string };
   parceiro?: { id: number; razaoSocial: string };
@@ -170,12 +170,12 @@ const EditarPropostaPendenciada: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   console.log('🔍 COMPONENTE INICIADO com ID:', id);
 
   // Validação early return para IDs inválidos - DEVE estar antes de qualquer hook
-  if (!id || id.trim() == '' || id == 'undefined' || id == 'null') {
+  if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
     console.log('🔍 ID INVÁLIDO DETECTADO:', id, ' - redirecionando para dashboard');
     return (
       <DashboardLayout title="Erro">
@@ -199,17 +199,17 @@ const EditarPropostaPendenciada: React.FC = () => {
   // Buscar dados da proposta - APENAS reativa (sem polling)
   const {
     data: proposta,
-  _isLoading,
-  _error,
+    isLoading,
+    error,
   } = useQuery({
     queryKey: [`/api/propostas/${id}`],
     queryFn: async () => {
       try {
         console.log('🔍 INICIANDO QUERY para:', `/api/propostas/${id}`);
-        const _response = await api.get(`/api/propostas/${id}`);
-        console.log('🔍 RESPOSTA DA API:',_response);
+        const response = await api.get(`/api/propostas/${id}`);
+        console.log('🔍 RESPOSTA DA API:', response);
         console.log('🔍 DADOS EXTRAÍDOS:', response.data);
-        return response.data as PropostaData; }
+        return response.data as PropostaData;
       } catch (error) {
         console.error('🔍 ERRO NA QUERY:', error);
         throw error;
@@ -228,8 +228,8 @@ const EditarPropostaPendenciada: React.FC = () => {
         clienteData: proposta.clienteData,
         ocupacao_atual: proposta.clienteData?.ocupacao,
         renda_atual: proposta.clienteData?.renda,
-        ocupacao_vazia: proposta.clienteData?.ocupacao == '',
-        renda_vazia: proposta.clienteData?.renda == '',
+        ocupacao_vazia: proposta.clienteData?.ocupacao === '',
+        renda_vazia: proposta.clienteData?.renda === '',
       });
       setFormData({
         clienteData: proposta.clienteData || {},
@@ -239,11 +239,11 @@ const EditarPropostaPendenciada: React.FC = () => {
   }, [proposta]);
 
   // Mutation para salvar alterações (dados da proposta)
-  const _updateMutation = useMutation({
-    mutationFn: async (data) => {
-      console.log('🔍 SALVANDO ALTERAÇÕES:',_data);
-      const _response = await api.put(`/api/propostas/${id}`,_data);
-      return response.data; }
+  const updateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      console.log('🔍 SALVANDO ALTERAÇÕES:', data);
+      const response = await api.put(`/api/propostas/${id}`, data);
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -255,11 +255,11 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
-    onError: (error) => {
-      const _errorMessage =
+    onError: (error: any) => {
+      const errorMessage =
         error?.message ||
         error?.response?.data?.message ||
-        (typeof error == 'object' ? JSON.stringify(error) : String(error)) ||
+        (typeof error === 'object' ? JSON.stringify(error) : String(error)) ||
         'Erro desconhecido';
       console.error('🔍 ERRO AO SALVAR:', { error, errorMessage });
       toast({
@@ -271,7 +271,7 @@ const EditarPropostaPendenciada: React.FC = () => {
   });
 
   // Mutation para reenviar proposta (mudança de status)
-  const _resubmitMutation = useMutation({
+  const resubmitMutation = useMutation({
     mutationFn: async () => {
       console.log('🔍 REENVIANDO PROPOSTA para análise');
       // Primeiro salva as alterações se houver
@@ -288,11 +288,11 @@ const EditarPropostaPendenciada: React.FC = () => {
 
       // Depois muda o status para aguardando_analise
       console.log('🔍 MUDANDO STATUS para aguardando_analise');
-      const _response = await api.put(`/api/propostas/${id}/status`, {
+      const response = await api.put(`/api/propostas/${id}/status`, {
         status: 'aguardando_analise',
         observacao: 'Proposta corrigida e reenviada pelo atendente',
       });
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -306,11 +306,11 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['proposta'] });
       setLocation('/dashboard');
     },
-    onError: (error) => {
-      const _errorMessage =
+    onError: (error: any) => {
+      const errorMessage =
         error?.message ||
         error?.response?.data?.message ||
-        (typeof error == 'object' ? JSON.stringify(error) : String(error)) ||
+        (typeof error === 'object' ? JSON.stringify(error) : String(error)) ||
         'Erro desconhecido';
       console.error('🔍 ERRO AO REENVIAR:', { error, errorMessage });
       toast({
@@ -332,9 +332,9 @@ const EditarPropostaPendenciada: React.FC = () => {
   }
 
   if (error || !proposta) {
-    const _errorMessage =
+    const errorMessage =
       error?.message ||
-      (typeof error == 'object' ? JSON.stringify(error) : String(error)) ||
+      (typeof error === 'object' ? JSON.stringify(error) : String(error)) ||
       'Proposta não encontrada';
     console.log('🔍 ERRO OU PROPOSTA VAZIA:', { error, proposta, errorMessage });
     return (
@@ -362,13 +362,13 @@ const EditarPropostaPendenciada: React.FC = () => {
     statusType: typeof proposta.status,
     statusLength: proposta.status?.length,
     expectedStatus: 'pendenciado',
-    isEqual: proposta.status == 'pendenciado',
+    isEqual: proposta.status === 'pendenciado',
     statusAsString: String(proposta.status),
     propostaCompleta: proposta,
   });
 
   // Verificar se a proposta está pendenciada (tratamento universal de tipos)
-  const _statusString = String(proposta.status || '').trim();
+  const statusString = String(proposta.status || '').trim();
   if (statusString !== 'pendenciado') {
     return (
       <DashboardLayout title="Editar Proposta">
@@ -412,7 +412,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     );
   }
 
-  const _handleClientChange = (field: string, value) => {
+  const handleClientChange = (field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       clienteData: {
@@ -422,7 +422,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
-  const _handleCondicoesChange = (field: string, value) => {
+  const handleCondicoesChange = (field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       condicoesData: {
@@ -432,14 +432,14 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
-  const _handleSave = () => {
+  const handleSave = () => {
     updateMutation.mutate({
       cliente_data: formData.clienteData,
       condicoes_data: formData.condicoesData,
     });
   };
 
-  const _handleResubmit = () => {
+  const handleResubmit = () => {
     // Primeiro salvar, depois reenviar
     handleSave();
     setTimeout(() => {
@@ -472,19 +472,19 @@ const EditarPropostaPendenciada: React.FC = () => {
             <div className="grid gap-2 text-sm">
               <div>
                 <span className="font-medium">Cliente:</span>{' '}
-                {(formData.clienteData as unknown)?.nome || 'N/A'}
+                {(formData.clienteData as any)?.nome || 'N/A'}
               </div>
               <div>
                 <span className="font-medium">CPF:</span>{' '}
-                {(formData.clienteData as unknown)?.cpf || 'N/A'}
+                {(formData.clienteData as any)?.cpf || 'N/A'}
               </div>
               <div>
                 <span className="font-medium">Valor Solicitado:</span> R${' '}
-                {(formData.condicoesData as unknown)?.valor || 0}
+                {(formData.condicoesData as any)?.valor || 0}
               </div>
               <div>
                 <span className="font-medium">Prazo:</span>{' '}
-                {(formData.condicoesData as unknown)?.prazo || 0} meses
+                {(formData.condicoesData as any)?.prazo || 0} meses
               </div>
             </div>
           </CardContent>
@@ -509,7 +509,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="nome">Nome Completo *</Label>
                       <Input
                         id="nome"
-                        value={(formData.clienteData as unknown)?.nome || ''}
+                        value={(formData.clienteData as any)?.nome || ''}
                         onChange={(e) => handleClientChange('nome', e.target.value)}
                       />
                     </div>
@@ -517,7 +517,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="cpf">CPF *</Label>
                       <Input
                         id="cpf"
-                        value={(formData.clienteData as unknown)?.cpf || ''}
+                        value={(formData.clienteData as any)?.cpf || ''}
                         onChange={(e) => handleClientChange('cpf', e.target.value)}
                         placeholder="000.000.000-00"
                       />
@@ -526,7 +526,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="rg">RG</Label>
                       <Input
                         id="rg"
-                        value={(formData.clienteData as unknown)?.rg || ''}
+                        value={(formData.clienteData as any)?.rg || ''}
                         onChange={(e) => handleClientChange('rg', e.target.value)}
                       />
                     </div>
@@ -534,7 +534,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="orgaoEmissor">Órgão Emissor</Label>
                       <Input
                         id="orgaoEmissor"
-                        value={(formData.clienteData as unknown)?.orgaoEmissor || ''}
+                        value={(formData.clienteData as any)?.orgaoEmissor || ''}
                         onChange={(e) => handleClientChange('orgaoEmissor', e.target.value)}
                         placeholder="SSP/SP"
                       />
@@ -544,7 +544,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Input
                         id="dataNascimento"
                         type="date"
-                        value={(formData.clienteData as unknown)?.dataNascimento || ''}
+                        value={(formData.clienteData as any)?.dataNascimento || ''}
                         onChange={(e) => handleClientChange('dataNascimento', e.target.value)}
                       />
                     </div>
@@ -552,7 +552,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="estadoCivil">Estado Civil</Label>
                       <Input
                         id="estadoCivil"
-                        value={(formData.clienteData as unknown)?.estadoCivil || ''}
+                        value={(formData.clienteData as any)?.estadoCivil || ''}
                         onChange={(e) => handleClientChange('estadoCivil', e.target.value)}
                         placeholder="Solteiro, Casado, etc."
                       />
@@ -561,7 +561,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="nacionalidade">Nacionalidade</Label>
                       <Input
                         id="nacionalidade"
-                        value={(formData.clienteData as unknown)?.nacionalidade || ''}
+                        value={(formData.clienteData as any)?.nacionalidade || ''}
                         onChange={(e) => handleClientChange('nacionalidade', e.target.value)}
                         placeholder="Brasileira"
                       />
@@ -578,7 +578,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Input
                         id="email"
                         type="email"
-                        value={(formData.clienteData as unknown)?.email || ''}
+                        value={(formData.clienteData as any)?.email || ''}
                         onChange={(e) => handleClientChange('email', e.target.value)}
                         placeholder="cliente@email.com"
                       />
@@ -587,7 +587,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="telefone">Telefone *</Label>
                       <Input
                         id="telefone"
-                        value={(formData.clienteData as unknown)?.telefone || ''}
+                        value={(formData.clienteData as any)?.telefone || ''}
                         onChange={(e) => handleClientChange('telefone', e.target.value)}
                         placeholder="(11) 99999-9999"
                       />
@@ -603,7 +603,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="cep">CEP</Label>
                       <Input
                         id="cep"
-                        value={(formData.clienteData as unknown)?.cep || ''}
+                        value={(formData.clienteData as any)?.cep || ''}
                         onChange={(e) => handleClientChange('cep', e.target.value)}
                         placeholder="00000-000"
                       />
@@ -612,7 +612,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="endereco">Endereço Completo</Label>
                       <Textarea
                         id="endereco"
-                        value={(formData.clienteData as unknown)?.endereco || ''}
+                        value={(formData.clienteData as any)?.endereco || ''}
                         onChange={(e) => handleClientChange('endereco', e.target.value)}
                         rows={3}
                         placeholder="Rua, número, bairro, cidade, estado"
@@ -630,8 +630,8 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Input
                         id="ocupacao"
                         value={
-                          (formData.clienteData as unknown)?.ocupacao ||
-                          (formData.clienteData as unknown)?.profissao ||
+                          (formData.clienteData as any)?.ocupacao ||
+                          (formData.clienteData as any)?.profissao ||
                           ''
                         }
                         onChange={(e) => handleClientChange('ocupacao', e.target.value)}
@@ -643,8 +643,8 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <CurrencyInput
                         id="renda"
                         value={
-                          (formData.clienteData as unknown)?.renda ||
-                          (formData.clienteData as unknown)?.rendaMensal ||
+                          (formData.clienteData as any)?.renda ||
+                          (formData.clienteData as any)?.rendaMensal ||
                           ''
                         }
                         onChange={(e) => handleClientChange('renda', e.target.value)}
@@ -665,7 +665,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="valor">Valor Solicitado *</Label>
                       <CurrencyInput
                         id="valor"
-                        value={(formData.condicoesData as unknown)?.valor || ''}
+                        value={(formData.condicoesData as any)?.valor || ''}
                         onChange={(e) => handleCondicoesChange('valor', e.target.value)}
                       />
                     </div>
@@ -676,7 +676,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         type="number"
                         min="1"
                         max="120"
-                        value={(formData.condicoesData as unknown)?.prazo || ''}
+                        value={(formData.condicoesData as any)?.prazo || ''}
                         onChange={(e) => handleCondicoesChange('prazo', e.target.value)}
                         placeholder="12"
                       />
@@ -685,7 +685,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="valorTac">Valor TAC</Label>
                       <CurrencyInput
                         id="valorTac"
-                        value={(formData.condicoesData as unknown)?.valorTac || ''}
+                        value={(formData.condicoesData as any)?.valorTac || ''}
                         onChange={(e) => handleCondicoesChange('valorTac', e.target.value)}
                         disabled
                       />
@@ -694,7 +694,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="valorIof">Valor IOF</Label>
                       <CurrencyInput
                         id="valorIof"
-                        value={(formData.condicoesData as unknown)?.valorIof || ''}
+                        value={(formData.condicoesData as any)?.valorIof || ''}
                         onChange={(e) => handleCondicoesChange('valorIof', e.target.value)}
                         disabled
                       />
@@ -703,7 +703,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="valorTotalFinanciado">Valor Total Financiado</Label>
                       <CurrencyInput
                         id="valorTotalFinanciado"
-                        value={(formData.condicoesData as unknown)?.valorTotalFinanciado || ''}
+                        value={(formData.condicoesData as any)?.valorTotalFinanciado || ''}
                         onChange={(e) =>
                           handleCondicoesChange('valorTotalFinanciado', e.target.value)
                         }
@@ -714,7 +714,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="valorParcela">Valor da Parcela</Label>
                       <CurrencyInput
                         id="valorParcela"
-                        value={(formData.condicoesData as unknown)?.valorParcela || ''}
+                        value={(formData.condicoesData as any)?.valorParcela || ''}
                         onChange={(e) => handleCondicoesChange('valorParcela', e.target.value)}
                         disabled
                       />
@@ -775,7 +775,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="finalidade">Finalidade *</Label>
                       <Input
                         id="finalidade"
-                        value={(formData.condicoesData as unknown)?.finalidade || ''}
+                        value={(formData.condicoesData as any)?.finalidade || ''}
                         onChange={(e) => handleCondicoesChange('finalidade', e.target.value)}
                         placeholder="Capital de giro, aquisição de equipamentos, etc."
                       />
@@ -784,7 +784,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="garantia">Garantia</Label>
                       <Input
                         id="garantia"
-                        value={(formData.condicoesData as unknown)?.garantia || ''}
+                        value={(formData.condicoesData as any)?.garantia || ''}
                         onChange={(e) => handleCondicoesChange('garantia', e.target.value)}
                         placeholder="Sem garantia, aval, etc."
                       />
@@ -799,7 +799,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                     <Label htmlFor="observacoes">Observações Adicionais</Label>
                     <Textarea
                       id="observacoes"
-                      value={(formData.condicoesData as unknown)?.observacoes || ''}
+                      value={(formData.condicoesData as any)?.observacoes || ''}
                       onChange={(e) => handleCondicoesChange('observacoes', e.target.value)}
                       rows={4}
                       placeholder="Informações adicionais sobre o empréstimo..."

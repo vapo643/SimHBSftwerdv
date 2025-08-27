@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { notificationService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/send', async (req, res) => {
   try {
-    const _result = await notificationService.executeOperation('send_email', req.body);
-    res.json(_result);
-  } catch (error) {
+    const result = await notificationService.executeOperation('send_email', req.body);
+    res.json(result);
+  } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

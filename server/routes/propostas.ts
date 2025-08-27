@@ -14,38 +14,38 @@ import { propostaService } from '../services/propostaService';
  * Toggle proposta status between active and suspended
  * PUT /api/propostas/:id/toggle-status
  */
-export const _togglePropostaStatus = async (req: AuthenticatedRequest, res: Response) => {
+export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
     // Input validation
     if (!propostaId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da proposta é obrigatório' });
     }
 
     // Delegate to service layer
-    const _result = await propostaService.togglePropostaStatus({
-  _propostaId,
+    const result = await propostaService.togglePropostaStatus({
+      propostaId,
       userId: req.user?.id || '',
       userRole: req.user?.role || '',
     });
 
     // Return response
-    res.json(_result);
-  } catch (error) {
+    res.json(result);
+  } catch (error: any) {
     // Error handling
     console.error('Erro ao alterar status da proposta:', error);
 
-    if (error.message == 'Proposta não encontrada') {
-      return res.*);
+    if (error.message === 'Proposta não encontrada') {
+      return res.status(404).json({ message: error.message });
     }
 
     if (error.message?.includes('permissão')) {
-      return res.*);
+      return res.status(403).json({ message: error.message });
     }
 
     if (error.message?.includes('não pode ser suspensa')) {
-      return res.*);
+      return res.status(400).json({ message: error.message });
     }
 
     if (error.message?.includes('Invalid transition')) {
@@ -65,33 +65,33 @@ export const _togglePropostaStatus = async (req: AuthenticatedRequest, res: Resp
  * Get signed CCB for a proposta
  * GET /api/propostas/:id/ccb
  */
-export const _getCcbAssinada = async (req: AuthenticatedRequest, res: Response) => {
+export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
     // Input validation
     if (!propostaId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da proposta é obrigatório' });
     }
 
     // Delegate to service layer
-    const _ccbData = await propostaService.getCcbAssinada(propostaId);
+    const ccbData = await propostaService.getCcbAssinada(propostaId);
 
     // Return response
     res.json(ccbData);
-  } catch (error) {
+  } catch (error: any) {
     // Error handling
     console.error('Erro ao buscar CCB:', error);
 
-    if (error.message == 'Proposta não encontrada') {
-      return res.*);
+    if (error.message === 'Proposta não encontrada') {
+      return res.status(404).json({ message: error.message });
     }
 
     if (error.message?.includes('CCB assinada não encontrada')) {
       // Parse debug info from error message if available
-      let _debugInfo = {};
+      let debugInfo = {};
       try {
-        const _debugMatch = error.message.match(/Debug: (.+)$/);
+        const debugMatch = error.message.match(/Debug: (.+)$/);
         if (debugMatch) {
           debugInfo = JSON.parse(debugMatch[1]);
         }
@@ -116,17 +116,17 @@ export const _getCcbAssinada = async (req: AuthenticatedRequest, res: Response) 
  * Get propostas by status
  * GET /api/propostas/by-status/:status
  */
-export const _getPropostasByStatus = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasByStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { status } = req.params;
 
     if (!status) {
-      return res.*);
+      return res.status(400).json({ message: 'Status é obrigatório' });
     }
 
-    const _propostas = await propostaService.getPropostasByStatus(status);
+    const propostas = await propostaService.getPropostasByStatus(status);
     res.json(propostas);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao buscar propostas por status:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -138,12 +138,12 @@ export const _getPropostasByStatus = async (req: AuthenticatedRequest, res: Resp
  * Get propostas by user
  * GET /api/propostas/by-user/:userId
  */
-export const _getPropostasByUser = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasByUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { userId } = req.params;
 
     if (!userId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID do usuário é obrigatório' });
     }
 
     // Check permissions
@@ -153,9 +153,9 @@ export const _getPropostasByUser = async (req: AuthenticatedRequest, res: Respon
       });
     }
 
-    const _propostas = await propostaService.getPropostasByUser(userId);
+    const propostas = await propostaService.getPropostasByUser(userId);
     res.json(propostas);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao buscar propostas por usuário:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -167,22 +167,22 @@ export const _getPropostasByUser = async (req: AuthenticatedRequest, res: Respon
  * Get propostas by loja
  * GET /api/propostas/by-loja/:lojaId
  */
-export const _getPropostasByLoja = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasByLoja = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { lojaId } = req.params;
 
     if (!lojaId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da loja é obrigatório' });
     }
 
-    const _lojaIdNumber = parseInt(lojaId, 10);
+    const lojaIdNumber = parseInt(lojaId, 10);
     if (isNaN(lojaIdNumber)) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da loja deve ser um número' });
     }
 
-    const _propostas = await propostaService.getPropostasByLoja(lojaIdNumber);
+    const propostas = await propostaService.getPropostasByLoja(lojaIdNumber);
     res.json(propostas);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao buscar propostas por loja:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -194,7 +194,7 @@ export const _getPropostasByLoja = async (req: AuthenticatedRequest, res: Respon
  * Get propostas pending signature
  * GET /api/propostas/pending-signature
  */
-export const _getPropostasPendingSignature = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasPendingSignature = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Check permissions - only admins can see all pending signatures
     if (req.user?.role !== 'ADMINISTRADOR') {
@@ -203,9 +203,9 @@ export const _getPropostasPendingSignature = async (req: AuthenticatedRequest, r
       });
     }
 
-    const _propostas = await propostaService.getPropostasPendingSignature();
+    const propostas = await propostaService.getPropostasPendingSignature();
     res.json(propostas);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao buscar propostas pendentes de assinatura:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -217,17 +217,17 @@ export const _getPropostasPendingSignature = async (req: AuthenticatedRequest, r
  * Update CCB path for a proposta
  * PATCH /api/propostas/:id/ccb-path
  */
-export const _updateCcbPath = async (req: AuthenticatedRequest, res: Response) => {
+export const updateCcbPath = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
     const { ccbPath } = req.body;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da proposta é obrigatório' });
     }
 
     if (!ccbPath) {
-      return res.*);
+      return res.status(400).json({ message: 'Caminho do CCB é obrigatório' });
     }
 
     // Check permissions - only admins or system can update CCB path
@@ -239,7 +239,7 @@ export const _updateCcbPath = async (req: AuthenticatedRequest, res: Response) =
 
     await propostaService.updateCcbPath(propostaId, ccbPath);
     res.json({ success: true, message: 'Caminho do CCB atualizado com sucesso' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao atualizar caminho do CCB:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao atualizar caminho do CCB',
@@ -251,12 +251,12 @@ export const _updateCcbPath = async (req: AuthenticatedRequest, res: Response) =
  * Mark CCB as generated
  * POST /api/propostas/:id/mark-ccb-generated
  */
-export const _markCcbGenerated = async (req: AuthenticatedRequest, res: Response) => {
+export const markCcbGenerated = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da proposta é obrigatório' });
     }
 
     // Check permissions
@@ -268,7 +268,7 @@ export const _markCcbGenerated = async (req: AuthenticatedRequest, res: Response
 
     await propostaService.markCcbGenerated(propostaId);
     res.json({ success: true, message: 'CCB marcado como gerado' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao marcar CCB como gerado:', error);
     res.status(500).json({
       message: 'Erro interno do servidor',
@@ -280,13 +280,13 @@ export const _markCcbGenerated = async (req: AuthenticatedRequest, res: Response
  * Mark signature as completed
  * POST /api/propostas/:id/mark-signature-completed
  */
-export const _markSignatureCompleted = async (req: AuthenticatedRequest, res: Response) => {
+export const markSignatureCompleted = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
     const { clicksignKey } = req.body;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da proposta é obrigatório' });
     }
 
     // Check permissions
@@ -298,7 +298,7 @@ export const _markSignatureCompleted = async (req: AuthenticatedRequest, res: Re
 
     await propostaService.markSignatureCompleted(propostaId, clicksignKey);
     res.json({ success: true, message: 'Assinatura marcada como concluída' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao marcar assinatura como concluída:', error);
     res.status(500).json({
       message: 'Erro interno do servidor',
@@ -310,18 +310,18 @@ export const _markSignatureCompleted = async (req: AuthenticatedRequest, res: Re
  * Get proposta with full details
  * GET /api/propostas/:id/details
  */
-export const _getPropostaWithDetails = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostaWithDetails = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
     if (!propostaId) {
-      return res.*);
+      return res.status(400).json({ message: 'ID da proposta é obrigatório' });
     }
 
-    const _proposta = await propostaService.getPropostaWithDetails(propostaId);
+    const proposta = await propostaService.getPropostaWithDetails(propostaId);
 
     if (!proposta) {
-      return res.*);
+      return res.status(404).json({ message: 'Proposta não encontrada' });
     }
 
     // Check permissions
@@ -332,7 +332,7 @@ export const _getPropostaWithDetails = async (req: AuthenticatedRequest, res: Re
     }
 
     res.json(proposta);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao buscar detalhes da proposta:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar detalhes',

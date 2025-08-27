@@ -17,10 +17,10 @@
 import https from 'https';
 import { Agent as UndiciAgent } from 'undici';
 import {
-  _createCircuitBreaker,
+  createCircuitBreaker,
   INTER_BREAKER_OPTIONS,
-  _isCircuitBreakerOpen,
-  _formatCircuitBreakerError,
+  isCircuitBreakerOpen,
+  formatCircuitBreakerError,
 } from '../lib/circuit-breaker';
 import { rateLimitService } from './rateLimitService.js'; // PAM V1.0 - Rate Limiting inteligente
 
@@ -140,12 +140,12 @@ class InterBankService {
     token: string;
     expiresAt: number;
   } | null = null;
-  private tokenBreaker: unknown;
-  private apiBreaker: unknown;
+  private tokenBreaker: any;
+  private apiBreaker: any;
 
   constructor() {
     // Auto-detect if we're using production credentials based on presence of INTER_CONTA_CORRENTE
-    const _isProduction = !!process.env.INTER_CONTA_CORRENTE;
+    const isProduction = !!process.env.INTER_CONTA_CORRENTE;
 
     this.config = {
       environment: isProduction ? 'production' : 'sandbox',
@@ -159,10 +159,10 @@ class InterBankService {
       contaCorrente: process.env.INTER_CONTA_CORRENTE || '',
     };
 
-    console.log(`[INTER] 🏦 Initialized in ${this._config.environment} mode`);
-    console.log(`[INTER] 🌐 API URL: ${this._config.apiUrl}`);
+    console.log(`[INTER] 🏦 Initialized in ${this.config.environment} mode`);
+    console.log(`[INTER] 🌐 API URL: ${this.config.apiUrl}`);
 
-    if (!this._config.clientId || !this._config.clientSecret) {
+    if (!this.config.clientId || !this.config.clientSecret) {
       console.warn(
         '[INTER] ⚠️ Client credentials not configured. Inter Bank integration will not work.'
       );
@@ -187,10 +187,10 @@ class InterBankService {
         async (
           endpoint: string,
           method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET',
-          data?: unknown,
-          headers?: unknown
+          data?: any,
+          headers?: any
         ) => {
-          return this.makeRequestDirect(endpoint, method,_data, headers); }
+          return this.makeRequestDirect(endpoint, method, data, headers);
         },
         { ...INTER_BREAKER_OPTIONS, name: 'interApiBreaker' }
       );
@@ -204,7 +204,7 @@ class InterBankService {
     this.initializeBreakers();
 
     try {
-      return await this.tokenBreaker.fire(); }
+      return await this.tokenBreaker.fire();
     } catch (error) {
       if (isCircuitBreakerOpen(error)) {
         console.log(formatCircuitBreakerError(error, 'Inter Token API'));
@@ -221,34 +221,34 @@ class InterBankService {
     try {
       // Check if we have a valid cached token
       if (this.tokenCache && Date.now() < this.tokenCache.expiresAt) {
-        return this.tokenCache.token; }
+        return this.tokenCache.token;
       }
 
       console.log('[INTER] 🔑 Requesting new access token...');
 
-      const _tokenUrl = new URL(`${this._config.apiUrl}/oauth/v2/token`);
+      const tokenUrl = new URL(`${this.config.apiUrl}/oauth/v2/token`);
 
       console.log(`[INTER] 🌐 Token URL: ${tokenUrl.hostname}${tokenUrl.pathname}`);
       console.log(`[INTER] 📄 Using form-based authentication per official docs`);
       console.log(
-        `[INTER] 🔓 Certificate configured: ${this._config.certificate ? '✅ Present' : '❌ Missing'}`
+        `[INTER] 🔓 Certificate configured: ${this.config.certificate ? '✅ Present' : '❌ Missing'}`
       );
       console.log(
-        `[INTER] 🔑 Private Key configured: ${this._config.privateKey ? '✅ Present' : '❌ Missing'}`
+        `[INTER] 🔑 Private Key configured: ${this.config.privateKey ? '✅ Present' : '❌ Missing'}`
       );
 
       // Follow official Inter Bank documentation format
       // client_id and client_secret are REQUIRED per official docs
-      const _formBody = new URLSearchParams({
-        client_id: this._config.clientId,
-        client_secret: this._config.clientSecret,
+      const formBody = new URLSearchParams({
+        client_id: this.config.clientId,
+        client_secret: this.config.clientSecret,
         grant_type: 'client_credentials',
         scope: 'boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write', // All required scopes for API v3
       });
 
       // Log client_id length for debugging
-      console.log(`[INTER] 📊 Client ID length: ${this._config.clientId.length} chars`);
-      console.log(`[INTER] 📊 Client Secret length: ${this._config.clientSecret.length} chars`);
+      console.log(`[INTER] 📊 Client ID length: ${this.config.clientId.length} chars`);
+      console.log(`[INTER] 📊 Client Secret length: ${this.config.clientSecret.length} chars`);
 
       console.log(
         `[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=${formBody.get('scope')}`
@@ -260,8 +260,8 @@ class InterBankService {
       console.log(`[INTER] 🔒 Using mTLS certificate authentication`);
 
       // Prepare certificate and key in proper PEM format
-      let _cert = this._config.certificate;
-      let _key = this._config.privateKey;
+      let cert = this.config.certificate;
+      let key = this.config.privateKey;
 
       // CRITICAL FIX: Add line breaks to PEM format certificates
       // The certificates are valid PEM but in single line format
@@ -273,11 +273,11 @@ class InterBankService {
       if (cert.includes('-----BEGIN CERTIFICATE-----') && !cert.includes('\n')) {
         console.log('[INTER] 📋 Certificate is single-line PEM, adding line breaks...');
         // Extract the base64 content between headers
-        const _certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
+        const certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
         if (certMatch && certMatch[1]) {
-          const _base64Content = certMatch[1].trim();
+          const base64Content = certMatch[1].trim();
           // Add line breaks every 64 characters
-          const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+          const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
           cert = `-----BEGIN CERTIFICATE-----\n${formattedContent}\n-----END CERTIFICATE-----`;
           console.log('[INTER] ✅ Certificate formatted with line breaks');
         }
@@ -287,12 +287,12 @@ class InterBankService {
       if (key.includes('-----BEGIN') && key.includes('KEY-----') && !key.includes('\n')) {
         console.log('[INTER] 🔑 Private key is single-line PEM, adding line breaks...');
         // Extract the base64 content between headers (works for both RSA and regular private keys)
-        const _keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
+        const keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
         if (keyMatch && keyMatch[2]) {
-          const _keyType = keyMatch[1];
-          const _base64Content = keyMatch[2].trim();
+          const keyType = keyMatch[1];
+          const base64Content = keyMatch[2].trim();
           // Add line breaks every 64 characters
-          const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+          const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
           key = `-----BEGIN ${keyType}-----\n${formattedContent}\n-----END ${keyType}-----`;
           console.log('[INTER] ✅ Private key formatted with line breaks');
         }
@@ -302,13 +302,13 @@ class InterBankService {
       console.log('[INTER] ✅ Certificates formatted and ready');
 
       // SANDBOX ONLY: Try alternative approach
-      if (this._config.environment == 'sandbox') {
+      if (this.config.environment === 'sandbox') {
         console.log('[INTER] ⚠️ SANDBOX MODE: Using alternative HTTPS configuration');
       }
 
       // Create Undici agent for proper mTLS support with Node.js fetch
       console.log('[INTER] 🔧 Creating Undici agent for mTLS...');
-      const _undiciAgent = new UndiciAgent({
+      const undiciAgent = new UndiciAgent({
         connect: {
           cert: cert,
           key: key,
@@ -320,11 +320,11 @@ class InterBankService {
       console.log('[INTER] 🚀 Making mTLS request with Undici agent...');
 
       // Declare response variable to use throughout the method
-      let response: unknown;
+      let response: any;
 
       // Try using node fetch with undici dispatcher
       try {
-        const _fetchResponse = await fetch(tokenUrl.toString(), {
+        const fetchResponse = await fetch(tokenUrl.toString(), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -349,11 +349,11 @@ class InterBankService {
         };
 
         if (!response.ok) {
-          const _errorText = await response.text();
+          const errorText = await response.text();
           console.log(`[INTER] ❌ Error response body: ${errorText}`);
 
           // Try to parse error details
-          if (fetchResponse.status == 400) {
+          if (fetchResponse.status === 400) {
             console.log('[INTER] 🔍 Bad Request - possible causes:');
             console.log('[INTER]   - Invalid grant_type or scope');
             console.log('[INTER]   - Invalid client credentials');
@@ -366,15 +366,15 @@ class InterBankService {
         }
 
         // Return early if fetch succeeded
-        return response; }
+        return response;
       } catch (fetchError) {
         console.error(`[INTER] ❌ Fetch error: ${(fetchError as Error).message}`);
 
         // Fallback to raw HTTPS request
         console.log('[INTER] 🔄 Falling back to raw HTTPS request...');
 
-        response = await new Promise<unknown>((resolve, reject) => {
-          const _options = {
+        response = await new Promise<any>((resolve, reject) => {
+          const options = {
             hostname: tokenUrl.hostname,
             port: tokenUrl.port || 443,
             path: tokenUrl.pathname,
@@ -393,8 +393,8 @@ class InterBankService {
             secureProtocol: 'TLS_method',
           };
 
-          const _req = https.request(options, (res) => {
-            let _data = '';
+          const req = https.request(options, (res) => {
+            let data = '';
             res.on('data', (chunk) => {
               data += chunk;
             });
@@ -406,7 +406,7 @@ class InterBankService {
                 text: async () => data,
                 json: async () => {
                   try {
-                    return JSON.parse(_data); }
+                    return JSON.parse(data);
                   } catch (e) {
                     throw new Error('Invalid JSON response');
                   }
@@ -428,12 +428,12 @@ class InterBankService {
       console.log(`[INTER] 📡 Response status: ${response.status}`);
 
       if (!response.ok) {
-        const _errorText = await response.text();
+        const errorText = await response.text();
         console.log(`[INTER] ❌ Error response body: ${errorText}`);
 
         // Tentar parse JSON do erro
         try {
-          const _errorJson = JSON.parse(errorText);
+          const errorJson = JSON.parse(errorText);
           console.log(`[INTER] ❌ Parsed error JSON:`, errorJson);
         } catch (e) {
           console.log(`[INTER] ❌ Error response is not JSON`);
@@ -453,7 +453,7 @@ class InterBankService {
       console.log(
         `[INTER] ✅ Access token obtained successfully (expires in ${tokenData.expires_in}s)`
       );
-      return tokenData.access_token; }
+      return tokenData.access_token;
     } catch (error) {
       console.error('[INTER] ❌ Failed to get access token:', error);
       throw error;
@@ -466,13 +466,13 @@ class InterBankService {
   private async makeRequest(
     endpoint: string,
     method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET',
-    data?: unknown,
+    data?: any,
     additionalHeaders?: Record<string, string>
-  ): Promise<unknown> {
+  ): Promise<any> {
     this.initializeBreakers();
 
     try {
-      return await this.apiBreaker.fire(endpoint, method,_data, additionalHeaders); }
+      return await this.apiBreaker.fire(endpoint, method, data, additionalHeaders);
     } catch (error) {
       if (isCircuitBreakerOpen(error)) {
         console.log(formatCircuitBreakerError(error, 'Inter API'));
@@ -489,32 +489,32 @@ class InterBankService {
   private async makeRequestDirect(
     endpoint: string,
     method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET',
-    data?: unknown,
+    data?: any,
     additionalHeaders?: Record<string, string>
-  ): Promise<unknown> {
+  ): Promise<any> {
     try {
-      const _token = await this.getAccessToken();
-      const _url = new URL(`${this._config.apiUrl}${endpoint}`);
+      const token = await this.getAccessToken();
+      const url = new URL(`${this.config.apiUrl}${endpoint}`);
 
-      console.log('[INTER] ======= REQUEST DETAILS =======');
+      console.log('[INTER] ========== REQUEST DETAILS ==========');
       console.log(`[INTER] 🌐 FULL URL: ${url.toString()}`);
       console.log(`[INTER] 🔧 METHOD: ${method}`);
       console.log(`[INTER] 🪙 TOKEN (first 20 chars):', ${token.substring(0, 20)}...`);
-      console.log('[INTER] ========================');
+      console.log('[INTER] ===================================');
 
       // CRITICAL: Use HTTPS request with mTLS like getAccessToken
       return new Promise((resolve, reject) => {
         // Format certificates first (same logic as getAccessToken)
-        let _cert = this._config.certificate;
-        let _key = this._config.privateKey;
+        let cert = this.config.certificate;
+        let key = this.config.privateKey;
 
         // Fix certificate format if needed
         if (cert.includes('-----BEGIN CERTIFICATE-----') && !cert.includes('\n')) {
           console.log('[INTER] 📋 Certificate is single-line PEM, adding line breaks...');
-          const _certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
+          const certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
           if (certMatch && certMatch[1]) {
-            const _base64Content = certMatch[1].trim();
-            const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+            const base64Content = certMatch[1].trim();
+            const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
             cert = `-----BEGIN CERTIFICATE-----\n${formattedContent}\n-----END CERTIFICATE-----`;
           }
         }
@@ -522,11 +522,11 @@ class InterBankService {
         // Fix private key format if needed
         if (key.includes('-----BEGIN') && key.includes('KEY-----') && !key.includes('\n')) {
           console.log('[INTER] 🔑 Private key is single-line PEM, adding line breaks...');
-          const _keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
+          const keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
           if (keyMatch && keyMatch[2]) {
-            const _keyType = keyMatch[1];
-            const _base64Content = keyMatch[2].trim();
-            const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+            const keyType = keyMatch[1];
+            const base64Content = keyMatch[2].trim();
+            const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
             key = `-----BEGIN ${keyType}-----\n${formattedContent}\n-----END ${keyType}-----`;
           }
         }
@@ -540,24 +540,24 @@ class InterBankService {
         };
 
         // Add account header if configured
-        if (this._config.contaCorrente) {
-          headers['x-conta-corrente'] = this._config.contaCorrente;
-          console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this._config.contaCorrente);
+        if (this.config.contaCorrente) {
+          headers['x-conta-corrente'] = this.config.contaCorrente;
+          console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this.config.contaCorrente);
         } else {
           console.log('[INTER] ⚠️ NO CONTA CORRENTE CONFIGURED!');
         }
 
         // Prepare body if needed
         let body: string | undefined;
-        if (data && (method == 'POST' || method == 'PATCH' || method == 'PUT')) {
+        if (data && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
           headers['Content-Type'] = 'application/json';
-          body = JSON.stringify(_data); // NO CUSTOM STRINGIFY - Use standard JSON
+          body = JSON.stringify(data); // NO CUSTOM STRINGIFY - Use standard JSON
           console.log('[INTER] 📦 REQUEST BODY:', body);
         }
 
         console.log('[INTER] 🔑 ALL HEADERS:', JSON.stringify(headers, null, 2));
 
-        const _options = {
+        const options = {
           hostname: url.hostname,
           port: url.port || 443,
           path: url.pathname + url.search,
@@ -568,20 +568,20 @@ class InterBankService {
           },
           cert: cert,
           key: key,
-          rejectUnauthorized: this._config.environment == 'production',
+          rejectUnauthorized: this.config.environment === 'production',
           requestCert: true,
           timeout: 30000,
         };
 
-        const _req = https.request(options, (res) => {
+        const req = https.request(options, (res) => {
           const chunks: Buffer[] = [];
 
-          console.log('[INTER] ======= RESPONSE DETAILS =======');
+          console.log('[INTER] ========== RESPONSE DETAILS ==========');
           console.log(`[INTER] 📊 STATUS: ${res.statusCode} ${res.statusMessage}`);
           console.log('[INTER] 📋 RESPONSE HEADERS:', res.headers);
 
           // Check if response is PDF
-          const _isPdf = res.headers['content-type']?.includes('application/pdf');
+          const isPdf = res.headers['content-type']?.includes('application/pdf');
           console.log(`[INTER] 🔍 Response Content-Type: ${res.headers['content-type']}`);
           console.log(`[INTER] 🔍 Is PDF Response: ${isPdf}`);
 
@@ -590,14 +590,14 @@ class InterBankService {
           });
 
           res.on('end', () => {
-            const _buffer = Buffer.concat(chunks);
+            const buffer = Buffer.concat(chunks);
             console.log(`[INTER] 📦 Response buffer size: ${buffer.length} bytes`);
 
             if (!res.statusCode || res.statusCode >= 400) {
               console.log('[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌');
               console.log(`[INTER] 🚨 Status Code: ${res.statusCode}`);
 
-              const _errorText = buffer.toString('utf-8');
+              const errorText = buffer.toString('utf-8');
               console.log(`[INTER] 🚨 Error Body: "${errorText}"`);
               console.log(`[INTER] 🚨 Error Body Length: ${errorText.length} chars`);
 
@@ -609,12 +609,12 @@ class InterBankService {
                 console.log(`[INTER] 📄 Content-Type received: ${res.headers['content-type']}`);
               }
 
-              if (errorText.length == 0) {
+              if (errorText.length === 0) {
                 console.log('[INTER] 📋 EMPTY ERROR BODY!');
                 console.log('[INTER] 📋 Response headers for debugging:', res.headers);
               } else {
                 try {
-                  const _errorJson = JSON.parse(errorText);
+                  const errorJson = JSON.parse(errorText);
                   console.log('[INTER] 📋 Error as JSON:', JSON.stringify(errorJson, null, 2));
                 } catch (e) {
                   console.log('[INTER] 📋 Error is not JSON, raw text:', errorText);
@@ -629,10 +629,10 @@ class InterBankService {
             }
 
             console.log('[INTER] ✅ Response OK');
-            console.log('[INTER] =========================');
+            console.log('[INTER] =====================================');
 
             // Handle empty responses (204 No Content or DELETE)
-            if (res.statusCode == 204 || buffer.length == 0) {
+            if (res.statusCode === 204 || buffer.length === 0) {
               resolve(null);
               return;
             }
@@ -646,7 +646,7 @@ class InterBankService {
 
             // Parse JSON response
             try {
-              const _responseText = buffer.toString('utf-8');
+              const responseText = buffer.toString('utf-8');
               resolve(JSON.parse(responseText));
             } catch (e) {
               // Return raw text if not JSON
@@ -686,35 +686,35 @@ class InterBankService {
     try {
       console.log('[INTER] 🔍 Testing connection...');
       console.log('[INTER] 📋 Configuration check:');
-      console.log(`[INTER]   - Environment: ${this._config.environment}`);
-      console.log(`[INTER]   - API URL: ${this._config.apiUrl}`);
+      console.log(`[INTER]   - Environment: ${this.config.environment}`);
+      console.log(`[INTER]   - API URL: ${this.config.apiUrl}`);
       console.log(
-        `[INTER]   - Client ID: ${this._config.clientId ? '✅ Present (' + this._config.clientId.substring(0, 8) + '...)' : '❌ Missing'}`
+        `[INTER]   - Client ID: ${this.config.clientId ? '✅ Present (' + this.config.clientId.substring(0, 8) + '...)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Client Secret: ${this._config.clientSecret ? '✅ Present (' + this._config.clientSecret.substring(0, 8) + '...)' : '❌ Missing'}`
+        `[INTER]   - Client Secret: ${this.config.clientSecret ? '✅ Present (' + this.config.clientSecret.substring(0, 8) + '...)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Certificate: ${this._config.certificate ? '✅ Present (' + this._config.certificate.length + ' chars)' : '❌ Missing'}`
+        `[INTER]   - Certificate: ${this.config.certificate ? '✅ Present (' + this.config.certificate.length + ' chars)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Private Key: ${this._config.privateKey ? '✅ Present (' + this._config.privateKey.length + ' chars)' : '❌ Missing'}`
+        `[INTER]   - Private Key: ${this.config.privateKey ? '✅ Present (' + this.config.privateKey.length + ' chars)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Conta Corrente: ${this._config.contaCorrente ? '✅ Present (' + this._config.contaCorrente + ')' : '❌ Missing'}`
+        `[INTER]   - Conta Corrente: ${this.config.contaCorrente ? '✅ Present (' + this.config.contaCorrente + ')' : '❌ Missing'}`
       );
 
-      if (!this._config.clientId || !this._config.clientSecret) {
+      if (!this.config.clientId || !this.config.clientSecret) {
         console.log('[INTER] ❌ No client credentials configured');
-        return false; }
+        return false;
       }
 
       await this.getAccessToken();
       console.log('[INTER] ✅ Connection test successful');
-      return true; }
+      return true;
     } catch (error) {
       console.error('[INTER] ❌ Connection test failed:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -729,7 +729,7 @@ class InterBankService {
       console.log('[INTER] 📋 COMPLETE Request data:', JSON.stringify(cobrancaData, null, 2));
 
       // PAM V1.0 - Execute with intelligent rate limiting
-      const _response = await rateLimitService.executeWithRateLimit(
+      const response = await rateLimitService.executeWithRateLimit(
         'inter-api-cobranca',
         async () => this.makeRequest('/cobranca/v3/cobrancas', 'POST', cobrancaData),
         {
@@ -741,7 +741,7 @@ class InterBankService {
       );
 
       console.log(`[INTER] ✅ Collection created successfully: ${response.codigoSolicitacao}`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to create collection:', error);
       throw error;
@@ -751,16 +751,16 @@ class InterBankService {
   /**
    * Get detailed collection information
    */
-  async recuperarCobranca(codigoSolicitacao: string): Promise<unknown> {
+  async recuperarCobranca(codigoSolicitacao: string): Promise<any> {
     try {
       console.log(`[INTER] 📋 Retrieving collection: ${codigoSolicitacao}`);
 
-      const _response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`);
 
-      console.log(`[INTER] 📊 Collection data:`, JSON.stringify(_response, null, 2));
+      console.log(`[INTER] 📊 Collection data:`, JSON.stringify(response, null, 2));
 
       // Enriquecer dados com campos adicionais
-      const _enrichedData = {
+      const enrichedData = {
         ...response,
         // Garantir que temos a linha digitável completa
         linhaDigitavel: response.boleto?.linhaDigitavel || response.linhaDigitavel,
@@ -777,7 +777,7 @@ class InterBankService {
       console.log(`[INTER] 📊 Código de barras: ${enrichedData.codigoBarras}`);
       console.log(`[INTER] 📊 PIX disponível: ${enrichedData.pixCopiaECola ? 'Sim' : 'Não'}`);
 
-      return enrichedData; }
+      return enrichedData;
     } catch (error) {
       console.error('[INTER] ❌ Failed to retrieve collection:', error);
       throw error;
@@ -791,10 +791,10 @@ class InterBankService {
     try {
       // Por enquanto, retornar null - em produção, usar biblioteca QR code
       console.log(`[INTER] ⚠️ QR Code generation not implemented yet`);
-      return null; }
+      return null;
     } catch (error) {
       console.error('[INTER] ❌ Failed to generate QR code:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -818,18 +818,18 @@ class InterBankService {
     tipoCobranca?: 'SIMPLES' | 'PARCELADO' | 'RECORRENTE';
     itensPorPagina?: number;
     paginaAtual?: number;
-  }): Promise<unknown> {
+  }): Promise<any> {
     try {
       console.log(
         `[INTER] 🔍 Searching collections from ${filters.dataInicial} to ${filters.dataFinal}`
       );
 
-      const _queryParams = new URLSearchParams();
+      const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined) {
-          if (key == 'itensPorPagina') {
+          if (key === 'itensPorPagina') {
             queryParams.append('paginacao.itensPorPagina', value.toString());
-          } else if (key == 'paginaAtual') {
+          } else if (key === 'paginaAtual') {
             queryParams.append('paginacao.paginaAtual', value.toString());
           } else {
             queryParams.append(key, value.toString());
@@ -837,10 +837,10 @@ class InterBankService {
         }
       });
 
-      const _response = await this.makeRequest(`/cobranca/v3/cobrancas?${queryParams.toString()}`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas?${queryParams.toString()}`);
 
       console.log(`[INTER] ✅ Found ${response.totalElementos} collections`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to search collections:', error);
       throw error;
@@ -853,13 +853,13 @@ class InterBankService {
   async editarCobranca(
     codigoSolicitacao: string,
     updateData: Partial<CobrancaRequest>
-  ): Promise<unknown> {
+  ): Promise<any> {
     try {
-      console.log(`🔍 [AUDIT-INTER] ==== EDITANDO COBRANÇA ====`);
+      console.log(`🔍 [AUDIT-INTER] ===== EDITANDO COBRANÇA =====`);
       console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
       console.log(`🔍 [AUDIT-INTER] Payload Exato Enviado:`, JSON.stringify(updateData, null, 2));
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}`,
         'PATCH',
         updateData
@@ -867,11 +867,11 @@ class InterBankService {
 
       console.log(`🔍 [AUDIT-INTER] Resposta Completa da API:`, {
         statusRecebido: response ? 'Success' : 'Null response',
-        dadosRetornados: JSON.stringify(_response, null, 2),
+        dadosRetornados: JSON.stringify(response, null, 2),
       });
-      console.log(`🔍 [AUDIT-INTER] ==== FIM EDIÇÃO ====`);
+      console.log(`🔍 [AUDIT-INTER] ===== FIM EDIÇÃO =====`);
 
-      return response; }
+      return response;
     } catch (error) {
       console.error('🔍 [AUDIT-INTER] ❌ Erro ao editar cobrança:', error);
       throw error;
@@ -884,22 +884,22 @@ class InterBankService {
   async cancelarCobranca(
     codigoSolicitacao: string,
     motivoCancelamento: string = 'CANCELAMENTO_ADMINISTRATIVO'
-  ): Promise<unknown> {
+  ): Promise<any> {
     try {
-      console.log(`🔍 [AUDIT-INTER] ==== CANCELANDO COBRANÇA ====`);
+      console.log(`🔍 [AUDIT-INTER] ===== CANCELANDO COBRANÇA =====`);
       console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
       console.log(`🔍 [AUDIT-INTER] Motivo: ${motivoCancelamento}`);
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/cancelamento`,
         'POST',
         { motivoCancelamento }
       );
 
-      console.log(`🔍 [AUDIT-INTER] Resposta do Cancelamento:`, JSON.stringify(_response, null, 2));
-      console.log(`🔍 [AUDIT-INTER] ==== FIM CANCELAMENTO ====`);
+      console.log(`🔍 [AUDIT-INTER] Resposta do Cancelamento:`, JSON.stringify(response, null, 2));
+      console.log(`🔍 [AUDIT-INTER] ===== FIM CANCELAMENTO =====`);
 
-      return response; }
+      return response;
     } catch (error) {
       console.error('🔍 [AUDIT-INTER] ❌ Erro ao cancelar cobrança:', error);
       throw error;
@@ -922,10 +922,10 @@ class InterBankService {
 
       // FAZER REQUISIÇÃO PARA O ENDPOINT /pdf
       console.log(`[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...`);
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
         'GET',
-  _null,
+        null,
         {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -935,12 +935,12 @@ class InterBankService {
       console.log(`[INTER] 📊 Tipo de resposta:`, typeof response);
 
       // SOLUÇÃO PRINCIPAL: API retorna JSON com PDF em base64
-      if (typeof response == 'object' && response !== null) {
+      if (typeof response === 'object' && response !== null) {
         console.log(`[INTER] 📋 Resposta é JSON, procurando campo base64...`);
-        console.log(`[INTER] 📋 Campos disponíveis no JSON:`, Object.keys(_response));
+        console.log(`[INTER] 📋 Campos disponíveis no JSON:`, Object.keys(response));
 
         // Procurar possíveis campos que contenham o PDF base64
-        const _possibleFields = [
+        const possibleFields = [
           'pdf',
           'arquivo',
           'base64',
@@ -953,8 +953,8 @@ class InterBankService {
           'documento',
         ];
 
-        let _base64String = null;
-        let _foundField = null;
+        let base64String = null;
+        let foundField = null;
 
         for (const field of possibleFields) {
           if (response[field]) {
@@ -963,14 +963,14 @@ class InterBankService {
             );
             base64String = response[field];
             foundField = field;
-            break; }
+            break;
           }
         }
 
         // Se não encontrou em campo direto, verificar estrutura aninhada
         if (!base64String && response.data) {
           console.log(`[INTER] 🔍 Verificando estrutura aninhada em 'data'...`);
-          if (typeof response.data == 'string') {
+          if (typeof response.data === 'string') {
             base64String = response.data;
             foundField = 'data';
           } else if (response.data.pdf) {
@@ -983,17 +983,17 @@ class InterBankService {
         if (!base64String) {
           console.log(`[INTER] ⚠️ PDF não encontrado nos campos conhecidos`);
           console.log(`[INTER] 📋 Estrutura completa do JSON (primeiros 500 chars):`);
-          console.log(JSON.stringify(_response, null, 2).substring(0, 500));
+          console.log(JSON.stringify(response, null, 2).substring(0, 500));
 
           // Tentar campos menos óbvios
           for (const key in response) {
-            if (typeof response[key] == 'string' && response[key].length > 1000) {
+            if (typeof response[key] === 'string' && response[key].length > 1000) {
               console.log(
                 `[INTER] 🔍 Campo '${key}' tem ${response[key].length} chars, pode ser base64`
               );
               base64String = response[key];
               foundField = key;
-              break; }
+              break;
             }
           }
         }
@@ -1009,21 +1009,21 @@ class InterBankService {
           }
 
           // Converter base64 para Buffer
-          const _pdfBuffer = Buffer.from(base64String, 'base64');
+          const pdfBuffer = Buffer.from(base64String, 'base64');
           console.log(`[INTER] ✅ PDF convertido: ${pdfBuffer.length} bytes`);
 
           // Validar se é realmente um PDF
-          const _pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
+          const pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
-            return pdfBuffer; }
+            return pdfBuffer;
           } else {
             console.log(
               `[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`,
               pdfBuffer.slice(0, 20)
             );
             // Tentar retornar mesmo assim
-            return pdfBuffer; }
+            return pdfBuffer;
           }
         }
       }
@@ -1031,23 +1031,23 @@ class InterBankService {
       // Se response é Buffer direto (improvável na v3)
       if (response instanceof Buffer) {
         console.log(`[INTER] 📊 Resposta é Buffer direto`);
-        const _pdfMagic = response.slice(0, 5).toString('utf8');
+        const pdfMagic = response.slice(0, 5).toString('utf8');
         if (pdfMagic.startsWith('%PDF')) {
           console.log(`[INTER] ✅ PDF binário válido (${response.length} bytes)`);
-          return response; }
+          return response;
         }
       }
 
       // Se response é string (pode ser base64 direto)
-      if (typeof response == 'string') {
+      if (typeof response === 'string') {
         console.log(`[INTER] 📊 Resposta é string, tentando decodificar como base64...`);
         try {
-          const _pdfBuffer = Buffer.from(_response, 'base64');
-          const _pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+          const pdfBuffer = Buffer.from(response, 'base64');
+          const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
 
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
-            return pdfBuffer; }
+            return pdfBuffer;
           }
         } catch (decodeError) {
           console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);
@@ -1058,18 +1058,18 @@ class InterBankService {
       console.error(`[INTER] ❌ Não foi possível processar a resposta:`, {
         type: typeof response,
         isBuffer: response instanceof Buffer,
-        isObject: typeof response == 'object',
-        keys: typeof response == 'object' ? Object.keys(_response) : 'N/A',
+        isObject: typeof response === 'object',
+        keys: typeof response === 'object' ? Object.keys(response) : 'N/A',
       });
 
       throw new Error('PDF não encontrado na resposta da API - formato inesperado');
-    } catch (error) {
+    } catch (error: any) {
       console.error('[INTER] ❌ Erro ao obter PDF:', error.message);
 
       // Tentar endpoints alternativos
       if (!error.message?.includes('não encontrado na API')) {
         console.log('[INTER] 🔄 Tentando endpoints alternativos...');
-        return this.tentarEndpointsAlternativos(codigoSolicitacao); }
+        return this.tentarEndpointsAlternativos(codigoSolicitacao);
       }
 
       throw error;
@@ -1080,7 +1080,7 @@ class InterBankService {
   private async tentarEndpointsAlternativos(codigoSolicitacao: string): Promise<Buffer> {
     console.log(`[INTER] 🔄 Testando endpoints alternativos para PDF...`);
 
-    const _alternativeEndpoints = [
+    const alternativeEndpoints = [
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf/download`,
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/arquivo`,
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/documento`,
@@ -1091,15 +1091,15 @@ class InterBankService {
       try {
         console.log(`[INTER] 🔄 Tentando: ${endpoint}`);
 
-        const _response = await this.makeRequest(endpoint, 'GET', null, {
+        const response = await this.makeRequest(endpoint, 'GET', null, {
           Accept: 'application/pdf, application/json',
           'Content-Type': 'application/json',
         });
 
         // Processar resposta similar ao método principal
-        if (typeof response == 'object' && response.pdf) {
+        if (typeof response === 'object' && response.pdf) {
           console.log(`[INTER] ✅ PDF encontrado em endpoint alternativo!`);
-          return Buffer.from(response.pdf, 'base64'); }
+          return Buffer.from(response.pdf, 'base64');
         }
 
         if (
@@ -1107,7 +1107,7 @@ class InterBankService {
           response.slice(0, 5).toString('utf8').startsWith('%PDF')
         ) {
           console.log(`[INTER] ✅ PDF binário encontrado em endpoint alternativo!`);
-          return response; }
+          return response;
         }
       } catch (err) {
         console.log(`[INTER] ❌ Endpoint ${endpoint} falhou`);
@@ -1121,11 +1121,11 @@ class InterBankService {
    * Método de debug para analisar resposta da API
    * USADO PARA DIAGNOSTICAR O PROBLEMA DO PDF
    */
-  async debugPdfResponse(codigoSolicitacao: string): Promise<unknown> {
+  async debugPdfResponse(codigoSolicitacao: string): Promise<any> {
     console.log(`[INTER] 🔍 DEBUG MODE: Analisando resposta completa da API`);
 
     try {
-      const _response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`);
 
       console.log('[INTER] 🔍 RESPOSTA COMPLETA DA API:');
       console.log('Data type:', typeof response);
@@ -1133,24 +1133,24 @@ class InterBankService {
       if (response instanceof Buffer) {
         console.log('Buffer size:', response.length);
         console.log('Is PDF:', response.slice(0, 5).toString('utf8').startsWith('%PDF'));
-      } else if (typeof response == 'object') {
-        console.log('Object keys:', Object.keys(_response));
+      } else if (typeof response === 'object') {
+        console.log('Object keys:', Object.keys(response));
         console.log('Sample (first 1000 chars):');
-        console.log(JSON.stringify(_response, null, 2).substring(0, 1000));
+        console.log(JSON.stringify(response, null, 2).substring(0, 1000));
 
         // Verificar cada campo
         for (const key in response) {
-          const _value = response[key];
+          const value = response[key];
           console.log(`Field '${key}':`, {
             type: typeof value,
-            length: typeof value == 'string' ? value.length : 'N/A',
-            preview: typeof value == 'string' ? value.substring(0, 50) + '...' : value,
+            length: typeof value === 'string' ? value.length : 'N/A',
+            preview: typeof value === 'string' ? value.substring(0, 50) + '...' : value,
           });
         }
       }
 
-      return response; }
-    } catch (error) {
+      return response;
+    } catch (error: any) {
       console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;
     }
@@ -1163,23 +1163,23 @@ class InterBankService {
     dataInicial: string;
     dataFinal: string;
     filtrarDataPor?: 'VENCIMENTO' | 'EMISSAO' | 'PAGAMENTO';
-  }): Promise<unknown> {
+  }): Promise<any> {
     try {
       console.log(`[INTER] 📊 Getting collections summary`);
 
-      const _queryParams = new URLSearchParams();
+      const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined) {
           queryParams.append(key, value.toString());
         }
       });
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/sumario?${queryParams.toString()}`
       );
 
       console.log(`[INTER] ✅ Summary retrieved successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to get summary:', error);
       throw error;
@@ -1189,14 +1189,14 @@ class InterBankService {
   /**
    * Setup webhook for collection events
    */
-  async configurarWebhook(webhookData: WebhookData): Promise<unknown> {
+  async configurarWebhook(webhookData: WebhookData): Promise<any> {
     try {
       console.log(`[INTER] 🔗 Setting up webhook: ${webhookData.url}`);
 
-      const _response = await this.makeRequest('/webhook', 'PUT', webhookData);
+      const response = await this.makeRequest('/webhook', 'PUT', webhookData);
 
       console.log(`[INTER] ✅ Webhook configured successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to configure webhook:', error);
       throw error;
@@ -1206,14 +1206,14 @@ class InterBankService {
   /**
    * Get current webhook configuration
    */
-  async obterWebhook(): Promise<unknown> {
+  async obterWebhook(): Promise<any> {
     try {
       console.log(`[INTER] 🔗 Getting webhook configuration`);
 
-      const _response = await this.makeRequest('/webhook');
+      const response = await this.makeRequest('/webhook');
 
       console.log(`[INTER] ✅ Webhook configuration retrieved`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to get webhook:', error);
       throw error;
@@ -1223,14 +1223,14 @@ class InterBankService {
   /**
    * Delete webhook
    */
-  async excluirWebhook(): Promise<unknown> {
+  async excluirWebhook(): Promise<any> {
     try {
       console.log(`[INTER] 🗑️ Deleting webhook`);
 
-      const _response = await this.makeRequest('/webhook', 'DELETE');
+      const response = await this.makeRequest('/webhook', 'DELETE');
 
       console.log(`[INTER] ✅ Webhook deleted successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to delete webhook:', error);
       throw error;
@@ -1240,22 +1240,22 @@ class InterBankService {
   /**
    * Simulate payment (sandbox only)
    */
-  async pagarCobrancaSandbox(codigoSolicitacao: string, valorPago: number): Promise<unknown> {
+  async pagarCobrancaSandbox(codigoSolicitacao: string, valorPago: number): Promise<any> {
     try {
-      if (this._config.environment !== 'sandbox') {
+      if (this.config.environment !== 'sandbox') {
         throw new Error('Payment simulation is only available in sandbox environment');
       }
 
       console.log(`[INTER] 💰 Simulating payment for collection: ${codigoSolicitacao}`);
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pagamento`,
         'POST',
         { valorPago }
       );
 
       console.log(`[INTER] ✅ Payment simulated successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to simulate payment:', error);
       throw error;
@@ -1287,11 +1287,11 @@ class InterBankService {
       console.log(`[INTER] 🚀 Creating collection for proposal: ${proposalData.id}`);
 
       // Extract DDD and phone number from telefone
-      let _ddd = '';
-      let _telefoneNumero = '';
+      let ddd = '';
+      let telefoneNumero = '';
       if (proposalData.clienteData.telefone) {
         // Remove all non-numeric characters
-        const _cleanPhone = proposalData.clienteData.telefone.replace(/\D/g, '');
+        const cleanPhone = proposalData.clienteData.telefone.replace(/\D/g, '');
         if (cleanPhone.length >= 10) {
           ddd = cleanPhone.substring(0, 2);
           telefoneNumero = cleanPhone.substring(2);
@@ -1299,7 +1299,7 @@ class InterBankService {
       }
 
       // Função para remover acentos e caracteres especiais
-      const _removeAccents = (str: string): string => {
+      const removeAccents = (str: string): string => {
         return str
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
@@ -1308,21 +1308,21 @@ class InterBankService {
       };
 
       // Correção automática para CEP 29165460 (Serra, ES)
-      let _cidade = proposalData.clienteData.cidade;
-      let _uf = proposalData.clienteData.uf;
-      const _cepLimpo = proposalData.clienteData.cep.replace(/\D/g, '');
+      let cidade = proposalData.clienteData.cidade;
+      let uf = proposalData.clienteData.uf;
+      const cepLimpo = proposalData.clienteData.cep.replace(/\D/g, '');
 
-      if (cepLimpo == '29165460') {
+      if (cepLimpo === '29165460') {
         console.log('[INTER] 📍 Corrigindo cidade/UF para CEP 29165460: Serra, ES');
         cidade = 'Serra';
         uf = 'ES';
       }
 
       // Remove caracteres especiais de todos os campos de texto
-      const _nomeClean = removeAccents(proposalData.clienteData.nome);
-      const _enderecoClean = removeAccents(proposalData.clienteData.endereco);
-      const _bairroClean = removeAccents(proposalData.clienteData.bairro);
-      const _cidadeClean = removeAccents(cidade);
+      const nomeClean = removeAccents(proposalData.clienteData.nome);
+      const enderecoClean = removeAccents(proposalData.clienteData.endereco);
+      const bairroClean = removeAccents(proposalData.clienteData.bairro);
+      const cidadeClean = removeAccents(cidade);
 
       console.log('[INTER] 🧹 Dados limpos:', {
         nome: nomeClean,
@@ -1332,23 +1332,23 @@ class InterBankService {
       });
 
       // Garantir que o valor está em formato decimal com 2 casas
-      const _valorDecimal = Number(proposalData.valorTotal).toFixed(2);
+      const valorDecimal = Number(proposalData.valorTotal).toFixed(2);
       console.log('[INTER] 💰 Valor formatado:', valorDecimal);
 
       // REMOVED: dataEmissao is not valid in API v3
 
       // 🔥 FIX: Garantir seuNumero único para cada parcela
       // Se o ID contém "-" seguido de número no final (ex: "proposta-id-1"), preservar isso
-      let _seuNumeroUnico = proposalData.id;
+      let seuNumeroUnico = proposalData.id;
 
       // Se o ID é muito longo, precisamos ser inteligentes ao truncar
       if (seuNumeroUnico.length > 15) {
         // Verificar se tem sufixo de parcela (ex: "-1", "-2", etc)
-        const _parcelaMatch = seuNumeroUnico.match(/-(\d+)$/);
+        const parcelaMatch = seuNumeroUnico.match(/-(\d+)$/);
         if (parcelaMatch) {
           // Tem sufixo de parcela, preservar ele
-          const _sufixoParcela = parcelaMatch[0]; // ex: "-1"
-          const _prefixo = seuNumeroUnico.substring(0, 15 - sufixoParcela.length);
+          const sufixoParcela = parcelaMatch[0]; // ex: "-1"
+          const prefixo = seuNumeroUnico.substring(0, 15 - sufixoParcela.length);
           seuNumeroUnico = prefixo + sufixoParcela;
         } else {
           // Não tem sufixo, apenas truncar
@@ -1423,10 +1423,10 @@ class InterBankService {
       console.log('[INTER]   - mensagem present?', !!cobrancaData.mensagem);
       console.log('[INTER] 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
 
-      const _result = await this.emitirCobranca(cobrancaData);
+      const result = await this.emitirCobranca(cobrancaData);
 
       console.log(`[INTER] ✅ Collection created for proposal successfully`);
-      return result; }
+      return result;
     } catch (error) {
       console.error('[INTER] ❌ Failed to create collection for proposal:', error);
       throw error;
@@ -1435,4 +1435,4 @@ class InterBankService {
 }
 
 // Export singleton instance
-export const _interBankService = new InterBankService();
+export const interBankService = new InterBankService();

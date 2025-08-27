@@ -13,10 +13,10 @@ import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposal
 
 export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
-    const _data = proposal.toPersistence();
+    const data = proposal.toPersistence();
 
     // Verificar se é create ou update
-    const _exists = await this.exists(proposal.id);
+    const exists = await this.exists(proposal.id);
 
     if (exists) {
       // Update
@@ -44,40 +44,38 @@ export class ProposalRepository implements IProposalRepository {
         .where(eq(propostas.id, data.id));
     } else {
       // Create - gerar IDs sequenciais
-      const _sequentialId = await this.getNextSequentialId();
-      const _numeroProposta = await this.getNextNumeroProposta();
+      const sequentialId = await this.getNextSequentialId();
+      const numeroProposta = await this.getNextNumeroProposta();
 
-      await db.insert(propostas).values([
-        {
-          id: proposal.id, // UUID do domínio
-          numeroProposta: numeroProposta, // ID sequencial começando em 300001
-          status: data.status,
-          clienteNome: data.cliente_data.nome,
-          clienteCpf: data.cliente_data.cpf,
-          clienteData: JSON.stringify(data.cliente_data),
-          valor: data.valor.toString(),
-          prazo: data.prazo,
-          taxaJuros: data.taxa_juros.toString(),
-          produtoId: data.produto_id,
-          tabelaComercialId: data.tabela_comercial_id,
-          lojaId: data.loja_id,
-          metodoPagamento: data.dados_pagamento?.metodo,
-          dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
-          dadosPagamentoBanco: data.dados_pagamento?.banco,
-          dadosPagamentoAgencia: data.dados_pagamento?.agencia,
-          dadosPagamentoConta: data.dados_pagamento?.conta,
-          dadosPagamentoPix: data.dados_pagamento?.pix_chave,
-          motivoPendencia: data.motivo_rejeicao,
-          observacoes: data.observacoes,
-          ccbDocumentoUrl: data.ccb_url,
-          createdAt: data.created_at,
-          // updatedAt campo removido - será atualizado automaticamente pelo schema
-        },
-      ]);
+      await db.insert(propostas).values([{
+        id: proposal.id, // UUID do domínio
+        numeroProposta: numeroProposta, // ID sequencial começando em 300001
+        status: data.status,
+        clienteNome: data.cliente_data.nome,
+        clienteCpf: data.cliente_data.cpf,
+        clienteData: JSON.stringify(data.cliente_data),
+        valor: data.valor.toString(),
+        prazo: data.prazo,
+        taxaJuros: data.taxa_juros.toString(),
+        produtoId: data.produto_id,
+        tabelaComercialId: data.tabela_comercial_id,
+        lojaId: data.loja_id,
+        metodoPagamento: data.dados_pagamento?.metodo,
+        dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
+        dadosPagamentoBanco: data.dados_pagamento?.banco,
+        dadosPagamentoAgencia: data.dados_pagamento?.agencia,
+        dadosPagamentoConta: data.dados_pagamento?.conta,
+        dadosPagamentoPix: data.dados_pagamento?.pix_chave,
+        motivoPendencia: data.motivo_rejeicao,
+        observacoes: data.observacoes,
+        ccbDocumentoUrl: data.ccb_url,
+        createdAt: data.created_at,
+        // updatedAt campo removido - será atualizado automaticamente pelo schema
+      }]);
     }
 
     // Processar eventos de domínio
-    const _events = proposal.getUncommittedEvents();
+    const events = proposal.getUncommittedEvents();
     for (const event of events) {
       // Aqui poderíamos publicar os eventos para um event bus
       // Por enquanto, apenas logamos
@@ -87,21 +85,21 @@ export class ProposalRepository implements IProposalRepository {
   }
 
   async findById(id: string): Promise<Proposal | null> {
-    const _result = await db
+    const result = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)))
       .limit(1);
 
-    if (!result || result.length == 0) {
-      return null; }
+    if (!result || result.length === 0) {
+      return null;
     }
 
-    return this.mapToDomain(result[0]); }
+    return this.mapToDomain(result[0]);
   }
 
   async findByCriteria(criteria: ProposalSearchCriteria): Promise<Proposal[]> {
-    const _conditions = [isNull(propostas.deletedAt)];
+    const conditions = [isNull(propostas.deletedAt)];
 
     if (criteria.status) {
       conditions.push(eq(propostas.status, criteria.status));
@@ -116,7 +114,7 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     if (criteria.cpf) {
-      const _cleanCPF = criteria.cpf.replace(/\D/g, '');
+      const cleanCPF = criteria.cpf.replace(/\D/g, '');
       conditions.push(eq(propostas.clienteCpf, cleanCPF));
     }
 
@@ -128,69 +126,69 @@ export class ProposalRepository implements IProposalRepository {
       conditions.push(lte(propostas.createdAt, criteria.dateTo));
     }
 
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(...conditions));
 
-    return results.map((row) => this.mapToDomain(row)); }
+    return results.map((row) => this.mapToDomain(row));
   }
 
   async findAll(): Promise<Proposal[]> {
-    const _results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
+    const results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
 
-    return results.map((row) => this.mapToDomain(row)); }
+    return results.map((row) => this.mapToDomain(row));
   }
 
   async findByStatus(status: string): Promise<Proposal[]> {
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.status, status), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row)); }
+    return results.map((row) => this.mapToDomain(row));
   }
 
   async findByCPF(cpf: string): Promise<Proposal[]> {
-    const _cleanCPF = cpf.replace(/\D/g, '');
+    const cleanCPF = cpf.replace(/\D/g, '');
 
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.clienteCpf, cleanCPF), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row)); }
+    return results.map((row) => this.mapToDomain(row));
   }
 
   async findByLojaId(lojaId: number): Promise<Proposal[]> {
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.lojaId, lojaId), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row)); }
+    return results.map((row) => this.mapToDomain(row));
   }
 
   async findByAtendenteId(atendenteId: string): Promise<Proposal[]> {
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.analistaId, atendenteId), isNull(propostas.deletedAt)));
 
-    return results.map((row) => this.mapToDomain(row)); }
+    return results.map((row) => this.mapToDomain(row));
   }
 
   async exists(id: string): Promise<boolean> {
-    const _result = await db
+    const result = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)));
 
-    return result[0].count > 0; }
+    return result[0].count > 0;
   }
 
   async delete(id: string): Promise<void> {
-    const _now = new Date();
+    const now = new Date();
 
     await db.update(propostas).set({ deletedAt: now }).where(eq(propostas.id, id));
   }
@@ -198,36 +196,36 @@ export class ProposalRepository implements IProposalRepository {
   async getNextSequentialId(): Promise<number> {
     // Buscar o maior ID atual e incrementar
     // Como o ID é string no banco, precisamos converter
-    const _result = await db
+    const result = await db
       .select({ maxId: sql<number>`COALESCE(MAX(CAST(id AS INTEGER)), 300000)` })
       .from(propostas);
 
-    return result[0].maxId + 1; }
+    return result[0].maxId + 1;
   }
 
   async getNextNumeroProposta(): Promise<number> {
     // Buscar o maior numero_proposta e incrementar
     // Inicia em 300001 se não houver propostas
-    const _result = await db
+    const result = await db
       .select({ maxNumero: sql<number>`COALESCE(MAX(numero_proposta), 300000)` })
       .from(propostas);
 
-    return result[0].maxNumero + 1; }
+    return result[0].maxNumero + 1;
   }
 
   /**
    * Mapeia dados do banco para o agregado Proposal
    */
-  private mapToDomain(row): Proposal {
+  private mapToDomain(row: any): Proposal {
     // ID já é string no banco
-    const _aggregateId = row.id;
+    const aggregateId = row.id;
 
     // Parse cliente_data from JSON string if it exists
     let clienteData;
     if (row.clienteData) {
       try {
         clienteData =
-          typeof row.clienteData == 'string' ? JSON.parse(row.clienteData) : row.clienteData;
+          typeof row.clienteData === 'string' ? JSON.parse(row.clienteData) : row.clienteData;
       } catch {
         clienteData = {
           nome: row.clienteNome,

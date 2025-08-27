@@ -15,7 +15,7 @@ import { sql } from 'drizzle-orm';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { requireAdmin, requireManagerOrAdmin } from '../lib/role-guards';
 
-const _router = Router();
+const router = Router();
 
 // Middleware de autenticação para todas as rotas
 router.use(jwtAuthMiddleware);
@@ -26,10 +26,10 @@ router.use(jwtAuthMiddleware);
  */
 router.get('/metrics', async (req: Request, res: Response) => {
   try {
-    const _timeRange = (req.query.timeRange as string) || '1h';
+    const timeRange = (req.query.timeRange as string) || '1h';
 
     // Return mock metrics data for dashboard functionality
-    const _mockMetrics = {
+    const mockMetrics = {
       totalRequests: 1247,
       suspiciousRequests: 23,
       blockedRequests: 8,
@@ -68,7 +68,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
 router.get('/vulnerabilities', async (req: Request, res: Response) => {
   try {
     // Return mock data for dashboard functionality
-    const _vulnerabilities = [
+    const vulnerabilities = [
       {
         id: 'vuln-001',
         type: 'SQL Injection',
@@ -98,11 +98,11 @@ router.get('/vulnerabilities', async (req: Request, res: Response) => {
     ];
 
     // Filter and sort by severity
-    const _filtered = vulnerabilities
+    const filtered = vulnerabilities
       .filter((v) => v.falsePositiveScore < 0.5)
       .sort((a, b) => {
-        const _severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-        return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity]; }
+        const severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+        return (severityOrder as any)[b.severity] - (severityOrder as any)[a.severity];
       });
 
     res.json(filtered);
@@ -119,7 +119,7 @@ router.get('/vulnerabilities', async (req: Request, res: Response) => {
 router.get('/anomalies', async (req: Request, res: Response) => {
   try {
     // Return mock anomaly data
-    const _anomalies = [
+    const anomalies = [
       {
         id: 'anom-001',
         type: 'Unusual Login Pattern',
@@ -144,7 +144,7 @@ router.get('/anomalies', async (req: Request, res: Response) => {
     ];
 
     // Filter recent anomalies with high confidence
-    const _filtered = anomalies
+    const filtered = anomalies
       .filter((a) => new Date(a.timestamp).getTime() > Date.now() - 86400000) // Last 24h
       .filter((a) => a.confidence > 0.7);
 
@@ -162,7 +162,7 @@ router.get('/anomalies', async (req: Request, res: Response) => {
 router.get('/dependency-scan', async (req: Request, res: Response) => {
   try {
     // Return mock dependency scan data
-    const _mockData = {
+    const mockData = {
       lastScan: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
       totalVulnerabilities: 12,
       bySeverity: {
@@ -213,7 +213,7 @@ router.get('/dependency-scan', async (req: Request, res: Response) => {
 router.get('/semgrep-findings', async (req: Request, res: Response) => {
   try {
     // Return mock Semgrep findings data
-    const _mockFindings = [
+    const mockFindings = [
       {
         id: 'semgrep-001',
         rule: 'javascript.express.security.audit.express-cookie-session-no-httponly',
@@ -265,23 +265,23 @@ router.post('/scan', requireAdmin, async (req: Request, res: Response) => {
     const { type } = req.body;
 
     switch (type) {
-      case 'vulnerability': {
-        const _vulnScanner = getSecurityScanner();
+      case 'vulnerability':
+        const vulnScanner = getSecurityScanner();
         // Executar scan
         res.json({ message: 'Scan de vulnerabilidades iniciado' });
-        break; }
+        break;
 
-      case 'dependency': {
-        const _depScanner = getDependencyScanner();
+      case 'dependency':
+        const depScanner = getDependencyScanner();
         depScanner.runScan();
         res.json({ message: 'Scan de dependências iniciado' });
-        break; }
+        break;
 
-      case 'code': {
-        const _codeScanner = getSemgrepScanner();
+      case 'code':
+        const codeScanner = getSemgrepScanner();
         codeScanner.runScan();
         res.json({ message: 'Análise de código iniciada' });
-        break; }
+        break;
 
       default:
         res.status(400).json({ error: 'Tipo de scan inválido' });
@@ -299,7 +299,7 @@ router.post('/scan', requireAdmin, async (req: Request, res: Response) => {
 router.get('/alerts/active', async (req: Request, res: Response) => {
   try {
     // Buscar alertas não resolvidos
-    const _alerts = await db
+    const alerts = await db
       .select()
       .from(security_logs)
       .where(
@@ -330,7 +330,7 @@ router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Respo
   try {
     const { id } = req.params;
     const { reason } = req.body;
-    const _userId = (req as unknown).user.id;
+    const userId = (req as any).user.id;
 
     // Marcar como resolvido (implementar tabela se necessário)
     // await db.insert(security_alerts_resolved).values({
@@ -353,12 +353,12 @@ router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Respo
  */
 router.get('/report', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const _scanner = getSecurityScanner();
-    const _vulnDetector = getVulnerabilityDetector();
-    const _depScanner = getDependencyScanner();
-    const _codeScanner = getSemgrepScanner();
+    const scanner = getSecurityScanner();
+    const vulnDetector = getVulnerabilityDetector();
+    const depScanner = getDependencyScanner();
+    const codeScanner = getSemgrepScanner();
 
-    const _report = {
+    const report = {
       generatedAt: new Date(),
       summary: {
         overallScore: calculateOverallScore(),
@@ -385,27 +385,27 @@ router.get('/report', requireAdmin, async (req: Request, res: Response) => {
 
 // Funções auxiliares
 function getTimeRangeDate(timeRange: string): Date {
-  const _now = new Date();
+  const now = new Date();
   switch (timeRange) {
-    case '1h': {
-      return new Date(now.getTime() - 60 * 60 * 1000); }
-    case '24h': {
-      return new Date(now.getTime() - 24 * 60 * 60 * 1000); }
-    case '7d': {
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); }
-    case '30d': {
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); }
+    case '1h':
+      return new Date(now.getTime() - 60 * 60 * 1000);
+    case '24h':
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    case '7d':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '30d':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     default:
-      return new Date(now.getTime() - 60 * 60 * 1000); }
+      return new Date(now.getTime() - 60 * 60 * 1000);
   }
 }
 
-function generateTrendData(logs: unknown[], timeRange: string): unknown[] {
+function generateTrendData(logs: any[], timeRange: string): any[] {
   // Gerar dados de tendência para gráficos
-  const _intervals = timeRange == '1h' ? 12 : 24; // 5min ou 1h intervals
-  const _trend = [];
+  const intervals = timeRange === '1h' ? 12 : 24; // 5min ou 1h intervals
+  const trend = [];
 
-  for (let _i = 0; i < intervals; i++) {
+  for (let i = 0; i < intervals; i++) {
     trend.push({
       time: `T-${intervals - i}`,
       securityScore: Math.floor(Math.random() * 20) + 80,
@@ -413,7 +413,7 @@ function generateTrendData(logs: unknown[], timeRange: string): unknown[] {
     });
   }
 
-  return trend; }
+  return trend;
 }
 
 function calculateOverallScore(): number {

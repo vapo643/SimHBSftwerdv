@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { securityService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/limits', async (req, res) => {
   try {
-    const _result = await securityService.executeOperation('api_limiter', req.query);
-    res.json(_result);
-  } catch (error) {
+    const result = await securityService.executeOperation('api_limiter', req.query);
+    res.json(result);
+  } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

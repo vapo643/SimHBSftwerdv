@@ -6,14 +6,14 @@ import ErrorBoundary from './components/ErrorBoundary';
 // Global error handling for unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {
   // Ignore common browser extension errors
-  const _ignoredErrors = [
+  const ignoredErrors = [
     'The message port closed before a response was received',
     'mce-autosize-textarea',
     'custom element',
     'ResizeObserver loop limit exceeded',
   ];
 
-  const _shouldIgnore = ignoredErrors.some(
+  const shouldIgnore = ignoredErrors.some(
     (ignored) =>
       event.reason?.message?.includes(ignored) || event.reason?.toString()?.includes(ignored)
   );
@@ -26,9 +26,9 @@ window.addEventListener('unhandledrejection', (event) => {
 // Global error handling for script errors
 window.addEventListener('error', (event) => {
   // Ignore common HMR and extension errors
-  const _ignoredErrors = ['mce-autosize-textarea', 'custom element', 'webcomponents-ce.js'];
+  const ignoredErrors = ['mce-autosize-textarea', 'custom element', 'webcomponents-ce.js'];
 
-  const _shouldIgnore = ignoredErrors.some(
+  const shouldIgnore = ignoredErrors.some(
     (ignored) => event.message?.includes(ignored) || event.filename?.includes(ignored)
   );
 

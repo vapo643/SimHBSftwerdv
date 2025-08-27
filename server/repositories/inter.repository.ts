@@ -5,13 +5,13 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { supabaseAdmin } from '../lib/supabase-admin.js';
 import {
-  _interCollections,
-  _propostas,
-  _historicoObservacoesCobranca,
-  _statusContextuais,
+  interCollections,
+  propostas,
+  historicoObservacoesCobranca,
+  statusContextuais,
   type InterCollection,
   type Proposta,
 } from '@shared/schema';
@@ -27,26 +27,26 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Find collection by proposal ID
    */
   async findByProposalId(proposalId: string): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, proposalId))
       .limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
    * Find collection by codigoSolicitacao
    */
   async findByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -71,8 +71,8 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     limit?: number;
     offset?: number;
   }): Promise<InterCollection[]> {
-    let _query = db.select().from(interCollections) as unknown;
-    const _conditions = [];
+    let query = db.select().from(interCollections) as any;
+    const conditions = [];
 
     if (params.dataInicial && params.dataFinal) {
       conditions.push(
@@ -97,40 +97,34 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as unknown;
+      query = query.where(and(...conditions)) as any;
     }
 
-    query = query.orderBy(desc(interCollections.createdAt)) as unknown;
+    query = query.orderBy(desc(interCollections.createdAt)) as any;
 
     if (params.limit) {
-      query = query.limit(params.limit) as unknown;
+      query = query.limit(params.limit) as any;
     }
 
     if (params.offset) {
-      query = query.offset(params.offset) as unknown;
+      query = query.offset(params.offset) as any;
     }
 
-    return await query; }
+    return await query;
   }
 
   /**
    * Create a new collection
    */
   async createCollection(data: Partial<InterCollection>): Promise<InterCollection> {
-    const _timestamp = getBrasiliaDate();
-
+    const timestamp = getBrasiliaDate();
+    
     // Ensure required fields are present
-    if (
-      !data.propostaId ||
-      !data.codigoSolicitacao ||
-      !data.seuNumero ||
-      !data.valorNominal ||
-      !data.dataVencimento
-    ) {
+    if (!data.propostaId || !data.codigoSolicitacao || !data.seuNumero || !data.valorNominal || !data.dataVencimento) {
       throw new Error('Required fields missing for collection creation');
     }
-
-    const _collectionData = {
+    
+    const collectionData = {
       ...data,
       propostaId: data.propostaId!,
       codigoSolicitacao: data.codigoSolicitacao!,
@@ -141,9 +135,9 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       updatedAt: timestamp,
     };
 
-    const _result = await db.insert(interCollections).values([collectionData]).returning();
+    const result = await db.insert(interCollections).values([collectionData]).returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -153,7 +147,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     id: number,
     data: Partial<InterCollection>
   ): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .update(interCollections)
       .set({
         ...data,
@@ -162,7 +156,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.id, id))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -172,7 +166,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     codigoSolicitacao: string,
     data: Partial<InterCollection>
   ): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .update(interCollections)
       .set({
         ...data,
@@ -181,14 +175,14 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
    * Delete collection (soft delete)
    */
   async deleteCollection(id: number): Promise<boolean> {
-    const _result = await db
+    const result = await db
       .update(interCollections)
       .set({
         isActive: false,
@@ -197,16 +191,16 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.id, id))
       .returning();
 
-    return result.length > 0; }
+    return result.length > 0;
   }
 
   /**
    * Get proposal by ID
    */
   async getProposal(proposalId: string): Promise<Proposta | undefined> {
-    const _result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
+    const result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -217,17 +211,17 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
-    const _result = await db
+    const result = await db
       .update(propostas)
       .set({
-  _status,
+        status,
         updatedAt: getBrasiliaDate(),
         userId: userId,
       })
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -238,22 +232,20 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     mensagem: string;
     criadoPor: string;
     tipoAcao?: string;
-    dadosAcao?: unknown;
-  }): Promise<unknown> {
-    const _result = await db
+    dadosAcao?: any;
+  }): Promise<any> {
+    const result = await db
       .insert(historicoObservacoesCobranca)
-      .values([
-        {
-          propostaId: data.propostaId,
-          mensagem: data.mensagem,
-          criadoPor: data.criadoPor,
-          tipoAcao: data.tipoAcao,
-          dadosAcao: data.dadosAcao,
-        },
-      ])
+      .values([{
+        propostaId: data.propostaId,
+        mensagem: data.mensagem,
+        criadoPor: data.criadoPor,
+        tipoAcao: data.tipoAcao,
+        dadosAcao: data.dadosAcao,
+      }])
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -266,22 +258,20 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     statusAnterior?: string;
     atualizadoPor?: string;
     observacoes?: string;
-  }): Promise<unknown> {
-    const _result = await db
+  }): Promise<any> {
+    const result = await db
       .insert(statusContextuais)
-      .values([
-        {
-          propostaId: data.propostaId,
-          contexto: data.contexto,
-          status: data.status,
-          statusAnterior: data.statusAnterior,
-          atualizadoPor: data.atualizadoPor,
-          observacoes: data.observacoes,
-        },
-      ])
+      .values([{
+        propostaId: data.propostaId,
+        contexto: data.contexto,
+        status: data.status,
+        statusAnterior: data.statusAnterior,
+        atualizadoPor: data.atualizadoPor,
+        observacoes: data.observacoes,
+      }])
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -314,9 +304,9 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     path: string,
     file: Buffer | Uint8Array,
     contentType: string
-  ): Promise<{ data: unknown; error: unknown }> {
+  ): Promise<{ data: any; error: any }> {
     return await supabaseAdmin.storage.from(bucket).upload(path, file, {
-  _contentType,
+      contentType,
       upsert: true,
     });
   }
@@ -324,9 +314,9 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
   /**
    * Get download URL from storage
    */
-  async getStorageUrl(bucket: string, path: string): Promise<{ data: unknown; error: unknown }> {
+  async getStorageUrl(bucket: string, path: string): Promise<{ data: any; error: any }> {
     return supabaseAdmin.storage.from(bucket).createSignedUrl(path, 3600); // 1 hour expiry
   }
 }
 
-export const _interRepository = new InterRepository();
+export const interRepository = new InterRepository();

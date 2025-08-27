@@ -175,8 +175,8 @@ describe('userService - createUser', () => {
       };
 
       mockSupabaseClient.from.mockImplementation((table: string) => {
-        if (table == 'profiles') return profileInsertMock;
-        if (table == 'gerente_lojas') return gerenteLojaInsertMock;
+        if (table === 'profiles') return profileInsertMock;
+        if (table === 'gerente_lojas') return gerenteLojaInsertMock;
         return profileInsertMock; // default fallback
       });
 
@@ -465,8 +465,8 @@ describe('userService - createUser', () => {
       };
 
       mockSupabaseClient.from.mockImplementation((table: string) => {
-        if (table == 'profiles') return profileInsertMock;
-        if (table == 'gerente_lojas') return gerenteLojaInsertMock;
+        if (table === 'profiles') return profileInsertMock;
+        if (table === 'gerente_lojas') return gerenteLojaInsertMock;
         return profileInsertMock; // default fallback
       });
 

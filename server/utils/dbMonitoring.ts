@@ -11,7 +11,7 @@ import { sql } from 'drizzle-orm';
  */
 export async function getDatabaseStats() {
   try {
-    const _stats = await db.execute(sql`
+    const stats = await db.execute(sql`
       SELECT 
         current_database() as database_name,
         pg_database_size(current_database()) as database_size,
@@ -22,7 +22,7 @@ export async function getDatabaseStats() {
         current_timestamp as checked_at
     `);
 
-    return stats[0]; }
+    return stats[0];
   } catch (error) {
     console.error('Erro ao buscar estatísticas do banco:', error);
     throw error;
@@ -34,9 +34,9 @@ export async function getDatabaseStats() {
  */
 export async function getSlowQueries(limit = 10) {
   try {
-    const _queries = await db.execute(sql`
+    const queries = await db.execute(sql`
       SELECT 
-  _calls,
+        calls,
         total_exec_time,
         mean_exec_time,
         max_exec_time,
@@ -50,11 +50,11 @@ export async function getSlowQueries(limit = 10) {
       LIMIT ${limit}
     `);
 
-    return queries; }
+    return queries;
   } catch (error) {
     // pg_stat_statements pode não estar habilitado
     console.warn('pg_stat_statements não disponível');
-    return []; }
+    return [];
   }
 }
 
@@ -63,10 +63,10 @@ export async function getSlowQueries(limit = 10) {
  */
 export async function getTableStats() {
   try {
-    const _stats = await db.execute(sql`
+    const stats = await db.execute(sql`
       SELECT 
-  _schemaname,
-  _tablename,
+        schemaname,
+        tablename,
         pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as total_size,
         n_live_tup as live_rows,
         n_dead_tup as dead_rows,
@@ -80,7 +80,7 @@ export async function getTableStats() {
       ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     `);
 
-    return stats; }
+    return stats;
   } catch (error) {
     console.error('Erro ao buscar estatísticas das tabelas:', error);
     throw error;
@@ -92,11 +92,11 @@ export async function getTableStats() {
  */
 export async function getIndexUsage() {
   try {
-    const _usage = await db.execute(sql`
+    const usage = await db.execute(sql`
       SELECT 
-  _schemaname,
-  _tablename,
-  _indexname,
+        schemaname,
+        tablename,
+        indexname,
         idx_scan as index_scans,
         idx_tup_read as tuples_read_via_index,
         idx_tup_fetch as tuples_fetched_via_index,
@@ -106,7 +106,7 @@ export async function getIndexUsage() {
       ORDER BY idx_scan DESC
     `);
 
-    return usage; }
+    return usage;
   } catch (error) {
     console.error('Erro ao buscar uso de índices:', error);
     throw error;
@@ -118,13 +118,13 @@ export async function getIndexUsage() {
  */
 export async function getActiveConnections() {
   try {
-    const _connections = await db.execute(sql`
+    const connections = await db.execute(sql`
       SELECT 
-  _pid,
-  _usename,
+        pid,
+        usename,
         application_name,
         client_addr,
-  _state,
+        state,
         query_start,
         state_change,
         wait_event_type,
@@ -141,7 +141,7 @@ export async function getActiveConnections() {
       ORDER BY query_start DESC
     `);
 
-    return connections; }
+    return connections;
   } catch (error) {
     console.error('Erro ao buscar conexões ativas:', error);
     throw error;
@@ -153,21 +153,21 @@ export async function getActiveConnections() {
  */
 export async function checkDatabaseHealth() {
   try {
-    const _health = {
+    const health = {
       status: 'healthy',
       issues: [] as string[],
-      metrics: {} as unknown,
+      metrics: {} as any,
     };
 
     // Verificar conexões
-    const _connStats = await db.execute(sql`
+    const connStats = await db.execute(sql`
       SELECT 
         (SELECT count(*) FROM pg_stat_activity) as total,
         (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') as active,
         (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') as max_allowed
     `);
 
-    const _conn = connStats[0] as unknown;
+    const conn = connStats[0] as any;
     health.metrics.connections = conn;
 
     if (conn.total > conn.max_allowed * 0.8) {
@@ -176,10 +176,10 @@ export async function checkDatabaseHealth() {
     }
 
     // Verificar bloat das tabelas
-    const _bloat = await db.execute(sql`
+    const bloat = await db.execute(sql`
       SELECT 
-  _schemaname,
-  _tablename,
+        schemaname,
+        tablename,
         n_dead_tup,
         n_live_tup,
         ROUND(n_dead_tup::numeric / NULLIF(n_live_tup, 0) * 100, 2) as dead_ratio
@@ -192,7 +192,7 @@ export async function checkDatabaseHealth() {
 
     health.metrics.table_bloat = bloat;
 
-    for (const table of bloat as unknown[]) {
+    for (const table of bloat as any[]) {
       if (table.dead_ratio > 20) {
         health.issues.push(`Tabela ${table.tablename} com ${table.dead_ratio}% de linhas mortas`);
         if (table.dead_ratio > 50) {
@@ -204,20 +204,20 @@ export async function checkDatabaseHealth() {
     }
 
     // Verificar queries longas
-    const _longQueries = await db.execute(sql`
+    const longQueries = await db.execute(sql`
       SELECT count(*) as count
       FROM pg_stat_activity
       WHERE state = 'active'
         AND query_start < now() - interval '5 minutes'
     `);
 
-    const _longCount = (longQueries[0] as unknown).count;
+    const longCount = (longQueries[0] as any).count;
     if (longCount > 0) {
       health.issues.push(`${longCount} queries rodando há mais de 5 minutos`);
       health.status = 'warning';
     }
 
-    return health; }
+    return health;
   } catch (error) {
     console.error('Erro ao verificar saúde do banco:', error);
     return {

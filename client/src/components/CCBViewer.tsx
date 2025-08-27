@@ -29,14 +29,14 @@ interface CCBStatus {
 
 export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const { user } = useAuth(); // PAM V1.0: Obter informações do usuário para verificar role
 
   // Query para buscar status do CCB
   const {
     data: ccbStatus,
-    _isLoading,
-    _error,
+    isLoading,
+    error,
   } = useQuery<CCBStatus>({
     queryKey: [`/api/formalizacao/${proposalId}/ccb`],
     refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
@@ -45,19 +45,14 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   // PAM V1.0: Query para buscar dados da proposta (verificar se tem CCB assinada)
   const { data: proposalData } = useQuery({
     queryKey: [`/api/propostas/${proposalId}`],
-    select: (data: {
-      caminhoCcbAssinado?: string;
-      caminho_ccb_assinado?: string;
-      dataAssinatura?: string;
-      data_assinatura?: string;
-    }) => ({
+    select: (data: any) => ({
       caminhoCcbAssinado: data?.caminhoCcbAssinado || data?.caminho_ccb_assinado,
       dataAssinatura: data?.dataAssinatura || data?.data_assinatura,
     }),
   });
 
   // Mutation para gerar CCB
-  const _generateCCBMutation = useMutation({
+  const generateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
       return apiRequest('/api/formalizacao/generate-ccb', {
@@ -86,9 +81,9 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       }, 500);
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       setIsGenerating(false);
-      const _errorMessage =
+      const errorMessage =
         error instanceof Error ? error.message : 'Ocorreu um erro ao gerar o documento.';
       toast({
         title: 'Erro ao gerar CCB',
@@ -99,7 +94,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   });
 
   // Mutation para regenerar CCB
-  const _regenerateCCBMutation = useMutation({
+  const regenerateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
       return apiRequest(`/api/formalizacao/${proposalId}/regenerate-ccb`, {
@@ -126,9 +121,9 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       }, 500);
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       setIsGenerating(false);
-      const _errorMessage =
+      const errorMessage =
         error instanceof Error ? error.message : 'Ocorreu um erro ao regenerar o documento.';
       toast({
         title: 'Erro ao regenerar CCB',
@@ -138,29 +133,29 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     },
   });
 
-  const _handleDownload = () => {
+  const handleDownload = () => {
     if (ccbStatus?.signedUrl) {
       // Adicionar timestamp para forçar download da versão mais recente
-      const _urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
+      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
       window.open(urlWithTimestamp, '_blank');
     }
   };
 
-  const _handleView = () => {
+  const handleView = () => {
     // Forçar refetch da URL mais recente antes de visualizar
     queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
 
     if (ccbStatus?.signedUrl) {
       // Adicionar timestamp para garantir versão mais recente
-      const _urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
+      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
       window.open(urlWithTimestamp, '_blank');
     }
   };
 
   // PAM V1.0: Nova função para visualizar CCB Assinada (apenas ADMINISTRADOR)
-  const _handleViewCCBAssinada = async () => {
+  const handleViewCCBAssinada = async () => {
     try {
-      const _response = (await apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`)) as {
+      const response = (await apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`)) as {
         publicUrl?: string;
         message?: string;
       };
@@ -220,7 +215,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     );
   }
 
-  const _hasCCB = ccbStatus && ccbStatus.signedUrl;
+  const hasCCB = ccbStatus && ccbStatus.signedUrl;
 
   return (
     <Card>
@@ -291,23 +286,23 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                 </Button>
 
                 {/* PAM V1.0: Botão de download CCB assinada - EXCLUSIVO para ADMINISTRADOR */}
-                {proposalData?.caminhoCcbAssinado && user?.role == 'ADMINISTRADOR' && (
+                {proposalData?.caminhoCcbAssinado && user?.role === 'ADMINISTRADOR' && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={async () => {
                       try {
-                        const _response = (await apiRequest(
+                        const response = (await apiRequest(
                           `/api/formalizacao/${proposalId}/ccb-assinada`
                         )) as { publicUrl?: string };
                         if (response.publicUrl) {
                           // Forçar download ao invés de abrir em nova aba
-                          const _link = document.createElement('a');
+                          const link = document.createElement('a');
                           link.href = response.publicUrl;
                           link.download = `CCB_Assinada_${proposalId}.pdf`;
                           link.click();
                         }
-                      } catch (_error) {
+                      } catch (error) {
                         toast({
                           title: 'Erro ao baixar',
                           description: 'Erro ao baixar CCB assinada',

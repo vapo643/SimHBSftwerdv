@@ -10,7 +10,7 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { AuthenticatedRequest } from '../../shared/types/express';
-import { config } from '../lib/config';
+import { config } from '../lib/config.js';
 
 interface CSRFRequest extends AuthenticatedRequest {
   csrfToken?: string;
@@ -102,7 +102,7 @@ export class CSRFProtection {
       // Set secure cookie for double-submit pattern
       res.cookie(CSRFProtection.CSRF_COOKIE_NAME, csrfToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV == 'production',
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 60 * 60 * 1000, // 1 hour
         path: '/',
@@ -211,7 +211,7 @@ export class CSRFProtection {
 
       // Allow requests with proper AJAX headers or form content
       if (
-        requestedWith == 'XMLHttpRequest' ||
+        requestedWith === 'XMLHttpRequest' ||
         (contentType && contentType.includes('application/json'))
       ) {
         return next();

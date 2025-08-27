@@ -15,7 +15,7 @@ import { Produto } from '@shared/schema';
 import { MultiProductSelector } from './MultiProductSelector';
 
 // Updated schema for N:N structure
-const _tabelaSchema = z.object({
+const tabelaSchema = z.object({
   nomeTabela: z.string().min(3, 'Nome da Tabela deve ter pelo menos 3 caracteres.'),
   taxaJuros: z.number().positive('Taxa de Juros deve ser um número positivo.'),
   comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero.').default(0),
@@ -34,19 +34,19 @@ interface TabelaComercialFormProps {
 }
 
 const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
-  _initialData,
-  _onSubmit,
-  _onCancel,
+  initialData,
+  onSubmit,
+  onCancel,
 }) => {
   const [novoPrazo, setNovoPrazo] = useState('');
   const [prazos, setPrazos] = useState<number[]>(initialData?.prazos || []);
   const [selectedProducts, setSelectedProducts] = useState<number[]>(initialData?.produtoIds || []);
 
   const {
-  _register,
-  _handleSubmit,
+    register,
+    handleSubmit,
     formState: { errors },
-  _setValue,
+    setValue,
   } = useForm<TabelaFormData>({
     resolver: zodResolver(tabelaSchema),
     defaultValues: {
@@ -62,28 +62,28 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
   const { data: produtos = [], isLoading: loadingProdutos } = useQuery<Produto[]>({
     queryKey: ['/api/produtos'],
     queryFn: async () => {
-      const _response = (await apiRequest('/api/produtos', { method: 'GET' })) as Produto[];
-      return response.filter((p: Produto) => p.isActive); }
+      const response = await apiRequest('/api/produtos', { method: 'GET' }) as Produto[];
+      return response.filter((p: Produto) => p.isActive);
     },
   });
 
-  const _adicionarPrazo = () => {
-    const _prazo = parseInt(novoPrazo);
+  const adicionarPrazo = () => {
+    const prazo = parseInt(novoPrazo);
     if (prazo > 0 && !prazos.includes(prazo)) {
-      const _novosPrazos = [...prazos, prazo].sort((a, b) => a - b);
+      const novosPrazos = [...prazos, prazo].sort((a, b) => a - b);
       setPrazos(novosPrazos);
       setValue('prazosPermitidos', novosPrazos);
       setNovoPrazo('');
     }
   };
 
-  const _removerPrazo = (prazoRemover: number) => {
-    const _novosPrazos = prazos.filter((p) => p !== prazoRemover);
+  const removerPrazo = (prazoRemover: number) => {
+    const novosPrazos = prazos.filter((p) => p !== prazoRemover);
     setPrazos(novosPrazos);
     setValue('prazosPermitidos', novosPrazos);
   };
 
-  const _handleFormSubmit = (data: TabelaFormData) => {
+  const handleFormSubmit = (data: TabelaFormData) => {
     onSubmit({
       nomeTabela: data.nomeTabela,
       taxaJuros: data.taxaJuros,
@@ -93,13 +93,13 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     });
   };
 
-  const _handleProductsChange = (products: number[]) => {
+  const handleProductsChange = (products: number[]) => {
     setSelectedProducts(products);
     setValue('produtoIds', products);
   };
 
-  const _handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key == 'Enter') {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
       e.preventDefault();
       adicionarPrazo();
     }

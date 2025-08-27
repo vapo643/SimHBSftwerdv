@@ -9,10 +9,10 @@ import { join } from 'path';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 // Middleware for admin access
-const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
+const requireAdmin = (req: AuthenticatedRequest, res: any, next: any) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -32,24 +32,24 @@ router.use(jwtAuthMiddleware);
 router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Common paths where dependency-check reports might be stored
-    const _reportPaths = [
+    const reportPaths = [
       'dependency-check-report.json',
       '.security/dependency-check-report.json',
       'reports/dependency-check-report.json',
       'target/dependency-check-report.json',
     ];
 
-    let _reportData = null;
-    let _reportPath = null;
+    let reportData = null;
+    let reportPath = null;
 
     // Try to find the report in common locations
     for (const path of reportPaths) {
       try {
-        const _fullPath = join(process.cwd(), path);
-        const _data = await fs.readFile(fullPath, 'utf-8');
-        reportData = JSON.parse(_data);
+        const fullPath = join(process.cwd(), path);
+        const data = await fs.readFile(fullPath, 'utf-8');
+        reportData = JSON.parse(data);
         reportPath = path;
-        break; }
+        break;
       } catch (e) {
         // Continue trying other paths
       }
@@ -75,7 +75,7 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
     }
 
     // Parse vulnerability counts from report
-    const _vulnerabilities = {
+    const vulnerabilities = {
       critical: 0,
       high: 0,
       medium: 0,
@@ -85,9 +85,9 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
 
     // Process dependencies if they exist
     if (reportData.dependencies && Array.isArray(reportData.dependencies)) {
-      reportData.dependencies.forEach((dep) => {
+      reportData.dependencies.forEach((dep: any) => {
         if (dep.vulnerabilities && Array.isArray(dep.vulnerabilities)) {
-          dep.vulnerabilities.forEach((vuln) => {
+          dep.vulnerabilities.forEach((vuln: any) => {
             vulnerabilities.total++;
 
             // Check CVSS score or severity
@@ -109,10 +109,10 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
       success: true,
       data: {
         reportFound: true,
-  _vulnerabilities,
+        vulnerabilities,
         lastScan: reportData.reportDate || new Date().toISOString(),
         projectInfo: reportData.projectInfo || {},
-  _reportPath,
+        reportPath,
       },
     });
   } catch (error) {
@@ -131,7 +131,7 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
 router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Check if script exists first
-    const _scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
+    const scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
 
     try {
       await fs.access(scriptPath);
@@ -144,7 +144,7 @@ router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => 
 
     const { exec } = await import('child_process');
     const { promisify } = await import('util');
-    const _execAsync = promisify(exec);
+    const execAsync = promisify(exec);
 
     // Send immediate response
     res.json({

@@ -4,7 +4,7 @@
  * Adaptado para funcionar com mock queue em desenvolvimento
  */
 
-const _isDevelopment = process.env.NODE_ENV == 'development';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 if (isDevelopment) {
   // Usar mock queue em desenvolvimento
@@ -13,9 +13,9 @@ if (isDevelopment) {
   // Importar o mock queue
   import('./lib/mock-queue').then(({ queues }) => {
     // Escutar eventos da fila mock
-    const _queue = queues.pdfProcessing;
+    const queue = queues.pdfProcessing;
 
-    queue.on('active', async (job) => {
+    queue.on('active', async (job: any) => {
       console.log(`[WORKER] Processando job ${job.id} com dados:`, job.data);
 
       // Simular processamento
@@ -29,7 +29,7 @@ if (isDevelopment) {
 } else {
   // Usar BullMQ real em produção
   import('bullmq').then(({ Worker }) => {
-    const _worker = new Worker(
+    const worker = new Worker(
       'pdf-processing',
       async (job) => {
         console.log(`[WORKER] Processando job ${job.id} com dados:`, job.data);
@@ -38,7 +38,7 @@ if (isDevelopment) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         console.log(`[WORKER] ✅ Job ${job.id} processado com sucesso`);
-        return { success: true, jobId: job.id, processedAt: new Date().toISOString() }; }
+        return { success: true, jobId: job.id, processedAt: new Date().toISOString() };
       },
       {
         connection: {

@@ -59,7 +59,7 @@ async function testCalibrationSystem() {
 }
 
 // Executar teste se chamado diretamente
-if (require.main == module) {
+if (require.main === module) {
   testCalibrationSystem();
 }
 

@@ -5,9 +5,9 @@
  */
 
 import {
-  _propostaRepository,
-  _Proposta,
-  _PropostaWithDetails,
+  propostaRepository,
+  Proposta,
+  PropostaWithDetails,
 } from '../repositories/proposta.repository';
 import { transitionTo, InvalidTransitionError } from './statusFsmService';
 
@@ -53,7 +53,7 @@ export class PropostaService {
     const { propostaId, userId, userRole } = request;
 
     // 1. Fetch current proposta
-    const _proposta = await propostaRepository.getPropostaById(propostaId);
+    const proposta = await propostaRepository.getPropostaById(propostaId);
 
     if (!proposta) {
       throw new Error('Proposta não encontrada');
@@ -70,21 +70,21 @@ export class PropostaService {
     }
 
     // 4. Determine new status
-    const _novoStatus = proposta.status == 'suspensa' ? 'aguardando_analise' : 'suspensa';
+    const novoStatus = proposta.status === 'suspensa' ? 'aguardando_analise' : 'suspensa';
 
     // 5. Use FSM for status transition validation
     try {
       await transitionTo({
-  _propostaId,
-  _novoStatus,
+        propostaId,
+        novoStatus,
         userId: userId || 'sistema',
         contexto: 'geral',
-        observacoes: `Status ${novoStatus == 'suspensa' ? 'suspenso' : 'reativado'} pelo usuário`,
+        observacoes: `Status ${novoStatus === 'suspensa' ? 'suspenso' : 'reativado'} pelo usuário`,
         metadata: {
-          tipoAcao: novoStatus == 'suspensa' ? 'SUSPENDER_PROPOSTA' : 'REATIVAR_PROPOSTA',
+          tipoAcao: novoStatus === 'suspensa' ? 'SUSPENDER_PROPOSTA' : 'REATIVAR_PROPOSTA',
           statusAnterior: proposta.status,
           usuarioRole: userRole || 'desconhecido',
-          motivoSuspensao: novoStatus == 'suspensa' ? 'Ação manual do usuário' : null,
+          motivoSuspensao: novoStatus === 'suspensa' ? 'Ação manual do usuário' : null,
         },
       });
     } catch (error) {
@@ -104,11 +104,11 @@ export class PropostaService {
 
     return {
       success: true,
-  _propostaId,
+      propostaId,
       statusAnterior: proposta.status,
       statusNovo: novoStatus,
       message:
-        novoStatus == 'suspensa'
+        novoStatus === 'suspensa'
           ? 'Proposta suspensa com sucesso'
           : 'Proposta reativada com sucesso',
     };
@@ -121,7 +121,7 @@ export class PropostaService {
     console.log(`[CCB] Buscando CCB para proposta: ${propostaId}`);
 
     // Fetch proposta with ClickSign data
-    const _proposta = await propostaRepository.getPropostaById(propostaId);
+    const proposta = await propostaRepository.getPropostaById(propostaId);
 
     if (!proposta) {
       throw new Error('Proposta não encontrada');
@@ -134,7 +134,7 @@ export class PropostaService {
       try {
         console.log(`[CCB] Tentando gerar URL para caminho: ${proposta.caminhoCcbAssinado}`);
 
-        const _signedUrl = await propostaRepository.generateCcbSignedUrl(
+        const signedUrl = await propostaRepository.generateCcbSignedUrl(
           proposta.caminhoCcbAssinado
         );
 
@@ -156,10 +156,10 @@ export class PropostaService {
 
     // PRIORITY 2: Try legacy path for compatibility
     try {
-      const _legacyPath = `proposta-${propostaId}/ccb-assinada.pdf`;
+      const legacyPath = `proposta-${propostaId}/ccb-assinada.pdf`;
       console.log(`[CCB] Tentando caminho legado: ${legacyPath}`);
 
-      const _signedUrl = await propostaRepository.generateCcbSignedUrl(legacyPath);
+      const signedUrl = await propostaRepository.generateCcbSignedUrl(legacyPath);
 
       if (signedUrl) {
         console.log(`[CCB] ✅ URL legada gerada com sucesso`);
@@ -191,8 +191,8 @@ export class PropostaService {
     // CCB not found
     console.log(`[CCB] ❌ CCB não encontrada para proposta ${propostaId}`);
 
-    const _debugInfo = {
-  _propostaId,
+    const debugInfo = {
+      propostaId,
       caminhosSalvos: proposta.caminhoCcbAssinado,
       clicksignKey: proposta.clicksignDocumentKey,
       ccbGerado: proposta.ccbGerado,
@@ -208,28 +208,28 @@ export class PropostaService {
    * Get propostas by status
    */
   async getPropostasByStatus(status: string): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByStatus(status); }
+    return await propostaRepository.getPropostasByStatus(status);
   }
 
   /**
    * Get propostas by user
    */
   async getPropostasByUser(userId: string): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByUser(userId); }
+    return await propostaRepository.getPropostasByUser(userId);
   }
 
   /**
    * Get propostas by loja
    */
   async getPropostasByLoja(lojaId: number): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByLoja(lojaId); }
+    return await propostaRepository.getPropostasByLoja(lojaId);
   }
 
   /**
    * Get propostas pending signature
    */
   async getPropostasPendingSignature(): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasPendingSignature(); }
+    return await propostaRepository.getPropostasPendingSignature();
   }
 
   /**
@@ -257,9 +257,9 @@ export class PropostaService {
    * Get proposta with full details
    */
   async getPropostaWithDetails(propostaId: string): Promise<PropostaWithDetails | null> {
-    return await propostaRepository.getPropostaWithDetails(propostaId); }
+    return await propostaRepository.getPropostaWithDetails(propostaId);
   }
 }
 
 // Export singleton instance
-export const _propostaService = new PropostaService();
+export const propostaService = new PropostaService();

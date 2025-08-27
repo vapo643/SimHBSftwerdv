@@ -10,7 +10,7 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-mi
 import { requireAnyRole } from '../lib/role-guards';
 import { queues } from '../lib/mock-queue';
 
-const _router = Router();
+const router = Router();
 
 /**
  * Endpoint para consultar o status de um job
@@ -18,8 +18,8 @@ const _router = Router();
  */
 router.get(
   '/:jobId/status',
-  _jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { jobId } = req.params;
@@ -33,8 +33,8 @@ router.get(
       }
 
       // Tentar encontrar o job em todas as filas
-      let _job = null;
-      let _queueName = null;
+      let job = null;
+      let queueName = null;
 
       // Buscar job real das filas (desenvolvimento usa mock-queue)
       // Verificar em qual fila o job está baseado no prefixo do ID
@@ -54,16 +54,16 @@ router.get(
 
       if (job) {
         // Job encontrado - retornar dados reais
-        const _state = await job.getState();
-        const _progress = job.progress;
-        const _returnvalue = job.returnvalue;
+        const state = await job.getState();
+        const progress = job.progress;
+        const returnvalue = job.returnvalue;
 
         console.log(`[JOB STATUS API] 📊 Job ${jobId} - Status: ${state}, Progress: ${progress}%`);
 
         // Formatar a resposta baseada no estado real do job
-        let _responseData = null;
+        let responseData = null;
 
-        if (state == 'completed' && returnvalue) {
+        if (state === 'completed' && returnvalue) {
           // Para jobs de carnê, incluir a URL do carnê se disponível
           responseData = {
             success: returnvalue.success || false,
@@ -74,7 +74,7 @@ router.get(
             size: returnvalue.size,
             timestamp: new Date().toISOString(),
           };
-        } else if (state == 'failed') {
+        } else if (state === 'failed') {
           responseData = {
             success: false,
             error: job.failedReason || 'Erro desconhecido no processamento',
@@ -84,7 +84,7 @@ router.get(
 
         return res.json({
           success: true,
-          _jobId,
+          jobId,
           queue: queueName,
           status: state,
           progress: progress || 0,
@@ -102,10 +102,10 @@ router.get(
 
       return res.status(404).json({
         error: 'Job não encontrado',
-        _jobId,
+        jobId,
         hint: 'O job pode ter expirado ou o ID está incorreto',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(`[JOB STATUS API] ❌ Erro ao consultar status:`, error);
       return res.status(500).json({
         error: 'Erro ao consultar status do job',

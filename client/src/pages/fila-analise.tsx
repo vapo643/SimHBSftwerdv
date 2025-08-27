@@ -8,21 +8,21 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import {
-  _Search,
-  _Filter,
-  _Clock,
-  _TrendingUp,
-  _Eye,
-  _CheckCircle,
-  _XCircle,
-  _AlertCircle,
+  Search,
+  Filter,
+  Clock,
+  TrendingUp,
+  Eye,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
 } from 'lucide-react';
 
 interface Proposta {
@@ -48,9 +48,9 @@ export default function FilaAnalise() {
     queryKey: ['/api/propostas'],
   });
 
-  const _getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string) => {
     const statusMap: Record<
-  _string,
+      string,
       { label: string; variant: 'secondary' | 'default' | 'destructive' | 'outline' }
     > = {
       // Status V2.0
@@ -71,29 +71,29 @@ export default function FilaAnalise() {
     );
   };
 
-  const _getPriorityBadge = (valor: string) => {
-    const _valorNum = parseFloat(valor);
-    if (valorNum > 100000) return { label: 'Alta', variant: 'destructive' as const }; }
-    if (valorNum > 50000) return { label: 'Média', variant: 'secondary' as const }; }
-    return { label: 'Baixa', variant: 'outline' as const }; }
+  const getPriorityBadge = (valor: string) => {
+    const valorNum = parseFloat(valor);
+    if (valorNum > 100000) return { label: 'Alta', variant: 'destructive' as const };
+    if (valorNum > 50000) return { label: 'Média', variant: 'secondary' as const };
+    return { label: 'Baixa', variant: 'outline' as const };
   };
 
-  const _formatCurrency = (value: string) => {
+  const formatCurrency = (value: string) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(parseFloat(value));
   };
 
-  const _filteredPropostas = propostas
+  const filteredPropostas = propostas
     ?.filter((proposta) => {
       // PAM V1.0 - Usar status contextual com fallback
-      const _statusFinal = proposta.statusContextual || proposta.status;
-      const _matchesStatus = !statusFilter || statusFinal == statusFilter;
-      const _matchesBusca =
+      const statusFinal = proposta.statusContextual || proposta.status;
+      const matchesStatus = !statusFilter || statusFinal === statusFilter;
+      const matchesBusca =
         !busca || proposta.clienteNome.toLowerCase().includes(busca.toLowerCase());
 
-      let _matchesValor = true;
+      let matchesValor = true;
       if (valorMinimo) {
         matchesValor = matchesValor && parseFloat(proposta.valor) >= parseFloat(valorMinimo);
       }
@@ -102,39 +102,39 @@ export default function FilaAnalise() {
       }
 
       // Filtro por prioridade
-      let _matchesPrioridade = true;
+      let matchesPrioridade = true;
       if (prioridadeFilter) {
-        const _valorNum = parseFloat(proposta.valor);
-        const _prioridade = getPriorityBadge(proposta.valor).label;
-        matchesPrioridade = prioridade == prioridadeFilter;
+        const valorNum = parseFloat(proposta.valor);
+        const prioridade = getPriorityBadge(proposta.valor).label;
+        matchesPrioridade = prioridade === prioridadeFilter;
       }
 
-      return matchesStatus && matchesBusca && matchesValor && matchesPrioridade; }
+      return matchesStatus && matchesBusca && matchesValor && matchesPrioridade;
     })
     ?.sort((a, b) => {
       switch (ordenacao) {
-        case 'data_desc': {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); }
-        case 'data_asc': {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); }
-        case 'valor_desc': {
-          return parseFloat(b.valor) - parseFloat(a.valor); }
-        case 'valor_asc': {
-          return parseFloat(a.valor) - parseFloat(b.valor); }
-        case 'prioridade': {
-          const _getPriorityValue = (valor: string) => {
-            const _num = parseFloat(valor);
-            if (num > 100000) return 3; }
-            if (num > 50000) return 2; }
-            return 1; }
+        case 'data_desc':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'data_asc':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'valor_desc':
+          return parseFloat(b.valor) - parseFloat(a.valor);
+        case 'valor_asc':
+          return parseFloat(a.valor) - parseFloat(b.valor);
+        case 'prioridade':
+          const getPriorityValue = (valor: string) => {
+            const num = parseFloat(valor);
+            if (num > 100000) return 3;
+            if (num > 50000) return 2;
+            return 1;
           };
-          return getPriorityValue(b.valor) - getPriorityValue(a.valor); }
+          return getPriorityValue(b.valor) - getPriorityValue(a.valor);
         default:
-          return 0; }
+          return 0;
       }
     });
 
-  const _clearFilters = () => {
+  const clearFilters = () => {
     setStatusFilter('');
     setValorMinimo('');
     setValorMaximo('');
@@ -144,29 +144,29 @@ export default function FilaAnalise() {
   };
 
   // Estatísticas
-  const _getStats = () => {
-    if (!propostas) return null; }
+  const getStats = () => {
+    if (!propostas) return null;
 
-    const _aguardando = propostas.filter((p) => p.status == 'aguardando_analise').length;
-    const _emAnalise = propostas.filter((p) => p.status == 'em_analise').length;
-    const _aprovadas = propostas.filter((p) => p.status == 'aprovado').length;
-    const _rejeitadas = propostas.filter((p) => p.status == 'rejeitado').length;
+    const aguardando = propostas.filter((p) => p.status === 'aguardando_analise').length;
+    const emAnalise = propostas.filter((p) => p.status === 'em_analise').length;
+    const aprovadas = propostas.filter((p) => p.status === 'aprovado').length;
+    const rejeitadas = propostas.filter((p) => p.status === 'rejeitado').length;
 
-    const _valorTotal = propostas.reduce((acc, p) => acc + parseFloat(p.valor), 0);
-    const _valorMedio = valorTotal / propostas.length;
+    const valorTotal = propostas.reduce((acc, p) => acc + parseFloat(p.valor), 0);
+    const valorMedio = valorTotal / propostas.length;
 
     return {
-  _aguardando,
-  _emAnalise,
-  _aprovadas,
-  _rejeitadas,
-  _valorTotal,
-  _valorMedio,
+      aguardando,
+      emAnalise,
+      aprovadas,
+      rejeitadas,
+      valorTotal,
+      valorMedio,
       total: propostas.length,
     };
   };
 
-  const _stats = getStats();
+  const stats = getStats();
 
   if (isLoading) {
     return (
@@ -410,8 +410,8 @@ export default function FilaAnalise() {
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   {filteredPropostas && filteredPropostas.length > 0 ? (
                     filteredPropostas.map((proposta) => {
-                      const _statusInfo = getStatusBadge(proposta.status);
-                      const _priorityInfo = getPriorityBadge(proposta.valor);
+                      const statusInfo = getStatusBadge(proposta.status);
+                      const priorityInfo = getPriorityBadge(proposta.valor);
 
                       return (
                         <tr key={proposta.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -429,9 +429,9 @@ export default function FilaAnalise() {
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">
                             {(() => {
-                              const _statusFinal = proposta.statusContextual || proposta.status;
-                              const _statusInfo = getStatusBadge(statusFinal);
-                              return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>; }
+                              const statusFinal = proposta.statusContextual || proposta.status;
+                              const statusInfo = getStatusBadge(statusFinal);
+                              return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
                             })()}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">
@@ -448,7 +448,7 @@ export default function FilaAnalise() {
                                   Analisar
                                 </Button>
                               </Link>
-                              {proposta.status == 'aguardando_analise' && (
+                              {proposta.status === 'aguardando_analise' && (
                                 <Button size="sm" variant="outline">
                                   Iniciar
                                 </Button>

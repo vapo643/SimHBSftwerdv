@@ -4,8 +4,8 @@ import { Redis } from 'ioredis';
 let redisClient: Redis | null = null;
 
 // Verificar se estamos em desenvolvimento para usar cache in-memory
-const isDevelopment = process.env.NODE_ENV == 'development';
-const inMemoryCache = new Map<string, { value: unknown; expires: number }>();
+const isDevelopment = process.env.NODE_ENV === 'development';
+const inMemoryCache = new Map<string, { value: any; expires: number }>();
 
 /**
  * Inicializa o cliente Redis reutilizando a conexão existente
@@ -82,7 +82,7 @@ export async function setToCache<T>(
     // Em desenvolvimento, usar cache in-memory
     if (isDevelopment) {
       inMemoryCache.set(key, {
-  _value,
+        value,
         expires: Date.now() + ttlInSeconds * 1000,
       });
       console.log(`[CACHE-MEMORY] 💾 Stored in cache with key: ${key} (TTL: ${ttlInSeconds}s)`);
@@ -90,8 +90,8 @@ export async function setToCache<T>(
     }
 
     // Em produção, usar Redis
-    const _client = initializeRedisClient();
-    const _serialized = JSON.stringify(value);
+    const client = initializeRedisClient();
+    const serialized = JSON.stringify(value);
 
     // Armazena com TTL (EX = expire in seconds)
     await client.set(key, serialized, 'EX', ttlInSeconds);

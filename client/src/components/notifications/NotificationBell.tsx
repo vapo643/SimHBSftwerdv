@@ -4,12 +4,11 @@
  */
 
 import { Bell } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import { apiRequest } from '@/lib/queryClient';
 
-// Interface para tipagem de notificações
 interface Notificacao {
   id: number;
   tipo: string;
@@ -26,7 +25,7 @@ interface Notificacao {
 
 export function NotificationBell() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   // Buscar notificações a cada 60 segundos
   const { data, isLoading } = useQuery({
@@ -35,17 +34,11 @@ export function NotificationBell() {
     refetchOnWindowFocus: true,
   });
 
-  // Tipagem específica da resposta da API de notificações
-  interface NotificationApiResponse {
-    notificacoes: Notificacao[];
-    totalNaoLidas: number;
-  }
-
-  const _notificacoes = (data as NotificationApiResponse)?.notificacoes || [];
-  const _totalNaoLidas = (data as NotificationApiResponse)?.totalNaoLidas || 0;
+  const notificacoes = (data as any)?.notificacoes || [];
+  const totalNaoLidas = (data as any)?.totalNaoLidas || 0;
 
   // Mutação para marcar notificação como lida
-  const _marcarComoLidaMutation = useMutation({
+  const marcarComoLidaMutation = useMutation({
     mutationFn: async (id: number) => {
       return await apiRequest(`/api/alertas/notificacoes/${id}/marcar-lida`, {
         method: 'POST',
@@ -59,12 +52,12 @@ export function NotificationBell() {
     },
   });
 
-  const _marcarComoLida = (id: number) => {
+  const marcarComoLida = (id: number) => {
     marcarComoLidaMutation.mutate(id);
   };
 
   // Mutação para marcar todas como lidas
-  const _marcarTodasComoLidasMutation = useMutation({
+  const marcarTodasComoLidasMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('/api/alertas/notificacoes/marcar-todas-lidas', {
         method: 'POST',
@@ -79,7 +72,7 @@ export function NotificationBell() {
   });
 
   // Mutação para limpar histórico (arquivar todas)
-  const _limparHistoricoMutation = useMutation({
+  const limparHistoricoMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('/api/alertas/notificacoes/all', {
         method: 'DELETE',
@@ -94,11 +87,11 @@ export function NotificationBell() {
     },
   });
 
-  const _marcarTodasComoLidas = () => {
+  const marcarTodasComoLidas = () => {
     marcarTodasComoLidasMutation.mutate();
   };
 
-  const _limparHistorico = () => {
+  const limparHistorico = () => {
     limparHistoricoMutation.mutate();
   };
 
@@ -128,14 +121,7 @@ export function NotificationBell() {
       {isDropdownOpen && (
         <>
           {/* Overlay para fechar dropdown ao clicar fora */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsDropdownOpen(false)}
-            onKeyDown={(e) => e.key == 'Escape' && setIsDropdownOpen(false)}
-            role="button"
-            tabIndex={0}
-            aria-label="Fechar notificações"
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
 
           {/* Dropdown Component */}
           <NotificationDropdown

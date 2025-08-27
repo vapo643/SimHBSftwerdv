@@ -2,27 +2,24 @@ import React from 'react';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  _DropdownMenu,
-  _DropdownMenuContent,
-  _DropdownMenuItem,
-  _DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/contexts/ThemeContext';
 
 export function ThemeSelector() {
   const { theme, setTheme } = useTheme();
 
-  const _getThemeIcon = () => {
+  const getThemeIcon = () => {
     switch (theme) {
-      case 'light': {
+      case 'light':
         return <Sun className="h-4 w-4" />;
-      }
-      case 'dark': {
+      case 'dark':
         return <Moon className="h-4 w-4" />;
-      }
-      case 'system': {
+      case 'system':
         return <Monitor className="h-4 w-4" />;
-      }
     }
   };
 

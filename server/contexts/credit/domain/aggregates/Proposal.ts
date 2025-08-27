@@ -176,29 +176,29 @@ export class Proposal {
     // Remove non-digits
     cpf = cpf.replace(/\D/g, '');
 
-    if (cpf.length !== 11) return false; }
+    if (cpf.length !== 11) return false;
 
     // Check for known invalid patterns
-    if (/^(\d)\1{10}$/.test(cpf)) return false; }
+    if (/^(\d)\1{10}$/.test(cpf)) return false;
 
     // Validate check digits
-    let _sum = 0;
-    for (let _i = 0; i < 9; i++) {
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
       sum += parseInt(cpf.charAt(i)) * (10 - i);
     }
-    let _checkDigit = 11 - (sum % 11);
-    if (checkDigit == 10 || checkDigit == 11) checkDigit = 0;
-    if (checkDigit !== parseInt(cpf.charAt(9))) return false; }
+    let checkDigit = 11 - (sum % 11);
+    if (checkDigit === 10 || checkDigit === 11) checkDigit = 0;
+    if (checkDigit !== parseInt(cpf.charAt(9))) return false;
 
     sum = 0;
-    for (let _i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++) {
       sum += parseInt(cpf.charAt(i)) * (11 - i);
     }
     checkDigit = 11 - (sum % 11);
-    if (checkDigit == 10 || checkDigit == 11) checkDigit = 0;
-    if (checkDigit !== parseInt(cpf.charAt(10))) return false; }
+    if (checkDigit === 10 || checkDigit === 11) checkDigit = 0;
+    if (checkDigit !== parseInt(cpf.charAt(10))) return false;
 
-    return true; }
+    return true;
   }
 
   // Financial Calculations
@@ -207,65 +207,65 @@ export class Proposal {
 
     // Se não tiver taxa de juros definida, retorna null
     if (!interestRate || interestRate <= 0) {
-      return null; }
+      return null;
     }
 
     // Cálculo de parcela usando fórmula de juros compostos
-    const _monthlyRate = interestRate / 100 / 12;
-    const _numerator = requestedAmount * monthlyRate * Math.pow(1 + monthlyRate, term);
-    const _denominator = Math.pow(1 + monthlyRate, term) - 1;
+    const monthlyRate = interestRate / 100 / 12;
+    const numerator = requestedAmount * monthlyRate * Math.pow(1 + monthlyRate, term);
+    const denominator = Math.pow(1 + monthlyRate, term) - 1;
 
-    return numerator / denominator; }
+    return numerator / denominator;
   }
 
   public calculateTotalAmount(): number | null {
-    const _monthlyPayment = this.calculateMonthlyPayment();
+    const monthlyPayment = this.calculateMonthlyPayment();
 
     if (!monthlyPayment) {
-      return null; }
+      return null;
     }
 
-    return monthlyPayment * this.loanConditions.term; }
+    return monthlyPayment * this.loanConditions.term;
   }
 
   // Getters
   public getId(): string {
-    return this.id; }
+    return this.id;
   }
   public getStatus(): ProposalStatus {
-    return this.status; }
+    return this.status;
   }
   public getCustomerData(): CustomerData {
-    return { ...this.customerData }; }
+    return { ...this.customerData };
   }
   public getLoanConditions(): LoanConditions {
-    return { ...this.loanConditions }; }
+    return { ...this.loanConditions };
   }
   public getPartnerId(): string | undefined {
-    return this.partnerId; }
+    return this.partnerId;
   }
   public getStoreId(): string | undefined {
-    return this.storeId; }
+    return this.storeId;
   }
   public getProductId(): string | undefined {
-    return this.productId; }
+    return this.productId;
   }
   public getCreatedAt(): Date {
-    return this.createdAt; }
+    return this.createdAt;
   }
   public getUpdatedAt(): Date {
-    return this.updatedAt; }
+    return this.updatedAt;
   }
   public getPendingReason(): string | undefined {
-    return this.pendingReason; }
+    return this.pendingReason;
   }
   public getObservations(): string | undefined {
-    return this.observations; }
+    return this.observations;
   }
 
   // Factory method to reconstruct from persistence
-  public static fromPersistence(data): Proposal {
-    const _proposal = Object.create(Proposal.prototype);
+  public static fromPersistence(data: any): Proposal {
+    const proposal = Object.create(Proposal.prototype);
     Object.assign(proposal, {
       id: data.id,
       status: data.status,
@@ -279,6 +279,6 @@ export class Proposal {
       pendingReason: data.pendingReason,
       observations: data.observations,
     });
-    return proposal; }
+    return proposal;
   }
 }

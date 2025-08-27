@@ -13,15 +13,15 @@ import { requireAdmin } from '../../lib/role-guards.js';
 import { userService } from '../../services/userService-refactored.js';
 import { UserDataSchema } from '../../../shared/types/user.js';
 
-const _router = Router();
+const router = Router();
 
 // Helper function to get client IP
 function getClientIP(req: Request): string {
-  const _forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded == 'string') {
-    return forwarded.split(',')[0].trim(); }
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
   }
-  return req.connection?.remoteAddress || req.socket?.remoteAddress || 'Unknown'; }
+  return req.connection?.remoteAddress || req.socket?.remoteAddress || 'Unknown';
 }
 
 /**
@@ -33,17 +33,17 @@ function getClientIP(req: Request): string {
  */
 router.get(
   '/',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  jwtAuthMiddleware,
+  requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       console.log('📋 [Controller/Users] Fetching all users');
 
       // PADRÃO CORRETO: Controller chama Service, não acessa DB
-      const _users = await userService.getAllUsers();
+      const users = await userService.getAllUsers();
 
       // Format response using service method
-      const _formattedUsers = userService.formatUsersForResponse(users);
+      const formattedUsers = userService.formatUsersForResponse(users);
 
       console.log(`✅ [Controller/Users] Retrieved ${formattedUsers.length} users`);
 
@@ -65,8 +65,8 @@ router.get(
  */
 router.get(
   '/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  jwtAuthMiddleware,
+  requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -78,7 +78,7 @@ router.get(
       }
 
       // PADRÃO CORRETO: Service gerencia acesso aos dados
-      const _user = await userService.getUserById(id);
+      const user = await userService.getUserById(id);
 
       if (!user) {
         return res.status(404).json({
@@ -86,7 +86,7 @@ router.get(
         });
       }
 
-      const _formattedUser = userService.formatUserForResponse(user);
+      const formattedUser = userService.formatUserForResponse(user);
 
       res.json(formattedUser);
     } catch (error) {
@@ -106,32 +106,32 @@ router.get(
  */
 router.post(
   '/',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  jwtAuthMiddleware,
+  requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       console.log('📝 [Controller/Users] Creating new user');
       console.log('📝 [Controller/Users] Request by:', req.user?.email);
 
       // Validate input data
-      const _validatedData = UserDataSchema.parse(req.body);
-      const _clientIp = getClientIP(req);
+      const validatedData = UserDataSchema.parse(req.body);
+      const clientIp = getClientIP(req);
 
       // PADRÃO CORRETO: Service gerencia toda lógica de negócio
-      const _newUser = await userService.createUser(validatedData, req.user?.id, clientIp);
+      const newUser = await userService.createUser(validatedData, req.user?.id, clientIp);
 
-      const _formattedUser = userService.formatUserForResponse(newUser);
+      const formattedUser = userService.formatUserForResponse(newUser);
 
       console.log(`✅ [Controller/Users] User created: ${newUser.email}`);
 
-      return res.*);
-    } catch (error) {
+      return res.status(201).json(formattedUser);
+    } catch (error: any) {
       // Handle validation errors
       if (error instanceof z.ZodError) {
-        const _flatErrors = error.flatten();
+        const flatErrors = error.flatten();
         console.error('❌ [Controller/Users] Validation error:', flatErrors);
 
-        let _errorMessage = 'Dados de entrada inválidos';
+        let errorMessage = 'Dados de entrada inválidos';
         if (flatErrors.fieldErrors.password) {
           errorMessage = 'Erro de validação de senha - Verifique os requisitos de segurança';
         } else if (flatErrors.fieldErrors.role) {
@@ -155,8 +155,8 @@ router.post(
       }
 
       // Handle conflict errors
-      if (error.name == 'ConflictError') {
-        return res.*);
+      if (error.name === 'ConflictError') {
+        return res.status(409).json({ message: error.message });
       }
 
       console.error('❌ [Controller/Users] Error creating user:', error.message);
@@ -176,11 +176,11 @@ router.post(
  */
 router.put(
   '/:id/deactivate',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  jwtAuthMiddleware,
+  requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const _userId = req.params.id;
+      const userId = req.params.id;
 
       if (!userId) {
         return res.status(400).json({
@@ -188,15 +188,15 @@ router.put(
         });
       }
 
-      const _clientIp = getClientIP(req);
-      const _userAgent = req.headers['user-agent'];
+      const clientIp = getClientIP(req);
+      const userAgent = req.headers['user-agent'];
 
       // PADRÃO CORRETO: Service gerencia deativação e todas as regras de negócio
-      const _result = await userService.deactivateUser(
-  _userId,
+      const result = await userService.deactivateUser(
+        userId,
         req.user!.id,
         req.user!.email!,
-  _clientIp,
+        clientIp,
         userAgent
       );
 
@@ -213,7 +213,7 @@ router.put(
     } catch (error) {
       console.error('❌ [Controller/Users] Error deactivating user:', error);
 
-      const _statusCode =
+      const statusCode =
         error instanceof Error &&
         (error.message.includes('não pode desativar') ||
           error.message.includes('último administrador'))
@@ -235,11 +235,11 @@ router.put(
  */
 router.put(
   '/:id/reactivate',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  jwtAuthMiddleware,
+  requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const _userId = req.params.id;
+      const userId = req.params.id;
 
       if (!userId) {
         return res.status(400).json({
@@ -247,15 +247,15 @@ router.put(
         });
       }
 
-      const _clientIp = getClientIP(req);
-      const _userAgent = req.headers['user-agent'];
+      const clientIp = getClientIP(req);
+      const userAgent = req.headers['user-agent'];
 
       // PADRÃO CORRETO: Service gerencia reativação
-      const _result = await userService.reactivateUser(
-  _userId,
+      const result = await userService.reactivateUser(
+        userId,
         req.user!.id,
         req.user!.email!,
-  _clientIp,
+        clientIp,
         userAgent
       );
 
@@ -267,7 +267,7 @@ router.put(
     } catch (error) {
       console.error('❌ [Controller/Users] Error reactivating user:', error);
 
-      const _statusCode =
+      const statusCode =
         error instanceof Error && error.message.includes('já está ativo') ? 400 : 500;
 
       res.status(statusCode).json({
@@ -285,8 +285,8 @@ router.put(
  */
 router.get(
   '/role/:role',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  jwtAuthMiddleware,
+  requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { role } = req.params;
@@ -298,8 +298,8 @@ router.get(
       }
 
       // PADRÃO CORRETO: Service busca usuários por perfil
-      const _users = await userService.getUsersByRole(role);
-      const _formattedUsers = userService.formatUsersForResponse(users as unknown);
+      const users = await userService.getUsersByRole(role);
+      const formattedUsers = userService.formatUsersForResponse(users as any);
 
       res.json(formattedUsers);
     } catch (error) {
@@ -322,11 +322,11 @@ router.get(
  */
 router.get(
   '/loja/:lojaId',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  jwtAuthMiddleware,
+  requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const _lojaId = parseInt(req.params.lojaId);
+      const lojaId = parseInt(req.params.lojaId);
 
       if (isNaN(lojaId)) {
         return res.status(400).json({
@@ -335,8 +335,8 @@ router.get(
       }
 
       // PADRÃO CORRETO: Service busca usuários por loja
-      const _users = await userService.getUsersByLoja(lojaId);
-      const _formattedUsers = userService.formatUsersForResponse(users as unknown);
+      const users = await userService.getUsersByLoja(lojaId);
+      const formattedUsers = userService.formatUsersForResponse(users as any);
 
       res.json(formattedUsers);
     } catch (error) {
@@ -355,11 +355,11 @@ export default router;
 
 /**
  * DOCUMENTAÇÃO DO PADRÃO ARQUITETURAL
- * =========================
+ * =====================================
  *
  * ANTES (Violação):
  * Controller → Supabase Client (direto)
- * - Imports dinâmicos de "../lib/_supabase.js"
+ * - Imports dinâmicos de "../lib/supabase.js"
  * - Queries diretas no controller
  * - Lógica de negócio misturada
  *
@@ -377,7 +377,7 @@ export default router;
  * 5. ✅ Conformidade com SOLID principles
  *
  * VIOLAÇÕES ELIMINADAS:
- * - Removido import de "../../lib/_supabase.js"
+ * - Removido import de "../../lib/supabase.js"
  * - Eliminadas queries diretas a "profiles" e "auth.users"
  * - Transferida lógica de negócio para camada apropriada
  */

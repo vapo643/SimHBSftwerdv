@@ -11,10 +11,10 @@ import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 import { z } from 'zod';
 
-const _router = express.Router();
+const router = express.Router();
 
 // Validation schemas
-const _searchCollectionsSchema = z.object({
+const searchCollectionsSchema = z.object({
   dataInicial: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   dataFinal: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   situacao: z
@@ -34,11 +34,11 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
   try {
     console.log(`[INTER] Testing connection for user: ${req.user?.email}`);
 
-    const _isConnected = await interService.testConnection();
+    const isConnected = await interService.testConnection();
 
     res.json({
       success: isConnected,
-      environment: process.env.NODE_ENV == 'production' ? 'production' : 'sandbox',
+      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
       timestamp: getBrasiliaTimestamp(),
     });
   } catch (error) {
@@ -64,22 +64,22 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       });
     }
 
-    const _collection = await interService.createCollection(req.body, req.user?.id);
+    const collection = await interService.createCollection(req.body, req.user?.id);
 
     res.status(201).json({
       success: true,
-  _collection,
+      collection,
       message: 'Cobrança criada com sucesso',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[INTER] Failed to create collection:', error);
 
-    if (error.message == 'Proposta não encontrada') {
-      return res.status(404).json({ error: 'Proposta não encontrada' });
+    if (error.message === 'Proposta não encontrada') {
+      return res.status(404).json({ error: error.message });
     }
 
-    if (error.message == 'Já existe uma cobrança para esta proposta') {
-      return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
+    if (error.message === 'Já existe uma cobrança para esta proposta') {
+      return res.status(409).json({ error: error.message });
     }
 
     res.status(500).json({
@@ -96,15 +96,15 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
 router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // Validate query parameters
-    const _params = searchCollectionsSchema.parse(req.query);
+    const params = searchCollectionsSchema.parse(req.query);
 
-    const _result = await interService.searchCollections(params);
+    const result = await interService.searchCollections(params);
 
     res.json({
       success: true,
       ...result,
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         error: 'Parâmetros inválidos',
@@ -126,20 +126,20 @@ router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRe
  */
 router.get(
   '/collections/:codigoSolicitacao',
-  _jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { codigoSolicitacao } = req.params;
 
-      const _details = await interService.getCollectionDetails(codigoSolicitacao);
+      const details = await interService.getCollectionDetails(codigoSolicitacao);
 
       res.json({
         success: true,
         collection: details,
       });
-    } catch (error) {
-      if (error.message == 'Cobrança não encontrada') {
-        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
+    } catch (error: any) {
+      if (error.message === 'Cobrança não encontrada') {
+        return res.status(404).json({ error: error.message });
       }
 
       console.error('[INTER] Get collection details failed:', error);
@@ -157,7 +157,7 @@ router.get(
  */
 router.delete(
   '/collections/:codigoSolicitacao',
-  _jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       // Check user permissions
@@ -171,23 +171,23 @@ router.delete(
       const { motivo } = req.body;
 
       if (!motivo) {
-        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
+        return res.status(400).json({ error: 'Motivo do cancelamento é obrigatório' });
       }
 
-      const _collection = await interService.cancelCollection(
-  _codigoSolicitacao,
-  _motivo,
+      const collection = await interService.cancelCollection(
+        codigoSolicitacao,
+        motivo,
         req.user?.id
       );
 
       res.json({
         success: true,
         message: 'Cobrança cancelada com sucesso',
-  _collection,
+        collection,
       });
-    } catch (error) {
-      if (error.message == 'Cobrança não encontrada') {
-        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
+    } catch (error: any) {
+      if (error.message === 'Cobrança não encontrada') {
+        return res.status(404).json({ error: error.message });
       }
 
       console.error('[INTER] Cancel collection failed:', error);
@@ -205,7 +205,7 @@ router.delete(
  */
 router.patch(
   '/collections/batch-extend',
-  _jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       // Check user permissions
@@ -220,27 +220,27 @@ router.patch(
       if (
         !codigosSolicitacao ||
         !Array.isArray(codigosSolicitacao) ||
-        codigosSolicitacao.length == 0
+        codigosSolicitacao.length === 0
       ) {
-        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
+        return res.status(400).json({ error: 'Selecione pelo menos um boleto' });
       }
 
       if (!novaDataVencimento) {
-        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
+        return res.status(400).json({ error: 'Nova data de vencimento é obrigatória' });
       }
 
-      const _result = await interService.batchExtendDueDates(
-  _codigosSolicitacao,
-  _novaDataVencimento,
+      const result = await interService.batchExtendDueDates(
+        codigosSolicitacao,
+        novaDataVencimento,
         req.user?.id
       );
 
       res.json({
         success: true,
         message: `${result.success.length} vencimentos prorrogados com sucesso`,
-        data: result,
+        ...result,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('[INTER] Batch extend failed:', error);
       res.status(500).json({
         error: 'Erro ao prorrogar vencimentos',
@@ -256,12 +256,12 @@ router.patch(
  */
 router.get(
   '/collections/:codigoSolicitacao/pdf',
-  _jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { codigoSolicitacao } = req.params;
 
-      const _pdfBuffer = await interService.generateCollectionPDF(codigoSolicitacao);
+      const pdfBuffer = await interService.generateCollectionPDF(codigoSolicitacao);
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
@@ -269,9 +269,9 @@ router.get(
         `attachment; filename="boleto-${codigoSolicitacao}.pdf"`
       );
       res.send(pdfBuffer);
-    } catch (error) {
-      if (error.message == 'Cobrança não encontrada') {
-        return res.status(409).json({ error: 'Já existe uma cobrança para esta proposta' });
+    } catch (error: any) {
+      if (error.message === 'Cobrança não encontrada') {
+        return res.status(404).json({ error: error.message });
       }
 
       console.error('[INTER] Generate PDF failed:', error);
@@ -316,14 +316,14 @@ router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =
       });
     }
 
-    const _result = await interService.syncCollectionsStatus();
+    const result = await interService.syncCollectionsStatus();
 
     res.json({
       success: true,
       message: `Sincronização concluída: ${result.updated} atualizadas, ${result.errors} erros`,
       ...result,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[INTER] Sync failed:', error);
     res.status(500).json({
       error: 'Erro ao sincronizar cobranças',
@@ -338,13 +338,13 @@ router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =
  */
 router.get('/statistics', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _stats = await interService.getCollectionStatistics();
+    const stats = await interService.getCollectionStatistics();
 
     res.json({
       success: true,
       statistics: stats,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[INTER] Get statistics failed:', error);
     res.status(500).json({
       error: 'Erro ao obter estatísticas',

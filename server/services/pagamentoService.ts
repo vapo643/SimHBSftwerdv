@@ -9,7 +9,7 @@ import { transitionTo, InvalidTransitionError } from './statusFsmService.js';
 import { z } from 'zod';
 
 // Validation schema
-const _pagamentoSchema = z.object({
+const pagamentoSchema = z.object({
   propostaId: z.string().uuid(),
   numeroContrato: z.string(),
   nomeCliente: z.string(),
@@ -43,29 +43,29 @@ export class PagamentoService {
     userRole?: string;
   }): Promise<any[]> {
     // Get payment statistics for debugging
-    const _stats = await pagamentoRepository.getPaymentStatistics();
+    const stats = await pagamentoRepository.getPaymentStatistics();
 
     console.log('[PAGAMENTOS DEBUG] Statistics:', stats);
 
     // Get proposals with filters
-    const _proposals = await pagamentoRepository.getProposalsReadyForPayment({
+    const proposals = await pagamentoRepository.getProposalsReadyForPayment({
       status: filters.status,
       periodo: filters.periodo,
-      incluirPagos: filters.incluir_pagos == true,
+      incluirPagos: filters.incluir_pagos === true,
       userId: filters.userId,
       userRole: filters.userRole,
     });
 
     console.log(`[PAGAMENTOS DEBUG] Found ${proposals.length} proposals for payment`);
 
-    return proposals; }
+    return proposals;
   }
 
   /**
    * Get specific proposal for payment
    */
-  async getProposalForPayment(proposalId: string): Promise<unknown> {
-    const _proposal = await pagamentoRepository.getProposalForPayment(proposalId);
+  async getProposalForPayment(proposalId: string): Promise<any> {
+    const proposal = await pagamentoRepository.getProposalForPayment(proposalId);
 
     if (!proposal) {
       throw new Error('Proposta não encontrada ou não está pronta para pagamento');
@@ -74,7 +74,7 @@ export class PagamentoService {
     // Verify proposal is ready for payment
     const { proposta, boleto } = proposal;
 
-    const _isReadyForPayment =
+    const isReadyForPayment =
       (proposta.ccbGerado && proposta.assinaturaEletronicaConcluida) || boleto?.codigoSolicitacao;
 
     if (!isReadyForPayment) {
@@ -83,28 +83,28 @@ export class PagamentoService {
       );
     }
 
-    return proposal; }
+    return proposal;
   }
 
   /**
    * Create new payment
    */
-  async createPayment(paymentData, userId: string): Promise<unknown> {
+  async createPayment(paymentData: any, userId: string): Promise<any> {
     // Validate payment data
-    const _validated = pagamentoSchema.parse(paymentData);
+    const validated = pagamentoSchema.parse(paymentData);
 
     // Check if proposal exists and is ready for payment
-    const _proposal = await this.getProposalForPayment(validated.propostaId);
+    const proposal = await this.getProposalForPayment(validated.propostaId);
 
     // Check if payment already exists
-    if (proposal.proposta.statusPagamento == 'pago') {
+    if (proposal.proposta.statusPagamento === 'pago') {
       throw new Error('Esta proposta já possui pagamento confirmado');
     }
 
     // Create payment record
-    const _updatedProposal = await pagamentoRepository.createPayment({
+    const updatedProposal = await pagamentoRepository.createPayment({
       ...validated,
-  _userId,
+      userId,
     });
 
     if (!updatedProposal) {
@@ -134,7 +134,7 @@ export class PagamentoService {
 
     // Try to transition proposal status
     try {
-      // await transitionTo({ propostaId: validated.propostaId, targetStatus: 'processando_pagamento', userId, observacoes: 'Pagamento criado e enviado para processamento' }); // FIXED: Transition disabled
+      await transitionTo({ propostaId: validated.propostaId, targetStatus: 'processando_pagamento', userId, observacoes: 'Pagamento criado e enviado para processamento' });
     } catch (error) {
       if (error instanceof InvalidTransitionError) {
         console.warn(
@@ -147,7 +147,7 @@ export class PagamentoService {
       }
     }
 
-    return updatedProposal; }
+    return updatedProposal;
   }
 
   /**
@@ -158,19 +158,19 @@ export class PagamentoService {
     status: string,
     userId: string,
     observacoes?: string
-  ): Promise<unknown> {
+  ): Promise<any> {
     // Get current proposal
-    const _proposal = await pagamentoRepository.getProposalForPayment(proposalId);
+    const proposal = await pagamentoRepository.getProposalForPayment(proposalId);
     if (!proposal) {
       throw new Error('Proposta não encontrada');
     }
 
-    const _statusAnterior = proposal.proposta.statusPagamento || 'pendente';
+    const statusAnterior = proposal.proposta.statusPagamento || 'pendente';
 
     // Update payment status
-    const _updatedProposal = await pagamentoRepository.updatePaymentStatus(
-  _proposalId,
-  _status,
+    const updatedProposal = await pagamentoRepository.updatePaymentStatus(
+      proposalId,
+      status,
       userId
     );
 
@@ -180,33 +180,33 @@ export class PagamentoService {
 
     // Audit status change
     await pagamentoRepository.auditPaymentAction(
-  _proposalId,
-  _userId,
+      proposalId,
+      userId,
       `PAGAMENTO_STATUS_${status.toUpperCase()}`,
       {
-  _statusAnterior,
+        statusAnterior,
         statusNovo: status,
-  _observacoes,
+        observacoes,
       }
     );
 
     // Create status contextual record
     await pagamentoRepository.createStatusContextual({
       propostaId: proposalId,
-  _statusAnterior,
+      statusAnterior,
       statusNovo: status,
       contexto: `Status de pagamento alterado: ${statusAnterior} → ${status}`,
       metadata: {
-  _observacoes,
+        observacoes,
         timestamp: new Date().toISOString(),
       },
       usuarioId: userId,
     });
 
     // Handle status transitions
-    if (status == 'pago') {
+    if (status === 'pago') {
       try {
-        // await transitionTo({ propostaId: proposalId, targetStatus: 'pago', userId, observacoes: 'Pagamento confirmado e processado com sucesso' }); // FIXED: Transition disabled
+        await transitionTo({ propostaId: proposalId, targetStatus: 'pago', userId, observacoes: 'Pagamento confirmado e processado com sucesso' });
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
@@ -214,9 +214,9 @@ export class PagamentoService {
           throw error;
         }
       }
-    } else if (status == 'rejeitado') {
+    } else if (status === 'rejeitado') {
       try {
-        // await transitionTo({ propostaId: proposalId, targetStatus: 'pagamento_rejeitado', userId, observacoes: observacoes || 'Pagamento rejeitado' }); // FIXED: Transition disabled
+        await transitionTo({ propostaId: proposalId, targetStatus: 'pagamento_rejeitado', userId, observacoes: observacoes || 'Pagamento rejeitado' });
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
@@ -226,7 +226,7 @@ export class PagamentoService {
       }
     }
 
-    return updatedProposal; }
+    return updatedProposal;
   }
 
   /**
@@ -239,15 +239,15 @@ export class PagamentoService {
     loja?: string;
     formato?: 'csv' | 'excel';
   }): Promise<{
-    data: unknown[];
+    data: any[];
     filename: string;
     contentType: string;
   }> {
     // Get filtered payments
-    const _payments = await pagamentoRepository.getPaymentsForExport(filters);
+    const payments = await pagamentoRepository.getPaymentsForExport(filters);
 
     // Transform data for export
-    const _exportData = payments.map((payment) => {
+    const exportData = payments.map((payment) => {
       const { proposta, loja, produto, boleto } = payment;
 
       return {
@@ -273,15 +273,15 @@ export class PagamentoService {
     });
 
     // Generate filename with current timestamp
-    const _now = new Date();
-    const _timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
-    const _filename = `pagamentos-export-${timestamp}`;
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+    const filename = `pagamentos-export-${timestamp}`;
 
     return {
       data: exportData,
-  _filename,
+      filename,
       contentType:
-        filters.formato == 'excel'
+        filters.formato === 'excel'
           ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           : 'text/csv',
     };
@@ -291,42 +291,42 @@ export class PagamentoService {
    * Get payment statistics dashboard
    */
   async getPaymentsDashboard(): Promise<{
-    statistics: unknown;
-    recentPayments: unknown[];
+    statistics: any;
+    recentPayments: any[];
     pendingCount: number;
     totalValue: number;
   }> {
-    const _statistics = await pagamentoRepository.getPaymentStatistics();
+    const statistics = await pagamentoRepository.getPaymentStatistics();
 
     // Get recent payments (last 10)
-    const _recentPayments = await pagamentoRepository.getProposalsReadyForPayment({
+    const recentPayments = await pagamentoRepository.getProposalsReadyForPayment({
       status: undefined,
       incluirPagos: true,
     });
 
-    const _recent = recentPayments.slice(0, 10);
+    const recent = recentPayments.slice(0, 10);
 
     // Calculate pending count and total value
-    const _pendingPayments = recentPayments.filter(
+    const pendingPayments = recentPayments.filter(
       (p) => !p.proposta.statusPagamento || p.proposta.statusPagamento !== 'pago'
     );
 
-    const _totalValue = recentPayments.reduce((sum, payment) => {
-      return sum + (payment.proposta.valorLiquido || 0); }
+    const totalValue = recentPayments.reduce((sum, payment) => {
+      return sum + (payment.proposta.valorLiquido || 0);
     }, 0);
 
     return {
-  _statistics,
+      statistics,
       recentPayments: recent,
       pendingCount: pendingPayments.length,
-  _totalValue,
+      totalValue,
     };
   }
 
   /**
    * Validate payment data before processing
    */
-  async validatePaymentData(paymentData): Promise<{
+  async validatePaymentData(paymentData: any): Promise<{
     valid: boolean;
     errors: string[];
     warnings: string[];
@@ -359,9 +359,9 @@ export class PagamentoService {
     }
 
     return {
-      valid: errors.length == 0,
-  _errors,
-  _warnings,
+      valid: errors.length === 0,
+      errors,
+      warnings,
     };
   }
 
@@ -369,8 +369,8 @@ export class PagamentoService {
    * Get available lojas and produtos for filters
    */
   async getFilterOptions(): Promise<{
-    lojas: unknown[];
-    produtos: unknown[];
+    lojas: any[];
+    produtos: any[];
     statusOptions: string[];
     formaPagamentoOptions: string[];
   }> {
@@ -380,12 +380,12 @@ export class PagamentoService {
     ]);
 
     return {
-  _lojas,
-  _produtos,
+      lojas,
+      produtos,
       statusOptions: ['todos', 'aprovado', 'processando_pagamento', 'pago', 'pagamento_rejeitado'],
       formaPagamentoOptions: ['ted', 'pix', 'doc'],
     };
   }
 }
 
-export const _pagamentoService = new PagamentoService();
+export const pagamentoService = new PagamentoService();

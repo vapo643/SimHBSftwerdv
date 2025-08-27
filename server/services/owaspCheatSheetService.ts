@@ -2610,7 +2610,7 @@ export class OwaspCheatSheetService {
       ],
     });
 
-    return results; }
+    return results;
   }
 
   /**
@@ -2625,25 +2625,25 @@ export class OwaspCheatSheetService {
     compliancePercentage: number;
     criticalGaps: number;
   } {
-    const _totalCheatSheets = 111; // ALL 111 CHEAT SHEETS
-    const _implemented = 85; // Fully implemented
-    const _partial = 12; // Partially implemented
-    const _notImplemented = 3; // Not yet implemented (MFA, security.txt, champions)
-    const _notApplicable = 11; // Framework/language specific not used
+    const totalCheatSheets = 111; // ALL 111 CHEAT SHEETS
+    const implemented = 85; // Fully implemented
+    const partial = 12; // Partially implemented
+    const notImplemented = 3; // Not yet implemented (MFA, security.txt, champions)
+    const notApplicable = 11; // Framework/language specific not used
 
-    const _compliancePercentage = Math.round(
+    const compliancePercentage = Math.round(
       ((implemented + partial * 0.5) / (totalCheatSheets - notApplicable)) * 100
     );
-    const _criticalGaps = 1; // Only MFA is critical gap
+    const criticalGaps = 1; // Only MFA is critical gap
 
     return {
-  _totalCheatSheets,
-  _implemented,
-  _partial,
-  _notImplemented,
-  _notApplicable,
-  _compliancePercentage,
-  _criticalGaps,
+      totalCheatSheets,
+      implemented,
+      partial,
+      notImplemented,
+      notApplicable,
+      compliancePercentage,
+      criticalGaps,
     };
   }
 
@@ -2651,11 +2651,11 @@ export class OwaspCheatSheetService {
    * Process individual cheat sheet URL
    */
   static async processCheatSheetUrl(url: string, content: string): Promise<CheatSheetAnalysis> {
-    const _name = this.extractCheatSheetName(url);
+    const name = this.extractCheatSheetName(url);
 
     return {
-  _url,
-  _name,
+      url,
+      name,
       status: 'processed',
       processedAt: new Date(),
       recommendations: [],
@@ -2663,10 +2663,10 @@ export class OwaspCheatSheetService {
   }
 
   private static extractCheatSheetName(url: string): string {
-    const _match = url.match(/cheatsheets\/(.+)_Cheat_Sheet\.html/);
+    const match = url.match(/cheatsheets\/(.+)_Cheat_Sheet\.html/);
     if (match) {
-      return match[1].replace(/_/g, ' '); }
+      return match[1].replace(/_/g, ' ');
     }
-    return 'Unknown'; }
+    return 'Unknown';
   }
 }

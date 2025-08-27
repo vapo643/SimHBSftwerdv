@@ -11,10 +11,10 @@ import { observacoesService } from '../services/observacoesService';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { getClientIP } from '../lib/security-logger';
 
-const _router = Router();
+const router = Router();
 
 // Schema para validação do corpo da requisição
-const _createObservacaoSchema = z.object({
+const createObservacaoSchema = z.object({
   observacao: z.string().min(1, 'Observação é obrigatória').max(1000, 'Observação muito longa'),
   tipo_acao: z
     .enum([
@@ -27,7 +27,7 @@ const _createObservacaoSchema = z.object({
     .optional(),
 });
 
-const _updateObservacaoSchema = z.object({
+const updateObservacaoSchema = z.object({
   observacao: z.string().min(1, 'Observação é obrigatória').max(1000, 'Observação muito longa'),
 });
 
@@ -37,7 +37,7 @@ const _updateObservacaoSchema = z.object({
  *
  * PADRÃO ARQUITETURAL: Controller -> Service -> Repository -> DB
  */
-router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, res) => {
+router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { propostaId } = req.params;
     const { role } = req.user!;
@@ -51,11 +51,11 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, 
     }
 
     // PADRÃO CORRETO: Controller chama Service, não acessa DB
-    const _observacoes = await observacoesService.getObservacoesByProposta(Number(propostaId));
+    const observacoes = await observacoesService.getObservacoesByProposta(Number(propostaId));
 
     res.json({
       success: true,
-      _observacoes,
+      observacoes,
       total: observacoes.length,
     });
   } catch (error) {
@@ -73,7 +73,7 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, 
  *
  * PADRÃO ARQUITETURAL: Validação no Controller, lógica no Service
  */
-router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, res) => {
+router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { propostaId } = req.params;
     const { id: userId, email, role } = req.user!;
@@ -87,14 +87,14 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
     }
 
     // Validar dados de entrada
-    const _validatedData = createObservacaoSchema.parse(req.body);
-    const _clientIp = getClientIP(req);
+    const validatedData = createObservacaoSchema.parse(req.body);
+    const clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Controller chama Service com dados validados
-    const _novaObservacao = await observacoesService.createObservacao(
+    const novaObservacao = await observacoesService.createObservacao(
       Number(propostaId),
       validatedData.observacao,
-      _userId,
+      userId,
       clientIp
     );
 
@@ -126,20 +126,20 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
  *
  * PADRÃO ARQUITETURAL: Permissões e validação no Controller, lógica no Service
  */
-router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => {
+router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { observacaoId } = req.params;
     const { id: userId, role } = req.user!;
 
     // Validar dados
-    const _validatedData = updateObservacaoSchema.parse(req.body);
-    const _clientIp = getClientIP(req);
+    const validatedData = updateObservacaoSchema.parse(req.body);
+    const clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Service cuida da lógica de negócio e validações
-    const _observacaoAtualizada = await observacoesService.updateObservacao(
+    const observacaoAtualizada = await observacoesService.updateObservacao(
       Number(observacaoId),
       validatedData.observacao,
-      _userId,
+      userId,
       clientIp
     );
 
@@ -159,7 +159,7 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => 
 
     console.error('❌ [Controller/Observações] Erro ao atualizar observação:', error);
 
-    const _statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
+    const statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
     res.status(statusCode).json({
       success: false,
       message: error instanceof Error ? error.message : 'Erro ao atualizar observação',
@@ -173,11 +173,11 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => 
  *
  * PADRÃO ARQUITETURAL: Autenticação/autorização no Controller, lógica no Service
  */
-router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => {
+router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { observacaoId } = req.params;
     const { id: userId } = req.user!;
-    const _clientIp = getClientIP(req);
+    const clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Service gerencia permissões específicas e lógica
     await observacoesService.deleteObservacao(Number(observacaoId), userId, clientIp);
@@ -189,7 +189,7 @@ router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) 
   } catch (error) {
     console.error('❌ [Controller/Observações] Erro ao deletar observação:', error);
 
-    const _statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
+    const statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
     res.status(statusCode).json({
       success: false,
       message: error instanceof Error ? error.message : 'Erro ao deletar observação',
@@ -203,7 +203,7 @@ router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) 
  *
  * PADRÃO ARQUITETURAL: Query params no Controller, processamento no Service
  */
-router.get('/observacoes', jwtAuthMiddleware, async (req, res) => {
+router.get('/observacoes', jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { page = 1, limit = 10, proposta_id, usuario_id } = req.query;
     const { role } = req.user!;
@@ -222,7 +222,7 @@ router.get('/observacoes', jwtAuthMiddleware, async (req, res) => {
     if (usuario_id) filters.usuario_id = usuario_id;
 
     // PADRÃO CORRETO: Service processa a lógica de paginação
-    const _result = await observacoesService.getObservacoesPaginated(
+    const result = await observacoesService.getObservacoesPaginated(
       Number(page),
       Number(limit),
       filters
@@ -245,7 +245,7 @@ export default router;
 
 /**
  * DOCUMENTAÇÃO DO PADRÃO ARQUITETURAL
- * =========================
+ * =====================================
  *
  * ANTES (Violação):
  * Controller -> Database (direto via import { db })

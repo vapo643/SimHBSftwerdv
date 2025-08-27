@@ -191,7 +191,7 @@ async function rollbackMigration(steps: number = 1) {
       LIMIT ${steps}
     `;
 
-    if (migrations.length == 0) {
+    if (migrations.length === 0) {
       logger.info('ℹ️ Nenhuma migração para reverter');
       return true;
     }
@@ -289,7 +289,7 @@ async function rollbackMigration(steps: number = 1) {
       logger.warn('Verifique os logs e considere rollback manual');
     }
 
-    return failureCount == 0;
+    return failureCount === 0;
   } catch (error: any) {
     logger.error('💥 Erro fatal no rollback:', error);
 
@@ -327,7 +327,7 @@ if (isNaN(steps) || steps < 1) {
 }
 
 // Confirmar execução em produção
-if (process.env.NODE_ENV == 'production') {
+if (process.env.NODE_ENV === 'production') {
   logger.warn('');
   logger.warn('🔴 ATENÇÃO: Você está prestes a executar ROLLBACK em PRODUÇÃO!');
   logger.warn(`📊 Migrações a reverter: ${steps}`);

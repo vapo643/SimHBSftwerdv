@@ -21,27 +21,27 @@ interface Recommendation {
   currentStatus: string;
 }
 
-const _router = Router();
-const _owaspService = new OWASPAssessmentService();
-const _sammUrlProcessor = new SAMMUrlProcessor();
-const _owaspCheatSheetService = new OwaspCheatSheetService();
+const router = Router();
+const owaspService = new OWASPAssessmentService();
+const sammUrlProcessor = new SAMMUrlProcessor();
+const owaspCheatSheetService = new OwaspCheatSheetService();
 
 // Configure multer for OWASP document uploads
-const _storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(process.cwd(), 'owasp_documents'));
   },
   filename: (req, file, cb) => {
-    const _timestamp = Date.now();
-    const _ext = path.extname(file.originalname);
+    const timestamp = Date.now();
+    const ext = path.extname(file.originalname);
     cb(null, `owasp_${timestamp}${ext}`);
   },
 });
 
-const _upload = multer({
-  _storage,
+const upload = multer({
+  storage,
   fileFilter: (req, file, cb) => {
-    if (file.mimetype == 'application/pdf') {
+    if (file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
       cb(new Error('Apenas arquivos PDF são aceitos para documentos OWASP'));
@@ -53,7 +53,7 @@ const _upload = multer({
 });
 
 // Helper function to check admin role
-const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
+const requireAdmin = (req: AuthenticatedRequest, res: any, next: any) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -69,7 +69,7 @@ router.use(jwtAuthMiddleware);
 // GET /api/owasp/samm - OWASP SAMM Assessment
 router.get('/samm', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _assessment = await owaspService.processSAMMAssessment();
+    const assessment = await owaspService.processSAMMAssessment();
     res.json({
       success: true,
       data: assessment,
@@ -87,7 +87,7 @@ router.get('/samm', requireAdmin, async (req: AuthenticatedRequest, res) => {
 // GET /api/owasp/samm/report - OWASP SAMM Maturity Report
 router.get('/samm/report', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _report = await owaspService.generateSAMMMaturityReport();
+    const report = await owaspService.generateSAMMMaturityReport();
     res.setHeader('Content-Type', 'text/markdown');
     res.setHeader('Content-Disposition', 'attachment; filename="samm_maturity_report.md"');
     res.send(report);
@@ -103,7 +103,7 @@ router.get('/samm/report', requireAdmin, async (req: AuthenticatedRequest, res) 
 // GET /api/owasp/asvs - OWASP ASVS Requirements
 router.get('/asvs', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _requirements = await owaspService.processASVSRequirements();
+    const requirements = await owaspService.processASVSRequirements();
     res.json({
       success: true,
       data: requirements,
@@ -121,7 +121,7 @@ router.get('/asvs', requireAdmin, async (req: AuthenticatedRequest, res) => {
 // GET /api/owasp/strategic-plan - Plano Estratégico Completo
 router.get('/strategic-plan', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _plan = await owaspService.generateStrategicPlan();
+    const plan = await owaspService.generateStrategicPlan();
     res.setHeader('Content-Type', 'text/markdown');
     res.setHeader('Content-Disposition', 'attachment; filename="owasp_strategic_plan.md"');
     res.send(plan);
@@ -137,7 +137,7 @@ router.get('/strategic-plan', requireAdmin, async (req: AuthenticatedRequest, re
 // POST /api/owasp/upload - Upload OWASP Document (PDF)
 router.post(
   '/upload',
-  _requireAdmin,
+  requireAdmin,
   upload.single('owaspDocument'),
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -165,7 +165,7 @@ router.post(
           filename: req.file.filename,
           originalName: req.file.originalname,
           size: req.file.size,
-  _framework,
+          framework,
           processedAt: new Date().toISOString(),
         },
       });
@@ -183,33 +183,33 @@ router.post(
 router.get('/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Calcular status baseado nos assessments existentes
-    const _sammAssessment = await owaspService.processSAMMAssessment();
-    const _asvsRequirements = await owaspService.processASVSRequirements();
+    const sammAssessment = await owaspService.processSAMMAssessment();
+    const asvsRequirements = await owaspService.processASVSRequirements();
 
-    const _totalSAMMGap = sammAssessment.reduce((sum, assessment) => sum + assessment.gap, 0);
-    const _totalSAMMPossible = sammAssessment.length * 3;
-    const _sammMaturityScore = Math.round(
+    const totalSAMMGap = sammAssessment.reduce((sum, assessment) => sum + assessment.gap, 0);
+    const totalSAMMPossible = sammAssessment.length * 3;
+    const sammMaturityScore = Math.round(
       ((totalSAMMPossible - totalSAMMGap) / totalSAMMPossible) * 100
     );
 
-    const _compliantASVS = asvsRequirements.filter((r) => r.compliance == 'COMPLIANT').length;
-    const _asvsComplianceScore = Math.round((compliantASVS / asvsRequirements.length) * 100);
+    const compliantASVS = asvsRequirements.filter((r) => r.compliance === 'COMPLIANT').length;
+    const asvsComplianceScore = Math.round((compliantASVS / asvsRequirements.length) * 100);
 
-    const _highPriorityGaps = sammAssessment.filter((a) => a.priority == 'HIGH').length;
-    const _nonCompliantASVS = asvsRequirements.filter(
-      (r) => r.compliance == 'NON_COMPLIANT'
+    const highPriorityGaps = sammAssessment.filter((a) => a.priority === 'HIGH').length;
+    const nonCompliantASVS = asvsRequirements.filter(
+      (r) => r.compliance === 'NON_COMPLIANT'
     ).length;
 
     res.json({
       success: true,
       data: {
         overall: {
-  _sammMaturityScore,
-  _asvsComplianceScore,
+          sammMaturityScore,
+          asvsComplianceScore,
           overallSecurityScore: Math.round((sammMaturityScore + asvsComplianceScore) / 2),
         },
         priorities: {
-  _highPriorityGaps,
+          highPriorityGaps,
           nonCompliantRequirements: nonCompliantASVS,
         },
         phases: {
@@ -233,12 +233,12 @@ router.get('/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
 // GET /api/owasp/samm/urls - Retorna todas as URLs do SAMM
 router.get('/samm/urls', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _urls = sammUrlProcessor.getUrls();
+    const urls = sammUrlProcessor.getUrls();
     res.json({
       success: true,
       data: {
         totalUrls: urls.length,
-  _urls,
+        urls,
         categories: [
           'Model',
           'Governance',
@@ -264,7 +264,7 @@ router.get('/samm/urls', requireAdmin, async (req: AuthenticatedRequest, res) =>
 router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Processar o PDF já copiado para owasp_documents
-    const _pdfPath = path.join(process.cwd(), 'owasp_documents', 'SAMM_Core_V1-5_FINAL.pdf');
+    const pdfPath = path.join(process.cwd(), 'owasp_documents', 'SAMM_Core_V1-5_FINAL.pdf');
     await owaspService.processOWASPDocument(pdfPath, 'SAMM');
 
     res.json({
@@ -290,14 +290,14 @@ router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest,
 // GET /api/owasp/cheatsheets - OWASP Cheat Sheets Analysis
 router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
+    const cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
     res.json({
       success: true,
       data: {
         totalCheatSheets: cheatsheets.length,
-        processedCheatSheets: cheatsheets.filter((cs: CheatSheet) => cs.status == 'processed')
+        processedCheatSheets: cheatsheets.filter((cs: CheatSheet) => cs.status === 'processed')
           .length,
-  _cheatsheets,
+        cheatsheets,
         summary: {
           totalRecommendations: cheatsheets.reduce(
             (sum: number, cs: CheatSheet) => sum + (cs.recommendations?.length || 0),
@@ -306,14 +306,14 @@ router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) 
           criticalRecommendations: cheatsheets.reduce(
             (sum: number, cs: CheatSheet) =>
               sum +
-              (cs.recommendations?.filter((r: Recommendation) => r.priority == 'critical')
+              (cs.recommendations?.filter((r: Recommendation) => r.priority === 'critical')
                 .length || 0),
             0
           ),
           implementedItems: cheatsheets.reduce(
             (sum: number, cs: CheatSheet) =>
               sum +
-              (cs.recommendations?.filter((r: Recommendation) => r.currentStatus == 'implemented')
+              (cs.recommendations?.filter((r: Recommendation) => r.currentStatus === 'implemented')
                 .length || 0),
             0
           ),
@@ -333,24 +333,24 @@ router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) 
 // GET /api/owasp/cheatsheets/recommendations - Get All Security Recommendations
 router.get('/cheatsheets/recommendations', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
-    const _allRecommendations = cheatsheets.flatMap((cs: CheatSheet) => cs.recommendations || []);
+    const cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
+    const allRecommendations = cheatsheets.flatMap((cs: CheatSheet) => cs.recommendations || []);
 
     // Group by category and priority
-    const _byCategory = allRecommendations.reduce(
+    const byCategory = allRecommendations.reduce(
       (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
         if (!acc[rec.category]) acc[rec.category] = [];
         acc[rec.category].push(rec);
-        return acc; }
+        return acc;
       },
       {} as Record<string, Recommendation[]>
     );
 
-    const _byPriority = allRecommendations.reduce(
+    const byPriority = allRecommendations.reduce(
       (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
         if (!acc[rec.priority]) acc[rec.priority] = [];
         acc[rec.priority].push(rec);
-        return acc; }
+        return acc;
       },
       {} as Record<string, Recommendation[]>
     );
@@ -359,20 +359,20 @@ router.get('/cheatsheets/recommendations', requireAdmin, async (req: Authenticat
       success: true,
       data: {
         totalRecommendations: allRecommendations.length,
-  _byCategory,
-  _byPriority,
+        byCategory,
+        byPriority,
         summary: {
           critical: byPriority.critical?.length || 0,
           high: byPriority.high?.length || 0,
           medium: byPriority.medium?.length || 0,
           low: byPriority.low?.length || 0,
           implemented: allRecommendations.filter(
-            (r: Recommendation) => r.currentStatus == 'implemented'
+            (r: Recommendation) => r.currentStatus === 'implemented'
           ).length,
-          partial: allRecommendations.filter((r: Recommendation) => r.currentStatus == 'partial')
+          partial: allRecommendations.filter((r: Recommendation) => r.currentStatus === 'partial')
             .length,
           notImplemented: allRecommendations.filter(
-            (r: Recommendation) => r.currentStatus == 'not_implemented'
+            (r: Recommendation) => r.currentStatus === 'not_implemented'
           ).length,
         },
       },
@@ -390,11 +390,11 @@ router.get('/cheatsheets/recommendations', requireAdmin, async (req: Authenticat
 // POST /api/owasp/wstg/process - Process WSTG URLs
 router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _wstgData = await import('../data/wstg-urls.json');
+    const wstgData = await import('../data/wstg-urls.json');
     const allUrls: string[] = [];
 
     // Extract all URLs from the JSON structure
-    Object.values(wstgData.categories).forEach((category) => {
+    Object.values(wstgData.categories).forEach((category: any) => {
       if (category.urls) {
         allUrls.push(...category.urls);
       }
@@ -406,7 +406,7 @@ router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res
     console.log(`[WSTG] Processing ${allUrls.length} URLs...`);
 
     // Process URLs using the WSTG service
-    const _results = await OwaspWstgService.processWstgUrls(allUrls);
+    const results = await OwaspWstgService.processWstgUrls(allUrls);
 
     res.json({
       success: true,
@@ -429,7 +429,7 @@ router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res
 // GET /api/owasp/wstg/status - Get WSTG compliance status
 router.get('/wstg/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const _status = OwaspWstgService.getComplianceStatus();
+    const status = OwaspWstgService.getComplianceStatus();
     res.json({
       success: true,
       data: status,

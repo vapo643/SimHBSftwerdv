@@ -3,7 +3,7 @@ import { supabase, db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const _router = Router();
+const router = Router();
 
 /**
  * Endpoint para Correção de Sincronização
@@ -27,10 +27,10 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     }
 
     // Passo 1: Deletar boletos existentes no Storage
-    const _boletosPath = `propostas/${id}/boletos/`;
+    const boletosPath = `propostas/${id}/boletos/`;
 
     // Listar todos os boletos existentes
-    const { data: boletosFiles, error: listError } = await _supabase.storage
+    const { data: boletosFiles, error: listError } = await supabase.storage
       .from('documents')
       .list(boletosPath, {
         limit: 100,
@@ -46,14 +46,14 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
 
     // Deletar cada boleto existente
     if (boletosFiles && boletosFiles.length > 0) {
-      const _filesToDelete = boletosFiles
-        .filter((file) => file.name.endsWith('.pdf'))
-        .map((file) => `${boletosPath}${file.name}`);
+      const filesToDelete = boletosFiles
+        .filter((file: any) => file.name.endsWith('.pdf'))
+        .map((file: any) => `${boletosPath}${file.name}`);
 
       if (filesToDelete.length > 0) {
         console.log(`[CORRIGIR SYNC] Deletando ${filesToDelete.length} boletos existentes`);
 
-        const { error: deleteError } = await _supabase.storage
+        const { error: deleteError } = await supabase.storage
           .from('documents')
           .remove(filesToDelete);
 
@@ -67,9 +67,9 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     }
 
     // Passo 2: Deletar carnês existentes
-    const _carnePath = `propostas/${id}/carnes/`;
+    const carnePath = `propostas/${id}/carnes/`;
 
-    const { data: carneFiles, error: carneListError } = await _supabase.storage
+    const { data: carneFiles, error: carneListError } = await supabase.storage
       .from('documents')
       .list(carnePath, {
         limit: 10,
@@ -77,14 +77,14 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
       });
 
     if (!carneListError && carneFiles && carneFiles.length > 0) {
-      const _carnesToDelete = carneFiles
-        .filter((file) => file.name.endsWith('.pdf'))
-        .map((file) => `${carnePath}${file.name}`);
+      const carnesToDelete = carneFiles
+        .filter((file: any) => file.name.endsWith('.pdf'))
+        .map((file: any) => `${carnePath}${file.name}`);
 
       if (carnesToDelete.length > 0) {
         console.log(`[CORRIGIR SYNC] Deletando ${carnesToDelete.length} carnês existentes`);
 
-        const { error: deleteCarneError } = await _supabase.storage
+        const { error: deleteCarneError } = await supabase.storage
           .from('documents')
           .remove(carnesToDelete);
 
@@ -97,13 +97,13 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     // Passo 3: Adicionar job à fila de sincronização
     const { boletoSyncQueue } = await import('../lib/mock-queue');
 
-    const _jobData = {
+    const jobData = {
       propostaId: id,
       forceSync: true, // Forçar re-sincronização
       timestamp: new Date().toISOString(),
     };
 
-    const _job = await boletoSyncQueue.add('sync-boletos', jobData);
+    const job = await boletoSyncQueue.add('sync-boletos', jobData);
 
     console.log(`[CORRIGIR SYNC] Job de re-sincronização adicionado: ${job.id}`);
 

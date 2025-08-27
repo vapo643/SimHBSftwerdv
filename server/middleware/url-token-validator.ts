@@ -37,7 +37,7 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
 
     // Check if value looks like a JWT token
     const value = req.query[key];
-    if (typeof value == 'string' && JWT_PATTERN.test(value)) {
+    if (typeof value === 'string' && JWT_PATTERN.test(value)) {
       return res.status(400).json({
         error: 'Detectado possível token em parâmetro de URL. Use o header Authorization.',
         code: 'URL_TOKEN_DETECTED',
@@ -67,13 +67,13 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
 /**
  * Strips sensitive parameters from URLs in responses
  */
-export function sanitizeResponseUrls(data: any): unknown {
-  if (typeof data == 'string') {
+export function sanitizeResponseUrls(data: any): any {
+  if (typeof data === 'string') {
     // Remove token parameters from URLs
     return data.replace(/([?&])(token|jwt|auth|access_token|session)=[^&]*/gi, '$1');
   }
 
-  if (typeof data == 'object' && data !== null) {
+  if (typeof data === 'object' && data !== null) {
     if (Array.isArray(data)) {
       return data.map((item) => sanitizeResponseUrls(item));
     }

@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import { Save, X, Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ import type { Loja, Parceiro } from '@shared/schema';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 
 // Simplified schema for the form
-const _lojaFormSchema = z.object({
+const lojaFormSchema = z.object({
   parceiroId: z
     .number({ required_error: 'Parceiro é obrigatório' })
     .min(1, 'Selecione um parceiro'),
@@ -36,15 +36,15 @@ interface LojaFormProps {
 }
 
 const LojaForm: React.FC<LojaFormProps> = ({
-  _initialData,
-  _onSubmit,
-  _onCancel,
+  initialData,
+  onSubmit,
+  onCancel,
   isLoading = false,
 }) => {
   const {
-  _register,
-  _handleSubmit,
-  _control,
+    register,
+    handleSubmit,
+    control,
     formState: { errors },
   } = useForm<LojaFormData>({
     resolver: zodResolver(lojaFormSchema),
@@ -66,8 +66,8 @@ const LojaForm: React.FC<LojaFormProps> = ({
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
       const { api } = await import('@/lib/apiClient');
-      const _response = await api.get<Parceiro[]>('/api/parceiros');
-      return (response as unknown).data || response; }
+      const response = await api.get<Parceiro[]>('/api/parceiros');
+      return (response as any).data || response;
     },
   });
 

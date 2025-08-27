@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { auditService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/performance', async (req, res) => {
   try {
-    const _result = await auditService.executeOperation('performance_check', req.query);
-    res.json(_result);
-  } catch (error) {
+    const result = await auditService.executeOperation('performance_check', req.query);
+    res.json(result);
+  } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

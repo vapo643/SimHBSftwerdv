@@ -7,7 +7,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/test-queue
@@ -17,21 +17,21 @@ router.post('/test-queue', async (req: Request, res: Response) => {
   try {
     console.log('[TEST QUEUE] 📋 Recebendo requisição de teste');
 
-    const _isDevelopment = process.env.NODE_ENV == 'development';
+    const isDevelopment = process.env.NODE_ENV === 'development';
 
     if (isDevelopment) {
       // Usar mock queue em desenvolvimento
       const { queues } = await import('../lib/mock-queue');
-      const _queue = queues.pdfProcessing;
+      const queue = queues.pdfProcessing;
 
-      const _testData = {
+      const testData = {
         type: 'TEST_JOB',
         timestamp: new Date().toISOString(),
         message: 'Job de teste conforme PAM V1.0',
         ...req.body,
       };
 
-      const _job = await queue.add('test-job', testData);
+      const job = await queue.add('test-job', testData);
 
       console.log(`[TEST QUEUE] ✅ Job ${job.id} adicionado à fila com sucesso`);
 
@@ -47,14 +47,14 @@ router.post('/test-queue', async (req: Request, res: Response) => {
       // Usar queue real em produção
       const { pdfQueue } = await import('../lib/queues-basic');
 
-      const _testData = {
+      const testData = {
         type: 'TEST_JOB',
         timestamp: new Date().toISOString(),
         message: 'Job de teste conforme PAM V1.0',
         ...req.body,
       };
 
-      const _job = await pdfQueue.add('test-job', testData);
+      const job = await pdfQueue.add('test-job', testData);
 
       console.log(`[TEST QUEUE] ✅ Job ${job.id} adicionado à fila com sucesso`);
 
@@ -67,7 +67,7 @@ router.post('/test-queue', async (req: Request, res: Response) => {
         data: testData,
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('[TEST QUEUE] ❌ Erro ao adicionar job:', error);
 
     return res.status(500).json({
@@ -84,7 +84,7 @@ router.post('/test-queue', async (req: Request, res: Response) => {
  */
 router.get('/test-queue/status', async (req: Request, res: Response) => {
   try {
-    const _isDevelopment = process.env.NODE_ENV == 'development';
+    const isDevelopment = process.env.NODE_ENV === 'development';
 
     return res.json({
       success: true,
@@ -93,7 +93,7 @@ router.get('/test-queue/status', async (req: Request, res: Response) => {
       status: 'operational',
       message: 'Fila operacional e pronta para receber jobs',
     });
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       error: 'Erro ao verificar status',

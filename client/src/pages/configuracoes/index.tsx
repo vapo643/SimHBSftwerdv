@@ -7,9 +7,9 @@ import { User, Mail, Shield, Settings, Lock, Monitor, ArrowRight } from 'lucide-
 
 export default function Configuracoes() {
   const { user } = useAuth();
-  const _isAdmin = user?.role == 'ADMINISTRADOR';
+  const isAdmin = user?.role === 'ADMINISTRADOR';
 
-  const _settingsOptions = [
+  const settingsOptions = [
     {
       title: 'Alterar Email',
       description: 'Altere o email associado à sua conta',

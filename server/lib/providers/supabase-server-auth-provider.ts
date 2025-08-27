@@ -12,7 +12,7 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
   /**
    * Converte usuário do Supabase para nossa interface padronizada
    */
-  private mapSupabaseUser(supabaseUser): ServerUser {
+  private mapSupabaseUser(supabaseUser: any): ServerUser {
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
@@ -25,8 +25,8 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
     try {
       const {
         data: { user },
-  _error,
-      } = await this._supabase.auth.getUser(token);
+        error,
+      } = await this.supabase.auth.getUser(token);
 
       if (error || !user) {
         return {
@@ -51,9 +51,9 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
     try {
       // Para Supabase, precisaríamos de um token administrativo para buscar usuário por ID
       // Por agora, retornamos null pois essa operação requer privilégios admin
-      return null; }
+      return null;
     } catch (error) {
-      return null; }
+      return null;
     }
   }
 }

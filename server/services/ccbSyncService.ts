@@ -3,7 +3,7 @@
  * Automatically downloads signed CCBs from ClickSign and stores them in Supabase Storage
  */
 
-import { db, supabase } from '../lib/_supabase.js';
+import { db, supabase } from '../lib/supabase.js';
 import { propostas } from '@shared/schema.js';
 import { sql } from 'drizzle-orm';
 
@@ -55,9 +55,9 @@ class CCBSyncService {
       console.log('[CCB SYNC] 🔄 Starting CCB synchronization...');
 
       // Find proposals that have been signed but not saved to Storage
-      const _pendingProposals = await db.execute(sql`
+      const pendingProposals = await db.execute(sql`
         SELECT 
-  _id, 
+          id, 
           clicksign_document_key as "clicksignDocumentKey",
           cliente_nome as "clienteNome"
         FROM propostas 
@@ -68,7 +68,7 @@ class CCBSyncService {
         LIMIT 10
       `);
 
-      if (pendingProposals.length == 0) {
+      if (pendingProposals.length === 0) {
         console.log('[CCB SYNC] ✅ No pending CCBs to sync');
         return;
       }
@@ -76,11 +76,7 @@ class CCBSyncService {
       console.log(`[CCB SYNC] 📋 Found ${pendingProposals.length} CCBs to sync`);
 
       for (const proposal of pendingProposals) {
-        await this.syncSingleCCB(
-          proposal.id as string,
-          proposal.clicksignDocumentKey as string,
-          proposal.clienteNome as string
-        );
+        await this.syncSingleCCB(proposal.id as string, proposal.clicksignDocumentKey as string, proposal.clienteNome as string);
       }
 
       console.log('[CCB SYNC] ✅ Synchronization complete');
@@ -104,25 +100,25 @@ class CCBSyncService {
       const { clickSignService } = await import('./clickSignService.js');
 
       // Download the signed document from ClickSign
-      const _pdfBuffer = await clickSignService.downloadSignedDocument(clicksignKey);
+      const pdfBuffer = await clickSignService.downloadSignedDocument(clicksignKey);
 
-      if (!pdfBuffer || pdfBuffer.length == 0) {
+      if (!pdfBuffer || pdfBuffer.length === 0) {
         console.log(`[CCB SYNC] ⚠️ Empty PDF received for ${proposalId}`);
-        return false as boolean; }
+        return false as boolean;
       }
 
       // Create a clean filename
-      const _timestamp = Date.now();
-      const _cleanName = clientName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-      const _filename = `CCB_${cleanName}_${proposalId}_${timestamp}.pdf`;
+      const timestamp = Date.now();
+      const cleanName = clientName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+      const filename = `CCB_${cleanName}_${proposalId}_${timestamp}.pdf`;
 
       // Storage path - organized folder structure
-      const _storagePath = `ccb-assinadas/${proposalId}/${filename}`;
+      const storagePath = `ccb-assinadas/${proposalId}/${filename}`;
 
       console.log(`[CCB SYNC] 💾 Saving to Storage: ${storagePath}`);
 
       // Upload to Supabase Storage
-      const { error: uploadError } = await _supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('documents')
         .upload(storagePath, pdfBuffer, {
           contentType: 'application/pdf',
@@ -131,7 +127,7 @@ class CCBSyncService {
 
       if (uploadError) {
         console.error(`[CCB SYNC] ❌ Upload error for ${proposalId}:`, uploadError);
-        return false; }
+        return false;
       }
 
       // Update the database with the storage path
@@ -144,10 +140,10 @@ class CCBSyncService {
       `);
 
       console.log(`[CCB SYNC] ✅ Successfully synced CCB for ${proposalId}`);
-      return true; }
+      return true;
     } catch (error) {
       console.error(`[CCB SYNC] ❌ Error syncing CCB for ${proposalId}:`, error);
-      return false; }
+      return false;
     }
   }
 
@@ -159,9 +155,9 @@ class CCBSyncService {
       console.log(`[CCB SYNC] 🔄 Force syncing proposal ${proposalId}`);
 
       // Get proposal details
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
         SELECT 
-  _id,
+          id,
           clicksign_document_key as "clicksignDocumentKey",
           cliente_nome as "clienteNome",
           assinatura_eletronica_concluida as "assinaturaEletronicaConcluida"
@@ -170,21 +166,21 @@ class CCBSyncService {
         LIMIT 1
       `);
 
-      const _proposal = result[0];
+      const proposal = result[0];
 
       if (!proposal) {
         console.log(`[CCB SYNC] ❌ Proposal ${proposalId} not found`);
-        return false; }
+        return false;
       }
 
       if (!proposal.clicksignDocumentKey) {
         console.log(`[CCB SYNC] ❌ Proposal ${proposalId} has no ClickSign key`);
-        return false; }
+        return false;
       }
 
       if (!proposal.assinaturaEletronicaConcluida) {
         console.log(`[CCB SYNC] ⚠️ Proposal ${proposalId} not signed yet`);
-        return false; }
+        return false;
       }
 
       return await this.syncSingleCCB(
@@ -194,16 +190,16 @@ class CCBSyncService {
       );
     } catch (error) {
       console.error(`[CCB SYNC] ❌ Error force syncing ${proposalId}:`, error);
-      return false; }
+      return false;
     }
   }
 }
 
 // Create singleton instance
-export const _ccbSyncService = new CCBSyncService();
+export const ccbSyncService = new CCBSyncService();
 
 // Auto-start sync in production
-if (process.env.NODE_ENV == 'production') {
+if (process.env.NODE_ENV === 'production') {
   ccbSyncService.startAutoSync(5); // Every 5 minutes
 } else {
   // In development, sync every 2 minutes

@@ -14,39 +14,46 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import {
-  _Shield,
-  _AlertTriangle,
-  _Activity,
-  _Bug,
-  _Lock,
-  _AlertCircle,
-  _CheckCircle,
-  _XCircle,
-  _Zap,
-  _FileSearch,
-  _Package,
+  Shield,
+  AlertTriangle,
+  Activity,
+  Bug,
+  Lock,
+  Eye,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Zap,
+  Target,
+  FileSearch,
+  Package,
 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import RefreshButton from '@/components/RefreshButton';
 import {
-  _AreaChart,
-  _Area,
-  _PieChart,
-  _Pie,
-  _Cell,
-  _XAxis,
-  _YAxis,
-  _CartesianGrid,
-  _Tooltip,
-  _Legend,
-  _ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts';
 
 interface SecurityMetrics {
@@ -58,7 +65,7 @@ interface SecurityMetrics {
   errorRate: number;
   anomalyScore: number;
   blockedIPs: number;
-  trend: Record<string, unknown>[]>{
+  trend: Array<{
     time: string;
     securityScore: number;
     threats: number;
@@ -103,7 +110,7 @@ const SEVERITY_COLORS = {
 };
 
 export default function SecurityDashboard() {
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const [selectedTimeRange, setSelectedTimeRange] = useState('1h');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
@@ -139,33 +146,33 @@ export default function SecurityDashboard() {
   useEffect(() => {
     try {
       // Get the correct port from window.location
-      const _protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
-      const _host = window.location.hostname;
-      const _port = window.location.port || (window.location.protocol == 'https:' ? '443' : '80');
-      const _wsUrl = `${protocol}//${host}:${port}/ws/security`;
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.hostname;
+      const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
+      const wsUrl = `${protocol}//${host}:${port}/ws/security`;
 
       console.log('🔌 [SecurityDashboard] Connecting to WebSocket:', wsUrl);
 
-      const _ws = new WebSocket(wsUrl);
+      const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
         console.log('🔌 [SecurityDashboard] WebSocket connected successfully');
       };
 
       ws.onmessage = (event) => {
-        const _data = JSON.parse(event.data);
+        const data = JSON.parse(event.data);
 
         switch (data.type) {
-          case 'anomaly': {
+          case 'anomaly':
             queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
-            break; }
-          case 'vulnerability': {
+            break;
+          case 'vulnerability':
             queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
-            break; }
-          case 'critical-alert': {
+            break;
+          case 'critical-alert':
             // Mostrar notificação
-            showCriticalAlert(_data);
-            break; }
+            showCriticalAlert(data);
+            break;
         }
       };
 
@@ -186,11 +193,11 @@ export default function SecurityDashboard() {
   }, [queryClient]);
 
   // Calcular estatísticas
-  const _stats = {
+  const stats = {
     securityScore: calculateSecurityScore(metrics, vulnerabilities),
     totalVulnerabilities: Array.isArray(vulnerabilities) ? vulnerabilities.length : 0,
     criticalVulnerabilities: Array.isArray(vulnerabilities)
-      ? vulnerabilities.filter((v: VulnerabilityReport) => v.severity == 'CRITICAL').length
+      ? vulnerabilities.filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length
       : 0,
     recentAnomalies: Array.isArray(anomalies)
       ? anomalies.filter(
@@ -199,7 +206,7 @@ export default function SecurityDashboard() {
       : 0,
   };
 
-  const _handleRefresh = () => {
+  const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/security/metrics'] });
     queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
     queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
@@ -329,7 +336,7 @@ export default function SecurityDashboard() {
         {/* Alertas Críticos */}
         {Array.isArray(vulnerabilities) &&
           (vulnerabilities as VulnerabilityReport[]).filter(
-            (v: VulnerabilityReport) => v.severity == 'CRITICAL'
+            (v: VulnerabilityReport) => v.severity === 'CRITICAL'
           ).length > 0 && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -339,7 +346,7 @@ export default function SecurityDashboard() {
                 <div className="mt-2 space-y-1">
                   {Array.isArray(vulnerabilities) &&
                     (vulnerabilities as VulnerabilityReport[])
-                      .filter((v: VulnerabilityReport) => v.severity == 'CRITICAL')
+                      .filter((v: VulnerabilityReport) => v.severity === 'CRITICAL')
                       .slice(0, 3)
                       .map((vuln: VulnerabilityReport) => (
                         <div key={vuln.id} className="text-sm">
@@ -428,7 +435,7 @@ export default function SecurityDashboard() {
 }
 
 // Componentes auxiliares
-function StatsCard({ title, value, icon, trend, critical }) {
+function StatsCard({ title, value, icon, trend, critical }: any) {
   return (
     <Card>
       <CardContent className="p-6">
@@ -455,8 +462,8 @@ function StatsCard({ title, value, icon, trend, critical }) {
   );
 }
 
-function VulnerabilitiesPanel({ vulnerabilities }) {
-  if (!vulnerabilities || vulnerabilities.length == 0) {
+function VulnerabilitiesPanel({ vulnerabilities }: any) {
+  if (!vulnerabilities || vulnerabilities.length === 0) {
     return (
       <Card>
         <CardContent className="p-12 text-center">
@@ -507,7 +514,7 @@ function VulnerabilitiesPanel({ vulnerabilities }) {
   );
 }
 
-function AnomaliesPanel({ anomalies }) {
+function AnomaliesPanel({ anomalies }: any) {
   return (
     <div className="space-y-4">
       <Card>
@@ -533,7 +540,7 @@ function AnomaliesPanel({ anomalies }) {
   );
 }
 
-function AttacksPanel({ metrics }) {
+function AttacksPanel({ metrics }: any) {
   return (
     <Card>
       <CardHeader>
@@ -567,8 +574,8 @@ function AttacksPanel({ metrics }) {
   );
 }
 
-function AttackPattern({ type, count, blocked }) {
-  const _blockRate = count > 0 ? ((blocked / count) * 100).toFixed(0) : 100;
+function AttackPattern({ type, count, blocked }: any) {
+  const blockRate = count > 0 ? ((blocked / count) * 100).toFixed(0) : 100;
 
   return (
     <div className="flex items-center justify-between rounded-lg border p-4">
@@ -586,7 +593,7 @@ function AttackPattern({ type, count, blocked }) {
   );
 }
 
-function DependenciesPanel({ scans }) {
+function DependenciesPanel({ scans }: any) {
   return (
     <Card>
       <CardHeader>
@@ -596,7 +603,7 @@ function DependenciesPanel({ scans }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {scans?.vulnerabilities?.map((dep) => (
+        {scans?.vulnerabilities?.map((dep: any) => (
           <div key={dep.cve} className="border-b py-4 last:border-0">
             <div className="flex items-start justify-between">
               <div>
@@ -624,7 +631,7 @@ function DependenciesPanel({ scans }) {
   );
 }
 
-function CodeAnalysisPanel({ findings }) {
+function CodeAnalysisPanel({ findings }: any) {
   return (
     <Card>
       <CardHeader>
@@ -634,12 +641,12 @@ function CodeAnalysisPanel({ findings }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {findings?.map((finding) => (
+        {findings?.map((finding: any) => (
           <div key={finding.id} className="border-b py-4 last:border-0">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="font-medium">{finding.rule}</p>
-                <Badge variant={finding.severity == 'ERROR' ? 'destructive' : 'default'}>
+                <Badge variant={finding.severity === 'ERROR' ? 'destructive' : 'default'}>
                   {finding.severity}
                 </Badge>
               </div>
@@ -665,7 +672,7 @@ function CodeAnalysisPanel({ findings }) {
   );
 }
 
-function SecurityTrendChart({ data }) {
+function SecurityTrendChart({ data }: any) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data}>
@@ -695,12 +702,12 @@ function SecurityTrendChart({ data }) {
   );
 }
 
-function VulnerabilityDistribution({ vulnerabilities }) {
-  const _data = vulnerabilities
+function VulnerabilityDistribution({ vulnerabilities }: any) {
+  const data = vulnerabilities
     ? Object.entries(
-        vulnerabilities.reduce((acc, vuln: VulnerabilityReport) => {
+        vulnerabilities.reduce((acc: any, vuln: VulnerabilityReport) => {
           acc[vuln.severity] = (acc[vuln.severity] || 0) + 1;
-          return acc; }
+          return acc;
         }, {})
       ).map(([severity, count]) => ({
         name: severity,
@@ -733,13 +740,13 @@ function VulnerabilityDistribution({ vulnerabilities }) {
 }
 
 // Funções auxiliares
-function calculateSecurityScore(metrics, vulnerabilities): number {
-  if (!metrics || !vulnerabilities) return 100; }
+function calculateSecurityScore(metrics: any, vulnerabilities: any): number {
+  if (!metrics || !vulnerabilities) return 100;
 
-  let _score = 100;
+  let score = 100;
 
   // Penalizar por vulnerabilidades
-  const _vulnPenalty = {
+  const vulnPenalty = {
     CRITICAL: 15,
     HIGH: 10,
     MEDIUM: 5,
@@ -755,17 +762,17 @@ function calculateSecurityScore(metrics, vulnerabilities): number {
   if (metrics.anomalyScore > 50) score -= 15;
   if (metrics.blockedRequests > metrics.totalRequests * 0.1) score -= 20;
 
-  return Math.max(0, Math.min(100, score)); }
+  return Math.max(0, Math.min(100, score));
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return '#10b981'; }
-  if (score >= 70) return '#f59e0b'; }
-  if (score >= 50) return '#ea580c'; }
-  return '#dc2626'; }
+  if (score >= 90) return '#10b981';
+  if (score >= 70) return '#f59e0b';
+  if (score >= 50) return '#ea580c';
+  return '#dc2626';
 }
 
-function showCriticalAlert(data) {
+function showCriticalAlert(data: any) {
   // Implementar notificação do navegador ou toast
-  console.error('ALERTA CRÍTICO:',_data);
+  console.error('ALERTA CRÍTICO:', data);
 }

@@ -1,33 +1,33 @@
 import React, { useState } from 'react';
 import {
-  _Table,
-  _TableHeader,
-  _TableBody,
-  _TableHead,
-  _TableRow,
-  _TableCell,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import {
-  _Dialog,
-  _DialogContent,
-  _DialogHeader,
-  _DialogTitle,
-  _DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  _Edit,
-  _Trash2,
+  Edit,
+  Trash2,
   Table as TableIcon,
-  _TrendingUp,
-  _BarChart3,
-  _Settings,
-  _Users,
-  _Package,
-  _Calculator,
-  _Plus,
+  TrendingUp,
+  BarChart3,
+  Settings,
+  Users,
+  Package,
+  Calculator,
+  Plus,
 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import TabelaComercialForm from '@/components/tabelas-comerciais/TabelaComercialForm';
@@ -39,7 +39,7 @@ import { api } from '@/lib/apiClient';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export interface TabelaComercial {
-  id: unknown;
+  id: string | number;
   nomeTabela: string;
   taxaJuros: number | string;
   comissao: number | string;
@@ -59,27 +59,27 @@ const TabelasComerciais: React.FC = () => {
   // Fetch all commercial tables
   const {
     data: tabelas = [],
-  _isLoading,
-  _error,
+    isLoading,
+    error,
   } = useQuery<TabelaComercial[]>({
     queryKey: ['tabelas-comerciais-admin'],
     queryFn: async () => {
-      const _response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
-      return Array.isArray(_response) ? response : (response as unknown).data || []; }
+      const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
+      return Array.isArray(response) ? response : (response as any).data || [];
     },
   });
 
   // Create mutation
-  const _createMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: async (data: Omit<TabelaComercial, 'id'>) => {
-      const _response = await api.post('/api/admin/tabelas-comerciais', {
+      const response = await api.post('/api/admin/tabelas-comerciais', {
         nomeTabela: data.nomeTabela,
         taxaJuros: Number(data.taxaJuros),
         prazos: data.prazos || [],
         produtoIds: data.produtoIds || [],
         comissao: Number(data.comissao),
       });
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais-admin'] });
@@ -90,7 +90,7 @@ const TabelasComerciais: React.FC = () => {
         description: 'A tabela comercial foi adicionada ao sistema.',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro ao criar tabela',
         description: error.message || 'Ocorreu um erro ao criar a tabela comercial.',
@@ -100,16 +100,16 @@ const TabelasComerciais: React.FC = () => {
   });
 
   // Update mutation
-  const _updateMutation = useMutation({
-    mutationFn: async (data: { id: unknown; data: Omit<TabelaComercial, 'id'> }) => {
-      const _response = await api.put(`/api/admin/tabelas-comerciais/${data.id}`, {
+  const updateMutation = useMutation({
+    mutationFn: async (data: { id: string | number; data: Omit<TabelaComercial, 'id'> }) => {
+      const response = await api.put(`/api/admin/tabelas-comerciais/${data.id}`, {
         nomeTabela: data.data.nomeTabela,
         taxaJuros: Number(data.data.taxaJuros),
         prazos: data.data.prazos || [],
         produtoIds: data.data.produtoIds || [],
         comissao: Number(data.data.comissao),
       });
-      return response.data; }
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais-admin'] });
@@ -121,7 +121,7 @@ const TabelasComerciais: React.FC = () => {
         description: 'As alterações foram salvas.',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro ao atualizar tabela',
         description: error.message || 'Ocorreu um erro ao atualizar a tabela comercial.',
@@ -131,8 +131,8 @@ const TabelasComerciais: React.FC = () => {
   });
 
   // Delete mutation
-  const _deleteMutation = useMutation({
-    mutationFn: async (id) => {
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string | number) => {
       await api.delete(`/api/admin/tabelas-comerciais/${id}`);
     },
     onSuccess: () => {
@@ -145,7 +145,7 @@ const TabelasComerciais: React.FC = () => {
         description: 'A tabela comercial foi removida do sistema.',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro ao excluir tabela',
         description: error.message || 'Ocorreu um erro ao excluir a tabela comercial.',
@@ -154,28 +154,28 @@ const TabelasComerciais: React.FC = () => {
     },
   });
 
-  const _handleCreate = (novaTabela: Omit<TabelaComercial, 'id'>) => {
+  const handleCreate = (novaTabela: Omit<TabelaComercial, 'id'>) => {
     createMutation.mutate(novaTabela);
   };
 
-  const _handleEdit = (tabelaAtualizada: Omit<TabelaComercial, 'id'>) => {
+  const handleEdit = (tabelaAtualizada: Omit<TabelaComercial, 'id'>) => {
     if (selectedTabela) {
       updateMutation.mutate({ id: selectedTabela.id, data: tabelaAtualizada });
     }
   };
 
-  const _handleDelete = () => {
+  const handleDelete = () => {
     if (selectedTabela) {
       deleteMutation.mutate(selectedTabela.id);
     }
   };
 
-  const _openEditModal = (tabela: TabelaComercial) => {
+  const openEditModal = (tabela: TabelaComercial) => {
     setSelectedTabela(tabela);
     setIsEditModalOpen(true);
   };
 
-  const _openDeleteModal = (tabela: TabelaComercial) => {
+  const openDeleteModal = (tabela: TabelaComercial) => {
     setSelectedTabela(tabela);
     setIsDeleteModalOpen(true);
   };
@@ -191,7 +191,7 @@ const TabelasComerciais: React.FC = () => {
   }
 
   // Calcular estatísticas das tabelas
-  const _tabelasStats = {
+  const tabelasStats = {
     total: tabelas.length,
     taxaMediaJuros:
       tabelas.length > 0
@@ -338,7 +338,7 @@ const TabelasComerciais: React.FC = () => {
                   ))}
                 </div>
               </div>
-            ) : tabelas.length == 0 ? (
+            ) : tabelas.length === 0 ? (
               <div className="py-12 text-center">
                 <TableIcon className="mx-auto mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">

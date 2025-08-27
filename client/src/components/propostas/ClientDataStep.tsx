@@ -4,25 +4,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  _User,
-  _Phone,
-  _MapPin,
-  _Briefcase,
-  _Building2,
-  _CreditCard,
-  _Smartphone,
-  _FileText,
-  _CheckCircle2,
-  _Loader2,
+  User,
+  Phone,
+  MapPin,
+  Briefcase,
+  Building2,
+  CreditCard,
+  Smartphone,
+  FileText,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Save,
 } from 'lucide-react';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import { MaskedInput } from '@/components/ui/MaskedInput';
@@ -93,14 +95,14 @@ export function ClientDataStep() {
   const [progress, setProgress] = useState(0);
 
   // Função para buscar CEP usando nosso backend
-  const _fetchAddressByCep = useCallback(
+  const fetchAddressByCep = useCallback(
     async (cep: string) => {
-      const _cleanCep = cep.replace(/\D/g, '');
+      const cleanCep = cep.replace(/\D/g, '');
       if (cleanCep.length !== 8) return;
 
       setLoadingCep(true);
       try {
-        const _data = (await apiRequest(`/api/cep/${cleanCep}`, {
+        const data = (await apiRequest(`/api/cep/${cleanCep}`, {
           method: 'GET',
         })) as CepApiResponse;
 
@@ -132,22 +134,22 @@ export function ClientDataStep() {
   );
 
   // Função para buscar dados existentes do cliente por CPF
-  const _fetchClientDataByCpf = useCallback(
+  const fetchClientDataByCpf = useCallback(
     async (cpf: string) => {
-      const _cleanCPF = cpf.replace(/\D/g, '');
+      const cleanCPF = cpf.replace(/\D/g, '');
       if (cleanCPF.length !== 11) return;
 
       setLoadingCpfData(true);
       try {
-        const _response = (await apiRequest(`/api/clientes/cpf/${cleanCPF}`, {
+        const response = (await apiRequest(`/api/clientes/cpf/${cleanCPF}`, {
           method: 'GET',
         })) as ClientDataApiResponse;
 
         if (response && response.exists && response.data) {
-          const _data = response.data;
+          const data = response.data;
 
           // Mostrar diálogo confirmando que encontrou dados
-          const _userConfirmed = window.confirm(
+          const userConfirmed = window.confirm(
             `Cliente já cadastrado!\n\nEncontramos dados de: ${data.nome}\n\nDeseja usar os dados existentes para esta nova proposta?`
           );
 
@@ -204,7 +206,7 @@ export function ClientDataStep() {
   );
 
   // Handlers
-  const _handleTipoPessoaChange = (checked: boolean) => {
+  const handleTipoPessoaChange = (checked: boolean) => {
     updateClient({
       tipoPessoa: checked ? 'PJ' : 'PF',
       // Clear PJ fields if switching to PF
@@ -213,49 +215,49 @@ export function ClientDataStep() {
   };
 
   // Handlers simplificados - SEM VALIDAÇÃO
-  const _handleCPFChange = (value: string) => {
+  const handleCPFChange = (value: string) => {
     updateClient({ cpf: value });
     clearError('cpf');
     // Buscar dados quando tiver 11 dígitos
-    const _cleanCPF = value.replace(/\D/g, '');
-    if (cleanCPF.length == 11) {
+    const cleanCPF = value.replace(/\D/g, '');
+    if (cleanCPF.length === 11) {
       fetchClientDataByCpf(value);
     }
   };
 
-  const _handleCNPJChange = (value: string) => {
+  const handleCNPJChange = (value: string) => {
     updateClient({ cnpj: value });
     clearError('cnpj');
   };
 
-  const _handleEmailChange = (value: string) => {
+  const handleEmailChange = (value: string) => {
     updateClient({ email: value });
     clearError('email');
   };
 
-  const _handlePhoneChange = (value: string) => {
+  const handlePhoneChange = (value: string) => {
     updateClient({ telefone: value });
     clearError('telefone');
   };
 
-  const _handleCEPChange = (value: string) => {
+  const handleCEPChange = (value: string) => {
     updateClient({ cep: value });
     clearError('cep');
     // Auto-buscar endereço quando CEP tiver 8 dígitos
-    const _cleanCep = value.replace(/\D/g, '');
-    if (cleanCep.length == 8) {
+    const cleanCep = value.replace(/\D/g, '');
+    if (cleanCep.length === 8) {
       fetchAddressByCep(value);
     }
   };
 
-  const _handleNameChange = (value: string) => {
+  const handleNameChange = (value: string) => {
     updateClient({ nome: value });
     clearError('nome');
   };
 
   // Calcular progresso do formulário
   useEffect(() => {
-    const _requiredFields = [
+    const requiredFields = [
       clientData.nome,
       clientData.cpf || clientData.cnpj,
       clientData.email,
@@ -270,11 +272,11 @@ export function ClientDataStep() {
       clientData.rendaMensal,
     ];
 
-    const _filledFields = requiredFields.filter(
+    const filledFields = requiredFields.filter(
       (field) => field && field.toString().trim() !== ''
     ).length;
-    const _totalFields = requiredFields.length;
-    const _progressValue = Math.round((filledFields / totalFields) * 100);
+    const totalFields = requiredFields.length;
+    const progressValue = Math.round((filledFields / totalFields) * 100);
     setProgress(progressValue);
   }, [clientData]);
 
@@ -317,7 +319,7 @@ export function ClientDataStep() {
             </Label>
             <Switch
               id="tipo-pessoa"
-              checked={clientData.tipoPessoa == 'PJ'}
+              checked={clientData.tipoPessoa === 'PJ'}
               onCheckedChange={handleTipoPessoaChange}
               data-testid="switch-tipo-pessoa"
             />
@@ -333,16 +335,16 @@ export function ClientDataStep() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            {clientData.tipoPessoa == 'PJ' ? 'Dados da Empresa' : 'Dados Pessoais'}
+            {clientData.tipoPessoa === 'PJ' ? 'Dados da Empresa' : 'Dados Pessoais'}
           </CardTitle>
           <CardDescription>
-            {clientData.tipoPessoa == 'PJ'
+            {clientData.tipoPessoa === 'PJ'
               ? 'Informações da empresa'
               : 'Informações básicas do cliente'}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {clientData.tipoPessoa == 'PJ' ? (
+          {clientData.tipoPessoa === 'PJ' ? (
             <>
               <div className="md:col-span-2">
                 <Label htmlFor="razaoSocial">Razão Social *</Label>
@@ -860,9 +862,7 @@ export function ClientDataStep() {
               id="clienteDividasExistentes"
               value={clientData.clienteDividasExistentes?.toString() || ''}
               onChange={(e) => {
-                const _value = parseFloat(
-                  e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
-                );
+                const value = parseFloat(e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.'));
                 updateClient({ clienteDividasExistentes: isNaN(value) ? undefined : value });
               }}
               placeholder="R$ 0,00"
@@ -887,9 +887,7 @@ export function ClientDataStep() {
         <CardContent>
           <Tabs
             value={clientData.metodoPagamento}
-            onValueChange={(value: string) =>
-              updateClient({ metodoPagamento: value as 'pix' | 'conta_bancaria' })
-            }
+            onValueChange={(value: any) => updateClient({ metodoPagamento: value })}
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="conta_bancaria" data-testid="tab-conta-bancaria">
@@ -926,7 +924,7 @@ export function ClientDataStep() {
                         Todos os Bancos
                       </div>
                       {brazilianBanks
-                        .filter((b) => !commonBanks.find((c) => c.code == b.code))
+                        .filter((b) => !commonBanks.find((c) => c.code === b.code))
                         .map((bank) => (
                           <SelectItem key={bank.code} value={bank.code}>
                             {bank.code} - {bank.name}
@@ -1046,7 +1044,7 @@ export function ClientDataStep() {
                         Todos os Bancos
                       </div>
                       {brazilianBanks
-                        .filter((b) => !commonBanks.find((c) => c.code == b.code))
+                        .filter((b) => !commonBanks.find((c) => c.code === b.code))
                         .map((bank) => (
                           <SelectItem key={bank.code} value={bank.code}>
                             {bank.code} - {bank.name}

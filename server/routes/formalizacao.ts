@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { proposalService } from '../services/proposalService.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/formalizacao/execute
@@ -16,9 +16,9 @@ const _router = Router();
  */
 router.post('/execute', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const _result = await proposalService.executeOperation('formalization', req.body);
-    res.json(_result);
-  } catch (error) {
+    const result = await proposalService.executeOperation('formalization', req.body);
+    res.json(result);
+  } catch (error: any) {
     console.error('[FORMALIZACAO] Error:', error);
     res.status(500).json({
       success: false,
@@ -33,9 +33,9 @@ router.post('/execute', async (req: AuthenticatedRequest, res: Response) => {
  */
 router.get('/status/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const _result = await proposalService.executeOperation('get_status', { id: req.params.id });
-    res.json(_result);
-  } catch (error) {
+    const result = await proposalService.executeOperation('get_status', { id: req.params.id });
+    res.json(result);
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       error: error.message || 'Status check failed',

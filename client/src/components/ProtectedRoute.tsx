@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     // Nossa nova camada de abstração retorna AuthSubscription diretamente
-    const _subscription = onAuthStateChange((user) => {
+    const subscription = onAuthStateChange((user) => {
       setUser(user);
       setLoading(false);
 
@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
     });
 
-    return () => subscription.unsubscribe(); }
+    return () => subscription.unsubscribe();
   }, [setLocation]);
 
   if (loading) {
@@ -34,8 +34,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return null; }
+    return null;
   }
 
-  return <>{children}</>; }
+  return <>{children}</>;
 }

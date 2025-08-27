@@ -4,7 +4,7 @@ async function testProfileQuery() {
   const supabase = createServerSupabaseAdminClient();
 
   // First, let's find an existing user profile
-  const { data: profiles, error: listError } = await _supabase.from('profiles').select('*').limit(5);
+  const { data: profiles, error: listError } = await supabase.from('profiles').select('*').limit(5);
 
   console.log('Existing profiles:', profiles);
 

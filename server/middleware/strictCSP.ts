@@ -35,7 +35,7 @@ export class StrictCSP {
       res.locals.nonce = nonce;
 
       // Build CSP policy based on environment
-      const isDevelopment = process.env.NODE_ENV == 'development';
+      const isDevelopment = process.env.NODE_ENV === 'development';
 
       const cspPolicy = [
         // Default source - only self and data URIs for images
@@ -85,17 +85,17 @@ export class StrictCSP {
         "manifest-src 'self'",
 
         // Upgrade insecure requests in production
-        ...(process.env.NODE_ENV == 'production' ? ['upgrade-insecure-requests'] : []),
+        ...(process.env.NODE_ENV === 'production' ? ['upgrade-insecure-requests'] : []),
 
         // Block mixed content in production
-        ...(process.env.NODE_ENV == 'production' ? ['block-all-mixed-content'] : []),
+        ...(process.env.NODE_ENV === 'production' ? ['block-all-mixed-content'] : []),
       ].join('; ');
 
       // Set Content Security Policy header
       res.setHeader('Content-Security-Policy', cspPolicy);
 
       // Also set report-only for testing (optional)
-      if (process.env.NODE_ENV == 'development') {
+      if (process.env.NODE_ENV === 'development') {
         const reportOnlyPolicy = cspPolicy.replace(
           `'nonce-${nonce}'`,
           `'nonce-${nonce}' 'unsafe-eval'`

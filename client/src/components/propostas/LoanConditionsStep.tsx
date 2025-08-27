@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -31,13 +31,13 @@ export function LoanConditionsStep() {
   }
 
   // Get selected product
-  const _selectedProduct = context.produtos.find((p) => p.id == loanData.produtoId);
+  const selectedProduct = context.produtos.find((p) => p.id === loanData.produtoId);
 
   // Get available terms from selected table
-  const _selectedTable = selectedProduct?.tabelasDisponiveis.find(
-    (t) => t.id == loanData.tabelaComercialId
+  const selectedTable = selectedProduct?.tabelasDisponiveis.find(
+    (t) => t.id === loanData.tabelaComercialId
   );
-  const _availableTerms = selectedTable?.prazos || [];
+  const availableTerms = selectedTable?.prazos || [];
 
   return (
     <div className="space-y-6">
@@ -63,7 +63,7 @@ export function LoanConditionsStep() {
                 {context.produtos.map((produto) => (
                   <SelectItem key={produto.id} value={produto.id.toString()}>
                     {produto.nome}
-                    {produto.tacTipo == 'fixo'
+                    {produto.tacTipo === 'fixo'
                       ? ` (TAC: R$ ${produto.tacValor})`
                       : ` (TAC: ${produto.tacValor}%)`}
                   </SelectItem>

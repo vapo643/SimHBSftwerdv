@@ -43,11 +43,11 @@ interface ValidationResult {
  */
 async function validateStatusConsistency(): Promise<ValidationResult> {
   console.log(
-    `${colors.cyan}${colors.bright}==========================${colors.reset}`
+    `${colors.cyan}${colors.bright}======================================${colors.reset}`
   );
   console.log(`${colors.cyan}${colors.bright}  VALIDAÇÃO DE CONSISTÊNCIA DE STATUS${colors.reset}`);
   console.log(
-    `${colors.cyan}${colors.bright}==========================${colors.reset}\n`
+    `${colors.cyan}${colors.bright}======================================${colors.reset}\n`
   );
 
   const startTime = Date.now();
@@ -139,11 +139,11 @@ async function validateStatusConsistency(): Promise<ValidationResult> {
 
     // 5. Relatório final
     console.log(
-      `\n${colors.cyan}${colors.bright}==========================${colors.reset}`
+      `\n${colors.cyan}${colors.bright}======================================${colors.reset}`
     );
     console.log(`${colors.cyan}${colors.bright}           RELATÓRIO FINAL${colors.reset}`);
     console.log(
-      `${colors.cyan}${colors.bright}==========================${colors.reset}\n`
+      `${colors.cyan}${colors.bright}======================================${colors.reset}\n`
     );
 
     console.log(`${colors.bright}📊 ESTATÍSTICAS:${colors.reset}`);
@@ -155,7 +155,7 @@ async function validateStatusConsistency(): Promise<ValidationResult> {
     );
     console.log(`  • Tempo de Execução: ${elapsedTime}ms\n`);
 
-    if (inconsistencias.length == 0) {
+    if (inconsistencias.length === 0) {
       console.log(`${colors.green}${colors.bright}✅ [CONSISTÊNCIA VALIDADA]${colors.reset}`);
       console.log(
         `${colors.green}Verificadas ${allPropostas.length} propostas. Nenhuma inconsistência encontrada.${colors.reset}`
@@ -176,7 +176,7 @@ async function validateStatusConsistency(): Promise<ValidationResult> {
     // Alertar sobre propostas órfãs recentes
     const dataImplementacao = new Date('2025-08-19');
     const orfasRecentes = propostasOrfas.filter((id) => {
-      const prop = allPropostas.find((p) => p.id == id);
+      const prop = allPropostas.find((p) => p.id === id);
       return prop && prop.createdAt && prop.createdAt > dataImplementacao;
     });
 
@@ -193,7 +193,7 @@ async function validateStatusConsistency(): Promise<ValidationResult> {
       }
     }
 
-    console.log(`\n${colors.cyan}==========================${colors.reset}\n`);
+    console.log(`\n${colors.cyan}======================================${colors.reset}\n`);
 
     return {
       totalPropostas: allPropostas.length,
@@ -276,7 +276,7 @@ async function main() {
 
 // Executar se chamado diretamente
 // Em ES modules, usamos import.meta.url
-if (import.meta.url == `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
 

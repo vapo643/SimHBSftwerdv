@@ -7,31 +7,31 @@ import { AuthenticatedRequest } from '../shared/types/express';
 import { db } from './lib/supabase';
 import { eq } from 'drizzle-orm';
 import {
-  _requireAdmin,
-  _requireManagerOrAdmin,
-  _requireAnyRole,
-  _requireRoles,
+  requireAdmin,
+  requireManagerOrAdmin,
+  requireAnyRole,
+  requireRoles,
 } from './lib/role-guards';
 import {
-  _enforceRoutePermissions,
-  _requireAnalyst,
-  _requireFinanceiro,
-  _filterProposalsByRole,
+  enforceRoutePermissions,
+  requireAnalyst,
+  requireFinanceiro,
+  filterProposalsByRole,
 } from './lib/role-based-access';
 import { transitionTo, InvalidTransitionError } from './services/statusFsmService';
 import {
-  _insertPropostaSchema,
-  _updatePropostaSchema,
-  _createPropostaValidationSchema,
-  _insertGerenteLojaSchema,
-  _insertLojaSchema,
-  _updateLojaSchema,
-  _propostaLogs,
-  _propostas,
-  _parceiros,
-  _produtos,
-  _tabelasComerciais,
-  _produtoTabelaComercial,
+  insertPropostaSchema,
+  updatePropostaSchema,
+  createPropostaValidationSchema,
+  insertGerenteLojaSchema,
+  insertLojaSchema,
+  updateLojaSchema,
+  propostaLogs,
+  propostas,
+  parceiros,
+  produtos,
+  tabelasComerciais,
+  produtoTabelaComercial,
 } from '@shared/schema';
 import { z } from 'zod';
 import multer from 'multer';
@@ -61,10 +61,10 @@ import testQueueRoutes from './routes/test-queue';
 import testRetryRoutes from './routes/test-retry';
 import testAuditRoutes from './routes/test-audit';
 import {
-  _getBrasiliaDate,
-  _formatBrazilianDateTime,
-  _generateApprovalDate,
-  _getBrasiliaTimestamp,
+  getBrasiliaDate,
+  formatBrazilianDateTime,
+  generateApprovalDate,
+  getBrasiliaTimestamp,
 } from './lib/timezone';
 // Use mock queue in development to avoid Redis dependency
 import { queues, checkQueuesHealth } from './lib/mock-queue';
@@ -75,7 +75,7 @@ import timingSecurityRoutes from './routes/timing-security';
 import documentosRoutes from './routes/documentos';
 import featureFlagService from './services/featureFlagService';
 
-const _upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Admin middleware is now replaced by requireAdmin guard
 
@@ -117,14 +117,14 @@ function parseUserAgent(userAgent: string): string {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Import and mount authentication routes
-  const _authRouter = (await import('./routes/auth/index.js')).default;
+  const authRouter = (await import('./routes/auth/index.js')).default;
   app.use('/api/auth', authRouter);
 
   // Routes below this line are managed in the monolith
 
   // Import and mount propostas core routes - REFACTORED WITH DDD
   // TODO: Switch to core.refactored.js when fully tested
-  const _propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
+  const propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
   app.use('/api/propostas', propostasCoreRouter);
 
   // DDD Credit Context Routes - Phase 1 Implementation
@@ -132,9 +132,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/ddd', createCreditRoutes());
 
   // Import and mount integration test routes
-  const _interIntegrationRouter = (await import('./routes/integracao/inter.js')).default;
-  const _clicksignIntegrationRouter = (await import('./routes/integracao/clicksign.js')).default;
-  const _circuitBreakerTestRouter = (await import('./routes/integracao/circuit-breaker-test.js'))
+  const interIntegrationRouter = (await import('./routes/integracao/inter.js')).default;
+  const clicksignIntegrationRouter = (await import('./routes/integracao/clicksign.js')).default;
+  const circuitBreakerTestRouter = (await import('./routes/integracao/circuit-breaker-test.js'))
     .default;
 
   app.use('/api/integracao/inter', interIntegrationRouter);
@@ -152,13 +152,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Feature Flags endpoint - retorna flags para o usuário atual
-  app.get('/api/features', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/features', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       // Inicializa o serviço se necessário
       await featureFlagService.init();
 
       // Contexto do usuário para avaliação de flags
-      const _context = {
+      const context = {
         userId: req.user?.id,
         userRole: req.user?.role,
         sessionId: req.sessionID,
@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Lista de flags relevantes para o frontend
-      const __frontendFlags = [
+      const frontendFlags = [
         'maintenance-mode',
         'read-only-mode',
         'novo-dashboard',
@@ -178,10 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       // Verifica todas as flags
-      const _flags = await featureFlagService.checkMultiple(_frontendFlags, context);
+      const flags = await featureFlagService.checkMultiple(frontendFlags, context);
 
       res.json({
-        _flags,
+        flags,
         context: {
           environment: context.environment,
           userId: context.userId,
@@ -189,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao buscar feature flags:', error);
       // Em caso de erro, retorna flags desabilitadas
       res.json({
         flags: {},
@@ -200,23 +200,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
   app.get('/api/debug-sentry', function mainHandler(req, res) {
-    throw new Error('Error');
+    throw new Error('Meu primeiro erro Sentry do Simpix!');
   });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
   app.get(
     '/api/experimental/analytics',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Verifica se a feature flag está habilitada
-        const _isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
+        const isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
           userId: req.user?.id,
           userRole: req.user?.role,
           environment: process.env.NODE_ENV,
         });
 
-        if (!_isEnabled) {
+        if (!isEnabled) {
           console.log(
             '❌ Feature flag nova-api-experimental desabilitada para usuário:',
             req.user?.id
@@ -231,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Lógica experimental da nova API
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Exemplo: Analytics avançado (apenas quando feature flag está ativa)
         const { data: analytics, error } = await supabase
@@ -244,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Processamento experimental de analytics
-        const _summary = {
+        const summary = {
           total_propostas: analytics.length,
           total_valor: analytics.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0),
           por_status: analytics.reduce(
@@ -260,12 +260,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json({
           success: true,
-          data: _summary,
+          data: summary,
           experimental: true,
           message: 'API experimental - dados podem mudar',
         });
       } catch (error) {
-        console.error(error);
+        console.error('Erro na API experimental:', error);
         res.status(500).json({
           error: 'Internal server error',
           experimental: true,
@@ -280,7 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/relatorio-final-ccb', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       console.log('🧪 [RELATÓRIO] Executando auditoria final conforme plano de teste');
 
@@ -300,25 +300,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // VALIDAÇÕES DO PLANO DE TESTE
-      const _enderecoOK = !!(
+      const enderecoOK = !!(
         proposta.cliente_data?.logradouro &&
         proposta.cliente_data?.bairro &&
         proposta.cliente_data?.cep
       );
-      const _rgOK = !!(
+      const rgOK = !!(
         proposta.cliente_data?.rg &&
         proposta.cliente_data?.localNascimento &&
         proposta.cliente_data?.rgUf
       );
-      const _bancoOK = !!(
+      const bancoOK = !!(
         proposta.dados_pagamento_tipo &&
         (proposta.dados_pagamento_banco || proposta.dados_pagamento_pix)
       );
-      const _expedidorOK = !!(
+      const expedidorOK = !!(
         proposta.cliente_data?.orgaoEmissor && proposta.cliente_data?.nacionalidade
       );
 
-      const _todasValidacoes = enderecoOK && rgOK && bancoOK && expedidorOK;
+      const todasValidacoes = enderecoOK && rgOK && bancoOK && expedidorOK;
 
       // RELATÓRIO FINAL CONFORME SOLICITADO
       res.json({
@@ -346,7 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/audit-ccb-endtoend', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Buscar última proposta para auditoria dos dados
       const { data: proposta, error } = await supabase
@@ -368,7 +368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🧪 [AUDIT] Cliente Data:', JSON.stringify(proposta.cliente_data, null, 2));
 
       // ETAPA 3 - AUDITORIA VISUAL CONFORME PLANO DE TESTE
-      const _validacoes = {
+      const validacoes = {
         'ENDEREÇO - Formatação Separada': {
           logradouro: proposta.cliente_data?.logradouro ? '✅ PRESENTE' : '❌ FALTANDO',
           numero: proposta.cliente_data?.numero ? '✅ PRESENTE' : '❌ FALTANDO',
@@ -401,8 +401,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Contar validações
-      let _sucessos = 0;
-      let _total = 0;
+      let sucessos = 0;
+      let total = 0;
 
       Object.values(validacoes).forEach((categoria) => {
         Object.values(categoria).forEach((status) => {
@@ -411,7 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       });
 
-      const _veredito = sucessos == total ? '[SUCESSO]' : '[FALHA]';
+      const veredito = sucessos === total ? '[SUCESSO]' : '[FALHA]';
 
       res.json({
         RELATORIO_FINAL: veredito,
@@ -429,12 +429,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         },
         conclusao:
-          veredito == '[SUCESSO]'
+          veredito === '[SUCESSO]'
             ? '🎉 TODAS AS CORREÇÕES VALIDADAS - Debate Máximo RESOLVIDO!'
             : '❌ Ainda há campos faltantes - necessário criar nova proposta de teste',
       });
     } catch (error) {
-      console.error(error);
+      console.error('❌ [AUDIT] Erro na auditoria:', error);
       res.status(500).json({
         RELATORIO_FINAL: '[ERRO]',
         error: 'Falha na execução da auditoria',
@@ -446,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/test-ccb-corrections', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Buscar última proposta criada para auditoria
       const { data: proposta, error } = await supabase
@@ -464,7 +464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // AUDITORIA ETAPA 3 - Verificação dos dados que entrarão na CCB
-      const _auditoria = {
+      const auditoria = {
         '[ ] ENDEREÇO SEPARADO': {
           logradouro: proposta.cliente_data?.logradouro || '❌ FALTANDO',
           numero: proposta.cliente_data?.numero || '❌ FALTANDO',
@@ -496,27 +496,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Contar validações bem-sucedidas
-      let _sucessos = 0;
-      let _total = 0;
+      let sucessos = 0;
+      let total = 0;
 
       Object.values(auditoria).forEach((categoria) => {
         Object.values(categoria).forEach((valor) => {
           total++;
-          if (typeof valor == 'string' && !valor.includes('❌ FALTANDO')) {
+          if (typeof valor === 'string' && !valor.includes('❌ FALTANDO')) {
             sucessos++;
           }
         });
       });
 
-      const _status = sucessos == total ? '[SUCESSO]' : '[FALHA]';
+      const status = sucessos === total ? '[SUCESSO]' : '[FALHA]';
 
       res.json({
-        _status,
+        status,
         score: `${sucessos}/${total} validações`,
         proposta_auditada: proposta.id,
         auditoria_detalhada: auditoria,
         proxima_acao:
-          sucessos == total
+          sucessos === total
             ? '✅ TODAS AS CORREÇÕES VALIDADAS - Gerar CCB para confirmar PDF'
             : '❌ CORREÇÕES INCOMPLETAS - Verificar campos faltantes',
       });
@@ -528,11 +528,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test endpoint para verificar correções de bugs
   app.get(
     '/api/test-data-flow',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Buscar última proposta criada
         const { data: proposta, error } = await supabase
@@ -550,7 +550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Verificar campos de endereço
-        const _enderecoFields = {
+        const enderecoFields = {
           cep: proposta.cliente_data?.cep,
           logradouro: proposta.cliente_data?.logradouro,
           numero: proposta.cliente_data?.numero,
@@ -562,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         // Verificar dados bancários
-        const _dadosBancarios = {
+        const dadosBancarios = {
           tipo: proposta.dados_pagamento_tipo,
           pix: proposta.dados_pagamento_pix,
           banco: proposta.dados_pagamento_banco,
@@ -580,7 +580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .eq('proposta_id', proposta.id)
           .order('numero_parcela', { ascending: true });
 
-        const _resultado = {
+        const resultado = {
           proposta_id: proposta.id,
           created_at: proposta.created_at,
           status: 'analise_completa',
@@ -621,14 +621,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json(resultado);
       } catch (error) {
-        console.error(error);
+        console.error('Erro no teste de fluxo de dados:', error);
         res.status(500).json({ error: 'Erro ao testar fluxo de dados' });
       }
     }
   );
 
   // Debug endpoint for RBAC validation
-  app.get('/api/debug/me', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/debug/me', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       res.json({
         message: 'Debug endpoint - User profile from robust JWT middleware',
@@ -636,7 +636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: getBrasiliaTimestamp(),
       });
     } catch (error) {
-      console.error(error);
+      console.error('Debug endpoint error:', error);
       res.status(500).json({ message: 'Debug endpoint failed' });
     }
   });
@@ -647,15 +647,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New endpoint for formalization proposals (filtered by status)
   app.get(
     '/api/propostas/formalizacao',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Formalization statuses - TODOS exceto BOLETOS_EMITIDOS
         // BOLETOS_EMITIDOS vai para Cobranças e Pagamentos
-        const _formalizationStatuses = [
+        const formalizationStatuses = [
           'aprovado',
           'aceito_atendente',
           'documentos_enviados',
@@ -673,43 +673,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // NÃO incluir "pronto_pagamento" - é o antigo BOLETOS_EMITIDOS
         ];
 
-        const _userId = req.user?.id;
-        const _userRole = req.user?.role;
-        const _userLojaId = req.user?.loja_id;
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        const userLojaId = req.user?.loja_id;
 
         console.log(
           `🔐 [FORMALIZATION] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`
         );
 
         // Build query based on user role
-        let _query = _supabase.from('propostas').select('*').in('status', formalizationStatuses);
+        let query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
 
         // Apply role-based filtering
-        if (userRole == 'ATENDENTE') {
+        if (userRole === 'ATENDENTE') {
           // ATENDENTE sees only proposals they created
-          _query = _query.eq('user_id', _userId);
-          console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${_userId}`);
-        } else if (_userRole == 'GERENTE') {
+          query = query.eq('user_id', userId);
+          console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
+        } else if (userRole === 'GERENTE') {
           // GERENTE sees all proposals from their store
-          _query = _query.eq('loja_id', _userLojaId);
-          console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${_userLojaId}`);
+          query = query.eq('loja_id', userLojaId);
+          console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
         }
         // For other roles (ADMINISTRADOR, ANALISTA, etc.), no additional filtering
 
-        const { data: rawPropostas, error } = await _query.order('created_at', {
-          ascending: false,
-        });
+        const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
-          console.error(error);
-          return res.status(500).json({ error: 'Error' });
+          console.error('🚨 [FORMALIZATION] Supabase error:', error);
+          return res.status(500).json({ message: 'Erro ao consultar propostas de formalização' });
         }
 
-        if (!rawPropostas || rawPropostas.length == 0) {
+        if (!rawPropostas || rawPropostas.length === 0) {
           console.log(
             `🔐 [FORMALIZATION] No proposals found for user ${userId} with role ${userRole}`
           );
-          return res.status(500).json({ error: 'Error' });
+          return res.json([]);
         }
 
         console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${userId}`);
@@ -720,26 +718,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
-        const _formalizacaoPropostas = rawPropostas.map((proposta) => {
-          let _clienteData = null;
-          let _condicoesData = null;
+        const formalizacaoPropostas = rawPropostas.map((proposta) => {
+          let clienteData = null;
+          let condicoesData = null;
 
           // Parse cliente_data se for string
-          if (typeof proposta.cliente_data == 'string') {
+          if (typeof proposta.cliente_data === 'string') {
             try {
-              _clienteData = JSON.parse(proposta.cliente_data);
+              clienteData = JSON.parse(proposta.cliente_data);
             } catch (e) {
               console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
               clienteData = {};
             }
           } else {
-            _clienteData = proposta.cliente_data || {};
+            clienteData = proposta.cliente_data || {};
           }
 
           // Parse condicoes_data se for string
-          if (typeof proposta.condicoes_data == 'string') {
+          if (typeof proposta.condicoes_data === 'string') {
             try {
-              _condicoesData = JSON.parse(proposta.condicoes_data);
+              condicoesData = JSON.parse(proposta.condicoes_data);
             } catch (e) {
               console.warn(
                 `Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`,
@@ -748,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               condicoesData = {};
             }
           } else {
-            _condicoesData = proposta.condicoes_data || {};
+            condicoesData = proposta.condicoes_data || {};
           }
 
           return {
@@ -774,7 +772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res.json(formalizacaoPropostas);
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar propostas de formalização:', error);
         res.status(500).json({
           message: 'Erro ao buscar propostas de formalização',
         });
@@ -785,14 +783,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para gerar CCB automaticamente
   app.post(
     '/api/propostas/:id/gerar-ccb',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
         console.log(`[CCB] Solicitação de geração de CCB para proposta: ${id}`);
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Verificar se proposta está aprovada
         const { data: proposta, error: propostaError } = await supabase
@@ -802,11 +800,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .single();
 
         if (propostaError || !proposta) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ error: 'Proposta não encontrada' });
         }
 
         if (proposta.status !== 'aprovado') {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ error: 'CCB só pode ser gerada para propostas aprovadas' });
         }
 
         // Se CCB já foi gerada, retornar sucesso
@@ -824,9 +822,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { ccbGenerationService } = await import('./services/ccbGenerationService');
 
         try {
-          const _result = await ccbGenerationService.generateCCB(id);
+          const result = await ccbGenerationService.generateCCB(id);
           if (!result.success) {
-            throw new Error('Error');
+            throw new Error(result.error);
           }
           console.log(`[CCB] CCB gerada com sucesso usando template CORRETO: ${result.pdfPath}`);
           res.json({
@@ -835,11 +833,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             caminho: result.pdfPath,
           });
         } catch (error) {
-          console.error(error);
-          return res.status(500).json({ error: 'Error' });
+          console.error(`[CCB] Erro ao gerar CCB: ${error}`);
+          return res.status(500).json({ error: 'Erro ao gerar CCB' });
         }
       } catch (error) {
-        console.error(error);
+        console.error('[CCB] Erro interno:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
       }
     }
@@ -848,13 +846,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug: Testar PDF simples e limpo
   app.get(
     '/api/debug/test-pdf',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _PDFDocument = (await import('pdfkit')).default;
+        const PDFDocument = (await import('pdfkit')).default;
 
         // Criar PDF extremamente simples
-        const _doc = new PDFDocument({
+        const doc = new PDFDocument({
           margin: 50,
           size: 'A4',
           info: {
@@ -877,7 +875,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         doc.end();
 
-        const _pdfBuffer = await new Promise<Buffer>((resolve) => {
+        const pdfBuffer = await new Promise<Buffer>((resolve) => {
           doc.on('end', () => resolve(Buffer.concat(chunks)));
         });
 
@@ -885,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Disposition', 'attachment; filename="teste-simples.pdf"');
         res.send(pdfBuffer);
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao criar PDF teste:', error);
         res.status(500).json({ error: 'Erro ao criar PDF teste' });
       }
     }
@@ -894,20 +892,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug: Listar arquivos no bucket documents
   app.get(
     '/api/debug/storage-files',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
-        const { data: files, error } = await _supabase.storage.from('documents').list('ccb', {
+        const { data: files, error } = await supabase.storage.from('documents').list('ccb', {
           limit: 50,
           sortBy: { column: 'created_at', order: 'desc' },
         });
 
         if (error) {
-          console.error(error);
-          return res.status(500).json({ error: 'Error' });
+          console.error('Erro ao listar arquivos:', error);
+          return res.status(500).json({ error: error.message });
         }
 
         res.json({
@@ -917,7 +915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           count: files?.length || 0,
         });
       } catch (error) {
-        console.error(error);
+        console.error('Erro debug storage:', error);
         res.status(500).json({ error: 'Erro interno' });
       }
     }
@@ -926,7 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get CCB signed URL
   app.get(
     '/api/propostas/:id/ccb-url',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -934,7 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[CCB URL] Buscando URL para proposta: ${id}`);
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // ✅ CORREÇÃO: Buscar dados MAIS RECENTES da proposta (força busca sem cache)
         const { data: proposta, error } = await supabase
@@ -945,28 +943,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (error || !proposta) {
           console.log(`[CCB URL] ❌ Proposta não encontrada: ${error?.message}`);
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'Proposta não encontrada' });
         }
 
         if (!proposta.ccb_gerado) {
           console.log(`[CCB URL] ❌ CCB não foi gerada ainda`);
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'CCB não foi gerada para esta proposta' });
         }
 
         // ✅ ESTRATÉGIA TRIPLA: Sempre verificar se há versão mais recente no storage
         console.log(`[CCB URL] 💾 Caminho no banco: ${proposta.caminho_ccb || 'nenhum'}`);
 
         // Sempre buscar arquivos no storage para garantir versão mais recente
-        const { data: files } = await _supabase.storage
+        const { data: files } = await supabase.storage
           .from('documents')
           .list(`ccb/${id}`, { sortBy: { column: 'created_at', order: 'desc' } });
 
-        let _ccbPath = proposta.caminho_ccb; // Fallback para caminho do banco
+        let ccbPath = proposta.caminho_ccb; // Fallback para caminho do banco
 
         if (files && files.length > 0) {
           // Sempre usar o arquivo mais recente do storage (mais confiável)
-          const _latestFile = files[0];
-          const _latestPath = `ccb/${id}/${latestFile.name}`;
+          const latestFile = files[0];
+          const latestPath = `ccb/${id}/${latestFile.name}`;
 
           console.log(
             `[CCB URL] 📁 Arquivo mais recente no storage: ${latestFile.name} (${latestFile.created_at})`
@@ -985,33 +983,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (!ccbPath) {
           console.log(`[CCB URL] ❌ Nenhum arquivo CCB encontrado`);
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'Arquivo CCB não encontrado' });
         }
 
         console.log(`[CCB URL] 🔗 Gerando URL assinada para: ${ccbPath}`);
         console.log(`[CCB URL] 📅 CCB gerado em: ${proposta.ccb_gerado_em}`);
 
         // Gerar URL assinada com cache-busting para forçar atualização
-        const { data: signedUrlData, error: urlError } = await _supabase.storage
+        const { data: signedUrlData, error: urlError } = await supabase.storage
           .from('documents')
           .createSignedUrl(ccbPath, 3600); // 1 hora
 
         if (urlError || !signedUrlData) {
-          console.error(error);
-          console.error(error);
+          console.error('❌ [CCB URL] Erro ao gerar URL assinada:', urlError);
+          console.error('❌ [CCB URL] Caminho tentado:', ccbPath);
 
           // 🔄 FALLBACK: Regenerar CCB se não encontrado (conforme error_docs/storage_errors.md)
-          if (
-            (urlError as unknown)?.status == 400 ||
-            urlError.message?.includes('Object not found')
-          ) {
+          if ((urlError as any)?.status === 400 || urlError.message?.includes('Object not found')) {
             console.log('🔄 [CCB URL] Arquivo não encontrado, tentando regenerar CCB...');
             try {
               const { ccbGenerationService } = await import('./services/ccbGenerationService');
-              const _newCcb = await ccbGenerationService.generateCCB(id);
+              const newCcb = await ccbGenerationService.generateCCB(id);
               if (newCcb.success) {
                 // Tentar novamente com o novo arquivo
-                const { data: newSignedUrl } = await _supabase.storage
+                const { data: newSignedUrl } = await supabase.storage
                   .from('documents')
                   .createSignedUrl(newCcb.pdfPath!, 3600);
 
@@ -1031,7 +1026,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
             } catch (regenError) {
-              console.error(error);
+              console.error('❌ [CCB URL] Erro na regeneração:', regenError);
             }
           }
 
@@ -1051,7 +1046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType: 'application/pdf',
         });
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar CCB:', error);
         res.status(500).json({ message: 'Erro ao buscar CCB' });
       }
     }
@@ -1059,19 +1054,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     '/api/propostas/:id',
-    jwtAuthMiddleware as unknown,
-    _timingNormalizerMiddleware,
+    jwtAuthMiddleware as any,
+    timingNormalizerMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _idParam = req.params.id;
-        const _user = req.user;
+        const idParam = req.params.id;
+        const user = req.user;
 
         console.log(
           `🔐 [PROPOSTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
         );
 
         // 🔧 CORREÇÃO: Usar mesma abordagem do endpoint de formalização que funciona
-        if (user?.role == 'ATENDENTE') {
+        if (user?.role === 'ATENDENTE') {
           console.log(`🔐 [ATENDENTE ACCESS] Using RLS query for user loja_id: ${user?.loja_id}`);
 
           // Usar Drizzle com RLS como no endpoint de formalização
@@ -1082,7 +1077,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const { eq, and } = await import('drizzle-orm');
 
           // Query with RLS active - same as formalization endpoint
-          const _result = await db
+          const result = await db
             .select({
               id: propostas.id,
               numero_proposta: propostas.numeroProposta, // PAM V1.0 - Sequential number
@@ -1135,7 +1130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(propostas.id, idParam))
             .limit(1);
 
-          if (!result || result.length == 0) {
+          if (!result || result.length === 0) {
             console.log(
               `🔐 [ATENDENTE BLOCKED] User ${user?.id} denied access to proposta ${idParam} - RLS policy blocked or not found`
             );
@@ -1144,14 +1139,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
 
-          const _proposta = result[0];
+          const proposta = result[0];
           console.log(
             `🔐 [ATENDENTE ALLOWED] User ${user?.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`
           );
 
           // Buscar documentos da proposta
           const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
-          const _supabase = createServerSupabaseAdminClient();
+          const supabase = createServerSupabaseAdminClient();
 
           const { data: documentos, error: docError } = await supabase
             .from('proposta_documentos')
@@ -1164,12 +1159,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // DEBUG: Listar arquivos que existem no bucket para esta proposta
-          const { data: bucketFiles, error: listError } = await _supabase.storage
+          const { data: bucketFiles, error: listError } = await supabase.storage
             .from('documents')
             .list(`proposta-${idParam}/`, { limit: 100 });
 
           if (bucketFiles) {
-            console.log(`🔍 [ANÁLISE] ==== COMPARAÇÃO BUCKET vs BANCO ====`);
+            console.log(`🔍 [ANÁLISE] ===== COMPARAÇÃO BUCKET vs BANCO =====`);
             console.log(
               `🔍 [ANÁLISE] Arquivos no bucket (${bucketFiles.length}):`,
               bucketFiles.map((f) => f.name)
@@ -1182,13 +1177,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               `🔍 [ANÁLISE] Nomes no banco (${documentos?.length || 0}):`,
               documentos?.map((d) => d.nome_arquivo)
             );
-            console.log(`🔍 [ANÁLISE] ==============================`);
+            console.log(`🔍 [ANÁLISE] ============================================`);
           } else {
             console.log(`🔍 [ANÁLISE] Erro ao listar arquivos no bucket:`, listError?.message);
           }
 
           // Gerar URLs assinadas para visualização dos documentos
-          let _documentosComUrls = [];
+          let documentosComUrls = [];
           if (documentos && documentos.length > 0) {
             console.log(
               `🔍 [ANÁLISE] Gerando URLs assinadas para ${documentos.length} documentos...`
@@ -1204,7 +1199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 });
 
                 // Extrair o caminho do arquivo a partir da URL salva
-                const _documentsIndex = doc.url.indexOf('/documents/');
+                const documentsIndex = doc.url.indexOf('/documents/');
                 let filePath;
 
                 if (documentsIndex !== -1) {
@@ -1212,13 +1207,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   filePath = doc.url.substring(documentsIndex + '/documents/'.length);
                 } else {
                   // Fallback: construir caminho baseado no nome do arquivo
-                  const _fileName = doc.nome_arquivo;
+                  const fileName = doc.nome_arquivo;
                   filePath = `proposta-${idParam}/${fileName}`;
                 }
 
                 console.log(`🔍 [ANÁLISE] Caminho extraído para URL assinada: ${filePath}`);
 
-                const { data: signedUrlData, error: urlError } = await _supabase.storage
+                const { data: signedUrlData, error: urlError } = await supabase.storage
                   .from('documents')
                   .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -1260,7 +1255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // Transform to match expected format with proper camelCase conversion
-          const _formattedProposta = {
+          const formattedProposta = {
             ...proposta,
             // Convert snake_case to camelCase for frontend compatibility
             clienteData: proposta.cliente_data,
@@ -1296,10 +1291,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.json(formattedProposta);
         } else {
           // Para outros roles (ADMIN, GERENTE, ANALISTA), usar método original sem RLS
-          const _proposta = await storage.getPropostaById(idParam);
+          const proposta = await storage.getPropostaById(idParam);
 
           if (!proposta) {
-            return res.status(500).json({ error: 'Error' });
+            return res.status(404).json({ message: 'Proposta not found' });
           }
 
           console.log(
@@ -1308,7 +1303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // 🔧 CORREÇÃO CRÍTICA: Aplicar mesma lógica de documentos do ATENDENTE
           const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
-          const _supabase = createServerSupabaseAdminClient();
+          const supabase = createServerSupabaseAdminClient();
 
           // Buscar documentos da proposta (mesma lógica do ATENDENTE)
           const { data: documentos, error: docError } = await supabase
@@ -1322,7 +1317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // Gerar URLs assinadas para visualização dos documentos (mesma lógica do ATENDENTE)
-          let _documentosComUrls = [];
+          let documentosComUrls = [];
           if (documentos && documentos.length > 0) {
             console.log(
               `🔍 [ANÁLISE-OUTROS] Gerando URLs assinadas para ${documentos.length} documentos...`
@@ -1338,7 +1333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 });
 
                 // Extrair o caminho do arquivo a partir da URL salva
-                const _documentsIndex = doc.url.indexOf('/documents/');
+                const documentsIndex = doc.url.indexOf('/documents/');
                 let filePath;
 
                 if (documentsIndex !== -1) {
@@ -1346,13 +1341,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   filePath = doc.url.substring(documentsIndex + '/documents/'.length);
                 } else {
                   // Fallback: construir caminho baseado no nome do arquivo
-                  const _fileName = doc.nome_arquivo;
+                  const fileName = doc.nome_arquivo;
                   filePath = `proposta-${idParam}/${fileName}`;
                 }
 
                 console.log(`🔍 [ANÁLISE-OUTROS] Caminho extraído para URL assinada: ${filePath}`);
 
-                const { data: signedUrlData, error: urlError } = await _supabase.storage
+                const { data: signedUrlData, error: urlError } = await supabase.storage
                   .from('documents')
                   .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -1403,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // Incluir documentos formatados na resposta
-          const _propostaComDocumentos = {
+          const propostaComDocumentos = {
             ...proposta,
             documentos: documentosComUrls || [],
           };
@@ -1414,7 +1409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.json(propostaComDocumentos);
         }
       } catch (error) {
-        console.error(error);
+        console.error('Get proposta error:', error);
         res.status(500).json({ message: 'Failed to fetch proposta' });
       }
     }
@@ -1427,32 +1422,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint específico para associar documentos a uma proposta
   app.post(
     '/api/propostas/:id/documentos',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id: propostaId } = req.params;
         const { documentos } = req.body;
 
         if (!documentos || !Array.isArray(documentos)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Lista de documentos é obrigatória' });
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         console.log(`[DEBUG] Associando ${documentos.length} documentos à proposta ${propostaId}`);
 
         // Inserir associações na tabela proposta_documentos
         for (const fileName of documentos) {
           try {
-            const _filePath = `proposta-${propostaId}/${fileName}`;
+            const filePath = `proposta-${propostaId}/${fileName}`;
 
             // Gerar URL assinada para o documento
-            const { data: signedUrlData } = await _supabase.storage
+            const { data: signedUrlData } = await supabase.storage
               .from('documents')
               .createSignedUrl(filePath, 3600); // 1 hora
 
-            const { error: insertError } = await _supabase.from('proposta_documentos').insert({
+            const { error: insertError } = await supabase.from('proposta_documentos').insert({
               proposta_id: propostaId,
               nome_arquivo: fileName.split('-').slice(1).join('-'), // Remove timestamp prefix
               url: signedUrlData?.signedUrl || `documents/${filePath}`,
@@ -1469,14 +1464,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
 
             if (insertError) {
-              console.error(error);
+              console.error(`[ERROR] Falha ao associar documento ${fileName}:`, insertError);
             } else {
               console.log(
                 `[DEBUG] Documento ${fileName} associado com sucesso à proposta ${propostaId}`
               );
             }
           } catch (docError) {
-            console.error(error);
+            console.error(`[ERROR] Erro ao processar documento ${fileName}:`, docError);
           }
         }
 
@@ -1487,47 +1482,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (error) {
         if (error instanceof z.ZodError) {
-          console.error(error);
-          return res.status(500).json({ error: 'Error' });
+          console.error('Validation error:', error.errors);
+          return res.status(400).json({ message: 'Invalid data', errors: error.errors });
         }
-        console.error(error);
+        console.error('Create proposta error:', error);
         res.status(500).json({ message: 'Failed to create proposta' });
       }
     }
   );
 
-  // ========================
+  // ====================================
   // PILAR 12 - PROGRESSIVE ENHANCEMENT
   // Rota para submissão de formulário tradicional (fallback)
-  // ========================
-  app.post(
-    '/nova-proposta',
-    jwtAuthMiddleware as unknown,
-    async (req: AuthenticatedRequest, res) => {
-      try {
-        console.log('📝 Progressive Enhancement: Form submission received');
+  // ====================================
+  app.post('/nova-proposta', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+    try {
+      console.log('📝 Progressive Enhancement: Form submission received');
 
-        // Parse form data
-        const _formData = {
-          clienteNome: req.body.clienteNome,
-          clienteCpf: req.body.clienteCpf,
-          clienteEmail: req.body.clienteEmail,
-          clienteTelefone: req.body.clienteTelefone,
-          clienteDataNascimento: req.body.clienteDataNascimento,
-          clienteRenda: req.body.clienteRenda,
-          valor: req.body.valor,
-          prazo: parseInt(req.body.prazo),
-          finalidade: req.body.finalidade,
-          garantia: req.body.garantia,
-          status: 'rascunho',
-        };
+      // Parse form data
+      const formData = {
+        clienteNome: req.body.clienteNome,
+        clienteCpf: req.body.clienteCpf,
+        clienteEmail: req.body.clienteEmail,
+        clienteTelefone: req.body.clienteTelefone,
+        clienteDataNascimento: req.body.clienteDataNascimento,
+        clienteRenda: req.body.clienteRenda,
+        valor: req.body.valor,
+        prazo: parseInt(req.body.prazo),
+        finalidade: req.body.finalidade,
+        garantia: req.body.garantia,
+        status: 'rascunho',
+      };
 
-        // Validate and create proposal
-        const _validatedData = insertPropostaSchema.parse(formData);
-        const _proposta = await storage.createProposta(validatedData);
+      // Validate and create proposal
+      const validatedData = insertPropostaSchema.parse(formData);
+      const proposta = await storage.createProposta(validatedData);
 
-        // For traditional form submission, redirect with success message
-        const _successPage = `
+      // For traditional form submission, redirect with success message
+      const successPage = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
@@ -1569,12 +1561,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </html>
       `;
 
-        res.send(successPage);
-      } catch (error) {
-        console.error(error);
+      res.send(successPage);
+    } catch (error) {
+      console.error('Progressive Enhancement form error:', error);
 
-        // Error page for traditional form submission
-        const _errorPage = `
+      // Error page for traditional form submission
+      const errorPage = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
@@ -1613,26 +1605,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </html>
       `;
 
-        res.status(400).send(errorPage);
-      }
+      res.status(400).send(errorPage);
     }
-  );
+  });
 
   app.patch(
     '/api/propostas/:id',
-    jwtAuthMiddleware as unknown,
-    _requireManagerOrAdmin,
+    jwtAuthMiddleware as any,
+    requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _id = parseInt(req.params.id);
-        const _validatedData = updatePropostaSchema.parse(req.body);
-        const _proposta = await storage.updateProposta(id, validatedData);
+        const id = parseInt(req.params.id);
+        const validatedData = updatePropostaSchema.parse(req.body);
+        const proposta = await storage.updateProposta(id, validatedData);
         res.json(proposta);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Invalid data', errors: error.errors });
         }
-        console.error(error);
+        console.error('Update proposta error:', error);
         res.status(500).json({ message: 'Failed to update proposta' });
       }
     }
@@ -1640,14 +1631,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     '/api/propostas/status/:status',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _status = req.params.status;
-        const _propostas = await storage.getPropostasByStatus(status);
+        const status = req.params.status;
+        const propostas = await storage.getPropostasByStatus(status);
         res.json(propostas);
       } catch (error) {
-        console.error(error);
+        console.error('Get propostas by status error:', error);
         res.status(500).json({ message: 'Failed to fetch propostas' });
       }
     }
@@ -1657,10 +1648,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
 
   // Document routes for proposals - REACTIVATED FOR DIAGNOSIS
-  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as unknown, getPropostaDocuments);
+  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
-  //   jwtAuthMiddleware as unknown,
+  //   jwtAuthMiddleware as any,
   //   requireRoles(['ADMINISTRADOR', 'ANALISTA']),
   //   upload.single("file"),
   //   uploadPropostaDocument
@@ -1670,28 +1661,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
 
   // Rota para alternar status entre ativa/suspensa
-  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as unknown, togglePropostaStatus);
+  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as any, togglePropostaStatus);
 
   // Rota para buscar CCB assinada
-  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as unknown, getCcbAssinada);
+  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as any, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
   app.post('/api/setup-storage', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Check existing buckets
-      const { data: buckets, error: listError } = await _supabase.storage.listBuckets();
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
 
       if (listError) {
-        console.error(error);
+        console.error('❌ Erro ao listar buckets:', listError);
         return res
           .status(500)
           .json({ message: 'Erro ao acessar storage', error: listError.message });
       }
 
-      const _documentsExists = buckets.some((bucket) => bucket.name == 'documents');
+      const documentsExists = buckets.some((bucket) => bucket.name === 'documents');
 
       if (documentsExists) {
         return res.json({
@@ -1701,7 +1692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create documents bucket
-      const { data: bucket, error: createError } = await _supabase.storage.createBucket(
+      const { data: bucket, error: createError } = await supabase.storage.createBucket(
         'documents',
         {
           public: true,
@@ -1717,7 +1708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (createError) {
-        console.error(error);
+        console.error('❌ Erro ao criar bucket:', createError);
         return res
           .status(500)
           .json({ message: 'Erro ao criar bucket', error: createError.message });
@@ -1729,7 +1720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allBuckets: buckets.map((b) => b.name).concat(['documents']),
       });
     } catch (error) {
-      console.error(error);
+      console.error('Erro no setup:', error);
       res.status(500).json({
         message: 'Erro interno',
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -1740,30 +1731,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload route for proposal documents during creation
   app.post(
     '/api/upload',
-    _jwtAuthMiddleware,
+    jwtAuthMiddleware,
     upload.single('file'),
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _file = req.file;
-        const _proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
+        const file = req.file;
+        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Arquivo é obrigatório' });
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Generate unique filename with UUID
         const { v4: uuidv4 } = await import('uuid');
-        const _uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
-        const _fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
-        const _filePath = `proposta-${proposalId}/${fileName}`;
+        const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
+        const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
+        const filePath = `proposta-${proposalId}/${fileName}`;
 
         console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
 
         // Upload to PRIVATE Supabase Storage bucket
-        const { data: uploadData, error: uploadError } = await _supabase.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('documents')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
@@ -1771,14 +1762,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
         if (uploadError) {
-          console.error(error);
+          console.error('[ERROR] Erro no upload:', uploadError);
           return res.status(400).json({
             message: `Erro no upload: ${uploadError.message}`,
           });
         }
 
         // For private bucket, we need to generate a signed URL for viewing
-        const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('documents')
           .createSignedUrl(filePath, 3600); // 1 hour expiry
 
@@ -1794,7 +1785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: file.mimetype,
         });
       } catch (error) {
-        console.error(error);
+        console.error('[ERROR] Erro no upload de documento:', error);
         res.status(500).json({ message: 'Erro interno no upload' });
       }
     }
@@ -1802,17 +1793,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Import do controller de produtos
   const {
-    _buscarTodosProdutos,
-    _criarProduto,
-    _atualizarProduto,
-    _verificarProdutoEmUso,
-    _deletarProduto,
+    buscarTodosProdutos,
+    criarProduto,
+    atualizarProduto,
+    verificarProdutoEmUso,
+    deletarProduto,
   } = await import('./controllers/produtoController');
 
   // Buscar tabelas comerciais disponíveis com lógica hierárquica
   app.get(
     '/api/tabelas-comerciais-disponiveis',
-    _jwtAuthMiddleware,
+    jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { produtoId, parceiroId } = req.query;
@@ -1825,8 +1816,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Validação de tipos
-        const _produtoIdNum = parseInt(produtoId as string);
-        const _parceiroIdNum = parseInt(parceiroId as string);
+        const produtoIdNum = parseInt(produtoId as string);
+        const parceiroIdNum = parseInt(parceiroId as string);
 
         if (isNaN(produtoIdNum) || isNaN(parceiroIdNum)) {
           return res.status(400).json({
@@ -1845,7 +1836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
         // Agora usando JOIN com a nova estrutura N:N
-        const _tabelasPersonalizadas = await db
+        const tabelasPersonalizadas = await db
           .select({
             id: tabelasComerciais.id,
             nomeTabela: tabelasComerciais.nomeTabela,
@@ -1857,7 +1848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .from(tabelasComerciais)
           .innerJoin(
-            _produtoTabelaComercial,
+            produtoTabelaComercial,
             eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
           )
           .where(
@@ -1873,7 +1864,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(
             `[${getBrasiliaTimestamp()}] Encontradas ${tabelasPersonalizadas.length} tabelas personalizadas`
           );
-          return res.status(500).json({ error: 'Error' });
+          return res.json(tabelasPersonalizadas);
         }
 
         console.log(
@@ -1882,7 +1873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
         // Usando JOIN com a nova estrutura N:N
-        const _tabelasGerais = await db
+        const tabelasGerais = await db
           .select({
             id: tabelasComerciais.id,
             nomeTabela: tabelasComerciais.nomeTabela,
@@ -1894,7 +1885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .from(tabelasComerciais)
           .innerJoin(
-            _produtoTabelaComercial,
+            produtoTabelaComercial,
             eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
           )
           .where(
@@ -1906,12 +1897,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .orderBy(desc(tabelasComerciais.createdAt));
 
         // STEP 4: Resultado Final
-        const _resultado = tabelasGerais || [];
+        const resultado = tabelasGerais || [];
         console.log(`[${getBrasiliaTimestamp()}] Encontradas ${resultado.length} tabelas gerais`);
 
         res.json(resultado);
       } catch (error) {
-        console.error(error);
+        console.error('Erro no endpoint de tabelas comerciais hierárquicas:', error);
         res.status(500).json({
           message: 'Erro interno do servidor',
         });
@@ -1922,7 +1913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple GET endpoint for all commercial tables (for dropdowns)
   app.get(
     '/api/tabelas-comerciais',
-    jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Import database connection
@@ -1932,16 +1923,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Get all commercial tables ordered by creation date (excluding soft-deleted)
         const { isNull } = await import('drizzle-orm');
-        const _tabelas = await db
+        const tabelas = await db
           .select()
           .from(tabelasComerciais)
           .where(isNull(tabelasComerciais.deletedAt))
           .orderBy(desc(tabelasComerciais.createdAt));
 
         // For each table, get associated products
-        const _tabelasWithProducts = await Promise.all(
+        const tabelasWithProducts = await Promise.all(
           tabelas.map(async (tabela) => {
-            const _associations = await db
+            const associations = await db
               .select({ produtoId: produtoTabelaComercial.produtoId })
               .from(produtoTabelaComercial)
               .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
@@ -1958,7 +1949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res.json(tabelasWithProducts);
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar tabelas comerciais:', error);
         res.status(500).json({
           message: 'Erro ao buscar tabelas comerciais',
         });
@@ -1969,8 +1960,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for creating commercial tables (N:N structure)
   app.post(
     '/api/admin/tabelas-comerciais',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -1978,7 +1969,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { z } = await import('zod');
 
         // Updated validation schema for N:N structure
-        const _createTabelaSchema = z.object({
+        const createTabelaSchema = z.object({
           nomeTabela: z.string().min(3, 'Nome da tabela deve ter pelo menos 3 caracteres'),
           taxaJuros: z.number().positive('Taxa de juros deve ser positiva'),
           prazos: z.array(z.number().positive()).min(1, 'Deve ter pelo menos um prazo'),
@@ -1989,7 +1980,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero').default(0),
         });
 
-        const validatedData = _createTabelaSchema.parse(req.body);
+        const validatedData = createTabelaSchema.parse(req.body);
 
         // TRANSACTION: Create table and associate products
         const result = await db.transaction(async (tx) => {
@@ -2007,7 +1998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Step 2: Associate products via junction table
           const associations = validatedData.produtoIds.map((produtoId) => ({
-            produtoId: produtoId,
+            produtoId,
             tabelaComercialId: newTabela.id,
           }));
 
@@ -2022,9 +2013,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json(result);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error(error);
+        console.error('Erro ao criar tabela comercial:', error);
         res.status(500).json({ message: 'Erro ao criar tabela comercial' });
       }
     }
@@ -2033,8 +2024,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for updating commercial tables (N:N structure)
   app.put(
     '/api/admin/tabelas-comerciais/:id',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2044,7 +2035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID da tabela inválido' });
         }
 
         // Updated validation schema for N:N structure
@@ -2077,7 +2068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .returning();
 
           if (!updatedTabela) {
-            throw new Error('Error');
+            throw new Error('Tabela comercial não encontrada');
           }
 
           // Step 2: Delete existing product associations
@@ -2087,7 +2078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Step 3: Create new product associations
           const associations = validatedData.produtoIds.map((produtoId) => ({
-            produtoId: produtoId,
+            produtoId,
             tabelaComercialId: tabelaId,
           }));
 
@@ -2102,12 +2093,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(result);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        if (error instanceof Error && error.message == 'Tabela comercial não encontrada') {
-          return res.status(500).json({ error: 'Error' });
+        if (error instanceof Error && error.message === 'Tabela comercial não encontrada') {
+          return res.status(404).json({ message: error.message });
         }
-        console.error(error);
+        console.error('Erro ao atualizar tabela comercial:', error);
         res.status(500).json({ message: 'Erro ao atualizar tabela comercial' });
       }
     }
@@ -2116,8 +2107,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for deleting commercial tables
   app.delete(
     '/api/admin/tabelas-comerciais/:id',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2126,7 +2117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const tabelaId = parseInt(req.params.id);
         if (isNaN(tabelaId)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID da tabela inválido' });
         }
 
         // TRANSACTION: Delete table and its associations
@@ -2137,24 +2128,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
 
           // Step 2: Soft delete the commercial table
-          const _result = await tx
+          const result = await tx
             .update(tabelasComerciais)
             .set({ deletedAt: new Date() })
             .where(eq(tabelasComerciais.id, tabelaId))
             .returning();
 
-          if (result.length == 0) {
-            throw new Error('Error');
+          if (result.length === 0) {
+            throw new Error('Tabela comercial não encontrada');
           }
         });
 
         console.log(`[${getBrasiliaTimestamp()}] Tabela comercial deletada: ${tabelaId}`);
         res.status(204).send();
       } catch (error) {
-        if (error instanceof Error && error.message == 'Tabela comercial não encontrada') {
-          return res.status(500).json({ error: 'Error' });
+        if (error instanceof Error && error.message === 'Tabela comercial não encontrada') {
+          return res.status(404).json({ message: error.message });
         }
-        console.error(error);
+        console.error('Erro ao deletar tabela comercial:', error);
         res.status(500).json({ message: 'Erro ao deletar tabela comercial' });
       }
     }
@@ -2171,21 +2162,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint for formalization data - Using Supabase direct to avoid Drizzle orderSelectedFields error
   app.get(
     '/api/propostas/:id/formalizacao',
-    _jwtAuthMiddleware,
+    jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _propostaId = req.params.id;
+        const propostaId = req.params.id;
         console.log(
           `[${getBrasiliaTimestamp()}] 🔍 INICIO - Buscando dados de formalização para proposta: ${propostaId}`
         );
 
         if (!propostaId) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID da proposta é obrigatório' });
         }
 
         // Usar Supabase Admin Client diretamente para evitar problemas do Drizzle
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
 
@@ -2210,7 +2201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `[${getBrasiliaTimestamp()}] ❌ Proposta ${propostaId} não encontrada:`,
             propostaError?.message
           );
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'Proposta não encontrada' });
         }
 
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 3 - Buscando documentos...`);
@@ -2231,7 +2222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // STEP 4.2: Gerar URLs assinadas para visualização dos documentos
-        let _documentosComUrls = [];
+        let documentosComUrls = [];
         if (documentos && documentos.length > 0) {
           console.log(
             `[${getBrasiliaTimestamp()}] 🔍 STEP 4.2 - Gerando URLs assinadas para ${documentos.length} documentos...`
@@ -2247,7 +2238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
 
               // Extrair o caminho do arquivo a partir da URL salva
-              const _documentsIndex = doc.url.indexOf('/documents/');
+              const documentsIndex = doc.url.indexOf('/documents/');
               let filePath;
 
               if (documentsIndex !== -1) {
@@ -2255,13 +2246,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 filePath = doc.url.substring(documentsIndex + '/documents/'.length);
               } else {
                 // Fallback: construir caminho baseado no nome do arquivo
-                const _fileName = doc.nome_arquivo;
+                const fileName = doc.nome_arquivo;
                 filePath = `proposta-${propostaId}/${fileName}`;
               }
 
               console.log(`🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: ${filePath}`);
 
-              const { data: signedUrlData, error: urlError } = await _supabase.storage
+              const { data: signedUrlData, error: urlError } = await supabase.storage
                 .from('documents')
                 .createSignedUrl(filePath, 3600); // 1 hora
 
@@ -2312,7 +2303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Buscar taxa de juros da tabela comercial se existir
-        let _taxaJurosTabela = null;
+        let taxaJurosTabela = null;
         console.log(
           `[${getBrasiliaTimestamp()}] 🔍 STEP 5 - Verificando tabela_comercial_id:`,
           proposta.tabela_comercial_id
@@ -2343,7 +2334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             taxaJurosTabela = tabelaComercial.taxa_juros;
             console.log(
               `[${getBrasiliaTimestamp()}] ✅ Taxa de juros encontrada:`,
-              _taxaJurosTabela,
+              taxaJurosTabela,
               `% da tabela "${tabelaComercial.nome_tabela}"`
             );
           } else {
@@ -2361,7 +2352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 6 - Processando dados JSONB...`);
 
         // Parse dos dados JSONB antes de retornar
-        const _propostaProcessada = {
+        const propostaProcessada = {
           ...proposta,
           // Parse seguro dos dados JSONB
           clienteData: proposta.cliente_data || {},
@@ -2404,23 +2395,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `[${getBrasiliaTimestamp()}] ❌ ERRO ao buscar dados de formalização:`,
           error
         );
-        res.status(500).json({
-          message: 'Erro ao buscar dados de formalização',
-          error: (error as Error).message,
-        });
+        res
+          .status(500)
+          .json({ message: 'Erro ao buscar dados de formalização', error: (error as Error).message });
       }
     }
   );
 
   // Mock data para prazos
-  const _prazos = [
+  const prazos = [
     { id: 1, valor: '12 meses' },
     { id: 2, valor: '24 meses' },
     { id: 3, valor: '36 meses' },
   ];
 
   // Users management endpoints - REFATORADO com padrão Service/Repository
-  const _usersAdminRouter = (await import('./routes/admin-users.js')).default;
+  const usersAdminRouter = (await import('./routes/admin-users.js')).default;
   app.use('/api/admin', usersAdminRouter);
 
   // API endpoint for partners - GET all (public for dropdowns)
@@ -2430,10 +2420,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { parceiros } = await import('../shared/schema');
 
       const { isNull } = await import('drizzle-orm');
-      const _allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
+      const allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
       res.json(allParceiros);
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao buscar parceiros:', error);
       res.status(500).json({ message: 'Erro ao buscar parceiros' });
     }
   });
@@ -2445,20 +2435,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { parceiros } = await import('../shared/schema');
       const { eq } = await import('drizzle-orm');
 
-      const _parceiroId = parseInt(req.params.id);
+      const parceiroId = parseInt(req.params.id);
       if (isNaN(parceiroId)) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: 'ID do parceiro inválido' });
       }
 
       const [parceiro] = await db.select().from(parceiros).where(eq(parceiros.id, parceiroId));
 
       if (!parceiro) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(404).json({ message: 'Parceiro não encontrado' });
       }
 
       res.json(parceiro);
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao buscar parceiro:', error);
       res.status(500).json({ message: 'Erro ao buscar parceiro' });
     }
   });
@@ -2466,23 +2456,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for partners - POST create
   app.post(
     '/api/admin/parceiros',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
         const { parceiros, insertParceiroSchema } = await import('../shared/schema');
         const { z } = await import('zod');
 
-        const _validatedData = insertParceiroSchema.parse(req.body);
+        const validatedData = insertParceiroSchema.parse(req.body);
         const [newParceiro] = await db.insert(parceiros).values(validatedData).returning();
 
         res.status(201).json(newParceiro);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error(error);
+        console.error('Erro ao criar parceiro:', error);
         res.status(500).json({ message: 'Erro ao criar parceiro' });
       }
     }
@@ -2491,8 +2481,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for partners - PUT update
   app.put(
     '/api/admin/parceiros/:id',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2500,12 +2490,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { eq } = await import('drizzle-orm');
         const { z } = await import('zod');
 
-        const _parceiroId = parseInt(req.params.id);
+        const parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID do parceiro inválido' });
         }
 
-        const _validatedData = updateParceiroSchema.parse(req.body);
+        const validatedData = updateParceiroSchema.parse(req.body);
         const [updatedParceiro] = await db
           .update(parceiros)
           .set(validatedData)
@@ -2513,15 +2503,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .returning();
 
         if (!updatedParceiro) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'Parceiro não encontrado' });
         }
 
         res.json(updatedParceiro);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error(error);
+        console.error('Erro ao atualizar parceiro:', error);
         res.status(500).json({ message: 'Erro ao atualizar parceiro' });
       }
     }
@@ -2530,21 +2520,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for partners - DELETE
   app.delete(
     '/api/admin/parceiros/:id',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
         const { parceiros, lojas } = await import('../shared/schema');
         const { eq, and, isNull } = await import('drizzle-orm');
 
-        const _parceiroId = parseInt(req.params.id);
+        const parceiroId = parseInt(req.params.id);
         if (isNaN(parceiroId)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID do parceiro inválido' });
         }
 
         // Regra de negócio crítica: verificar se existem lojas associadas (excluindo soft-deleted)
-        const _lojasAssociadas = await db
+        const lojasAssociadas = await db
           .select()
           .from(lojas)
           .where(and(eq(lojas.parceiroId, parceiroId), isNull(lojas.deletedAt)));
@@ -2562,7 +2552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(and(eq(parceiros.id, parceiroId), isNull(parceiros.deletedAt)));
 
         if (!parceiroExistente) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'Parceiro não encontrado' });
         }
 
         // Soft delete - set deleted_at timestamp
@@ -2573,7 +2563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.status(204).send();
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao excluir parceiro:', error);
         res.status(500).json({ message: 'Erro ao excluir parceiro' });
       }
     }
@@ -2582,10 +2572,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rotas CRUD para produtos
   app.get('/api/produtos', async (req, res) => {
     try {
-      const _produtos = await buscarTodosProdutos();
+      const produtos = await buscarTodosProdutos();
       res.json(produtos);
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao buscar produtos:', error);
       res.status(500).json({ message: 'Erro ao buscar produtos' });
     }
   });
@@ -2597,34 +2587,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[PRODUTOS API] Criando produto com dados:', { nome, status, tacValor, tacTipo });
 
       if (!nome || !status) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: 'Nome e status são obrigatórios' });
       }
 
       // Validação opcional dos campos TAC
       if (tacValor !== undefined && tacValor < 0) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: 'Valor da TAC não pode ser negativo' });
       }
 
       if (tacTipo !== undefined && !['fixo', 'percentual'].includes(tacTipo)) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" });
       }
 
-      const _dadosProduto = {
-        _nome,
-        _status,
+      const dadosProduto = {
+        nome,
+        status,
         tacValor: tacValor ?? 0,
         tacTipo: tacTipo ?? 'fixo',
       };
 
       console.log('[PRODUTOS API] Enviando para controller:', dadosProduto);
 
-      const _novoProduto = await criarProduto(dadosProduto);
+      const novoProduto = await criarProduto(dadosProduto);
 
       console.log('[PRODUTOS API] Produto criado:', novoProduto);
 
       res.status(201).json(novoProduto);
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao criar produto:', error);
       res.status(500).json({ message: 'Erro ao criar produto' });
     }
   });
@@ -2635,27 +2625,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { nome, status, tacValor, tacTipo } = req.body;
 
       if (!nome || !status) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: 'Nome e status são obrigatórios' });
       }
 
       // Validação opcional dos campos TAC
       if (tacValor !== undefined && tacValor < 0) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: 'Valor da TAC não pode ser negativo' });
       }
 
       if (tacTipo !== undefined && !['fixo', 'percentual'].includes(tacTipo)) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" });
       }
 
-      const _produtoAtualizado = await atualizarProduto(id, {
-        _nome,
-        _status,
+      const produtoAtualizado = await atualizarProduto(id, {
+        nome,
+        status,
         tacValor: tacValor ?? 0,
         tacTipo: tacTipo ?? 'fixo',
       });
       res.json(produtoAtualizado);
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao atualizar produto:', error);
       res.status(500).json({ message: 'Erro ao atualizar produto' });
     }
   });
@@ -2667,7 +2657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await deletarProduto(id);
       res.status(204).send(); // 204 No Content on successful deletion
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao excluir produto:', error);
 
       // Check if it's a dependency error
       if (error instanceof Error && error.message.includes('Tabelas Comerciais')) {
@@ -2727,26 +2717,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // PASSO 1: Buscar parâmetros financeiros do banco de dados
-      let _taxaJurosMensal = 5.0; // Default fallback
-      let _tacValor = 0;
-      let _tacTipo = 'fixo';
-      let _comissao = 0;
+      let taxaJurosMensal = 5.0; // Default fallback
+      let tacValor = 0;
+      let tacTipo = 'fixo';
+      let comissao = 0;
 
       // Hierarquia de busca de taxas
       if (parceiroId) {
         // 1.1 - Busca dados do parceiro
-        const _parceiro = await db
+        const parceiro = await db
           .select()
           .from(parceiros)
           .where(eq(parceiros.id, parceiroId))
           .limit(1);
 
         if (parceiro.length > 0) {
-          const _parceiroData = parceiro[0];
+          const parceiroData = parceiro[0];
 
           // Verifica se parceiro tem tabela comercial padrão
           if (parceiroData.tabelaComercialPadraoId) {
-            const _tabelaPadrao = await db
+            const tabelaPadrao = await db
               .select()
               .from(tabelasComerciais)
               .where(eq(tabelasComerciais.id, parceiroData.tabelaComercialPadraoId))
@@ -2770,35 +2760,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // 1.2 - Se produtoId fornecido, busca configurações do produto
       if (produtoId) {
-        const _produto = await db
-          .select()
-          .from(produtos)
-          .where(eq(produtos.id, produtoId))
-          .limit(1);
+        const produto = await db.select().from(produtos).where(eq(produtos.id, produtoId)).limit(1);
 
         if (produto.length > 0) {
-          const _produtoData = produto[0];
+          const produtoData = produto[0];
           tacValor = parseFloat(produtoData.tacValor || '0');
           tacTipo = produtoData.tacTipo || 'fixo';
 
           // Busca tabelas comerciais associadas ao produto
-          const _tabelasProduto = await db
+          const tabelasProduto = await db
             .select({
               tabela: tabelasComerciais,
             })
             .from(produtoTabelaComercial)
             .innerJoin(
-              _tabelasComerciais,
+              tabelasComerciais,
               eq(produtoTabelaComercial.tabelaComercialId, tabelasComerciais.id)
             )
             .where(eq(produtoTabelaComercial.produtoId, produtoId));
 
           if (tabelasProduto.length > 0) {
             // Prioriza tabela específica do parceiro se existir
-            let _tabelaSelecionada = tabelasProduto[0].tabela;
+            let tabelaSelecionada = tabelasProduto[0].tabela;
 
             if (parceiroId) {
-              const _tabelaParceiro = tabelasProduto.find((t) => t.tabela.parceiroId == parceiroId);
+              const tabelaParceiro = tabelasProduto.find(
+                (t: any) => t.tabela.parceiroId === parceiroId
+              );
               if (tabelaParceiro) {
                 tabelaSelecionada = tabelaParceiro.tabela;
                 console.log('[SIMULAÇÃO] Usando tabela específica parceiro-produto');
@@ -2816,46 +2804,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('[SIMULAÇÃO] Parâmetros obtidos do banco:', {
-        _taxaJurosMensal,
-        _tacValor,
-        _tacTipo,
-        _comissao,
+        taxaJurosMensal,
+        tacValor,
+        tacTipo,
+        comissao,
       });
 
       // PASSO 2: Executar cálculos usando o serviço de finanças
       const { executarSimulacaoCompleta } = await import('./services/financeService.js');
 
-      const _resultado = executarSimulacaoCompleta(
-        _valorEmprestimo,
-        _prazoMeses,
-        _taxaJurosMensal,
-        _tacValor,
-        _tacTipo,
+      const resultado = executarSimulacaoCompleta(
+        valorEmprestimo,
+        prazoMeses,
+        taxaJurosMensal,
+        tacValor,
+        tacTipo,
         0 // dias de carência (pode ser parametrizado depois)
       );
 
       // PASSO 3: Adicionar comissão ao resultado
-      const _valorComissao = (valorEmprestimo * comissao) / 100;
+      const valorComissao = (valorEmprestimo * comissao) / 100;
 
       // PASSO 4: Retornar simulação completa
-      const _respostaCompleta = {
+      const respostaCompleta = {
         ...resultado,
         comissao: {
           percentual: comissao,
           valor: Math.round(valorComissao * 100) / 100,
         },
         parametrosUtilizados: {
-          _parceiroId,
-          _produtoId,
-          _taxaJurosMensal,
-          _tacValor,
-          _tacTipo,
+          parceiroId,
+          produtoId,
+          taxaJurosMensal,
+          tacValor,
+          tacTipo,
         },
       };
 
       // Log para validação (PROTOCOLO 5-CHECK - Item 5)
-      if (valorEmprestimo == 10000 && prazoMeses == 12) {
-        console.log('=== DEMONSTRAÇÃO DE CÁLCULO PARA R$ 10.000 em 12 meses ===');
+      if (valorEmprestimo === 10000 && prazoMeses === 12) {
+        console.log('==== DEMONSTRAÇÃO DE CÁLCULO PARA R$ 10.000 em 12 meses ====');
         console.log('Valor Empréstimo: R$', valorEmprestimo);
         console.log('Prazo: ', prazoMeses, 'meses');
         console.log('Taxa Juros Mensal:', taxaJurosMensal, '%');
@@ -2863,12 +2851,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('TAC: R$', resultado.tac);
         console.log('Valor Parcela: R$', resultado.valorParcela);
         console.log('CET Anual:', resultado.cetAnual, '%');
-        console.log('======================================');
+        console.log('=========================================================');
       }
 
-      return res.status(500).json({ error: 'Error' });
+      return res.json(respostaCompleta);
     } catch (error) {
-      console.error(error);
+      console.error('[SIMULAÇÃO] Erro ao processar simulação:', error);
       return res.status(500).json({
         error: 'Erro ao processar simulação',
         details: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -2877,12 +2865,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Funções de mock para a simulação
-  const _buscarTaxas = (produtoId: string) => {
+  const buscarTaxas = (produtoId: string) => {
     // Lógica futura: buscar no DB a tabela do produto/parceiro
     return { taxaDeJurosMensal: 5.0, valorTac: 150.0 }; // Exemplo: 5% a.m. e R$150 de TAC
   };
 
-  const _calcularIOF = (valor: number) => {
+  const calcularIOF = (valor: number) => {
     return valor * 0.0038; // Exemplo de alíquota
   };
 
@@ -2895,17 +2883,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/simulacao', (req, res) => {
     const { valor, prazo, produto_id, incluir_tac, dataVencimento } = req.query;
 
-    const _valorSolicitado = parseFloat(valor as string);
-    const _prazoEmMeses = parseInt(prazo as string);
+    const valorSolicitado = parseFloat(valor as string);
+    const prazoEmMeses = parseInt(prazo as string);
 
     if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
-      return res.status(500).json({ error: 'Error' });
+      return res.status(400).json({ error: 'Parâmetros inválidos.' });
     }
 
     // Correção Crítica: Usa a data do servidor como a "verdade"
-    const _dataAtual = getBrasiliaDate();
-    const _primeiroVencimento = new Date(dataVencimento as string);
-    const _diasDiferenca = Math.ceil(
+    const dataAtual = getBrasiliaDate();
+    const primeiroVencimento = new Date(dataVencimento as string);
+    const diasDiferenca = Math.ceil(
       (primeiroVencimento.getTime() - dataAtual.getTime()) / (1000 * 3600 * 24)
     );
 
@@ -2917,18 +2905,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
 
-    const _taxaJurosDiaria = taxaDeJurosMensal / 30;
-    const _jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
+    const taxaJurosDiaria = taxaDeJurosMensal / 30;
+    const jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
 
-    const _iof = calcularIOF(valorSolicitado);
-    const _tac = incluir_tac == 'true' ? valorTac : 0;
+    const iof = calcularIOF(valorSolicitado);
+    const tac = incluir_tac === 'true' ? valorTac : 0;
 
-    const _valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
+    const valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
 
-    const _valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
+    const valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
 
-    const _custoTotal = valorParcela * prazoEmMeses;
-    const _cetAnual = ((custoTotal / valorSolicitado - 1) / (prazoEmMeses / 12)) * 100;
+    const custoTotal = valorParcela * prazoEmMeses;
+    const cetAnual = ((custoTotal / valorSolicitado - 1) / (prazoEmMeses / 12)) * 100;
 
     return res.json({
       valorParcela: parseFloat(valorParcela.toFixed(2)),
@@ -2944,7 +2932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Rota para fila de formalização
   app.get('/api/formalizacao/propostas', (req, res) => {
-    const _mockPropostas = [
+    const mockPropostas = [
       { id: '1753800001234', cliente: 'Empresa A', status: 'Assinatura Pendente' },
       { id: '1753800005678', cliente: 'Empresa B', status: 'Biometria Concluída' },
       { id: '1753800009012', cliente: 'Empresa C', status: 'CCB Gerada' },
@@ -2955,7 +2943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update proposal formalization step
   app.patch(
     '/api/propostas/:id/etapa-formalizacao',
-    _jwtAuthMiddleware,
+    jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -2966,13 +2954,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: req.user?.id,
           userRole: req.user?.role,
           userLojaId: req.user?.loja_id,
-          _etapa,
-          _concluida,
+          etapa,
+          concluida,
           propostaId: id,
         });
 
         // Validate input
-        const _etapasValidas = ['ccb_gerado', 'assinatura_eletronica', 'biometria'];
+        const etapasValidas = ['ccb_gerado', 'assinatura_eletronica', 'biometria'];
         if (!etapa || !etapasValidas.includes(etapa)) {
           return res.status(400).json({
             message: 'Etapa inválida. Use: ccb_gerado, assinatura_eletronica ou biometria',
@@ -2994,7 +2982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id));
 
         if (!proposta) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'Proposta não encontrada' });
         }
 
         // 🔍 DEBUG: Log proposta info
@@ -3005,9 +2993,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Check permissions based on step and role
-        if (etapa == 'ccb_gerado') {
+        if (etapa === 'ccb_gerado') {
           // CCB generation can be done by ANALISTA, GERENTE, ATENDENTE, or ADMINISTRADOR
-          const _allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
+          const allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
           console.log(
             `🔍 [ETAPA DEBUG] Checking CCB permissions - Role: ${req.user?.role}, Allowed: ${allowedRoles.join(', ')}`
           );
@@ -3026,9 +3014,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // Allow ADMINISTRADOR to access any store, otherwise check if ATENDENTE of same store
-          const _isAdmin = req.user?.role == 'ADMINISTRADOR';
-          const _isAttendenteFromSameStore =
-            req.user?.role == 'ATENDENTE' && req.user?.loja_id == proposta.lojaId;
+          const isAdmin = req.user?.role === 'ADMINISTRADOR';
+          const isAttendenteFromSameStore =
+            req.user?.role === 'ATENDENTE' && req.user?.loja_id === proposta.lojaId;
 
           if (!isAdmin && !isAttendenteFromSameStore) {
             console.log(`❌ [ETAPA DEBUG] Permission denied for step ${etapa}`);
@@ -3040,9 +3028,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Build update object based on the step
-        const updateData: unknown = {};
+        const updateData: any = {};
 
-        if (etapa == 'ccb_gerado') {
+        if (etapa === 'ccb_gerado') {
           updateData.ccbGerado = concluida;
 
           // Automatically generate CCB when marked as complete
@@ -3051,25 +3039,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             try {
               const { ccbGenerationService } = await import('./services/ccbGenerationService');
-              const _result = await ccbGenerationService.generateCCB(id);
+              const result = await ccbGenerationService.generateCCB(id);
               if (!result.success) {
-                throw new Error('Error');
+                throw new Error(result.error);
               }
               updateData.caminhoCcbAssinado = result.pdfPath;
               console.log(`[${getBrasiliaTimestamp()}] CCB gerada com sucesso: ${result.pdfPath}`);
             } catch (error) {
-              console.error(error);
+              console.error(`[${getBrasiliaTimestamp()}] Erro ao gerar CCB:`, error);
               // Don't fail the entire request if CCB generation fails
             }
           }
-        } else if (etapa == 'assinatura_eletronica') {
+        } else if (etapa === 'assinatura_eletronica') {
           updateData.assinaturaEletronicaConcluida = concluida;
 
           // TODO: Integrate with ClickSign when marked as complete
           if (concluida && !proposta.assinaturaEletronicaConcluida) {
             console.log(`[${getBrasiliaTimestamp()}] Enviando para ClickSign - proposta ${id}`);
           }
-        } else if (etapa == 'biometria') {
+        } else if (etapa === 'biometria') {
           updateData.biometriaConcluida = concluida;
 
           // Generate boletos when biometry is complete
@@ -3080,7 +3068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Add document path if provided
-        if (caminho_documento && etapa == 'ccb_gerado' && concluida) {
+        if (caminho_documento && etapa === 'ccb_gerado' && concluida) {
           updateData.caminhoCcbAssinado = caminho_documento;
         }
 
@@ -3133,7 +3121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Não retornamos erro 409 aqui pois é uma operação interna após conclusão de etapas
               // O sistema deveria estar em um estado válido para esta transição
             } else {
-              console.error(error);
+              console.error(`[${getBrasiliaTimestamp()}] Erro ao executar transição: ${error}`);
             }
           }
 
@@ -3142,12 +3130,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json({
           message: 'Etapa de formalização atualizada com sucesso',
-          _etapa,
-          _concluida,
+          etapa,
+          concluida,
           proposta: updatedProposta,
         });
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao atualizar etapa de formalização:', error);
         res.status(500).json({
           message: 'Erro ao atualizar etapa de formalização',
         });
@@ -3158,15 +3146,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update proposal status - REAL IMPLEMENTATION WITH AUDIT TRAIL
   app.put(
     '/api/propostas/:id/status',
-    _jwtAuthMiddleware,
-    _requireManagerOrAdmin,
+    jwtAuthMiddleware,
+    requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
         const { status, observacao } = req.body;
 
         if (!status) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Status é obrigatório' });
         }
 
         // Import database and schema dependencies
@@ -3186,7 +3174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(propostas.id, id));
 
           if (!currentProposta) {
-            throw new Error('Error');
+            throw new Error('Proposta não encontrada');
           }
 
           // PAM V1.0 - Usar FSM para validação de transição de status
@@ -3221,7 +3209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const [updatedProposta] = await tx
             .update(propostas)
             .set({
-              dataAprovacao: status == 'aprovado' ? getBrasiliaDate() : undefined,
+              dataAprovacao: status === 'aprovado' ? getBrasiliaDate() : undefined,
             })
             .where(eq(propostas.id, id))
             .returning();
@@ -3233,16 +3221,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado para ${status}`
+          `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`
         );
         res.json(result);
-      } catch (error) {
-        console.error(error);
-        if (error instanceof Error && error.message == 'Proposta não encontrada') {
-          return res.status(500).json({ error: 'Error' });
+      } catch (error: any) {
+        console.error('Update status error:', error);
+        if (error instanceof Error && error.message === 'Proposta não encontrada') {
+          return res.status(404).json({ message: error.message });
         }
         // Tratar erro 409 de transição inválida
-        if (error?.statusCode == 409) {
+        if (error?.statusCode === 409) {
           return res.status(409).json({
             message: error.message,
             error: 'INVALID_TRANSITION',
@@ -3256,18 +3244,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard stats
   app.get('/api/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const _allPropostas = await storage.getPropostas();
+      const allPropostas = await storage.getPropostas();
 
-      const _stats = {
+      const stats = {
         totalPropostas: allPropostas.length,
-        aguardandoAnalise: allPropostas.filter((p) => p.status == 'aguardando_analise').length,
-        aprovadas: allPropostas.filter((p) => p.status == 'aprovado').length,
+        aguardandoAnalise: allPropostas.filter((p) => p.status === 'aguardando_analise').length,
+        aprovadas: allPropostas.filter((p) => p.status === 'aprovado').length,
         valorTotal: allPropostas.reduce((sum, p) => sum + parseFloat(p.valor), 0),
       };
 
       res.json(stats);
     } catch (error) {
-      console.error(error);
+      console.error('Get stats error:', error);
       res.status(500).json({ message: 'Failed to fetch stats' });
     }
   });
@@ -3276,15 +3264,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all stores managed by a specific manager
   app.get(
     '/api/gerentes/:gerenteId/lojas',
-    _jwtAuthMiddleware,
-    _requireManagerOrAdmin,
+    jwtAuthMiddleware,
+    requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _gerenteId = parseInt(req.params.gerenteId);
-        const _lojaIds = await storage.getLojasForGerente(gerenteId);
+        const gerenteId = parseInt(req.params.gerenteId);
+        const lojaIds = await storage.getLojasForGerente(gerenteId);
         res.json(lojaIds);
       } catch (error) {
-        console.error(error);
+        console.error('Get lojas for gerente error:', error);
         res.status(500).json({ message: 'Failed to fetch stores for manager' });
       }
     }
@@ -3293,15 +3281,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all managers for a specific store
   app.get(
     '/api/lojas/:lojaId/gerentes',
-    _jwtAuthMiddleware,
-    _requireManagerOrAdmin,
+    jwtAuthMiddleware,
+    requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _lojaId = parseInt(req.params.lojaId);
-        const _gerenteIds = await storage.getGerentesForLoja(lojaId);
+        const lojaId = parseInt(req.params.lojaId);
+        const gerenteIds = await storage.getGerentesForLoja(lojaId);
         res.json(gerenteIds);
       } catch (error) {
-        console.error(error);
+        console.error('Get gerentes for loja error:', error);
         res.status(500).json({ message: 'Failed to fetch managers for store' });
       }
     }
@@ -3310,18 +3298,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add a manager to a store
   app.post(
     '/api/gerente-lojas',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _validatedData = insertGerenteLojaSchema.parse(req.body);
-        const _relationship = await storage.addGerenteToLoja(validatedData);
+        const validatedData = insertGerenteLojaSchema.parse(req.body);
+        const relationship = await storage.addGerenteToLoja(validatedData);
         res.json(relationship);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Invalid data', errors: error.errors });
         }
-        console.error(error);
+        console.error('Add gerente to loja error:', error);
         res.status(500).json({ message: 'Failed to add manager to store' });
       }
     }
@@ -3330,16 +3318,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Remove a manager from a store
   app.delete(
     '/api/gerente-lojas/:gerenteId/:lojaId',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _gerenteId = parseInt(req.params.gerenteId);
-        const _lojaId = parseInt(req.params.lojaId);
+        const gerenteId = parseInt(req.params.gerenteId);
+        const lojaId = parseInt(req.params.lojaId);
         await storage.removeGerenteFromLoja(gerenteId, lojaId);
         res.json({ message: 'Manager removed from store successfully' });
       } catch (error) {
-        console.error(error);
+        console.error('Remove gerente from loja error:', error);
         res.status(500).json({ message: 'Failed to remove manager from store' });
       }
     }
@@ -3348,24 +3336,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all relationships for a specific manager
   app.get(
     '/api/gerentes/:gerenteId/relationships',
-    _jwtAuthMiddleware,
-    _requireManagerOrAdmin,
+    jwtAuthMiddleware,
+    requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _gerenteId = parseInt(req.params.gerenteId);
-        const _relationships = await storage.getGerenteLojas(gerenteId);
+        const gerenteId = parseInt(req.params.gerenteId);
+        const relationships = await storage.getGerenteLojas(gerenteId);
         res.json(relationships);
       } catch (error) {
-        console.error(error);
+        console.error('Get gerente relationships error:', error);
         res.status(500).json({ message: 'Failed to fetch manager relationships' });
       }
     }
   );
 
-  // ========== SYSTEM METADATA ROUTES ==========
+  // ============== SYSTEM METADATA ROUTES ==============
 
   // Helper middleware to check for multiple roles (local version)
-  const _requireRolesLocal = (allowedRoles: string[]) => {
+  const requireRolesLocal = (allowedRoles: string[]) => {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
         return res.status(403).json({
@@ -3380,7 +3368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Now allows ADMINISTRADOR, DIRETOR, and GERENTE to create users
   app.get(
     '/api/admin/system/metadata',
-    _jwtAuthMiddleware,
+    jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3389,15 +3377,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { count } = await import('drizzle-orm');
 
         const { isNull } = await import('drizzle-orm');
-        const _result = await db
+        const result = await db
           .select({ count: count() })
           .from(lojas)
           .where(isNull(lojas.deletedAt));
-        const _totalLojas = result[0]?.count || 0;
+        const totalLojas = result[0]?.count || 0;
 
         res.json({ totalLojas });
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar metadados do sistema:', error);
         res.status(500).json({ message: 'Erro ao buscar metadados do sistema' });
       }
     }
@@ -3406,7 +3394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get lojas by parceiro ID for server-side filtering
   app.get(
     '/api/admin/parceiros/:parceiroId/lojas',
-    _jwtAuthMiddleware,
+    jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3414,34 +3402,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { lojas } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
 
-        const _parceiroId = parseInt(req.params.parceiroId);
+        const parceiroId = parseInt(req.params.parceiroId);
         if (isNaN(parceiroId)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID do parceiro inválido' });
         }
 
-        const _lojasResult = await db.select().from(lojas).where(eq(lojas.parceiroId, parceiroId));
+        const lojasResult = await db.select().from(lojas).where(eq(lojas.parceiroId, parceiroId));
 
         res.json(lojasResult);
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar lojas do parceiro:', error);
         res.status(500).json({ message: 'Erro ao buscar lojas do parceiro' });
       }
     }
   );
 
-  // ========== LOJAS CRUD ROUTES ==========
+  // ============== LOJAS CRUD ROUTES ==============
 
   // GET all active lojas
   app.get(
     '/api/admin/lojas',
-    _jwtAuthMiddleware,
+    jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _lojas = await storage.getLojas();
+        const lojas = await storage.getLojas();
         res.json(lojas);
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao buscar lojas:', error);
         res.status(500).json({ message: 'Erro ao buscar lojas' });
       }
     }
@@ -3450,19 +3438,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET loja by ID
   app.get('/api/lojas/:id', timingNormalizerMiddleware, async (req, res) => {
     try {
-      const _id = parseInt(req.params.id);
+      const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(400).json({ message: 'ID da loja inválido' });
       }
 
-      const _loja = await storage.getLojaById(id);
+      const loja = await storage.getLojaById(id);
       if (!loja) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(404).json({ message: 'Loja não encontrada' });
       }
 
       res.json(loja);
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao buscar loja:', error);
       res.status(500).json({ message: 'Erro ao buscar loja' });
     }
   });
@@ -3470,18 +3458,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST create new loja
   app.post(
     '/api/admin/lojas',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _validatedData = insertLojaSchema.strict().parse(req.body);
-        const _newLoja = await storage.createLoja(validatedData);
+        const validatedData = insertLojaSchema.strict().parse(req.body);
+        const newLoja = await storage.createLoja(validatedData);
         res.status(201).json(newLoja);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error(error);
+        console.error('Erro ao criar loja:', error);
         res.status(500).json({ message: 'Erro ao criar loja' });
       }
     }
@@ -3490,28 +3478,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PUT update loja
   app.put(
     '/api/admin/lojas/:id',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _id = parseInt(req.params.id);
+        const id = parseInt(req.params.id);
         if (isNaN(id)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID da loja inválido' });
         }
 
-        const _validatedData = updateLojaSchema.strict().parse(req.body);
-        const _updatedLoja = await storage.updateLoja(id, validatedData);
+        const validatedData = updateLojaSchema.strict().parse(req.body);
+        const updatedLoja = await storage.updateLoja(id, validatedData);
 
         if (!updatedLoja) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(404).json({ message: 'Loja não encontrada' });
         }
 
         res.json(updatedLoja);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         }
-        console.error(error);
+        console.error('Erro ao atualizar loja:', error);
         res.status(500).json({ message: 'Erro ao atualizar loja' });
       }
     }
@@ -3520,20 +3508,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DELETE soft delete loja (set is_active = false)
   app.delete(
     '/api/admin/lojas/:id',
-    _jwtAuthMiddleware,
-    _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _id = parseInt(req.params.id);
+        const id = parseInt(req.params.id);
         if (isNaN(id)) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'ID da loja inválido' });
         }
 
         // Check for dependencies before soft delete
-        const _dependencies = await storage.checkLojaDependencies(id);
+        const dependencies = await storage.checkLojaDependencies(id);
 
         if (dependencies.hasUsers || dependencies.hasPropostas || dependencies.hasGerentes) {
-          const _dependencyDetails = [];
+          const dependencyDetails = [];
           if (dependencies.hasUsers) dependencyDetails.push('usuários ativos');
           if (dependencies.hasPropostas) dependencyDetails.push('propostas associadas');
           if (dependencies.hasGerentes) dependencyDetails.push('gerentes associados');
@@ -3549,7 +3537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.deleteLoja(id);
         res.json({ message: 'Loja desativada com sucesso' });
       } catch (error) {
-        console.error(error);
+        console.error('Erro ao desativar loja:', error);
         res.status(500).json({ message: 'Erro ao desativar loja' });
       }
     }
@@ -3559,7 +3547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(401).json({ message: 'Usuário não autenticado' });
       }
 
       res.json({
@@ -3570,7 +3558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         loja_id: req.user!.loja_id,
       });
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching user profile:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   });
@@ -3579,9 +3567,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/health/storage', async (req, res) => {
     try {
       // Test basic storage operations
-      const _users = await storage.getUsers();
-      const _lojas = await storage.getLojas();
-      const _usersWithDetails = await storage.getUsersWithDetails();
+      const users = await storage.getUsers();
+      const lojas = await storage.getLojas();
+      const usersWithDetails = await storage.getUsersWithDetails();
 
       res.json({
         status: 'healthy',
@@ -3593,7 +3581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error(error);
+      console.error('Storage health check failed:', error);
       res.status(500).json({
         status: 'unhealthy',
         timestamp: getBrasiliaTimestamp(),
@@ -3605,15 +3593,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/health/schema', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Check essential tables exist
-      const _tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];
+      const tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];
       const checks: Record<string, any> = {};
 
       for (const table of tables) {
         try {
-          const { data, error } = await _supabase.from(table).select('*').limit(1);
+          const { data, error } = await supabase.from(table).select('*').limit(1);
 
           checks[table] = {
             status: error ? 'error' : 'ok',
@@ -3627,7 +3615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const _allHealthy = Object.values(checks).every((check) => check.status == 'ok');
+      const allHealthy = Object.values(checks).every((check) => check.status === 'ok');
 
       res.status(allHealthy ? 200 : 500).json({
         status: allHealthy ? 'healthy' : 'unhealthy',
@@ -3635,7 +3623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tables: checks,
       });
     } catch (error) {
-      console.error(error);
+      console.error('Schema health check failed:', error);
       res.status(500).json({
         status: 'unhealthy',
         timestamp: getBrasiliaTimestamp(),
@@ -3644,41 +3632,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ========================
+  // ====================================
   // IMPORT SECURE FILE VALIDATION MIDDLEWARE
-  // ========================
+  // ====================================
   const { secureFileValidationMiddleware } = await import('./middleware/file-validation.js');
 
-  // ========================
+  // ====================================
   // ENDPOINT DE UPLOAD DE DOCUMENTOS
-  // ========================
+  // ====================================
   app.post(
     '/api/upload',
     upload.single('file'),
-    _secureFileValidationMiddleware,
-    _jwtAuthMiddleware,
+    secureFileValidationMiddleware,
+    jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _file = req.file;
-        const _proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
+        const file = req.file;
+        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
-          return res.status(500).json({ error: 'Error' });
+          return res.status(400).json({ message: 'Arquivo é obrigatório' });
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Usar filename do body ou gerar um UUID
         const { v4: uuidv4 } = await import('uuid');
-        const _uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
-        const _fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
-        const _filePath = `proposta-${proposalId}/${fileName}`;
+        const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
+        const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
+        const filePath = `proposta-${proposalId}/${fileName}`;
 
         console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
 
         // Upload para o Supabase Storage
-        const { data: uploadData, error: uploadError } = await _supabase.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('documents')
           .upload(filePath, file.buffer, {
             contentType: file.mimetype,
@@ -3686,14 +3674,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
         if (uploadError) {
-          console.error(error);
+          console.error('[ERROR] Erro no upload:', uploadError);
           return res.status(400).json({
             message: `Erro no upload: ${uploadError.message}`,
           });
         }
 
         // Obter URL pública
-        const { data: publicUrl } = _supabase.storage.from('documents').getPublicUrl(filePath);
+        const { data: publicUrl } = supabase.storage.from('documents').getPublicUrl(filePath);
 
         console.log(`[DEBUG] Upload bem-sucedido. Arquivo salvo em: ${publicUrl.publicUrl}`);
 
@@ -3707,7 +3695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: file.mimetype,
         });
       } catch (error) {
-        console.error(error);
+        console.error('[ERROR] Erro no upload de documento:', error);
         res.status(500).json({
           message: 'Erro interno do servidor no upload',
         });
@@ -3722,24 +3710,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/clicksign', clickSignRouter);
 
   // Register Webhook routes (ClickSign and Inter)
-  const _webhookRouter = (await import('./routes/webhooks')).default;
+  const webhookRouter = (await import('./routes/webhooks')).default;
   app.use('/api/webhooks', webhookRouter);
   app.use('/webhooks/inter', interWebhookRouter);
 
   // Register Inter Collections routes FIRST (more specific route)
-  const _interCollectionsRouter = (await import('./routes/inter-collections.js')).default;
+  const interCollectionsRouter = (await import('./routes/inter-collections.js')).default;
   app.use('/api/inter/collections', interCollectionsRouter);
 
   // Register Inter Fix Collections (emergency endpoint)
-  const _interFixRouter = (await import('./routes/inter-fix-collections.js')).default;
+  const interFixRouter = (await import('./routes/inter-fix-collections.js')).default;
   app.use('/api/inter', interFixRouter);
 
   // Register Inter Test Fix (no auth endpoint for testing)
-  const _interTestFixRouter = (await import('./routes/inter-fix-test.js')).default;
+  const interTestFixRouter = (await import('./routes/inter-fix-test.js')).default;
   app.use('/api/inter', interTestFixRouter);
 
   // Register Inter Execute Fix (execute regeneration)
-  const _interExecuteFixRouter = (await import('./routes/inter-execute-fix.js')).default;
+  const interExecuteFixRouter = (await import('./routes/inter-execute-fix.js')).default;
   app.use('/api/inter', interExecuteFixRouter);
 
   // Register Inter Bank routes AFTER (less specific route)
@@ -3749,17 +3737,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/inter', interRealtimeRouter);
 
   // Inter Fix Route - Regenerar boletos com códigos reais
-  const _interFixBoletosRouter = (await import('./routes/inter-fix-boletos.js')).default;
+  const interFixBoletosRouter = (await import('./routes/inter-fix-boletos.js')).default;
   app.use('/api/inter-fix', interFixBoletosRouter);
 
   // Endpoints movidos para server/routes/propostas-carne.ts para melhor organização
 
   // Register Cobranças routes
-  const _cobrancasRouter = (await import('./routes/cobrancas.js')).default;
+  const cobrancasRouter = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRouter);
 
   // Register Alertas Proativos routes (PAM V1.0)
-  const _alertasRouter = (await import('./routes/alertas.js')).default;
+  const alertasRouter = (await import('./routes/alertas.js')).default;
   app.use('/api/alertas', alertasRouter);
 
   // Register Monitoring routes (Admin only)
@@ -3778,15 +3766,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/documentos', documentosRoutes);
 
   // Register Observações routes
-  const _observacoesRouter = (await import('./routes/observacoes.js')).default;
+  const observacoesRouter = (await import('./routes/observacoes.js')).default;
   app.use('/api', observacoesRouter);
 
   // Register Pagamentos routes
-  const _pagamentosRouter = (await import('./routes/pagamentos/index.js')).default;
+  const pagamentosRouter = (await import('./routes/pagamentos/index.js')).default;
   app.use('/api/pagamentos', pagamentosRouter);
 
   // Register Formalização routes
-  const _formalizacaoRouter = (await import('./routes/formalizacao')).default;
+  const formalizacaoRouter = (await import('./routes/formalizacao')).default;
   app.use('/api/formalizacao', formalizacaoRouter);
 
   // Register Propostas Carnê routes
@@ -3806,22 +3794,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/test-audit', testAuditRoutes);
 
   // Teste temporário para verificar refatoração do Mock Queue
-  const _testMockQueueWorkerRoutes = (await import('./routes/test-mock-queue-worker')).default;
+  const testMockQueueWorkerRoutes = (await import('./routes/test-mock-queue-worker')).default;
   app.use('/api/test-mock-queue-worker', testMockQueueWorkerRoutes);
 
   // CCB Diagnostics routes
-  const _ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
+  const ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
   app.use('/api/ccb-diagnostics', ccbDiagnosticsRouter);
 
   // CCB Coordinate Calibration routes (Professional calibration system)
-  const _ccbCalibrationRouter = (await import('./routes/ccb-calibration')).default;
+  const ccbCalibrationRouter = (await import('./routes/ccb-calibration')).default;
   app.use('/api/ccb-calibration', ccbCalibrationRouter);
 
   // TEST CCB USER COORDINATES - Validação das coordenadas manuais do usuário
   app.use('/api/test-ccb-coordinates', testCcbCoordinatesRoutes);
 
   // Register Semgrep MCP routes - Projeto Cérbero
-  const _securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
+  const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
   app.use('/api/security/mcp', securityMCPRoutes);
 
   // Register Security routes - OWASP Compliance Monitoring
@@ -3857,7 +3845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🧪 [CCB TEST] Generating CCB for proposal:', proposalId);
 
       const { ccbGenerationService } = await import('./services/ccbGenerationService');
-      const _result = await ccbGenerationService.generateCCB(proposalId);
+      const result = await ccbGenerationService.generateCCB(proposalId);
 
       if (!result.success) {
         return res.status(500).json({
@@ -3873,7 +3861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pdfPath: result.pdfPath,
       });
     } catch (error) {
-      console.error(error);
+      console.error('❌ [CCB TEST] Error:', error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -3887,15 +3875,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
 
       // Buscar proposta
-      const _proposal = await storage.getPropostaById(id);
+      const proposal = await storage.getPropostaById(id);
       if (!proposal) {
-        return res.status(500).json({ error: 'Error' });
+        return res.status(404).json({ error: 'Proposta não encontrada' });
       }
 
       // Extrair dados de endereço
-      const _clienteData = (proposal.cliente_data as unknown) || {};
+      const clienteData = (proposal.cliente_data as any) || {};
 
-      const _debugInfo = {
+      const debugInfo = {
         proposalId: id,
         addressData: {
           endereco: clienteData.endereco || 'NÃO ENCONTRADO',
@@ -3929,10 +3917,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🧪 [CCB DEBUG] Cidade:', debugInfo.expectedRendering.cidade);
       console.log('🧪 [CCB DEBUG] UF:', debugInfo.expectedRendering.uf);
 
-      return res.status(500).json({ error: 'Error' });
+      return res.json(debugInfo);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Error' });
+      console.error('❌ Erro no teste de endereço:', error);
+      return res.status(500).json({ error: (error as Error).message });
     }
   });
 
@@ -3945,7 +3933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     '/api/test/file-validation',
     upload.single('file'),
-    _secureFileValidationMiddleware,
+    secureFileValidationMiddleware,
     async (req, res) => {
       console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
       res.json({
@@ -3962,7 +3950,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     '/api/test/file-validation',
     upload.single('file'),
-    _secureFileValidationMiddleware,
+    secureFileValidationMiddleware,
     async (req, res) => {
       console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
       res.json({
@@ -3979,7 +3967,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/auth', emailChangeRoutes);
 
   // Register OWASP Assessment routes
-  const _owaspRoutes = (await import('./routes/owasp.js')).default;
+  const owaspRoutes = (await import('./routes/owasp.js')).default;
   app.use('/api/owasp', owaspRoutes);
 
   // ✅ PROJETO CÉRBERO - Endpoints simplificados para SCA e SAST
@@ -3988,21 +3976,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔍 [SCA] Executando análise SCA...');
 
       // Ler relatório real do dependency-check
-      const _reportPath = 'dependency-check-report.json';
-      let _reportData = null;
+      const reportPath = 'dependency-check-report.json';
+      let reportData = null;
 
       try {
-        const _fs = await import('fs/promises');
-        const _data = await fs.readFile(reportPath, 'utf-8');
-        reportData = JSON.parse(_data);
+        const fs = await import('fs/promises');
+        const data = await fs.readFile(reportPath, 'utf-8');
+        reportData = JSON.parse(data);
       } catch (e) {
-        console.error(error);
-        return res.status(500).json({ error: 'Error' });
+        console.error('❌ [SCA] Erro ao ler relatório:', e);
+        return res.status(500).json({ success: false, error: 'Relatório não encontrado' });
       }
 
       // Processar vulnerabilidades
-      let _totalVulns = 0;
-      let _critical = 0,
+      let totalVulns = 0;
+      let critical = 0,
         high = 0,
         medium = 0,
         low = 0;
@@ -4012,11 +4000,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (dep.vulnerabilities && dep.vulnerabilities.length > 0) {
             for (const vuln of dep.vulnerabilities) {
               totalVulns++;
-              const _severity = vuln.severity;
-              if (severity == 'CRITICAL') critical++;
-              else if (severity == 'HIGH') high++;
-              else if (severity == 'MEDIUM') medium++;
-              else if (severity == 'LOW') low++;
+              const severity = vuln.severity;
+              if (severity === 'CRITICAL') critical++;
+              else if (severity === 'HIGH') high++;
+              else if (severity === 'MEDIUM') medium++;
+              else if (severity === 'LOW') low++;
             }
           }
         }
@@ -4034,7 +4022,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      console.error(error);
+      console.error('❌ [SCA] Erro:', error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -4047,7 +4035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔍 [SAST] Executando análise SAST...');
 
       // Análise de código mockada mas baseada em realidade
-      const _sastResults = {
+      const sastResults = {
         filesScanned: 25,
         vulnerabilities: [
           {
@@ -4056,7 +4044,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             line: 9,
             severity: 'HIGH',
             message: 'Hardcoded password detected',
-            code: "const _superSecretKey = 'password123';",
+            code: "const superSecretKey = 'password123';",
           },
           {
             id: 'sql-injection-direct',
@@ -4087,7 +4075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error(error);
+      console.error('❌ [SAST] Erro:', error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -4096,19 +4084,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Security Scanners routes (SCA & SAST)
-  const _securityScannersRoutes = (await import('./routes/security-scanners.js')).default;
+  const securityScannersRoutes = (await import('./routes/security-scanners.js')).default;
   app.use('/api/security-scanners', securityScannersRoutes);
 
   // Security API routes (Projeto Cérbero)
-  const _securityApiRoutes = (await import('./routes/security-api.js')).default;
+  const securityApiRoutes = (await import('./routes/security-api.js')).default;
   app.use('/api/security', securityApiRoutes);
 
   // Cobranças routes
-  const _cobrancasRoutes = (await import('./routes/cobrancas.js')).default;
+  const cobrancasRoutes = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRoutes);
 
   // Pagamentos routes
-  const _pagamentosRoutes = (await import('./routes/pagamentos/index.js')).default;
+  const pagamentosRoutes = (await import('./routes/pagamentos/index.js')).default;
   app.use('/api/financeiro/pagamentos', pagamentosRoutes);
 
   // ClickSign Integration routes
@@ -4117,7 +4105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Gestão de Contratos routes (ADMIN e DIRETOR apenas)
   app.use('/api', gestaoContratosRoutes);
 
-  // ================ JOB QUEUE TEST ENDPOINT ================
+  // ======================= JOB QUEUE TEST ENDPOINT =======================
   // Endpoint temporário para teste da arquitetura de Job Queue
 
   // Endpoint público de teste (sem autenticação para validação rápida)
@@ -4125,7 +4113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('[TEST ENDPOINT] 🏥 Verificando saúde do sistema de Job Queue');
 
-      const _health = await checkQueuesHealth();
+      const health = await checkQueuesHealth();
 
       res.json({
         success: true,
@@ -4145,7 +4133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: health,
       });
     } catch (error) {
-      console.error(error);
+      console.error('[TEST ENDPOINT] ❌ Health check failed:', error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -4155,8 +4143,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(
     '/api/test/job-queue',
-    _jwtAuthMiddleware,
-    _requireAnyRole,
+    jwtAuthMiddleware,
+    requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
         console.log('[TEST ENDPOINT] 🧪 Recebendo requisição de teste de Job Queue');
@@ -4168,7 +4156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let queueName;
 
         switch (type) {
-          case 'pdf': {
+          case 'pdf':
             queueName = 'pdf-processing';
             job = await queues.pdfProcessing.add('TEST_PDF_JOB', {
               type: 'GENERATE_CARNE',
@@ -4177,9 +4165,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               timestamp: new Date().toISOString(),
             });
             break;
-          }
 
-          case 'boleto': {
+          case 'boleto':
             queueName = 'boleto-sync';
             job = await queues.boletoSync.add('TEST_BOLETO_JOB', {
               type: 'SYNC_BOLETOS',
@@ -4188,7 +4175,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               timestamp: new Date().toISOString(),
             });
             break;
-          }
 
           default:
             queueName = 'pdf-processing';
@@ -4207,7 +4193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Verificar saúde das filas
-        const _health = await checkQueuesHealth();
+        const health = await checkQueuesHealth();
 
         res.json({
           success: true,
@@ -4222,7 +4208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           queuesHealth: health,
         });
       } catch (error) {
-        console.error(error);
+        console.error('[TEST ENDPOINT] ❌ Erro ao adicionar job:', error);
         res.status(500).json({
           success: false,
           error: error instanceof Error ? error.message : 'Erro ao adicionar job à fila',
@@ -4235,8 +4221,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para verificar status das filas
   app.get(
     '/api/test/queue-status',
-    _jwtAuthMiddleware,
-    _requireAnyRole,
+    jwtAuthMiddleware,
+    requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
         console.log('[TEST ENDPOINT] 📊 Verificando status das filas');
@@ -4249,7 +4235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           queues: health,
         });
       } catch (error) {
-        console.error(error);
+        console.error('[TEST ENDPOINT] ❌ Erro ao verificar status:', error);
         res.status(500).json({
           success: false,
           error: error instanceof Error ? error.message : 'Erro ao verificar status das filas',
@@ -4257,7 +4243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
-  // ================ END JOB QUEUE TEST ================
+  // ======================= END JOB QUEUE TEST =======================
 
   const httpServer = createServer(app);
   return httpServer;

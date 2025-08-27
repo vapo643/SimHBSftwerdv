@@ -9,16 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import {
-  _Store,
-  _Edit,
-  _Trash2,
-  _Plus,
-  _Building2,
-  _Activity,
-  _BarChart3,
-  _TrendingUp,
-  _MapPin,
-  _Settings,
+  Store,
+  Edit,
+  Trash2,
+  Plus,
+  Building2,
+  Activity,
+  BarChart3,
+  TrendingUp,
+  MapPin,
+  Settings,
 } from 'lucide-react';
 
 import { LojaForm } from '@/components/lojas/LojaForm';
@@ -28,23 +28,23 @@ export default function LojasPage() {
   const [selectedLoja, setSelectedLoja] = useState<Loja | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   // Fetch lojas using new apiClient and hierarchical query keys
   const { data: lojas = [], isLoading: loadingLojas } = useQuery<Loja[]>({
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
-      const _response = await api.get<Loja[]>('/api/admin/lojas');
-      return Array.isArray(_response) ? response : (response as unknown).data || []; }
+      const response = await api.get<Loja[]>('/api/admin/lojas');
+      return Array.isArray(response) ? response : (response as any).data || [];
     },
   });
 
   // Create mutation using new apiClient
-  const _createMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: async (data: InsertLoja) => {
-      const _response = await api.post<Loja>('/api/admin/lojas',_data);
-      return (response as unknown).data || response; }
+      const response = await api.post<Loja>('/api/admin/lojas', data);
+      return (response as any).data || response;
     },
     onSuccess: () => {
       toast({
@@ -59,7 +59,7 @@ export default function LojasPage() {
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro',
         description: error.message || 'Erro ao criar loja',
@@ -69,10 +69,10 @@ export default function LojasPage() {
   });
 
   // Update mutation using new apiClient
-  const _updateMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateLoja }) => {
-      const _response = await api.put<Loja>(`/api/admin/lojas/${id}`,_data);
-      return (response as unknown).data || response; }
+      const response = await api.put<Loja>(`/api/admin/lojas/${id}`, data);
+      return (response as any).data || response;
     },
     onSuccess: () => {
       toast({
@@ -87,7 +87,7 @@ export default function LojasPage() {
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro',
         description: error.message || 'Erro ao atualizar loja',
@@ -97,10 +97,10 @@ export default function LojasPage() {
   });
 
   // Delete mutation using new apiClient
-  const _deleteMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const _response = await api.delete(`/api/admin/lojas/${id}`);
-      return response.data; }
+      const response = await api.delete(`/api/admin/lojas/${id}`);
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -113,7 +113,7 @@ export default function LojasPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.system.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro ao Desativar',
         description: error.details || error.message || 'Erro ao desativar loja',
@@ -122,19 +122,19 @@ export default function LojasPage() {
     },
   });
 
-  const _openNewModal = () => {
+  const openNewModal = () => {
     setModalMode('create');
     setSelectedLoja(null);
     setIsModalOpen(true);
   };
 
-  const _openEditModal = (loja: Loja) => {
+  const openEditModal = (loja: Loja) => {
     setModalMode('edit');
     setSelectedLoja(loja);
     setIsModalOpen(true);
   };
 
-  const _handleDelete = async (loja: Loja) => {
+  const handleDelete = async (loja: Loja) => {
     if (
       window.confirm(
         `Tem certeza que deseja desativar a loja "${loja.nomeLoja}"? Esta ação não pode ser desfeita.`
@@ -144,19 +144,19 @@ export default function LojasPage() {
     }
   };
 
-  const _handleSubmit = (data: InsertLoja | UpdateLoja) => {
-    if (modalMode == 'edit' && selectedLoja) {
+  const handleSubmit = (data: InsertLoja | UpdateLoja) => {
+    if (modalMode === 'edit' && selectedLoja) {
       updateMutation.mutate({ id: selectedLoja.id, data: data as UpdateLoja });
     } else {
       createMutation.mutate(data as InsertLoja);
     }
   };
 
-  const _isSubmitting =
+  const isSubmitting =
     createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
   // Calcular estatísticas das lojas
-  const _lojaStats = {
+  const lojaStats = {
     total: lojas.length,
     ativas: lojas.filter((l) => !l.deletedAt).length,
     inativas: lojas.filter((l) => l.deletedAt).length,
@@ -344,7 +344,7 @@ export default function LojasPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            {lojas.length == 0 ? (
+            {lojas.length === 0 ? (
               <div className="py-12 text-center">
                 <Store className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -459,7 +459,7 @@ export default function LojasPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{modalMode == 'create' ? 'Nova Loja' : 'Editar Loja'}</DialogTitle>
+            <DialogTitle>{modalMode === 'create' ? 'Nova Loja' : 'Editar Loja'}</DialogTitle>
           </DialogHeader>
           <LojaForm
             initialData={selectedLoja}

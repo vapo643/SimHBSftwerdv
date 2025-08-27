@@ -69,21 +69,21 @@ export class UserRepository extends BaseRepository<Profile> {
     }
 
     // Join auth users with profiles
-    const _users = profiles.map((profile) => {
-      const _authUser = authUsers.users.find((user) => user.id == profile.id);
+    const users = profiles.map((profile) => {
+      const authUser = authUsers.users.find((user) => user.id === profile.id);
       return {
         ...profile,
         email: authUser?.email || 'N/A',
         auth_status: authUser
           ? {
               email_confirmed: !!authUser.email_confirmed_at,
-              banned_until: (authUser as unknown).banned_until || null,
+              banned_until: (authUser as any).banned_until || null,
             }
           : undefined,
       };
     });
 
-    return users as UserWithAuth[]; }
+    return users as UserWithAuth[];
   }
 
   /**
@@ -98,9 +98,9 @@ export class UserRepository extends BaseRepository<Profile> {
       .single();
 
     if (profileError) {
-      if (profileError.code == 'PGRST116') {
+      if (profileError.code === 'PGRST116') {
         // Not found
-        return null; }
+        return null;
       }
       throw new Error(`Failed to fetch profile: ${profileError.message}`);
     }
@@ -119,7 +119,7 @@ export class UserRepository extends BaseRepository<Profile> {
       auth_status: authUser?.user
         ? {
             email_confirmed: !!authUser.user.email_confirmed_at,
-            banned_until: (authUser.user as unknown).banned_until || null,
+            banned_until: (authUser.user as any).banned_until || null,
           }
         : undefined,
     } as UserWithAuth;
@@ -198,7 +198,7 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to update profile: ${error.message}`);
     }
 
-    return updated as Profile; }
+    return updated as Profile;
   }
 
   /**
@@ -251,7 +251,7 @@ export class UserRepository extends BaseRepository<Profile> {
       .eq('email', email)
       .single();
 
-    return !!data; }
+    return !!data;
   }
 
   /**
@@ -269,7 +269,7 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to fetch users by role: ${error.message}`);
     }
 
-    return data as Profile[]; }
+    return data as Profile[];
   }
 
   /**
@@ -287,9 +287,9 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to fetch users by loja: ${error.message}`);
     }
 
-    return data as Profile[]; }
+    return data as Profile[];
   }
 }
 
 // Export singleton instance
-export const _userRepository = new UserRepository();
+export const userRepository = new UserRepository();

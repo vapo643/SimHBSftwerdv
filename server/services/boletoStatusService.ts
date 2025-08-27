@@ -15,9 +15,9 @@ import { interCollections, propostas } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 import { transitionTo, InvalidTransitionError } from './statusFsmService';
 // Usando import dinâmico para evitar ciclo de dependência
-const _getInterService = async () => {
+const getInterService = async () => {
   const { interBankService } = await import('./interBankService');
-  return interBankService; }
+  return interBankService;
 };
 
 // Mapeamento de status do Inter para nosso sistema
@@ -75,32 +75,32 @@ export class BoletoStatusService {
       }
 
       // Identificar o boleto
-      const _whereClause = cobranca.codigoSolicitacao
+      const whereClause = cobranca.codigoSolicitacao
         ? eq(interCollections.codigoSolicitacao, cobranca.codigoSolicitacao)
         : eq(interCollections.seuNumero, cobranca.seuNumero!);
 
       // Preparar dados de atualização
-      const updateData: unknown = {
+      const updateData: any = {
         updatedAt: new Date(),
       };
 
       // Mapear evento para status
       switch (evento) {
-        case 'cobranca-paga': {
+        case 'cobranca-paga':
           updateData.situacao = 'RECEBIDO';
           updateData.valorPago = cobranca.valorRecebido?.toString();
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
-          break; }
+          break;
 
-        case 'cobranca-vencida': {
+        case 'cobranca-vencida':
           updateData.situacao = 'ATRASADO';
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
-          break; }
+          break;
 
-        case 'cobranca-cancelada': {
+        case 'cobranca-cancelada':
           updateData.situacao = 'CANCELADO';
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
-          break; }
+          break;
 
         default:
           // Para outros eventos, usar o status direto se disponível
@@ -111,12 +111,12 @@ export class BoletoStatusService {
       }
 
       // Atualizar no banco
-      const _result = await db.update(interCollections).set(updateData).where(whereClause);
+      const result = await db.update(interCollections).set(updateData).where(whereClause);
 
       console.log(`[STATUS SERVICE] ✅ Status atualizado para ${updateData.situacao}`);
 
       // Verificar se todas as parcelas foram pagas
-      if (updateData.situacao == 'RECEBIDO' && cobranca.seuNumero) {
+      if (updateData.situacao === 'RECEBIDO' && cobranca.seuNumero) {
         await this.verificarQuitacaoCompleta(cobranca.seuNumero);
       }
 
@@ -143,16 +143,16 @@ export class BoletoStatusService {
     console.log(`[STATUS SERVICE] 🔄 Iniciando sincronização para proposta ${propostaId}`);
 
     const errors: string[] = [];
-    let _updatedCount = 0;
+    let updatedCount = 0;
 
     try {
       // Buscar todas as cobranças da proposta
-      const _cobrancas = await db
+      const cobrancas = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, propostaId));
 
-      if (cobrancas.length == 0) {
+      if (cobrancas.length === 0) {
         console.log('[STATUS SERVICE] ⚠️ Nenhuma cobrança encontrada para esta proposta');
         return {
           success: true,
@@ -169,8 +169,8 @@ export class BoletoStatusService {
           console.log(`[STATUS SERVICE] 🔍 Consultando status: ${cobranca.codigoSolicitacao}`);
 
           // Buscar status atualizado na API do Inter
-          const _interService = await getInterService();
-          const _detalhes = await interService.recuperarCobranca(cobranca.codigoSolicitacao);
+          const interService = await getInterService();
+          const detalhes = await interService.recuperarCobranca(cobranca.codigoSolicitacao);
 
           if (!detalhes?.cobranca) {
             console.log(
@@ -180,7 +180,7 @@ export class BoletoStatusService {
             continue;
           }
 
-          const _novoStatus = detalhes.cobranca.situacao;
+          const novoStatus = detalhes.cobranca.situacao;
 
           // Comparar e atualizar se diferente
           if (cobranca.situacao !== novoStatus) {
@@ -204,7 +204,7 @@ export class BoletoStatusService {
           // Delay para evitar rate limit (200ms entre requisições)
           await new Promise((resolve) => setTimeout(resolve, 200));
         } catch (error) {
-          const _errorMsg = `Erro ao sincronizar ${cobranca.codigoSolicitacao}: ${(error as Error).message}`;
+          const errorMsg = `Erro ao sincronizar ${cobranca.codigoSolicitacao}: ${(error as Error).message}`;
           console.error(`[STATUS SERVICE] ❌ ${errorMsg}`);
           errors.push(errorMsg);
         }
@@ -214,9 +214,9 @@ export class BoletoStatusService {
       await this.verificarQuitacaoProposta(propostaId);
 
       return {
-        success: errors.length == 0,
+        success: errors.length === 0,
         message: `Sincronização concluída: ${updatedCount} atualizações`,
-  _updatedCount,
+        updatedCount,
         errors: errors.length > 0 ? errors : undefined,
       };
     } catch (error) {
@@ -235,10 +235,10 @@ export class BoletoStatusService {
   private async verificarQuitacaoCompleta(seuNumero: string): Promise<void> {
     try {
       // Extrair propostaId do seuNumero (formato: SIMPIX-{propostaId}-{parcela})
-      const _parts = seuNumero.split('-');
+      const parts = seuNumero.split('-');
       if (parts.length < 2) return;
 
-      const _propostaId = parts[1];
+      const propostaId = parts[1];
       await this.verificarQuitacaoProposta(propostaId);
     } catch (error) {
       console.error('[STATUS SERVICE] ❌ Erro ao verificar quitação:', error);
@@ -249,12 +249,12 @@ export class BoletoStatusService {
    * Verifica status de quitação de uma proposta
    */
   private async verificarQuitacaoProposta(propostaId: string): Promise<void> {
-    const _todasCobrancas = await db
+    const todasCobrancas = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
 
-    const _todasPagas = todasCobrancas.every((c) => c.situacao == 'RECEBIDO');
+    const todasPagas = todasCobrancas.every((c) => c.situacao === 'RECEBIDO');
 
     if (todasPagas && todasCobrancas.length > 0) {
       console.log(`[STATUS SERVICE] 🎉 Proposta ${propostaId} totalmente quitada`);
@@ -262,7 +262,7 @@ export class BoletoStatusService {
       // PAM V1.0 - Usar FSM para validação de transição
       try {
         await transitionTo({
-  _propostaId,
+          propostaId,
           novoStatus: 'QUITADO',
           userId: 'boleto-status-service',
           contexto: 'cobrancas',
@@ -294,8 +294,8 @@ export class BoletoStatusService {
     try {
       console.log(`[STATUS SERVICE] 🔍 Sincronizando boleto individual: ${codigoSolicitacao}`);
 
-      const _interService = await getInterService();
-      const _detalhes = await interService.recuperarCobranca(codigoSolicitacao);
+      const interService = await getInterService();
+      const detalhes = await interService.recuperarCobranca(codigoSolicitacao);
 
       if (!detalhes?.cobranca) {
         return {
@@ -331,4 +331,4 @@ export class BoletoStatusService {
 }
 
 // Exportar instância singleton
-export const _boletoStatusService = new BoletoStatusService();
+export const boletoStatusService = new BoletoStatusService();

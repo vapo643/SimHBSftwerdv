@@ -47,7 +47,7 @@ export class InvalidTransitionError extends Error {
     public readonly toStatus: string,
     message?: string
   ) {
-    const _errorMessage =
+    const errorMessage =
       message || `Transição inválida: não é permitido mudar de "${fromStatus}" para "${toStatus}"`;
     super(errorMessage);
     this.name = 'InvalidTransitionError';
@@ -169,7 +169,7 @@ export function validateTransition(fromStatus: string, toStatus: string): boolea
 }
 
 // Alias para compatibilidade interna
-const _isTransitionValid = validateTransition;
+const isTransitionValid = validateTransition;
 
 /**
  * Função principal para realizar transição de status com validação FSM
@@ -200,11 +200,11 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
       throw new Error(`Proposta ${propostaId} não encontrada no banco de dados`);
     }
 
-    const _statusAtual = propostaAtual.status;
+    const statusAtual = propostaAtual.status;
     console.log(`[FSM] 📍 Status atual: ${statusAtual}`);
 
     // 2. Se o status não mudou, não fazer nada
-    if (statusAtual == novoStatus) {
+    if (statusAtual === novoStatus) {
       console.log(`[FSM] ℹ️ Status já está em ${novoStatus}, nenhuma transição necessária`);
       return;
     }
@@ -213,8 +213,8 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     if (!isTransitionValid(statusAtual, novoStatus)) {
       console.error(`[FSM] ❌ Transição inválida: ${statusAtual} → ${novoStatus}`);
       throw new InvalidTransitionError(
-        _statusAtual,
-        _novoStatus,
+        statusAtual,
+        novoStatus,
         `A transição de "${statusAtual}" para "${novoStatus}" não é permitida pelas regras de negócio`
       );
     }
@@ -224,11 +224,11 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     // 4. Delegar a escrita para updateStatusWithContext
     console.log(`[FSM] 📝 Delegando escrita para updateStatusWithContext`);
 
-    const _result = await updateStatusWithContext({
-      _propostaId,
-      _novoStatus,
-      _contexto,
-      _userId,
+    const result = await updateStatusWithContext({
+      propostaId,
+      novoStatus,
+      contexto,
+      userId,
       observacoes: observacoes || `Transição FSM: ${statusAtual} → ${novoStatus}`,
       metadata: {
         ...metadata,
@@ -274,7 +274,7 @@ export function getPossibleTransitions(fromStatus: string): string[] {
  */
 export function isFinalStatus(status: string): boolean {
   const transitions = transitionGraph[status];
-  return Array.isArray(transitions) && transitions.length == 0;
+  return Array.isArray(transitions) && transitions.length === 0;
 }
 
 /**

@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -22,12 +22,12 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import { useRoute } from 'wouter';
 
-const _configSchema = z.object({
+const configSchema = z.object({
   tabelaComercial: z.string().nonempty('A seleção da tabela é obrigatória.'),
   comissao: z.number().positive('A comissão deve ser um número positivo.'),
 });
 
-const _customTabelaSchema = z.object({
+const customTabelaSchema = z.object({
   nomeTabela: z.string().min(3, 'Nome da tabela deve ter pelo menos 3 caracteres'),
   produtoId: z.number().positive('Produto é obrigatório'),
   taxaJuros: z.number().positive('Taxa de juros deve ser positiva'),
@@ -55,7 +55,7 @@ interface Produto {
 
 const ConfiguracaoComercialForm: React.FC = () => {
   const [_match, params] = useRoute('/parceiros/detalhe/:id');
-  const _partnerId = params ? parseInt(params.id) : null;
+  const partnerId = params ? parseInt(params.id) : null;
 
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [novoPrazo, setNovoPrazo] = useState('');
@@ -63,12 +63,12 @@ const ConfiguracaoComercialForm: React.FC = () => {
   const { toast } = useToast();
 
   const {
-  _register,
-  _handleSubmit,
+    register,
+    handleSubmit,
     formState: { errors },
-  _control,
-  _watch,
-  _setValue,
+    control,
+    watch,
+    setValue,
   } = useForm<ConfigFormData>({
     resolver: zodResolver(configSchema),
   });
@@ -84,7 +84,7 @@ const ConfiguracaoComercialForm: React.FC = () => {
     resolver: zodResolver(customTabelaSchema),
   });
 
-  const _selectedTable = watch('tabelaComercial');
+  const selectedTable = watch('tabelaComercial');
 
   // Fetch commercial tables from API
   const {
@@ -94,8 +94,8 @@ const ConfiguracaoComercialForm: React.FC = () => {
   } = useQuery<TabelaComercial[]>({
     queryKey: ['tabelas-comerciais'],
     queryFn: async () => {
-      const _response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
-      return (response as unknown).data || response; }
+      const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
+      return (response as any).data || response;
     },
   });
 
@@ -103,18 +103,18 @@ const ConfiguracaoComercialForm: React.FC = () => {
   const { data: produtos = [], isLoading: loadingProdutos } = useQuery<Produto[]>({
     queryKey: ['produtos'],
     queryFn: async () => {
-      const _response = await api.get<Produto[]>('/api/produtos');
-      return (response as unknown).data || response; }
+      const response = await api.get<Produto[]>('/api/produtos');
+      return (response as any).data || response;
     },
   });
 
   // Mutation for creating custom table
-  const _createTabelaMutation = useMutation({
+  const createTabelaMutation = useMutation({
     mutationFn: async (data: CustomTabelaFormData & { prazos: number[] }) => {
       if (!partnerId) throw new Error('Partner ID not found');
 
       // Convert single produtoId to produtoIds array as expected by backend
-      const _payload = {
+      const payload = {
         nomeTabela: data.nomeTabela,
         taxaJuros: data.taxaJuros,
         comissao: data.comissao,
@@ -125,8 +125,8 @@ const ConfiguracaoComercialForm: React.FC = () => {
 
       console.log('Sending payload to backend:', payload);
 
-      const _response = await api.post('/api/admin/tabelas-comerciais', payload);
-      return response.data; }
+      const response = await api.post('/api/admin/tabelas-comerciais', payload);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais'] });
@@ -138,8 +138,8 @@ const ConfiguracaoComercialForm: React.FC = () => {
         description: 'Tabela comercial personalizada criada com sucesso!',
       });
     },
-    onError: (error) => {
-      const _errorMessage =
+    onError: (error: unknown) => {
+      const errorMessage =
         error instanceof Error ? error.message : 'Erro ao criar tabela comercial';
       toast({
         title: 'Erro!',
@@ -149,17 +149,17 @@ const ConfiguracaoComercialForm: React.FC = () => {
     },
   });
 
-  const _onSubmit = (data: ConfigFormData) => {
-    console.log('Configuração Salva:',_data);
+  const onSubmit = (data: ConfigFormData) => {
+    console.log('Configuração Salva:', data);
     toast({
       title: 'Configuração salva',
       description: 'As configurações comerciais foram atualizadas.',
     });
   };
 
-  const _onSubmitCustom = (data: CustomTabelaFormData) => {
+  const onSubmitCustom = (data: CustomTabelaFormData) => {
     // Validate that we have at least one prazo
-    if (prazos.length == 0) {
+    if (prazos.length === 0) {
       toast({
         title: 'Erro!',
         description: 'Adicione pelo menos um prazo permitido.',
@@ -168,34 +168,34 @@ const ConfiguracaoComercialForm: React.FC = () => {
       return;
     }
 
-    console.log('Form data:',_data);
+    console.log('Form data:', data);
     console.log('Prazos:', prazos);
 
     createTabelaMutation.mutate({
       ...data,
-  _prazos,
+      prazos,
     });
   };
 
   // Tag input functions
-  const _adicionarPrazo = () => {
-    const _prazo = parseInt(novoPrazo);
+  const adicionarPrazo = () => {
+    const prazo = parseInt(novoPrazo);
     if (prazo > 0 && !prazos.includes(prazo)) {
-      const _novosPrazos = [...prazos, prazo].sort((a, b) => a - b);
+      const novosPrazos = [...prazos, prazo].sort((a, b) => a - b);
       setPrazos(novosPrazos);
       setValueCustom('prazos', novosPrazos);
       setNovoPrazo('');
     }
   };
 
-  const _removerPrazo = (prazoRemover: number) => {
-    const _novosPrazos = prazos.filter((p) => p !== prazoRemover);
+  const removerPrazo = (prazoRemover: number) => {
+    const novosPrazos = prazos.filter((p) => p !== prazoRemover);
     setPrazos(novosPrazos);
     setValueCustom('prazos', novosPrazos);
   };
 
-  const _handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key == 'Enter') {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
       e.preventDefault();
       adicionarPrazo();
     }
@@ -203,7 +203,7 @@ const ConfiguracaoComercialForm: React.FC = () => {
 
   // Open custom modal when "custom" is selected
   React.useEffect(() => {
-    if (selectedTable == 'custom') {
+    if (selectedTable === 'custom') {
       setIsCustomModalOpen(true);
     }
   }, [selectedTable]);
@@ -236,7 +236,7 @@ const ConfiguracaoComercialForm: React.FC = () => {
                         <SelectItem value="error" disabled>
                           Erro ao carregar tabelas
                         </SelectItem>
-                      ) : tabelasComerciais.length == 0 ? (
+                      ) : tabelasComerciais.length === 0 ? (
                         <SelectItem value="empty" disabled>
                           Nenhuma tabela encontrada
                         </SelectItem>
@@ -322,7 +322,7 @@ const ConfiguracaoComercialForm: React.FC = () => {
                         <SelectItem value="loading" disabled>
                           Carregando produtos...
                         </SelectItem>
-                      ) : produtos.length == 0 ? (
+                      ) : produtos.length === 0 ? (
                         <SelectItem value="empty" disabled>
                           Nenhum produto encontrado
                         </SelectItem>

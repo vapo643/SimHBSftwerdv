@@ -7,13 +7,13 @@ import { Router, Request, Response } from 'express';
 import { semgrepMCPServer } from '../security/semgrep-mcp-server';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 
-const _router = Router();
+const router = Router();
 
 // Test endpoint for validation (no auth required)
 router.get('/test-validation', async (req, res) => {
   try {
     // Test basic functionality by scanning a simple file
-    const _testResult = await semgrepMCPServer.scanFile('package.json', { force_refresh: true });
+    const testResult = await semgrepMCPServer.scanFile('package.json', { force_refresh: true });
 
     res.json({
       success: true,
@@ -43,15 +43,15 @@ router.use(jwtAuthMiddleware);
  */
 router.get('/scan/*', async (req: Request, res: Response) => {
   try {
-    const _filePath = req.params[0]; // Captura o path completo após /scan/
-    const _options = {
-      force_refresh: req.query.refresh == 'true',
+    const filePath = req.params[0]; // Captura o path completo após /scan/
+    const options = {
+      force_refresh: req.query.refresh === 'true',
       severity_filter: req.query.severity ? [req.query.severity as string] : undefined,
     };
 
     console.log(`[MCP API] Scan request for: ${filePath}`);
 
-    const _result = await semgrepMCPServer.scanFile(filePath, options);
+    const result = await semgrepMCPServer.scanFile(filePath, options);
 
     res.json({
       success: true,
@@ -59,7 +59,7 @@ router.get('/scan/*', async (req: Request, res: Response) => {
       file: filePath,
       analysis: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[MCP API] Scan error:', error);
     res.status(500).json({
       success: false,
@@ -86,14 +86,14 @@ router.post('/analyze', async (req: Request, res: Response) => {
 
     console.log(`[MCP API] Analyzing code snippet (${code.length} chars)`);
 
-    const _result = await semgrepMCPServer.analyzeSnippet(code, context || {});
+    const result = await semgrepMCPServer.analyzeSnippet(code, context || {});
 
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
       analysis: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[MCP API] Analysis error:', error);
     res.status(500).json({
       success: false,
@@ -109,18 +109,18 @@ router.post('/analyze', async (req: Request, res: Response) => {
  */
 router.get('/context/:component', async (req: Request, res: Response) => {
   try {
-    const _component = req.params.component;
+    const component = req.params.component;
 
     console.log(`[MCP API] Getting context for component: ${component}`);
 
-    const _context = await semgrepMCPServer.getComponentContext(component);
+    const context = await semgrepMCPServer.getComponentContext(component);
 
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-  _context,
+      context,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[MCP API] Context error:', error);
     res.status(500).json({
       success: false,
@@ -136,19 +136,19 @@ router.get('/context/:component', async (req: Request, res: Response) => {
  */
 router.get('/history/*', async (req: Request, res: Response) => {
   try {
-    const _filePath = req.params[0];
-    const _days = parseInt(req.query.days as string) || 30;
+    const filePath = req.params[0];
+    const days = parseInt(req.query.days as string) || 30;
 
     console.log(`[MCP API] Getting history for: ${filePath} (${days} days)`);
 
-    const _history = await semgrepMCPServer.getFileHistory(filePath, days);
+    const history = await semgrepMCPServer.getFileHistory(filePath, days);
 
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-  _history,
+      history,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[MCP API] History error:', error);
     res.status(500).json({
       success: false,
@@ -166,25 +166,25 @@ router.get('/rules', async (req: Request, res: Response) => {
   try {
     console.log('[MCP API] Getting active rules');
 
-    const _rules = await semgrepMCPServer.getActiveRules();
+    const rules = await semgrepMCPServer.getActiveRules();
 
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
       rules: {
         total: rules.length,
-        by_severity: rules.reduce((acc, rule) => {
+        by_severity: rules.reduce((acc: any, rule: any) => {
           acc[rule.severity || 'unknown'] = (acc[rule.severity || 'unknown'] || 0) + 1;
-          return acc; }
+          return acc;
         }, {}),
-        by_category: rules.reduce((acc, rule) => {
+        by_category: rules.reduce((acc: any, rule: any) => {
           acc[rule.category || 'unknown'] = (acc[rule.category || 'unknown'] || 0) + 1;
-          return acc; }
+          return acc;
         }, {}),
         list: rules,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[MCP API] Rules error:', error);
     res.status(500).json({
       success: false,

@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { signIn } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 
-const _loginSchema = z.object({
+const loginSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
@@ -23,19 +23,19 @@ const LoginPage: React.FC = () => {
   const { toast } = useToast();
 
   const {
-    _register,
-    _handleSubmit,
+    register,
+    handleSubmit,
     formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
 
-  const _onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: LoginForm) => {
     setLoading(true);
     try {
       await signIn(data.email, data.password);
       setLocation('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Erro ao fazer login',
         description: error.message || 'Credenciais inválidas',
@@ -51,7 +51,7 @@ const LoginPage: React.FC = () => {
       <div className="relative hidden items-center justify-center overflow-hidden bg-muted lg:flex">
         <div className="to-primary/80 absolute inset-0 bg-gradient-to-br from-primary opacity-40 dark:opacity-60"></div>
         <img
-          src="https://dvglgxrvhmtsixaabxha._supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png"
+          src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png"
           alt="Simpix Logo"
           className="relative z-10 w-1/2 opacity-75"
         />

@@ -6,12 +6,12 @@
 
 import { db } from '../lib/supabase';
 import {
-  _notificacoes,
-  _regrasAlertas,
-  _historicoExecucoesAlertas,
-  _propostas,
-  _parcelas,
-  _users,
+  notificacoes,
+  regrasAlertas,
+  historicoExecucoesAlertas,
+  propostas,
+  parcelas,
+  users,
 } from '@shared/schema';
 import type { InsertNotificacao, RegraAlerta, InsertHistoricoExecucaoAlerta } from '@shared/schema';
 import { and, eq, gte, lte, ne, sql, inArray } from 'drizzle-orm';
@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 
 interface EventoTrigger {
   tipo: string;
-  dados: unknown;
+  dados: any;
 }
 
 interface ProcessadorRegra {
@@ -31,7 +31,7 @@ interface NotificacaoData {
   tipo: string;
   prioridade: string;
   destinatarios: string[];
-  dados: unknown;
+  dados: any;
   linkRelacionado?: string;
 }
 
@@ -51,7 +51,7 @@ export class AlertasProativosService {
     this.regras.set('alto_valor_vencimento_proximo', {
       nome: 'alto_valor_vencimento_proximo',
       processar: async () => {
-        const _resultado = await db
+        const resultado = await db
           .select({
             propostaId: propostas.id,
             clienteNome: propostas.clienteNome,
@@ -71,7 +71,7 @@ export class AlertasProativosService {
             )
           );
 
-        return resultado.map((r) => ({
+        return resultado.map((r: any) => ({
           tipo: 'alto_valor_vencimento_proximo',
           titulo: 'Proposta de Alto Valor Vencendo',
           mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - Valor Total: R$ ${parseFloat(r.valorTotal || 0).toFixed(2)} - Parcela ${r.numeroParcela} vence em ${format(new Date(r.dataVencimento), 'dd/MM/yyyy')}`,
@@ -93,7 +93,7 @@ export class AlertasProativosService {
     this.regras.set('atraso_longo_30_dias', {
       nome: 'atraso_longo_30_dias',
       processar: async () => {
-        const _resultado = await db
+        const resultado = await db
           .select({
             propostaId: propostas.id,
             clienteNome: propostas.clienteNome,
@@ -112,7 +112,7 @@ export class AlertasProativosService {
           )
           .groupBy(propostas.id);
 
-        return resultado.map((r) => ({
+        return resultado.map((r: any) => ({
           tipo: 'atraso_longo_30_dias',
           titulo: 'Atraso Superior a 30 Dias',
           mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - ${r.parcelasVencidas} parcelas vencidas há mais de 30 dias - Total: R$ ${r.valorTotalVencido.toFixed(2)}`,
@@ -136,7 +136,7 @@ export class AlertasProativosService {
       processar: async () => {
         // Esta regra será acionada via webhook da ClickSign
         // Por enquanto retorna vazio
-        return []; }
+        return [];
       },
     });
   }
@@ -145,26 +145,26 @@ export class AlertasProativosService {
    * Método principal executado pelo cron job diariamente
    */
   async executarVerificacaoDiaria(): Promise<void> {
-    const _inicioExecucao = Date.now();
-    let _totalNotificacoesCriadas = 0;
-    let _totalRegistrosProcessados = 0;
+    const inicioExecucao = Date.now();
+    let totalNotificacoesCriadas = 0;
+    let totalRegistrosProcessados = 0;
 
     console.log(`[ALERTAS PROATIVOS] Iniciando verificação diária às ${new Date().toISOString()}`);
 
     // Buscar regras ativas do tipo cron
-    const _regrasAtivas = await db
+    const regrasAtivas = await db
       .select()
       .from(regrasAlertas)
       .where(and(eq(regrasAlertas.ativa, true), eq(regrasAlertas.trigger, 'cron')));
 
     // Se não houver regras cadastradas no banco, usar as regras padrão
-    const _regrasParaProcessar =
+    const regrasParaProcessar =
       regrasAtivas.length > 0
         ? regrasAtivas.map((r) => r.nome)
         : ['alto_valor_vencimento_proximo', 'atraso_longo_30_dias'];
 
     for (const nomeRegra of regrasParaProcessar) {
-      const _processador = this.regras.get(nomeRegra);
+      const processador = this.regras.get(nomeRegra);
       if (!processador) {
         console.log(`[ALERTAS PROATIVOS] Regra ${nomeRegra} não encontrada`);
         continue;
@@ -173,16 +173,16 @@ export class AlertasProativosService {
       try {
         console.log(`[ALERTAS PROATIVOS] Processando regra: ${nomeRegra}`);
 
-        const _resultados = await processador.processar();
+        const resultados = await processador.processar();
         console.log(
           `[ALERTAS PROATIVOS] Regra ${nomeRegra} encontrou ${resultados.length} registros`
         );
         totalRegistrosProcessados += resultados.length;
 
         // Buscar usuários com roles apropriadas
-        const _rolesDestino = this.obterRolesDestino(nomeRegra);
+        const rolesDestino = this.obterRolesDestino(nomeRegra);
         console.log(`[ALERTAS PROATIVOS] Buscando usuários com roles: ${rolesDestino.join(', ')}`);
-        const _usuariosDestino = await db
+        const usuariosDestino = await db
           .select()
           .from(users)
           .where(inArray(users.role, rolesDestino));
@@ -214,16 +214,16 @@ export class AlertasProativosService {
 
         // Registrar execução no histórico
         await this.registrarExecucao(
-  _nomeRegra,
+          nomeRegra,
           'sucesso',
           resultados.length,
-  _totalNotificacoesCriadas,
+          totalNotificacoesCriadas,
           Date.now() - inicioExecucao
         );
       } catch (error) {
         console.error(`[ALERTAS PROATIVOS] Erro ao processar regra ${nomeRegra}:`, error);
         await this.registrarExecucao(
-  _nomeRegra,
+          nomeRegra,
           'erro',
           0,
           0,
@@ -233,7 +233,7 @@ export class AlertasProativosService {
       }
     }
 
-    const _duracaoTotal = Date.now() - inicioExecucao;
+    const duracaoTotal = Date.now() - inicioExecucao;
     console.log(`[ALERTAS PROATIVOS] Verificação concluída em ${duracaoTotal}ms`);
     console.log(`[ALERTAS PROATIVOS] Total de notificações criadas: ${totalNotificacoesCriadas}`);
     console.log(`[ALERTAS PROATIVOS] Total de registros processados: ${totalRegistrosProcessados}`);
@@ -248,7 +248,7 @@ export class AlertasProativosService {
     // Implementação futura para processar eventos de webhook
     // Por exemplo: quando ClickSign enviar evento de documento visualizado
 
-    if (evento.tipo == 'documento_visualizado') {
+    if (evento.tipo === 'documento_visualizado') {
       // Agendar verificação após 24h
       setTimeout(
         async () => {
@@ -262,7 +262,7 @@ export class AlertasProativosService {
   /**
    * Verifica se o pagamento foi realizado após visualização do boleto
    */
-  private async verificarPagamentoAposVisualizacao(dados): Promise<void> {
+  private async verificarPagamentoAposVisualizacao(dados: any): Promise<void> {
     // Implementação futura
     console.log(`[ALERTAS PROATIVOS] Verificando pagamento após visualização:`, dados);
   }
@@ -272,14 +272,14 @@ export class AlertasProativosService {
    */
   private obterRolesDestino(nomeRegra: string): string[] {
     switch (nomeRegra) {
-      case 'alto_valor_vencimento_proximo': {
-        return ['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA', 'FINANCEIRO']; }
-      case 'atraso_longo_30_dias': {
-        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA', 'FINANCEIRO']; }
-      case 'boleto_visualizado_nao_pago': {
-        return ['ADMINISTRADOR', 'COBRANCA']; }
+      case 'alto_valor_vencimento_proximo':
+        return ['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
+      case 'atraso_longo_30_dias':
+        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
+      case 'boleto_visualizado_nao_pago':
+        return ['ADMINISTRADOR', 'COBRANCA'];
       default:
-        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA']; }
+        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'];
     }
   }
 
@@ -305,15 +305,15 @@ export class AlertasProativosService {
       if (regra) {
         const historico: InsertHistoricoExecucaoAlerta = {
           regraId: regra.id,
-  _duracao,
-  _status,
-  _registrosProcessados,
-  _notificacoesCriadas,
-  _erroDetalhes,
+          duracao,
+          status,
+          registrosProcessados,
+          notificacoesCriadas,
+          erroDetalhes,
           triggerOrigem: 'cron',
           dadosContexto: {
             timestamp: new Date().toISOString(),
-  _nomeRegra,
+            nomeRegra,
           },
         };
 
@@ -332,7 +332,7 @@ export class AlertasProativosService {
       console.log(`[ALERTAS PROATIVOS] Executando teste do serviço...`);
 
       // Verificar se as tabelas existem
-      const _testeNotificacao = await db.select().from(notificacoes).limit(1);
+      const testeNotificacao = await db.select().from(notificacoes).limit(1);
 
       return {
         sucesso: true,
@@ -348,4 +348,4 @@ export class AlertasProativosService {
 }
 
 // Exportar instância única do serviço
-export const _alertasProativosService = new AlertasProativosService();
+export const alertasProativosService = new AlertasProativosService();

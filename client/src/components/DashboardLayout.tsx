@@ -8,29 +8,29 @@ import OfflineIndicator from './OfflineIndicator';
 import { ThemeSelector } from './ThemeSelector';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import {
-  _LayoutDashboard,
-  _PlusCircle,
-  _List,
-  _CreditCard,
-  _User,
-  _LogOut,
-  _FileText,
-  _Settings, // Adicionando o ícone para configurações
-  _Users, // Adicionando o ícone para usuários
-  _Building2, // Adicionando o ícone para parceiros
-  _Package, // Adicionando o ícone para produtos
-  _Store, // Adicionando o ícone para lojas
-  _Shield, // Adicionando o ícone para segurança OWASP
-  _Receipt, // Adicionando o ícone para cobranças
-  _Menu, // Ícone do menu hamburger
+  LayoutDashboard,
+  PlusCircle,
+  List,
+  CreditCard,
+  User,
+  LogOut,
+  FileText,
+  Settings, // Adicionando o ícone para configurações
+  Users, // Adicionando o ícone para usuários
+  Building2, // Adicionando o ícone para parceiros
+  Package, // Adicionando o ícone para produtos
+  Store, // Adicionando o ícone para lojas
+  Shield, // Adicionando o ícone para segurança OWASP
+  Receipt, // Adicionando o ícone para cobranças
+  Menu, // Ícone do menu hamburger
 } from 'lucide-react';
 import {
-  _DropdownMenu,
-  _DropdownMenuContent,
-  _DropdownMenuItem,
-  _DropdownMenuLabel,
-  _DropdownMenuSeparator,
-  _DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 interface DashboardLayoutProps {
@@ -47,18 +47,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
 
   // Fechar menu com Escape e ao navegar
   useEffect(() => {
-    const _handleEscape = (e: KeyboardEvent) => {
-      if (e.key == 'Escape') {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         setSidebarOpen(false);
       }
     };
 
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape); }
+    return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
   // Fechar menu ao navegar (mobile)
-  const _handleNavClick = () => {
+  const handleNavClick = () => {
     setSidebarOpen(false);
   };
 
@@ -66,7 +66,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
 
   // All navigation constants removed - logic implemented directly in JSX for better maintainability
 
-  const _handleSignOut = async () => {
+  const handleSignOut = async () => {
     try {
       await signOut();
       toast({
@@ -93,7 +93,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
         <div
           className="bg-background/80 fixed inset-0 z-50 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
-          onKeyDown={(e) => e.key == 'Escape' && setSidebarOpen(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
           role="button"
           tabIndex={0}
           aria-label="Close sidebar"
@@ -108,7 +108,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
           <div className="flex h-16 items-center justify-between border-b px-6">
             <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
               <img
-                src="https://dvglgxrvhmtsixaabxha._supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png"
+                src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png"
                 alt="Simpix Logo"
                 className="h-32 w-auto"
               />
@@ -153,33 +153,33 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   .filter((item) => {
                     // 🔒 FILTRO RÍGIDO POR ROLE
                     switch (user?.role) {
-                      case 'ATENDENTE': {
+                      case 'ATENDENTE':
                         // ATENDENTE: Dashboard, Nova Proposta e Formalização
                         return ['📊 Dashboard', '➕ Nova Proposta', '📄 Formalização'].includes(
                           item.name
                         );
 
-                      case 'ANALISTA': {
+                      case 'ANALISTA':
                         // ANALISTA: APENAS Fila de Análise
-                        return ['📋 Fila de Análise'].includes(item.name); }
+                        return ['📋 Fila de Análise'].includes(item.name);
 
-                      case 'FINANCEIRO': {
+                      case 'FINANCEIRO':
                         // FINANCEIRO: Sem acesso ao workflow principal
-                        return false; }
+                        return false;
 
-                      case 'GERENTE': {
-                      case 'ADMINISTRADOR': {
-                      case 'DIRETOR': {
+                      case 'GERENTE':
+                      case 'ADMINISTRADOR':
+                      case 'DIRETOR':
                         // Gestores: Acesso completo
-                        return true; }
+                        return true;
 
                       default:
-                        return false; }
+                        return false;
                     }
                   })
                   .map((item) => {
-                    const _Icon = item.icon;
-                    const _isActive = location == item.href;
+                    const Icon = item.icon;
+                    const isActive = location === item.href;
                     return (
                       <Link
                         key={item.name}
@@ -205,9 +205,9 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               </div>
 
               {/* Área Financeira */}
-              {(user?.role == 'FINANCEIRO' ||
-                user?.role == 'ADMINISTRADOR' ||
-                user?.role == 'DIRETOR') && (
+              {(user?.role === 'FINANCEIRO' ||
+                user?.role === 'ADMINISTRADOR' ||
+                user?.role === 'DIRETOR') && (
                 <div className="space-y-2">
                   <div className="px-3 pb-2">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -218,18 +218,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     href="/financeiro/pagamentos"
                     onClick={handleNavClick}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                      location == '/financeiro/pagamentos'
+                      location === '/financeiro/pagamentos'
                         ? 'scale-105 transform bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
                         : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <div
-                      className={`rounded-lg p-2 ${location == '/financeiro/pagamentos' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                      className={`rounded-lg p-2 ${location === '/financeiro/pagamentos' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                     >
                       <CreditCard className="h-4 w-4" />
                     </div>
                     <span
-                      className={`font-medium ${location == '/financeiro/pagamentos' ? 'text-white' : ''}`}
+                      className={`font-medium ${location === '/financeiro/pagamentos' ? 'text-white' : ''}`}
                     >
                       💳 Pagamentos
                     </span>
@@ -238,18 +238,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     href="/financeiro/cobrancas"
                     onClick={handleNavClick}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                      location == '/financeiro/cobrancas'
+                      location === '/financeiro/cobrancas'
                         ? 'scale-105 transform bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
                         : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <div
-                      className={`rounded-lg p-2 ${location == '/financeiro/cobrancas' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                      className={`rounded-lg p-2 ${location === '/financeiro/cobrancas' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                     >
                       <Receipt className="h-4 w-4" />
                     </div>
                     <span
-                      className={`font-medium ${location == '/financeiro/cobrancas' ? 'text-white' : ''}`}
+                      className={`font-medium ${location === '/financeiro/cobrancas' ? 'text-white' : ''}`}
                     >
                       📑 Cobranças
                     </span>
@@ -258,7 +258,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               )}
 
               {/* Gestão Administrativa */}
-              {(user?.role == 'ADMINISTRADOR' || user?.role == 'DIRETOR') && (
+              {(user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR') && (
                 <>
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
@@ -270,18 +270,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                       href="/admin/usuarios"
                       onClick={handleNavClick}
                       className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                        location == '/admin/usuarios'
+                        location === '/admin/usuarios'
                           ? 'scale-105 transform bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
                           : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <div
-                        className={`rounded-lg p-2 ${location == '/admin/usuarios' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                        className={`rounded-lg p-2 ${location === '/admin/usuarios' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
                       >
                         <Users className="h-4 w-4" />
                       </div>
                       <span
-                        className={`font-medium ${location == '/admin/usuarios' ? 'text-white' : ''}`}
+                        className={`font-medium ${location === '/admin/usuarios' ? 'text-white' : ''}`}
                       >
                         👤 Usuários & Perfis
                       </span>
@@ -308,8 +308,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                         gradient: 'from-cyan-500 to-blue-600',
                       },
                     ].map((item) => {
-                      const _Icon = item.icon;
-                      const _isActive = location == item.href;
+                      const Icon = item.icon;
+                      const isActive = location === item.href;
                       return (
                         <Link
                           key={item.name}
@@ -359,8 +359,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                         gradient: 'from-teal-500 to-cyan-600',
                       },
                     ].map((item) => {
-                      const _Icon = item.icon;
-                      const _isActive = location == item.href;
+                      const Icon = item.icon;
+                      const isActive = location === item.href;
                       return (
                         <Link
                           key={item.name}
@@ -404,8 +404,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                         gradient: 'from-purple-500 to-indigo-600',
                       },
                     ].map((item) => {
-                      const _Icon = item.icon;
-                      const _isActive = location == item.href;
+                      const Icon = item.icon;
+                      const isActive = location === item.href;
                       return (
                         <Link
                           key={item.name}

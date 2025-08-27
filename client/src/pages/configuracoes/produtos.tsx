@@ -5,31 +5,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
-  _Dialog,
-  _DialogContent,
-  _DialogDescription,
-  _DialogHeader,
-  _DialogTitle,
-  _DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import {
-  _Pencil,
-  _Trash2,
-  _Plus,
-  _Package,
-  _BarChart3,
-  _Activity,
-  _Settings,
-  _TrendingUp,
+  Pencil,
+  Trash2,
+  Plus,
+  Package,
+  BarChart3,
+  Activity,
+  Settings,
+  TrendingUp,
 } from 'lucide-react';
 import { api } from '@/lib/apiClient';
 import { handleApiError, showSuccessMessage } from '@/lib/errorHandler';
@@ -62,62 +62,62 @@ export default function GestãoProdutos() {
   });
 
   const { toast } = useToast();
-  const _queryClient = useQueryClient();
-  const _loadingStates = useLoadingStates();
+  const queryClient = useQueryClient();
+  const loadingStates = useLoadingStates();
 
   // Query para buscar produtos
   const { data: produtos = [], isLoading } = useQuery({
     queryKey: ['produtos'],
     queryFn: async () => {
-      const _response = await api.get<Produto[]>('/api/produtos');
-      return Array.isArray(_response) ? response : (response as unknown).data || []; }
+      const response = await api.get<Produto[]>('/api/produtos');
+      return Array.isArray(response) ? response : (response as any).data || [];
     },
   });
 
   // Mutation para criar produto
-  const _createMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: async (data: ProdutoFormData) => {
-      const _response = await api.post<Produto>('/api/produtos', {
+      const response = await api.post<Produto>('/api/produtos', {
         nome: data.nome,
         status: data.status,
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return (response as unknown).data || response; }
+      return (response as any).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
       showSuccessMessage('create', 'Produto');
       handleCloseDialog();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       handleApiError(error);
     },
   });
 
   // Mutation para atualizar produto
-  const _updateMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: ProdutoFormData }) => {
-      const _response = await api.put<Produto>(`/api/produtos/${id}`, {
+      const response = await api.put<Produto>(`/api/produtos/${id}`, {
         nome: data.nome,
         status: data.status,
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return (response as unknown).data || response; }
+      return (response as any).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
       showSuccessMessage('update', 'Produto');
       handleCloseDialog();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       handleApiError(error);
     },
   });
 
   // Mutation para deletar produto
-  const _deleteMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       await api.delete(`/api/produtos/${id}`);
     },
@@ -125,12 +125,12 @@ export default function GestãoProdutos() {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
       showSuccessMessage('delete', 'Produto');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       handleApiError(error);
     },
   });
 
-  const _handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingProduct) {
       updateMutation.mutate({
@@ -142,7 +142,7 @@ export default function GestãoProdutos() {
     }
   };
 
-  const _handleEdit = (produto: Produto) => {
+  const handleEdit = (produto: Produto) => {
     setEditingProduct(produto);
     setFormData({
       nome: produto.nomeProduto,
@@ -153,19 +153,19 @@ export default function GestãoProdutos() {
     setIsDialogOpen(true);
   };
 
-  const _handleDelete = (id: number) => {
+  const handleDelete = (id: number) => {
     if (confirm('Tem certeza de que deseja excluir este produto?')) {
       deleteMutation.mutate(id);
     }
   };
 
-  const _handleCloseDialog = () => {
+  const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProduct(null);
     setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
   };
 
-  const _handleOpenDialog = () => {
+  const handleOpenDialog = () => {
     setEditingProduct(null);
     setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
     setIsDialogOpen(true);
@@ -210,17 +210,13 @@ export default function GestãoProdutos() {
   }
 
   // Calcular estatísticas dos produtos
-  const _produtosStats = {
+  const produtosStats = {
     total: produtos.length,
     ativos: Array.isArray(produtos) ? produtos.filter((p) => p.isActive).length : 0,
     inativos: Array.isArray(produtos) ? produtos.filter((p) => !p.isActive).length : 0,
     percentualAtivos:
       produtos.length > 0
-        ? (
-            ((Array.isArray(produtos) ? produtos.filter((p) => p.isActive).length : 0) /
-              produtos.length) *
-            100
-          ).toFixed(1)
+        ? ((Array.isArray(produtos) ? produtos.filter((p) => p.isActive).length : 0) / produtos.length * 100).toFixed(1)
         : '0',
   };
 
@@ -397,7 +393,7 @@ export default function GestãoProdutos() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            {produtos.length == 0 ? (
+            {produtos.length === 0 ? (
               <div className="py-12 text-center">
                 <Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -416,7 +412,7 @@ export default function GestãoProdutos() {
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {produtos.map((produto) => (
+                {produtos.map((produto: any) => (
                   <Card
                     key={produto.id}
                     className="border border-gray-200 transition-all duration-200 hover:border-cyan-300 hover:shadow-lg dark:border-gray-700 dark:hover:border-cyan-600"

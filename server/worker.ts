@@ -12,7 +12,7 @@ import { boletoStorageService } from './services/boletoStorageService';
 import { clickSignService } from './services/clickSignService';
 
 // Redis connection for workers
-const _redisConnection = new Redis({
+const redisConnection = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
@@ -27,35 +27,35 @@ const workerOptions: WorkerOptions = {
   concurrency: 5, // Process up to 5 jobs simultaneously
 };
 
-// ========== PDF PROCESSING WORKER ==========
-const _pdfWorker = new Worker(
+// =============== PDF PROCESSING WORKER ===============
+const pdfWorker = new Worker(
   'pdf-processing',
   async (job: Job) => {
     console.log(`[WORKER:PDF] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
-        case 'GENERATE_CARNE': {
+        case 'GENERATE_CARNE':
           console.log(`[WORKER:PDF] 📚 Generating carnê for proposal ${job.data.propostaId}`);
 
           // Update job progress
           await job.updateProgress(10);
 
           // Generate the carnê
-          const _pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
+          const pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
 
           await job.updateProgress(70);
 
           // Save to storage
-          const _signedUrl = await pdfMergeService.salvarCarneNoStorage(
+          const signedUrl = await pdfMergeService.salvarCarneNoStorage(
             job.data.propostaId,
             pdfBuffer
           );
 
           await job.updateProgress(100);
 
-          const _pdfDuration = Date.now() - startTime;
+          const pdfDuration = Date.now() - startTime;
           console.log(`[WORKER:PDF] ✅ Carnê generated successfully in ${pdfDuration}ms`);
 
           return {
@@ -66,17 +66,17 @@ const _pdfWorker = new Worker(
             processingTime: pdfDuration,
           };
 
-        case 'MERGE_PDFS': {
+        case 'MERGE_PDFS':
           console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
           // Implementation for generic PDF merging
           // TODO: Implement when needed
-          return { success: true, message: 'PDF merge not yet implemented' }; }
+          return { success: true, message: 'PDF merge not yet implemented' };
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
     } catch (error) {
-      const _errorDuration = Date.now() - startTime;
+      const errorDuration = Date.now() - startTime;
       console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
       throw error; // Re-throw to trigger retry
     }
@@ -84,28 +84,28 @@ const _pdfWorker = new Worker(
   workerOptions
 );
 
-// ========== BOLETO SYNC WORKER ==========
-const _boletoWorker = new Worker(
+// =============== BOLETO SYNC WORKER ===============
+const boletoWorker = new Worker(
   'boleto-sync',
   async (job: Job) => {
     console.log(`[WORKER:BOLETO] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
-        case 'SYNC_BOLETOS': {
+        case 'SYNC_BOLETOS':
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
 
           await job.updateProgress(10);
 
           // Sync boletos from Banco Inter to Storage
-          const _result = await boletoStorageService.sincronizarBoletosDaProposta(
+          const result = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
 
           await job.updateProgress(100);
 
-          const _syncDuration = Date.now() - startTime;
+          const syncDuration = Date.now() - startTime;
           console.log(
             `[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`
           );
@@ -120,31 +120,31 @@ const _boletoWorker = new Worker(
             processingTime: syncDuration,
           };
 
-        case 'GENERATE_AND_SYNC_CARNE': {
+        case 'GENERATE_AND_SYNC_CARNE':
           console.log(
             `[WORKER:BOLETO] 📚 Full carnê generation for proposal ${job.data.propostaId}`
           );
 
           // Step 1: Sync boletos
           await job.updateProgress(10);
-          const _syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
+          const syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
 
           await job.updateProgress(50);
 
           // Step 2: Generate carnê from synced boletos
-          const _carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
+          const carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
 
           await job.updateProgress(100);
 
-          const _fullDuration = Date.now() - startTime;
+          const fullDuration = Date.now() - startTime;
           console.log(`[WORKER:BOLETO] ✅ Full carnê process completed in ${fullDuration}ms`);
 
           return {
             success: carneResult.success,
             propostaId: job.data.propostaId,
-  _syncResult,
+            syncResult,
             carneUrl: carneResult.url,
             processingTime: fullDuration,
           };
@@ -153,7 +153,7 @@ const _boletoWorker = new Worker(
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
     } catch (error) {
-      const _boletoErrorDuration = Date.now() - startTime;
+      const boletoErrorDuration = Date.now() - startTime;
       console.error(
         `[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`,
         error
@@ -164,30 +164,30 @@ const _boletoWorker = new Worker(
   workerOptions
 );
 
-// ========== DOCUMENT PROCESSING WORKER ==========
-const _documentWorker = new Worker(
+// =============== DOCUMENT PROCESSING WORKER ===============
+const documentWorker = new Worker(
   'document-processing',
   async (job: Job) => {
     console.log(`[WORKER:DOC] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
-        case 'UPLOAD_TO_CLICKSIGN': {
+        case 'UPLOAD_TO_CLICKSIGN':
           console.log(`[WORKER:DOC] 📤 Uploading document to ClickSign`);
           // TODO: Implement ClickSign upload
-          return { success: true, message: 'ClickSign upload not yet implemented' }; }
+          return { success: true, message: 'ClickSign upload not yet implemented' };
 
-        case 'DOWNLOAD_SIGNED_DOCUMENT': {
+        case 'DOWNLOAD_SIGNED_DOCUMENT':
           console.log(`[WORKER:DOC] 📥 Downloading signed document from ClickSign`);
           // TODO: Implement ClickSign download
-          return { success: true, message: 'ClickSign download not yet implemented' }; }
+          return { success: true, message: 'ClickSign download not yet implemented' };
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
     } catch (error) {
-      const _duration = Date.now() - startTime;
+      const duration = Date.now() - startTime;
       console.error(`[WORKER:DOC] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;
     }
@@ -195,30 +195,30 @@ const _documentWorker = new Worker(
   workerOptions
 );
 
-// ========== NOTIFICATION WORKER ==========
-const _notificationWorker = new Worker(
+// =============== NOTIFICATION WORKER ===============
+const notificationWorker = new Worker(
   'notifications',
   async (job: Job) => {
     console.log(`[WORKER:NOTIFY] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
-        case 'SEND_EMAIL': {
+        case 'SEND_EMAIL':
           console.log(`[WORKER:NOTIFY] 📧 Sending email notification`);
           // TODO: Implement email sending
-          return { success: true, message: 'Email notification not yet implemented' }; }
+          return { success: true, message: 'Email notification not yet implemented' };
 
-        case 'WEBHOOK': {
+        case 'WEBHOOK':
           console.log(`[WORKER:NOTIFY] 🔔 Sending webhook notification`);
           // TODO: Implement webhook
-          return { success: true, message: 'Webhook not yet implemented' }; }
+          return { success: true, message: 'Webhook not yet implemented' };
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
     } catch (error) {
-      const _duration = Date.now() - startTime;
+      const duration = Date.now() - startTime;
       console.error(`[WORKER:NOTIFY] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;
     }

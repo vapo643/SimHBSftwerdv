@@ -8,29 +8,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  _Table,
-  _TableBody,
-  _TableCell,
-  _TableHead,
-  _TableHeader,
-  _TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import {
-  _Dialog,
-  _DialogContent,
-  _DialogDescription,
-  _DialogFooter,
-  _DialogHeader,
-  _DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
@@ -38,46 +38,46 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import {
-  _DropdownMenu,
-  _DropdownMenuContent,
-  _DropdownMenuItem,
-  _DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  _Calendar,
-  _Search,
-  _Phone,
-  _MessageSquare,
-  _Eye,
-  _EyeOff,
-  _Download,
-  _AlertCircle,
-  _CheckCircle2,
-  _Clock,
-  _TrendingUp,
-  _Receipt,
-  _DollarSign,
-  _FileText,
-  _Send,
-  _Filter,
-  _QrCode,
-  _Copy,
-  _Building2,
-  _RefreshCw,
-  _User,
-  _Mail,
-  _MapPin,
-  _CreditCard,
-  _UserCheck,
-  _History,
-  _AlertTriangle,
-  _X,
-  _MoreVertical,
-  _CheckCircle,
-  _CalendarPlus,
-  _Percent,
-  _CheckSquare,
-  _Loader2,
+  Calendar,
+  Search,
+  Phone,
+  MessageSquare,
+  Eye,
+  EyeOff,
+  Download,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  Receipt,
+  DollarSign,
+  FileText,
+  Send,
+  Filter,
+  QrCode,
+  Copy,
+  Building2,
+  RefreshCw,
+  User,
+  Mail,
+  MapPin,
+  CreditCard,
+  UserCheck,
+  History,
+  AlertTriangle,
+  X,
+  MoreVertical,
+  CheckCircle,
+  CalendarPlus,
+  Percent,
+  CheckSquare,
+  Loader2,
 } from 'lucide-react';
 import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -85,19 +85,19 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Importar todas as interfaces necessárias
 import type {
-  _FichaCliente,
-  _PropostaCobranca,
-  _KPIsCobranca,
-  _ObservacaoCobranca,
-  _DebtInfo,
-  _ExportacaoInadimplentes,
-  _ProrrogacaoData,
-  _DescontoQuitacaoData,
-  _MutationResponse,
-  _StatusVencimento,
-  _StatusFilter,
-  _AtrasoFilter,
-  _StatusObservacao,
+  FichaCliente,
+  PropostaCobranca,
+  KPIsCobranca,
+  ObservacaoCobranca,
+  DebtInfo,
+  ExportacaoInadimplentes,
+  ProrrogacaoData,
+  DescontoQuitacaoData,
+  MutationResponse,
+  StatusVencimento,
+  StatusFilter,
+  AtrasoFilter,
+  StatusObservacao,
 } from '@shared/types/cobrancas';
 
 // Interfaces removidas - usando as importadas de @shared/types/cobrancas
@@ -137,7 +137,7 @@ export default function CobrancasPage() {
   const [novoValorQuitacao, setNovoValorQuitacao] = useState(0);
   const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
   const [novasParcelas, setNovasParcelas] = useState<
-    Record<string, unknown>[]>{ valor: number; dataVencimento: string }>
+    Array<{ valor: number; dataVencimento: string }>
   >([]);
 
   // Estados para Prorrogar Vencimento (seleção múltipla)
@@ -151,10 +151,10 @@ export default function CobrancasPage() {
   const [statusObservacao, setStatusObservacao] = useState<StatusObservacao>('Outros');
 
   // Verificar se o usuário tem role de cobrança
-  const _isCobrancaUser = user?.role == 'COBRANÇA';
-  const _isAdmin = user?.role == 'ADMINISTRADOR';
-  const _isFinanceiro = user?.role == 'FINANCEIRO';
-  const _canModifyBoletos = isAdmin || isFinanceiro; // ADMIN ou FINANCEIRO podem modificar boletos
+  const isCobrancaUser = user?.role === 'COBRANÇA';
+  const isAdmin = user?.role === 'ADMINISTRADOR';
+  const isFinanceiro = user?.role === 'FINANCEIRO';
+  const canModifyBoletos = isAdmin || isFinanceiro; // ADMIN ou FINANCEIRO podem modificar boletos
 
   // Buscar informações de dívida para desconto de quitação
   const {
@@ -172,11 +172,11 @@ export default function CobrancasPage() {
   });
 
   // Mutation para prorrogar vencimento em lote
-  const _prorrogarMutation = useMutation<MutationResponse, Error, ProrrogacaoData>({
+  const prorrogarMutation = useMutation<MutationResponse, Error, ProrrogacaoData>({
     mutationFn: async (data: ProrrogacaoData) => {
       return apiRequest('/api/inter/collections/batch-extend', {
         method: 'PATCH',
-        body: JSON.stringify(_data),
+        body: JSON.stringify(data),
       }) as Promise<MutationResponse>;
     },
     onSuccess: (result: MutationResponse) => {
@@ -198,11 +198,11 @@ export default function CobrancasPage() {
   });
 
   // Mutation para aplicar desconto de quitação
-  const _descontoQuitacaoMutation = useMutation<MutationResponse, Error, DescontoQuitacaoData>({
+  const descontoQuitacaoMutation = useMutation<MutationResponse, Error, DescontoQuitacaoData>({
     mutationFn: async (data: DescontoQuitacaoData) => {
       return apiRequest('/api/inter/collections/settlement-discount', {
         method: 'POST',
-        body: JSON.stringify(_data),
+        body: JSON.stringify(data),
       }) as Promise<MutationResponse>;
     },
     onSuccess: (result: MutationResponse) => {
@@ -227,21 +227,21 @@ export default function CobrancasPage() {
   // Buscar propostas de cobrança
   const {
     data: propostas,
-  _isLoading,
-  _refetch,
+    isLoading,
+    refetch,
   } = useQuery<PropostaCobranca[]>({
     queryKey: ['/api/cobrancas', statusFilter, atrasoFilter],
     queryFn: async () => {
-      const _params = new URLSearchParams();
+      const params = new URLSearchParams();
       if (statusFilter !== 'todos') params.append('status', statusFilter);
       if (atrasoFilter !== 'todos') params.append('atraso', atrasoFilter);
 
-      return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>; }
+      return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>;
     },
   });
 
   // Função para atualizar sem precisar recarregar a página
-  const _handleRefresh = () => {
+  const handleRefresh = () => {
     console.log('[COBRANÇAS] Atualizando dados da API do Banco Inter...');
     refetch();
   };
@@ -256,8 +256,8 @@ export default function CobrancasPage() {
   useEffect(() => {
     console.log('🔄 [REALTIME] Configurando escuta para atualizações de cobranças');
 
-    const _supabase = getSupabase();
-    const _channel = supabase
+    const supabase = getSupabase();
+    const channel = supabase
       .channel('cobrancas-realtime-updates')
       .on(
         'postgres_changes',
@@ -280,7 +280,7 @@ export default function CobrancasPage() {
 
           // Se uma assinatura foi concluída, notificar
           if (
-            payload.new?.assinatura_eletronica_concluida == true &&
+            payload.new?.assinatura_eletronica_concluida === true &&
             payload.old?.assinatura_eletronica_concluida !== true
           ) {
             toast({
@@ -302,10 +302,9 @@ export default function CobrancasPage() {
           console.log('📡 [REALTIME] Evento recebido em inter_collections:', payload);
           console.log('📡 [REALTIME] Tipo de evento:', payload.eventType);
           console.log('📡 [REALTIME] Dados do boleto:', {
-            propostaId:
-              (payload.new as unknown)?.proposta_id || (payload.old as unknown)?.proposta_id,
-            situacao: (payload.new as unknown)?.situacao || (payload.old as unknown)?.situacao,
-            isActive: (payload.new as unknown)?.is_active,
+            propostaId: (payload.new as any)?.proposta_id || (payload.old as any)?.proposta_id,
+            situacao: (payload.new as any)?.situacao || (payload.old as any)?.situacao,
+            isActive: (payload.new as any)?.is_active,
           });
 
           // Invalidar as queries para forçar um refetch
@@ -313,16 +312,16 @@ export default function CobrancasPage() {
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
 
           // Notificações específicas por tipo de evento
-          if (payload.eventType == 'INSERT') {
+          if (payload.eventType === 'INSERT') {
             console.log('📡 [REALTIME] Novo boleto inserido - atualizando lista');
             toast({
               title: 'Novos boletos gerados',
               description: 'A lista de cobranças foi atualizada com novos boletos',
               duration: 2000,
             });
-          } else if (payload.eventType == 'UPDATE') {
+          } else if (payload.eventType === 'UPDATE') {
             // Se o boleto foi cancelado
-            if (payload.new?.situacao == 'CANCELADO' && payload.old?.situacao !== 'CANCELADO') {
+            if (payload.new?.situacao === 'CANCELADO' && payload.old?.situacao !== 'CANCELADO') {
               console.log(
                 '📡 [REALTIME] Boleto cancelado - verificando se proposta deve sair da lista'
               );
@@ -333,7 +332,7 @@ export default function CobrancasPage() {
               });
             }
             // Se foi um pagamento
-            else if (payload.new?.situacao == 'RECEBIDO') {
+            else if (payload.new?.situacao === 'RECEBIDO') {
               toast({
                 title: '✅ Pagamento recebido',
                 description: `Boleto ${payload.new?.seu_numero || ''} foi pago`,
@@ -344,13 +343,13 @@ export default function CobrancasPage() {
         }
       )
       .subscribe((status) => {
-        if (status == 'SUBSCRIBED') {
+        if (status === 'SUBSCRIBED') {
           console.log('✅ [REALTIME] Conectado ao canal de atualizações de cobranças');
-        } else if (status == 'CHANNEL_ERROR') {
+        } else if (status === 'CHANNEL_ERROR') {
           console.error('❌ [REALTIME] Erro ao conectar ao canal');
-        } else if (status == 'TIMED_OUT') {
+        } else if (status === 'TIMED_OUT') {
           console.error('⏱️ [REALTIME] Timeout ao conectar');
-        } else if (status == 'CLOSED') {
+        } else if (status === 'CLOSED') {
           console.log('🔌 [REALTIME] Canal fechado');
         }
       });
@@ -358,7 +357,7 @@ export default function CobrancasPage() {
     // Cleanup ao desmontar o componente
     return () => {
       console.log('🧹 [REALTIME] Removendo canal de escuta de cobranças');
-      _supabase.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
   }, [queryClient, toast]);
 
@@ -379,12 +378,12 @@ export default function CobrancasPage() {
       return;
     }
 
-    const _checkSyncStatus = async () => {
+    const checkSyncStatus = async () => {
       try {
         console.log(
           `[PAM V1.0 POLLING] Verificando status de sincronização para proposta ${selectedPropostaId}`
         );
-        const _response = (await apiRequest(`/api/propostas/${selectedPropostaId}/sync-status`, {
+        const response = (await apiRequest(`/api/propostas/${selectedPropostaId}/sync-status`, {
           method: 'GET',
         })) as {
           success: boolean;
@@ -400,7 +399,7 @@ export default function CobrancasPage() {
           );
 
           // Se está em andamento e não atingiu limite, continuar polling
-          if (response.syncStatus == 'em_andamento' && pollCount < 20) {
+          if (response.syncStatus === 'em_andamento' && pollCount < 20) {
             setIsPolling(true);
             setPollCount((prev) => prev + 1);
           } else {
@@ -440,7 +439,7 @@ export default function CobrancasPage() {
   // As observações agora vêm diretamente da ficha do cliente
 
   // Função para salvar nova observação
-  const _handleSalvarObservacao = async () => {
+  const handleSalvarObservacao = async () => {
     if (!selectedPropostaId || !novaObservacao.trim() || !statusObservacao) return;
 
     setSalvandoObservacao(true);
@@ -476,11 +475,11 @@ export default function CobrancasPage() {
   };
 
   // Mutation para adicionar observação
-  const _adicionarObservacaoMutation = useMutation({
-    mutationFn: (data) =>
+  const adicionarObservacaoMutation = useMutation({
+    mutationFn: (data: any) =>
       apiRequest(`/api/cobrancas/${selectedPropostaId}/observacao`, {
         method: 'POST',
-        body: JSON.stringify(_data),
+        body: JSON.stringify(data),
       }),
     onSuccess: () => {
       toast({
@@ -503,7 +502,7 @@ export default function CobrancasPage() {
   });
 
   // Função para copiar texto
-  const _copyToClipboard = (text: string, label: string) => {
+  const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: `${label} copiado!`,
@@ -512,29 +511,29 @@ export default function CobrancasPage() {
   };
 
   // Função para mascarar CPF/CNPJ
-  const _maskDocument = (doc: string) => {
-    if (!doc) return ''; }
+  const maskDocument = (doc: string) => {
+    if (!doc) return '';
     if (!showCpf) {
-      if (doc.length == 11) {
+      if (doc.length === 11) {
         // CPF
-        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`; }
-      } else if (doc.length == 14) {
+        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`;
+      } else if (doc.length === 14) {
         // CNPJ
-        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`; }
+        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`;
       }
     }
-    return doc; }
+    return doc;
   };
 
   // Função para exportar inadimplentes
-  const _exportarInadimplentes = async () => {
+  const exportarInadimplentes = async () => {
     try {
-      const _data = (await apiRequest(
+      const data = (await apiRequest(
         '/api/cobrancas/exportar/inadimplentes'
       )) as ExportacaoInadimplentes;
 
       // Verificar se há dados
-      if (!data || !data.inadimplentes || data.inadimplentes.length == 0) {
+      if (!data || !data.inadimplentes || data.inadimplentes.length === 0) {
         toast({
           title: 'Sem dados para exportar',
           description: 'Não há inadimplentes para exportar.',
@@ -543,17 +542,17 @@ export default function CobrancasPage() {
       }
 
       // Criar CSV manualmente
-      const _headers = Object.keys(data.inadimplentes[0] || {});
-      const _csv = [
+      const headers = Object.keys(data.inadimplentes[0] || {});
+      const csv = [
         headers.join(','),
-        ...data.inadimplentes.map((row) =>
+        ...data.inadimplentes.map((row: any) =>
           headers.map((header) => `"${row[header] || ''}"`).join(',')
         ),
       ].join('\n');
 
       // Download do CSV
-      const _blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const _link = document.createElement('a');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `inadimplentes_${format(new Date(), 'yyyy-MM-dd')}.csv`;
       link.click();
@@ -572,82 +571,81 @@ export default function CobrancasPage() {
   };
 
   // Filtrar propostas localmente pela busca (lógica robusta para campos vazios)
-  const _propostasFiltradas = Array.isArray(propostas)
-    ? propostas?.filter((proposta: PropostaCobranca) => {
-        if (!searchTerm) return true; // Sem busca = mostrar todas
+  const propostasFiltradas = Array.isArray(propostas) ? 
+    propostas?.filter((proposta: PropostaCobranca) => {
+      if (!searchTerm) return true; // Sem busca = mostrar todas
 
-        const _search = searchTerm.toLowerCase();
+      const search = searchTerm.toLowerCase();
 
-        // Cria lista de campos pesquisáveis, removendo valores vazios/null/undefined
-        const _searchableFields = [
-          proposta.nomeCliente,
-          proposta.cpfCliente,
-          proposta.numeroContrato,
-          proposta.id,
-          proposta.numero_proposta, // Adicionar campo de número da proposta
-        ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
+      // Cria lista de campos pesquisáveis, removendo valores vazios/null/undefined
+      const searchableFields = [
+        proposta.nomeCliente,
+        proposta.cpfCliente,
+        proposta.numeroContrato,
+        proposta.id,
+        proposta.numero_proposta, // Adicionar campo de número da proposta
+      ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
 
-        // Verifica se algum dos campos válidos contém o termo de busca
-        return searchableFields.some((field) => String(field).toLowerCase().includes(search)); }
-      })
-    : [];
+      // Verifica se algum dos campos válidos contém o termo de busca
+      return searchableFields.some((field) => String(field).toLowerCase().includes(search));
+    }) : [];
 
-  const _getStatusColor = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'em_dia': {
-        return 'bg-green-100 text-green-800'; }
-      case 'inadimplente': {
-        return 'bg-red-100 text-red-800'; }
-      case 'quitado': {
-        return 'bg-blue-100 text-blue-800'; }
+      case 'em_dia':
+        return 'bg-green-100 text-green-800';
+      case 'inadimplente':
+        return 'bg-red-100 text-red-800';
+      case 'quitado':
+        return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const _getParcelaStatusColor = (status: string) => {
+  const getParcelaStatusColor = (status: string) => {
     switch (status) {
-      case 'pago': {
-        return 'bg-green-100 text-green-800'; }
-      case 'vencido': {
-        return 'bg-red-100 text-red-800'; }
-      case 'pendente': {
-        return 'bg-yellow-100 text-yellow-800'; }
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'vencido':
+        return 'bg-red-100 text-red-800';
+      case 'pendente':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   // Função para mapear status do Inter Bank para cores
-  const _getInterBankStatusColor = (status: string) => {
+  const getInterBankStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
-      case 'RECEBIDO': {
-      case 'MARCADO_RECEBIDO': {
-        return 'bg-green-100 text-green-800'; }
-      case 'CANCELADO': {
-      case 'EXPIRADO': {
-      case 'FALHA_EMISSAO': {
-        return 'bg-gray-100 text-gray-800'; }
-      case 'ATRASADO': {
-      case 'PROTESTO': {
-        return 'bg-red-100 text-red-800'; }
-      case 'A_RECEBER': {
-      case 'EM_PROCESSAMENTO': {
-      case 'EMITIDO': {
-        return 'bg-blue-100 text-blue-800'; }
-      case 'pago': {
-        return 'bg-green-100 text-green-800'; }
-      case 'vencido': {
-        return 'bg-red-100 text-red-800'; }
-      case 'pendente': {
-        return 'bg-yellow-100 text-yellow-800'; }
+      case 'RECEBIDO':
+      case 'MARCADO_RECEBIDO':
+        return 'bg-green-100 text-green-800';
+      case 'CANCELADO':
+      case 'EXPIRADO':
+      case 'FALHA_EMISSAO':
+        return 'bg-gray-100 text-gray-800';
+      case 'ATRASADO':
+      case 'PROTESTO':
+        return 'bg-red-100 text-red-800';
+      case 'A_RECEBER':
+      case 'EM_PROCESSAMENTO':
+      case 'EMITIDO':
+        return 'bg-blue-100 text-blue-800';
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'vencido':
+        return 'bg-red-100 text-red-800';
+      case 'pendente':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   // Função para mapear status do Inter Bank para texto de exibição
-  const _getInterBankStatusLabel = (
+  const getInterBankStatusLabel = (
     interSituacao?: string,
     localStatus?: string,
     vencida?: boolean
@@ -655,58 +653,58 @@ export default function CobrancasPage() {
     // Priorizar status do Inter Bank se disponível
     if (interSituacao) {
       switch (interSituacao.toUpperCase()) {
-        case 'RECEBIDO': {
-        case 'MARCADO_RECEBIDO': {
+        case 'RECEBIDO':
+        case 'MARCADO_RECEBIDO':
         case 'PAGO': // PAM V1.0 - FASE 1: Reconhecer "PAGO" como status válido
-          return 'Pago'; }
-        case 'CANCELADO': {
-        case 'EXPIRADO': {
-        case 'FALHA_EMISSAO': {
-          return 'Cancelado'; }
-        case 'ATRASADO': {
-        case 'PROTESTO': {
-          return 'Vencido'; }
-        case 'A_RECEBER': {
-        case 'EM_PROCESSAMENTO': {
-        case 'EMITIDO': {
-          return 'Pendente'; }
+          return 'Pago';
+        case 'CANCELADO':
+        case 'EXPIRADO':
+        case 'FALHA_EMISSAO':
+          return 'Cancelado';
+        case 'ATRASADO':
+        case 'PROTESTO':
+          return 'Vencido';
+        case 'A_RECEBER':
+        case 'EM_PROCESSAMENTO':
+        case 'EMITIDO':
+          return 'Pendente';
         default:
-          return interSituacao; }
+          return interSituacao;
       }
     }
 
     // Fallback para status local
-    if (localStatus == 'pago') return 'Pago'; }
-    if (vencida) return 'Vencido'; }
-    return 'Pendente'; }
+    if (localStatus === 'pago') return 'Pago';
+    if (vencida) return 'Vencido';
+    return 'Pendente';
   };
 
   // Função para calcular o Status de Vencimento inteligente
-  const _getStatusVencimento = (proposta) => {
+  const getStatusVencimento = (proposta: any) => {
     // Se tem situação do Inter Bank, verificar status especiais
     if (proposta.interSituacao) {
-      const _situacao = proposta.interSituacao.toUpperCase();
-      if (situacao == 'RECEBIDO' || situacao == 'MARCADO_RECEBIDO') {
-        return { text: 'Pago', color: 'text-green-600' }; }
+      const situacao = proposta.interSituacao.toUpperCase();
+      if (situacao === 'RECEBIDO' || situacao === 'MARCADO_RECEBIDO') {
+        return { text: 'Pago', color: 'text-green-600' };
       }
-      if (situacao == 'CANCELADO' || situacao == 'EXPIRADO' || situacao == 'FALHA_EMISSAO') {
-        return { text: 'Cancelado', color: 'text-gray-600' }; }
+      if (situacao === 'CANCELADO' || situacao === 'EXPIRADO' || situacao === 'FALHA_EMISSAO') {
+        return { text: 'Cancelado', color: 'text-gray-600' };
       }
     }
 
     // Se o status local indica pago
-    if (proposta.status == 'quitado' || proposta.status == 'pago') {
-      return { text: 'Pago', color: 'text-green-600' }; }
+    if (proposta.status === 'quitado' || proposta.status === 'pago') {
+      return { text: 'Pago', color: 'text-green-600' };
     }
 
     // Calcular baseado na data de vencimento
-    const _hoje = new Date();
-    const _dataVencimento = proposta.dataProximoVencimento
+    const hoje = new Date();
+    const dataVencimento = proposta.dataProximoVencimento
       ? parseISO(proposta.dataProximoVencimento)
       : null;
 
     if (!dataVencimento) {
-      return { text: 'Sem vencimento', color: 'text-gray-500' }; }
+      return { text: 'Sem vencimento', color: 'text-gray-500' };
     }
 
     // Se já venceu
@@ -719,21 +717,21 @@ export default function CobrancasPage() {
 
     // Se vence hoje
     if (isToday(dataVencimento)) {
-      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' }; }
+      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' };
     }
 
     // Se vence nos próximos 7 dias
-    const _diasParaVencer = differenceInDays(dataVencimento, hoje);
+    const diasParaVencer = differenceInDays(dataVencimento, hoje);
     if (diasParaVencer > 0 && diasParaVencer <= 7) {
-      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' }; }
+      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' };
     }
 
     // Para todos os outros casos, mostrar a data de vencimento
     if (isFuture(dataVencimento)) {
-      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' }; }
+      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' };
     }
 
-    return { text: 'Em dia', color: 'text-green-600' }; }
+    return { text: 'Em dia', color: 'text-green-600' };
   };
 
   return (
@@ -935,14 +933,14 @@ export default function CobrancasPage() {
                         Carregando...
                       </TableCell>
                     </TableRow>
-                  ) : propostasFiltradas?.length == 0 ? (
+                  ) : propostasFiltradas?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="text-center">
                         Nenhum contrato encontrado
                       </TableCell>
                     </TableRow>
                   ) : (
-                    propostasFiltradas?.map((proposta) => (
+                    propostasFiltradas?.map((proposta: any) => (
                       <TableRow
                         key={proposta.id}
                         className={proposta.diasAtraso > 30 ? 'bg-red-50' : ''}
@@ -962,15 +960,15 @@ export default function CobrancasPage() {
                         </TableCell>
                         <TableCell>
                           {(() => {
-                            const _statusInfo = getStatusVencimento(proposta);
-                            return <span className={statusInfo.color}>{statusInfo.text}</span>; }
+                            const statusInfo = getStatusVencimento(proposta);
+                            return <span className={statusInfo.color}>{statusInfo.text}</span>;
                           })()}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(proposta.status)}>
-                            {proposta.status == 'em_dia'
+                            {proposta.status === 'em_dia'
                               ? 'Em Dia'
-                              : proposta.status == 'inadimplente'
+                              : proposta.status === 'inadimplente'
                                 ? 'Inadimplente'
                                 : 'Quitado'}
                           </Badge>
@@ -1009,7 +1007,7 @@ export default function CobrancasPage() {
                                         });
                                         return;
                                       }
-                                      const _canModify = [
+                                      const canModify = [
                                         'A_RECEBER',
                                         'ATRASADO',
                                         'EM_PROCESSAMENTO',
@@ -1027,7 +1025,7 @@ export default function CobrancasPage() {
                                       // Buscar boletos ativos da proposta
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then((data) => {
+                                      ).then((data: any) => {
                                         setTodosBoletosAtivos(data.boletosAtivos || []);
                                       });
                                       setShowProrrogarModal(true);
@@ -1054,7 +1052,7 @@ export default function CobrancasPage() {
                                         });
                                         return;
                                       }
-                                      const _canModify = [
+                                      const canModify = [
                                         'A_RECEBER',
                                         'ATRASADO',
                                         'EM_PROCESSAMENTO',
@@ -1072,7 +1070,7 @@ export default function CobrancasPage() {
                                       // Buscar informações de dívida
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then((data) => {
+                                      ).then((data: any) => {
                                         setDebtInfo(data as DebtInfo);
                                         setNovoValorQuitacao((data.valorRestante || 0) * 0.5); // Sugerir 50% de desconto inicial
                                       });
@@ -1132,9 +1130,11 @@ export default function CobrancasPage() {
                         key={boleto.codigoSolicitacao}
                         className="flex cursor-pointer items-center space-x-3 rounded-lg p-2 hover:bg-muted"
                         onClick={() => {
-                          const _codigo = boleto.codigoSolicitacao || '';
+                          const codigo = boleto.codigoSolicitacao || '';
                           if (boletosParaProrrogar.includes(codigo)) {
-                            setBoletosParaProrrogar((prev) => prev.filter((c) => c !== codigo));
+                            setBoletosParaProrrogar((prev) =>
+                              prev.filter((c) => c !== codigo)
+                            );
                           } else if (codigo) {
                             setBoletosParaProrrogar((prev) => [...prev, codigo]);
                           }
@@ -1157,9 +1157,7 @@ export default function CobrancasPage() {
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Vencimento atual:{' '}
-                            {new Date(boleto.dataVencimento ?? new Date()).toLocaleDateString(
-                              'pt-BR'
-                            )}
+                            {new Date(boleto.dataVencimento ?? new Date()).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                       </div>
@@ -1206,7 +1204,7 @@ export default function CobrancasPage() {
               </Button>
               <Button
                 onClick={() => {
-                  if (boletosParaProrrogar.length == 0) {
+                  if (boletosParaProrrogar.length === 0) {
                     toast({
                       title: 'Erro',
                       description: 'Selecione pelo menos um boleto',
@@ -1224,10 +1222,10 @@ export default function CobrancasPage() {
                   }
                   prorrogarMutation.mutate({
                     codigosSolicitacao: boletosParaProrrogar,
-  _novaDataVencimento,
+                    novaDataVencimento,
                   });
                 }}
-                disabled={prorrogarMutation.isPending || boletosParaProrrogar.length == 0}
+                disabled={prorrogarMutation.isPending || boletosParaProrrogar.length === 0}
               >
                 {prorrogarMutation.isPending
                   ? 'Processando...'
@@ -1253,15 +1251,15 @@ export default function CobrancasPage() {
             <DialogHeader>
               <DialogTitle>Desconto para Quitação - Etapa {etapaDesconto} de 3</DialogTitle>
               <DialogDescription>
-                {etapaDesconto == 1 && 'Análise da dívida atual'}
-                {etapaDesconto == 2 && 'Configurar novo valor e parcelamento'}
-                {etapaDesconto == 3 && 'Confirmar operação'}
+                {etapaDesconto === 1 && 'Análise da dívida atual'}
+                {etapaDesconto === 2 && 'Configurar novo valor e parcelamento'}
+                {etapaDesconto === 3 && 'Confirmar operação'}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               {/* Etapa 1: Análise da Dívida */}
-              {etapaDesconto == 1 && (
+              {etapaDesconto === 1 && (
                 <div className="space-y-4">
                   {loadingDebt || !debtInfo ? (
                     <div className="flex items-center justify-center p-8">
@@ -1310,7 +1308,7 @@ export default function CobrancasPage() {
                         <div className="rounded-lg border p-4">
                           <h4 className="mb-2 font-medium">Boletos Ativos</h4>
                           <div className="max-h-40 space-y-2 overflow-y-auto">
-                            {(debtInfo.boletosAtivos ?? []).map((b, idx: number) => (
+                            {(debtInfo.boletosAtivos ?? []).map((b: any, idx: number) => (
                               <div
                                 key={idx}
                                 className="flex justify-between rounded bg-muted p-2 text-sm"
@@ -1336,7 +1334,7 @@ export default function CobrancasPage() {
               )}
 
               {/* Etapa 2: Configurar Novo Valor */}
-              {etapaDesconto == 2 && debtInfo && (
+              {etapaDesconto === 2 && debtInfo && (
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="novo-valor">Novo Valor para Quitação (R$)</Label>
@@ -1346,14 +1344,14 @@ export default function CobrancasPage() {
                       step="0.01"
                       value={novoValorQuitacao}
                       onChange={(e) => {
-                        const _valor = parseFloat(e.target.value);
+                        const valor = parseFloat(e.target.value);
                         setNovoValorQuitacao(valor);
                         // Recalcular parcelas
                         if (valor > 0 && quantidadeParcelas > 0) {
-                          const _valorParcela = valor / quantidadeParcelas;
-                          const _parcelas = [];
-                          for (let _i = 0; i < quantidadeParcelas; i++) {
-                            const _dataVenc = new Date();
+                          const valorParcela = valor / quantidadeParcelas;
+                          const parcelas = [];
+                          for (let i = 0; i < quantidadeParcelas; i++) {
+                            const dataVenc = new Date();
                             dataVenc.setMonth(dataVenc.getMonth() + i + 1);
                             parcelas.push({
                               valor: valorParcela,
@@ -1380,14 +1378,14 @@ export default function CobrancasPage() {
                     <Select
                       value={quantidadeParcelas.toString()}
                       onValueChange={(value) => {
-                        const _qtd = parseInt(value);
+                        const qtd = parseInt(value);
                         setQuantidadeParcelas(qtd);
                         // Recalcular parcelas
                         if (novoValorQuitacao > 0) {
-                          const _valorParcela = novoValorQuitacao / qtd;
-                          const _parcelas = [];
-                          for (let _i = 0; i < qtd; i++) {
-                            const _dataVenc = new Date();
+                          const valorParcela = novoValorQuitacao / qtd;
+                          const parcelas = [];
+                          for (let i = 0; i < qtd; i++) {
+                            const dataVenc = new Date();
                             dataVenc.setMonth(dataVenc.getMonth() + i + 1);
                             parcelas.push({
                               valor: valorParcela,
@@ -1404,7 +1402,7 @@ export default function CobrancasPage() {
                       <SelectContent>
                         {[1, 2, 3, 4, 5, 6, 12, 24].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
-                            {n} {n == 1 ? 'parcela' : 'parcelas'}
+                            {n} {n === 1 ? 'parcela' : 'parcelas'}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1421,9 +1419,8 @@ export default function CobrancasPage() {
                         }).format((debtInfo.valorRestante ?? 0) - novoValorQuitacao)}
                       </p>
                       <p className="text-xs text-green-600">
-                        (
-                        {((1 - novoValorQuitacao / (debtInfo.valorRestante ?? 1)) * 100).toFixed(1)}
-                        % de desconto)
+                        ({((1 - novoValorQuitacao / (debtInfo.valorRestante ?? 1)) * 100).toFixed(1)}% de
+                        desconto)
                       </p>
                     </div>
                   )}
@@ -1451,7 +1448,7 @@ export default function CobrancasPage() {
               )}
 
               {/* Etapa 3: Confirmação */}
-              {etapaDesconto == 3 && debtInfo && (
+              {etapaDesconto === 3 && debtInfo && (
                 <div className="space-y-4">
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                     <div className="flex items-start space-x-2">
@@ -1532,10 +1529,10 @@ export default function CobrancasPage() {
               {etapaDesconto < 3 ? (
                 <Button
                   onClick={() => {
-                    if (etapaDesconto == 1 && debtInfo) {
+                    if (etapaDesconto === 1 && debtInfo) {
                       setEtapaDesconto(2);
                     } else if (
-                      etapaDesconto == 2 &&
+                      etapaDesconto === 2 &&
                       novoValorQuitacao > 0 &&
                       novasParcelas.length > 0
                     ) {
@@ -1549,8 +1546,8 @@ export default function CobrancasPage() {
                     }
                   }}
                   disabled={
-                    (etapaDesconto == 1 && !debtInfo) ||
-                    (etapaDesconto == 2 && (!novoValorQuitacao || novasParcelas.length == 0))
+                    (etapaDesconto === 1 && !debtInfo) ||
+                    (etapaDesconto === 2 && (!novoValorQuitacao || novasParcelas.length === 0))
                   }
                 >
                   Próximo
@@ -1561,7 +1558,7 @@ export default function CobrancasPage() {
                     descontoQuitacaoMutation.mutate({
                       propostaId: selectedPropostaId ?? '',
                       desconto: (debtInfo?.valorRestante ?? 0) - novoValorQuitacao,
-  _novasParcelas,
+                      novasParcelas,
                     });
                   }}
                   disabled={descontoQuitacaoMutation.isPending}
@@ -1715,21 +1712,21 @@ export default function CobrancasPage() {
                       <div className="mt-4 grid grid-cols-3 gap-4">
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {fichaCliente.parcelas?.filter((p) => p.status == 'pago')
+                            {fichaCliente.parcelas?.filter((p: any) => p.status === 'pago')
                               .length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pagas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {fichaCliente.parcelas?.filter((p) => p.vencida).length || 0}
+                            {fichaCliente.parcelas?.filter((p: any) => p.vencida).length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Vencidas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
                             {fichaCliente.parcelas?.filter(
-                              (p) => p.status == 'pendente' && !p.vencida
+                              (p: any) => p.status === 'pendente' && !p.vencida
                             ).length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pendentes</p>
@@ -1762,12 +1759,7 @@ export default function CobrancasPage() {
                               />
                             </div>
                             <div className="flex gap-2">
-                              <Select
-                                value={statusObservacao}
-                                onValueChange={(value: string) =>
-                                  setStatusObservacao(value as unknown)
-                                }
-                              >
+                              <Select value={statusObservacao} onValueChange={(value: string) => setStatusObservacao(value as any)}>
                                 <SelectTrigger className="w-[250px]">
                                   <SelectValue placeholder="Selecione o status" />
                                 </SelectTrigger>
@@ -1810,7 +1802,7 @@ export default function CobrancasPage() {
                               Carregando histórico...
                             </p>
                           </div>
-                        ) : !fichaCliente.observacoes || fichaCliente.observacoes.length == 0 ? (
+                        ) : !fichaCliente.observacoes || fichaCliente.observacoes.length === 0 ? (
                           <div className="py-4 text-center text-muted-foreground">
                             Nenhuma observação registrada ainda.
                           </div>
@@ -1824,11 +1816,11 @@ export default function CobrancasPage() {
                                       <div className="flex items-center gap-2">
                                         <Badge
                                           variant={
-                                            obs.tipoContato == 'Acordo Fechado'
+                                            obs.tipoContato === 'Acordo Fechado'
                                               ? 'default'
-                                              : obs.tipoContato == 'Contato Realizado'
+                                              : obs.tipoContato === 'Contato Realizado'
                                                 ? 'secondary'
-                                                : obs.tipoContato == 'Negociação em Andamento'
+                                                : obs.tipoContato === 'Negociação em Andamento'
                                                   ? 'outline'
                                                   : 'secondary'
                                           }
@@ -1836,10 +1828,7 @@ export default function CobrancasPage() {
                                           {obs.tipoContato}
                                         </Badge>
                                         <span className="text-xs text-muted-foreground">
-                                          {format(
-                                            new Date(obs.createdAt ?? new Date()),
-                                            "dd/MM/yyyy 'às' HH:mm"
-                                          )}
+                                          {format(new Date(obs.createdAt ?? new Date()), "dd/MM/yyyy 'às' HH:mm")}
                                         </span>
                                       </div>
                                       <p className="mt-2 text-sm">{obs.observacao}</p>
@@ -1878,7 +1867,7 @@ export default function CobrancasPage() {
                                 });
 
                                 // Chamar endpoint de geração de carnê consolidado
-                                const _response = (await apiRequest(
+                                const response = (await apiRequest(
                                   `/api/propostas/${selectedPropostaId}/gerar-carne`,
                                   { method: 'POST' }
                                 )) as {
@@ -1959,7 +1948,7 @@ export default function CobrancasPage() {
                                   description: 'Atualizando status das parcelas com o Banco Inter',
                                 });
 
-                                const _response = (await apiRequest(
+                                const response = (await apiRequest(
                                   `/api/cobrancas/sincronizar/${selectedPropostaId}`,
                                   { method: 'POST' }
                                 )) as { updated: number; message: string };
@@ -1995,9 +1984,9 @@ export default function CobrancasPage() {
                           <div
                             key={parcela.id}
                             className={`rounded border p-3 ${
-                              (parcela as unknown).vencida
+                              (parcela as any).vencida
                                 ? 'border-red-300 bg-red-50'
-                                : parcela.status == 'pago'
+                                : parcela.status === 'pago'
                                   ? 'border-green-300 bg-green-50'
                                   : 'border-gray-200'
                             }`}
@@ -2081,7 +2070,7 @@ export default function CobrancasPage() {
 
                                       // PAM V1.0 CORRIGIDO: URL autenticada sem responseType blob
                                       // BUG CORRIGIDO: responseType blob interferia com autenticação JWT
-                                      const _pdfUrl = `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`;
+                                      const pdfUrl = `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`;
 
                                       // Abrir diretamente - o servidor retorna o PDF com headers corretos
                                       window.open(pdfUrl, '_blank');
@@ -2090,7 +2079,7 @@ export default function CobrancasPage() {
                                         title: 'PDF aberto',
                                         description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
                                       });
-                                    } catch (error) {
+                                    } catch (error: any) {
                                       console.error(
                                         '[PDF VIEW] Erro ao abrir PDF individual:',
                                         error
@@ -2146,7 +2135,7 @@ export default function CobrancasPage() {
                                   {getInterBankStatusLabel(
                                     parcela.interSituacao,
                                     parcela.status,
-                                    (parcela as unknown).vencida
+                                    (parcela as any).vencida
                                   )}
                                 </Badge>
 
@@ -2158,7 +2147,7 @@ export default function CobrancasPage() {
                                     onClick={async () => {
                                       try {
                                         // PAM V1.0 - FASE 3: Tipagem correta da resposta
-                                        const _response = (await apiRequest(
+                                        const response = (await apiRequest(
                                           `/api/cobrancas/parcelas/${parcela.codigoSolicitacao}/marcar-pago`,
                                           { method: 'PATCH' }
                                         )) as {

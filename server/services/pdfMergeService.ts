@@ -29,7 +29,7 @@ export class PdfMergeService {
         )
         .orderBy(interCollections.numeroParcela);
 
-      if (!collections || collections.length == 0) {
+      if (!collections || collections.length === 0) {
         throw new Error(`Nenhum boleto encontrado para a proposta ${propostaId}`);
       }
 
@@ -51,7 +51,7 @@ export class PdfMergeService {
           const pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
 
           // Validar PDF
-          if (!pdfBuffer || pdfBuffer.length == 0) {
+          if (!pdfBuffer || pdfBuffer.length === 0) {
             throw new Error(`PDF vazio para parcela ${collection.numeroParcela}`);
           }
 
@@ -70,7 +70,7 @@ export class PdfMergeService {
             console.log(`[PDF MERGE] ⏳ Aguardando 2s antes da próxima requisição...`);
             await new Promise((resolve) => setTimeout(resolve, 2000));
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error(
             `[PDF MERGE] ❌ Erro ao baixar parcela ${collection.numeroParcela}:`,
             error.message
@@ -80,7 +80,7 @@ export class PdfMergeService {
       }
 
       // Verificar se conseguiu baixar pelo menos um PDF
-      if (pdfBuffers.length == 0) {
+      if (pdfBuffers.length === 0) {
         throw new Error(`Não foi possível baixar nenhum PDF. Erros: ${errors.join('; ')}`);
       }
 
@@ -117,7 +117,7 @@ export class PdfMergeService {
           }
 
           console.log(`[PDF MERGE] ✅ PDF ${i + 1} adicionado (${pages.length} páginas)`);
-        } catch (error) {
+        } catch (error: any) {
           console.error(`[PDF MERGE] ❌ Erro ao processar PDF ${i + 1}:`, error.message);
           // Continuar com os outros PDFs mesmo se um falhar
         }
@@ -125,7 +125,7 @@ export class PdfMergeService {
 
       // Verificar se tem páginas no documento final
       const totalPages = mergedPdfDoc.getPageCount();
-      if (totalPages == 0) {
+      if (totalPages === 0) {
         throw new Error('Documento final não contém páginas');
       }
 
@@ -138,7 +138,7 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] ✅ Carnê gerado com sucesso (${mergedBuffer.length} bytes)`);
 
       return mergedBuffer;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`[PDF MERGE] ❌ Erro ao gerar carnê:`, error);
       throw error;
     }
@@ -186,7 +186,7 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] ✅ URL assinada gerada com sucesso`);
 
       return signedUrlData.signedUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`[PDF MERGE] ❌ Erro ao salvar carnê:`, error);
       throw error;
     }
@@ -194,4 +194,4 @@ export class PdfMergeService {
 }
 
 // Exportar instância única
-export const _pdfMergeService = new PdfMergeService();
+export const pdfMergeService = new PdfMergeService();

@@ -801,7 +801,7 @@ export const validateReferenciasCompletas = z
     (refs) => {
       const tipos = refs.map((r) => r.tipo_referencia);
       // PAM V1.1: Primeira referência deve ser pessoal, segunda pode ser qualquer tipo
-      return tipos.length == 2 && refs[0].tipo_referencia == 'pessoal';
+      return tipos.length === 2 && refs[0].tipo_referencia === 'pessoal';
     },
     {
       message: 'A primeira referência deve ser pessoal, a segunda pode ser pessoal ou profissional',

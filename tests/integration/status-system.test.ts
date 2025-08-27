@@ -380,7 +380,7 @@ describe('Sistema de Status FSM - Testes de Integração', () => {
         .where(eq(statusContextuais.propostaId, testProposalId));
 
       expect(contextosRegistrados.length).toBe(2);
-      expect(contextosRegistrados.every((c) => c.status == ProposalStatus.APROVADO)).toBe(true);
+      expect(contextosRegistrados.every((c) => c.status === ProposalStatus.APROVADO)).toBe(true);
 
       // Verificar que a tabela principal tem o status correto
       const [proposta] = await db

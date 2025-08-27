@@ -8,27 +8,27 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import {
-  _Table,
-  _TableBody,
-  _TableCell,
-  _TableHead,
-  _TableHeader,
-  _TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import {
-  _Dialog,
-  _DialogContent,
-  _DialogDescription,
-  _DialogFooter,
-  _DialogHeader,
-  _DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -42,31 +42,32 @@ import { api } from '@/lib/apiClient';
 import { format, isToday, isThisWeek, isThisMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-  _Search,
-  _DollarSign,
-  _Eye,
-  _CheckCircle,
-  _XCircle,
-  _AlertCircle,
-  _Clock,
-  _TrendingUp,
-  _FileText,
-  _Send,
-  _Building2,
-  _Calendar,
-  _CreditCard,
-  _Shield,
-  _Banknote,
-  _History,
-  _Filter,
-  _Download,
-  _RefreshCw,
-  _ChevronRight,
-  _PiggyBank,
-  _Wallet,
-  _ArrowUpRight,
-  _ArrowDownRight,
-  _ShieldCheck,
+  Search,
+  DollarSign,
+  Eye,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Clock,
+  TrendingUp,
+  FileText,
+  Send,
+  Building2,
+  Calendar,
+  CreditCard,
+  Shield,
+  UserCheck,
+  Banknote,
+  History,
+  Filter,
+  Download,
+  RefreshCw,
+  ChevronRight,
+  PiggyBank,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownRight,
+  ShieldCheck,
 } from 'lucide-react';
 import PaymentReviewModal from './pagamentos-review';
 import MarcarPagoModal from './marcar-pago-modal';
@@ -127,12 +128,12 @@ export default function Pagamentos() {
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [showSecurityVerificationModal, setShowSecurityVerificationModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [selectedPropostaForReview, setSelectedPropostaForReview] = useState<unknown>(null);
+  const [selectedPropostaForReview, setSelectedPropostaForReview] = useState<any>(null);
   const [showMarcarPagoModal, setShowMarcarPagoModal] = useState(false);
-  const [selectedPropostaForPago, setSelectedPropostaForPago] = useState<unknown>(null);
+  const [selectedPropostaForPago, setSelectedPropostaForPago] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [approvalObservation, setApprovalObservation] = useState('');
-  const [verificationData, setVerificationData] = useState<unknown>(null);
+  const [verificationData, setVerificationData] = useState<any>(null);
   const [paymentPassword, setPaymentPassword] = useState('');
   const [paymentObservation, setPaymentObservation] = useState('');
   const [mostrarPagos, setMostrarPagos] = useState(false);
@@ -140,29 +141,29 @@ export default function Pagamentos() {
   // Buscar pagamentos
   const {
     data: pagamentos = [],
-  _isLoading,
-  _error,
-  _refetch,
+    isLoading,
+    error,
+    refetch,
   } = useQuery({
     queryKey: ['/api/pagamentos', { status: statusFilter, periodo: periodoFilter, mostrarPagos }],
     queryFn: async () => {
-      const _params = new URLSearchParams();
+      const params = new URLSearchParams();
       if (statusFilter !== 'todos') params.append('status', statusFilter);
       if (periodoFilter !== 'todos') params.append('periodo', periodoFilter);
       if (mostrarPagos) params.append('incluir_pagos', 'true');
 
       console.log('[PAGAMENTOS] Buscando pagamentos com filtros:', {
-  _statusFilter,
-  _periodoFilter,
-  _mostrarPagos,
+        statusFilter,
+        periodoFilter,
+        mostrarPagos,
       });
 
       try {
-        const _response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
+        const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
           method: 'GET',
         });
-        console.log('[PAGAMENTOS] Resposta recebida:',_response);
-        return response as Pagamento[]; }
+        console.log('[PAGAMENTOS] Resposta recebida:', response);
+        return response as Pagamento[];
       } catch (err) {
         console.error('[PAGAMENTOS] Erro ao buscar:', err);
         throw err;
@@ -178,7 +179,7 @@ export default function Pagamentos() {
   const { data: verificacoes, isLoading: isLoadingVerificacao } = useQuery({
     queryKey: ['/api/pagamentos', selectedPagamento?.id, 'verificar-documentos'],
     queryFn: async () => {
-      if (!selectedPagamento?.id) return null; }
+      if (!selectedPagamento?.id) return null;
       return await apiRequest(`/api/pagamentos/${selectedPagamento.id}/verificar-documentos`, {
         method: 'GET',
       });
@@ -187,7 +188,7 @@ export default function Pagamentos() {
   });
 
   // Aprovar pagamento
-  const _aprovarMutation = useMutation({
+  const aprovarMutation = useMutation({
     mutationFn: async ({ id, observacao }: { id: string; observacao: string }) => {
       return await apiRequest(`/api/pagamentos/${id}/aprovar`, {
         method: 'POST',
@@ -213,11 +214,11 @@ export default function Pagamentos() {
   });
 
   // Confirmar desembolso com segurança
-  const _confirmarDesembolsoMutation = useMutation({
+  const confirmarDesembolsoMutation = useMutation({
     mutationFn: async ({
-  _id,
-  _senha,
-  _observacoes,
+      id,
+      senha,
+      observacoes,
     }: {
       id: string;
       senha: string;
@@ -239,7 +240,7 @@ export default function Pagamentos() {
       setPaymentObservation('');
       queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro ao confirmar desembolso',
         description: error.message || 'Verifique as validações de segurança.',
@@ -249,7 +250,7 @@ export default function Pagamentos() {
   });
 
   // Rejeitar pagamento
-  const _rejeitarMutation = useMutation({
+  const rejeitarMutation = useMutation({
     mutationFn: async ({ id, motivo }: { id: string; motivo: string }) => {
       return await apiRequest(`/api/pagamentos/${id}/rejeitar`, {
         method: 'POST',
@@ -275,29 +276,23 @@ export default function Pagamentos() {
   });
 
   // Filtrar pagamentos - Verificar se é array válido
-  const _pagamentosFiltrados = Array.isArray(pagamentos)
-    ? pagamentos.filter((pagamento) => {
-        // Se não há termo de busca, retorna todos
-        if (!searchTerm || searchTerm.trim() == '') {
-          return true; }
-        }
+  const pagamentosFiltrados = Array.isArray(pagamentos) ? pagamentos.filter((pagamento) => {
+    // Se não há termo de busca, retorna todos
+    if (!searchTerm || searchTerm.trim() === '') {
+      return true;
+    }
 
-        const _matchesSearch =
-          pagamento.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          pagamento.numeroContrato.includes(searchTerm) ||
-          pagamento.cpfCliente.includes(searchTerm) ||
-          pagamento.propostaId.includes(searchTerm);
+    const matchesSearch =
+      pagamento.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pagamento.numeroContrato.includes(searchTerm) ||
+      pagamento.cpfCliente.includes(searchTerm) ||
+      pagamento.propostaId.includes(searchTerm);
 
-        return matchesSearch; }
-      })
-    : [];
+    return matchesSearch;
+  }) : [];
 
   // Debug para ver o que está acontecendo
-  console.log(
-    '[PAGAMENTOS FRONTEND] Dados recebidos:',
-    Array.isArray(pagamentos) ? pagamentos?.length : 'NOT_ARRAY',
-    pagamentos
-  );
+  console.log('[PAGAMENTOS FRONTEND] Dados recebidos:', Array.isArray(pagamentos) ? pagamentos?.length : 'NOT_ARRAY', pagamentos);
   console.log('[PAGAMENTOS FRONTEND] Termo de busca:', searchTerm);
   console.log('[PAGAMENTOS FRONTEND] Dados filtrados:', pagamentosFiltrados?.length);
   if (Array.isArray(pagamentos) && pagamentos?.length > 0) {
@@ -305,103 +300,89 @@ export default function Pagamentos() {
   }
 
   // Estatísticas
-  const _stats = {
-    aguardandoAprovacao: Array.isArray(pagamentos)
-      ? pagamentos?.filter((p) => p.status == 'aguardando_aprovacao').length || 0
-      : 0,
-    aprovados: Array.isArray(pagamentos)
-      ? pagamentos?.filter((p) => p.status == 'aprovado').length || 0
-      : 0,
-    emProcessamento: Array.isArray(pagamentos)
-      ? pagamentos?.filter((p) => p.status == 'em_processamento').length || 0
-      : 0,
-    pagos: Array.isArray(pagamentos)
-      ? pagamentos?.filter((p) => p.status == 'pago').length || 0
-      : 0,
-    rejeitados: Array.isArray(pagamentos)
-      ? pagamentos?.filter((p) => p.status == 'rejeitado').length || 0
-      : 0,
-    valorTotalAguardando: Array.isArray(pagamentos)
-      ? pagamentos
-          ?.filter((p) => p.status == 'aguardando_aprovacao')
-          .reduce((acc, p) => acc + p.valorLiquido, 0) || 0
-      : 0,
-    valorTotalPago: Array.isArray(pagamentos)
-      ? pagamentos
-          ?.filter((p) => p.status == 'pago')
-          .reduce((acc, p) => acc + p.valorLiquido, 0) || 0
-      : 0,
-    valorTotalProcessando: Array.isArray(pagamentos)
-      ? pagamentos
-          ?.filter((p) => p.status == 'em_processamento' || p.status == 'aprovado')
-          .reduce((acc, p) => acc + p.valorLiquido, 0) || 0
-      : 0,
+  const stats = {
+    aguardandoAprovacao: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'aguardando_aprovacao').length || 0 : 0,
+    aprovados: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'aprovado').length || 0 : 0,
+    emProcessamento: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'em_processamento').length || 0 : 0,
+    pagos: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'pago').length || 0 : 0,
+    rejeitados: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'rejeitado').length || 0 : 0,
+    valorTotalAguardando: Array.isArray(pagamentos) ? 
+      pagamentos
+        ?.filter((p) => p.status === 'aguardando_aprovacao')
+        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0 : 0,
+    valorTotalPago: Array.isArray(pagamentos) ?
+      pagamentos?.filter((p) => p.status === 'pago').reduce((acc, p) => acc + p.valorLiquido, 0) ||
+      0 : 0,
+    valorTotalProcessando: Array.isArray(pagamentos) ?
+      pagamentos
+        ?.filter((p) => p.status === 'em_processamento' || p.status === 'aprovado')
+        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0 : 0,
   };
 
-  const _getStatusColor = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'aguardando_aprovacao': {
-        return 'bg-yellow-100 text-yellow-800'; }
-      case 'aprovado': {
-        return 'bg-blue-100 text-blue-800'; }
-      case 'em_processamento': {
-        return 'bg-purple-100 text-purple-800'; }
-      case 'pronto_pagamento': {
-        return 'bg-indigo-100 text-indigo-800'; }
-      case 'pagamento_autorizado': {
-        return 'bg-emerald-100 text-emerald-800'; }
-      case 'pago': {
-        return 'bg-green-100 text-green-800'; }
-      case 'rejeitado': {
-        return 'bg-red-100 text-red-800'; }
-      case 'cancelado': {
-        return 'bg-gray-100 text-gray-800'; }
+      case 'aguardando_aprovacao':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'aprovado':
+        return 'bg-blue-100 text-blue-800';
+      case 'em_processamento':
+        return 'bg-purple-100 text-purple-800';
+      case 'pronto_pagamento':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'pagamento_autorizado':
+        return 'bg-emerald-100 text-emerald-800';
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'rejeitado':
+        return 'bg-red-100 text-red-800';
+      case 'cancelado':
+        return 'bg-gray-100 text-gray-800';
       default:
-        return 'bg-gray-100 text-gray-800'; }
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const _getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'aguardando_aprovacao': {
-        return 'Aguardando Aprovação'; }
-      case 'aprovado': {
-        return 'Aprovado'; }
-      case 'em_processamento': {
-        return 'Em Processamento'; }
-      case 'pronto_pagamento': {
-        return 'Pronto para Pagamento'; }
-      case 'pagamento_autorizado': {
-        return 'Pagamento Autorizado'; }
-      case 'pago': {
-        return 'Pago'; }
-      case 'rejeitado': {
-        return 'Rejeitado'; }
-      case 'cancelado': {
-        return 'Cancelado'; }
+      case 'aguardando_aprovacao':
+        return 'Aguardando Aprovação';
+      case 'aprovado':
+        return 'Aprovado';
+      case 'em_processamento':
+        return 'Em Processamento';
+      case 'pronto_pagamento':
+        return 'Pronto para Pagamento';
+      case 'pagamento_autorizado':
+        return 'Pagamento Autorizado';
+      case 'pago':
+        return 'Pago';
+      case 'rejeitado':
+        return 'Rejeitado';
+      case 'cancelado':
+        return 'Cancelado';
       default:
-        return status; }
+        return status;
     }
   };
 
-  const _formatCurrency = (value: number) => {
+  const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(value);
   };
 
-  const _formatCPF = (cpf: string) => {
-    if (!cpf) return ''; }
-    const _cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
+  const formatCPF = (cpf: string) => {
+    if (!cpf) return '';
+    const cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
-  const _formatBankAccount = (conta) => {
-    return `${conta.banco} | Ag: ${conta.agencia} | Conta: ${conta.conta} (${conta.tipoConta})`; }
+  const formatBankAccount = (conta: any) => {
+    return `${conta.banco} | Ag: ${conta.agencia} | Conta: ${conta.conta} (${conta.tipoConta})`;
   };
 
-  const _userHasApprovalPermission = () => {
+  const userHasApprovalPermission = () => {
     // In a real app, this would check the user's role/permissions
     // For now, we'll assume certain roles can approve
     return true; // Replace with actual permission check
@@ -631,7 +612,7 @@ export default function Pagamentos() {
                         Carregando...
                       </TableCell>
                     </TableRow>
-                  ) : pagamentosFiltrados?.length == 0 ? (
+                  ) : pagamentosFiltrados?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="py-12 text-center">
                         <div className="space-y-3">
@@ -737,7 +718,7 @@ export default function Pagamentos() {
                               <Eye className="h-4 w-4" />
                             </Button>
                             {/* FASE 2: Alinhamento Frontend/Backend - Botão para status em_processamento (BOLETOS_EMITIDOS) */}
-                            {pagamento.status == 'em_processamento' &&
+                            {pagamento.status === 'em_processamento' &&
                               userHasApprovalPermission() && (
                                 <Button
                                   size="sm"
@@ -753,7 +734,7 @@ export default function Pagamentos() {
                                   Confirmar Veracidade
                                 </Button>
                               )}
-                            {pagamento.status == 'aprovado' && userHasApprovalPermission() && (
+                            {pagamento.status === 'aprovado' && userHasApprovalPermission() && (
                               <Button
                                 size="sm"
                                 variant="default"
@@ -1196,48 +1177,40 @@ export default function Pagamentos() {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as unknown).ccbAssinada ? (
+                        {(verificacoes as any).ccbAssinada ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
-                          className={
-                            (verificacoes as unknown).ccbAssinada
-                              ? 'text-green-700'
-                              : 'text-red-700'
-                          }
+                          className={(verificacoes as any).ccbAssinada ? 'text-green-700' : 'text-red-700'}
                         >
                           CCB Assinada e Localizada
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as unknown).boletosGerados ? (
+                        {(verificacoes as any).boletosGerados ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
                           className={
-                            (verificacoes as unknown).boletosGerados
-                              ? 'text-green-700'
-                              : 'text-red-700'
+                            (verificacoes as any).boletosGerados ? 'text-green-700' : 'text-red-700'
                           }
                         >
                           Boletos Registrados no Inter
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as unknown).titularidadeConta ? (
+                        {(verificacoes as any).titularidadeConta ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <AlertCircle className="h-4 w-4 text-yellow-600" />
                         )}
                         <span
                           className={
-                            (verificacoes as unknown).titularidadeConta
-                              ? 'text-green-700'
-                              : 'text-yellow-700'
+                            (verificacoes as any).titularidadeConta ? 'text-green-700' : 'text-yellow-700'
                           }
                         >
                           Titularidade da Conta
@@ -1255,7 +1228,7 @@ export default function Pagamentos() {
                       <CardTitle className="text-base">Documentação</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {(verificacoes as unknown).documentosCcb?.urlCcb ? (
+                      {(verificacoes as any).documentosCcb?.urlCcb ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -1268,19 +1241,19 @@ export default function Pagamentos() {
                               );
 
                               // Fazer a requisição para baixar a CCB assinada usando api diretamente
-                              const _response = await api.get(
+                              const response = await api.get(
                                 `/api/pagamentos/${selectedPagamento.id}/ccb-assinada`,
                                 {
                                   responseType: 'blob',
                                 }
                               );
 
-                              console.log('[CCB] Resposta recebida:',_response);
+                              console.log('[CCB] Resposta recebida:', response);
 
                               // Verificar se recebemos um blob
                               if (response.data instanceof Blob) {
-                                const _blob = response.data;
-                                const _url = window.URL.createObjectURL(blob);
+                                const blob = response.data;
+                                const url = window.URL.createObjectURL(blob);
                                 window.open(url, '_blank');
 
                                 // Limpar a URL após um tempo
@@ -1292,18 +1265,18 @@ export default function Pagamentos() {
                                 });
                               } else {
                                 // Se não for um blob, pode ser um erro
-                                console.error('[CCB] Resposta não é um blob:',_response);
+                                console.error('[CCB] Resposta não é um blob:', response);
                                 toast({
                                   title: 'Erro ao abrir CCB',
                                   description: 'Formato de resposta inesperado',
                                   variant: 'destructive',
                                 });
                               }
-                            } catch (error) {
+                            } catch (error: any) {
                               console.error('[CCB] Erro ao buscar CCB assinada:', error);
 
                               // Tratar erros específicos
-                              let _errorMessage = 'Erro ao carregar documento assinado';
+                              let errorMessage = 'Erro ao carregar documento assinado';
 
                               if (error.response?.data?.error) {
                                 errorMessage = error.response.data.error;
@@ -1353,14 +1326,13 @@ export default function Pagamentos() {
                               <strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}
                             </p>
                           </>
-                        ) : (verificacoes as unknown).dadosPagamento?.destino?.pix ? (
+                        ) : (verificacoes as any).dadosPagamento?.destino?.pix ? (
                           <>
                             <p>
                               <strong>Tipo:</strong> PIX
                             </p>
                             <p>
-                              <strong>Chave:</strong>{' '}
-                              {(verificacoes as unknown).dadosPagamento.destino.pix}
+                              <strong>Chave:</strong> {(verificacoes as any).dadosPagamento.destino.pix}
                             </p>
                           </>
                         ) : (
@@ -1450,8 +1422,8 @@ export default function Pagamentos() {
                 }}
                 disabled={
                   !paymentPassword ||
-                  !(verificacoes as unknown)?.ccbAssinada ||
-                  !(verificacoes as unknown)?.boletosGerados ||
+                  !(verificacoes as any)?.ccbAssinada ||
+                  !(verificacoes as any)?.boletosGerados ||
                   confirmarDesembolsoMutation.isPending
                 }
               >

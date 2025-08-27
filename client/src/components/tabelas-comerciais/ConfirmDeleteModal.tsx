@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-  _Dialog,
-  _DialogContent,
-  _DialogHeader,
-  _DialogTitle,
-  _DialogDescription,
-  _DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
@@ -18,10 +18,10 @@ interface ConfirmDeleteModalProps {
 }
 
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
-  _isOpen,
-  _onClose,
-  _onConfirm,
-  _tabelaNome,
+  isOpen,
+  onClose,
+  onConfirm,
+  tabelaNome,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

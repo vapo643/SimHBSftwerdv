@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  _AlertDialog,
-  _AlertDialogAction,
-  _AlertDialogCancel,
-  _AlertDialogContent,
-  _AlertDialogDescription,
-  _AlertDialogFooter,
-  _AlertDialogHeader,
-  _AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import PartnerForm from '@/components/parceiros/PartnerForm';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -23,16 +23,16 @@ import { queryKeys } from '@/hooks/queries/queryKeys';
 import { useToast } from '@/hooks/use-toast';
 import { Parceiro, InsertParceiro } from '@shared/schema';
 import {
-  _Edit,
-  _Trash2,
-  _Eye,
-  _Building2,
-  _Users,
-  _Plus,
-  _BarChart3,
-  _Activity,
-  _Settings,
-  _TrendingUp,
+  Edit,
+  Trash2,
+  Eye,
+  Building2,
+  Users,
+  Plus,
+  BarChart3,
+  Activity,
+  Settings,
+  TrendingUp,
 } from 'lucide-react';
 
 const PartnersPage: React.FC = () => {
@@ -45,21 +45,21 @@ const PartnersPage: React.FC = () => {
   // Fetch partners data using new apiClient and hierarchical query keys
   const {
     data: partners = [],
-  _isLoading,
-  _error,
+    isLoading,
+    error,
   } = useQuery<Parceiro[]>({
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
-      const _response = await api.get<Parceiro[]>('/api/parceiros');
-      return Array.isArray(_response) ? response : (response as unknown).data || []; }
+      const response = await api.get<Parceiro[]>('/api/parceiros');
+      return Array.isArray(response) ? response : (response as any).data || [];
     },
   });
 
   // Create partner mutation using new apiClient
-  const _createMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: async (data: InsertParceiro) => {
-      const _response = await api.post<Parceiro>('/api/admin/parceiros',_data);
-      return (response as unknown).data || response; }
+      const response = await api.post<Parceiro>('/api/admin/parceiros', data);
+      return (response as any).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -80,10 +80,10 @@ const PartnersPage: React.FC = () => {
   });
 
   // Update partner mutation using new apiClient
-  const _updateMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertParceiro> }) => {
-      const _response = await api.put<Parceiro>(`/api/admin/parceiros/${id}`,_data);
-      return (response as unknown).data || response; }
+      const response = await api.put<Parceiro>(`/api/admin/parceiros/${id}`, data);
+      return (response as any).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -104,10 +104,10 @@ const PartnersPage: React.FC = () => {
   });
 
   // Delete partner mutation using new apiClient
-  const _deleteMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const _response = await api.delete(`/api/admin/parceiros/${id}`);
-      return response.data; }
+      const response = await api.delete(`/api/admin/parceiros/${id}`);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -129,9 +129,9 @@ const PartnersPage: React.FC = () => {
     },
   });
 
-  const _handleCreateOrEdit = async (data: { razaoSocial: string; cnpj: string }) => {
+  const handleCreateOrEdit = async (data: { razaoSocial: string; cnpj: string }) => {
     // Add default values for the optional fields
-    const _completeData = {
+    const completeData = {
       ...data,
       comissaoPadrao: null,
       tabelaComercialPadraoId: null,
@@ -146,23 +146,23 @@ const PartnersPage: React.FC = () => {
     }
   };
 
-  const _handleEdit = (partner: Parceiro) => {
+  const handleEdit = (partner: Parceiro) => {
     setSelectedPartner(partner);
     setIsModalOpen(true);
   };
 
-  const _handleDelete = (partner: Parceiro) => {
+  const handleDelete = (partner: Parceiro) => {
     setPartnerToDelete(partner);
     setDeleteDialogOpen(true);
   };
 
-  const _confirmDelete = () => {
+  const confirmDelete = () => {
     if (partnerToDelete) {
       deleteMutation.mutate(partnerToDelete.id);
     }
   };
 
-  const _openNewModal = () => {
+  const openNewModal = () => {
     setSelectedPartner(null);
     setIsModalOpen(true);
   };
@@ -181,7 +181,7 @@ const PartnersPage: React.FC = () => {
   }
 
   // Calcular estatísticas dos parceiros
-  const _partnerStats = {
+  const partnerStats = {
     total: partners.length,
     ativos: partners.filter((p) => !p.deletedAt).length,
     inativos: partners.filter((p) => p.deletedAt).length,
@@ -375,7 +375,7 @@ const PartnersPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            {partners.length == 0 ? (
+            {partners.length === 0 ? (
               <div className="py-12 text-center">
                 <Building2 className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">

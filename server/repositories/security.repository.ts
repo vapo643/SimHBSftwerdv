@@ -5,21 +5,21 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { securityLogs } from '@shared/schema/security';
 import { sql, eq, and, desc, gte } from 'drizzle-orm';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
-export class SecurityRepository extends BaseRepository<unknown> {
+export class SecurityRepository extends BaseRepository<any> {
   constructor() {
-    super(securityLogs as unknown);
+    super(securityLogs as any);
   }
 
   /**
    * Get security metrics for dashboard
    */
-  async getSecurityMetrics(timeRange: string): Promise<unknown> {
-    const _startDate = this.getTimeRangeDate(timeRange);
+  async getSecurityMetrics(timeRange: string): Promise<any> {
+    const startDate = this.getTimeRangeDate(timeRange);
 
     try {
       const [totalRequests] = await db
@@ -48,7 +48,7 @@ export class SecurityRepository extends BaseRepository<unknown> {
         totalRequests: totalRequests?.count || 0,
         suspiciousRequests: suspiciousRequests?.count || 0,
         blockedRequests: blockedRequests?.count || 0,
-  _timeRange,
+        timeRange,
       };
     } catch (error) {
       console.error('[SECURITY_REPO] Error getting metrics:', error);
@@ -57,7 +57,7 @@ export class SecurityRepository extends BaseRepository<unknown> {
         totalRequests: 0,
         suspiciousRequests: 0,
         blockedRequests: 0,
-  _timeRange,
+        timeRange,
       };
     }
   }
@@ -67,7 +67,7 @@ export class SecurityRepository extends BaseRepository<unknown> {
    */
   async getActiveAlerts(limit: number = 50): Promise<any[]> {
     try {
-      const _alerts = await db
+      const alerts = await db
         .select()
         .from(securityLogs)
         .where(
@@ -83,10 +83,10 @@ export class SecurityRepository extends BaseRepository<unknown> {
         .orderBy(desc(securityLogs.created_at))
         .limit(limit);
 
-      return alerts; }
+      return alerts;
     } catch (error) {
       console.error('[SECURITY_REPO] Error getting active alerts:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -102,10 +102,10 @@ export class SecurityRepository extends BaseRepository<unknown> {
     endpoint?: string;
     statusCode?: number;
     success?: boolean;
-    details?: unknown;
+    details?: any;
   }): Promise<any | undefined> {
     try {
-      const _result = await db
+      const result = await db
         .insert(securityLogs)
         .values({
           event_type: event.eventType,
@@ -118,10 +118,10 @@ export class SecurityRepository extends BaseRepository<unknown> {
         })
         .returning();
 
-      return result[0]; }
+      return result[0];
     } catch (error) {
       console.error('[SECURITY_REPO] Error logging security event:', error);
-      return undefined; }
+      return undefined;
     }
   }
 
@@ -137,9 +137,9 @@ export class SecurityRepository extends BaseRepository<unknown> {
     offset?: number;
   }): Promise<any[]> {
     try {
-      let _query = db.select().from(securityLogs);
+      let query = db.select().from(securityLogs);
 
-      const _conditions = [];
+      const conditions = [];
 
       if (filters.startDate) {
         conditions.push(gte(securityLogs.created_at, filters.startDate));
@@ -162,23 +162,23 @@ export class SecurityRepository extends BaseRepository<unknown> {
       }
 
       if (conditions.length > 0) {
-        query = query.where(and(...conditions)) as unknown;
+        query = query.where(and(...conditions)) as any;
       }
 
-      query = query.orderBy(desc(securityLogs.created_at)) as unknown;
+      query = query.orderBy(desc(securityLogs.created_at)) as any;
 
       if (filters.limit) {
-        query = query.limit(filters.limit) as unknown;
+        query = query.limit(filters.limit) as any;
       }
 
       if (filters.offset) {
-        query = query.offset(filters.offset) as unknown;
+        query = query.offset(filters.offset) as any;
       }
 
-      return await query; }
+      return await query;
     } catch (error) {
       console.error('[SECURITY_REPO] Error getting security logs:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -189,23 +189,23 @@ export class SecurityRepository extends BaseRepository<unknown> {
     try {
       // For now, we'll mark it by updating the security log
       // In a full implementation, you might use a separate security_alerts_resolved table
-      const _result = await db
+      const result = await db
         .update(securityLogs)
         .set({
           metadata: sql`COALESCE(${securityLogs.metadata}, '{}')::jsonb || ${JSON.stringify({
             resolved: true,
-  _resolvedBy,
+            resolvedBy,
             resolvedAt: getBrasiliaTimestamp(),
-  _reason,
+            reason,
           })}::jsonb`,
         })
         .where(eq(securityLogs.id, alertId))
         .returning();
 
-      return result.length > 0; }
+      return result.length > 0;
     } catch (error) {
       console.error('[SECURITY_REPO] Error resolving alert:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -216,9 +216,9 @@ export class SecurityRepository extends BaseRepository<unknown> {
     totalEvents: number;
     eventsBySeverity: Record<string, number>;
     eventsByType: Record<string, number>;
-    trendData: unknown[];
+    trendData: any[];
   }> {
-    const _startDate = this.getTimeRangeDate(timeRange);
+    const startDate = this.getTimeRangeDate(timeRange);
 
     try {
       // Get total events
@@ -228,7 +228,7 @@ export class SecurityRepository extends BaseRepository<unknown> {
         .where(gte(securityLogs.created_at, startDate));
 
       // Get events by severity
-      const _severityResults = await db
+      const severityResults = await db
         .select({
           severity: securityLogs.severity,
           count: sql<number>`count(*)`,
@@ -237,16 +237,16 @@ export class SecurityRepository extends BaseRepository<unknown> {
         .where(gte(securityLogs.created_at, startDate))
         .groupBy(securityLogs.severity);
 
-      const _eventsBySeverity = severityResults.reduce(
+      const eventsBySeverity = severityResults.reduce(
         (acc, row) => {
           acc[row.severity] = row.count;
-          return acc; }
+          return acc;
         },
         {} as Record<string, number>
       );
 
       // Get events by type
-      const _typeResults = await db
+      const typeResults = await db
         .select({
           event_type: securityLogs.event_type,
           count: sql<number>`count(*)`,
@@ -255,18 +255,18 @@ export class SecurityRepository extends BaseRepository<unknown> {
         .where(gte(securityLogs.created_at, startDate))
         .groupBy(securityLogs.event_type);
 
-      const _eventsByType = typeResults.reduce(
+      const eventsByType = typeResults.reduce(
         (acc, row) => {
           acc[row.event_type] = row.count;
-          return acc; }
+          return acc;
         },
         {} as Record<string, number>
       );
 
       return {
         totalEvents: totalEvents?.count || 0,
-  _eventsBySeverity,
-  _eventsByType,
+        eventsBySeverity,
+        eventsByType,
         trendData: [], // Will be generated by service layer
       };
     } catch (error) {
@@ -292,7 +292,7 @@ export class SecurityRepository extends BaseRepository<unknown> {
         .limit(limit);
     } catch (error) {
       console.error('[SECURITY_REPO] Error getting recent events:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -300,18 +300,18 @@ export class SecurityRepository extends BaseRepository<unknown> {
    * Helper method to convert time range to date
    */
   private getTimeRangeDate(timeRange: string): Date {
-    const _now = new Date();
+    const now = new Date();
     switch (timeRange) {
-      case '1h': {
-        return new Date(now.getTime() - 60 * 60 * 1000); }
-      case '24h': {
-        return new Date(now.getTime() - 24 * 60 * 60 * 1000); }
-      case '7d': {
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); }
-      case '30d': {
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); }
+      case '1h':
+        return new Date(now.getTime() - 60 * 60 * 1000);
+      case '24h':
+        return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      case '7d':
+        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      case '30d':
+        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       default:
-        return new Date(now.getTime() - 60 * 60 * 1000); }
+        return new Date(now.getTime() - 60 * 60 * 1000);
     }
   }
 
@@ -320,20 +320,20 @@ export class SecurityRepository extends BaseRepository<unknown> {
    */
   async cleanOldLogs(retentionDays: number = 90): Promise<number> {
     try {
-      const _cutoffDate = new Date();
+      const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
-      const _result = await db
+      const result = await db
         .delete(securityLogs)
         .where(sql`${securityLogs.created_at} < ${cutoffDate.toISOString()}`)
         .returning({ id: securityLogs.id });
 
-      return result.length; }
+      return result.length;
     } catch (error) {
       console.error('[SECURITY_REPO] Error cleaning old logs:', error);
-      return 0; }
+      return 0;
     }
   }
 }
 
-export const _securityRepository = new SecurityRepository();
+export const securityRepository = new SecurityRepository();

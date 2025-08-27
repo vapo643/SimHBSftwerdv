@@ -7,11 +7,11 @@ import { Router } from 'express';
 import { ProposalController } from './ProposalController';
 
 export function createCreditRoutes(): Router {
-  const _router = Router();
-  const _controller = new ProposalController();
+  const router = Router();
+  const controller = new ProposalController();
 
   // Bind methods to preserve 'this' context
-  const _boundController = {
+  const boundController = {
     create: controller.create.bind(controller),
     getById: controller.getById.bind(controller),
     getAll: controller.getAll.bind(controller),
@@ -46,7 +46,7 @@ export function createCreditRoutes(): Router {
   router.get('/proposals/store/:storeId', boundController.getByStore);
   router.get('/proposals/cpf/:cpf', boundController.getByCpf);
 
-  return router; }
+  return router;
 }
 
 // Export for legacy compatibility if needed

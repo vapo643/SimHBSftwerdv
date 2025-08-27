@@ -10,21 +10,21 @@ export function DocumentsStep() {
   const { user } = useAuth();
   const { state } = useProposal();
   const { addDocument, removeDocument } = useProposalActions();
-  const _fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if user has permission to upload documents
   // ATENDENTES podem fazer upload na criação de propostas
   // ANALISTAS podem adicionar documentos durante análise
   // ADMINISTRADORES têm acesso total
-  const _canUpload =
-    user?.role == 'ADMINISTRADOR' || user?.role == 'ANALISTA' || user?.role == 'ATENDENTE';
+  const canUpload =
+    user?.role === 'ADMINISTRADOR' || user?.role === 'ANALISTA' || user?.role === 'ATENDENTE';
 
-  const _handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const _files = event.target.files;
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
     if (!files) return;
 
     Array.from(files).forEach((file) => {
-      const _document = {
+      const document = {
         id: `${Date.now()}-${Math.random()}`,
         name: file.name,
         type: file.type,
@@ -40,15 +40,15 @@ export function DocumentsStep() {
     }
   };
 
-  const _formatFileSize = (bytes: number) => {
-    if (bytes == 0) return '0 Bytes'; }
-    const _k = 1024;
-    const _sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const _i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]; }
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const _requiredDocuments = state.context?.documentosObrigatorios || [
+  const requiredDocuments = state.context?.documentosObrigatorios || [
     'Documento de Identidade (RG ou CNH)',
     'CPF',
     'Comprovante de Residência',
@@ -87,15 +87,6 @@ export function DocumentsStep() {
                 <div
                   className="hover:border-border/70 bg-muted/30 hover:bg-muted/50 cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors"
                   onClick={() => fileInputRef.current?.click()}
-                  onKeyDown={(e) => {
-                    if (e.key == 'Enter' || e.key == ' ') {
-                      e.preventDefault();
-                      fileInputRef.current?.click();
-                    }
-                  }}
-                  tabIndex={0}
-                  role="button"
-                  aria-label="Fazer upload de documentos"
                 >
                   <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="mb-2 text-lg font-medium text-foreground">

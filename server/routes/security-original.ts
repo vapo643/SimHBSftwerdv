@@ -5,25 +5,25 @@ import { requireAdmin } from '../lib/role-guards';
 import { securityLogger, SecurityEventType } from '../lib/security-logger';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
-export function setupSecurityRoutes(app) {
+export function setupSecurityRoutes(app: any) {
   // Health check de segurança
   app.get(
     '/api/security/health',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const _metrics = securityLogger.getSecurityMetrics(24); // Últimas 24 horas
-        const _anomalies = securityLogger.detectAnomalies();
+        const metrics = securityLogger.getSecurityMetrics(24); // Últimas 24 horas
+        const anomalies = securityLogger.detectAnomalies();
 
         res.json({
           timestamp: getBrasiliaTimestamp(),
-          status: anomalies.length == 0 ? 'healthy' : 'warning',
-  _metrics,
-  _anomalies,
+          status: anomalies.length === 0 ? 'healthy' : 'warning',
+          metrics,
+          anomalies,
           lastUpdate: getBrasiliaTimestamp(),
         });
-      } catch (error) {
+      } catch (error: any) {
         res
           .status(500)
           .json({ message: 'Erro ao obter métricas de segurança', error: error.message });
@@ -34,15 +34,15 @@ export function setupSecurityRoutes(app) {
   // Relatório detalhado de segurança
   app.get(
     '/api/security/report',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const _hours = parseInt(req.query.hours as string) || 24;
-        const _metrics = securityLogger.getSecurityMetrics(hours);
+        const hours = parseInt(req.query.hours as string) || 24;
+        const metrics = securityLogger.getSecurityMetrics(hours);
 
         // Análise adicional
-        const _analysis = {
+        const analysis = {
           riskLevel: calculateRiskLevel(metrics),
           recommendations: generateRecommendations(metrics),
           topThreats: identifyTopThreats(metrics),
@@ -50,11 +50,11 @@ export function setupSecurityRoutes(app) {
 
         res.json({
           period: `${hours} hours`,
-  _metrics,
-  _analysis,
+          metrics,
+          analysis,
           generatedAt: getBrasiliaTimestamp(),
         });
-      } catch (error) {
+      } catch (error: any) {
         res.status(500).json({ message: 'Erro ao gerar relatório', error: error.message });
       }
     }
@@ -63,28 +63,28 @@ export function setupSecurityRoutes(app) {
   // Log de evento de segurança manual (para testes)
   app.post(
     '/api/security/log-event',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
         const { type, severity, details } = req.body;
 
         if (!type || !severity) {
-          return res.*);
+          return res.status(400).json({ message: 'Type e severity são obrigatórios' });
         }
 
         securityLogger.logEvent({
           type: type as SecurityEventType,
-          severity: severity as unknown,
+          severity: severity as any,
           userId: req.user?.id,
           userEmail: req.user?.email,
           endpoint: '/api/security/log-event',
           success: true,
-  _details,
+          details,
         });
 
         res.json({ message: 'Evento registrado com sucesso' });
-      } catch (error) {
+      } catch (error: any) {
         res.status(500).json({ message: 'Erro ao registrar evento', error: error.message });
       }
     }
@@ -93,13 +93,13 @@ export function setupSecurityRoutes(app) {
   // Verificar status de conformidade OWASP
   app.get(
     '/api/security/owasp-compliance',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+    jwtAuthMiddleware,
+    requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const _compliance = checkOWASPCompliance();
+        const compliance = checkOWASPCompliance();
         res.json(compliance);
-      } catch (error) {
+      } catch (error: any) {
         res.status(500).json({ message: 'Erro ao verificar conformidade', error: error.message });
       }
     }
@@ -107,21 +107,21 @@ export function setupSecurityRoutes(app) {
 }
 
 // Calcula nível de risco baseado nas métricas
-function calculateRiskLevel(metrics): string {
-  const _score =
+function calculateRiskLevel(metrics: any): string {
+  const score =
     metrics.failedLogins * 2 +
     metrics.accessDenied * 3 +
     metrics.rateLimitExceeded * 1 +
     metrics.criticalEvents * 5;
 
-  if (score == 0) return 'LOW'; }
-  if (score < 50) return 'MEDIUM'; }
-  if (score < 100) return 'HIGH'; }
-  return 'CRITICAL'; }
+  if (score === 0) return 'LOW';
+  if (score < 50) return 'MEDIUM';
+  if (score < 100) return 'HIGH';
+  return 'CRITICAL';
 }
 
 // Gera recomendações baseadas nas métricas
-function generateRecommendations(metrics): string[] {
+function generateRecommendations(metrics: any): string[] {
   const recommendations: string[] = [];
 
   if (metrics.failedLogins > 100) {
@@ -144,16 +144,16 @@ function generateRecommendations(metrics): string[] {
     );
   }
 
-  if (recommendations.length == 0) {
+  if (recommendations.length === 0) {
     recommendations.push('Sistema operando dentro dos parâmetros normais de segurança.');
   }
 
-  return recommendations; }
+  return recommendations;
 }
 
 // Identifica principais ameaças
-function identifyTopThreats(metrics): Record<string, unknown>[]>{ type: string; count: number }> {
-  const _threats = [
+function identifyTopThreats(metrics: any): Array<{ type: string; count: number }> {
+  const threats = [
     { type: 'Brute Force Attempts', count: metrics.failedLogins },
     { type: 'Unauthorized Access', count: metrics.accessDenied },
     { type: 'DoS Attempts', count: metrics.rateLimitExceeded },
@@ -167,7 +167,7 @@ function identifyTopThreats(metrics): Record<string, unknown>[]>{ type: string; 
 }
 
 // Verifica conformidade com OWASP Top 10
-function checkOWASPCompliance(): unknown {
+function checkOWASPCompliance(): any {
   return {
     timestamp: getBrasiliaTimestamp(),
     overallCompliance: '70%',

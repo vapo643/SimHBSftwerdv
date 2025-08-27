@@ -4,14 +4,14 @@ import '@testing-library/jest-dom';
 import TabelasComerciais from '@/pages/configuracoes/tabelas';
 
 declare global {
-  var jest: unknown;
+  var jest: any;
 }
 
 // Mock do DashboardLayout
 jest.mock('@/components/DashboardLayout', () => {
   return function MockDashboardLayout({
-  _children,
-  _title,
+    children,
+    title,
   }: {
     children: React.ReactNode;
     title: string;
@@ -37,9 +37,9 @@ jest.mock('@/components/ui/table', () => ({
 
 jest.mock('@/components/ui/button', () => ({
   Button: ({
-  _children,
-  _onClick,
-  _disabled,
+    children,
+    onClick,
+    disabled,
   }: {
     children: React.ReactNode;
     onClick?: () => void;
@@ -66,13 +66,13 @@ jest.mock('@/components/ui/dialog', () => ({
 
 jest.mock('@/components/tabelas-comerciais/TabelaComercialForm', () => {
   return function MockTabelaComercialForm() {
-    return <div>Formulário de Tabela Comercial</div>; }
+    return <div>Formulário de Tabela Comercial</div>;
   };
 });
 
 jest.mock('@/components/tabelas-comerciais/ConfirmDeleteModal', () => {
   return function MockConfirmDeleteModal() {
-    return <div>Modal de Confirmação</div>; }
+    return <div>Modal de Confirmação</div>;
   };
 });
 
@@ -84,7 +84,7 @@ describe('TabelasComerciais', () => {
 
   test('renderiza o botão Nova Tabela Comercial', () => {
     render(<TabelasComerciais />);
-    const _buttonElement = screen.getByText(/Nova Tabela Comercial/i);
+    const buttonElement = screen.getByText(/Nova Tabela Comercial/i);
     expect(buttonElement).toBeInTheDocument();
   });
 
@@ -106,7 +106,7 @@ describe('TabelasComerciais', () => {
   test('renderiza botões de ação para cada linha', () => {
     render(<TabelasComerciais />);
     // Deve haver 3 tabelas mockadas, cada uma com botões de editar e excluir
-    const _editButtons = screen.getAllByRole('button');
+    const editButtons = screen.getAllByRole('button');
     // Verifica se há botões suficientes (1 Nova Tabela + 6 botões de ação para 3 linhas)
     expect(editButtons.length).toBeGreaterThan(6);
   });

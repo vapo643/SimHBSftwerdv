@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { profiles, userSessions } from '@shared/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import type { Session } from '@shared/schema';
@@ -41,10 +41,10 @@ export class AuthRepository extends BaseRepository<Session> {
         })
         .returning();
 
-      return session; }
+      return session;
     } catch (error) {
       console.error('[AUTH_REPO] Error creating session:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -60,7 +60,7 @@ export class AuthRepository extends BaseRepository<Session> {
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
       console.error('[AUTH_REPO] Error getting user sessions:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -82,7 +82,7 @@ export class AuthRepository extends BaseRepository<Session> {
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
       console.error('[AUTH_REPO] Error getting active sessions:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -91,15 +91,15 @@ export class AuthRepository extends BaseRepository<Session> {
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .delete(userSessions)
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return result.length > 0; }
+      return result.length > 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error deleting session:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -108,15 +108,15 @@ export class AuthRepository extends BaseRepository<Session> {
    */
   async deleteUserSessions(userId: string): Promise<number> {
     try {
-      const _result = await db
+      const result = await db
         .delete(userSessions)
         .where(eq(userSessions.userId, userId))
         .returning();
 
-      return result.length; }
+      return result.length;
     } catch (error) {
       console.error('[AUTH_REPO] Error deleting user sessions:', error);
-      return 0; }
+      return 0;
     }
   }
 
@@ -125,7 +125,7 @@ export class AuthRepository extends BaseRepository<Session> {
    */
   async deactivateSession(sessionId: string): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .update(userSessions)
         .set({
           isActive: false,
@@ -133,10 +133,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return result.length > 0; }
+      return result.length > 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error deactivating session:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -145,7 +145,7 @@ export class AuthRepository extends BaseRepository<Session> {
    */
   async updateSessionActivity(sessionId: string): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .update(userSessions)
         .set({
           lastActivityAt: new Date(),
@@ -153,10 +153,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return result.length > 0; }
+      return result.length > 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error updating session activity:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -177,10 +177,10 @@ export class AuthRepository extends BaseRepository<Session> {
         )
         .limit(1);
 
-      return !!session; }
+      return !!session;
     } catch (error) {
       console.error('[AUTH_REPO] Error checking session validity:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -189,15 +189,15 @@ export class AuthRepository extends BaseRepository<Session> {
    */
   async cleanupExpiredSessions(): Promise<number> {
     try {
-      const _result = await db
+      const result = await db
         .delete(userSessions)
         .where(sql`${userSessions.expiresAt} < NOW()`)
         .returning();
 
-      return result.length; }
+      return result.length;
     } catch (error) {
       console.error('[AUTH_REPO] Error cleaning up expired sessions:', error);
-      return 0; }
+      return 0;
     }
   }
 
@@ -212,24 +212,24 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.token, token))
         .limit(1);
 
-      return session || null; }
+      return session || null;
     } catch (error) {
       console.error('[AUTH_REPO] Error getting session by token:', error);
-      return null; }
+      return null;
     }
   }
 
   /**
    * Get user profile by ID
    */
-  async getUserProfile(userId: string): Promise<unknown> {
+  async getUserProfile(userId: string): Promise<any> {
     try {
       const [profile] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 
-      return profile || null; }
+      return profile || null;
     } catch (error) {
       console.error('[AUTH_REPO] Error getting user profile:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -238,7 +238,7 @@ export class AuthRepository extends BaseRepository<Session> {
    */
   async countActiveSessions(userId: string): Promise<number> {
     try {
-      const _result = await db
+      const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(userSessions)
         .where(
@@ -249,12 +249,12 @@ export class AuthRepository extends BaseRepository<Session> {
           )
         );
 
-      return result[0]?.count || 0; }
+      return result[0]?.count || 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error counting active sessions:', error);
-      return 0; }
+      return 0;
     }
   }
 }
 
-export const _authRepository = new AuthRepository();
+export const authRepository = new AuthRepository();

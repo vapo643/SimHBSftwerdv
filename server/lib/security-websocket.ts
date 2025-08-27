@@ -11,7 +11,7 @@ import { getSemgrepScanner } from './semgrep-scanner';
 
 interface SecurityWebSocketMessage {
   type: 'anomaly' | 'vulnerability' | 'critical-alert' | 'scan-status';
-  data: unknown;
+  data: any;
   timestamp: Date;
 }
 
@@ -21,7 +21,7 @@ export class SecurityWebSocketManager {
 
   constructor(server: HTTPServer) {
     this.wss = new WebSocketServer({
-  _server,
+      server,
       path: '/ws/security',
     });
 
@@ -58,10 +58,8 @@ export class SecurityWebSocketManager {
   private setupEventListeners() {
     // TODO: Implementar sistema de eventos para scanners de segurança
     // Por enquanto, apenas logamos que o sistema está pronto
-    console.log(
-      '🔌 [Security WS] Event listeners configurados (aguardando implementação de EventEmitter nos scanners)'
-    );
-
+    console.log('🔌 [Security WS] Event listeners configurados (aguardando implementação de EventEmitter nos scanners)');
+    
     // Enviar status inicial para clientes conectados
     setInterval(() => {
       this.broadcast({
@@ -73,16 +71,16 @@ export class SecurityWebSocketManager {
   }
 
   private broadcast(message: SecurityWebSocketMessage) {
-    const _messageStr = JSON.stringify(message);
+    const messageStr = JSON.stringify(message);
 
     this.clients.forEach((ws) => {
-      if (ws.readyState == WebSocket.OPEN) {
+      if (ws.readyState === WebSocket.OPEN) {
         ws.send(messageStr);
       }
     });
   }
 
-  public sendAlert(alert) {
+  public sendAlert(alert: any) {
     this.broadcast({
       type: 'critical-alert',
       data: alert,
@@ -97,9 +95,9 @@ export function setupSecurityWebSocket(server: HTTPServer): SecurityWebSocketMan
   if (!wsManager) {
     wsManager = new SecurityWebSocketManager(server);
   }
-  return wsManager; }
+  return wsManager;
 }
 
 export function getSecurityWebSocketManager(): SecurityWebSocketManager | null {
-  return wsManager; }
+  return wsManager;
 }

@@ -116,7 +116,7 @@ export async function loginTestUser(app: Express, user: TestUser): Promise<strin
 
     console.log(`[AUTH HELPER] 📡 Login response status: ${response.status}`);
 
-    if (response.status == 200 && response.body.session?.access_token) {
+    if (response.status === 200 && response.body.session?.access_token) {
       const accessToken = response.body.session.access_token;
       console.log(`[AUTH HELPER] ✅ Login successful - Token obtained`);
       return accessToken;
@@ -136,7 +136,7 @@ export async function loginTestUser(app: Express, user: TestUser): Promise<strin
 
     console.log(`[AUTH HELPER] 📝 Signup response status: ${signupResponse.status}`);
 
-    if (signupResponse.status == 200 && signupResponse.body.session?.access_token) {
+    if (signupResponse.status === 200 && signupResponse.body.session?.access_token) {
       const accessToken = signupResponse.body.session.access_token;
       console.log(`[AUTH HELPER] ✅ User created and logged in - Token obtained`);
       return accessToken;

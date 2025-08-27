@@ -10,15 +10,15 @@ interface HistoricoCompartilhadoV2Props {
 }
 
 const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
-  _propostaId,
+  propostaId,
   context = 'analise',
 }) => {
   // Query para buscar dados da proposta - APENAS reativa (sem polling)
   const { data: proposta, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}`],
     queryFn: async () => {
-      const _response = await api.get(`/api/propostas/${propostaId}`);
-      return response.data; }
+      const response = await api.get(`/api/propostas/${propostaId}`);
+      return response.data;
     },
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar requests desnecessários
@@ -31,11 +31,11 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
     queryKey: [`/api/propostas/${propostaId}/observacoes`],
     queryFn: async () => {
       try {
-        const _response = await api.get(`/api/propostas/${propostaId}/observacoes`);
-        return response.data; }
+        const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
+        return response.data;
       } catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
-        return { logs: [] }; }
+        return { logs: [] };
       }
     },
     enabled: !!propostaId,
@@ -87,7 +87,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
           </div>
 
           {/* Pendência (fallback se não houver logs) */}
-          {(!auditLogs?.logs || auditLogs.logs.length == 0) && proposta?.motivoPendencia && (
+          {(!auditLogs?.logs || auditLogs.logs.length === 0) && proposta?.motivoPendencia && (
             <div className="flex items-start gap-3 rounded-lg border border-yellow-600 bg-yellow-900/30 p-3">
               <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-yellow-500"></div>
               <div className="flex-1">
@@ -125,20 +125,20 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                 index: number
               ) => {
                 // Determine user type from log data
-                const _isAtendente = log.profiles?.role == 'ATENDENTE';
+                const isAtendente = log.profiles?.role === 'ATENDENTE';
 
                 // Determine action type from status changes
-                const _isResubmit =
-                  log.status_anterior == 'pendenciado' && log.status_novo == 'aguardando_analise';
-                const _isPendency = log.status_novo == 'pendenciado';
-                const _isApproval = log.status_novo == 'aprovado';
-                const _isRejection = log.status_novo == 'rejeitado';
+                const isResubmit =
+                  log.status_anterior === 'pendenciado' && log.status_novo === 'aguardando_analise';
+                const isPendency = log.status_novo === 'pendenciado';
+                const isApproval = log.status_novo === 'aprovado';
+                const isRejection = log.status_novo === 'rejeitado';
 
-                let _bgColor = 'bg-gray-800';
-                let _borderColor = '';
-                let _dotColor = 'bg-blue-500';
-                let _textColor = 'text-blue-400';
-                let _icon = '📝';
+                let bgColor = 'bg-gray-800';
+                let borderColor = '';
+                let dotColor = 'bg-blue-500';
+                let textColor = 'text-blue-400';
+                let icon = '📝';
 
                 // Special styling for ATENDENTE actions
                 if (isAtendente) {
@@ -201,15 +201,15 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                           ? new Date(log.created_at).toLocaleString('pt-BR')
                           : 'Data não disponível'}
                       </p>
-                      {log.profiles && (log.profiles as unknown).fullName && (
+                      {log.profiles && (log.profiles as any).fullName && (
                         <p className="mt-1 text-sm text-gray-300">
-                          <strong>Por:</strong> {(log.profiles as unknown).fullName} (
+                          <strong>Por:</strong> {(log.profiles as any).fullName} (
                           {log.profiles.role || 'Usuário'})
                         </p>
                       )}
 
                       {/* Destacar observação do ATENDENTE */}
-                      {(log as unknown).observacao && (
+                      {(log as any).observacao && (
                         <div
                           className={`mt-2 rounded border-l-2 p-2 text-sm ${
                             isAtendente
@@ -223,7 +223,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                             </span>
                           )}
                           <div className={isAtendente ? 'mt-1 italic' : 'mt-1'}>
-                            "{(log as unknown).observacao}"
+                            "{(log as any).observacao}"
                           </div>
                         </div>
                       )}
@@ -238,13 +238,13 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
             <div className="mt-2 h-2 w-2 flex-shrink-0 animate-pulse rounded-full bg-gray-400"></div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-300">
-                {context == 'edicao' ? '🔄 Em Correção' : '📋 Status Atual'}
+                {context === 'edicao' ? '🔄 Em Correção' : '📋 Status Atual'}
               </p>
               <p className="text-xs text-gray-400">
                 Atualizado em {new Date().toLocaleString('pt-BR')}
               </p>
               <p className="mt-1 text-sm text-gray-300">
-                {context == 'edicao'
+                {context === 'edicao'
                   ? 'Atendente corrigindo dados conforme solicitação do analista'
                   : `Status: ${proposta?.status || 'Carregando...'}`}
               </p>

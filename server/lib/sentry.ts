@@ -56,9 +56,9 @@ export function initSentry(app: Express) {
         nodeProfilingIntegration(),
       ],
       // Sample rate para traces
-      tracesSampleRate: process.env.NODE_ENV == 'production' ? 0.1 : 1.0,
+      tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
       // Sample rate para profiling
-      profilesSampleRate: process.env.NODE_ENV == 'production' ? 0.1 : 1.0,
+      profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
       // Filtrar dados sensíveis
       beforeSend(event, hint) {
@@ -73,7 +73,7 @@ export function initSentry(app: Express) {
             delete event.request.headers.cookie;
           }
           // Limpar query params sensíveis
-          if (event.request.query_string && typeof event.request.query_string == 'string') {
+          if (event.request.query_string && typeof event.request.query_string === 'string') {
             event.request.query_string = event.request.query_string.replace(
               /password=[^&]*/gi,
               'password=***'
@@ -145,7 +145,7 @@ export function sentryTransactionMiddleware(req: Request, res: Response, next: N
 
   if (transaction) {
     // Atualizar para API atual do Sentry v8
-    const _transactionName = `${req.method} ${req.route?.path || req.path}`;
+    const transactionName = `${req.method} ${req.route?.path || req.path}`;
     Sentry.getCurrentScope().setContext('transaction', { name: transactionName });
 
     res.on('finish', () => {
@@ -163,7 +163,7 @@ export function sentryTransactionMiddleware(req: Request, res: Response, next: N
 }
 
 // Helper para capturar exceções manuais
-export function captureException(error: Error, context?) {
+export function captureException(error: Error, context?: any) {
   logError('🔴 Capturing exception to Sentry', error, context);
   Sentry.captureException(error, {
     contexts: {
@@ -176,25 +176,25 @@ export function captureException(error: Error, context?) {
 export function captureMessage(
   message: string,
   level: Sentry.SeverityLevel = 'info',
-  context?: unknown
+  context?: any
 ) {
   logInfo(`📝 Capturing message to Sentry: ${message}`, context);
   Sentry.captureMessage(message, level);
 }
 
 // Helper para adicionar breadcrumbs
-export function addBreadcrumb(message: string, category: string, data?) {
+export function addBreadcrumb(message: string, category: string, data?: any) {
   Sentry.addBreadcrumb({
-    _message,
-    _category,
+    message,
+    category,
     level: 'info',
-    _data,
+    data,
     timestamp: Date.now() / 1000,
   });
 }
 
 // Exportar handlers do Sentry (nova API v8)
-export const _requestHandler = () => (req: Request, res: Response, next: NextFunction) => {
+export const requestHandler = () => (req: Request, res: Response, next: NextFunction) => {
   // Request handler básico
   if (req.correlationId) {
     Sentry.setTag('correlation_id', req.correlationId);
@@ -202,12 +202,12 @@ export const _requestHandler = () => (req: Request, res: Response, next: NextFun
   next();
 };
 
-export const _tracingHandler = () => (req: Request, res: Response, next: NextFunction) => {
+export const tracingHandler = () => (req: Request, res: Response, next: NextFunction) => {
   // Tracing handler básico
   next();
 };
 
-export const _errorHandler = () => (err, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = () => (err: any, req: Request, res: Response, next: NextFunction) => {
   // Capturar apenas erros 500+
   if (!err.status || err.status >= 500) {
     Sentry.captureException(err);

@@ -23,12 +23,12 @@ export class CCBGridGenerator {
       console.log('🎯 [CCB GRID] Gerando template com grade de coordenadas...');
 
       // Carregar template
-      const _templateBytes = await fs.readFile(this.templatePath);
-      const _pdfDoc = await PDFDocument.load(templateBytes);
-      const _helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const templateBytes = await fs.readFile(this.templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-      const _pages = pdfDoc.getPages();
-      const _firstPage = pages[0];
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
       const { width, height } = firstPage.getSize();
 
       console.log(`📐 Dimensões da página: ${width}x${height}`);
@@ -36,16 +36,16 @@ export class CCBGridGenerator {
       // DESENHAR GRADE DE COORDENADAS
 
       // Linhas verticais a cada 50px
-      for (let _x = 0; x <= width; x += 50) {
+      for (let x = 0; x <= width; x += 50) {
         firstPage.drawLine({
           start: { x, y: 0 },
           end: { x, y: height },
-          thickness: x % 100 == 0 ? 1 : 0.5,
+          thickness: x % 100 === 0 ? 1 : 0.5,
           color: rgb(0.9, 0.9, 0.9),
         });
 
         // Números de coordenada X a cada 100px
-        if (x % 100 == 0) {
+        if (x % 100 === 0) {
           firstPage.drawText(x.toString(), {
             x: x + 2,
             y: height - 20,
@@ -57,16 +57,16 @@ export class CCBGridGenerator {
       }
 
       // Linhas horizontais a cada 50px
-      for (let _y = 0; y <= height; y += 50) {
+      for (let y = 0; y <= height; y += 50) {
         firstPage.drawLine({
           start: { x: 0, y },
           end: { x: width, y },
-          thickness: y % 100 == 0 ? 1 : 0.5,
+          thickness: y % 100 === 0 ? 1 : 0.5,
           color: rgb(0.9, 0.9, 0.9),
         });
 
         // Números de coordenada Y a cada 100px
-        if (y % 100 == 0) {
+        if (y % 100 === 0) {
           firstPage.drawText(y.toString(), {
             x: 5,
             y: y + 2,
@@ -78,7 +78,7 @@ export class CCBGridGenerator {
       }
 
       // MARCADORES DE TESTE PARA CAMPOS PRINCIPAIS
-      const _testMarkers = [
+      const testMarkers = [
         { label: 'NOME', x: 120, y: 722, color: rgb(1, 0, 0) }, // Vermelho
         { label: 'CPF', x: 120, y: 697, color: rgb(0, 1, 0) }, // Verde
         { label: 'VALOR', x: 200, y: 602, color: rgb(0, 0, 1) }, // Azul
@@ -133,13 +133,13 @@ export class CCBGridGenerator {
       });
 
       // Salvar PDF
-      const _pdfBytes = await pdfDoc.save();
+      const pdfBytes = await pdfDoc.save();
 
       // Upload para Supabase
-      const _fileName = `ccb_grid_${Date.now()}.pdf`;
-      const _filePath = `ccb/grid/${fileName}`;
+      const fileName = `ccb_grid_${Date.now()}.pdf`;
+      const filePath = `ccb/grid/${fileName}`;
 
-      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const supabaseAdmin = createServerSupabaseAdminClient();
       const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
         .from('documents')
         .upload(filePath, pdfBytes, {
@@ -149,11 +149,11 @@ export class CCBGridGenerator {
 
       if (uploadError) {
         console.error('❌ [CCB GRID] Erro no upload:', uploadError);
-        return { success: false, error: 'Erro ao fazer upload do PDF' }; }
+        return { success: false, error: 'Erro ao fazer upload do PDF' };
       }
 
       console.log(`✅ [CCB GRID] Grade gerada! Arquivo: ${filePath}`);
-      return { success: true, pdfPath: filePath }; }
+      return { success: true, pdfPath: filePath };
     } catch (error) {
       console.error('❌ [CCB GRID] Erro na geração:', error);
       return {
@@ -168,15 +168,15 @@ export class CCBGridGenerator {
    */
   async getPublicUrl(filePath: string): Promise<string | null> {
     try {
-      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const supabaseAdmin = createServerSupabaseAdminClient();
       const { data } = supabaseAdmin.storage.from('documents').getPublicUrl(filePath);
 
-      return data?.publicUrl || null; }
+      return data?.publicUrl || null;
     } catch (error) {
       console.error('❌ [CCB GRID] Erro ao obter URL pública:', error);
-      return null; }
+      return null;
     }
   }
 }
 
-export const _ccbGridGenerator = new CCBGridGenerator();
+export const ccbGridGenerator = new CCBGridGenerator();

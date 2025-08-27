@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 // Configuração aprimorada do Helmet seguindo OWASP
 export function setupSecurityHeaders() {
   // Build CSP directives conditionally
-  const cspDirectives: unknown = {
+  const cspDirectives: any = {
     defaultSrc: ["'self'"],
     scriptSrc: [
       "'self'",
@@ -24,11 +24,11 @@ export function setupSecurityHeaders() {
     imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
     connectSrc: [
       "'self'",
-      'https://*._supabase.co', // Supabase
+      'https://*.supabase.co', // Supabase
       'https://cdn.inter.co', // Banco Inter
       'https://api.clicksign.com', // ClickSign
-      'wss://*._supabase.co', // WebSocket Supabase
-      process.env.NODE_ENV == 'development' ? 'ws://localhost:*' : '',
+      'wss://*.supabase.co', // WebSocket Supabase
+      process.env.NODE_ENV === 'development' ? 'ws://localhost:*' : '',
     ].filter(Boolean),
     mediaSrc: ["'none'"],
     objectSrc: ["'none'"],
@@ -39,7 +39,7 @@ export function setupSecurityHeaders() {
   };
 
   // Only add upgradeInsecureRequests in production
-  if (process.env.NODE_ENV == 'production') {
+  if (process.env.NODE_ENV === 'production') {
     cspDirectives.upgradeInsecureRequests = [];
   }
 
@@ -78,7 +78,7 @@ export function setupSecurityHeaders() {
     hidePoweredBy: true,
 
     // Cross-Origin-Embedder-Policy
-    crossOriginEmbedderPolicy: process.env.NODE_ENV == 'production',
+    crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
 
     // Cross-Origin-Opener-Policy
     crossOriginOpenerPolicy: { policy: 'same-origin' },
@@ -111,7 +111,7 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
 
   // Clear Site Data em logout
-  if (req.path == '/api/auth/logout') {
+  if (req.path === '/api/auth/logout') {
     res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
   }
 
@@ -127,7 +127,7 @@ function generateRequestId(): string {
 export function setupCORS() {
   // In development, allow Replit preview URLs and localhost
   const allowedOrigins =
-    process.env.NODE_ENV == 'production'
+    process.env.NODE_ENV === 'production'
       ? [process.env.FRONTEND_URL || 'https://simpix.com.br']
       : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'];
 

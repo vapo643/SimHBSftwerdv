@@ -64,8 +64,8 @@ interface ComponentSecurityContext {
   total_files: number;
   security_score: number;
   top_risks: SecurityRisk[];
-  dependencies: unknown;
-  attack_surface: unknown;
+  dependencies: any;
+  attack_surface: any;
   recommendations: string[];
 }
 
@@ -78,7 +78,7 @@ interface SecurityRisk {
 
 export class SemgrepMCPServer {
   private redis: Redis | null = null;
-  private memoryCache: Map<string, { data: unknown; expires: number }> = new Map();
+  private memoryCache: Map<string, { data: any; expires: number }> = new Map();
   private isScanning: boolean = false;
   private watchers: Map<string, chokidar.FSWatcher> = new Map();
   private cachePrefix = 'semgrep:mcp:';
@@ -86,7 +86,7 @@ export class SemgrepMCPServer {
 
   constructor() {
     // Tentar conectar ao Redis
-    if (process.env.NODE_ENV == 'production' || process.env.REDIS_HOST) {
+    if (process.env.NODE_ENV === 'production' || process.env.REDIS_HOST) {
       try {
         this.redis = new Redis({
           host: process.env.REDIS_HOST || 'localhost',
@@ -96,11 +96,11 @@ export class SemgrepMCPServer {
             if (process.env.NODE_ENV !== 'production' && times > 3) {
               console.log('[SEMGREP MCP] Redis not available, using in-memory cache');
               this.useMemoryCache = true;
-              return null; }
+              return null;
             }
             // Retry com backoff exponencial
-            const _delay = Math.min(times * 50, 2000);
-            return delay; }
+            const delay = Math.min(times * 50, 2000);
+            return delay;
           },
         });
 
@@ -136,19 +136,19 @@ export class SemgrepMCPServer {
    */
   private async cacheGet(key: string): Promise<string | null> {
     if (this.useMemoryCache) {
-      const _item = this.memoryCache.get(key);
+      const item = this.memoryCache.get(key);
       if (item && item.expires > Date.now()) {
-        return item.data; }
+        return item.data;
       }
       this.memoryCache.delete(key);
-      return null; }
+      return null;
     }
 
     try {
-      return this.redis ? await this.redis.get(key) : null; }
+      return this.redis ? await this.redis.get(key) : null;
     } catch (err) {
       console.error('[SEMGREP MCP] Cache get error:', err);
-      return null; }
+      return null;
     }
   }
 
@@ -178,7 +178,7 @@ export class SemgrepMCPServer {
   private async cacheDelete(pattern: string): Promise<void> {
     if (this.useMemoryCache) {
       // Deletar todas as chaves que correspondem ao padrão
-      const _keys = Array.from(this.memoryCache.keys());
+      const keys = Array.from(this.memoryCache.keys());
       for (const key of keys) {
         if (key.includes(pattern.replace('*', ''))) {
           this.memoryCache.delete(key);
@@ -189,7 +189,7 @@ export class SemgrepMCPServer {
 
     try {
       if (this.redis) {
-        const _keys = await this.redis.keys(pattern);
+        const keys = await this.redis.keys(pattern);
         if (keys.length > 0) {
           await this.redis.del(...keys);
         }
@@ -200,8 +200,8 @@ export class SemgrepMCPServer {
   }
 
   private cleanupMemoryCache(): void {
-    const _now = Date.now();
-    const _entries = Array.from(this.memoryCache.entries());
+    const now = Date.now();
+    const entries = Array.from(this.memoryCache.entries());
     for (const [key, item] of entries) {
       if (item.expires < now) {
         this.memoryCache.delete(key);
@@ -213,32 +213,32 @@ export class SemgrepMCPServer {
    * Analisa um arquivo específico e retorna contexto de segurança
    */
   async scanFile(filePath: string, options: ScanOptions = {}): Promise<SemgrepResult> {
-    const _fileHash = await this.getFileHash(filePath);
-    const _cacheKey = `${this.cachePrefix}scan:${filePath}:${fileHash}`;
+    const fileHash = await this.getFileHash(filePath);
+    const cacheKey = `${this.cachePrefix}scan:${filePath}:${fileHash}`;
 
     // Verificar cache primeiro
     if (!options.force_refresh) {
-      const _cached = await this.cacheGet(cacheKey);
+      const cached = await this.cacheGet(cacheKey);
       if (cached) {
         console.log(`[SEMGREP MCP] Cache hit for ${filePath}`);
-        return JSON.parse(cached); }
+        return JSON.parse(cached);
       }
     }
 
-    const _startTime = Date.now();
-    const _scanId = `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const startTime = Date.now();
+    const scanId = `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     try {
       console.log(`[SEMGREP MCP] Scanning file: ${filePath}`);
 
       // Executar Semgrep
-      const _semgrepArgs = [
+      const semgrepArgs = [
         '--config=auto',
         '--json',
         '--no-git-ignore',
         '--severity=ERROR',
         '--severity=WARNING',
-  _filePath,
+        filePath,
       ];
 
       // Adicionar config customizada se existir
@@ -246,8 +246,8 @@ export class SemgrepMCPServer {
         semgrepArgs.splice(1, 0, '--config=.semgrep.yml');
       }
 
-      const _results = await this.executeSemgrep(semgrepArgs);
-      const _processed = await this.processResults(results, scanId);
+      const results = await this.executeSemgrep(semgrepArgs);
+      const processed = await this.processResults(results, scanId);
 
       // Cache dos resultados (TTL: 1 hora)
       await this.cacheSet(cacheKey, JSON.stringify(processed), 3600);
@@ -255,8 +255,8 @@ export class SemgrepMCPServer {
       // Adicionar ao histórico
       await this.addToHistory(filePath, processed);
 
-      return processed; }
-    } catch (error) {
+      return processed;
+    } catch (error: any) {
       throw new Error(`Semgrep scan failed for ${filePath}: ${error.message}`);
     }
   }
@@ -264,14 +264,14 @@ export class SemgrepMCPServer {
   /**
    * Análise de snippet de código em tempo real
    */
-  async analyzeSnippet(code: string, context: AnalysisContext): Promise<unknown> {
-    const _tempFile = await this.createTempFile(code, context.language || 'typescript');
+  async analyzeSnippet(code: string, context: AnalysisContext): Promise<any> {
+    const tempFile = await this.createTempFile(code, context.language || 'typescript');
 
     try {
-      const _result = await this.scanFile(tempFile, { force_refresh: true });
+      const result = await this.scanFile(tempFile, { force_refresh: true });
 
       // Enriquecer com contexto
-      const _enrichedResult = await this.enrichWithContext(_result, context);
+      const enrichedResult = await this.enrichWithContext(result, context);
 
       return {
         findings: enrichedResult.findings,
@@ -289,8 +289,8 @@ export class SemgrepMCPServer {
    * Retorna contexto de segurança para componente/módulo
    */
   async getComponentContext(component: string): Promise<ComponentSecurityContext> {
-    const _componentFiles = await this.findComponentFiles(component);
-    const _results = await Promise.all(componentFiles.map((file) => this.scanFile(file)));
+    const componentFiles = await this.findComponentFiles(component);
+    const results = await Promise.all(componentFiles.map((file) => this.scanFile(file)));
 
     return {
       component: component,
@@ -306,10 +306,10 @@ export class SemgrepMCPServer {
   /**
    * Histórico de análises de segurança para um arquivo
    */
-  async getFileHistory(filePath: string, days: number = 30): Promise<unknown> {
-    const _historyKey = `${this.cachePrefix}history:${filePath}`;
+  async getFileHistory(filePath: string, days: number = 30): Promise<any> {
+    const historyKey = `${this.cachePrefix}history:${filePath}`;
     // Por enquanto, retornar histórico vazio quando não há Redis
-    const _history = this.redis ? await this.redis.lrange(historyKey, 0, days) : [];
+    const history = this.redis ? await this.redis.lrange(historyKey, 0, days) : [];
 
     return {
       file: filePath,
@@ -323,47 +323,47 @@ export class SemgrepMCPServer {
    * Retorna regras ativas do Semgrep
    */
   async getActiveRules(): Promise<any[]> {
-    const _cacheKey = `${this.cachePrefix}rules:active`;
+    const cacheKey = `${this.cachePrefix}rules:active`;
 
     // Verificar cache
-    const _cached = await this.cacheGet(cacheKey);
+    const cached = await this.cacheGet(cacheKey);
     if (cached) {
-      return JSON.parse(cached); }
+      return JSON.parse(cached);
     }
 
     try {
       // Listar regras
-      const _result = await this.executeSemgrep(['--config=auto', '--list-rules']);
+      const result = await this.executeSemgrep(['--config=auto', '--list-rules']);
 
       // Cache por 24 horas
-      await this.cacheSet(cacheKey, JSON.stringify(_result), 86400);
+      await this.cacheSet(cacheKey, JSON.stringify(result), 86400);
 
-      return result; }
+      return result;
     } catch (error) {
       console.error('[SEMGREP MCP] Failed to get rules:', error);
-      return []; }
+      return [];
     }
   }
 
   /**
    * Executa Semgrep com argumentos especificados
    */
-  private async executeSemgrep(args: string[]): Promise<unknown> {
+  private async executeSemgrep(args: string[]): Promise<any> {
     return new Promise((resolve, reject) => {
-      const _semgrep = spawn('semgrep', args);
-      let _stdout = '';
-      let _stderr = '';
+      const semgrep = spawn('semgrep', args);
+      let stdout = '';
+      let stderr = '';
 
-      semgrep.stdout.on('data', (_data) => {
+      semgrep.stdout.on('data', (data) => {
         stdout += data.toString();
       });
 
-      semgrep.stderr.on('data', (_data) => {
+      semgrep.stderr.on('data', (data) => {
         stderr += data.toString();
       });
 
       semgrep.on('close', (code) => {
-        if (code == 0 || code == 1 || code == 2) {
+        if (code === 0 || code === 1 || code === 2) {
           // 0 = success, 1 = findings found, 2 = no findings
           try {
             // Se o output não for JSON, retornar como texto
@@ -374,7 +374,7 @@ export class SemgrepMCPServer {
             }
           } catch (parseError) {
             // Se falhar o parse, tentar limpar o output
-            const _cleanOutput = stdout.substring(stdout.indexOf('{'));
+            const cleanOutput = stdout.substring(stdout.indexOf('{'));
             try {
               resolve(JSON.parse(cleanOutput));
             } catch {
@@ -395,9 +395,9 @@ export class SemgrepMCPServer {
   /**
    * Processa resultados brutos do Semgrep
    */
-  private async processResults(rawResults, scanId: string): Promise<SemgrepResult> {
+  private async processResults(rawResults: any, scanId: string): Promise<SemgrepResult> {
     const findings: SecurityFinding[] =
-      rawResults.results?.map((result) => ({
+      rawResults.results?.map((result: any) => ({
         rule_id: result.check_id,
         file: result.path,
         line: result.start.line,
@@ -424,8 +424,8 @@ export class SemgrepMCPServer {
     };
 
     return {
-  _findings,
-  _metadata,
+      findings,
+      metadata,
       performance: {
         scan_duration_ms: metadata.scan_duration_ms,
         rules_per_second: metadata.rules_applied / (metadata.scan_duration_ms / 1000) || 0,
@@ -438,7 +438,7 @@ export class SemgrepMCPServer {
    * Inicializa file watching para análise em tempo real
    */
   private initializeRealTimeWatching(): void {
-    const _watcher = chokidar.watch(['client/src/**/*.{ts,tsx}', 'server/**/*.ts'], {
+    const watcher = chokidar.watch(['client/src/**/*.{ts,tsx}', 'server/**/*.ts'], {
       ignored: /node_modules/,
       persistent: true,
     });
@@ -447,7 +447,7 @@ export class SemgrepMCPServer {
       console.log(`[SEMGREP MCP] File changed: ${filePath}`);
 
       // Invalidar cache
-      const _pattern = `${this.cachePrefix}scan:${filePath}:*`;
+      const pattern = `${this.cachePrefix}scan:${filePath}:*`;
       await this.cacheDelete(pattern);
 
       // Trigger análise incremental
@@ -465,10 +465,10 @@ export class SemgrepMCPServer {
    */
   private async getFileHash(filePath: string): Promise<string> {
     try {
-      const _content = await fs.readFile(filePath, 'utf8');
-      return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8); }
+      const content = await fs.readFile(filePath, 'utf8');
+      return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8);
     } catch {
-      return 'unknown'; }
+      return 'unknown';
     }
   }
 
@@ -478,9 +478,9 @@ export class SemgrepMCPServer {
   private async fileExists(path: string): Promise<boolean> {
     try {
       await fs.access(path);
-      return true; }
+      return true;
     } catch {
-      return false; }
+      return false;
     }
   }
 
@@ -488,13 +488,13 @@ export class SemgrepMCPServer {
    * Cria arquivo temporário para análise
    */
   private async createTempFile(content: string, language: string): Promise<string> {
-    const _extension = this.getExtensionForLanguage(language);
-    const _tempDir = '/tmp';
-    const _fileName = `semgrep_temp_${Date.now()}.${extension}`;
-    const _filePath = join(tempDir, fileName);
+    const extension = this.getExtensionForLanguage(language);
+    const tempDir = '/tmp';
+    const fileName = `semgrep_temp_${Date.now()}.${extension}`;
+    const filePath = join(tempDir, fileName);
 
     await fs.writeFile(filePath, content, 'utf8');
-    return filePath; }
+    return filePath;
   }
 
   /**
@@ -510,7 +510,7 @@ export class SemgrepMCPServer {
       ruby: 'rb',
       php: 'php',
     };
-    return map[language.toLowerCase()] || 'txt'; }
+    return map[language.toLowerCase()] || 'txt';
   }
 
   /**
@@ -519,12 +519,12 @@ export class SemgrepMCPServer {
   private async addToHistory(filePath: string, result: SemgrepResult): Promise<void> {
     if (!this.redis) return; // Histórico só funciona com Redis
 
-    const _historyKey = `${this.cachePrefix}history:${filePath}`;
-    const _entry = {
+    const historyKey = `${this.cachePrefix}history:${filePath}`;
+    const entry = {
       timestamp: result.metadata.timestamp,
       findings_count: result.findings.length,
-      critical: result.findings.filter((f) => f.severity == 'ERROR').length,
-      warnings: result.findings.filter((f) => f.severity == 'WARNING').length,
+      critical: result.findings.filter((f) => f.severity === 'ERROR').length,
+      warnings: result.findings.filter((f) => f.severity === 'WARNING').length,
     };
 
     await this.redis.lpush(historyKey, JSON.stringify(entry));
@@ -540,15 +540,15 @@ export class SemgrepMCPServer {
     context: AnalysisContext
   ): Promise<SemgrepResult> {
     // Adicionar contexto específico baseado na linguagem/framework
-    if (context.framework == 'react') {
+    if (context.framework === 'react') {
       // Adicionar regras específicas do React
     }
 
-    if (context.language == 'typescript') {
+    if (context.language === 'typescript') {
       // Adicionar análise de tipos
     }
 
-    return result; }
+    return result;
   }
 
   /**
@@ -563,31 +563,31 @@ export class SemgrepMCPServer {
       }
     });
 
-    return suggestions; }
+    return suggestions;
   }
 
   /**
    * Calcula score de risco
    */
   private calculateRiskScore(result: SemgrepResult): number {
-    let _score = 0;
+    let score = 0;
 
     result.findings.forEach((finding) => {
-      if (finding.severity == 'ERROR') score += 10;
-      if (finding.severity == 'WARNING') score += 5;
-      if (finding.severity == 'INFO') score += 1;
+      if (finding.severity === 'ERROR') score += 10;
+      if (finding.severity === 'WARNING') score += 5;
+      if (finding.severity === 'INFO') score += 1;
     });
 
-    return Math.min(score, 100); }
+    return Math.min(score, 100);
   }
 
   /**
    * Verifica compliance
    */
-  private async checkCompliance(result: SemgrepResult): Promise<unknown> {
+  private async checkCompliance(result: SemgrepResult): Promise<any> {
     return {
-      owasp_top_10: result.findings.filter((f) => f.owasp && f.owasp.length > 0).length == 0,
-      cwe_sans_top_25: result.findings.filter((f) => f.cwe && f.cwe.length > 0).length == 0,
+      owasp_top_10: result.findings.filter((f) => f.owasp && f.owasp.length > 0).length === 0,
+      cwe_sans_top_25: result.findings.filter((f) => f.cwe && f.cwe.length > 0).length === 0,
     };
   }
 
@@ -597,11 +597,11 @@ export class SemgrepMCPServer {
   private async findComponentFiles(component: string): Promise<string[]> {
     // Implementação simplificada - em produção, usar glob patterns
     const files: string[] = [];
-    const _dirs = ['client/src', 'server'];
+    const dirs = ['client/src', 'server'];
 
     for (const dir of dirs) {
       try {
-        const _entries = await fs.readdir(dir, { withFileTypes: true });
+        const entries = await fs.readdir(dir, { withFileTypes: true });
         for (const entry of entries) {
           if (entry.isFile() && entry.name.includes(component)) {
             files.push(join(dir, entry.name));
@@ -612,37 +612,37 @@ export class SemgrepMCPServer {
       }
     }
 
-    return files; }
+    return files;
   }
 
   /**
    * Calcula score de segurança do componente
    */
   private calculateComponentScore(results: SemgrepResult[]): number {
-    if (results.length == 0) return 100; }
+    if (results.length === 0) return 100;
 
-    let _totalFindings = 0;
-    let _criticalFindings = 0;
+    let totalFindings = 0;
+    let criticalFindings = 0;
 
-    results.forEach((_result) => {
+    results.forEach((result) => {
       totalFindings += result.findings.length;
-      criticalFindings += result.findings.filter((f) => f.severity == 'ERROR').length;
+      criticalFindings += result.findings.filter((f) => f.severity === 'ERROR').length;
     });
 
     // Fórmula simplificada
-    const _score = 100 - (criticalFindings * 10 + totalFindings * 2);
-    return Math.max(0, score); }
+    const score = 100 - (criticalFindings * 10 + totalFindings * 2);
+    return Math.max(0, score);
   }
 
   /**
    * Extrai principais riscos
    */
   private extractTopRisks(results: SemgrepResult[]): SecurityRisk[] {
-    const _riskMap = new Map<string, SecurityRisk>();
+    const riskMap = new Map<string, SecurityRisk>();
 
-    results.forEach((_result) => {
+    results.forEach((result) => {
       result.findings.forEach((finding) => {
-        const _key = finding.rule_id;
+        const key = finding.rule_id;
         if (!riskMap.has(key)) {
           riskMap.set(key, {
             rule_id: finding.rule_id,
@@ -663,7 +663,7 @@ export class SemgrepMCPServer {
   /**
    * Analisa dependências
    */
-  private async analyzeDependencies(files: string[]): Promise<unknown> {
+  private async analyzeDependencies(files: string[]): Promise<any> {
     // Implementação futura - integração com Dependency-Check
     return {
       total: 0,
@@ -675,7 +675,7 @@ export class SemgrepMCPServer {
   /**
    * Calcula superfície de ataque
    */
-  private calculateAttackSurface(results: SemgrepResult[]): unknown {
+  private calculateAttackSurface(results: SemgrepResult[]): any {
     return {
       exposed_endpoints: 0,
       authentication_issues: results.filter((r) =>
@@ -693,23 +693,23 @@ export class SemgrepMCPServer {
   private async generateComponentRecommendations(results: SemgrepResult[]): Promise<string[]> {
     const recommendations: string[] = [];
 
-    const _totalFindings = results.reduce((sum, r) => sum + r.findings.length, 0);
+    const totalFindings = results.reduce((sum, r) => sum + r.findings.length, 0);
     if (totalFindings > 10) {
       recommendations.push('Consider refactoring this component to reduce security complexity');
     }
 
-    const _hasAuthIssues = results.some((r) => r.findings.some((f) => f.rule_id.includes('auth')));
+    const hasAuthIssues = results.some((r) => r.findings.some((f) => f.rule_id.includes('auth')));
     if (hasAuthIssues) {
       recommendations.push('Review authentication implementation and use established patterns');
     }
 
-    return recommendations; }
+    return recommendations;
   }
 
   /**
    * Calcula tendências de segurança
    */
-  private calculateSecurityTrends(history: string[]): unknown {
+  private calculateSecurityTrends(history: string[]): any {
     // Análise simplificada de tendências
     return {
       improving: history.length > 1,
@@ -720,10 +720,10 @@ export class SemgrepMCPServer {
   /**
    * Identifica melhorias
    */
-  private identifyImprovements(history: string[]): unknown[] {
-    return []; }
+  private identifyImprovements(history: string[]): any[] {
+    return [];
   }
 }
 
 // Exportar singleton
-export const _semgrepMCPServer = new SemgrepMCPServer();
+export const semgrepMCPServer = new SemgrepMCPServer();

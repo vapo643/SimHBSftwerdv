@@ -3,19 +3,19 @@
  * Simula as operações e mostra exatamente como os logs de auditoria funcionam
  */
 
-console.log('🔍 ==== DEMONSTRAÇÃO DOS LOGS DE AUDITORIA ====\n');
+console.log('🔍 ====== DEMONSTRAÇÃO DOS LOGS DE AUDITORIA ======\n');
 
 console.log('🎯 PARTE 1: PRORROGAR VENCIMENTO - AUDITORIA COMPLETA');
-console.log('====================================\n');
+console.log('=====================================================\n');
 
 // Simular entrada de dados
-const _dadosProrrogar = {
+const dadosProrrogar = {
   codigosSolicitacao: ['44a467d1-e93f-4e91-b1f9-c79438ef5eea'],
   novaDataVencimento: '2025-12-25',
   usuario: 'admin@simpix.com',
 };
 
-console.log('🔍 [AUDIT-PRORROGAR] ==== INÍCIO DA PRORROGAÇÃO ====');
+console.log('🔍 [AUDIT-PRORROGAR] ====== INÍCIO DA PRORROGAÇÃO ======');
 console.log(
   '🔍 [AUDIT-PRORROGAR] Dados recebidos do frontend:',
   JSON.stringify(
@@ -26,7 +26,7 @@ console.log(
       timestamp: new Date().toISOString(),
       usuario: dadosProrrogar.usuario,
     },
-    _null,
+    null,
     2
   )
 );
@@ -42,12 +42,12 @@ console.log(
       numeroParcela: 4,
       valorNominal: '166.67',
     },
-    _null,
+    null,
     2
   )
 );
 
-console.log('\n🔍 [AUDIT-INTER] ==== EDITANDO COBRANÇA ====');
+console.log('\n🔍 [AUDIT-INTER] ===== EDITANDO COBRANÇA =====');
 console.log('🔍 [AUDIT-INTER] Código Solicitação: 44a467d1-e93f-4e91-b1f9-c79438ef5eea');
 console.log(
   '🔍 [AUDIT-INTER] Payload Exato Enviado:',
@@ -55,11 +55,11 @@ console.log(
     {
       dataVencimento: '2025-12-25',
     },
-    _null,
+    null,
     2
   )
 );
-console.log('🔍 [AUDIT-INTER] ==== RESPOSTA DA API ====');
+console.log('🔍 [AUDIT-INTER] ===== RESPOSTA DA API =====');
 console.log('🔍 [AUDIT-INTER] Status Code: 200');
 console.log('🔍 [AUDIT-INTER] Resposta: Cobrança editada com sucesso');
 
@@ -74,7 +74,7 @@ console.log(
       atualizacaoConfirmada: true,
       statusAPI: 'A_RECEBER',
     },
-    _null,
+    null,
     2
   )
 );
@@ -88,12 +88,12 @@ console.log(
       dataVencimentoDepois: '2025-12-25',
       atualizacaoBancoConfirmada: true,
     },
-    _null,
+    null,
     2
   )
 );
 
-console.log('\n🔍 [AUDIT-PRORROGAR] ==== RELATÓRIO FINAL ====');
+console.log('\n🔍 [AUDIT-PRORROGAR] ====== RELATÓRIO FINAL ======');
 console.log(
   '🔍 [AUDIT-PRORROGAR] Resumo:',
   JSON.stringify(
@@ -103,7 +103,7 @@ console.log(
       falhas: 0,
       taxaSucesso: '100.0%',
     },
-    _null,
+    null,
     2
   )
 );
@@ -128,19 +128,19 @@ console.log(
         sucesso: true,
       },
     ],
-    _null,
+    null,
     2
   )
 );
 
-console.log('🔍 [AUDIT-PRORROGAR] ==== FIM DA PRORROGAÇÃO ====\n');
+console.log('🔍 [AUDIT-PRORROGAR] ====== FIM DA PRORROGAÇÃO ======\n');
 
 // Aguardar um momento
 setTimeout(() => {
   console.log('\n🎯 PARTE 2: DESCONTO PARA QUITAÇÃO - AUDITORIA COMPLETA');
-  console.log('======================================\n');
+  console.log('========================================================\n');
 
-  const _dadosQuitacao = {
+  const dadosQuitacao = {
     propostaId: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
     desconto: 500.0,
     novasParcelas: [
@@ -149,7 +149,7 @@ setTimeout(() => {
     ],
   };
 
-  console.log('🔍 [AUDIT-QUITACAO] ==== INÍCIO DA QUITAÇÃO COM DESCONTO ====');
+  console.log('🔍 [AUDIT-QUITACAO] ====== INÍCIO DA QUITAÇÃO COM DESCONTO ======');
   console.log(
     '🔍 [AUDIT-QUITACAO] Dados recebidos do frontend:',
     JSON.stringify(
@@ -161,7 +161,7 @@ setTimeout(() => {
         timestamp: new Date().toISOString(),
         usuario: 'admin@simpix.com',
       },
-      _null,
+      null,
       2
     )
   );
@@ -176,7 +176,7 @@ setTimeout(() => {
         percentualDesconto: '50.0%',
         novoValorTotal: 500.0,
       },
-      _null,
+      null,
       2
     )
   );
@@ -190,7 +190,7 @@ setTimeout(() => {
         valorOriginal: '333.33',
         dataVencimentoOriginal: '2025-08-15',
       },
-      _null,
+      null,
       2
     )
   );
@@ -203,7 +203,7 @@ setTimeout(() => {
         statusRetornadoAPI: 'CANCELADO',
         cancelamentoConfirmado: true,
       },
-      _null,
+      null,
       2
     )
   );
@@ -217,7 +217,7 @@ setTimeout(() => {
         valorOriginal: '333.33',
         dataVencimentoOriginal: '2025-09-15',
       },
-      _null,
+      null,
       2
     )
   );
@@ -230,7 +230,7 @@ setTimeout(() => {
         statusRetornadoAPI: 'CANCELADO',
         cancelamentoConfirmado: true,
       },
-      _null,
+      null,
       2
     )
   );
@@ -243,7 +243,7 @@ setTimeout(() => {
         valor: 250.0,
         dataVencimento: '2025-09-15',
       },
-      _null,
+      null,
       2
     )
   );
@@ -255,7 +255,7 @@ setTimeout(() => {
         codigoSolicitacao: 'novo-boleto-quit-1',
         sucesso: true,
       },
-      _null,
+      null,
       2
     )
   );
@@ -270,7 +270,7 @@ setTimeout(() => {
         situacao: 'A_RECEBER',
         criacaoConfirmada: true,
       },
-      _null,
+      null,
       2
     )
   );
@@ -283,7 +283,7 @@ setTimeout(() => {
         valor: 250.0,
         dataVencimento: '2025-10-15',
       },
-      _null,
+      null,
       2
     )
   );
@@ -295,7 +295,7 @@ setTimeout(() => {
         codigoSolicitacao: 'novo-boleto-quit-2',
         sucesso: true,
       },
-      _null,
+      null,
       2
     )
   );
@@ -310,7 +310,7 @@ setTimeout(() => {
         situacao: 'A_RECEBER',
         criacaoConfirmada: true,
       },
-      _null,
+      null,
       2
     )
   );
@@ -325,12 +325,12 @@ setTimeout(() => {
         boletosInativosCorretos: true,
         novosBoletosCorretos: true,
       },
-      _null,
+      null,
       2
     )
   );
 
-  console.log('\n🔍 [AUDIT-QUITACAO] ==== RELATÓRIO FINAL ====');
+  console.log('\n🔍 [AUDIT-QUITACAO] ====== RELATÓRIO FINAL ======');
   console.log(
     '🔍 [AUDIT-QUITACAO] Resumo:',
     JSON.stringify(
@@ -342,7 +342,7 @@ setTimeout(() => {
         novosBoletosData: 2,
         sucesso: true,
       },
-      _null,
+      null,
       2
     )
   );
@@ -390,17 +390,17 @@ setTimeout(() => {
           },
         ],
       },
-      _null,
+      null,
       2
     )
   );
 
-  console.log('🔍 [AUDIT-QUITACAO] ==== FIM DA QUITAÇÃO COM DESCONTO ====\n');
+  console.log('🔍 [AUDIT-QUITACAO] ====== FIM DA QUITAÇÃO COM DESCONTO ======\n');
 
   setTimeout(() => {
-    console.log('\n✅ ==== DEMONSTRAÇÃO COMPLETA ====');
+    console.log('\n✅ ====== DEMONSTRAÇÃO COMPLETA ======');
     console.log('\n📊 RESUMO DA AUDITORIA IMPLEMENTADA:');
-    console.log('=========================');
+    console.log('=====================================');
     console.log('\n1️⃣ PRORROGAR VENCIMENTO:');
     console.log('   ✓ Log completo dos dados recebidos');
     console.log('   ✓ Estado anterior do boleto');

@@ -1,12 +1,12 @@
 // Endpoint temporário para observações - será integrado no futuro
 import { Request, Response } from 'express';
 
-export const _getPropostaObservacoes = async (req: Request, res: Response) => {
+export const getPropostaObservacoes = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
     // Por enquanto retorna array vazio - preparado para futuras observações
-    const _observacoes = {
+    const observacoes = {
       observacoes: [],
     };
 

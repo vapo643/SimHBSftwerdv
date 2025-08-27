@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { alertService } from '../services/genericService';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/alertas
@@ -16,9 +16,9 @@ const _router = Router();
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const _result = await alertService.executeOperation('list_alerts', req.query);
-    res.json(_result);
-  } catch (error) {
+    const result = await alertService.executeOperation('list_alerts', req.query);
+    res.json(result);
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to fetch alerts',

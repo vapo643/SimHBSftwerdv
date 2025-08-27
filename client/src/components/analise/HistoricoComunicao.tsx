@@ -10,20 +10,20 @@ interface Log {
   created_at: string;
 }
 
-const _fetchLogs = async (propostaId: string | undefined) => {
-  if (!propostaId) return []; }
-  const _response = await fetch(`/api/propostas/${propostaId}/logs`);
+const fetchLogs = async (propostaId: string | undefined) => {
+  if (!propostaId) return [];
+  const response = await fetch(`/api/propostas/${propostaId}/logs`);
   if (!response.ok) {
     throw new Error('Erro ao carregar histórico');
   }
-  return response.json(); }
+  return response.json();
 };
 
 const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ propostaId }) => {
   const {
     data: logs,
-  _isLoading,
-  _isError,
+    isLoading,
+    isError,
   } = useQuery<Log[]>({
     queryKey: ['proposta_logs', propostaId],
     queryFn: () => fetchLogs(propostaId),

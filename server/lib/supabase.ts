@@ -57,7 +57,7 @@ export function createServerSupabaseClient(accessToken?: string) {
 // Temporary: Use lazy connection to prevent server crash
 let dbClient;
 
-if (databaseUrl.includes('_supabase.com')) {
+if (databaseUrl.includes('supabase.com')) {
   console.log('✅ Database: Configuring Supabase connection...');
 
   // Use transaction pooler port and SSL

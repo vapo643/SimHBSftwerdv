@@ -10,14 +10,14 @@ export abstract class ValueObject<T> {
   }
 
   equals(vo?: ValueObject<T>): boolean {
-    if (vo == null || vo == undefined) {
+    if (vo === null || vo === undefined) {
       return false;
     }
 
-    if (vo.props == undefined) {
+    if (vo.props === undefined) {
       return false;
     }
 
-    return JSON.stringify(this.props) == JSON.stringify(vo.props);
+    return JSON.stringify(this.props) === JSON.stringify(vo.props);
   }
 }

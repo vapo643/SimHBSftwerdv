@@ -7,25 +7,25 @@ import { UserDataSchema, UserData } from '../../shared/types/user';
 export { UserData };
 
 export async function createUser(userData: UserData) {
-  const _supabase = createServerSupabaseAdminClient();
-  let createdAuthUser: unknown = null;
-  let createdProfile: unknown = null;
+  const supabase = createServerSupabaseAdminClient();
+  let createdAuthUser: any = null;
+  let createdProfile: any = null;
 
   try {
     // Check if user already exists by listing all users and finding by email
-    const { data: existingUsers, error: checkError } = await _supabase.auth.admin.listUsers();
+    const { data: existingUsers, error: checkError } = await supabase.auth.admin.listUsers();
     if (checkError) {
       throw new Error(`Erro ao verificar email: ${checkError.message}`);
     }
 
-    const _existingUser = existingUsers.users.find((user) => user.email == userData.email);
+    const existingUser = existingUsers.users.find((user) => user.email === userData.email);
     if (existingUser) {
-      const _conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
+      const conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
       conflictError.name = 'ConflictError';
       throw conflictError;
     }
 
-    const { data: authData, error: authError } = await _supabase.auth.admin.createUser({
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: userData.email,
       password: userData.password,
       email_confirm: true,
@@ -35,11 +35,11 @@ export async function createUser(userData: UserData) {
     if (!authData.user) throw new Error('Falha crítica ao criar usuário no Auth.');
     createdAuthUser = authData.user;
 
-    const _profilePayload = {
+    const profilePayload = {
       id: createdAuthUser.id,
       role: userData.role,
       full_name: userData.fullName,
-      loja_id: userData.role == 'ATENDENTE' ? userData.lojaId : null,
+      loja_id: userData.role === 'ATENDENTE' ? userData.lojaId : null,
     };
 
     const { data: profileResult, error: profileError } = await supabase
@@ -50,8 +50,8 @@ export async function createUser(userData: UserData) {
     if (profileError) throw new Error(`Erro ao criar perfil: ${profileError.message}`);
     createdProfile = profileResult;
 
-    if (userData.role == 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
-      const _gerenteLojaInserts = userData.lojaIds.map((lojaId) => ({
+    if (userData.role === 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
+      const gerenteLojaInserts = userData.lojaIds.map((lojaId) => ({
         gerente_id: createdAuthUser.id,
         loja_id: lojaId,
       }));
@@ -70,7 +70,7 @@ export async function createUser(userData: UserData) {
   } catch (error) {
     if (createdAuthUser) {
       console.error('ERRO DETECTADO. Iniciando rollback completo...');
-      await _supabase.auth.admin.deleteUser(createdAuthUser.id);
+      await supabase.auth.admin.deleteUser(createdAuthUser.id);
       console.log(`ROLLBACK: Usuário ${createdAuthUser.id} removido do Auth.`);
     }
     throw error;

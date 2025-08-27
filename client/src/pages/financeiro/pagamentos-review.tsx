@@ -3,12 +3,12 @@ import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import {
-  _Dialog,
-  _DialogContent,
-  _DialogDescription,
-  _DialogFooter,
-  _DialogHeader,
-  _DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,15 +17,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import {
-  _AlertTriangle,
-  _CheckCircle,
-  _FileText,
-  _Shield,
-  _CreditCard,
-  _Copy,
-  _ExternalLink,
-  _Key,
-  _Loader2,
+  AlertTriangle,
+  CheckCircle,
+  FileText,
+  Shield,
+  CreditCard,
+  Copy,
+  ExternalLink,
+  Key,
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -33,15 +33,15 @@ import { ptBR } from 'date-fns/locale';
 interface PaymentReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposta: unknown;
+  proposta: any;
   onConfirm: () => void;
 }
 
 export default function PaymentReviewModal({
-  _isOpen,
-  _onClose,
-  _proposta,
-  _onConfirm,
+  isOpen,
+  onClose,
+  proposta,
+  onConfirm,
 }: PaymentReviewModalProps) {
   const { toast } = useToast();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -56,20 +56,20 @@ export default function PaymentReviewModal({
   const [paymentObservation, setPaymentObservation] = useState('');
 
   // Confirmar veracidade
-  const _confirmarVeracidadeMutation = useMutation({
+  const confirmarVeracidadeMutation = useMutation({
     mutationFn: async () => {
-      const _propostaId = proposta?.id;
+      const propostaId = proposta?.id;
       console.log('[REVIEW MODAL] Confirmando veracidade para proposta:', propostaId);
       return await apiRequest(`/api/pagamentos/${propostaId}/confirmar-veracidade`, {
         method: 'POST',
         body: JSON.stringify({ observacoes }),
       });
     },
-    onSuccess: (_data) => {
-      console.log('✅ [REVIEW MODAL] Veracidade confirmada com sucesso:',_data);
+    onSuccess: (data) => {
+      console.log('✅ [REVIEW MODAL] Veracidade confirmada com sucesso:', data);
 
       // Verificar se foi uma resposta idempotente
-      if ((data as unknown).idempotent) {
+      if ((data as any).idempotent) {
         toast({
           title: 'Pagamento já autorizado',
           description: 'Este pagamento já foi autorizado anteriormente.',
@@ -89,7 +89,7 @@ export default function PaymentReviewModal({
       setShowConfirmDialog(false);
       queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('❌ [REVIEW MODAL] Erro ao confirmar veracidade:', error);
       toast({
         title: 'Erro ao confirmar veracidade',
@@ -100,9 +100,9 @@ export default function PaymentReviewModal({
   });
 
   // NOVO: Mutation para marcar como pago
-  const _marcarPagoMutation = useMutation({
+  const marcarPagoMutation = useMutation({
     mutationFn: async () => {
-      const _formData = new FormData();
+      const formData = new FormData();
       formData.append('observacoes', paymentObservation);
 
       if (comprovante) {
@@ -112,12 +112,12 @@ export default function PaymentReviewModal({
       console.log('[MARCAR PAGO] Iniciando requisição para:', `${proposta?.id}`);
 
       // Usar apiRequest para garantir token válido
-      const _response = await apiRequest(`/api/pagamentos/${proposta?.id}/marcar-pago`, {
+      const response = await apiRequest(`/api/pagamentos/${proposta?.id}/marcar-pago`, {
         method: 'POST',
         body: formData,
       });
 
-      return response; }
+      return response;
     },
     onSuccess: () => {
       toast({
@@ -137,7 +137,7 @@ export default function PaymentReviewModal({
       onConfirm();
       onClose();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Erro ao marcar como pago',
         description: error.message || 'Não foi possível marcar a proposta como paga.',
@@ -147,7 +147,7 @@ export default function PaymentReviewModal({
   });
 
   // Função para copiar PIX
-  const _copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: 'Copiado!',
@@ -156,16 +156,16 @@ export default function PaymentReviewModal({
   };
 
   // Função para visualizar CCB em nova aba com JWT
-  const _handleViewCCB = async () => {
+  const handleViewCCB = async () => {
     try {
       console.log('🔍 [CCB VIEW] Iniciando visualização da CCB para proposta:', proposta.id);
 
       // Usar o endpoint correto implementado
-      const _response = (await apiRequest(`/api/propostas/${proposta.id}/ccb`, {
+      const response = (await apiRequest(`/api/propostas/${proposta.id}/ccb`, {
         method: 'GET',
       })) as { url: string; nome: string; status: string; fonte: string };
 
-      console.log('✅ [CCB VIEW] Resposta recebida:',_response);
+      console.log('✅ [CCB VIEW] Resposta recebida:', response);
 
       if (response.url) {
         // Abrir URL assinada em nova aba
@@ -181,7 +181,7 @@ export default function PaymentReviewModal({
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [CCB VIEW] Erro:', error);
       toast({
         title: 'Erro ao abrir CCB',
@@ -191,21 +191,21 @@ export default function PaymentReviewModal({
     }
   };
 
-  const _formatCurrency = (value: number) => {
+  const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(value);
   };
 
-  const _formatCPF = (cpf: string) => {
-    if (!cpf) return ''; }
-    const _cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
+  const formatCPF = (cpf: string) => {
+    if (!cpf) return '';
+    const cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   if (!proposta) {
-    return null; }
+    return null;
   }
 
   return (
@@ -355,8 +355,8 @@ export default function PaymentReviewModal({
 
                 {/* Observações (opcional) */}
                 {!pixKeyVisible &&
-                  (proposta.status == 'pronto_pagamento' ||
-                    proposta.status == 'em_processamento') && (
+                  (proposta.status === 'pronto_pagamento' ||
+                    proposta.status === 'em_processamento') && (
                     <div>
                       <Label>Observações (opcional)</Label>
                       <Textarea
@@ -374,7 +374,7 @@ export default function PaymentReviewModal({
 
           <DialogFooter>
             {!veracidadeConfirmada &&
-            (proposta.status == 'pronto_pagamento' || proposta.status == 'em_processamento') ? (
+            (proposta.status === 'pronto_pagamento' || proposta.status === 'em_processamento') ? (
               <>
                 <Button variant="outline" onClick={onClose}>
                   Cancelar
@@ -560,7 +560,7 @@ export default function PaymentReviewModal({
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) => {
-                        const _file = e.target.files?.[0];
+                        const file = e.target.files?.[0];
                         if (file) {
                           setComprovante(file);
                           toast({

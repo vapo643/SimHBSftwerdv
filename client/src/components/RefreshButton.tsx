@@ -14,7 +14,7 @@ interface RefreshButtonProps {
 }
 
 export const RefreshButton: React.FC<RefreshButtonProps> = ({
-  _onRefresh,
+  onRefresh,
   isLoading = false,
   variant = 'ghost',
   size = 'sm',
@@ -24,7 +24,7 @@ export const RefreshButton: React.FC<RefreshButtonProps> = ({
 }) => {
   const { toast } = useToast();
 
-  const _handleRefresh = () => {
+  const handleRefresh = () => {
     onRefresh();
     toast({
       title: 'Dados atualizados',

@@ -3,7 +3,7 @@ import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middlew
 import { timingNormalizer } from '../middleware/timing-normalizer.js';
 import { requireAdmin } from '../lib/role-guards.js';
 
-const _router = Router();
+const router = Router();
 
 // Aplicar autenticação a todas as rotas
 router.use(jwtAuthMiddleware);
@@ -13,11 +13,11 @@ router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const { endpoint } = req.query;
 
-    const _metrics = timingNormalizer.getMetrics();
-    const _statistics = timingNormalizer.getStatistics(endpoint as string);
+    const metrics = timingNormalizer.getMetrics();
+    const statistics = timingNormalizer.getStatistics(endpoint as string);
 
     // Análise de vulnerabilidade de timing attack
-    const _vulnerabilityAssessment = {
+    const vulnerabilityAssessment = {
       isVulnerable: false,
       riskLevel: 'LOW',
       details: 'Sistema protegido por normalização temporal',
@@ -25,8 +25,8 @@ router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
 
     // Se temos métricas suficientes, fazer análise estatística
     if (statistics.count > 100) {
-      const _actualTimeVariance = statistics.actualTime.p99 - statistics.actualTime.p50;
-      const _totalTimeVariance = statistics.totalTime.p99 - statistics.totalTime.p50;
+      const actualTimeVariance = statistics.actualTime.p99 - statistics.actualTime.p50;
+      const totalTimeVariance = statistics.totalTime.p99 - statistics.totalTime.p50;
 
       // Se variância no tempo real for muito maior que no tempo total,
       // pode indicar vazamento de informação
@@ -43,8 +43,8 @@ router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
     res.json({
       timestamp: new Date().toISOString(),
       metricsCount: metrics.length,
-  _statistics,
-  _vulnerabilityAssessment,
+      statistics,
+      vulnerabilityAssessment,
       recentMetrics: metrics.slice(-50), // Últimas 50 métricas
     });
   } catch (error) {
@@ -57,7 +57,7 @@ router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
 router.get('/config', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Como configs é privado, vou retornar informações sobre configuração
-    const _configInfo = {
+    const configInfo = {
       defaultBaseline: 15,
       endpoints: {
         '/api/propostas/:id': { baseline: 25, jitter: 5 },
@@ -85,14 +85,14 @@ router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
     const { endpoint = '/api/propostas/1', iterations = 100 } = req.body;
 
     if (iterations > 1000) {
-      return res.*);
+      return res.status(400).json({ error: 'Máximo 1000 iterações permitidas' });
     }
 
-    const _testResults = {
-  _endpoint,
-  _iterations,
+    const testResults = {
+      endpoint,
+      iterations,
       startTime: new Date().toISOString(),
-      results: [] as Record<string, unknown>[]>{
+      results: [] as Array<{
         iteration: number;
         responseTime: number;
         status: number;
@@ -100,27 +100,27 @@ router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
     };
 
     // Simular teste de timing attack (em produção isso seria um teste real)
-    for (let _i = 0; i < iterations; i++) {
-      const _startTime = process.hrtime.bigint();
+    for (let i = 0; i < iterations; i++) {
+      const startTime = process.hrtime.bigint();
 
       // Simular request (em implementação real, faria requests HTTP)
       await new Promise((resolve) => setTimeout(resolve, Math.random() * 5 + 15));
 
-      const _endTime = process.hrtime.bigint();
-      const _responseTime = Number(endTime - startTime) / 1_000_000;
+      const endTime = process.hrtime.bigint();
+      const responseTime = Number(endTime - startTime) / 1_000_000;
 
       testResults.results.push({
         iteration: i + 1,
-  _responseTime,
+        responseTime,
         status: 200,
       });
     }
 
     // Análise estatística dos resultados
-    const _responseTimes = testResults.results.map((r) => r.responseTime);
+    const responseTimes = testResults.results.map((r) => r.responseTime);
     responseTimes.sort((a, b) => a - b);
 
-    const _statistics = {
+    const statistics = {
       min: Math.min(...responseTimes),
       max: Math.max(...responseTimes),
       avg: responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length,
@@ -134,7 +134,7 @@ router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
       ),
     };
 
-    const _assessment = {
+    const assessment = {
       isVulnerable: statistics.stdDev > 5, // Se desvio padrão > 5ms, pode ser vulnerável
       variance: statistics.max - statistics.min,
       recommendation:
@@ -145,8 +145,8 @@ router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
 
     res.json({
       ...testResults,
-  _statistics,
-  _assessment,
+      statistics,
+      assessment,
       completedAt: new Date().toISOString(),
     });
   } catch (error) {
@@ -160,12 +160,12 @@ router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, 
   try {
     const { targetEndpoint = '/api/propostas', validIds = [], invalidIds = [] } = req.body;
 
-    const _attackSimulation = {
+    const attackSimulation = {
       target: targetEndpoint,
       timestamp: new Date().toISOString(),
       results: {
-        validIdRequests: [] as Record<string, unknown>[]>{ id: string; avgTime: number; samples: number }>,
-        invalidIdRequests: [] as Record<string, unknown>[]>{ id: string; avgTime: number; samples: number }>,
+        validIdRequests: [] as Array<{ id: string; avgTime: number; samples: number }>,
+        invalidIdRequests: [] as Array<{ id: string; avgTime: number; samples: number }>,
         analysis: {
           timingLeakDetected: false,
           avgDifference: 0,
@@ -177,18 +177,18 @@ router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, 
     // Simular requests para IDs válidos
     for (const id of validIds.slice(0, 5)) {
       // Limitar a 5 IDs
-      const _samples = [];
-      for (let _i = 0; i < 10; i++) {
-        const _startTime = process.hrtime.bigint();
+      const samples = [];
+      for (let i = 0; i < 10; i++) {
+        const startTime = process.hrtime.bigint();
         await new Promise((resolve) => setTimeout(resolve, Math.random() * 10 + 20)); // Simular tempo de response
-        const _endTime = process.hrtime.bigint();
+        const endTime = process.hrtime.bigint();
         samples.push(Number(endTime - startTime) / 1_000_000);
       }
 
-      const _avgTime = samples.reduce((a, b) => a + b, 0) / samples.length;
+      const avgTime = samples.reduce((a, b) => a + b, 0) / samples.length;
       attackSimulation.results.validIdRequests.push({
         id: id.toString(),
-  _avgTime,
+        avgTime,
         samples: samples.length,
       });
     }
@@ -196,18 +196,18 @@ router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, 
     // Simular requests para IDs inválidos
     for (const id of invalidIds.slice(0, 5)) {
       // Limitar a 5 IDs
-      const _samples = [];
-      for (let _i = 0; i < 10; i++) {
-        const _startTime = process.hrtime.bigint();
+      const samples = [];
+      for (let i = 0; i < 10; i++) {
+        const startTime = process.hrtime.bigint();
         await new Promise((resolve) => setTimeout(resolve, Math.random() * 8 + 18)); // Simular tempo de response
-        const _endTime = process.hrtime.bigint();
+        const endTime = process.hrtime.bigint();
         samples.push(Number(endTime - startTime) / 1_000_000);
       }
 
-      const _avgTime = samples.reduce((a, b) => a + b, 0) / samples.length;
+      const avgTime = samples.reduce((a, b) => a + b, 0) / samples.length;
       attackSimulation.results.invalidIdRequests.push({
         id: id.toString(),
-  _avgTime,
+        avgTime,
         samples: samples.length,
       });
     }
@@ -217,14 +217,14 @@ router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, 
       attackSimulation.results.validIdRequests.length > 0 &&
       attackSimulation.results.invalidIdRequests.length > 0
     ) {
-      const _validAvg =
+      const validAvg =
         attackSimulation.results.validIdRequests.reduce((a, b) => a + b.avgTime, 0) /
         attackSimulation.results.validIdRequests.length;
-      const _invalidAvg =
+      const invalidAvg =
         attackSimulation.results.invalidIdRequests.reduce((a, b) => a + b.avgTime, 0) /
         attackSimulation.results.invalidIdRequests.length;
 
-      const _difference = Math.abs(validAvg - invalidAvg);
+      const difference = Math.abs(validAvg - invalidAvg);
       attackSimulation.results.analysis.avgDifference = difference;
 
       if (difference > 5) {

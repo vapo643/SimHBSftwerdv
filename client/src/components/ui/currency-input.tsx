@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-const _CurrencyInput = React.forwardRef<HTMLInputElement, InputProps>(
+const CurrencyInput = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, ...props }, ref) => {
     return (
       <div className="relative">

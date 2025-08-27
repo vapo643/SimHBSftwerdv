@@ -18,18 +18,18 @@ const DEFAULT_EVENTS = [
 ];
 
 export function useIdleTimer({
-  _timeout,
-  _onIdle,
+  timeout,
+  onIdle,
   events = DEFAULT_EVENTS,
   throttle = 500,
 }: UseIdleTimerOptions) {
-  const _timeoutId = useRef<NodeJS.Timeout | null>(null);
-  const _lastEventTime = useRef<number>(Date.now());
-  const _isIdle = useRef<boolean>(false);
+  const timeoutId = useRef<NodeJS.Timeout | null>(null);
+  const lastEventTime = useRef<number>(Date.now());
+  const isIdle = useRef<boolean>(false);
 
   // Função para resetar o timer
-  const _resetTimer = useCallback(() => {
-    const _now = Date.now();
+  const resetTimer = useCallback(() => {
+    const now = Date.now();
 
     // Throttle: só processa se passou o tempo mínimo desde o último evento
     if (now - lastEventTime.current < throttle) {
@@ -55,7 +55,7 @@ export function useIdleTimer({
   }, [timeout, onIdle, throttle]);
 
   // Função para parar o timer
-  const _stopTimer = useCallback(() => {
+  const stopTimer = useCallback(() => {
     if (timeoutId.current) {
       clearTimeout(timeoutId.current);
       timeoutId.current = null;
@@ -64,15 +64,15 @@ export function useIdleTimer({
   }, []);
 
   // Função para iniciar o timer manualmente
-  const _startTimer = useCallback(() => {
+  const startTimer = useCallback(() => {
     resetTimer();
   }, [resetTimer]);
 
   useEffect(() => {
     // Handler de eventos throttled
-    let _lastCall = 0;
-    const _throttledHandler = () => {
-      const _now = Date.now();
+    let lastCall = 0;
+    const throttledHandler = () => {
+      const now = Date.now();
       if (now - lastCall >= throttle) {
         lastCall = now;
         resetTimer();
@@ -98,8 +98,8 @@ export function useIdleTimer({
 
   // Detecta mudanças de tab/foco
   useEffect(() => {
-    const _handleVisibilityChange = () => {
-      if (document.visibilityState == 'visible') {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
         // Usuário voltou para a tab, reseta o timer
         resetTimer();
       } else {
@@ -118,8 +118,8 @@ export function useIdleTimer({
 
   return {
     isIdle: isIdle.current,
-    _resetTimer,
-    _stopTimer,
-    _startTimer,
+    resetTimer,
+    stopTimer,
+    startTimer,
   };
 }

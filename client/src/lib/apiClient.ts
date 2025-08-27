@@ -17,40 +17,40 @@ import { getSupabase } from './supabase';
  * This ensures compatibility with both backend (snake_case) and frontend (camelCase) conventions
  */
 function snakeToCamel(str: string): string {
-  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()); }
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
-function deepTransformDualCase(obj): unknown {
+function deepTransformDualCase(obj: any): any {
   if (obj === null || obj === undefined) {
-    return obj; }
+    return obj;
   }
 
   if (Array.isArray(obj)) {
-    return obj.map((item) => deepTransformDualCase(item)); }
+    return obj.map((item) => deepTransformDualCase(item));
   }
 
-  if (typeof obj == 'object' && obj !== null) {
-    const result: Record<string, unknown> = {};
+  if (typeof obj === 'object' && obj !== null) {
+    const result: any = {};
 
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const _value = deepTransformDualCase(obj[key]);
+      if (obj.hasOwnProperty(key)) {
+        const value = deepTransformDualCase(obj[key]);
 
         // Always preserve the original key
         result[key] = value;
 
         // If the key contains underscore, also add camelCase version
         if (key.includes('_')) {
-          const _camelKey = snakeToCamel(key);
+          const camelKey = snakeToCamel(key);
           result[camelKey] = value;
         }
       }
     }
 
-    return result; }
+    return result;
   }
 
-  return obj; }
+  return obj;
 }
 
 export interface ApiClientOptions {
@@ -106,35 +106,35 @@ export class ApiError extends Error {
 
   private inferCodeFromStatus(status: number): ApiErrorCode {
     switch (status) {
-      case 400: {
-        return ApiErrorCode.VALIDATION_ERROR; }
-      case 401: {
-        return ApiErrorCode.TOKEN_EXPIRED; }
-      case 403: {
-        return ApiErrorCode.FORBIDDEN; }
-      case 404: {
-        return ApiErrorCode.NOT_FOUND; }
-      case 409: {
-        return ApiErrorCode.CONFLICT; }
-      case 500: {
-      case 502: {
-      case 503: {
-      case 504: {
-        return ApiErrorCode.SERVER_ERROR; }
-      case 0: {
+      case 400:
+        return ApiErrorCode.VALIDATION_ERROR;
+      case 401:
+        return ApiErrorCode.TOKEN_EXPIRED;
+      case 403:
+        return ApiErrorCode.FORBIDDEN;
+      case 404:
+        return ApiErrorCode.NOT_FOUND;
+      case 409:
+        return ApiErrorCode.CONFLICT;
+      case 500:
+      case 502:
+      case 503:
+      case 504:
+        return ApiErrorCode.SERVER_ERROR;
+      case 0:
         return this.message.includes('timeout')
           ? ApiErrorCode.TIMEOUT_ERROR
           : ApiErrorCode.NETWORK_ERROR;
       default:
-        return ApiErrorCode.UNKNOWN_ERROR; }
+        return ApiErrorCode.UNKNOWN_ERROR;
     }
   }
 
   private determineRetryability(): boolean {
     return (
       [503, 504, 0].includes(this.status) ||
-      this.code == ApiErrorCode.TIMEOUT_ERROR ||
-      this.code == ApiErrorCode.NETWORK_ERROR
+      this.code === ApiErrorCode.TIMEOUT_ERROR ||
+      this.code === ApiErrorCode.NETWORK_ERROR
     );
   }
 }
@@ -154,7 +154,7 @@ class TokenManager {
     if (!TokenManager.instance) {
       TokenManager.instance = new TokenManager();
     }
-    return TokenManager.instance; }
+    return TokenManager.instance;
   }
 
   async getValidToken(forceRefresh: boolean = false): Promise<string | null> {
@@ -162,41 +162,41 @@ class TokenManager {
     if (!forceRefresh) {
       // Check if we have a valid cached token
       if (this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry * 1000) {
-        return this.cachedToken; }
+        return this.cachedToken;
       }
     }
 
     // If there's already a refresh in progress, wait for it
     if (this.refreshPromise) {
-      return await this.refreshPromise; }
+      return await this.refreshPromise;
     }
 
     // Start token refresh
     this.refreshPromise = this.refreshToken();
-    const _token = await this.refreshPromise;
+    const token = await this.refreshPromise;
     this.refreshPromise = null;
 
-    return token; }
+    return token;
   }
 
   private async refreshToken(): Promise<string | null> {
     try {
       // Get fresh session directly from Supabase - bypasses auth.ts abstraction
-      const _supabase = getSupabase();
+      const supabase = getSupabase();
       const {
         data: { session },
-      } = await _supabase.auth.getSession();
+      } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
         this.clearCache();
-        return null; }
+        return null;
       }
 
       // Decode JWT to get expiry (simple base64 decode of payload)
-      const _tokenParts = session.access_token.split('.');
-      if (tokenParts.length == 3) {
+      const tokenParts = session.access_token.split('.');
+      if (tokenParts.length === 3) {
         try {
-          const _payload = JSON.parse(atob(tokenParts[1]));
+          const payload = JSON.parse(atob(tokenParts[1]));
           this.tokenExpiry = payload.exp;
         } catch {
           // If we can't decode, set a conservative expiry (30 minutes from now)
@@ -206,11 +206,11 @@ class TokenManager {
 
       this.cachedToken = session.access_token;
       console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken.length}`);
-      return this.cachedToken; }
+      return this.cachedToken;
     } catch (error) {
       console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
       this.clearCache();
-      return null; }
+      return null;
     }
   }
 
@@ -240,42 +240,42 @@ class ApiConfig {
     if (!ApiConfig.instance) {
       ApiConfig.instance = new ApiConfig();
     }
-    return ApiConfig.instance; }
+    return ApiConfig.instance;
   }
 
   private determineBaseUrl(): string {
     // Priority 1: Environment variable
     if (import.meta.env.VITE_API_BASE_URL) {
-      return import.meta.env.VITE_API_BASE_URL; }
+      return import.meta.env.VITE_API_BASE_URL;
     }
 
     // Priority 2: Auto-detect environment
     if (typeof window !== 'undefined') {
-      const _hostname = window.location.hostname;
+      const hostname = window.location.hostname;
 
       // Replit environment
       if (hostname.includes('replit.') || hostname.includes('.repl.co')) {
-        return window.location.origin; }
+        return window.location.origin;
       }
 
       // Local development
-      if (hostname == 'localhost' || hostname == '127.0.0.1') {
-        return `${window.location.protocol}//${hostname}:5000`; }
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `${window.location.protocol}//${hostname}:5000`;
       }
     }
 
     // Priority 3: Fallback
-    return 'http://localhost:5000'; }
+    return 'http://localhost:5000';
   }
 
   buildUrl(endpoint: string): string {
     // Remove leading slash if present to avoid double slashes
-    const _cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    return `${this.baseUrl}/${cleanEndpoint}`; }
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    return `${this.baseUrl}/${cleanEndpoint}`;
   }
 
   getBaseUrl(): string {
-    return this.baseUrl; }
+    return this.baseUrl;
   }
 }
 
@@ -291,44 +291,44 @@ class RequestManager {
   ): Promise<Response> {
     let lastError: Error;
 
-    for (let _attempt = 0; attempt <= retries; attempt++) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         // Create abort controller for timeout
-        const _controller = new AbortController();
-        const _timeoutId = setTimeout(() => controller.abort(), timeout);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-        const _requestOptions = {
+        const requestOptions = {
           ...options,
           signal: controller.signal,
         };
 
-        const _response = await fetch(url, requestOptions);
+        const response = await fetch(url, requestOptions);
         clearTimeout(timeoutId);
 
-        return response; }
+        return response;
       } catch (error) {
         lastError = error as Error;
 
         // Clear any pending timeout
-        if (error instanceof Error && error.name == 'AbortError') {
+        if (error instanceof Error && error.name === 'AbortError') {
           lastError = new Error('Request timeout');
         }
 
         // Don't retry on the last attempt
-        if (attempt == retries) {
-          break; }
+        if (attempt === retries) {
+          break;
         }
 
         // Only retry on network errors or timeouts
-        const _isRetryableError =
-          error instanceof TypeError || (error instanceof Error && error.name == 'AbortError');
+        const isRetryableError =
+          error instanceof TypeError || (error instanceof Error && error.name === 'AbortError');
 
         if (!isRetryableError) {
-          break; }
+          break;
         }
 
         // Exponential backoff delay
-        const _delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s...
+        const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s...
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
@@ -350,7 +350,7 @@ export async function apiClient<T = any>(
 ): Promise<T | ApiResponse<T>> {
   const {
     method = 'GET',
-  _body,
+    body,
     headers: customHeaders = {},
     requireAuth = true,
     timeout = 15000,
@@ -359,8 +359,8 @@ export async function apiClient<T = any>(
   } = options;
 
   // PASSO 5.1: Use ApiConfig to build complete URL
-  const _apiConfig = ApiConfig.getInstance();
-  const _fullUrl = apiConfig.buildUrl(url);
+  const apiConfig = ApiConfig.getInstance();
+  const fullUrl = apiConfig.buildUrl(url);
 
   // Build headers - Don't set Content-Type for FormData
   const headers: Record<string, string> = {
@@ -375,8 +375,8 @@ export async function apiClient<T = any>(
 
   // PASSO 5.2: Use TokenManager to get valid authentication token
   if (requireAuth) {
-    const _tokenManager = TokenManager.getInstance();
-    const _token = await tokenManager.getValidToken();
+    const tokenManager = TokenManager.getInstance();
+    const token = await tokenManager.getValidToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -392,8 +392,8 @@ export async function apiClient<T = any>(
 
   // Prepare request configuration
   const requestConfig: RequestInit = {
-  _method,
-  _headers,
+    method,
+    headers,
   };
 
   // Add body for non-GET requests
@@ -401,7 +401,7 @@ export async function apiClient<T = any>(
     if (body instanceof FormData) {
       // FormData should be passed directly
       requestConfig.body = body;
-    } else if (typeof body == 'string') {
+    } else if (typeof body === 'string') {
       requestConfig.body = body;
     } else {
       requestConfig.body = JSON.stringify(body);
@@ -410,40 +410,40 @@ export async function apiClient<T = any>(
 
   try {
     // PASSO 5.3: Use RequestManager for network call with timeout and retry
-    const _response = await RequestManager.fetchWithTimeout(
-  _fullUrl,
-  _requestConfig,
-  _timeout,
+    const response = await RequestManager.fetchWithTimeout(
+      fullUrl,
+      requestConfig,
+      timeout,
       retries
     );
 
     // Handle different response types based on responseType option
     let data: T;
-    const _contentType = response.headers.get('content-type');
+    const contentType = response.headers.get('content-type');
 
     // For blob responses, directly return the blob
-    if (responseType == 'blob') {
+    if (responseType === 'blob') {
       data = (await response.blob()) as T;
-    } else if (responseType == 'text') {
+    } else if (responseType === 'text') {
       data = (await response.text()) as T;
     } else {
       // Default JSON handling
       if (contentType && contentType.includes('application/json')) {
-        const _jsonData = await response.json();
+        const jsonData = await response.json();
         console.log('[API Client] Raw JSON response from', fullUrl, ':', jsonData);
         // Apply dual-key transformation for /api/ endpoints
         if (fullUrl.includes('/api/')) {
           data = deepTransformDualCase(jsonData);
-          console.log('[API Client] After dual-key transformation:',_data);
+          console.log('[API Client] After dual-key transformation:', data);
         } else {
           data = jsonData;
         }
-      } else if (response.status == 204 || response.status == 205) {
+      } else if (response.status === 204 || response.status === 205) {
         // No content responses
         data = null as T;
       } else {
         // Try to parse as text for error messages
-        const _text = await response.text();
+        const text = await response.text();
         data = (text || null) as T;
       }
     }
@@ -451,54 +451,54 @@ export async function apiClient<T = any>(
     // Check if response is successful
     if (!response.ok) {
       // PASSO 5.4: Handle token expiration with automatic retry
-      if (response.status == 401 && requireAuth) {
-        const _tokenManager = TokenManager.getInstance();
+      if (response.status === 401 && requireAuth) {
+        const tokenManager = TokenManager.getInstance();
         tokenManager.invalidateToken();
 
         // Try once more with fresh token
-        const _newToken = await tokenManager.getValidToken();
+        const newToken = await tokenManager.getValidToken();
         if (newToken) {
           headers['Authorization'] = `Bearer ${newToken}`;
-          const _retryConfig = { ...requestConfig, headers };
+          const retryConfig = { ...requestConfig, headers };
 
           try {
-            const _retryResponse = await RequestManager.fetchWithTimeout(
-  _fullUrl,
-  _retryConfig,
-  _timeout,
+            const retryResponse = await RequestManager.fetchWithTimeout(
+              fullUrl,
+              retryConfig,
+              timeout,
               0
             );
 
             let retryData: T;
-            const _retryContentType = retryResponse.headers.get('content-type');
+            const retryContentType = retryResponse.headers.get('content-type');
 
             // Handle different response types based on responseType option
-            if (responseType == 'blob') {
+            if (responseType === 'blob') {
               retryData = (await retryResponse.blob()) as T;
-            } else if (responseType == 'text') {
+            } else if (responseType === 'text') {
               retryData = (await retryResponse.text()) as T;
             } else {
               // Default JSON handling
               if (retryContentType && retryContentType.includes('application/json')) {
-                const _retryJsonData = await retryResponse.json();
+                const retryJsonData = await retryResponse.json();
                 // Apply dual-key transformation for /api/ endpoints
                 if (fullUrl.includes('/api/')) {
                   retryData = deepTransformDualCase(retryJsonData);
                 } else {
                   retryData = retryJsonData;
                 }
-              } else if (retryResponse.status == 204 || retryResponse.status == 205) {
+              } else if (retryResponse.status === 204 || retryResponse.status === 205) {
                 retryData = null as T;
               } else {
-                const _retryText = await retryResponse.text();
+                const retryText = await retryResponse.text();
                 retryData = (retryText || null) as T;
               }
             }
 
             if (retryResponse.ok) {
               // Return blob directly for blob responses (for PDFDownloader compatibility)
-              if (responseType == 'blob') {
-                return retryData as T; }
+              if (responseType === 'blob') {
+                return retryData as T;
               }
 
               return {
@@ -515,33 +515,33 @@ export async function apiClient<T = any>(
       }
 
       // PASSO 5.5: Use enhanced ApiError class with full response data
-      const _errorMessage =
-        typeof data == 'object' &&
+      const errorMessage =
+        typeof data === 'object' &&
         data !== null &&
         'message' in data &&
-        typeof (data as unknown).message == 'string'
-          ? (data as unknown).message
-          : typeof data == 'string'
+        typeof (data as any).message === 'string'
+          ? (data as any).message
+          : typeof data === 'string'
             ? data
             : `HTTP Error ${response.status}`;
 
       throw new ApiError(
-  _errorMessage,
+        errorMessage,
         response.status,
         response.statusText,
-  _response,
-  _undefined, // code will be inferred
+        response,
+        undefined, // code will be inferred
         data // Pass full response data
       );
     }
 
     // Return blob directly for blob responses (for PDFDownloader compatibility)
-    if (responseType == 'blob' && response.ok) {
-      return data as T; }
+    if (responseType === 'blob' && response.ok) {
+      return data as T;
     }
 
     return {
-  _data,
+      data,
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
@@ -558,7 +558,7 @@ export async function apiClient<T = any>(
         'Request timeout: The server took too long to respond',
         0,
         'Timeout Error',
-  _undefined,
+        undefined,
         ApiErrorCode.TIMEOUT_ERROR
       );
     }
@@ -569,7 +569,7 @@ export async function apiClient<T = any>(
         'Network error: Unable to connect to the server',
         0,
         'Network Error',
-  _undefined,
+        undefined,
         ApiErrorCode.NETWORK_ERROR
       );
     }
@@ -579,7 +579,7 @@ export async function apiClient<T = any>(
       error instanceof Error ? error.message : 'Unknown error occurred',
       0,
       'Unknown Error',
-  _undefined,
+      undefined,
       ApiErrorCode.UNKNOWN_ERROR
     );
   }
@@ -588,7 +588,7 @@ export async function apiClient<T = any>(
 /**
  * Convenience methods for common HTTP operations
  */
-export const _api = {
+export const api = {
   get: <T = any>(url: string, options: Omit<ApiClientOptions, 'method'> = {}) =>
     apiClient<T>(url, { ...options, method: 'GET' }),
 
@@ -620,7 +620,7 @@ export default apiClient;
  * Backward compatibility export for files that haven't been migrated yet
  * @deprecated Use api.get, api.post, etc. instead
  */
-export const _fetchWithToken = apiClient;
+export const fetchWithToken = apiClient;
 
 /**
  * Export TokenManager for components that need direct token access

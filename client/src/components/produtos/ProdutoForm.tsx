@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 
-const _produtoSchema = z.object({
+const produtoSchema = z.object({
   nome: z.string().min(3, 'Nome do Produto é obrigatório.'),
   status: z.enum(['Ativo', 'Inativo'], {
     errorMap: () => ({ message: 'Status é obrigatório.' }),
@@ -36,9 +36,9 @@ interface ProdutoFormProps {
 
 const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialData }) => {
   const {
-    _control,
-    _register,
-    _handleSubmit,
+    control,
+    register,
+    handleSubmit,
     formState: { errors },
   } = useForm<ProdutoFormData>({
     resolver: zodResolver(produtoSchema),

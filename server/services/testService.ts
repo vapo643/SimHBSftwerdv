@@ -14,21 +14,21 @@ export class TestService extends GenericService {
   /**
    * Execute test suites
    */
-  async executeTestSuite(suite: string, params): Promise<unknown> {
-    return await this.executeOperation(`test_suite_${suite}`, params); }
+  async executeTestSuite(suite: string, params: any): Promise<any> {
+    return await this.executeOperation(`test_suite_${suite}`, params);
   }
 
   /**
    * Run validation tests
    */
-  async runValidationTests(type: string): Promise<unknown> {
+  async runValidationTests(type: string): Promise<any> {
     return await this.executeOperation(`validation_${type}`, {
       timestamp: new Date().toISOString(),
     });
   }
 }
 
-export const _testService = new TestService();
-export const _testQueueService = new GenericService('TEST_QUEUE');
-export const _testRetryService = new GenericService('TEST_RETRY');
-export const _testAuditService = new GenericService('TEST_AUDIT');
+export const testService = new TestService();
+export const testQueueService = new GenericService('TEST_QUEUE');
+export const testRetryService = new GenericService('TEST_RETRY');
+export const testAuditService = new GenericService('TEST_AUDIT');

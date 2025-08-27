@@ -13,7 +13,7 @@ export interface WebhookLog {
   id?: string;
   source: 'clicksign' | 'inter' | 'other';
   event: string;
-  payload: unknown;
+  payload: any;
   signature?: string;
   status: 'pending' | 'processed' | 'failed';
   propostaId?: string;
@@ -21,7 +21,7 @@ export interface WebhookLog {
   error?: string;
   processedAt?: string;
   createdAt?: string;
-  metadata?: unknown;
+  metadata?: any;
 }
 
 export interface Proposal {
@@ -55,7 +55,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
    */
   async findProposalByClickSignDocument(documentKey: string): Promise<Proposal | null> {
     try {
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
         SELECT id, cliente_nome, status, clicksign_document_id, clicksign_envelope_id
         FROM propostas 
         WHERE clicksign_document_id = ${documentKey}
@@ -63,11 +63,11 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         LIMIT 1
       `);
 
-      if (!result || result.length == 0) {
-        return null; }
+      if (!result || result.length === 0) {
+        return null;
       }
 
-      const _row = result[0];
+      const row = result[0];
       return {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
@@ -75,7 +75,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         clicksignDocumentId: row.clicksign_document_id as string | undefined,
         clicksignEnvelopeId: row.clicksign_envelope_id as string | undefined,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to find proposal by ClickSign document: ${error.message}`);
     }
   }
@@ -85,25 +85,25 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
    */
   async findProposalByNossoNumero(nossoNumero: string): Promise<Proposal | null> {
     try {
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
         SELECT id, cliente_nome, status, nosso_numero
         FROM propostas 
         WHERE nosso_numero = ${nossoNumero}
         LIMIT 1
       `);
 
-      if (!result || result.length == 0) {
-        return null; }
+      if (!result || result.length === 0) {
+        return null;
       }
 
-      const _row = result[0];
+      const row = result[0];
       return {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
         status: row.status as string,
         nossoNumero: row.nosso_numero as string | undefined,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to find proposal by nosso_numero: ${error.message}`);
     }
   }
@@ -113,18 +113,18 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
    */
   async findPaymentByNossoNumero(nossoNumero: string): Promise<Payment | null> {
     try {
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
         SELECT id, nosso_numero, valor_pago, data_pagamento, status, proposta_id
         FROM pagamentos 
         WHERE nosso_numero = ${nossoNumero}
         LIMIT 1
       `);
 
-      if (!result || result.length == 0) {
-        return null; }
+      if (!result || result.length === 0) {
+        return null;
       }
 
-      const _row = result[0];
+      const row = result[0];
       return {
         id: row.id as string,
         nossoNumero: row.nosso_numero as string,
@@ -133,7 +133,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         status: row.status as string,
         propostaId: row.proposta_id as string,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to find payment by nosso_numero: ${error.message}`);
     }
   }
@@ -161,7 +161,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
           updated_at = NOW()
         WHERE id = ${propostaId}
       `);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to update proposal signature status: ${error.message}`);
     }
   }
@@ -175,7 +175,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
       status?: string;
       valorPago?: number;
       dataPagamento?: string;
-      metadata?: unknown;
+      metadata?: any;
     }
   ): Promise<void> {
     try {
@@ -189,7 +189,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
           updated_at = NOW()
         WHERE id = ${paymentId}
       `);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to update payment status: ${error.message}`);
     }
   }
@@ -219,10 +219,10 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
     if (error) {
       console.error('Failed to create webhook log:', error);
       // Non-critical error, don't throw
-      return ''; }
+      return '';
     }
 
-    return data?.id || ''; }
+    return data?.id || '';
   }
 
   /**
@@ -233,8 +233,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
     status: 'processed' | 'failed',
     error?: string
   ): Promise<void> {
-    const updateData: unknown = {
-  _status,
+    const updateData: any = {
+      status,
       processed_at: new Date().toISOString(),
     };
 
@@ -267,10 +267,10 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
 
     if (error) {
       console.error('Failed to check webhook idempotency:', error);
-      return false; }
+      return false;
     }
 
-    return data && data.length > 0; }
+    return data && data.length > 0;
   }
 
   /**
@@ -287,7 +287,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
       throw new Error(`Failed to fetch webhook logs: ${error.message}`);
     }
 
-    return data as WebhookLog[]; }
+    return data as WebhookLog[];
   }
 
   /**
@@ -304,9 +304,9 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
       throw new Error(`Failed to fetch webhook logs for proposal: ${error.message}`);
     }
 
-    return data as WebhookLog[]; }
+    return data as WebhookLog[];
   }
 }
 
 // Export singleton instance
-export const _webhookRepository = new WebhookRepository();
+export const webhookRepository = new WebhookRepository();

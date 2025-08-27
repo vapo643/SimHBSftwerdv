@@ -51,12 +51,12 @@ export const CLICKSIGN_BREAKER_OPTIONS: CircuitBreaker.Options = {
 /**
  * Create a circuit breaker with logging
  */
-export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<unknown>>(
+export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
   asyncFunction: T,
   options: CircuitBreaker.Options
 ): CircuitBreaker<any[], any> {
-  const _breaker = new CircuitBreaker(asyncFunction, options);
-  const _name = options.name || 'UnnamedBreaker';
+  const breaker = new CircuitBreaker(asyncFunction, options);
+  const name = options.name || 'UnnamedBreaker';
 
   // Event listeners for monitoring
   breaker.on('open', () => {
@@ -90,16 +90,16 @@ export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<u
     console.log(`[CIRCUIT_BREAKER] 🚫 ${name} rejected request - circuit is OPEN`);
   });
 
-  return breaker; }
+  return breaker;
 }
 
 /**
  * Check if error is from circuit breaker being open
  */
-export function isCircuitBreakerOpen(error): boolean {
+export function isCircuitBreakerOpen(error: any): boolean {
   return (
     error &&
-    (error.code == 'EOPENBREAKER' ||
+    (error.code === 'EOPENBREAKER' ||
       error.message?.includes('Breaker is open') ||
       error.message?.includes('Circuit breaker is OPEN'))
   );
@@ -108,11 +108,11 @@ export function isCircuitBreakerOpen(error): boolean {
 /**
  * Format circuit breaker error for logging
  */
-export function formatCircuitBreakerError(error, serviceName: string): string {
+export function formatCircuitBreakerError(error: any, serviceName: string): string {
   if (isCircuitBreakerOpen(error)) {
-    return `[CIRCUIT_BREAKER] Circuit for ${serviceName} is OPEN. Job failed immediately to protect the system.`; }
+    return `[CIRCUIT_BREAKER] Circuit for ${serviceName} is OPEN. Job failed immediately to protect the system.`;
   }
-  return `[CIRCUIT_BREAKER] ${serviceName} error: ${error.message || error}`; }
+  return `[CIRCUIT_BREAKER] ${serviceName} error: ${error.message || error}`;
 }
 
 /**
@@ -127,13 +127,13 @@ export function getCircuitBreakerStats(breaker: CircuitBreaker): {
     isHealthy: boolean;
   };
 } {
-  const _stats = breaker.stats;
-  const _totalRequests = stats.fires;
-  const _errorPercentage = totalRequests > 0 ? (stats.failures / totalRequests) * 100 : 0;
+  const stats = breaker.stats;
+  const totalRequests = stats.fires;
+  const errorPercentage = totalRequests > 0 ? (stats.failures / totalRequests) * 100 : 0;
 
   return {
     state: breaker.opened ? 'OPEN' : breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
-  _stats,
+    stats,
     healthCheck: {
       requests: totalRequests,
       errorPercentage: Math.round(errorPercentage),

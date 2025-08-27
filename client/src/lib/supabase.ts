@@ -3,34 +3,34 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 let clientSupabaseInstance: SupabaseClient | null = null;
 
 // Função para criar o cliente Supabase para o lado do servidor (Express.js)
-export const _createServerSupabaseClient = () => {
-  const _supabaseUrl = process.env.SUPABASE_URL || '';
-  const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+export const createServerSupabaseClient = () => {
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables');
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey); }
+  return createClient(supabaseUrl, supabaseAnonKey);
 };
 
 // Função para criar ou retornar a instância única do cliente para o lado do cliente (React)
-export const _createClientSupabaseClient = () => {
+export const createClientSupabaseClient = () => {
   if (clientSupabaseInstance) {
-    return clientSupabaseInstance; }
+    return clientSupabaseInstance;
   }
 
   // Check if we're in a browser environment before accessing import.meta.env
   if (typeof window !== 'undefined') {
-    const _supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-    const _supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Missing Supabase environment variables');
     }
 
     clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
-    return clientSupabaseInstance; }
+    return clientSupabaseInstance;
   }
 
   // For server-side, create a basic client that won't be used
@@ -38,4 +38,4 @@ export const _createClientSupabaseClient = () => {
 };
 
 // Lazy export the singleton client instance for React components
-export const _getSupabase = () => createClientSupabaseClient();
+export const getSupabase = () => createClientSupabaseClient();

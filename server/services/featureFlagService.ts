@@ -1,13 +1,13 @@
 import {
-  _initialize,
+  initialize,
   isEnabled as unleashIsEnabled,
-  _startUnleash,
-  _getVariant,
+  startUnleash,
+  getVariant,
 } from 'unleash-client';
 import winston from 'winston';
 
 // Logger configurado para o serviço
-const _logger = winston.createLogger({
+const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   defaultMeta: { service: 'feature-flags' },
@@ -55,7 +55,7 @@ class FeatureFlagService {
         Authorization: process.env.UNLEASH_API_KEY || '*:development.unleash-insecure-api-token',
       },
       refreshInterval: 15000, // 15 segundos
-      disableMetrics: process.env.NODE_ENV == 'test',
+      disableMetrics: process.env.NODE_ENV === 'test',
     };
 
     // Flags de fallback para quando o serviço Unleash não estiver disponível
@@ -102,25 +102,25 @@ class FeatureFlagService {
 
     try {
       // Em modo teste ou quando UNLEASH_DISABLED=true, usa apenas fallback
-      if (process.env.NODE_ENV == 'test' || process.env.UNLEASH_DISABLED == 'true') {
+      if (process.env.NODE_ENV === 'test' || process.env.UNLEASH_DISABLED === 'true') {
         logger.info('Feature flags running in fallback mode');
         this.initialized = true;
         return;
       }
 
       // Inicializa o cliente Unleash
-      const _unleash = initialize({
-        url: this._config.url,
-        appName: this._config.appName,
-        environment: this._config.environment,
-        customHeaders: this._config.customHeaders,
-        refreshInterval: this._config.refreshInterval,
-        disableMetrics: this._config.disableMetrics,
+      const unleash = initialize({
+        url: this.config.url,
+        appName: this.config.appName,
+        environment: this.config.environment,
+        customHeaders: this.config.customHeaders,
+        refreshInterval: this.config.refreshInterval,
+        disableMetrics: this.config.disableMetrics,
       });
 
       // Aguarda conexão inicial
       await new Promise<void>((resolve, reject) => {
-        const _timeout = setTimeout(() => {
+        const timeout = setTimeout(() => {
           logger.warn('Unleash connection timeout, using fallback flags');
           resolve();
         }, 5000);
@@ -142,7 +142,7 @@ class FeatureFlagService {
       });
 
       this.initialized = true;
-      logger.info(`Feature flag service initialized for ${this._config.environment}`);
+      logger.info(`Feature flag service initialized for ${this.config.environment}`);
     } catch (error) {
       logger.error('Failed to initialize feature flags:', error);
       this.initialized = true; // Marca como inicializado para usar fallback
@@ -166,17 +166,17 @@ class FeatureFlagService {
     }
 
     // Merge contexto com padrão
-    const _fullContext = {
+    const fullContext = {
       ...this.defaultContext,
       ...context,
-      appName: this._config.appName,
-      environment: this._config.environment,
+      appName: this.config.appName,
+      environment: this.config.environment,
     };
 
     try {
       // Em modo fallback, retorna valor do mapa
-      if (process.env.NODE_ENV == 'test' || process.env.UNLEASH_DISABLED == 'true') {
-        const _fallbackValue = this.fallbackFlags.get(flagName) ?? false;
+      if (process.env.NODE_ENV === 'test' || process.env.UNLEASH_DISABLED === 'true') {
+        const fallbackValue = this.fallbackFlags.get(flagName) ?? false;
         logger.debug(`Flag ${flagName} (fallback): ${fallbackValue}`);
         return fallbackValue;
       }
@@ -218,20 +218,20 @@ class FeatureFlagService {
   /**
    * Obtém variante de uma flag (para A/B testing)
    */
-  async getVariant(flagName: string, context?: FeatureFlagContext): Promise<unknown> {
+  async getVariant(flagName: string, context?: FeatureFlagContext): Promise<any> {
     if (!this.initialized) {
       await this.init();
     }
 
-    const _fullContext = {
+    const fullContext = {
       ...this.defaultContext,
       ...context,
-      appName: this._config.appName,
-      environment: this._config.environment,
+      appName: this.config.appName,
+      environment: this.config.environment,
     };
 
     try {
-      if (process.env.NODE_ENV == 'test' || process.env.UNLEASH_DISABLED == 'true') {
+      if (process.env.NODE_ENV === 'test' || process.env.UNLEASH_DISABLED === 'true') {
         return { name: 'disabled', enabled: false };
       }
 
@@ -278,13 +278,13 @@ class FeatureFlagService {
 }
 
 // Singleton instance
-export const _featureFlagService = new FeatureFlagService();
+export const featureFlagService = new FeatureFlagService();
 
 // Export helper functions para uso direto
-export const _isEnabled = (flagName: string, context?: FeatureFlagContext) =>
+export const isEnabled = (flagName: string, context?: FeatureFlagContext) =>
   featureFlagService.isEnabled(flagName, context);
 
-export const _checkMultipleFlags = (flagNames: string[], context?: FeatureFlagContext) =>
+export const checkMultipleFlags = (flagNames: string[], context?: FeatureFlagContext) =>
   featureFlagService.checkMultiple(flagNames, context);
 
 export default featureFlagService;

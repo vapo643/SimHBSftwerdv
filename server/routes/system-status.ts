@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { adminService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/status', async (req, res) => {
   try {
-    const _result = await adminService.executeOperation('system_status', req.query);
-    res.json(_result);
-  } catch (error) {
+    const result = await adminService.executeOperation('system_status', req.query);
+    res.json(result);
+  } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

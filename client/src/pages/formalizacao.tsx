@@ -16,33 +16,33 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { getSupabase } from '@/lib/supabase';
 import {
-  _CheckCircle,
-  _Clock,
-  _FileText,
-  _AlertCircle,
-  _User,
-  _CreditCard,
-  _Download,
-  _Upload,
-  _Edit,
-  _Send,
-  _ArrowLeft,
-  _Calendar,
-  _DollarSign,
-  _Shield,
-  _Percent,
-  _Activity,
-  _Eye,
-  _MessageSquare,
-  _FileCheck,
-  _Signature,
-  _TrendingUp,
-  _Building2,
-  _Printer,
-  _Copy,
-  _QrCode,
-  _Barcode,
-  _RefreshCw,
+  CheckCircle,
+  Clock,
+  FileText,
+  AlertCircle,
+  User,
+  CreditCard,
+  Download,
+  Upload,
+  Edit,
+  Send,
+  ArrowLeft,
+  Calendar,
+  DollarSign,
+  Shield,
+  Percent,
+  Activity,
+  Eye,
+  MessageSquare,
+  FileCheck,
+  Signature,
+  TrendingUp,
+  Building2,
+  Printer,
+  Copy,
+  QrCode,
+  Barcode,
+  RefreshCw,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -127,7 +127,7 @@ interface Proposta {
 //            BOLETOS_EMITIDOS → BOLETOS_EMITIDOS
 //            pago → PAGAMENTO_CONFIRMADO
 
-const _updateFormalizacaoSchema = z.object({
+const updateFormalizacaoSchema = z.object({
   status: z
     .enum([
       'aprovado',
@@ -152,53 +152,53 @@ type UpdateFormalizacaoForm = z.infer<typeof updateFormalizacaoSchema>;
 
 function FormalizacaoList() {
   const [, setLocation] = useLocation();
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
 
   // Função para parsing defensivo de dados JSONB
-  const _parseJsonbField = (field, fieldName: string, propostaId: string) => {
+  const parseJsonbField = (field: any, fieldName: string, propostaId: string) => {
     // Se é null, undefined ou vazio, retornar objeto vazio
-    if (!field || field == 'null' || field == 'undefined') {
-      return {}; }
+    if (!field || field === 'null' || field === 'undefined') {
+      return {};
     }
 
-    if (typeof field == 'string' && field.trim() !== '') {
+    if (typeof field === 'string' && field.trim() !== '') {
       try {
-        return JSON.parse(field); }
+        return JSON.parse(field);
       } catch (e) {
         console.warn(`Erro ao fazer parse de ${fieldName} para proposta ${propostaId}:`, e);
-        return {}; }
+        return {};
       }
     }
 
     // Se já é um objeto, retornar como está
-    if (typeof field == 'object') {
-      return field || {}; }
+    if (typeof field === 'object') {
+      return field || {};
     }
 
-    return {}; }
+    return {};
   };
 
   const {
     data: propostas,
-  _isLoading,
-  _error,
+    isLoading,
+    error,
   } = useQuery<Proposta[]>({
     queryKey: ['/api/propostas/formalizacao'],
     queryFn: async () => {
       console.log('Fazendo requisição para /api/propostas/formalizacao');
-      const _response = await apiRequest('/api/propostas/formalizacao');
-      console.log('Resposta do endpoint formalizacao:',_response);
+      const response = await apiRequest('/api/propostas/formalizacao');
+      console.log('Resposta do endpoint formalizacao:', response);
 
       // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
-      const _propostsWithParsedData = (response as unknown[]).map((proposta) => ({
+      const propostsWithParsedData = (response as any[]).map((proposta: any) => ({
         ...proposta,
         cliente_data: parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id),
         condicoes_data: parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id),
       }));
 
       console.log('Propostas com dados parseados:', propostsWithParsedData);
-      return propostsWithParsedData; }
+      return propostsWithParsedData;
     },
   });
 
@@ -207,21 +207,21 @@ function FormalizacaoList() {
     console.error('Erro na query de formalização:', error);
   }
 
-  const _formatCurrency = (value) => {
-    const _numValue = typeof value == 'string' ? parseFloat(value) : value;
+  const formatCurrency = (value: string | number) => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(numValue);
   };
 
-  const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'; }
-    return new Date(dateString).toLocaleDateString('pt-BR'); }
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const _getStatusColor = (status: string) => {
-    const _statusColors = {
+  const getStatusColor = (status: string) => {
+    const statusColors = {
       aprovado: 'bg-green-500',
       documentos_enviados: 'bg-blue-500',
       CCB_GERADA: 'bg-purple-500',
@@ -229,11 +229,11 @@ function FormalizacaoList() {
       BOLETOS_EMITIDOS: 'bg-orange-500',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
-  const _getStatusText = (status: string) => {
-    const _statusTexts = {
+  const getStatusText = (status: string) => {
+    const statusTexts = {
       aprovado: 'Aprovado',
       documentos_enviados: 'Documentos Enviados',
       CCB_GERADA: 'CCB Gerada',
@@ -241,15 +241,15 @@ function FormalizacaoList() {
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status; }
+    return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
   // Backend already handles all permission filtering
-  const _formalizacaoPropostas = propostas || [];
+  const formalizacaoPropostas = propostas || [];
 
   // 🔍 PAM V1.0 - LOG DE DIAGNÓSTICO #1: Dados recebidos
   console.log('🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual:', {
-  _isLoading,
+    isLoading,
     hasError: !!error,
     totalPropostas: formalizacaoPropostas.length,
     propostas: formalizacaoPropostas,
@@ -277,16 +277,16 @@ function FormalizacaoList() {
     );
   }
 
-  const _handleRefresh = () => {
+  const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
   };
 
-  const _getTitle = () => {
-    return 'Propostas em Formalização'; }
+  const getTitle = () => {
+    return 'Propostas em Formalização';
   };
 
-  const _getDescription = () => {
-    return 'Acompanhe o processo de formalização das propostas aprovadas'; }
+  const getDescription = () => {
+    return 'Acompanhe o processo de formalização das propostas aprovadas';
   };
 
   return (
@@ -318,7 +318,7 @@ function FormalizacaoList() {
             { status: 'ASSINATURA_CONCLUIDA', label: 'Assinados', color: 'bg-indigo-500' },
             { status: 'BOLETOS_EMITIDOS', label: 'Pronto Pag.', color: 'bg-orange-500' },
           ].map((item) => {
-            const _count = formalizacaoPropostas.filter((p) => p.status == item.status).length;
+            const count = formalizacaoPropostas.filter((p) => p.status === item.status).length;
             return (
               <Card
                 key={item.status}
@@ -397,15 +397,15 @@ function FormalizacaoList() {
                       onClick={() => setLocation(`/formalizacao/acompanhamento/${proposta.id}`)}
                       className="w-full"
                       variant={
-                        user?.role == 'ATENDENTE' &&
-                        (proposta.status == 'aprovado' ||
-                          proposta.status == 'documentos_enviados')
+                        user?.role === 'ATENDENTE' &&
+                        (proposta.status === 'aprovado' ||
+                          proposta.status === 'documentos_enviados')
                           ? 'default'
                           : 'outline'
                       }
                     >
-                      {user?.role == 'ATENDENTE' &&
-                      (proposta.status == 'aprovado' || proposta.status == 'documentos_enviados')
+                      {user?.role === 'ATENDENTE' &&
+                      (proposta.status === 'aprovado' || proposta.status === 'documentos_enviados')
                         ? 'Ação Necessária'
                         : 'Acompanhar'}
                     </Button>
@@ -416,7 +416,7 @@ function FormalizacaoList() {
           })}
         </div>
 
-        {formalizacaoPropostas.length == 0 && (
+        {formalizacaoPropostas.length === 0 && (
           <div className="py-12 text-center">
             <FileText className="mx-auto mb-4 h-16 w-16 text-gray-400" />
             <p className="text-lg text-gray-500">Nenhuma proposta em formalização</p>
@@ -434,7 +434,7 @@ export default function Formalizacao() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<'timeline' | 'documents' | 'contracts'>('timeline');
   const { toast } = useToast();
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   const [showCcbViewer, setShowCcbViewer] = useState(false);
@@ -449,7 +449,7 @@ export default function Formalizacao() {
   interface InterBoletoResponse {
     totalCriados?: number;
     codigoSolicitacao?: string;
-    boletos?: unknown[];
+    boletos?: any[];
   }
 
   interface CCBResponse {
@@ -501,16 +501,16 @@ export default function Formalizacao() {
     isLoading: true,
   });
 
-  const _propostaId = params?.id;
+  const propostaId = params?.id;
 
   // Função para verificar automaticamente status do carnê
-  const _checkCarneStatus = async () => {
+  const checkCarneStatus = async () => {
     if (!propostaId) return;
 
     setCarneStatus((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      const _response = (await apiRequest(`/api/propostas/${propostaId}/carne-status`)) as {
+      const response = (await apiRequest(`/api/propostas/${propostaId}/carne-status`)) as {
         carneExists: boolean;
         url?: string;
         fileName?: string;
@@ -549,13 +549,13 @@ export default function Formalizacao() {
 
   const {
     data: proposta,
-  _isLoading,
-  _refetch,
+    isLoading,
+    refetch,
   } = useQuery<Proposta>({
     queryKey: ['/api/propostas', propostaId, 'formalizacao'],
     queryFn: async (): Promise<Proposta> => {
-      const _response = (await apiRequest(`/api/propostas/${propostaId}/formalizacao`)) as Proposta;
-      return response; }
+      const response = (await apiRequest(`/api/propostas/${propostaId}/formalizacao`)) as Proposta;
+      return response;
     },
     enabled: !!propostaId,
     staleTime: 1 * 60 * 1000, // Cache por 1 minuto
@@ -563,28 +563,28 @@ export default function Formalizacao() {
   });
 
   // Função para verificar status do Storage
-  const _checkStorageStatus = async () => {
+  const checkStorageStatus = async () => {
     if (!propostaId) return;
 
     setCheckingStorage(true);
     try {
-      const _response = (await apiRequest(`/api/propostas/${propostaId}/storage-status`)) as unknown;
+      const response = (await apiRequest(`/api/propostas/${propostaId}/storage-status`)) as any;
 
       // Mapear resposta da API para o formato esperado
-      const _totalBoletos = response.totalParcelas || 0;
-      const _boletosInStorage = response.fileCount || 0;
-      const _hasCarnet = response.carneExists || false;
-      const _carnetUrl = response.carneUrl || null;
+      const totalBoletos = response.totalParcelas || 0;
+      const boletosInStorage = response.fileCount || 0;
+      const hasCarnet = response.carneExists || false;
+      const carnetUrl = response.carneUrl || null;
 
       // Determinar estados baseados no syncStatus
-      const _needsSync = response.syncStatus == 'nenhum';
-      const _needsCorrection = response.syncStatus == 'incompleto';
+      const needsSync = response.syncStatus === 'nenhum';
+      const needsCorrection = response.syncStatus === 'incompleto';
 
       // Calcular boletos faltantes
       const missingBoletos: string[] = [];
       if (response.boletosNoStorage && totalBoletos > 0) {
-        for (let _i = 1; i <= totalBoletos; i++) {
-          const _boletoId = `boleto-${i}`;
+        for (let i = 1; i <= totalBoletos; i++) {
+          const boletoId = `boleto-${i}`;
           if (!response.boletosNoStorage.includes(boletoId)) {
             missingBoletos.push(boletoId);
           }
@@ -592,13 +592,13 @@ export default function Formalizacao() {
       }
 
       setStorageStatus({
-  _totalBoletos,
-  _boletosInStorage,
-  _missingBoletos,
-  _hasCarnet,
-  _carnetUrl,
-  _needsSync,
-  _needsCorrection,
+        totalBoletos,
+        boletosInStorage,
+        missingBoletos,
+        hasCarnet,
+        carnetUrl,
+        needsSync,
+        needsCorrection,
       });
 
       // Se carnê existe, atualizar estado
@@ -613,10 +613,10 @@ export default function Formalizacao() {
         setCarneTotalBoletos(totalBoletos);
       }
 
-      return response; }
+      return response;
     } catch (error) {
       console.error('[STORAGE STATUS] Erro ao verificar status:', error);
-      return null; }
+      return null;
     } finally {
       setCheckingStorage(false);
     }
@@ -626,18 +626,18 @@ export default function Formalizacao() {
   const { data: collectionsData } = useQuery<any[]>({
     queryKey: ['/api/inter/collections', propostaId],
     queryFn: async (): Promise<any[]> => {
-      if (!propostaId) return []; }
+      if (!propostaId) return [];
       console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
-      const _response = (await apiRequest(`/api/inter/collections/${propostaId}`)) as unknown[];
+      const response = (await apiRequest(`/api/inter/collections/${propostaId}`)) as any[];
       console.log(
-        `[INTER QUERY] Boletos encontrados: ${Array.isArray(_response) ? response.length : 0}`
+        `[INTER QUERY] Boletos encontrados: ${Array.isArray(response) ? response.length : 0}`
       );
-      return Array.isArray(_response) ? response : []; }
+      return Array.isArray(response) ? response : [];
     },
     enabled:
       !!propostaId &&
       !!proposta &&
-      (proposta?.status == 'ASSINATURA_CONCLUIDA' || proposta?.interBoletoGerado),
+      (proposta?.status === 'ASSINATURA_CONCLUIDA' || proposta?.interBoletoGerado),
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos para evitar chamadas excessivas
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
     retry: 1, // Reduzir tentativas de retry
@@ -657,7 +657,7 @@ export default function Formalizacao() {
     }
   }, [proposta, propostaId, collectionsData]);
 
-  const _form = useForm<UpdateFormalizacaoForm>({
+  const form = useForm<UpdateFormalizacaoForm>({
     resolver: zodResolver(updateFormalizacaoSchema),
     defaultValues: {
       status: proposta?.status as
@@ -674,13 +674,13 @@ export default function Formalizacao() {
     },
   });
 
-  const _updateFormalizacao = useMutation({
+  const updateFormalizacao = useMutation({
     mutationFn: async (data: UpdateFormalizacaoForm) => {
-      const _response = await apiRequest(`/api/propostas/${propostaId}`, {
+      const response = await apiRequest(`/api/propostas/${propostaId}`, {
         method: 'PATCH',
-        body: JSON.stringify(_data),
+        body: JSON.stringify(data),
       });
-      return response; }
+      return response;
     },
     onSuccess: () => {
       toast({
@@ -704,33 +704,33 @@ export default function Formalizacao() {
     },
   });
 
-  const _formatCurrency = (value) => {
-    const _numValue = typeof value == 'string' ? parseFloat(value) : value;
+  const formatCurrency = (value: string | number) => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(numValue);
   };
 
-  const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'; }
-    return new Date(dateString).toLocaleDateString('pt-BR'); }
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const _formatDateTime = (dateString: string) => {
-    if (!dateString) return 'N/A'; }
-    return new Date(dateString).toLocaleString('pt-BR'); }
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('pt-BR');
   };
 
   // Função para gerar CCB
-  const _generateCCB = async (propostaId: string) => {
+  const generateCCB = async (propostaId: string) => {
     try {
       toast({
         title: 'Gerando CCB',
         description: 'Aguarde, gerando CCB com todos os dados da proposta...',
       });
 
-      const _response = (await apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, {
+      const response = (await apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, {
         method: 'POST',
       })) as { success?: boolean; message?: string };
 
@@ -753,10 +753,10 @@ export default function Formalizacao() {
   };
 
   // Função para visualizar CCB
-  const _viewCCB = async (propostaId: string) => {
+  const viewCCB = async (propostaId: string) => {
     try {
       // ✅ CORREÇÃO: Usar endpoint de formalização padrão
-      const _response = (await apiRequest(`/api/formalizacao/${propostaId}/ccb`)) as {
+      const response = (await apiRequest(`/api/formalizacao/${propostaId}/ccb`)) as {
         status?: string;
         publicUrl?: string;
       };
@@ -783,7 +783,7 @@ export default function Formalizacao() {
   };
 
   // Função para enviar CCB para ClickSign
-  const _sendToClickSign = async (propostaId: string) => {
+  const sendToClickSign = async (propostaId: string) => {
     setLoadingClickSign(true);
     try {
       toast({
@@ -791,7 +791,7 @@ export default function Formalizacao() {
         description: 'Preparando CCB para assinatura eletrônica...',
       });
 
-      const _response = (await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
+      const response = (await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
         method: 'POST',
       })) as { success?: boolean; signUrl?: string; envelopeId?: string };
 
@@ -804,7 +804,7 @@ export default function Formalizacao() {
         await checkClickSignStatus(propostaId);
         refetch();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao enviar para ClickSign:', error);
       toast({
         title: 'Erro',
@@ -817,16 +817,16 @@ export default function Formalizacao() {
   };
 
   // Função para consultar status ClickSign
-  const _checkClickSignStatus = async (propostaId: string): Promise<ClickSignData | null> => {
+  const checkClickSignStatus = async (propostaId: string): Promise<ClickSignData | null> => {
     try {
       console.log('🔍 [CLICKSIGN] Consultando status para proposta:', propostaId);
-      const _response = (await apiRequest(`/api/clicksign/status/${propostaId}`)) as ClickSignData;
-      console.log('📡 [CLICKSIGN] Status retornado:',_response);
-      setClickSignData(_response);
-      return response; }
+      const response = (await apiRequest(`/api/clicksign/status/${propostaId}`)) as ClickSignData;
+      console.log('📡 [CLICKSIGN] Status retornado:', response);
+      setClickSignData(response);
+      return response;
     } catch (error) {
       console.error('❌ [CLICKSIGN] Erro ao consultar status:', error);
-      return null; }
+      return null;
     }
   };
 
@@ -837,7 +837,7 @@ export default function Formalizacao() {
     enabled:
       !!propostaId &&
       !!proposta &&
-      (proposta?.status == 'CCB_GERADA' || proposta?.status == 'AGUARDANDO_ASSINATURA'),
+      (proposta?.status === 'CCB_GERADA' || proposta?.status === 'AGUARDANDO_ASSINATURA'),
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
     retry: 1, // Reduzir tentativas
@@ -859,8 +859,8 @@ export default function Formalizacao() {
 
     console.log('🔄 [REALTIME] Configurando escuta para proposta:', propostaId);
 
-    const _supabase = getSupabase();
-    const _channel = supabase
+    const supabase = getSupabase();
+    const channel = supabase
       .channel(`propostas-changes-${propostaId}`)
       .on(
         'postgres_changes',
@@ -873,7 +873,7 @@ export default function Formalizacao() {
         (payload) => {
           console.log('📡 [REALTIME] Evento recebido:', payload);
 
-          if (payload.eventType == 'UPDATE') {
+          if (payload.eventType === 'UPDATE') {
             console.log('✅ [REALTIME] Proposta atualizada, analisando mudanças...');
 
             // Atualizar dados da proposta (sempre necessário)
@@ -882,10 +882,10 @@ export default function Formalizacao() {
             });
 
             // 🎯 CORREÇÃO: Só invalidar ClickSign se status realmente mudou
-            const _oldData = payload.old;
-            const _newData = payload.new;
+            const oldData = payload.old;
+            const newData = payload.new;
 
-            if (oldData?.status !== newData?.status && newData?.status == 'ASSINATURA_CONCLUIDA') {
+            if (oldData?.status !== newData?.status && newData?.status === 'ASSINATURA_CONCLUIDA') {
               console.log('🔄 [REALTIME] Contrato foi assinado, atualizando timeline');
               queryClient.invalidateQueries({
                 queryKey: ['/api/clicksign/status', propostaId],
@@ -894,7 +894,7 @@ export default function Formalizacao() {
 
             // Atualizar boletos APENAS se status mudou para ASSINATURA_CONCLUIDA ou Inter foi ativado
             if (
-              newData?.status == 'ASSINATURA_CONCLUIDA' ||
+              newData?.status === 'ASSINATURA_CONCLUIDA' ||
               newData?.interBoletoGerado !== oldData?.interBoletoGerado
             ) {
               console.log('🔄 [REALTIME] Atualizando boletos Inter devido a mudança relevante');
@@ -908,13 +908,13 @@ export default function Formalizacao() {
         }
       )
       .subscribe((status) => {
-        if (status == 'SUBSCRIBED') {
+        if (status === 'SUBSCRIBED') {
           console.log('✅ [REALTIME] Conectado ao canal de atualizações');
-        } else if (status == 'CHANNEL_ERROR') {
+        } else if (status === 'CHANNEL_ERROR') {
           console.error('❌ [REALTIME] Erro ao conectar ao canal');
-        } else if (status == 'TIMED_OUT') {
+        } else if (status === 'TIMED_OUT') {
           console.error('⏱️ [REALTIME] Timeout ao conectar');
-        } else if (status == 'CLOSED') {
+        } else if (status === 'CLOSED') {
           console.log('🔌 [REALTIME] Canal fechado');
         }
       });
@@ -922,12 +922,12 @@ export default function Formalizacao() {
     // Cleanup ao desmontar o componente
     return () => {
       console.log('🧹 [REALTIME] Removendo canal de escuta');
-      _supabase.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
   }, [propostaId, queryClient, toast]);
 
-  const _getStatusProgress = (status: string) => {
-    const _statusMap = {
+  const getStatusProgress = (status: string) => {
+    const statusMap = {
       aprovado: 20,
       documentos_enviados: 40,
       CCB_GERADA: 60,
@@ -935,11 +935,11 @@ export default function Formalizacao() {
       BOLETOS_EMITIDOS: 90,
       pago: 100,
     };
-    return statusMap[status as keyof typeof statusMap] || 0; }
+    return statusMap[status as keyof typeof statusMap] || 0;
   };
 
-  const _getStatusColor = (status: string) => {
-    const _statusColors = {
+  const getStatusColor = (status: string) => {
+    const statusColors = {
       aprovado: 'bg-green-500',
       documentos_enviados: 'bg-blue-500',
       CCB_GERADA: 'bg-purple-500',
@@ -947,11 +947,11 @@ export default function Formalizacao() {
       BOLETOS_EMITIDOS: 'bg-orange-500',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
   };
 
-  const _getStatusText = (status: string) => {
-    const _statusTexts = {
+  const getStatusText = (status: string) => {
+    const statusTexts = {
       aprovado: 'Aprovado',
       documentos_enviados: 'Documentos Enviados',
       CCB_GERADA: 'CCB Gerada',
@@ -959,7 +959,7 @@ export default function Formalizacao() {
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status; }
+    return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
   // AGORA toda a lógica condicional pode vir aqui, APÓS todos os hooks
@@ -967,10 +967,10 @@ export default function Formalizacao() {
   // 🔧 CORREÇÃO CRÍTICA: Lógica condicional APÓS todos os hooks
   // Se não tem ID, mostrar lista de propostas
   if (!propostaId) {
-    return <FormalizacaoList />; }
+    return <FormalizacaoList />;
   }
 
-  const _getFormalizationSteps = (proposta: Proposta) => [
+  const getFormalizationSteps = (proposta: Proposta) => [
     {
       id: 1,
       title: 'Proposta Aprovada',
@@ -986,24 +986,24 @@ export default function Formalizacao() {
       description: 'Cédula de Crédito Bancário gerada automaticamente',
       icon: FileText,
       status:
-        proposta.status == 'CCB_GERADA' ||
-        proposta.status == 'AGUARDANDO_ASSINATURA' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS'
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS'
           ? 'completed'
           : 'current',
       date:
-        proposta.status == 'CCB_GERADA' ||
-        proposta.status == 'AGUARDANDO_ASSINATURA' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS'
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS'
           ? formatDate(proposta.createdAt)
           : 'Pendente',
       completed:
-        proposta.status == 'CCB_GERADA' ||
-        proposta.status == 'AGUARDANDO_ASSINATURA' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS',
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS',
       interactive: true,
       etapa: 'ccb_gerado' as const,
     },
@@ -1013,31 +1013,31 @@ export default function Formalizacao() {
       description: 'Documento enviado para ClickSign para assinatura',
       icon: Signature,
       status:
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA'
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA'
           ? 'completed'
-          : proposta.status == 'CCB_GERADA' ||
-              proposta.status == 'AGUARDANDO_ASSINATURA' ||
-              proposta.status == 'ASSINATURA_CONCLUIDA' ||
-              proposta.status == 'BOLETOS_EMITIDOS'
+          : proposta.status === 'CCB_GERADA' ||
+              proposta.status === 'AGUARDANDO_ASSINATURA' ||
+              proposta.status === 'ASSINATURA_CONCLUIDA' ||
+              proposta.status === 'BOLETOS_EMITIDOS'
             ? 'current'
             : 'pending',
       date:
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA'
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA'
           ? formatDate(proposta.dataAssinatura || proposta.createdAt)
           : 'Pendente',
       completed:
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA',
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA',
       interactive:
-        proposta.status == 'CCB_GERADA' ||
-        proposta.status == 'AGUARDANDO_ASSINATURA' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS',
+        proposta.status === 'CCB_GERADA' ||
+        proposta.status === 'AGUARDANDO_ASSINATURA' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS',
       etapa: 'assinatura_eletronica' as const,
     },
     {
@@ -1046,18 +1046,18 @@ export default function Formalizacao() {
       description: 'Validação biométrica concluída',
       icon: Shield,
       status:
-        proposta.biometriaConcluida || proposta.status == 'ASSINATURA_CONCLUIDA'
+        proposta.biometriaConcluida || proposta.status === 'ASSINATURA_CONCLUIDA'
           ? 'completed'
-          : proposta.status == 'ASSINATURA_CONCLUIDA' || proposta.status == 'BOLETOS_EMITIDOS'
+          : proposta.status === 'ASSINATURA_CONCLUIDA' || proposta.status === 'BOLETOS_EMITIDOS'
             ? 'current'
             : 'pending',
       date:
-        proposta.biometriaConcluida || proposta.status == 'ASSINATURA_CONCLUIDA'
+        proposta.biometriaConcluida || proposta.status === 'ASSINATURA_CONCLUIDA'
           ? formatDate(proposta.dataAssinatura || proposta.createdAt)
           : 'Pendente',
-      completed: proposta.biometriaConcluida || proposta.status == 'ASSINATURA_CONCLUIDA',
+      completed: proposta.biometriaConcluida || proposta.status === 'ASSINATURA_CONCLUIDA',
       interactive:
-        proposta.status == 'ASSINATURA_CONCLUIDA' || proposta.status == 'BOLETOS_EMITIDOS',
+        proposta.status === 'ASSINATURA_CONCLUIDA' || proposta.status === 'BOLETOS_EMITIDOS',
       etapa: 'biometria' as const,
     },
     {
@@ -1067,17 +1067,17 @@ export default function Formalizacao() {
       icon: Building2,
       status: proposta.interBoletoGerado
         ? 'completed'
-        : proposta.status == 'ASSINATURA_CONCLUIDA' ||
-            proposta.status == 'BOLETOS_EMITIDOS' ||
-            proposta.status == 'ASSINATURA_CONCLUIDA'
+        : proposta.status === 'ASSINATURA_CONCLUIDA' ||
+            proposta.status === 'BOLETOS_EMITIDOS' ||
+            proposta.status === 'ASSINATURA_CONCLUIDA'
           ? 'current'
           : 'pending',
       date: proposta.interBoletoGerado ? formatDate(proposta.createdAt) : 'Pendente',
       completed: proposta.interBoletoGerado || false,
       interactive:
-        proposta.status == 'ASSINATURA_CONCLUIDA' ||
-        proposta.status == 'BOLETOS_EMITIDOS' ||
-        proposta.status == 'ASSINATURA_CONCLUIDA',
+        proposta.status === 'ASSINATURA_CONCLUIDA' ||
+        proposta.status === 'BOLETOS_EMITIDOS' ||
+        proposta.status === 'ASSINATURA_CONCLUIDA',
       etapa: 'banco_inter' as const,
     },
     {
@@ -1086,18 +1086,18 @@ export default function Formalizacao() {
       description: 'Valor liberado e disponível para transferência',
       icon: CreditCard,
       status:
-        proposta.status == 'BOLETOS_EMITIDOS'
+        proposta.status === 'BOLETOS_EMITIDOS'
           ? 'current'
-          : proposta.status == 'PAGAMENTO_CONFIRMADO'
+          : proposta.status === 'PAGAMENTO_CONFIRMADO'
             ? 'completed'
             : 'pending',
       date: proposta.dataPagamento ? formatDate(proposta.dataPagamento) : 'Pendente',
-      completed: proposta.status == 'PAGAMENTO_CONFIRMADO',
+      completed: proposta.status === 'PAGAMENTO_CONFIRMADO',
     },
   ];
 
-  const _onSubmit = (data: UpdateFormalizacaoForm) => {
-    updateFormalizacao.mutate(_data);
+  const onSubmit = (data: UpdateFormalizacaoForm) => {
+    updateFormalizacao.mutate(data);
   };
 
   if (isLoading) {
@@ -1132,16 +1132,16 @@ export default function Formalizacao() {
     );
   }
 
-  const _formalizationSteps = getFormalizationSteps(proposta);
+  const formalizationSteps = getFormalizationSteps(proposta);
 
   // Título unificado para todos os roles
-  const _getTitle = () => {
-    return `Formalização - Proposta #${proposta.id}`; }
+  const getTitle = () => {
+    return `Formalização - Proposta #${proposta.id}`;
   };
 
   // Destino unificado do botão voltar
-  const _getBackLocation = () => {
-    return '/formalizacao'; }
+  const getBackLocation = () => {
+    return '/formalizacao';
   };
 
   // 🔧 SEGURANÇA: Verificação de permissão agora é feita no BACKEND via RLS
@@ -1199,18 +1199,18 @@ export default function Formalizacao() {
                 <button
                   onClick={() => setActiveTab('timeline')}
                   className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
-                    activeTab == 'timeline'
+                    activeTab === 'timeline'
                       ? 'border-blue-400 text-blue-400'
                       : 'border-transparent text-gray-400 hover:text-gray-200'
                   }`}
                 >
                   <Activity className="h-4 w-4" />
-                  {user?.role == 'ATENDENTE' ? 'Progresso' : 'Timeline'}
+                  {user?.role === 'ATENDENTE' ? 'Progresso' : 'Timeline'}
                 </button>
                 <button
                   onClick={() => setActiveTab('documents')}
                   className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
-                    activeTab == 'documents'
+                    activeTab === 'documents'
                       ? 'border-blue-400 text-blue-400'
                       : 'border-transparent text-gray-400 hover:text-gray-200'
                   }`}
@@ -1223,7 +1223,7 @@ export default function Formalizacao() {
                   <button
                     onClick={() => setActiveTab('contracts')}
                     className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
-                      activeTab == 'contracts'
+                      activeTab === 'contracts'
                         ? 'border-blue-400 text-blue-400'
                         : 'border-transparent text-gray-400 hover:text-gray-200'
                     }`}
@@ -1241,7 +1241,7 @@ export default function Formalizacao() {
           {/* Main Content */}
           <div className="space-y-6 lg:col-span-2">
             {/* Timeline Tab */}
-            {activeTab == 'timeline' && (
+            {activeTab === 'timeline' && (
               <Card className="border-gray-700 bg-gray-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
@@ -1252,14 +1252,14 @@ export default function Formalizacao() {
                 <CardContent>
                   <div className="space-y-6">
                     {formalizationSteps.map((step, index) => {
-                      const _Icon = step.icon;
-                      const _isCompleted = step.completed;
-                      const _isCurrent = step.status == 'current';
+                      const Icon = step.icon;
+                      const isCompleted = step.completed;
+                      const isCurrent = step.status === 'current';
 
                       // Se é uma etapa interativa, mostra o controle (independente do role)
                       if (step.interactive && step.etapa) {
                         // Para a etapa de CCB, mostrar o CCBViewer
-                        if (step.etapa == 'ccb_gerado') {
+                        if (step.etapa === 'ccb_gerado') {
                           return (
                             <div key={step.id} className="mb-4">
                               <CCBViewer
@@ -1272,11 +1272,11 @@ export default function Formalizacao() {
 
                         // Para a etapa de assinatura eletrônica, mostrar interface customizada
                         if (
-                          step.etapa == 'assinatura_eletronica' &&
-                          (proposta.status == 'CCB_GERADA' ||
-                            proposta.status == 'AGUARDANDO_ASSINATURA' ||
-                            proposta.status == 'ASSINATURA_CONCLUIDA' ||
-                            proposta.status == 'BOLETOS_EMITIDOS')
+                          step.etapa === 'assinatura_eletronica' &&
+                          (proposta.status === 'CCB_GERADA' ||
+                            proposta.status === 'AGUARDANDO_ASSINATURA' ||
+                            proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                            proposta.status === 'BOLETOS_EMITIDOS')
                         ) {
                           return (
                             <div key={step.id} className="mb-4">
@@ -1298,8 +1298,8 @@ export default function Formalizacao() {
                                 />
 
                                 {/* 🎯 ESTADO INICIAL: Botão azul quando CCB gerada mas sem assinatura */}
-                                {(proposta.status == 'CCB_GERADA' ||
-                                  proposta.status == 'AGUARDANDO_ASSINATURA') &&
+                                {(proposta.status === 'CCB_GERADA' ||
+                                  proposta.status === 'AGUARDANDO_ASSINATURA') &&
                                   !clickSignData?.signUrl &&
                                   !initialClickSignData?.signUrl && (
                                     <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
@@ -1321,7 +1321,7 @@ export default function Formalizacao() {
                                               '🚀 [CLICKSIGN] Enviando CCB para proposta:',
                                               proposta.id
                                             );
-                                            const _response = (await apiRequest(
+                                            const response = (await apiRequest(
                                               `/api/propostas/${proposta.id}/clicksign/enviar`,
                                               {
                                                 method: 'POST',
@@ -1332,14 +1332,14 @@ export default function Formalizacao() {
                                               '✅ [CLICKSIGN] Resposta recebida:',
                                               response
                                             );
-                                            setClickSignData(_response);
+                                            setClickSignData(response);
 
                                             toast({
                                               title: 'Sucesso',
                                               description:
                                                 'Contrato enviado para ClickSign com sucesso!',
                                             });
-                                          } catch (error) {
+                                          } catch (error: any) {
                                             console.error('❌ [CLICKSIGN] Erro ao enviar:', error);
                                             toast({
                                               title: 'Erro',
@@ -1371,8 +1371,8 @@ export default function Formalizacao() {
                                   )}
 
                                 {/* ✅ CONTRATO ASSINADO: Mostrar confirmação */}
-                                {(proposta.status == 'ASSINATURA_CONCLUIDA' ||
-                                  proposta.status == 'BOLETOS_EMITIDOS') && (
+                                {(proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                                  proposta.status === 'BOLETOS_EMITIDOS') && (
                                   <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                     <div className="mb-3 flex items-center">
                                       <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
@@ -1392,8 +1392,8 @@ export default function Formalizacao() {
                                 {(clickSignData?.signUrl ||
                                   initialClickSignData?.signUrl ||
                                   proposta.clicksignSignUrl) &&
-                                  (proposta.status == 'CCB_GERADA' ||
-                                    proposta.status == 'AGUARDANDO_ASSINATURA') && (
+                                  (proposta.status === 'CCB_GERADA' ||
+                                    proposta.status === 'AGUARDANDO_ASSINATURA') && (
                                     <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                       <div className="mb-3 flex items-center">
                                         <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
@@ -1420,7 +1420,7 @@ export default function Formalizacao() {
                                         <Button
                                           size="sm"
                                           onClick={() => {
-                                            const _linkUrl =
+                                            const linkUrl =
                                               clickSignData?.signUrl ||
                                               initialClickSignData?.signUrl ||
                                               proposta.clicksignSignUrl ||
@@ -1459,7 +1459,7 @@ export default function Formalizacao() {
                                                 clickSignData
                                               );
 
-                                              const _response = (await apiRequest(
+                                              const response = (await apiRequest(
                                                 `/api/propostas/${proposta.id}/clicksign/regenerar`,
                                                 {
                                                   method: 'POST',
@@ -1472,7 +1472,7 @@ export default function Formalizacao() {
                                               );
 
                                               // 🎯 CORREÇÃO CRÍTICA: Preservar o link na tela
-                                              setClickSignData(_response);
+                                              setClickSignData(response);
 
                                               toast({
                                                 title: '✅ Link Regenerado',
@@ -1486,7 +1486,7 @@ export default function Formalizacao() {
                                                 ['/api/clicksign/status', propostaId],
                                                 response
                                               );
-                                            } catch (error) {
+                                            } catch (error: any) {
                                               console.error(
                                                 '❌ [CLICKSIGN] Erro ao regenerar:',
                                                 error
@@ -1530,10 +1530,10 @@ export default function Formalizacao() {
 
                         // Para a etapa do Banco Inter, mostrar interface customizada
                         if (
-                          step.etapa == 'banco_inter' &&
-                          (proposta.status == 'ASSINATURA_CONCLUIDA' ||
-                            proposta.status == 'BOLETOS_EMITIDOS' ||
-                            proposta.status == 'ASSINATURA_CONCLUIDA')
+                          step.etapa === 'banco_inter' &&
+                          (proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                            proposta.status === 'BOLETOS_EMITIDOS' ||
+                            proposta.status === 'ASSINATURA_CONCLUIDA')
                         ) {
                           return (
                             <div key={step.id} className="mb-4">
@@ -1553,7 +1553,7 @@ export default function Formalizacao() {
                                     ao cliente.
                                   </p>
 
-                                  {(!collectionsData || collectionsData.length == 0) &&
+                                  {(!collectionsData || collectionsData.length === 0) &&
                                   !interBoletoData &&
                                   !proposta.interBoletoGerado ? (
                                     // Botão para gerar boletos
@@ -1562,11 +1562,11 @@ export default function Formalizacao() {
                                         setLoadingInter(true);
                                         try {
                                           // Preparar dados para a API do Inter
-                                          const _dataVencimento = new Date();
+                                          const dataVencimento = new Date();
                                           dataVencimento.setDate(dataVencimento.getDate() + 5); // Vencimento em 5 dias
 
                                           // Aviso se dados de endereço estão incompletos
-                                          const _enderecoIncompleto =
+                                          const enderecoIncompleto =
                                             !proposta.cliente_data?.endereco ||
                                             !proposta.cliente_data?.numero ||
                                             !proposta.cliente_data?.bairro ||
@@ -1580,7 +1580,7 @@ export default function Formalizacao() {
                                             );
                                           }
 
-                                          const _requestData = {
+                                          const requestData = {
                                             proposalId: proposta.id,
                                             valorTotal: proposta.condicoes_data?.valor || 0,
                                             dataVencimento: dataVencimento
@@ -1610,7 +1610,7 @@ export default function Formalizacao() {
                                             requestData
                                           );
 
-                                          const _response = (await apiRequest(
+                                          const response = (await apiRequest(
                                             '/api/inter/collections',
                                             {
                                               method: 'POST',
@@ -1618,7 +1618,7 @@ export default function Formalizacao() {
                                             }
                                           )) as InterBoletoResponse;
 
-                                          console.log('[INTER] Resposta da API:',_response);
+                                          console.log('[INTER] Resposta da API:', response);
 
                                           toast({
                                             title: 'Sucesso',
@@ -1642,15 +1642,15 @@ export default function Formalizacao() {
                                               ],
                                             }),
                                           ]);
-                                        } catch (error) {
+                                        } catch (error: any) {
                                           console.error('[INTER] Erro ao gerar boleto:', error);
 
                                           // Verificar se é erro de boleto duplicado
                                           if (
-                                            error.status == 409 ||
-                                            error.response?.status == 409
+                                            error.status === 409 ||
+                                            error.response?.status === 409
                                           ) {
-                                            const _existingCollections =
+                                            const existingCollections =
                                               error.response?.data?.existingCollections || [];
                                             toast({
                                               title: 'Boletos já existentes',
@@ -1786,12 +1786,12 @@ export default function Formalizacao() {
                                                         });
 
                                                         // Chamar endpoint de correção
-                                                        const _response = await apiRequest(
+                                                        const response = await apiRequest(
                                                           `/api/propostas/${proposta.id}/corrigir-sincronizacao`,
                                                           { method: 'POST' }
                                                         );
 
-                                                        const _data = response as unknown;
+                                                        const data = response as any;
                                                         if (data.success) {
                                                           toast({
                                                             title: 'Correção iniciada',
@@ -1803,7 +1803,7 @@ export default function Formalizacao() {
                                                             await checkStorageStatus();
                                                           }, 3000);
                                                         }
-                                                      } catch (error) {
+                                                      } catch (error: any) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
@@ -1836,7 +1836,7 @@ export default function Formalizacao() {
                                               if (
                                                 !carneStatus.exists &&
                                                 !carneStatus.isLoading &&
-                                                storageStatus?.boletosInStorage ==
+                                                storageStatus?.boletosInStorage ===
                                                   storageStatus?.totalBoletos
                                               ) {
                                                 return (
@@ -1854,12 +1854,12 @@ export default function Formalizacao() {
                                                         });
 
                                                         // Chamar endpoint de geração de carnê
-                                                        const _response = await apiRequest(
+                                                        const response = await apiRequest(
                                                           `/api/propostas/${proposta.id}/gerar-carne`,
                                                           { method: 'POST' }
                                                         );
 
-                                                        const _data = response as unknown;
+                                                        const data = response as any;
                                                         if (data.success) {
                                                           toast({
                                                             title: 'Carnê gerado!',
@@ -1871,7 +1871,7 @@ export default function Formalizacao() {
                                                           await checkCarneStatus();
                                                           await checkStorageStatus();
                                                         }
-                                                      } catch (error) {
+                                                      } catch (error: any) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
@@ -1918,7 +1918,7 @@ export default function Formalizacao() {
                                                       });
 
                                                       // Sincronizar boletos
-                                                      const _response = await apiRequest(
+                                                      const response = await apiRequest(
                                                         `/api/propostas/${proposta.id}/sincronizar-boletos`,
                                                         {
                                                           method: 'POST',
@@ -1928,7 +1928,7 @@ export default function Formalizacao() {
                                                         }
                                                       );
 
-                                                      const _data = response as unknown;
+                                                      const data = response as any;
                                                       if (data.success) {
                                                         toast({
                                                           title: 'Sincronização concluída',
@@ -1938,7 +1938,7 @@ export default function Formalizacao() {
                                                         // Recarregar status
                                                         await checkStorageStatus();
                                                       }
-                                                    } catch (error) {
+                                                    } catch (error: any) {
                                                       toast({
                                                         title: 'Erro',
                                                         description:
@@ -1975,7 +1975,7 @@ export default function Formalizacao() {
                                             size="sm"
                                             onClick={() => {
                                               // Download do carnê via URL assinada
-                                              const _link = document.createElement('a');
+                                              const link = document.createElement('a');
                                               link.href = carneUrl;
                                               link.download = `carne-proposta-${proposta.id}.pdf`;
                                               link.target = '_blank';
@@ -2001,7 +2001,7 @@ export default function Formalizacao() {
                                       {/* Listar todos os boletos gerados */}
                                       {collectionsData && collectionsData.length > 0 ? (
                                         <div className="space-y-3">
-                                          {collectionsData.map((boleto, index: number) => (
+                                          {collectionsData.map((boleto: any, index: number) => (
                                             <div
                                               key={boleto.id || index}
                                               className="rounded-lg border border-gray-700 bg-gray-800 p-4"
@@ -2026,14 +2026,14 @@ export default function Formalizacao() {
                                                 </div>
                                                 <Badge
                                                   variant={
-                                                    boleto.situacao == 'RECEBIDO'
+                                                    boleto.situacao === 'RECEBIDO'
                                                       ? 'default'
-                                                      : boleto.situacao == 'VENCIDO'
+                                                      : boleto.situacao === 'VENCIDO'
                                                         ? 'destructive'
                                                         : 'secondary'
                                                   }
                                                   className={
-                                                    boleto.situacao == 'RECEBIDO'
+                                                    boleto.situacao === 'RECEBIDO'
                                                       ? 'border-green-700 bg-green-900 text-green-300'
                                                       : ''
                                                   }
@@ -2095,7 +2095,7 @@ export default function Formalizacao() {
                                                         size="sm"
                                                         variant="ghost"
                                                         onClick={() => {
-                                                          const _codigo =
+                                                          const codigo =
                                                             boleto.linhaDigitavel ||
                                                             boleto.codigoBarras;
                                                           navigator.clipboard.writeText(codigo);
@@ -2134,8 +2134,8 @@ export default function Formalizacao() {
 
                                                       // Se o status ainda é EM_PROCESSAMENTO, avisar o usuário
                                                       if (
-                                                        boleto.situacao == 'EM_PROCESSAMENTO' ||
-                                                        boleto.situacao == 'CODIGO_INVALIDO'
+                                                        boleto.situacao === 'EM_PROCESSAMENTO' ||
+                                                        boleto.situacao === 'CODIGO_INVALIDO'
                                                       ) {
                                                         toast({
                                                           title: 'PDF temporariamente indisponível',
@@ -2149,7 +2149,7 @@ export default function Formalizacao() {
                                                           boleto.linhaDigitavel ||
                                                           boleto.codigoBarras
                                                         ) {
-                                                          const _codigo =
+                                                          const codigo =
                                                             boleto.linhaDigitavel ||
                                                             boleto.codigoBarras;
                                                           await navigator.clipboard.writeText(
@@ -2179,9 +2179,9 @@ export default function Formalizacao() {
                                                       const { TokenManager } = await import(
                                                         '@/lib/apiClient'
                                                       );
-                                                      const _tokenManager =
+                                                      const tokenManager =
                                                         TokenManager.getInstance();
-                                                      const _token =
+                                                      const token =
                                                         await tokenManager.getValidToken();
 
                                                       if (!token) {
@@ -2194,7 +2194,7 @@ export default function Formalizacao() {
                                                         `[PDF DOWNLOAD] Token obtido com sucesso (${token.length} caracteres)`
                                                       );
 
-                                                      const _response = await fetch(
+                                                      const response = await fetch(
                                                         `/api/inter/collections/${boleto.codigoSolicitacao}/pdf`,
                                                         {
                                                           method: 'GET',
@@ -2207,10 +2207,10 @@ export default function Formalizacao() {
                                                       );
 
                                                       if (response.ok) {
-                                                        const _blob = await response.blob();
-                                                        const _url =
+                                                        const blob = await response.blob();
+                                                        const url =
                                                           window.URL.createObjectURL(blob);
-                                                        const _a = document.createElement('a');
+                                                        const a = document.createElement('a');
                                                         a.href = url;
                                                         a.download = `boleto-${boleto.codigoSolicitacao}.pdf`;
                                                         document.body.appendChild(a);
@@ -2228,7 +2228,7 @@ export default function Formalizacao() {
                                                           `Erro ${response.status}: ${response.statusText}`
                                                         );
                                                       }
-                                                    } catch (error) {
+                                                    } catch (error: any) {
                                                       console.error('[PDF DOWNLOAD] Erro:', error);
 
                                                       // SEMPRE informar que o PDF está disponível e pode tentar novamente
@@ -2270,7 +2270,7 @@ export default function Formalizacao() {
                                               const { apiRequest } = await import(
                                                 '@/lib/queryClient'
                                               );
-                                              const _response = (await apiRequest(
+                                              const response = (await apiRequest(
                                                 `/api/inter/realtime-update/${proposta.id}`,
                                                 {
                                                   method: 'POST',
@@ -2316,23 +2316,23 @@ export default function Formalizacao() {
                                           onClick={async () => {
                                             try {
                                               // Usar dados das coleções já carregadas
-                                              const _collections = collectionsData || [];
+                                              const collections = collectionsData || [];
                                               if (collections.length > 0) {
                                                 // Abrir o PDF do primeiro boleto
-                                                const _firstCollection = collections[0];
+                                                const firstCollection = collections[0];
                                                 if (firstCollection.codigoSolicitacao) {
                                                   // Importar TokenManager para obter token válido
                                                   const { TokenManager } = await import(
                                                     '@/lib/apiClient'
                                                   );
-                                                  const _tokenManager = TokenManager.getInstance();
-                                                  const _token = await tokenManager.getValidToken();
+                                                  const tokenManager = TokenManager.getInstance();
+                                                  const token = await tokenManager.getValidToken();
 
                                                   if (!token) {
                                                     throw new Error('Não autenticado');
                                                   }
 
-                                                  const _response = await fetch(
+                                                  const response = await fetch(
                                                     `/api/inter/collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`,
                                                     {
                                                       headers: {
@@ -2342,9 +2342,9 @@ export default function Formalizacao() {
                                                   );
 
                                                   if (response.ok) {
-                                                    const _blob = await response.blob();
-                                                    const _url = window.URL.createObjectURL(blob);
-                                                    const _a = document.createElement('a');
+                                                    const blob = await response.blob();
+                                                    const url = window.URL.createObjectURL(blob);
+                                                    const a = document.createElement('a');
                                                     a.href = url;
                                                     a.download = `boleto-${firstCollection.seuNumero || firstCollection.codigoSolicitacao}.pdf`;
                                                     document.body.appendChild(a);
@@ -2388,12 +2388,12 @@ export default function Formalizacao() {
                                           onClick={async () => {
                                             try {
                                               // Buscar coleções para esta proposta
-                                              const _collections = collectionsData || [];
+                                              const collections = collectionsData || [];
                                               if (collections.length > 0) {
                                                 // Mostrar informações de todas as coleções
-                                                const _statusInfo = collections
+                                                const statusInfo = collections
                                                   .map(
-                                                    (col) =>
+                                                    (col: any) =>
                                                       `Parcela ${col.numeroParcela}: ${col.situacao || 'Aguardando'}`
                                                   )
                                                   .join('\n');
@@ -2470,7 +2470,7 @@ export default function Formalizacao() {
                             </div>
                           );
                         }
-                        return null; }
+                        return null;
                       }
 
                       // Caso contrário, mostra a timeline normal
@@ -2537,17 +2537,17 @@ export default function Formalizacao() {
                               )}
 
                               {/* Botões para CCB e ClickSign */}
-                              {step.id == 2 &&
-                                (proposta.status == 'CCB_GERADA' ||
-                                  proposta.status == 'AGUARDANDO_ASSINATURA' ||
-                                  proposta.status == 'ASSINATURA_CONCLUIDA' ||
-                                  proposta.status == 'BOLETOS_EMITIDOS') && (
+                              {step.id === 2 &&
+                                (proposta.status === 'CCB_GERADA' ||
+                                  proposta.status === 'AGUARDANDO_ASSINATURA' ||
+                                  proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                                  proposta.status === 'BOLETOS_EMITIDOS') && (
                                   <div className="mt-3">
                                     <Button
                                       onClick={async () => {
                                         try {
                                           // ✅ CORREÇÃO: Usar endpoint de formalização correto
-                                          const _response = (await apiRequest(
+                                          const response = (await apiRequest(
                                             `/api/formalizacao/${proposta.id}/ccb`
                                           )) as CCBResponse;
                                           if (!response.publicUrl) {
@@ -2579,9 +2579,9 @@ export default function Formalizacao() {
                                   </div>
                                 )}
 
-                              {step.id == 3 &&
-                                (proposta.status == 'CCB_GERADA' ||
-                                  proposta.status == 'AGUARDANDO_ASSINATURA') && (
+                              {step.id === 3 &&
+                                (proposta.status === 'CCB_GERADA' ||
+                                  proposta.status === 'AGUARDANDO_ASSINATURA') && (
                                   <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
                                     <div className="mb-3 flex items-center justify-between">
                                       <h5 className="font-medium text-blue-300">
@@ -2623,7 +2623,7 @@ export default function Formalizacao() {
                                             '🚀 [CLICKSIGN] Enviando CCB com biometria:',
                                             useBiometricAuth
                                           );
-                                          const _response = (await apiRequest(
+                                          const response = (await apiRequest(
                                             `/api/propostas/${proposta.id}/clicksign/enviar`,
                                             {
                                               method: 'POST',
@@ -2637,14 +2637,14 @@ export default function Formalizacao() {
                                             '✅ [CLICKSIGN] Resposta com biometria:',
                                             response
                                           );
-                                          setClickSignData(_response);
+                                          setClickSignData(response);
 
                                           toast({
                                             title: 'Sucesso',
                                             description:
                                               'Contrato enviado para ClickSign com sucesso!',
                                           });
-                                        } catch (error) {
+                                        } catch (error: any) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro no envio com biometria:',
                                             error
@@ -2678,7 +2678,7 @@ export default function Formalizacao() {
                                   </div>
                                 )}
 
-                              {(clickSignData || proposta.clicksignSignUrl) && step.id == 3 && (
+                              {(clickSignData || proposta.clicksignSignUrl) && step.id === 3 && (
                                 <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                   <div className="mb-3 flex items-center">
                                     <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
@@ -2701,7 +2701,7 @@ export default function Formalizacao() {
                                     <Button
                                       size="sm"
                                       onClick={() => {
-                                        const _linkUrl =
+                                        const linkUrl =
                                           clickSignData?.signUrl || proposta.clicksignSignUrl || '';
                                         navigator.clipboard.writeText(linkUrl);
                                         toast({
@@ -2737,7 +2737,7 @@ export default function Formalizacao() {
                                             clickSignData
                                           );
 
-                                          const _response = (await apiRequest(
+                                          const response = (await apiRequest(
                                             `/api/propostas/${proposta.id}/clicksign/regenerar`,
                                             {
                                               method: 'POST',
@@ -2750,22 +2750,22 @@ export default function Formalizacao() {
                                           );
 
                                           // 🎯 CORREÇÃO CRÍTICA: Preservar o link na tela
-                                          setClickSignData(_response);
+                                          setClickSignData(response);
 
                                           toast({
                                             title: 'Sucesso',
                                             description:
                                               'Novo link de assinatura gerado com sucesso!',
                                           });
-                                        } catch (error) {
+                                        } catch (error: any) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro ao regenerar (seção 2):',
                                             error
                                           );
                                           // Tratamento específico para erro de token ClickSign
                                           if (
-                                            error.response?.status == 401 &&
-                                            error.response?.data?.action ==
+                                            error.response?.status === 401 &&
+                                            error.response?.data?.action ===
                                               'UPDATE_CLICKSIGN_TOKEN'
                                           ) {
                                             toast({
@@ -2776,8 +2776,8 @@ export default function Formalizacao() {
                                               variant: 'destructive',
                                             });
                                           } else if (
-                                            error.response?.status == 400 &&
-                                            error.response?.data?.action ==
+                                            error.response?.status === 400 &&
+                                            error.response?.data?.action ===
                                               'CHECK_CLICKSIGN_SERVICE'
                                           ) {
                                             toast({
@@ -2832,7 +2832,7 @@ export default function Formalizacao() {
             )}
 
             {/* Documents Tab */}
-            {activeTab == 'documents' && (
+            {activeTab === 'documents' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -2846,10 +2846,10 @@ export default function Formalizacao() {
                     propostaId={proposta.id}
                     documents={[]}
                     ccbDocumentoUrl={
-                      proposta.status == 'CCB_GERADA' ||
-                      proposta.status == 'AGUARDANDO_ASSINATURA' ||
-                      proposta.status == 'ASSINATURA_CONCLUIDA' ||
-                      proposta.status == 'BOLETOS_EMITIDOS'
+                      proposta.status === 'CCB_GERADA' ||
+                      proposta.status === 'AGUARDANDO_ASSINATURA' ||
+                      proposta.status === 'ASSINATURA_CONCLUIDA' ||
+                      proposta.status === 'BOLETOS_EMITIDOS'
                         ? `/api/propostas/${proposta.id}/ccb-url`
                         : undefined
                     }
@@ -2859,7 +2859,7 @@ export default function Formalizacao() {
             )}
 
             {/* Contracts Tab */}
-            {activeTab == 'contracts' && (
+            {activeTab === 'contracts' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -3066,7 +3066,7 @@ export default function Formalizacao() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {proposta.status == 'aprovado' && (
+                  {proposta.status === 'aprovado' && (
                     <div className="rounded-md border border-blue-700 bg-blue-900/30 p-3">
                       <p className="text-sm font-medium text-blue-300">
                         Aguardando documentos adicionais
@@ -3076,7 +3076,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status == 'documentos_enviados' && (
+                  {proposta.status === 'documentos_enviados' && (
                     <div className="rounded-md border border-purple-700 bg-purple-900/30 p-3">
                       <p className="text-sm font-medium text-purple-300">Preparar contratos</p>
                       <p className="mt-1 text-sm text-purple-200">
@@ -3084,7 +3084,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status == 'CCB_GERADA' && (
+                  {proposta.status === 'CCB_GERADA' && (
                     <div className="rounded-md border border-indigo-700 bg-indigo-900/30 p-3">
                       <p className="text-sm font-medium text-indigo-300">Aguardando assinatura</p>
                       <p className="mt-1 text-sm text-indigo-200">
@@ -3092,7 +3092,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status == 'ASSINATURA_CONCLUIDA' && (
+                  {proposta.status === 'ASSINATURA_CONCLUIDA' && (
                     <div className="rounded-md border border-orange-700 bg-orange-900/30 p-3">
                       <p className="text-sm font-medium text-orange-300">Preparar pagamento</p>
                       <p className="mt-1 text-sm text-orange-200">
@@ -3100,7 +3100,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status == 'BOLETOS_EMITIDOS' && (
+                  {proposta.status === 'BOLETOS_EMITIDOS' && (
                     <div className="rounded-md border border-green-700 bg-green-900/30 p-3">
                       <p className="text-sm font-medium text-green-300">Liberar pagamento</p>
                       <p className="mt-1 text-sm text-green-200">
@@ -3108,7 +3108,7 @@ export default function Formalizacao() {
                       </p>
                     </div>
                   )}
-                  {proposta.status == 'PAGAMENTO_CONFIRMADO' && (
+                  {proposta.status === 'PAGAMENTO_CONFIRMADO' && (
                     <div className="rounded-md border border-green-700 bg-green-900/30 p-3">
                       <p className="text-sm font-medium text-green-300">Processo concluído</p>
                       <p className="mt-1 text-sm text-green-200">

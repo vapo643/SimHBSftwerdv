@@ -8,17 +8,17 @@ interface MaskedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   placeholder?: string;
 }
 
-const _MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
+const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
   ({ mask, value = '', onChange, placeholder, ...props }, ref) => {
     // Define helper functions first
-    const _applyMask = (inputValue: string, maskPattern: string): string => {
+    const applyMask = (inputValue: string, maskPattern: string): string => {
       // Remove all non-numeric characters
-      const _cleanValue = inputValue.replace(/\D/g, '');
-      let _formatted = '';
-      let _cleanIndex = 0;
+      const cleanValue = inputValue.replace(/\D/g, '');
+      let formatted = '';
+      let cleanIndex = 0;
 
-      for (let _i = 0; i < maskPattern.length && cleanIndex < cleanValue.length; i++) {
-        if (maskPattern[i] == '9') {
+      for (let i = 0; i < maskPattern.length && cleanIndex < cleanValue.length; i++) {
+        if (maskPattern[i] === '9') {
           formatted += cleanValue[cleanIndex];
           cleanIndex++;
         } else {
@@ -26,25 +26,25 @@ const _MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
         }
       }
 
-      return formatted; }
+      return formatted;
     };
 
-    const _formatValue = (val: string, maskPattern: string): string => {
-      if (!val) return ''; }
-      return applyMask(val, maskPattern); }
+    const formatValue = (val: string, maskPattern: string): string => {
+      if (!val) return '';
+      return applyMask(val, maskPattern);
     };
 
     // Now safely use formatValue in useState
     const [displayValue, setDisplayValue] = useState(formatValue(value, mask));
 
-    const _handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const _inputValue = e.target.value;
-      const _formatted = applyMask(inputValue, mask);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      const formatted = applyMask(inputValue, mask);
       setDisplayValue(formatted);
 
       if (onChange) {
         // Return clean value (numbers only) to the parent
-        const _cleanValue = inputValue.replace(/\D/g, '');
+        const cleanValue = inputValue.replace(/\D/g, '');
         onChange(cleanValue);
       }
     };

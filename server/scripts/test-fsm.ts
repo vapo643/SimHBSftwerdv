@@ -4,12 +4,12 @@
  */
 
 import {
-  _transitionTo,
-  _getPossibleTransitions,
-  _isFinalStatus,
-  _getTransitionGraphInfo,
-  _InvalidTransitionError,
-  _ProposalStatus,
+  transitionTo,
+  getPossibleTransitions,
+  isFinalStatus,
+  getTransitionGraphInfo,
+  InvalidTransitionError,
+  ProposalStatus,
 } from '../services/statusFsmService';
 
 console.log('🧪 Teste do Serviço FSM - Máquina de Estados Finitos');
@@ -17,19 +17,19 @@ console.log('='.repeat(60));
 
 // 1. Exibir informações do grafo
 console.log('\n📊 Informações do Grafo de Transições:');
-const _graphInfo = getTransitionGraphInfo();
+const graphInfo = getTransitionGraphInfo();
 console.log(`- Total de estados: ${graphInfo.totalStates}`);
 console.log(`- Estados finais: ${graphInfo.finalStates.join(', ')}`);
 
 // 2. Testar transições possíveis
 console.log('\n🔄 Transições Possíveis por Estado:');
 Object.values(ProposalStatus).forEach((status) => {
-  const _transitions = getPossibleTransitions(status);
-  const _isFinal = isFinalStatus(status);
+  const transitions = getPossibleTransitions(status);
+  const isFinal = isFinalStatus(status);
   console.log(`\n  ${status}:`);
   if (isFinal) {
     console.log(`    ⛔ ESTADO FINAL (sem transições)`);
-  } else if (transitions.length == 0) {
+  } else if (transitions.length === 0) {
     console.log(`    ⚠️ Sem transições definidas`);
   } else {
     transitions.forEach((t) => console.log(`    → ${t}`));
@@ -38,7 +38,7 @@ Object.values(ProposalStatus).forEach((status) => {
 
 // 3. Validar algumas transições válidas
 console.log('\n✅ Testando Transições Válidas:');
-const _validTransitions = [
+const validTransitions = [
   { from: ProposalStatus.RASCUNHO, to: ProposalStatus.APROVADO },
   { from: ProposalStatus.APROVADO, to: ProposalStatus.CCB_GERADA },
   { from: ProposalStatus.CCB_GERADA, to: ProposalStatus.AGUARDANDO_ASSINATURA },
@@ -46,14 +46,14 @@ const _validTransitions = [
 ];
 
 validTransitions.forEach(({ from, to }) => {
-  const _transitions = getPossibleTransitions(from);
-  const _isValid = transitions.includes(to);
+  const transitions = getPossibleTransitions(from);
+  const isValid = transitions.includes(to);
   console.log(`  ${from} → ${to}: ${isValid ? '✅ VÁLIDA' : '❌ INVÁLIDA'}`);
 });
 
 // 4. Validar algumas transições inválidas
 console.log('\n❌ Testando Transições Inválidas:');
-const _invalidTransitions = [
+const invalidTransitions = [
   { from: ProposalStatus.RASCUNHO, to: ProposalStatus.BOLETOS_EMITIDOS },
   { from: ProposalStatus.REJEITADO, to: ProposalStatus.APROVADO },
   { from: ProposalStatus.PAGAMENTO_AUTORIZADO, to: ProposalStatus.RASCUNHO },
@@ -61,8 +61,8 @@ const _invalidTransitions = [
 ];
 
 invalidTransitions.forEach(({ from, to }) => {
-  const _transitions = getPossibleTransitions(from);
-  const _isValid = transitions.includes(to);
+  const transitions = getPossibleTransitions(from);
+  const isValid = transitions.includes(to);
   console.log(`  ${from} → ${to}: ${isValid ? '✅ VÁLIDA' : '❌ INVÁLIDA (esperado)'}`);
 });
 

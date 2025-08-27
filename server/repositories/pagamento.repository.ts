@@ -5,15 +5,15 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import {
-  _propostas,
-  _users,
-  _profiles,
-  _lojas,
-  _produtos,
-  _interCollections,
-  _statusContextuais,
+  propostas,
+  users,
+  profiles,
+  lojas,
+  produtos,
+  interCollections,
+  statusContextuais,
   type Proposta,
   type User,
   type Loja,
@@ -39,7 +39,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     userRole?: string;
   }): Promise<any[]> {
     // Build conditions array
-    const _conditions = [
+    const conditions = [
       sql`${propostas.deletedAt} IS NULL`,
       // Proposals that have signed CCB or Inter Bank collections
       or(
@@ -55,29 +55,29 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
 
     // Apply date period filter
     if (filters.periodo) {
-      const _now = new Date();
+      const now = new Date();
       let startDate: Date;
       let endDate: Date;
 
       switch (filters.periodo) {
-        case 'hoje': {
+        case 'hoje':
           startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
           endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-          break; }
-        case 'semana': {
-          const _startOfWeek = new Date(now);
+          break;
+        case 'semana':
+          const startOfWeek = new Date(now);
           startOfWeek.setDate(now.getDate() - now.getDay());
           startOfWeek.setHours(0, 0, 0, 0);
-          const _endOfWeek = new Date(startOfWeek);
+          const endOfWeek = new Date(startOfWeek);
           endOfWeek.setDate(startOfWeek.getDate() + 6);
           endOfWeek.setHours(23, 59, 59, 999);
           startDate = startOfWeek;
           endDate = endOfWeek;
-          break; }
-        case 'mes': {
+          break;
+        case 'mes':
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-          break; }
+          break;
         default:
           startDate = new Date(0);
           endDate = new Date();
@@ -92,7 +92,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     }
 
     // Build single query with consolidated conditions
-    const _query = db
+    const query = db
       .select({
         proposta: propostas,
         loja: lojas,
@@ -106,7 +106,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(and(...conditions))
       .orderBy(desc(propostas.updatedAt));
 
-    return await query; }
+    return await query;
   }
 
   /**
@@ -139,7 +139,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
         )
       );
 
-    const _propostasComBoletos = await db
+    const propostasComBoletos = await db
       .select({
         count: sql<number>`count(DISTINCT ${interCollections.propostaId})`,
       })
@@ -158,7 +158,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
    * Get proposal by ID for payment
    */
   async getProposalForPayment(proposalId: string): Promise<any | undefined> {
-    const _result = await db
+    const result = await db
       .select({
         proposta: propostas,
         loja: lojas,
@@ -172,7 +172,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(and(eq(propostas.id, proposalId), sql`${propostas.deletedAt} IS NULL`))
       .limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -187,7 +187,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     valorLiquido: number;
     valorIOF: number;
     valorTAC: number;
-    contaBancaria: unknown;
+    contaBancaria: any;
     formaPagamento: string;
     loja: string;
     produto: string;
@@ -195,7 +195,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     userId: string;
   }): Promise<Proposta | undefined> {
     // Update proposal with payment information
-    const _result = await db
+    const result = await db
       .update(propostas)
       .set({
         valorTotalFinanciado: String(data.valorFinanciado),
@@ -212,7 +212,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, data.propostaId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -223,7 +223,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
-    const _result = await db
+    const result = await db
       .update(propostas)
       .set({
         status: status,
@@ -233,7 +233,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -244,17 +244,17 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
-    const _result = await db
+    const result = await db
       .update(propostas)
       .set({
-  _status,
+        status,
         userId: userId,
         updatedAt: new Date(),
       })
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -265,10 +265,10 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     statusAnterior: string;
     statusNovo: string;
     contexto: string;
-    metadata?: unknown;
+    metadata?: any;
     usuarioId?: string;
-  }): Promise<unknown> {
-    const _result = await db
+  }): Promise<any> {
+    const result = await db
       .insert(statusContextuais)
       .values({
         ...data,
@@ -278,7 +278,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       })
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -291,12 +291,12 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     loja?: string;
   }): Promise<any[]> {
     // Build conditions array
-    const _conditions = [sql`${propostas.deletedAt} IS NULL`];
+    const conditions = [sql`${propostas.deletedAt} IS NULL`];
 
     // Apply date range filter
     if (filters.dataInicio && filters.dataFim) {
-      const _startDate = new Date(filters.dataInicio);
-      const _endDate = new Date(filters.dataFim);
+      const startDate = new Date(filters.dataInicio);
+      const endDate = new Date(filters.dataFim);
       conditions.push(gte(propostas.createdAt, startDate), lte(propostas.createdAt, endDate));
     }
 
@@ -311,7 +311,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     }
 
     // Build single query with consolidated conditions
-    const _query = db
+    const query = db
       .select({
         proposta: propostas,
         loja: lojas,
@@ -325,21 +325,21 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(and(...conditions))
       .orderBy(desc(propostas.updatedAt));
 
-    return await query; }
+    return await query;
   }
 
   /**
    * Get all lojas for filters
    */
   async getAllLojas(): Promise<Loja[]> {
-    return await db.select().from(lojas).where(eq(lojas.isActive, true)); }
+    return await db.select().from(lojas).where(eq(lojas.isActive, true));
   }
 
   /**
    * Get all produtos for filters
    */
   async getAllProdutos(): Promise<Produto[]> {
-    return await db.select().from(produtos).where(eq(produtos.isActive, true)); }
+    return await db.select().from(produtos).where(eq(produtos.isActive, true));
   }
 
   /**
@@ -349,9 +349,9 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     propostaId: string,
     userId: string,
     acao: string,
-    detalhes: unknown
+    detalhes: any
   ): Promise<void> {
-    const _now = getBrasiliaTimestamp();
+    const now = getBrasiliaTimestamp();
     console.log(
       `[AUDITORIA PAGAMENTO] ${now} - Proposta: ${propostaId}, User: ${userId}, Ação: ${acao}`,
       detalhes
@@ -360,4 +360,4 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
   }
 }
 
-export const _pagamentoRepository = new PagamentoRepository();
+export const pagamentoRepository = new PagamentoRepository();

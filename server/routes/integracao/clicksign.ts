@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import type { AuthenticatedRequest } from '../../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
-// ==============================
+// =============================================
 // CIRCUIT BREAKER TEST ENDPOINTS - PAM V1.0
-// ==============================
+// =============================================
 
 // Endpoint que testa o circuit breaker real do ClickSignService
 router.get('/test/circuit-breaker', async (req: AuthenticatedRequest, res) => {
@@ -13,14 +13,14 @@ router.get('/test/circuit-breaker', async (req: AuthenticatedRequest, res) => {
     const { clickSignService } = await import('../../services/clickSignService');
 
     // Tentar uma conexão de teste
-    const _result = await clickSignService.testConnection();
+    const result = await clickSignService.testConnection();
 
     res.json({
       success: true,
       serviceStatus: result ? 'operational' : 'unavailable',
       circuitBreakerStatus: 'closed',
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error.message?.includes('circuit breaker is OPEN')) {
       console.log('[CIRCUIT TEST] ⚡ ClickSign circuit breaker is OPEN');
       res.status(503).json({

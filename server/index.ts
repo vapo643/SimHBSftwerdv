@@ -4,14 +4,14 @@ import { config, logConfigStatus, isAppOperational } from './lib/config';
 import { registerRoutes } from './routes';
 
 (async () => {
-  const _app = await createApp();
+  const app = await createApp();
 
   // Register routes and get server instance
-  const _server = await registerRoutes(app);
+  const server = await registerRoutes(app);
 
   // Setup Security WebSocket
   const { setupSecurityWebSocket } = await import('./lib/security-websocket');
-  const _securityWS = setupSecurityWebSocket(server);
+  const securityWS = setupSecurityWebSocket(server);
   log('🔐 Security WebSocket initialized');
 
   // Initialize refactored CCB Sync Service (now as fallback polling)
@@ -23,9 +23,9 @@ import { registerRoutes } from './routes';
   const { alertasProativosService } = await import('./services/alertasProativosService');
 
   // Configurar execução diária às 7h da manhã (Brasília)
-  const _horaExecucao = 7; // 7h da manhã
-  const _agora = new Date();
-  const _proximaExecucao = new Date();
+  const horaExecucao = 7; // 7h da manhã
+  const agora = new Date();
+  const proximaExecucao = new Date();
   proximaExecucao.setHours(horaExecucao, 0, 0, 0);
 
   // Se já passou das 7h hoje, agendar para amanhã
@@ -33,7 +33,7 @@ import { registerRoutes } from './routes';
     proximaExecucao.setDate(proximaExecucao.getDate() + 1);
   }
 
-  const _tempoAteProximaExecucao = proximaExecucao.getTime() - agora.getTime();
+  const tempoAteProximaExecucao = proximaExecucao.getTime() - agora.getTime();
 
   // Agendar primeira execução
   setTimeout(() => {
@@ -59,21 +59,21 @@ import { registerRoutes } from './routes';
   const { getSemgrepScanner } = await import('./lib/semgrep-scanner');
 
   // Start security monitoring if configured
-  if (process.env.ENABLE_SECURITY_MONITORING == 'true') {
+  if (process.env.ENABLE_SECURITY_MONITORING === 'true') {
     log('🚀 Starting autonomous security monitoring...');
 
-    const _scanner = getSecurityScanner();
+    const scanner = getSecurityScanner();
     if (scanner) {
       scanner.start();
     }
 
-    const _vulnDetector = getVulnerabilityDetector();
+    const vulnDetector = getVulnerabilityDetector();
     // VulnerabilityDetector does not have start method - scanner is event-driven
 
-    const _depScanner = getDependencyScanner();
+    const depScanner = getDependencyScanner();
     depScanner.start();
 
-    const _semgrepScanner = getSemgrepScanner();
+    const semgrepScanner = getSemgrepScanner();
     semgrepScanner.start();
 
     log('✅ All security scanners started');
@@ -82,7 +82,7 @@ import { registerRoutes } from './routes';
   }
 
   // Setup Vite or static serving based on environment
-  if (app.get('env') == 'development') {
+  if (app.get('env') === 'development') {
     await setupVite(app, server);
   } else {
     serveStatic(app);
@@ -101,29 +101,29 @@ import { registerRoutes } from './routes';
   async function initializeStorage() {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       log('📦 Checking storage buckets...');
 
       // Check existing buckets
-      const { data: buckets, error: listError } = await _supabase.storage.listBuckets();
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
 
       if (listError) {
         log('⚠️ Could not list buckets:', listError.message);
         return;
       }
 
-      const _documentsExists = buckets.some((bucket) => bucket.name == 'documents');
+      const documentsExists = buckets.some((bucket) => bucket.name === 'documents');
 
       if (documentsExists) {
         // Check if it's public or private
-        const _documentsBucket = buckets.find((bucket) => bucket.name == 'documents');
-        if (documentsBucket && documentsBucket.public == true) {
+        const documentsBucket = buckets.find((bucket) => bucket.name === 'documents');
+        if (documentsBucket && documentsBucket.public === true) {
           log('⚠️ Storage bucket "documents" exists but is PUBLIC. Need to recreate as PRIVATE.');
 
           // Delete the public bucket
           log('🗑️ Deleting public bucket...');
-          const { error: deleteError } = await _supabase.storage.deleteBucket('documents');
+          const { error: deleteError } = await supabase.storage.deleteBucket('documents');
           if (deleteError) {
             log('❌ Could not delete bucket:', deleteError.message);
             return;
@@ -138,7 +138,7 @@ import { registerRoutes } from './routes';
       // Delete existing public bucket if it exists (to recreate as private)
       if (documentsExists) {
         log('🗑️ Deleting existing public bucket to recreate as private...');
-        const { error: deleteError } = await _supabase.storage.deleteBucket('documents');
+        const { error: deleteError } = await supabase.storage.deleteBucket('documents');
         if (deleteError) {
           log('⚠️ Could not delete bucket:', deleteError.message);
         }
@@ -146,7 +146,7 @@ import { registerRoutes } from './routes';
 
       // Create documents bucket AS PRIVATE
       log('🔨 Creating PRIVATE storage bucket "documents"...');
-      const { data: bucket, error: createError } = await _supabase.storage.createBucket(
+      const { data: bucket, error: createError } = await supabase.storage.createBucket(
         'documents',
         {
           public: false, // PRIVATE bucket for security
@@ -178,13 +178,13 @@ import { registerRoutes } from './routes';
   // Start server on configured port
   server.listen(
     {
-      port: _config.port,
+      port: config.port,
       host: '0.0.0.0',
       reusePort: true,
     },
     async () => {
-      log(`🚀 Server running on port ${_config.port}`);
-      log(`🌍 Environment: ${_config.nodeEnv}`);
+      log(`🚀 Server running on port ${config.port}`);
+      log(`🌍 Environment: ${config.nodeEnv}`);
 
       // Initialize storage bucket
       await initializeStorage();

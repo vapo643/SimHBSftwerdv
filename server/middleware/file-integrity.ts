@@ -26,17 +26,17 @@ export function fileIntegrityMiddleware(
   next: NextFunction
 ) {
   // Store original send methods
-  const _originalSend = res.send;
-  const _originalJson = res.json;
+  const originalSend = res.send;
+  const originalJson = res.json;
 
   // Override send method to add integrity headers
-  res.send = function (data) {
+  res.send = function (data: any) {
     if (
-      Buffer.isBuffer(_data) &&
+      Buffer.isBuffer(data) &&
       res.getHeader('Content-Type')?.toString().includes('application/pdf')
     ) {
       // Generate hashes for file content
-      const _integrity = generateFileHashes(_data);
+      const integrity = generateFileHashes(data);
 
       // Add integrity headers
       res.setHeader('X-Content-SHA256', integrity.sha256);
@@ -57,8 +57,8 @@ export function fileIntegrityMiddleware(
       securityLogger.logEvent({
         type: SecurityEventType.DATA_ACCESS,
         severity: 'LOW',
-        userId: (req as unknown).user?.id,
-        userEmail: (req as unknown).user?.email,
+        userId: (req as any).user?.id,
+        userEmail: (req as any).user?.email,
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
@@ -71,21 +71,21 @@ export function fileIntegrityMiddleware(
       });
     }
 
-    return originalSend.call(this,_data); }
+    return originalSend.call(this, data);
   };
 
   // Override json method to add integrity for JSON downloads
-  res.json = function (data) {
-    if (req.query.download == 'true' || req.headers['x-download-request'] == 'true') {
-      const _jsonString = JSON.stringify(_data);
-      const _buffer = Buffer.from(jsonString, 'utf-8');
-      const _integrity = generateFileHashes(buffer);
+  res.json = function (data: any) {
+    if (req.query.download === 'true' || req.headers['x-download-request'] === 'true') {
+      const jsonString = JSON.stringify(data);
+      const buffer = Buffer.from(jsonString, 'utf-8');
+      const integrity = generateFileHashes(buffer);
 
       res.setHeader('X-Content-SHA256', integrity.sha256);
       res.setHeader('X-Content-Size', integrity.size.toString());
     }
 
-    return originalJson.call(this,_data); }
+    return originalJson.call(this, data);
   };
 
   next();
@@ -105,7 +105,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
     }
 
     // Get stored integrity info
-    const _storedIntegrity = getFileIntegrity(fileId);
+    const storedIntegrity = getFileIntegrity(fileId);
 
     if (!storedIntegrity) {
       return res.status(404).json({
@@ -114,7 +114,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
     }
 
     // Verify provided hashes
-    const _verification = {
+    const verification = {
       valid: true,
       errors: [] as string[],
     };
@@ -142,15 +142,15 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
         ? SecurityEventType.DATA_ACCESS
         : SecurityEventType.FILE_INTEGRITY_VIOLATION,
       severity: verification.valid ? 'LOW' : 'HIGH',
-      userId: (req as unknown).user?.id,
-      userEmail: (req as unknown).user?.email,
+      userId: (req as any).user?.id,
+      userEmail: (req as any).user?.email,
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
       endpoint: req.originalUrl,
       success: verification.valid,
       details: {
-  _fileId,
-  _verification,
+        fileId,
+        verification,
       },
     });
 
@@ -159,7 +159,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       errors: verification.errors,
       storedAt: storedIntegrity.generatedAt,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       error: 'Erro ao verificar integridade do arquivo',
       message: error.message,

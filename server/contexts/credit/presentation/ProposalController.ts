@@ -10,7 +10,7 @@ import { CreditAnalysisService } from '../domain/services/CreditAnalysisService'
 import { z } from 'zod';
 
 // Input validation schemas
-const _createProposalSchema = z.object({
+const createProposalSchema = z.object({
   customerData: z.object({
     name: z.string().min(1),
     cpf: z.string().regex(/^\d{11}$/),
@@ -47,8 +47,8 @@ export class ProposalController {
 
   constructor() {
     // Initialize dependencies
-    const _repository = new ProposalRepositoryImpl();
-    const _creditAnalysisService = new CreditAnalysisService();
+    const repository = new ProposalRepositoryImpl();
+    const creditAnalysisService = new CreditAnalysisService();
     this.applicationService = new ProposalApplicationService(repository, creditAnalysisService);
   }
 
@@ -59,17 +59,17 @@ export class ProposalController {
   async create(req: Request, res: Response): Promise<void> {
     try {
       // Validate input
-      const _validatedData = createProposalSchema.parse(req.body);
+      const validatedData = createProposalSchema.parse(req.body);
 
       // Transform dates if needed
       if (validatedData.customerData.birthDate) {
-        (validatedData.customerData as unknown).birthDate = new Date(
+        (validatedData.customerData as any).birthDate = new Date(
           validatedData.customerData.birthDate
         );
       }
 
       // Create proposal through application service
-      const _proposal = await this.applicationService.createProposal(validatedData as unknown);
+      const proposal = await this.applicationService.createProposal(validatedData as any);
 
       // Return created proposal
       res.status(201).json({
@@ -106,7 +106,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const _proposal = await this.applicationService.getProposal(id);
+      const proposal = await this.applicationService.getProposal(id);
 
       if (!proposal) {
         res.status(404).json({
@@ -134,7 +134,7 @@ export class ProposalController {
    */
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const _proposals = await this.applicationService.getAllProposals();
+      const proposals = await this.applicationService.getAllProposals();
 
       res.json({
         success: true,
@@ -157,7 +157,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const _proposal = await this.applicationService.submitForAnalysis(id);
+      const proposal = await this.applicationService.submitForAnalysis(id);
 
       res.json({
         success: true,
@@ -180,7 +180,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const _proposal = await this.applicationService.analyzeProposal(id);
+      const proposal = await this.applicationService.analyzeProposal(id);
 
       res.json({
         success: true,
@@ -203,7 +203,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const _proposal = await this.applicationService.approveProposal(id);
+      const proposal = await this.applicationService.approveProposal(id);
 
       res.json({
         success: true,
@@ -235,7 +235,7 @@ export class ProposalController {
         return;
       }
 
-      const _proposal = await this.applicationService.rejectProposal(id, reason);
+      const proposal = await this.applicationService.rejectProposal(id, reason);
 
       res.json({
         success: true,
@@ -267,7 +267,7 @@ export class ProposalController {
         return;
       }
 
-      const _proposal = await this.applicationService.setPendingProposal(id, reason);
+      const proposal = await this.applicationService.setPendingProposal(id, reason);
 
       res.json({
         success: true,
@@ -290,7 +290,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const _proposal = await this.applicationService.formalizeProposal(id);
+      const proposal = await this.applicationService.formalizeProposal(id);
 
       res.json({
         success: true,
@@ -313,7 +313,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const _proposal = await this.applicationService.markProposalAsPaid(id);
+      const proposal = await this.applicationService.markProposalAsPaid(id);
 
       res.json({
         success: true,
@@ -336,7 +336,7 @@ export class ProposalController {
     try {
       const { storeId } = req.params;
 
-      const _proposals = await this.applicationService.getProposalsByStore(storeId);
+      const proposals = await this.applicationService.getProposalsByStore(storeId);
 
       res.json({
         success: true,
@@ -359,7 +359,7 @@ export class ProposalController {
     try {
       const { cpf } = req.params;
 
-      const _proposals = await this.applicationService.getProposalsByCpf(cpf);
+      const proposals = await this.applicationService.getProposalsByCpf(cpf);
 
       res.json({
         success: true,
@@ -380,7 +380,7 @@ export class ProposalController {
    */
   async getPendingAnalysis(req: Request, res: Response): Promise<void> {
     try {
-      const _proposals = await this.applicationService.getPendingAnalysisProposals();
+      const proposals = await this.applicationService.getPendingAnalysisProposals();
 
       res.json({
         success: true,

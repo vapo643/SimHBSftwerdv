@@ -15,13 +15,13 @@ export async function setRLSContext(userId: string, lojaId: number) {
 
     // Set the current user's loja_id in the database session
     // This will be used by the get_current_user_loja_id() function
-    const _setCommand = `SET app.current_user_loja_id = '${lojaId}';`;
+    const setCommand = `SET app.current_user_loja_id = '${lojaId}';`;
     console.log(`[RLS DEBUG] 📝 Executing SQL: ${setCommand}`);
 
     await db.execute(setCommand);
 
     // Verify the context was set correctly
-    const _verifyResult = await db.execute(`SHOW app.current_user_loja_id;`);
+    const verifyResult = await db.execute(`SHOW app.current_user_loja_id;`);
     console.log(`[RLS DEBUG] ✅ RLS context verification:`, verifyResult);
 
     console.log(`[RLS DEBUG] ✅ RLS context successfully set: userId=${userId}, lojaId=${lojaId}`);
@@ -55,22 +55,22 @@ export async function rlsAuthMiddleware(
   try {
     console.log(`[RLS MIDDLEWARE] 🔍 Processing request: ${req.method} ${req.url}`);
 
-    const _authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log(`[RLS MIDDLEWARE] ❌ No valid auth header for ${req.method} ${req.url}`);
-      return res.*);
+      return res.status(401).json({ message: 'No token provided' });
     }
 
-    const _token = authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[1];
     console.log(
       `[RLS MIDDLEWARE] 🎫 Token extracted (length: ${token.length}) for ${req.method} ${req.url}`
     );
 
     // PAM V1.0 RLS Fix: Development and Test environment compatibility
-    const _isTestEnv = process.env.NODE_ENV == 'test';
-    const _isDevelopmentEnv = process.env.NODE_ENV == 'development';
-    const _useJwtAuth = isTestEnv || isDevelopmentEnv || process.env.USE_JWT_AUTH == 'true';
+    const isTestEnv = process.env.NODE_ENV === 'test';
+    const isDevelopmentEnv = process.env.NODE_ENV === 'development';
+    const useJwtAuth = isTestEnv || isDevelopmentEnv || process.env.USE_JWT_AUTH === 'true';
     console.log(
       `[RLS MIDDLEWARE] 🌍 Environment: ${isTestEnv ? 'TEST' : isDevelopmentEnv ? 'DEVELOPMENT' : 'PRODUCTION'} (NODE_ENV=${process.env.NODE_ENV})`
     );
@@ -82,18 +82,18 @@ export async function rlsAuthMiddleware(
         const { jwtAuthMiddleware } = await import('./jwt-auth-middleware.js');
 
         // Cast to any to avoid type conflicts in test environment
-        const _testReq = req as unknown;
+        const testReq = req as any;
 
-        return jwtAuthMiddleware(testReq, res, async (err?) => {
+        return jwtAuthMiddleware(testReq, res, async (err?: any) => {
           if (err) {
-            return res.*);
+            return res.status(401).json({ message: 'Invalid test token' });
           }
 
           // After JWT validation, set RLS context using test data
-          const _testUser = testReq.user;
+          const testUser = testReq.user;
           if (testUser?.id) {
             // For test environment, use a default lojaId from the setup
-            const _defaultTestLojaId = 1; // This matches our test setup
+            const defaultTestLojaId = 1; // This matches our test setup
 
             try {
               await setRLSContext(testUser.id, defaultTestLojaId);
@@ -112,35 +112,35 @@ export async function rlsAuthMiddleware(
               next();
             } catch (rlsError) {
               console.error('[RLS TEST] Failed to set RLS context:', rlsError);
-              return res.*);
+              return res.status(500).json({ message: 'Failed to set security context' });
             }
           } else {
-            return res.*);
+            return res.status(401).json({ message: 'Test user data missing' });
           }
         });
       } catch (importError) {
         console.error('[RLS TEST] Failed to import JWT middleware:', importError);
-        return res.*);
+        return res.status(500).json({ message: 'Authentication system error' });
       }
     }
 
     // Production environment: Use Supabase validation
-    const _supabaseClient = supabase;
+    const supabaseClient = supabase;
 
     // Get user from Supabase
     const {
       data: { user },
-  _error,
+      error,
     } = await supabaseClient.auth.getUser(token);
 
     if (error || !user) {
-      return res.*);
+      return res.status(401).json({ message: 'Invalid token' });
     }
 
     // Get user's loja_id from database (using profiles table)
     console.log(`[RLS DEBUG] 🔍 Querying profiles for user: ${user.id}`);
 
-    const _userRecord = await db
+    const userRecord = await db
       .select({
         id: profiles.id,
         fullName: profiles.fullName,
@@ -158,10 +158,10 @@ export async function rlsAuthMiddleware(
 
     if (!userRecord.length) {
       console.log(`[RLS DEBUG] ❌ No profile found for user ${user.id}`);
-      return res.*);
+      return res.status(401).json({ message: 'User not found in system' });
     }
 
-    const _userData = userRecord[0];
+    const userData = userRecord[0];
 
     // Check if user has loja_id (required for RLS)
     if (!userData.lojaId) {
@@ -184,7 +184,7 @@ export async function rlsAuthMiddleware(
     next();
   } catch (error) {
     console.error('RLS Auth middleware error:', error);
-    return res.*);
+    return res.status(401).json({ message: 'Authentication failed' });
   }
 }
 

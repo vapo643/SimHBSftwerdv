@@ -13,11 +13,11 @@ export class ClienteService {
    */
   async getClientByCPF(cpf: string): Promise<{
     exists: boolean;
-    data?: unknown;
+    data?: any;
     message?: string;
   }> {
     try {
-      const _cleanCPF = cpf.replace(/\D/g, '');
+      const cleanCPF = cpf.replace(/\D/g, '');
 
       if (!cleanCPF || cleanCPF.length !== 11) {
         return {
@@ -29,7 +29,7 @@ export class ClienteService {
       console.log(`[CLIENTE_SERVICE] Searching for CPF: ${cleanCPF}`);
 
       // Check for demonstration CPF
-      if (cleanCPF == '12345678901') {
+      if (cleanCPF === '12345678901') {
         console.log(`[CLIENTE_SERVICE] Demo data for CPF: ${cleanCPF}`);
 
         return {
@@ -71,7 +71,7 @@ export class ClienteService {
       }
 
       // Search in database
-      const _clientData = await clienteRepository.findByCPF(cleanCPF);
+      const clientData = await clienteRepository.findByCPF(cleanCPF);
 
       if (!clientData) {
         console.log(`[CLIENTE_SERVICE] No client found for CPF: ${cleanCPF}`);
@@ -82,7 +82,7 @@ export class ClienteService {
       }
 
       // Apply PII masking
-      const _maskedData = {
+      const maskedData = {
         ...clientData,
         cpf: maskCPF(clientData.cpf),
         email: clientData.email ? maskEmail(clientData.email) : '',
@@ -110,16 +110,16 @@ export class ClienteService {
   /**
    * Search address by CEP (Brazilian Postal Code)
    */
-  async getAddressByCEP(cep: string): Promise<unknown> {
+  async getAddressByCEP(cep: string): Promise<any> {
     try {
-      const _cleanCep = cep.replace(/\D/g, '');
+      const cleanCep = cep.replace(/\D/g, '');
 
       if (cleanCep.length !== 8) {
         throw new Error('CEP inválido');
       }
 
       // Try multiple CEP APIs
-      const _apis = [
+      const apis = [
         `https://viacep.com.br/ws/${cleanCep}/json/`,
         `https://brasilapi.com.br/api/cep/v2/${cleanCep}`,
         `https://cep.awesomeapi.com.br/json/${cleanCep}`,
@@ -127,9 +127,9 @@ export class ClienteService {
 
       for (const apiUrl of apis) {
         try {
-          const _response = await fetch(apiUrl);
+          const response = await fetch(apiUrl);
           if (response.ok) {
-            const _data = await response.json();
+            const data = await response.json();
 
             // Normalize response from different APIs
             if (apiUrl.includes('viacep')) {
@@ -167,11 +167,11 @@ export class ClienteService {
       }
 
       throw new Error('CEP não encontrado');
-    } catch (error) {
+    } catch (error: any) {
       console.error('[CLIENTE_SERVICE] Error fetching CEP:', error);
       throw error;
     }
   }
 }
 
-export const _clienteService = new ClienteService();
+export const clienteService = new ClienteService();

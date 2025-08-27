@@ -5,6 +5,7 @@
 
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Link } from 'wouter';
 import { AlertCircle, AlertTriangle, Info, CheckCircle, Clock, X } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -33,46 +34,46 @@ interface NotificationDropdownProps {
 }
 
 export function NotificationDropdown({
-  _notificacoes,
-  _isLoading,
-  _onMarcarComoLida,
-  _onMarcarTodasComoLidas,
-  _onLimparHistorico,
-  _onClose,
+  notificacoes,
+  isLoading,
+  onMarcarComoLida,
+  onMarcarTodasComoLidas,
+  onLimparHistorico,
+  onClose,
 }: NotificationDropdownProps) {
   // Ícone baseado na prioridade
-  const _getIcon = (prioridade: string) => {
+  const getIcon = (prioridade: string) => {
     switch (prioridade) {
-      case 'CRITICA': {
-        return <AlertCircle className="h-4 w-4 text-red-500" />; }
-      case 'ALTA': {
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />; }
-      case 'MEDIA': {
-        return <Info className="h-4 w-4 text-blue-500" />; }
+      case 'CRITICA':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      case 'ALTA':
+        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+      case 'MEDIA':
+        return <Info className="h-4 w-4 text-blue-500" />;
       default:
-        return <CheckCircle className="h-4 w-4 text-gray-500" />; }
+        return <CheckCircle className="h-4 w-4 text-gray-500" />;
     }
   };
 
   // Cor de fundo baseada na prioridade
-  const _getBgColor = (prioridade: string, status: string) => {
-    if (status == 'lida') return 'bg-gray-50'; }
+  const getBgColor = (prioridade: string, status: string) => {
+    if (status === 'lida') return 'bg-gray-50';
 
     switch (prioridade) {
-      case 'CRITICA': {
-        return 'bg-red-50 hover:bg-red-100'; }
-      case 'ALTA': {
-        return 'bg-orange-50 hover:bg-orange-100'; }
-      case 'MEDIA': {
-        return 'bg-blue-50 hover:bg-blue-100'; }
+      case 'CRITICA':
+        return 'bg-red-50 hover:bg-red-100';
+      case 'ALTA':
+        return 'bg-orange-50 hover:bg-orange-100';
+      case 'MEDIA':
+        return 'bg-blue-50 hover:bg-blue-100';
       default:
-        return 'bg-white hover:bg-gray-50'; }
+        return 'bg-white hover:bg-gray-50';
     }
   };
 
   // Filtrar apenas não lidas para exibição inicial
-  const _notificacoesVisiveis = notificacoes.slice(0, 10);
-  const _temNaoLidas = notificacoes.some((n) => n.status == 'nao_lida');
+  const notificacoesVisiveis = notificacoes.slice(0, 10);
+  const temNaoLidas = notificacoes.some((n) => n.status === 'nao_lida');
 
   return (
     <div
@@ -107,7 +108,7 @@ export function NotificationDropdown({
       <ScrollArea className="h-96">
         {isLoading ? (
           <div className="p-4 text-center text-gray-500">Carregando notificações...</div>
-        ) : notificacoesVisiveis.length == 0 ? (
+        ) : notificacoesVisiveis.length === 0 ? (
           <div className="p-8 text-center">
             <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">Nenhuma notificação</p>
@@ -126,7 +127,7 @@ export function NotificationDropdown({
                 )}`}
                 onClick={() => {
                   // Marcar como lida
-                  if (notificacao.status == 'nao_lida') {
+                  if (notificacao.status === 'nao_lida') {
                     onMarcarComoLida(notificacao.id);
                   }
 
@@ -136,24 +137,6 @@ export function NotificationDropdown({
                     onClose();
                   }
                 }}
-                onKeyDown={(e) => {
-                  if (e.key == 'Enter' || e.key == ' ') {
-                    e.preventDefault();
-                    // Marcar como lida
-                    if (notificacao.status == 'nao_lida') {
-                      onMarcarComoLida(notificacao.id);
-                    }
-
-                    // Navegar para o link se existir
-                    if (notificacao.linkRelacionado) {
-                      window.location.href = notificacao.linkRelacionado;
-                      onClose();
-                    }
-                  }
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`Notificação: ${notificacao.titulo}`}
                 data-testid={`notification-item-${notificacao.id}`}
               >
                 <div className="flex items-start gap-3">
@@ -164,7 +147,7 @@ export function NotificationDropdown({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <p className="font-medium text-sm text-gray-900">{notificacao.titulo}</p>
-                      {notificacao.status == 'nao_lida' && (
+                      {notificacao.status === 'nao_lida' && (
                         <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full ml-2" />
                       )}
                     </div>

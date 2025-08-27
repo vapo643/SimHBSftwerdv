@@ -27,14 +27,14 @@ export const UserDataSchema = z
     lojaIds: z.array(z.number().int()).nullable().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.role == 'ATENDENTE' && (data.lojaId == null || data.lojaId == undefined)) {
+    if (data.role === 'ATENDENTE' && (data.lojaId === null || data.lojaId === undefined)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "O campo 'lojaId' é obrigatório para o perfil ATENDENTE.",
         path: ['lojaId'],
       });
     }
-    if (data.role == 'GERENTE' && (!data.lojaIds || data.lojaIds.length == 0)) {
+    if (data.role === 'GERENTE' && (!data.lojaIds || data.lojaIds.length === 0)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "O campo 'lojaIds' deve conter ao menos uma loja para o perfil GERENTE.",

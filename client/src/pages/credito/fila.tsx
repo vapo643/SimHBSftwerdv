@@ -1,38 +1,38 @@
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import {
-  _Table,
-  _TableBody,
-  _TableCell,
-  _TableHeader,
-  _TableHead,
-  _TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableHead,
+  TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'wouter';
 import {
-  _Calendar,
-  _TrendingUp,
-  _Clock,
-  _Eye,
-  _FileText,
-  _Users,
-  _Store,
-  _Filter,
-  _User,
-  _Building,
-  _Loader2,
-  _Edit,
+  Calendar,
+  TrendingUp,
+  Clock,
+  Eye,
+  FileText,
+  Users,
+  Store,
+  Filter,
+  User,
+  Building,
+  Loader2,
+  Edit,
 } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -73,72 +73,72 @@ const FilaAnalise: React.FC = () => {
   const { user } = useAuth();
 
   // 🔒 Build query based on user role - CRITICAL FOR SECURITY
-  const _queryUrl = useMemo(() => {
+  const queryUrl = useMemo(() => {
     switch (user?.role) {
-      case 'ATENDENTE': {
+      case 'ATENDENTE':
         // ATENDENTE vê apenas suas próprias propostas
-        return `/api/propostas?atendenteId=${user.id}`; }
+        return `/api/propostas?atendenteId=${user.id}`;
 
-      case 'ANALISTA': {
+      case 'ANALISTA':
         // ANALISTA vê fila de análise OU histórico completo
         return showHistorico
           ? '/api/propostas' // Histórico completo
           : '/api/propostas?queue=analysis'; // Apenas fila de análise
 
-      case 'GERENTE': {
-      case 'ADMINISTRADOR': {
-      case 'DIRETOR': {
+      case 'GERENTE':
+      case 'ADMINISTRADOR':
+      case 'DIRETOR':
         // Gestores veem tudo ou fila de análise dependendo da página
-        return '/api/propostas?queue=analysis'; }
+        return '/api/propostas?queue=analysis';
 
       default:
-        return '/api/propostas'; }
+        return '/api/propostas';
     }
   }, [user?.role, user?.id, showHistorico]);
 
   // Fetch real proposals data - filtered based on role with PROPER SECURITY
   const {
     data: propostasResponse,
-  _isLoading,
-  _error,
+    isLoading,
+    error,
   } = useQuery<{ success: boolean; data: Proposta[]; total: number }>({
     queryKey: [queryUrl],
     enabled: !!user?.role, // Só fazer query se tiver role definido
   });
 
   // Extract the actual proposals array from the response
-  const _propostas = propostasResponse?.data || [];
+  const propostas = propostasResponse?.data || [];
 
   // Fetch partners data
-  const { data: parceiros } = useQuery<Record<string, unknown>[]>{ id: number; razaoSocial: string }>>({
+  const { data: parceiros } = useQuery<Array<{ id: number; razaoSocial: string }>>({
     queryKey: ['/api/parceiros'],
   });
 
-  const _filteredData = useMemo(() => {
+  const filteredData = useMemo(() => {
     if (!propostas || !Array.isArray(propostas)) {
-      return []; }
+      return [];
     }
 
-    let _filtered = propostas;
+    let filtered = propostas;
 
     // For ANALISTA role, filter based on mode (fila vs histórico)
-    if (user?.role == 'ANALISTA' && !showHistorico) {
+    if (user?.role === 'ANALISTA' && !showHistorico) {
       filtered = propostas.filter(
-        (proposta) => proposta.status == 'aguardando_analise' || proposta.status == 'em_analise'
+        (proposta) => proposta.status === 'aguardando_analise' || proposta.status === 'em_analise'
       );
     }
 
     // Apply additional filters
     return filtered.filter((proposta) => {
-      const _byStatus = filterStatus !== 'all' ? proposta.status == filterStatus : true;
-      const _byPartner =
-        filterPartner !== 'all' ? proposta.parceiro?.razaoSocial == filterPartner : true;
-      const _byStore = filterStore !== 'all' ? proposta.loja?.nomeLoja == filterStore : true;
-      return byStatus && byPartner && byStore; }
+      const byStatus = filterStatus !== 'all' ? proposta.status === filterStatus : true;
+      const byPartner =
+        filterPartner !== 'all' ? proposta.parceiro?.razaoSocial === filterPartner : true;
+      const byStore = filterStore !== 'all' ? proposta.loja?.nomeLoja === filterStore : true;
+      return byStatus && byPartner && byStore;
     });
   }, [propostas, filterStatus, filterPartner, filterStore, user?.role, showHistorico]);
 
-  const _handlePartnerChange = (partnerId: string) => {
+  const handlePartnerChange = (partnerId: string) => {
     setFilterPartner(partnerId);
     setFilterStore('all'); // Reseta o filtro de loja ao mudar o parceiro
   };
@@ -146,20 +146,20 @@ const FilaAnalise: React.FC = () => {
   const { toast } = useToast();
 
   // Mutation para alternar status
-  const _toggleStatusMutation = useMutation({
+  const toggleStatusMutation = useMutation({
     mutationFn: async ({
-  _propostaId,
-  _currentStatus,
+      propostaId,
+      currentStatus,
     }: {
       propostaId: string;
       currentStatus: string;
     }) => {
-      const _response = await apiRequest(`/api/propostas/${propostaId}/toggle-status`, {
+      const response = await apiRequest(`/api/propostas/${propostaId}/toggle-status`, {
         method: 'PUT',
       });
-      return response; }
+      return response;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: 'Status alterado com sucesso',
         description: data?.message || 'Status alterado com sucesso',
@@ -179,20 +179,20 @@ const FilaAnalise: React.FC = () => {
     },
   });
 
-  const _handleToggleStatus = (propostaId: string, currentStatus: string) => {
+  const handleToggleStatus = (propostaId: string, currentStatus: string) => {
     toggleStatusMutation.mutate({ propostaId, currentStatus });
   };
 
-  const _today = new Date().toISOString().split('T')[0];
-  const _propostasHoje = propostas?.filter((p) => p.createdAt.split('T')[0] == today).length || 0;
+  const today = new Date().toISOString().split('T')[0];
+  const propostasHoje = propostas?.filter((p) => p.createdAt.split('T')[0] === today).length || 0;
 
-  const _propostasPendentes =
-    propostas?.filter((p) => p.status == 'aguardando_analise' || p.status == 'em_analise')
+  const propostasPendentes =
+    propostas?.filter((p) => p.status === 'aguardando_analise' || p.status === 'em_analise')
       .length || 0;
 
-  const _acumuladoMes = propostas?.length || 0;
+  const acumuladoMes = propostas?.length || 0;
 
-  const _handleRefresh = () => {
+  const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: [queryUrl] });
     queryClient.invalidateQueries({ queryKey: ['/api/parceiros'] });
   };
@@ -200,7 +200,7 @@ const FilaAnalise: React.FC = () => {
   return (
     <DashboardLayout
       title={
-        user?.role == 'ANALISTA'
+        user?.role === 'ANALISTA'
           ? showHistorico
             ? 'Histórico de Análises'
             : 'Fila de Análise de Crédito'
@@ -249,7 +249,7 @@ const FilaAnalise: React.FC = () => {
         {/* Filters Section */}
         <div className="flex flex-col gap-4 md:flex-row">
           {/* Toggle História para ANALISTA */}
-          {user?.role == 'ANALISTA' && (
+          {user?.role === 'ANALISTA' && (
             <div className="flex items-center gap-2">
               <Button
                 variant={showHistorico ? 'default' : 'outline'}
@@ -287,7 +287,7 @@ const FilaAnalise: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Parceiros</SelectItem>
-                {parceiros?.map((p) => (
+                {parceiros?.map((p: any) => (
                   <SelectItem key={p.id} value={p.razaoSocial}>
                     {p.razaoSocial}
                   </SelectItem>
@@ -300,7 +300,7 @@ const FilaAnalise: React.FC = () => {
             <Select
               onValueChange={setFilterStore}
               value={filterStore}
-              disabled={filterPartner == 'all'}
+              disabled={filterPartner === 'all'}
             >
               <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Filtrar por Loja" />
@@ -373,7 +373,7 @@ const FilaAnalise: React.FC = () => {
                         Erro ao carregar propostas. Por favor, recarregue a página.
                       </TableCell>
                     </TableRow>
-                  ) : filteredData.length == 0 ? (
+                  ) : filteredData.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="py-8 text-center text-gray-500">
                         Nenhuma proposta encontrada.
@@ -400,24 +400,24 @@ const FilaAnalise: React.FC = () => {
                         <TableCell>
                           <span
                             className={
-                              proposta.status == 'aprovado'
+                              proposta.status === 'aprovado'
                                 ? 'status-approved'
-                                : proposta.status == 'rejeitado'
+                                : proposta.status === 'rejeitado'
                                   ? 'status-rejected'
-                                  : proposta.status == 'suspensa'
+                                  : proposta.status === 'suspensa'
                                     ? 'status-suspended'
                                     : 'status-pending'
                             }
                           >
-                            {proposta.status == 'aguardando_analise'
+                            {proposta.status === 'aguardando_analise'
                               ? 'Aguardando Análise'
-                              : proposta.status == 'em_analise'
+                              : proposta.status === 'em_analise'
                                 ? 'Em Análise'
-                                : proposta.status == 'aprovado'
+                                : proposta.status === 'aprovado'
                                   ? 'Aprovado'
-                                  : proposta.status == 'rejeitado'
+                                  : proposta.status === 'rejeitado'
                                     ? 'Rejeitado'
-                                    : proposta.status == 'suspensa'
+                                    : proposta.status === 'suspensa'
                                       ? 'Suspensa'
                                       : proposta.status}
                           </span>
@@ -434,7 +434,7 @@ const FilaAnalise: React.FC = () => {
                               </Button>
                             </Link>
                             {/* Botão de editar/suspender para atendentes e administradores */}
-                            {(user?.role == 'ATENDENTE' || user?.role == 'ADMINISTRADOR') &&
+                            {(user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR') &&
                               [
                                 'rascunho',
                                 'aguardando_analise',
@@ -444,14 +444,14 @@ const FilaAnalise: React.FC = () => {
                               ].includes(proposta.status) && (
                                 <Button
                                   className={
-                                    proposta.status == 'suspensa'
+                                    proposta.status === 'suspensa'
                                       ? 'bg-yellow-500 text-white hover:bg-yellow-600'
                                       : 'bg-gray-500 text-white hover:bg-gray-600'
                                   }
                                   size="sm"
                                   onClick={() => handleToggleStatus(proposta.id, proposta.status)}
                                   title={
-                                    proposta.status == 'suspensa'
+                                    proposta.status === 'suspensa'
                                       ? 'Reativar proposta'
                                       : 'Suspender proposta'
                                   }
