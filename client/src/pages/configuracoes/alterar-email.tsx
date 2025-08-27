@@ -62,10 +62,10 @@ export default function AlterarEmail() {
   // Request email change mutation
   const changeEmailMutation = useMutation({
     mutationFn: async (data: EmailChangeFormData) => {
-      const response = await apiRequest<EmailChangeResponse>('/api/auth/change-email', {
+      const response = await apiRequest('/api/auth/change-email', {
         method: 'POST',
         body: JSON.stringify(data),
-      });
+      }) as EmailChangeResponse;
       return response;
     },
     onSuccess: (data) => {
@@ -75,8 +75,8 @@ export default function AlterarEmail() {
       });
 
       // In development, show the token
-      if (data.debugToken) {
-        setVerificationToken(data.debugToken);
+      if ((data as any).debugToken) {
+        setVerificationToken((data as any).debugToken);
       }
 
       setPendingEmail(form.getValues('newEmail'));

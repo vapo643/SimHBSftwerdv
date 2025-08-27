@@ -70,7 +70,7 @@ export default function GestãoProdutos() {
     queryKey: ['produtos'],
     queryFn: async () => {
       const response = await api.get<Produto[]>('/api/produtos');
-      return response.data;
+      return Array.isArray(response) ? response : (response as any).data || [];
     },
   });
 
@@ -83,7 +83,7 @@ export default function GestãoProdutos() {
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return response.data;
+      return (response as any).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
@@ -104,7 +104,7 @@ export default function GestãoProdutos() {
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return response.data;
+      return (response as any).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
@@ -412,7 +412,7 @@ export default function GestãoProdutos() {
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {produtos.map((produto) => (
+                {produtos.map((produto: any) => (
                   <Card
                     key={produto.id}
                     className="border border-gray-200 transition-all duration-200 hover:border-cyan-300 hover:shadow-lg dark:border-gray-700 dark:hover:border-cyan-600"

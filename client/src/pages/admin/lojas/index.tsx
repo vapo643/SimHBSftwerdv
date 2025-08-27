@@ -36,7 +36,7 @@ export default function LojasPage() {
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
       const response = await api.get<Loja[]>('/api/admin/lojas');
-      return response.data;
+      return Array.isArray(response) ? response : (response as any).data || [];
     },
   });
 
@@ -44,7 +44,7 @@ export default function LojasPage() {
   const createMutation = useMutation({
     mutationFn: async (data: InsertLoja) => {
       const response = await api.post<Loja>('/api/admin/lojas', data);
-      return response.data;
+      return (response as any).data || response;
     },
     onSuccess: () => {
       toast({
@@ -72,7 +72,7 @@ export default function LojasPage() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateLoja }) => {
       const response = await api.put<Loja>(`/api/admin/lojas/${id}`, data);
-      return response.data;
+      return (response as any).data || response;
     },
     onSuccess: () => {
       toast({

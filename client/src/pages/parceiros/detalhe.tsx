@@ -56,7 +56,7 @@ const PartnerDetailPage: React.FC = () => {
     queryFn: async () => {
       if (!partnerId) throw new Error('Partner ID is required');
       const response = await api.get<Partner>(`/api/parceiros/${partnerId}`);
-      return response.data;
+      return (response as any).data || response;
     },
     enabled: !!partnerId,
   });

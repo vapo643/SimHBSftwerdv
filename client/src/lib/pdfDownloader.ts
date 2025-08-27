@@ -148,7 +148,7 @@ export class PDFDownloader {
           const error = new Error(
             errorMessage || `HTTP ${response.status}: ${response.statusText}`
           );
-          (error as unknown).details = errorDetails;
+          (error as any).details = errorDetails;
           throw error;
         }
 
@@ -181,7 +181,7 @@ export class PDFDownloader {
         // Validação adicional: verificar magic bytes do PDF
         const arrayBuffer = await blob.slice(0, 5).arrayBuffer();
         const bytes = new Uint8Array(arrayBuffer);
-        const pdfMagic = String.fromCharCode(...bytes);
+        const pdfMagic = String.fromCharCode(...Array.from(bytes));
 
         if (!pdfMagic.startsWith('%PDF')) {
           console.error(`[PDF_DOWNLOAD] File is not a valid PDF. Magic bytes: ${pdfMagic}`);
