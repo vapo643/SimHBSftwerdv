@@ -15,13 +15,13 @@ export async function setRLSContext(userId: string, lojaId: number) {
 
     // Set the current user's loja_id in the database session
     // This will be used by the get_current_user_loja_id() function
-    const _setCommand = `SET app.current_user_loja_id = '${lojaId}';`;
+    const setCommand = `SET app.current_user_loja_id = '${lojaId}';`;
     console.log(`[RLS DEBUG] 📝 Executing SQL: ${setCommand}`);
 
     await db.execute(setCommand);
 
     // Verify the context was set correctly
-    const _verifyResult = await db.execute(`SHOW app.current_user_loja_id;`);
+    const verifyResult = await db.execute(`SHOW app.current_user_loja_id;`);
     console.log(`[RLS DEBUG] ✅ RLS context verification:`, verifyResult);
 
     console.log(`[RLS DEBUG] ✅ RLS context successfully set: userId=${userId}, lojaId=${lojaId}`);
@@ -56,22 +56,22 @@ export async function rlsAuthMiddleware(
   try {
     console.log(`[RLS MIDDLEWARE] 🔍 Processing request: ${req.method} ${req.url}`);
 
-    const _authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log(`[RLS MIDDLEWARE] ❌ No valid auth header for ${req.method} ${req.url}`);
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _token = authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[1];
     console.log(
       `[RLS MIDDLEWARE] 🎫 Token extracted (length: ${token.length}) for ${req.method} ${req.url}`
     );
 
     // PAM V1.0 RLS Fix: Development and Test environment compatibility
-    const _isTestEnv = process.env.NODE_ENV == 'test';
-    const _isDevelopmentEnv = process.env.NODE_ENV == 'development';
-    const _useJwtAuth = isTestEnv || isDevelopmentEnv || process.env.USE_JWT_AUTH == 'true';
+    const isTestEnv = process.env.NODE_ENV == 'test';
+    const isDevelopmentEnv = process.env.NODE_ENV == 'development';
+    const useJwtAuth = isTestEnv || isDevelopmentEnv || process.env.USE_JWT_AUTH == 'true';
     console.log(
       `[RLS MIDDLEWARE] 🌍 Environment: ${isTestEnv ? 'TEST' : isDevelopmentEnv ? 'DEVELOPMENT' : 'PRODUCTION'} (NODE_ENV=${process.env.NODE_ENV})`
     );
@@ -83,7 +83,7 @@ export async function rlsAuthMiddleware(
         const { _jwtAuthMiddleware } = await import('./jwt-auth-middleware.js');
 
         // Cast to any to avoid type conflicts in test environment
-        const _testReq = req as unknown;
+        const testReq = req as unknown;
 
         return _jwtAuthMiddleware(testReq, res, async (err?) => {
           if (err) {
@@ -91,10 +91,10 @@ export async function rlsAuthMiddleware(
           }
 
           // After JWT validation, set RLS context using test data
-          const _testUser = testReq.user;
+          const testUser = testReq.user;
           if (testUser?.id) {
             // For test environment, use a default lojaId from the setup
-            const _defaultTestLojaId = 1; // This matches our test setup
+            const defaultTestLojaId = 1; // This matches our test setup
 
             try {
               await setRLSContext(testUser.id, defaultTestLojaId);
@@ -129,12 +129,12 @@ catch (importError) {
     }
 
     // Production environment: Use Supabase validation
-    const _supabaseClient = supabase;
+    const supabaseClient = supabase;
 
     // Get user from Supabase
     const {
       data: { user },
-  _error,
+  error,
     } = await supabaseClient.auth.getUser(token);
 
     if (error || !user) {
@@ -144,7 +144,7 @@ catch (importError) {
     // Get user's loja_id from database (using profiles table)
     console.log(`[RLS DEBUG] 🔍 Querying profiles for user: ${user.id}`);
 
-    const _userRecord = await db
+    const userRecord = await db
       .select({
         id: profiles.id,
         fullName: profiles.fullName,
@@ -165,7 +165,7 @@ catch (importError) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _userData = userRecord[0];
+    const userData = userRecord[0];
 
     // Check if user has loja_id (required for RLS)
     if (!userData.lojaId) {

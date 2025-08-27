@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { validationService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/schemas', async (req, res) => {
   try {
-    const _result = await validationService.executeOperation('get_schemas', req.query);
+    const result = await validationService.executeOperation('get_schemas', req.query);
     res.json(_result);
   }
 catch (error) {

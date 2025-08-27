@@ -18,9 +18,9 @@ const DEFAULT_EVENTS = [
 ];
 
 export function useIdleTimer({
-  _timeout,
-  _onIdle,
-  events = DEFAULT_EVENTS,
+  timeout,
+  onIdle,
+  events = DEFAULTEVENTS,
   throttle = 500,
 }: UseIdleTimerOptions) {
   const _timeoutId = useRef<NodeJS.Timeout | null>(null);
@@ -119,8 +119,8 @@ else {
 
   return {
     isIdle: isIdle.current,
-    _resetTimer,
-    _stopTimer,
-    _startTimer,
+    resetTimer,
+    stopTimer,
+    startTimer,
   };
 }

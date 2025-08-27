@@ -4,11 +4,11 @@ import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const _router = Router();
+const router = Router();
 
 // Gerar UUID válido
 function generateValidUUID() {
-  const _chars = '0123456789abcdef';
+  const chars = '0123456789abcdef';
   let _uuid = '';
   for (let _i = 0; i < 32; i++) {
     if (i == 8 || i == 12 || i == 16 || i == 20) {
@@ -41,7 +41,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
     }
 
     // Buscar boletos atuais (válidos e inválidos)
-    const _boletoesAtuais = await db
+    const boletoesAtuais = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
@@ -49,7 +49,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
     console.log(`🔍 [EXECUTE FIX] Encontrados ${boletoesAtuais.length} boletos atuais`);
 
     // Identificar códigos inválidos
-    const _codigosInvalidos = boletoesAtuais.filter(
+    const codigosInvalidos = boletoesAtuais.filter(
       (b) =>
         !b.codigoSolicitacao.match(
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -73,7 +73,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
     // =====================
 
     // 1. Desativar TODOS os boletos (válidos e inválidos)
-    const _resultUpdate = await db
+    const resultUpdate = await db
       .update(interCollections)
       .set({ isActive: false })
       .where(eq(interCollections.propostaId, propostaId))
@@ -82,7 +82,7 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
     console.log(`✅ [EXECUTE FIX] ${resultUpdate.length} boletos antigos desativados`);
 
     // 2. Preparar dados das parcelas
-    const _parcelas = boletoesAtuais
+    const parcelas = boletoesAtuais
       .map((boleto) => ({
         numero: boleto.numeroParcela || 1,
         valor: parseFloat(boleto.valorNominal.toString()),
@@ -92,15 +92,15 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
 
     console.log(`📋 [EXECUTE FIX] ${parcelas.length} parcelas preparadas para regeneração`);
 
-    const _novosBoletosGerados = [];
-    const _errosEncontrados = [];
+    const novosBoletosGerados = [];
+    const errosEncontrados = [];
 
     // 3. Criar novos boletos com códigos simulados válidos (para teste)
     for (let _i = 0; i < parcelas.length; i++) {
-      const _parcela = parcelas[i];
+      const parcela = parcelas[i];
 
       try {
-        const _seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
+        const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
 
         console.log(
           `📄 [EXECUTE FIX] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`
@@ -108,14 +108,14 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
 
         // Usar função UUID válida
 
-        const _codigoSolicitacaoValido = generateValidUUID();
+        const codigoSolicitacaoValido = generateValidUUID();
 
         console.log(`✅ [EXECUTE FIX] UUID válido gerado: ${codigoSolicitacaoValido}`);
 
         // **PAM V1.0 CORREÇÃO**: Seguir padrão correto do ClickSign webhook
         // 1. Criar boleto no Banco Inter
-        const _boletoData = {
-  _seuNumero,
+        const boletoData = {
+  seuNumero,
           valorNominal: parcela.valor,
           dataVencimento: parcela.vencimento,
           numDiasAgenda: 60,
@@ -150,10 +150,10 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
         console.log(
           `[PAM V1.0 FIX] Criando boleto real no Banco Inter - Parcela ${parcela.numero}`
         );
-        const _createResponse = await interBankService.emitirCobranca(boletoData);
+        const createResponse = await interBankService.emitirCobranca(boletoData);
 
         // 2. Buscar dados completos (incluindo PIX)
-        const _interCollection = await interBankService.recuperarCobranca(
+        const interCollection = await interBankService.recuperarCobranca(
           createResponse.codigoSolicitacao
         );
 
@@ -161,9 +161,9 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
         const [novoBoleto] = await db
           .insert(interCollections)
           .values({
-  _propostaId,
+  propostaId,
             codigoSolicitacao: createResponse.codigoSolicitacao,
-  _seuNumero,
+  seuNumero,
             valorNominal: parcela.valor.toString(),
             dataVencimento: parcela.vencimento,
             situacao: interCollection.cobranca.situacao,
@@ -210,7 +210,7 @@ catch (error) {
     res.json({
       success: true,
       message: `Regeneração completa: ${novosBoletosGerados.length} boletos criados com códigos válidos`,
-  _propostaId,
+  propostaId,
       clienteNome: proposta.clienteNome,
       boletoAntigos: boletoesAtuais.length,
       boletosDesativados: resultUpdate.length,

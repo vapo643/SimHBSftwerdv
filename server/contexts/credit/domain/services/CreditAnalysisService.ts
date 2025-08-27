@@ -3,7 +3,7 @@
  * Contains complex business logic that doesn't belong to a single aggregate
  */
 
-import { Proposal } from '../aggregates/Proposal';
+import { Proposal } from '../domain/aggregates/Proposal';
 
 export interface CreditScore {
   score: number;
@@ -26,37 +26,37 @@ export class CreditAnalysisService {
    * Analyzes a proposal and returns credit decision
    */
   public analyzeProposal(proposal: Proposal): AnalysisResult {
-    const _customerData = proposal.getCustomerData();
-    const _loanConditions = proposal.getLoanConditions();
+    const customerData = proposal.getCustomerData();
+    const loanConditions = proposal.getLoanConditions();
 
     // Calculate credit score based on multiple factors
-    const _score = this.calculateCreditScore(customerData, loanConditions);
+    const score = this.calculateCreditScore(customerData, loanConditions);
 
     // Determine approval based on score and business rules
-    const _approved = this.shouldApprove(score, loanConditions);
+    const approved = this.shouldApprove(score, loanConditions);
 
     // Calculate maximum approved amount based on income and score
-    const _maxApprovedAmount = this.calculateMaxApprovedAmount(
+    const maxApprovedAmount = this.calculateMaxApprovedAmount(
       customerData.monthlyIncome || 0,
       score
     );
 
     // Suggest optimal terms based on risk profile
-    const _suggestedTerms = this.suggestOptimalTerms(score.risk);
+    const suggestedTerms = this.suggestOptimalTerms(score.risk);
 
     // Determine required documents based on amount and risk
-    const _requiredDocuments = this.getRequiredDocuments(loanConditions.requestedAmount, score.risk);
+    const requiredDocuments = this.getRequiredDocuments(loanConditions.requestedAmount, score.risk);
 
     // Generate analysis observations
-    const _observations = this.generateObservations(score, approved);
+    const observations = this.generateObservations(score, approved);
 
     return {
-  _approved,
-  _score,
-  _maxApprovedAmount,
-  _suggestedTerms,
-  _requiredDocuments,
-  _observations,
+  approved,
+  score,
+  maxApprovedAmount,
+  suggestedTerms,
+  requiredDocuments,
+  observations,
     };
   }
 
@@ -69,7 +69,7 @@ export class CreditAnalysisService {
 
     // Income analysis
     if (customerData.monthlyIncome) {
-      const _debtToIncomeRatio = loanConditions.monthlyPayment / customerData.monthlyIncome;
+      const debtToIncomeRatio = loanConditions.monthlyPayment / customerData.monthlyIncome;
       if (debtToIncomeRatio < 0.3) {
         score += 100;
         factors.push('Excellent debt-to-income ratio');
@@ -86,7 +86,7 @@ else {
 
     // Age analysis
     if (customerData.birthDate) {
-      const _age = this.calculateAge(customerData.birthDate);
+      const age = this.calculateAge(customerData.birthDate);
       if (age >= 25 && age <= 65) {
         score += 50;
         factors.push('Prime working age');
@@ -131,10 +131,10 @@ else {
     }
 
     return {
-  _score,
-  _risk,
-  _factors,
-  _recommendation,
+  score,
+  risk,
+  factors,
+  recommendation,
     };
   }
 
@@ -221,7 +221,7 @@ else {
    * Determine required documents based on amount and risk
    */
   private getRequiredDocuments(amount: number, risk: string): string[] {
-    const _baseDocuments = ['CPF', 'RG', 'Comprovante de Residência', 'Comprovante de Renda'];
+    const baseDocuments = ['CPF', 'RG', 'Comprovante de Residência', 'Comprovante de Renda'];
 
     if (amount > 30000 || risk == 'HIGH' || risk == 'VERY_HIGH') {
       baseDocuments.push(
@@ -266,10 +266,10 @@ else {
    * Helper method to calculate age from birth date
    */
   private calculateAge(birthDate: Date): number {
-    const _today = new Date();
-    const _birth = new Date(birthDate);
+    const today = new Date();
+    const birth = new Date(birthDate);
     let _age = today.getFullYear() - birth.getFullYear();
-    const _monthDiff = today.getMonth() - birth.getMonth();
+    const monthDiff = today.getMonth() - birth.getMonth();
 
     if (monthDiff < 0 || (monthDiff == 0 && today.getDate() < birth.getDate())) {
       age--;

@@ -89,8 +89,8 @@ function validateSecrets(): {
 
   return {
     isValid: missing.length == 0,
-    _missing,
-    _warnings,
+    missing,
+    warnings,
   };
 }
 
@@ -99,15 +99,15 @@ function generateSecureSecret(name: string): string {
   if (process.env.NODE_ENV == 'production') {
     throw new Error(`${name} is required in production!`);
   }
-  const _fallback = crypto.randomBytes(32).toString('hex');
+  const fallback = crypto.randomBytes(32).toString('hex');
   log(`⚠️  ${name} not configured! Using secure random value for development.`);
-  return _fallback;
+  return fallback;
 }
 
 // Configuração centralizada com fallbacks seguros
 export function loadConfig(): AppConfig {
   try {
-    const _validation = validateSecrets();
+    const validation = validateSecrets();
 
     // Log de status de secrets (sem expor valores)
     if (validation.missing.length > 0) {
@@ -139,7 +139,7 @@ export function loadConfig(): AppConfig {
         serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
       },
       security: {
-        enableRateLimit: process.env.NODE_ENV == 'production' || !!process.env.DATABASE_URL,
+        enableRateLimit: process.env.NODE_ENV == 'production' || !!process.env.DATABASEURL,
         enableHelmet: true,
         jwtSecret: process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET'),
         sessionSecret: process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET'),
@@ -168,7 +168,7 @@ export function loadConfig(): AppConfig {
     };
   }
 catch (error) {
-    const _errorMsg = _error instanceof Error ? error.message : String(error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
     log(`❌ Error loading config: ${errorMsg}`);
     // Em produção, falha fatal se secrets críticos estão faltando
     if (process.env.NODE_ENV == 'production') {
@@ -205,21 +205,21 @@ catch (error) {
 }
 
 // Configuração global (carregada uma única vez)
-export const _config = loadConfig();
+export const config = loadConfig();
 
 // Helper para verificar se o app pode funcionar
 export function isAppOperational(): boolean {
-  return _config.database.url !== null || _config.nodeEnv == 'development';
+  return config.database.url !== null || config.nodeEnv == 'development';
 }
 
 // Helper para logs de status
 export function logConfigStatus(): void {
   log(`🔧 App Config Status:`);
-  log(`  - Port: ${_config.port}`);
-  log(`  - Environment: ${_config.nodeEnv}`);
-  log(`  - Database: ${_config.database.url ? '✅ Connected' : '❌ Not configured'}`);
-  log(`  - Supabase: ${_config._supabase.url ? '✅ Connected' : '❌ Not configured'}`);
+  log(`  - Port: ${config.port}`);
+  log(`  - Environment: ${config.nodeEnv}`);
+  log(`  - Database: ${config.database.url ? '✅ Connected' : '❌ Not configured'}`);
+  log(`  - Supabase: ${config._supabase.url ? '✅ Connected' : '❌ Not configured'}`);
   log(
-    `  - Security: Rate Limit ${_config.security.enableRateLimit ? '✅' : '❌'}, Helmet ${_config.security.enableHelmet ? '✅' : '❌'}`
+    `  - Security: Rate Limit ${config.security.enableRateLimit ? '✅' : '❌'}, Helmet ${config.security.enableHelmet ? '✅' : '❌'}`
   );
 }

@@ -117,9 +117,9 @@ else {
   const _error = metadataError || allLojasError || parceiroLojasError || null;
 
   return {
-  _filteredLojas,
-  _isLoading,
-  _error,
-  _filteringMode,
+  filteredLojas,
+  isLoading,
+  error,
+  filteringMode,
   };
 }

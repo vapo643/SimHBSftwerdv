@@ -6,13 +6,13 @@
 
 import { getAuthProvider } from './auth-config';
 import {
-  _User,
-  _Session,
-  _SignInCredentials,
-  _SignInResult,
-  _AuthStateChangeCallback,
-  _AuthSubscription,
-  _AuthProvider,
+  User,
+  Session,
+  SignInCredentials,
+  SignInResult,
+  AuthStateChangeCallback,
+  AuthSubscription,
+  AuthProvider,
 } from './auth-types';
 
 /**

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { ccbTestService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/diagnostics', async (req, res) => {
   try {
-    const _result = await ccbTestService.executeOperation('diagnostics', req.query);
+    const result = await ccbTestService.executeOperation('diagnostics', req.query);
     res.json(_result);
   }
 catch (error) {

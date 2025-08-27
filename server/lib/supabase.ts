@@ -3,9 +3,9 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@shared/schema';
 
-const _supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-const _databaseUrl = process.env.DATABASE_URL || '';
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+const databaseUrl = process.env.DATABASE_URL || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
@@ -16,7 +16,7 @@ if (!databaseUrl) {
 }
 
 // Server-side Supabase client - properly isolated from client-side singleton
-export const _supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // NOVA FUNÇÃO para operações Admin:
 export function createServerSupabaseAdminClient() {
@@ -34,7 +34,7 @@ export function createServerSupabaseAdminClient() {
 
 // FUNÇÃO ANTI-FRÁGIL para operações com RLS (autenticadas):
 export function createServerSupabaseClient(accessToken?: string) {
-  const _client = createClient(supabaseUrl, supabaseAnonKey, {
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -61,7 +61,7 @@ if (databaseUrl.includes('_supabase.com')) {
   console.log('✅ Database: Configuring Supabase connection...');
 
   // Use transaction pooler port and SSL
-  let _correctedUrl = databaseUrl;
+  let correctedUrl = databaseUrl;
   if (!correctedUrl.includes('sslmode=')) {
     correctedUrl += correctedUrl.includes('?') ? '&sslmode=require' : '?sslmode=require';
   }
@@ -82,8 +82,8 @@ else {
   dbClient = postgres(databaseUrl);
 }
 
-const _client = dbClient;
-export const _db = drizzle(client, { schema });
+const client = dbClient;
+export const db = drizzle(client, { schema });
 
 // Test database connection asynchronously
 setTimeout(async () => {

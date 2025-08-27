@@ -137,9 +137,9 @@ describe('TAC Integration Tests - Production Ready', () => {
 
       await db.execute(sql`
         INSERT INTO propostas (
-          id, numero_proposta, status, valor, prazo, taxa_juros,
-          cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
-          produto_id, tabela_comercial_id, loja_id, user_id,
+          id, numeroproposta, status, valor, prazo, taxajuros,
+          clientenome, clientecpf, clientetelefone, clienteemail,
+          produtoid, tabela_comercialid, lojaid, userid,
           finalidade, garantia, valor_tac
         ) VALUES (
           ${uuidv4()}, 999001, 'QUITADO', '8000.00', 12, '1.99',
@@ -186,9 +186,9 @@ describe('TAC Integration Tests - Production Ready', () => {
 
       await db.execute(sql`
         INSERT INTO propostas (
-          id, numero_proposta, status, valor, prazo, taxa_juros,
-          cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
-          produto_id, tabela_comercial_id, loja_id, user_id,
+          id, numeroproposta, status, valor, prazo, taxajuros,
+          clientenome, clientecpf, clientetelefone, clienteemail,
+          produtoid, tabela_comercialid, lojaid, userid,
           finalidade, garantia
         ) VALUES (
           ${uuidv4()}, 999002, 'aprovado', '12000.00', 18, '2.1',
@@ -230,9 +230,9 @@ describe('TAC Integration Tests - Production Ready', () => {
       // Criar histórico para cliente cadastrado
       await db.execute(sql`
         INSERT INTO propostas (
-          id, numero_proposta, status, valor, prazo, taxa_juros,
-          cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
-          produto_id, tabela_comercial_id, loja_id, user_id,
+          id, numeroproposta, status, valor, prazo, taxajuros,
+          clientenome, clientecpf, clientetelefone, clienteemail,
+          produtoid, tabela_comercialid, lojaid, userid,
           finalidade, garantia
         ) VALUES (
           ${uuidv4()}, 999003, 'ASSINATURA_CONCLUIDA', '10000.00', 24, '2.5',
@@ -306,9 +306,9 @@ describe('TAC Integration Tests - Production Ready', () => {
         // Criar proposta com status específico
         await db.execute(sql`
           INSERT INTO propostas (
-            id, numero_proposta, status, valor, prazo, taxa_juros,
-            cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
-            produto_id, tabela_comercial_id, loja_id, user_id,
+            id, numeroproposta, status, valor, prazo, taxajuros,
+            clientenome, clientecpf, clientetelefone, clienteemail,
+            produtoid, tabela_comercialid, lojaid, userid,
             finalidade, garantia
           ) VALUES (
             ${uuidv4()}, ${999010 + i}, ${status}, '5000.00', 6, '1.5',

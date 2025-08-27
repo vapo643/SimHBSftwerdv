@@ -17,7 +17,7 @@ export class ClienteService {
     message?: string;
   }> {
     try {
-      const _cleanCPF = cpf.replace(/\D/g, '');
+      const cleanCPF = cpf.replace(/\D/g, '');
 
       if (!cleanCPF || cleanCPF.length !== 11) {
         return {
@@ -71,7 +71,7 @@ export class ClienteService {
       }
 
       // Search in database
-      const _clientData = await clienteRepository.findByCPF(cleanCPF);
+      const clientData = await clienteRepository.findByCPF(cleanCPF);
 
       if (!clientData) {
         console.log(`[CLIENTE_SERVICE] No client found for CPF: ${cleanCPF}`);
@@ -82,7 +82,7 @@ export class ClienteService {
       }
 
       // Apply PII masking
-      const _maskedData = {
+      const maskedData = {
         ...clientData,
         cpf: maskCPF(clientData.cpf),
         email: clientData.email ? maskEmail(clientData.email) : '',
@@ -113,14 +113,14 @@ catch (error) {
    */
   async getAddressByCEP(cep: string): Promise<unknown> {
     try {
-      const _cleanCep = cep.replace(/\D/g, '');
+      const cleanCep = cep.replace(/\D/g, '');
 
       if (cleanCep.length !== 8) {
         throw new Error('CEP inválido');
       }
 
       // Try multiple CEP APIs
-      const _apis = [
+      const apis = [
         `https://viacep.com.br/ws/${cleanCep}/json/`,
         `https://brasilapi.com.br/api/cep/v2/${cleanCep}`,
         `https://cep.awesomeapi.com.br/json/${cleanCep}`,
@@ -128,9 +128,9 @@ catch (error) {
 
       for (const apiUrl of apis) {
         try {
-          const _response = await fetch(apiUrl);
+          const response = await fetch(apiUrl);
           if (response.ok) {
-            const _data = await response.json();
+            const data = await response.json();
 
             // Normalize response from different APIs
             if (apiUrl.includes('viacep')) {
@@ -179,4 +179,4 @@ catch (error) {
   }
 }
 
-export const _clienteService = new ClienteService();
+export const clienteService = new ClienteService();

@@ -9,7 +9,7 @@
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 import fs from 'fs/promises';
 import path from 'path';
-import { CCB_COMPLETE_MAPPING, FieldPosition, yFromTop } from './ccbFieldMappingComplete';
+import { CCB_COMPLETEMAPPING, FieldPosition, yFromTop } from './ccbFieldMappingComplete';
 
 export interface CalibrationResult {
   success: boolean;
@@ -44,12 +44,12 @@ export class CCBCoordinateCalibrator {
     try {
       console.log('🔍 [CALIBRATOR] Iniciando diagnóstico completo do template...');
 
-      const _templateBytes = await fs.readFile(this.templatePath);
-      const _pdfDoc = await PDFDocument.load(templateBytes);
+      const templateBytes = await fs.readFile(this.templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
 
       // Verificar AcroForms
-      const _form = pdfDoc.getForm();
-      const _hasAcroForms = form && form.getFields().length > 0;
+      const form = pdfDoc.getForm();
+      const hasAcroForms = form && form.getFields().length > 0;
       const formFields: string[] = [];
 
       if (hasAcroForms) {
@@ -59,7 +59,7 @@ export class CCBCoordinateCalibrator {
       }
 
       // Obter dimensões da página
-      const _firstPage = pdfDoc.getPages()[0];
+      const firstPage = pdfDoc.getPages()[0];
       const { width, height } = firstPage.getSize();
 
       // Gerar recomendações
@@ -85,10 +85,10 @@ else {
       console.log(`   - Dimensões: ${width}x${height}`);
 
       return {
-        _hasAcroForms,
+        hasAcroForms,
         fields: formFields,
         pageSize: { width, height },
-        _recommendations,
+        recommendations,
       };
     }
 catch (error) {
@@ -112,19 +112,19 @@ catch (error) {
       // Garantir que diretório existe
       await fs.mkdir(this.outputDir, { recursive: true });
 
-      const _templateBytes = await fs.readFile(this.templatePath);
-      const _pdfDoc = await PDFDocument.load(templateBytes);
-      const _firstPage = pdfDoc.getPages()[0];
+      const templateBytes = await fs.readFile(this.templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
+      const firstPage = pdfDoc.getPages()[0];
       const { width, height } = firstPage.getSize();
 
       // Fontes para o grid
-      const _helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const _helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
       // Cores do grid
-      const _gridColor = rgb(0.2, 0.6, 1.0); // Azul claro
-      const _textColor = rgb(0.8, 0.0, 0.0); // Vermelho
-      const _highlightColor = rgb(0.0, 0.8, 0.0); // Verde
+      const gridColor = rgb(0.2, 0.6, 1.0); // Azul claro
+      const textColor = rgb(0.8, 0.0, 0.0); // Vermelho
+      const highlightColor = rgb(0.0, 0.8, 0.0); // Verde
 
       // Desenhar grid vertical
       for (let _x = 0; x <= width; x += gridSpacing) {
@@ -171,7 +171,7 @@ catch (error) {
       // Destacar campos específicos se solicitado
       if (highlightFields.length > 0) {
         highlightFields.forEach((fieldName) => {
-          const _fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
+          const fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
           if (fieldPos) {
             // Desenhar círculo de destaque
             firstPage.drawCircle({
@@ -194,8 +194,8 @@ catch (error) {
       }
 
       // Salvar PDF de calibração
-      const _outputPath = path.join(this.outputDir, `calibration_grid_${Date.now()}.pdf`);
-      const _pdfBytes = await pdfDoc.save();
+      const outputPath = path.join(this.outputDir, `calibration_grid_${Date.now()}.pdf`);
+      const pdfBytes = await pdfDoc.save();
       await fs.writeFile(outputPath, pdfBytes);
 
       console.log(`✅ [CALIBRATOR] Grid de calibração salvo: ${outputPath}`);
@@ -217,30 +217,30 @@ catch (error) {
 
       await fs.mkdir(this.outputDir, { recursive: true });
 
-      const _templateBytes = await fs.readFile(this.templatePath);
-      const _pdfDoc = await PDFDocument.load(templateBytes);
-      const _firstPage = pdfDoc.getPages()[0];
+      const templateBytes = await fs.readFile(this.templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
+      const firstPage = pdfDoc.getPages()[0];
       const { height } = firstPage.getSize();
 
       // Fontes
-      const _helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const _helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
       // Cor de teste (azul escuro para destacar dos dados reais)
-      const _testColor = rgb(0.0, 0.0, 0.8);
+      const testColor = rgb(0.0, 0.0, 0.8);
 
       // Desenhar dados de teste
       Object.entries(testData).forEach(([fieldName, value]) => {
-        const _fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
+        const fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
         if (fieldPos && value) {
-          const _font = (fieldPos as unknown).fontWeight == 'bold' ? helveticaBold : helvetica;
+          const font = (fieldPos as unknown).fontWeight == 'bold' ? helveticaBold : helvetica;
 
           // Desenhar o texto
           firstPage.drawText(value, {
             x: fieldPos.x,
             y: fieldPos.y,
             size: fieldPos.fontSize,
-            _font,
+            font,
             color: testColor,
           });
 
@@ -255,8 +255,8 @@ catch (error) {
       });
 
       // Salvar PDF de teste
-      const _outputPath = path.join(this.outputDir, `field_test_${Date.now()}.pdf`);
-      const _pdfBytes = await pdfDoc.save();
+      const outputPath = path.join(this.outputDir, `field_test_${Date.now()}.pdf`);
+      const pdfBytes = await pdfDoc.save();
       await fs.writeFile(outputPath, pdfBytes);
 
       console.log(`✅ [CALIBRATOR] Teste de campos salvo: ${outputPath}`);
@@ -281,20 +281,20 @@ catch (error) {
       console.log('⚡ [CALIBRATOR] Iniciando calibração inteligente...');
 
       // Gerar versão original
-      const _originalPath = await this.testFieldPositions(sampleData);
+      const originalPath = await this.testFieldPositions(sampleData);
 
       // Aplicar ajustes heurísticos baseados em padrões comuns
-      const _adjustedData = this.applyIntelligentAdjustments(sampleData);
-      const _adjustedPath = await this.testFieldPositions(adjustedData);
+      const adjustedData = this.applyIntelligentAdjustments(sampleData);
+      const adjustedPath = await this.testFieldPositions(adjustedData);
 
       // Gerar recomendações
-      const _recommendations = this.generateRecommendations(sampleData);
+      const recommendations = this.generateRecommendations(sampleData);
 
       console.log('✅ [CALIBRATOR] Calibração inteligente concluída');
       return {
-        _originalPath,
-        _adjustedPath,
-        _recommendations,
+        originalPath,
+        adjustedPath,
+        recommendations,
       };
     }
 catch (error) {
@@ -338,17 +338,17 @@ catch (error) {
       console.log('📊 [CALIBRATOR] Gerando relatório completo...');
 
       // Análise do template
-      const _templateAnalysis = await this.diagnoseTemplate();
+      const templateAnalysis = await this.diagnoseTemplate();
 
       // Grid de calibração
-      const _gridPath = await this.generateCalibrationGrid(50, true, [
+      const gridPath = await this.generateCalibrationGrid(50, true, [
         'devedorNome',
         'devedorCpf',
         'valorPrincipal',
       ]);
 
       // Recomendações específicas
-      const _recommendations = [
+      const recommendations = [
         '🎯 Use o grid de calibração para ajustar posições visualmente',
         '📱 Teste com dados reais de diferentes comprimentos',
         '🖨️ Considere diferenças entre visualização e impressão',
@@ -358,9 +358,9 @@ catch (error) {
 
       console.log('✅ [CALIBRATOR] Relatório completo gerado');
       return {
-        _templateAnalysis,
-        _gridPath,
-        _recommendations,
+        templateAnalysis,
+        gridPath,
+        recommendations,
       };
     }
 catch (error) {
@@ -371,4 +371,4 @@ catch (error) {
 }
 
 // Instância singleton
-export const _ccbCoordinateCalibrator = new CCBCoordinateCalibrator();
+export const ccbCoordinateCalibrator = new CCBCoordinateCalibrator();

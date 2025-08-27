@@ -73,8 +73,8 @@ class ClickSignWebhookService {
     }
 
     // Check timestamp age
-    const _currentTime = Math.floor(Date.now() / 1000);
-    const _webhookTime = parseInt(timestamp);
+    const currentTime = Math.floor(Date.now() / 1000);
+    const webhookTime = parseInt(timestamp);
 
     if (currentTime - webhookTime > this.maxTimestampAge) {
       console.error('[CLICKSIGN WEBHOOK] Request timestamp too old');
@@ -82,13 +82,13 @@ class ClickSignWebhookService {
     }
 
     // Validate HMAC signature
-    const _signedPayload = `${timestamp}.${payload}`;
-    const _expectedSignature = crypto
+    const signedPayload = `${timestamp}.${payload}`;
+    const expectedSignature = crypto
       .createHmac('sha256', this.webhookSecret)
       .update(signedPayload)
       .digest('hex');
 
-    const _isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+    const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
 
     if (!isValid) {
       console.error('[CLICKSIGN WEBHOOK] Invalid signature');
@@ -101,7 +101,7 @@ class ClickSignWebhookService {
    * Check for duplicate events
    */
   isDuplicateEvent(eventId: string): boolean {
-    const _key = `${eventId}_${Date.now()}`;
+    const key = `${eventId}_${Date.now()}`;
 
     if (this.processedEvents.has(key)) {
       return true;
@@ -111,7 +111,7 @@ class ClickSignWebhookService {
 
     // Clean old events (keep last 1000)
     if (this.processedEvents.size > 1000) {
-      const _entries = Array.from(this.processedEvents);
+      const entries = Array.from(this.processedEvents);
       this.processedEvents = new Set(entries.slice(-500));
     }
 
@@ -128,18 +128,18 @@ class ClickSignWebhookService {
     status?: string;
     documentKey?: string;
   }> {
-    const _eventType = event.event;
-    const _eventData = event.data;
+    const eventType = event.event;
+    const eventData = event.data;
 
     console.log(`[CLICKSIGN WEBHOOK] Processing event: ${eventType}`, {
       documentKey: eventData.document?.key,
       listKey: eventData.list?.key,
       signerEmail: eventData.signer?.email,
-      occurredAt: event.occurred_at,
+      occurredAt: event.occurredat,
     });
 
     // Find related proposal
-    const _proposta = await this.findProposal(eventData);
+    const proposta = await this.findProposal(eventData);
 
     if (!proposta) {
       console.warn('[CLICKSIGN WEBHOOK] No proposal found for event');
@@ -193,8 +193,8 @@ class ClickSignWebhookService {
    * Find proposal by ClickSign keys (API v1/v2)
    */
   private async findProposal(data: WebhookEvent['data']) {
-    const _documentKey = data.document?.key;
-    const _listKey = data.list?.key;
+    const documentKey = data.document?.key;
+    const listKey = data.list?.key;
 
     if (documentKey) {
       return await storage.getPropostaByClickSignKey('document', documentKey);
@@ -212,10 +212,10 @@ else if (listKey) {
   private async handleAutoClose(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] 🎉 AUTO_CLOSE for proposal: ${proposta.id}`);
 
-    const _now = _getBrasiliaTimestamp();
+    const now = _getBrasiliaTimestamp();
 
     // Update proposal with signature completion
-    const _updateData = {
+    const updateData = {
       clicksignStatus: 'finished',
       clicksignSignedAt: new Date(now),
       assinaturaEletronicaConcluida: true,
@@ -257,7 +257,7 @@ else if (listKey) {
       console.log(
         `[CLICKSIGN → STORAGE] 📥 Iniciando processamento automático do documento assinado`
       );
-      const _processingResult = await documentProcessingService.processSignedDocument(
+      const processingResult = await documentProcessingService.processSignedDocument(
         proposta.id,
         ProcessingSource.WEBHOOK,
         data.document?.key || data.list?.key
@@ -386,7 +386,7 @@ catch (error) {
   private async handleSign(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] ✍️ Document signed for proposal: ${proposta.id}`);
 
-    const _signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
+    const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
 
     // Update proposal to mark electronic signature as completed
     await storage.updateProposta(proposta.id, {
@@ -410,7 +410,7 @@ catch (error) {
     // PAM V1.0: Processar documento assinado automaticamente (evento de assinatura individual)
     try {
       console.log(`[CLICKSIGN → STORAGE] 📥 Processando documento após assinatura individual`);
-      const _processingResult = await documentProcessingService.processSignedDocument(
+      const processingResult = await documentProcessingService.processSignedDocument(
         proposta.id,
         ProcessingSource.WEBHOOK,
         data.document?.key
@@ -446,7 +446,7 @@ catch (error) {
   private async handleRefusal(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] ❌ Document refused for proposal: ${proposta.id}`);
 
-    const _signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
+    const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
 
     await storage.updateProposta(proposta.id, {
       clicksignStatus: 'refused',
@@ -486,7 +486,7 @@ catch (error) {
   private async handleDocumentSigned(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document signed for proposal: ${proposta.id}`);
 
-    const _updateData = {
+    const updateData = {
       clicksignStatus: 'signed',
       clicksignSignedAt: new Date(),
       assinaturaEletronicaConcluida: true,
@@ -516,9 +516,9 @@ catch (error) {
   private async handleDocumentFinished(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document finished for proposal: ${proposta.id}`);
 
-    const _finishedAt = _getBrasiliaTimestamp();
+    const finishedAt = _getBrasiliaTimestamp();
 
-    const _updateData = {
+    const updateData = {
       clicksignStatus: 'finished',
       clicksignSignedAt: new Date(finishedAt),
     };
@@ -542,7 +542,7 @@ catch (error) {
   private async handleDocumentCancelled(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document cancelled for proposal: ${proposta.id}`);
 
-    const _updateData = {
+    const updateData = {
       clicksignStatus: 'cancelled',
     };
 
@@ -565,7 +565,7 @@ catch (error) {
   private async handleDocumentRefused(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document refused for proposal: ${proposta.id}`);
 
-    const _updateData = {
+    const updateData = {
       clicksignStatus: 'refused',
     };
 
@@ -591,7 +591,7 @@ catch (error) {
 
       // ==== PROTEÇÃO CONTRA CONDIÇÃO DE CORRIDA ====
       // Check if collection already exists (ENHANCED CHECK)
-      const _existingCollections = await storage.getInterCollectionsByProposalId(proposta.id);
+      const existingCollections = await storage.getInterCollectionsByProposalId(proposta.id);
 
       if (existingCollections && existingCollections.length > 0) {
         console.log(
@@ -626,7 +626,7 @@ catch (error) {
 
       // Wait 500ms and check again to prevent race conditions
       await new Promise((resolve) => setTimeout(resolve, 500));
-      const _secondCheck = await storage.getInterCollectionsByProposalId(proposta.id);
+      const secondCheck = await storage.getInterCollectionsByProposalId(proposta.id);
 
       if (secondCheck && secondCheck.length > 0) {
         console.log(
@@ -643,19 +643,19 @@ catch (error) {
       }
 
       // Parse proposal data
-      const _clienteData =
+      const clienteData =
         typeof proposta.clienteData == 'string'
           ? JSON.parse(proposta.clienteData)
           : proposta.clienteData || {};
 
-      const _condicoesData =
+      const condicoesData =
         typeof proposta.condicoesData == 'string'
           ? JSON.parse(proposta.condicoesData)
           : proposta.condicoesData || {};
 
       // Get number of installments and value per installment
-      const _numeroParcelas = parseInt(condicoesData.prazoMeses || '1');
-      const _valorParcela = parseFloat(String(condicoesData.valorParcela || 0));
+      const numeroParcelas = parseInt(condicoesData.prazoMeses || '1');
+      const valorParcela = parseFloat(String(condicoesData.valorParcela || 0));
 
       console.log(
         `[CLICKSIGN → INTER] ✅ AUTORIZADO: Criando ${numeroParcelas} boletos de R$ ${valorParcela} cada para proposta ${proposta.id}`
@@ -664,16 +664,16 @@ catch (error) {
         `[CLICKSIGN → INTER] 📊 Detalhes: numeroParcelas=${numeroParcelas}, valorParcela=${valorParcela}`
       );
 
-      const _successfulBoletos = [];
-      const _failedBoletos = [];
+      const successfulBoletos = [];
+      const failedBoletos = [];
 
       // Create one boleto for each installment
       for (let _i = 0; i < numeroParcelas; i++) {
         try {
-          const _parcelaNumero = i + 1;
+          const parcelaNumero = i + 1;
 
           // Generate boleto according to Inter Bank API requirements
-          const _boletoData = {
+          const boletoData = {
             seuNumero: `${proposta.id.slice(0, 12)}-${parcelaNumero}`, // Max 15 chars with installment number
             valorNominal: valorParcela, // Use installment value, not total
             dataVencimento: this.calculateDueDateByMonth(i + 1), // First installment in 30 days, then monthly
@@ -705,11 +705,11 @@ catch (error) {
           };
 
           console.log(`[CLICKSIGN → INTER] Creating boleto ${parcelaNumero}/${numeroParcelas}`);
-          const _createResponse = await interBankService.emitirCobranca(boletoData);
+          const createResponse = await interBankService.emitirCobranca(boletoData);
 
           if (createResponse.codigoSolicitacao) {
             // Fetch collection details
-            const _interCollection = await interBankService.recuperarCobranca(
+            const interCollection = await interBankService.recuperarCobranca(
               createResponse.codigoSolicitacao
             );
 
@@ -782,7 +782,7 @@ catch (error) {
    * Calculate due date
    */
   private calculateDueDate(days: number): string {
-    const _date = new Date();
+    const date = new Date();
     date.setDate(date.getDate() + days);
     return date.toISOString().split('T')[0];
   }
@@ -791,7 +791,7 @@ catch (error) {
    * Calculate due date by month (for installments)
    */
   private calculateDueDateByMonth(monthNumber: number): string {
-    const _date = new Date();
+    const date = new Date();
     date.setMonth(date.getMonth() + monthNumber);
     return date.toISOString().split('T')[0];
   }
@@ -806,4 +806,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _clickSignWebhookService = new ClickSignWebhookService();
+export const clickSignWebhookService = new ClickSignWebhookService();

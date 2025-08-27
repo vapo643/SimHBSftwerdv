@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { clientService } from '../services/genericService';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/clientes
@@ -16,7 +16,7 @@ const _router = Router();
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const _result = await clientService.executeOperation('list_clients', req.query);
+    const result = await clientService.executeOperation('list_clients', req.query);
     res.json(_result);
   }
 catch (error) {

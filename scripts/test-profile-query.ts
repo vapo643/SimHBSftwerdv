@@ -27,7 +27,7 @@ async function testProfileQuery() {
       .select(
         `
         id,
-        full_name,
+        fullname,
         loja_id
       `
       )
@@ -37,18 +37,18 @@ async function testProfileQuery() {
     console.log('\nProfile with basic select:', joinData);
     console.log('Join error:', joinError);
 
-    // If there's a loja_id, try to fetch loja separately
+    // If there's a lojaid, try to fetch loja separately
     if (joinData?.loja_id) {
       const { data: lojaData, error: lojaError } = await supabase
         .from('lojas')
         .select(
           `
           id,
-          nome_loja,
-          parceiro_id,
+          nomeloja,
+          parceiroid,
           parceiros (
             id,
-            razao_social,
+            razaosocial,
             cnpj
           )
         `

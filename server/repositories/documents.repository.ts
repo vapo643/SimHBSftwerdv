@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db, createServerSupabaseAdminClient } from '../lib/_supabase.js';
+import { db, createServerSupabaseAdminClient } from '../lib/supabase.js';
 import { propostaDocumentos, propostas } from '@shared/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import type { PropostaDocumento } from '@shared/schema';
@@ -65,8 +65,8 @@ catch (error) {
       const [document] = await db
         .insert(propostaDocumentos)
         .values({
-          propostaId: documentData.proposta_id,
-          nomeArquivo: documentData.nome_arquivo,
+          propostaId: documentData.propostaid,
+          nomeArquivo: documentData.nomearquivo,
           url: documentData.url,
           tipo: documentData.tipo,
           tamanho: documentData.tamanho,
@@ -87,7 +87,7 @@ catch (error) {
    */
   async deleteDocument(documentId: number): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .delete(propostaDocumentos)
         .where(eq(propostaDocumentos.id, documentId))
         .returning();
@@ -128,12 +128,12 @@ catch (error) {
     contentType: string
   ): Promise<{ publicUrl: string } | null> {
     try {
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       const { data, error } = await _supabase.storage
         .from('documents')
         .upload(filePath, fileBuffer, {
-          _contentType,
+          contentType,
           upsert: false,
         });
 
@@ -157,7 +157,7 @@ catch (error) {
    */
   async generateSignedUrl(path: string, expiresIn: number = 3600): Promise<string | null> {
     try {
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       const { data, error } = await _supabase.storage
         .from('documents')
@@ -177,4 +177,4 @@ catch (error) {
   }
 }
 
-export const _documentsRepository = new DocumentsRepository();
+export const documentsRepository = new DocumentsRepository();

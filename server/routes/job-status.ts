@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { testQueueService } from '../services/testService.js';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/job-status/:id
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const _result = await testQueueService.executeOperation('get_job_status', {
+    const result = await testQueueService.executeOperation('get_job_status', {
       jobId: req.params.id,
     });
     res.json(_result);
@@ -34,7 +34,7 @@ catch (error) {
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const _result = await testQueueService.executeOperation('list_jobs', req.query);
+    const result = await testQueueService.executeOperation('list_jobs', req.query);
     res.json(_result);
   }
 catch (error) {

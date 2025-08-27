@@ -27,7 +27,7 @@ export class CCBGenerationServiceV2 {
       console.log('🚀 [CCB V2] Iniciando geração inteligente para proposta:', propostaData.id);
 
       // Validar dados essenciais
-      const _validation = this.validatePropostaData(propostaData);
+      const validation = this.validatePropostaData(propostaData);
       if (!validation.valid) {
         return {
           success: false,
@@ -37,28 +37,28 @@ export class CCBGenerationServiceV2 {
       }
 
       // Carregar template
-      const _templateBytes = await fs.readFile(this.templatePath);
-      const _pdfDoc = await PDFDocument.load(templateBytes);
+      const templateBytes = await fs.readFile(this.templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
 
       // Usar sistema de detecção inteligente
-      const _detector = new FieldDetector(pdfDoc);
-      const _font = await pdfDoc.embedFont('Helvetica');
+      const detector = new FieldDetector(pdfDoc);
+      const font = await pdfDoc.embedFont('Helvetica');
 
       // Preencher campos com mapeamento corrigido
       await detector.detectAndFillFields(propostaData, font);
 
       // Obter logs do processo
-      const _logs = detector.getLogs();
+      const logs = detector.getLogs();
 
       // Salvar PDF
-      const _pdfBytes = await pdfDoc.save();
+      const pdfBytes = await pdfDoc.save();
 
       console.log('✅ [CCB V2] Geração concluída com sucesso');
 
       return {
         success: true,
-        _pdfBytes,
-        _logs,
+        pdfBytes,
+        logs,
       };
     }
 catch (error) {
@@ -75,12 +75,12 @@ catch (error) {
    * Valida dados da proposta
    */
   private validatePropostaData(data): { valid: boolean; missingFields: string[] } {
-    const _requiredFields = ['id', 'clienteNome', 'clienteCpf', 'valor', 'prazo'];
+    const requiredFields = ['id', 'clienteNome', 'clienteCpf', 'valor', 'prazo'];
 
-    const _missingFields = requiredFields.filter((field) => !data[field]);
+    const missingFields = requiredFields.filter((field) => !data[field]);
 
     // Avisos para campos opcionais mas importantes
-    const _optionalButImportant = [
+    const optionalButImportant = [
       'clienteRg',
       'clienteEndereco',
       'dadosPagamentoBanco',
@@ -89,7 +89,7 @@ catch (error) {
       'taxaJuros',
     ];
 
-    const _missingOptional = optionalButImportant.filter((field) => !data[field]);
+    const missingOptional = optionalButImportant.filter((field) => !data[field]);
 
     if (missingOptional.length > 0) {
       console.log(`⚠️ [CCB V2] Campos opcionais vazios: ${missingOptional.join(', ')}`);
@@ -97,7 +97,7 @@ catch (error) {
 
     return {
       valid: missingFields.length == 0,
-      _missingFields,
+      missingFields,
     };
   }
 
@@ -106,8 +106,8 @@ catch (error) {
    */
   async saveCCBToStorage(pdfBytes: Uint8Array, propostaId: string): Promise<string | null> {
     try {
-      const _fileName = `ccb_${propostaId}_${Date.now()}.pdf`;
-      const _filePath = `ccb/${fileName}`;
+      const fileName = `ccb_${propostaId}_${Date.now()}.pdf`;
+      const filePath = `ccb/${fileName}`;
 
       const { data, error } = await _supabase.storage.from('documents').upload(filePath, pdfBytes, {
         contentType: 'application/pdf',
@@ -158,7 +158,7 @@ catch (error) {
       console.log('🔍 [CCB V2] Buscando linha digitável para proposta:', propostaId);
 
       // TODO: Implementar query real
-      // const _result = await db
+      // const result = await db
       //   .select()
       //   .from(interCollections)
       //   .where(eq(interCollections.propostaId, propostaId))

@@ -6,7 +6,7 @@
  * total de todas as mudanças de estado das propostas.
  */
 
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { statusTransitions } from '../../shared/schema.js';
 import type { InsertStatusTransition } from '../../shared/schema.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
@@ -41,7 +41,7 @@ export async function logStatusTransition(transition: StatusTransitionLog) {
     console.log(`[AUDIT V2.0] Triggered by: ${transition.triggeredBy}`);
 
     // Add timestamp to metadata
-    const _enrichedMetadata = {
+    const enrichedMetadata = {
       ...transition.metadata,
       timestamp_brasilia: _getBrasiliaTimestamp(),
       source_version: 'V2.0',
@@ -82,7 +82,7 @@ export async function getProposalStatusHistory(propostaId: string) {
   try {
     console.log(`[AUDIT V2.0] 📖 Fetching status history for proposal ${propostaId}`);
 
-    const _transitions = await db
+    const transitions = await db
       .select()
       .from(statusTransitions)
       .where(eq(statusTransitions.propostaId, propostaId))
@@ -106,7 +106,7 @@ catch (error) {
  */
 export async function getLastTransition(propostaId: string) {
   try {
-    const _transitions = await db
+    const transitions = await db
       .select()
       .from(statusTransitions)
       .where(
@@ -169,7 +169,7 @@ export function isValidTransition(currentStatus: string, targetStatus: string): 
     return true;
   }
 
-  const _allowedTransitions = validTransitions[currentStatus];
+  const allowedTransitions = validTransitions[currentStatus];
   return allowedTransitions ? allowedTransitions.includes(targetStatus) : false;
 }
 
@@ -177,12 +177,12 @@ export function isValidTransition(currentStatus: string, targetStatus: string): 
 import { eq, and, isNull, desc } from 'drizzle-orm';
 
 // Export the service
-export const _auditService = {
-  _logStatusTransition,
-  _getProposalStatusHistory,
-  _getLastTransition,
-  _logFailedTransition,
-  _isValidTransition,
+export const auditService = {
+  logStatusTransition,
+  getProposalStatusHistory,
+  getLastTransition,
+  logFailedTransition,
+  isValidTransition,
 };
 
 export default auditService;

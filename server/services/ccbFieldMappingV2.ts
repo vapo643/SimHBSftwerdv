@@ -349,8 +349,8 @@ export class CoordinateAdjuster {
    */
   static validateFieldPlacement(page: PDFPage, coord: FieldCoordinate, value: string): boolean {
     // Validação simplificada - em produção usaríamos OCR
-    const _hasValue = Boolean(value && value.trim().length > 0);
-    const _inBounds =
+    const hasValue = Boolean(value && value.trim().length > 0);
+    const inBounds =
       coord.x >= 0 &&
       coord.x <= 595 && // A4 width
       coord.y >= 0 &&
@@ -363,7 +363,7 @@ export class CoordinateAdjuster {
    * Aplica ajustes inteligentes baseados no tipo de campo
    */
   static smartAdjust(fieldName: string, coord: FieldCoordinate): FieldCoordinate {
-    const _adjusted = { ...coord };
+    const adjusted = { ...coord };
 
     // Ajustes específicos por tipo de campo
     if (fieldName.includes('data')) {
@@ -404,19 +404,19 @@ export class FieldDetector {
     for (const [fieldName, coord] of Object.entries(CCB_FIELD_MAPPING_V2)) {
       try {
         // Obter página correta
-        const _pageIndex = coord.page - 1;
+        const pageIndex = coord.page - 1;
         if (pageIndex < 0 || pageIndex >= this.pages.length) {
           this.log(`Campo ${fieldName}: Página ${coord.page} não existe`);
           continue;
         }
 
-        const _page = this.pages[pageIndex];
+        const page = this.pages[pageIndex];
 
         // Ajustar coordenadas inteligentemente
-        const _adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, coord);
+        const adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, coord);
 
         // Obter valor do campo
-        const _value = await this.getFieldValue(fieldName, _data);
+        const value = await this.getFieldValue(fieldName, _data);
         if (!value) {
           this.log(`Campo ${fieldName}: Sem valor para preencher`);
           continue;
@@ -445,11 +445,11 @@ catch (error) {
    * Preenche um campo específico
    */
   private fillField(page: PDFPage, coord: FieldCoordinate, value: string, font: PDFFont): void {
-    const _size = coord.size || 11;
+    const size = coord.size || 11;
 
     // Aplicar quebra de linha se necessário
     if (coord.maxWidth) {
-      const _lines = this.wrapText(value, coord.maxWidth, font, size);
+      const lines = this.wrapText(value, coord.maxWidth, font, size);
       let _yOffset = 0;
 
       for (const line of lines) {
@@ -479,13 +479,13 @@ else {
    * Quebra texto em múltiplas linhas
    */
   private wrapText(text: string, maxWidth: number, font: PDFFont, size: number): string[] {
-    const _words = text.split(' ');
+    const words = text.split(' ');
     const lines: string[] = [];
     let _currentLine = '';
 
     for (const word of words) {
-      const _testLine = currentLine ? `${currentLine} ${word}` : word;
-      const _width = font.widthOfTextAtSize(testLine, size);
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const width = font.widthOfTextAtSize(testLine, size);
 
       if (width <= maxWidth) {
         currentLine = testLine;
@@ -505,7 +505,7 @@ else {
    */
   private async getFieldValue(fieldName: string, data): Promise<string> {
     // Buscar configuração da empresa (vamos simular por enquanto)
-    const _configEmpresa = {
+    const configEmpresa = {
       razaoSocial: 'SIMPIX LTDA',
       cnpj: '00.000.000/0001-00',
       endereco: 'Av. Paulista, 1000',
@@ -517,15 +517,15 @@ else {
     };
 
     // Formatar endereço completo do cliente
-    const _enderecoClienteCompleto = this.formatarEnderecoCompleto(_data);
+    const enderecoClienteCompleto = this.formatarEnderecoCompleto(_data);
 
     // Formatar endereço completo do credor
-    const _enderecoCredorCompleto = `${configEmpresa.endereco}, ${configEmpresa.complemento} - ${configEmpresa.bairro} - ${configEmpresa.cidade}/${configEmpresa.uf} - CEP ${configEmpresa.cep}`;
+    const enderecoCredorCompleto = `${configEmpresa.endereco}, ${configEmpresa.complemento} - ${configEmpresa.bairro} - ${configEmpresa.cidade}/${configEmpresa.uf} - CEP ${configEmpresa.cep}`;
 
     // Determinar se é PF ou PJ
-    const _isPJ = data.tipoPessoa == 'PJ';
-    const _nomeOuRazao = isPJ ? data.clienteRazaoSocial || data.clienteNome : data.clienteNome;
-    const _documentoIdentificacao = isPJ ? data.clienteCnpj || data.clienteCpf : data.clienteCpf;
+    const isPJ = data.tipoPessoa == 'PJ';
+    const nomeOuRazao = isPJ ? data.clienteRazaoSocial || data.clienteNome : data.clienteNome;
+    const documentoIdentificacao = isPJ ? data.clienteCnpj || data.clienteCpf : data.clienteCpf;
 
     // Mapeamento completo com TODOS os campos novos
     const fieldMap: { [key: string]: string } = {
@@ -651,11 +651,11 @@ else {
    */
   private generatePaymentFields(data): { [key: string]: string } {
     const fields: { [key: string]: string } = {};
-    const _numParcelas = Math.min(data.prazo || 1, 6);
-    const _valorParcela = this.calculateParcela(data.valor, data.taxaJuros, data.prazo);
+    const numParcelas = Math.min(data.prazo || 1, 6);
+    const valorParcela = this.calculateParcela(data.valor, data.taxaJuros, data.prazo);
 
     for (let _i = 1; i <= numParcelas; i++) {
-      const _vencimento = this.calculateVencimento(
+      const vencimento = this.calculateVencimento(
         data.dataAprovacao || data.createdAt || new Date().toISOString(),
         i
       );
@@ -679,7 +679,7 @@ else {
    */
   private formatCurrency(value: number | string): string {
     if (!value) return 'R$ 0,00';
-    const _num = typeof value == 'string' ? parseFloat(value) : value;
+    const num = typeof value == 'string' ? parseFloat(value) : value;
     return `R$ ${num.toFixed(2).replace('.', ',')}`;
   }
 
@@ -735,7 +735,7 @@ else {
       banrisul: '041',
     };
 
-    const _normalizedBank = bankName.toLowerCase().trim();
+    const normalizedBank = bankName.toLowerCase().trim();
 
     // Busca direta
     if (bankCodes[normalizedBank]) {
@@ -758,8 +758,8 @@ else {
   private formatAccountNumber(agencia: string, conta: string, digito?: string): string {
     if (!agencia && !conta) return '';
 
-    const _agenciaFormatted = agencia || '';
-    const _contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : '';
+    const agenciaFormatted = agencia || '';
+    const contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : '';
 
     if (agenciaFormatted && contaFormatted) {
       return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`;
@@ -780,7 +780,7 @@ else if (contaFormatted) {
   private formatarEnderecoCompleto(data): string {
     // Se tiver endereço detalhado, usar
     if (data.clienteLogradouro) {
-      const _partes = [
+      const partes = [
         data.clienteLogradouro,
         data.clienteNumero ? `nº ${data.clienteNumero}` : '',
         data.clienteComplemento,
@@ -803,8 +803,8 @@ else if (contaFormatted) {
     if (!valor || !prazo) return 0;
 
     // IOF = 0,38% + 0,0082% ao dia
-    const _iofFixo = valor * 0.0038;
-    const _iofDiario = valor * 0.000082 * (prazo * 30); // Aproximado
+    const iofFixo = valor * 0.0038;
+    const iofDiario = valor * 0.000082 * (prazo * 30); // Aproximado
 
     return iofFixo + iofDiario;
   }
@@ -813,9 +813,9 @@ else if (contaFormatted) {
    * Calcula valor total financiado
    */
   private calcularTotalFinanciado(data): number {
-    const _valor = Number(data.valor) || 0;
-    const _tac = Number(data.valorTac || data.tacValor) || 50;
-    const _iof = Number(data.valorIof) || this.calcularIOF(valor, data.prazo);
+    const valor = Number(data.valor) || 0;
+    const tac = Number(data.valorTac || data.tacValor) || 50;
+    const iof = Number(data.valorIof) || this.calcularIOF(valor, data.prazo);
 
     return valor + tac + iof;
   }
@@ -824,10 +824,10 @@ else if (contaFormatted) {
    * Calcula valor líquido liberado
    */
   private calcularLiquidoLiberado(data): number {
-    const _valor = Number(data.valor) || 0;
-    const _tac = Number(data.valorTac || data.tacValor) || 50;
-    const _tarifaTed = Number(data.tarifaTed) || 10;
-    const _taxaCredito = Number(data.taxaCredito) || 50;
+    const valor = Number(data.valor) || 0;
+    const tac = Number(data.valorTac || data.tacValor) || 50;
+    const tarifaTed = Number(data.tarifaTed) || 10;
+    const taxaCredito = Number(data.taxaCredito) || 50;
 
     return valor - tac - tarifaTed - taxaCredito;
   }
@@ -864,20 +864,20 @@ else if (contaFormatted) {
    */
   private calculateCET(taxaJuros: number | string, prazo: number): string {
     // Converte taxa para número se necessário
-    const _taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
+    const taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
 
     if (!taxa || !prazo) return '2,5% a.m.'; // Valor padrão
 
     // CET simplificado: taxa + IOF + TAC/prazo
-    const _iofPercentual = 0.38; // IOF de 0,38%
-    const _tacValor = 50; // TAC de R$ 50
-    const _valorMedio = 5000; // Valor médio estimado para cálculo
+    const iofPercentual = 0.38; // IOF de 0,38%
+    const tacValor = 50; // TAC de R$ 50
+    const valorMedio = 5000; // Valor médio estimado para cálculo
 
-    const _tacPercentual = ((tacValor / valorMedio) * 100) / prazo;
-    const _cetMensal = taxa + iofPercentual / prazo + tacPercentual;
+    const tacPercentual = ((tacValor / valorMedio) * 100) / prazo;
+    const cetMensal = taxa + iofPercentual / prazo + tacPercentual;
 
     // Calcula CET anual
-    const _cetAnual = (Math.pow(1 + cetMensal / 100, 12) - 1) * 100;
+    const cetAnual = (Math.pow(1 + cetMensal / 100, 12) - 1) * 100;
 
     return `${cetMensal.toFixed(2)}% a.m. / ${cetAnual.toFixed(2)}% a.a.`;
   }
@@ -891,8 +891,8 @@ else if (contaFormatted) {
     prazo: number
   ): number {
     // Converte valores para número
-    const _principal = typeof valor == 'string' ? parseFloat(valor) : valor;
-    const _taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
+    const principal = typeof valor == 'string' ? parseFloat(valor) : valor;
+    const taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
 
     if (!principal || !prazo) return 0;
 
@@ -902,8 +902,8 @@ else if (contaFormatted) {
     }
 
     // Tabela Price: P = V * (i * (1+i)^n) / ((1+i)^n - 1)
-    const _i = taxa / 100; // Taxa em decimal
-    const _parcela = (principal * (i * Math.pow(1 + i, prazo))) / (Math.pow(1 + i, prazo) - 1);
+    const i = taxa / 100; // Taxa em decimal
+    const parcela = (principal * (i * Math.pow(1 + i, prazo))) / (Math.pow(1 + i, prazo) - 1);
 
     return parcela;
   }
@@ -938,7 +938,7 @@ export class FallbackSystem {
     primaryCoord: FieldCoordinate,
     font: PDFFont
   ): Promise<boolean> {
-    const _strategies = [
+    const strategies = [
       // Estratégia 1: Usar coordenadas primárias
       () => this.tryFill(page, primaryCoord, value, font),
 
@@ -952,9 +952,9 @@ export class FallbackSystem {
       () => {
         if (primaryCoord.fallbackX && primaryCoord.fallbackY) {
           return this.tryFill(
-            _page,
+            page,
             { ...primaryCoord, x: primaryCoord.fallbackX, y: primaryCoord.fallbackY },
-            _value,
+            value,
             font
           );
         }

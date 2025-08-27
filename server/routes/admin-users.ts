@@ -10,7 +10,7 @@ import { users } from '../../shared/schema';
 import { db } from '../lib/supabase';
 import { isNull } from 'drizzle-orm';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/admin/users
@@ -20,7 +20,7 @@ router.get('/users', async (req: Request, res: Response) => {
   try {
     console.log('[ADMIN USERS] Fetching all users...');
 
-    const _allUsers = await db
+    const allUsers = await db
       .select({
         id: users.id,
         name: users.name,

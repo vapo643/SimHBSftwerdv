@@ -104,7 +104,7 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
   }
 
   // X-Request-ID para rastreamento
-  const _requestId = req.headers['x-request-id'] || generateRequestId();
+  const requestId = req.headers['x-request-id'] || generateRequestId();
   res.setHeader('X-Request-ID', requestId);
 
   // Previne informações de timing
@@ -126,13 +126,13 @@ function generateRequestId(): string {
 // Configuração CORS segura
 export function setupCORS() {
   // In development, allow Replit preview URLs and localhost
-  const _allowedOrigins =
+  const allowedOrigins =
     process.env.NODE_ENV == 'production'
       ? [process.env.FRONTEND_URL || 'https://simpix.com.br']
       : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'];
 
   // Allow any Replit URL in development
-  const _isReplitUrl = (origin: string) => {
+  const isReplitUrl = (origin: string) => {
     return origin.includes('.replit.dev') || origin.includes('.repl.co');
   };
 

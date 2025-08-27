@@ -26,8 +26,8 @@ export function fileIntegrityMiddleware(
   next: NextFunction
 ) {
   // Store original send methods
-  const _originalSend = res.send;
-  const _originalJson = res.json;
+  const originalSend = res.send;
+  const originalJson = res.json;
 
   // Override send method to add integrity headers
   res.send = function (data) {
@@ -36,7 +36,7 @@ export function fileIntegrityMiddleware(
       res.getHeader('Content-Type')?.toString().includes('application/pdf')
     ) {
       // Generate hashes for file content
-      const _integrity = generateFileHashes(_data);
+      const integrity = generateFileHashes(_data);
 
       // Add integrity headers
       res.setHeader('X-Content-SHA256', integrity.sha256);
@@ -55,7 +55,7 @@ export function fileIntegrityMiddleware(
 
       // Log file download with integrity info
       securityLogger.logEvent({
-        type: SecurityEventType.DATA_ACCESS,
+        type: SecurityEventType.DATAACCESS,
         severity: 'LOW',
         userId: (req as unknown).user?.id,
         userEmail: (req as unknown).user?.email,
@@ -77,9 +77,9 @@ export function fileIntegrityMiddleware(
   // Override json method to add integrity for JSON downloads
   res.json = function (data) {
     if (req.query.download == 'true' || req.headers['x-download-request'] == 'true') {
-      const _jsonString = JSON.stringify(_data);
-      const _buffer = Buffer.from(jsonString, 'utf-8');
-      const _integrity = generateFileHashes(buffer);
+      const jsonString = JSON.stringify(_data);
+      const buffer = Buffer.from(jsonString, 'utf-8');
+      const integrity = generateFileHashes(buffer);
 
       res.setHeader('X-Content-SHA256', integrity.sha256);
       res.setHeader('X-Content-Size', integrity.size.toString());
@@ -105,7 +105,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
     }
 
     // Get stored integrity info
-    const _storedIntegrity = getFileIntegrity(fileId);
+    const storedIntegrity = getFileIntegrity(fileId);
 
     if (!storedIntegrity) {
       return res.status(404).json({
@@ -114,7 +114,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
     }
 
     // Verify provided hashes
-    const _verification = {
+    const verification = {
       valid: true,
       errors: [] as string[],
     };
@@ -140,7 +140,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
     securityLogger.logEvent({
       type: verification.valid
         ? SecurityEventType.DATA_ACCESS
-        : SecurityEventType.FILE_INTEGRITY_VIOLATION,
+        : SecurityEventType.FILE_INTEGRITYVIOLATION,
       severity: verification.valid ? 'LOW' : 'HIGH',
       userId: (req as unknown).user?.id,
       userEmail: (req as unknown).user?.email,
@@ -149,8 +149,8 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       endpoint: req.originalUrl,
       success: verification.valid,
       details: {
-        _fileId,
-        _verification,
+        fileId,
+        verification,
       },
     });
 

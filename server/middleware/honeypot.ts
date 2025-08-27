@@ -10,8 +10,8 @@ import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-
 import { createHash } from 'crypto';
 
 // Track suspicious IPs (use Redis in production)
-const _suspiciousIPs = new Map<
-  _string,
+const suspiciousIPs = new Map<
+  string,
   {
     count: number;
     firstSeen: Date;
@@ -74,23 +74,23 @@ function getSuspiciousIP(ip: string) {
  * Honeypot endpoint handler
  */
 export function honeypotHandler(req: Request, res: Response) {
-  const _ip = getClientIP(req);
-  const _userAgent = req.headers['user-agent'] || 'unknown';
-  const _endpoint = req.originalUrl;
+  const ip = getClientIP(req);
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  const endpoint = req.originalUrl;
 
   // Track suspicious activity
-  const _suspiciousRecord = getSuspiciousIP(ip);
+  const suspiciousRecord = getSuspiciousIP(ip);
   suspiciousRecord.count++;
   suspiciousRecord.lastSeen = new Date();
   suspiciousRecord.endpoints.add(endpoint);
 
   // Log security event
   securityLogger.logEvent({
-    type: SecurityEventType.SUSPICIOUS_ACTIVITY,
+    type: SecurityEventType.SUSPICIOUSACTIVITY,
     severity: 'HIGH',
     ipAddress: ip,
-    _userAgent,
-    _endpoint,
+    userAgent,
+    endpoint,
     success: false,
     details: {
       honeypot: true,
@@ -103,14 +103,14 @@ export function honeypotHandler(req: Request, res: Response) {
   });
 
   // Respond with realistic but fake error
-  const _fakeResponses = [
+  const fakeResponses = [
     { status: 404, message: 'Endpoint não encontrado' },
     { status: 403, message: 'Acesso negado' },
     { status: 401, message: 'Não autorizado' },
     { status: 500, message: 'Erro interno do servidor' },
   ];
 
-  const _response = fakeResponses[Math.floor(Math.random() * fakeResponses.length)];
+  const response = fakeResponses[Math.floor(Math.random() * fakeResponses.length)];
 
   // Add random delay to simulate processing
   setTimeout(
@@ -131,25 +131,25 @@ export function formHoneypotMiddleware(req: Request, res: Response, next: NextFu
   }
 
   // Check for honeypot fields
-  const _filledHoneypotFields = HONEYPOT_FIELDS.filter(
+  const filledHoneypotFields = HONEYPOT_FIELDS.filter(
     (field) => req.body[field] && req.body[field].toString().trim().length > 0
   );
 
   if (filledHoneypotFields.length > 0) {
-    const _ip = getClientIP(req);
-    const _userAgent = req.headers['user-agent'] || 'unknown';
+    const ip = getClientIP(req);
+    const userAgent = req.headers['user-agent'] || 'unknown';
 
     // Track suspicious activity
-    const _suspiciousRecord = getSuspiciousIP(ip);
+    const suspiciousRecord = getSuspiciousIP(ip);
     suspiciousRecord.count++;
     suspiciousRecord.lastSeen = new Date();
 
     // Log security event
     securityLogger.logEvent({
-      type: SecurityEventType.AUTOMATED_ATTACK,
+      type: SecurityEventType.AUTOMATEDATTACK,
       severity: 'HIGH',
       ipAddress: ip,
-      _userAgent,
+      userAgent,
       endpoint: req.originalUrl,
       success: false,
       details: {
@@ -186,7 +186,7 @@ export function registerHoneypots(app) {
  * Check if IP is suspicious
  */
 export function isSuspiciousIP(ip: string): boolean {
-  const _record = suspiciousIPs.get(ip);
+  const record = suspiciousIPs.get(ip);
   if (!record) return false;
 
   // Suspicious if accessed honeypots multiple times
@@ -197,14 +197,14 @@ export function isSuspiciousIP(ip: string): boolean {
  * Get suspicious IP report
  */
 export function getSuspiciousIPReport() {
-  const _report = [];
-  const _now = Date.now();
+  const report = [];
+  const now = Date.now();
 
   for (const [ip, record] of suspiciousIPs.entries()) {
     // Only include IPs seen in last 24 hours
     if (now - record.lastSeen.getTime() < 86400000) {
       report.push({
-        _ip,
+        ip,
         count: record.count,
         firstSeen: record.firstSeen,
         lastSeen: record.lastSeen,
@@ -221,8 +221,8 @@ export function getSuspiciousIPReport() {
  * Clean up old records periodically
  */
 setInterval(() => {
-  const _now = Date.now();
-  const _oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
 
   for (const [ip, record] of suspiciousIPs.entries()) {
     if (record.lastSeen.getTime() < oneWeekAgo) {

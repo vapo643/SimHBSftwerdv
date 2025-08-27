@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { notificationService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/sms', async (req, res) => {
   try {
-    const _result = await notificationService.executeOperation('send_sms', req.body);
+    const result = await notificationService.executeOperation('send_sms', req.body);
     res.json(_result);
   }
 catch (error) {

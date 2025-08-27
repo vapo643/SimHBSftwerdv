@@ -3,7 +3,7 @@
  * Implementação específica do Supabase para autenticação no servidor
  */
 
-import { createServerSupabaseClient } from '../../../client/src/lib/supabase';
+import { createServerSupabaseClient } from './supabase';
 import { ServerAuthProvider, ServerUser, TokenValidationResult } from '../auth-types';
 
 export class SupabaseServerAuthProvider implements ServerAuthProvider {
@@ -25,7 +25,7 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
     try {
       const {
         data: { user },
-        _error,
+        error,
       } = await this._supabase.auth.getUser(token);
 
       if (error || !user) {

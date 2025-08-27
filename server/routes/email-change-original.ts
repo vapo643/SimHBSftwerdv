@@ -1,28 +1,28 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
-import { createServerSupabaseClient } from '../../client/src/lib/supabase';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { createServerSupabaseClient } from '../lib/supabase';
 import { storage } from '../storage';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
 import { randomBytes } from 'crypto';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
-const _router = Router();
+const router = Router();
 
 // Schema for email change request
-const _emailChangeSchema = z.object({
+const emailChangeSchema = z.object({
   newEmail: z.string().email('Email inválido'),
   password: z.string().min(1, 'Senha é obrigatória'),
 });
 
 // Schema for email change verification
-const _verifyEmailChangeSchema = z.object({
+const verifyEmailChangeSchema = z.object({
   token: z.string().min(1, 'Token é obrigatório'),
 });
 
 // In-memory store for email change tokens (in production, use Redis or database)
-const _emailChangeTokens = new Map<
-  _string,
+const emailChangeTokens = new Map<
+  string,
   {
     userId: string;
     oldEmail: string;
@@ -35,8 +35,8 @@ const _emailChangeTokens = new Map<
 // Clean up expired tokens every hour
 setInterval(
   () => {
-    const _now = new Date();
-    const _entries = Array.from(emailChangeTokens.entries());
+    const now = new Date();
+    const entries = Array.from(emailChangeTokens.entries());
     for (const [token, data] of entries) {
       if (data.expiresAt < now) {
         emailChangeTokens.delete(token);
@@ -50,11 +50,11 @@ setInterval(
  * POST /api/auth/change-email
  * Request email change - sends verification to new email
  */
-router.post('/change-email', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { newEmail, password } = emailChangeSchema.parse(req.body);
-    const _userId = req.user!.id;
-    const _currentEmail = req.user!.email;
+    const userId = req.user!.id;
+    const currentEmail = req.user!.email;
 
     // Check if new email is same as current
     if (newEmail.toLowerCase() == (currentEmail || '').toLowerCase()) {
@@ -64,17 +64,17 @@ router.post('/change-email', _jwtAuthMiddleware, async (req: AuthenticatedReques
     }
 
     // Verify user's password
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
     const { error: signInError } = await _supabase.auth.signInWithPassword({
       email: currentEmail || '',
-  _password,
+  password,
     });
 
     if (signInError) {
       securityLogger.logEvent({
-        type: SecurityEventType.INVALID_CREDENTIALS,
+        type: SecurityEventType.INVALIDCREDENTIALS,
         severity: 'MEDIUM',
-  _userId,
+  userId,
         userEmail: currentEmail || '',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -103,17 +103,17 @@ router.post('/change-email', _jwtAuthMiddleware, async (req: AuthenticatedReques
     }
 
     // Generate verification token
-    const _token = randomBytes(32).toString('hex');
-    const _expiresAt = new Date();
+    const token = randomBytes(32).toString('hex');
+    const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiry
 
     // Store token
     emailChangeTokens.set(token, {
-  _userId,
+  userId,
       oldEmail: currentEmail || '',
-  _newEmail,
+  newEmail,
       createdAt: new Date(),
-  _expiresAt,
+  expiresAt,
     });
 
     // In a real implementation, send emails here:
@@ -124,9 +124,9 @@ router.post('/change-email', _jwtAuthMiddleware, async (req: AuthenticatedReques
     // TODO: Integrate with email service (SendGrid, AWS SES, etc.)
 
     securityLogger.logEvent({
-      type: SecurityEventType.EMAIL_CHANGE_REQUESTED,
+      type: SecurityEventType.EMAIL_CHANGEREQUESTED,
       severity: 'MEDIUM',
-  _userId,
+  userId,
       userEmail: currentEmail,
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
@@ -160,7 +160,7 @@ router.post('/verify-email-change', async (req, res) => {
     const { token } = verifyEmailChangeSchema.parse(req.body);
 
     // Get token data
-    const _tokenData = emailChangeTokens.get(token);
+    const tokenData = emailChangeTokens.get(token);
     if (!tokenData) {
       return res.status(400).json({
         error: 'Token inválido ou expirado',
@@ -175,7 +175,7 @@ router.post('/verify-email-change', async (req, res) => {
       });
     }
 
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
 
     // Update user's email in auth
     const { error: updateAuthError } = await _supabase.auth.admin.updateUserById(tokenData.userId, {
@@ -212,7 +212,7 @@ router.post('/verify-email-change', async (req, res) => {
 
     // Log the successful change
     securityLogger.logEvent({
-      type: SecurityEventType.EMAIL_CHANGED,
+      type: SecurityEventType.EMAILCHANGED,
       severity: 'HIGH',
       userId: tokenData.userId,
       userEmail: tokenData.oldEmail,
@@ -244,14 +244,14 @@ catch (error) {
  * GET /api/auth/email-change-status
  * Check if user has pending email change
  */
-router.get('/email-change-status', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-  const _userId = req.user!.id;
+router.get('/email-change-status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
 
   // Check for pending email changes
   let _hasPendingChange = false;
   let newEmail: string | undefined;
 
-  const _entries = Array.from(emailChangeTokens.entries());
+  const entries = Array.from(emailChangeTokens.entries());
   for (const [_, data] of entries) {
     if (data.userId == userId && data.expiresAt > new Date()) {
       hasPendingChange = true;
@@ -261,7 +261,7 @@ router.get('/email-change-status', _jwtAuthMiddleware, async (req: Authenticated
   }
 
   res.json({
-  _hasPendingChange,
+  hasPendingChange,
     newEmail: hasPendingChange ? newEmail : null,
   });
 });

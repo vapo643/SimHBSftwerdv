@@ -5,13 +5,13 @@
 
 import { createClientSupabaseClient } from '../supabase';
 import {
-  _AuthProvider,
-  _User,
-  _Session,
-  _SignInCredentials,
-  _SignInResult,
-  _AuthStateChangeCallback,
-  _AuthSubscription,
+  AuthProvider,
+  User,
+  Session,
+  SignInCredentials,
+  SignInResult,
+  AuthStateChangeCallback,
+  AuthSubscription,
 } from '../auth-types';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -26,7 +26,7 @@ export class SupabaseAuthProvider implements AuthProvider {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name,
-      avatar: supabaseUser.user_metadata?.avatar_url,
+      avatar: supabaseUser.user_metadata?.avatarurl,
       createdAt: supabaseUser.created_at ? new Date(supabaseUser.created_at) : undefined,
     };
   }
@@ -37,8 +37,8 @@ export class SupabaseAuthProvider implements AuthProvider {
   private mapSupabaseSession(supabaseSession): Session {
     return {
       user: this.mapSupabaseUser(supabaseSession.user),
-      accessToken: supabaseSession.access_token,
-      refreshToken: supabaseSession.refresh_token,
+      accessToken: supabaseSession.accesstoken,
+      refreshToken: supabaseSession.refreshtoken,
       expiresAt: supabaseSession.expires_at
         ? new Date(supabaseSession.expires_at * 1000)
         : undefined,
@@ -61,9 +61,9 @@ export class SupabaseAuthProvider implements AuthProvider {
 
     // Log de diagnóstico para rastrear o token JWT
     console.log('[PASSO 1 - LOGIN]', {
-      accessToken: data.session.access_token,
+      accessToken: data.session.accesstoken,
       tokenLength: data.session.access_token?.length,
-      expiresAt: data.session.expires_at,
+      expiresAt: data.session.expiresat,
     });
 
     return { user, session }
@@ -77,7 +77,7 @@ export class SupabaseAuthProvider implements AuthProvider {
   async getSession(): Promise<Session | null> {
     const {
       data: { session },
-  _error,
+  error,
     } = await this._supabase.auth.getSession();
 
     if (error) throw error;
@@ -89,7 +89,7 @@ export class SupabaseAuthProvider implements AuthProvider {
   async getCurrentUser(): Promise<User | null> {
     const {
       data: { user },
-  _error,
+  error,
     } = await this._supabase.auth.getUser();
 
     if (error) throw error;

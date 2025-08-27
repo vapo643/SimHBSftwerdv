@@ -4,13 +4,13 @@
  */
 
 import {
-  _Proposal,
-  _ProposalStatus,
-  _CustomerData,
-  _LoanConditions,
+  Proposal,
+  ProposalStatus,
+  CustomerData,
+  LoanConditions,
 } from '../domain/aggregates/Proposal';
-import { IProposalRepository } from '../domain/repositories/IProposalRepository';
-import { CreditAnalysisService } from '../domain/services/CreditAnalysisService';
+import { IProposalRepository } from '../domain/aggregates/Proposal';
+import { CreditAnalysisService } from '../domain/aggregates/Proposal';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface CreateProposalDTO {
@@ -53,11 +53,11 @@ export class ProposalApplicationService {
    */
   async createProposal(dto: CreateProposalDTO): Promise<ProposalDTO> {
     // Generate unique ID
-    const _id = uuidv4();
+    const id = uuidv4();
 
     // Create domain entity
-    const _proposal = new Proposal(
-      _id,
+    const proposal = new Proposal(
+      id,
       dto.customerData,
       dto.loanConditions,
       dto.partnerId,
@@ -77,7 +77,7 @@ export class ProposalApplicationService {
    */
   async submitForAnalysis(proposalId: string): Promise<ProposalDTO> {
     // Get proposal from repository
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     if (!proposal) {
       throw new Error(`Proposal ${proposalId} not found`);
     }
@@ -97,7 +97,7 @@ export class ProposalApplicationService {
    */
   async analyzeProposal(proposalId: string): Promise<ProposalDTO> {
     // Get proposal from repository
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     if (!proposal) {
       throw new Error(`Proposal ${proposalId} not found`);
     }
@@ -106,7 +106,7 @@ export class ProposalApplicationService {
     proposal.startAnalysis();
 
     // Perform credit analysis
-    const _analysisResult = this.creditAnalysisService.analyzeProposal(proposal);
+    const analysisResult = this.creditAnalysisService.analyzeProposal(proposal);
 
     // Update proposal based on analysis result
     if (analysisResult.approved) {
@@ -123,7 +123,7 @@ else {
     await this.proposalRepository.update(proposal);
 
     // Return DTO with analysis result
-    const _dto = this.toDTO(proposal);
+    const dto = this.toDTO(proposal);
     dto.analysisResult = analysisResult;
     return dto;
   }
@@ -132,7 +132,7 @@ else {
    * Approve a proposal manually
    */
   async approveProposal(proposalId: string): Promise<ProposalDTO> {
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     if (!proposal) {
       throw new Error(`Proposal ${proposalId} not found`);
     }
@@ -153,7 +153,7 @@ else {
    * Reject a proposal manually
    */
   async rejectProposal(proposalId: string, reason: string): Promise<ProposalDTO> {
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     if (!proposal) {
       throw new Error(`Proposal ${proposalId} not found`);
     }
@@ -173,7 +173,7 @@ else {
    * Set proposal as pending
    */
   async setPendingProposal(proposalId: string, reason: string): Promise<ProposalDTO> {
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     if (!proposal) {
       throw new Error(`Proposal ${proposalId} not found`);
     }
@@ -193,7 +193,7 @@ else {
    * Formalize an approved proposal
    */
   async formalizeProposal(proposalId: string): Promise<ProposalDTO> {
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     if (!proposal) {
       throw new Error(`Proposal ${proposalId} not found`);
     }
@@ -208,7 +208,7 @@ else {
    * Mark proposal as paid
    */
   async markProposalAsPaid(proposalId: string): Promise<ProposalDTO> {
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     if (!proposal) {
       throw new Error(`Proposal ${proposalId} not found`);
     }
@@ -223,7 +223,7 @@ else {
    * Get proposal by ID
    */
   async getProposal(proposalId: string): Promise<ProposalDTO | null> {
-    const _proposal = await this.proposalRepository.findById(proposalId);
+    const proposal = await this.proposalRepository.findById(proposalId);
     return proposal ? this.toDTO(proposal) : null;
   }
 
@@ -231,7 +231,7 @@ else {
    * Get all proposals
    */
   async getAllProposals(): Promise<ProposalDTO[]> {
-    const _proposals = await this.proposalRepository.findAll();
+    const proposals = await this.proposalRepository.findAll();
     return proposals.map((p) => this.toDTO(p));
   }
 
@@ -239,7 +239,7 @@ else {
    * Get proposals by store
    */
   async getProposalsByStore(storeId: string): Promise<ProposalDTO[]> {
-    const _proposals = await this.proposalRepository.findByStoreId(storeId);
+    const proposals = await this.proposalRepository.findByStoreId(storeId);
     return proposals.map((p) => this.toDTO(p));
   }
 
@@ -247,7 +247,7 @@ else {
    * Get proposals by CPF
    */
   async getProposalsByCpf(cpf: string): Promise<ProposalDTO[]> {
-    const _proposals = await this.proposalRepository.findByCpf(cpf);
+    const proposals = await this.proposalRepository.findByCpf(cpf);
     return proposals.map((p) => this.toDTO(p));
   }
 
@@ -255,7 +255,7 @@ else {
    * Get pending analysis proposals
    */
   async getPendingAnalysisProposals(): Promise<ProposalDTO[]> {
-    const _proposals = await this.proposalRepository.findPendingAnalysis();
+    const proposals = await this.proposalRepository.findPendingAnalysis();
     return proposals.map((p) => this.toDTO(p));
   }
 
@@ -263,23 +263,23 @@ else {
    * Update proposal
    */
   async updateProposal(dto: UpdateProposalDTO): Promise<ProposalDTO> {
-    const _proposal = await this.proposalRepository.findById(dto.id);
+    const proposal = await this.proposalRepository.findById(dto.id);
     if (!proposal) {
       throw new Error(`Proposal ${dto.id} not found`);
     }
 
     // Update customer data if provided
     if (dto.customerData) {
-      const _currentData = proposal.getCustomerData();
-      const _updatedData = { ...currentData, ...dto.customerData };
+      const currentData = proposal.getCustomerData();
+      const updatedData = { ...currentData, ...dto.customerData };
       // We need to recreate the proposal with updated data
       // This is a limitation of the current design - could be improved
     }
 
     // Update loan conditions if provided
     if (dto.loanConditions) {
-      const _currentConditions = proposal.getLoanConditions();
-      const _updatedConditions = { ...currentConditions, ...dto.loanConditions };
+      const currentConditions = proposal.getLoanConditions();
+      const updatedConditions = { ...currentConditions, ...dto.loanConditions };
       // Same limitation as above
     }
 

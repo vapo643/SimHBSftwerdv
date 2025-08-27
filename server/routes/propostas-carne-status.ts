@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { propostasStatusService } from '../services/proposalService.js';
-const _router = Router();
+const router = Router();
 router.get('/:id/status', async (req, res) => {
   try {
-    const _result = await propostasStatusService.executeOperation('carne_status', {
+    const result = await propostasStatusService.executeOperation('carne_status', {
       id: req.params.id,
     });
     res.json(_result);

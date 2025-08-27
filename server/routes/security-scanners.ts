@@ -6,12 +6,13 @@
 import { Router, Request, Response } from 'express';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 // Middleware for admin access
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
 const __requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
@@ -23,16 +24,17 @@ const __requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
 };
 
 // Apply authentication middleware
-router.use(_jwtAuthMiddleware);
+router.use(jwtAuthMiddleware);
 
 /**
  * GET /api/security-scanners/sca/latest
  * Get latest OWASP Dependency Check report
  */
-router.get('/sca/latest', _requireAdmin, async (req: AuthenticatedRequest, res) => {
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Common paths where dependency-check reports might be stored
-    const _reportPaths = [
+    const reportPaths = [
       'dependency-check-report.json',
       '.security/dependency-check-report.json',
       'reports/dependency-check-report.json',
@@ -45,8 +47,8 @@ router.get('/sca/latest', _requireAdmin, async (req: AuthenticatedRequest, res) 
     // Try to find the report in common locations
     for (const path of reportPaths) {
       try {
-        const _fullPath = join(process.cwd(), path);
-        const _data = await fs.readFile(fullPath, 'utf-8');
+        const fullPath = join(process.cwd(), path);
+        const data = await fs.readFile(fullPath, 'utf-8');
         reportData = JSON.parse(_data);
         reportPath = path;
         break;
@@ -76,7 +78,7 @@ catch (e) {
     }
 
     // Parse vulnerability counts from report
-    const _vulnerabilities = {
+    const vulnerabilities = {
       critical: 0,
       high: 0,
       medium: 0,
@@ -113,10 +115,10 @@ else {
       success: true,
       data: {
         reportFound: true,
-        _vulnerabilities,
+        vulnerabilities,
         lastScan: reportData.reportDate || new Date().toISOString(),
         projectInfo: reportData.projectInfo || {},
-        _reportPath,
+        reportPath,
       },
     });
   }
@@ -133,10 +135,11 @@ catch (error) {
  * POST /api/security-scanners/sca/run
  * Trigger new dependency check scan
  */
-router.post('/sca/run', _requireAdmin, async (req: AuthenticatedRequest, res) => {
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Check if script exists first
-    const _scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
+    const scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
 
     try {
       await fs.access(scriptPath);
@@ -150,7 +153,7 @@ catch (e) {
 
     const { exec } = await import('child_process');
     const { promisify } = await import('util');
-    const _execAsync = promisify(exec);
+    const execAsync = promisify(exec);
 
     // Send immediate response
     res.json({

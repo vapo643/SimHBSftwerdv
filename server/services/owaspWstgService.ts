@@ -152,7 +152,7 @@ export class OwaspWstgService {
     const _results: WstgTestCase[] = [];
 
     for (const url of urls) {
-      const _testCase = await this.analyzeWstgUrl(url);
+      const testCase = await this.analyzeWstgUrl(url);
       results.push(testCase);
     }
 
@@ -164,8 +164,8 @@ export class OwaspWstgService {
    */
   private static async analyzeWstgUrl(url: string): Promise<WstgTestCase> {
     // Extract test ID from URL
-    const _testId = this.extractTestId(url);
-    const _category = this.getCategoryFromId(testId);
+    const testId = this.extractTestId(url);
+    const category = this.getCategoryFromId(testId);
 
     // For now, create a pending test case
     // Will be enhanced with actual test execution
@@ -187,7 +187,7 @@ export class OwaspWstgService {
    * Extract test ID from WSTG URL
    */
   private static extractTestId(url: string): string {
-    const _match = url.match(/WSTG-[A-Z]+-\d+/);
+    const match = url.match(/WSTG-[A-Z]+-\d+/);
     return match ? match[0] : 'UNKNOWN';
   }
 
@@ -195,7 +195,7 @@ export class OwaspWstgService {
    * Get category from test ID
    */
   private static getCategoryFromId(testId: string): string {
-    const _parts = testId.split('-');
+    const parts = testId.split('-');
     return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'UNKNOWN';
   }
 
@@ -218,7 +218,7 @@ export class OwaspWstgService {
       'WSTG-API': 'API Testing',
     };
 
-    const _category = this.getCategoryFromId(testId);
+    const category = this.getCategoryFromId(testId);
     return categoryMap[category] || 'Unknown Category';
   }
 
@@ -226,8 +226,8 @@ export class OwaspWstgService {
    * Extract test name from URL
    */
   private static getTestName(url: string): string {
-    const _urlParts = url.split('/');
-    const _filename = urlParts[urlParts.length - 1];
+    const urlParts = url.split('/');
+    const filename = urlParts[urlParts.length - 1];
     return filename.replace('.html', '').replace(/-/g, ' ');
   }
 
@@ -242,16 +242,16 @@ export class OwaspWstgService {
     compliancePercentage: number;
     categories: WstgCategory[];
   } {
-    const _totalTests = this.categories.reduce((sum, cat) => sum + cat.totalTests, 0);
-    const _completedTests = this.categories.reduce((sum, cat) => sum + cat.completedTests, 0);
-    const _secureTests = this.categories.reduce((sum, cat) => sum + cat.secureTests, 0);
-    const _vulnerableTests = this.categories.reduce((sum, cat) => sum + cat.vulnerableTests, 0);
+    const totalTests = this.categories.reduce((sum, cat) => sum + cat.totalTests, 0);
+    const completedTests = this.categories.reduce((sum, cat) => sum + cat.completedTests, 0);
+    const secureTests = this.categories.reduce((sum, cat) => sum + cat.secureTests, 0);
+    const vulnerableTests = this.categories.reduce((sum, cat) => sum + cat.vulnerableTests, 0);
 
     return {
-  _totalTests,
-  _completedTests,
-  _secureTests,
-  _vulnerableTests,
+  totalTests,
+  completedTests,
+  secureTests,
+  vulnerableTests,
       compliancePercentage: totalTests > 0 ? Math.round((secureTests / totalTests) * 100) : 0,
       categories: this.categories,
     };
@@ -265,8 +265,8 @@ export class OwaspWstgService {
     vulnerabilities: WstgTestCase[];
     recommendations: string[];
   } {
-    const _vulnerabilities = testCases.filter((tc) => tc.currentStatus == 'vulnerable');
-    const _tested = testCases.filter((tc) => tc.currentStatus !== 'pending');
+    const vulnerabilities = testCases.filter((tc) => tc.currentStatus == 'vulnerable');
+    const tested = testCases.filter((tc) => tc.currentStatus !== 'pending');
 
     return {
       summary: {
@@ -276,7 +276,7 @@ export class OwaspWstgService {
         secureCount: testCases.filter((tc) => tc.currentStatus == 'secure').length,
         pendingCount: testCases.filter((tc) => tc.currentStatus == 'pending').length,
       },
-  _vulnerabilities,
+  vulnerabilities,
       recommendations: this.generateRecommendations(vulnerabilities),
     };
   }
@@ -288,7 +288,7 @@ export class OwaspWstgService {
     const recommendations: string[] = [];
 
     // Group by category
-    const _byCategory = vulnerabilities.reduce(
+    const byCategory = vulnerabilities.reduce(
       (acc, vuln) => {
         if (!acc[vuln.category]) acc[vuln.category] = [];
         acc[vuln.category].push(vuln);

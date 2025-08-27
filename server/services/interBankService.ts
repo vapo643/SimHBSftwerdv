@@ -17,10 +17,10 @@
 import https from 'https';
 import { Agent as UndiciAgent } from 'undici';
 import {
-  _createCircuitBreaker,
+  createCircuitBreaker,
   INTER_BREAKER_OPTIONS,
-  _isCircuitBreakerOpen,
-  _formatCircuitBreakerError,
+  isCircuitBreakerOpen,
+  formatCircuitBreakerError,
 } from '../lib/circuit-breaker';
 import { rateLimitService } from './rateLimitService.js'; // PAM V1.0 - Rate Limiting inteligente
 
@@ -145,7 +145,7 @@ class InterBankService {
 
   constructor() {
     // Auto-detect if we're using production credentials based on presence of INTER_CONTA_CORRENTE
-    const _isProduction = !!process.env.INTER_CONTA_CORRENTE;
+    const isProduction = !!process.env.INTER_CONTA_CORRENTE;
 
     this.config = {
       environment: isProduction ? 'production' : 'sandbox',
@@ -159,10 +159,10 @@ class InterBankService {
       contaCorrente: process.env.INTER_CONTA_CORRENTE || '',
     };
 
-    console.log(`[INTER] 🏦 Initialized in ${this._config.environment} mode`);
-    console.log(`[INTER] 🌐 API URL: ${this._config.apiUrl}`);
+    console.log(`[INTER] 🏦 Initialized in ${this.config.environment} mode`);
+    console.log(`[INTER] 🌐 API URL: ${this.config.apiUrl}`);
 
-    if (!this._config.clientId || !this._config.clientSecret) {
+    if (!this.config.clientId || !this.config.clientSecret) {
       console.warn(
         '[INTER] ⚠️ Client credentials not configured. Inter Bank integration will not work.'
       );
@@ -190,7 +190,7 @@ class InterBankService {
           data?: unknown,
           headers?: unknown
         ) => {
-          return this.makeRequestDirect(endpoint, method, _data, headers);
+          return this.makeRequestDirect(endpoint, method, data, headers);
         },
         { ...INTER_BREAKER_OPTIONS, name: 'interApiBreaker' }
       );
@@ -227,32 +227,32 @@ catch (error) {
 
       console.log('[INTER] 🔑 Requesting new access token...');
 
-      const _tokenUrl = new URL(`${this._config.apiUrl}/oauth/v2/token`);
+      const tokenUrl = new URL(`${this.config.apiUrl}/oauth/v2/token`);
 
       console.log(`[INTER] 🌐 Token URL: ${tokenUrl.hostname}${tokenUrl.pathname}`);
       console.log(`[INTER] 📄 Using form-based authentication per official docs`);
       console.log(
-        `[INTER] 🔓 Certificate configured: ${this._config.certificate ? '✅ Present' : '❌ Missing'}`
+        `[INTER] 🔓 Certificate configured: ${this.config.certificate ? '✅ Present' : '❌ Missing'}`
       );
       console.log(
-        `[INTER] 🔑 Private Key configured: ${this._config.privateKey ? '✅ Present' : '❌ Missing'}`
+        `[INTER] 🔑 Private Key configured: ${this.config.privateKey ? '✅ Present' : '❌ Missing'}`
       );
 
       // Follow official Inter Bank documentation format
       // client_id and client_secret are REQUIRED per official docs
-      const _formBody = new URLSearchParams({
-        client_id: this._config.clientId,
-        client_secret: this._config.clientSecret,
+      const formBody = new URLSearchParams({
+        client_id: this.config.clientId,
+        client_secret: this.config.clientSecret,
         grant_type: 'client_credentials',
         scope: 'boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write', // All required scopes for API v3
       });
 
       // Log client_id length for debugging
-      console.log(`[INTER] 📊 Client ID length: ${this._config.clientId.length} chars`);
-      console.log(`[INTER] 📊 Client Secret length: ${this._config.clientSecret.length} chars`);
+      console.log(`[INTER] 📊 Client ID length: ${this.config.clientId.length} chars`);
+      console.log(`[INTER] 📊 Client Secret length: ${this.config.clientSecret.length} chars`);
 
       console.log(
-        `[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=${formBody.get('scope')}`
+        `[INTER] 📝 Form parameters: client_id=***, grant_type=clientcredentials, scope=${formBody.get('scope')}`
       );
       console.log(`[INTER] 📝 Form body string length: ${formBody.toString().length} chars`);
       console.log(`[INTER] 📝 Form body preview: ${formBody.toString().substring(0, 100)}...`);
@@ -261,8 +261,8 @@ catch (error) {
       console.log(`[INTER] 🔒 Using mTLS certificate authentication`);
 
       // Prepare certificate and key in proper PEM format
-      let _cert = this._config.certificate;
-      let _key = this._config.privateKey;
+      let _cert = this.config.certificate;
+      let _key = this.config.privateKey;
 
       // CRITICAL FIX: Add line breaks to PEM format certificates
       // The certificates are valid PEM but in single line format
@@ -274,11 +274,11 @@ catch (error) {
       if (cert.includes('-----BEGIN CERTIFICATE-----') && !cert.includes('\n')) {
         console.log('[INTER] 📋 Certificate is single-line PEM, adding line breaks...');
         // Extract the base64 content between headers
-        const _certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
+        const certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
         if (certMatch && certMatch[1]) {
-          const _base64Content = certMatch[1].trim();
+          const base64Content = certMatch[1].trim();
           // Add line breaks every 64 characters
-          const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+          const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
           cert = `-----BEGIN CERTIFICATE-----\n${formattedContent}\n-----END CERTIFICATE-----`;
           console.log('[INTER] ✅ Certificate formatted with line breaks');
         }
@@ -288,12 +288,12 @@ catch (error) {
       if (key.includes('-----BEGIN') && key.includes('KEY-----') && !key.includes('\n')) {
         console.log('[INTER] 🔑 Private key is single-line PEM, adding line breaks...');
         // Extract the base64 content between headers (works for both RSA and regular private keys)
-        const _keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
+        const keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
         if (keyMatch && keyMatch[2]) {
-          const _keyType = keyMatch[1];
-          const _base64Content = keyMatch[2].trim();
+          const keyType = keyMatch[1];
+          const base64Content = keyMatch[2].trim();
           // Add line breaks every 64 characters
-          const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+          const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
           key = `-----BEGIN ${keyType}-----\n${formattedContent}\n-----END ${keyType}-----`;
           console.log('[INTER] ✅ Private key formatted with line breaks');
         }
@@ -303,13 +303,13 @@ catch (error) {
       console.log('[INTER] ✅ Certificates formatted and ready');
 
       // SANDBOX ONLY: Try alternative approach
-      if (this._config.environment == 'sandbox') {
+      if (this.config.environment == 'sandbox') {
         console.log('[INTER] ⚠️ SANDBOX MODE: Using alternative HTTPS configuration');
       }
 
       // Create Undici agent for proper mTLS support with Node.js fetch
       console.log('[INTER] 🔧 Creating Undici agent for mTLS...');
-      const _undiciAgent = new UndiciAgent({
+      const undiciAgent = new UndiciAgent({
         connect: {
           cert: cert,
           key: key,
@@ -325,7 +325,7 @@ catch (error) {
 
       // Try using node fetch with undici dispatcher
       try {
-        const _fetchResponse = await fetch(tokenUrl.toString(), {
+        const fetchResponse = await fetch(tokenUrl.toString(), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -350,7 +350,7 @@ catch (error) {
         };
 
         if (!response.ok) {
-          const _errorText = await response.text();
+          const errorText = await response.text();
           console.log(`[INTER] ❌ Error response body: ${errorText}`);
 
           // Try to parse error details
@@ -376,7 +376,7 @@ catch (fetchError) {
         console.log('[INTER] 🔄 Falling back to raw HTTPS request...');
 
         response = await new Promise<unknown>((resolve, reject) => {
-          const _options = {
+          const options = {
             hostname: tokenUrl.hostname,
             port: tokenUrl.port || 443,
             path: tokenUrl.pathname,
@@ -395,7 +395,7 @@ catch (fetchError) {
             secureProtocol: 'TLS_method',
           };
 
-          const _req = https.request(options, (res) => {
+          const req = https.request(options, (res) => {
             let _data = '';
             res.on('data', (chunk) => {
               data += chunk;
@@ -431,12 +431,12 @@ catch (e) {
       console.log(`[INTER] 📡 Response status: ${response.status}`);
 
       if (!response.ok) {
-        const _errorText = await response.text();
+        const errorText = await response.text();
         console.log(`[INTER] ❌ Error response body: ${errorText}`);
 
         // Tentar parse JSON do erro
         try {
-          const _errorJson = JSON.parse(errorText);
+          const errorJson = JSON.parse(errorText);
           console.log(`[INTER] ❌ Parsed error JSON:`, errorJson);
         }
 catch (e) {
@@ -450,7 +450,7 @@ catch (e) {
 
       // Cache token with 5 minute buffer before expiration
       this.tokenCache = {
-        token: tokenData.access_token,
+        token: tokenData.accesstoken,
         expiresAt: Date.now() + (tokenData.expires_in - 300) * 1000,
       };
 
@@ -477,7 +477,7 @@ catch (error) {
     this.initializeBreakers();
 
     try {
-      return await this.apiBreaker.fire(endpoint, method, _data, additionalHeaders);
+      return await this.apiBreaker.fire(endpoint, method, data, additionalHeaders);
     }
 catch (error) {
       if (isCircuitBreakerOpen(error)) {
@@ -499,8 +499,8 @@ catch (error) {
     additionalHeaders?: Record<string, string>
   ): Promise<unknown> {
     try {
-      const _token = await this.getAccessToken();
-      const _url = new URL(`${this._config.apiUrl}${endpoint}`);
+      const token = await this.getAccessToken();
+      const url = new URL(`${this.config.apiUrl}${endpoint}`);
 
       console.log('[INTER] ======= REQUEST DETAILS =======');
       console.log(`[INTER] 🌐 FULL URL: ${url.toString()}`);
@@ -511,18 +511,18 @@ catch (error) {
       // CRITICAL: Use HTTPS request with mTLS like getAccessToken
       return new Promise((resolve, reject) => {
         // Format certificates first (same logic as getAccessToken)
-        let _cert = this._config.certificate;
-        let _key = this._config.privateKey;
+        let _cert = this.config.certificate;
+        let _key = this.config.privateKey;
 
         // Fix certificate format if needed
         if (cert.includes('-----BEGIN CERTIFICATE-----') && !cert.includes('\n')) {
           console.log('[INTER] 📋 Certificate is single-line PEM, adding line breaks...');
-          const _certMatch = cert.match(
+          const certMatch = cert.match(
             /-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/
           );
           if (certMatch && certMatch[1]) {
-            const _base64Content = certMatch[1].trim();
-            const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+            const base64Content = certMatch[1].trim();
+            const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
             cert = `-----BEGIN CERTIFICATE-----\n${formattedContent}\n-----END CERTIFICATE-----`;
           }
         }
@@ -530,11 +530,11 @@ catch (error) {
         // Fix private key format if needed
         if (key.includes('-----BEGIN') && key.includes('KEY-----') && !key.includes('\n')) {
           console.log('[INTER] 🔑 Private key is single-line PEM, adding line breaks...');
-          const _keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
+          const keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
           if (keyMatch && keyMatch[2]) {
-            const _keyType = keyMatch[1];
-            const _base64Content = keyMatch[2].trim();
-            const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+            const keyType = keyMatch[1];
+            const base64Content = keyMatch[2].trim();
+            const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
             key = `-----BEGIN ${keyType}-----\n${formattedContent}\n-----END ${keyType}-----`;
           }
         }
@@ -548,9 +548,9 @@ catch (error) {
         };
 
         // Add account header if configured
-        if (this._config.contaCorrente) {
-          headers['x-conta-corrente'] = this._config.contaCorrente;
-          console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this._config.contaCorrente);
+        if (this.config.contaCorrente) {
+          headers['x-conta-corrente'] = this.config.contaCorrente;
+          console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this.config.contaCorrente);
         }
 else {
           console.log('[INTER] ⚠️ NO CONTA CORRENTE CONFIGURED!');
@@ -566,7 +566,7 @@ else {
 
         console.log('[INTER] 🔑 ALL HEADERS:', JSON.stringify(headers, null, 2));
 
-        const _options = {
+        const options = {
           hostname: url.hostname,
           port: url.port || 443,
           path: url.pathname + url.search,
@@ -577,12 +577,12 @@ else {
           },
           cert: cert,
           key: key,
-          rejectUnauthorized: this._config.environment == 'production',
+          rejectUnauthorized: this.config.environment == 'production',
           requestCert: true,
           timeout: 30000,
         };
 
-        const _req = https.request(options, (res) => {
+        const req = https.request(options, (res) => {
           const chunks: Buffer[] = [];
 
           console.log('[INTER] ======= RESPONSE DETAILS =======');
@@ -590,7 +590,7 @@ else {
           console.log('[INTER] 📋 RESPONSE HEADERS:', res.headers);
 
           // Check if response is PDF
-          const _isPdf = res.headers['content-type']?.includes('application/pdf');
+          const isPdf = res.headers['content-type']?.includes('application/pdf');
           console.log(`[INTER] 🔍 Response Content-Type: ${res.headers['content-type']}`);
           console.log(`[INTER] 🔍 Is PDF Response: ${isPdf}`);
 
@@ -599,14 +599,14 @@ else {
           });
 
           res.on('end', () => {
-            const _buffer = Buffer.concat(chunks);
+            const buffer = Buffer.concat(chunks);
             console.log(`[INTER] 📦 Response buffer size: ${buffer.length} bytes`);
 
             if (!res.statusCode || res.statusCode >= 400) {
               console.log('[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌');
               console.log(`[INTER] 🚨 Status Code: ${res.statusCode}`);
 
-              const _errorText = buffer.toString('utf-8');
+              const errorText = buffer.toString('utf-8');
               console.log(`[INTER] 🚨 Error Body: "${errorText}"`);
               console.log(`[INTER] 🚨 Error Body Length: ${errorText.length} chars`);
 
@@ -624,7 +624,7 @@ else {
               }
 else {
                 try {
-                  const _errorJson = JSON.parse(errorText);
+                  const errorJson = JSON.parse(errorText);
                   console.log('[INTER] 📋 Error as JSON:', JSON.stringify(errorJson, null, 2));
                 }
 catch (e) {
@@ -657,7 +657,7 @@ catch (e) {
 
             // Parse JSON response
             try {
-              const _responseText = buffer.toString('utf-8');
+              const responseText = buffer.toString('utf-8');
               resolve(JSON.parse(responseText));
             }
 catch (e) {
@@ -699,25 +699,25 @@ catch (error) {
     try {
       console.log('[INTER] 🔍 Testing connection...');
       console.log('[INTER] 📋 Configuration check:');
-      console.log(`[INTER]   - Environment: ${this._config.environment}`);
-      console.log(`[INTER]   - API URL: ${this._config.apiUrl}`);
+      console.log(`[INTER]   - Environment: ${this.config.environment}`);
+      console.log(`[INTER]   - API URL: ${this.config.apiUrl}`);
       console.log(
-        `[INTER]   - Client ID: ${this._config.clientId ? '✅ Present (' + this._config.clientId.substring(0, 8) + '...)' : '❌ Missing'}`
+        `[INTER]   - Client ID: ${this.config.clientId ? '✅ Present (' + this.config.clientId.substring(0, 8) + '...)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Client Secret: ${this._config.clientSecret ? '✅ Present (' + this._config.clientSecret.substring(0, 8) + '...)' : '❌ Missing'}`
+        `[INTER]   - Client Secret: ${this.config.clientSecret ? '✅ Present (' + this.config.clientSecret.substring(0, 8) + '...)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Certificate: ${this._config.certificate ? '✅ Present (' + this._config.certificate.length + ' chars)' : '❌ Missing'}`
+        `[INTER]   - Certificate: ${this.config.certificate ? '✅ Present (' + this.config.certificate.length + ' chars)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Private Key: ${this._config.privateKey ? '✅ Present (' + this._config.privateKey.length + ' chars)' : '❌ Missing'}`
+        `[INTER]   - Private Key: ${this.config.privateKey ? '✅ Present (' + this.config.privateKey.length + ' chars)' : '❌ Missing'}`
       );
       console.log(
-        `[INTER]   - Conta Corrente: ${this._config.contaCorrente ? '✅ Present (' + this._config.contaCorrente + ')' : '❌ Missing'}`
+        `[INTER]   - Conta Corrente: ${this.config.contaCorrente ? '✅ Present (' + this.config.contaCorrente + ')' : '❌ Missing'}`
       );
 
-      if (!this._config.clientId || !this._config.clientSecret) {
+      if (!this.config.clientId || !this.config.clientSecret) {
         console.log('[INTER] ❌ No client credentials configured');
         return false;
       }
@@ -743,7 +743,7 @@ catch (error) {
       console.log('[INTER] 📋 COMPLETE Request data:', JSON.stringify(cobrancaData, null, 2));
 
       // PAM V1.0 - Execute with intelligent rate limiting
-      const _response = await rateLimitService.executeWithRateLimit(
+      const response = await rateLimitService.executeWithRateLimit(
         'inter-api-cobranca',
         async () => this.makeRequest('/cobranca/v3/cobrancas', 'POST', cobrancaData),
         {
@@ -770,12 +770,12 @@ catch (error) {
     try {
       console.log(`[INTER] 📋 Retrieving collection: ${codigoSolicitacao}`);
 
-      const _response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`);
 
-      console.log(`[INTER] 📊 Collection data:`, JSON.stringify(_response, null, 2));
+      console.log(`[INTER] 📊 Collection data:`, JSON.stringify(response, null, 2));
 
       // Enriquecer dados com campos adicionais
-      const _enrichedData = {
+      const enrichedData = {
         ...response,
         // Garantir que temos a linha digitável completa
         linhaDigitavel: response.boleto?.linhaDigitavel || response.linhaDigitavel,
@@ -841,7 +841,7 @@ catch (error) {
         `[INTER] 🔍 Searching collections from ${filters.dataInicial} to ${filters.dataFinal}`
       );
 
-      const _queryParams = new URLSearchParams();
+      const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined) {
           if (key == 'itensPorPagina') {
@@ -856,7 +856,7 @@ else {
         }
       });
 
-      const _response = await this.makeRequest(`/cobranca/v3/cobrancas?${queryParams.toString()}`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas?${queryParams.toString()}`);
 
       console.log(`[INTER] ✅ Found ${response.totalElementos} collections`);
       return response;
@@ -879,7 +879,7 @@ catch (error) {
       console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
       console.log(`🔍 [AUDIT-INTER] Payload Exato Enviado:`, JSON.stringify(updateData, null, 2));
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}`,
         'PATCH',
         updateData
@@ -887,7 +887,7 @@ catch (error) {
 
       console.log(`🔍 [AUDIT-INTER] Resposta Completa da API:`, {
         statusRecebido: response ? 'Success' : 'Null response',
-        dadosRetornados: JSON.stringify(_response, null, 2),
+        dadosRetornados: JSON.stringify(response, null, 2),
       });
       console.log(`🔍 [AUDIT-INTER] ==== FIM EDIÇÃO ====`);
 
@@ -911,13 +911,13 @@ catch (error) {
       console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
       console.log(`🔍 [AUDIT-INTER] Motivo: ${motivoCancelamento}`);
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/cancelamento`,
         'POST',
         { motivoCancelamento }
       );
 
-      console.log(`🔍 [AUDIT-INTER] Resposta do Cancelamento:`, JSON.stringify(_response, null, 2));
+      console.log(`🔍 [AUDIT-INTER] Resposta do Cancelamento:`, JSON.stringify(response, null, 2));
       console.log(`🔍 [AUDIT-INTER] ==== FIM CANCELAMENTO ====`);
 
       return response;
@@ -944,10 +944,10 @@ catch (error) {
 
       // FAZER REQUISIÇÃO PARA O ENDPOINT /pdf
       console.log(`[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...`);
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
         'GET',
-        _null,
+        null,
         {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -962,7 +962,7 @@ catch (error) {
         console.log(`[INTER] 📋 Campos disponíveis no JSON:`, Object.keys(_response));
 
         // Procurar possíveis campos que contenham o PDF base64
-        const _possibleFields = [
+        const possibleFields = [
           'pdf',
           'arquivo',
           'base64',
@@ -1006,7 +1006,7 @@ else if (response.data.pdf) {
         if (!base64String) {
           console.log(`[INTER] ⚠️ PDF não encontrado nos campos conhecidos`);
           console.log(`[INTER] 📋 Estrutura completa do JSON (primeiros 500 chars):`);
-          console.log(JSON.stringify(_response, null, 2).substring(0, 500));
+          console.log(JSON.stringify(response, null, 2).substring(0, 500));
 
           // Tentar campos menos óbvios
           for (const key in response) {
@@ -1032,11 +1032,11 @@ else if (response.data.pdf) {
           }
 
           // Converter base64 para Buffer
-          const _pdfBuffer = Buffer.from(base64String, 'base64');
+          const pdfBuffer = Buffer.from(base64String, 'base64');
           console.log(`[INTER] ✅ PDF convertido: ${pdfBuffer.length} bytes`);
 
           // Validar se é realmente um PDF
-          const _pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
+          const pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
             return pdfBuffer;
@@ -1055,7 +1055,7 @@ else {
       // Se response é Buffer direto (improvável na v3)
       if (response instanceof Buffer) {
         console.log(`[INTER] 📊 Resposta é Buffer direto`);
-        const _pdfMagic = response.slice(0, 5).toString('utf8');
+        const pdfMagic = response.slice(0, 5).toString('utf8');
         if (pdfMagic.startsWith('%PDF')) {
           console.log(`[INTER] ✅ PDF binário válido (${response.length} bytes)`);
           return response;
@@ -1066,8 +1066,8 @@ else {
       if (typeof response == 'string') {
         console.log(`[INTER] 📊 Resposta é string, tentando decodificar como base64...`);
         try {
-          const _pdfBuffer = Buffer.from(_response, 'base64');
-          const _pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+          const pdfBuffer = Buffer.from(response, 'base64');
+          const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
 
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
@@ -1106,7 +1106,7 @@ catch (error) {
   private async tentarEndpointsAlternativos(codigoSolicitacao: string): Promise<Buffer> {
     console.log(`[INTER] 🔄 Testando endpoints alternativos para PDF...`);
 
-    const _alternativeEndpoints = [
+    const alternativeEndpoints = [
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf/download`,
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/arquivo`,
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/documento`,
@@ -1117,7 +1117,7 @@ catch (error) {
       try {
         console.log(`[INTER] 🔄 Tentando: ${endpoint}`);
 
-        const _response = await this.makeRequest(endpoint, 'GET', null, {
+        const response = await this.makeRequest(endpoint, 'GET', null, {
           Accept: 'application/pdf, application/json',
           'Content-Type': 'application/json',
         });
@@ -1152,7 +1152,7 @@ catch (err) {
     console.log(`[INTER] 🔍 DEBUG MODE: Analisando resposta completa da API`);
 
     try {
-      const _response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`);
 
       console.log('[INTER] 🔍 RESPOSTA COMPLETA DA API:');
       console.log('Data type:', typeof response);
@@ -1164,11 +1164,11 @@ catch (err) {
 else if (typeof response == 'object') {
         console.log('Object keys:', Object.keys(_response));
         console.log('Sample (first 1000 chars):');
-        console.log(JSON.stringify(_response, null, 2).substring(0, 1000));
+        console.log(JSON.stringify(response, null, 2).substring(0, 1000));
 
         // Verificar cada campo
         for (const key in response) {
-          const _value = response[key];
+          const value = response[key];
           console.log(`Field '${key}':`, {
             type: typeof value,
             length: typeof value == 'string' ? value.length : 'N/A',
@@ -1196,14 +1196,14 @@ catch (error) {
     try {
       console.log(`[INTER] 📊 Getting collections summary`);
 
-      const _queryParams = new URLSearchParams();
+      const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined) {
           queryParams.append(key, value.toString());
         }
       });
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/sumario?${queryParams.toString()}`
       );
 
@@ -1223,7 +1223,7 @@ catch (error) {
     try {
       console.log(`[INTER] 🔗 Setting up webhook: ${webhookData.url}`);
 
-      const _response = await this.makeRequest('/webhook', 'PUT', webhookData);
+      const response = await this.makeRequest('/webhook', 'PUT', webhookData);
 
       console.log(`[INTER] ✅ Webhook configured successfully`);
       return response;
@@ -1241,7 +1241,7 @@ catch (error) {
     try {
       console.log(`[INTER] 🔗 Getting webhook configuration`);
 
-      const _response = await this.makeRequest('/webhook');
+      const response = await this.makeRequest('/webhook');
 
       console.log(`[INTER] ✅ Webhook configuration retrieved`);
       return response;
@@ -1259,7 +1259,7 @@ catch (error) {
     try {
       console.log(`[INTER] 🗑️ Deleting webhook`);
 
-      const _response = await this.makeRequest('/webhook', 'DELETE');
+      const response = await this.makeRequest('/webhook', 'DELETE');
 
       console.log(`[INTER] ✅ Webhook deleted successfully`);
       return response;
@@ -1275,13 +1275,13 @@ catch (error) {
    */
   async pagarCobrancaSandbox(codigoSolicitacao: string, valorPago: number): Promise<unknown> {
     try {
-      if (this._config.environment !== 'sandbox') {
+      if (this.config.environment !== 'sandbox') {
         throw new Error('Payment simulation is only available in sandbox environment');
       }
 
       console.log(`[INTER] 💰 Simulating payment for collection: ${codigoSolicitacao}`);
 
-      const _response = await this.makeRequest(
+      const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pagamento`,
         'POST',
         { valorPago }
@@ -1325,7 +1325,7 @@ catch (error) {
       let _telefoneNumero = '';
       if (proposalData.clienteData.telefone) {
         // Remove all non-numeric characters
-        const _cleanPhone = proposalData.clienteData.telefone.replace(/\D/g, '');
+        const cleanPhone = proposalData.clienteData.telefone.replace(/\D/g, '');
         if (cleanPhone.length >= 10) {
           ddd = cleanPhone.substring(0, 2);
           telefoneNumero = cleanPhone.substring(2);
@@ -1333,7 +1333,7 @@ catch (error) {
       }
 
       // Função para remover acentos e caracteres especiais
-      const _removeAccents = (str: string): string => {
+      const removeAccents = (str: string): string => {
         return str
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
@@ -1344,7 +1344,7 @@ catch (error) {
       // Correção automática para CEP 29165460 (Serra, ES)
       let _cidade = proposalData.clienteData.cidade;
       let _uf = proposalData.clienteData.uf;
-      const _cepLimpo = proposalData.clienteData.cep.replace(/\D/g, '');
+      const cepLimpo = proposalData.clienteData.cep.replace(/\D/g, '');
 
       if (cepLimpo == '29165460') {
         console.log('[INTER] 📍 Corrigindo cidade/UF para CEP 29165460: Serra, ES');
@@ -1353,10 +1353,10 @@ catch (error) {
       }
 
       // Remove caracteres especiais de todos os campos de texto
-      const _nomeClean = removeAccents(proposalData.clienteData.nome);
-      const _enderecoClean = removeAccents(proposalData.clienteData.endereco);
-      const _bairroClean = removeAccents(proposalData.clienteData.bairro);
-      const _cidadeClean = removeAccents(cidade);
+      const nomeClean = removeAccents(proposalData.clienteData.nome);
+      const enderecoClean = removeAccents(proposalData.clienteData.endereco);
+      const bairroClean = removeAccents(proposalData.clienteData.bairro);
+      const cidadeClean = removeAccents(cidade);
 
       console.log('[INTER] 🧹 Dados limpos:', {
         nome: nomeClean,
@@ -1366,7 +1366,7 @@ catch (error) {
       });
 
       // Garantir que o valor está em formato decimal com 2 casas
-      const _valorDecimal = Number(proposalData.valorTotal).toFixed(2);
+      const valorDecimal = Number(proposalData.valorTotal).toFixed(2);
       console.log('[INTER] 💰 Valor formatado:', valorDecimal);
 
       // REMOVED: dataEmissao is not valid in API v3
@@ -1378,11 +1378,11 @@ catch (error) {
       // Se o ID é muito longo, precisamos ser inteligentes ao truncar
       if (seuNumeroUnico.length > 15) {
         // Verificar se tem sufixo de parcela (ex: "-1", "-2", etc)
-        const _parcelaMatch = seuNumeroUnico.match(/-(\d+)$/);
+        const parcelaMatch = seuNumeroUnico.match(/-(\d+)$/);
         if (parcelaMatch) {
           // Tem sufixo de parcela, preservar ele
-          const _sufixoParcela = parcelaMatch[0]; // ex: "-1"
-          const _prefixo = seuNumeroUnico.substring(0, 15 - sufixoParcela.length);
+          const sufixoParcela = parcelaMatch[0]; // ex: "-1"
+          const prefixo = seuNumeroUnico.substring(0, 15 - sufixoParcela.length);
           seuNumeroUnico = prefixo + sufixoParcela;
         }
 else {
@@ -1458,7 +1458,7 @@ else {
       console.log('[INTER]   - mensagem present?', !!cobrancaData.mensagem);
       console.log('[INTER] 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
 
-      const _result = await this.emitirCobranca(cobrancaData);
+      const result = await this.emitirCobranca(cobrancaData);
 
       console.log(`[INTER] ✅ Collection created for proposal successfully`);
       return _result;
@@ -1471,4 +1471,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _interBankService = new InterBankService();
+export const interBankService = new InterBankService();

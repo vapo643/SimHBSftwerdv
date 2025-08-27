@@ -349,8 +349,8 @@ catch (error) {
   // Salvar assessments em arquivos
   private async saveAssessment(filename: string, data): Promise<void> {
     try {
-      const _filePath = path.join(this.assessmentPath, filename);
-      await fs.writeFile(filePath, JSON.stringify(_data, null, 2));
+      const filePath = path.join(this.assessmentPath, filename);
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
       console.log(`✅ Assessment saved: ${filename}`);
     }
 catch (error) {
@@ -360,24 +360,24 @@ catch (error) {
 
   // Gerar relatório de maturidade SAMM
   async generateSAMMMaturityReport(): Promise<string> {
-    const _assessments = await this.processSAMMAssessment();
+    const assessments = await this.processSAMMAssessment();
 
     let _report = '# OWASP SAMM Maturity Assessment Report\n\n';
     report += `**Data da Avaliação**: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
 
     // Calcular score geral
-    const _totalGap = assessments.reduce((sum, assessment) => sum + assessment.gap, 0);
-    const _totalPossible = assessments.length * 3; // Máximo level 3
-    const _maturityScore = Math.round(((totalPossible - totalGap) / totalPossible) * 100);
+    const totalGap = assessments.reduce((sum, assessment) => sum + assessment.gap, 0);
+    const totalPossible = assessments.length * 3; // Máximo level 3
+    const maturityScore = Math.round(((totalPossible - totalGap) / totalPossible) * 100);
 
     report += `## Score de Maturidade Geral: ${maturityScore}%\n\n`;
 
     // Agrupar por domínio
-    const _domains = Array.from(new Set(assessments.map((a) => a.domain)));
+    const domains = Array.from(new Set(assessments.map((a) => a.domain)));
 
     for (const domain of domains) {
       report += `## Domínio: ${domain}\n\n`;
-      const _domainAssessments = assessments.filter((a) => a.domain == domain);
+      const domainAssessments = assessments.filter((a) => a.domain == domain);
 
       for (const assessment of domainAssessments) {
         report += `### ${assessment.practice}\n`;
@@ -408,7 +408,7 @@ for framework: ${framework}`);
       id: Date.now().toString(),
       type: 'PDF',
       title: framework == 'SAMM' ? 'SAMM Core v1.5 FINAL' : `OWASP ${framework} Document`,
-      _framework,
+      framework,
       processedAt: new Date(),
       status: 'COMPLETED',
       metadata: {
@@ -420,8 +420,8 @@ for framework: ${framework}`);
 
     // Processar URLs do SAMM se for o framework SAMM
     if (framework == 'SAMM') {
-      const _urls = this.sammUrlProcessor.getUrls();
-      const _urlReport = this.sammUrlProcessor.generateUrlReport();
+      const urls = this.sammUrlProcessor.getUrls();
+      const urlReport = this.sammUrlProcessor.generateUrlReport();
       await this.saveAssessment('samm_urls_report.md', urlReport);
       console.log(`✅ Processed ${urls.length} SAMM URLs`);
     }
@@ -431,16 +431,16 @@ for framework: ${framework}`);
 
   // Gerar plano estratégico completo
   async generateStrategicPlan(): Promise<string> {
-    const _sammAssessments = await this.processSAMMAssessment();
-    const _asvsRequirements = await this.processASVSRequirements();
-    const _sammUrls = this.sammUrlProcessor.getUrls();
+    const sammAssessments = await this.processSAMMAssessment();
+    const asvsRequirements = await this.processASVSRequirements();
+    const sammUrls = this.sammUrlProcessor.getUrls();
 
     let _plan = '# Plano Estratégico de Segurança OWASP - Simpix\n\n';
     plan += `**Gerado em**: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
     plan += `**Baseado em**: OWASP SAMM v1.5 (${sammUrls.length} URLs processadas)\n\n`;
 
     // Prioridades baseadas em gaps SAMM
-    const _highPriorityGaps = sammAssessments.filter((a) => a.priority == 'HIGH');
+    const highPriorityGaps = sammAssessments.filter((a) => a.priority == 'HIGH');
 
     plan += '## Prioridades Imediatas (30 dias)\n\n';
     highPriorityGaps.forEach((gap) => {
@@ -454,7 +454,7 @@ for framework: ${framework}`);
     });
 
     // Requisitos ASVS não conformes
-    const _nonCompliantASVS = asvsRequirements.filter((r) => r.compliance == 'NON_COMPLIANT');
+    const nonCompliantASVS = asvsRequirements.filter((r) => r.compliance == 'NON_COMPLIANT');
 
     plan += '## Requisitos ASVS Não Conformes\n\n';
     nonCompliantASVS.forEach((req) => {

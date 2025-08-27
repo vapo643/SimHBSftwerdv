@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { analyticsService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/v2/analytics', async (req, res) => {
   try {
-    const _result = await analyticsService.executeOperation('analytics', req.query);
+    const result = await analyticsService.executeOperation('analytics', req.query);
     res.json(_result);
   }
 catch (error) {

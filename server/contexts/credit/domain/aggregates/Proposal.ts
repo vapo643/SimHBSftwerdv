@@ -211,15 +211,15 @@ export class Proposal {
     }
 
     // Cálculo de parcela usando fórmula de juros compostos
-    const _monthlyRate = interestRate / 100 / 12;
-    const _numerator = requestedAmount * monthlyRate * Math.pow(1 + monthlyRate, term);
-    const _denominator = Math.pow(1 + monthlyRate, term) - 1;
+    const monthlyRate = interestRate / 100 / 12;
+    const numerator = requestedAmount * monthlyRate * Math.pow(1 + monthlyRate, term);
+    const denominator = Math.pow(1 + monthlyRate, term) - 1;
 
     return numerator / denominator;
   }
 
   public calculateTotalAmount(): number | null {
-    const _monthlyPayment = this.calculateMonthlyPayment();
+    const monthlyPayment = this.calculateMonthlyPayment();
 
     if (!monthlyPayment) {
       return null;
@@ -265,7 +265,7 @@ export class Proposal {
 
   // Factory method to reconstruct from persistence
   public static fromPersistence(data): Proposal {
-    const _proposal = Object.create(Proposal.prototype);
+    const proposal = Object.create(Proposal.prototype);
     Object.assign(proposal, {
       id: data.id,
       status: data.status,

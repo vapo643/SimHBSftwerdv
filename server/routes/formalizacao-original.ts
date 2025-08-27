@@ -4,17 +4,17 @@
  */
 
 import express from 'express';
-import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { ccbGenerationService } from '../services/ccbGenerationService';
 import { supabase } from '../lib/supabase';
 import { db } from '../lib/supabase';
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 
-const _router = express.Router();
+const router = express.Router();
 
 // Schema de validação
-const _generateCCBSchema = z.object({
+const generateCCBSchema = z.object({
   proposalId: z.string().uuid(),
 });
 
@@ -22,23 +22,23 @@ const _generateCCBSchema = z.object({
  * GET /api/formalizacao/:proposalId/status
  * Retorna status completo da formalização
  */
-router.get('/:proposalId/status', _jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
-    const _result = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT 
-  _id,
-  _status,
-        ccb_gerado,
-        caminho_ccb,
-        ccb_gerado_em,
-        assinatura_eletronica_enviada,
-        assinatura_eletronica_concluida,
-        clicksign_document_id,
-        clicksign_envelope_id,
-        boletos_gerados,
-        quantidade_boletos_gerados,
+  id,
+  status,
+        ccbgerado,
+        caminhoccb,
+        ccb_geradoem,
+        assinatura_eletronicaenviada,
+        assinatura_eletronicaconcluida,
+        clicksign_documentid,
+        clicksign_envelopeid,
+        boletosgerados,
+        quantidade_boletosgerados,
         todos_boletos_enviados
       FROM propostas
       WHERE id = ${proposalId}
@@ -50,14 +50,14 @@ router.get('/:proposalId/status', _jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const _proposal = result[0];
+    const proposal = result[0];
 
     // Buscar timeline de eventos
-    const _logsResult = await db.execute(sql`
+    const logsResult = await db.execute(sql`
       SELECT 
-  _id,
-  _acao,
-  _detalhes,
+  id,
+  acao,
+  detalhes,
         created_at
       FROM proposta_logs
       WHERE proposta_id = ${proposalId}
@@ -68,7 +68,7 @@ router.get('/:proposalId/status', _jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      _proposal,
+      proposal,
       timeline: logsResult || [],
     });
   }
@@ -84,9 +84,9 @@ catch (error) {
  * POST /api/formalizacao/generate-ccb
  * Gera CCB usando template PDF
  */
-router.post('/generate-ccb', _jwtAuthMiddleware, async (req, res) => {
+router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _validation = generateCCBSchema.safeParse(req.body);
+    const validation = generateCCBSchema.safeParse(req.body);
 
     if (!validation.success) {
       return res.status(400).json({
@@ -98,7 +98,7 @@ router.post('/generate-ccb', _jwtAuthMiddleware, async (req, res) => {
     const { proposalId } = validation.data;
 
     // Verificar se CCB já foi gerado
-    const _alreadyGenerated = await ccbGenerationService.isCCBGenerated(proposalId);
+    const alreadyGenerated = await ccbGenerationService.isCCBGenerated(proposalId);
     if (alreadyGenerated) {
       return res.status(400).json({
         error: 'CCB já foi gerado para esta proposta',
@@ -106,7 +106,7 @@ router.post('/generate-ccb', _jwtAuthMiddleware, async (req, res) => {
     }
 
     // Gerar CCB
-    const _result = await ccbGenerationService.generateCCB(proposalId);
+    const result = await ccbGenerationService.generateCCB(proposalId);
 
     if (!_result.success) {
       return res.status(500).json({
@@ -115,13 +115,13 @@ router.post('/generate-ccb', _jwtAuthMiddleware, async (req, res) => {
     }
 
     // Obter URL pública para visualização
-    const _publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
+    const publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
 
     res.json({
       success: true,
       message: 'CCB gerado com sucesso',
       pdfPath: _result.pdfPath,
-      _publicUrl,
+      publicUrl,
     });
   }
 catch (error) {
@@ -136,14 +136,14 @@ catch (error) {
  * GET /api/formalizacao/:proposalId/ccb
  * Retorna URL do CCB ORIGINAL para visualização
  */
-router.get('/:proposalId/ccb', _jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
-    const _result = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT 
-        ccb_gerado,
-        caminho_ccb,
+        ccbgerado,
+        caminhoccb,
         ccb_gerado_em
       FROM propostas
       WHERE id = ${proposalId}
@@ -155,7 +155,7 @@ router.get('/:proposalId/ccb', _jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const _proposal = result[0];
+    const proposal = result[0];
 
     if (!proposal.ccb_gerado || !proposal.caminho_ccb) {
       return res.status(200).json({
@@ -167,7 +167,7 @@ router.get('/:proposalId/ccb', _jwtAuthMiddleware, async (req, res) => {
 
     // ✅ CORREÇÃO: Usar admin client para gerar URLs assinadas (conforme error_docs/storage_errors.md)
     const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-    const _adminSupabase = createServerSupabaseAdminClient();
+    const adminSupabase = createServerSupabaseAdminClient();
 
     const { data: signedUrl, error } = await adminSupabase.storage
       .from('documents')
@@ -180,7 +180,7 @@ router.get('/:proposalId/ccb', _jwtAuthMiddleware, async (req, res) => {
       if ((error as unknown)?.status == 400 || error.message?.includes('Object not found')) {
         console.log('🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...');
         try {
-          const _newCcb = await ccbGenerationService.generateCCB(proposalId);
+          const newCcb = await ccbGenerationService.generateCCB(proposalId);
           if (newCcb.success) {
             return res.json({
               success: true,
@@ -204,9 +204,9 @@ catch (regenError) {
 
     res.json({
       success: true,
-      ccbPath: proposal.caminho_ccb,
+      ccbPath: proposal.caminhoccb,
       signedUrl: signedUrl?.signedUrl,
-      generatedAt: proposal.ccb_gerado_em,
+      generatedAt: proposal.ccb_geradoem,
     });
   }
 catch (error) {
@@ -221,7 +221,7 @@ catch (error) {
  * POST /api/formalizacao/:proposalId/regenerate-ccb
  * Regenera CCB (substitui o anterior)
  */
-router.post('/:proposalId/regenerate-ccb', _jwtAuthMiddleware, async (req, res) => {
+router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -236,7 +236,7 @@ router.post('/:proposalId/regenerate-ccb', _jwtAuthMiddleware, async (req, res) 
     `);
 
     // Gerar novo CCB
-    const _result = await ccbGenerationService.generateCCB(proposalId);
+    const result = await ccbGenerationService.generateCCB(proposalId);
 
     if (!_result.success) {
       return res.status(500).json({
@@ -245,13 +245,13 @@ router.post('/:proposalId/regenerate-ccb', _jwtAuthMiddleware, async (req, res) 
     }
 
     // Obter URL pública
-    const _publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
+    const publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
 
     res.json({
       success: true,
       message: 'CCB regenerado com sucesso',
       pdfPath: _result.pdfPath,
-      _publicUrl,
+      publicUrl,
     });
   }
 catch (error) {
@@ -266,16 +266,16 @@ catch (error) {
  * GET /api/formalizacao/:proposalId/timeline
  * Retorna timeline de eventos da formalização
  */
-router.get('/:proposalId/timeline', _jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
-    const _result = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT 
-  _id,
-  _acao,
-  _detalhes,
-        usuario_id,
+  id,
+  acao,
+  detalhes,
+        usuarioid,
         created_at
       FROM proposta_logs
       WHERE proposta_id = ${proposalId}
@@ -304,14 +304,14 @@ catch (error) {
  */
 router.get(
   '/:proposalId/ccb-assinada',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { proposalId } = req.params;
 
       // PAM V1.0 CORREÇÃO: Todos os roles autorizados podem VER CCB assinada
       // Roles permitidos: ATENDENTE, FINANCEIRO, GERENTE, DIRETOR, ADMINISTRADOR
-      const _allowedRoles = ['ATENDENTE', 'FINANCEIRO', 'GERENTE', 'DIRETOR', 'ADMINISTRADOR'];
+      const allowedRoles = ['ATENDENTE', 'FINANCEIRO', 'GERENTE', 'DIRETOR', 'ADMINISTRADOR'];
 
       if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
         return res.status(403).json({
@@ -320,10 +320,10 @@ router.get(
         });
       }
 
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
       SELECT 
-        caminho_ccb_assinado,
-        data_assinatura,
+        caminho_ccbassinado,
+        dataassinatura,
         assinatura_eletronica_concluida
       FROM propostas
       WHERE id = ${proposalId}
@@ -335,7 +335,7 @@ router.get(
         });
       }
 
-      const _proposal = result[0];
+      const proposal = result[0];
 
       if (!proposal.caminho_ccb_assinado) {
         return res.status(200).json({
@@ -347,7 +347,7 @@ router.get(
 
       // Usar admin client para gerar URL assinada
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const _adminSupabase = createServerSupabaseAdminClient();
+      const adminSupabase = createServerSupabaseAdminClient();
 
       const { data: signedUrl, error } = await adminSupabase.storage
         .from('documents')
@@ -367,9 +367,9 @@ router.get(
 
       res.json({
         success: true,
-        ccbAssinadoPath: proposal.caminho_ccb_assinado,
+        ccbAssinadoPath: proposal.caminho_ccbassinado,
         publicUrl: signedUrl?.signedUrl,
-        dataAssinatura: proposal.data_assinatura,
+        dataAssinatura: proposal.dataassinatura,
         status: 'assinado',
       });
     }

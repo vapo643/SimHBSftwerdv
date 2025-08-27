@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { profiles, userSessions } from '@shared/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import type { Session } from '@shared/schema';
@@ -94,7 +94,7 @@ catch (error) {
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .delete(userSessions)
         .where(eq(userSessions.id, sessionId))
         .returning();
@@ -112,7 +112,7 @@ catch (error) {
    */
   async deleteUserSessions(userId: string): Promise<number> {
     try {
-      const _result = await db
+      const result = await db
         .delete(userSessions)
         .where(eq(userSessions.userId, userId))
         .returning();
@@ -130,7 +130,7 @@ catch (error) {
    */
   async deactivateSession(sessionId: string): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .update(userSessions)
         .set({
           isActive: false,
@@ -151,7 +151,7 @@ catch (error) {
    */
   async updateSessionActivity(sessionId: string): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .update(userSessions)
         .set({
           lastActivityAt: new Date(),
@@ -197,7 +197,7 @@ catch (error) {
    */
   async cleanupExpiredSessions(): Promise<number> {
     try {
-      const _result = await db
+      const result = await db
         .delete(userSessions)
         .where(sql`${userSessions.expiresAt} < NOW()`)
         .returning();
@@ -249,7 +249,7 @@ catch (error) {
    */
   async countActiveSessions(userId: string): Promise<number> {
     try {
-      const _result = await db
+      const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(userSessions)
         .where(
@@ -269,4 +269,4 @@ catch (error) {
   }
 }
 
-export const _authRepository = new AuthRepository();
+export const authRepository = new AuthRepository();

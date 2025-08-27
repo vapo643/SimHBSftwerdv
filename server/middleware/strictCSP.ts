@@ -28,16 +28,16 @@ export class StrictCSP {
   static middleware() {
     return (req: CSPRequest, res: Response, next: NextFunction) => {
       // Generate unique nonce for this request
-      const _nonce = StrictCSP.generateNonce();
+      const nonce = StrictCSP.generateNonce();
       req.nonce = nonce;
 
       // Make nonce available to templates
       res.locals.nonce = nonce;
 
       // Build CSP policy based on environment
-      const _isDevelopment = process.env.NODE_ENV == 'development';
+      const isDevelopment = process.env.NODE_ENV == 'development';
 
-      const _cspPolicy = [
+      const cspPolicy = [
         // Default source - only self and data URIs for images
         "default-src 'self'",
 
@@ -96,7 +96,7 @@ export class StrictCSP {
 
       // Also set report-only for testing (optional)
       if (process.env.NODE_ENV == 'development') {
-        const _reportOnlyPolicy = cspPolicy.replace(
+        const reportOnlyPolicy = cspPolicy.replace(
           `'nonce-${nonce}'`,
           `'nonce-${nonce}' 'unsafe-eval'`
         );
@@ -135,7 +135,7 @@ export class StrictCSP {
    */
   static violationReportEndpoint() {
     return (req: Request, res: Response) => {
-      const _report = req.body;
+      const report = req.body;
 
       console.warn('[CSP] 🚨 CSP Violation Report:', {
         documentURI: report['document-uri'],
@@ -160,7 +160,7 @@ export class StrictCSP {
    */
   static validateInlineScript(scriptContent: string, nonce: string): boolean {
     // Check if script tag includes the correct nonce
-    const _noncePattern = new RegExp(`nonce=["']${nonce}["']`);
+    const noncePattern = new RegExp(`nonce=["']${nonce}["']`);
     return noncePattern.test(scriptContent);
   }
 
@@ -182,11 +182,11 @@ export class StrictCSP {
 /**
  * Export middleware for easy use
  */
-export const _strictCSP = StrictCSP.middleware();
+export const strictCSP = StrictCSP.middleware();
 
 /**
  * CSP violation report handler
  */
-export const _cspViolationReport = StrictCSP.violationReportEndpoint();
+export const cspViolationReport = StrictCSP.violationReportEndpoint();
 
 export default StrictCSP;

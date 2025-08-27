@@ -23,7 +23,7 @@ export async function createApp() {
   // FASE 0 - Initialize Sentry BEFORE creating app (conforme PAM V1.0)
   initializeSentry();
 
-  const _app = express();
+  const app = express();
 
   // FASE 0 - Initialize Sentry error tracking (legacy compatibility)
   initSentry(app);
@@ -32,7 +32,7 @@ export async function createApp() {
   // FASE 0 - Request logging middleware
   app.use(requestLoggingMiddleware);
   logInfo('📊 Observability layer initialized', {
-    sentry: !!process.env.SENTRY_DSN,
+    sentry: !!process.env.SENTRYDSN,
     logging: true,
   });
 
@@ -43,7 +43,7 @@ export async function createApp() {
   app.set('trust proxy', process.env.NODE_ENV == 'production' ? 1 : ['127.0.0.1', '::1']);
 
   // Configure CORS - OWASP ASVS V13.2.1
-  const _corsOptions = setupCORS();
+  const corsOptions = setupCORS();
   app.use(cors(corsOptions));
   log('🔒 [SECURITY] CORS protection configured - ASVS V13.2.1');
 
@@ -55,7 +55,7 @@ export async function createApp() {
   app.use(express.urlencoded({ extended: true }));
 
   // Enhanced OWASP Security Headers
-  if (_config.security.enableHelmet) {
+  if (config.security.enableHelmet) {
     app.use(setupSecurityHeaders());
     app.use(additionalSecurityHeaders);
     // Apply appropriate CSP based on environment
@@ -84,9 +84,9 @@ else {
   // Rate Limiting - Configuração por ambiente
   if (process.env.NODE_ENV !== 'test') {
     // Configurações diferentes por ambiente
-    const _isDevelopment = process.env.NODE_ENV == 'development';
+    const isDevelopment = process.env.NODE_ENV == 'development';
 
-    const _generalApiLimiter = rateLimit({
+    const generalApiLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
       max: isDevelopment ? 10000 : 1000, // 10k dev, 1k prod (muito mais permissivo)
       message: {
@@ -99,7 +99,7 @@ else {
       legacyHeaders: false,
       handler: (req, res) => {
         securityLogger.logEvent({
-          type: SecurityEventType.RATE_LIMIT_EXCEEDED,
+          type: SecurityEventType.RATE_LIMITEXCEEDED,
           severity: isDevelopment ? 'LOW' : 'MEDIUM',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
@@ -107,7 +107,7 @@ else {
           success: false,
           details: {
             type: 'general_api',
-            environment: process.env.NODE_ENV,
+            environment: process.env.NODEENV,
             limit: isDevelopment ? 10000 : 1000,
           },
         });
@@ -120,7 +120,7 @@ else {
       },
     });
 
-    const _authLimiter = rateLimit({
+    const authLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
       max: isDevelopment ? 1000 : 20, // 1000 dev, 20 prod (muito mais permissivo)
       skipSuccessfulRequests: true,
@@ -134,7 +134,7 @@ else {
       legacyHeaders: false,
       handler: (req, res) => {
         securityLogger.logEvent({
-          type: SecurityEventType.BRUTE_FORCE_DETECTED,
+          type: SecurityEventType.BRUTE_FORCEDETECTED,
           severity: isDevelopment ? 'LOW' : 'HIGH',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
@@ -142,7 +142,7 @@ else {
           success: false,
           details: {
             type: 'authentication_brute_force',
-            environment: process.env.NODE_ENV,
+            environment: process.env.NODEENV,
             limit: isDevelopment ? 1000 : 20,
           },
         });
@@ -171,8 +171,8 @@ else {
 
   // Error handling
   app.use((err, req: Request, res: Response, next: NextFunction) => {
-    const _status = err.status || err.statusCode || 500;
-    const _message = err.message || 'Internal Server Error';
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
 
     if (status == 500) {
       console.error(`[express] Error:`, err);

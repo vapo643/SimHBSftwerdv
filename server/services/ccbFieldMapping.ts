@@ -153,7 +153,7 @@ export function yFromTop(pageHeight: number, yFromTop: number): number {
 export function formatTextWithLineBreaks(text: string, maxWidth: number = 50): string {
   if (text.length <= maxWidth) return text;
 
-  const _words = text.split(' ');
+  const words = text.split(' ');
   const lines: string[] = [];
   let _currentLine = '';
 

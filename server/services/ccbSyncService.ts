@@ -3,7 +3,7 @@
  * Automatically downloads signed CCBs from ClickSign and stores them in Supabase Storage
  */
 
-import { db, supabase } from '../lib/_supabase.js';
+import { db, supabase } from '../lib/supabase.js';
 import { propostas } from '@shared/schema.js';
 import { sql } from 'drizzle-orm';
 
@@ -55,9 +55,9 @@ class CCBSyncService {
       console.log('[CCB SYNC] 🔄 Starting CCB synchronization...');
 
       // Find proposals that have been signed but not saved to Storage
-      const _pendingProposals = await db.execute(sql`
+      const pendingProposals = await db.execute(sql`
         SELECT 
-  _id, 
+  id, 
           clicksign_document_key as "clicksignDocumentKey",
           cliente_nome as "clienteNome"
         FROM propostas 
@@ -105,7 +105,7 @@ catch (error) {
       const { clickSignService } = await import('./clickSignService.js');
 
       // Download the signed document from ClickSign
-      const _pdfBuffer = await clickSignService.downloadSignedDocument(clicksignKey);
+      const pdfBuffer = await clickSignService.downloadSignedDocument(clicksignKey);
 
       if (!pdfBuffer || pdfBuffer.length == 0) {
         console.log(`[CCB SYNC] ⚠️ Empty PDF received for ${proposalId}`);
@@ -113,12 +113,12 @@ catch (error) {
       }
 
       // Create a clean filename
-      const _timestamp = Date.now();
-      const _cleanName = clientName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-      const _filename = `CCB_${cleanName}_${proposalId}_${timestamp}.pdf`;
+      const timestamp = Date.now();
+      const cleanName = clientName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+      const filename = `CCB_${cleanName}_${proposalId}_${timestamp}.pdf`;
 
       // Storage path - organized folder structure
-      const _storagePath = `ccb-assinadas/${proposalId}/${filename}`;
+      const storagePath = `ccb-assinadas/${proposalId}/${filename}`;
 
       console.log(`[CCB SYNC] 💾 Saving to Storage: ${storagePath}`);
 
@@ -161,9 +161,9 @@ catch (error) {
       console.log(`[CCB SYNC] 🔄 Force syncing proposal ${proposalId}`);
 
       // Get proposal details
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
         SELECT 
-  _id,
+  id,
           clicksign_document_key as "clicksignDocumentKey",
           cliente_nome as "clienteNome",
           assinatura_eletronica_concluida as "assinaturaEletronicaConcluida"
@@ -172,7 +172,7 @@ catch (error) {
         LIMIT 1
       `);
 
-      const _proposal = result[0];
+      const proposal = result[0];
 
       if (!proposal) {
         console.log(`[CCB SYNC] ❌ Proposal ${proposalId} not found`);
@@ -203,7 +203,7 @@ catch (error) {
 }
 
 // Create singleton instance
-export const _ccbSyncService = new CCBSyncService();
+export const ccbSyncService = new CCBSyncService();
 
 // Auto-start sync in production
 if (process.env.NODE_ENV == 'production') {

@@ -19,16 +19,16 @@ export interface AuthenticatedRequest extends Request {
 // Interface já definida acima
 
 // Token blacklist para segurança aprimorada (SAMM Optimization)
-const _tokenBlacklist = new Set<string>();
+const tokenBlacklist = new Set<string>();
 const TOKEN_BLACKLIST_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hora
 
 // Rate limiting por usuário (SAMM Optimization)
-const _userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
+const userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
 const MAX_AUTH_ATTEMPTS = 10;
 const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 
 // User token tracking for invalidation on account deactivation
-const _userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
+const userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
 
 // Limpar blacklist periodicamente
 setInterval(() => {
@@ -42,7 +42,7 @@ setInterval(() => {
 export function addToBlacklist(token: string): void {
   tokenBlacklist.add(token);
   securityLogger.logEvent({
-    type: SecurityEventType.TOKEN_BLACKLISTED,
+    type: SecurityEventType.TOKENBLACKLISTED,
     severity: 'LOW',
     success: true,
     details: { reason: 'Token added to blacklist' },
@@ -54,14 +54,14 @@ export function addToBlacklist(token: string): void {
  * Também usado para ASVS 8.3.7 - Account Deactivation
  */
 export function invalidateAllUserTokens(userId: string): void {
-  const _tokens = userTokens.get(userId);
+  const tokens = userTokens.get(userId);
   if (tokens && tokens.size > 0) {
     tokens.forEach((token) => tokenBlacklist.add(token));
     userTokens.delete(userId);
     securityLogger.logEvent({
-      type: SecurityEventType.TOKEN_BLACKLISTED,
+      type: SecurityEventType.TOKENBLACKLISTED,
       severity: 'HIGH',
-  _userId,
+  userId,
       success: true,
       details: {
         reason: 'All user tokens invalidated - token rotation',
@@ -100,7 +100,7 @@ export async function _jwtAuthMiddleware(
     console.log('[JWT DEBUG] Referer:', req.headers.referer);
 
     // Step a: Validate JWT token
-    const _authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization;
     console.log('[JWT DEBUG] Header Auth presente:', !!authHeader);
     console.log('[JWT DEBUG] Header começa com Bearer:', authHeader?.startsWith('Bearer '));
 
@@ -119,7 +119,7 @@ export async function _jwtAuthMiddleware(
         console.error('[JWT AUTH - PDF DOWNLOAD] Missing or invalid auth header');
       }
       securityLogger.logEvent({
-        type: SecurityEventType.TOKEN_INVALID,
+        type: SecurityEventType.TOKENINVALID,
         severity: 'MEDIUM',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -130,7 +130,7 @@ export async function _jwtAuthMiddleware(
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const _token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Debug logging para PDF downloads - token info
     if (req.path.includes('/pdf')) {
@@ -144,7 +144,7 @@ export async function _jwtAuthMiddleware(
     // SAMM Optimization: Check token blacklist
     if (tokenBlacklist.has(token)) {
       securityLogger.logEvent({
-        type: SecurityEventType.TOKEN_INVALID,
+        type: SecurityEventType.TOKENINVALID,
         severity: 'HIGH',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -163,9 +163,9 @@ export async function _jwtAuthMiddleware(
     // Auto-detect token type by checking JWT header
     let tokenType: 'supabase' | 'local' = 'local';
     try {
-      const _tokenParts = token.split('.');
+      const tokenParts = token.split('.');
       if (tokenParts.length == 3) {
-        const _header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
+        const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
         // Supabase tokens have 'kid' (Key ID) in header
         if (header.kid) {
           tokenType = 'supabase';
@@ -184,8 +184,8 @@ catch (e) {
       try {
         console.log('[JWT DEBUG] Using Supabase token validation');
         const { createServerSupabaseAdminClient } = await import('./supabase');
-        const _supabase = createServerSupabaseAdminClient();
-        const _supabaseResult = await _supabase.auth.getUser(token);
+        const supabase = createServerSupabaseAdminClient();
+        const supabaseResult = await _supabase.auth.getUser(token);
 
         data = supabaseResult.data;
         error = supabaseResult.error;
@@ -205,10 +205,10 @@ else {
       // Use local JWT validation for local tokens
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
-        const _jwt = await import('jsonwebtoken');
+        const jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
 
-        const _decoded = jwt.default.verify(token, JWT_SECRET) as unknown;
+        const decoded = jwt.default.verify(token, JWT_SECRET) as unknown;
         console.log('[JWT DEBUG] JWT decoded successfully:', {
           userId: decoded.userId,
           email: decoded.email,
@@ -255,7 +255,7 @@ catch (jwtError) {
       securityLogger.logEvent({
         type: error?.message?.includes('expired')
           ? SecurityEventType.TOKEN_EXPIRED
-          : SecurityEventType.TOKEN_INVALID,
+          : SecurityEventType.TOKENINVALID,
         severity: 'MEDIUM',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -271,7 +271,7 @@ catch (jwtError) {
     const { profiles } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
 
-    const _profileResult = await db
+    const profileResult = await db
       .select({
         id: profiles.id,
         fullName: profiles.fullName,
@@ -286,10 +286,10 @@ catch (jwtError) {
     if (!profileResult.length) {
       console.error('Profile query failed: No profile found for user', userId);
       securityLogger.logEvent({
-        type: SecurityEventType.ACCESS_DENIED,
+        type: SecurityEventType.ACCESSDENIED,
         severity: 'HIGH',
-  _userId,
-  _userEmail,
+  userId,
+  userEmail,
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
@@ -302,7 +302,7 @@ catch (jwtError) {
       });
     }
 
-    const _profile = profileResult[0];
+    const profile = profileResult[0];
 
     // Track the current token for this user (for token rotation)
     trackUserToken(userId, token);
@@ -331,14 +331,14 @@ catch (error) {
 export async function extractRoleFromToken(authToken: string): Promise<string | null> {
   try {
     const { createServerSupabaseAdminClient } = await import('./supabase');
-    const _supabase = createServerSupabaseAdminClient();
+    const supabase = createServerSupabaseAdminClient();
     const { data, error } = await _supabase.auth.getUser(authToken);
 
     if (error || !data.user) {
       return null;
     }
 
-    const _supabaseAdmin = createServerSupabaseAdminClient();
+    const supabaseAdmin = createServerSupabaseAdminClient();
 
     const { data: profile } = await supabaseAdmin
       .from('profiles')
@@ -353,3 +353,6 @@ catch (error) {
     return null;
   }
 }
+
+// Export alias for consistency
+export const jwtAuthMiddleware = _jwtAuthMiddleware;

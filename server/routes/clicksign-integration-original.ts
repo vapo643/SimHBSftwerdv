@@ -4,22 +4,22 @@
  */
 
 import express from 'express';
-import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
 import { clickSignServiceV3 } from '../services/clickSignServiceV3.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { createServerSupabaseAdminClient } from '../lib/_supabase.js';
+import { createServerSupabaseAdminClient } from '../lib/supabase.js';
 
-const _router = express.Router();
+const router = express.Router();
 
 /**
  * Test ClickSign API Token
  * GET /api/clicksign/test-token
  */
-router.get('/clicksign/test-token', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _userRole = req.user?.role;
+    const userRole = req.user?.role;
 
     // Only ADMINISTRADOR can test tokens
     if (userRole !== 'ADMINISTRADOR') {
@@ -29,9 +29,9 @@ router.get('/clicksign/test-token', _jwtAuthMiddleware, async (req: Authenticate
     }
 
     // Test token using PRODUCTION ClickSign API (legal signatures only)
-    const _testUrl = `https://app.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`;
+    const testUrl = `https://app.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`;
 
-    const _response = await fetch(testUrl, {
+    const response = await fetch(testUrl, {
       method: 'GET',
       headers: {
         Accept: 'application/vnd.api+json',
@@ -39,7 +39,7 @@ router.get('/clicksign/test-token', _jwtAuthMiddleware, async (req: Authenticate
       },
     });
 
-    const _data = await response.json();
+    const data = await response.json();
 
     if (response.ok) {
       res.json({
@@ -75,12 +75,12 @@ catch (error) {
  */
 router.post(
   '/propostas/:id/clicksign/regenerar',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
-      const _userId = req.user?.id;
-      const _userRole = req.user?.role;
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
 
       console.log(
         `[CLICKSIGN] 🔄 Regenerating signature link - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`
@@ -94,7 +94,7 @@ router.post(
       }
 
       // Create Supabase client for storage operations
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Import database dependencies
       const { db } = await import('../lib/supabase');
@@ -130,7 +130,7 @@ catch (error) {
       }
 
       // Parse client data from JSONB
-      const _clienteData = proposta.clienteData as unknown;
+      const clienteData = proposta.clienteData as unknown;
       if (!clienteData || !clienteData.nome || !clienteData.email || !clienteData.cpf) {
         return res.status(400).json({
           message:
@@ -148,11 +148,11 @@ catch (error) {
 
         // Generate new CCB using TEMPLATE SERVICE (pdf-lib)
         const { ccbGenerationService } = await import('../services/ccbGenerationService');
-        const _result = await ccbGenerationService.generateCCB(propostaId);
+        const result = await ccbGenerationService.generateCCB(propostaId);
         if (!_result.success) {
           throw new Error(`Erro ao gerar CCB: ${_result.error}`);
         }
-        const _ccbPath = _result.pdfPath!;
+        const ccbPath = _result.pdfPath!;
 
         // Update proposal with new CCB path
         await db
@@ -169,7 +169,7 @@ catch (error) {
           throw new Error(`Erro ao baixar CCB: ${downloadError?.message || 'Unknown error'}`);
         }
 
-        const _ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
+        const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
         pdfBase64 = ccbBuffer.toString('base64');
 
         console.log(`[CLICKSIGN] ✅ New CCB generated: ${ccbPath}`);
@@ -185,7 +185,7 @@ else {
             throw new Error(`Erro ao baixar CCB: ${downloadError?.message || 'File not found'}`);
           }
 
-          const _ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
+          const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
           pdfBase64 = ccbBuffer.toString('base64');
 
           console.log(
@@ -199,11 +199,11 @@ catch (fileError) {
 
           // Generate new CCB using TEMPLATE SERVICE (pdf-lib)
           const { ccbGenerationService } = await import('../services/ccbGenerationService');
-          const _result = await ccbGenerationService.generateCCB(propostaId);
+          const result = await ccbGenerationService.generateCCB(propostaId);
           if (!_result.success) {
             throw new Error(`Erro ao gerar CCB: ${_result.error}`);
           }
-          const _ccbPath = _result.pdfPath!;
+          const ccbPath = _result.pdfPath!;
 
           // Update proposal with new CCB path
           await db
@@ -222,7 +222,7 @@ catch (fileError) {
             );
           }
 
-          const _ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
+          const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
           pdfBase64 = ccbBuffer.toString('base64');
 
           console.log(`[CLICKSIGN] ✅ New CCB regenerated: ${ccbPath}`);
@@ -230,7 +230,7 @@ catch (fileError) {
       }
 
       // Gerar novo link usando o mesmo fluxo
-      const _result = await clickSignServiceV3.sendCCBForSignature(propostaId, pdfBase64, {
+      const result = await clickSignServiceV3.sendCCBForSignature(propostaId, pdfBase64, {
         name: clienteData.nome,
         email: clienteData.email,
         cpf: clienteData.cpf,
@@ -298,13 +298,13 @@ catch (error) {
  */
 router.post(
   '/propostas/:id/clicksign/enviar',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
       const { useBiometricAuth = false } = req.body;
-      const _userId = req.user?.id;
-      const _userRole = req.user?.role;
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
 
       console.log(
         `[CLICKSIGN] ${_getBrasiliaTimestamp()} - Iniciando envio para ClickSign - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`
@@ -350,7 +350,7 @@ router.post(
       }
 
       // Parse client data from JSONB
-      const _clienteData = proposta.clienteData as unknown;
+      const clienteData = proposta.clienteData as unknown;
       if (!clienteData || !clienteData.nome || !clienteData.email || !clienteData.cpf) {
         return res.status(400).json({
           message: 'Dados do cliente incompletos. Nome, email e CPF são obrigatórios.',
@@ -363,11 +363,11 @@ router.post(
 
       // Verificar se arquivo CCB existe
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Extrair caminho correto do CCB
       let _ccbPath = proposta.caminhoCcbAssinado;
-      const _documentsIndex = ccbPath.indexOf('/documents/');
+      const documentsIndex = ccbPath.indexOf('/documents/');
       if (documentsIndex !== -1) {
         ccbPath = ccbPath.substring(documentsIndex + '/documents/'.length);
       }
@@ -387,15 +387,15 @@ router.post(
       }
 
       // Convert file to base64 with Data URI format
-      const _arrayBuffer = await ccbFile.arrayBuffer();
-      const _buffer = Buffer.from(arrayBuffer);
-      const _base64Raw = buffer.toString('base64');
-      const _base64Content = `data:application/pdf;base64,${base64Raw}`;
+      const arrayBuffer = await ccbFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const base64Raw = buffer.toString('base64');
+      const base64Content = `data:application/pdf;base64,${base64Raw}`;
 
       console.log(`[CLICKSIGN] CCB convertido para base64, tamanho: ${base64Content.length} chars`);
 
       // Preparar dados para ClickSign
-      const _envelopeData = {
+      const envelopeData = {
         name: `Contrato CCB - Proposta ${propostaId}`,
         locale: 'pt-BR',
         auto_close: false,
@@ -403,12 +403,12 @@ router.post(
         block_after_refusal: true,
       };
 
-      const _documentData = {
+      const documentData = {
         content: base64Content,
         filename: `CCB-${propostaId}.pdf`,
       };
 
-      const _signerData = {
+      const signerData = {
         name: clienteData.nome,
         email: clienteData.email,
         phone: clienteData.telefone || '',
@@ -420,7 +420,7 @@ router.post(
       console.log(`[CLICKSIGN] Enviando para ClickSign API...`);
 
       // Chamar ClickSign API
-      const _result = await clickSignServiceV3.sendCCBForSignature(propostaId, base64Content, {
+      const result = await clickSignServiceV3.sendCCBForSignature(propostaId, base64Content, {
         name: clienteData.nome,
         email: clienteData.email,
         phone: clienteData.telefone || '',
@@ -447,7 +447,7 @@ router.post(
       // Log de auditoria
       const { propostaLogs } = await import('../../shared/schema');
       await db.insert(propostaLogs).values({
-  _propostaId,
+  propostaId,
         autorId: userId || '',
         statusNovo: 'clicksign_enviado',
         observacao: `Contrato enviado para ClickSign. Documento: ${_result.documentKey}`,
@@ -482,7 +482,7 @@ catch (error) {
  */
 router.get(
   '/propostas/:id/clicksign/status',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
@@ -517,7 +517,7 @@ router.get(
 
       // Buscar status atualizado no ClickSign
       try {
-        const _envelopeStatus = await clickSignServiceV3.getEnvelopeStatus(
+        const envelopeStatus = await clickSignServiceV3.getEnvelopeStatus(
           proposta.clicksignListKey
         );
 

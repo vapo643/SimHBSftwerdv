@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { simulatorService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/limits', async (req, res) => {
   try {
-    const _result = await simulatorService.executeOperation('credit_limits', req.query);
+    const result = await simulatorService.executeOperation('credit_limits', req.query);
     res.json(_result);
   }
 catch (error) {

@@ -11,14 +11,14 @@ import { sql } from 'drizzle-orm';
  */
 export async function getDatabaseStats() {
   try {
-    const _stats = await db.execute(sql`
+    const stats = await db.execute(sql`
       SELECT 
-        current_database() as database_name,
-        pg_database_size(current_database()) as database_size,
-        pg_size_pretty(pg_database_size(current_database())) as database_size_pretty,
-        (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') as active_connections,
-        (SELECT count(*) FROM pg_stat_activity) as total_connections,
-        (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as total_tables,
+        current_database() as databasename,
+        pg_database_size(current_database()) as databasesize,
+        pg_size_pretty(pg_database_size(current_database())) as database_sizepretty,
+        (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') as activeconnections,
+        (SELECT count(*) FROM pg_stat_activity) as totalconnections,
+        (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as totaltables,
         current_timestamp as checked_at
     `);
 
@@ -35,14 +35,14 @@ catch (error) {
  */
 export async function getSlowQueries(limit = 10) {
   try {
-    const _queries = await db.execute(sql`
+    const queries = await db.execute(sql`
       SELECT 
-  _calls,
-        total_exec_time,
-        mean_exec_time,
-        max_exec_time,
-        min_exec_time,
-        stddev_exec_time,
+  calls,
+        total_exectime,
+        mean_exectime,
+        max_exectime,
+        min_exectime,
+        stddev_exectime,
         LEFT(query, 100) as query_preview
       FROM pg_stat_statements
       WHERE query NOT LIKE '%pg_%'
@@ -65,17 +65,17 @@ catch (error) {
  */
 export async function getTableStats() {
   try {
-    const _stats = await db.execute(sql`
+    const stats = await db.execute(sql`
       SELECT 
-  _schemaname,
-  _tablename,
-        pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as total_size,
-        n_live_tup as live_rows,
-        n_dead_tup as dead_rows,
-        n_mod_since_analyze as modifications_since_analyze,
-        last_vacuum,
-        last_autovacuum,
-        last_analyze,
+  schemaname,
+  tablename,
+        pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as totalsize,
+        n_live_tup as liverows,
+        n_dead_tup as deadrows,
+        n_mod_since_analyze as modifications_sinceanalyze,
+        lastvacuum,
+        lastautovacuum,
+        lastanalyze,
         last_autoanalyze
       FROM pg_stat_user_tables
       WHERE schemaname = 'public'
@@ -95,14 +95,14 @@ catch (error) {
  */
 export async function getIndexUsage() {
   try {
-    const _usage = await db.execute(sql`
+    const usage = await db.execute(sql`
       SELECT 
-  _schemaname,
-  _tablename,
-  _indexname,
-        idx_scan as index_scans,
-        idx_tup_read as tuples_read_via_index,
-        idx_tup_fetch as tuples_fetched_via_index,
+  schemaname,
+  tablename,
+  indexname,
+        idx_scan as indexscans,
+        idx_tup_read as tuples_read_viaindex,
+        idx_tup_fetch as tuples_fetched_viaindex,
         pg_size_pretty(pg_relation_size(indexrelid)) as index_size
       FROM pg_stat_user_indexes
       WHERE schemaname = 'public'
@@ -122,22 +122,22 @@ catch (error) {
  */
 export async function getActiveConnections() {
   try {
-    const _connections = await db.execute(sql`
+    const connections = await db.execute(sql`
       SELECT 
-  _pid,
-  _usename,
-        application_name,
-        client_addr,
-  _state,
-        query_start,
-        state_change,
-        wait_event_type,
-        wait_event,
+  pid,
+  usename,
+        applicationname,
+        clientaddr,
+  state,
+        querystart,
+        statechange,
+        wait_eventtype,
+        waitevent,
         CASE 
           WHEN state = 'active' THEN 
             EXTRACT(EPOCH FROM (now() - query_start))::integer
           ELSE NULL 
-        END as query_duration_seconds,
+        END as query_durationseconds,
         LEFT(query, 200) as current_query
       FROM pg_stat_activity
       WHERE state != 'idle'
@@ -158,21 +158,21 @@ catch (error) {
  */
 export async function checkDatabaseHealth() {
   try {
-    const _health = {
+    const health = {
       status: 'healthy',
       issues: [] as string[],
       metrics: {} as unknown,
     };
 
     // Verificar conexões
-    const _connStats = await db.execute(sql`
+    const connStats = await db.execute(sql`
       SELECT 
         (SELECT count(*) FROM pg_stat_activity) as total,
         (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') as active,
         (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') as max_allowed
     `);
 
-    const _conn = connStats[0] as unknown;
+    const conn = connStats[0] as unknown;
     health.metrics.connections = conn;
 
     if (conn.total > conn.max_allowed * 0.8) {
@@ -181,13 +181,13 @@ export async function checkDatabaseHealth() {
     }
 
     // Verificar bloat das tabelas
-    const _bloat = await db.execute(sql`
+    const bloat = await db.execute(sql`
       SELECT 
-  _schemaname,
-  _tablename,
-        n_dead_tup,
-        n_live_tup,
-        ROUND(n_dead_tup::numeric / NULLIF(n_live_tup, 0) * 100, 2) as dead_ratio
+  schemaname,
+  tablename,
+        n_deadtup,
+        n_livetup,
+        ROUND(n_dead_tup::numeric / NULLIF(n_livetup, 0) * 100, 2) as dead_ratio
       FROM pg_stat_user_tables
       WHERE schemaname = 'public'
         AND n_dead_tup > 1000
@@ -210,14 +210,14 @@ else if (health.status !== 'critical') {
     }
 
     // Verificar queries longas
-    const _longQueries = await db.execute(sql`
+    const longQueries = await db.execute(sql`
       SELECT count(*) as count
       FROM pg_stat_activity
       WHERE state = 'active'
         AND query_start < now() - interval '5 minutes'
     `);
 
-    const _longCount = (longQueries[0] as unknown).count;
+    const longCount = (longQueries[0] as unknown).count;
     if (longCount > 0) {
       health.issues.push(`${longCount} queries rodando há mais de 5 minutos`);
       health.status = 'warning';

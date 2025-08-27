@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { securityTestService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/timing-analysis', async (req, res) => {
   try {
-    const _result = await securityTestService.executeOperation('timing_analysis', req.query);
+    const result = await securityTestService.executeOperation('timing_analysis', req.query);
     res.json(_result);
   }
 catch (error) {

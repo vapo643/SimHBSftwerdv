@@ -1,19 +1,19 @@
 import { Router } from 'express';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../../shared/types/express';
 import { db } from '../lib/supabase';
 import { eq, and, isNull } from 'drizzle-orm';
 import {
-  _produtos,
-  _tabelasComerciais,
-  _lojas,
-  _parceiros,
-  _users,
-  _produtoTabelaComercial,
+  produtos,
+  tabelasComerciais,
+  lojas,
+  parceiros,
+  users,
+  produtoTabelaComercial,
 } from '@shared/schema';
 import { getFromCache, setToCache } from '../services/cacheService';
 
-const _router = Router();
+const router = Router();
 
 interface OriginationContext {
   atendente: {
@@ -53,22 +53,22 @@ interface OriginationContext {
 }
 
 // GET /api/origination/context - Orchestrator endpoint for T-01
-router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // 1. Get authenticated user with their store and partner data
-    const _userId = req.user?.id;
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
     // Fetch user profile with store and partner information using Supabase client
     const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-    const _supabase = createServerSupabaseAdminClient();
+    const supabase = createServerSupabaseAdminClient();
 
     // First, get the profile
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('id, full_name, loja_id')
+      .select('id, fullname, loja_id')
       .eq('id', userId)
       .single();
 
@@ -102,12 +102,12 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
       .from('lojas')
       .select(
         `
-  _id,
-        nome_loja,
-        parceiro_id,
+  id,
+        nomeloja,
+        parceiroid,
         parceiros (
-  _id,
-          razao_social,
+  id,
+          razaosocial,
           cnpj
         )
       `
@@ -121,31 +121,31 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
     }
 
     // Fix: parceiros should be a single object, not an array
-    const _parceiro = lojaData.parceiros as unknown;
+    const parceiro = lojaData.parceiros as unknown;
 
-    const _userProfile = {
+    const userProfile = {
       id: profileData.id,
-      nome: profileData.full_name,
-      loja_id: profileData.loja_id,
-      nome_loja: lojaData.nome_loja,
-      parceiro_id: lojaData.parceiro_id,
-      razao_social: parceiro?.razao_social,
+      nome: profileData.fullname,
+      loja_id: profileData.lojaid,
+      nome_loja: lojaData.nomeloja,
+      parceiro_id: lojaData.parceiroid,
+      razao_social: parceiro?.razaosocial,
       cnpj: parceiro?.cnpj,
     };
 
-    const _parceiroId = userProfile.parceiro_id;
+    const parceiroId = userProfile.parceiro_id;
 
     // 2. Fetch all active products
-    const _produtosAtivos = await db.select().from(produtos).where(eq(produtos.isActive, true));
+    const produtosAtivos = await db.select().from(produtos).where(eq(produtos.isActive, true));
 
     // 3. For each product, fetch available commercial tables
-    const _produtosComTabelas = await Promise.all(
+    const produtosComTabelas = await Promise.all(
       produtosAtivos.map(async (produto) => {
         // Gerar chave de cache única e determinística
-        const _cacheKey = `tabelas-comerciais:produtoId:${produto.id}:parceiroId:${parceiroId}`;
+        const cacheKey = `tabelas-comerciais:produtoId:${produto.id}:parceiroId:${parceiroId}`;
 
         // Tentar buscar do cache primeiro
-        const _cachedTabelas = await getFromCache<
+        const cachedTabelas = await getFromCache<
           Array<{
             id: number;
             nomeTabela: string;
@@ -169,7 +169,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 
         // Cache miss - buscar do banco de dados
         // First, fetch personalized tables for this partner using N:N relationship
-        const _tabelasPersonalizadas = await db
+        const tabelasPersonalizadas = await db
           .select({
             id: tabelasComerciais.id,
             nomeTabela: tabelasComerciais.nomeTabela,
@@ -179,7 +179,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
           })
           .from(tabelasComerciais)
           .innerJoin(
-  _produtoTabelaComercial,
+  produtoTabelaComercial,
             eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
           )
           .where(
@@ -207,7 +207,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 
         // If no personalized tables, fetch general tables using N:N relationship
         if (tabelasPersonalizadas.length == 0) {
-          const _tabelasGerais = await db
+          const tabelasGerais = await db
             .select({
               id: tabelasComerciais.id,
               nomeTabela: tabelasComerciais.nomeTabela,
@@ -217,7 +217,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
             })
             .from(tabelasComerciais)
             .innerJoin(
-  _produtoTabelaComercial,
+  produtoTabelaComercial,
               eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
             )
             .where(
@@ -245,7 +245,7 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
           nome: produto.nomeProduto,
           tacValor: produto.tacValor || '0',
           tacTipo: produto.tacTipo || 'fixo',
-  _tabelasDisponiveis,
+  tabelasDisponiveis,
         };
       })
     );
@@ -256,11 +256,11 @@ router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
         id: userProfile.id,
         nome: userProfile.nome,
         loja: {
-          id: userProfile.loja_id,
-          nome: userProfile.nome_loja,
+          id: userProfile.lojaid,
+          nome: userProfile.nomeloja,
           parceiro: {
-            id: userProfile.parceiro_id,
-            razaoSocial: userProfile.razao_social,
+            id: userProfile.parceiroid,
+            razaoSocial: userProfile.razaosocial,
             cnpj: userProfile.cnpj,
           },
         },

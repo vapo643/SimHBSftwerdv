@@ -14,7 +14,7 @@ import { propostaService } from '../services/propostaService';
  * Toggle proposta status between active and suspended
  * PUT /api/propostas/:id/toggle-status
  */
-export const _togglePropostaStatus = async (req: AuthenticatedRequest, res: Response) => {
+export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
@@ -24,8 +24,8 @@ export const _togglePropostaStatus = async (req: AuthenticatedRequest, res: Resp
     }
 
     // Delegate to service layer
-    const _result = await propostaService.togglePropostaStatus({
-  _propostaId,
+    const result = await propostaService.togglePropostaStatus({
+  propostaId,
       userId: req.user?.id || '',
       userRole: req.user?.role || '',
     });
@@ -66,7 +66,7 @@ catch (error) {
  * Get signed CCB for a proposta
  * GET /api/propostas/:id/ccb
  */
-export const _getCcbAssinada = async (req: AuthenticatedRequest, res: Response) => {
+export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
@@ -76,7 +76,7 @@ export const _getCcbAssinada = async (req: AuthenticatedRequest, res: Response) 
     }
 
     // Delegate to service layer
-    const _ccbData = await propostaService.getCcbAssinada(propostaId);
+    const ccbData = await propostaService.getCcbAssinada(propostaId);
 
     // Return response
     res.json(ccbData);
@@ -93,7 +93,7 @@ catch (error) {
       // Parse debug info from error message if available
       let _debugInfo = {};
       try {
-        const _debugMatch = error.message.match(/Debug: (.+)$/);
+        const debugMatch = error.message.match(/Debug: (.+)$/);
         if (debugMatch) {
           debugInfo = JSON.parse(debugMatch[1]);
         }
@@ -119,7 +119,7 @@ catch (e) {
  * Get propostas by status
  * GET /api/propostas/by-status/:status
  */
-export const _getPropostasByStatus = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasByStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { status } = req.params;
 
@@ -127,7 +127,7 @@ export const _getPropostasByStatus = async (req: AuthenticatedRequest, res: Resp
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _propostas = await propostaService.getPropostasByStatus(status);
+    const propostas = await propostaService.getPropostasByStatus(status);
     res.json(propostas);
   }
 catch (error) {
@@ -142,7 +142,7 @@ catch (error) {
  * Get propostas by user
  * GET /api/propostas/by-user/:userId
  */
-export const _getPropostasByUser = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasByUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { userId } = req.params;
 
@@ -157,7 +157,7 @@ export const _getPropostasByUser = async (req: AuthenticatedRequest, res: Respon
       });
     }
 
-    const _propostas = await propostaService.getPropostasByUser(userId);
+    const propostas = await propostaService.getPropostasByUser(userId);
     res.json(propostas);
   }
 catch (error) {
@@ -172,7 +172,7 @@ catch (error) {
  * Get propostas by loja
  * GET /api/propostas/by-loja/:lojaId
  */
-export const _getPropostasByLoja = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasByLoja = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { lojaId } = req.params;
 
@@ -180,12 +180,12 @@ export const _getPropostasByLoja = async (req: AuthenticatedRequest, res: Respon
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _lojaIdNumber = parseInt(lojaId, 10);
+    const lojaIdNumber = parseInt(lojaId, 10);
     if (_isNaN(lojaIdNumber)) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _propostas = await propostaService.getPropostasByLoja(lojaIdNumber);
+    const propostas = await propostaService.getPropostasByLoja(lojaIdNumber);
     res.json(propostas);
   }
 catch (error) {
@@ -200,7 +200,7 @@ catch (error) {
  * Get propostas pending signature
  * GET /api/propostas/pending-signature
  */
-export const _getPropostasPendingSignature = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostasPendingSignature = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Check permissions - only admins can see all pending signatures
     if (req.user?.role !== 'ADMINISTRADOR') {
@@ -209,7 +209,7 @@ export const _getPropostasPendingSignature = async (req: AuthenticatedRequest, r
       });
     }
 
-    const _propostas = await propostaService.getPropostasPendingSignature();
+    const propostas = await propostaService.getPropostasPendingSignature();
     res.json(propostas);
   }
 catch (error) {
@@ -224,7 +224,7 @@ catch (error) {
  * Update CCB path for a proposta
  * PATCH /api/propostas/:id/ccb-path
  */
-export const _updateCcbPath = async (req: AuthenticatedRequest, res: Response) => {
+export const updateCcbPath = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
     const { ccbPath } = req.body;
@@ -259,7 +259,7 @@ catch (error) {
  * Mark CCB as generated
  * POST /api/propostas/:id/mark-ccb-generated
  */
-export const _markCcbGenerated = async (req: AuthenticatedRequest, res: Response) => {
+export const markCcbGenerated = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
@@ -289,7 +289,7 @@ catch (error) {
  * Mark signature as completed
  * POST /api/propostas/:id/mark-signature-completed
  */
-export const _markSignatureCompleted = async (req: AuthenticatedRequest, res: Response) => {
+export const markSignatureCompleted = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
     const { clicksignKey } = req.body;
@@ -320,7 +320,7 @@ catch (error) {
  * Get proposta with full details
  * GET /api/propostas/:id/details
  */
-export const _getPropostaWithDetails = async (req: AuthenticatedRequest, res: Response) => {
+export const getPropostaWithDetails = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
@@ -328,7 +328,7 @@ export const _getPropostaWithDetails = async (req: AuthenticatedRequest, res: Re
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _proposta = await propostaService.getPropostaWithDetails(propostaId);
+    const proposta = await propostaService.getPropostaWithDetails(propostaId);
 
     if (!proposta) {
       return res.status(401).json({error: "Unauthorized"});

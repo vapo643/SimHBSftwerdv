@@ -7,7 +7,7 @@ import { UserDataSchema, UserData } from '../../shared/types/user';
 export { UserData };
 
 export async function createUser(userData: UserData) {
-  const _supabase = createServerSupabaseAdminClient();
+  const supabase = createServerSupabaseAdminClient();
   let createdAuthUser: unknown = null;
   let createdProfile: unknown = null;
 
@@ -18,9 +18,9 @@ export async function createUser(userData: UserData) {
       throw new Error(`Erro ao verificar email: ${checkError.message}`);
     }
 
-    const _existingUser = existingUsers.users.find((user) => user.email == userData.email);
+    const existingUser = existingUsers.users.find((user) => user.email == userData.email);
     if (existingUser) {
-      const _conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
+      const conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
       conflictError.name = 'ConflictError';
       throw conflictError;
     }
@@ -35,7 +35,7 @@ export async function createUser(userData: UserData) {
     if (!authData.user) throw new Error('Falha crítica ao criar usuário no Auth.');
     createdAuthUser = authData.user;
 
-    const _profilePayload = {
+    const profilePayload = {
       id: createdAuthUser.id,
       role: userData.role,
       full_name: userData.fullName,
@@ -51,7 +51,7 @@ export async function createUser(userData: UserData) {
     createdProfile = profileResult;
 
     if (userData.role == 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
-      const _gerenteLojaInserts = userData.lojaIds.map((lojaId) => ({
+      const gerenteLojaInserts = userData.lojaIds.map((lojaId) => ({
         gerente_id: createdAuthUser.id,
         loja_id: lojaId,
       }));

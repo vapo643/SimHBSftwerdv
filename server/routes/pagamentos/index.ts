@@ -5,41 +5,41 @@
  */
 
 import { Router } from 'express';
-import { _jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
 import { AuthenticatedRequest } from '../../../shared/types/express';
 import { pagamentoService } from '../../services/pagamentoService.js';
 import { z } from 'zod';
 import multer from 'multer';
 
 // Multer configuration for file uploads
-const _upload = multer({
+const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB
   },
 });
 
-const _router = Router();
+const router = Router();
 
 /**
  * Get payments list with filters
  * GET /api/pagamentos
  */
-router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, periodo, incluir_pagos } = req.query;
-    const _userId = req.user?.id;
-    const _userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _payments = await pagamentoService.getPayments({
+    const payments = await pagamentoService.getPayments({
       status: status as string,
       periodo: periodo as string,
       incluir_pagos: incluir_pagos == 'true',
-  _userId,
+  userId,
       userRole: userRole || undefined,
     });
 
@@ -62,11 +62,11 @@ catch (error) {
  * Get specific proposal for payment
  * GET /api/pagamentos/:id
  */
-router.get('/:id', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
-    const _proposal = await pagamentoService.getProposalForPayment(id);
+    const proposal = await pagamentoService.getProposalForPayment(id);
 
     res.json({
       success: true,
@@ -90,10 +90,10 @@ catch (error) {
  * Create new payment
  * POST /api/pagamentos
  */
-router.post('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _userId = req.user?.id;
-    const _userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
@@ -107,7 +107,7 @@ router.post('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 
     // Validate payment data
-    const _validation = await pagamentoService.validatePaymentData(req.body);
+    const validation = await pagamentoService.validatePaymentData(req.body);
 
     if (!validation.valid) {
       return res.status(400).json({
@@ -122,7 +122,7 @@ router.post('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 
     // Create payment
-    const _payment = await pagamentoService.createPayment(req.body, userId);
+    const payment = await pagamentoService.createPayment(req.body, userId);
 
     res.status(201).json({
       success: true,
@@ -152,12 +152,12 @@ catch (error) {
  * Update payment status
  * PATCH /api/pagamentos/:id/status
  */
-router.patch('/:id/status', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.patch('/:id/status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { status, observacoes } = req.body;
-    const _userId = req.user?.id;
-    const _userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
@@ -176,18 +176,18 @@ router.patch('/:id/status', _jwtAuthMiddleware, async (req: AuthenticatedRequest
     }
 
     // Validate status
-    const _validStatuses = ['processando', 'pago', 'rejeitado', 'cancelado'];
+    const validStatuses = ['processando', 'pago', 'rejeitado', 'cancelado'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         error: 'Status inválido',
-  _validStatuses,
+  validStatuses,
       });
     }
 
-    const _updatedPayment = await pagamentoService.updatePaymentStatus(
-  _id,
-  _status,
-  _userId,
+    const updatedPayment = await pagamentoService.updatePaymentStatus(
+  id,
+  status,
+  userId,
       observacoes
     );
 
@@ -215,10 +215,10 @@ catch (error) {
  * Export payments data
  * GET /api/pagamentos/export
  */
-router.get('/export/data', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/export/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { dataInicio, dataFim, status, loja, formato = 'csv' } = req.query;
-    const _userRole = req.user?.role;
+    const userRole = req.user?.role;
 
     // Check user permissions
     if (!['ADMINISTRADOR', 'GERENTE'].includes(userRole || '')) {
@@ -227,7 +227,7 @@ router.get('/export/data', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
       });
     }
 
-    const _filters = {
+    const filters = {
       dataInicio: dataInicio as string,
       dataFim: dataFim as string,
       status: status ? (status as string).split(',') : undefined,
@@ -235,7 +235,7 @@ router.get('/export/data', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
       formato: formato as 'csv' | 'excel',
     };
 
-    const _exportData = await pagamentoService.exportPayments(filters);
+    const exportData = await pagamentoService.exportPayments(filters);
 
     // Set response headers for download
     res.setHeader('Content-Type', exportData.contentType);
@@ -246,7 +246,7 @@ router.get('/export/data', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
 
     // For CSV format, convert data to CSV string
     if (formato == 'csv') {
-      const _csv = convertToCSV(exportData.data);
+      const csv = convertToCSV(exportData.data);
       res.send(csv);
     }
 else {
@@ -268,9 +268,9 @@ catch (error) {
  * Get payments dashboard data
  * GET /api/pagamentos/dashboard
  */
-router.get('/dashboard/stats', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _dashboard = await pagamentoService.getPaymentsDashboard();
+    const dashboard = await pagamentoService.getPaymentsDashboard();
 
     res.json({
       success: true,
@@ -290,9 +290,9 @@ catch (error) {
  * Get filter options for payment screens
  * GET /api/pagamentos/filter-options
  */
-router.get('/filter-options/data', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/filter-options/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _options = await pagamentoService.getFilterOptions();
+    const options = await pagamentoService.getFilterOptions();
 
     res.json({
       success: true,
@@ -312,9 +312,9 @@ catch (error) {
  * Validate payment data
  * POST /api/pagamentos/validate
  */
-router.post('/validate', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/validate', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _validation = await pagamentoService.validatePaymentData(req.body);
+    const validation = await pagamentoService.validatePaymentData(req.body);
 
     res.json({
       success: true,
@@ -336,13 +336,13 @@ catch (error) {
  */
 router.post(
   '/:id/documents',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   upload.single('document'),
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const _userId = req.user?.id;
-      const _file = req.file;
+      const userId = req.user?.id;
+      const file = req.file;
 
       if (!userId) {
         return res.status(401).json({error: "Unauthorized"});
@@ -384,16 +384,16 @@ function convertToCSV(data: unknown[]): string {
     return '';
   }
 
-  const _headers = Object.keys(data[0]);
-  const _csvRows = [];
+  const headers = Object.keys(data[0]);
+  const csvRows = [];
 
   // Add headers
   csvRows.push(headers.join(','));
 
   // Add data rows
   for (const row of data) {
-    const _values = headers.map((header) => {
-      const _value = row[header];
+    const values = headers.map((header) => {
+      const value = row[header];
       // Escape values that contain commas or quotes
       if (typeof value == 'string' && (value.includes(',') || value.includes('"'))) {
         return `"${value.replace(/"/g, '""')}"`;

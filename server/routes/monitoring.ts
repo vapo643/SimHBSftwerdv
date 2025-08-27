@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { monitoringService } from '../services/monitoringService.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/monitoring/stats
@@ -16,7 +16,7 @@ const _router = Router();
  */
 router.get('/stats', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const _stats = await monitoringService.getDatabaseStats();
+    const stats = await monitoringService.getDatabaseStats();
     res.json({ success: true, data: stats });
   }
 catch (error) {
@@ -34,7 +34,7 @@ catch (error) {
  */
 router.get('/tables', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const _stats = await monitoringService.getTableStats();
+    const stats = await monitoringService.getTableStats();
     res.json({ success: true, data: stats });
   }
 catch (error) {
@@ -52,7 +52,7 @@ catch (error) {
  */
 router.get('/indexes', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const _usage = await monitoringService.getIndexUsage();
+    const usage = await monitoringService.getIndexUsage();
     res.json({ success: true, data: usage });
   }
 catch (error) {
@@ -70,7 +70,7 @@ catch (error) {
  */
 router.get('/connections', async (req: Request, res: Response) => {
   try {
-    const _connections = await monitoringService.getActiveConnections();
+    const connections = await monitoringService.getActiveConnections();
     res.json({ success: true, data: connections });
   }
 catch (error) {
@@ -88,8 +88,8 @@ catch (error) {
  */
 router.get('/health', async (req: Request, res: Response) => {
   try {
-    const _health = await monitoringService.checkHealth();
-    const _statusCode = health.status == 'healthy' ? 200 : health.status == 'degraded' ? 503 : 500;
+    const health = await monitoringService.checkHealth();
+    const statusCode = health.status == 'healthy' ? 200 : health.status == 'degraded' ? 503 : 500;
     res.status(statusCode).json({ success: true, data: health });
   }
 catch (error) {
@@ -107,7 +107,7 @@ catch (error) {
  */
 router.get('/report', async (req: Request, res: Response) => {
   try {
-    const _report = await monitoringService.generateReport();
+    const report = await monitoringService.generateReport();
     res.json({ success: true, data: report });
   }
 catch (error) {

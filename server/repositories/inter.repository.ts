@@ -5,13 +5,13 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { supabaseAdmin } from '../lib/supabase-admin.js';
 import {
-  _interCollections,
-  _propostas,
-  _historicoObservacoesCobranca,
-  _statusContextuais,
+  interCollections,
+  propostas,
+  historicoObservacoesCobranca,
+  statusContextuais,
   type InterCollection,
   type Proposta,
 } from '@shared/schema';
@@ -27,7 +27,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Find collection by proposal ID
    */
   async findByProposalId(proposalId: string): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, proposalId))
@@ -40,7 +40,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Find collection by codigoSolicitacao
    */
   async findByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
@@ -72,7 +72,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     offset?: number;
   }): Promise<InterCollection[]> {
     let _query = db.select().from(interCollections) as unknown;
-    const _conditions = [];
+    const conditions = [];
 
     if (params.dataInicial && params.dataFinal) {
       conditions.push(
@@ -117,7 +117,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Create a new collection
    */
   async createCollection(data: Partial<InterCollection>): Promise<InterCollection> {
-    const _timestamp = getBrasiliaDate();
+    const timestamp = getBrasiliaDate();
 
     // Ensure required fields are present
     if (
@@ -130,7 +130,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       throw new Error('Required fields missing for collection creation');
     }
 
-    const _collectionData = {
+    const collectionData = {
       ...data,
       propostaId: data.propostaId!,
       codigoSolicitacao: data.codigoSolicitacao!,
@@ -141,7 +141,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       updatedAt: timestamp,
     };
 
-    const _result = await db.insert(interCollections).values([collectionData]).returning();
+    const result = await db.insert(interCollections).values([collectionData]).returning();
 
     return _result[0];
   }
@@ -153,7 +153,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     id: number,
     data: Partial<InterCollection>
   ): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .update(interCollections)
       .set({
         ...data,
@@ -172,7 +172,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     codigoSolicitacao: string,
     data: Partial<InterCollection>
   ): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .update(interCollections)
       .set({
         ...data,
@@ -188,7 +188,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Delete collection (soft delete)
    */
   async deleteCollection(id: number): Promise<boolean> {
-    const _result = await db
+    const result = await db
       .update(interCollections)
       .set({
         isActive: false,
@@ -204,7 +204,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Get proposal by ID
    */
   async getProposal(proposalId: string): Promise<Proposta | undefined> {
-    const _result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
+    const result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
 
     return _result[0];
   }
@@ -217,10 +217,10 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     status: string,
     userId?: string
   ): Promise<Proposta | undefined> {
-    const _result = await db
+    const result = await db
       .update(propostas)
       .set({
-        _status,
+        status,
         updatedAt: getBrasiliaDate(),
         userId: userId,
       })
@@ -240,7 +240,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     tipoAcao?: string;
     dadosAcao?: unknown;
   }): Promise<unknown> {
-    const _result = await db
+    const result = await db
       .insert(historicoObservacoesCobranca)
       .values([
         {
@@ -267,7 +267,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     atualizadoPor?: string;
     observacoes?: string;
   }): Promise<unknown> {
-    const _result = await db
+    const result = await db
       .insert(statusContextuais)
       .values([
         {
@@ -316,7 +316,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     contentType: string
   ): Promise<{ data: unknown; error: unknown }> {
     return await supabaseAdmin.storage.from(bucket).upload(path, file, {
-      _contentType,
+      contentType,
       upsert: true,
     });
   }
@@ -329,4 +329,4 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
   }
 }
 
-export const _interRepository = new InterRepository();
+export const interRepository = new InterRepository();

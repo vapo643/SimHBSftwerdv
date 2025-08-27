@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { interFixService } from '../services/genericService';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/inter-fix-test/run
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.post('/run', async (req: Request, res: Response) => {
   try {
-    const _result = await interFixService.executeOperation('test_fix', req.body);
+    const result = await interFixService.executeOperation('test_fix', req.body);
     res.json(_result);
   }
 catch (error) {
@@ -33,7 +33,7 @@ catch (error) {
  */
 router.get('/status', async (req: Request, res: Response) => {
   try {
-    const _status = await interFixService.getStatus();
+    const status = await interFixService.getStatus();
     res.json(status);
   }
 catch (error) {

@@ -21,7 +21,7 @@ export class PdfMergeService {
       // 1. BUSCAR BOLETOS: Consultar tabela inter_collections
       console.log(`[PDF MERGE] 🔍 Buscando boletos da proposta...`);
 
-      const _collections = await db
+      const collections = await db
         .select()
         .from(interCollections)
         .where(
@@ -42,20 +42,20 @@ export class PdfMergeService {
       const errors: string[] = [];
 
       for (let _i = 0; i < collections.length; i++) {
-        const _collection = collections[i];
+        const collection = collections[i];
         try {
           console.log(
             `[PDF MERGE] 📄 Baixando PDF parcela ${collection.numeroParcela}/${collection.totalParcelas} (${i + 1}/${collections.length})...`
           );
 
-          const _pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
+          const pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
 
           // Validar PDF
           if (!pdfBuffer || pdfBuffer.length == 0) {
             throw new Error(`PDF vazio para parcela ${collection.numeroParcela}`);
           }
 
-          const _pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
+          const pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
           if (!pdfMagic.startsWith('%PDF')) {
             throw new Error(`PDF inválido para parcela ${collection.numeroParcela}`);
           }
@@ -93,7 +93,7 @@ catch (error) {
       console.log(`[PDF MERGE] 🔀 Iniciando fusão de ${pdfBuffers.length} PDFs...`);
 
       // Criar documento PDF vazio
-      const _mergedPdfDoc = await PDFDocument.create();
+      const mergedPdfDoc = await PDFDocument.create();
       mergedPdfDoc.setTitle(`Carnê de Boletos - Proposta ${propostaId}`);
       mergedPdfDoc.setSubject('Carnê de Boletos Bancários');
       mergedPdfDoc.setCreator('Sistema Simpix');
@@ -107,10 +107,10 @@ catch (error) {
           console.log(`[PDF MERGE] 📑 Processando PDF ${i + 1}/${pdfBuffers.length}...`);
 
           // Carregar PDF individual
-          const _pdfDoc = await PDFDocument.load(pdfBuffers[i]);
+          const pdfDoc = await PDFDocument.load(pdfBuffers[i]);
 
           // Copiar todas as páginas
-          const _pages = await mergedPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+          const pages = await mergedPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
 
           // Adicionar páginas ao documento final
           for (const page of pages) {
@@ -126,7 +126,7 @@ catch (error) {
       }
 
       // Verificar se tem páginas no documento final
-      const _totalPages = mergedPdfDoc.getPageCount();
+      const totalPages = mergedPdfDoc.getPageCount();
       if (totalPages == 0) {
         throw new Error('Documento final não contém páginas');
       }
@@ -134,8 +134,8 @@ catch (error) {
       console.log(`[PDF MERGE] 📊 Documento final contém ${totalPages} páginas`);
 
       // 4. SALVAR: Converter para buffer
-      const _mergedPdfBytes = await mergedPdfDoc.save();
-      const _mergedBuffer = Buffer.from(mergedPdfBytes);
+      const mergedPdfBytes = await mergedPdfDoc.save();
+      const mergedBuffer = Buffer.from(mergedPdfBytes);
 
       console.log(`[PDF MERGE] ✅ Carnê gerado com sucesso (${mergedBuffer.length} bytes)`);
 
@@ -157,11 +157,11 @@ catch (error) {
     try {
       console.log(`[PDF MERGE] 💾 Salvando carnê no Supabase Storage...`);
 
-      const _timestamp = _getBrasiliaTimestamp().replace(/[^0-9]/g, '');
-      const _fileName = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
+      const timestamp = _getBrasiliaTimestamp().replace(/[^0-9]/g, '');
+      const fileName = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
 
       // Upload para o Supabase Storage
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
       const { data: uploadData, error: uploadError } = await _supabase.storage
         .from('documents')
         .upload(fileName, pdfBuffer, {
@@ -198,4 +198,4 @@ catch (error) {
 }
 
 // Exportar instância única
-export const _pdfMergeService = new PdfMergeService();
+export const pdfMergeService = new PdfMergeService();

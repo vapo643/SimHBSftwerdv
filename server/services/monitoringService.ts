@@ -12,7 +12,7 @@ export class MonitoringService {
    */
   async getDatabaseStats(): Promise<unknown> {
     try {
-      const _stats = await monitoringRepository.getDatabaseStats();
+      const stats = await monitoringRepository.getDatabaseStats();
 
       return {
         databaseSize: this.formatBytes(stats.database_size),
@@ -33,16 +33,16 @@ catch (error) {
    */
   async getTableStats(): Promise<any[]> {
     try {
-      const _tables = await monitoringRepository.getTableStats();
+      const tables = await monitoringRepository.getTableStats();
 
       return tables.map((table) => ({
         schema: table.schemaname,
         table: table.tablename,
         rowCount: parseInt(table.row_count || 0),
         deadRows: parseInt(table.dead_rows || 0),
-        lastVacuum: table.last_vacuum,
-        lastAutoVacuum: table.last_autovacuum,
-        totalSize: table.total_size,
+        lastVacuum: table.lastvacuum,
+        lastAutoVacuum: table.lastautovacuum,
+        totalSize: table.totalsize,
         needsVacuum: parseInt(table.dead_rows || 0) > parseInt(table.row_count || 0) * 0.1,
       }));
     }
@@ -57,7 +57,7 @@ catch (error) {
    */
   async getIndexUsage(): Promise<any[]> {
     try {
-      const _indexes = await monitoringRepository.getIndexUsage();
+      const indexes = await monitoringRepository.getIndexUsage();
 
       return indexes.map((index) => ({
         schema: index.schemaname,
@@ -66,7 +66,7 @@ catch (error) {
         scans: parseInt(index.index_scans || 0),
         tuplesRead: parseInt(index.tuples_read || 0),
         tuplesFetched: parseInt(index.tuples_fetched || 0),
-        size: index.index_size,
+        size: index.indexsize,
         efficiency: this.calculateIndexEfficiency(index),
       }));
     }
@@ -86,17 +86,17 @@ catch (error) {
     byApplication: unknown;
   }> {
     try {
-      const _connections = await monitoringRepository.getActiveConnections();
+      const connections = await monitoringRepository.getActiveConnections();
 
       // Categorize by state
-      const _byState = connections.reduce((acc, conn) => {
+      const byState = connections.reduce((acc, conn) => {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
         return acc;
       }, {} as unknown);
 
       // Categorize by application
-      const _byApplication = connections.reduce((acc, conn) => {
-        const _app = conn.application_name || 'unknown';
+      const byApplication = connections.reduce((acc, conn) => {
+        const app = conn.application_name || 'unknown';
         acc[app] = (acc[app] || 0) + 1;
         return acc;
       }, {} as unknown);
@@ -106,15 +106,15 @@ catch (error) {
         connections: connections.map((conn) => ({
           pid: conn.pid,
           user: conn.usename,
-          application: conn.application_name,
-          clientAddress: conn.client_addr,
-          startTime: conn.backend_start,
+          application: conn.applicationname,
+          clientAddress: conn.clientaddr,
+          startTime: conn.backendstart,
           state: conn.state,
-          stateChangeTime: conn.state_change,
+          stateChangeTime: conn.statechange,
           currentQuery: conn.query?.substring(0, 100), // Truncate for safety
         })),
-        _byState,
-        _byApplication,
+        byState,
+        byApplication,
       };
     }
 catch (error) {
@@ -132,8 +132,8 @@ catch (error) {
     recommendations: string[];
   }> {
     try {
-      const _health = await monitoringRepository.checkDatabaseHealth();
-      const _stats = await monitoringRepository.getDatabaseStats();
+      const health = await monitoringRepository.checkDatabaseHealth();
+      const stats = await monitoringRepository.getDatabaseStats();
 
       const recommendations: string[] = [];
       let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
@@ -155,9 +155,9 @@ catch (error) {
       }
 
       return {
-        _status,
+        status,
         checks: health.checks,
-        _recommendations,
+        recommendations,
       };
     }
 catch (error) {
@@ -175,10 +175,10 @@ catch (error) {
    */
   async generateReport(): Promise<unknown> {
     try {
-      const _report = await monitoringRepository.generateReport();
+      const report = await monitoringRepository.generateReport();
 
       // Add analysis and recommendations
-      const _analysis = {
+      const analysis = {
         databaseSize: this.formatBytes(report.database.database_size),
         performance: this.analyzePerformance(report),
         recommendations: this.generateRecommendations(report),
@@ -186,7 +186,7 @@ catch (error) {
 
       return {
         ...report,
-        _analysis,
+        analysis,
       };
     }
 catch (error) {
@@ -199,8 +199,8 @@ catch (error) {
    * Helper: Format bytes to human readable
    */
   private formatBytes(bytes): string {
-    const _size = typeof bytes == 'string' ? parseInt(bytes) : bytes;
-    const _units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const size = typeof bytes == 'string' ? parseInt(bytes) : bytes;
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let _index = 0;
     let _value = size;
 
@@ -216,13 +216,13 @@ catch (error) {
    * Helper: Calculate index efficiency
    */
   private calculateIndexEfficiency(index): string {
-    const _scans = parseInt(index.index_scans || 0);
-    const _reads = parseInt(index.tuples_read || 0);
+    const scans = parseInt(index.index_scans || 0);
+    const reads = parseInt(index.tuples_read || 0);
 
     if (scans == 0) return 'unused';
     if (reads == 0) return 'efficient';
 
-    const _ratio = reads / scans;
+    const ratio = reads / scans;
     if (ratio < 10) return 'very efficient';
     if (ratio < 100) return 'efficient';
     if (ratio < 1000) return 'moderate';
@@ -233,7 +233,7 @@ catch (error) {
    * Helper: Analyze performance metrics
    */
   private analyzePerformance(report): string {
-    const _connections = report.activeConnections;
+    const connections = report.activeConnections;
 
     if (connections > 50) return 'high load';
     if (connections > 20) return 'moderate load';
@@ -247,16 +247,16 @@ catch (error) {
     const recommendations: string[] = [];
 
     // Check for unused indexes
-    const _unusedIndexes = report.indexes.filter((idx) => parseInt(idx.index_scans || 0) == 0);
+    const unusedIndexes = report.indexes.filter((idx) => parseInt(idx.index_scans || 0) == 0);
 
     if (unusedIndexes.length > 0) {
       recommendations.push(`${unusedIndexes.length} unused indexes detected`);
     }
 
     // Check for tables needing vacuum
-    const _needsVacuum = report.tables.filter((table) => {
-      const _dead = parseInt(table.dead_rows || 0);
-      const _live = parseInt(table.row_count || 0);
+    const needsVacuum = report.tables.filter((table) => {
+      const dead = parseInt(table.dead_rows || 0);
+      const live = parseInt(table.row_count || 0);
       return dead > live * 0.1;
     });
 
@@ -268,4 +268,4 @@ catch (error) {
   }
 }
 
-export const _monitoringService = new MonitoringService();
+export const monitoringService = new MonitoringService();

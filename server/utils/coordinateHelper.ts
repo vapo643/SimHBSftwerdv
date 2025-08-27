@@ -64,7 +64,7 @@ export function addCoordinateLabel(
   font: PDFFont,
   label?: string
 ) {
-  const _text = label || `(${x.toFixed(0)}, ${y.toFixed(0)})`;
+  const text = label || `(${x.toFixed(0)}, ${y.toFixed(0)})`;
 
   page.drawText(text, {
     x: x + 15,
@@ -91,7 +91,7 @@ export function getCenteredX(
   fontSize: number,
   pageWidth: number
 ): number {
-  const _textWidth = getTextWidth(text, font, fontSize);
+  const textWidth = getTextWidth(text, font, fontSize);
   return (pageWidth - textWidth) / 2;
 }
 
@@ -104,7 +104,7 @@ export function getRightAlignedX(
   fontSize: number,
   rightMargin: number
 ): number {
-  const _textWidth = getTextWidth(text, font, fontSize);
+  const textWidth = getTextWidth(text, font, fontSize);
   return rightMargin - textWidth;
 }
 
@@ -122,20 +122,20 @@ export async function generateTestCoordinatesPDF(
     bold?: boolean;
   }>
 ) {
-  const _templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
-  const _outputPath = path.resolve(process.cwd(), 'template_ccb_COORDINATE_TEST.pdf');
+  const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+  const outputPath = path.resolve(process.cwd(), 'template_ccb_COORDINATE_TEST.pdf');
 
-  const _templateBytes = await fs.readFile(templatePath);
-  const _pdfDoc = await PDFDocument.load(templateBytes);
+  const templateBytes = await fs.readFile(templatePath);
+  const pdfDoc = await PDFDocument.load(templateBytes);
 
-  const _fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const _fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  const _pages = pdfDoc.getPages();
+  const pages = pdfDoc.getPages();
 
   for (const coord of coordinates) {
     if (coord.page > 0 && coord.page <= pages.length) {
-      const _page = pages[coord.page - 1];
+      const page = pages[coord.page - 1];
 
       // Desenhar cruz de referência
       drawCrosshair(page, coord.x, coord.y, 8, rgb(1, 0, 0));
@@ -145,8 +145,8 @@ export async function generateTestCoordinatesPDF(
 
       // Adicionar texto de teste se fornecido
       if (coord.text) {
-        const _font = coord.bold ? fontBold : fontRegular;
-        const _fontSize = coord.fontSize || 10;
+        const font = coord.bold ? fontBold : fontRegular;
+        const fontSize = coord.fontSize || 10;
 
         page.drawText(coord.text, {
           x: coord.x,
@@ -159,7 +159,7 @@ export async function generateTestCoordinatesPDF(
     }
   }
 
-  const _pdfBytes = await pdfDoc.save();
+  const pdfBytes = await pdfDoc.save();
   await fs.writeFile(outputPath, pdfBytes);
 
   console.log(`✅ PDF de teste de coordenadas gerado: ${outputPath}`);

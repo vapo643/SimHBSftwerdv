@@ -1,6 +1,6 @@
 // Endpoints de Monitoramento de Segurança - OWASP A09
 import { Request, Response } from 'express';
-import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { _requireAdmin } from '../lib/role-guards';
 import { securityLogger, SecurityEventType } from '../lib/security-logger';
 import { getBrasiliaTimestamp } from '../lib/timezone';
@@ -9,18 +9,19 @@ export function setupSecurityRoutes(app) {
   // Health check de segurança
   app.get(
     '/api/security/health',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const _metrics = securityLogger.getSecurityMetrics(24); // Últimas 24 horas
-        const _anomalies = securityLogger.detectAnomalies();
+        const metrics = securityLogger.getSecurityMetrics(24); // Últimas 24 horas
+        const anomalies = securityLogger.detectAnomalies();
 
         res.json({
           timestamp: _getBrasiliaTimestamp(),
           status: anomalies.length == 0 ? 'healthy' : 'warning',
-  _metrics,
-  _anomalies,
+  metrics,
+  anomalies,
           lastUpdate: _getBrasiliaTimestamp(),
         });
       }
@@ -35,15 +36,16 @@ catch (error) {
   // Relatório detalhado de segurança
   app.get(
     '/api/security/report',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const _hours = parseInt(req.query.hours as string) || 24;
-        const _metrics = securityLogger.getSecurityMetrics(hours);
+        const hours = parseInt(req.query.hours as string) || 24;
+        const metrics = securityLogger.getSecurityMetrics(hours);
 
         // Análise adicional
-        const _analysis = {
+        const analysis = {
           riskLevel: calculateRiskLevel(metrics),
           recommendations: generateRecommendations(metrics),
           topThreats: identifyTopThreats(metrics),
@@ -51,8 +53,8 @@ catch (error) {
 
         res.json({
           period: `${hours} hours`,
-  _metrics,
-  _analysis,
+  metrics,
+  analysis,
           generatedAt: _getBrasiliaTimestamp(),
         });
       }
@@ -65,8 +67,9 @@ catch (error) {
   // Log de evento de segurança manual (para testes)
   app.post(
     '/api/security/log-event',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
         const { type, severity, details } = req.body;
@@ -82,7 +85,7 @@ catch (error) {
           userEmail: req.user?.email,
           endpoint: '/api/security/log-event',
           success: true,
-  _details,
+  details,
         });
 
         res.json({ message: 'Evento registrado com sucesso' });
@@ -96,11 +99,12 @@ catch (error) {
   // Verificar status de conformidade OWASP
   app.get(
     '/api/security/owasp-compliance',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const _compliance = checkOWASPCompliance();
+        const compliance = checkOWASPCompliance();
         res.json(compliance);
       }
 catch (error) {
@@ -112,7 +116,7 @@ catch (error) {
 
 // Calcula nível de risco baseado nas métricas
 function calculateRiskLevel(metrics): string {
-  const _score =
+  const score =
     metrics.failedLogins * 2 +
     metrics.accessDenied * 3 +
     metrics.rateLimitExceeded * 1 +
@@ -157,7 +161,7 @@ function generateRecommendations(metrics): string[] {
 
 // Identifica principais ameaças
 function identifyTopThreats(metrics): Array<{ type: string; count: number }> {
-  const _threats = [
+  const threats = [
     { type: 'Brute Force Attempts', count: metrics.failedLogins },
     { type: 'Unauthorized Access', count: metrics.accessDenied },
     { type: 'DoS Attempts', count: metrics.rateLimitExceeded },

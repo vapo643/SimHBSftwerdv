@@ -24,13 +24,13 @@ declare global {
 
 // Função principal de inicialização do Sentry (conforme PAM V1.0)
 export function initializeSentry() {
-  if (!_config.observability.sentryDsn) {
+  if (!config.observability.sentryDsn) {
     logInfo('⚠️ Sentry DSN not configured - error tracking disabled');
     return;
   }
 
   Sentry.init({
-    dsn: _config.observability.sentryDsn,
+    dsn: config.observability.sentryDsn,
     integrations: [nodeProfilingIntegration()],
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
@@ -44,7 +44,7 @@ export function initializeSentry() {
 
 // Configuração do Sentry (função legada, mantida para compatibilidade)
 export function initSentry(app: Express) {
-  const _sentryDsn = _config.observability.sentryDsn;
+  const sentryDsn = config.observability.sentryDsn;
 
   try {
     Sentry.init({
@@ -89,7 +89,7 @@ export function initSentry(app: Express) {
 
         // Log local do erro para auditoria
         logError('🔴 Error sent to Sentry', hint.originalException || hint.syntheticException, {
-          eventId: event.event_id,
+          eventId: event.eventid,
         });
 
         return event;
@@ -111,7 +111,7 @@ export function initSentry(app: Express) {
 
     logInfo('✅ Sentry initialized successfully', {
       dsn: sentryDsn ? sentryDsn.substring(0, 20) + '...' : 'not configured',
-      environment: process.env.NODE_ENV,
+      environment: process.env.NODEENV,
     });
   }
 catch (error) {
@@ -139,14 +139,14 @@ export function sentryUserContext(req: Request, res: Response, next: NextFunctio
 
 // Middleware para capturar transações
 export function sentryTransactionMiddleware(req: Request, res: Response, next: NextFunction) {
-  const _transaction = Sentry.startInactiveSpan({
+  const transaction = Sentry.startInactiveSpan({
     op: 'http.server',
     name: `${req.method} ${req.route?.path || req.path}`,
   });
 
   if (transaction) {
     // Atualizar para API atual do Sentry v8
-    const _transactionName = `${req.method} ${req.route?.path || req.path}`;
+    const transactionName = `${req.method} ${req.route?.path || req.path}`;
     Sentry.getCurrentScope().setContext('transaction', { name: transactionName });
 
     res.on('finish', () => {
@@ -187,16 +187,16 @@ export function captureMessage(
 // Helper para adicionar breadcrumbs
 export function addBreadcrumb(message: string, category: string, data?) {
   Sentry.addBreadcrumb({
-    _message,
-    _category,
+    message,
+    category,
     level: 'info',
-    _data,
+    data,
     timestamp: Date.now() / 1000,
   });
 }
 
 // Exportar handlers do Sentry (nova API v8)
-export const _requestHandler = () => (req: Request, res: Response, next: NextFunction) => {
+export const requestHandler = () => (req: Request, res: Response, next: NextFunction) => {
   // Request handler básico
   if (req.correlationId) {
     Sentry.setTag('correlation_id', req.correlationId);
@@ -204,12 +204,12 @@ export const _requestHandler = () => (req: Request, res: Response, next: NextFun
   next();
 };
 
-export const _tracingHandler = () => (req: Request, res: Response, next: NextFunction) => {
+export const tracingHandler = () => (req: Request, res: Response, next: NextFunction) => {
   // Tracing handler básico
   next();
 };
 
-export const _errorHandler = () => (err, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = () => (err, req: Request, res: Response, next: NextFunction) => {
   // Capturar apenas erros 500+
   if (!err.status || err.status >= 500) {
     Sentry.captureException(err);

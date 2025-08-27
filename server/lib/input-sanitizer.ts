@@ -58,7 +58,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
   }
 catch (error) {
     securityLogger.logEvent({
-      type: SecurityEventType.XSS_ATTEMPT,
+      type: SecurityEventType.XSSATTEMPT,
       severity: 'HIGH',
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
@@ -127,7 +127,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
   for (const pattern of SQL_INJECTION_PATTERNS) {
     if (pattern.test(value)) {
       securityLogger.logEvent({
-        type: SecurityEventType.SQL_INJECTION_ATTEMPT,
+        type: SecurityEventType.SQL_INJECTIONATTEMPT,
         severity: 'CRITICAL',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -143,7 +143,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
   for (const pattern of XSS_PATTERNS) {
     if (pattern.test(value)) {
       securityLogger.logEvent({
-        type: SecurityEventType.XSS_ATTEMPT,
+        type: SecurityEventType.XSSATTEMPT,
         severity: 'HIGH',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -161,7 +161,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
   for (const pattern of PATH_TRAVERSAL_PATTERNS) {
     if (pattern.test(value)) {
       securityLogger.logEvent({
-        type: SecurityEventType.XSS_ATTEMPT,
+        type: SecurityEventType.XSSATTEMPT,
         severity: 'HIGH',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -198,14 +198,14 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     rg: /^[0-9A-Za-z.-]+$/,
   };
 
-  const _validator = validators[fieldName.toLowerCase()];
+  const validator = validators[fieldName.toLowerCase()];
   if (validator) {
     // Remove caracteres especiais para validação
-    const _cleanValue = value.replace(/\D/g, '');
+    const cleanValue = value.replace(/\D/g, '');
 
     if (!validator.test(fieldName == 'email' ? value : cleanValue)) {
       securityLogger.logEvent({
-        type: SecurityEventType.XSS_ATTEMPT,
+        type: SecurityEventType.XSSATTEMPT,
         severity: 'MEDIUM',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -224,15 +224,15 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
  * Valida headers HTTP suspeitos
  */
 function validateHeaders(req: Request) {
-  const _suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
+  const suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
 
   for (const header of suspiciousHeaders) {
     if (req.headers[header]) {
-      const _value = req.headers[header] as string;
+      const value = req.headers[header] as string;
       // Validar se o header contém valores suspeitos
       if (value.includes('..') || value.includes('://')) {
         securityLogger.logEvent({
-          type: SecurityEventType.XSS_ATTEMPT,
+          type: SecurityEventType.XSSATTEMPT,
           severity: 'HIGH',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],

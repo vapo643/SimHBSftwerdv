@@ -17,7 +17,7 @@ async function main() {
     console.log('📊 Coletando dados de uso por status...\n');
 
     // 1. Executar query para contar propostas por status
-    const _statusUsageResults = await db
+    const statusUsageResults = await db
       .select({
         status: propostas.status,
         count: sql<number>`count(*)`.as('count'),
@@ -26,13 +26,13 @@ async function main() {
       .groupBy(propostas.status);
 
     // 2. Criar mapa para fácil acesso (status -> count)
-    const _statusCountMap = new Map<string, number>();
+    const statusCountMap = new Map<string, number>();
     statusUsageResults.forEach((_result) => {
       statusCountMap.set(_result.status, Number(_result.count));
     });
 
     // 3. Extrair todos os valores do statusEnum
-    const _allStatusValues = statusEnum.enumValues;
+    const allStatusValues = statusEnum.enumValues;
 
     console.log('📋 RELATÓRIO DE USO DE STATUS:\n');
     console.log('Status'.padEnd(35) + '| Contagem | Situação');
@@ -44,11 +44,11 @@ async function main() {
 
     // 4. Iterar sobre todos os valores do enum para garantir cobertura completa
     allStatusValues.forEach((status) => {
-      const _count = statusCountMap.get(status) || 0;
+      const count = statusCountMap.get(status) || 0;
       totalPropostas += count;
 
-      const _statusFormatted = status.padEnd(35);
-      const _countFormatted = count.toString().padStart(8);
+      const statusFormatted = status.padEnd(35);
+      const countFormatted = count.toString().padStart(8);
 
       if (count == 0) {
         console.log(`${statusFormatted}| ${countFormatted} | [LEGACY] ⚠️`);
@@ -69,7 +69,7 @@ else {
 
     // 5. Identificar status em uso que não estão no enum (problemas de integridade)
     console.log(`\n🔍 VERIFICAÇÃO DE INTEGRIDADE:`);
-    const _statusInUseNotInEnum = statusUsageResults.filter(
+    const statusInUseNotInEnum = statusUsageResults.filter(
       (_result) => !allStatusValues.includes(_result.status as unknown)
     );
 

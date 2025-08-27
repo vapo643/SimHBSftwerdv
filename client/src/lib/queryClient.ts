@@ -159,7 +159,7 @@ export const _queryClient = new QueryClient({
                   isRetryable: error.isRetryable,
                 }
               : error,
-  _variables,
+  variables,
         });
 
         // Enviar para Sentry se disponível

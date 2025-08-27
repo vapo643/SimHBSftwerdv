@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireAnyRole } from '../lib/role-guards';
 import { interBankService } from '../services/interBankService';
 import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 
-const _router = Router();
+const router = Router();
 
 /**
  * ENDPOINT DE CORREÇÃO: Regenerar boletos com códigos REAIS do Inter
@@ -14,8 +14,8 @@ const _router = Router();
  */
 router.post(
   '/regenerate/:propostaId',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
@@ -23,9 +23,9 @@ router.post(
       console.log(`[INTER FIX] 🔧 INICIANDO REGENERAÇÃO DE BOLETOS PARA: ${propostaId}`);
 
       // 1. Buscar proposta usando queryClient
-      const _queryResult = await db.execute(`SELECT * FROM propostas WHERE id = $1 LIMIT 1`);
+      const queryResult = await db.execute(`SELECT * FROM propostas WHERE id = $1 LIMIT 1`);
 
-      const _proposta = queryResult[0];
+      const proposta = queryResult[0];
 
       if (!proposta) {
         return res.status(401).json({error: "Unauthorized"});
@@ -34,7 +34,7 @@ router.post(
       console.log(`[INTER FIX] ✅ Proposta encontrada`);
 
       // 2. Buscar boletos existentes (com códigos inválidos)
-      const _boletosInvalidos = await db
+      const boletosInvalidos = await db
         .select()
         .from(interCollections)
         .where(
@@ -44,7 +44,7 @@ router.post(
 
       console.log(`[INTER FIX] 📋 Encontrados ${boletosInvalidos.length} boletos para regenerar`);
 
-      const _results = [];
+      const results = [];
       let _successCount = 0;
       let _failCount = 0;
 
@@ -56,18 +56,18 @@ router.post(
           );
 
           // Extrair dados do cliente
-          const _clienteData =
+          const clienteData =
             typeof proposta.clienteData == 'string'
               ? JSON.parse(proposta.clienteData)
               : proposta.clienteData;
 
           // Calcular data de vencimento (30 dias entre parcelas)
-          const _dataBase = new Date();
-          const _dataVencimento = new Date(dataBase);
+          const dataBase = new Date();
+          const dataVencimento = new Date(dataBase);
           dataVencimento.setDate(dataBase.getDate() + (boleto.numeroParcela || 1) * 30);
 
           // Preparar dados completos para o Inter
-          const _dadosCobranca = {
+          const dadosCobranca = {
             id: `${propostaId}-${String(boleto.numeroParcela).padStart(3, '0')}`,
             valorTotal: parseFloat(boleto.valorNominal),
             dataVencimento: dataVencimento.toISOString().split('T')[0],
@@ -89,7 +89,7 @@ router.post(
           console.log(`[INTER FIX] 📤 Criando boleto no Inter API...`);
 
           // CRIAR BOLETO REAL NO INTER
-          const _response = await interBankService.criarCobrancaParaProposta(dadosCobranca);
+          const response = await interBankService.criarCobrancaParaProposta(dadosCobranca);
 
           if (!response.codigoSolicitacao) {
             throw new Error('Inter não retornou código de solicitação');
@@ -98,7 +98,7 @@ router.post(
           console.log(`[INTER FIX] ✅ Boleto criado! Código REAL: ${response.codigoSolicitacao}`);
 
           // 4. Buscar detalhes completos do boleto criado
-          const _detalhes = await interBankService.recuperarCobranca(response.codigoSolicitacao);
+          const detalhes = await interBankService.recuperarCobranca(response.codigoSolicitacao);
 
           // 5. Atualizar banco com dados REAIS
           await db
@@ -147,8 +147,8 @@ catch (error) {
         success: true,
         message: `Regeneração concluída: ${successCount} boletos criados com sucesso`,
         total: boletosInvalidos.length,
-  _successCount,
-  _failCount,
+  successCount,
+  failCount,
         detalhes: results,
       });
     }

@@ -9,30 +9,30 @@ import { clickSignWebhookService } from '../services/clickSignWebhookService.js'
 import { clickSignSecurityService } from '../services/clickSignSecurityService.js';
 import { interBankService } from '../services/interBankService.js';
 import { storage } from '../storage.js';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 // STATUS V2.0: Import do serviço de auditoria
 import { logStatusTransition } from '../services/auditService.js';
 // PAM V1.0: Import para status contextual
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { statusContextuais } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 
-const _router = express.Router();
+const router = express.Router();
 
 /**
  * Send CCB to ClickSign for electronic signature
  * POST /api/clicksign/send-ccb/:propostaId
  */
-router.post('/send-ccb/:propostaId', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { propostaId } = req.params;
 
     console.log(`[CLICKSIGN] Initiating CCB signature for proposal: ${propostaId}`);
 
     // 1. Get proposal data
-    const _proposta = await storage.getPropostaById(propostaId);
+    const proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
       return res.status(401).json({error: "Unauthorized"});
     }
@@ -58,21 +58,21 @@ router.post('/send-ccb/:propostaId', _jwtAuthMiddleware, async (req: Authenticat
     }
 
     // 2. Get CCB file from Supabase Storage
-    const _ccbUrl = await storage.getCcbUrl(propostaId);
+    const ccbUrl = await storage.getCcbUrl(propostaId);
     if (!ccbUrl) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
     // Download CCB as buffer
-    const _ccbResponse = await fetch(ccbUrl);
+    const ccbResponse = await fetch(ccbUrl);
     if (!ccbResponse.ok) {
       throw new Error(`Failed to download CCB: ${ccbResponse.status}`);
     }
-    const _ccbBuffer = Buffer.from(await ccbResponse.arrayBuffer());
+    const ccbBuffer = Buffer.from(await ccbResponse.arrayBuffer());
 
     // 3. Prepare and validate client data with security
-    const _clienteData = JSON.parse(proposta.clienteData || '{}');
-    const _rawClientData = {
+    const clienteData = JSON.parse(proposta.clienteData || '{}');
+    const rawClientData = {
       name: clienteData.nomeCompleto || proposta.clienteNome,
       email: clienteData.email || proposta.clienteEmail,
       cpf: clienteData.cpf || proposta.clienteCpf,
@@ -93,7 +93,7 @@ catch (error) {
     }
 
     // Generate filename for ClickSign
-    const _filename = `CCB-${propostaId}-${Date.now()}.pdf`;
+    const filename = `CCB-${propostaId}-${Date.now()}.pdf`;
 
     // Validate PDF security
     try {
@@ -108,7 +108,7 @@ catch (error) {
     }
 
     // Create audit log
-    const _auditLog = clickSignSecurityService.createAuditLog(
+    const auditLog = clickSignSecurityService.createAuditLog(
       'CLICKSIGN_SEND_CCB',
       { proposalId: propostaId, clientEmail: clientData.email },
       req.user?.id
@@ -116,9 +116,9 @@ catch (error) {
     console.log('[CLICKSIGN AUDIT]', auditLog);
 
     // 4. Send to ClickSign
-    const _clickSignResult = await clickSignService.sendCCBForSignature(
-  _ccbBuffer,
-  _filename,
+    const clickSignResult = await clickSignService.sendCCBForSignature(
+  ccbBuffer,
+  filename,
       clientData
     );
 
@@ -175,11 +175,11 @@ catch (error) {
  * Get ClickSign status for a proposal
  * GET /api/clicksign/status/:propostaId
  */
-router.get('/status/:propostaId', _jwtAuthMiddleware, async (req, res) => {
+router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
 
-    const _proposta = await storage.getPropostaById(propostaId);
+    const proposta = await storage.getPropostaById(propostaId);
     if (!proposta) {
       return res.status(401).json({error: "Unauthorized"});
     }
@@ -201,7 +201,7 @@ catch (error) {
     }
 
     res.json({
-  _propostaId,
+  propostaId,
       clickSignData: {
         documentKey: proposta.clicksignDocumentKey,
         signerKey: proposta.clicksignSignerKey,
@@ -235,7 +235,7 @@ catch (error) {
 router.post('/webhook', async (req, res) => {
   try {
     // Security: IP validation and rate limiting
-    const _clientIP = req.ip || req.connection.remoteAddress || '';
+    const clientIP = req.ip || req.connection.remoteAddress || '';
 
     if (!clickSignSecurityService.validateWebhookIP(clientIP)) {
       console.error('[CLICKSIGN WEBHOOK] Blocked request from unauthorized IP:', clientIP);
@@ -258,20 +258,20 @@ catch (error) {
     }
 
     // Security: Log sanitized event
-    const _auditLog = clickSignSecurityService.createAuditLog(
+    const auditLog = clickSignSecurityService.createAuditLog(
       'CLICKSIGN_WEBHOOK_RECEIVED',
-  _validatedEvent,
+  validatedEvent,
       'webhook'
     );
     console.log('[CLICKSIGN WEBHOOK AUDIT]', auditLog);
 
     // Validate signature if secret is configured
-    const _signature = req.headers['x-clicksign-signature'] as string;
-    const _timestamp = req.headers['x-clicksign-timestamp'] as string;
+    const signature = req.headers['x-clicksign-signature'] as string;
+    const timestamp = req.headers['x-clicksign-timestamp'] as string;
 
     if (signature && timestamp) {
-      const _payload = JSON.stringify(req.body);
-      const _isValid = clickSignWebhookService.validateSignature(payload, signature, timestamp);
+      const payload = JSON.stringify(req.body);
+      const isValid = clickSignWebhookService.validateSignature(payload, signature, timestamp);
 
       if (!isValid) {
         console.error('[CLICKSIGN WEBHOOK] ❌ Invalid signature or expired timestamp');
@@ -280,21 +280,21 @@ catch (error) {
     }
 
     // Extract event data from v1/v2 structure
-    const _eventData = validatedEvent;
+    const eventData = validatedEvent;
 
     if (!eventData.event || !eventData.data) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
     // Check for duplicate events
-    const _eventId = `${eventData.event}_${eventData.data.document?.key || eventData.data.list?.key || ''}_${eventData.occurred_at || Date.now()}`;
+    const eventId = `${eventData.event}_${eventData.data.document?.key || eventData.data.list?.key || ''}_${eventData.occurred_at || Date.now()}`;
     if (clickSignWebhookService.isDuplicateEvent(eventId)) {
       console.log('[CLICKSIGN WEBHOOK] Duplicate event detected, skipping');
       return res.status(401).json({error: "Unauthorized"});
     }
 
     // Process event using webhook service
-    const _result = await clickSignWebhookService.processEvent(eventData);
+    const result = await clickSignWebhookService.processEvent(eventData);
 
     if (!_result.processed) {
       console.log(`[CLICKSIGN WEBHOOK] Event not processed: ${_result.reason}`);
@@ -326,14 +326,14 @@ router.post('/webhook-test', async (req, res) => {
     console.log(`[CLICKSIGN WEBHOOK TEST] Received event:`, req.body);
 
     // Process event directly without validation
-    const _result = await clickSignWebhookService.processEvent(req.body);
+    const result = await clickSignWebhookService.processEvent(req.body);
 
     if (!_result.processed) {
       console.log(`[CLICKSIGN WEBHOOK TEST] Event not processed: ${_result.reason}`);
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    console.log(`[CLICKSIGN WEBHOOK TEST] ✅ Event processed successfully:`,_result);
+    console.log(`[CLICKSIGN WEBHOOK TEST] ✅ Event processed successfully:`, result);
     res.json({ success: true, message: 'Webhook processed successfully', result });
   }
 catch (error) {
@@ -349,9 +349,9 @@ catch (error) {
  * Test ClickSign connection
  * GET /api/clicksign/test
  */
-router.get('/test', _jwtAuthMiddleware, async (req, res) => {
+router.get('/test', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _isConnected = await clickSignService.testConnection();
+    const isConnected = await clickSignService.testConnection();
 
     res.json({
       connected: isConnected,

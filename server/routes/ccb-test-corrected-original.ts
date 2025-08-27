@@ -4,19 +4,19 @@
  */
 
 import { Router } from 'express';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { CCBGenerationServiceV2 } from '../services/ccbGenerationServiceV2';
 import { db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/ccb-corrected/test/:propostaId
  * Testa geração de CCB com mapeamento corrigido
  */
-router.post('/test/:propostaId', _jwtAuthMiddleware, async (req, res) => {
+router.post('/test/:propostaId', jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
     const { useTestData } = req.body;
@@ -100,8 +100,8 @@ else {
     }
 
     // Gerar CCB com sistema corrigido
-    const _service = new CCBGenerationServiceV2();
-    const _result = await service.generateCCB(propostaData);
+    const service = new CCBGenerationServiceV2();
+    const result = await service.generateCCB(propostaData);
 
     if (!_result.success || !_result.pdfBytes) {
       return res.status(500).json({
@@ -112,7 +112,7 @@ else {
     }
 
     // Salvar no storage
-    const _filePath = await service.saveCCBToStorage(_result.pdfBytes, propostaId);
+    const filePath = await service.saveCCBToStorage(_result.pdfBytes, propostaId);
 
     if (!filePath) {
       return res.status(500).json({
@@ -123,11 +123,11 @@ else {
     }
 
     // Gerar URL pública
-    const _publicUrl = await service.getCCBPublicUrl(filePath);
+    const publicUrl = await service.getCCBPublicUrl(filePath);
 
     // Analisar logs para feedback
-    const _logs = _result.logs || [];
-    const _stats = {
+    const logs = _result.logs || [];
+    const stats = {
       totalFields: logs.length,
       successFields: logs.filter((l) => l.includes('✓')).length,
       warningFields: logs.filter((l) => l.includes('⚠')).length,
@@ -144,17 +144,17 @@ else {
 
     res.json({
       success: true,
-      _filePath,
-      _publicUrl,
-      _logs,
-      _stats,
+      filePath,
+      publicUrl,
+      logs,
+      stats,
       analysis: {
         completeness: Math.round((stats.successFields / stats.totalFields) * 100) + '%',
         quality: stats.errorFields == 0 ? 'Excelente' : stats.warningFields > 3 ? 'Regular' : 'Boa',
         missingData: logs
           .filter((l) => l.includes('Sem valor'))
           .map((l) => {
-            const _match = l.match(/Campo (\w+): Sem valor/);
+            const match = l.match(/Campo (\w+): Sem valor/);
             return match ? match[1] : null;
           })
           .filter(Boolean),
@@ -174,9 +174,9 @@ catch (error) {
  * GET /api/ccb-corrected/field-mapping
  * Retorna o mapeamento atual de campos
  */
-router.get('/field-mapping', _jwtAuthMiddleware, async (req, res) => {
+router.get('/field-mapping', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _mapping = {
+    const mapping = {
       page1: {
         title: 'Identificação e Valores',
         fields: {
@@ -222,7 +222,7 @@ router.get('/field-mapping', _jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      _mapping,
+      mapping,
       summary: {
         totalFields: 29,
         correctedFields: 12,
@@ -243,7 +243,7 @@ catch (error) {
  * POST /api/ccb-corrected/validate-proposal/:propostaId
  * Valida se uma proposta tem todos os dados necessários
  */
-router.post('/validate-proposal/:propostaId', _jwtAuthMiddleware, async (req, res) => {
+router.post('/validate-proposal/:propostaId', jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
 
@@ -262,7 +262,7 @@ router.post('/validate-proposal/:propostaId', _jwtAuthMiddleware, async (req, re
     }
 
     // Validar campos obrigatórios
-    const _requiredFields = {
+    const requiredFields = {
       id: proposta.id,
       clienteNome: proposta.clienteNome,
       clienteCpf: proposta.clienteCpf,
@@ -271,7 +271,7 @@ router.post('/validate-proposal/:propostaId', _jwtAuthMiddleware, async (req, re
     };
 
     // Validar campos importantes
-    const _importantFields = {
+    const importantFields = {
       clienteRg: proposta.clienteRg,
       clienteEndereco: proposta.clienteEndereco,
       dadosPagamentoBanco: proposta.dadosPagamentoBanco,
@@ -282,16 +282,16 @@ router.post('/validate-proposal/:propostaId', _jwtAuthMiddleware, async (req, re
     };
 
     // Calcular completude
-    const _requiredMissing = Object.entries(requiredFields)
+    const requiredMissing = Object.entries(requiredFields)
       .filter(([_, value]) => !value)
       .map(([key]) => key);
 
-    const _importantMissing = Object.entries(importantFields)
+    const importantMissing = Object.entries(importantFields)
       .filter(([_, value]) => !value)
       .map(([key]) => key);
 
-    const _isValid = requiredMissing.length == 0;
-    const _completeness = Math.round(
+    const isValid = requiredMissing.length == 0;
+    const completeness = Math.round(
       ((Object.values(requiredFields).filter(Boolean).length +
         Object.values(importantFields).filter(Boolean).length) /
         (Object.keys(requiredFields).length + Object.keys(importantFields).length)) *

@@ -8,9 +8,9 @@ import { alertasProativosService } from '../services/alertasProativosService';
 import { db } from '../lib/supabase';
 import { notificacoes, regrasAlertas, historicoExecucoesAlertas, users } from '@shared/schema';
 import { eq, and, desc, inArray, sql } from 'drizzle-orm';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/alertas/teste
@@ -18,7 +18,7 @@ const _router = Router();
  */
 router.get('/teste', async (req, res) => {
   try {
-    const _resultado = await alertasProativosService.testarServico();
+    const resultado = await alertasProativosService.testarServico();
     res.json(resultado);
   }
 catch (error) {
@@ -34,9 +34,9 @@ catch (error) {
  * POST /api/alertas/executar
  * Endpoint para executar verificação manual (apenas ADMINISTRADOR)
  */
-router.post('/executar', _jwtAuthMiddleware, async (req, res) => {
+router.post('/executar', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _userRole = req.user?.role;
+    const userRole = req.user?.role;
 
     // Apenas ADMINISTRADOR pode executar manualmente
     if (userRole !== 'ADMINISTRADOR') {
@@ -71,9 +71,9 @@ catch (error) {
  * GET /api/alertas/notificacoes
  * Listar notificações do usuário
  */
-router.get('/notificacoes', _jwtAuthMiddleware, async (req, res) => {
+router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _userEmail = req.user?.email;
+    const userEmail = req.user?.email;
     const { status, limite = 50 } = req.query;
 
     if (!userEmail) {
@@ -95,7 +95,7 @@ router.get('/notificacoes', _jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const _localUserId = localUser.id.toString();
+    const localUserId = localUser.id.toString();
     console.log(`[ALERTAS] Mapeamento: ${userEmail} -> Local ID: ${localUserId}`);
 
     let whereConditions: unknown = eq(notificacoes.userId, localUserId);
@@ -104,7 +104,7 @@ router.get('/notificacoes', _jwtAuthMiddleware, async (req, res) => {
       whereConditions = and(whereConditions, eq(notificacoes.status, status));
     }
 
-    const _listaNotificacoes = await db
+    const listaNotificacoes = await db
       .select()
       .from(notificacoes)
       .where(whereConditions)
@@ -139,10 +139,10 @@ catch (error) {
  * POST /api/alertas/notificacoes/:id/marcar-lida
  * Marcar notificação como lida
  */
-router.post('/notificacoes/:id/marcar-lida', _jwtAuthMiddleware, async (req, res) => {
+router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const _userEmail = req.user?.email;
+    const userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
@@ -161,7 +161,7 @@ router.post('/notificacoes/:id/marcar-lida', _jwtAuthMiddleware, async (req, res
       });
     }
 
-    const _localUserId = localUser.id.toString();
+    const localUserId = localUser.id.toString();
 
     await db
       .update(notificacoes)
@@ -188,9 +188,9 @@ catch (error) {
  * POST /api/alertas/notificacoes/marcar-todas-lidas
  * Marcar todas as notificações como lidas
  */
-router.post('/notificacoes/marcar-todas-lidas', _jwtAuthMiddleware, async (req, res) => {
+router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _userEmail = req.user?.email;
+    const userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
@@ -209,9 +209,9 @@ router.post('/notificacoes/marcar-todas-lidas', _jwtAuthMiddleware, async (req, 
       });
     }
 
-    const _localUserId = localUser.id.toString();
+    const localUserId = localUser.id.toString();
 
-    const _resultado = await db
+    const resultado = await db
       .update(notificacoes)
       .set({
         status: 'lida',
@@ -242,9 +242,9 @@ catch (error) {
  * DELETE /api/alertas/notificacoes/all
  * Limpar histórico de notificações (arquivar todas)
  */
-router.delete('/notificacoes/all', _jwtAuthMiddleware, async (req, res) => {
+router.delete('/notificacoes/all', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _userEmail = req.user?.email;
+    const userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
@@ -263,10 +263,10 @@ router.delete('/notificacoes/all', _jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const _localUserId = localUser.id.toString();
+    const localUserId = localUser.id.toString();
 
     // Marcar todas as notificações como arquivadas
-    const _resultado = await db
+    const resultado = await db
       .update(notificacoes)
       .set({
         status: 'arquivada',
@@ -298,9 +298,9 @@ catch (error) {
  * GET /api/alertas/regras
  * Listar regras de alertas (apenas ADMINISTRADOR)
  */
-router.get('/regras', _jwtAuthMiddleware, async (req, res) => {
+router.get('/regras', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _userRole = req.user?.role;
+    const userRole = req.user?.role;
 
     if (userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
@@ -309,7 +309,7 @@ router.get('/regras', _jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const _regras = await db.select().from(regrasAlertas).orderBy(regrasAlertas.nome);
+    const regras = await db.select().from(regrasAlertas).orderBy(regrasAlertas.nome);
 
     res.json(regras);
   }
@@ -326,9 +326,9 @@ catch (error) {
  * GET /api/alertas/historico
  * Visualizar histórico de execuções (apenas ADMINISTRADOR)
  */
-router.get('/historico', _jwtAuthMiddleware, async (req, res) => {
+router.get('/historico', jwtAuthMiddleware, async (req, res) => {
   try {
-    const _userRole = req.user?.role;
+    const userRole = req.user?.role;
 
     if (userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
@@ -337,7 +337,7 @@ router.get('/historico', _jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const _historico = await db
+    const historico = await db
       .select({
         id: historicoExecucoesAlertas.id,
         regraId: historicoExecucoesAlertas.regraId,

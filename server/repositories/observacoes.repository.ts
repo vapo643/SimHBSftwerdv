@@ -29,7 +29,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    */
   async findByPropostaId(propostaId: number): Promise<Observacao[]> {
     try {
-      const _data = await db
+      const data = await db
         .select({
           id: observacoesCobranca.id,
           proposta_id: observacoesCobranca.propostaId,
@@ -62,7 +62,7 @@ catch (error) {
         .insert(observacoesCobranca)
         .values({
           propostaId: String(propostaId),
-          _observacao,
+          observacao,
           userId: usuarioId,
           userName: 'Sistema',
           createdAt: new Date(),
@@ -84,9 +84,9 @@ catch (error) {
    * Get observacoes with pagination
    */
   async findPaginated(page: number = 1, limit: number = 10, filters?: Record<string, any>) {
-    const _offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-    const _result = await db
+    const result = await db
       .select()
       .from(observacoesCobranca)
       .where(isNull(observacoesCobranca.dataPromessaPagamento))
@@ -100,8 +100,8 @@ catch (error) {
     return {
       data: result as unknown as Observacao[],
       total: _result.length,
-      _page,
-      _limit,
+      page,
+      limit,
       totalPages: Math.ceil(_result.length / limit),
     };
   }
@@ -120,4 +120,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _observacoesRepository = new ObservacoesRepository();
+export const observacoesRepository = new ObservacoesRepository();

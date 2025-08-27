@@ -28,9 +28,9 @@ async function migrateStatusV2() {
     const stats = await db.execute(sql`
       SELECT 
         COUNT(*) as total,
-        COUNT(CASE WHEN ccb_gerado = true THEN 1 END) as com_ccb,
+        COUNT(CASE WHEN ccb_gerado = true THEN 1 END) as comccb,
         COUNT(CASE WHEN assinatura_eletronica_concluida = true THEN 1 END) as assinadas,
-        COUNT(CASE WHEN clicksign_document_key IS NOT NULL THEN 1 END) as no_clicksign,
+        COUNT(CASE WHEN clicksign_document_key IS NOT NULL THEN 1 END) as noclicksign,
         COUNT(DISTINCT ic.proposta_id) as com_boletos
       FROM propostas p
       LEFT JOIN inter_collections ic ON p.id = ic.proposta_id
@@ -112,10 +112,10 @@ async function migrateStatusV2() {
     const auditResult = await db.execute(sql`
       INSERT INTO status_transitions (
         id,
-        proposta_id,
-        from_status,
-        to_status,
-        triggered_by,
+        propostaid,
+        fromstatus,
+        tostatus,
+        triggeredby,
         metadata,
         created_at
       )
@@ -129,8 +129,8 @@ async function migrateStatusV2() {
           'migration_script', 'migrate-status-v2.ts',
           'migration_date', NOW(),
           'previous_flags', jsonb_build_object(
-            'ccb_gerado', p.ccb_gerado,
-            'assinatura_eletronica_concluida', p.assinatura_eletronica_concluida,
+            'ccb_gerado', p.ccbgerado,
+            'assinatura_eletronica_concluida', p.assinatura_eletronicaconcluida,
             'biometria_concluida', p.biometria_concluida
           )
         ),

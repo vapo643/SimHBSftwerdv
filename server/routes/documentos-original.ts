@@ -6,11 +6,11 @@
 
 import { Router, Request, Response } from 'express';
 import { documentsService } from '../services/documentsService.js';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { requireAnyRole } from '../lib/role-guards.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/documentos/download
@@ -18,8 +18,8 @@ const _router = Router();
  */
 router.get(
   '/download',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { path } = req.query;
@@ -30,12 +30,12 @@ router.get(
         });
       }
 
-      const _result = await documentsService.downloadDocument(path);
+      const result = await documentsService.downloadDocument(path);
 
       if (_result.success) {
         // Check if it's a JSON request or redirect
-        const _acceptHeader = req.headers.accept || '';
-        const _isJsonRequest = acceptHeader.includes('application/json');
+        const acceptHeader = req.headers.accept || '';
+        const isJsonRequest = acceptHeader.includes('application/json');
 
         if (isJsonRequest) {
           // Return URL as JSON for requests with Authorization header
@@ -51,7 +51,7 @@ else {
         }
       }
 else {
-        const _statusCode = _result.error?.includes('não encontrado') ? 404 : 500;
+        const statusCode = _result.error?.includes('não encontrado') ? 404 : 500;
         res.status(statusCode).json({
           error: _result.error,
           details: statusCode == 404 ? `Arquivo '${path}' não existe no storage` : undefined,
@@ -73,8 +73,8 @@ catch (error) {
  */
 router.get(
   '/list/:propostaId',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { propostaId } = req.params;
@@ -85,13 +85,13 @@ router.get(
         });
       }
 
-      const _result = await documentsService.getProposalDocuments(String(propostaId));
+      const result = await documentsService.getProposalDocuments(String(propostaId));
       res.json(_result);
     }
 catch (error) {
       console.error('[DOCUMENTOS_CONTROLLER] Error listing documents:', error);
 
-      const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
+      const statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
       res.status(statusCode).json({
         error: error.message || 'Erro ao listar documentos',
       });

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { testRetryService } from '../services/testService.js';
-const _router = Router();
+const router = Router();
 router.post('/retry', async (req, res) => {
   try {
-    const _result = await testRetryService.executeOperation('retry', req.body);
+    const result = await testRetryService.executeOperation('retry', req.body);
     res.json(_result);
   }
 catch (error) {

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { simulatorService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/simulate', async (req, res) => {
   try {
-    const _result = await simulatorService.executeOperation('simulate', req.body);
+    const result = await simulatorService.executeOperation('simulate', req.body);
     res.json(_result);
   }
 catch (error) {

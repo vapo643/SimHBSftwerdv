@@ -6,11 +6,11 @@
  */
 
 import { Router } from 'express';
-import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireAnyRole } from '../lib/role-guards';
 import { queues } from '../lib/mock-queue';
 
-const _router = Router();
+const router = Router();
 
 /**
  * Endpoint para consultar o status de um job
@@ -18,8 +18,8 @@ const _router = Router();
  */
 router.get(
   '/:jobId/status',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { jobId } = req.params;
@@ -57,9 +57,9 @@ else if (jobId.startsWith('notifications')) {
 
       if (job) {
         // Job encontrado - retornar dados reais
-        const _state = await job.getState();
-        const _progress = job.progress;
-        const _returnvalue = job.returnvalue;
+        const state = await job.getState();
+        const progress = job.progress;
+        const returnvalue = job.returnvalue;
 
         console.log(`[JOB STATUS API] 📊 Job ${jobId} - Status: ${state}, Progress: ${progress}%`);
 
@@ -88,7 +88,7 @@ else if (state == 'failed') {
 
         return res.json({
           success: true,
-          _jobId,
+          jobId,
           queue: queueName,
           status: state,
           progress: progress || 0,
@@ -106,7 +106,7 @@ else if (state == 'failed') {
 
       return res.status(404).json({
         error: 'Job não encontrado',
-        _jobId,
+        jobId,
         hint: 'O job pode ter expirado ou o ID está incorreto',
       });
     }

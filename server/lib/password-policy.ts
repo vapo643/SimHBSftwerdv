@@ -53,7 +53,7 @@ export function validatePasswordPolicy(
   personalInfo: string[] = [],
   zxcvbnScore: number = 0
 ): PasswordPolicyResult {
-  const _requirements = {
+  const requirements = {
     minLength: password.length >= 12, // NIST recommends minimum 8, we use 12
     maxLength: password.length <= 128, // NIST recommends max 64+, we use 128
     noCommonPatterns: true,
@@ -83,7 +83,7 @@ export function validatePasswordPolicy(
   }
 
   // Check keyboard patterns
-  const _lowerPassword = password.toLowerCase();
+  const lowerPassword = password.toLowerCase();
   for (const pattern of KEYBOARD_PATTERNS) {
     if (
       lowerPassword.includes(pattern) ||
@@ -113,14 +113,14 @@ export function validatePasswordPolicy(
   }
 
   // Check sequential characters
-  const _hasSequential = checkSequentialChars(password);
+  const hasSequential = checkSequentialChars(password);
   if (hasSequential) {
     requirements.noSequentialChars = false;
     suggestions.push('Evite sequências como "abc" ou "123"');
   }
 
   // Calculate if valid
-  const _isValid = Object.values(requirements).every((req) => req);
+  const isValid = Object.values(requirements).every((req) => req);
 
   // Generate message
   let _message = '';
@@ -132,11 +132,11 @@ else {
   }
 
   return {
-  _isValid,
+  isValid,
     score: zxcvbnScore,
-  _message,
-  _requirements,
-  _suggestions,
+  message,
+  requirements,
+  suggestions,
   };
 }
 
@@ -144,12 +144,12 @@ else {
  * Check for sequential characters
  */
 function checkSequentialChars(password: string): boolean {
-  const _chars = password.toLowerCase().split('');
+  const chars = password.toLowerCase().split('');
 
   for (let _i = 0; i < chars.length - 2; i++) {
-    const _char1 = chars[i].charCodeAt(0);
-    const _char2 = chars[i + 1].charCodeAt(0);
-    const _char3 = chars[i + 2].charCodeAt(0);
+    const char1 = chars[i].charCodeAt(0);
+    const char2 = chars[i + 1].charCodeAt(0);
+    const char3 = chars[i + 2].charCodeAt(0);
 
     // Check ascending or descending sequences
     if (
@@ -173,16 +173,16 @@ export function logPasswordPolicyViolation(
   ipAddress?: string
 ): void {
   securityLogger.logEvent({
-    type: SecurityEventType.LOGIN_FAILURE,
+    type: SecurityEventType.LOGINFAILURE,
     severity: 'LOW',
-  _userId,
+  userId,
     userEmail: email,
-  _ipAddress,
+  ipAddress,
     endpoint: '/api/auth/register',
     success: false,
     details: {
       reason: 'Password policy violations',
-  _violations,
+  violations,
     },
   });
 }

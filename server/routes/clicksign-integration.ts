@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { clicksignService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/integrate', async (req, res) => {
   try {
-    const _result = await clicksignService.executeOperation('integrate', req.body);
+    const result = await clicksignService.executeOperation('integrate', req.body);
     res.json(_result);
   }
 catch (error) {

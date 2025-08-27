@@ -93,7 +93,7 @@ export class AutonomousSecurityScanner {
     this.app._router.stack.forEach((middleware) => {
       if (middleware.route) {
         // Rota direta
-        const _methods = Object.keys(middleware.route.methods);
+        const methods = Object.keys(middleware.route.methods);
         methods.forEach((method) => {
           routes.push({
             path: middleware.route.path,
@@ -106,7 +106,7 @@ else if (middleware.name == 'router') {
         // Sub-router
         middleware.handle.stack.forEach((handler) => {
           if (handler.route) {
-            const _methods = Object.keys(handler.route.methods);
+            const methods = Object.keys(handler.route.methods);
             methods.forEach((method) => {
               routes.push({
                 path: handler.route.path,
@@ -121,7 +121,7 @@ else if (middleware.name == 'router') {
 
     // Criar perfil para cada endpoint
     routes.forEach((route) => {
-      const _key = `${route.method}:${route.path}`;
+      const key = `${route.method}:${route.path}`;
       this.endpoints.set(key, {
         method: route.method,
         path: route.path,
@@ -148,7 +148,7 @@ else if (middleware.name == 'router') {
     console.log('📊 [AUTONOMOUS SECURITY] Estabelecendo baseline...');
 
     // Analisar logs históricos
-    const _logs = await db
+    const logs = await db
       .select()
       .from(security_logs)
       .where(sql`created_at > NOW() - INTERVAL '7 days'`)
@@ -169,12 +169,12 @@ else if (middleware.name == 'router') {
   private startContinuousMonitoring() {
     // Interceptar TODAS as requisições
     this.app.use((req: Request, res: Response, next) => {
-      const _startTime = Date.now();
-      const _reqData = this.captureRequestData(req);
+      const startTime = Date.now();
+      const reqData = this.captureRequestData(req);
 
       // Interceptar response
-      const _originalSend = res.send;
-      const _self = this;
+      const originalSend = res.send;
+      const self = this;
       res.send = function (data) {
         res.locals.responseTime = Date.now() - startTime;
         res.locals.responseSize = Buffer.byteLength(_data);
@@ -219,20 +219,20 @@ else if (middleware.name == 'router') {
    * Analisar requisição/resposta em tempo real
    */
   private async analyzeRequestResponse(req: Request, res: Response, reqData) {
-    const _responseTime = res.locals.responseTime;
-    const _responseSize = res.locals.responseSize;
-    const _statusCode = res.statusCode;
+    const responseTime = res.locals.responseTime;
+    const responseSize = res.locals.responseSize;
+    const statusCode = res.statusCode;
 
     // 1. Detecção de anomalias por endpoint
-    const _endpointKey = `${req.method}:${req.path}`;
-    const _endpoint = this.endpoints.get(endpointKey);
+    const endpointKey = `${req.method}:${req.path}`;
+    const endpoint = this.endpoints.get(endpointKey);
 
     if (endpoint) {
-      const _anomalies = this.detectAnomalies({
-        _endpoint,
-        _responseTime,
-        _responseSize,
-        _statusCode,
+      const anomalies = this.detectAnomalies({
+        endpoint,
+        responseTime,
+        responseSize,
+        statusCode,
         headers: reqData.headers,
         params: { ...reqData.query, ...reqData.body },
       });
@@ -243,7 +243,7 @@ else if (middleware.name == 'router') {
     }
 
     // 2. Detecção de padrões de ataque
-    const _attacks = this.detectAttackPatterns(reqData);
+    const attacks = this.detectAttackPatterns(reqData);
     if (attacks.length > 0) {
       this.handleAttacks(attacks, reqData);
     }
@@ -260,12 +260,12 @@ else if (middleware.name == 'router') {
    */
   private detectAnomalies(data): string[] {
     const anomalies: string[] = [];
-    const _endpoint = data.endpoint;
-    const _normal = endpoint.normalBehavior;
+    const endpoint = data.endpoint;
+    const normal = endpoint.normalBehavior;
 
     // Tempo de resposta anormal
     if (normal.avgResponseTime > 0) {
-      const _deviation = Math.abs(data.responseTime - normal.avgResponseTime);
+      const deviation = Math.abs(data.responseTime - normal.avgResponseTime);
       if (deviation > normal.avgResponseTime * 3) {
         // 3x desvio
         anomalies.push('response_time_anomaly');
@@ -279,7 +279,7 @@ else if (middleware.name == 'router') {
     }
 
     // Headers suspeitos
-    const _suspiciousHeaders = [
+    const suspiciousHeaders = [
       'x-forwarded-host',
       'x-original-url',
       'x-rewrite-url',
@@ -295,8 +295,8 @@ else if (middleware.name == 'router') {
     }
 
     // Parâmetros não esperados
-    const _paramKeys = Object.keys(data.params);
-    const _unexpectedParams = paramKeys.filter(
+    const paramKeys = Object.keys(data.params);
+    const unexpectedParams = paramKeys.filter(
       (key) => !normal.commonParams.has(key) && !this.learningMode
     );
 
@@ -314,7 +314,7 @@ else if (middleware.name == 'router') {
     const detectedAttacks: AttackPattern[] = [];
 
     // Converter todos os dados em string para análise
-    const _dataString = JSON.stringify({
+    const dataString = JSON.stringify({
       path: reqData.path,
       query: reqData.query,
       body: reqData.body,
@@ -322,7 +322,7 @@ else if (middleware.name == 'router') {
     }).toLowerCase();
 
     // 1. SQL Injection
-    const _sqlPatterns = [
+    const sqlPatterns = [
       /(\b(union|select|insert|update|delete|drop|create|alter|exec|execute)\b.*\b(from|where|table|database)\b)/i,
       /(\b(or|and)\b\s*\d+\s*=\s*\d+)/i,
       /(\'|\")\s*(or|and)\s*(\'|\")\s*=\s*(\'|\")/i,
@@ -343,7 +343,7 @@ else if (middleware.name == 'router') {
     }
 
     // 2. XSS
-    const _xssPatterns = [
+    const xssPatterns = [
       /<script[^>]*>[\s\S]*?<\/script>/gi,
       /javascript:\s*[^"']+/gi,
       /on\w+\s*=\s*["'][^"']+["']/gi,
@@ -366,7 +366,7 @@ else if (middleware.name == 'router') {
     }
 
     // 3. Command Injection
-    const _cmdPatterns = [
+    const cmdPatterns = [
       /(\||;|&|`|\$\(|\${).*?(ls|cat|grep|find|wget|curl|nc|bash|sh|cmd|powershell)/i,
       /\b(system|exec|popen|proc_open|shell_exec|passthru)\s*\(/i,
     ];
@@ -384,7 +384,7 @@ else if (middleware.name == 'router') {
     }
 
     // 4. Path Traversal
-    const _pathPatterns = [/\.\.[\/\\]/, /%2e%2e[\/\\]/i, /\.\.%2f/i, /\.\.%5c/i];
+    const pathPatterns = [/\.\.[\/\\]/, /%2e%2e[\/\\]/i, /\.\.%2f/i, /\.\.%5c/i];
 
     for (const pattern of pathPatterns) {
       if (pattern.test(dataString)) {
@@ -399,11 +399,11 @@ else if (middleware.name == 'router') {
     }
 
     // 5. LDAP Injection
-    const _ldapPatterns = [/[()&|*]/, /\b(objectClass|cn|sn|uid|mail)\s*=/i];
+    const ldapPatterns = [/[()&|*]/, /\b(objectClass|cn|sn|uid|mail)\s*=/i];
 
     // 6. XML/XXE Injection
     if (reqData.contentType?.includes('xml')) {
-      const _xxePatterns = [
+      const xxePatterns = [
         /<!ENTITY/i,
         /SYSTEM\s+["'](file:|http:|https:|ftp:|php:|zlib:|data:|glob:|phar:|ssh2:|rar:|ogg:|expect:)/i,
       ];
@@ -422,10 +422,10 @@ else if (middleware.name == 'router') {
     }
 
     // 7. NoSQL Injection
-    const _noSqlPatterns = [/\$where/, /\$ne/, /\$gt/, /\$regex/, /\$exists/];
+    const noSqlPatterns = [/\$where/, /\$ne/, /\$gt/, /\$regex/, /\$exists/];
 
     // 8. SSRF Patterns
-    const _ssrfPatterns = [
+    const ssrfPatterns = [
       /localhost|127\.0\.0\.1|0\.0\.0\.0|::1/,
       /169\.254\.\d+\.\d+/, // Link-local
       /10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+/, // Private IPs
@@ -450,7 +450,7 @@ else if (middleware.name == 'router') {
       });
     }
 
-    const _profile = this.ipProfiles.get(ip)!;
+    const profile = this.ipProfiles.get(ip)!;
     profile.lastSeen = new Date();
     profile.requestCount++;
     profile.endpoints.add(`${reqData.method}:${reqData.path}`);
@@ -503,10 +503,10 @@ else if (middleware.name == 'router') {
     }
 
     // 2. Insecure Direct Object Reference (IDOR)
-    const _idPattern = /\/(users?|accounts?|orders?|documents?|files?)\/(\d+|[a-f0-9-]{36})/i;
+    const idPattern = /\/(users?|accounts?|orders?|documents?|files?)\/(\d+|[a-f0-9-]{36})/i;
     if (idPattern.test(reqData.path)) {
       // Verificar se há validação de autorização
-      const _hasAuthHeader = !!reqData.headers.authorization;
+      const hasAuthHeader = !!reqData.headers.authorization;
       if (!hasAuthHeader) {
         vulnerabilities.push({
           id: this.generateVulnId(),
@@ -525,7 +525,7 @@ else if (middleware.name == 'router') {
     }
 
     // 3. Missing Security Headers
-    const _securityHeaders = [
+    const securityHeaders = [
       'x-frame-options',
       'x-content-type-options',
       'strict-transport-security',
@@ -533,7 +533,7 @@ else if (middleware.name == 'router') {
       'x-xss-protection',
     ];
 
-    const _missingHeaders = securityHeaders.filter((h) => !reqData.headers[h]);
+    const missingHeaders = securityHeaders.filter((h) => !reqData.headers[h]);
     if (missingHeaders.length > 0) {
       vulnerabilities.push({
         id: this.generateVulnId(),
@@ -576,7 +576,7 @@ else if (middleware.name == 'router') {
 
       // Log de segurança
       securityLogger.logEvent({
-        type: SecurityEventType.SECURITY_ALERT,
+        type: SecurityEventType.SECURITYALERT,
         severity: vuln.severity,
         endpoint: vuln.endpoint,
         ipAddress: reqData.ip,
@@ -598,14 +598,14 @@ else if (middleware.name == 'router') {
     // Simular aprendizado de máquina básico
     setInterval(async () => {
       // Analisar logs recentes para novos padrões
-      const _recentLogs = await db
+      const recentLogs = await db
         .select()
         .from(security_logs)
         .where(sql`created_at > NOW() - INTERVAL '1 hour'`)
         .limit(1000);
 
       // Agrupar por padrões similares
-      const _patterns = this.extractPatterns(recentLogs);
+      const patterns = this.extractPatterns(recentLogs);
 
       // Adicionar novos padrões detectados
       for (const pattern of patterns) {
@@ -645,7 +645,7 @@ else if (middleware.name == 'router') {
    * Gerar relatório automático
    */
   private async generateSecurityReport() {
-    const _report = {
+    const report = {
       timestamp: new Date(),
       summary: {
         totalVulnerabilities: this.vulnerabilities.size,
@@ -678,7 +678,7 @@ else if (middleware.name == 'router') {
   }
 
   private getSeverityScore(severity: string): number {
-    const _scores = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+    const scores = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
     return scores[severity as keyof typeof scores] || 0;
   }
 
@@ -699,7 +699,7 @@ else if (middleware.name == 'router') {
     const recommendations: string[] = [];
 
     // Baseado nas vulnerabilidades encontradas
-    const _vulns = Array.from(this.vulnerabilities.values());
+    const vulns = Array.from(this.vulnerabilities.values());
 
     if (vulns.some((v) => v.type == 'SQL_INJECTION')) {
       recommendations.push('Implementar prepared statements em todas as queries');

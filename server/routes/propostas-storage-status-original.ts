@@ -3,7 +3,7 @@ import { supabase, db } from '../lib/supabase';
 import { propostas, interCollections } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const _router = Router();
+const router = Router();
 
 /**
  * Endpoint de Consciência de Estado do Storage
@@ -37,16 +37,16 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
     }
 
     // Calcular número total de parcelas esperadas
-    const _condicoesData =
+    const condicoesData =
       typeof proposta.condicoesData == 'string'
         ? JSON.parse(proposta.condicoesData)
         : proposta.condicoesData;
-    const _totalParcelas = condicoesData?.prazo || 0;
+    const totalParcelas = condicoesData?.prazo || 0;
 
     // Verificar boletos individuais no Storage
 
     // Listar boletos individuais
-    const _boletosPath = `propostas/${id}/boletos/`;
+    const boletosPath = `propostas/${id}/boletos/`;
     const { data: boletosFiles, error: boletosError } = await _supabase.storage
       .from('documents')
       .list(boletosPath, {
@@ -62,14 +62,14 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
     }
 
     // Filtrar apenas arquivos PDF de boletos
-    const _boletosNoStorage = (boletosFiles || [])
+    const boletosNoStorage = (boletosFiles || [])
       .filter((file) => file.name.endsWith('.pdf'))
       .map((file) => file.name.replace('.pdf', ''));
 
-    const _fileCount = boletosNoStorage.length;
+    const fileCount = boletosNoStorage.length;
 
     // Verificar se existe carnê consolidado
-    const _carnePath = `propostas/${id}/carnes/`;
+    const carnePath = `propostas/${id}/carnes/`;
     const { data: carneFiles, error: carneError } = await _supabase.storage
       .from('documents')
       .list(carnePath, {
@@ -82,11 +82,11 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
     }
 
     // Verificar se existe algum carnê
-    const _carneFile = (carneFiles || []).find(
+    const carneFile = (carneFiles || []).find(
       (file) => file.name.startsWith('carne-') && file.name.endsWith('.pdf')
     );
 
-    const _carneExists = !!carneFile;
+    const carneExists = !!carneFile;
     let _carneUrl = null;
 
     // Se existe carnê, gerar URL assinada
@@ -117,19 +117,19 @@ else {
     }
 
     console.log(`[STORAGE STATUS] Proposta ${id}:`, {
-      _syncStatus,
-      _carneExists,
-      _fileCount,
-      _totalParcelas,
+      syncStatus,
+      carneExists,
+      fileCount,
+      totalParcelas,
     });
 
     return res.json({
-      _syncStatus,
-      _carneExists,
-      _fileCount,
-      _totalParcelas,
-      _boletosNoStorage,
-      _carneUrl,
+      syncStatus,
+      carneExists,
+      fileCount,
+      totalParcelas,
+      boletosNoStorage,
+      carneUrl,
       carneFileName: carneFile?.name || null,
     });
   }
@@ -175,12 +175,12 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
     }
 
     // Buscar boletos do Banco Inter para esta proposta
-    const _boletosInter = await db
+    const boletosInter = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, id));
 
-    const _totalBoletos = boletosInter.length;
+    const totalBoletos = boletosInter.length;
 
     if (totalBoletos == 0) {
       return res.json({
@@ -193,7 +193,7 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
     }
 
     // Verificar quantos PDFs existem no Storage
-    const _boletosPath = `propostas/${id}/boletos/emitidos_pendentes/`;
+    const boletosPath = `propostas/${id}/boletos/emitidos_pendentes/`;
     const { data: boletosFiles, error: boletosError } = await _supabase.storage
       .from('documents')
       .list(boletosPath, {
@@ -206,7 +206,7 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
       return res.json({
         success: true,
         syncStatus: 'falhou',
-        _totalBoletos,
+        totalBoletos,
         boletosSincronizados: 0,
         ultimaAtualizacao: new Date().toISOString(),
         detalhes: {
@@ -216,7 +216,7 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
     }
 
     // Contar PDFs sincronizados
-    const _boletosSincronizados = (boletosFiles || []).filter((file) =>
+    const boletosSincronizados = (boletosFiles || []).filter((file) =>
       file.name.endsWith('.pdf')
     ).length;
 
@@ -235,23 +235,23 @@ else {
 
     // Verificar se há job de sincronização em andamento (simplificado para MVP)
     // Em produção, verificar status real do job queue
-    const _jobEmAndamento = syncStatus == 'em_andamento' && Date.now() % 10000 < 5000; // Simulação simples
+    const jobEmAndamento = syncStatus == 'em_andamento' && Date.now() % 10000 < 5000; // Simulação simples
 
     if (jobEmAndamento) {
       syncStatus = 'em_andamento';
     }
 
     console.log(`[SYNC STATUS PAM V1.0] Proposta ${id}:`, {
-      _syncStatus,
-      _totalBoletos,
-      _boletosSincronizados,
+      syncStatus,
+      totalBoletos,
+      boletosSincronizados,
     });
 
     return res.json({
       success: true,
-      _syncStatus,
-      _totalBoletos,
-      _boletosSincronizados,
+      syncStatus,
+      totalBoletos,
+      boletosSincronizados,
       ultimaAtualizacao: new Date().toISOString(),
       detalhes: {
         tempoConclusao: syncStatus == 'concluido' ? Math.floor(Math.random() * 10) + 5 : undefined,

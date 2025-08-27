@@ -34,8 +34,8 @@ catch (error) {
   }
 }
 
-export const _proposalService = new ProposalService();
-export const _propostasCarneService = new GenericService('PROPOSTAS_CARNE');
-export const _propostasStatusService = new GenericService('PROPOSTAS_STATUS');
-export const _propostasStorageService = new GenericService('PROPOSTAS_STORAGE');
-export const _propostasSyncService = new GenericService('PROPOSTAS_SYNC');
+export const proposalService = new ProposalService();
+export const propostasCarneService = new GenericService('PROPOSTAS_CARNE');
+export const propostasStatusService = new GenericService('PROPOSTAS_STATUS');
+export const propostasStorageService = new GenericService('PROPOSTAS_STORAGE');
+export const propostasSyncService = new GenericService('PROPOSTAS_SYNC');

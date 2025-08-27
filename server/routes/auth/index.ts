@@ -6,11 +6,11 @@
 
 import { Router, Request, Response } from 'express';
 import { authService } from '../../services/authService.js';
-import { _jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
 import { getClientIP } from '../../lib/security-logger.js';
 import { AuthenticatedRequest } from '../../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/auth/login
@@ -26,7 +26,7 @@ router.post('/login', async (req: Request, res: Response) => {
       });
     }
 
-    const _result = await authService.login(email, password, req);
+    const result = await authService.login(email, password, req);
 
     if (_result.success) {
       res.json(_result.data);
@@ -55,7 +55,7 @@ router.post('/register', async (req: Request, res: Response) => {
       });
     }
 
-    const _result = await authService.register(email, password, name);
+    const result = await authService.register(email, password, name);
 
     if (_result.success) {
       res.json(_result.data);
@@ -77,9 +77,9 @@ catch (error) {
  * POST /api/auth/logout
  * User logout endpoint
  */
-router.post('/logout', _jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.post('/logout', jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
-    const _result = await authService.logout();
+    const result = await authService.logout();
 
     if (_result.success) {
       res.json({ message: 'Logged out successfully' });
@@ -98,9 +98,9 @@ catch (error) {
  * POST /api/auth/change-password
  * Change user password with current password verification
  */
-router.post('/change-password', _jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.post('/change-password', jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
     const { currentPassword, newPassword, confirmPassword } = authReq.body;
 
     // Validate input
@@ -122,11 +122,11 @@ router.post('/change-password', _jwtAuthMiddleware, async (req: Request, res: Re
       });
     }
 
-    const _result = await authService.changePassword(
+    const result = await authService.changePassword(
       authReq.user.id,
       authReq.user.email,
-  _currentPassword,
-  _newPassword,
+  currentPassword,
+  newPassword,
       req
     );
 
@@ -163,7 +163,7 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
       });
     }
 
-    const _result = await authService.requestPasswordReset(email, req);
+    const result = await authService.requestPasswordReset(email, req);
     res.json({ message: _result.message });
   }
 catch (error) {
@@ -176,16 +176,16 @@ catch (error) {
  * GET /api/auth/sessions
  * List all user sessions
  */
-router.get('/sessions', _jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.get('/sessions', jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
 
     if (!authReq.user?.id) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _currentToken = authReq.headers.authorization?.replace('Bearer ', '');
-    const _result = await authService.getUserSessions(authReq.user.id, currentToken);
+    const currentToken = authReq.headers.authorization?.replace('Bearer ', '');
+    const result = await authService.getUserSessions(authReq.user.id, currentToken);
 
     res.json(_result);
   }
@@ -199,16 +199,16 @@ catch (error) {
  * DELETE /api/auth/sessions/:sessionId
  * Terminate a specific session
  */
-router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
     const { sessionId } = authReq.params;
 
     if (!authReq.user?.id) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _result = await authService.deleteSession(authReq.user.id, sessionId, authReq);
+    const result = await authService.deleteSession(authReq.user.id, sessionId, authReq);
 
     if (_result.success) {
       res.json({ message: 'Sessão encerrada com sucesso' });
@@ -227,9 +227,9 @@ catch (error) {
  * GET /api/auth/profile
  * Get current user profile
  */
-router.get('/profile', _jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.get('/profile', jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
 
     if (!authReq.user) {
       return res.status(401).json({error: "Unauthorized"});
@@ -239,8 +239,8 @@ router.get('/profile', _jwtAuthMiddleware, async (req: Request, res: Response) =
       id: authReq.user.id,
       email: authReq.user.email,
       role: authReq.user.role,
-      full_name: authReq.user.full_name,
-      loja_id: authReq.user.loja_id,
+      full_name: authReq.user.fullname,
+      loja_id: authReq.user.lojaid,
     });
   }
 catch (error) {
@@ -253,9 +253,9 @@ catch (error) {
  * GET /api/auth/validate
  * Validate current session
  */
-router.get('/validate', _jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.get('/validate', jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
 
     if (!authReq.user) {
       return res.status(401).json({

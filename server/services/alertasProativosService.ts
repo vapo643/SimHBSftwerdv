@@ -6,12 +6,12 @@
 
 import { db } from '../lib/supabase';
 import {
-  _notificacoes,
-  _regrasAlertas,
-  _historicoExecucoesAlertas,
-  _propostas,
-  _parcelas,
-  _users,
+  notificacoes,
+  regrasAlertas,
+  historicoExecucoesAlertas,
+  propostas,
+  parcelas,
+  users,
 } from '@shared/schema';
 import type { InsertNotificacao, RegraAlerta, InsertHistoricoExecucaoAlerta } from '@shared/schema';
 import { and, eq, gte, lte, ne, sql, inArray } from 'drizzle-orm';
@@ -51,7 +51,7 @@ export class AlertasProativosService {
     this.regras.set('alto_valor_vencimento_proximo', {
       nome: 'alto_valor_vencimento_proximo',
       processar: async () => {
-        const _resultado = await db
+        const resultado = await db
           .select({
             propostaId: propostas.id,
             clienteNome: propostas.clienteNome,
@@ -93,7 +93,7 @@ export class AlertasProativosService {
     this.regras.set('atraso_longo_30_dias', {
       nome: 'atraso_longo_30_dias',
       processar: async () => {
-        const _resultado = await db
+        const resultado = await db
           .select({
             propostaId: propostas.id,
             clienteNome: propostas.clienteNome,
@@ -145,26 +145,26 @@ export class AlertasProativosService {
    * Método principal executado pelo cron job diariamente
    */
   async executarVerificacaoDiaria(): Promise<void> {
-    const _inicioExecucao = Date.now();
+    const inicioExecucao = Date.now();
     let _totalNotificacoesCriadas = 0;
     let _totalRegistrosProcessados = 0;
 
     console.log(`[ALERTAS PROATIVOS] Iniciando verificação diária às ${new Date().toISOString()}`);
 
     // Buscar regras ativas do tipo cron
-    const _regrasAtivas = await db
+    const regrasAtivas = await db
       .select()
       .from(regrasAlertas)
       .where(and(eq(regrasAlertas.ativa, true), eq(regrasAlertas.trigger, 'cron')));
 
     // Se não houver regras cadastradas no banco, usar as regras padrão
-    const _regrasParaProcessar =
+    const regrasParaProcessar =
       regrasAtivas.length > 0
         ? regrasAtivas.map((r) => r.nome)
         : ['alto_valor_vencimento_proximo', 'atraso_longo_30_dias'];
 
     for (const nomeRegra of regrasParaProcessar) {
-      const _processador = this.regras.get(nomeRegra);
+      const processador = this.regras.get(nomeRegra);
       if (!processador) {
         console.log(`[ALERTAS PROATIVOS] Regra ${nomeRegra} não encontrada`);
         continue;
@@ -173,16 +173,16 @@ export class AlertasProativosService {
       try {
         console.log(`[ALERTAS PROATIVOS] Processando regra: ${nomeRegra}`);
 
-        const _resultados = await processador.processar();
+        const resultados = await processador.processar();
         console.log(
           `[ALERTAS PROATIVOS] Regra ${nomeRegra} encontrou ${resultados.length} registros`
         );
         totalRegistrosProcessados += resultados.length;
 
         // Buscar usuários com roles apropriadas
-        const _rolesDestino = this.obterRolesDestino(nomeRegra);
+        const rolesDestino = this.obterRolesDestino(nomeRegra);
         console.log(`[ALERTAS PROATIVOS] Buscando usuários com roles: ${rolesDestino.join(', ')}`);
-        const _usuariosDestino = await db
+        const usuariosDestino = await db
           .select()
           .from(users)
           .where(inArray(users.role, rolesDestino));
@@ -191,7 +191,7 @@ export class AlertasProativosService {
         );
 
         // Criar notificações para cada resultado e cada usuário
-        for (const _resultado of resultados) {
+        for (const resultado of resultados) {
           for (const usuario of usuariosDestino) {
             const notificacao: InsertNotificacao = {
               tipo: resultado.tipo,
@@ -214,17 +214,17 @@ export class AlertasProativosService {
 
         // Registrar execução no histórico
         await this.registrarExecucao(
-  _nomeRegra,
+  nomeRegra,
           'sucesso',
           resultados.length,
-  _totalNotificacoesCriadas,
+  totalNotificacoesCriadas,
           Date.now() - inicioExecucao
         );
       }
 catch (error) {
         console.error(`[ALERTAS PROATIVOS] Erro ao processar regra ${nomeRegra}:`, error);
         await this.registrarExecucao(
-  _nomeRegra,
+  nomeRegra,
           'erro',
           0,
           0,
@@ -234,7 +234,7 @@ catch (error) {
       }
     }
 
-    const _duracaoTotal = Date.now() - inicioExecucao;
+    const duracaoTotal = Date.now() - inicioExecucao;
     console.log(`[ALERTAS PROATIVOS] Verificação concluída em ${duracaoTotal}ms`);
     console.log(`[ALERTAS PROATIVOS] Total de notificações criadas: ${totalNotificacoesCriadas}`);
     console.log(`[ALERTAS PROATIVOS] Total de registros processados: ${totalRegistrosProcessados}`);
@@ -312,15 +312,15 @@ catch (error) {
       if (regra) {
         const historico: InsertHistoricoExecucaoAlerta = {
           regraId: regra.id,
-  _duracao,
-  _status,
-  _registrosProcessados,
-  _notificacoesCriadas,
-  _erroDetalhes,
+  duracao,
+  status,
+  registrosProcessados,
+  notificacoesCriadas,
+  erroDetalhes,
           triggerOrigem: 'cron',
           dadosContexto: {
             timestamp: new Date().toISOString(),
-  _nomeRegra,
+  nomeRegra,
           },
         };
 
@@ -340,7 +340,7 @@ catch (error) {
       console.log(`[ALERTAS PROATIVOS] Executando teste do serviço...`);
 
       // Verificar se as tabelas existem
-      const _testeNotificacao = await db.select().from(notificacoes).limit(1);
+      const testeNotificacao = await db.select().from(notificacoes).limit(1);
 
       return {
         sucesso: true,
@@ -357,4 +357,4 @@ catch (error) {
 }
 
 // Exportar instância única do serviço
-export const _alertasProativosService = new AlertasProativosService();
+export const alertasProativosService = new AlertasProativosService();

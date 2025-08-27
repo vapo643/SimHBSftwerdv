@@ -64,7 +64,7 @@ class BoletoStorageService {
 
     const _result: BoletoSyncResult = {
       success: true,
-  _propostaId,
+  propostaId,
       totalBoletos: 0,
       boletosProcessados: 0,
       boletosComErro: 0,
@@ -74,7 +74,7 @@ class BoletoStorageService {
 
     try {
       // 1. Buscar todos os códigos de solicitação da proposta
-      const _collections = await storage.getInterCollectionsByProposalId(propostaId);
+      const collections = await storage.getInterCollectionsByProposalId(propostaId);
 
       if (!collections || collections.length == 0) {
         console.log(`[BOLETO STORAGE] ⚠️ Nenhum boleto encontrado para proposta ${propostaId}`);
@@ -83,15 +83,15 @@ class BoletoStorageService {
       }
 
       _result.totalBoletos = collections.length;
-      const _totalLotes = Math.ceil(collections.length / BATCH_SIZE);
+      const totalLotes = Math.ceil(collections.length / BATCH_SIZE);
       console.log(
         `[BOLETO STORAGE] 📊 Encontrados ${collections.length} boletos para processar em ${totalLotes} lotes`
       );
 
       // 2. Processar boletos em lotes paralelos
       for (let _i = 0; i < collections.length; i += BATCH_SIZE) {
-        const _loteAtual = Math.floor(i / BATCH_SIZE) + 1;
-        const _batch = collections.slice(i, i + BATCH_SIZE);
+        const loteAtual = Math.floor(i / BATCH_SIZE) + 1;
+        const batch = collections.slice(i, i + BATCH_SIZE);
 
         console.log(
           `[BOLETO STORAGE] 🔄 Processando lote ${loteAtual}/${totalLotes} (${batch.length} boletos em paralelo)`
@@ -99,7 +99,7 @@ class BoletoStorageService {
         console.time(`[BOLETO STORAGE] ⏱️ Lote ${loteAtual}`);
 
         // Processar lote em paralelo usando Promise.all
-        const _resultadosLote = await Promise.all(
+        const resultadosLote = await Promise.all(
           batch.map(async (collection) => {
             const { codigoSolicitacao, numeroParcela } = collection;
 
@@ -144,14 +144,14 @@ catch (downloadError) {
               );
 
               // 2.2. Definir caminho no Storage
-              const _caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
+              const caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
 
               // 2.3. Upload para Supabase Storage - COM BLINDAGEM
               console.log(`[BOLETO STORAGE] 📤 [Parcela ${numeroParcela}] Fazendo upload...`);
 
               let uploadData, uploadError;
               try {
-                const _uploadResult = await this._supabase.storage
+                const uploadResult = await this.supabase.storage
                   .from('documents')
                   .upload(caminhoArquivo, pdfBuffer, {
                     contentType: 'application/pdf',
@@ -182,9 +182,9 @@ catch (storageError) {
 
               return {
                 success: true,
-  _codigoSolicitacao,
-  _caminhoArquivo,
-  _numeroParcela,
+  codigoSolicitacao,
+  caminhoArquivo,
+  numeroParcela,
               };
             }
 catch (error) {
@@ -195,9 +195,9 @@ catch (error) {
 
               return {
                 success: false,
-  _codigoSolicitacao,
+  codigoSolicitacao,
                 erro: error.message || 'Erro desconhecido',
-  _numeroParcela,
+  numeroParcela,
               };
             }
           })
@@ -239,7 +239,7 @@ else {
       // STATUS V2.0: Se todos os boletos foram processados com sucesso, atualizar status
       if (_result.success && _result.boletosProcessados == _result.totalBoletos) {
         // Buscar status atual da proposta
-        const _proposta = await storage.getPropostaById(propostaId);
+        const proposta = await storage.getPropostaById(propostaId);
 
         // Atualizar status para BOLETOS_EMITIDOS
         await storage.updateProposta(propostaId, {
@@ -299,9 +299,9 @@ catch (error) {
    */
   async verificarBoletoExiste(propostaId: string, codigoSolicitacao: string): Promise<boolean> {
     try {
-      const _caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
+      const caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
 
-      const { data, error } = await this._supabase.storage
+      const { data, error } = await this.supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 1,
@@ -326,7 +326,7 @@ catch (error) {
    */
   async listarBoletosSalvos(propostaId: string): Promise<string[]> {
     try {
-      const { data, error } = await this._supabase.storage
+      const { data, error } = await this.supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 100,
@@ -350,17 +350,17 @@ catch (error) {
    */
   async limparBoletosSalvos(propostaId: string): Promise<boolean> {
     try {
-      const _boletos = await this.listarBoletosSalvos(propostaId);
+      const boletos = await this.listarBoletosSalvos(propostaId);
 
       if (boletos.length == 0) {
         return true;
       }
 
-      const _caminhos = boletos.map(
+      const caminhos = boletos.map(
         (nome) => `propostas/${propostaId}/boletos/emitidos_pendentes/${nome}`
       );
 
-      const { data, error } = await this._supabase.storage.from('documents').remove(caminhos);
+      const { data, error } = await this.supabase.storage.from('documents').remove(caminhos);
 
       if (error) {
         console.error(`[BOLETO STORAGE] Erro ao limpar boletos:`, error);
@@ -392,7 +392,7 @@ catch (error) {
         `[CARNE DEBUG] Listando ficheiros em propostas/${propostaId}/boletos/emitidos_pendentes/`
       );
 
-      const { data: files, error: listError } = await this._supabase.storage
+      const { data: files, error: listError } = await this.supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 100,
@@ -418,14 +418,14 @@ catch (error) {
       const errors: string[] = [];
 
       for (let _i = 0; i < files.length; i++) {
-        const _file = files[i];
-        const _filePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${file.name}`;
+        const file = files[i];
+        const filePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${file.name}`;
 
         try {
           console.log(`[CARNE DEBUG] Baixando ficheiro: ${file.name}`);
 
           // Download do ficheiro
-          const { data: fileData, error: downloadError } = await this._supabase.storage
+          const { data: fileData, error: downloadError } = await this.supabase.storage
             .from('documents')
             .download(filePath);
 
@@ -440,11 +440,11 @@ catch (error) {
           }
 
           // Converter Blob para Buffer
-          const _arrayBuffer = await fileData.arrayBuffer();
-          const _buffer = Buffer.from(arrayBuffer);
+          const arrayBuffer = await fileData.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
 
           // Validar PDF
-          const _pdfMagic = buffer.slice(0, 5).toString('ascii');
+          const pdfMagic = buffer.slice(0, 5).toString('ascii');
           if (!pdfMagic.startsWith('%PDF')) {
             console.log(
               `[CARNE DEBUG] ⚠️ Ficheiro ${file.name} não é PDF válido. Magic bytes: ${pdfMagic}`
@@ -473,19 +473,19 @@ catch (error) {
       );
 
       // 3. LÓGICA DE FUSÃO COM PDF-LIB
-      const _mergedPdf = await PDFDocument.create();
+      const mergedPdf = await PDFDocument.create();
       let _totalPages = 0;
 
       for (let _i = 0; i < pdfBuffers.length; i++) {
         try {
           console.log(`[CARNE DEBUG] Processando PDF ${i + 1} de ${pdfBuffers.length}...`);
 
-          const _pdfDoc = await PDFDocument.load(pdfBuffers[i], {
+          const pdfDoc = await PDFDocument.load(pdfBuffers[i], {
             ignoreEncryption: true,
             throwOnInvalidObject: false,
           });
 
-          const _pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+          const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
           pages.forEach((page) => {
             mergedPdf.addPage(page);
             totalPages++;
@@ -505,24 +505,24 @@ catch (error) {
       }
 
       // Gerar buffer do PDF final
-      const _mergedPdfBytes = await mergedPdf.save();
-      const _mergedBuffer = Buffer.from(mergedPdfBytes);
+      const mergedPdfBytes = await mergedPdf.save();
+      const mergedBuffer = Buffer.from(mergedPdfBytes);
 
       console.log(
         `[CARNE DEBUG] Fusão concluída com sucesso. Tamanho do carnê: ${mergedBuffer.length} bytes. Iniciando upload para o Storage...`
       );
 
       // 4. UPLOAD DO CARNÊ
-      const _timestamp = new Date()
+      const timestamp = new Date()
         .toISOString()
         .replace(/[:.]/g, '-')
         .replace('T', '_')
         .split('Z')[0];
-      const _carnePath = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
+      const carnePath = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
 
       console.log(`[CARNE DEBUG] Fazendo upload para: ${carnePath}`);
 
-      const { data: uploadData, error: uploadError } = await this._supabase.storage
+      const { data: uploadData, error: uploadError } = await this.supabase.storage
         .from('documents')
         .upload(carnePath, mergedBuffer, {
           contentType: 'application/pdf',
@@ -537,7 +537,7 @@ catch (error) {
       console.log(`[CARNE DEBUG] Upload do carnê concluído. Gerando URL assinada...`);
 
       // 5. GERAR URL ASSINADA
-      const { data: urlData, error: urlError } = await this._supabase.storage
+      const { data: urlData, error: urlError } = await this.supabase.storage
         .from('documents')
         .createSignedUrl(carnePath, 86400); // URL válida por 24 horas
 
@@ -572,4 +572,4 @@ catch (error) {
 }
 
 // Exportar instância singleton
-export const _boletoStorageService = new BoletoStorageService();
+export const boletoStorageService = new BoletoStorageService();

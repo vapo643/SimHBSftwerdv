@@ -23,11 +23,11 @@ const JWT_PATTERN = /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$/;
 
 export function urlTokenValidator(req: Request, res: Response, next: NextFunction) {
   // Check query parameters
-  const _queryKeys = Object.keys(req.query);
+  const queryKeys = Object.keys(req.query);
 
   for (const key of queryKeys) {
     // Check if parameter name suggests it might contain a token
-    const _lowerKey = key.toLowerCase();
+    const lowerKey = key.toLowerCase();
     if (TOKEN_PARAM_NAMES.some((tokenParam) => lowerKey.includes(tokenParam))) {
       return res.status(400).json({
         error: 'Por motivos de segurança, tokens não podem ser passados em parâmetros de URL',
@@ -36,7 +36,7 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
     }
 
     // Check if value looks like a JWT token
-    const _value = req.query[key];
+    const value = req.query[key];
     if (typeof value == 'string' && JWT_PATTERN.test(value)) {
       return res.status(400).json({
         error: 'Detectado possível token em parâmetro de URL. Use o header Authorization.',
@@ -46,7 +46,7 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
   }
 
   // Check URL path for token-like segments
-  const _pathSegments = req.path.split('/');
+  const pathSegments = req.path.split('/');
   for (const segment of pathSegments) {
     if (JWT_PATTERN.test(segment)) {
       return res.status(400).json({

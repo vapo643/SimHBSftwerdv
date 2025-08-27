@@ -67,36 +67,36 @@ class SecurityMonitoringService {
   }
 
   async getSecurityMetrics(): Promise<SecurityMetrics> {
-    const _cacheKey = 'security-metrics';
-    const _cached = this.getCachedData(cacheKey);
+    const cacheKey = 'security-metrics';
+    const cached = this.getCachedData(cacheKey);
     if (cached) return cached;
 
-    const _now = new Date();
-    const _oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    const _oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     try {
       // Get threat metrics from security logs
-      const _threatLogs = await db
+      const threatLogs = await db
         .select({
-          event_type: securityLogs.event_type,
+          event_type: securityLogs.eventtype,
           count: count(),
         })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, oneDayAgo))
+        .where(gte(securityLogs.createdat, oneDayAgo))
         .groupBy(securityLogs.event_type);
 
-      const _recentThreatLogs = await db
+      const recentThreatLogs = await db
         .select({
-          event_type: securityLogs.event_type,
+          event_type: securityLogs.eventtype,
           count: count(),
         })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, oneHourAgo))
+        .where(gte(securityLogs.createdat, oneHourAgo))
         .groupBy(securityLogs.event_type);
 
       // Get authentication metrics
-      const _authLogs = await db
+      const authLogs = await db
         .select({
           total: count(),
           failed: sql<number>`COUNT(CASE WHEN event_type IN ('LOGIN_FAILED', 'INVALID_TOKEN') THEN 1 END)`,
@@ -105,35 +105,35 @@ class SecurityMonitoringService {
         .from(securityLogs)
         .where(
           and(
-            gte(securityLogs.created_at, oneDayAgo),
+            gte(securityLogs.createdat, oneDayAgo),
             sql`event_type IN ('LOGIN_SUCCESS', 'LOGIN_FAILED', 'INVALID_TOKEN', 'SESSION_TIMEOUT')`
           )
         );
 
-      const _recentFailures = await db
+      const recentFailures = await db
         .select({ count: count() })
         .from(securityLogs)
         .where(
-          and(gte(securityLogs.created_at, oneHourAgo), eq(securityLogs.event_type, 'LOGIN_FAILED'))
+          and(gte(securityLogs.createdat, oneHourAgo), eq(securityLogs.eventtype, 'LOGIN_FAILED'))
         );
 
       // Get active sessions count
-      const _activeSessions = await db
+      const activeSessions = await db
         .select({ count: count() })
         .from(users)
         .where(sql`last_sign_in_at > NOW() - INTERVAL '30 minutes'`);
 
       // Get last login time
-      const _lastLogin = await db
+      const lastLogin = await db
         .select({ created_at: securityLogs.created_at })
         .from(securityLogs)
-        .where(eq(securityLogs.event_type, 'LOGIN_SUCCESS'))
+        .where(eq(securityLogs.eventtype, 'LOGIN_SUCCESS'))
         .orderBy(desc(securityLogs.created_at))
         .limit(1);
 
       // Calculate metrics
-      const _threatMap = new Map(threatLogs.map((t) => [t.event_type, t.count]));
-      const _recentThreatMap = new Map(recentThreatLogs.map((t) => [t.event_type, t.count]));
+      const threatMap = new Map(threatLogs.map((t) => [t.eventtype, t.count]));
+      const recentThreatMap = new Map(recentThreatLogs.map((t) => [t.eventtype, t.count]));
 
       const metrics: SecurityMetrics = {
         threats: {
@@ -202,10 +202,10 @@ catch (error) {
   }) {
     try {
       // await db.insert(securityLogs).values({
-      //   eventType: event.event_type,
-      //   userId: event.user_id,
+      //   eventType: event.eventtype,
+      //   userId: event.userid,
       //   description: event.description,
-      //   ipAddress: event.ip_address,
+      //   ipAddress: event.ipaddress,
       //   severity: event.severity,
       //   metadata: event.metadata ? JSON.stringify(event.metadata) : null,
       //   createdAt: new Date(),
@@ -219,7 +219,7 @@ catch (error) {
 
   async getRealTimeAlerts(limit: number = 10) {
     try {
-      const _alerts = await db
+      const alerts = await db
         .select()
         .from(securityLogs)
         .where(sql`severity IN ('HIGH', 'CRITICAL')`)
@@ -245,12 +245,12 @@ catch (error) {
   }
 
   private async getApiErrorsCount(since: Date): Promise<number> {
-    const _errors = await db
+    const errors = await db
       .select({ count: count() })
       .from(securityLogs)
       .where(
         and(
-          gte(securityLogs.created_at, since),
+          gte(securityLogs.createdat, since),
           sql`event_type LIKE '%ERROR%' OR severity = 'HIGH'`
         )
       );
@@ -259,7 +259,7 @@ catch (error) {
   }
 
   private getCachedData(key: string): unknown | null {
-    const _cached = this.metricsCache.get(key);
+    const cached = this.metricsCache.get(key);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
       return cached.data;
     }
@@ -268,10 +268,10 @@ catch (error) {
 
   private setCachedData(key: string, data): void {
     this.metricsCache.set(key, {
-      _data,
+      data,
       timestamp: Date.now(),
     });
   }
 }
 
-export const _securityMonitoring = SecurityMonitoringService.getInstance();
+export const securityMonitoring = SecurityMonitoringService.getInstance();

@@ -78,7 +78,7 @@ catch (error) {
       .select(
         `
         *,
-        user:profiles!propostas_user_id_fkey(id, full_name, email),
+        user:profiles!propostas_user_id_fkey(id, fullname, email),
         loja:lojas!propostas_loja_id_fkey(id, nome)
       `
       )
@@ -300,4 +300,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _propostaRepository = new PropostaRepository();
+export const propostaRepository = new PropostaRepository();

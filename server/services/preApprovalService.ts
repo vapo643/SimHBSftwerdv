@@ -61,7 +61,7 @@ export class PreApprovalService {
       console.log(`[PRE-APPROVAL] Iniciando verificação para proposta ${proposalData.id}`);
 
       // PASSO 1: Validar dados obrigatórios
-      const _validation = this.validateRequiredFinancialData(proposalData);
+      const validation = this.validateRequiredFinancialData(proposalData);
       if (!validation.valid) {
         console.log(`[PRE-APPROVAL] Dados financeiros incompletos: ${validation.reason}`);
         return {
@@ -74,16 +74,16 @@ export class PreApprovalService {
       }
 
       // PASSO 2: Calcular comprometimento de renda
-      const _renda = this.parseNumber(proposalData.clienteRenda);
-      const _dividasExistentes = this.parseNumber(proposalData.clienteDividasExistentes) || 0;
-      const _valorParcela = this.calculateMonthlyPayment(
+      const renda = this.parseNumber(proposalData.clienteRenda);
+      const dividasExistentes = this.parseNumber(proposalData.clienteDividasExistentes) || 0;
+      const valorParcela = this.calculateMonthlyPayment(
         proposalData.valor,
         proposalData.prazo,
         proposalData.taxaJuros || 2.5
       );
 
-      const _comprometimentoTotal = dividasExistentes + valorParcela;
-      const _percentualComprometimento = (comprometimentoTotal / renda) * 100;
+      const comprometimentoTotal = dividasExistentes + valorParcela;
+      const percentualComprometimento = (comprometimentoTotal / renda) * 100;
 
       console.log(`[PRE-APPROVAL] Cálculo detalhado:`, {
         renda: `R$ ${renda.toFixed(2)}`,
@@ -101,7 +101,7 @@ export class PreApprovalService {
           decision: 'REJECTED',
           reason: 'INCOME_COMMITMENT_EXCEEDED',
           calculatedCommitment: percentualComprometimento,
-          limit: this.LIMITE_COMPROMETIMENTO,
+          limit: this.LIMITECOMPROMETIMENTO,
           details: { renda, dividasExistentes, valorParcela },
         });
 
@@ -122,7 +122,7 @@ export class PreApprovalService {
         decision: 'APPROVED',
         reason: 'INCOME_COMMITMENT_WITHIN_LIMIT',
         calculatedCommitment: percentualComprometimento,
-        limit: this.LIMITE_COMPROMETIMENTO,
+        limit: this.LIMITECOMPROMETIMENTO,
         details: { renda, dividasExistentes, valorParcela },
       });
 
@@ -169,8 +169,8 @@ catch (error) {
     }
 
     // Price formula para parcela fixa
-    const _taxaMensal = taxa / 100;
-    const _parcela =
+    const taxaMensal = taxa / 100;
+    const parcela =
       (valor * (taxaMensal * Math.pow(1 + taxaMensal, prazo))) /
       (Math.pow(1 + taxaMensal, prazo) - 1);
 
@@ -222,8 +222,8 @@ catch (error) {
    */
   private async logPreApprovalDecision(proposalId: string, decision: AuditDecision): Promise<void> {
     // Log estruturado para auditoria e debugging
-    const _auditLog = {
-      _proposalId,
+    const auditLog = {
+      proposalId,
       timestamp: new Date().toISOString(),
       decision: decision.decision,
       reason: decision.reason,
@@ -264,9 +264,9 @@ catch (error) {
     let _cleaned = value.replace(/R\$/g, '').trim();
 
     // Detectar se é formato brasileiro (vírgula como decimal) ou internacional (ponto como decimal)
-    const _hasBothCommaAndDot = cleaned.includes(',') && cleaned.includes('.');
-    const _lastCommaIndex = cleaned.lastIndexOf(',');
-    const _lastDotIndex = cleaned.lastIndexOf('.');
+    const hasBothCommaAndDot = cleaned.includes(',') && cleaned.includes('.');
+    const lastCommaIndex = cleaned.lastIndexOf(',');
+    const lastDotIndex = cleaned.lastIndexOf('.');
 
     if (hasBothCommaAndDot) {
       // Formato brasileiro: "10.000,50" ou "1.000.000,00"
@@ -288,7 +288,7 @@ else {
       // Não remover pontos - manter como está
     }
 
-    const _parsed = parseFloat(cleaned);
+    const parsed = parseFloat(cleaned);
 
     if (_isNaN(parsed)) {
       throw new Error(`Valor inválido para conversão numérica: ${value}`);
@@ -299,4 +299,4 @@ else {
 }
 
 // Exportar instância singleton do serviço
-export const _preApprovalService = new PreApprovalService();
+export const preApprovalService = new PreApprovalService();

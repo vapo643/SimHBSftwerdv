@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { adminService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/maintenance', async (req, res) => {
   try {
-    const _result = await adminService.executeOperation('system_maintenance', req.body);
+    const result = await adminService.executeOperation('system_maintenance', req.body);
     res.json(_result);
   }
 catch (error) {

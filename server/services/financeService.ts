@@ -22,11 +22,11 @@ export function calcularParcela(
   }
 
   // Converte taxa percentual para decimal
-  const _i = taxaJurosMensal / 100;
+  const i = taxaJurosMensal / 100;
 
   // Fórmula da Tabela Price: PMT = PV × [i(1+i)^n] / [(1+i)^n - 1]
-  const _fatorPotencia = Math.pow(1 + i, prazoMeses);
-  const _parcela = (principal * (i * fatorPotencia)) / (fatorPotencia - 1);
+  const fatorPotencia = Math.pow(1 + i, prazoMeses);
+  const parcela = (principal * (i * fatorPotencia)) / (fatorPotencia - 1);
 
   return Math.round(parcela * 100) / 100; // Arredonda para 2 casas decimais
 }
@@ -49,24 +49,24 @@ export function calcularIOF(
   const ALIQUOTA_ADICIONAL = 0.0038; // 0.38% sobre o valor total
 
   // Calcula o número de dias total da operação
-  const _diasOperacao = prazoMeses * 30 + diasCarencia;
+  const diasOperacao = prazoMeses * 30 + diasCarencia;
 
   // IOF diário: limitado a 365 dias (teto regulamentar)
-  const _diasCalculoIOF = Math.min(diasOperacao, 365);
-  const _iofDiario = valorEmprestimo * ALIQUOTA_DIARIA * diasCalculoIOF;
+  const diasCalculoIOF = Math.min(diasOperacao, 365);
+  const iofDiario = valorEmprestimo * ALIQUOTA_DIARIA * diasCalculoIOF;
 
   // IOF adicional: 0.38% sobre o valor do empréstimo
-  const _iofAdicional = valorEmprestimo * ALIQUOTA_ADICIONAL;
+  const iofAdicional = valorEmprestimo * ALIQUOTA_ADICIONAL;
 
   // IOF total
-  const _iofTotal = iofDiario + iofAdicional;
+  const iofTotal = iofDiario + iofAdicional;
 
   console.log('[IOF] Cálculo detalhado:', {
-  _valorEmprestimo,
-  _diasOperacao,
-  _diasCalculoIOF,
-    aliquotaDiaria: ALIQUOTA_DIARIA,
-    aliquotaAdicional: ALIQUOTA_ADICIONAL,
+  valorEmprestimo,
+  diasOperacao,
+  diasCalculoIOF,
+    aliquotaDiaria: ALIQUOTADIARIA,
+    aliquotaAdicional: ALIQUOTAADICIONAL,
     iofDiario: iofDiario.toFixed(2),
     iofAdicional: iofAdicional.toFixed(2),
     iofTotal: iofTotal.toFixed(2),
@@ -122,13 +122,13 @@ export function calcularCET(
   // Passo 1: Calcular o valor líquido recebido pelo cliente
   // IOF NÃO é deduzido do valor recebido - é financiado junto com o empréstimo
   // Apenas TAC e outros encargos antecipados são deduzidos
-  const _valorLiquidoRecebido = valorEmprestimo - tacTotal - outrosEncargos;
+  const valorLiquidoRecebido = valorEmprestimo - tacTotal - outrosEncargos;
 
   // Passo 2: Calcular o valor total pago pelo cliente
-  const _valorTotalPago = valorParcela * prazoMeses;
+  const valorTotalPago = valorParcela * prazoMeses;
 
   // Passo 3: Calcular o custo total da operação
-  const _custoTotalOperacao = valorTotalPago - valorLiquidoRecebido;
+  const custoTotalOperacao = valorTotalPago - valorLiquidoRecebido;
 
   // Passo 4: Usar método iterativo de Newton-Raphson para encontrar a taxa
   // que iguala o valor presente dos pagamentos ao valor líquido
@@ -143,13 +143,13 @@ export function calcularCET(
 
     // Calcula o valor presente das parcelas e sua derivada
     for (let _mes = 1; mes <= prazoMeses; mes++) {
-      const _fator = Math.pow(1 + taxaMensal, mes);
+      const fator = Math.pow(1 + taxaMensal, mes);
       valorPresente += valorParcela / fator;
       derivada -= (mes * valorParcela) / (fator * (1 + taxaMensal));
     }
 
     // Diferença entre valor presente calculado e valor líquido recebido
-    const _diferenca = valorPresente - valorLiquidoRecebido;
+    const diferenca = valorPresente - valorLiquidoRecebido;
 
     // Se convergiu (diferença menor que R$ 0.01), para
     if (Math.abs(diferenca) < 0.01) {
@@ -166,22 +166,22 @@ export function calcularCET(
 
   // Passo 5: Converter taxa mensal para anual
   // CET anual = [(1 + taxa_mensal)^12 - 1] × 100
-  const _cetAnual = (Math.pow(1 + taxaMensal, 12) - 1) * 100;
+  const cetAnual = (Math.pow(1 + taxaMensal, 12) - 1) * 100;
 
   // Log detalhado para auditoria (CRÍTICO para conformidade regulatória)
   console.log('[CET] Cálculo detalhado para auditoria:', {
     '1_ENTRADA': {
-  _valorEmprestimo,
-  _iofTotal,
-  _tacTotal,
-  _outrosEncargos,
-  _valorParcela,
-  _prazoMeses,
+  valorEmprestimo,
+  iofTotal,
+  tacTotal,
+  outrosEncargos,
+  valorParcela,
+  prazoMeses,
     },
     '2_CALCULO_BASE': {
       valorLiquidoRecebido: valorLiquidoRecebido + ' (IOF NÃO deduzido - é financiado)',
-  _valorTotalPago,
-  _custoTotalOperacao,
+  valorTotalPago,
+  custoTotalOperacao,
     },
     '3_TAXA_CONVERGIDA': {
       taxaMensal: (taxaMensal * 100).toFixed(4) + '%',
@@ -220,20 +220,20 @@ export function gerarCronogramaPagamento(
   valorAmortizacao: number;
   saldoDevedor: number;
 }> {
-  const _cronograma = [];
+  const cronograma = [];
   let _saldoDevedor = valorEmprestimo;
-  const _taxaDecimal = taxaJurosMensal / 100;
+  const taxaDecimal = taxaJurosMensal / 100;
 
   for (let _i = 1; i <= prazoMeses; i++) {
     // Calcula a data de vencimento (mensal)
-    const _dataVencimento = new Date(dataInicio);
+    const dataVencimento = new Date(dataInicio);
     dataVencimento.setMonth(dataVencimento.getMonth() + i);
 
     // Calcula juros do período
-    const _valorJuros = saldoDevedor * taxaDecimal;
+    const valorJuros = saldoDevedor * taxaDecimal;
 
     // Calcula amortização (parcela - juros)
-    const _valorAmortizacao = valorParcela - valorJuros;
+    const valorAmortizacao = valorParcela - valorJuros;
 
     // Atualiza saldo devedor
     saldoDevedor -= valorAmortizacao;
@@ -285,48 +285,48 @@ export function executarSimulacaoCompleta(
   diasCarencia: number = 0
 ): ResultadoSimulacao {
   // 1. Calcula IOF
-  const _iof = calcularIOF(valorEmprestimo, prazoMeses, diasCarencia);
+  const iof = calcularIOF(valorEmprestimo, prazoMeses, diasCarencia);
 
   // 2. Calcula TAC
-  const _tac = calcularTAC(tacValor, tacTipo, valorEmprestimo);
+  const tac = calcularTAC(tacValor, tacTipo, valorEmprestimo);
 
   // 3. Valor total financiado (inclui IOF e TAC)
-  const _valorTotalFinanciado = valorEmprestimo + iof.iofTotal + tac;
+  const valorTotalFinanciado = valorEmprestimo + iof.iofTotal + tac;
 
   // 4. Calcula parcela
-  const _valorParcela = calcularParcela(valorTotalFinanciado, prazoMeses, taxaJurosMensal);
+  const valorParcela = calcularParcela(valorTotalFinanciado, prazoMeses, taxaJurosMensal);
 
   // 5. Calcula CET
-  const _cetAnual = calcularCET(valorEmprestimo, valorParcela, prazoMeses, iof.iofTotal, tac);
+  const cetAnual = calcularCET(valorEmprestimo, valorParcela, prazoMeses, iof.iofTotal, tac);
 
   // 6. Gera cronograma
-  const _cronograma = gerarCronogramaPagamento(
-  _valorTotalFinanciado,
-  _valorParcela,
-  _prazoMeses,
+  const cronograma = gerarCronogramaPagamento(
+  valorTotalFinanciado,
+  valorParcela,
+  prazoMeses,
     taxaJurosMensal
   );
 
   // 7. Calcula totais
-  const _valorTotalAPagar = valorParcela * prazoMeses;
-  const _custoTotalOperacao = valorTotalAPagar - valorEmprestimo;
+  const valorTotalAPagar = valorParcela * prazoMeses;
+  const custoTotalOperacao = valorTotalAPagar - valorEmprestimo;
 
   return {
-  _valorEmprestimo,
-  _prazoMeses,
-  _taxaJurosMensal,
+  valorEmprestimo,
+  prazoMeses,
+  taxaJurosMensal,
     taxaJurosAnual: (Math.pow(1 + taxaJurosMensal / 100, 12) - 1) * 100,
-  _valorParcela,
+  valorParcela,
     iof: {
       diario: iof.iofDiario,
       adicional: iof.iofAdicional,
       total: iof.iofTotal,
     },
-  _tac,
-  _cetAnual,
-  _valorTotalFinanciado,
-  _valorTotalAPagar,
-  _custoTotalOperacao,
+  tac,
+  cetAnual,
+  valorTotalFinanciado,
+  valorTotalAPagar,
+  custoTotalOperacao,
     cronogramaPagamento: cronograma,
   };
 }

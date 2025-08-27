@@ -2,12 +2,12 @@ import { Router } from 'express';
 import { db } from '../lib/supabase';
 import { propostas, interCollections } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
-import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 
 import { interBankService } from '../services/interBankService';
 import { boletoStorageService } from '../services/boletoStorageService';
 
-const _router = Router();
+const router = Router();
 
 /**
  * PAM V1.0 - Endpoint para sincronizar boletos do Banco Inter para o Storage
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.post(
   '/:id/sincronizar-boletos',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
@@ -37,7 +37,7 @@ router.post(
       }
 
       // Buscar todas as collections (boletos) da proposta
-      const _collections = await db
+      const collections = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, propostaId));
@@ -62,14 +62,14 @@ router.post(
           console.log(`[PAM V1.0 SYNC] Processando boleto ${collection.codigoSolicitacao}`);
 
           // Baixar PDF do Banco Inter
-          const _pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
+          const pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
 
           if (pdfBuffer && pdfBuffer.length > 0) {
             // Verificar se é um PDF válido
-            const _pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+            const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
             if (pdfMagic.startsWith('%PDF')) {
               // Salvar no Storage usando o serviço
-              const _result = { success: true, url: 'placeholder' }; // FIXED: Service call disabled
+              const result = { success: true, url: 'placeholder' }; // FIXED: Service call disabled
               // await boletoStorageService.uploadFile(propostaId, collection.codigoSolicitacao, pdfBuffer);
 
               if (_result.success) {
@@ -113,8 +113,8 @@ catch (error) {
 
       return res.json({
         success: true,
-        _boletosProcessados,
-        _erros,
+        boletosProcessados,
+        erros,
         total: collections.length,
         message:
           erros > 0

@@ -55,8 +55,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
    */
   async findProposalByClickSignDocument(documentKey: string): Promise<Proposal | null> {
     try {
-      const _result = await db.execute(sql`
-        SELECT id, cliente_nome, status, clicksign_document_id, clicksign_envelope_id
+      const result = await db.execute(sql`
+        SELECT id, clientenome, status, clicksign_documentid, clicksign_envelope_id
         FROM propostas 
         WHERE clicksign_document_id = ${documentKey}
            OR clicksign_envelope_id = ${documentKey}
@@ -67,7 +67,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         return null;
       }
 
-      const _row = result[0];
+      const row = result[0];
       return {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
@@ -86,8 +86,8 @@ catch (error) {
    */
   async findProposalByNossoNumero(nossoNumero: string): Promise<Proposal | null> {
     try {
-      const _result = await db.execute(sql`
-        SELECT id, cliente_nome, status, nosso_numero
+      const result = await db.execute(sql`
+        SELECT id, clientenome, status, nosso_numero
         FROM propostas 
         WHERE nosso_numero = ${nossoNumero}
         LIMIT 1
@@ -97,7 +97,7 @@ catch (error) {
         return null;
       }
 
-      const _row = result[0];
+      const row = result[0];
       return {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
@@ -115,8 +115,8 @@ catch (error) {
    */
   async findPaymentByNossoNumero(nossoNumero: string): Promise<Payment | null> {
     try {
-      const _result = await db.execute(sql`
-        SELECT id, nosso_numero, valor_pago, data_pagamento, status, proposta_id
+      const result = await db.execute(sql`
+        SELECT id, nossonumero, valorpago, datapagamento, status, proposta_id
         FROM pagamentos 
         WHERE nosso_numero = ${nossoNumero}
         LIMIT 1
@@ -126,7 +126,7 @@ catch (error) {
         return null;
       }
 
-      const _row = result[0];
+      const row = result[0];
       return {
         id: row.id as string,
         nossoNumero: row.nosso_numero as string,
@@ -239,7 +239,7 @@ catch (error) {
     error?: string
   ): Promise<void> {
     const updateData: unknown = {
-      _status,
+      status,
       processed_at: new Date().toISOString(),
     };
 
@@ -314,4 +314,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _webhookRepository = new WebhookRepository();
+export const webhookRepository = new WebhookRepository();

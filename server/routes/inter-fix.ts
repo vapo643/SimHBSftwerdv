@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { interFixService } from '../services/genericService';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/inter-fix/execute
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.post('/execute', async (req: Request, res: Response) => {
   try {
-    const _result = await interFixService.executeOperation('execute_fix', req.body);
+    const result = await interFixService.executeOperation('execute_fix', req.body);
     res.json(_result);
   }
 catch (error) {
@@ -33,7 +33,7 @@ catch (error) {
  */
 router.post('/boletos', async (req: Request, res: Response) => {
   try {
-    const _result = await interFixService.executeOperation('fix_boletos', req.body);
+    const result = await interFixService.executeOperation('fix_boletos', req.body);
     res.json(_result);
   }
 catch (error) {
@@ -51,7 +51,7 @@ catch (error) {
  */
 router.post('/collections', async (req: Request, res: Response) => {
   try {
-    const _result = await interFixService.executeOperation('fix_collections', req.body);
+    const result = await interFixService.executeOperation('fix_collections', req.body);
     res.json(_result);
   }
 catch (error) {
@@ -69,7 +69,7 @@ catch (error) {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const _result = await interFixService.testConnection();
+    const result = await interFixService.testConnection();
     res.json(_result);
   }
 catch (error) {

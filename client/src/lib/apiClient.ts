@@ -359,7 +359,7 @@ export async function apiClient<T = any>(
 ): Promise<T | ApiResponse<T>> {
   const {
     method = 'GET',
-  _body,
+  body,
     headers: customHeaders = {},
     requireAuth = true,
     timeout = 15000,
@@ -401,8 +401,8 @@ export async function apiClient<T = any>(
 
   // Prepare request configuration
   const requestConfig: RequestInit = {
-  _method,
-  _headers,
+  method,
+  headers,
   };
 
   // Add body for non-GET requests
@@ -422,9 +422,9 @@ else {
   try {
     // PASSO 5.3: Use RequestManager for network call with timeout and retry
     const _response = await RequestManager.fetchWithTimeout(
-  _fullUrl,
-  _requestConfig,
-  _timeout,
+  fullUrl,
+  requestConfig,
+  timeout,
       retries
     );
 
@@ -479,9 +479,9 @@ else {
 
           try {
             const _retryResponse = await RequestManager.fetchWithTimeout(
-  _fullUrl,
-  _retryConfig,
-  _timeout,
+  fullUrl,
+  retryConfig,
+  timeout,
               0
             );
 
@@ -548,11 +548,11 @@ catch (_retryError) {
             : `HTTP Error ${response.status}`;
 
       throw new ApiError(
-  _errorMessage,
+  errorMessage,
         response.status,
         response.statusText,
-  _response,
-  _undefined, // code will be inferred
+  response,
+  undefined, // code will be inferred
         data // Pass full response data
       );
     }
@@ -563,7 +563,7 @@ catch (_retryError) {
     }
 
     return {
-  _data,
+  data,
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
@@ -581,7 +581,7 @@ catch (error) {
         'Request timeout: The server took too long to respond',
         0,
         'Timeout Error',
-  _undefined,
+  undefined,
         ApiErrorCode.TIMEOUT_ERROR
       );
     }
@@ -592,7 +592,7 @@ catch (error) {
         'Network error: Unable to connect to the server',
         0,
         'Network Error',
-  _undefined,
+  undefined,
         ApiErrorCode.NETWORK_ERROR
       );
     }
@@ -602,7 +602,7 @@ catch (error) {
       error instanceof Error ? error.message : 'Unknown error occurred',
       0,
       'Unknown Error',
-  _undefined,
+  undefined,
       ApiErrorCode.UNKNOWN_ERROR
     );
   }

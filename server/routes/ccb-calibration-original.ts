@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { ccbCalibrationService } from '../services/genericService';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/ccb-calibration/calibrate
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.post('/calibrate', async (req: Request, res: Response) => {
   try {
-    const _result = await ccbCalibrationService.executeOperation('calibrate', req.body);
+    const result = await ccbCalibrationService.executeOperation('calibrate', req.body);
     res.json(_result);
   }
 catch (error) {
@@ -33,7 +33,7 @@ catch (error) {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const _result = await ccbCalibrationService.testConnection();
+    const result = await ccbCalibrationService.testConnection();
     res.json(_result);
   }
 catch (error) {
@@ -51,7 +51,7 @@ catch (error) {
  */
 router.get('/status', async (req: Request, res: Response) => {
   try {
-    const _status = await ccbCalibrationService.getStatus();
+    const status = await ccbCalibrationService.getStatus();
     res.json(status);
   }
 catch (error) {

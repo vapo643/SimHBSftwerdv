@@ -6,14 +6,14 @@
 
 import { Router, Request, Response } from 'express';
 import { securityService } from '../services/securityService.js';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
-import { _requireAdmin, requireManagerOrAdmin } from '../lib/role-guards.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { requireAdmin, requireManagerOrAdmin } from '../lib/role-guards.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 // Middleware de autenticação para todas as rotas
-router.use(_jwtAuthMiddleware);
+router.use(jwtAuthMiddleware);
 
 /**
  * GET /api/security/metrics
@@ -21,8 +21,8 @@ router.use(_jwtAuthMiddleware);
  */
 router.get('/metrics', async (req: Request, res: Response) => {
   try {
-    const _timeRange = (req.query.timeRange as string) || '1h';
-    const _metrics = await securityService.getSecurityMetrics(timeRange);
+    const timeRange = (req.query.timeRange as string) || '1h';
+    const metrics = await securityService.getSecurityMetrics(timeRange);
     res.json(metrics);
   }
 catch (error) {
@@ -40,7 +40,7 @@ catch (error) {
  */
 router.get('/vulnerabilities', async (req: Request, res: Response) => {
   try {
-    const _vulnerabilities = await securityService.getVulnerabilities();
+    const vulnerabilities = await securityService.getVulnerabilities();
     res.json(vulnerabilities);
   }
 catch (error) {
@@ -58,7 +58,7 @@ catch (error) {
  */
 router.get('/anomalies', async (req: Request, res: Response) => {
   try {
-    const _anomalies = await securityService.getAnomalies();
+    const anomalies = await securityService.getAnomalies();
     res.json(anomalies);
   }
 catch (error) {
@@ -76,7 +76,7 @@ catch (error) {
  */
 router.get('/dependency-scan', async (req: Request, res: Response) => {
   try {
-    const _scanResults = await securityService.getDependencyScanResults();
+    const scanResults = await securityService.getDependencyScanResults();
     res.json(scanResults);
   }
 catch (error) {
@@ -94,7 +94,7 @@ catch (error) {
  */
 router.get('/semgrep-findings', async (req: Request, res: Response) => {
   try {
-    const _findings = await securityService.getSemgrepFindings();
+    const findings = await securityService.getSemgrepFindings();
     res.json(findings);
   }
 catch (error) {
@@ -110,9 +110,10 @@ catch (error) {
  * POST /api/security/scan
  * Execute security scan
  */
-router.post('/scan', _requireAdmin, async (req: Request, res: Response) => {
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+router.post('/scan', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
     const { type } = authReq.body;
 
     if (!type) {
@@ -122,15 +123,15 @@ router.post('/scan', _requireAdmin, async (req: Request, res: Response) => {
       });
     }
 
-    const _validTypes = ['vulnerability', 'dependency', 'code'];
+    const validTypes = ['vulnerability', 'dependency', 'code'];
     if (!validTypes.includes(type)) {
       return res.status(400).json({
         error: 'Tipo de scan inválido',
-  _validTypes,
+  validTypes,
       });
     }
 
-    const _result = await securityService.executeScan(type);
+    const result = await securityService.executeScan(type);
 
     if (_result.success) {
       res.json({
@@ -161,11 +162,11 @@ catch (error) {
  */
 router.get('/alerts/active', async (req: Request, res: Response) => {
   try {
-    const _limit = parseInt(req.query.limit as string) || 50;
-    const _alerts = await securityService.getActiveAlerts();
+    const limit = parseInt(req.query.limit as string) || 50;
+    const alerts = await securityService.getActiveAlerts();
 
     // Apply limit if specified
-    const _limitedAlerts = limit ? alerts.slice(0, limit) : alerts;
+    const limitedAlerts = limit ? alerts.slice(0, limit) : alerts;
 
     res.json({
       success: true,
@@ -187,12 +188,13 @@ catch (error) {
  * POST /api/security/alerts/:id/resolve
  * Resolve security alert
  */
-router.post('/alerts/:id/resolve', _requireAdmin, async (req: Request, res: Response) => {
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
     const { id } = authReq.params;
     const { reason } = authReq.body;
-    const _userId = authReq.user?.id;
+    const userId = authReq.user?.id;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
@@ -202,7 +204,7 @@ router.post('/alerts/:id/resolve', _requireAdmin, async (req: Request, res: Resp
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _resolved = await securityService.resolveAlert(id, userId, reason);
+    const resolved = await securityService.resolveAlert(id, userId, reason);
 
     if (resolved) {
       res.json({
@@ -231,9 +233,10 @@ catch (error) {
  * GET /api/security/report
  * Generate comprehensive security report
  */
-router.get('/report', _requireAdmin, async (req: Request, res: Response) => {
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+router.get('/report', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const _report = await securityService.generateSecurityReport();
+    const report = await securityService.generateSecurityReport();
 
     res.json({
       success: true,
@@ -255,7 +258,7 @@ catch (error) {
  */
 router.get('/dashboard', async (req: Request, res: Response) => {
   try {
-    const _timeRange = (req.query.timeRange as string) || '24h';
+    const timeRange = (req.query.timeRange as string) || '24h';
 
     // Get all dashboard data in parallel
     const [metrics, vulnerabilities, anomalies, alerts] = await Promise.all([
@@ -265,8 +268,8 @@ router.get('/dashboard', async (req: Request, res: Response) => {
       securityService.getActiveAlerts(),
     ]);
 
-    const _dashboard = {
-  _metrics,
+    const dashboard = {
+  metrics,
       vulnerabilities: vulnerabilities.slice(0, 5), // Top 5 for dashboard
       anomalies: anomalies.slice(0, 5), // Top 5 for dashboard
       alerts: alerts.slice(0, 10), // Top 10 for dashboard
@@ -305,8 +308,8 @@ router.get('/status', async (req: Request, res: Response) => {
       securityService.getActiveAlerts(),
     ]);
 
-    const _criticalIssues = vulnerabilities.filter((v) => v.severity == 'CRITICAL').length;
-    const _highIssues = vulnerabilities.filter((v) => v.severity == 'HIGH').length;
+    const criticalIssues = vulnerabilities.filter((v) => v.severity == 'CRITICAL').length;
+    const highIssues = vulnerabilities.filter((v) => v.severity == 'HIGH').length;
 
     let _status = 'healthy';
     let _message = 'Sistema operando normalmente';
@@ -323,8 +326,8 @@ else if (highIssues > 3 || alerts.length > 10) {
     res.json({
       success: true,
       data: {
-  _status,
-  _message,
+  status,
+  message,
         timestamp: new Date(),
         metrics: {
           totalVulnerabilities: vulnerabilities.length,
@@ -349,17 +352,18 @@ catch (error) {
  * POST /api/security/test-alert
  * Test alert system (admin only)
  */
-router.post('/test-alert', _requireAdmin, async (req: Request, res: Response) => {
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+router.post('/test-alert', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const _authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthenticatedRequest;
     const { severity = 'MEDIUM', message = 'Alert de teste' } = authReq.body;
-    const _userId = authReq.user?.id;
+    const userId = authReq.user?.id;
 
-    const _validSeverities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+    const validSeverities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
     if (!validSeverities.includes(severity)) {
       return res.status(400).json({
         error: 'Severity inválida',
-  _validSeverities,
+  validSeverities,
       });
     }
 
@@ -369,8 +373,8 @@ router.post('/test-alert', _requireAdmin, async (req: Request, res: Response) =>
       success: true,
       message: 'Alerta de teste criado',
       testAlert: {
-  _severity,
-  _message,
+  severity,
+  message,
         createdBy: userId,
         timestamp: new Date(),
       },

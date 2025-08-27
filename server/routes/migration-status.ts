@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { migrationService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/status', async (req, res) => {
   try {
-    const _result = await migrationService.executeOperation('migration_status', req.query);
+    const result = await migrationService.executeOperation('migration_status', req.query);
     res.json(_result);
   }
 catch (error) {

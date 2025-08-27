@@ -444,8 +444,8 @@ export function formatCurrency(value: number): string {
  */
 export function numberToWords(value: number): string {
   // Implementação básica - pode ser expandida com biblioteca específica
-  const _unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
-  const _dezenas = [
+  const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+  const dezenas = [
     '',
     '',
     'vinte',
@@ -457,7 +457,7 @@ export function numberToWords(value: number): string {
     'oitenta',
     'noventa',
   ];
-  const _centenas = [
+  const centenas = [
     '',
     'cem',
     'duzentos',

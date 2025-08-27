@@ -12,7 +12,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 
-const _execAsync = promisify(exec);
+const execAsync = promisify(exec);
 
 export interface SemgrepFinding {
   id: string;
@@ -143,7 +143,7 @@ rules:
     console.log('🔍 [SEMGREP] Iniciando scanner SAST...');
 
     // Verificar instalação
-    const _isInstalled = await this.checkInstallation();
+    const isInstalled = await this.checkInstallation();
     if (!isInstalled) {
       await this.installSemgrep();
     }
@@ -200,7 +200,7 @@ catch (error) {
    * Criar arquivo de regras customizadas
    */
   private async createCustomRulesFile() {
-    const _rulesDir = path.join(process.cwd(), '.semgrep');
+    const rulesDir = path.join(process.cwd(), '.semgrep');
     await fsPromises.mkdir(rulesDir, { recursive: true });
 
     // Salvar cada conjunto de regras
@@ -221,13 +221,13 @@ catch (error) {
     this.isScanning = true;
     console.log('🔍 [SEMGREP] Iniciando análise SAST...');
 
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
-      const _resultsPath = path.join(process.cwd(), 'semgrep-results.json');
+      const resultsPath = path.join(process.cwd(), 'semgrep-results.json');
 
       // Construir comando
-      const _command = `semgrep \
+      const command = `semgrep \
         --config=auto \
         --config=.semgrep/ \
         --json \
@@ -250,17 +250,17 @@ catch (error) {
       });
 
       // Processar resultados
-      const _results = JSON.parse(await fsPromises.readFile(resultsPath, 'utf-8'));
+      const results = JSON.parse(await fsPromises.readFile(resultsPath, 'utf-8'));
 
-      const _findings = this.parseFindings(results);
-      const _scanDuration = Date.now() - startTime;
+      const findings = this.parseFindings(results);
+      const scanDuration = Date.now() - startTime;
 
       const _result: SemgrepScanResult = {
         timestamp: new Date(),
         totalFindings: findings.length,
         criticalFindings: findings.filter((f) => f.severity == 'ERROR').length,
-  _findings,
-  _scanDuration,
+  findings,
+  scanDuration,
       };
 
       this.lastScanResult = result;
@@ -272,7 +272,7 @@ catch (error) {
       if (findings.length > 0) {
         this.emit('findings',_result);
 
-        const _critical = findings.filter((f) => f.severity == 'ERROR');
+        const critical = findings.filter((f) => f.severity == 'ERROR');
         if (critical.length > 0) {
           this.emit('critical-findings', critical);
         }
@@ -285,7 +285,7 @@ catch (error) {
       // Limpar arquivo temporário
       await fsPromises.unlink(resultsPath).catch (() => {});
 
-      return _result;
+      return result;
     }
 catch (error) {
       console.error('❌ [SEMGREP] Erro no scan:', error);
@@ -308,7 +308,7 @@ finally {
     results.results.forEach((result) => {
       findings.push({
         id: `SEMGREP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        rule: _result.check_id,
+        rule: _result.checkid,
         severity: this.mapSeverity(_result.extra.severity),
         file: _result.path,
         line: _result.start.line,
@@ -323,7 +323,7 @@ finally {
     });
 
     return findings.sort((a, b) => {
-      const _severityOrder = { ERROR: 3, WARNING: 2, INFO: 1 };
+      const severityOrder = { ERROR: 3, WARNING: 2, INFO: 1 };
       return severityOrder[b.severity] - severityOrder[a.severity];
     });
   }
@@ -377,7 +377,7 @@ finally {
    * Gerar sugestão de correção
    */
   private generateFixSuggestion(result): string {
-    const _rule = _result.check_id;
+    const rule = _result.check_id;
 
     const suggestions: Record<string, string> = {
       'simpix-jwt-token-exposure':
@@ -386,7 +386,7 @@ finally {
         'Mova secrets para variáveis de ambiente. Use process.env.NOME_DA_VARIAVEL',
       'simpix-unsafe-sql': 'Use prepared statements ou query builders como Drizzle ORM',
       'simpix-missing-auth-check':
-        'Adicione middleware de autenticação: app.post("/rota", _jwtAuthMiddleware, handler)',
+        'Adicione middleware de autenticação: app.post("/rota", jwtAuthMiddleware, handler)',
       'javascript.express.security.audit.xss.ejs.var-in-script-tag':
         'Escape dados do usuário antes de inserir no HTML',
       'javascript.lang.security.audit.path-traversal':
@@ -403,11 +403,11 @@ finally {
     // Comparar com scan anterior
     if (!this.lastScanResult) return;
 
-    const _previousIds = new Set(
+    const previousIds = new Set(
       this.lastScanResult.findings.map((f) => `${f.rule}:${f.file}:${f.line}`)
     );
 
-    const _newFindings = findings.filter((f) => !previousIds.has(`${f.rule}:${f.file}:${f.line}`));
+    const newFindings = findings.filter((f) => !previousIds.has(`${f.rule}:${f.file}:${f.line}`));
 
     if (newFindings.length > 0) {
       console.log(`🆕 [SEMGREP] ${newFindings.length} novos problemas detectados`);
@@ -423,7 +423,7 @@ finally {
    */
   private learnFromFindings(findings: SemgrepFinding[]) {
     // Agrupar por categoria
-    const _byCategory = new Map<string, number>();
+    const byCategory = new Map<string, number>();
     findings.forEach((f) => {
       byCategory.set(f.category, (byCategory.get(f.category) || 0) + 1);
     });
@@ -441,13 +441,13 @@ finally {
    * Monitorar mudanças no código
    */
   private watchCodeChanges() {
-    const _directories = ['server', 'client/src', 'shared'];
+    const directories = ['server', 'client/src', 'shared'];
 
     directories.forEach((dir) => {
-      const _fullPath = path.join(process.cwd(), dir);
+      const fullPath = path.join(process.cwd(), dir);
 
       // Criar callback separadamente para evitar problemas de tipagem
-      const _watchCallback = (eventType: string, filename?: string) => {
+      const watchCallback = (eventType: string, filename?: string) => {
         if (filename && (filename.endsWith('.ts') || filename.endsWith('.tsx'))) {
           console.log(`📝 [SEMGREP] Arquivo modificado: ${filename}`);
 
@@ -477,7 +477,7 @@ catch (error) {
    */
   private async runIncrementalScan(filePath: string) {
     try {
-      const _command = `semgrep \
+      const command = `semgrep \
         --config=auto \
         --config=.semgrep/ \
         --json \
@@ -486,8 +486,8 @@ catch (error) {
         ${filePath}`;
 
       const { stdout } = await execAsync(command);
-      const _results = JSON.parse(stdout);
-      const _findings = this.parseFindings(results);
+      const results = JSON.parse(stdout);
+      const findings = this.parseFindings(results);
 
       if (findings.length > 0) {
         console.log(`⚠️  [SEMGREP] ${findings.length} problemas em ${filePath}`);
@@ -509,7 +509,7 @@ catch (error) {
     bySeverity: Record<string, number>;
     topFindings: SemgrepFinding[];
   } {
-    const _findings = this.lastScanResult?.findings || [];
+    const findings = this.lastScanResult?.findings || [];
 
     const byCategory: Record<string, number> = {};
     const bySeverity: Record<string, number> = {
@@ -526,8 +526,8 @@ catch (error) {
     return {
       lastScan: this.lastScanResult?.timestamp || null,
       totalFindings: findings.length,
-  _byCategory,
-  _bySeverity,
+  byCategory,
+  bySeverity,
       topFindings: findings.slice(0, 10),
     };
   }

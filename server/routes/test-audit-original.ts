@@ -10,7 +10,7 @@ import { auditService } from '../services/auditService.js';
 import { storage } from '../storage.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
-const _router = Router();
+const router = Router();
 
 /**
  * Test endpoint to create a sample status transition
@@ -20,7 +20,7 @@ router.post('/test-transition', async (req, res) => {
     console.log('[TEST AUDIT] 🧪 Testing status transition logging');
 
     // Get a sample proposal or create a test one
-    const _propostas = await storage.getPropostas();
+    const propostas = await storage.getPropostas();
 
     if (propostas.length == 0) {
       return res.status(404).json({
@@ -28,11 +28,11 @@ router.post('/test-transition', async (req, res) => {
       });
     }
 
-    const _testProposta = propostas[0];
+    const testProposta = propostas[0];
     console.log(`[TEST AUDIT] Using proposal: ${testProposta.id}`);
 
     // Log a test transition
-    const _transition = await auditService.logStatusTransition({
+    const transition = await auditService.logStatusTransition({
       propostaId: testProposta.id,
       fromStatus: testProposta.status,
       toStatus: 'CCB_GERADA',
@@ -49,12 +49,12 @@ router.post('/test-transition', async (req, res) => {
     console.log('[TEST AUDIT] ✅ Test transition created successfully');
 
     // Fetch the history to confirm
-    const _history = await auditService.getProposalStatusHistory(testProposta.id);
+    const history = await auditService.getProposalStatusHistory(testProposta.id);
 
     res.json({
       success: true,
       message: 'Test transition logged successfully',
-      _transition,
+      transition,
       totalTransitions: history.length,
       history: history.slice(-5), // Last 5 transitions
     });
@@ -81,12 +81,12 @@ router.post('/validate-transition', async (req, res) => {
       });
     }
 
-    const _isValid = auditService.isValidTransition(fromStatus, toStatus);
+    const isValid = auditService.isValidTransition(fromStatus, toStatus);
 
     res.json({
-      _fromStatus,
-      _toStatus,
-      _isValid,
+      fromStatus,
+      toStatus,
+      isValid,
       message: isValid
         ? 'Transition is valid according to V2.0 workflow'
         : 'Transition is not allowed in V2.0 workflow',
@@ -108,12 +108,12 @@ router.get('/history/:propostaId', async (req, res) => {
   try {
     const { propostaId } = req.params;
 
-    const _history = await auditService.getProposalStatusHistory(propostaId);
+    const history = await auditService.getProposalStatusHistory(propostaId);
 
     res.json({
-      _propostaId,
+      propostaId,
       totalTransitions: history.length,
-      _history,
+      history,
     });
   }
 catch (error) {

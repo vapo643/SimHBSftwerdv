@@ -5,17 +5,17 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import {
-  _propostas,
-  _parcelas,
-  _observacoesCobranca,
-  _historicoObservacoesCobranca,
-  _interCollections,
-  _profiles,
-  _solicitacoesModificacao,
-  _propostaLogs,
-  _statusContextuais,
+  propostas,
+  parcelas,
+  observacoesCobranca,
+  historicoObservacoesCobranca,
+  interCollections,
+  profiles,
+  solicitacoesModificacao,
+  propostaLogs,
+  statusContextuais,
 } from '@shared/schema';
 import { eq, and, sql, desc, gte, lte, inArray, or, not, isNotNull, isNull } from 'drizzle-orm';
 
@@ -29,7 +29,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
    */
   async getPropostasCobranca(filters: { status?: string; atraso?: string }): Promise<any[]> {
     try {
-      const _statusElegiveis = [
+      const statusElegiveis = [
         'BOLETOS_EMITIDOS',
         'PAGAMENTO_PENDENTE',
         'PAGAMENTO_PARCIAL',
@@ -42,11 +42,11 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         inArray(propostas.status, statusElegiveis)
       );
 
-      const _result = await db
+      const result = await db
         .select()
         .from(propostas)
         .leftJoin(
-          _statusContextuais,
+          statusContextuais,
           and(
             eq(statusContextuais.propostaId, propostas.id),
             eq(statusContextuais.contexto, 'cobranca')
@@ -138,7 +138,7 @@ catch (error) {
         .values({
           propostaId: String(data.proposta_id),
           observacao: data.observacao,
-          userId: data.created_by,
+          userId: data.createdby,
           userName: 'Sistema', // Default value since not provided in data
           createdAt: new Date(),
         })
@@ -170,7 +170,7 @@ catch (error) {
         Object.assign(updates, updateData);
       }
 
-      const _result = await db
+      const result = await db
         .update(parcelas)
         .set(updates)
         .where(eq(parcelas.id, parcelaId))
@@ -218,7 +218,7 @@ catch (error) {
           propostaId: String(data.proposta_id),
           tipoSolicitacao: data.tipo,
           dadosSolicitacao: { motivo: data.motivo, detalhes: data.detalhes },
-          solicitadoPorId: data.solicitado_por,
+          solicitadoPorId: data.solicitadopor,
           solicitadoPorNome: 'Sistema', // Default value
           solicitadoPorRole: 'system', // Default value
           status: 'pendente',
@@ -257,7 +257,7 @@ catch (error) {
    */
   async getOverdueCount(): Promise<number> {
     try {
-      const _result = await db
+      const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(propostas)
         .innerJoin(parcelas, eq(parcelas.propostaId, propostas.id))
@@ -288,7 +288,7 @@ catch (error) {
   ): Promise<boolean> {
     try {
       const updates: unknown = {
-        _status,
+        status,
         updatedAt: new Date(),
       };
 
@@ -296,7 +296,7 @@ catch (error) {
         Object.assign(updates, additionalData);
       }
 
-      const _result = await db
+      const result = await db
         .update(propostas)
         .set(updates)
         .where(eq(propostas.id, String(propostaId)))
@@ -311,4 +311,4 @@ catch (error) {
   }
 }
 
-export const _cobrancasRepository = new CobrancasRepository();
+export const cobrancasRepository = new CobrancasRepository();

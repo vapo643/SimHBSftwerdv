@@ -1,40 +1,40 @@
 import { Router } from 'express';
-import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
-import { db, supabase } from '../../lib/_supabase.js';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
+import { db, supabase } from '../../lib/supabase.js';
 import {
-  _propostas,
-  _users,
-  _profiles,
-  _lojas,
-  _produtos,
-  _interCollections,
-  _statusContextuais,
+  propostas,
+  users,
+  profiles,
+  lojas,
+  produtos,
+  interCollections,
+  statusContextuais,
 } from '@shared/schema';
 import { eq, and, or, desc, sql, gte, lte, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { transitionTo, InvalidTransitionError } from '../../services/statusFsmService';
 import {
-  _isToday,
-  _isThisWeek,
-  _isThisMonth,
-  _startOfDay,
-  _endOfDay,
-  _startOfWeek,
-  _endOfWeek,
-  _startOfMonth,
-  _endOfMonth,
+  isToday,
+  isThisWeek,
+  isThisMonth,
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
 } from 'date-fns';
 import multer from 'multer';
 
 // Configuração do multer para upload de arquivos
-const _upload = multer({
+const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB
   },
 });
 
-const _router = Router();
+const router = Router();
 
 // Função auxiliar para registrar auditoria de pagamentos
 async function registrarAuditoriaPagamento(
@@ -43,7 +43,7 @@ async function registrarAuditoriaPagamento(
   acao: string,
   detalhes: unknown
 ) {
-  const _now = new Date().toISOString();
+  const now = new Date().toISOString();
   console.log(
     `[AUDITORIA PAGAMENTO] ${now} - Proposta: ${propostaId}, User: ${userId}, Ação: ${acao}`
   );
@@ -51,7 +51,7 @@ async function registrarAuditoriaPagamento(
 }
 
 // Schema de validação para pagamento
-const _pagamentoSchema = z.object({
+const pagamentoSchema = z.object({
   propostaId: z.string().uuid(),
   numeroContrato: z.string(),
   nomeCliente: z.string(),
@@ -74,28 +74,28 @@ const _pagamentoSchema = z.object({
 });
 
 // Buscar pagamentos
-router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, periodo, incluir_pagos } = req.query;
-    const _userId = req.user?.id;
-    const _userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
     // Primeiro, vamos debugar para ver quantas propostas existem com cada condição
-    const _totalPropostas = await db
+    const totalPropostas = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(sql`${propostas.deletedAt} IS NULL`);
 
-    const _propostasAprovadas = await db
+    const propostasAprovadas = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(and(eq(propostas.status, 'aprovado'), sql`${propostas.deletedAt} IS NULL`));
 
-    const _propostasComCCB = await db
+    const propostasComCCB = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(
@@ -107,7 +107,7 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       );
 
     // Verificar também boletos gerados via Inter Bank
-    const _propostasComBoletos = await db
+    const propostasComBoletos = await db
       .select({
         count: sql<number>`count(DISTINCT ${interCollections.propostaId})`,
         propostaId: interCollections.propostaId,
@@ -126,7 +126,7 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       );
 
       // Debug: verificar o status dessa proposta específica
-      const _propostaIdString = propostasComBoletos[0].propostaId;
+      const propostaIdString = propostasComBoletos[0].propostaId;
       if (propostaIdString) {
         const [propostaComBoleto] = await db
           .select()
@@ -147,7 +147,7 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 
     // Buscar propostas com status pronto_pagamento
-    const _propostasComStatusPronto = await db
+    const propostasComStatusPronto = await db
       .select()
       .from(propostas)
       .where(
@@ -172,7 +172,7 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     // ESTRATÉGIA: Busca em duas etapas para evitar problemas de tipo
     // Etapa 1: Buscar IDs de propostas que têm boletos Inter
-    const _boletosDetalhados = await db
+    const boletosDetalhados = await db
       .select({
         propostaId: interCollections.propostaId,
         boletoId: interCollections.id,
@@ -199,11 +199,11 @@ router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 else {
       // Extrair e validar os IDs das propostas
-      const _propostaIds = boletosDetalhados
+      const propostaIds = boletosDetalhados
         .map((item) => item.propostaId)
         .filter((id) => {
           // Validação extra para garantir que são UUIDs válidos
-          const _uuidRegex =
+          const uuidRegex =
             /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
           return id && uuidRegex.test(id);
         });
@@ -212,7 +212,7 @@ else {
 
       if (propostaIds.length > 0) {
         // Etapa 2: Buscar as propostas elegíveis usando conversão de tipos
-        const _todasPropostasComBoletos = await db
+        const todasPropostasComBoletos = await db
           .select({
             id: propostas.id,
             clienteNome: propostas.clienteNome,
@@ -248,13 +248,13 @@ else {
     // REGRA CRÍTICA DE SEGURANÇA - STATUS SYSTEM V2.0: Uma proposta só pode aparecer para pagamento se:
     // 1. CCB foi gerado e assinado (ccb_gerado = true)
     // 2. Boletos foram gerados no Inter Bank
-    // 3. Status V2.0: BOLETOS_EMITIDOS, PAGAMENTO_PENDENTE ou QUITADO (para histórico)
+    // 3. Status V2.0: BOLETOSEMITIDOS, PAGAMENTO_PENDENTE ou QUITADO (para histórico)
     console.log(
       `[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos - Status System V2.0`
     );
 
     // Query mais simples: buscar propostas elegíveis e verificar boletos depois
-    const _propostasElegiveis = await db
+    const propostasElegiveis = await db
       .select({
         // Dados da proposta
         proposta: propostas,
@@ -268,7 +268,7 @@ else {
       .from(propostas)
       // PAM V1.0 - LEFT JOIN com status_contextuais para contexto de pagamentos
       .leftJoin(
-  _statusContextuais,
+  statusContextuais,
         and(
           eq(propostas.id, statusContextuais.propostaId),
           eq(statusContextuais.contexto, 'pagamentos')
@@ -296,19 +296,19 @@ else {
       .orderBy(desc(propostas.dataAprovacao));
 
     // Buscar boletos de forma mais simples para evitar erro de tipos
-    const _boletosInfo = await db
+    const boletosInfo = await db
       .select({
         propostaId: interCollections.propostaId,
       })
       .from(interCollections)
       .where(sql`${interCollections.propostaId} IS NOT NULL`);
 
-    const _propostasComBoletosSet = new Set(
+    const propostasComBoletosSet = new Set(
       boletosInfo.map((b) => b.propostaId).filter((id) => id !== null)
     );
 
     // Filtrar apenas as propostas que têm boletos
-    const _result = propostasElegiveis.filter((p) => propostasComBoletosSet.has(p.proposta.id));
+    const result = propostasElegiveis.filter((p) => propostasComBoletosSet.has(p.proposta.id));
 
     console.log(`[PAGAMENTOS DEBUG] Total propostas encontradas: ${_result.length}`);
 
@@ -333,11 +333,11 @@ else {
     });
 
     // Processar os resultados para o formato esperado pelo frontend
-    const _pagamentosFormatados = _result.map((row) => {
+    const pagamentosFormatados = _result.map((row) => {
       const { proposta, statusContextual, loja, produto } = row;
 
       // PAM V1.0 - Usar status contextual com fallback para status legado
-      const _statusAtual = statusContextual || proposta.status;
+      const statusAtual = statusContextual || proposta.status;
 
       console.log(`[PAGAMENTOS DEBUG] Processando proposta ${proposta.id}:`, {
         clienteNome: proposta.clienteNome,
@@ -351,10 +351,10 @@ else {
       });
 
       // Calcular valor líquido
-      const _valorFinanciado = Number(proposta.valorTotalFinanciado || 0);
-      const _valorIof = Number(proposta.valorIof || 0);
-      const _valorTac = Number(proposta.valorTac || 0);
-      const _valorLiquido = valorFinanciado - valorIof - valorTac;
+      const valorFinanciado = Number(proposta.valorTotalFinanciado || 0);
+      const valorIof = Number(proposta.valorIof || 0);
+      const valorTac = Number(proposta.valorTac || 0);
+      const valorLiquido = valorFinanciado - valorIof - valorTac;
 
       // Mapear status para o formato esperado pelo frontend - Sistema V2.0 + Legado
       let _statusFrontend = 'aguardando_aprovacao';
@@ -391,7 +391,7 @@ else if (statusAtual == 'cancelado') {
       }
 
       // Dados bancários da proposta ou N/A quando não disponível
-      const _contaBancaria = {
+      const contaBancaria = {
         banco: proposta.dadosPagamentoBanco || 'N/A',
         agencia: proposta.dadosPagamentoAgencia || 'N/A',
         conta: proposta.dadosPagamentoConta || 'N/A',
@@ -399,7 +399,7 @@ else if (statusAtual == 'cancelado') {
         titular: proposta.dadosPagamentoNomeTitular || proposta.clienteNome || 'N/A',
       };
 
-      const _pagamentoFormatado = {
+      const pagamentoFormatado = {
         id: proposta.id,
         propostaId: proposta.id,
         numeroContrato: `CONT-${proposta.id.slice(0, 8).toUpperCase()}`,
@@ -471,7 +471,7 @@ else if (statusAtual == 'cancelado') {
     // 🔒 AUDITORIA: Por padrão, ocultar pagamentos já processados (mas manter para consulta)
     if (incluir_pagos !== 'true') {
       console.log(`[PAGAMENTOS DEBUG] Ocultando propostas pagas (auditoria preservada)`);
-      const _antesPagos = pagamentosFiltrados.length;
+      const antesPagos = pagamentosFiltrados.length;
       pagamentosFiltrados = pagamentosFiltrados.filter(
         (p) => !['pago', 'QUITADO', 'PAGAMENTO_CONFIRMADO'].includes(p.status)
       );
@@ -483,7 +483,7 @@ else if (statusAtual == 'cancelado') {
     // Filtrar por status
     if (status && status !== 'todos') {
       console.log(`[PAGAMENTOS DEBUG] Aplicando filtro de status: ${status}`);
-      const _antesStatus = pagamentosFiltrados.length;
+      const antesStatus = pagamentosFiltrados.length;
       pagamentosFiltrados = pagamentosFiltrados.filter((p) => p.status == status);
       console.log(
         `[PAGAMENTOS DEBUG] Após filtro status: ${antesStatus} -> ${pagamentosFiltrados.length}`
@@ -493,10 +493,10 @@ else if (statusAtual == 'cancelado') {
     // Filtrar por período
     if (periodo && periodo !== 'todos') {
       console.log(`[PAGAMENTOS DEBUG] Aplicando filtro de período: ${periodo}`);
-      const _antesPeriodo = pagamentosFiltrados.length;
-      const _now = new Date();
+      const antesPeriodo = pagamentosFiltrados.length;
+      const now = new Date();
       pagamentosFiltrados = pagamentosFiltrados.filter((p) => {
-        const _dataReq = new Date(p.dataRequisicao);
+        const dataReq = new Date(p.dataRequisicao);
         switch (periodo) {
           case 'hoje': {
         break;
@@ -537,12 +537,12 @@ catch (error) {
 });
 
 // Aprovar pagamento
-router.post('/:id/aprovar', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/aprovar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { observacao } = req.body;
-    const _userId = req.user?.id;
-    const _userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
@@ -554,7 +554,7 @@ router.post('/:id/aprovar', _jwtAuthMiddleware, async (req: AuthenticatedRequest
     }
 
     // Buscar a proposta
-    const _proposta = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
+    const proposta = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
     if (!proposta.length) {
       return res.status(401).json({error: "Unauthorized"});
@@ -565,7 +565,7 @@ router.post('/:id/aprovar', _jwtAuthMiddleware, async (req: AuthenticatedRequest
       await transitionTo({
         propostaId: id,
         novoStatus: 'pago',
-  _userId,
+  userId,
         contexto: 'pagamentos',
         observacoes: `Pagamento aprovado. ${observacao || ''}`,
         metadata: {
@@ -595,12 +595,12 @@ catch (error) {
 });
 
 // Rejeitar pagamento
-router.post('/:id/rejeitar', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { motivo } = req.body;
-    const _userId = req.user?.id;
-    const _userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
@@ -620,7 +620,7 @@ router.post('/:id/rejeitar', _jwtAuthMiddleware, async (req: AuthenticatedReques
       await transitionTo({
         propostaId: id,
         novoStatus: 'rejeitado',
-  _userId,
+  userId,
         contexto: 'pagamentos',
         observacoes: `Pagamento rejeitado. Motivo: ${motivo}`,
         metadata: {
@@ -651,11 +651,11 @@ catch (error) {
 });
 
 // Processar pagamento
-router.post('/:id/processar', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { comprovante } = req.body;
-    const _userId = req.user?.id;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
@@ -715,11 +715,11 @@ catch (error) {
 // Nova rota para verificar documentos CCB antes do pagamento
 router.get(
   '/:id/verificar-documentos',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const _userId = req.user?.id;
+      const userId = req.user?.id;
 
       if (!userId) {
         return res.status(401).json({error: "Unauthorized"});
@@ -738,12 +738,12 @@ router.get(
       }
 
       // Verificar boletos no Inter
-      const _boletos = await db
+      const boletos = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, id));
 
-      const _verificacoes = {
+      const verificacoes = {
         ccbAssinada: proposta.ccbGerado && proposta.assinaturaEletronicaConcluida,
         boletosGerados: boletos.length > 0,
         titularidadeConta: proposta.dadosPagamentoCpfTitular == proposta.clienteCpf,
@@ -779,13 +779,13 @@ catch (error) {
 // Nova rota para confirmar pagamento com segurança máxima
 router.post(
   '/:id/confirmar-desembolso',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const { senha, observacoes } = req.body;
-      const _userId = req.user?.id;
-      const _userRole = req.user?.role;
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
 
       if (!userId) {
         return res.status(401).json({error: "Unauthorized"});
@@ -810,7 +810,7 @@ router.post(
         return res.status(401).json({error: "Unauthorized"});
       }
 
-      const _boletos = await db
+      const boletos = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, id));
@@ -829,7 +829,7 @@ router.post(
           observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes || 'Pagamento realizado ao cliente'}`,
           metadata: {
             tipoAcao: 'DESEMBOLSO_CONFIRMADO',
-  _userRole,
+  userRole,
             valorDesembolsado: proposta.valorTotalFinanciado,
             dataPagamento: new Date().toISOString(),
             destino: {
@@ -863,7 +863,7 @@ catch (error) {
       // Registrar auditoria completa e imutável
       await registrarAuditoriaPagamento(id, userId, 'DESEMBOLSO_CONFIRMADO', {
         timestamp: new Date().toISOString(),
-  _userRole,
+  userRole,
         valorDesembolsado: proposta.valorTotalFinanciado,
         destino: {
           tipo: proposta.dadosPagamentoPix ? 'PIX' : 'TED',
@@ -871,7 +871,7 @@ catch (error) {
             proposta.dadosPagamentoPix ||
             `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`,
         },
-  _observacoes,
+  observacoes,
         ip: req.ip,
         userAgent: req.headers['user-agent'],
       });
@@ -891,10 +891,10 @@ catch (error) {
 );
 
 // Rota para buscar CCB assinada (primeiro tenta Supabase Storage, depois ClickSign)
-router.get('/:id/ccb-assinada', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
-    const _userId = req.user?.id;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({error: "Unauthorized"});
@@ -918,7 +918,7 @@ router.get('/:id/ccb-assinada', _jwtAuthMiddleware, async (req: AuthenticatedReq
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _filename = `CCB_${proposta.id}_assinada.pdf`;
+    const filename = `CCB_${proposta.id}_assinada.pdf`;
 
     // ESTRATÉGIA 1: Tentar buscar do Supabase Storage primeiro (mais rápido e econômico)
     if (proposta.caminhoCcbAssinado) {
@@ -934,7 +934,7 @@ router.get('/:id/ccb-assinada', _jwtAuthMiddleware, async (req: AuthenticatedReq
 
         if (!error && data) {
           console.log(`[PAGAMENTOS] ✅ CCB encontrada no Supabase Storage`);
-          const _buffer = Buffer.from(await data.arrayBuffer());
+          const buffer = Buffer.from(await data.arrayBuffer());
 
           res.setHeader('Content-Type', 'application/pdf');
           res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
@@ -961,12 +961,12 @@ catch (storageError) {
     try {
       // Baixar o documento assinado da ClickSign
       console.log(`[PAGAMENTOS] Baixando documento da ClickSign: ${proposta.clicksignDocumentKey}`);
-      const _pdfBuffer = await clickSignService.downloadSignedDocument(
+      const pdfBuffer = await clickSignService.downloadSignedDocument(
         proposta.clicksignDocumentKey
       );
 
       // Salvar no Supabase Storage para próximas requisições
-      const _storagePath = `ccb/assinadas/${proposta.id}/${filename}`;
+      const storagePath = `ccb/assinadas/${proposta.id}/${filename}`;
 
       console.log(`[PAGAMENTOS] Salvando CCB no Supabase Storage: ${storagePath}`);
       const { error: uploadError } = await _supabase.storage
@@ -1024,14 +1024,14 @@ catch (error) {
 });
 
 // Rota para verificar status de armazenamento da CCB
-router.get('/:id/ccb-storage-status', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-storage-status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
     // Buscar dados da proposta usando SQL direto para evitar problemas de schema
-    const _result = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT 
-  _id, ccb_gerado as "ccbGerado", 
+  id, ccb_gerado as "ccbGerado", 
         assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
         caminho_ccb_assinado as "caminhoCcbAssinado",
         clicksign_document_key as "clicksignDocumentKey",
@@ -1040,7 +1040,7 @@ router.get('/:id/ccb-storage-status', _jwtAuthMiddleware, async (req: Authentica
       WHERE id = ${id} 
       LIMIT 1
     `);
-    const _proposta = result[0] as
+    const proposta = result[0] as
       | {
           id: string;
           ccbGerado: boolean;
@@ -1060,8 +1060,8 @@ router.get('/:id/ccb-storage-status', _jwtAuthMiddleware, async (req: Authentica
     let _storageUrl = null;
 
     if (proposta.caminhoCcbAssinado) {
-      const _pathParts = proposta.caminhoCcbAssinado.split('/');
-      const _folderPath = pathParts.slice(0, -1).join('/');
+      const pathParts = proposta.caminhoCcbAssinado.split('/');
+      const folderPath = pathParts.slice(0, -1).join('/');
       const { data: files } = await _supabase.storage.from('documents').list(folderPath);
 
       existsInStorage = files
@@ -1105,26 +1105,26 @@ catch (error) {
 });
 
 // Rota para buscar detalhes completos da proposta
-router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
-    const _userId = req.user?.id;
-    const _userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     console.log(`[PAGAMENTOS] Buscando detalhes completos da proposta: ${id}`);
 
     // SOLUÇÃO DEFINITIVA: Usar SQL direto para evitar problemas de mapeamento do Drizzle
-    const _result = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT 
-  _id, loja_id as "lojaId", produto_id as "produtoId", tabela_comercial_id as "tabelaComercialId",
+  id, loja_id as "lojaId", produto_id as "produtoId", tabela_comercial_id as "tabelaComercialId",
         cliente_nome as "clienteNome", cliente_cpf as "clienteCpf", cliente_email as "clienteEmail", 
         cliente_telefone as "clienteTelefone", cliente_data_nascimento as "clienteDataNascimento",
         cliente_renda as "clienteRenda", cliente_rg as "clienteRg", cliente_orgao_emissor as "clienteOrgaoEmissor",
         cliente_estado_civil as "clienteEstadoCivil", cliente_nacionalidade as "clienteNacionalidade",
         cliente_cep as "clienteCep", cliente_endereco as "clienteEndereco", cliente_ocupacao as "clienteOcupacao",
-  _valor, prazo, finalidade, garantia, taxa_juros as "taxaJuros", valor_tac as "valorTac",
+  valor, prazo, finalidade, garantia, taxa_juros as "taxaJuros", valor_tac as "valorTac",
         valor_iof as "valorIof", valor_total_financiado as "valorTotalFinanciado", valor_aprovado as "valorAprovado",
-  _status, ccb_gerado as "ccbGerado", assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
+  status, ccb_gerado as "ccbGerado", assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
         biometria_concluida as "biometriaConcluida", caminho_ccb_assinado as "caminhoCcbAssinado",
         ccb_documento_url as "ccbDocumentoUrl", status_assinatura as "statusAssinatura", 
         status_biometria as "statusBiometria",
@@ -1138,7 +1138,7 @@ router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: Authentica
         dados_pagamento_cpf_titular as "dadosPagamentoCpfTitular",
         dados_pagamento_pix as "dadosPagamentoPix", dados_pagamento_tipo_pix as "dadosPagamentoTipoPix",
         url_comprovante_pagamento as "urlComprovantePagamento",
-  _observacoes, observacoes_formalizacao as "observacoesFormalizacao", user_id as "userId",
+  observacoes, observacoes_formalizacao as "observacoesFormalizacao", user_id as "userId",
         analista_id as "analistaId", data_analise as "dataAnalise", data_aprovacao as "dataAprovacao",
         motivo_pendencia as "motivoPendencia", documentos, documentos_adicionais as "documentosAdicionais",
         contrato_gerado as "contratoGerado", contrato_assinado as "contratoAssinado",
@@ -1150,7 +1150,7 @@ router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: Authentica
       LIMIT 1
     `);
 
-    const _propostaData = result[0];
+    const propostaData = result[0];
 
     if (!propostaData) {
       return res.status(401).json({error: "Unauthorized"});
@@ -1159,7 +1159,7 @@ router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: Authentica
     // Buscar dados relacionados usando SQL direto para evitar problemas de schema
     let _lojaData = null;
     if (propostaData.lojaId) {
-      const _lojaResult = await db.execute(sql`
+      const lojaResult = await db.execute(sql`
         SELECT id, nome_loja as "nomeLoja" FROM lojas WHERE id = ${propostaData.lojaId} LIMIT 1
       `);
       lojaData = lojaResult[0];
@@ -1167,7 +1167,7 @@ router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: Authentica
 
     let _produtoData = null;
     if (propostaData.produtoId) {
-      const _produtoResult = await db.execute(sql`
+      const produtoResult = await db.execute(sql`
         SELECT id, nome_produto as "nomeProduto" FROM produtos WHERE id = ${propostaData.produtoId} LIMIT 1
       `);
       produtoData = produtoResult[0];
@@ -1175,7 +1175,7 @@ router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: Authentica
 
     let _usuarioData = null;
     if (propostaData.userId) {
-      const _usuarioResult = await db.execute(sql`
+      const usuarioResult = await db.execute(sql`
         SELECT id, full_name as "fullName" FROM profiles WHERE id = ${propostaData.userId} LIMIT 1
       `);
       usuarioData = usuarioResult[0];
@@ -1185,11 +1185,11 @@ router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: Authentica
     console.log('[DEBUG] Tentando buscar boletos para proposta:', id);
     let boletos: unknown[] = [];
     try {
-      const _boletosResult = await db.execute(sql`
+      const boletosResult = await db.execute(sql`
         SELECT 
-  _id, codigo_solicitacao as "codigoSolicitacao", 
+  id, codigo_solicitacao as "codigoSolicitacao", 
           data_vencimento as "dataVencimento", valor_nominal as "valorNominal", 
-  _situacao, linha_digitavel as "linhaDigitavel", 
+  situacao, linha_digitavel as "linhaDigitavel", 
           pix_copia_e_cola as "pixCopiaECola"
         FROM inter_collections 
         WHERE proposta_id = ${id}
@@ -1219,7 +1219,7 @@ catch (boletoError) {
     });
 
     // Montar resposta completa
-    const _respostaCompleta = {
+    const respostaCompleta = {
       ...propostaData,
       lojaNome: lojaData?.nomeLoja,
       produtoNome: produtoData?.nomeProduto,
@@ -1258,13 +1258,13 @@ catch (error) {
 // Rota para confirmar veracidade e autorizar pagamento
 router.post(
   '/:id/confirmar-veracidade',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const { observacoes } = req.body; // PAM V1.0: Extrair observações do frontend
-      const _userId = req.user?.id;
-      const _userRole = req.user?.role;
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
 
       // Verificar permissões - apenas ADMIN e FINANCEIRO podem confirmar
       if (userRole !== 'ADMINISTRADOR' && userRole !== 'FINANCEIRO') {
@@ -1279,9 +1279,9 @@ router.post(
 
       console.log(`[PAGAMENTOS] 🔍 STEP 1: Iniciando busca da proposta no banco...`);
       // Buscar proposta usando SQL direto para evitar problemas de schema
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
         SELECT 
-  _id, status, cliente_nome as "clienteNome", 
+  id, status, cliente_nome as "clienteNome", 
           assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
           dados_pagamento_pix as "dadosPagamentoPix",
           dados_pagamento_banco as "dadosPagamentoBanco",
@@ -1291,7 +1291,7 @@ router.post(
         WHERE id = ${id} 
         LIMIT 1
       `);
-      const _proposta = result[0];
+      const proposta = result[0];
       console.log(`[PAGAMENTOS] 🔍 STEP 2: Query executada com sucesso`);
 
       if (!proposta) {
@@ -1329,8 +1329,8 @@ router.post(
       }
 
       // Verificar se está no status correto para nova autorização
-      const _statusValidos = ['pronto_pagamento', 'BOLETOS_EMITIDOS', 'em_processamento'];
-      const _statusString = String(proposta.status);
+      const statusValidos = ['pronto_pagamento', 'BOLETOS_EMITIDOS', 'em_processamento'];
+      const statusString = String(proposta.status);
       if (!statusValidos.includes(statusString)) {
         console.log(`[PAGAMENTOS] ⚠️ Status inválido para pagamento: ${statusString}`);
         return res.status(400).json({
@@ -1357,16 +1357,16 @@ router.post(
       console.log(`[PAGAMENTOS] 🔍 STEP 4: Status atualizado com sucesso`);
 
       // Buscar informações do usuário para o log usando SQL direto
-      const _userResult = await db.execute(sql`
+      const userResult = await db.execute(sql`
         SELECT full_name as "fullName", role 
         FROM profiles 
         WHERE id = ${userId} 
         LIMIT 1
       `);
-      const _user = userResult[0];
+      const user = userResult[0];
 
       // PAM V1.0: Montar mensagem com observações customizadas do usuário
-      const _mensagemCompleta = observacoes
+      const mensagemCompleta = observacoes
         ? `Pagamento autorizado por ${userRole}. Observação: ${observacoes}`
         : `Pagamento autorizado por ${userRole}. Nenhuma observação fornecida.`;
 
@@ -1374,7 +1374,7 @@ router.post(
       console.log(`[PAGAMENTOS] 🔍 STEP 5: Registrando histórico...`);
       await db.execute(sql`
         INSERT INTO historico_observacoes_cobranca (
-          proposta_id, mensagem, criado_por, tipo_acao, dados_acao, created_at
+          propostaid, mensagem, criadopor, tipoacao, dadosacao, created_at
         ) VALUES (
           ${id}, 
           ${mensagemCompleta}, 
@@ -1432,14 +1432,14 @@ catch (error) {
 // Rota para marcar pagamento como pago
 router.post(
   '/:id/marcar-pago',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   upload.single('comprovante'),
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const { observacoes } = req.body;
-      const _userId = req.user?.id;
-      const _userRole = req.user?.role;
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
 
       console.log(`[PAGAMENTOS] 🔍 [AUDIT] Iniciando marcação como pago - Proposta: ${id}`);
       console.log(`[PAGAMENTOS] 🔍 [AUDIT] Usuário: ${userId} | Role: ${userRole}`);
@@ -1483,7 +1483,7 @@ router.post(
         );
 
         // Validar tipo de arquivo
-        const _allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
         if (!allowedTypes.includes(req.file.mimetype)) {
           console.log(`[PAGAMENTOS] ❌ [AUDIT] Tipo de arquivo inválido: ${req.file.mimetype}`);
           return res.status(400).json({
@@ -1492,7 +1492,7 @@ router.post(
         }
 
         // Validar tamanho (máximo 5MB)
-        const _maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024; // 5MB
         if (req.file.size > maxSize) {
           console.log(`[PAGAMENTOS] ❌ [AUDIT] Arquivo muito grande: ${req.file.size} bytes`);
           return res.status(400).json({
@@ -1503,8 +1503,8 @@ router.post(
         try {
           // Upload para Supabase Storage
           const { supabase } = await import('../../lib/_supabase.js');
-          const _fileName = `comprovante_${Date.now()}_${req.file.originalname}`;
-          const _filePath = `comprovantes/${id}/${fileName}`;
+          const fileName = `comprovante_${Date.now()}_${req.file.originalname}`;
+          const filePath = `comprovantes/${id}/${fileName}`;
 
           console.log(`[PAGAMENTOS] 📤 [AUDIT] Fazendo upload para Storage - Caminho: ${filePath}`);
 
@@ -1589,7 +1589,7 @@ catch (error) {
 
       // Registrar na tabela de histórico de observações
       const { historicoObservacoesCobranca } = await import('@shared/schema');
-      const _mensagemLog = `Proposta marcada como paga por ${user?.fullName || userId}. ${observacoes ? `Observações: ${observacoes}` : ''}${comprovanteUrl ? ' Comprovante anexado.' : ''}`;
+      const mensagemLog = `Proposta marcada como paga por ${user?.fullName || userId}. ${observacoes ? `Observações: ${observacoes}` : ''}${comprovanteUrl ? ' Comprovante anexado.' : ''}`;
 
       await db.insert(historicoObservacoesCobranca).values({
         propostaId: id,
@@ -1636,16 +1636,16 @@ catch (error) {
 );
 
 // Rota para obter URL assinada do Supabase Storage para CCB - Com Cache Inteligente
-router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
     console.log(`[PAGAMENTOS CCB-URL] 🚀 Iniciando fluxo para proposta: ${id}`);
 
     // PASSO 1: Buscar dados da proposta
-    const _result = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT 
-  _id, 
+  id, 
         caminho_ccb_assinado as "caminhoCcbAssinado", 
         clicksign_document_key as "clicksignDocumentKey",
         assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
@@ -1654,7 +1654,7 @@ router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
       WHERE id = ${id} 
       LIMIT 1
     `);
-    const _proposta = result[0] as
+    const proposta = result[0] as
       | {
           id: string;
           caminhoCcbAssinado: string | null;
@@ -1679,11 +1679,11 @@ router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
     }
 
     // PASSO 2: Construir caminho esperado no Storage
-    const _expectedPath = `ccb/assinadas/${id}/ccb_assinada.pdf`;
+    const expectedPath = `ccb/assinadas/${id}/ccb_assinada.pdf`;
     console.log(`[PAGAMENTOS CCB-URL] 📁 Caminho esperado no Storage: ${expectedPath}`);
 
     // PASSO 3: Verificar se arquivo existe no Storage (CACHE HIT)
-    const _folderPath = `ccb/assinadas/${id}`;
+    const folderPath = `ccb/assinadas/${id}`;
     const { data: files, error: listError } = await _supabase.storage
       .from('documents')
       .list(folderPath);
@@ -1693,7 +1693,7 @@ router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
 
     if (files && files.length > 0) {
       // Arquivo existe - usar o primeiro arquivo PDF encontrado
-      const _pdfFile = files.find((f) => f.name.endsWith('.pdf'));
+      const pdfFile = files.find((f) => f.name.endsWith('.pdf'));
       if (pdfFile) {
         fileExists = true;
         actualFilePath = `${folderPath}/${pdfFile.name}`;
@@ -1711,7 +1711,7 @@ router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
 
         // Baixar documento do ClickSign
         console.log(`[PAGAMENTOS CCB-URL] 📥 Baixando documento: ${proposta.clicksignDocumentKey}`);
-        const _pdfBuffer = await clickSignService.downloadSignedDocument(
+        const pdfBuffer = await clickSignService.downloadSignedDocument(
           proposta.clicksignDocumentKey as string
         );
 
@@ -1722,10 +1722,10 @@ router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest,
         console.log(`[PAGAMENTOS CCB-URL] 📄 PDF baixado: ${pdfBuffer.length} bytes`);
 
         // Salvar no Storage
-        const _timestamp = Date.now();
-        const _cleanName = proposta.clienteNome.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-        const _fileName = `CCB_${cleanName}_${timestamp}.pdf`;
-        const _storagePath = `ccb/assinadas/${id}/${fileName}`;
+        const timestamp = Date.now();
+        const cleanName = proposta.clienteNome.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+        const fileName = `CCB_${cleanName}_${timestamp}.pdf`;
+        const storagePath = `ccb/assinadas/${id}/${fileName}`;
 
         console.log(`[PAGAMENTOS CCB-URL] 💾 Salvando no Storage: ${storagePath}`);
 

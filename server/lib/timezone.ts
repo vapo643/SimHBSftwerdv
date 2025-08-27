@@ -24,7 +24,7 @@ export function toBrasiliaDate(date: Date): Date {
  * Formata uma data no padrão brasileiro (dd/mm/aaaa)
  */
 export function formatBrazilianDate(date?: Date): string {
-  const _brasiliaDate = date ? toBrasiliaDate(date) : getBrasiliaDate();
+  const brasiliaDate = date ? toBrasiliaDate(date) : getBrasiliaDate();
   return brasiliaDate.toLocaleDateString('pt-BR', { timeZone: BRASILIA_TIMEZONE });
 }
 
@@ -32,9 +32,9 @@ export function formatBrazilianDate(date?: Date): string {
  * Formata uma data com hora no padrão brasileiro (dd/mm/aaaa hh:mm:ss)
  */
 export function _formatBrazilianDateTime(date?: Date): string {
-  const _brasiliaDate = date ? toBrasiliaDate(date) : getBrasiliaDate();
+  const brasiliaDate = date ? toBrasiliaDate(date) : getBrasiliaDate();
   return brasiliaDate.toLocaleString('pt-BR', {
-    timeZone: BRASILIA_TIMEZONE,
+    timeZone: BRASILIATIMEZONE,
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -48,7 +48,7 @@ export function _formatBrazilianDateTime(date?: Date): string {
  * Retorna timestamp no horário de Brasília para logs
  */
 export function _getBrasiliaTimestamp(): string {
-  const _now = getBrasiliaDate();
+  const now = getBrasiliaDate();
   return now.toISOString().replace('Z', '-03:00'); // Ajusta para mostrar fuso correto
 }
 

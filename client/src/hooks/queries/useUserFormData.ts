@@ -97,18 +97,18 @@ else {
     // Data
     partners: partners || [],
     allStores: shouldUseClientSideFiltering ? allStores || [] : [],
-  _metadata,
+  metadata,
 
     // Loading states (granular)
-  _isLoading,
-  _isMetadataLoading,
-  _isPartnersLoading,
+  isLoading,
+  isMetadataLoading,
+  isPartnersLoading,
     isAllStoresLoading: shouldUseClientSideFiltering ? isAllStoresLoading : false,
 
     // Error states (granular)
-  _error,
-  _metadataError,
-  _partnersError,
+  error,
+  metadataError,
+  partnersError,
     allStoresError: shouldUseClientSideFiltering ? allStoresError : null,
 
     // Filtering strategy info
@@ -116,7 +116,7 @@ else {
     totalLojas: metadata?.totalLojas || 0,
 
     // Methods
-  _fetchStoresByPartner,
+  fetchStoresByPartner,
 
     // Helper methods for UI
     getStoresByPartner: (partnerId: number) => {

@@ -4,7 +4,7 @@ import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const _router = Router();
+const router = Router();
 
 /**
  * ENDPOINT DE TESTE: Regenerar boletos com códigos válidos da API Inter (SEM AUTH)
@@ -30,7 +30,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
     }
 
     // Buscar boletos atuais
-    const _boletoesAtuais = await db
+    const boletoesAtuais = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
@@ -38,7 +38,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
     console.log(`🔍 [TEST FIX] Encontrados ${boletoesAtuais.length} boletos atuais`);
 
     // Verificar códigos inválidos
-    const _codigosInvalidos = boletoesAtuais.filter(
+    const codigosInvalidos = boletoesAtuais.filter(
       (b) =>
         !b.codigoSolicitacao.match(
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -71,7 +71,7 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
     console.log(`✅ [TEST FIX] ${codigosInvalidos.length} boletos antigos desativados`);
 
     // 2. Preparar dados para regeneração
-    const _parcelas = boletoesAtuais
+    const parcelas = boletoesAtuais
       .map((boleto) => ({
         numero: boleto.numeroParcela || 1,
         valor: parseFloat(boleto.valorNominal.toString()),
@@ -81,23 +81,23 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
 
     console.log(`📋 [TEST FIX] ${parcelas.length} parcelas preparadas para regeneração`);
 
-    const _novosBoletosGerados = [];
-    const _errosEncontrados = [];
+    const novosBoletosGerados = [];
+    const errosEncontrados = [];
 
     // 3. Gerar novos boletos com API Inter
     for (let _i = 0; i < Math.min(parcelas.length, 3); i++) {
       // Limitar a 3 para teste
-      const _parcela = parcelas[i];
+      const parcela = parcelas[i];
 
       try {
-        const _seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
+        const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
 
         console.log(
           `📄 [TEST FIX] Criando boleto ${i + 1}/${Math.min(parcelas.length, 3)} - Parcela ${parcela.numero}`
         );
 
         // Simular resposta da API Inter (para teste)
-        const _mockApiResponse = {
+        const mockApiResponse = {
           codigoSolicitacao: `${Math.random().toString(36).slice(2, 10)}-${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 14)}`,
           situacao: 'EM_PROCESSAMENTO',
         };
@@ -108,9 +108,9 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
         const [novoBoleto] = await db
           .insert(interCollections)
           .values({
-  _propostaId,
+  propostaId,
             codigoSolicitacao: mockApiResponse.codigoSolicitacao, // UUID simulado
-  _seuNumero,
+  seuNumero,
             valorNominal: parcela.valor.toString(),
             dataVencimento: parcela.vencimento,
             situacao: 'A_RECEBER', // PAM V1.0: Estado Inicial Forçado - nunca confiar na API
@@ -153,7 +153,7 @@ catch (error) {
           ? 'UUID_VALIDO'
           : 'FORMATO_INVALIDO',
       })),
-  _errosEncontrados,
+  errosEncontrados,
       totalBoletosCriados: novosBoletosGerados.length,
     });
   }

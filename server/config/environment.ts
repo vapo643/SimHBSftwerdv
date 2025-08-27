@@ -52,7 +52,7 @@ export interface EnvironmentConfig {
  * Get configuration for current environment
  */
 export function getEnvironmentConfig(): EnvironmentConfig {
-  const _env = process.env.NODE_ENV || 'development';
+  const env = process.env.NODE_ENV || 'development';
 
   // Base configuration (shared across environments)
   const baseConfig: Partial<EnvironmentConfig> = {
@@ -127,7 +127,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
 
       // Monitoring
       enableSecurityMonitoring: true,
-      securityAlertEmail: process.env.STAGING_ALERT_EMAIL,
+      securityAlertEmail: process.env.STAGING_ALERTEMAIL,
 
       // Feature Flags
       enableHoneypots: true,
@@ -178,7 +178,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     } as EnvironmentConfig,
   };
 
-  const _config = configs[env];
+  const config = configs[env];
 
   if (!config) {
     throw new Error(`Invalid environment: ${env}`);
@@ -194,7 +194,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
  * Validate configuration
  */
 function validateConfig(config: EnvironmentConfig): void {
-  const _required = [
+  const required = [
     'databaseUrl',
     'supabaseUrl',
     'supabaseAnonKey',
@@ -212,22 +212,22 @@ for environment ${_config.name}`);
   }
 
   // Production-specific validations
-  if (_config.name == 'production') {
+  if (config.name == 'production') {
     // Ensure production doesn't use development secrets
     if (
-      _config.jwtSecret.includes('dev') ||
-      _config.csrfSecret.includes('dev') ||
-      _config.sessionSecret.includes('dev')
+      config.jwtSecret.includes('dev') ||
+      config.csrfSecret.includes('dev') ||
+      config.sessionSecret.includes('dev')
     ) {
       throw new Error('Production environment using development secrets!');
     }
 
     // Ensure security features are enabled
-    if (!_config.enableSecurityMonitoring) {
+    if (!config.enableSecurityMonitoring) {
       throw new Error('Security monitoring must be enabled in production!');
     }
 
-    if (!_config.securityAlertEmail) {
+    if (!config.securityAlertEmail) {
       throw new Error('Security alert email must be configured in production!');
     }
   }

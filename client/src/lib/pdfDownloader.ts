@@ -17,9 +17,9 @@ export class PDFDownloader {
   ): Promise<void> {
     try {
       console.log('[PDF_DOWNLOAD] Starting download via API client:', {
-        _propostaId,
-        _codigoSolicitacao,
-        _numeroParcela,
+        propostaId,
+        codigoSolicitacao,
+        numeroParcela,
       });
 
       // Usar o apiClient que já tem autenticação configurada
@@ -78,8 +78,8 @@ catch (error) {
     for (let _attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`[PDF_DOWNLOAD] Fetch attempt ${attempt}/${maxRetries}:`, {
-          _propostaId,
-          _codigoSolicitacao,
+          propostaId,
+          codigoSolicitacao,
         });
 
         // Importar e obter token fresco a cada tentativa

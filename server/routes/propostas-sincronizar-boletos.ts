@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { propostasSyncService } from '../services/proposalService.js';
-const _router = Router();
+const router = Router();
 router.post('/sync-boletos', async (req, res) => {
   try {
-    const _result = await propostasSyncService.executeOperation('sync_boletos', req.body);
+    const result = await propostasSyncService.executeOperation('sync_boletos', req.body);
     res.json(_result);
   }
 catch (error) {

@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import {
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   type AuthenticatedRequest,
-  _invalidateAllUserTokens,
-  _trackUserToken,
+  invalidateAllUserTokens,
+  trackUserToken,
 } from '../../lib/jwt-auth-middleware.js';
-import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../../lib/_supabase.js';
+import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../../lib/supabase.js';
 import { validatePassword } from '../../lib/password-validator.js';
 import { securityLogger, SecurityEventType, getClientIP } from '../../lib/security-logger.js';
 import { storage } from '../../storage.js';
 
-const _router = Router();
+const router = Router();
 
 // Helper function to parse user agent for better display
 function parseUserAgent(userAgent: string): string {
@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
 
     // PASSO 1 - ASVS 7.1.3: Token Rotation on Re-authentication
     // First, check if user already has active sessions
@@ -62,13 +62,13 @@ router.post('/login', async (req, res) => {
     } = await _supabase.auth.getUser();
 
     const { data, error } = await _supabase.auth.signInWithPassword({
-  _email,
-  _password,
+  email,
+  password,
     });
 
     if (error) {
       securityLogger.logEvent({
-        type: SecurityEventType.LOGIN_FAILURE,
+        type: SecurityEventType.LOGINFAILURE,
         severity: 'MEDIUM',
         userEmail: email,
         ipAddress: getClientIP(req),
@@ -90,20 +90,20 @@ router.post('/login', async (req, res) => {
 
         // ASVS 7.4.3 - Create session record for active session management
         try {
-          const _ipAddress = getClientIP(req);
-          const _userAgent = req.headers['user-agent'] || 'Unknown';
+          const ipAddress = getClientIP(req);
+          const userAgent = req.headers['user-agent'] || 'Unknown';
 
           // Session expires when JWT expires (1 hour from now)
-          const _expiresAt = new Date();
+          const expiresAt = new Date();
           expiresAt.setHours(expiresAt.getHours() + 1);
 
           await storage.createSession({
-            id: data.session.access_token,
+            id: data.session.accesstoken,
             userId: data.user.id,
-            token: data.session.access_token,
-  _ipAddress,
-  _userAgent,
-  _expiresAt,
+            token: data.session.accesstoken,
+  ipAddress,
+  userAgent,
+  expiresAt,
           });
         }
 catch (sessionError) {
@@ -114,7 +114,7 @@ catch (sessionError) {
     }
 
     securityLogger.logEvent({
-      type: SecurityEventType.LOGIN_SUCCESS,
+      type: SecurityEventType.LOGINSUCCESS,
       severity: 'LOW',
       userId: data.user?.id,
       userEmail: email,
@@ -145,7 +145,7 @@ router.post('/register', async (req, res) => {
     const { email, password, name } = req.body;
 
     // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
-    const _passwordValidation = validatePassword(password, [email, name || '']);
+    const passwordValidation = validatePassword(password, [email, name || '']);
     if (!passwordValidation.isValid) {
       return res.status(400).json({
         message: passwordValidation.message,
@@ -153,13 +153,13 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
     const { data, error } = await _supabase.auth.signUp({
-  _email,
-  _password,
+  email,
+  password,
       options: {
         data: {
-  _name,
+  name,
         },
       },
     });
@@ -180,9 +180,9 @@ catch (error) {
 });
 
 // POST /api/auth/logout
-router.post('/logout', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/logout', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
     const { error } = await _supabase.auth.signOut();
 
     if (error) {
@@ -199,7 +199,7 @@ catch (error) {
 
 // PASSO 2 - ASVS 6.2.3: Change Password with Current Password Verification
 // POST /api/auth/change-password
-router.post('/change-password', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
@@ -217,7 +217,7 @@ router.post('/change-password', _jwtAuthMiddleware, async (req: AuthenticatedReq
     }
 
     // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
-    const _passwordValidation = validatePassword(newPassword, [
+    const passwordValidation = validatePassword(newPassword, [
       req.user?.email || '',
       req.user?.full_name || '',
     ]);
@@ -235,7 +235,7 @@ router.post('/change-password', _jwtAuthMiddleware, async (req: AuthenticatedReq
     }
 
     // Step 1: Verify current password
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
     const { error: signInError } = await _supabase.auth.signInWithPassword({
       email: req.user.email,
       password: currentPassword,
@@ -243,7 +243,7 @@ router.post('/change-password', _jwtAuthMiddleware, async (req: AuthenticatedReq
 
     if (signInError) {
       securityLogger.logEvent({
-        type: SecurityEventType.PASSWORD_CHANGE_FAILED,
+        type: SecurityEventType.PASSWORD_CHANGEFAILED,
         severity: 'HIGH',
         userId: req.user.id,
         userEmail: req.user.email,
@@ -259,7 +259,7 @@ router.post('/change-password', _jwtAuthMiddleware, async (req: AuthenticatedReq
     }
 
     // Step 2: Update password using admin client
-    const _supabaseAdmin = createServerSupabaseAdminClient();
+    const supabaseAdmin = createServerSupabaseAdminClient();
 
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(req.user.id, {
       password: newPassword,
@@ -276,7 +276,7 @@ router.post('/change-password', _jwtAuthMiddleware, async (req: AuthenticatedReq
     invalidateAllUserTokens(req.user.id);
 
     securityLogger.logEvent({
-      type: SecurityEventType.PASSWORD_CHANGED,
+      type: SecurityEventType.PASSWORDCHANGED,
       severity: 'HIGH',
       userId: req.user.id,
       userEmail: req.user.email,
@@ -312,7 +312,7 @@ router.post('/forgot-password', async (req, res) => {
       });
     }
 
-    const _supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient();
 
     // Always return the same message regardless of whether the email exists
     // This prevents user enumeration attacks
@@ -322,7 +322,7 @@ router.post('/forgot-password', async (req, res) => {
 
     // Log the attempt for security monitoring
     securityLogger.logEvent({
-      type: SecurityEventType.PASSWORD_RESET_REQUEST,
+      type: SecurityEventType.PASSWORD_RESETREQUEST,
       severity: 'MEDIUM',
       userEmail: email,
       ipAddress: getClientIP(req),
@@ -348,16 +348,16 @@ catch (error) {
 
 // ASVS 7.4.3 - List user sessions
 // GET /api/auth/sessions
-router.get('/sessions', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _sessions = await storage.getUserSessions(req.user.id);
+    const sessions = await storage.getUserSessions(req.user.id);
 
     // Format sessions for frontend display
-    const _formattedSessions = sessions.map((session) => ({
+    const formattedSessions = sessions.map((session) => ({
       id: session.id,
       ipAddress: session.ipAddress || 'Desconhecido',
       userAgent: session.userAgent || 'Desconhecido',
@@ -380,7 +380,7 @@ catch (error) {
 
 // ASVS 7.4.3 - Delete a specific session
 // DELETE /api/auth/sessions/:sessionId
-router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({error: "Unauthorized"});
@@ -389,8 +389,8 @@ router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: Authentica
     const { sessionId } = req.params;
 
     // First verify the session belongs to the current user
-    const _sessions = await storage.getUserSessions(req.user.id);
-    const _sessionToDelete = sessions.find((s) => s.id == sessionId);
+    const sessions = await storage.getUserSessions(req.user.id);
+    const sessionToDelete = sessions.find((s) => s.id == sessionId);
 
     if (!sessionToDelete) {
       return res.status(401).json({error: "Unauthorized"});
@@ -400,14 +400,14 @@ router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: Authentica
     await storage.deleteSession(sessionId);
 
     // Also invalidate the token if it's not the current session
-    const _currentToken = req.headers.authorization?.replace('Bearer ', '');
+    const currentToken = req.headers.authorization?.replace('Bearer ', '');
     if (sessionId !== currentToken) {
       // Token will be invalidated when session is deleted
       // invalidateToken is not available, sessions are managed via storage
     }
 
     securityLogger.logEvent({
-      type: SecurityEventType.SESSION_TERMINATED,
+      type: SecurityEventType.SESSIONTERMINATED,
       severity: 'MEDIUM',
       userId: req.user.id,
       userEmail: req.user.email,
@@ -416,7 +416,7 @@ router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: Authentica
       endpoint: req.originalUrl,
       success: true,
       details: {
-  _sessionId,
+  sessionId,
         terminatedByUser: true,
       },
     });
@@ -431,7 +431,7 @@ catch (error) {
 
 // User profile endpoint for RBAC context
 // GET /api/auth/profile
-router.get('/profile', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({error: "Unauthorized"});
@@ -441,8 +441,8 @@ router.get('/profile', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res
       id: req.user.id,
       email: req.user.email,
       role: req.user.role,
-      full_name: req.user.full_name,
-      loja_id: req.user.loja_id,
+      full_name: req.user.fullname,
+      loja_id: req.user.lojaid,
     });
   }
 catch (error) {

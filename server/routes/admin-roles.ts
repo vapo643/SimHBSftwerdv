@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { adminService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/roles', async (req, res) => {
   try {
-    const _result = await adminService.executeOperation('list_roles', req.query);
+    const result = await adminService.executeOperation('list_roles', req.query);
     res.json(_result);
   }
 catch (error) {

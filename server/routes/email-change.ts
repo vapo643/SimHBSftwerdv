@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { securityTestService } from '../services/genericService';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/email-change/request
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.post('/request', async (req: Request, res: Response) => {
   try {
-    const _result = await securityTestService.executeOperation('email_change_request', req.body);
+    const result = await securityTestService.executeOperation('email_change_request', req.body);
     res.json(_result);
   }
 catch (error) {
@@ -32,7 +32,7 @@ catch (error) {
  */
 router.post('/confirm', async (req: Request, res: Response) => {
   try {
-    const _result = await securityTestService.executeOperation('email_change_confirm', req.body);
+    const result = await securityTestService.executeOperation('email_change_confirm', req.body);
     res.json(_result);
   }
 catch (error) {

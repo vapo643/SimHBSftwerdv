@@ -10,14 +10,14 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { AuthenticatedRequest } from '../../shared/types/express';
-import { config } from '../lib/_config.js';
+import { config } from '../lib/config.js';
 
 interface CSRFRequest extends AuthenticatedRequest {
   csrfToken?: string;
 }
 
 export class CSRFProtection {
-  private static readonly CSRF_SECRET = _config.security.csrfSecret;
+  private static readonly CSRF_SECRET = config.security.csrfSecret;
   private static readonly CSRF_COOKIE_NAME = '__Secure-CSRF-Token';
   private static readonly CSRF_HEADER_NAME = 'X-CSRF-Token';
 
@@ -25,16 +25,16 @@ export class CSRFProtection {
    * Generate CSRF token using HMAC with session binding
    */
   static generateToken(sessionId: string): string {
-    const _randomValue = crypto.randomBytes(32).toString('hex');
-    const _timestamp = Date.now().toString();
+    const randomValue = crypto.randomBytes(32).toString('hex');
+    const timestamp = Date.now().toString();
 
     // Create message with session binding
-    const _message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
+    const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
 
     // Generate HMAC
-    const _hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
+    const hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
     hmac.update(message);
-    const _signature = hmac.digest('hex');
+    const signature = hmac.digest('hex');
 
     // Return token: signature.randomValue.timestamp
     return `${signature}.${randomValue}.${timestamp}`;
@@ -49,7 +49,7 @@ export class CSRFProtection {
     }
 
     try {
-      const _parts = token.split('.');
+      const parts = token.split('.');
       if (parts.length !== 3) {
         return false;
       }
@@ -57,19 +57,19 @@ export class CSRFProtection {
       const [signature, randomValue, timestamp] = parts;
 
       // Check token age (max 1 hour)
-      const _tokenTime = parseInt(timestamp);
-      const _now = Date.now();
+      const tokenTime = parseInt(timestamp);
+      const now = Date.now();
       if (now - tokenTime > 60 * 60 * 1000) {
         return false;
       }
 
       // Recreate message
-      const _message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
+      const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
 
       // Verify HMAC
-      const _hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
+      const hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
       hmac.update(message);
-      const _expectedSignature = hmac.digest('hex');
+      const expectedSignature = hmac.digest('hex');
 
       // Constant-time comparison
       return crypto.timingSafeEqual(
@@ -94,14 +94,14 @@ catch (error) {
       }
 
       // Generate token bound to user session
-      const _sessionId = req.user.id;
-      const _csrfToken = CSRFProtection.generateToken(sessionId);
+      const sessionId = req.user.id;
+      const csrfToken = CSRFProtection.generateToken(sessionId);
 
       // Set token in response for client access
       req.csrfToken = csrfToken;
 
       // Set secure cookie for double-submit pattern
-      res.cookie(CSRFProtection.CSRF_COOKIE_NAME, csrfToken, {
+      res.cookie(CSRFProtection.CSRF_COOKIENAME, csrfToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV == 'production',
         sameSite: 'strict',
@@ -128,7 +128,7 @@ catch (error) {
         return next();
       }
 
-      const _sessionId = req.user.id;
+      const sessionId = req.user.id;
 
       // Get token from header (primary method)
       let _token = req.headers[CSRFProtection.CSRF_HEADER_NAME] as string;
@@ -139,7 +139,7 @@ catch (error) {
       }
 
       // Get token from cookie for double-submit validation
-      const _cookieToken = req.cookies[CSRFProtection.CSRF_COOKIE_NAME];
+      const cookieToken = req.cookies[CSRFProtection.CSRF_COOKIE_NAME];
 
       // Validate token presence
       if (!token) {
@@ -207,8 +207,8 @@ catch (error) {
       }
 
       // Check for X-Requested-With header (AJAX indicator)
-      const _requestedWith = req.headers['x-requested-with'];
-      const _contentType = req.headers['content-type'];
+      const requestedWith = req.headers['x-requested-with'];
+      const contentType = req.headers['content-type'];
 
       // Allow requests with proper AJAX headers or form content
       if (
@@ -226,8 +226,8 @@ catch (error) {
       console.warn('[CSRF] Request missing custom headers:', {
         method: req.method,
         path: req.path,
-        _contentType,
-        _requestedWith,
+        contentType,
+        requestedWith,
         userAgent: req.headers['user-agent'],
       });
 
@@ -243,13 +243,13 @@ catch (error) {
 /**
  * Export middleware functions for easy use
  */
-export const _generateCSRFToken = CSRFProtection.generateMiddleware();
-export const _validateCSRFToken = CSRFProtection.validateMiddleware();
-export const _requireCustomHeaders = CSRFProtection.requireCustomHeaders();
+export const generateCSRFToken = CSRFProtection.generateMiddleware();
+export const validateCSRFToken = CSRFProtection.validateMiddleware();
+export const requireCustomHeaders = CSRFProtection.requireCustomHeaders();
 
 /**
  * Combined CSRF protection middleware
  */
-export const _csrfProtection = [generateCSRFToken, validateCSRFToken];
+export const csrfProtection = [generateCSRFToken, validateCSRFToken];
 
 export default CSRFProtection;

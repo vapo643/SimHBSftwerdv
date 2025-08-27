@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { AuthenticatedRequest } from '../../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 // ==============================
 // CIRCUIT BREAKER TEST ENDPOINTS - PAM V1.0
@@ -13,7 +13,7 @@ router.get('/test/circuit-breaker', async (req: AuthenticatedRequest, res) => {
     const { interBankService } = await import('../../services/interBankService');
 
     // Tentar uma conexão de teste
-    const _result = await interBankService.testConnection();
+    const result = await interBankService.testConnection();
 
     res.json({
       success: true,

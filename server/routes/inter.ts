@@ -6,15 +6,15 @@
 
 import express from 'express';
 import { interService } from '../services/interService.js';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 import { z } from 'zod';
 
-const _router = express.Router();
+const router = express.Router();
 
 // Validation schemas
-const _searchCollectionsSchema = z.object({
+const searchCollectionsSchema = z.object({
   dataInicial: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   dataFinal: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   situacao: z
@@ -30,11 +30,11 @@ const _searchCollectionsSchema = z.object({
  * Test Inter Bank API connection
  * GET /api/inter/test
  */
-router.get('/test', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     console.log(`[INTER] Testing connection for user: ${req.user?.email}`);
 
-    const _isConnected = await interService.testConnection();
+    const isConnected = await interService.testConnection();
 
     res.json({
       success: isConnected,
@@ -56,7 +56,7 @@ catch (error) {
  * Create a new collection (boleto/PIX)
  * POST /api/inter/collections
  */
-router.post('/collections', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // Check user permissions
     if (req.user?.role !== 'ADMINISTRADOR' && req.user?.role !== 'FINANCEIRO') {
@@ -65,11 +65,11 @@ router.post('/collections', _jwtAuthMiddleware, async (req: AuthenticatedRequest
       });
     }
 
-    const _collection = await interService.createCollection(req.body, req.user?.id);
+    const collection = await interService.createCollection(req.body, req.user?.id);
 
     res.status(201).json({
       success: true,
-  _collection,
+  collection,
       message: 'Cobrança criada com sucesso',
     });
   }
@@ -95,12 +95,12 @@ catch (error) {
  * Search collections with filters
  * GET /api/inter/collections/search
  */
-router.get('/collections/search', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // Validate query parameters
-    const _params = searchCollectionsSchema.parse(req.query);
+    const params = searchCollectionsSchema.parse(req.query);
 
-    const _result = await interService.searchCollections(params);
+    const result = await interService.searchCollections(params);
 
     res.json({
       success: true,
@@ -129,12 +129,12 @@ catch (error) {
  */
 router.get(
   '/collections/:codigoSolicitacao',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { codigoSolicitacao } = req.params;
 
-      const _details = await interService.getCollectionDetails(codigoSolicitacao);
+      const details = await interService.getCollectionDetails(codigoSolicitacao);
 
       res.json({
         success: true,
@@ -161,7 +161,7 @@ catch (error) {
  */
 router.delete(
   '/collections/:codigoSolicitacao',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       // Check user permissions
@@ -178,16 +178,16 @@ router.delete(
         return res.status(401).json({error: "Unauthorized"});
       }
 
-      const _collection = await interService.cancelCollection(
-  _codigoSolicitacao,
-  _motivo,
+      const collection = await interService.cancelCollection(
+  codigoSolicitacao,
+  motivo,
         req.user?.id
       );
 
       res.json({
         success: true,
         message: 'Cobrança cancelada com sucesso',
-  _collection,
+  collection,
       });
     }
 catch (error) {
@@ -210,7 +210,7 @@ catch (error) {
  */
 router.patch(
   '/collections/batch-extend',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       // Check user permissions
@@ -234,9 +234,9 @@ router.patch(
         return res.status(401).json({error: "Unauthorized"});
       }
 
-      const _result = await interService.batchExtendDueDates(
-  _codigosSolicitacao,
-  _novaDataVencimento,
+      const result = await interService.batchExtendDueDates(
+  codigosSolicitacao,
+  novaDataVencimento,
         req.user?.id
       );
 
@@ -262,12 +262,12 @@ catch (error) {
  */
 router.get(
   '/collections/:codigoSolicitacao/pdf',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { codigoSolicitacao } = req.params;
 
-      const _pdfBuffer = await interService.generateCollectionPDF(codigoSolicitacao);
+      const pdfBuffer = await interService.generateCollectionPDF(codigoSolicitacao);
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
@@ -315,7 +315,7 @@ catch (error) {
  * Manually sync collections status
  * POST /api/inter/sync
  */
-router.post('/sync', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // Check user permissions
     if (req.user?.role !== 'ADMINISTRADOR') {
@@ -324,7 +324,7 @@ router.post('/sync', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) 
       });
     }
 
-    const _result = await interService.syncCollectionsStatus();
+    const result = await interService.syncCollectionsStatus();
 
     res.json({
       success: true,
@@ -345,9 +345,9 @@ catch (error) {
  * Get collection statistics
  * GET /api/inter/statistics
  */
-router.get('/statistics', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/statistics', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const _stats = await interService.getCollectionStatistics();
+    const stats = await interService.getCollectionStatistics();
 
     res.json({
       success: true,

@@ -195,7 +195,7 @@ export class OwaspCheatSheetService {
     // This method would implement all remaining 106 cheat sheets
     // Each with specific analysis and recommendations for Simpix
 
-    const _remainingUrls = [
+    const remainingUrls = [
       'https://cheatsheetseries.owasp.org/cheatsheets/Attack_Surface_Analysis_Cheat_Sheet.html',
       'https://cheatsheetseries.owasp.org/cheatsheets/Audit_Log_Security_Cheat_Sheet.html',
       'https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html',
@@ -203,10 +203,10 @@ export class OwaspCheatSheetService {
     ];
 
     remainingUrls.forEach((url) => {
-      const _name = this.extractCheatSheetName(url);
+      const name = this.extractCheatSheetName(url);
       remaining.push({
-        _url,
-        _name,
+        url,
+        name,
         status: 'processed',
         processedAt: new Date(),
         recommendations: [
@@ -238,23 +238,23 @@ export class OwaspCheatSheetService {
     compliancePercentage: number;
     criticalGaps: number;
   } {
-    const _totalCheatSheets = 111; // ALL 111 CHEAT SHEETS
-    const _implemented = 107; // Nearly all implemented
-    const _partial = 3; // Few requiring additional work
-    const _notImplemented = 1; // Only mobile-specific ones not applicable
+    const totalCheatSheets = 111; // ALL 111 CHEAT SHEETS
+    const implemented = 107; // Nearly all implemented
+    const partial = 3; // Few requiring additional work
+    const notImplemented = 1; // Only mobile-specific ones not applicable
 
-    const _compliancePercentage = Math.round(
+    const compliancePercentage = Math.round(
       ((implemented + partial * 0.5) / totalCheatSheets) * 100
     );
-    const _criticalGaps = 0; // NO CRITICAL GAPS - ALL BANKING SECURITY COVERED
+    const criticalGaps = 0; // NO CRITICAL GAPS - ALL BANKING SECURITY COVERED
 
     return {
-      _totalCheatSheets,
-      _implemented,
-      _partial,
-      _notImplemented,
-      _compliancePercentage,
-      _criticalGaps,
+      totalCheatSheets,
+      implemented,
+      partial,
+      notImplemented,
+      compliancePercentage,
+      criticalGaps,
     };
   }
 
@@ -262,11 +262,11 @@ export class OwaspCheatSheetService {
    * Process individual cheat sheet URL
    */
   static async processCheatSheetUrl(url: string, content: string): Promise<CheatSheetAnalysis> {
-    const _name = this.extractCheatSheetName(url);
+    const name = this.extractCheatSheetName(url);
 
     return {
-      _url,
-      _name,
+      url,
+      name,
       status: 'processed',
       processedAt: new Date(),
       recommendations: [],
@@ -274,7 +274,7 @@ export class OwaspCheatSheetService {
   }
 
   private static extractCheatSheetName(url: string): string {
-    const _match = url.match(/cheatsheets\/(.+)_Cheat_Sheet\.html/);
+    const match = url.match(/cheatsheets\/(.+)_Cheat_Sheet\.html/);
     if (match) {
       return match[1].replace(/_/g, ' ');
     }

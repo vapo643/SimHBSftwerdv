@@ -13,10 +13,10 @@ import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposal
 
 export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
-    const _data = proposal.toPersistence();
+    const data = proposal.toPersistence();
 
     // Verificar se é create ou update
-    const _exists = await this.exists(proposal.id);
+    const exists = await this.exists(proposal.id);
 
     if (exists) {
       // Update
@@ -28,25 +28,25 @@ export class ProposalRepository implements IProposalRepository {
           valor: data.valor.toString(),
           prazo: data.prazo,
           taxaJuros: data.taxa_juros.toString(),
-          produtoId: data.produto_id,
-          tabelaComercialId: data.tabela_comercial_id,
-          lojaId: data.loja_id,
-          dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
+          produtoId: data.produtoid,
+          tabelaComercialId: data.tabela_comercialid,
+          lojaId: data.lojaid,
+          dadosPagamentoTipo: data.dados_pagamento?.tipoconta,
           dadosPagamentoBanco: data.dados_pagamento?.banco,
           dadosPagamentoAgencia: data.dados_pagamento?.agencia,
           dadosPagamentoConta: data.dados_pagamento?.conta,
-          dadosPagamentoPix: data.dados_pagamento?.pix_chave,
-          motivoPendencia: data.motivo_rejeicao,
+          dadosPagamentoPix: data.dados_pagamento?.pixchave,
+          motivoPendencia: data.motivorejeicao,
           observacoes: data.observacoes,
-          ccbDocumentoUrl: data.ccb_url,
+          ccbDocumentoUrl: data.ccburl,
           // updatedAt campo removido - será atualizado automaticamente pelo schema
         })
         .where(eq(propostas.id, data.id));
     }
 else {
       // Create - gerar IDs sequenciais
-      const _sequentialId = await this.getNextSequentialId();
-      const _numeroProposta = await this.getNextNumeroProposta();
+      const sequentialId = await this.getNextSequentialId();
+      const numeroProposta = await this.getNextNumeroProposta();
 
       await db.insert(propostas).values([
         {
@@ -59,26 +59,26 @@ else {
           valor: data.valor.toString(),
           prazo: data.prazo,
           taxaJuros: data.taxa_juros.toString(),
-          produtoId: data.produto_id,
-          tabelaComercialId: data.tabela_comercial_id,
-          lojaId: data.loja_id,
+          produtoId: data.produtoid,
+          tabelaComercialId: data.tabela_comercialid,
+          lojaId: data.lojaid,
           metodoPagamento: data.dados_pagamento?.metodo,
-          dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
+          dadosPagamentoTipo: data.dados_pagamento?.tipoconta,
           dadosPagamentoBanco: data.dados_pagamento?.banco,
           dadosPagamentoAgencia: data.dados_pagamento?.agencia,
           dadosPagamentoConta: data.dados_pagamento?.conta,
-          dadosPagamentoPix: data.dados_pagamento?.pix_chave,
-          motivoPendencia: data.motivo_rejeicao,
+          dadosPagamentoPix: data.dados_pagamento?.pixchave,
+          motivoPendencia: data.motivorejeicao,
           observacoes: data.observacoes,
-          ccbDocumentoUrl: data.ccb_url,
-          createdAt: data.created_at,
+          ccbDocumentoUrl: data.ccburl,
+          createdAt: data.createdat,
           // updatedAt campo removido - será atualizado automaticamente pelo schema
         },
       ]);
     }
 
     // Processar eventos de domínio
-    const _events = proposal.getUncommittedEvents();
+    const events = proposal.getUncommittedEvents();
     for (const event of events) {
       // Aqui poderíamos publicar os eventos para um event bus
       // Por enquanto, apenas logamos
@@ -89,7 +89,7 @@ for aggregate ${event.aggregateId}`);
   }
 
   async findById(id: string): Promise<Proposal | null> {
-    const _result = await db
+    const result = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)))
@@ -103,7 +103,7 @@ for aggregate ${event.aggregateId}`);
   }
 
   async findByCriteria(criteria: ProposalSearchCriteria): Promise<Proposal[]> {
-    const _conditions = [isNull(propostas.deletedAt)];
+    const conditions = [isNull(propostas.deletedAt)];
 
     if (criteria.status) {
       conditions.push(eq(propostas.status, criteria.status));
@@ -118,7 +118,7 @@ for aggregate ${event.aggregateId}`);
     }
 
     if (criteria.cpf) {
-      const _cleanCPF = criteria.cpf.replace(/\D/g, '');
+      const cleanCPF = criteria.cpf.replace(/\D/g, '');
       conditions.push(eq(propostas.clienteCpf, cleanCPF));
     }
 
@@ -130,7 +130,7 @@ for aggregate ${event.aggregateId}`);
       conditions.push(lte(propostas.createdAt, criteria.dateTo));
     }
 
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(...conditions));
@@ -139,13 +139,13 @@ for aggregate ${event.aggregateId}`);
   }
 
   async findAll(): Promise<Proposal[]> {
-    const _results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
+    const results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
 
     return _results.map((row) => this.mapToDomain(row));
   }
 
   async findByStatus(status: string): Promise<Proposal[]> {
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.status, status), isNull(propostas.deletedAt)));
@@ -154,9 +154,9 @@ for aggregate ${event.aggregateId}`);
   }
 
   async findByCPF(cpf: string): Promise<Proposal[]> {
-    const _cleanCPF = cpf.replace(/\D/g, '');
+    const cleanCPF = cpf.replace(/\D/g, '');
 
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.clienteCpf, cleanCPF), isNull(propostas.deletedAt)));
@@ -165,7 +165,7 @@ for aggregate ${event.aggregateId}`);
   }
 
   async findByLojaId(lojaId: number): Promise<Proposal[]> {
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.lojaId, lojaId), isNull(propostas.deletedAt)));
@@ -174,7 +174,7 @@ for aggregate ${event.aggregateId}`);
   }
 
   async findByAtendenteId(atendenteId: string): Promise<Proposal[]> {
-    const _results = await db
+    const results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.analistaId, atendenteId), isNull(propostas.deletedAt)));
@@ -183,7 +183,7 @@ for aggregate ${event.aggregateId}`);
   }
 
   async exists(id: string): Promise<boolean> {
-    const _result = await db
+    const result = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)));
@@ -192,7 +192,7 @@ for aggregate ${event.aggregateId}`);
   }
 
   async delete(id: string): Promise<void> {
-    const _now = new Date();
+    const now = new Date();
 
     await db.update(propostas).set({ deletedAt: now }).where(eq(propostas.id, id));
   }
@@ -200,7 +200,7 @@ for aggregate ${event.aggregateId}`);
   async getNextSequentialId(): Promise<number> {
     // Buscar o maior ID atual e incrementar
     // Como o ID é string no banco, precisamos converter
-    const _result = await db
+    const result = await db
       .select({ maxId: sql<number>`COALESCE(MAX(CAST(id AS INTEGER)), 300000)` })
       .from(propostas);
 
@@ -210,7 +210,7 @@ for aggregate ${event.aggregateId}`);
   async getNextNumeroProposta(): Promise<number> {
     // Buscar o maior numero_proposta e incrementar
     // Inicia em 300001 se não houver propostas
-    const _result = await db
+    const result = await db
       .select({ maxNumero: sql<number>`COALESCE(MAX(numero_proposta), 300000)` })
       .from(propostas);
 
@@ -222,7 +222,7 @@ for aggregate ${event.aggregateId}`);
    */
   private mapToDomain(row): Proposal {
     // ID já é string no banco
-    const _aggregateId = row.id;
+    const aggregateId = row.id;
 
     // Parse cliente_data from JSON string if it exists
     let clienteData;

@@ -518,7 +518,7 @@ export const historicoObservacoesCobranca = pgTable('historico_observacoes_cobra
     .notNull(),
   mensagem: text('mensagem').notNull(),
   criadoPor: text('criado_por').notNull(), // Email do usuário
-  tipoAcao: text('tipo_acao'), // DESCONTO_QUITACAO, PRORROGACAO, OBSERVACAO, etc
+  tipoAcao: text('tipo_acao'), // DESCONTOQUITACAO, PRORROGACAO, OBSERVACAO, etc
   dadosAcao: jsonb('dados_acao'), // JSON com detalhes da ação
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
@@ -576,7 +576,7 @@ export const observacoesCobranca = pgTable('observacoes_cobranca', {
   userName: text('user_name').notNull(), // Nome do usuário que fez a observação
   observacao: text('observacao').notNull(),
   tipoContato: text('tipo_contato'), // telefone, whatsapp, sms, email, presencial
-  statusPromessa: text('status_promessa'), // promessa_pagamento, recusa, sem_contato, etc
+  statusPromessa: text('status_promessa'), // promessapagamento, recusa, semcontato, etc
   dataPromessaPagamento: timestamp('data_promessa_pagamento'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

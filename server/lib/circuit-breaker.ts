@@ -55,8 +55,8 @@ export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<u
   asyncFunction: T,
   options: CircuitBreaker.Options
 ): CircuitBreaker<any[], any> {
-  const _breaker = new CircuitBreaker(asyncFunction, options);
-  const _name = options.name || 'UnnamedBreaker';
+  const breaker = new CircuitBreaker(asyncFunction, options);
+  const name = options.name || 'UnnamedBreaker';
 
   // Event listeners for monitoring
   breaker.on('open', () => {
@@ -127,13 +127,13 @@ export function getCircuitBreakerStats(breaker: CircuitBreaker): {
     isHealthy: boolean;
   };
 } {
-  const _stats = breaker.stats;
-  const _totalRequests = stats.fires;
-  const _errorPercentage = totalRequests > 0 ? (stats.failures / totalRequests) * 100 : 0;
+  const stats = breaker.stats;
+  const totalRequests = stats.fires;
+  const errorPercentage = totalRequests > 0 ? (stats.failures / totalRequests) * 100 : 0;
 
   return {
     state: breaker.opened ? 'OPEN' : breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
-    _stats,
+    stats,
     healthCheck: {
       requests: totalRequests,
       errorPercentage: Math.round(errorPercentage),

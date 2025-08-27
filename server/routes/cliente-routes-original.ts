@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { clienteService } from '../services/clienteService.js';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/clientes/cpf/:cpf
@@ -17,7 +17,7 @@ router.get('/clientes/cpf/:cpf', async (req: Request, res: Response) => {
   try {
     const { cpf } = req.params;
 
-    const _result = await clienteService.getClientByCPF(cpf);
+    const result = await clienteService.getClientByCPF(cpf);
 
     if (_result.exists) {
       res.json(_result);
@@ -44,7 +44,7 @@ router.get('/cep/:cep', async (req: Request, res: Response) => {
   try {
     const { cep } = req.params;
 
-    const _address = await clienteService.getAddressByCEP(cep);
+    const address = await clienteService.getAddressByCEP(cep);
     res.json(address);
   }
 catch (error) {

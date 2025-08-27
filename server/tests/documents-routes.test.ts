@@ -47,11 +47,11 @@ describe('Documents Routes Integration Test - PAM V4.0', () => {
 
     it('should have clean, readable code structure (not minified)', async () => {
       // Read the documents.ts file and verify it's not corrupted/minified
-      const _fs = await import('fs/promises');
-      const _fileContent = await fs.readFile('server/routes/documents.ts', 'utf-8');
+      const fs = await import('fs/promises');
+      const fileContent = await fs.readFile('server/routes/documents.ts', 'utf-8');
 
       // Verify file has multiple lines (not minified)
-      const _lines = fileContent.split('\n');
+      const lines = fileContent.split('\n');
       expect(lines.length).toBeGreaterThan(10);
 
       // Verify it contains proper documentation
@@ -63,7 +63,7 @@ describe('Documents Routes Integration Test - PAM V4.0', () => {
 
   describe('🌐 API Endpoint Tests', () => {
     it('should respond to GET /api/propostas/:id/documents with authentication error (not undefined error)', async () => {
-      const _response = await request(app)
+      const response = await request(app)
         .get('/api/propostas/123/documents')
         .expect((res) => {
           // Should get authentication error, NOT undefined function error
@@ -78,13 +78,13 @@ describe('Documents Routes Integration Test - PAM V4.0', () => {
 
     it('should not crash server when accessing documents endpoint', async () => {
       // This test ensures the server doesn't crash like before
-      const _healthBefore = await request(app).get('/api/health').expect(200);
+      const healthBefore = await request(app).get('/api/health').expect(200);
 
       // Try to access documents endpoint
       await request(app).get('/api/propostas/999/documents');
 
       // Server should still be healthy after
-      const _healthAfter = await request(app).get('/api/health').expect(200);
+      const healthAfter = await request(app).get('/api/health').expect(200);
 
       expect(healthBefore.body.status).toBe('ok');
       expect(healthAfter.body.status).toBe('ok');
@@ -93,8 +93,8 @@ describe('Documents Routes Integration Test - PAM V4.0', () => {
 
   describe('📝 Documentation Tests', () => {
     it('should have proper JSDoc comments for all functions', async () => {
-      const _fs = await import('fs/promises');
-      const _fileContent = await fs.readFile('server/routes/documents.ts', 'utf-8');
+      const fs = await import('fs/promises');
+      const fileContent = await fs.readFile('server/routes/documents.ts', 'utf-8');
 
       expect(fileContent).toContain('* GET /api/propostas/:id/documents');
       expect(fileContent).toContain('* POST /api/propostas/:id/documents');

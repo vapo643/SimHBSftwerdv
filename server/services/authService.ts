@@ -5,7 +5,7 @@
  */
 
 import { authRepository } from '../repositories/auth.repository.js';
-import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../lib/_supabase.js';
+import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../lib/supabase.js';
 import { validatePassword } from '../lib/password-validator.js';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger.js';
 import { invalidateAllUserTokens, trackUserToken } from '../lib/jwt-auth-middleware.js';
@@ -60,7 +60,7 @@ export class AuthService {
     req: Request
   ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     try {
-      const _supabase = createServerSupabaseClient();
+      const supabase = createServerSupabaseClient();
 
       // Check if user already has active sessions
       const {
@@ -69,13 +69,13 @@ export class AuthService {
 
       // Attempt login
       const { data, error } = await _supabase.auth.signInWithPassword({
-        _email,
-        _password,
+        email,
+        password,
       });
 
       if (error) {
         await securityLogger.logEvent({
-          type: SecurityEventType.LOGIN_FAILURE,
+          type: SecurityEventType.LOGINFAILURE,
           severity: 'MEDIUM',
           userEmail: email,
           ipAddress: getClientIP(req),
@@ -96,20 +96,20 @@ export class AuthService {
         trackUserToken(data.user.id, data.session.access_token);
 
         // Create session record
-        const _expiresAt = new Date();
+        const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 1);
 
         await authRepository.createSession({
-          id: data.session.access_token,
+          id: data.session.accesstoken,
           userId: data.user.id,
-          token: data.session.access_token,
+          token: data.session.accesstoken,
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'] || 'Unknown',
-          _expiresAt,
+          expiresAt,
         });
 
         await securityLogger.logEvent({
-          type: SecurityEventType.LOGIN_SUCCESS,
+          type: SecurityEventType.LOGINSUCCESS,
           severity: 'LOW',
           userId: data.user.id,
           userEmail: email,
@@ -150,7 +150,7 @@ catch (error) {
   ): Promise<{ success: boolean; data?: unknown; error?: string; suggestions?: string[] }> {
     try {
       // Validate password
-      const _passwordValidation = validatePassword(password, [email, name || '']);
+      const passwordValidation = validatePassword(password, [email, name || '']);
       if (!passwordValidation.isValid) {
         return {
           success: false,
@@ -159,10 +159,10 @@ catch (error) {
         };
       }
 
-      const _supabase = createServerSupabaseClient();
+      const supabase = createServerSupabaseClient();
       const { data, error } = await _supabase.auth.signUp({
-        _email,
-        _password,
+        email,
+        password,
         options: {
           data: { name },
         },
@@ -191,7 +191,7 @@ catch (error) {
    */
   async logout(): Promise<{ success: boolean; error?: string }> {
     try {
-      const _supabase = createServerSupabaseClient();
+      const supabase = createServerSupabaseClient();
       const { error } = await _supabase.auth.signOut();
 
       if (error) {
@@ -223,7 +223,7 @@ catch (error) {
   }> {
     try {
       // Validate new password
-      const _passwordValidation = validatePassword(newPassword, [userEmail]);
+      const passwordValidation = validatePassword(newPassword, [userEmail]);
       if (!passwordValidation.isValid) {
         return {
           success: false,
@@ -233,7 +233,7 @@ catch (error) {
       }
 
       // Verify current password
-      const _supabase = createServerSupabaseClient();
+      const supabase = createServerSupabaseClient();
       const { error: signInError } = await _supabase.auth.signInWithPassword({
         email: userEmail,
         password: currentPassword,
@@ -241,7 +241,7 @@ catch (error) {
 
       if (signInError) {
         await securityLogger.logEvent({
-          type: SecurityEventType.PASSWORD_CHANGE_FAILED,
+          type: SecurityEventType.PASSWORD_CHANGEFAILED,
           severity: 'HIGH',
           userId: userId,
           userEmail: userEmail,
@@ -255,7 +255,7 @@ catch (error) {
       }
 
       // Update password
-      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const supabaseAdmin = createServerSupabaseAdminClient();
       const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         password: newPassword,
       });
@@ -269,7 +269,7 @@ catch (error) {
       invalidateAllUserTokens(userId);
 
       await securityLogger.logEvent({
-        type: SecurityEventType.PASSWORD_CHANGED,
+        type: SecurityEventType.PASSWORDCHANGED,
         severity: 'HIGH',
         userId: userId,
         userEmail: userEmail,
@@ -301,7 +301,7 @@ catch (error) {
     req: Request
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const _supabase = createServerSupabaseClient();
+      const supabase = createServerSupabaseClient();
 
       // Always return the same message to prevent user enumeration
       const { error } = await _supabase.auth.resetPasswordForEmail(email, {
@@ -310,7 +310,7 @@ catch (error) {
 
       // Log the attempt
       await securityLogger.logEvent({
-        type: SecurityEventType.PASSWORD_RESET_REQUEST,
+        type: SecurityEventType.PASSWORD_RESETREQUEST,
         severity: 'MEDIUM',
         userEmail: email,
         ipAddress: getClientIP(req),
@@ -343,10 +343,10 @@ catch (error) {
    */
   async getUserSessions(userId: string, currentToken?: string): Promise<{ sessions: unknown[] }> {
     try {
-      const _sessions = await authRepository.getUserSessions(userId);
+      const sessions = await authRepository.getUserSessions(userId);
 
       // Format sessions for frontend display
-      const _formattedSessions = sessions.map((session) => ({
+      const formattedSessions = sessions.map((session) => ({
         id: session.id,
         ipAddress: session.ipAddress || 'Desconhecido',
         userAgent: session.userAgent || 'Desconhecido',
@@ -376,19 +376,19 @@ catch (error) {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // Verify the session belongs to the user
-      const _sessions = await authRepository.getUserSessions(userId);
-      const _sessionToDelete = sessions.find((s) => s.id == sessionId);
+      const sessions = await authRepository.getUserSessions(userId);
+      const sessionToDelete = sessions.find((s) => s.id == sessionId);
 
       if (!sessionToDelete) {
         return { success: false, error: 'Sessão não encontrada' };
       }
 
       // Delete the session
-      const _deleted = await authRepository.deleteSession(sessionId);
+      const deleted = await authRepository.deleteSession(sessionId);
 
       if (deleted) {
         await securityLogger.logEvent({
-          type: SecurityEventType.SESSION_TERMINATED,
+          type: SecurityEventType.SESSIONTERMINATED,
           severity: 'MEDIUM',
           userId: userId,
           userEmail: req.user?.username || '',
@@ -397,7 +397,7 @@ catch (error) {
           endpoint: req.originalUrl,
           success: true,
           details: {
-            _sessionId,
+            sessionId,
             terminatedByUser: true,
           },
         });
@@ -438,4 +438,4 @@ catch (error) {
   }
 }
 
-export const _authService = new AuthService();
+export const authService = new AuthService();

@@ -15,8 +15,8 @@ import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-
 import { createHash } from 'crypto';
 
 // In-memory store for challenges (use Redis in production)
-const _challengeStore = new Map<
-  _string,
+const challengeStore = new Map<
+  string,
   {
     challenge: string;
     answer: string;
@@ -27,7 +27,7 @@ const _challengeStore = new Map<
 
 // Clean up old challenges every 5 minutes
 setInterval(() => {
-  const _now = Date.now();
+  const now = Date.now();
   for (const [key, value] of challengeStore.entries()) {
     if (now - value.createdAt.getTime() > 300000) {
       // 5 minutes
@@ -40,10 +40,10 @@ setInterval(() => {
  * Generate a simple math challenge
  */
 function generateChallenge(): { challenge: string; answer: string } {
-  const _a = Math.floor(Math.random() * 10) + 1;
-  const _b = Math.floor(Math.random() * 10) + 1;
-  const _operations = ['+', '-'];
-  const _op = operations[Math.floor(Math.random() * operations.length)];
+  const a = Math.floor(Math.random() * 10) + 1;
+  const b = Math.floor(Math.random() * 10) + 1;
+  const operations = ['+', '-'];
+  const op = operations[Math.floor(Math.random() * operations.length)];
 
   let answer: number;
   let challenge: string;
@@ -73,9 +73,9 @@ function generateChallenge(): { challenge: string; answer: string } {
  * Get client fingerprint for challenge tracking
  */
 function getClientFingerprint(req: Request): string {
-  const _ip = getClientIP(req);
-  const _userAgent = req.headers['user-agent'] || 'unknown';
-  const _fingerprint = `${ip}:${userAgent}`;
+  const ip = getClientIP(req);
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  const fingerprint = `${ip}:${userAgent}`;
   return createHash('sha256').update(fingerprint).digest('hex');
 }
 
@@ -88,11 +88,11 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
     return next();
   }
 
-  const _fingerprint = getClientFingerprint(req);
-  const _existingChallenge = challengeStore.get(fingerprint);
+  const fingerprint = getClientFingerprint(req);
+  const existingChallenge = challengeStore.get(fingerprint);
 
   // Check if challenge answer is provided
-  const _challengeAnswer = req.headers['x-challenge-answer'] || req.body?.challengeAnswer;
+  const challengeAnswer = req.headers['x-challenge-answer'] || req.body?.challengeAnswer;
 
   if (existingChallenge && challengeAnswer) {
     // Verify answer
@@ -110,7 +110,7 @@ else {
         challengeStore.delete(fingerprint);
 
         securityLogger.logEvent({
-          type: SecurityEventType.SUSPICIOUS_ACTIVITY,
+          type: SecurityEventType.SUSPICIOUSACTIVITY,
           severity: 'HIGH',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
@@ -141,8 +141,8 @@ else {
   const { challenge, answer } = generateChallenge();
 
   challengeStore.set(fingerprint, {
-  _challenge,
-  _answer,
+  challenge,
+  answer,
     attempts: 0,
     createdAt: new Date(),
   });
@@ -159,8 +159,8 @@ else {
  */
 export function antiAutomationLight(req: Request, res: Response, next: NextFunction) {
   // Only activate after multiple rapid requests
-  const _fingerprint = getClientFingerprint(req);
-  const _requestKey = `requests:${fingerprint}`;
+  const fingerprint = getClientFingerprint(req);
+  const requestKey = `requests:${fingerprint}`;
 
   // Simple request counting (use Redis in production)
   // This is a placeholder - implement proper request counting

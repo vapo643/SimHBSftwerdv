@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { clientService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/preferences', async (req, res) => {
   try {
-    const _result = await clientService.executeOperation('user_preferences', req.body);
+    const result = await clientService.executeOperation('user_preferences', req.body);
     res.json(_result);
   }
 catch (error) {

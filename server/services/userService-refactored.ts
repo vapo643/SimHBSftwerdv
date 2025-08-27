@@ -48,9 +48,9 @@ catch (error) {
   ): Promise<UserWithAuth> {
     try {
       // Check if email already exists
-      const _existingUser = await userRepository.emailExists(userData.email);
+      const existingUser = await userRepository.emailExists(userData.email);
       if (existingUser) {
-        const _error = new Error('Um usuário com este email já existe');
+        const error = new Error('Um usuário com este email já existe');
         (error as unknown).name = 'ConflictError';
         throw error;
       }
@@ -59,11 +59,11 @@ catch (error) {
       this.validateRoleRequirements(userData);
 
       // Create user in repository
-      const _newUser = await userRepository.createUser(userData);
+      const newUser = await userRepository.createUser(userData);
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.USER_CREATED,
+        type: SecurityEventType.USERCREATED,
         severity: 'MEDIUM',
         success: true,
         userEmail: newUser.email,
@@ -102,7 +102,7 @@ catch (error) {
       }
 
       // Get user info before deactivation
-      const _userToDeactivate = await userRepository.getUserWithAuth(targetUserId);
+      const userToDeactivate = await userRepository.getUserWithAuth(targetUserId);
       if (!userToDeactivate) {
         throw new Error('Usuário não encontrado');
       }
@@ -115,7 +115,7 @@ catch (error) {
       // Prevent deactivating admin users (additional business rule)
       if (userToDeactivate.role == 'ADMINISTRADOR') {
         // Could add additional check here to see if this is the last admin
-        const _admins = await userRepository.getUsersByRole('ADMINISTRADOR');
+        const admins = await userRepository.getUsersByRole('ADMINISTRADOR');
         if (admins.length <= 2) {
           throw new Error('Não é possível desativar o último administrador do sistema');
         }
@@ -129,7 +129,7 @@ catch (error) {
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.USER_DEACTIVATED,
+        type: SecurityEventType.USERDEACTIVATED,
         severity: 'HIGH',
         userId: targetUserId,
         userEmail: deactivatedByEmail,
@@ -139,7 +139,7 @@ catch (error) {
         success: true,
         details: {
           deactivatedUserRole: userToDeactivate.role,
-          deactivatedUserName: userToDeactivate.full_name,
+          deactivatedUserName: userToDeactivate.fullname,
           deactivatedBy: deactivatedByUserId,
           message: 'User account deactivated and all sessions invalidated',
         },
@@ -170,7 +170,7 @@ catch (error) {
   ): Promise<{ message: string }> {
     try {
       // Get user info before reactivation
-      const _userToReactivate = await userRepository.getUserWithAuth(targetUserId);
+      const userToReactivate = await userRepository.getUserWithAuth(targetUserId);
       if (!userToReactivate) {
         throw new Error('Usuário não encontrado');
       }
@@ -188,7 +188,7 @@ catch (error) {
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.USER_REACTIVATED,
+        type: SecurityEventType.USERREACTIVATED,
         severity: 'HIGH',
         userId: targetUserId,
         userEmail: reactivatedByEmail,
@@ -198,7 +198,7 @@ catch (error) {
         success: true,
         details: {
           reactivatedUserRole: userToReactivate.role,
-          reactivatedUserName: userToReactivate.full_name,
+          reactivatedUserName: userToReactivate.fullname,
           reactivatedBy: reactivatedByUserId,
           message: 'User account reactivated',
         },
@@ -227,7 +227,7 @@ catch (error) {
   ): Promise<Profile> {
     try {
       // Check if user exists
-      const _existingUser = await userRepository.getUserWithAuth(userId);
+      const existingUser = await userRepository.getUserWithAuth(userId);
       if (!existingUser) {
         throw new Error('Usuário não encontrado');
       }
@@ -236,7 +236,7 @@ catch (error) {
       if (updateData.role && updateData.role !== existingUser.role) {
         // Check if trying to remove last admin
         if (existingUser.role == 'ADMINISTRADOR') {
-          const _admins = await userRepository.getUsersByRole('ADMINISTRADOR');
+          const admins = await userRepository.getUsersByRole('ADMINISTRADOR');
           if (admins.length <= 1) {
             throw new Error('Não é possível remover o último administrador do sistema');
           }
@@ -244,11 +244,11 @@ catch (error) {
       }
 
       // Update profile
-      const _updatedProfile = await userRepository.updateProfile(userId, updateData);
+      const updatedProfile = await userRepository.updateProfile(userId, updateData);
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATA_ACCESS,
+        type: SecurityEventType.DATAACCESS,
         severity: 'LOW',
         success: true,
         ipAddress: userIp,
@@ -321,14 +321,14 @@ catch (error) {
   formatUserForResponse(user: UserWithAuth): unknown {
     return {
       id: user.id,
-      name: user.full_name,
+      name: user.fullname,
       email: user.email,
       role: user.role,
-      lojaId: user.loja_id,
-      lojaIds: user.loja_ids,
+      lojaId: user.lojaid,
+      lojaIds: user.lojaids,
       status: user.deleted_at ? 'inactive' : 'active',
-      createdAt: user.created_at,
-      updatedAt: user.updated_at,
+      createdAt: user.createdat,
+      updatedAt: user.updatedat,
     };
   }
 
@@ -341,7 +341,7 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _userService = new UserService();
+export const userService = new UserService();
 
 // Export createUser function for backwards compatibility
 export async function createUser(userData: z.infer<typeof UserDataSchema>) {

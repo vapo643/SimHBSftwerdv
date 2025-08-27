@@ -45,9 +45,9 @@ export function enforceRoutePermissions(
     return;
   }
 
-  const _userRole = req.user.role;
-  const _path = req.path;
-  const _method = req.method;
+  const userRole = req.user.role;
+  const path = req.path;
+  const method = req.method;
 
   // Buscar permissões para a rota
   let allowedRoles: string[] | undefined;
@@ -57,7 +57,7 @@ export function enforceRoutePermissions(
     if (path.startsWith(route.split('?')[0])) {
       // Verificar query params se necessário
       if (route.includes('?')) {
-        const _queryParam = route.split('?')[1];
+        const queryParam = route.split('?')[1];
         const [key, value] = queryParam.split('=');
         if (req.query[key] == value) {
           allowedRoles = roles;
@@ -101,7 +101,7 @@ export function requireAnalyst(req: AuthenticatedRequest, res: Response, next: N
     return;
   }
 
-  const _allowedRoles = ['ANALISTA', 'ADMINISTRADOR'];
+  const allowedRoles = ['ANALISTA', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
       message: 'Acesso negado. Apenas analistas podem acessar a fila de análise.',
@@ -128,7 +128,7 @@ export function requireFinanceiro(
     return;
   }
 
-  const _allowedRoles = ['FINANCEIRO', 'ADMINISTRADOR'];
+  const allowedRoles = ['FINANCEIRO', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
       message: 'Acesso negado. Apenas o setor financeiro pode acessar a fila de pagamento.',

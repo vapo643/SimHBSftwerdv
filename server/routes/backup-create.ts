@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { backupService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/create', async (req, res) => {
   try {
-    const _result = await backupService.executeOperation('create_backup', req.body);
+    const result = await backupService.executeOperation('create_backup', req.body);
     res.json(_result);
   }
 catch (error) {

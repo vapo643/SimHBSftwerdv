@@ -17,14 +17,14 @@ export interface AuthRequest extends Request {
  */
 export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const _authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('Auth middleware: No token provided');
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _token = authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[1];
 
     if (!token || token == 'undefined' || token == 'null') {
       console.log('Auth middleware: Invalid token format');
@@ -32,8 +32,8 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
     }
 
     // Usa a camada de abstração em vez de chamar Supabase diretamente
-    const _authProvider = getServerAuthProvider();
-    const _validationResult = await authProvider.validateToken(token);
+    const authProvider = getServerAuthProvider();
+    const validationResult = await authProvider.validateToken(token);
 
     if (!validationResult.valid) {
       console.log('Auth middleware: Token validation failed');

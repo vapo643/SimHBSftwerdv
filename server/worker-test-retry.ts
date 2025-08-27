@@ -8,10 +8,10 @@ import { Worker, Job, WorkerOptions } from 'bullmq';
 import { Redis } from 'ioredis';
 
 // Redis connection for test worker
-const _redisConnection = new Redis({
+const redisConnection = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
+  password: process.env.REDISPASSWORD,
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
 });
@@ -34,10 +34,10 @@ const testWorkerOptions: WorkerOptions = {
 };
 
 // Test Retry Worker
-const _testRetryWorker = new Worker(
+const testRetryWorker = new Worker(
   'test-retry',
   async (job: Job) => {
-    const _attemptNumber = job.attemptsMade + 1;
+    const attemptNumber = job.attemptsMade + 1;
 
     console.log(`[TEST RETRY WORKER] 🔄 Processando job ${job.id}`);
     console.log(`[TEST RETRY WORKER] 📊 Tentativa ${attemptNumber} de ${job.opts.attempts || 1}`);
@@ -59,8 +59,8 @@ testRetryWorker.on('completed', (job) => {
 });
 
 testRetryWorker.on('failed', (job, err) => {
-  const _attemptNumber = job?.attemptsMade || 0;
-  const _maxAttempts = job?.opts.attempts || 1;
+  const attemptNumber = job?.attemptsMade || 0;
+  const maxAttempts = job?.opts.attempts || 1;
 
   console.log(
     `[TEST RETRY WORKER] ❌ Job ${job?.id} falhou na tentativa ${attemptNumber}/${maxAttempts}`
@@ -69,7 +69,7 @@ testRetryWorker.on('failed', (job, err) => {
 
   if (attemptNumber < maxAttempts) {
     // Calcular delay do backoff exponencial
-    const _backoffDelay = job?.opts.backoff
+    const backoffDelay = job?.opts.backoff
       ? Math.pow(2, attemptNumber - 1) *
         (typeof job.opts.backoff == 'number'
           ? job.opts.backoff

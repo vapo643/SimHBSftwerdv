@@ -4,15 +4,15 @@
 
 import { Router } from 'express';
 import {
-  _getDatabaseStats,
-  _getTableStats,
-  _getIndexUsage,
-  _getActiveConnections,
-  _checkDatabaseHealth,
-  _generateMonitoringReport,
+  getDatabaseStats,
+  getTableStats,
+  getIndexUsage,
+  getActiveConnections,
+  checkDatabaseHealth,
+  generateMonitoringReport,
 } from '../utils/dbMonitoring';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/monitoring/stats
@@ -20,7 +20,7 @@ const _router = Router();
  */
 router.get('/stats', async (req, res) => {
   try {
-    const _stats = await getDatabaseStats();
+    const stats = await getDatabaseStats();
     res.json({ success: true, data: stats });
   }
 catch (error) {
@@ -38,7 +38,7 @@ catch (error) {
  */
 router.get('/tables', async (req, res) => {
   try {
-    const _stats = await getTableStats();
+    const stats = await getTableStats();
     res.json({ success: true, data: stats });
   }
 catch (error) {
@@ -56,7 +56,7 @@ catch (error) {
  */
 router.get('/indexes', async (req, res) => {
   try {
-    const _usage = await getIndexUsage();
+    const usage = await getIndexUsage();
     res.json({ success: true, data: usage });
   }
 catch (error) {
@@ -74,7 +74,7 @@ catch (error) {
  */
 router.get('/connections', async (req, res) => {
   try {
-    const _connections = await getActiveConnections();
+    const connections = await getActiveConnections();
     res.json({ success: true, data: connections });
   }
 catch (error) {
@@ -92,8 +92,8 @@ catch (error) {
  */
 router.get('/health', async (req, res) => {
   try {
-    const _health = await checkDatabaseHealth();
-    const _statusCode =
+    const health = await checkDatabaseHealth();
+    const statusCode =
       health.status == 'healthy'
         ? 200
         : health.status == 'warning'
@@ -119,7 +119,7 @@ catch (error) {
  */
 router.get('/report', async (req, res) => {
   try {
-    const _report = await generateMonitoringReport();
+    const report = await generateMonitoringReport();
     res.json({ success: true, data: report });
   }
 catch (error) {

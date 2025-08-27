@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { documentService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/preview/:id', async (req, res) => {
   try {
-    const _result = await documentService.executeOperation('file_preview', { id: req.params.id });
+    const result = await documentService.executeOperation('file_preview', { id: req.params.id });
     res.json(_result);
   }
 catch (error) {

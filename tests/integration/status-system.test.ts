@@ -172,14 +172,14 @@ catch (error) {
       // APROVADO → CCB_GERADA
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.CCB_GERADA,
+        novoStatus: ProposalStatus.CCBGERADA,
         userId: testUserId,
       });
 
       // CCB_GERADA → AGUARDANDO_ASSINATURA
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.AGUARDANDO_ASSINATURA,
+        novoStatus: ProposalStatus.AGUARDANDOASSINATURA,
         userId: testUserId,
         observacoes: 'CCB enviada para assinatura',
       });
@@ -218,17 +218,17 @@ catch (error) {
       // Primeiro vamos para ASSINATURA_CONCLUIDA através de transições válidas
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.CCB_GERADA,
+        novoStatus: ProposalStatus.CCBGERADA,
         userId: testUserId,
       });
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.AGUARDANDO_ASSINATURA,
+        novoStatus: ProposalStatus.AGUARDANDOASSINATURA,
         userId: testUserId,
       });
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.ASSINATURA_CONCLUIDA,
+        novoStatus: ProposalStatus.ASSINATURACONCLUIDA,
         userId: testUserId,
       });
 

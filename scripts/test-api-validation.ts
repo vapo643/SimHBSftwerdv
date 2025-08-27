@@ -40,7 +40,7 @@ async function testApiValidation() {
 
   return {
     teste1: testeInvalido1,
-    baseUrl: BASE_URL,
+    baseUrl: BASEURL,
   };
 }
 

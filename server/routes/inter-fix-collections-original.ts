@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { interBankService } from '../services/interBankService';
 import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { storage } from '../storage';
 
-const _router = Router();
+const router = Router();
 
 /**
  * ENDPOINT EMERGENCIAL: Regenerar boletos com códigos válidos da API Inter
@@ -14,7 +14,7 @@ const _router = Router();
  */
 router.post(
   '/fix-collections/:propostaId',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
@@ -40,7 +40,7 @@ router.post(
       }
 
       // Buscar boletos atuais (possivelmente com códigos inválidos)
-      const _boletoesAtuais = await db
+      const boletoesAtuais = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, propostaId));
@@ -48,7 +48,7 @@ router.post(
       console.log(`🔍 [FIX COLLECTIONS] Encontrados ${boletoesAtuais.length} boletos atuais`);
 
       // Verificar se são códigos inválidos
-      const _codigosInvalidos = boletoesAtuais.filter(
+      const codigosInvalidos = boletoesAtuais.filter(
         (b) =>
           !b.codigoSolicitacao.match(
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -73,7 +73,7 @@ router.post(
         .where(eq(interCollections.propostaId, propostaId));
 
       // Preparar dados para criação de novos boletos
-      const _parcelas = boletoesAtuais
+      const parcelas = boletoesAtuais
         .map((boleto) => ({
           numero: boleto.numeroParcela || 1,
           valor: parseFloat(boleto.valorNominal.toString()),
@@ -83,21 +83,21 @@ router.post(
 
       console.log(`🔄 [FIX COLLECTIONS] Criando ${parcelas.length} novos boletos na API Inter...`);
 
-      const _novosBoletosGerados = [];
+      const novosBoletosGerados = [];
 
       for (let _i = 0; i < parcelas.length; i++) {
-        const _parcela = parcelas[i];
+        const parcela = parcelas[i];
 
         try {
-          const _seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
+          const seuNumero = `${propostaId.slice(0, 18)}-${String(parcela.numero).padStart(3, '0')}`;
 
           console.log(
             `📄 [FIX COLLECTIONS] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`
           );
 
           // Criar cobrança na API Inter
-          const _collectionData = await interBankService.emitirCobranca({
-  _seuNumero,
+          const collectionData = await interBankService.emitirCobranca({
+  seuNumero,
             valorNominal: parcela.valor,
             dataVencimento: parcela.vencimento,
             numDiasAgenda: 1,
@@ -121,12 +121,12 @@ router.post(
           );
 
           // Salvar no banco com código válido
-          const _novoBoleto = await db
+          const novoBoleto = await db
             .insert(interCollections)
             .values({
-  _propostaId,
+  propostaId,
               codigoSolicitacao: collectionData.codigoSolicitacao, // UUID válido da API Inter
-  _seuNumero,
+  seuNumero,
               valorNominal: parcela.valor.toString(),
               dataVencimento: parcela.vencimento,
               situacao: 'A_RECEBER', // PAM V1.0: Estado Inicial Forçado - nunca confiar na API

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { documentService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/render', async (req, res) => {
   try {
-    const _result = await documentService.executeOperation('template_engine', req.body);
+    const result = await documentService.executeOperation('template_engine', req.body);
     res.json(_result);
   }
 catch (error) {

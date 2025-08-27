@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { auditService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/view', async (req, res) => {
   try {
-    const _result = await auditService.executeOperation('view_logs', req.query);
+    const result = await auditService.executeOperation('view_logs', req.query);
     res.json(_result);
   }
 catch (error) {

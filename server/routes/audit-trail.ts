@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { auditService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/trail/:id', async (req, res) => {
   try {
-    const _result = await auditService.executeOperation('get_trail', { id: req.params.id });
+    const result = await auditService.executeOperation('get_trail', { id: req.params.id });
     res.json(_result);
   }
 catch (error) {

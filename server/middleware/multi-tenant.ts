@@ -27,7 +27,7 @@ export async function multiTenantMiddleware(
     }
 
     // Get user's loja_id from database via gerente_lojas junction table
-    const _userRecord = await db
+    const userRecord = await db
       .select({
         id: users.id,
         email: users.email,
@@ -44,10 +44,10 @@ export async function multiTenantMiddleware(
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _userData = userRecord[0];
+    const userData = userRecord[0];
 
     // Handle case where user might not have a loja assigned
-    const _lojaId = userData.lojaId || 1; // Default to loja 1 if no assignment
+    const lojaId = userData.lojaId || 1; // Default to loja 1 if no assignment
 
     // Set database session context for RLS
     await db.execute(`SET LOCAL app.current_user_loja_id = '${lojaId}';`);

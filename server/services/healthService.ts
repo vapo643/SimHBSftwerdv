@@ -4,7 +4,7 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { createClient } from '@supabase/supabase-js';
 import os from 'os';
 import fs from 'fs';
@@ -54,7 +54,7 @@ export class HealthService {
     checks.externalApis = await this.checkExternalApis();
 
     // Metrics
-    const _metrics = this.getSystemMetrics();
+    const metrics = this.getSystemMetrics();
 
     return {
       status: overallStatus,
@@ -62,8 +62,8 @@ export class HealthService {
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development',
       version: process.env.npm_package_version || '1.0.0',
-      _checks,
-      _metrics,
+      checks,
+      metrics,
     };
   }
 
@@ -71,15 +71,15 @@ export class HealthService {
    * Check database connectivity and performance
    */
   private async checkDatabase(): Promise<unknown> {
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       await db.execute(sql`SELECT 1`);
-      const _latency = Date.now() - startTime;
+      const latency = Date.now() - startTime;
 
       return {
         status: latency < 100 ? 'healthy' : 'degraded',
-        _latency,
+        latency,
       };
     }
 catch (error) {
@@ -95,11 +95,11 @@ catch (error) {
    * Check Supabase connectivity
    */
   private async checkSupabase(): Promise<unknown> {
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
-      const _supabaseUrl = process.env.SUPABASE_URL;
-      const _supabaseKey = process.env.SUPABASE_ANON_KEY;
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseKey) {
         return {
@@ -108,10 +108,10 @@ catch (error) {
         };
       }
 
-      const _supabase = createClient(supabaseUrl, supabaseKey);
+      const supabase = createClient(supabaseUrl, supabaseKey);
       const { error } = await _supabase.from('propostas').select('count').limit(1);
 
-      const _latency = Date.now() - startTime;
+      const latency = Date.now() - startTime;
 
       if (error) {
         throw error;
@@ -119,7 +119,7 @@ catch (error) {
 
       return {
         status: latency < 200 ? 'healthy' : 'degraded',
-        _latency,
+        latency,
       };
     }
 catch (error) {
@@ -136,7 +136,7 @@ catch (error) {
    */
   private async checkFilesystem(): Promise<unknown> {
     try {
-      const _testFile = '/tmp/health_check_test.txt';
+      const testFile = '/tmp/health_check_test.txt';
 
       // Test write
       await fs.promises.writeFile(testFile, 'health check');
@@ -165,10 +165,10 @@ catch (error) {
    * Check memory usage
    */
   private checkMemory(): unknown {
-    const _totalMemory = os.totalmem();
-    const _freeMemory = os.freemem();
-    const _usedMemory = totalMemory - freeMemory;
-    const _usagePercentage = (usedMemory / totalMemory) * 100;
+    const totalMemory = os.totalmem();
+    const freeMemory = os.freemem();
+    const usedMemory = totalMemory - freeMemory;
+    const usagePercentage = (usedMemory / totalMemory) * 100;
 
     return {
       status: usagePercentage < 90 ? 'healthy' : 'unhealthy',
@@ -201,9 +201,9 @@ catch (error) {
    * Get system metrics
    */
   private getSystemMetrics(): unknown {
-    const _totalMemory = os.totalmem();
-    const _freeMemory = os.freemem();
-    const _usedMemory = totalMemory - freeMemory;
+    const totalMemory = os.totalmem();
+    const freeMemory = os.freemem();
+    const usedMemory = totalMemory - freeMemory;
 
     return {
       cpu: {
@@ -263,11 +263,11 @@ catch {
       process.env.SUPABASE_ANON_KEY
     );
 
-    const _ready = Object.values(checks).every((check) => check == true);
+    const ready = Object.values(checks).every((check) => check == true);
 
     return {
-      _ready,
-      _checks,
+      ready,
+      checks,
       timestamp: new Date().toISOString(),
     };
   }
@@ -276,7 +276,7 @@ catch {
    * Helper: Format bytes to human readable
    */
   private formatBytes(bytes: number): string {
-    const _units = ['B', 'KB', 'MB', 'GB'];
+    const units = ['B', 'KB', 'MB', 'GB'];
     let _index = 0;
     let _value = bytes;
 
@@ -289,4 +289,4 @@ catch {
   }
 }
 
-export const _healthService = new HealthService();
+export const healthService = new HealthService();

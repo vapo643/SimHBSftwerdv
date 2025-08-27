@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { cacheService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/stats', async (req, res) => {
   try {
-    const _result = await cacheService.executeOperation('cache_stats', req.query);
+    const result = await cacheService.executeOperation('cache_stats', req.query);
     res.json(_result);
   }
 catch (error) {

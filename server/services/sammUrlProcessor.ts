@@ -397,7 +397,7 @@ export class SAMMUrlProcessor {
     let _report = '# OWASP SAMM URLs - Relatório Completo\n\n';
     report += `Total de URLs: ${this.sammUrls.length}\n\n`;
 
-    const _categories = [
+    const categories = [
       'Model',
       'Governance',
       'Design',
@@ -408,7 +408,7 @@ export class SAMMUrlProcessor {
     ];
 
     categories.forEach((category) => {
-      const _urls = this.getUrlsByCategory(category);
+      const urls = this.getUrlsByCategory(category);
       if (urls.length > 0) {
         report += `## ${category} (${urls.length} URLs)\n\n`;
         urls.forEach((url) => {

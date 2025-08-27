@@ -92,7 +92,7 @@ async function createBackupPoint(sql: postgres.Sql) {
   // Em produção, usar pg_dump ou snapshot do provedor cloud
   // Aqui apenas registramos o ponto
   await sql`
-    INSERT INTO __drizzle_migrations (hash, created_at, success, error_message)
+    INSERT INTO __drizzle_migrations (hash, createdat, success, error_message)
     VALUES (${backupName}, NOW(), true, 'BACKUP_POINT')
   `;
 
@@ -162,7 +162,7 @@ async function runMigration() {
     // Registrar sucesso
     const executionTime = Date.now() - startTime;
     await sql`
-      INSERT INTO __drizzle_migrations (hash, created_at, success, execution_time_ms)
+      INSERT INTO __drizzle_migrations (hash, createdat, success, execution_time_ms)
       VALUES (${'migration_' + Date.now()}, NOW(), true, ${executionTime})
     `;
 
@@ -185,7 +185,7 @@ catch (error: any) {
     // Registrar falha
     try {
       await sql`
-        INSERT INTO __drizzle_migrations (hash, created_at, success, error_message, execution_time_ms)
+        INSERT INTO __drizzle_migrations (hash, createdat, success, errormessage, execution_time_ms)
         VALUES (${'failed_' + Date.now()}, NOW(), false, ${error.message}, ${executionTime})
       `;
     }

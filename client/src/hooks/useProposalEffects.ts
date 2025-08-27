@@ -70,11 +70,11 @@ export function useProposalEffects() {
 
         // Prepare payload for new API
         const _payload = {
-          _valorEmprestimo,
+          valorEmprestimo,
           prazoMeses: debouncedPrazo,
           produtoId: state.loanData.produtoId,
           parceiroId: state.context?.atendente?.loja?.parceiro?.id || null,
-          _diasCarencia, // Pass grace period to API for proper calculation
+          diasCarencia, // Pass grace period to API for proper calculation
         };
 
         console.log('[FRONTEND] Enviando simulação para nova API:', payload);
@@ -110,7 +110,7 @@ export function useProposalEffects() {
             diasCarencia > 0
               ? String(valorEmprestimo * (response.taxaJurosMensal / 100 / 30) * diasCarencia)
               : '0',
-          _diasCarencia,
+          diasCarencia,
           parametrosUtilizados: response.parametrosUtilizados,
         });
       }
@@ -139,12 +139,12 @@ else {
   }, [
     state.loanData.produtoId,
     state.loanData.tabelaComercialId,
-    _debouncedValorSolicitado,
-    _debouncedPrazo,
+    debouncedValorSolicitado,
+    debouncedPrazo,
     state.loanData.incluirTac,
     state.loanData.dataCarencia,
     state.context,
-    _toast,
+    toast,
   ]);
 
   // Validation effect for limits

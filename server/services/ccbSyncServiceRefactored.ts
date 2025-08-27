@@ -69,7 +69,7 @@ export class CCBSyncService {
    * Acts as a safety net for webhook failures
    */
   async syncPendingCCBs() {
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       console.log('[CCB SYNC] 🔍 Running fallback check for missed documents...');
@@ -80,15 +80,15 @@ export class CCBSyncService {
       // 1. Have been waiting for signature for more than 3 hours
       // 2. Are marked as signed but haven't been processed
       // 3. Don't have a stored CCB file
-      const _pendingProposals = await db.execute(sql`
+      const pendingProposals = await db.execute(sql`
         SELECT 
           p.id,
-          p.clicksign_document_id,
-          p.clicksign_envelope_id,
-          p.cliente_nome,
-          p.data_aprovacao,
-          p.assinatura_eletronica_concluida,
-          p.caminho_ccb_assinado,
+          p.clicksign_documentid,
+          p.clicksign_envelopeid,
+          p.clientenome,
+          p.dataaprovacao,
+          p.assinatura_eletronicaconcluida,
+          p.caminho_ccbassinado,
           p.atualizado_em
         FROM propostas p
         WHERE 
@@ -111,25 +111,25 @@ export class CCBSyncService {
         return;
       }
 
-      const _proposals = pendingProposals;
+      const proposals = pendingProposals;
       console.warn(
         `[CCB SYNC] ⚠️ Found ${proposals.length} potentially missed documents (older than 3 hours)`
       );
 
       // Process in batch
-      const _processingTasks = proposals.map((proposal) => ({
+      const processingTasks = proposals.map((proposal) => ({
         id: proposal.id as string,
         documentKey: (proposal.clicksign_document_id || proposal.clicksign_envelope_id) as string,
       }));
 
-      const _results = await documentProcessingService.processBatch(
-        _processingTasks,
+      const results = await documentProcessingService.processBatch(
+        processingTasks,
         ProcessingSource.POLLING
       );
 
       // Count successes
-      const _successCount = results.filter((r) => r.success).length;
-      const _failureCount = results.filter((r) => !r.success).length;
+      const successCount = results.filter((r) => r.success).length;
+      const failureCount = results.filter((r) => !r.success).length;
 
       this.syncStats.documentsProcessed += successCount;
       this.syncStats.failedAttempts += failureCount;
@@ -146,7 +146,7 @@ export class CCBSyncService {
       }
 
       // Log sync statistics
-      const _processingTime = Date.now() - startTime;
+      const processingTime = Date.now() - startTime;
       console.log(`[CCB SYNC] 📊 Fallback sync completed in ${processingTime}ms`);
       console.log(`[CCB SYNC] 📈 Stats:`, {
         totalSyncs: this.syncStats.totalSyncs,
@@ -164,10 +164,10 @@ export class CCBSyncService {
         // Log alert for monitoring
         await db.execute(sql`
           INSERT INTO system_alerts (
-  _type,
-  _severity,
-  _message,
-  _details,
+  type,
+  severity,
+  message,
+  details,
             created_at
           ) VALUES (
             ${'webhook_failure_suspected'},
@@ -208,8 +208,8 @@ catch (error) {
     try {
       console.log(`[CCB SYNC] 🔧 Manual sync triggered for proposal ${proposalId}`);
 
-      const _result = await documentProcessingService.processSignedDocument(
-        _proposalId,
+      const result = await documentProcessingService.processSignedDocument(
+        proposalId,
         ProcessingSource.MANUAL
       );
 
@@ -223,4 +223,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _ccbSyncService = new CCBSyncService();
+export const ccbSyncService = new CCBSyncService();

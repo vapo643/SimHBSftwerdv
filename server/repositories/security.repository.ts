@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { securityLogs } from '@shared/schema/security';
 import { sql, eq, and, desc, gte } from 'drizzle-orm';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
@@ -19,20 +19,20 @@ export class SecurityRepository extends BaseRepository<unknown> {
    * Get security metrics for dashboard
    */
   async getSecurityMetrics(timeRange: string): Promise<unknown> {
-    const _startDate = this.getTimeRangeDate(timeRange);
+    const startDate = this.getTimeRangeDate(timeRange);
 
     try {
       const [totalRequests] = await db
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate));
+        .where(gte(securityLogs.createdat, startDate));
 
       const [suspiciousRequests] = await db
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
         .where(
           and(
-            gte(securityLogs.created_at, startDate),
+            gte(securityLogs.createdat, startDate),
             sql`${securityLogs.severity} IN ('HIGH', 'CRITICAL')`
           )
         );
@@ -41,14 +41,14 @@ export class SecurityRepository extends BaseRepository<unknown> {
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
         .where(
-          and(gte(securityLogs.created_at, startDate), eq(securityLogs.event_type, 'BLOCKED'))
+          and(gte(securityLogs.createdat, startDate), eq(securityLogs.eventtype, 'BLOCKED'))
         );
 
       return {
         totalRequests: totalRequests?.count || 0,
         suspiciousRequests: suspiciousRequests?.count || 0,
         blockedRequests: blockedRequests?.count || 0,
-  _timeRange,
+  timeRange,
       };
     }
 catch (error) {
@@ -58,7 +58,7 @@ catch (error) {
         totalRequests: 0,
         suspiciousRequests: 0,
         blockedRequests: 0,
-  _timeRange,
+  timeRange,
       };
     }
   }
@@ -68,7 +68,7 @@ catch (error) {
    */
   async getActiveAlerts(limit: number = 50): Promise<any[]> {
     try {
-      const _alerts = await db
+      const alerts = await db
         .select()
         .from(securityLogs)
         .where(
@@ -107,7 +107,7 @@ catch (error) {
     details?: unknown;
   }): Promise<any | undefined> {
     try {
-      const _result = await db
+      const result = await db
         .insert(securityLogs)
         .values({
           event_type: event.eventType,
@@ -142,10 +142,10 @@ catch (error) {
     try {
       let _query = db.select().from(securityLogs);
 
-      const _conditions = [];
+      const conditions = [];
 
       if (filters.startDate) {
-        conditions.push(gte(securityLogs.created_at, filters.startDate));
+        conditions.push(gte(securityLogs.createdat, filters.startDate));
       }
 
       if (filters.endDate) {
@@ -161,7 +161,7 @@ catch (error) {
       }
 
       if (filters.eventType) {
-        conditions.push(eq(securityLogs.event_type, filters.eventType));
+        conditions.push(eq(securityLogs.eventtype, filters.eventType));
       }
 
       if (conditions.length > 0) {
@@ -193,14 +193,14 @@ catch (error) {
     try {
       // For now, we'll mark it by updating the security log
       // In a full implementation, you might use a separate security_alerts_resolved table
-      const _result = await db
+      const result = await db
         .update(securityLogs)
         .set({
           metadata: sql`COALESCE(${securityLogs.metadata}, '{}')::jsonb || ${JSON.stringify({
             resolved: true,
-  _resolvedBy,
+  resolvedBy,
             resolvedAt: _getBrasiliaTimestamp(),
-  _reason,
+  reason,
           })}::jsonb`,
         })
         .where(eq(securityLogs.id, alertId))
@@ -223,26 +223,26 @@ catch (error) {
     eventsByType: Record<string, number>;
     trendData: unknown[];
   }> {
-    const _startDate = this.getTimeRangeDate(timeRange);
+    const startDate = this.getTimeRangeDate(timeRange);
 
     try {
       // Get total events
       const [totalEvents] = await db
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate));
+        .where(gte(securityLogs.createdat, startDate));
 
       // Get events by severity
-      const _severityResults = await db
+      const severityResults = await db
         .select({
           severity: securityLogs.severity,
           count: sql<number>`count(*)`,
         })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate))
+        .where(gte(securityLogs.createdat, startDate))
         .groupBy(securityLogs.severity);
 
-      const _eventsBySeverity = severityResults.reduce(
+      const eventsBySeverity = severityResults.reduce(
         (acc, row) => {
           acc[row.severity] = row.count;
           return acc;
@@ -251,16 +251,16 @@ catch (error) {
       );
 
       // Get events by type
-      const _typeResults = await db
+      const typeResults = await db
         .select({
-          event_type: securityLogs.event_type,
+          event_type: securityLogs.eventtype,
           count: sql<number>`count(*)`,
         })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate))
+        .where(gte(securityLogs.createdat, startDate))
         .groupBy(securityLogs.event_type);
 
-      const _eventsByType = typeResults.reduce(
+      const eventsByType = typeResults.reduce(
         (acc, row) => {
           acc[row.event_type] = row.count;
           return acc;
@@ -270,8 +270,8 @@ catch (error) {
 
       return {
         totalEvents: totalEvents?.count || 0,
-  _eventsBySeverity,
-  _eventsByType,
+  eventsBySeverity,
+  eventsByType,
         trendData: [], // Will be generated by service layer
       };
     }
@@ -307,7 +307,7 @@ catch (error) {
    * Helper method to convert time range to date
    */
   private getTimeRangeDate(timeRange: string): Date {
-    const _now = new Date();
+    const now = new Date();
     switch (timeRange) {
       case '1h': {
         break;
@@ -335,10 +335,10 @@ catch (error) {
    */
   async cleanOldLogs(retentionDays: number = 90): Promise<number> {
     try {
-      const _cutoffDate = new Date();
+      const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
-      const _result = await db
+      const result = await db
         .delete(securityLogs)
         .where(sql`${securityLogs.created_at} < ${cutoffDate.toISOString()}`)
         .returning({ id: securityLogs.id });
@@ -352,4 +352,4 @@ catch (error) {
   }
 }
 
-export const _securityRepository = new SecurityRepository();
+export const securityRepository = new SecurityRepository();

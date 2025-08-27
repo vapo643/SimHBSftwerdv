@@ -13,7 +13,7 @@ async function fazerLogin(): Promise<string> {
   try {
     console.log('🔐 Fazendo login como administrador...');
 
-    const _response = await axios.post(`${API_URL}/auth/login`, {
+    const response = await axios.post(`${API_URL}/auth/login`, {
       email: 'admin@simpix.com', // Sem .br
       password: 'admin123', // Senha simples que funciona
     });
@@ -40,7 +40,7 @@ catch (error) {
 
       console.log('✅ Usuário admin criado, fazendo login...');
 
-      const _loginResponse = await axios.post(`${API_URL}/auth/login`, {
+      const loginResponse = await axios.post(`${API_URL}/auth/login`, {
         email: 'admin@simpix.com',
         password: 'admin123',
       });
@@ -61,15 +61,15 @@ async function buscarPropostaComBoletos(
     console.log('📋 Buscando proposta com boletos ativos...');
 
     // Buscar primeira proposta com boletos ativos
-    const _response = await axios.get(`${API_URL}/inter/collections/list`, {
+    const response = await axios.get(`${API_URL}/inter/collections/list`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Cookie: `jwt=${token}`,
       },
     });
 
-    const _collections = response.data.collections || [];
-    const _boletoAtivo = collections.find((c) => c.isActive && c.situacao == 'A_RECEBER');
+    const collections = response.data.collections || [];
+    const boletoAtivo = collections.find((c) => c.isActive && c.situacao == 'A_RECEBER');
 
     if (!boletoAtivo) {
       throw new Error('Nenhum boleto ativo encontrado');
@@ -94,13 +94,13 @@ async function testarProrrogacaoComAuditoria(token: string, codigoSolicitacao: s
 
   try {
     // Calcular nova data (30 dias a mais)
-    const _hoje = new Date();
+    const hoje = new Date();
     hoje.setDate(hoje.getDate() + 30);
-    const _novaData = hoje.toISOString().split('T')[0];
+    const novaData = hoje.toISOString().split('T')[0];
 
     console.log(`📅 Prorrogando boleto ${codigoSolicitacao} para ${novaData}...\n`);
 
-    const _response = await axios.patch(
+    const response = await axios.patch(
       `${API_URL}/inter/collections/batch-extend`,
       {
         codigosSolicitacao: [codigoSolicitacao],
@@ -133,7 +133,7 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
 
   try {
     // Buscar informações da proposta
-    const _proposalResponse = await axios.get(
+    const proposalResponse = await axios.get(
       `${API_URL}/inter/collections/proposal/${propostaId}`,
       {
         headers: {
@@ -151,17 +151,17 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     }
 
     // Aplicar desconto de 30%
-    const _desconto = valorRestante * 0.3;
-    const _novoValorTotal = valorRestante - desconto;
+    const desconto = valorRestante * 0.3;
+    const novoValorTotal = valorRestante - desconto;
 
     // Criar 2 novas parcelas
-    const _hoje = new Date();
-    const _parcela1Data = new Date(hoje);
+    const hoje = new Date();
+    const parcela1Data = new Date(hoje);
     parcela1Data.setDate(parcela1Data.getDate() + 30);
-    const _parcela2Data = new Date(hoje);
+    const parcela2Data = new Date(hoje);
     parcela2Data.setDate(parcela2Data.getDate() + 60);
 
-    const _novasParcelas = [
+    const novasParcelas = [
       { valor: novoValorTotal / 2, dataVencimento: parcela1Data.toISOString().split('T')[0] },
       { valor: novoValorTotal / 2, dataVencimento: parcela2Data.toISOString().split('T')[0] },
     ];
@@ -172,12 +172,12 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     console.log(`   • Novo valor: R$ ${novoValorTotal.toFixed(2)}`);
     console.log(`   • 2 parcelas de R$ ${(novoValorTotal / 2).toFixed(2)}\n`);
 
-    const _response = await axios.post(
+    const response = await axios.post(
       `${API_URL}/inter/collections/settlement-discount`,
       {
-        _propostaId,
-        _desconto,
-        _novasParcelas,
+        propostaId,
+        desconto,
+        novasParcelas,
       },
       {
         headers: {
@@ -203,19 +203,19 @@ catch (error) {
 // Executar todos os testes
 async function executarTestes() {
   try {
-    const _token = await fazerLogin();
+    const token = await fazerLogin();
     const { propostaId, codigoSolicitacao } = await buscarPropostaComBoletos(token);
 
     console.log('📊 DADOS PARA TESTE:');
     console.log(`   • Proposta ID: ${propostaId}`);
     console.log(`   • Código Solicitação: ${codigoSolicitacao}\n`);
 
-    const _resultadoProrrogacao = await testarProrrogacaoComAuditoria(token, codigoSolicitacao);
+    const resultadoProrrogacao = await testarProrrogacaoComAuditoria(token, codigoSolicitacao);
 
     // Aguardar um pouco entre os testes
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const _resultadoDesconto = await testarDescontoComAuditoria(token, propostaId);
+    const resultadoDesconto = await testarDescontoComAuditoria(token, propostaId);
 
     console.log('🏁 ==== RELATÓRIO FINAL ====');
     console.log(`✅ Prorrogação: ${resultadoProrrogacao ? 'SUCESSO' : 'FALHA'}`);

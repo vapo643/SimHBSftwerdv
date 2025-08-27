@@ -15,7 +15,7 @@ import { interCollections, propostas } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 import { transitionTo, InvalidTransitionError } from './statusFsmService';
 // Usando import dinâmico para evitar ciclo de dependência
-const _getInterService = async () => {
+const getInterService = async () => {
   const { interBankService } = await import('./interBankService');
   return interBankService;
 };
@@ -75,7 +75,7 @@ export class BoletoStatusService {
       }
 
       // Identificar o boleto
-      const _whereClause = cobranca.codigoSolicitacao
+      const whereClause = cobranca.codigoSolicitacao
         ? eq(interCollections.codigoSolicitacao, cobranca.codigoSolicitacao)
         : eq(interCollections.seuNumero, cobranca.seuNumero!);
 
@@ -117,7 +117,7 @@ export class BoletoStatusService {
       }
 
       // Atualizar no banco
-      const _result = await db.update(interCollections).set(updateData).where(whereClause);
+      const result = await db.update(interCollections).set(updateData).where(whereClause);
 
       console.log(`[STATUS SERVICE] ✅ Status atualizado para ${updateData.situacao}`);
 
@@ -154,7 +154,7 @@ catch (error) {
 
     try {
       // Buscar todas as cobranças da proposta
-      const _cobrancas = await db
+      const cobrancas = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, propostaId));
@@ -176,8 +176,8 @@ catch (error) {
           console.log(`[STATUS SERVICE] 🔍 Consultando status: ${cobranca.codigoSolicitacao}`);
 
           // Buscar status atualizado na API do Inter
-          const _interService = await getInterService();
-          const _detalhes = await interService.recuperarCobranca(cobranca.codigoSolicitacao);
+          const interService = await getInterService();
+          const detalhes = await interService.recuperarCobranca(cobranca.codigoSolicitacao);
 
           if (!detalhes?.cobranca) {
             console.log(
@@ -187,7 +187,7 @@ catch (error) {
             continue;
           }
 
-          const _novoStatus = detalhes.cobranca.situacao;
+          const novoStatus = detalhes.cobranca.situacao;
 
           // Comparar e atualizar se diferente
           if (cobranca.situacao !== novoStatus) {
@@ -213,7 +213,7 @@ else {
           await new Promise((resolve) => setTimeout(resolve, 200));
         }
 catch (error) {
-          const _errorMsg = `Erro ao sincronizar ${cobranca.codigoSolicitacao}: ${(error as Error).message}`;
+          const errorMsg = `Erro ao sincronizar ${cobranca.codigoSolicitacao}: ${(error as Error).message}`;
           console.error(`[STATUS SERVICE] ❌ ${errorMsg}`);
           errors.push(errorMsg);
         }
@@ -225,7 +225,7 @@ catch (error) {
       return {
         success: errors.length == 0,
         message: `Sincronização concluída: ${updatedCount} atualizações`,
-  _updatedCount,
+  updatedCount,
         errors: errors.length > 0 ? errors : undefined,
       };
     }
@@ -245,10 +245,10 @@ catch (error) {
   private async verificarQuitacaoCompleta(seuNumero: string): Promise<void> {
     try {
       // Extrair propostaId do seuNumero (formato: SIMPIX-{propostaId}-{parcela})
-      const _parts = seuNumero.split('-');
+      const parts = seuNumero.split('-');
       if (parts.length < 2) return;
 
-      const _propostaId = parts[1];
+      const propostaId = parts[1];
       await this.verificarQuitacaoProposta(propostaId);
     }
 catch (error) {
@@ -260,12 +260,12 @@ catch (error) {
    * Verifica status de quitação de uma proposta
    */
   private async verificarQuitacaoProposta(propostaId: string): Promise<void> {
-    const _todasCobrancas = await db
+    const todasCobrancas = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
 
-    const _todasPagas = todasCobrancas.every((c) => c.situacao == 'RECEBIDO');
+    const todasPagas = todasCobrancas.every((c) => c.situacao == 'RECEBIDO');
 
     if (todasPagas && todasCobrancas.length > 0) {
       console.log(`[STATUS SERVICE] 🎉 Proposta ${propostaId} totalmente quitada`);
@@ -273,7 +273,7 @@ catch (error) {
       // PAM V1.0 - Usar FSM para validação de transição
       try {
         await transitionTo({
-  _propostaId,
+  propostaId,
           novoStatus: 'QUITADO',
           userId: 'boleto-status-service',
           contexto: 'cobrancas',
@@ -307,8 +307,8 @@ else {
     try {
       console.log(`[STATUS SERVICE] 🔍 Sincronizando boleto individual: ${codigoSolicitacao}`);
 
-      const _interService = await getInterService();
-      const _detalhes = await interService.recuperarCobranca(codigoSolicitacao);
+      const interService = await getInterService();
+      const detalhes = await interService.recuperarCobranca(codigoSolicitacao);
 
       if (!detalhes?.cobranca) {
         return {
@@ -345,4 +345,4 @@ catch (error) {
 }
 
 // Exportar instância singleton
-export const _boletoStatusService = new BoletoStatusService();
+export const boletoStatusService = new BoletoStatusService();

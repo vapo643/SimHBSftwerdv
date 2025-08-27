@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { validationService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/validate', async (req, res) => {
   try {
-    const _result = await validationService.executeOperation('data_validation', req.body);
+    const result = await validationService.executeOperation('data_validation', req.body);
     res.json(_result);
   }
 catch (error) {

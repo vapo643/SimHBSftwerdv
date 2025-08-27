@@ -9,7 +9,7 @@ import { Router } from 'express';
 import { ProposalController } from '../../contexts/proposal/presentation/proposalController.js';
 
 // Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
-const _auth = async (req, res: unknown, next) => {
+const auth = async (req, res: unknown, next) => {
   try {
     // Import dinâmico do middleware RLS - RETURN Promise não await
     const { rlsAuthMiddleware } = await import('../../lib/rls-setup.js');
@@ -21,8 +21,8 @@ catch (error) {
   }
 };
 
-const _router = Router();
-const _controller = new ProposalController();
+const router = Router();
+const controller = new ProposalController();
 
 // ==== ROTAS PRINCIPAIS ====
 
@@ -56,22 +56,22 @@ router.put('/:id/reject', auth, (req, res) => controller.reject(req, res));
 // GET /:id/observacoes - Logs de auditoria (manter original por enquanto)
 router.get('/:id/observacoes', auth, async (req, res) => {
   try {
-    const _propostaId = req.params.id;
+    const propostaId = req.params.id;
     const { createServerSupabaseAdminClient } = await import('../../lib/_supabase.js');
-    const _supabase = createServerSupabaseAdminClient();
+    const supabase = createServerSupabaseAdminClient();
 
     const { data: logs, error } = await supabase
       .from('proposta_logs')
       .select(
         `
-  _id,
-  _observacao,
-        status_anterior,
-        status_novo,
-        created_at,
-        autor_id,
+  id,
+  observacao,
+        statusanterior,
+        statusnovo,
+        createdat,
+        autorid,
         profiles!proposta_logs_autor_id_fkey (
-          full_name,
+          fullname,
           role
         )
       `
@@ -84,7 +84,7 @@ router.get('/:id/observacoes', auth, async (req, res) => {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _transformedLogs =
+    const transformedLogs =
       logs?.map((log) => ({
         id: log.id,
         acao:
@@ -92,13 +92,13 @@ router.get('/:id/observacoes', auth, async (req, res) => {
             ? 'reenvio_atendente'
             : `mudanca_status_${log.status_novo}`,
         detalhes: log.observacao,
-        status_anterior: log.status_anterior,
-        status_novo: log.status_novo,
-        data_acao: log.created_at,
-        autor_id: log.autor_id,
+        status_anterior: log.statusanterior,
+        status_novo: log.statusnovo,
+        data_acao: log.createdat,
+        autor_id: log.autorid,
         profiles: log.profiles,
         observacao: log.observacao,
-        created_at: log.created_at,
+        created_at: log.createdat,
       })) || [];
 
     res.json({

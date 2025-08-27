@@ -7,7 +7,7 @@
 import { Router } from 'express';
 import { interFixService } from '../../services/genericService';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /webhooks/inter

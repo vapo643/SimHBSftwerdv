@@ -86,7 +86,7 @@ class ClickSignServiceV3 {
       environment: 'production',
     };
 
-    if (!this._config.apiToken) {
+    if (!this.config.apiToken) {
       console.error(
         '[CLICKSIGN V1] ❌ ERROR: API token not configured! Check CLICKSIGN_API_TOKEN environment variable'
       );
@@ -94,8 +94,8 @@ class ClickSignServiceV3 {
     }
 
     console.log(`[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)`);
-    console.log(`[CLICKSIGN V1] API URL: ${this._config.apiUrl}`);
-    console.log(`[CLICKSIGN V1] Token configured: ${this._config.apiToken.substring(0, 10)}...`);
+    console.log(`[CLICKSIGN V1] API URL: ${this.config.apiUrl}`);
+    console.log(`[CLICKSIGN V1] Token configured: ${this.config.apiToken.substring(0, 10)}...`);
   }
 
   /**
@@ -108,13 +108,13 @@ class ClickSignServiceV3 {
   ): Promise<ClickSignV3Response<T>> {
     // Check rate limit
     if (this.rateLimitRemaining <= 0 && new Date() < this.rateLimitReset) {
-      const _waitTime = this.rateLimitReset.getTime() - Date.now();
+      const waitTime = this.rateLimitReset.getTime() - Date.now();
       console.log(`[CLICKSIGN V1] ⚠️ Rate limit reached. Waiting ${waitTime}ms`);
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
     // ClickSign uses query parameter authentication
-    const _url = `${this._config.apiUrl}${endpoint}?access_token=${this._config.apiToken}`;
+    const url = `${this.config.apiUrl}${endpoint}?access_token=${this.config.apiToken}`;
     // Use standard JSON format for v1 API
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -126,19 +126,19 @@ class ClickSignServiceV3 {
     console.log(`[CLICKSIGN V1] Headers:`, {
       'Content-Type': headers['Content-Type'],
       Accept: headers['Accept'],
-      Authorization: `${this._config.apiToken.substring(0, 10)}...`,
+      Authorization: `${this.config.apiToken.substring(0, 10)}...`,
     });
 
     try {
-      const _response = await fetch(url, {
-  _method,
-  _headers,
+      const response = await fetch(url, {
+  method,
+  headers,
         body: body ? JSON.stringify(body) : undefined,
       });
 
       // Update rate limit info
-      const _rateLimitHeader = response.headers.get('X-RateLimit-Remaining');
-      const _rateLimitResetHeader = response.headers.get('X-RateLimit-Reset');
+      const rateLimitHeader = response.headers.get('X-RateLimit-Remaining');
+      const rateLimitResetHeader = response.headers.get('X-RateLimit-Reset');
 
       if (rateLimitHeader) {
         this.rateLimitRemaining = parseInt(rateLimitHeader);
@@ -148,7 +148,7 @@ class ClickSignServiceV3 {
       }
 
       // Check if response is JSON
-      const _contentType = response.headers.get('content-type');
+      const contentType = response.headers.get('content-type');
       console.log(`[CLICKSIGN V1] Response content-type: ${contentType}`);
       console.log(`[CLICKSIGN V1] Response status: ${response.status}`);
 
@@ -161,7 +161,7 @@ class ClickSignServiceV3 {
       }
 
       // Always try to get text first to debug
-      const _responseText = await response.text();
+      const responseText = await response.text();
 
       let data;
       if (responseText.trim() == '') {
@@ -211,7 +211,7 @@ catch (error) {
    * Helper function to ensure correct Data URI format
    */
   private formatBase64ToDataURI(base64Content: string): string {
-    const _prefix = 'data:application/pdf;base64,';
+    const prefix = 'data:application/pdf;base64,';
 
     if (base64Content.startsWith(prefix)) {
       return base64Content; // Already correct
@@ -219,7 +219,7 @@ catch (error) {
 
     // If has another 'data:' prefix, remove it before adding the correct one
     if (base64Content.startsWith('data:')) {
-      const _parts = base64Content.split(',');
+      const parts = base64Content.split(',');
       if (parts.length == 2) {
         return `${prefix}${parts[1]}`;
       }
@@ -234,7 +234,7 @@ catch (error) {
    */
   private sanitizeAndValidateCPF(rawCpf: string): string {
     // Sanitize: Remove all non-numeric characters
-    const _cleanCpf = rawCpf.replace(/\D/g, '');
+    const cleanCpf = rawCpf.replace(/\D/g, '');
 
     console.log(`[CLICKSIGN V1] 🧹 CPF sanitization: ${rawCpf} → ${cleanCpf}`);
 
@@ -260,13 +260,13 @@ catch (error) {
 
     // Use simple JSON format for v1 API
     // Add MIME type prefix to base64 content
-    const _contentWithMimeType = `data:application/pdf;base64,${documentData.content_base64}`;
+    const contentWithMimeType = `data:application/pdf;base64,${documentData.content_base64}`;
 
-    const _requestBody = {
+    const requestBody = {
       document: {
         path: `/propostas/${Date.now()}.pdf`,
         content_base64: contentWithMimeType,
-        deadline_at: documentData.deadline_at,
+        deadline_at: documentData.deadlineat,
         auto_close: true,
         locale: 'pt-BR',
         reminders: true,
@@ -276,11 +276,11 @@ catch (error) {
 
     console.log(`[CLICKSIGN V1] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
 
-    const _response = await this.makeRequest<unknown>('POST', '/documents', requestBody);
+    const response = await this.makeRequest<unknown>('POST', '/documents', requestBody);
 
-    console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(_response, null, 2));
+    console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
 
-    const _document =
+    const document =
       (response as unknown).data?.document || (response as unknown).document || response;
     console.log(`[CLICKSIGN V1] ✅ Document created: ${document.key}`);
 
@@ -295,7 +295,7 @@ catch (error) {
     console.log(`[CLICKSIGN V1] Document data:`, documentData);
 
     // Use JSON:API format
-    const _requestBody = {
+    const requestBody = {
       data: {
         type: 'documents',
         attributes: documentData,
@@ -304,15 +304,15 @@ catch (error) {
 
     console.log(`[CLICKSIGN V1] Request body being sent:`, JSON.stringify(requestBody, null, 2));
 
-    const _response = await this.makeRequest<unknown>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/documents`,
       requestBody
     );
 
-    console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(_response, null, 2));
+    console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
 
-    const _document = response.data?.data || response.data;
+    const document = response.data?.data || response.data;
     console.log(`[CLICKSIGN V1] ✅ Document added to envelope: ${document.id}`);
 
     return document;
@@ -333,10 +333,10 @@ catch (error) {
     // Determine authentication methods
     // For ClickSign v1: only 'email' is valid in the auths array
     // Biometric is controlled by boolean flags, not the auths array
-    const _auths = ['email'];
+    const auths = ['email'];
 
     // Use simple JSON format for v1
-    const _requestBody = {
+    const requestBody = {
       signer: {
         name: signerData.name,
         email: signerData.email,
@@ -364,9 +364,9 @@ catch (error) {
     );
     console.log(`[CLICKSIGN V1] 🔐 Authentication methods requested:`, auths);
 
-    const _response = await this.makeRequest<unknown>('POST', '/signers', requestBody);
+    const response = await this.makeRequest<unknown>('POST', '/signers', requestBody);
 
-    const _signer = (response as unknown).data?.signer || (response as unknown).signer || response;
+    const signer = (response as unknown).data?.signer || (response as unknown).signer || response;
     console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
     console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
     console.log(`[CLICKSIGN V1] 🔐 Signer authentication methods returned:`, signer.auths);
@@ -387,7 +387,7 @@ catch (error) {
       `[CLICKSIGN V1] Envelope ID: ${envelopeId}, Signer ID: ${signerId}, Sign as: ${signAs}`
     );
 
-    const _requestBody = {
+    const requestBody = {
       signer_id: signerId,
       sign_as: signAs,
       refusable: false,
@@ -397,14 +397,14 @@ catch (error) {
     console.log(`[CLICKSIGN V1] 📡 POST /envelopes/${envelopeId}/signers`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
 
-    const _response = await this.makeRequest<unknown>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/signers`,
       requestBody
     );
 
     console.log(`[CLICKSIGN V1] ✅ STEP 2 COMPLETE: Signer added to envelope`);
-    console.log(`[CLICKSIGN V1] Response:`, JSON.stringify(_response, null, 2));
+    console.log(`[CLICKSIGN V1] Response:`, JSON.stringify(response, null, 2));
     return response.data;
   }
 
@@ -435,14 +435,14 @@ catch (error) {
     console.log(`[CLICKSIGN V1] 🔨 Adding requirement to envelope ${envelopeId}`);
 
     // Use correct JSON API format
-    const _requestBody = {
+    const requestBody = {
       data: {
         type: 'requirements',
         attributes: requirementData,
       },
     };
 
-    const _response = await this.makeRequest<unknown>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/requirements`,
       requestBody
@@ -456,7 +456,7 @@ catch (error) {
    * Finish envelope (send for signature)
    */
   async finishEnvelope(envelopeId: string) {
-    const _response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/finish`, {});
+    const response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/finish`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope finished and sent for signature`);
     return response.data?.data || response.data;
@@ -466,7 +466,7 @@ catch (error) {
    * Get envelope status
    */
   async getEnvelopeStatus(envelopeId: string) {
-    const _response = await this.makeRequest<unknown>('GET', `/envelopes/${envelopeId}`);
+    const response = await this.makeRequest<unknown>('GET', `/envelopes/${envelopeId}`);
     return response.data?.data || response.data;
   }
 
@@ -474,7 +474,7 @@ catch (error) {
    * Cancel envelope
    */
   async cancelEnvelope(envelopeId: string) {
-    const _response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/cancel`, {});
+    const response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/cancel`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope cancelled`);
     return response.data?.data || response.data;
@@ -484,7 +484,7 @@ catch (error) {
    * Download signed document
    */
   async downloadDocument(envelopeId: string, documentId: string) {
-    const _response = await this.makeRequest<unknown>(
+    const response = await this.makeRequest<unknown>(
       'GET',
       `/envelopes/${envelopeId}/documents/${documentId}/download`
     );
@@ -495,7 +495,7 @@ catch (error) {
    * Configure webhook
    */
   async configureWebhook(webhookData: WebhookData) {
-    const _response = await this.makeRequest<unknown>('POST', '/webhooks', {
+    const response = await this.makeRequest<unknown>('POST', '/webhooks', {
       webhook: webhookData,
     });
 
@@ -512,7 +512,7 @@ catch (error) {
     phone: string,
     message?: string
   ) {
-    const _response = await this.makeRequest<unknown>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/signers/${signerId}/whatsapp`,
       { phone, message }
@@ -526,7 +526,7 @@ catch (error) {
    * Add signer to document (v1 API)
    */
   async addSignerToDocument(documentKey: string, signerKey: string) {
-    const _requestBody = {
+    const requestBody = {
       list: {
         document_key: documentKey,
         signer_key: signerKey,
@@ -536,9 +536,9 @@ catch (error) {
 
     console.log(`[CLICKSIGN V1] 📡 POST /lists`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
-    const _response = await this.makeRequest<unknown>('POST', '/lists', requestBody);
-    console.log(`[CLICKSIGN V1] 📦 List response:`, JSON.stringify(_response, null, 2));
-    const _list = (response as unknown).data?.list || (response as unknown).list || response;
+    const response = await this.makeRequest<unknown>('POST', '/lists', requestBody);
+    console.log(`[CLICKSIGN V1] 📦 List response:`, JSON.stringify(response, null, 2));
+    const list = (response as unknown).data?.list || (response as unknown).list || response;
     console.log(
       `[CLICKSIGN V1] ✅ List created with request_signature_key: ${list.request_signature_key}`
     );
@@ -549,12 +549,12 @@ catch (error) {
    * Request signature (v1 API)
    */
   async requestSignature(signerKey: string) {
-    const _requestBody = {
+    const requestBody = {
       request_signature_key: signerKey,
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /notifications`);
-    const _response = await this.makeRequest<unknown>('POST', '/notifications', requestBody);
+    const response = await this.makeRequest<unknown>('POST', '/notifications', requestBody);
     return response;
   }
 
@@ -575,11 +575,11 @@ catch (error) {
   ) {
     try {
       // Validate and sanitize client data
-      const _validatedClientData = clickSignSecurityService.validateClientData(clientData);
+      const validatedClientData = clickSignSecurityService.validateClientData(clientData);
 
       // Create audit log for signature request
-      const _auditLog = clickSignSecurityService.createAuditLog('CLICKSIGN_V1_SEND_CCB', {
-  _proposalId,
+      const auditLog = clickSignSecurityService.createAuditLog('CLICKSIGN_V1_SEND_CCB', {
+  proposalId,
         clientEmail: validatedClientData.email,
       });
       console.log('[CLICKSIGN V1 AUDIT]', auditLog);
@@ -587,15 +587,15 @@ catch (error) {
       console.log(`[CLICKSIGN V1] 🚀 Starting CCB signature flow for proposal: ${proposalId}`);
 
       // 1. Ensure correct base64 format (no data URI prefix)
-      const _cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
+      const cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
 
       // 2. Validate and sanitize CPF before proceeding
       console.log(`[CLICKSIGN V1] Validating CPF for client: ${clientData.name}`);
-      const _validatedCpf = this.sanitizeAndValidateCPF(clientData.cpf);
+      const validatedCpf = this.sanitizeAndValidateCPF(clientData.cpf);
 
       // 3. Upload document
       console.log(`[CLICKSIGN V1] 📄 Uploading document`);
-      const _document = await this.createDocumentBatch({
+      const document = await this.createDocumentBatch({
         content_base64: cleanBase64,
         deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
       });
@@ -603,7 +603,7 @@ catch (error) {
 
       // 4. Create signer
       console.log(`[CLICKSIGN V1] 👤 Creating signer`);
-      const _signer = await this.createSigner({
+      const signer = await this.createSigner({
         name: clientData.name,
         email: clientData.email,
         phone: clientData.phone,
@@ -615,7 +615,7 @@ catch (error) {
 
       // 5. Add signer to document
       console.log(`[CLICKSIGN V1] 🔗 Adding signer to document`);
-      const _list = await this.addSignerToDocument(document.key, signer.key);
+      const list = await this.addSignerToDocument(document.key, signer.key);
       console.log(`[CLICKSIGN V1] ✅ Signer added to document`);
 
       // 5.1 Add biometric requirement if enabled
@@ -623,7 +623,7 @@ catch (error) {
         console.log(`[CLICKSIGN V1] 🔐 Adding biometric requirement for signer`);
         try {
           // Some ClickSign versions require explicit requirement configuration
-          const _requirementBody = {
+          const requirementBody = {
             requirement: {
               document_key: document.key,
               signer_key: signer.key,
@@ -646,11 +646,11 @@ catch (err) {
 
       // 6. Request signature
       console.log(`[CLICKSIGN V1] 📧 Requesting signature`);
-      const _notification = await this.requestSignature(list.request_signature_key || signer.key);
+      const notification = await this.requestSignature(list.request_signature_key || signer.key);
       console.log(`[CLICKSIGN V1] ✅ Signature requested`);
 
       // 7. Build sign URL
-      const _signUrl = list.request_signature_key
+      const signUrl = list.request_signature_key
         ? `https://app.clicksign.com/sign/${list.request_signature_key}`
         : `https://app.clicksign.com/documento/${document.key}`;
 
@@ -688,4 +688,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _clickSignServiceV3 = new ClickSignServiceV3();
+export const clickSignServiceV3 = new ClickSignServiceV3();

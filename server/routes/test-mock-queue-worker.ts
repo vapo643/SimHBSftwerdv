@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import { queues } from '../lib/mock-queue';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/test-mock-queue-worker
@@ -19,13 +19,13 @@ router.get('/verify-worker-execution', async (req, res) => {
     console.log('==========================================\n');
 
     // Usar proposta conhecida com dados reais
-    const _propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
+    const propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
 
     console.log(`📌 Testando com proposta: ${propostaId}`);
     console.log('📌 Esta proposta tem 24 boletos no sistema');
 
     // Adicionar job à fila
-    const _job = await queues.pdfProcessing.add('GENERATE_CARNE', {
+    const job = await queues.pdfProcessing.add('GENERATE_CARNE', {
       type: 'GENERATE_CARNE',
       propostaId: propostaId,
       userId: 'test-user',
@@ -69,10 +69,10 @@ router.get('/status/:jobId', async (req, res) => {
   try {
     const { jobId } = req.params;
 
-    const _counts = await queues.pdfProcessing.getJobCounts();
+    const counts = await queues.pdfProcessing.getJobCounts();
 
     res.json({
-      _jobId,
+      jobId,
       queueStatus: counts,
       message: 'Verifique os logs do servidor para confirmar execução do Worker',
     });

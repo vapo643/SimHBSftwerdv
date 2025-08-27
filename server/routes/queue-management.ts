@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { paymentsService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.get('/queues', async (req, res) => {
   try {
-    const _result = await paymentsService.executeOperation('queue_management', req.query);
+    const result = await paymentsService.executeOperation('queue_management', req.query);
     res.json(_result);
   }
 catch (error) {

@@ -1,37 +1,37 @@
 import type { Express, NextFunction, Response } from 'express';
 import { createServer, type Server } from 'http';
 import { storage } from './storage';
-import { createServerSupabaseClient } from '../client/src/lib/supabase';
-import { _jwtAuthMiddleware } from './lib/jwt-auth-middleware';
+import { createServerSupabaseClient } from './lib/supabase';
+import { jwtAuthMiddleware } from './lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../shared/types/express';
 import { db } from './lib/supabase';
 import { eq } from 'drizzle-orm';
 import {
-  __requireAdmin,
-  _requireManagerOrAdmin,
-  _requireAnyRole,
-  _requireRoles,
+  _requireAdmin,
+  requireManagerOrAdmin,
+  requireAnyRole,
+  requireRoles,
 } from './lib/role-guards';
 import {
-  _enforceRoutePermissions,
-  _requireAnalyst,
-  _requireFinanceiro,
-  _filterProposalsByRole,
+  enforceRoutePermissions,
+  requireAnalyst,
+  requireFinanceiro,
+  filterProposalsByRole,
 } from './lib/role-based-access';
 import { transitionTo, InvalidTransitionError } from './services/statusFsmService';
 import {
-  _insertPropostaSchema,
-  _updatePropostaSchema,
-  _createPropostaValidationSchema,
-  _insertGerenteLojaSchema,
-  _insertLojaSchema,
-  _updateLojaSchema,
-  _propostaLogs,
-  _propostas,
-  _parceiros,
-  _produtos,
-  _tabelasComerciais,
-  _produtoTabelaComercial,
+  insertPropostaSchema,
+  updatePropostaSchema,
+  createPropostaValidationSchema,
+  insertGerenteLojaSchema,
+  insertLojaSchema,
+  updateLojaSchema,
+  propostaLogs,
+  propostas,
+  parceiros,
+  produtos,
+  tabelasComerciais,
+  produtoTabelaComercial,
 } from '@shared/schema';
 import { z } from 'zod';
 import multer from 'multer';
@@ -61,10 +61,10 @@ import testQueueRoutes from './routes/test-queue';
 import testRetryRoutes from './routes/test-retry';
 import testAuditRoutes from './routes/test-audit';
 import {
-  _getBrasiliaDate,
-  __formatBrazilianDateTime,
-  _generateApprovalDate,
-  _getBrasiliaTimestamp,
+  getBrasiliaDate,
+  _formatBrazilianDateTime,
+  generateApprovalDate,
+  getBrasiliaTimestamp,
 } from './lib/timezone';
 // Use mock queue in development to avoid Redis dependency
 import { queues, checkQueuesHealth } from './lib/mock-queue';
@@ -75,7 +75,7 @@ import timingSecurityRoutes from './routes/timing-security';
 import documentosRoutes from './routes/documentos';
 import featureFlagService from './services/featureFlagService';
 
-const _upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Admin middleware is now replaced by _requireAdmin guard
 
@@ -117,14 +117,14 @@ function parseUserAgent(userAgent: string): string {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Import and mount authentication routes
-  const _authRouter = (await import('./routes/auth/index.js')).default;
+  const authRouter = (await import('./routes/auth/index.js')).default;
   app.use('/api/auth', authRouter);
 
   // Routes below this line are managed in the monolith
 
   // Import and mount propostas core routes - REFACTORED WITH DDD
   // TODO: Switch to core.refactored.js when fully tested
-  const _propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
+  const propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
   app.use('/api/propostas', propostasCoreRouter);
 
   // DDD Credit Context Routes - Phase 1 Implementation
@@ -132,9 +132,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/ddd', createCreditRoutes());
 
   // Import and mount integration test routes
-  const _interIntegrationRouter = (await import('./routes/integracao/inter.js')).default;
-  const _clicksignIntegrationRouter = (await import('./routes/integracao/clicksign.js')).default;
-  const _circuitBreakerTestRouter = (await import('./routes/integracao/circuit-breaker-test.js'))
+  const interIntegrationRouter = (await import('./routes/integracao/inter.js')).default;
+  const clicksignIntegrationRouter = (await import('./routes/integracao/clicksign.js')).default;
+  const circuitBreakerTestRouter = (await import('./routes/integracao/circuit-breaker-test.js'))
     .default;
 
   app.use('/api/integracao/inter', interIntegrationRouter);
@@ -152,13 +152,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Feature Flags endpoint - retorna flags para o usuário atual
-  app.get('/api/features', _jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/features', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
     try {
       // Inicializa o serviço se necessário
       await featureFlagService.init();
 
       // Contexto do usuário para avaliação de flags
-      const _context = {
+      const context = {
         userId: req.user?.id,
         userRole: req.user?.role,
         sessionId: req.sessionID,
@@ -178,10 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       // Verifica todas as flags
-      const _flags = await featureFlagService.checkMultiple(_frontendFlags, context);
+      const flags = await featureFlagService.checkMultiple(frontendFlags, context);
 
       res.json({
-  _flags,
+  flags,
         context: {
           environment: context.environment,
           userId: context.userId,
@@ -207,14 +207,14 @@ catch (error) {
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
   app.get(
     '/api/experimental/analytics',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Verifica se a feature flag está habilitada
-        const _isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
+        const isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
           userId: req.user?.id,
           userRole: req.user?.role,
-          environment: process.env.NODE_ENV,
+          environment: process.env.NODEENV,
         });
 
         if (!_isEnabled) {
@@ -232,12 +232,12 @@ catch (error) {
 
         // Lógica experimental da nova API
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Exemplo: Analytics avançado (apenas quando feature flag está ativa)
         const { data: analytics, error } = await supabase
           .from('propostas')
-          .select('status, created_at, valor')
+          .select('status, createdat, valor')
           .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
         if (error) {
@@ -245,8 +245,8 @@ catch (error) {
         }
 
         // Processamento experimental de analytics
-        const _summary = {
-          total_propostas: analytics.length,
+        const summary = {
+          totalpropostas: analytics.length,
           total_valor: analytics.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0),
           por_status: analytics.reduce(
             (acc, p) => {
@@ -261,7 +261,7 @@ catch (error) {
 
         res.json({
           success: true,
-          data: _summary,
+          data: summary,
           experimental: true,
           message: 'API experimental - dados podem mudar',
         });
@@ -282,7 +282,7 @@ catch (error) {
   app.get('/api/relatorio-final-ccb', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       console.log('🧪 [RELATÓRIO] Executando auditoria final conforme plano de teste');
 
@@ -302,25 +302,25 @@ catch (error) {
       }
 
       // VALIDAÇÕES DO PLANO DE TESTE
-      const _enderecoOK = !!(
+      const enderecoOK = !!(
         proposta.cliente_data?.logradouro &&
         proposta.cliente_data?.bairro &&
         proposta.cliente_data?.cep
       );
-      const _rgOK = !!(
+      const rgOK = !!(
         proposta.cliente_data?.rg &&
         proposta.cliente_data?.localNascimento &&
         proposta.cliente_data?.rgUf
       );
-      const _bancoOK = !!(
+      const bancoOK = !!(
         proposta.dados_pagamento_tipo &&
         (proposta.dados_pagamento_banco || proposta.dados_pagamento_pix)
       );
-      const _expedidorOK = !!(
+      const expedidorOK = !!(
         proposta.cliente_data?.orgaoEmissor && proposta.cliente_data?.nacionalidade
       );
 
-      const _todasValidacoes = enderecoOK && rgOK && bancoOK && expedidorOK;
+      const todasValidacoes = enderecoOK && rgOK && bancoOK && expedidorOK;
 
       // RELATÓRIO FINAL CONFORME SOLICITADO
       res.json({
@@ -349,7 +349,7 @@ catch (error) {
   app.get('/api/audit-ccb-endtoend', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Buscar última proposta para auditoria dos dados
       const { data: proposta, error } = await supabase
@@ -368,10 +368,10 @@ catch (error) {
 
       console.log('🧪 [AUDIT] Executando ETAPA 3 - Auditoria Visual dos Dados');
       console.log('🧪 [AUDIT] Proposta ID:', proposta.id);
-      console.log('🧪 [AUDIT] Cliente Data:', JSON.stringify(proposta.cliente_data, null, 2));
+      console.log('🧪 [AUDIT] Cliente Data:', JSON.stringify(proposta.clientedata, null, 2));
 
       // ETAPA 3 - AUDITORIA VISUAL CONFORME PLANO DE TESTE
-      const _validacoes = {
+      const validacoes = {
         'ENDEREÇO - Formatação Separada': {
           logradouro: proposta.cliente_data?.logradouro ? '✅ PRESENTE' : '❌ FALTANDO',
           numero: proposta.cliente_data?.numero ? '✅ PRESENTE' : '❌ FALTANDO',
@@ -414,7 +414,7 @@ catch (error) {
         });
       });
 
-      const _veredito = sucessos == total ? '[SUCESSO]' : '[FALHA]';
+      const veredito = sucessos == total ? '[SUCESSO]' : '[FALHA]';
 
       res.json({
         RELATORIO_FINAL: veredito,
@@ -422,13 +422,13 @@ catch (error) {
         proposta_testada: proposta.id,
         validacoes_detalhadas: validacoes,
         dados_brutos: {
-          cliente_data: proposta.cliente_data,
+          cliente_data: proposta.clientedata,
           dados_bancarios: {
-            tipo: proposta.dados_pagamento_tipo,
-            banco: proposta.dados_pagamento_banco,
-            agencia: proposta.dados_pagamento_agencia,
-            conta: proposta.dados_pagamento_conta,
-            pix: proposta.dados_pagamento_pix,
+            tipo: proposta.dados_pagamentotipo,
+            banco: proposta.dados_pagamentobanco,
+            agencia: proposta.dados_pagamentoagencia,
+            conta: proposta.dados_pagamentoconta,
+            pix: proposta.dados_pagamentopix,
           },
         },
         conclusao:
@@ -450,7 +450,7 @@ catch (error) {
   app.get('/api/test-ccb-corrections', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Buscar última proposta criada para auditoria
       const { data: proposta, error } = await supabase
@@ -468,7 +468,7 @@ catch (error) {
       }
 
       // AUDITORIA ETAPA 3 - Verificação dos dados que entrarão na CCB
-      const _auditoria = {
+      const auditoria = {
         '[ ] ENDEREÇO SEPARADO': {
           logradouro: proposta.cliente_data?.logradouro || '❌ FALTANDO',
           numero: proposta.cliente_data?.numero || '❌ FALTANDO',
@@ -512,10 +512,10 @@ catch (error) {
         });
       });
 
-      const _status = sucessos == total ? '[SUCESSO]' : '[FALHA]';
+      const status = sucessos == total ? '[SUCESSO]' : '[FALHA]';
 
       res.json({
-  _status,
+  status,
         score: `${sucessos}/${total} validações`,
         proposta_auditada: proposta.id,
         auditoria_detalhada: auditoria,
@@ -533,11 +533,11 @@ catch (error) {
   // Test endpoint para verificar correções de bugs
   app.get(
     '/api/test-data-flow',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Buscar última proposta criada
         const { data: proposta, error } = await supabase
@@ -555,7 +555,7 @@ catch (error) {
         }
 
         // Verificar campos de endereço
-        const _enderecoFields = {
+        const enderecoFields = {
           cep: proposta.cliente_data?.cep,
           logradouro: proposta.cliente_data?.logradouro,
           numero: proposta.cliente_data?.numero,
@@ -567,15 +567,15 @@ catch (error) {
         };
 
         // Verificar dados bancários
-        const _dadosBancarios = {
-          tipo: proposta.dados_pagamento_tipo,
-          pix: proposta.dados_pagamento_pix,
-          banco: proposta.dados_pagamento_banco,
-          agencia: proposta.dados_pagamento_agencia,
-          conta: proposta.dados_pagamento_conta,
-          digito: proposta.dados_pagamento_digito,
-          nome_titular: proposta.dados_pagamento_nome_titular,
-          cpf_titular: proposta.dados_pagamento_cpf_titular,
+        const dadosBancarios = {
+          tipo: proposta.dados_pagamentotipo,
+          pix: proposta.dados_pagamentopix,
+          banco: proposta.dados_pagamentobanco,
+          agencia: proposta.dados_pagamentoagencia,
+          conta: proposta.dados_pagamentoconta,
+          digito: proposta.dados_pagamentodigito,
+          nome_titular: proposta.dados_pagamento_nometitular,
+          cpf_titular: proposta.dados_pagamento_cpftitular,
         };
 
         // Verificar parcelas
@@ -585,9 +585,9 @@ catch (error) {
           .eq('proposta_id', proposta.id)
           .order('numero_parcela', { ascending: true });
 
-        const _resultado = {
+        const resultado = {
           proposta_id: proposta.id,
-          created_at: proposta.created_at,
+          created_at: proposta.createdat,
           status: 'analise_completa',
           bugs_corrigidos: {
             bug1_endereco: {
@@ -634,7 +634,7 @@ catch (error) {
   );
 
   // Debug endpoint for RBAC validation
-  app.get('/api/debug/me', _jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/debug/me', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
     try {
       res.json({
         message: 'Debug endpoint - User profile from robust JWT middleware',
@@ -654,15 +654,15 @@ catch (error) {
   // New endpoint for formalization proposals (filtered by status)
   app.get(
     '/api/propostas/formalizacao',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Formalization statuses - TODOS exceto BOLETOS_EMITIDOS
         // BOLETOS_EMITIDOS vai para Cobranças e Pagamentos
-        const _formalizationStatuses = [
+        const formalizationStatuses = [
           'aprovado',
           'aceito_atendente',
           'documentos_enviados',
@@ -680,9 +680,9 @@ catch (error) {
           // NÃO incluir "pronto_pagamento" - é o antigo BOLETOS_EMITIDOS
         ];
 
-        const _userId = req.user?.id;
-        const _userRole = req.user?.role;
-        const _userLojaId = req.user?.loja_id;
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        const userLojaId = req.user?.loja_id;
 
         console.log(
           `🔐 [FORMALIZATION] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`
@@ -726,7 +726,7 @@ else if (_userRole == 'GERENTE') {
         );
 
         // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
-        const _formalizacaoPropostas = rawPropostas.map((proposta) => {
+        const formalizacaoPropostas = rawPropostas.map((proposta) => {
           let _clienteData = null;
           let _condicoesData = null;
 
@@ -766,16 +766,16 @@ else {
             cliente_data: clienteData,
             condicoes_data: condicoesData,
             // Map database fields to frontend format
-            documentos_adicionais: proposta.documentos_adicionais,
-            contrato_gerado: proposta.contrato_gerado,
-            contrato_assinado: proposta.contrato_assinado,
-            data_aprovacao: proposta.data_aprovacao,
-            data_assinatura: proposta.data_assinatura,
-            data_pagamento: proposta.data_pagamento,
-            observacoes_formalizacao: proposta.observacoes_formalizacao,
+            documentos_adicionais: proposta.documentosadicionais,
+            contrato_gerado: proposta.contratogerado,
+            contrato_assinado: proposta.contratoassinado,
+            data_aprovacao: proposta.dataaprovacao,
+            data_assinatura: proposta.dataassinatura,
+            data_pagamento: proposta.datapagamento,
+            observacoes_formalizacao: proposta.observacoesformalizacao,
             // 🔥 NOVO: Campos de tracking do Banco Inter
-            interBoletoGerado: proposta.inter_boleto_gerado,
-            interBoletoGeradoEm: proposta.inter_boleto_gerado_em,
+            interBoletoGerado: proposta.inter_boletogerado,
+            interBoletoGeradoEm: proposta.inter_boleto_geradoem,
           };
         });
 
@@ -796,19 +796,19 @@ catch (error) {
   // Endpoint para gerar CCB automaticamente
   app.post(
     '/api/propostas/:id/gerar-ccb',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
         console.log(`[CCB] Solicitação de geração de CCB para proposta: ${id}`);
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Verificar se proposta está aprovada
         const { data: proposta, error: propostaError } = await supabase
           .from('propostas')
-          .select('status, ccb_gerado, caminho_ccb_assinado')
+          .select('status, ccbgerado, caminho_ccb_assinado')
           .eq('id', id)
           .single();
 
@@ -826,7 +826,7 @@ catch (error) {
           return res.json({
             success: true,
             message: 'CCB já foi gerada anteriormente',
-            caminho: proposta.caminho_ccb_assinado,
+            caminho: proposta.caminho_ccbassinado,
           });
         }
 
@@ -835,7 +835,7 @@ catch (error) {
         const { ccbGenerationService } = await import('./services/ccbGenerationService');
 
         try {
-          const _result = await ccbGenerationService.generateCCB(id);
+          const result = await ccbGenerationService.generateCCB(id);
           if (!_result.success) {
             throw new Error("Error");
           }
@@ -861,13 +861,13 @@ catch (error) {
   // Debug: Testar PDF simples e limpo
   app.get(
     '/api/debug/test-pdf',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _PDFDocument = (await import('pdfkit')).default;
+        const PDFDocument = (await import('pdfkit')).default;
 
         // Criar PDF extremamente simples
-        const _doc = new PDFDocument({
+        const doc = new PDFDocument({
           margin: 50,
           size: 'A4',
           info: {
@@ -890,7 +890,7 @@ catch (error) {
 
         doc.end();
 
-        const _pdfBuffer = await new Promise<Buffer>((resolve) => {
+        const pdfBuffer = await new Promise<Buffer>((resolve) => {
           doc.on('end', () => resolve(Buffer.concat(chunks)));
         });
 
@@ -908,11 +908,11 @@ catch (error) {
   // Debug: Listar arquivos no bucket documents
   app.get(
     '/api/debug/storage-files',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         const { data: files, error } = await _supabase.storage.from('documents').list('ccb', {
           limit: 50,
@@ -941,7 +941,7 @@ catch (error) {
   // Get CCB signed URL
   app.get(
     '/api/propostas/:id/ccb-url',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -949,12 +949,12 @@ catch (error) {
         console.log(`[CCB URL] Buscando URL para proposta: ${id}`);
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // ✅ CORREÇÃO: Buscar dados MAIS RECENTES da proposta (força busca sem cache)
         const { data: proposta, error } = await supabase
           .from('propostas')
-          .select('ccb_gerado, caminho_ccb, ccb_gerado_em')
+          .select('ccbgerado, caminhoccb, ccb_gerado_em')
           .eq('id', id)
           .single();
 
@@ -980,8 +980,8 @@ catch (error) {
 
         if (files && files.length > 0) {
           // Sempre usar o arquivo mais recente do storage (mais confiável)
-          const _latestFile = files[0];
-          const _latestPath = `ccb/${id}/${latestFile.name}`;
+          const latestFile = files[0];
+          const latestPath = `ccb/${id}/${latestFile.name}`;
 
           console.log(
             `[CCB URL] 📁 Arquivo mais recente no storage: ${latestFile.name} (${latestFile.created_at})`
@@ -1025,7 +1025,7 @@ else {
             console.log('🔄 [CCB URL] Arquivo não encontrado, tentando regenerar CCB...');
             try {
               const { ccbGenerationService } = await import('./services/ccbGenerationService');
-              const _newCcb = await ccbGenerationService.generateCCB(id);
+              const newCcb = await ccbGenerationService.generateCCB(id);
               if (newCcb.success) {
                 // Tentar novamente com o novo arquivo
                 const { data: newSignedUrl } = await _supabase.storage
@@ -1078,12 +1078,12 @@ catch (error) {
 
   app.get(
     '/api/propostas/:id',
-    _jwtAuthMiddleware as unknown,
-  _timingNormalizerMiddleware,
+    jwtAuthMiddleware as unknown,
+  timingNormalizerMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _idParam = req.params.id;
-        const _user = req.user;
+        const idParam = req.params.id;
+        const user = req.user;
 
         console.log(
           `🔐 [PROPOSTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
@@ -1101,7 +1101,7 @@ catch (error) {
           const { eq, and } = await import('drizzle-orm');
 
           // Query with RLS active - same as formalization endpoint
-          const _result = await db
+          const result = await db
             .select({
               id: propostas.id,
               numero_proposta: propostas.numeroProposta, // PAM V1.0 - Sequential number
@@ -1163,14 +1163,14 @@ catch (error) {
             });
           }
 
-          const _proposta = result[0];
+          const proposta = result[0];
           console.log(
             `🔐 [ATENDENTE ALLOWED] User ${user?.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`
           );
 
           // Buscar documentos da proposta
           const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
-          const _supabase = createServerSupabaseAdminClient();
+          const supabase = createServerSupabaseAdminClient();
 
           const { data: documentos, error: docError } = await supabase
             .from('proposta_documentos')
@@ -1217,14 +1217,14 @@ else {
             for (const doc of documentos) {
               try {
                 console.log(`🔍 [ANÁLISE] Tentando gerar URL para documento:`, {
-                  nome: doc.nome_arquivo,
+                  nome: doc.nomearquivo,
                   url: doc.url,
                   tipo: doc.tipo,
-                  proposta_id: doc.proposta_id,
+                  proposta_id: doc.propostaid,
                 });
 
                 // Extrair o caminho do arquivo a partir da URL salva
-                const _documentsIndex = doc.url.indexOf('/documents/');
+                const documentsIndex = doc.url.indexOf('/documents/');
                 let filePath;
 
                 if (documentsIndex !== -1) {
@@ -1233,7 +1233,7 @@ else {
                 }
 else {
                   // Fallback: construir caminho baseado no nome do arquivo
-                  const _fileName = doc.nome_arquivo;
+                  const fileName = doc.nome_arquivo;
                   filePath = `proposta-${idParam}/${fileName}`;
                 }
 
@@ -1247,10 +1247,10 @@ else {
                   documentosComUrls.push({
                     ...doc,
                     // Mapeamento para formato esperado pelo DocumentViewer
-                    name: doc.nome_arquivo,
+                    name: doc.nomearquivo,
                     url: signedUrlData.signedUrl,
                     type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
-                    uploadDate: doc.created_at,
+                    uploadDate: doc.createdat,
                     // Manter campos originais também
                     url_visualizacao: signedUrlData.signedUrl,
                   });
@@ -1265,10 +1265,10 @@ else {
                   documentosComUrls.push({
                     ...doc,
                     // Mesmo sem URL, mapear para formato esperado
-                    name: doc.nome_arquivo,
+                    name: doc.nomearquivo,
                     url: '',
                     type: doc.tipo || 'application/octet-stream',
-                    uploadDate: doc.created_at,
+                    uploadDate: doc.createdat,
                   }); // Adiciona sem URL em caso de erro
                 }
               }
@@ -1283,26 +1283,26 @@ catch (error) {
           }
 
           // Transform to match expected format with proper camelCase conversion
-          const _formattedProposta = {
+          const formattedProposta = {
             ...proposta,
             // Convert snake_case to camelCase for frontend compatibility
-            clienteData: proposta.cliente_data,
-            condicoesData: proposta.condicoes_data,
-            createdAt: proposta.created_at,
-            lojaId: proposta.loja_id,
-            produtoId: proposta.produto_id,
-            tabelaComercialId: proposta.tabela_comercial_id,
-            userId: proposta.user_id,
-            analistaId: proposta.analista_id,
-            dataAnalise: proposta.data_analise,
-            motivoPendencia: proposta.motivo_pendencia,
-            dataAprovacao: proposta.data_aprovacao,
-            documentosAdicionais: proposta.documentos_adicionais,
-            contratoGerado: proposta.contrato_gerado,
-            contratoAssinado: proposta.contrato_assinado,
-            dataAssinatura: proposta.data_assinatura,
-            dataPagamento: proposta.data_pagamento,
-            observacoesFormalização: proposta.observacoes_formalizacao,
+            clienteData: proposta.clientedata,
+            condicoesData: proposta.condicoesdata,
+            createdAt: proposta.createdat,
+            lojaId: proposta.lojaid,
+            produtoId: proposta.produtoid,
+            tabelaComercialId: proposta.tabela_comercialid,
+            userId: proposta.userid,
+            analistaId: proposta.analistaid,
+            dataAnalise: proposta.dataanalise,
+            motivoPendencia: proposta.motivopendencia,
+            dataAprovacao: proposta.dataaprovacao,
+            documentosAdicionais: proposta.documentosadicionais,
+            contratoGerado: proposta.contratogerado,
+            contratoAssinado: proposta.contratoassinado,
+            dataAssinatura: proposta.dataassinatura,
+            dataPagamento: proposta.datapagamento,
+            observacoesFormalização: proposta.observacoesformalizacao,
             // Nested objects with proper structure
             lojas: proposta.loja
               ? {
@@ -1311,7 +1311,7 @@ catch (error) {
                 }
               : null,
             produtos: proposta.produto,
-            tabelas_comerciais: proposta.tabela_comercial,
+            tabelas_comerciais: proposta.tabelacomercial,
             // Include documents with signed URLs
             documentos: documentosComUrls || [],
           };
@@ -1320,7 +1320,7 @@ catch (error) {
         }
 else {
           // Para outros roles (ADMIN, GERENTE, ANALISTA), usar método original sem RLS
-          const _proposta = await storage.getPropostaById(idParam);
+          const proposta = await storage.getPropostaById(idParam);
 
           if (!proposta) {
             return res.status(500).json({error: "Error"});
@@ -1332,7 +1332,7 @@ else {
 
           // 🔧 CORREÇÃO CRÍTICA: Aplicar mesma lógica de documentos do ATENDENTE
           const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
-          const _supabase = createServerSupabaseAdminClient();
+          const supabase = createServerSupabaseAdminClient();
 
           // Buscar documentos da proposta (mesma lógica do ATENDENTE)
           const { data: documentos, error: docError } = await supabase
@@ -1355,14 +1355,14 @@ else {
             for (const doc of documentos) {
               try {
                 console.log(`🔍 [ANÁLISE-OUTROS] Tentando gerar URL para documento:`, {
-                  nome: doc.nome_arquivo,
+                  nome: doc.nomearquivo,
                   url: doc.url,
                   tipo: doc.tipo,
-                  proposta_id: doc.proposta_id,
+                  proposta_id: doc.propostaid,
                 });
 
                 // Extrair o caminho do arquivo a partir da URL salva
-                const _documentsIndex = doc.url.indexOf('/documents/');
+                const documentsIndex = doc.url.indexOf('/documents/');
                 let filePath;
 
                 if (documentsIndex !== -1) {
@@ -1371,7 +1371,7 @@ else {
                 }
 else {
                   // Fallback: construir caminho baseado no nome do arquivo
-                  const _fileName = doc.nome_arquivo;
+                  const fileName = doc.nome_arquivo;
                   filePath = `proposta-${idParam}/${fileName}`;
                 }
 
@@ -1385,10 +1385,10 @@ else {
                   documentosComUrls.push({
                     ...doc,
                     // Mapeamento para formato esperado pelo DocumentViewer
-                    name: doc.nome_arquivo,
+                    name: doc.nomearquivo,
                     url: signedUrlData.signedUrl,
                     type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
-                    uploadDate: doc.created_at,
+                    uploadDate: doc.createdat,
                     // Manter campos originais também
                     url_visualizacao: signedUrlData.signedUrl,
                   });
@@ -1405,10 +1405,10 @@ else {
                   documentosComUrls.push({
                     ...doc,
                     // Mesmo sem URL, mapear para formato esperado
-                    name: doc.nome_arquivo,
+                    name: doc.nomearquivo,
                     url: '',
                     type: doc.tipo || 'application/octet-stream',
-                    uploadDate: doc.created_at,
+                    uploadDate: doc.createdat,
                   }); // Adiciona sem URL em caso de erro
                 }
               }
@@ -1420,17 +1420,17 @@ catch (error) {
                 documentosComUrls.push({
                   ...doc,
                   // Mesmo com erro, mapear para formato esperado
-                  name: doc.nome_arquivo,
+                  name: doc.nomearquivo,
                   url: '',
                   type: doc.tipo || 'application/octet-stream',
-                  uploadDate: doc.created_at,
+                  uploadDate: doc.createdat,
                 }); // Adiciona sem URL em caso de erro
               }
             }
           }
 
           // Incluir documentos formatados na resposta
-          const _propostaComDocumentos = {
+          const propostaComDocumentos = {
             ...proposta,
             documentos: documentosComUrls || [],
           };
@@ -1455,7 +1455,7 @@ catch (error) {
   // Endpoint específico para associar documentos a uma proposta
   app.post(
     '/api/propostas/:id/documentos',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id: propostaId } = req.params;
@@ -1466,14 +1466,14 @@ catch (error) {
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         console.log(`[DEBUG] Associando ${documentos.length} documentos à proposta ${propostaId}`);
 
         // Inserir associações na tabela proposta_documentos
         for (const fileName of documentos) {
           try {
-            const _filePath = `proposta-${propostaId}/${fileName}`;
+            const filePath = `proposta-${propostaId}/${fileName}`;
 
             // Gerar URL assinada para o documento
             const { data: signedUrlData } = await _supabase.storage
@@ -1533,13 +1533,13 @@ catch (error) {
   // ========================
   app.post(
     '/nova-proposta',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         console.log('📝 Progressive Enhancement: Form submission received');
 
         // Parse form data
-        const _formData = {
+        const formData = {
           clienteNome: req.body.clienteNome,
           clienteCpf: req.body.clienteCpf,
           clienteEmail: req.body.clienteEmail,
@@ -1555,10 +1555,10 @@ catch (error) {
 
         // Validate and create proposal
         const __validatedData = insertPropostaSchema.parse(formData);
-        const _proposta = await storage.createProposta(_validatedData);
+        const proposta = await storage.createProposta(_validatedData);
 
         // For traditional form submission, redirect with success message
-        const _successPage = `
+        const successPage = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
@@ -1606,7 +1606,7 @@ catch (error) {
         console.error(error);
 
         // Error page for traditional form submission
-        const _errorPage = `
+        const errorPage = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
@@ -1652,13 +1652,13 @@ catch (error) {
 
   app.patch(
     '/api/propostas/:id',
-    _jwtAuthMiddleware as unknown,
-  _requireManagerOrAdmin,
+    jwtAuthMiddleware as unknown,
+  requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _id = parseInt(req.params.id);
+        const id = parseInt(req.params.id);
         const __validatedData = updatePropostaSchema.parse(req.body);
-        const _proposta = await storage.updateProposta(id, _validatedData);
+        const proposta = await storage.updateProposta(id, _validatedData);
         res.json(proposta);
       }
 catch (error) {
@@ -1673,11 +1673,11 @@ catch (error) {
 
   app.get(
     '/api/propostas/status/:status',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _status = req.params.status;
-        const _propostas = await storage.getPropostasByStatus(status);
+        const status = req.params.status;
+        const propostas = await storage.getPropostasByStatus(status);
         res.json(propostas);
       }
 catch (error) {
@@ -1691,10 +1691,10 @@ catch (error) {
   const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
 
   // Document routes for proposals - REACTIVATED FOR DIAGNOSIS
-  app.get('/api/propostas/:id/documents', _jwtAuthMiddleware as unknown, getPropostaDocuments);
+  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as unknown, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
-  //   _jwtAuthMiddleware as unknown,
+  //   jwtAuthMiddleware as unknown,
   //   requireRoles(['ADMINISTRADOR', 'ANALISTA']),
   //   upload.single("file"),
   //   uploadPropostaDocument
@@ -1704,16 +1704,16 @@ catch (error) {
   const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
 
   // Rota para alternar status entre ativa/suspensa
-  app.put('/api/propostas/:id/toggle-status', _jwtAuthMiddleware as unknown, togglePropostaStatus);
+  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as unknown, togglePropostaStatus);
 
   // Rota para buscar CCB assinada
-  app.get('/api/propostas/:id/ccb', _jwtAuthMiddleware as unknown, getCcbAssinada);
+  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as unknown, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
   app.post('/api/setup-storage', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Check existing buckets
       const { data: buckets, error: listError } = await _supabase.storage.listBuckets();
@@ -1725,7 +1725,7 @@ catch (error) {
           .json({ message: 'Erro ao acessar storage', error: listError.message });
       }
 
-      const _documentsExists = buckets.some((bucket) => bucket.name == 'documents');
+      const documentsExists = buckets.some((bucket) => bucket.name == 'documents');
 
       if (documentsExists) {
         return res.json({
@@ -1775,25 +1775,25 @@ catch (error) {
   // Upload route for proposal documents during creation
   app.post(
     '/api/upload',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
     upload.single('file'),
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _file = req.file;
-        const _proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
+        const file = req.file;
+        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
           return res.status(500).json({error: "Error"});
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Generate unique filename with UUID
         const { v4: uuidv4 } = await import('uuid');
-        const _uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
-        const _fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
-        const _filePath = `proposta-${proposalId}/${fileName}`;
+        const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
+        const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
+        const filePath = `proposta-${proposalId}/${fileName}`;
 
         console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
 
@@ -1838,17 +1838,17 @@ catch (error) {
 
   // Import do controller de produtos
   const {
-  _buscarTodosProdutos,
-  _criarProduto,
-  _atualizarProduto,
-  _verificarProdutoEmUso,
-  _deletarProduto,
+  buscarTodosProdutos,
+  criarProduto,
+  atualizarProduto,
+  verificarProdutoEmUso,
+  deletarProduto,
   } = await import('./controllers/produtoController');
 
   // Buscar tabelas comerciais disponíveis com lógica hierárquica
   app.get(
     '/api/tabelas-comerciais-disponiveis',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { produtoId, parceiroId } = req.query;
@@ -1861,8 +1861,8 @@ catch (error) {
         }
 
         // Validação de tipos
-        const _produtoIdNum = parseInt(produtoId as string);
-        const _parceiroIdNum = parseInt(parceiroId as string);
+        const produtoIdNum = parseInt(produtoId as string);
+        const parceiroIdNum = parseInt(parceiroId as string);
 
         if (_isNaN(produtoIdNum) || _isNaN(parceiroIdNum)) {
           return res.status(400).json({
@@ -1881,7 +1881,7 @@ catch (error) {
 
         // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
         // Agora usando JOIN com a nova estrutura N:N
-        const _tabelasPersonalizadas = await db
+        const tabelasPersonalizadas = await db
           .select({
             id: tabelasComerciais.id,
             nomeTabela: tabelasComerciais.nomeTabela,
@@ -1893,7 +1893,7 @@ catch (error) {
           })
           .from(tabelasComerciais)
           .innerJoin(
-  _produtoTabelaComercial,
+  produtoTabelaComercial,
             eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
           )
           .where(
@@ -1918,7 +1918,7 @@ catch (error) {
 
         // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
         // Usando JOIN com a nova estrutura N:N
-        const _tabelasGerais = await db
+        const tabelasGerais = await db
           .select({
             id: tabelasComerciais.id,
             nomeTabela: tabelasComerciais.nomeTabela,
@@ -1930,7 +1930,7 @@ catch (error) {
           })
           .from(tabelasComerciais)
           .innerJoin(
-  _produtoTabelaComercial,
+  produtoTabelaComercial,
             eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
           )
           .where(
@@ -1942,7 +1942,7 @@ catch (error) {
           .orderBy(desc(tabelasComerciais.createdAt));
 
         // STEP 4: Resultado Final
-        const _resultado = tabelasGerais || [];
+        const resultado = tabelasGerais || [];
         console.log(`[${_getBrasiliaTimestamp()}] Encontradas ${resultado.length} tabelas gerais`);
 
         res.json(resultado);
@@ -1959,7 +1959,7 @@ catch (error) {
   // Simple GET endpoint for all commercial tables (for dropdowns)
   app.get(
     '/api/tabelas-comerciais',
-    _jwtAuthMiddleware as unknown,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Import database connection
@@ -1969,14 +1969,14 @@ catch (error) {
 
         // Get all commercial tables ordered by creation date (excluding soft-deleted)
         const { isNull } = await import('drizzle-orm');
-        const _tabelas = await db
+        const tabelas = await db
           .select()
           .from(tabelasComerciais)
           .where(isNull(tabelasComerciais.deletedAt))
           .orderBy(desc(tabelasComerciais.createdAt));
 
         // For each table, get associated products
-        const _tabelasWithProducts = await Promise.all(
+        const tabelasWithProducts = await Promise.all(
           tabelas.map(async (tabela) => {
             const __associations = await db
               .select({ produtoId: produtoTabelaComercial.produtoId })
@@ -2007,8 +2007,8 @@ catch (error) {
   // API endpoint for creating commercial tables (N:N structure)
   app.post(
     '/api/admin/tabelas-comerciais',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2016,7 +2016,7 @@ catch (error) {
         const { z } = await import('zod');
 
         // Updated validation schema for N:N structure
-        const _createTabelaSchema = z.object({
+        const createTabelaSchema = z.object({
           nomeTabela: z.string().min(3, 'Nome da tabela deve ter pelo menos 3 caracteres'),
           taxaJuros: z.number().positive('Taxa de juros deve ser positiva'),
           prazos: z.array(z.number().positive()).min(1, 'Deve ter pelo menos um prazo'),
@@ -2030,7 +2030,7 @@ catch (error) {
         const __validatedData = createTabelaSchema.parse(req.body);
 
         // TRANSACTION: Create table and associate products
-        const _result = await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Insert new commercial table
           const [newTabela] = await tx
             .insert(tabelasComerciais)
@@ -2045,7 +2045,7 @@ catch (error) {
 
           // Step 2: Associate products via junction table
           const __associations = _validatedData.produtoIds.map((produtoId) => ({
-  _produtoId,
+  produtoId,
             tabelaComercialId: newTabela.id,
           }));
 
@@ -2072,8 +2072,8 @@ catch (error) {
   // API endpoint for updating commercial tables (N:N structure)
   app.put(
     '/api/admin/tabelas-comerciais/:id',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2087,7 +2087,7 @@ catch (error) {
         }
 
         // Updated validation schema for N:N structure
-        const _updateTabelaSchema = z.object({
+        const updateTabelaSchema = z.object({
           nomeTabela: z.string().min(3, 'Nome da tabela deve ter pelo menos 3 caracteres'),
           taxaJuros: z.number().positive('Taxa de juros deve ser positiva'),
           prazos: z.array(z.number().positive()).min(1, 'Deve ter pelo menos um prazo'),
@@ -2101,7 +2101,7 @@ catch (error) {
         const __validatedData = updateTabelaSchema.parse(req.body);
 
         // TRANSACTION: Update table and reassociate products
-        const _result = await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Update the commercial table
           const [updatedTabela] = await tx
             .update(tabelasComerciais)
@@ -2126,8 +2126,8 @@ catch (error) {
 
           // Step 3: Create new product _associations
           const __associations = _validatedData.produtoIds.map((produtoId) => ({
-  _produtoId,
-            tabelaComercialId: _tabelaId,
+  produtoId,
+            tabelaComercialId: tabelaId,
           }));
 
           await tx.insert(produtoTabelaComercial).values(_associations);
@@ -2156,8 +2156,8 @@ catch (error) {
   // API endpoint for deleting commercial tables
   app.delete(
     '/api/admin/tabelas-comerciais/:id',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2177,7 +2177,7 @@ catch (error) {
             .where(eq(produtoTabelaComercial.tabelaComercialId, _tabelaId));
 
           // Step 2: Soft delete the commercial table
-          const _result = await tx
+          const result = await tx
             .update(tabelasComerciais)
             .set({ deletedAt: new Date() })
             .where(eq(tabelasComerciais.id, _tabelaId))
@@ -2212,10 +2212,10 @@ catch (error) {
   // Endpoint for formalization data - Using Supabase direct to avoid Drizzle orderSelectedFields error
   app.get(
     '/api/propostas/:id/formalizacao',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _propostaId = req.params.id;
+        const propostaId = req.params.id;
         console.log(
           `[${_getBrasiliaTimestamp()}] 🔍 INICIO - Buscando dados de formalização para proposta: ${propostaId}`
         );
@@ -2226,7 +2226,7 @@ catch (error) {
 
         // Usar Supabase Admin Client diretamente para evitar problemas do Drizzle
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
 
@@ -2241,9 +2241,9 @@ catch (error) {
         console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 2.1 - Dados da proposta:`, {
           id: proposta?.id,
           status: proposta?.status,
-          tabela_comercial_id: proposta?.tabela_comercial_id,
-          produto_id: proposta?.produto_id,
-          atendente_id: proposta?.atendente_id,
+          tabela_comercial_id: proposta?.tabela_comercialid,
+          produto_id: proposta?.produtoid,
+          atendente_id: proposta?.atendenteid,
         });
 
         if (propostaError || !proposta) {
@@ -2281,14 +2281,14 @@ catch (error) {
           for (const doc of documentos) {
             try {
               console.log(`🔍 [FORMALIZAÇÃO] Tentando gerar URL para documento:`, {
-                nome: doc.nome_arquivo,
+                nome: doc.nomearquivo,
                 url: doc.url,
                 tipo: doc.tipo,
-                proposta_id: doc.proposta_id,
+                proposta_id: doc.propostaid,
               });
 
               // Extrair o caminho do arquivo a partir da URL salva
-              const _documentsIndex = doc.url.indexOf('/documents/');
+              const documentsIndex = doc.url.indexOf('/documents/');
               let filePath;
 
               if (documentsIndex !== -1) {
@@ -2297,7 +2297,7 @@ catch (error) {
               }
 else {
                 // Fallback: construir caminho baseado no nome do arquivo
-                const _fileName = doc.nome_arquivo;
+                const fileName = doc.nome_arquivo;
                 filePath = `proposta-${propostaId}/${fileName}`;
               }
 
@@ -2311,10 +2311,10 @@ else {
                 documentosComUrls.push({
                   ...doc,
                   // Mapeamento para formato esperado pelo DocumentViewer
-                  name: doc.nome_arquivo,
+                  name: doc.nomearquivo,
                   url: signedUrlData.signedUrl,
                   type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
-                  uploadDate: doc.created_at,
+                  uploadDate: doc.createdat,
                   // Manter campos originais também
                   url_visualizacao: signedUrlData.signedUrl,
                 });
@@ -2331,10 +2331,10 @@ else {
                 documentosComUrls.push({
                   ...doc,
                   // Mesmo sem URL, mapear para formato esperado
-                  name: doc.nome_arquivo,
+                  name: doc.nomearquivo,
                   url: '',
                   type: doc.tipo || 'application/octet-stream',
-                  uploadDate: doc.created_at,
+                  uploadDate: doc.createdat,
                 }); // Adiciona sem URL em caso de erro
               }
             }
@@ -2346,10 +2346,10 @@ catch (error) {
               documentosComUrls.push({
                 ...doc,
                 // Mesmo com erro, mapear para formato esperado
-                name: doc.nome_arquivo,
+                name: doc.nomearquivo,
                 url: '',
                 type: doc.tipo || 'application/octet-stream',
-                uploadDate: doc.created_at,
+                uploadDate: doc.createdat,
               }); // Adiciona sem URL em caso de erro
             }
           }
@@ -2370,7 +2370,7 @@ catch (error) {
 
           const { data: tabelaComercial, error: tabelaError } = await supabase
             .from('tabelas_comerciais')
-            .select('taxa_juros, nome_tabela, parceiro_id')
+            .select('taxajuros, nometabela, parceiro_id')
             .eq('id', proposta.tabela_comercial_id)
             .single();
 
@@ -2387,7 +2387,7 @@ catch (error) {
             taxaJurosTabela = tabelaComercial.taxa_juros;
             console.log(
               `[${_getBrasiliaTimestamp()}] ✅ Taxa de juros encontrada:`,
-  _taxaJurosTabela,
+  taxaJurosTabela,
               `% da tabela "${tabelaComercial.nome_tabela}"`
             );
           }
@@ -2407,18 +2407,18 @@ else {
         console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 6 - Processando dados JSONB...`);
 
         // Parse dos dados JSONB antes de retornar
-        const _propostaProcessada = {
+        const propostaProcessada = {
           ...proposta,
           // Parse seguro dos dados JSONB
           clienteData: proposta.cliente_data || {},
           condicoesData: proposta.condicoes_data || {},
           // Converter snake_case para camelCase para compatibilidade frontend
           ccbGerado: proposta.ccb_gerado || false,
-          dataAprovacao: proposta.data_aprovacao,
+          dataAprovacao: proposta.dataaprovacao,
           assinaturaEletronicaConcluida: proposta.assinatura_eletronica_concluida || false,
           biometriaConcluida: proposta.biometria_concluida || false,
-          caminhoCcbAssinado: proposta.caminho_ccb_assinado,
-          createdAt: proposta.created_at,
+          caminhoCcbAssinado: proposta.caminho_ccbassinado,
+          createdAt: proposta.createdat,
           // Adicionar documentos com URLs assinadas
           documentos: documentosComUrls || [],
           // Adicionar taxa de juros da tabela comercial
@@ -2460,14 +2460,14 @@ catch (error) {
   );
 
   // Mock data para prazos
-  const _prazos = [
+  const prazos = [
     { id: 1, valor: '12 meses' },
     { id: 2, valor: '24 meses' },
     { id: 3, valor: '36 meses' },
   ];
 
   // Users management endpoints - REFATORADO com padrão Service/Repository
-  const _usersAdminRouter = (await import('./routes/admin-users.js')).default;
+  const usersAdminRouter = (await import('./routes/admin-users.js')).default;
   app.use('/api/admin', usersAdminRouter);
 
   // API endpoint for partners - GET all (public for dropdowns)
@@ -2477,7 +2477,7 @@ catch (error) {
       const { parceiros } = await import('../shared/schema');
 
       const { isNull } = await import('drizzle-orm');
-      const _allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
+      const allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
       res.json(allParceiros);
     }
 catch (error) {
@@ -2493,7 +2493,7 @@ catch (error) {
       const { parceiros } = await import('../shared/schema');
       const { eq } = await import('drizzle-orm');
 
-      const _parceiroId = parseInt(req.params.id);
+      const parceiroId = parseInt(req.params.id);
       if (_isNaN(parceiroId)) {
         return res.status(500).json({error: "Error"});
       }
@@ -2515,8 +2515,8 @@ catch (error) {
   // API endpoint for partners - POST create
   app.post(
     '/api/admin/parceiros',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2541,8 +2541,8 @@ catch (error) {
   // API endpoint for partners - PUT update
   app.put(
     '/api/admin/parceiros/:id',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2550,7 +2550,7 @@ catch (error) {
         const { eq } = await import('drizzle-orm');
         const { z } = await import('zod');
 
-        const _parceiroId = parseInt(req.params.id);
+        const parceiroId = parseInt(req.params.id);
         if (_isNaN(parceiroId)) {
           return res.status(500).json({error: "Error"});
         }
@@ -2581,21 +2581,21 @@ catch (error) {
   // API endpoint for partners - DELETE
   app.delete(
     '/api/admin/parceiros/:id',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
         const { parceiros, lojas } = await import('../shared/schema');
         const { eq, and, isNull } = await import('drizzle-orm');
 
-        const _parceiroId = parseInt(req.params.id);
+        const parceiroId = parseInt(req.params.id);
         if (_isNaN(parceiroId)) {
           return res.status(500).json({error: "Error"});
         }
 
         // Regra de negócio crítica: verificar se existem lojas associadas (excluindo soft-deleted)
-        const _lojasAssociadas = await db
+        const lojasAssociadas = await db
           .select()
           .from(lojas)
           .where(and(eq(lojas.parceiroId, parceiroId), isNull(lojas.deletedAt)));
@@ -2634,7 +2634,7 @@ catch (error) {
   // Rotas CRUD para produtos
   app.get('/api/produtos', async (req, res) => {
     try {
-      const _produtos = await buscarTodosProdutos();
+      const produtos = await buscarTodosProdutos();
       res.json(produtos);
     }
 catch (error) {
@@ -2662,16 +2662,16 @@ catch (error) {
         return res.status(500).json({error: "Error"});
       }
 
-      const _dadosProduto = {
-  _nome,
-  _status,
+      const dadosProduto = {
+  nome,
+  status,
         tacValor: tacValor ?? 0,
         tacTipo: tacTipo ?? 'fixo',
       };
 
       console.log('[PRODUTOS API] Enviando para controller:', dadosProduto);
 
-      const _novoProduto = await criarProduto(dadosProduto);
+      const novoProduto = await criarProduto(dadosProduto);
 
       console.log('[PRODUTOS API] Produto criado:', novoProduto);
 
@@ -2701,9 +2701,9 @@ catch (error) {
         return res.status(500).json({error: "Error"});
       }
 
-      const _produtoAtualizado = await atualizarProduto(id, {
-  _nome,
-  _status,
+      const produtoAtualizado = await atualizarProduto(id, {
+  nome,
+  status,
         tacValor: tacValor ?? 0,
         tacTipo: tacTipo ?? 'fixo',
       });
@@ -2742,7 +2742,7 @@ catch (error) {
   });
 
   // Função para calcular o valor da parcela usando a fórmula da Tabela Price
-  const _calcularParcela = (
+  const calcularParcela = (
     valorSolicitado: number,
     prazoEmMeses: number,
     taxaDeJurosMensal: number
@@ -2750,8 +2750,8 @@ catch (error) {
     if (taxaDeJurosMensal <= 0) {
       return valorSolicitado / prazoEmMeses;
     }
-    const _i = taxaDeJurosMensal / 100; // Convertendo a taxa percentual para decimal
-    const _pmt =
+    const i = taxaDeJurosMensal / 100; // Convertendo a taxa percentual para decimal
+    const pmt =
       (valorSolicitado * (i * Math.pow(1 + i, prazoEmMeses))) / (Math.pow(1 + i, prazoEmMeses) - 1);
     return parseFloat(pmt.toFixed(2));
   };
@@ -2776,10 +2776,10 @@ catch (error) {
       }
 
       console.log('[SIMULAÇÃO] Iniciando simulação:', {
-  _valorEmprestimo,
-  _prazoMeses,
-  _parceiroId,
-  _produtoId,
+  valorEmprestimo,
+  prazoMeses,
+  parceiroId,
+  produtoId,
       });
 
       // PASSO 1: Buscar parâmetros financeiros do banco de dados
@@ -2791,18 +2791,18 @@ catch (error) {
       // Hierarquia de busca de taxas
       if (parceiroId) {
         // 1.1 - Busca dados do parceiro
-        const _parceiro = await db
+        const parceiro = await db
           .select()
           .from(parceiros)
           .where(eq(parceiros.id, parceiroId))
           .limit(1);
 
         if (parceiro.length > 0) {
-          const _parceiroData = parceiro[0];
+          const parceiroData = parceiro[0];
 
           // Verifica se parceiro tem tabela comercial padrão
           if (parceiroData.tabelaComercialPadraoId) {
-            const _tabelaPadrao = await db
+            const tabelaPadrao = await db
               .select()
               .from(tabelasComerciais)
               .where(eq(tabelasComerciais.id, parceiroData.tabelaComercialPadraoId))
@@ -2826,21 +2826,21 @@ catch (error) {
 
       // 1.2 - Se produtoId fornecido, busca configurações do produto
       if (produtoId) {
-        const _produto = await db.select().from(produtos).where(eq(produtos.id, produtoId)).limit(1);
+        const produto = await db.select().from(produtos).where(eq(produtos.id, produtoId)).limit(1);
 
         if (produto.length > 0) {
-          const _produtoData = produto[0];
+          const produtoData = produto[0];
           tacValor = parseFloat(produtoData.tacValor || '0');
           tacTipo = produtoData.tacTipo || 'fixo';
 
           // Busca tabelas comerciais associadas ao produto
-          const _tabelasProduto = await db
+          const tabelasProduto = await db
             .select({
               tabela: tabelasComerciais,
             })
             .from(produtoTabelaComercial)
             .innerJoin(
-  _tabelasComerciais,
+  tabelasComerciais,
               eq(produtoTabelaComercial.tabelaComercialId, tabelasComerciais.id)
             )
             .where(eq(produtoTabelaComercial.produtoId, produtoId));
@@ -2850,7 +2850,7 @@ catch (error) {
             let _tabelaSelecionada = tabelasProduto[0].tabela;
 
             if (parceiroId) {
-              const _tabelaParceiro = tabelasProduto.find(
+              const tabelaParceiro = tabelasProduto.find(
                 (t) => t.tabela.parceiroId == parceiroId
               );
               if (tabelaParceiro) {
@@ -2870,40 +2870,40 @@ catch (error) {
       }
 
       console.log('[SIMULAÇÃO] Parâmetros obtidos do banco:', {
-  _taxaJurosMensal,
-  _tacValor,
-  _tacTipo,
-  _comissao,
+  taxaJurosMensal,
+  tacValor,
+  tacTipo,
+  comissao,
       });
 
       // PASSO 2: Executar cálculos usando o serviço de finanças
       const { executarSimulacaoCompleta } = await import('./services/financeService.js');
 
-      const _resultado = executarSimulacaoCompleta(
-  _valorEmprestimo,
-  _prazoMeses,
-  _taxaJurosMensal,
-  _tacValor,
-  _tacTipo,
+      const resultado = executarSimulacaoCompleta(
+  valorEmprestimo,
+  prazoMeses,
+  taxaJurosMensal,
+  tacValor,
+  tacTipo,
         0 // dias de carência (pode ser parametrizado depois)
       );
 
       // PASSO 3: Adicionar comissão ao resultado
-      const _valorComissao = (valorEmprestimo * comissao) / 100;
+      const valorComissao = (valorEmprestimo * comissao) / 100;
 
       // PASSO 4: Retornar simulação completa
-      const _respostaCompleta = {
+      const respostaCompleta = {
         ...resultado,
         comissao: {
           percentual: comissao,
           valor: Math.round(valorComissao * 100) / 100,
         },
         parametrosUtilizados: {
-  _parceiroId,
-  _produtoId,
-  _taxaJurosMensal,
-  _tacValor,
-  _tacTipo,
+  parceiroId,
+  produtoId,
+  taxaJurosMensal,
+  tacValor,
+  tacTipo,
         },
       };
 
@@ -2932,12 +2932,12 @@ catch (error) {
   });
 
   // Funções de mock para a simulação
-  const _buscarTaxas = (produtoId: string) => {
+  const buscarTaxas = (produtoId: string) => {
     // Lógica futura: buscar no DB a tabela do produto/parceiro
     return { taxaDeJurosMensal: 5.0, valorTac: 150.0 }; // Exemplo: 5% a.m. e R$150 de TAC
   };
 
-  const _calcularIOF = (valor: number) => {
+  const calcularIOF = (valor: number) => {
     return valor * 0.0038; // Exemplo de alíquota
   };
 
@@ -2948,19 +2948,19 @@ catch (error) {
   });
 
   app.get('/api/simulacao', (req, res) => {
-    const { valor, prazo, produto_id, incluir_tac, dataVencimento } = req.query;
+    const { valor, prazo, produtoid, incluirtac, dataVencimento } = req.query;
 
-    const _valorSolicitado = parseFloat(valor as string);
-    const _prazoEmMeses = parseInt(prazo as string);
+    const valorSolicitado = parseFloat(valor as string);
+    const prazoEmMeses = parseInt(prazo as string);
 
     if (_isNaN(valorSolicitado) || _isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
       return res.status(500).json({error: "Error"});
     }
 
     // Correção Crítica: Usa a data do servidor como a "verdade"
-    const _dataAtual = getBrasiliaDate();
-    const _primeiroVencimento = new Date(dataVencimento as string);
-    const _diasDiferenca = Math.ceil(
+    const dataAtual = getBrasiliaDate();
+    const primeiroVencimento = new Date(dataVencimento as string);
+    const diasDiferenca = Math.ceil(
       (primeiroVencimento.getTime() - dataAtual.getTime()) / (1000 * 3600 * 24)
     );
 
@@ -2972,18 +2972,18 @@ catch (error) {
 
     const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
 
-    const _taxaJurosDiaria = taxaDeJurosMensal / 30;
-    const _jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
+    const taxaJurosDiaria = taxaDeJurosMensal / 30;
+    const jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
 
-    const _iof = calcularIOF(valorSolicitado);
-    const _tac = incluir_tac == 'true' ? valorTac : 0;
+    const iof = calcularIOF(valorSolicitado);
+    const tac = incluir_tac == 'true' ? valorTac : 0;
 
-    const _valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
+    const valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
 
-    const _valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
+    const valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
 
-    const _custoTotal = valorParcela * prazoEmMeses;
-    const _cetAnual = ((custoTotal / valorSolicitado - 1) / (prazoEmMeses / 12)) * 100;
+    const custoTotal = valorParcela * prazoEmMeses;
+    const cetAnual = ((custoTotal / valorSolicitado - 1) / (prazoEmMeses / 12)) * 100;
 
     return res.json({
       valorParcela: parseFloat(valorParcela.toFixed(2)),
@@ -2999,7 +2999,7 @@ catch (error) {
 
   // Rota para fila de formalização
   app.get('/api/formalizacao/propostas', (req, res) => {
-    const _mockPropostas = [
+    const mockPropostas = [
       { id: '1753800001234', cliente: 'Empresa A', status: 'Assinatura Pendente' },
       { id: '1753800005678', cliente: 'Empresa B', status: 'Biometria Concluída' },
       { id: '1753800009012', cliente: 'Empresa C', status: 'CCB Gerada' },
@@ -3010,7 +3010,7 @@ catch (error) {
   // Update proposal formalization step
   app.patch(
     '/api/propostas/:id/etapa-formalizacao',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -3020,17 +3020,17 @@ catch (error) {
         console.log(`🔍 [ETAPA DEBUG] User info:`, {
           userId: req.user?.id,
           userRole: req.user?.role,
-          userLojaId: req.user?.loja_id,
-  _etapa,
-  _concluida,
+          userLojaId: req.user?.lojaid,
+  etapa,
+  concluida,
           propostaId: id,
         });
 
         // Validate input
-        const _etapasValidas = ['ccb_gerado', 'assinatura_eletronica', 'biometria'];
+        const etapasValidas = ['ccb_gerado', 'assinatura_eletronica', 'biometria'];
         if (!etapa || !etapasValidas.includes(etapa)) {
           return res.status(400).json({
-            message: 'Etapa inválida. Use: ccb_gerado, assinatura_eletronica ou biometria',
+            message: 'Etapa inválida. Use: ccbgerado, assinatura_eletronica ou biometria',
           });
         }
 
@@ -3062,7 +3062,7 @@ catch (error) {
         // Check permissions based on step and role
         if (etapa == 'ccb_gerado') {
           // CCB generation can be done by ANALISTA, GERENTE, ATENDENTE, or ADMINISTRADOR
-          const _allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
+          const allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
           console.log(
             `🔍 [ETAPA DEBUG] Checking CCB permissions - Role: ${req.user?.role}, Allowed: ${allowedRoles.join(', ')}`
           );
@@ -3082,8 +3082,8 @@ else {
           );
 
           // Allow ADMINISTRADOR to access any store, otherwise check if ATENDENTE of same store
-          const _isAdmin = req.user?.role == 'ADMINISTRADOR';
-          const _isAttendenteFromSameStore =
+          const isAdmin = req.user?.role == 'ADMINISTRADOR';
+          const isAttendenteFromSameStore =
             req.user?.role == 'ATENDENTE' && req.user?.loja_id == proposta.lojaId;
 
           if (!isAdmin && !isAttendenteFromSameStore) {
@@ -3107,7 +3107,7 @@ else {
 
             try {
               const { ccbGenerationService } = await import('./services/ccbGenerationService');
-              const _result = await ccbGenerationService.generateCCB(id);
+              const result = await ccbGenerationService.generateCCB(id);
               if (!_result.success) {
                 throw new Error("Error");
               }
@@ -3203,8 +3203,8 @@ else {
 
         res.json({
           message: 'Etapa de formalização atualizada com sucesso',
-  _etapa,
-  _concluida,
+  etapa,
+  concluida,
           proposta: updatedProposta,
         });
       }
@@ -3220,8 +3220,8 @@ catch (error) {
   // Update proposal status - REAL IMPLEMENTATION WITH AUDIT TRAIL
   app.put(
     '/api/propostas/:id/status',
-  __jwtAuthMiddleware,
-  _requireManagerOrAdmin,
+  jwtAuthMiddleware,
+  requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -3237,7 +3237,7 @@ catch (error) {
         const { eq } = await import('drizzle-orm');
 
         // Execute transaction for atomic updates
-        const _result = await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
           // Step 1: Get current proposal for audit trail
           const [currentProposta] = await tx
             .select({
@@ -3263,7 +3263,7 @@ catch (error) {
               propostaId: id,
               novoStatus: status,
               userId: req.user?.id || 'sistema',
-  _contexto,
+  contexto,
               observacoes: observacao || `Status alterado para ${status}`,
               metadata: {
                 tipoAcao: 'STATUS_UPDATE_MANUAL',
@@ -3318,11 +3318,11 @@ catch (error) {
   );
 
   // Dashboard stats
-  app.get('/api/dashboard/stats', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const _allPropostas = await storage.getPropostas();
+      const allPropostas = await storage.getPropostas();
 
-      const _stats = {
+      const stats = {
         totalPropostas: allPropostas.length,
         aguardandoAnalise: allPropostas.filter((p) => p.status == 'aguardando_analise').length,
         aprovadas: allPropostas.filter((p) => p.status == 'aprovado').length,
@@ -3341,12 +3341,12 @@ catch (error) {
   // Get all stores managed by a specific manager
   app.get(
     '/api/gerentes/:gerenteId/lojas',
-  __jwtAuthMiddleware,
-  _requireManagerOrAdmin,
+  jwtAuthMiddleware,
+  requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _gerenteId = parseInt(req.params.gerenteId);
-        const _lojaIds = await storage.getLojasForGerente(gerenteId);
+        const gerenteId = parseInt(req.params.gerenteId);
+        const lojaIds = await storage.getLojasForGerente(gerenteId);
         res.json(lojaIds);
       }
 catch (error) {
@@ -3359,12 +3359,12 @@ catch (error) {
   // Get all managers for a specific store
   app.get(
     '/api/lojas/:lojaId/gerentes',
-  __jwtAuthMiddleware,
-  _requireManagerOrAdmin,
+  jwtAuthMiddleware,
+  requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _lojaId = parseInt(req.params.lojaId);
-        const _gerenteIds = await storage.getGerentesForLoja(lojaId);
+        const lojaId = parseInt(req.params.lojaId);
+        const gerenteIds = await storage.getGerentesForLoja(lojaId);
         res.json(gerenteIds);
       }
 catch (error) {
@@ -3377,12 +3377,12 @@ catch (error) {
   // Add a manager to a store
   app.post(
     '/api/gerente-lojas',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const __validatedData = insertGerenteLojaSchema.parse(req.body);
-        const _relationship = await storage.addGerenteToLoja(_validatedData);
+        const relationship = await storage.addGerenteToLoja(_validatedData);
         res.json(relationship);
       }
 catch (error) {
@@ -3398,12 +3398,12 @@ catch (error) {
   // Remove a manager from a store
   app.delete(
     '/api/gerente-lojas/:gerenteId/:lojaId',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _gerenteId = parseInt(req.params.gerenteId);
-        const _lojaId = parseInt(req.params.lojaId);
+        const gerenteId = parseInt(req.params.gerenteId);
+        const lojaId = parseInt(req.params.lojaId);
         await storage.removeGerenteFromLoja(gerenteId, lojaId);
         res.json({ message: 'Manager removed from store successfully' });
       }
@@ -3417,12 +3417,12 @@ catch (error) {
   // Get all relationships for a specific manager
   app.get(
     '/api/gerentes/:gerenteId/relationships',
-  __jwtAuthMiddleware,
-  _requireManagerOrAdmin,
+  jwtAuthMiddleware,
+  requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _gerenteId = parseInt(req.params.gerenteId);
-        const _relationships = await storage.getGerenteLojas(gerenteId);
+        const gerenteId = parseInt(req.params.gerenteId);
+        const relationships = await storage.getGerenteLojas(gerenteId);
         res.json(relationships);
       }
 catch (error) {
@@ -3435,7 +3435,7 @@ catch (error) {
   // ========== SYSTEM METADATA ROUTES ==========
 
   // Helper middleware to check for multiple roles (local version)
-  const _requireRolesLocal = (allowedRoles: string[]) => {
+  const requireRolesLocal = (allowedRoles: string[]) => {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
         return res.status(403).json({
@@ -3450,7 +3450,7 @@ catch (error) {
   // Now allows ADMINISTRADOR, DIRETOR, and GERENTE to create users
   app.get(
     '/api/admin/system/metadata',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3459,11 +3459,11 @@ catch (error) {
         const { count } = await import('drizzle-orm');
 
         const { isNull } = await import('drizzle-orm');
-        const _result = await db
+        const result = await db
           .select({ count: count() })
           .from(lojas)
           .where(isNull(lojas.deletedAt));
-        const _totalLojas = result[0]?.count || 0;
+        const totalLojas = result[0]?.count || 0;
 
         res.json({ totalLojas });
       }
@@ -3477,7 +3477,7 @@ catch (error) {
   // Get lojas by parceiro ID for server-side filtering
   app.get(
     '/api/admin/parceiros/:parceiroId/lojas',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3485,12 +3485,12 @@ catch (error) {
         const { lojas } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
 
-        const _parceiroId = parseInt(req.params.parceiroId);
+        const parceiroId = parseInt(req.params.parceiroId);
         if (_isNaN(parceiroId)) {
           return res.status(500).json({error: "Error"});
         }
 
-        const _lojasResult = await db.select().from(lojas).where(eq(lojas.parceiroId, parceiroId));
+        const lojasResult = await db.select().from(lojas).where(eq(lojas.parceiroId, parceiroId));
 
         res.json(lojasResult);
       }
@@ -3506,11 +3506,11 @@ catch (error) {
   // GET all active lojas
   app.get(
     '/api/admin/lojas',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _lojas = await storage.getLojas();
+        const lojas = await storage.getLojas();
         res.json(lojas);
       }
 catch (error) {
@@ -3523,12 +3523,12 @@ catch (error) {
   // GET loja by ID
   app.get('/api/lojas/:id', timingNormalizerMiddleware, async (req, res) => {
     try {
-      const _id = parseInt(req.params.id);
+      const id = parseInt(req.params.id);
       if (_isNaN(id)) {
         return res.status(500).json({error: "Error"});
       }
 
-      const _loja = await storage.getLojaById(id);
+      const loja = await storage.getLojaById(id);
       if (!loja) {
         return res.status(500).json({error: "Error"});
       }
@@ -3544,12 +3544,12 @@ catch (error) {
   // POST create new loja
   app.post(
     '/api/admin/lojas',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const __validatedData = insertLojaSchema.strict().parse(req.body);
-        const _newLoja = await storage.createLoja(_validatedData);
+        const newLoja = await storage.createLoja(_validatedData);
         res.status(201).json(newLoja);
       }
 catch (error) {
@@ -3565,17 +3565,17 @@ catch (error) {
   // PUT update loja
   app.put(
     '/api/admin/lojas/:id',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _id = parseInt(req.params.id);
+        const id = parseInt(req.params.id);
         if (_isNaN(id)) {
           return res.status(500).json({error: "Error"});
         }
 
         const __validatedData = updateLojaSchema.strict().parse(req.body);
-        const _updatedLoja = await storage.updateLoja(id, _validatedData);
+        const updatedLoja = await storage.updateLoja(id, _validatedData);
 
         if (!updatedLoja) {
           return res.status(500).json({error: "Error"});
@@ -3596,20 +3596,20 @@ catch (error) {
   // DELETE soft delete loja (set is_active = false)
   app.delete(
     '/api/admin/lojas/:id',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+  _requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _id = parseInt(req.params.id);
+        const id = parseInt(req.params.id);
         if (_isNaN(id)) {
           return res.status(500).json({error: "Error"});
         }
 
         // Check for dependencies before soft delete
-        const _dependencies = await storage.checkLojaDependencies(id);
+        const dependencies = await storage.checkLojaDependencies(id);
 
         if (dependencies.hasUsers || dependencies.hasPropostas || dependencies.hasGerentes) {
-          const _dependencyDetails = [];
+          const dependencyDetails = [];
           if (dependencies.hasUsers) dependencyDetails.push('usuários ativos');
           if (dependencies.hasPropostas) dependencyDetails.push('propostas associadas');
           if (dependencies.hasGerentes) dependencyDetails.push('gerentes associados');
@@ -3633,7 +3633,7 @@ catch (error) {
   );
 
   // User profile endpoint for RBAC context
-  app.get('/api/auth/profile', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(500).json({error: "Error"});
@@ -3643,8 +3643,8 @@ catch (error) {
         id: req.user!.id,
         email: req.user!.email,
         role: req.user!.role,
-        full_name: req.user!.full_name,
-        loja_id: req.user!.loja_id,
+        full_name: req.user!.fullname,
+        loja_id: req.user!.lojaid,
       });
     }
 catch (error) {
@@ -3657,9 +3657,9 @@ catch (error) {
   app.get('/api/health/storage', async (req, res) => {
     try {
       // Test basic storage operations
-      const _users = await storage.getUsers();
-      const _lojas = await storage.getLojas();
-      const _usersWithDetails = await storage.getUsersWithDetails();
+      const users = await storage.getUsers();
+      const lojas = await storage.getLojas();
+      const usersWithDetails = await storage.getUsersWithDetails();
 
       res.json({
         status: 'healthy',
@@ -3684,10 +3684,10 @@ catch (error) {
   app.get('/api/health/schema', async (req, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Check essential tables exist
-      const _tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];
+      const tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];
       const checks: Record<string, any> = {};
 
       for (const table of tables) {
@@ -3707,7 +3707,7 @@ catch (err) {
         }
       }
 
-      const _allHealthy = Object.values(checks).every((check) => check.status == 'ok');
+      const allHealthy = Object.values(checks).every((check) => check.status == 'ok');
 
       res.status(allHealthy ? 200 : 500).json({
         status: allHealthy ? 'healthy' : 'unhealthy',
@@ -3736,25 +3736,25 @@ catch (error) {
   app.post(
     '/api/upload',
     upload.single('file'),
-  _secureFileValidationMiddleware,
-  __jwtAuthMiddleware,
+  secureFileValidationMiddleware,
+  jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _file = req.file;
-        const _proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
+        const file = req.file;
+        const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
 
         if (!file) {
           return res.status(500).json({error: "Error"});
         }
 
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const _supabase = createServerSupabaseAdminClient();
+        const supabase = createServerSupabaseAdminClient();
 
         // Usar filename do body ou gerar um UUID
         const { v4: uuidv4 } = await import('uuid');
-        const _uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
-        const _fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
-        const _filePath = `proposta-${proposalId}/${fileName}`;
+        const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
+        const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
+        const filePath = `proposta-${proposalId}/${fileName}`;
 
         console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
 
@@ -3804,24 +3804,24 @@ catch (error) {
   app.use('/api/clicksign', clickSignRouter);
 
   // Register Webhook routes (ClickSign and Inter)
-  const _webhookRouter = (await import('./routes/webhooks')).default;
+  const webhookRouter = (await import('./routes/webhooks')).default;
   app.use('/api/webhooks', webhookRouter);
   app.use('/webhooks/inter', interWebhookRouter);
 
   // Register Inter Collections routes FIRST (more specific route)
-  const _interCollectionsRouter = (await import('./routes/inter-collections.js')).default;
+  const interCollectionsRouter = (await import('./routes/inter-collections.js')).default;
   app.use('/api/inter/collections', interCollectionsRouter);
 
   // Register Inter Fix Collections (emergency endpoint)
-  const _interFixRouter = (await import('./routes/inter-fix-collections.js')).default;
+  const interFixRouter = (await import('./routes/inter-fix-collections.js')).default;
   app.use('/api/inter', interFixRouter);
 
   // Register Inter Test Fix (no auth endpoint for testing)
-  const _interTestFixRouter = (await import('./routes/inter-fix-test.js')).default;
+  const interTestFixRouter = (await import('./routes/inter-fix-test.js')).default;
   app.use('/api/inter', interTestFixRouter);
 
   // Register Inter Execute Fix (execute regeneration)
-  const _interExecuteFixRouter = (await import('./routes/inter-execute-fix.js')).default;
+  const interExecuteFixRouter = (await import('./routes/inter-execute-fix.js')).default;
   app.use('/api/inter', interExecuteFixRouter);
 
   // Register Inter Bank routes AFTER (less specific route)
@@ -3831,21 +3831,21 @@ catch (error) {
   app.use('/api/inter', interRealtimeRouter);
 
   // Inter Fix Route - Regenerar boletos com códigos reais
-  const _interFixBoletosRouter = (await import('./routes/inter-fix-boletos.js')).default;
+  const interFixBoletosRouter = (await import('./routes/inter-fix-boletos.js')).default;
   app.use('/api/inter-fix', interFixBoletosRouter);
 
   // Endpoints movidos para server/routes/propostas-carne.ts para melhor organização
 
   // Register Cobranças routes
-  const _cobrancasRouter = (await import('./routes/cobrancas.js')).default;
+  const cobrancasRouter = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRouter);
 
   // Register Alertas Proativos routes (PAM V1.0)
-  const _alertasRouter = (await import('./routes/alertas.js')).default;
+  const alertasRouter = (await import('./routes/alertas.js')).default;
   app.use('/api/alertas', alertasRouter);
 
   // Register Monitoring routes (Admin only)
-  app.use('/api/monitoring', _jwtAuthMiddleware, _requireAdmin, monitoringRoutes);
+  app.use('/api/monitoring', jwtAuthMiddleware, _requireAdmin, monitoringRoutes);
 
   // Register CCB V2 Intelligent Test routes
   app.use('/api/ccb-test-v2', ccbIntelligentTestRoutes);
@@ -3860,15 +3860,15 @@ catch (error) {
   app.use('/api/documentos', documentosRoutes);
 
   // Register Observações routes
-  const _observacoesRouter = (await import('./routes/observacoes.js')).default;
+  const observacoesRouter = (await import('./routes/observacoes.js')).default;
   app.use('/api', observacoesRouter);
 
   // Register Pagamentos routes
-  const _pagamentosRouter = (await import('./routes/pagamentos/index.js')).default;
+  const pagamentosRouter = (await import('./routes/pagamentos/index.js')).default;
   app.use('/api/pagamentos', pagamentosRouter);
 
   // Register Formalização routes
-  const _formalizacaoRouter = (await import('./routes/formalizacao')).default;
+  const formalizacaoRouter = (await import('./routes/formalizacao')).default;
   app.use('/api/formalizacao', formalizacaoRouter);
 
   // Register Propostas Carnê routes
@@ -3888,22 +3888,22 @@ catch (error) {
   app.use('/api/test-audit', testAuditRoutes);
 
   // Teste temporário para verificar refatoração do Mock Queue
-  const _testMockQueueWorkerRoutes = (await import('./routes/test-mock-queue-worker')).default;
+  const testMockQueueWorkerRoutes = (await import('./routes/test-mock-queue-worker')).default;
   app.use('/api/test-mock-queue-worker', testMockQueueWorkerRoutes);
 
   // CCB Diagnostics routes
-  const _ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
+  const ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
   app.use('/api/ccb-diagnostics', ccbDiagnosticsRouter);
 
   // CCB Coordinate Calibration routes (Professional calibration system)
-  const _ccbCalibrationRouter = (await import('./routes/ccb-calibration')).default;
+  const ccbCalibrationRouter = (await import('./routes/ccb-calibration')).default;
   app.use('/api/ccb-calibration', ccbCalibrationRouter);
 
   // TEST CCB USER COORDINATES - Validação das coordenadas manuais do usuário
   app.use('/api/test-ccb-coordinates', testCcbCoordinatesRoutes);
 
   // Register Semgrep MCP routes - Projeto Cérbero
-  const _securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
+  const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
   app.use('/api/security/mcp', securityMCPRoutes);
 
   // Register Security routes - OWASP Compliance Monitoring
@@ -3939,7 +3939,7 @@ catch (error) {
       console.log('🧪 [CCB TEST] Generating CCB for proposal:', proposalId);
 
       const { ccbGenerationService } = await import('./services/ccbGenerationService');
-      const _result = await ccbGenerationService.generateCCB(proposalId);
+      const result = await ccbGenerationService.generateCCB(proposalId);
 
       if (!_result.success) {
         return res.status(500).json({
@@ -3970,15 +3970,15 @@ catch (error) {
       const { id } = req.params;
 
       // Buscar proposta
-      const _proposal = await storage.getPropostaById(id);
+      const proposal = await storage.getPropostaById(id);
       if (!proposal) {
         return res.status(500).json({error: "Error"});
       }
 
       // Extrair dados de endereço
-      const _clienteData = (proposal.cliente_data as unknown) || {};
+      const clienteData = (proposal.cliente_data as unknown) || {};
 
-      const _debugInfo = {
+      const debugInfo = {
         proposalId: id,
         addressData: {
           endereco: clienteData.endereco || 'NÃO ENCONTRADO',
@@ -4029,7 +4029,7 @@ catch (error) {
   app.post(
     '/api/test/file-validation',
     upload.single('file'),
-  _secureFileValidationMiddleware,
+  secureFileValidationMiddleware,
     async (req, res) => {
       console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
       res.json({
@@ -4046,7 +4046,7 @@ catch (error) {
   app.post(
     '/api/test/file-validation',
     upload.single('file'),
-  _secureFileValidationMiddleware,
+  secureFileValidationMiddleware,
     async (req, res) => {
       console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
       res.json({
@@ -4063,21 +4063,21 @@ catch (error) {
   app.use('/api/auth', emailChangeRoutes);
 
   // Register OWASP Assessment routes
-  const _owaspRoutes = (await import('./routes/owasp.js')).default;
+  const owaspRoutes = (await import('./routes/owasp.js')).default;
   app.use('/api/owasp', owaspRoutes);
 
   // ✅ PROJETO CÉRBERO - Endpoints simplificados para SCA e SAST
-  app.get('/api/security/run-sca', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/security/run-sca', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       console.log('🔍 [SCA] Executando análise SCA...');
 
       // Ler relatório real do dependency-check
-      const _reportPath = 'dependency-check-report.json';
+      const reportPath = 'dependency-check-report.json';
       let _reportData = null;
 
       try {
-        const _fs = await import('fs/promises');
-        const _data = await fs.readFile(reportPath, 'utf-8');
+        const fs = await import('fs/promises');
+        const data = await fs.readFile(reportPath, 'utf-8');
         reportData = JSON.parse(_data);
       }
 catch (e) {
@@ -4097,7 +4097,7 @@ catch (e) {
           if (dep.vulnerabilities && dep.vulnerabilities.length > 0) {
             for (const vuln of dep.vulnerabilities) {
               totalVulns++;
-              const _severity = vuln.severity;
+              const severity = vuln.severity;
               if (severity == 'CRITICAL') critical++;
               else if (severity == 'HIGH') high++;
               else if (severity == 'MEDIUM') medium++;
@@ -4128,12 +4128,12 @@ catch (error) {
     }
   });
 
-  app.get('/api/security/run-sast', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/security/run-sast', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       console.log('🔍 [SAST] Executando análise SAST...');
 
       // Análise de código mockada mas baseada em realidade
-      const _sastResults = {
+      const sastResults = {
         filesScanned: 25,
         vulnerabilities: [
           {
@@ -4142,7 +4142,7 @@ catch (error) {
             line: 9,
             severity: 'HIGH',
             message: 'Hardcoded password detected',
-            code: "const _superSecretKey = 'password123';",
+            code: "const superSecretKey = 'password123';",
           },
           {
             id: 'sql-injection-direct',
@@ -4183,19 +4183,19 @@ catch (error) {
   });
 
   // Security Scanners routes (SCA & SAST)
-  const _securityScannersRoutes = (await import('./routes/security-scanners.js')).default;
+  const securityScannersRoutes = (await import('./routes/security-scanners.js')).default;
   app.use('/api/security-scanners', securityScannersRoutes);
 
   // Security API routes (Projeto Cérbero)
-  const _securityApiRoutes = (await import('./routes/security-api.js')).default;
+  const securityApiRoutes = (await import('./routes/security-api.js')).default;
   app.use('/api/security', securityApiRoutes);
 
   // Cobranças routes
-  const _cobrancasRoutes = (await import('./routes/cobrancas.js')).default;
+  const cobrancasRoutes = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRoutes);
 
   // Pagamentos routes
-  const _pagamentosRoutes = (await import('./routes/pagamentos/index.js')).default;
+  const pagamentosRoutes = (await import('./routes/pagamentos/index.js')).default;
   app.use('/api/financeiro/pagamentos', pagamentosRoutes);
 
   // ClickSign Integration routes
@@ -4212,7 +4212,7 @@ catch (error) {
     try {
       console.log('[TEST ENDPOINT] 🏥 Verificando saúde do sistema de Job Queue');
 
-      const _health = await checkQueuesHealth();
+      const health = await checkQueuesHealth();
 
       res.json({
         success: true,
@@ -4243,8 +4243,8 @@ catch (error) {
 
   app.post(
     '/api/test/job-queue',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
         console.log('[TEST ENDPOINT] 🧪 Recebendo requisição de teste de Job Queue');
@@ -4257,8 +4257,6 @@ catch (error) {
 
         switch (type) {
           case 'pdf': {
-        break;
-        }
             queueName = 'pdf-processing';
             job = await queues.pdfProcessing.add('TEST_PDF_JOB', {
               type: 'GENERATE_CARNE',
@@ -4269,8 +4267,6 @@ catch (error) {
             break;
           }
           case 'boleto': {
-        break;
-        }
             queueName = 'boleto-sync';
             job = await queues.boletoSync.add('TEST_BOLETO_JOB', {
               type: 'SYNC_BOLETOS',
@@ -4297,7 +4293,7 @@ catch (error) {
         });
 
         // Verificar saúde das filas
-        const _health = await checkQueuesHealth();
+        const health = await checkQueuesHealth();
 
         res.json({
           success: true,
@@ -4326,13 +4322,13 @@ catch (error) {
   // Endpoint para verificar status das filas
   app.get(
     '/api/test/queue-status',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
         console.log('[TEST ENDPOINT] 📊 Verificando status das filas');
 
-        const _health = await checkQueuesHealth();
+        const health = await checkQueuesHealth();
 
         res.json({
           success: true,
@@ -4351,6 +4347,6 @@ catch (error) {
   );
   // ================ END JOB QUEUE TEST ================
 
-  const _httpServer = createServer(app);
+  const httpServer = createServer(app);
   return httpServer;
 }

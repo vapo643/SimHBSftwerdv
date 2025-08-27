@@ -80,7 +80,7 @@ async function createRestorePoint(sql: postgres.Sql): Promise<string> {
   logger.info(`💾 Criando ponto de restauração: ${restorePoint}`);
 
   await sql`
-    INSERT INTO __drizzle_migrations (hash, created_at, success, error_message)
+    INSERT INTO __drizzle_migrations (hash, createdat, success, error_message)
     VALUES (${restorePoint}, NOW(), true, 'RESTORE_POINT_BEFORE_ROLLBACK')
   `;
 
@@ -120,7 +120,7 @@ async function generateRollbackSQL(
     // Buscar informações sobre mudanças recentes no schema
     const recentChanges = await sql`
       SELECT 
-        event_object_table as table_name,
+        event_object_table as tablename,
         event_manipulation as action,
         event_time
       FROM information_schema.events
@@ -257,7 +257,7 @@ catch (error: any) {
 
         // Registrar falha
         await sql`
-          INSERT INTO __drizzle_migrations (hash, created_at, success, error_message)
+          INSERT INTO __drizzle_migrations (hash, createdat, success, error_message)
           VALUES (${'rollback_failed_' + Date.now()}, NOW(), false, ${error.message})
         `;
       }
@@ -302,7 +302,7 @@ catch (error: any) {
     // Registrar erro crítico
     try {
       await sql`
-        INSERT INTO __drizzle_migrations (hash, created_at, success, error_message)
+        INSERT INTO __drizzle_migrations (hash, createdat, success, error_message)
         VALUES (${'rollback_critical_' + Date.now()}, NOW(), false, ${error.message})
       `;
     }

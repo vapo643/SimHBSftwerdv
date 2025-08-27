@@ -25,7 +25,7 @@ const MOCK_TOKENS = {
 };
 
 // Cores para output no console
-const _colors = {
+const colors = {
   green: '\x1b[32m',
   red: '\x1b[31m',
   yellow: '\x1b[33m',
@@ -42,7 +42,7 @@ async function testAdminAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const _response = await axios.get(API_ENDPOINT, {
+    const response = await axios.get(APIENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.ADMIN,
         'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ async function testAdminAccess() {
 
     // Validar estrutura da resposta
     if (response.data.contratos && response.data.contratos.length > 0) {
-      const _primeiroContrato = response.data.contratos[0];
+      const primeiroContrato = response.data.contratos[0];
       console.log(`\n${colors.green}✅ Estrutura do contrato válida:${colors.reset}`);
       console.log(`   - ID: ${primeiroContrato.id}`);
       console.log(`   - Cliente: ${primeiroContrato.clienteNome}`);
@@ -86,7 +86,7 @@ async function testDiretorAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const _response = await axios.get(API_ENDPOINT, {
+    const response = await axios.get(APIENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.DIRETOR,
         'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ async function testGerenteAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const _response = await axios.get(API_ENDPOINT, {
+    const response = await axios.get(APIENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.GERENTE,
         'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ async function testAtendenteAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const _response = await axios.get(API_ENDPOINT, {
+    const response = await axios.get(APIENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.ATENDENTE,
         'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ async function testNoTokenAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const _response = await axios.get(API_ENDPOINT, {
+    const response = await axios.get(APIENDPOINT, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -238,7 +238,7 @@ async function testGetSpecificContract(contractId: string) {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const _response = await axios.get(`${API_ENDPOINT}/${contractId}`, {
+    const response = await axios.get(`${API_ENDPOINT}/${contractId}`, {
       headers: {
         Authorization: MOCK_TOKENS.ADMIN,
         'Content-Type': 'application/json',
@@ -278,7 +278,7 @@ async function testSearchFilters() {
   console.log(`${colors.blue}TESTE 7: Testar filtros de busca${colors.reset}`);
   console.log(`${colors.blue}===========================${colors.reset}`);
 
-  const _filters = [
+  const filters = [
     { dataInicio: '2025-01-01', dataFim: '2025-01-31' },
     { lojaId: '1' },
     { status: 'pago' },
@@ -289,7 +289,7 @@ async function testSearchFilters() {
     try {
       console.log(`\n${colors.yellow}Testando filtro: ${JSON.stringify(filter)}${colors.reset}`);
 
-      const _response = await axios.get(API_ENDPOINT, {
+      const response = await axios.get(APIENDPOINT, {
         headers: {
           Authorization: MOCK_TOKENS.DIRETOR,
           'Content-Type': 'application/json',
@@ -319,7 +319,7 @@ async function runAllTests() {
   console.log(`\nEndpoint: ${API_ENDPOINT}`);
   console.log(`Timestamp: ${new Date().toISOString()}\n`);
 
-  const _results = [];
+  const results = [];
 
   // Executar testes sequencialmente
   results.push(await testAdminAccess());
@@ -338,8 +338,8 @@ async function runAllTests() {
   console.log(`${colors.yellow}║           RESUMO DOS TESTES              ║${colors.reset}`);
   console.log(`${colors.yellow}╚════════════════════════════════════════╝${colors.reset}`);
 
-  const _passed = results.filter((r) => r == true).length;
-  const _failed = results.filter((r) => r == false).length;
+  const passed = results.filter((r) => r == true).length;
+  const failed = results.filter((r) => r == false).length;
 
   console.log(`\nTestes aprovados: ${colors.green}${passed}${colors.reset}`);
   console.log(`Testes falhados: ${colors.red}${failed}${colors.reset}`);

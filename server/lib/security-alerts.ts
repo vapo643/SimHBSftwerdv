@@ -60,7 +60,7 @@ const ALERT_THRESHOLDS = {
 };
 
 // In-memory alert store (use Redis or database in production)
-const _activeAlerts = new Map<string, SecurityAlert>();
+const activeAlerts = new Map<string, SecurityAlert>();
 const alertHistory: SecurityAlert[] = [];
 
 /**
@@ -118,29 +118,29 @@ catch (error) {
    * Check for brute force attempts
    */
   private async checkBruteForceAttempts(): Promise<void> {
-    const _oneHourAgo = new Date(Date.now() - 3600000);
+    const oneHourAgo = new Date(Date.now() - 3600000);
 
     // Check failed logins per IP
-    const _failedLoginsByIp = await db
+    const failedLoginsByIp = await db
       .select({
-        ip_address: securityLogs.ip_address,
+        ip_address: securityLogs.ipaddress,
         count: sql<number>`count(*)::int`,
       })
       .from(securityLogs)
       .where(
-        and(eq(securityLogs.event_type, 'LOGIN_FAILED'), gte(securityLogs.created_at, oneHourAgo))
+        and(eq(securityLogs.eventtype, 'LOGIN_FAILED'), gte(securityLogs.createdat, oneHourAgo))
       )
       .groupBy(securityLogs.ip_address);
 
     for (const record of failedLoginsByIp) {
       if (record.count >= ALERT_THRESHOLDS.FAILED_LOGINS_PER_IP_PER_HOUR) {
         this.createAlert({
-          type: AlertType.BRUTE_FORCE,
+          type: AlertType.BRUTEFORCE,
           severity: 'HIGH',
           title: 'Possível ataque de força bruta detectado',
           description: `IP ${record.ip_address} teve ${record.count} tentativas de login falhadas na última hora`,
           metadata: {
-            ipAddress: record.ip_address,
+            ipAddress: record.ipaddress,
             failedAttempts: record.count,
             timeWindow: '1 hour',
           },
@@ -153,18 +153,18 @@ catch (error) {
    * Check for rate limit abuse
    */
   private async checkRateLimitAbuse(): Promise<void> {
-    const _oneHourAgo = new Date(Date.now() - 3600000);
+    const oneHourAgo = new Date(Date.now() - 3600000);
 
-    const _rateLimitViolations = await db
+    const rateLimitViolations = await db
       .select({
-        ip_address: securityLogs.ip_address,
+        ip_address: securityLogs.ipaddress,
         count: sql<number>`count(*)::int`,
       })
       .from(securityLogs)
       .where(
         and(
-          eq(securityLogs.event_type, 'RATE_LIMIT_EXCEEDED'),
-          gte(securityLogs.created_at, oneHourAgo)
+          eq(securityLogs.eventtype, 'RATE_LIMIT_EXCEEDED'),
+          gte(securityLogs.createdat, oneHourAgo)
         )
       )
       .groupBy(securityLogs.ip_address);
@@ -172,12 +172,12 @@ catch (error) {
     for (const record of rateLimitViolations) {
       if (record.count >= ALERT_THRESHOLDS.RATE_LIMIT_VIOLATIONS_PER_IP_PER_HOUR) {
         this.createAlert({
-          type: AlertType.RATE_LIMIT_ABUSE,
+          type: AlertType.RATE_LIMITABUSE,
           severity: 'MEDIUM',
           title: 'Abuso de rate limit detectado',
           description: `IP ${record.ip_address} excedeu o rate limit ${record.count} vezes na última hora`,
           metadata: {
-            ipAddress: record.ip_address,
+            ipAddress: record.ipaddress,
             violations: record.count,
             timeWindow: '1 hour',
           },
@@ -190,41 +190,41 @@ catch (error) {
    * Check for unusual access patterns
    */
   private async checkUnusualAccessPatterns(): Promise<void> {
-    const _currentHour = new Date().getHours();
+    const currentHour = new Date().getHours();
 
     // Check for access during unusual hours
     if (
       currentHour >= ALERT_THRESHOLDS.UNUSUAL_HOUR_START &&
       currentHour < ALERT_THRESHOLDS.UNUSUAL_HOUR_END
     ) {
-      const _fiveMinutesAgo = new Date(Date.now() - 300000);
+      const fiveMinutesAgo = new Date(Date.now() - 300000);
 
-      const _recentAccess = await db
+      const recentAccess = await db
         .select({
-          user_id: securityLogs.user_id,
-          user_email: securityLogs.user_id,
+          user_id: securityLogs.userid,
+          user_email: securityLogs.userid,
           count: sql<number>`count(*)::int`,
         })
         .from(securityLogs)
         .where(
           and(
-            eq(securityLogs.event_type, 'DATA_ACCESS'),
-            gte(securityLogs.created_at, fiveMinutesAgo)
+            eq(securityLogs.eventtype, 'DATA_ACCESS'),
+            gte(securityLogs.createdat, fiveMinutesAgo)
           )
         )
-        .groupBy(securityLogs.user_id, securityLogs.user_id);
+        .groupBy(securityLogs.userid, securityLogs.user_id);
 
       for (const record of recentAccess) {
         if (record.count > 10) {
           // More than 10 data accesses in 5 minutes at unusual hours
           this.createAlert({
-            type: AlertType.SUSPICIOUS_ACCESS_PATTERN,
+            type: AlertType.SUSPICIOUS_ACCESSPATTERN,
             severity: 'MEDIUM',
             title: 'Padrão de acesso suspeito detectado',
             description: `Usuário ${record.user_email} acessando dados em horário incomum (${currentHour}h)`,
             metadata: {
-              userId: record.user_id,
-              userEmail: record.user_email,
+              userId: record.userid,
+              userEmail: record.useremail,
               accessCount: record.count,
               hour: currentHour,
             },
@@ -238,35 +238,35 @@ catch (error) {
    * Check for potential data exfiltration
    */
   private async checkDataExfiltration(): Promise<void> {
-    const _oneHourAgo = new Date(Date.now() - 3600000);
+    const oneHourAgo = new Date(Date.now() - 3600000);
 
-    const _largeDataRequests = await db
+    const largeDataRequests = await db
       .select({
-        user_id: securityLogs.user_id,
-        user_email: securityLogs.user_id,
+        user_id: securityLogs.userid,
+        user_email: securityLogs.userid,
         total_size: sql<number>`sum((details->>'size')::int)::int`,
       })
       .from(securityLogs)
       .where(
         and(
-          eq(securityLogs.event_type, 'DATA_EXPORT'),
-          gte(securityLogs.created_at, oneHourAgo),
+          eq(securityLogs.eventtype, 'DATA_EXPORT'),
+          gte(securityLogs.createdat, oneHourAgo),
           sql`details->>'size' IS NOT NULL`
         )
       )
-      .groupBy(securityLogs.user_id, securityLogs.user_id);
+      .groupBy(securityLogs.userid, securityLogs.user_id);
 
     for (const record of largeDataRequests) {
-      const _sizeMB = record.total_size / (1024 * 1024);
+      const sizeMB = record.total_size / (1024 * 1024);
       if (sizeMB > ALERT_THRESHOLDS.LARGE_DATA_EXPORT_SIZE_MB) {
         this.createAlert({
-          type: AlertType.DATA_EXFILTRATION,
+          type: AlertType.DATAEXFILTRATION,
           severity: 'HIGH',
           title: 'Possível exfiltração de dados detectada',
           description: `Usuário ${record.user_email} exportou ${sizeMB.toFixed(2)}MB de dados na última hora`,
           metadata: {
-            userId: record.user_id,
-            userEmail: record.user_email,
+            userId: record.userid,
+            userEmail: record.useremail,
             totalSizeMB: sizeMB,
             timeWindow: '1 hour',
           },
@@ -280,32 +280,32 @@ catch (error) {
    */
   private async checkAuthenticationAnomalies(): Promise<void> {
     // Check for multiple concurrent sessions
-    const _activeSessions = await db
+    const activeSessions = await db
       .select({
-        user_id: securityLogs.user_id,
-        user_email: securityLogs.user_id,
+        user_id: securityLogs.userid,
+        user_email: securityLogs.userid,
         session_count: sql<number>`count(distinct details->>'session_id')::int`,
       })
       .from(securityLogs)
       .where(
         and(
-          eq(securityLogs.event_type, 'LOGIN_SUCCESS'),
-          gte(securityLogs.created_at, new Date(Date.now() - 86400000)) // Last 24 hours
+          eq(securityLogs.eventtype, 'LOGIN_SUCCESS'),
+          gte(securityLogs.createdat, new Date(Date.now() - 86400000)) // Last 24 hours
         )
       )
-      .groupBy(securityLogs.user_id, securityLogs.user_id);
+      .groupBy(securityLogs.userid, securityLogs.user_id);
 
     for (const record of activeSessions) {
       if (record.session_count > ALERT_THRESHOLDS.MAX_CONCURRENT_SESSIONS_PER_USER) {
         this.createAlert({
-          type: AlertType.CONCURRENT_SESSION_LIMIT,
+          type: AlertType.CONCURRENT_SESSIONLIMIT,
           severity: 'MEDIUM',
           title: 'Múltiplas sessões concorrentes detectadas',
           description: `Usuário ${record.user_email} tem ${record.session_count} sessões ativas`,
           metadata: {
-            userId: record.user_id,
-            userEmail: record.user_email,
-            sessionCount: record.session_count,
+            userId: record.userid,
+            userEmail: record.useremail,
+            sessionCount: record.sessioncount,
           },
         });
       }
@@ -316,10 +316,10 @@ catch (error) {
    * Create a new security alert
    */
   private createAlert(data: Omit<SecurityAlert, 'id' | 'detectedAt' | 'resolved'>): void {
-    const _alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Check if similar alert already exists
-    const _existingAlert = Array.from(activeAlerts.values()).find(
+    const existingAlert = Array.from(activeAlerts.values()).find(
       (alert) =>
         alert.type == data.type &&
         JSON.stringify(alert.metadata) == JSON.stringify(data.metadata) &&
@@ -342,13 +342,13 @@ catch (error) {
 
     // Log the alert
     securityLogger.logEvent({
-      type: SecurityEventType.SECURITY_ALERT,
+      type: SecurityEventType.SECURITYALERT,
       severity: data.severity,
       endpoint: 'security-monitor',
       success: true,
       details: {
         alertType: data.type,
-        _alertId,
+        alertId,
         ...data.metadata,
       },
     });
@@ -390,7 +390,7 @@ catch (error) {
    * Resolve an alert
    */
   resolveAlert(alertId: string, resolvedBy: string): boolean {
-    const _alert = activeAlerts.get(alertId);
+    const alert = activeAlerts.get(alertId);
     if (!alert) {
       return false;
     }
@@ -404,7 +404,7 @@ catch (error) {
 }
 
 // Create singleton instance
-export const _securityMonitor = new SecurityMonitor();
+export const securityMonitor = new SecurityMonitor();
 
 // Auto-start monitoring in non-test environments
 if (process.env.NODE_ENV !== 'test') {

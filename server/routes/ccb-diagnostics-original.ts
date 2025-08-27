@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { ccbDiagnosticsService } from '../services/genericService';
 
-const _router = Router();
+const router = Router();
 
 /**
  * POST /api/ccb-diagnostics/run
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.post('/run', async (req: Request, res: Response) => {
   try {
-    const _result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
+    const result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
     res.json(_result);
   }
 catch (error) {
@@ -33,7 +33,7 @@ catch (error) {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const _result = await ccbDiagnosticsService.testConnection();
+    const result = await ccbDiagnosticsService.testConnection();
     res.json(_result);
   }
 catch (error) {
@@ -51,7 +51,7 @@ catch (error) {
  */
 router.get('/report', async (req: Request, res: Response) => {
   try {
-    const _report = await ccbDiagnosticsService.executeOperation('generate_report', {
+    const report = await ccbDiagnosticsService.executeOperation('generate_report', {
       timestamp: new Date().toISOString(),
     });
     res.json(report);

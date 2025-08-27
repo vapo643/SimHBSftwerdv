@@ -5,15 +5,15 @@
 
 import { Router, Request, Response } from 'express';
 import { semgrepMCPServer } from '../security/semgrep-mcp-server';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 
-const _router = Router();
+const router = Router();
 
 // Test endpoint for validation (no auth required)
 router.get('/test-validation', async (req, res) => {
   try {
     // Test basic functionality by scanning a simple file
-    const _testResult = await semgrepMCPServer.scanFile('package.json', { force_refresh: true });
+    const testResult = await semgrepMCPServer.scanFile('package.json', { force_refresh: true });
 
     res.json({
       success: true,
@@ -21,7 +21,7 @@ router.get('/test-validation', async (req, res) => {
       timestamp: new Date().toISOString(),
       test_scan: {
         findings_count: testResult.findings.length,
-        scan_duration_ms: testResult.metadata.scan_duration_ms,
+        scan_duration_ms: testResult.metadata.scan_durationms,
       },
       version: '2.0',
       phase: '1&2 Complete',
@@ -36,7 +36,7 @@ catch (error) {
 });
 
 // Aplicar autenticação em todas as outras rotas
-router.use(_jwtAuthMiddleware);
+router.use(jwtAuthMiddleware);
 
 /**
  * GET /api/security/mcp/scan/*
@@ -44,15 +44,15 @@ router.use(_jwtAuthMiddleware);
  */
 router.get('/scan/*', async (req: Request, res: Response) => {
   try {
-    const _filePath = req.params[0]; // Captura o path completo após /scan/
-    const _options = {
+    const filePath = req.params[0]; // Captura o path completo após /scan/
+    const options = {
       force_refresh: req.query.refresh == 'true',
       severity_filter: req.query.severity ? [req.query.severity as string] : undefined,
     };
 
     console.log(`[MCP API] Scan request for: ${filePath}`);
 
-    const _result = await semgrepMCPServer.scanFile(filePath, options);
+    const result = await semgrepMCPServer.scanFile(filePath, options);
 
     res.json({
       success: true,
@@ -88,7 +88,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
 
     console.log(`[MCP API] Analyzing code snippet (${code.length} chars)`);
 
-    const _result = await semgrepMCPServer.analyzeSnippet(code, context || {});
+    const result = await semgrepMCPServer.analyzeSnippet(code, context || {});
 
     res.json({
       success: true,
@@ -112,16 +112,16 @@ catch (error) {
  */
 router.get('/context/:component', async (req: Request, res: Response) => {
   try {
-    const _component = req.params.component;
+    const component = req.params.component;
 
     console.log(`[MCP API] Getting context for component: ${component}`);
 
-    const _context = await semgrepMCPServer.getComponentContext(component);
+    const context = await semgrepMCPServer.getComponentContext(component);
 
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-      _context,
+      context,
     });
   }
 catch (error) {
@@ -140,17 +140,17 @@ catch (error) {
  */
 router.get('/history/*', async (req: Request, res: Response) => {
   try {
-    const _filePath = req.params[0];
-    const _days = parseInt(req.query.days as string) || 30;
+    const filePath = req.params[0];
+    const days = parseInt(req.query.days as string) || 30;
 
     console.log(`[MCP API] Getting history for: ${filePath} (${days} days)`);
 
-    const _history = await semgrepMCPServer.getFileHistory(filePath, days);
+    const history = await semgrepMCPServer.getFileHistory(filePath, days);
 
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-      _history,
+      history,
     });
   }
 catch (error) {
@@ -171,7 +171,7 @@ router.get('/rules', async (req: Request, res: Response) => {
   try {
     console.log('[MCP API] Getting active rules');
 
-    const _rules = await semgrepMCPServer.getActiveRules();
+    const rules = await semgrepMCPServer.getActiveRules();
 
     res.json({
       success: true,

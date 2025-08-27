@@ -69,14 +69,14 @@ export class UserRepository extends BaseRepository<Profile> {
     }
 
     // Join auth users with profiles
-    const _users = profiles.map((profile) => {
-      const _authUser = authUsers.users.find((user) => user.id == profile.id);
+    const users = profiles.map((profile) => {
+      const authUser = authUsers.users.find((user) => user.id == profile.id);
       return {
         ...profile,
         email: authUser?.email || 'N/A',
         auth_status: authUser
           ? {
-              email_confirmed: !!authUser.email_confirmed_at,
+              email_confirmed: !!authUser.email_confirmedat,
               banned_until: (authUser as unknown).banned_until || null,
             }
           : undefined,
@@ -118,7 +118,7 @@ export class UserRepository extends BaseRepository<Profile> {
       email: authUser?.user?.email || 'N/A',
       auth_status: authUser?.user
         ? {
-            email_confirmed: !!authUser.user.email_confirmed_at,
+            email_confirmed: !!authUser.user.email_confirmedat,
             banned_until: (authUser.user as unknown).banned_until || null,
           }
         : undefined,
@@ -293,4 +293,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _userRepository = new UserRepository();
+export const userRepository = new UserRepository();

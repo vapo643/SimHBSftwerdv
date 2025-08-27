@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { reportingService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/forecast', async (req, res) => {
   try {
-    const _result = await reportingService.executeOperation('financial_forecast', req.body);
+    const result = await reportingService.executeOperation('financial_forecast', req.body);
     res.json(_result);
   }
 catch (error) {

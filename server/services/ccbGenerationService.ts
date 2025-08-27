@@ -15,7 +15,7 @@ import { ptBR } from 'date-fns/locale';
 // REMOVIDO: Imports conflitantes do ccbFieldMapping (coordenadas antigas)
 import { CoordinateAdjustment, applyCoordinateAdjustments } from './ccbCoordinateMapper';
 // USANDO NOVAS COORDENADAS DO USUÁRIO
-import { USER_CCB_COORDINATES, getCoordinateForSystemField } from './ccbUserCoordinates';
+import { USER_CCBCOORDINATES, getCoordinateForSystemField } from './ccbUserCoordinates';
 // STATUS V2.0: Import do serviço de auditoria
 import { logStatusTransition } from './auditService';
 
@@ -51,32 +51,32 @@ export class CCBGenerationService {
       console.log(`📄 [CCB] Template path: ${this.templatePath}`);
 
       // 1. Buscar dados da proposta
-      const _proposalData = await this.getProposalData(proposalId);
+      const proposalData = await this.getProposalData(proposalId);
       if (!proposalData) {
         return { success: false, error: 'Proposta não encontrada ou dados incompletos' };
       }
 
       console.log('📄 [CCB] Dados da proposta carregados:', {
-        nome: proposalData.cliente_nome,
-        cpf: proposalData.cliente_cpf,
-        valor: proposalData.valor_emprestimo,
+        nome: proposalData.clientenome,
+        cpf: proposalData.clientecpf,
+        valor: proposalData.valoremprestimo,
       });
 
       // 2. CARREGAR TEMPLATE PDF EXISTENTE (NÃO criar novo!)
       console.log('📄 [CCB] Carregando template PDF existente...');
-      const _templateBytes = await fs.readFile(this.templatePath);
+      const templateBytes = await fs.readFile(this.templatePath);
       console.log(`📄 [CCB] Template carregado: ${templateBytes.length} bytes`);
-      const _pdfDoc = await PDFDocument.load(templateBytes);
+      const pdfDoc = await PDFDocument.load(templateBytes);
       console.log(`📄 [CCB] PDF carregado: ${pdfDoc.getPageCount()} páginas`);
 
       // 3. Preparar fonte para desenhar texto
-      const _helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
       // 4. Obter todas as páginas do template
-      const _pages = pdfDoc.getPages();
-      const _firstPage = pages[0];
-      const _secondPage = pages[1] || null;
-      const _thirdPage = pages[2] || null;
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+      const secondPage = pages[1] || null;
+      const thirdPage = pages[2] || null;
       const { width, height } = firstPage.getSize();
 
       console.log(`📄 [CCB] Dimensões da página: ${width}x${height}`);
@@ -102,10 +102,10 @@ export class CCBGenerationService {
       };
 
       // Parse do endereço concatenado se existir
-      const _enderecoCompleto = proposalData.cliente_data?.endereco || '';
+      const enderecoCompleto = proposalData.cliente_data?.endereco || '';
       if (enderecoCompleto) {
         // Exemplo: "Rua Miguel Angelo, 675, Casa, Parque Residencial Laranjeiras, Serra/ES - CEP: 29165-460"
-        const _partes = enderecoCompleto.split(',').map((s: string) => s.trim());
+        const partes = enderecoCompleto.split(',').map((s: string) => s.trim());
 
         if (partes.length >= 4) {
           enderecoParseado.logradouro = partes[0] || ''; // "Rua Miguel Angelo"
@@ -114,8 +114,8 @@ export class CCBGenerationService {
           enderecoParseado.bairro = partes[3] || ''; // "Parque Residencial Laranjeiras"
 
           // Extrair cidade/estado do último elemento
-          const _ultimaParte = partes[partes.length - 1] || '';
-          const _cidadeEstadoMatch = ultimaParte.match(/([^\/]+)\/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
+          const ultimaParte = partes[partes.length - 1] || '';
+          const cidadeEstadoMatch = ultimaParte.match(/([^\/]+)\/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
           if (cidadeEstadoMatch) {
             enderecoParseado.cidade = cidadeEstadoMatch[1].trim();
             enderecoParseado.estado = cidadeEstadoMatch[2].trim();
@@ -124,7 +124,7 @@ export class CCBGenerationService {
 else if (ultimaParte.includes('/')) {
             const [cidade, resto] = ultimaParte.split('/');
             enderecoParseado.cidade = cidade.trim();
-            const _estadoCepMatch = resto.match(/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
+            const estadoCepMatch = resto.match(/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
             if (estadoCepMatch) {
               enderecoParseado.estado = estadoCepMatch[1].trim();
               enderecoParseado.cep = estadoCepMatch[2].trim();
@@ -135,10 +135,10 @@ else if (ultimaParte.includes('/')) {
 
       // REFATORADO: Remover fallbacks e exigir dados reais
       // Validação de campos obrigatórios
-      const _nomeCliente = proposalData.cliente_nome || proposalData.cliente_data?.nome;
-      const _cpfCliente = proposalData.cliente_cpf || proposalData.cliente_data?.cpf;
-      const _rgCliente = proposalData.cliente_rg || proposalData.cliente_data?.rg;
-      const _enderecoCliente = proposalData.cliente_endereco || proposalData.cliente_data?.endereco;
+      const nomeCliente = proposalData.cliente_nome || proposalData.cliente_data?.nome;
+      const cpfCliente = proposalData.cliente_cpf || proposalData.cliente_data?.cpf;
+      const rgCliente = proposalData.cliente_rg || proposalData.cliente_data?.rg;
+      const enderecoCliente = proposalData.cliente_endereco || proposalData.cliente_data?.endereco;
 
       // Lançar erro se dados críticos estão faltando
       if (!nomeCliente) {
@@ -159,7 +159,7 @@ else if (ultimaParte.includes('/')) {
         );
       }
 
-      const _dadosCliente = {
+      const dadosCliente = {
         // Dados diretos da tabela propostas - sem fallbacks
         nome: nomeCliente,
         cpf: cpfCliente || '',
@@ -211,9 +211,9 @@ else if (ultimaParte.includes('/')) {
       // ===========================
       // DETECÇÃO INTELIGENTE DO TIPO DE CLIENTE
       // ===========================
-      const _isPJ = !!(proposalData.cliente_data?.razaoSocial || proposalData.cliente_data?.cnpj);
-      const _isPF = !isPJ;
-      const _tipoCliente = isPJ ? 'PJ' : 'PF';
+      const isPJ = !!(proposalData.cliente_data?.razaoSocial || proposalData.cliente_data?.cnpj);
+      const isPF = !isPJ;
+      const tipoCliente = isPJ ? 'PJ' : 'PF';
 
       console.log(`🔍 [CCB] Tipo de Cliente Detectado: ${tipoCliente}`);
       console.log(`🔍 [CCB] isPF: ${isPF}, isPJ: ${isPJ}`);
@@ -227,7 +227,7 @@ else {
       }
 
       // CONDIÇÕES FINANCEIRAS
-      const _condicoesFinanceiras = {
+      const condicoesFinanceiras = {
         valor:
           proposalData.valor ||
           proposalData.valor_aprovado ||
@@ -243,7 +243,7 @@ else {
       };
 
       // REFATORADO: Buscar dados bancários sem fallbacks hardcoded
-      const _dadosPagamento = {
+      const dadosPagamento = {
         codigoBanco:
           proposalData.dados_pagamento_codigo_banco || proposalData.cliente_data?.banco || '',
         banco: proposalData.dados_pagamento_banco || proposalData.cliente_data?.banco || '',
@@ -280,7 +280,7 @@ else {
 
       // DADOS FIXOS DA SIMPIX PARA SEÇÃO II.CREDOR ORIGINÁRIO
       // REGRA DE NEGÓCIO: SEMPRE usar dados da SIMPIX, NUNCA do parceiro
-      const _dadosCredorOriginario = {
+      const dadosCredorOriginario = {
         razaoSocial: 'SIMPIX SOLUCOES E INTERMEDIACOES LTDA',
         cnpj: '42.162.929/0001-67',
         endereco: 'AV PAULO PEREIRA GOMES, 1156',
@@ -299,11 +299,11 @@ else {
       // CORREÇÃO 3: Gerar parcelas se não existirem
       let parcelas: unknown[] = [];
       try {
-        const _parcelasResult = await db.execute(sql`
+        const parcelasResult = await db.execute(sql`
           SELECT 
-            numero_parcela,
-            data_vencimento,
-            valor_parcela,
+            numeroparcela,
+            datavencimento,
+            valorparcela,
             status
           FROM parcelas 
           WHERE proposta_id = ${proposalId}
@@ -315,13 +315,13 @@ else {
         // Se não há parcelas, gerar baseado nas condições financeiras
         if (parcelas.length == 0 && condicoesFinanceiras.prazo > 0) {
           console.log('📊 [CCB] Gerando parcelas automaticamente...');
-          const _valorParcela =
+          const valorParcela =
             (condicoesFinanceiras.valorTotalFinanciado || condicoesFinanceiras.valor) /
             condicoesFinanceiras.prazo;
-          const _dataBase = new Date();
+          const dataBase = new Date();
 
           for (let _i = 0; i < condicoesFinanceiras.prazo; i++) {
-            const _dataVencimento = new Date(dataBase);
+            const dataVencimento = new Date(dataBase);
             dataVencimento.setMonth(dataVencimento.getMonth() + i + 1);
 
             parcelas.push({
@@ -347,7 +347,7 @@ catch (parcelasError) {
 
       // IDENTIFICAÇÃO DA CCB - SOMENTE O NÚMERO SEQUENCIAL (300001, 300002, etc.)
       if (USER_CCB_COORDINATES.numeroCedula) {
-        const _numeroCCB = String(proposalData.numero_proposta); // Número sequencial: 300001, 300002, etc.
+        const numeroCCB = String(proposalData.numero_proposta); // Número sequencial: 300001, 300002, etc.
         firstPage.drawText(numeroCCB, {
           x: USER_CCB_COORDINATES.numeroCedula.x,
           y: USER_CCB_COORDINATES.numeroCedula.y,
@@ -358,8 +358,8 @@ catch (parcelasError) {
       }
 
       if (USER_CCB_COORDINATES.dataEmissao) {
-        const _dataEmissao = proposalData.ccb_gerado_em || proposalData.created_at;
-        const _dataFormatada = format(new Date(dataEmissao), 'dd/MM/yyyy');
+        const dataEmissao = proposalData.ccb_gerado_em || proposalData.created_at;
+        const dataFormatada = format(new Date(dataEmissao), 'dd/MM/yyyy');
         firstPage.drawText(dataFormatada, {
           x: USER_CCB_COORDINATES.dataEmissao.x,
           y: USER_CCB_COORDINATES.dataEmissao.y,
@@ -370,7 +370,7 @@ catch (parcelasError) {
       }
 
       if (USER_CCB_COORDINATES.finalidadeOperacao) {
-        const _finalidade = proposalData.condicoes_data?.finalidade || 'Empréstimo pessoal';
+        const finalidade = proposalData.condicoes_data?.finalidade || 'Empréstimo pessoal';
         firstPage.drawText(finalidade, {
           x: USER_CCB_COORDINATES.finalidadeOperacao.x,
           y: USER_CCB_COORDINATES.finalidadeOperacao.y,
@@ -464,7 +464,7 @@ catch (parcelasError) {
           dadosCliente.rgDataEmissao &&
           dadosCliente.rgDataEmissao !== 'NÃO INFORMADO'
         ) {
-          const _dataRg = format(new Date(dadosCliente.rgDataEmissao), 'dd/MM/yyyy');
+          const dataRg = format(new Date(dadosCliente.rgDataEmissao), 'dd/MM/yyyy');
           firstPage.drawText(dataRg, {
             x: USER_CCB_COORDINATES.rgEmissao.x,
             y: USER_CCB_COORDINATES.rgEmissao.y,
@@ -586,7 +586,7 @@ else if (dadosCliente.logradouro) {
         });
         console.log(
           '📊 [CCB] Endereço básico renderizado:',
-          _enderecoBasico,
+          enderecoBasico,
           'em X:',
           USER_CCB_COORDINATES.enderecoCliente.x,
           'Y:',
@@ -596,7 +596,7 @@ else if (dadosCliente.logradouro) {
 
       // CEP - Renderizar apenas se existir
       if (USER_CCB_COORDINATES.cepCliente && dadosCliente.cep) {
-        const _cepFormatado = this.formatCEP(dadosCliente.cep);
+        const cepFormatado = this.formatCEP(dadosCliente.cep);
 
         firstPage.drawText(cepFormatado, {
           x: USER_CCB_COORDINATES.cepCliente.x,
@@ -607,7 +607,7 @@ else if (dadosCliente.logradouro) {
         });
         console.log(
           '📊 [CCB] CEP renderizado:',
-          _cepFormatado,
+          cepFormatado,
           'em X:',
           USER_CCB_COORDINATES.cepCliente.x,
           'Y:',
@@ -617,7 +617,7 @@ else if (dadosCliente.logradouro) {
 
       // CIDADE - Renderizar apenas se existir
       if (USER_CCB_COORDINATES.cidadeCliente && dadosCliente.cidade) {
-        const _cidadeValue = dadosCliente.cidade;
+        const cidadeValue = dadosCliente.cidade;
 
         firstPage.drawText(cidadeValue, {
           x: USER_CCB_COORDINATES.cidadeCliente.x,
@@ -628,7 +628,7 @@ else if (dadosCliente.logradouro) {
         });
         console.log(
           '📊 [CCB] Cidade renderizada:',
-          _cidadeValue,
+          cidadeValue,
           'em X:',
           USER_CCB_COORDINATES.cidadeCliente.x,
           'Y:',
@@ -638,7 +638,7 @@ else if (dadosCliente.logradouro) {
 
       // UF - Renderizar apenas se existir
       if (USER_CCB_COORDINATES.ufCliente && (dadosCliente.estado || dadosCliente.uf)) {
-        const _ufValue = dadosCliente.estado || dadosCliente.uf || '';
+        const ufValue = dadosCliente.estado || dadosCliente.uf || '';
 
         firstPage.drawText(ufValue, {
           x: USER_CCB_COORDINATES.ufCliente.x,
@@ -649,7 +649,7 @@ else if (dadosCliente.logradouro) {
         });
         console.log(
           '📊 [CCB] UF renderizada:',
-          _ufValue,
+          ufValue,
           'em X:',
           USER_CCB_COORDINATES.ufCliente.x,
           'Y:',
@@ -743,7 +743,7 @@ else if (dadosCliente.logradouro) {
 
       // CONDIÇÕES FINANCEIRAS
       if (USER_CCB_COORDINATES.valorPrincipal) {
-        const _valor = condicoesFinanceiras.valor || 0;
+        const valor = condicoesFinanceiras.valor || 0;
         firstPage.drawText(this.formatCurrency(valor), {
           x: USER_CCB_COORDINATES.valorPrincipal.x,
           y: USER_CCB_COORDINATES.valorPrincipal.y,
@@ -754,7 +754,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.dataEmissaoCond) {
-        const _dataEmissao = format(new Date(), 'dd/MM/yyyy');
+        const dataEmissao = format(new Date(), 'dd/MM/yyyy');
         firstPage.drawText(dataEmissao, {
           x: USER_CCB_COORDINATES.dataEmissaoCond.x,
           y: USER_CCB_COORDINATES.dataEmissaoCond.y,
@@ -765,7 +765,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.vencimentoParcela && parcelas.length > 0) {
-        const _primeiroVenc = format(
+        const primeiroVenc = format(
           new Date(parcelas[0].data_vencimento || parcelas[0].vencimento),
           'dd/MM/yyyy'
         );
@@ -779,7 +779,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.vencimentoUltimaParcela && parcelas.length > 0) {
-        const _ultimoVenc = format(
+        const ultimoVenc = format(
           new Date(
             parcelas[parcelas.length - 1].data_vencimento ||
               parcelas[parcelas.length - 1].vencimento
@@ -796,7 +796,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.prazoAmortizacao) {
-        const _prazo = condicoesFinanceiras.prazo || 12;
+        const prazo = condicoesFinanceiras.prazo || 12;
         firstPage.drawText(`${prazo} meses`, {
           x: USER_CCB_COORDINATES.prazoAmortizacao.x,
           y: USER_CCB_COORDINATES.prazoAmortizacao.y,
@@ -807,7 +807,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.percentualIndice) {
-        const _taxa = condicoesFinanceiras.taxaJuros || 0;
+        const taxa = condicoesFinanceiras.taxaJuros || 0;
         firstPage.drawText(`${taxa}%`, {
           x: USER_CCB_COORDINATES.percentualIndice.x,
           y: USER_CCB_COORDINATES.percentualIndice.y,
@@ -819,7 +819,7 @@ else if (dadosCliente.logradouro) {
 
       // TAXAS E ENCARGOS
       if (USER_CCB_COORDINATES.taxaJurosEfetivaMensal) {
-        const _taxaMensal = condicoesFinanceiras.taxaJuros || 0;
+        const taxaMensal = condicoesFinanceiras.taxaJuros || 0;
         firstPage.drawText(`${taxaMensal}% a.m.`, {
           x: USER_CCB_COORDINATES.taxaJurosEfetivaMensal.x,
           y: USER_CCB_COORDINATES.taxaJurosEfetivaMensal.y,
@@ -830,7 +830,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.taxaJurosEfetivaAnual) {
-        const _taxaAnual = ((1 + (condicoesFinanceiras.taxaJuros || 0) / 100) ** 12 - 1) * 100;
+        const taxaAnual = ((1 + (condicoesFinanceiras.taxaJuros || 0) / 100) ** 12 - 1) * 100;
         firstPage.drawText(`${taxaAnual.toFixed(2)}% a.a.`, {
           x: USER_CCB_COORDINATES.taxaJurosEfetivaAnual.x,
           y: USER_CCB_COORDINATES.taxaJurosEfetivaAnual.y,
@@ -841,7 +841,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.iof) {
-        const _iof = condicoesFinanceiras.valorIof || 0;
+        const iof = condicoesFinanceiras.valorIof || 0;
         firstPage.drawText(this.formatCurrency(iof), {
           x: USER_CCB_COORDINATES.iof.x,
           y: USER_CCB_COORDINATES.iof.y,
@@ -852,7 +852,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.pracaPagamento) {
-        const _praca = proposalData.cidade_emissao || dadosCliente.cidade || 'São Paulo';
+        const praca = proposalData.cidade_emissao || dadosCliente.cidade || 'São Paulo';
         firstPage.drawText(praca, {
           x: USER_CCB_COORDINATES.pracaPagamento.x,
           y: USER_CCB_COORDINATES.pracaPagamento.y,
@@ -873,7 +873,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.tac) {
-        const _tac = condicoesFinanceiras.valorTac || 0;
+        const tac = condicoesFinanceiras.valorTac || 0;
         firstPage.drawText(this.formatCurrency(tac), {
           x: USER_CCB_COORDINATES.tac.x,
           y: USER_CCB_COORDINATES.tac.y,
@@ -894,7 +894,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.custoEfetivoTotal) {
-        const _cet = condicoesFinanceiras.cet || 0;
+        const cet = condicoesFinanceiras.cet || 0;
         firstPage.drawText(`${cet}%`, {
           x: USER_CCB_COORDINATES.custoEfetivoTotal.x,
           y: USER_CCB_COORDINATES.custoEfetivoTotal.y,
@@ -905,7 +905,7 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.dataLiberacaoRecurso) {
-        const _dataLib = format(new Date(), 'dd/MM/yyyy');
+        const dataLib = format(new Date(), 'dd/MM/yyyy');
         firstPage.drawText(dataLib, {
           x: USER_CCB_COORDINATES.dataLiberacaoRecurso.x,
           y: USER_CCB_COORDINATES.dataLiberacaoRecurso.y,
@@ -916,10 +916,10 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.valorLiquidoLiberado) {
-        const _valor = condicoesFinanceiras.valor || 0;
-        const _iof = condicoesFinanceiras.valorIof || 0;
-        const _tac = condicoesFinanceiras.valorTac || 0;
-        const _liquido = valor - iof - tac;
+        const valor = condicoesFinanceiras.valor || 0;
+        const iof = condicoesFinanceiras.valorIof || 0;
+        const tac = condicoesFinanceiras.valorTac || 0;
+        const liquido = valor - iof - tac;
         firstPage.drawText(this.formatCurrency(liquido), {
           x: USER_CCB_COORDINATES.valorLiquidoLiberado.x,
           y: USER_CCB_COORDINATES.valorLiquidoLiberado.y,
@@ -930,10 +930,10 @@ else if (dadosCliente.logradouro) {
       }
 
       if (USER_CCB_COORDINATES.valorLiquidoEmissor) {
-        const _valor = condicoesFinanceiras.valor || 0;
-        const _iof = condicoesFinanceiras.valorIof || 0;
-        const _tac = condicoesFinanceiras.valorTac || 0;
-        const _liquido = valor - iof - tac - 10; // menos TED
+        const valor = condicoesFinanceiras.valor || 0;
+        const iof = condicoesFinanceiras.valorIof || 0;
+        const tac = condicoesFinanceiras.valorTac || 0;
+        const liquido = valor - iof - tac - 10; // menos TED
         firstPage.drawText(this.formatCurrency(liquido), {
           x: USER_CCB_COORDINATES.valorLiquidoEmissor.x,
           y: USER_CCB_COORDINATES.valorLiquidoEmissor.y,
@@ -1083,18 +1083,18 @@ else if (isPJ) {
         console.log(`📄 [CCB] Iniciando preenchimento de ${parcelas.length} parcelas`);
 
         for (let _i = 0; i < Math.min(parcelas.length, 24); i++) {
-          const _parcela = parcelas[i];
-          const _parcelaNum = i + 1;
+          const parcela = parcelas[i];
+          const parcelaNum = i + 1;
 
           // Determinar qual página usar (1-21 na página 2, 22-24 na página 3)
-          const _currentPage = parcelaNum <= 21 ? secondPage : thirdPage;
+          const currentPage = parcelaNum <= 21 ? secondPage : thirdPage;
 
           if (!currentPage) continue;
 
           // Buscar coordenadas específicas da parcela
-          const _numeroKey = `parcela${parcelaNum}Numero`;
-          const _vencimentoKey = `parcela${parcelaNum}Vencimento`;
-          const _valorKey = `parcela${parcelaNum}Valor`;
+          const numeroKey = `parcela${parcelaNum}Numero`;
+          const vencimentoKey = `parcela${parcelaNum}Vencimento`;
+          const valorKey = `parcela${parcelaNum}Valor`;
 
           // Número da parcela
           if (USER_CCB_COORDINATES[numeroKey]) {
@@ -1112,7 +1112,7 @@ else if (isPJ) {
             USER_CCB_COORDINATES[vencimentoKey] &&
             (parcela.data_vencimento || parcela.vencimento)
           ) {
-            const _vencFormatado = format(
+            const vencFormatado = format(
               new Date(parcela.data_vencimento || parcela.vencimento),
               'dd/MM/yyyy'
             );
@@ -1149,14 +1149,14 @@ else if (isPJ) {
       console.log(`📄 [CCB] Template Simpix aplicado com sucesso - dados posicionados`);
 
       // 6. Salvar PDF com dados preenchidos
-      const _pdfBytes = await pdfDoc.save();
+      const pdfBytes = await pdfDoc.save();
       console.log('📄 [CCB] PDF preenchido gerado com sucesso');
 
       // 7. Upload para Supabase Storage
-      const _fileName = `ccb_${proposalId}_${Date.now()}.pdf`;
-      const _filePath = `ccb/${proposalId}/${fileName}`;
+      const fileName = `ccb_${proposalId}_${Date.now()}.pdf`;
+      const filePath = `ccb/${proposalId}/${fileName}`;
 
-      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const supabaseAdmin = createServerSupabaseAdminClient();
       const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
         .from('documents')
         .upload(filePath, pdfBytes, {
@@ -1217,53 +1217,53 @@ catch (error) {
    */
   private async getProposalData(proposalId: string): Promise<any | null> {
     try {
-      const _result = await db.execute(sql`
+      const result = await db.execute(sql`
         SELECT 
           p.id,
-          p.numero_proposta,
-          p.cliente_data,
-          p.condicoes_data,
-          p.valor_aprovado,
-          p.created_at,
-          p.ccb_gerado_em,
-          p.dados_pagamento_banco,
-          p.dados_pagamento_agencia,
-          p.dados_pagamento_conta,
-          p.dados_pagamento_tipo,
-          p.dados_pagamento_nome_titular,
-          p.dados_pagamento_cpf_titular,
-          p.dados_pagamento_pix,
-          p.dados_pagamento_tipo_pix,
-          p.dados_pagamento_codigo_banco,
-          p.dados_pagamento_digito,
-          p.dados_pagamento_pix_banco,
-          p.dados_pagamento_pix_nome_titular,
-          p.dados_pagamento_pix_cpf_titular,
-          p.cliente_nome,
-          p.cliente_cpf,
-          p.cliente_rg,
-          p.cliente_orgao_emissor,
-          p.cliente_estado_civil,
-          p.cliente_nacionalidade,
-          p.cliente_endereco,
-          p.cliente_cidade,
-          p.cliente_uf,
-          p.cliente_cep,
-          p.cliente_rg_uf,
-          p.cliente_rg_data_emissao,
-          p.cliente_local_nascimento,
-          p.tipo_pessoa,
-          p.cliente_razao_social,
-          p.cliente_cnpj,
+          p.numeroproposta,
+          p.clientedata,
+          p.condicoesdata,
+          p.valoraprovado,
+          p.createdat,
+          p.ccb_geradoem,
+          p.dados_pagamentobanco,
+          p.dados_pagamentoagencia,
+          p.dados_pagamentoconta,
+          p.dados_pagamentotipo,
+          p.dados_pagamento_nometitular,
+          p.dados_pagamento_cpftitular,
+          p.dados_pagamentopix,
+          p.dados_pagamento_tipopix,
+          p.dados_pagamento_codigobanco,
+          p.dados_pagamentodigito,
+          p.dados_pagamento_pixbanco,
+          p.dados_pagamento_pix_nometitular,
+          p.dados_pagamento_pix_cpftitular,
+          p.clientenome,
+          p.clientecpf,
+          p.clienterg,
+          p.cliente_orgaoemissor,
+          p.cliente_estadocivil,
+          p.clientenacionalidade,
+          p.clienteendereco,
+          p.clientecidade,
+          p.clienteuf,
+          p.clientecep,
+          p.cliente_rguf,
+          p.cliente_rg_dataemissao,
+          p.cliente_localnascimento,
+          p.tipopessoa,
+          p.cliente_razaosocial,
+          p.clientecnpj,
           p.valor,
           p.prazo,
-          p.taxa_juros,
-          p.valor_tac,
-          p.valor_iof,
-          p.valor_total_financiado,
-          p.valor_liquido_liberado,
-          pr.nome_produto as produto_nome,
-          l.nome_loja as loja_nome,
+          p.taxajuros,
+          p.valortac,
+          p.valoriof,
+          p.valor_totalfinanciado,
+          p.valor_liquidoliberado,
+          pr.nome_produto as produtonome,
+          l.nome_loja as lojanome,
           l.endereco as loja_endereco
         FROM propostas p
         LEFT JOIN produtos pr ON p.produto_id = pr.id
@@ -1276,7 +1276,7 @@ catch (error) {
         return null;
       }
 
-      const _proposta = result[0] as unknown;
+      const proposta = result[0] as unknown;
 
       // AUDITORIA COMPLETA DOS DADOS
       console.log('📊 [CCB] ======= AUDITORIA COMPLETA DE DADOS =======');
@@ -1339,7 +1339,7 @@ catch (error) {
    */
   private formatCPF(cpf?: string): string {
     if (!cpf) return '';
-    const _cleaned = cpf.replace(/\D/g, '');
+    const cleaned = cpf.replace(/\D/g, '');
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   }
 
@@ -1348,7 +1348,7 @@ catch (error) {
    */
   private formatCNPJ(cnpj?: string): string {
     if (!cnpj) return '';
-    const _cleaned = cnpj.replace(/\D/g, '');
+    const cleaned = cnpj.replace(/\D/g, '');
     return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
   }
 
@@ -1367,7 +1367,7 @@ catch (error) {
    */
   private formatCEP(cep?: string): string {
     if (!cep) return '';
-    const _cleaned = cep.replace(/\D/g, '');
+    const cleaned = cep.replace(/\D/g, '');
     return cleaned.replace(/(\d{5})(\d{3})/, '$1-$2');
   }
 
@@ -1386,7 +1386,7 @@ catch (error) {
    */
   async getPublicUrl(filePath: string): Promise<string | null> {
     try {
-      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const supabaseAdmin = createServerSupabaseAdminClient();
       const { data } = supabaseAdmin.storage.from('documents').getPublicUrl(filePath);
 
       return data?.publicUrl || null;
@@ -1402,13 +1402,13 @@ catch (error) {
    */
   async isCCBGenerated(proposalId: string): Promise<boolean> {
     try {
-      const _result = await db.execute(sql`
-        SELECT ccb_gerado, caminho_ccb
+      const result = await db.execute(sql`
+        SELECT ccbgerado, caminho_ccb
         FROM propostas
         WHERE id = ${proposalId}
       `);
 
-      const _proposal = result[0];
+      const proposal = result[0];
       return proposal?.ccb_gerado == true && !!proposal?.caminho_ccb;
     }
 catch (error) {
@@ -1419,4 +1419,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _ccbGenerationService = new CCBGenerationService();
+export const ccbGenerationService = new CCBGenerationService();

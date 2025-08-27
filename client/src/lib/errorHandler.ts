@@ -115,7 +115,7 @@ else if (error.message) {
   return {
     code: errorCode,
     userMessage: finalUserMessage,
-  _technicalMessage,
+  technicalMessage,
     originalError: error,
   };
 };

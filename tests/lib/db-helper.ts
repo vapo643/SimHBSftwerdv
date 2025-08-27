@@ -271,7 +271,7 @@ export async function setupTestEnvironment(): Promise<{
     // 3. Create test partner using raw SQL (with timestamp for uniqueness)
     console.log('[TEST DB] 🏢 Creating test partner...');
     const partnerResult = await directDb`
-      INSERT INTO parceiros (razao_social, cnpj)
+      INSERT INTO parceiros (razaosocial, cnpj)
       VALUES (
         'Test Partner Company',
         ${`1234567800019${timestamp.toString().slice(-1)}`}
@@ -285,7 +285,7 @@ export async function setupTestEnvironment(): Promise<{
     // 3. Create test store using raw SQL
     console.log('[TEST DB] 🏪 Creating test store...');
     const storeResult = await directDb`
-      INSERT INTO lojas (nome_loja, parceiro_id, endereco)
+      INSERT INTO lojas (nomeloja, parceiroid, endereco)
       VALUES (
         'Test Store',
         ${testPartnerId},
@@ -298,7 +298,7 @@ export async function setupTestEnvironment(): Promise<{
     // 5. Create test product using raw SQL (with timestamp for uniqueness)
     console.log('[TEST DB] 📦 Creating test product...');
     const productResult = await directDb`
-      INSERT INTO produtos (nome_produto, is_active)
+      INSERT INTO produtos (nomeproduto, is_active)
       VALUES (
         ${`Test Product ${timestamp}`},
         true
@@ -310,7 +310,7 @@ export async function setupTestEnvironment(): Promise<{
     // 6. Create test commercial table using raw SQL (with timestamp for uniqueness)
     console.log('[TEST DB] 📊 Creating test commercial table...');
     const commercialTableResult = await directDb`
-      INSERT INTO tabelas_comerciais (nome_tabela, taxa_juros, prazos, comissao)
+      INSERT INTO tabelas_comerciais (nometabela, taxajuros, prazos, comissao)
       VALUES (
         ${`Test Commercial Table ${timestamp}`},
         '1.99',
@@ -325,7 +325,7 @@ export async function setupTestEnvironment(): Promise<{
     console.log(`[TEST DB] 👤 Creating user profile for testUserId: ${testUserId}...`);
 
     const profileInsertResult = await directDb`
-      INSERT INTO profiles (id, role, loja_id, full_name)
+      INSERT INTO profiles (id, role, lojaid, full_name)
       VALUES (
         ${testUserId},
         'ATENDENTE',
@@ -334,16 +334,16 @@ export async function setupTestEnvironment(): Promise<{
       )
       ON CONFLICT (id) DO UPDATE SET
         role = 'ATENDENTE',
-        loja_id = EXCLUDED.loja_id,
+        loja_id = EXCLUDED.lojaid,
         full_name = 'Integration Test User'
-      RETURNING id, role, loja_id, full_name
+      RETURNING id, role, lojaid, full_name
     `;
 
     console.log(`[TEST DB] ✅ Profile insertion result:`, profileInsertResult[0]);
 
     // Verify the profile was created by querying it back
     const verifyProfile = await directDb`
-      SELECT id, role, loja_id, full_name 
+      SELECT id, role, lojaid, full_name 
       FROM profiles 
       WHERE id = ${testUserId}
     `;
@@ -354,12 +354,12 @@ export async function setupTestEnvironment(): Promise<{
     // 7. Create gerente_lojas association for RLS
     console.log('[TEST DB] 🔗 Creating store manager association...');
     await directDb`
-      INSERT INTO gerente_lojas (gerente_id, loja_id)
+      INSERT INTO gerente_lojas (gerenteid, loja_id)
       VALUES (
         ${dbUserId},
         ${testStoreId}
       )
-      ON CONFLICT (gerente_id, loja_id) DO NOTHING
+      ON CONFLICT (gerenteid, loja_id) DO NOTHING
     `;
 
     const duration = Date.now() - startTime;

@@ -12,10 +12,10 @@ import { boletoStorageService } from './services/boletoStorageService';
 import { clickSignService } from './services/clickSignService';
 
 // Redis connection for workers
-const _redisConnection = new Redis({
+const redisConnection = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
+  password: process.env.REDISPASSWORD,
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
 });
@@ -28,11 +28,11 @@ const workerOptions: WorkerOptions = {
 };
 
 // ========== PDF PROCESSING WORKER ==========
-const _pdfWorker = new Worker(
+const pdfWorker = new Worker(
   'pdf-processing',
   async (job: Job) => {
     console.log(`[WORKER:PDF] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
@@ -45,19 +45,19 @@ const _pdfWorker = new Worker(
           await job.updateProgress(10);
 
           // Generate the carnê
-          const _pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
+          const pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
 
           await job.updateProgress(70);
 
           // Save to storage
-          const _signedUrl = await pdfMergeService.salvarCarneNoStorage(
+          const signedUrl = await pdfMergeService.salvarCarneNoStorage(
             job.data.propostaId,
             pdfBuffer
           );
 
           await job.updateProgress(100);
 
-          const _pdfDuration = Date.now() - startTime;
+          const pdfDuration = Date.now() - startTime;
           console.log(`[WORKER:PDF] ✅ Carnê generated successfully in ${pdfDuration}ms`);
 
           return {
@@ -81,7 +81,7 @@ const _pdfWorker = new Worker(
       }
     }
 catch (error) {
-      const _errorDuration = Date.now() - startTime;
+      const errorDuration = Date.now() - startTime;
       console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
       throw error; // Re-throw to trigger retry
     }
@@ -90,11 +90,11 @@ catch (error) {
 );
 
 // ========== BOLETO SYNC WORKER ==========
-const _boletoWorker = new Worker(
+const boletoWorker = new Worker(
   'boleto-sync',
   async (job: Job) => {
     console.log(`[WORKER:BOLETO] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
@@ -106,13 +106,13 @@ const _boletoWorker = new Worker(
           await job.updateProgress(10);
 
           // Sync boletos from Banco Inter to Storage
-          const _result = await boletoStorageService.sincronizarBoletosDaProposta(
+          const result = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
 
           await job.updateProgress(100);
 
-          const _syncDuration = Date.now() - startTime;
+          const syncDuration = Date.now() - startTime;
           console.log(
             `[WORKER:BOLETO] ✅ Synced ${_result.boletosProcessados}/${_result.totalBoletos} boletos in ${syncDuration}ms`
           );
@@ -136,24 +136,24 @@ const _boletoWorker = new Worker(
 
           // Step 1: Sync boletos
           await job.updateProgress(10);
-          const _syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
+          const syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
 
           await job.updateProgress(50);
 
           // Step 2: Generate carnê from synced boletos
-          const _carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
+          const carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
 
           await job.updateProgress(100);
 
-          const _fullDuration = Date.now() - startTime;
+          const fullDuration = Date.now() - startTime;
           console.log(`[WORKER:BOLETO] ✅ Full carnê process completed in ${fullDuration}ms`);
 
           return {
             success: carneResult.success,
             propostaId: job.data.propostaId,
-  _syncResult,
+  syncResult,
             carneUrl: carneResult.url,
             processingTime: fullDuration,
           };
@@ -163,7 +163,7 @@ const _boletoWorker = new Worker(
       }
     }
 catch (error) {
-      const _boletoErrorDuration = Date.now() - startTime;
+      const boletoErrorDuration = Date.now() - startTime;
       console.error(
         `[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`,
         error
@@ -175,11 +175,11 @@ catch (error) {
 );
 
 // ========== DOCUMENT PROCESSING WORKER ==========
-const _documentWorker = new Worker(
+const documentWorker = new Worker(
   'document-processing',
   async (job: Job) => {
     console.log(`[WORKER:DOC] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
@@ -202,7 +202,7 @@ const _documentWorker = new Worker(
       }
     }
 catch (error) {
-      const _duration = Date.now() - startTime;
+      const duration = Date.now() - startTime;
       console.error(`[WORKER:DOC] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;
     }
@@ -211,11 +211,11 @@ catch (error) {
 );
 
 // ========== NOTIFICATION WORKER ==========
-const _notificationWorker = new Worker(
+const notificationWorker = new Worker(
   'notifications',
   async (job: Job) => {
     console.log(`[WORKER:NOTIFY] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       switch (job.data.type) {
@@ -238,7 +238,7 @@ const _notificationWorker = new Worker(
       }
     }
 catch (error) {
-      const _duration = Date.now() - startTime;
+      const duration = Date.now() - startTime;
       console.error(`[WORKER:NOTIFY] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;
     }

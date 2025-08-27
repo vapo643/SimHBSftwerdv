@@ -6,29 +6,29 @@
 
 import { Router, Request, Response } from 'express';
 import { cobrancasService } from '../services/cobrancasService.js';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/cobrancas
  * List all proposals with billing information
  */
-router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { status, atraso } = req.query;
-    const _userRole = req.user?.role || '';
+    const userRole = req.user?.role || '';
 
-    const _propostas = await cobrancasService.getPropostasCobranca({
+    const propostas = await cobrancasService.getPropostasCobranca({
       status: status as string,
       atraso: atraso as string,
-      _userRole,
+      userRole,
     });
 
     res.json({
       success: true,
-      _propostas,
+      propostas,
       total: propostas.length,
     });
   }
@@ -45,7 +45,7 @@ catch (error) {
  * GET /api/cobrancas/:id
  * Get detailed billing info for a specific proposal
  */
-router.get('/:id', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -56,7 +56,7 @@ router.get('/:id', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Re
       });
     }
 
-    const _details = await cobrancasService.getPropostaCobrancaDetalhes(parseInt(id));
+    const details = await cobrancasService.getPropostaCobrancaDetalhes(parseInt(id));
     res.json({
       success: true,
       ...details,
@@ -65,7 +65,7 @@ router.get('/:id', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Re
 catch (error) {
     console.error('[COBRANCAS_CONTROLLER] Error fetching proposal details:', error);
 
-    const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
+    const statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
     res.status(statusCode).json({
       success: false,
       error: error.message || 'Erro ao buscar detalhes da proposta',
@@ -79,7 +79,7 @@ catch (error) {
  */
 router.post(
   '/:id/observacoes',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -92,16 +92,16 @@ router.post(
         });
       }
 
-      const _observation = await cobrancasService.addObservacao({
+      const observation = await cobrancasService.addObservacao({
         proposta_id: parseInt(id),
-        _observacao,
-        _tipo,
+        observacao,
+        tipo,
         created_by: req.user?.id || '',
       });
 
       res.json({
         success: true,
-        _observation,
+        observation,
       });
     }
 catch (error) {
@@ -120,7 +120,7 @@ catch (error) {
  */
 router.put(
   '/parcelas/:parcelaId',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { parcelaId } = req.params;
@@ -133,13 +133,13 @@ router.put(
         });
       }
 
-      const _success = await cobrancasService.updateParcelaStatus(parseInt(parcelaId), status, {
+      const success = await cobrancasService.updateParcelaStatus(parseInt(parcelaId), status, {
         data_pagamento: dataPagamento,
         valor_pago: valorPago,
       });
 
       res.json({
-        _success,
+        success,
         message: success ? 'Parcela atualizada com sucesso' : 'Erro ao atualizar parcela',
       });
     }
@@ -159,7 +159,7 @@ catch (error) {
  */
 router.post(
   '/:id/solicitacoes',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -172,17 +172,17 @@ router.post(
         });
       }
 
-      const _request = await cobrancasService.requestModification({
+      const request = await cobrancasService.requestModification({
         proposta_id: parseInt(id),
-        _tipo,
-        _motivo,
-        _detalhes,
+        tipo,
+        motivo,
+        detalhes,
         solicitado_por: req.user?.id || '',
       });
 
       res.json({
         success: true,
-        _request,
+        request,
       });
     }
 catch (error) {
@@ -201,10 +201,10 @@ catch (error) {
  */
 router.get(
   '/stats/overdue',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const _stats = await cobrancasService.getOverdueStats();
+      const stats = await cobrancasService.getOverdueStats();
       res.json({
         success: true,
         ...stats,
@@ -226,7 +226,7 @@ catch (error) {
  */
 router.post(
   '/batch/payment-update',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { updates } = req.body;
@@ -238,7 +238,7 @@ router.post(
         });
       }
 
-      const _result = await cobrancasService.processBatchPaymentUpdate(updates);
+      const result = await cobrancasService.processBatchPaymentUpdate(updates);
       res.json({
         success: true,
         processed: _result.success || 0,
@@ -260,9 +260,9 @@ catch (error) {
  * GET /api/cobrancas/kpis
  * Get billing KPIs and analytics
  */
-router.get('/kpis', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/kpis', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const _kpis = await cobrancasService.getKPIs();
+    const kpis = await cobrancasService.getKPIs();
     res.json({
       success: true,
       ...kpis,

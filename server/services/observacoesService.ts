@@ -43,15 +43,15 @@ catch (error) {
         throw new Error('Observação não pode ter mais de 1000 caracteres');
       }
 
-      const _created = await observacoesRepository.createWithUser(
-        _propostaId,
+      const created = await observacoesRepository.createWithUser(
+        propostaId,
         observacao.trim(),
         usuarioId
       );
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATA_ACCESS,
+        type: SecurityEventType.DATAACCESS,
         severity: 'LOW',
         userId: usuarioId,
         userEmail: '',
@@ -97,7 +97,7 @@ catch (error) {
   async deleteObservacao(observacaoId: number, usuarioId: string, userIp?: string): Promise<void> {
     try {
       // Check if observacao exists
-      const _observacao = await observacoesRepository.findById(observacaoId);
+      const observacao = await observacoesRepository.findById(observacaoId);
       if (!observacao) {
         throw new Error('Observação não encontrada');
       }
@@ -113,7 +113,7 @@ catch (error) {
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATA_ACCESS,
+        type: SecurityEventType.DATAACCESS,
         severity: 'MEDIUM',
         userId: usuarioId,
         userEmail: '',
@@ -150,7 +150,7 @@ catch (error) {
       }
 
       // Check if observacao exists and user has permission
-      const _existing = await observacoesRepository.findById(observacaoId);
+      const existing = await observacoesRepository.findById(observacaoId);
       if (!existing) {
         throw new Error('Observação não encontrada');
       }
@@ -159,14 +159,14 @@ catch (error) {
         throw new Error('Sem permissão para editar esta observação');
       }
 
-      const _updated = await observacoesRepository.update(observacaoId, {
+      const updated = await observacoesRepository.update(observacaoId, {
         observacao: observacao.trim(),
         updated_at: new Date().toISOString(),
       });
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATA_ACCESS,
+        type: SecurityEventType.DATAACCESS,
         severity: 'LOW',
         userId: usuarioId,
         userEmail: '',
@@ -187,4 +187,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const _observacoesService = new ObservacoesService();
+export const observacoesService = new ObservacoesService();

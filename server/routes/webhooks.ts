@@ -11,10 +11,10 @@ import { documentProcessingService, ProcessingSource } from '../services/documen
 import { clickSignWebhookService } from '../services/clickSignWebhookService';
 import { z } from 'zod';
 
-const _router = express.Router();
+const router = express.Router();
 
 // Schema de validação para webhook do ClickSign
-const _clickSignWebhookSchema = z.object({
+const clickSignWebhookSchema = z.object({
   event: z.object({
     name: z.string(),
     data: z.any(),
@@ -31,7 +31,7 @@ const _clickSignWebhookSchema = z.object({
 });
 
 // Schema de validação para webhook do Banco Inter
-const _interWebhookSchema = z.object({
+const interWebhookSchema = z.object({
   codigoSolicitacao: z.string(),
   situacao: z.string(),
   dataHora: z.string().optional(),
@@ -49,14 +49,14 @@ const _interWebhookSchema = z.object({
  * Valida assinatura HMAC do ClickSign
  */
 function validateClickSignHMAC(payload: string, signature: string): boolean {
-  const _secret = process.env.CLICKSIGN_WEBHOOK_SECRET;
+  const secret = process.env.CLICKSIGN_WEBHOOK_SECRET;
 
   if (!secret) {
     console.error('❌ [WEBHOOK] CLICKSIGN_WEBHOOK_SECRET not configured');
     return false;
   }
 
-  const _expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
   // Timing-safe comparison
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
@@ -66,7 +66,7 @@ function validateClickSignHMAC(payload: string, signature: string): boolean {
  * Valida assinatura HMAC do Banco Inter
  */
 function validateInterHMAC(payload: string, signature: string): boolean {
-  const _secret = process.env.INTER_WEBHOOK_SECRET;
+  const secret = process.env.INTER_WEBHOOK_SECRET;
 
   if (!secret) {
     console.error('❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET not configured');
@@ -74,9 +74,9 @@ function validateInterHMAC(payload: string, signature: string): boolean {
   }
 
   // Remover prefixos possíveis (sha256=, etc.)
-  const _cleanSignature = signature.replace(/^(sha256=|SHA256=)?/, '');
+  const cleanSignature = signature.replace(/^(sha256=|SHA256=)?/, '');
 
-  const _expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
   console.log(
     `🔐 [WEBHOOK INTER] Signature received (clean): ${cleanSignature.substring(0, 20)}...`
@@ -109,14 +109,14 @@ catch (error) {
  * Recebe eventos de assinatura do ClickSign
  */
 router.post('/clicksign', express.raw({ type: 'application/json' }), async (req, res) => {
-  const _startTime = Date.now();
+  const startTime = Date.now();
 
   try {
     console.log('🔔 [WEBHOOK] ClickSign webhook received');
 
     // 1. Validar assinatura HMAC
-    const _signature = req.headers['content-hmac'] as string;
-    const _payload = req.body.toString();
+    const signature = req.headers['content-hmac'] as string;
+    const payload = req.body.toString();
 
     if (!signature) {
       console.warn('⚠️ [WEBHOOK] Missing HMAC signature');
@@ -143,7 +143,7 @@ catch (parseError) {
     console.log(`📋 [WEBHOOK] Event: ${event.name}, Document: ${document?.key || 'N/A'}`);
 
     // 3. Processar apenas eventos de documento finalizado
-    const _signedEvents = ['document.signed', 'document.finished', 'auto_close'];
+    const signedEvents = ['document.signed', 'document.finished', 'auto_close'];
 
     if (!signedEvents.includes(event.name)) {
       console.log(`ℹ️ [WEBHOOK] Ignoring event ${event.name} (not a signing completion event)`);
@@ -164,8 +164,8 @@ catch (parseError) {
     }
 
     // 4. Buscar proposta associada ao documento
-    const _proposalResult = await db.execute(sql`
-      SELECT id, cliente_nome, status
+    const proposalResult = await db.execute(sql`
+      SELECT id, clientenome, status
       FROM propostas 
       WHERE clicksign_document_id = ${document.key}
          OR clicksign_envelope_id = ${document.key}
@@ -177,7 +177,7 @@ catch (parseError) {
       return res.status(401).json({error: "Unauthorized"});
     }
 
-    const _proposal = proposalResult[0];
+    const proposal = proposalResult[0];
     console.log(`🎯 [WEBHOOK] Found proposal ${proposal.id}
 for document ${document.key}`);
 
@@ -192,14 +192,14 @@ for document ${document.key}`);
     setImmediate(async () => {
       try {
         // CORREÇÃO CRÍTICA: Usar clickSignWebhookService para atualizar status corretamente
-        const _result = await clickSignWebhookService.processEvent({
+        const result = await clickSignWebhookService.processEvent({
           event: event.name,
           data: {
             document: document,
             signer: event.data?.signer,
             list: event.data?.list,
           },
-          occurred_at: event.occurred_at,
+          occurred_at: event.occurredat,
         });
 
         if (_result.processed) {
@@ -219,11 +219,11 @@ for document ${document.key}`);
           // Log webhook success
           await db.execute(sql`
             INSERT INTO webhook_logs (
-  _source,
-              event_type,
-  _payload,
-  _processed,
-              processing_time,
+  source,
+              eventtype,
+  payload,
+  processed,
+              processingtime,
               created_at
             ) VALUES (
               ${'clicksign'},
@@ -253,11 +253,11 @@ catch (error) {
     try {
       await db.execute(sql`
         INSERT INTO webhook_logs (
-  _source,
-          event_type,
-  _payload,
-  _processed,
-  _error,
+  source,
+          eventtype,
+  payload,
+  processed,
+  error,
           created_at
         ) VALUES (
           ${'clicksign'},
@@ -282,23 +282,23 @@ catch (logError) {
  * Recebe notificações de pagamento do Banco Inter
  */
 router.post('/inter', express.json(), async (req, res) => {
-  const _startTime = Date.now();
+  const startTime = Date.now();
   let codigoSolicitacao: string | undefined;
 
   try {
     console.log('🏦 [WEBHOOK INTER] Webhook recebido');
 
     // 1. Validar presença do secret
-    const _secret = process.env.INTER_WEBHOOK_SECRET;
+    const secret = process.env.INTER_WEBHOOK_SECRET;
     if (!secret) {
       console.error('❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET não configurado');
       return res.status(401).json({error: "Unauthorized"});
     }
 
     // 2. Validar assinatura HMAC (o header exato pode variar)
-    const _signature =
+    const signature =
       req.headers['x-signature'] || req.headers['x-inter-signature'] || req.headers['signature'];
-    const _payload = JSON.stringify(req.body);
+    const payload = JSON.stringify(req.body);
 
     console.log(
       `🔐 [WEBHOOK INTER] Headers recebidos:`,
@@ -307,7 +307,7 @@ router.post('/inter', express.json(), async (req, res) => {
     console.log(`🔐 [WEBHOOK INTER] Signature header: ${signature ? 'presente' : 'ausente'}`);
 
     // Em desenvolvimento, permitir webhooks sem assinatura para testes
-    const _isDevelopment = process.env.NODE_ENV == 'development';
+    const isDevelopment = process.env.NODE_ENV == 'development';
 
     if (signature) {
       if (!validateInterHMAC(payload, signature as string)) {
@@ -325,10 +325,10 @@ else {
     }
 
     // 3. Usar payload já parseado pelo express.json()
-    const _webhookData = req.body;
+    const webhookData = req.body;
 
     // 4. Validar schema
-    const _validationResult = interWebhookSchema.safeParse(webhookData);
+    const validationResult = interWebhookSchema.safeParse(webhookData);
     if (!validationResult.success) {
       console.warn(
         '⚠️ [WEBHOOK INTER] Schema inválido, processando mesmo assim:',
@@ -337,7 +337,7 @@ else {
     }
 
     codigoSolicitacao = webhookData.codigoSolicitacao;
-    const _situacao = webhookData.situacao;
+    const situacao = webhookData.situacao;
 
     console.log(
       `🏦 [WEBHOOK INTER] Evento para codigoSolicitacao: ${codigoSolicitacao}, situacao: ${situacao}`
@@ -346,10 +346,10 @@ else {
     // 5. Salvar callback na tabela inter_callbacks
     await db.execute(sql`
       INSERT INTO inter_callbacks (
-        codigo_solicitacao,
-  _evento,
-  _payload,
-  _processado,
+        codigosolicitacao,
+  evento,
+  payload,
+  processado,
         created_at
       ) VALUES (
         ${codigoSolicitacao},
@@ -392,11 +392,11 @@ catch (error) {
       try {
         await db.execute(sql`
           INSERT INTO inter_callbacks (
-            codigo_solicitacao,
-  _evento,
-  _payload,
-  _processado,
-  _erro,
+            codigosolicitacao,
+  evento,
+  payload,
+  processado,
+  erro,
             created_at
           ) VALUES (
             ${codigoSolicitacao},
@@ -427,15 +427,15 @@ async function processInterWebhookEvent(
 ) {
   console.log(`🔄 [WEBHOOK INTER] Processando evento para ${codigoSolicitacao}`);
 
-  const _situacao = webhookData.situacao;
-  const _valorPago = webhookData.valorPago || webhookData.valorTotalRecebido;
-  const _dataPagamento = webhookData.dataPagamento;
-  const _origemRecebimento = webhookData.origemRecebimento;
+  const situacao = webhookData.situacao;
+  const valorPago = webhookData.valorPago || webhookData.valorTotalRecebido;
+  const dataPagamento = webhookData.dataPagamento;
+  const origemRecebimento = webhookData.origemRecebimento;
 
   // PAM V1.0 - TRANSAÇÃO ATÔMICA: Envolver todas as operações de escrita em uma única transação
   await db.transaction(async (tx) => {
     // Atualizar registro na tabela inter_collections
-    const _updateResult = await tx.execute(sql`
+    const updateResult = await tx.execute(sql`
       UPDATE inter_collections 
       SET 
         situacao = ${situacao},
@@ -457,8 +457,8 @@ else {
     }
 
     // Buscar proposta relacionada para atualizações adicionais
-    const _collection = await tx.execute(sql`
-      SELECT ic.proposta_id, ic.numero_parcela, ic.total_parcelas, p.status as proposta_status
+    const collection = await tx.execute(sql`
+      SELECT ic.propostaid, ic.numeroparcela, ic.totalparcelas, p.status as proposta_status
       FROM inter_collections ic
       JOIN propostas p ON p.id = ic.proposta_id
       WHERE ic.codigo_solicitacao = ${codigoSolicitacao}
@@ -466,7 +466,7 @@ else {
     `);
 
     if (collection.length > 0) {
-      const { proposta_id, numero_parcela, total_parcelas, proposta_status } =
+      const { propostaid, numeroparcela, totalparcelas, proposta_status } =
         collection[0] as unknown;
 
       // Se foi pago, verificar se todas as parcelas foram pagas
@@ -478,7 +478,7 @@ else {
         );
 
         // Atualizar o status da parcela correspondente para 'pago'
-        const _updateParcelaResult = await tx.execute(sql`
+        const updateParcelaResult = await tx.execute(sql`
           UPDATE parcelas 
           SET 
             status = 'pago',
@@ -500,14 +500,14 @@ else {
           );
         }
 
-        const _allPaid = await tx.execute(sql`
+        const allPaid = await tx.execute(sql`
           SELECT COUNT(*) as total_paid
           FROM inter_collections 
           WHERE proposta_id = ${proposta_id}
           AND (situacao = 'PAGO' OR situacao = 'RECEBIDO')
         `);
 
-        const _totalPaidCount = (allPaid[0] as unknown)?.total_paid || 0;
+        const totalPaidCount = (allPaid[0] as unknown)?.total_paid || 0;
 
         // Se todas as parcelas foram pagas, atualizar status da proposta
         if (totalPaidCount == total_parcelas) {

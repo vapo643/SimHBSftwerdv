@@ -4,7 +4,7 @@
  * Query para buscar uma proposta específica
  */
 
-import { IProposalRepository } from '../domain/IProposalRepository';
+import { IProposalRepository } from '../domain/Proposal';
 import { Proposal } from '../domain/Proposal';
 
 export class GetProposalByIdUseCase {

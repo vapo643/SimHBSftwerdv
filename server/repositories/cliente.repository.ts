@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/_supabase.js';
+import { db } from '../lib/supabase.js';
 import { propostas } from '@shared/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 
@@ -56,7 +56,7 @@ catch (error) {
    */
   async clientExists(cpf: string): Promise<boolean> {
     try {
-      const _result = await db
+      const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(propostas)
         .where(eq(propostas.clienteCpf, cpf));
@@ -70,4 +70,4 @@ catch (error) {
   }
 }
 
-export const _clienteRepository = new ClienteRepository();
+export const clienteRepository = new ClienteRepository();

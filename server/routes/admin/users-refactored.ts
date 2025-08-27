@@ -8,16 +8,16 @@
 
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { _jwtAuthMiddleware, AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
-import { _requireAdmin } from '../../lib/role-guards.js';
+import { jwtAuthMiddleware, AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
+import { _requireAdmin as requireAdmin } from '../../lib/role-guards.js';
 import { userService } from '../../services/userService-refactored.js';
 import { UserDataSchema } from '../../../shared/types/user.js';
 
-const _router = Router();
+const router = Router();
 
 // Helper function to get client IP
 function getClientIP(req: Request): string {
-  const _forwarded = req.headers['x-forwarded-for'];
+  const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded == 'string') {
     return forwarded.split(',')[0].trim();
   }
@@ -33,17 +33,18 @@ function getClientIP(req: Request): string {
  */
 router.get(
   '/',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       console.log('📋 [Controller/Users] Fetching all users');
 
       // PADRÃO CORRETO: Controller chama Service, não acessa DB
-      const _users = await userService.getAllUsers();
+      const users = await userService.getAllUsers();
 
       // Format response using service method
-      const _formattedUsers = userService.formatUsersForResponse(users);
+      const formattedUsers = userService.formatUsersForResponse(users);
 
       console.log(`✅ [Controller/Users] Retrieved ${formattedUsers.length} users`);
 
@@ -66,8 +67,9 @@ catch (error) {
  */
 router.get(
   '/:id',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -79,7 +81,7 @@ router.get(
       }
 
       // PADRÃO CORRETO: Service gerencia acesso aos dados
-      const _user = await userService.getUserById(id);
+      const user = await userService.getUserById(id);
 
       if (!user) {
         return res.status(404).json({
@@ -87,7 +89,7 @@ router.get(
         });
       }
 
-      const _formattedUser = userService.formatUserForResponse(user);
+      const formattedUser = userService.formatUserForResponse(user);
 
       res.json(formattedUser);
     }
@@ -108,8 +110,9 @@ catch (error) {
  */
 router.post(
   '/',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       console.log('📝 [Controller/Users] Creating new user');
@@ -117,12 +120,12 @@ router.post(
 
       // Validate input data
       const __validatedData = UserDataSchema.parse(req.body);
-      const _clientIp = getClientIP(req);
+      const clientIp = getClientIP(req);
 
       // PADRÃO CORRETO: Service gerencia toda lógica de negócio
-      const _newUser = await userService.createUser(_validatedData, req.user?.id, clientIp);
+      const newUser = await userService.createUser(validatedData, req.user?.id, clientIp);
 
-      const _formattedUser = userService.formatUserForResponse(newUser);
+      const formattedUser = userService.formatUserForResponse(newUser);
 
       console.log(`✅ [Controller/Users] User created: ${newUser.email}`);
 
@@ -131,7 +134,7 @@ router.post(
 catch (error) {
       // Handle validation errors
       if (error instanceof z.ZodError) {
-        const _flatErrors = error.flatten();
+        const flatErrors = error.flatten();
         console.error('❌ [Controller/Users] Validation error:', flatErrors);
 
         let _errorMessage = 'Dados de entrada inválidos';
@@ -180,11 +183,12 @@ else if (flatErrors.fieldErrors.role) {
  */
 router.put(
   '/:id/deactivate',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const _userId = req.params.id;
+      const userId = req.params.id;
 
       if (!userId) {
         return res.status(400).json({
@@ -192,15 +196,15 @@ router.put(
         });
       }
 
-      const _clientIp = getClientIP(req);
-      const _userAgent = req.headers['user-agent'];
+      const clientIp = getClientIP(req);
+      const userAgent = req.headers['user-agent'];
 
       // PADRÃO CORRETO: Service gerencia deativação e todas as regras de negócio
-      const _result = await userService.deactivateUser(
-  _userId,
+      const result = await userService.deactivateUser(
+  userId,
         req.user!.id,
         req.user!.email!,
-  _clientIp,
+  clientIp,
         userAgent
       );
 
@@ -210,7 +214,7 @@ router.put(
         message: _result.message,
         deactivatedUser: {
           id: _result.user.id,
-          name: _result.user.full_name,
+          name: _result.user.fullname,
           role: _result.user.role,
         },
       });
@@ -218,7 +222,7 @@ router.put(
 catch (error) {
       console.error('❌ [Controller/Users] Error deactivating user:', error);
 
-      const _statusCode =
+      const statusCode =
         error instanceof Error &&
         (error.message.includes('não pode desativar') ||
           error.message.includes('último administrador'))
@@ -240,11 +244,12 @@ catch (error) {
  */
 router.put(
   '/:id/reactivate',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const _userId = req.params.id;
+      const userId = req.params.id;
 
       if (!userId) {
         return res.status(400).json({
@@ -252,15 +257,15 @@ router.put(
         });
       }
 
-      const _clientIp = getClientIP(req);
-      const _userAgent = req.headers['user-agent'];
+      const clientIp = getClientIP(req);
+      const userAgent = req.headers['user-agent'];
 
       // PADRÃO CORRETO: Service gerencia reativação
-      const _result = await userService.reactivateUser(
-  _userId,
+      const result = await userService.reactivateUser(
+  userId,
         req.user!.id,
         req.user!.email!,
-  _clientIp,
+  clientIp,
         userAgent
       );
 
@@ -273,7 +278,7 @@ router.put(
 catch (error) {
       console.error('❌ [Controller/Users] Error reactivating user:', error);
 
-      const _statusCode =
+      const statusCode =
         error instanceof Error && error.message.includes('já está ativo') ? 400 : 500;
 
       res.status(statusCode).json({
@@ -291,8 +296,9 @@ catch (error) {
  */
 router.get(
   '/role/:role',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { role } = req.params;
@@ -304,8 +310,8 @@ router.get(
       }
 
       // PADRÃO CORRETO: Service busca usuários por perfil
-      const _users = await userService.getUsersByRole(role);
-      const _formattedUsers = userService.formatUsersForResponse(users as unknown);
+      const users = await userService.getUsersByRole(role);
+      const formattedUsers = userService.formatUsersForResponse(users as unknown);
 
       res.json(formattedUsers);
     }
@@ -329,11 +335,12 @@ catch (error) {
  */
 router.get(
   '/loja/:lojaId',
-  __jwtAuthMiddleware,
-  __requireAdmin,
+  jwtAuthMiddleware,
+import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const _lojaId = parseInt(req.params.lojaId);
+      const lojaId = parseInt(req.params.lojaId);
 
       if (_isNaN(lojaId)) {
         return res.status(400).json({
@@ -342,8 +349,8 @@ router.get(
       }
 
       // PADRÃO CORRETO: Service busca usuários por loja
-      const _users = await userService.getUsersByLoja(lojaId);
-      const _formattedUsers = userService.formatUsersForResponse(users as unknown);
+      const users = await userService.getUsersByLoja(lojaId);
+      const formattedUsers = userService.formatUsersForResponse(users as unknown);
 
       res.json(formattedUsers);
     }

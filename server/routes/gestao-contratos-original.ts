@@ -7,17 +7,17 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireRoles } from '../lib/role-guards';
 import { storage } from '../storage';
 import { db } from '../lib/supabase';
 import {
-  _propostas,
-  _parceiros,
-  _lojas,
-  _produtos,
-  _propostaLogs,
-  _statusContextuais,
+  propostas,
+  parceiros,
+  lojas,
+  produtos,
+  propostaLogs,
+  statusContextuais,
 } from '@shared/schema';
 import { gte, lte } from 'drizzle-orm';
 import { eq, and, isNotNull, isNull, desc } from 'drizzle-orm';
@@ -25,7 +25,7 @@ import { createServerSupabaseAdminClient } from '../lib/supabase';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
 import { maskCPF, maskEmail, maskRG, maskTelefone } from '../utils/masking';
 
-const _router = Router();
+const router = Router();
 
 /**
  * GET /api/contratos
@@ -43,13 +43,13 @@ const _router = Router();
  */
 router.get(
   '/contratos',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   requireRoles(['ADMINISTRADOR', 'DIRETOR']), // Apenas ADMIN e DIRETOR
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Log de auditoria - acesso a contratos
       securityLogger.logEvent({
-        type: SecurityEventType.SENSITIVE_DATA_ACCESS,
+        type: SecurityEventType.SENSITIVE_DATAACCESS,
         severity: 'LOW',
         userId: req.user?.id,
         userEmail: req.user?.email,
@@ -134,7 +134,7 @@ router.get(
         .from(propostas)
         // PAM V1.0 - LEFT JOIN com status contextual para contratos
         .leftJoin(
-  _statusContextuais,
+  statusContextuais,
           and(
             eq(propostas.id, statusContextuais.propostaId),
             eq(statusContextuais.contexto, 'contratos')
@@ -160,7 +160,7 @@ router.get(
         .limit(parseInt(limite as string));
 
       // Aplicar filtros adicionais se fornecidos
-      const _conditions = [];
+      const conditions = [];
 
       // Filtro por status
       if (status && typeof status == 'string') {
@@ -174,25 +174,25 @@ router.get(
 
       // Filtro por período de assinatura
       if (dataInicio && typeof dataInicio == 'string') {
-        const _startDate = new Date(dataInicio);
+        const startDate = new Date(dataInicio);
         startDate.setHours(0, 0, 0, 0);
         conditions.push(gte(propostas.dataAssinatura, startDate));
       }
 
       if (dataFim && typeof dataFim == 'string') {
-        const _endDate = new Date(dataFim);
+        const endDate = new Date(dataFim);
         endDate.setHours(23, 59, 59, 999);
         conditions.push(lte(propostas.dataAssinatura, endDate));
       }
 
       // Executar query
-      const _contratos = await query;
+      const contratos = await query;
 
       console.log(`[CONTRATOS] ${contratos.length} contratos encontrados`);
 
       // Gerar URLs dos documentos assinados
-      const _supabaseAdmin = createServerSupabaseAdminClient();
-      const _contratosComUrls = await Promise.all(
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      const contratosComUrls = await Promise.all(
         contratos.map(async (contrato) => {
           let _urlCcbAssinado = null;
           let _urlComprovantePagamento = null;
@@ -209,7 +209,7 @@ router.get(
           // Verificar se há comprovante de pagamento
           if (contrato.dataPagamento) {
             // Assumindo que o comprovante está em formato padrão
-            const _comprovantePath = `comprovantes/${contrato.id}/comprovante.pdf`;
+            const comprovantePath = `comprovantes/${contrato.id}/comprovante.pdf`;
             const { data: comprovanteUrl } = supabaseAdmin.storage
               .from('documents')
               .getPublicUrl(comprovantePath);
@@ -226,8 +226,8 @@ router.get(
 
           return {
             ...contrato,
-  _urlCcbAssinado,
-  _urlComprovantePagamento,
+  urlCcbAssinado,
+  urlComprovantePagamento,
 
             // Adicionar indicadores úteis
             diasDesdeAssinatura: contrato.dataAssinatura
@@ -245,16 +245,16 @@ router.get(
       );
 
       // Estatísticas gerais (útil para dashboard)
-      const _estatisticas = {
+      const estatisticas = {
         totalContratos: contratosComUrls.length,
         aguardandoPagamento: contratosComUrls.filter((c) => c.aguardandoPagamento).length,
         pagos: contratosComUrls.filter((c) => c.dataPagamento).length,
         valorTotalContratado: contratosComUrls.reduce((sum: number, c) => {
-          const _valor = parseFloat(c.valor || '0');
+          const valor = parseFloat(c.valor || '0');
           return sum + valor;
         }, 0),
         valorTotalLiberado: contratosComUrls.reduce((sum: number, c) => {
-          const _valor = parseFloat(c.valorLiquidoLiberado || '0');
+          const valor = parseFloat(c.valorLiquidoLiberado || '0');
           return sum + (c.dataPagamento ? valor : 0);
         }, 0),
       };
@@ -263,12 +263,12 @@ router.get(
       res.json({
         success: true,
         contratos: contratosComUrls,
-  _estatisticas,
+  estatisticas,
         filtrosAplicados: {
-  _status,
-  _lojaId,
-  _dataInicio,
-  _dataFim,
+  status,
+  lojaId,
+  dataInicio,
+  dataFim,
           limite: parseInt(limite as string),
         },
       });
@@ -278,7 +278,7 @@ catch (error) {
 
       // Log de erro
       securityLogger.logEvent({
-        type: SecurityEventType.ACCESS_DENIED,
+        type: SecurityEventType.ACCESSDENIED,
         severity: 'HIGH',
         userId: req.user?.id,
         userEmail: req.user?.email,
@@ -315,7 +315,7 @@ catch (error) {
  */
 router.get(
   '/contratos/:id',
-  __jwtAuthMiddleware,
+  jwtAuthMiddleware,
   requireRoles(['ADMINISTRADOR', 'DIRETOR']),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -324,7 +324,7 @@ router.get(
       console.log('[CONTRATOS] Buscando detalhes do contrato:', id);
 
       // Buscar contrato com todos os relacionamentos
-      const _contrato = await db
+      const contrato = await db
         .select()
         .from(propostas)
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
@@ -348,15 +348,15 @@ router.get(
       }
 
       // Buscar histórico de logs da proposta
-      const _historico = await db
+      const historico = await db
         .select()
         .from(propostaLogs)
         .where(eq(propostaLogs.propostaId, id))
         .orderBy(desc(propostaLogs.createdAt));
 
       // Gerar URLs dos documentos
-      const _supabaseAdmin = createServerSupabaseAdminClient();
-      const _contratoData = contrato[0].propostas;
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      const contratoData = contrato[0].propostas;
 
       let _urlCcbAssinado = null;
       let _urlCcbOriginal = null;
@@ -395,10 +395,10 @@ router.get(
         success: true,
         contrato: {
           ...contrato[0],
-  _urlCcbAssinado,
-  _urlCcbOriginal,
-  _documentosAdicionais,
-  _historico,
+  urlCcbAssinado,
+  urlCcbOriginal,
+  documentosAdicionais,
+  historico,
           statusFormalizacao: determinarStatusFormalizacao(contratoData),
         },
       });

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { integrationTestService } from '../services/genericService';
-const _router = Router();
+const router = Router();
 router.post('/external', async (req, res) => {
   try {
-    const _result = await integrationTestService.executeOperation('external_integration', req.body);
+    const result = await integrationTestService.executeOperation('external_integration', req.body);
     res.json(_result);
   }
 catch (error) {

@@ -9,7 +9,7 @@
  * @module scripts/migrate-legacy-products-tac
  */
 
-import { db } from '../server/lib/_supabase.js';
+import { db } from '../server/lib/supabase.js';
 import { produtos } from '../shared/schema.js';
 import { isNull } from 'drizzle-orm';
 

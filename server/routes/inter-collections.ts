@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import type { AuthenticatedRequest } from '../../shared/types/express';
 import { requireAnyRole } from '../lib/role-guards';
 import { interBankService } from '../services/interBankService';
@@ -8,7 +8,7 @@ import { interCollections, propostas } from '@shared/schema';
 import { eq, and, not, like } from 'drizzle-orm';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
-const _router = Router();
+const router = Router();
 
 /**
  * Listar boletos gerados para uma proposta
@@ -16,8 +16,8 @@ const _router = Router();
  */
 router.get(
   '/:propostaId',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
@@ -25,7 +25,7 @@ router.get(
       console.log(`[INTER COLLECTIONS] Fetching collections for proposal: ${propostaId}`);
 
       // Buscar collections ATIVAS da proposta no banco (apenas com número de parcela preenchido)
-      const _collections = await db
+      const collections = await db
         .select()
         .from(interCollections)
         .where(
@@ -35,12 +35,12 @@ router.get(
 
       // Se tiver collections, buscar detalhes atualizados na API do Inter
       if (collections.length > 0) {
-        const _interService = interBankService;
+        const interService = interBankService;
 
-        const _updatedCollections = await Promise.all(
+        const updatedCollections = await Promise.all(
           collections.map(async (collection) => {
             try {
-              const _details = await interService.recuperarCobranca(collection.codigoSolicitacao);
+              const details = await interService.recuperarCobranca(collection.codigoSolicitacao);
 
               // Atualizar situacao no banco se mudou
               if (details.situacao !== collection.situacao) {
@@ -109,8 +109,8 @@ catch (error) {
  */
 router.get(
   '/:propostaId/:codigoSolicitacao/pdf',
-  __jwtAuthMiddleware,
-  _requireAnyRole,
+  jwtAuthMiddleware,
+  requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId, codigoSolicitacao } = req.params;
@@ -118,7 +118,7 @@ router.get(
       console.log(`[PDF STORAGE] Buscando PDF no storage para: ${codigoSolicitacao}`);
 
       // STEP 1: Verificar se collection pertence à proposta
-      const _collection = await db
+      const collection = await db
         .select()
         .from(interCollections)
         .where(
@@ -147,7 +147,7 @@ router.get(
         console.log(`[PDF STORAGE] Código customizado detectado: ${codigoSolicitacao}`);
 
         // Buscar boleto com UUID real para a mesma parcela
-        const _numeroParcela = collection[0].numeroParcela;
+        const numeroParcela = collection[0].numeroParcela;
         if (numeroParcela === null) {
           console.log(
             `[PDF STORAGE] ⚠️ Número da parcela é null - não é possível buscar UUID real`
@@ -155,7 +155,7 @@ router.get(
           return res.status(401).json({error: "Unauthorized"});
         }
 
-        const _realCollection = await db
+        const realCollection = await db
           .select()
           .from(interCollections)
           .where(
@@ -180,10 +180,10 @@ else {
 
       // STEP 3: Buscar PDF no Supabase Storage com UUID real
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const _supabaseAdmin = createServerSupabaseAdminClient();
+      const supabaseAdmin = createServerSupabaseAdminClient();
 
       // Caminho do PDF no storage usando UUID real
-      const _storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${realCodigoSolicitacao}.pdf`;
+      const storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${realCodigoSolicitacao}.pdf`;
 
       console.log(`[PDF STORAGE] Verificando arquivo com UUID real: ${storagePath}`);
 
@@ -223,8 +223,8 @@ else {
       console.log(`[PDF STORAGE] Tentando fallback para API do Banco Inter com UUID real...`);
 
       try {
-        const _interService = interBankService;
-        const _pdfBuffer = await interService.obterPdfCobranca(realCodigoSolicitacao);
+        const interService = interBankService;
+        const pdfBuffer = await interService.obterPdfCobranca(realCodigoSolicitacao);
 
         if (!pdfBuffer || pdfBuffer.length == 0) {
           return res.status(404).json({
@@ -234,7 +234,7 @@ else {
         }
 
         // Validar PDF
-        const _pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+        const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
         if (!pdfMagic.startsWith('%PDF')) {
           return res.status(422).json({
             error: 'PDF inválido',
@@ -284,17 +284,17 @@ catch (error) {
  * Listar todos os boletos (para tela de cobranças)
  * GET /api/inter/collections
  */
-router.get('/', _jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
+router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, dataInicial, dataFinal } = req.query;
 
     console.log('[INTER COLLECTIONS] Listing all collections with filters:', {
-  _status,
-  _dataInicial,
-  _dataFinal,
+  status,
+  dataInicial,
+  dataFinal,
     });
 
-    const _interService = interBankService;
+    const interService = interBankService;
 
     // Buscar collections na API do Inter
     const filters: unknown = {};
@@ -302,7 +302,7 @@ router.get('/', _jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedReq
     if (dataInicial) filters.dataInicial = dataInicial as string;
     if (dataFinal) filters.dataFinal = dataFinal as string;
 
-    const _collections = await interService.pesquisarCobrancas({
+    const collections = await interService.pesquisarCobrancas({
       dataInicial:
         filters.dataInicial ||
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -311,14 +311,14 @@ router.get('/', _jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedReq
     });
 
     // Enriquecer com dados das propostas
-    const _enrichedCollections = await Promise.all(
+    const enrichedCollections = await Promise.all(
       collections.map(async (collection) => {
         // Extrair propostaId do codigoSolicitacao (formato: SIMPIX-{propostaId}-{parcela})
-        const _parts = collection.codigoSolicitacao?.split('-');
+        const parts = collection.codigoSolicitacao?.split('-');
         if (parts && parts.length >= 2 && parts[0] == 'SIMPIX') {
-          const _propostaId = parts[1];
+          const propostaId = parts[1];
 
-          const _proposta = await db
+          const proposta = await db
             .select()
             .from(propostas)
             .where(eq(propostas.id, propostaId))
