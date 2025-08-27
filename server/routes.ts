@@ -2410,8 +2410,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   ];
 
   // Users management endpoints - REFATORADO com padrão Service/Repository
-  const usersAdminRouter = (await import('./routes/admin/users-refactored.js')).default;
-  app.use('/api/admin/users', usersAdminRouter);
+  const usersAdminRouter = (await import('./routes/admin-users.js')).default;
+  app.use('/api/admin', usersAdminRouter);
 
   // API endpoint for partners - GET all (public for dropdowns)
   app.get('/api/parceiros', async (req, res) => {

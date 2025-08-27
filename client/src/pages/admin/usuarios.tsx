@@ -55,7 +55,7 @@ const UsuariosPage: React.FC = () => {
     queryFn: async () => {
       const response = await api.get('/api/admin/users');
       const data = response.data;
-      return Array.isArray(data) ? data : (data as any)?.data || [];
+      return Array.isArray(data) ? data : Array.isArray((data as any)?.data) ? (data as any)?.data : [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -313,11 +313,11 @@ const UsuariosPage: React.FC = () => {
   // Calcular estatísticas dos usuários
   const userStats = {
     total: users.length,
-    administradores: users.filter((u) => u.role === 'ADMINISTRADOR').length,
-    analistas: users.filter((u) => u.role === 'ANALISTA').length,
-    atendentes: users.filter((u) => u.role === 'ATENDENTE').length,
-    gerentes: users.filter((u) => u.role === 'GERENTE').length,
-    financeiro: users.filter((u) => u.role === 'FINANCEIRO').length,
+    administradores: Array.isArray(users) ? users.filter((u) => u.role === 'ADMINISTRADOR').length : 0,
+    analistas: Array.isArray(users) ? users.filter((u) => u.role === 'ANALISTA').length : 0,
+    atendentes: Array.isArray(users) ? users.filter((u) => u.role === 'ATENDENTE').length : 0,
+    gerentes: Array.isArray(users) ? users.filter((u) => u.role === 'GERENTE').length : 0,
+    financeiro: Array.isArray(users) ? users.filter((u) => u.role === 'FINANCEIRO').length : 0,
     ativosPercentual:
       users.length > 0 ? ((users.length / (users.length + 0)) * 100).toFixed(1) : '0',
   };
@@ -431,7 +431,7 @@ const UsuariosPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {users.length === 0 ? (
+            {Array.isArray(users) && users.length === 0 ? (
               <div className="py-12 text-center">
                 <Users className="mx-auto mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" />
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
@@ -464,7 +464,7 @@ const UsuariosPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => {
+                    {Array.isArray(users) && users.map((user) => {
                       const initials = user.name
                         .split(' ')
                         .map((n) => n[0])

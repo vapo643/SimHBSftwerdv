@@ -212,11 +212,11 @@ export default function GestãoProdutos() {
   // Calcular estatísticas dos produtos
   const produtosStats = {
     total: produtos.length,
-    ativos: produtos.filter((p) => p.isActive).length,
-    inativos: produtos.filter((p) => !p.isActive).length,
+    ativos: Array.isArray(produtos) ? produtos.filter((p) => p.isActive).length : 0,
+    inativos: Array.isArray(produtos) ? produtos.filter((p) => !p.isActive).length : 0,
     percentualAtivos:
       produtos.length > 0
-        ? ((produtos.filter((p) => p.isActive).length / produtos.length) * 100).toFixed(1)
+        ? ((Array.isArray(produtos) ? produtos.filter((p) => p.isActive).length : 0) / produtos.length * 100).toFixed(1)
         : '0',
   };
 

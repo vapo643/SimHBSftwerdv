@@ -177,7 +177,7 @@ const Dashboard: React.FC = () => {
 
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   // The apiClient automatically adds camelCase aliases for all snake_case keys
-  const propostas = (propostasResponse?.data || []).map((p: any) => {
+  const propostas = Array.isArray(propostasResponse?.data) ? propostasResponse.data.map((p: any) => {
     console.log('[Dashboard] Processing proposal:', p);
     return {
       id: p.id,
@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => {
       statusContextual: p.status,
       parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' },
     };
-  });
+  }) : [];
 
   // Fetch user metrics if user is ATENDENTE
   const { data: metricas } = useQuery<{
@@ -220,7 +220,7 @@ const Dashboard: React.FC = () => {
 
   // Filtrar propostas - HOOK SEMPRE EXECUTADO
   const propostasFiltradas = useMemo(() => {
-    return propostasData.filter((proposta) => {
+    return Array.isArray(propostasData) ? propostasData.filter((proposta) => {
       const matchesSearch =
         proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         proposta.id.includes(searchTerm) ||
@@ -234,18 +234,18 @@ const Dashboard: React.FC = () => {
         parceiroFilter === 'todos' || proposta.parceiro?.razaoSocial === parceiroFilter;
 
       return matchesSearch && matchesStatus && matchesParceiro;
-    });
+    }) : [];
   }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
 
   // Estatísticas computadas - HOOK SEMPRE EXECUTADO
   const estatisticas = useMemo(() => {
     const total = propostasData.length;
-    const aprovadas = propostasData.filter((p) => p.status === 'aprovado').length;
-    const pendentes = propostasData.filter(
+    const aprovadas = Array.isArray(propostasData) ? propostasData.filter((p) => p.status === 'aprovado').length : 0;
+    const pendentes = Array.isArray(propostasData) ? propostasData.filter(
       (p) => p.status === 'aguardando_analise' || p.status === 'em_analise'
-    ).length;
-    const rejeitadas = propostasData.filter((p) => p.status === 'rejeitado').length;
-    const pendenciadas = propostasData.filter((p) => p.status === 'pendenciado').length;
+    ).length : 0;
+    const rejeitadas = Array.isArray(propostasData) ? propostasData.filter((p) => p.status === 'rejeitado').length : 0;
+    const pendenciadas = Array.isArray(propostasData) ? propostasData.filter((p) => p.status === 'pendenciado').length : 0;
     // Debug: log first few values to understand the data structure
     console.log(
       'DEBUG - First 3 proposals values:',
