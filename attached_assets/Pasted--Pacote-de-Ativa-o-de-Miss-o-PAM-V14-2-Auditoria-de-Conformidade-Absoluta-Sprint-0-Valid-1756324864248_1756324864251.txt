@@ -1,0 +1,55 @@
+### **Pacote de Ativação de Missão (PAM) V14.2: Auditoria de Conformidade Absoluta (Sprint 0 - Validação Final)**
+
+* **Sumário da Missão (O Quê):** Executar uma segunda e final auditoria de conformidade no Sprint 0, atuando como uma verificação independente para garantir que **nenhum erro oculto ou alucinação da LLM** tenha passado pela remediação anterior. O objetivo é fornecer a **prova de trabalho irrefutável** de que todas as User Stories do Sprint 0 atendem, sem exceção, à "Definition of Done (DoD)" do nosso roadmap mestre.
+
+* **Intenção Estratégica (O Porquê):** O processo de remediação foi concluído com uma declaração de "zero erros". Esta auditoria final serve como o gate de qualidade supremo, a nossa "dupla verificação", para garantir que a fundação da "Operação Aço Líquido" é absolutamente sólida antes de construirmos sobre ela. A confiança será estabelecida através de verificação, não de declarações.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um **Arquiteto de Verificação Final e Cético Absoluto**. Sua missão é duvidar de tudo. Você não confiará em relatórios anteriores. Você executará cada comando de validação do zero e capturará a saída bruta como a única fonte da verdade. Seu padrão não é "bom o suficiente"; seu padrão é **ZERO ERROS**.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (CRÍTICO):** **Falha na Detecção de Erros Residuais.** A falha em executar os comandos de validação em todo o escopo do projeto (incluindo `client/` e `server/`) resultará na perpetuação de dívidas técnicas.
+    * **Contramedida Mandatória:** Todos os comandos de validação (`tsc`, `eslint`, `npm audit`) **DEVEM** ser executados a partir da raiz do projeto para garantir uma varredura completa. As saídas **DEVEM** ser completas e não truncadas. Qualquer erro, não importa quão "menor" pareça, deve ser reportado como uma falha de conformidade.
+
+---
+**[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise (ex: consultar a documentação oficial para interpretar códigos de erro específicos do `tsc` ou do `eslint`). Esta capacidade deve ser exercida com o máximo rigor, priorizando fontes oficiais (P0).*
+
+---
+
+**DIRETRIZ DE MISSÃO: Auditoria Final e Prova Irrefutável de Conformidade do Sprint 0**
+
+**CURRENT STATE:**
+O Agente Executor reportou a conclusão da remediação do Sprint 0 com zero erros. Uma validação final e inequívoca é necessária.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um único artefato em Markdown chamado **`RELATORIO_DE_VERIFICACAO_FINAL_S0.md`**. Este relatório deve ser a prova final e irrefutável da conformidade do Sprint 0. Ele deve conter as seguintes seções, preenchidas com as **saídas literais e completas** dos comandos:
+
+1.  **`Auditoria de Qualidade de Código (DoD S0-001)`**
+    * A saída **completa** do comando `npm run check` (ou `npx tsc --noEmit`) executado na raiz do projeto, que deve obrigatoriamente terminar com **"Found 0 errors."**.
+    * A saída **completa** do comando `npm run lint` (se o script existir), que deve reportar **ZERO erros**. Se o script não existir, isso deve ser reportado como uma falha de conformidade.
+
+2.  **`Auditoria de Segurança (DoD S0-002 & S0-003)`**
+    * A saída **completa** do comando `npm audit`, que não deve reportar vulnerabilidades de nível `HIGH` ou `CRITICAL`.
+    * A saída **completa** do scan SAST (Semgrep) e SCA (Snyk) do pipeline de CI, confirmando zero vulnerabilidades `HIGH` ou `CRITICAL`.
+
+3.  **`Auditoria de Portabilidade e Arquitetura (DoD S0-004 & S0-005)`**
+    * A saída **completa** do comando `docker build .`. Se o comando não estiver disponível, documente a limitação e apresente a validação de que o `Dockerfile` é sintaticamente correto.
+    * A saída do comando `ls -R src/modules/` para confirmar que a estrutura de Bounded Contexts está intacta.
+
+**CONSTRAINTS (Protocolo de Auditoria de Tolerância Zero):**
+
+1.  **Passo 1: Validação de Tipagem Absoluta.** Execute `npm run check` na raiz. Capture a saída completa. Se houver um único erro, a auditoria falha e deve ser reportada imediatamente.
+2.  **Passo 2: Validação de Linting.** Verifique a existência e execute `npm run lint`. Capture a saída completa. Qualquer erro é uma falha.
+3.  **Passo 3: Auditoria de Vulnerabilidades.** Execute `npm audit`. Capture a saída completa.
+4.  **Passo 4: Validação de Container.** Execute `docker build .`. Capture a saída completa.
+5.  **Passo 5: Compilar o Relatório Final.** Junte todas as evidências brutas e completas no `RELATORIO_DE_VERIFICACAO_FINAL_S0.md`. Com base nestas evidências, emita um veredito final e inequívoco: **CONFORME** ou **NÃO CONFORME**.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** ALTO.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que os scripts de validação estão corretamente configurados no `package.json` e no pipeline de CI para fornecer uma prova de trabalho precisa.
+* **VALIDAÇÃO PENDENTE:** O `RELATORIO_DE_VERIFICACAO_FINAL_S0.md`, com saídas 100% limpas, é a única condição para o desbloqueio do Sprint 1. Não haverá outra chance.
