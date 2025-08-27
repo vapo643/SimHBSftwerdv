@@ -96,7 +96,7 @@ class ClickSignSecurityService {
   /**
    * Validate and sanitize client data
    */
-  validateClientData(data: any): z.infer<typeof ClientDataSchema> {
+  validateClientData(data: unknown): z.infer<typeof ClientDataSchema> {
     try {
       // Remove formatting from CPF
       if (data.cpf) {
@@ -189,7 +189,7 @@ class ClickSignSecurityService {
   /**
    * Validate webhook event structure
    */
-  validateWebhookEvent(event: any): z.infer<typeof WebhookEventSchema> {
+  validateWebhookEvent(event: unknown): z.infer<typeof WebhookEventSchema> {
     return WebhookEventSchema.parse(event);
   }
 
@@ -238,12 +238,12 @@ class ClickSignSecurityService {
   /**
    * Sanitize data for secure logging
    */
-  sanitizeForLogging(data: any): any {
+  sanitizeForLogging(data: unknown): unknown {
     if (!data) return data;
 
     const sanitized = JSON.parse(JSON.stringify(data));
 
-    const sanitizeObject = (obj: any) => {
+    const sanitizeObject = (obj: unknown) => {
       for (const key in obj) {
         if (this.config.sensitiveFields.includes(key.toLowerCase())) {
           obj[key] = this.maskSensitiveValue(obj[key]);
@@ -260,7 +260,7 @@ class ClickSignSecurityService {
   /**
    * Mask sensitive values
    */
-  private maskSensitiveValue(value: any): string {
+  private maskSensitiveValue(value: unknown): string {
     if (!value) return '[EMPTY]';
 
     const str = String(value);
@@ -279,14 +279,14 @@ class ClickSignSecurityService {
   /**
    * Validate ClickSign response
    */
-  validateResponse(response: any): void {
+  validateResponse(response: unknown): void {
     if (!response || typeof response !== 'object') {
       throw new Error('Invalid ClickSign response format');
     }
 
     // Check for error responses
     if (response.errors && Array.isArray(response.errors)) {
-      const errors = response.errors.map((e: any) => e.message || e.error).join(', ');
+      const errors = response.errors.map((e: unknown) => e.message || e.error).join(', ');
       throw new Error(`ClickSign API errors: ${errors}`);
     }
   }
@@ -294,7 +294,7 @@ class ClickSignSecurityService {
   /**
    * Create security audit log entry
    */
-  createAuditLog(action: string, data: any, userId?: string): any {
+  createAuditLog(action: string, data: unknown, userId?: string): unknown {
     return {
       timestamp: new Date().toISOString(),
       action,

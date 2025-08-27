@@ -5,7 +5,7 @@ router.get('/templates', async (req, res) => {
   try {
     const result = await documentService.executeOperation('template_manager', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

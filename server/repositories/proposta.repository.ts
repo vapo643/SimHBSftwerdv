@@ -60,7 +60,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
-      return (proposta as any) || null;
+      return (proposta as unknown) || null;
     } catch (error) {
       throw new Error(
         `Failed to fetch proposta: ${error instanceof Error ? error.message : String(error)}`
@@ -243,7 +243,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
    * Mark signature as completed
    */
   async markSignatureCompleted(propostaId: string, clicksignKey?: string): Promise<void> {
-    const updateData: any = {
+    const updateData: unknown = {
       assinatura_eletronica_concluida: true,
       data_aprovacao: new Date().toISOString(),
       updated_at: new Date().toISOString(),

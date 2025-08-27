@@ -53,7 +53,7 @@ const upload = multer({
 });
 
 // Helper function to check admin role
-const requireAdmin = (req: AuthenticatedRequest, res: any, next: any) => {
+const requireAdmin = (req: AuthenticatedRequest, res: unknown, next: unknown) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -394,7 +394,7 @@ router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res
     const allUrls: string[] = [];
 
     // Extract all URLs from the JSON structure
-    Object.values(wstgData.categories).forEach((category: any) => {
+    Object.values(wstgData.categories).forEach((category: unknown) => {
       if (category.urls) {
         allUrls.push(...category.urls);
       }

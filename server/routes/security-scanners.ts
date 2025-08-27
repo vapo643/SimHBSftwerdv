@@ -12,7 +12,7 @@ import { AuthenticatedRequest } from '../../shared/types/express';
 const router = Router();
 
 // Middleware for admin access
-const requireAdmin = (req: AuthenticatedRequest, res: any, next: any) => {
+const requireAdmin = (req: AuthenticatedRequest, res: unknown, next: unknown) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -85,9 +85,9 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
 
     // Process dependencies if they exist
     if (reportData.dependencies && Array.isArray(reportData.dependencies)) {
-      reportData.dependencies.forEach((dep: any) => {
+      reportData.dependencies.forEach((dep: unknown) => {
         if (dep.vulnerabilities && Array.isArray(dep.vulnerabilities)) {
-          dep.vulnerabilities.forEach((vuln: any) => {
+          dep.vulnerabilities.forEach((vuln: unknown) => {
             vulnerabilities.total++;
 
             // Check CVSS score or severity

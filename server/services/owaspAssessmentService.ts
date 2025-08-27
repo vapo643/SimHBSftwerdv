@@ -346,7 +346,7 @@ export class OWASPAssessmentService {
   }
 
   // Salvar assessments em arquivos
-  private async saveAssessment(filename: string, data: any): Promise<void> {
+  private async saveAssessment(filename: string, data: unknown): Promise<void> {
     try {
       const filePath = path.join(this.assessmentPath, filename);
       await fs.writeFile(filePath, JSON.stringify(data, null, 2));

@@ -8,8 +8,8 @@ export { UserData };
 
 export async function createUser(userData: UserData) {
   const supabase = createServerSupabaseAdminClient();
-  let createdAuthUser: any = null;
-  let createdProfile: any = null;
+  let createdAuthUser: unknown = null;
+  let createdProfile: unknown = null;
 
   try {
     // Check if user already exists by listing all users and finding by email

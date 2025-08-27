@@ -11,7 +11,7 @@ import { registerRoutes } from '../routes.js';
 
 describe('Health Check Endpoint - Smoke Test', () => {
   let app: Express;
-  let server: any;
+  let server: unknown;
 
   beforeAll(async () => {
     // Configurar aplicação Express para teste

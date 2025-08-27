@@ -302,9 +302,10 @@ export default function CobrancasPage() {
           console.log('📡 [REALTIME] Evento recebido em inter_collections:', payload);
           console.log('📡 [REALTIME] Tipo de evento:', payload.eventType);
           console.log('📡 [REALTIME] Dados do boleto:', {
-            propostaId: (payload.new as any)?.proposta_id || (payload.old as any)?.proposta_id,
-            situacao: (payload.new as any)?.situacao || (payload.old as any)?.situacao,
-            isActive: (payload.new as any)?.is_active,
+            propostaId:
+              (payload.new as unknown)?.proposta_id || (payload.old as unknown)?.proposta_id,
+            situacao: (payload.new as unknown)?.situacao || (payload.old as unknown)?.situacao,
+            isActive: (payload.new as unknown)?.is_active,
           });
 
           // Invalidar as queries para forçar um refetch
@@ -476,7 +477,7 @@ export default function CobrancasPage() {
 
   // Mutation para adicionar observação
   const adicionarObservacaoMutation = useMutation({
-    mutationFn: (data: any) =>
+    mutationFn: (data: unknown) =>
       apiRequest(`/api/cobrancas/${selectedPropostaId}/observacao`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -545,7 +546,7 @@ export default function CobrancasPage() {
       const headers = Object.keys(data.inadimplentes[0] || {});
       const csv = [
         headers.join(','),
-        ...data.inadimplentes.map((row: any) =>
+        ...data.inadimplentes.map((row: unknown) =>
           headers.map((header) => `"${row[header] || ''}"`).join(',')
         ),
       ].join('\n');
@@ -681,7 +682,7 @@ export default function CobrancasPage() {
   };
 
   // Função para calcular o Status de Vencimento inteligente
-  const getStatusVencimento = (proposta: any) => {
+  const getStatusVencimento = (proposta: unknown) => {
     // Se tem situação do Inter Bank, verificar status especiais
     if (proposta.interSituacao) {
       const situacao = proposta.interSituacao.toUpperCase();
@@ -941,7 +942,7 @@ export default function CobrancasPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    propostasFiltradas?.map((proposta: any) => (
+                    propostasFiltradas?.map((proposta: unknown) => (
                       <TableRow
                         key={proposta.id}
                         className={proposta.diasAtraso > 30 ? 'bg-red-50' : ''}
@@ -1026,7 +1027,7 @@ export default function CobrancasPage() {
                                       // Buscar boletos ativos da proposta
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then((data: any) => {
+                                      ).then((data: unknown) => {
                                         setTodosBoletosAtivos(data.boletosAtivos || []);
                                       });
                                       setShowProrrogarModal(true);
@@ -1071,7 +1072,7 @@ export default function CobrancasPage() {
                                       // Buscar informações de dívida
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then((data: any) => {
+                                      ).then((data: unknown) => {
                                         setDebtInfo(data as DebtInfo);
                                         setNovoValorQuitacao((data.valorRestante || 0) * 0.5); // Sugerir 50% de desconto inicial
                                       });
@@ -1309,7 +1310,7 @@ export default function CobrancasPage() {
                         <div className="rounded-lg border p-4">
                           <h4 className="mb-2 font-medium">Boletos Ativos</h4>
                           <div className="max-h-40 space-y-2 overflow-y-auto">
-                            {(debtInfo.boletosAtivos ?? []).map((b: any, idx: number) => (
+                            {(debtInfo.boletosAtivos ?? []).map((b: unknown, idx: number) => (
                               <div
                                 key={idx}
                                 className="flex justify-between rounded bg-muted p-2 text-sm"
@@ -1714,21 +1715,21 @@ export default function CobrancasPage() {
                       <div className="mt-4 grid grid-cols-3 gap-4">
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {fichaCliente.parcelas?.filter((p: any) => p.status === 'pago')
+                            {fichaCliente.parcelas?.filter((p: unknown) => p.status === 'pago')
                               .length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pagas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {fichaCliente.parcelas?.filter((p: any) => p.vencida).length || 0}
+                            {fichaCliente.parcelas?.filter((p: unknown) => p.vencida).length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Vencidas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
                             {fichaCliente.parcelas?.filter(
-                              (p: any) => p.status === 'pendente' && !p.vencida
+                              (p: unknown) => p.status === 'pendente' && !p.vencida
                             ).length || 0}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pendentes</p>
@@ -1763,7 +1764,9 @@ export default function CobrancasPage() {
                             <div className="flex gap-2">
                               <Select
                                 value={statusObservacao}
-                                onValueChange={(value: string) => setStatusObservacao(value as any)}
+                                onValueChange={(value: string) =>
+                                  setStatusObservacao(value as unknown)
+                                }
                               >
                                 <SelectTrigger className="w-[250px]">
                                   <SelectValue placeholder="Selecione o status" />
@@ -1992,7 +1995,7 @@ export default function CobrancasPage() {
                           <div
                             key={parcela.id}
                             className={`rounded border p-3 ${
-                              (parcela as any).vencida
+                              (parcela as unknown).vencida
                                 ? 'border-red-300 bg-red-50'
                                 : parcela.status === 'pago'
                                   ? 'border-green-300 bg-green-50'
@@ -2087,7 +2090,7 @@ export default function CobrancasPage() {
                                         title: 'PDF aberto',
                                         description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
                                       });
-                                    } catch (error: any) {
+                                    } catch (error: unknown) {
                                       console.error(
                                         '[PDF VIEW] Erro ao abrir PDF individual:',
                                         error
@@ -2143,7 +2146,7 @@ export default function CobrancasPage() {
                                   {getInterBankStatusLabel(
                                     parcela.interSituacao,
                                     parcela.status,
-                                    (parcela as any).vencida
+                                    (parcela as unknown).vencida
                                   )}
                                 </Badge>
 

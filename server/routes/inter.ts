@@ -71,7 +71,7 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       collection,
       message: 'Cobrança criada com sucesso',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[INTER] Failed to create collection:', error);
 
     if (error.message === 'Proposta não encontrada') {
@@ -104,7 +104,7 @@ router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRe
       success: true,
       ...result,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         error: 'Parâmetros inválidos',
@@ -137,7 +137,7 @@ router.get(
         success: true,
         collection: details,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message === 'Cobrança não encontrada') {
         return res.status(404).json({ error: error.message });
       }
@@ -185,7 +185,7 @@ router.delete(
         message: 'Cobrança cancelada com sucesso',
         collection,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message === 'Cobrança não encontrada') {
         return res.status(404).json({ error: error.message });
       }
@@ -240,7 +240,7 @@ router.patch(
         message: `${result.success.length} vencimentos prorrogados com sucesso`,
         data: result,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[INTER] Batch extend failed:', error);
       res.status(500).json({
         error: 'Erro ao prorrogar vencimentos',
@@ -269,7 +269,7 @@ router.get(
         `attachment; filename="boleto-${codigoSolicitacao}.pdf"`
       );
       res.send(pdfBuffer);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message === 'Cobrança não encontrada') {
         return res.status(404).json({ error: error.message });
       }
@@ -323,7 +323,7 @@ router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =
       message: `Sincronização concluída: ${result.updated} atualizadas, ${result.errors} erros`,
       ...result,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[INTER] Sync failed:', error);
     res.status(500).json({
       error: 'Erro ao sincronizar cobranças',
@@ -344,7 +344,7 @@ router.get('/statistics', jwtAuthMiddleware, async (req: AuthenticatedRequest, r
       success: true,
       statistics: stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[INTER] Get statistics failed:', error);
     res.status(500).json({
       error: 'Erro ao obter estatísticas',

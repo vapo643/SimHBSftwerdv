@@ -51,7 +51,7 @@ export const CLICKSIGN_BREAKER_OPTIONS: CircuitBreaker.Options = {
 /**
  * Create a circuit breaker with logging
  */
-export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
+export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<unknown>>(
   asyncFunction: T,
   options: CircuitBreaker.Options
 ): CircuitBreaker<any[], any> {
@@ -96,7 +96,7 @@ export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>
 /**
  * Check if error is from circuit breaker being open
  */
-export function isCircuitBreakerOpen(error: any): boolean {
+export function isCircuitBreakerOpen(error: unknown): boolean {
   return (
     error &&
     (error.code === 'EOPENBREAKER' ||
@@ -108,7 +108,7 @@ export function isCircuitBreakerOpen(error: any): boolean {
 /**
  * Format circuit breaker error for logging
  */
-export function formatCircuitBreakerError(error: any, serviceName: string): string {
+export function formatCircuitBreakerError(error: unknown, serviceName: string): string {
   if (isCircuitBreakerOpen(error)) {
     return `[CIRCUIT_BREAKER] Circuit for ${serviceName} is OPEN. Job failed immediately to protect the system.`;
   }

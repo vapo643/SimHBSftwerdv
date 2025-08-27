@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 // Configuração aprimorada do Helmet seguindo OWASP
 export function setupSecurityHeaders() {
   // Build CSP directives conditionally
-  const cspDirectives: any = {
+  const cspDirectives: unknown = {
     defaultSrc: ["'self'"],
     scriptSrc: [
       "'self'",

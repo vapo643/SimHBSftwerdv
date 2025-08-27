@@ -57,7 +57,7 @@ export class CobrancasService {
       );
 
       return processedPropostas;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error fetching proposals:', error);
       throw new Error('Erro ao buscar propostas de cobrança');
     }
@@ -66,7 +66,7 @@ export class CobrancasService {
   /**
    * Get detailed billing info for a specific proposal
    */
-  async getPropostaCobrancaDetalhes(propostaId: number): Promise<any> {
+  async getPropostaCobrancaDetalhes(propostaId: number): Promise<unknown> {
     try {
       // Get proposal details
       const [propostaData] = await cobrancasRepository.getPropostasCobranca({});
@@ -106,7 +106,7 @@ export class CobrancasService {
         logs,
         paymentSummary,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error fetching proposal details:', error);
       throw error;
     }
@@ -120,7 +120,7 @@ export class CobrancasService {
     observacao: string;
     tipo: string;
     created_by: string;
-  }): Promise<any> {
+  }): Promise<unknown> {
     try {
       const observation = await cobrancasRepository.createObservacao(data);
 
@@ -133,7 +133,7 @@ export class CobrancasService {
       console.log(`[COBRANCAS_SERVICE] Observation added for proposal ${data.proposta_id}`);
 
       return observation;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error adding observation:', error);
       throw error;
     }
@@ -142,7 +142,11 @@ export class CobrancasService {
   /**
    * Update installment payment status
    */
-  async updateParcelaStatus(parcelaId: number, status: string, updateData?: any): Promise<boolean> {
+  async updateParcelaStatus(
+    parcelaId: number,
+    status: string,
+    updateData?: unknown
+  ): Promise<boolean> {
     try {
       const success = await cobrancasRepository.updateParcelaStatus(parcelaId, status, updateData);
 
@@ -151,7 +155,7 @@ export class CobrancasService {
       }
 
       return success;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error updating installment:', error);
       throw error;
     }
@@ -164,9 +168,9 @@ export class CobrancasService {
     proposta_id: number;
     tipo: string;
     motivo: string;
-    detalhes?: any;
+    detalhes?: unknown;
     solicitado_por: string;
-  }): Promise<any> {
+  }): Promise<unknown> {
     try {
       const request = await cobrancasRepository.createSolicitacaoModificacao(data);
 
@@ -178,7 +182,7 @@ export class CobrancasService {
       console.log(`[COBRANCAS_SERVICE] Modification requested for proposal ${data.proposta_id}`);
 
       return request;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error requesting modification:', error);
       throw error;
     }
@@ -189,7 +193,7 @@ export class CobrancasService {
    */
   async getOverdueStats(): Promise<{
     total: number;
-    byDaysOverdue: any[];
+    byDaysOverdue: unknown[];
   }> {
     try {
       const total = await cobrancasRepository.getOverdueCount();
@@ -206,7 +210,7 @@ export class CobrancasService {
         total,
         byDaysOverdue,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error getting overdue stats:', error);
       throw error;
     }
@@ -215,7 +219,7 @@ export class CobrancasService {
   /**
    * Calculate payment summary from installments
    */
-  private calculatePaymentSummary(parcelas: any[]): any {
+  private calculatePaymentSummary(parcelas: unknown[]): unknown {
     if (!parcelas || parcelas.length === 0) {
       return {
         totalParcelas: 0,
@@ -280,12 +284,12 @@ export class CobrancasService {
   ): Promise<{
     success: number;
     failed: number;
-    errors: any[];
+    errors: unknown[];
   }> {
     try {
       let success = 0;
       let failed = 0;
-      const errors: any[] = [];
+      const errors: unknown[] = [];
 
       for (const update of updates) {
         try {
@@ -304,14 +308,14 @@ export class CobrancasService {
             failed++;
             errors.push({ parcelaId: update.parcelaId, error: 'Update failed' });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           failed++;
           errors.push({ parcelaId: update.parcelaId, error: error.message });
         }
       }
 
       return { success, failed, errors };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error in batch update:', error);
       throw error;
     }
@@ -319,7 +323,7 @@ export class CobrancasService {
   /**
    * Get KPIs for billing dashboard
    */
-  async getKPIs(): Promise<any> {
+  async getKPIs(): Promise<unknown> {
     try {
       console.log('[COBRANCAS_SERVICE] Calculating KPIs...');
 
@@ -379,7 +383,7 @@ export class CobrancasService {
 
       console.log('[COBRANCAS_SERVICE] KPIs calculated:', kpis);
       return kpis;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[COBRANCAS_SERVICE] Error calculating KPIs:', error);
       throw new Error('Erro ao calcular KPIs de cobrança');
     }

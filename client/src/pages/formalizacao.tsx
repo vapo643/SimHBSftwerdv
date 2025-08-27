@@ -156,7 +156,7 @@ function FormalizacaoList() {
   const { user } = useAuth();
 
   // Função para parsing defensivo de dados JSONB
-  const parseJsonbField = (field: any, fieldName: string, propostaId: string) => {
+  const parseJsonbField = (field: unknown, fieldName: string, propostaId: string) => {
     // Se é null, undefined ou vazio, retornar objeto vazio
     if (!field || field === 'null' || field === 'undefined') {
       return {};
@@ -191,7 +191,7 @@ function FormalizacaoList() {
       console.log('Resposta do endpoint formalizacao:', response);
 
       // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
-      const propostsWithParsedData = (response as any[]).map((proposta: any) => ({
+      const propostsWithParsedData = (response as unknown[]).map((proposta: unknown) => ({
         ...proposta,
         cliente_data: parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id),
         condicoes_data: parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id),
@@ -449,7 +449,7 @@ export default function Formalizacao() {
   interface InterBoletoResponse {
     totalCriados?: number;
     codigoSolicitacao?: string;
-    boletos?: any[];
+    boletos?: unknown[];
   }
 
   interface CCBResponse {
@@ -568,7 +568,7 @@ export default function Formalizacao() {
 
     setCheckingStorage(true);
     try {
-      const response = (await apiRequest(`/api/propostas/${propostaId}/storage-status`)) as any;
+      const response = (await apiRequest(`/api/propostas/${propostaId}/storage-status`)) as unknown;
 
       // Mapear resposta da API para o formato esperado
       const totalBoletos = response.totalParcelas || 0;
@@ -628,7 +628,7 @@ export default function Formalizacao() {
     queryFn: async (): Promise<any[]> => {
       if (!propostaId) return [];
       console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
-      const response = (await apiRequest(`/api/inter/collections/${propostaId}`)) as any[];
+      const response = (await apiRequest(`/api/inter/collections/${propostaId}`)) as unknown[];
       console.log(
         `[INTER QUERY] Boletos encontrados: ${Array.isArray(response) ? response.length : 0}`
       );
@@ -804,7 +804,7 @@ export default function Formalizacao() {
         await checkClickSignStatus(propostaId);
         refetch();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao enviar para ClickSign:', error);
       toast({
         title: 'Erro',
@@ -1339,7 +1339,7 @@ export default function Formalizacao() {
                                               description:
                                                 'Contrato enviado para ClickSign com sucesso!',
                                             });
-                                          } catch (error: any) {
+                                          } catch (error: unknown) {
                                             console.error('❌ [CLICKSIGN] Erro ao enviar:', error);
                                             toast({
                                               title: 'Erro',
@@ -1486,7 +1486,7 @@ export default function Formalizacao() {
                                                 ['/api/clicksign/status', propostaId],
                                                 response
                                               );
-                                            } catch (error: any) {
+                                            } catch (error: unknown) {
                                               console.error(
                                                 '❌ [CLICKSIGN] Erro ao regenerar:',
                                                 error
@@ -1642,7 +1642,7 @@ export default function Formalizacao() {
                                               ],
                                             }),
                                           ]);
-                                        } catch (error: any) {
+                                        } catch (error: unknown) {
                                           console.error('[INTER] Erro ao gerar boleto:', error);
 
                                           // Verificar se é erro de boleto duplicado
@@ -1791,7 +1791,7 @@ export default function Formalizacao() {
                                                           { method: 'POST' }
                                                         );
 
-                                                        const data = response as any;
+                                                        const data = response as unknown;
                                                         if (data.success) {
                                                           toast({
                                                             title: 'Correção iniciada',
@@ -1803,7 +1803,7 @@ export default function Formalizacao() {
                                                             await checkStorageStatus();
                                                           }, 3000);
                                                         }
-                                                      } catch (error: any) {
+                                                      } catch (error: unknown) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
@@ -1859,7 +1859,7 @@ export default function Formalizacao() {
                                                           { method: 'POST' }
                                                         );
 
-                                                        const data = response as any;
+                                                        const data = response as unknown;
                                                         if (data.success) {
                                                           toast({
                                                             title: 'Carnê gerado!',
@@ -1871,7 +1871,7 @@ export default function Formalizacao() {
                                                           await checkCarneStatus();
                                                           await checkStorageStatus();
                                                         }
-                                                      } catch (error: any) {
+                                                      } catch (error: unknown) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
@@ -1928,7 +1928,7 @@ export default function Formalizacao() {
                                                         }
                                                       );
 
-                                                      const data = response as any;
+                                                      const data = response as unknown;
                                                       if (data.success) {
                                                         toast({
                                                           title: 'Sincronização concluída',
@@ -1938,7 +1938,7 @@ export default function Formalizacao() {
                                                         // Recarregar status
                                                         await checkStorageStatus();
                                                       }
-                                                    } catch (error: any) {
+                                                    } catch (error: unknown) {
                                                       toast({
                                                         title: 'Erro',
                                                         description:
@@ -2001,7 +2001,7 @@ export default function Formalizacao() {
                                       {/* Listar todos os boletos gerados */}
                                       {collectionsData && collectionsData.length > 0 ? (
                                         <div className="space-y-3">
-                                          {collectionsData.map((boleto: any, index: number) => (
+                                          {collectionsData.map((boleto: unknown, index: number) => (
                                             <div
                                               key={boleto.id || index}
                                               className="rounded-lg border border-gray-700 bg-gray-800 p-4"
@@ -2228,7 +2228,7 @@ export default function Formalizacao() {
                                                           `Erro ${response.status}: ${response.statusText}`
                                                         );
                                                       }
-                                                    } catch (error: any) {
+                                                    } catch (error: unknown) {
                                                       console.error('[PDF DOWNLOAD] Erro:', error);
 
                                                       // SEMPRE informar que o PDF está disponível e pode tentar novamente
@@ -2393,7 +2393,7 @@ export default function Formalizacao() {
                                                 // Mostrar informações de todas as coleções
                                                 const statusInfo = collections
                                                   .map(
-                                                    (col: any) =>
+                                                    (col: unknown) =>
                                                       `Parcela ${col.numeroParcela}: ${col.situacao || 'Aguardando'}`
                                                   )
                                                   .join('\n');
@@ -2644,7 +2644,7 @@ export default function Formalizacao() {
                                             description:
                                               'Contrato enviado para ClickSign com sucesso!',
                                           });
-                                        } catch (error: any) {
+                                        } catch (error: unknown) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro no envio com biometria:',
                                             error
@@ -2757,7 +2757,7 @@ export default function Formalizacao() {
                                             description:
                                               'Novo link de assinatura gerado com sucesso!',
                                           });
-                                        } catch (error: any) {
+                                        } catch (error: unknown) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro ao regenerar (seção 2):',
                                             error

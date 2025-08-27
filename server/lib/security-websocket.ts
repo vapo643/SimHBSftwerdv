@@ -11,7 +11,7 @@ import { getSemgrepScanner } from './semgrep-scanner';
 
 interface SecurityWebSocketMessage {
   type: 'anomaly' | 'vulnerability' | 'critical-alert' | 'scan-status';
-  data: any;
+  data: unknown;
   timestamp: Date;
 }
 
@@ -82,7 +82,7 @@ export class SecurityWebSocketManager {
     });
   }
 
-  public sendAlert(alert: any) {
+  public sendAlert(alert: unknown) {
     this.broadcast({
       type: 'critical-alert',
       data: alert,

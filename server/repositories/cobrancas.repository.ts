@@ -21,7 +21,7 @@ import { eq, and, sql, desc, gte, lte, inArray, or, not, isNotNull, isNull } fro
 
 export class CobrancasRepository extends BaseRepository<typeof propostas> {
   constructor() {
-    super(propostas as any);
+    super(propostas as unknown);
   }
 
   /**
@@ -150,9 +150,13 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   /**
    * Update installment status
    */
-  async updateParcelaStatus(parcelaId: number, status: string, updateData?: any): Promise<boolean> {
+  async updateParcelaStatus(
+    parcelaId: number,
+    status: string,
+    updateData?: unknown
+  ): Promise<boolean> {
     try {
-      const updates: any = {
+      const updates: unknown = {
         status: status,
         updatedAt: new Date(),
       };
@@ -197,7 +201,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
     proposta_id: number;
     tipo: string;
     motivo: string;
-    detalhes?: any;
+    detalhes?: unknown;
     solicitado_por: string;
   }): Promise<any | null> {
     try {
@@ -270,10 +274,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   async updatePropostaStatus(
     propostaId: number,
     status: string,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<boolean> {
     try {
-      const updates: any = {
+      const updates: unknown = {
         status,
         updatedAt: new Date(),
       };

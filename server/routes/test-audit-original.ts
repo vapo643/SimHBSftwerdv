@@ -43,7 +43,7 @@ router.post('/test-transition', async (req, res) => {
         endpoint: '/api/test-audit/test-transition',
         testReason: 'Validating V2.0 audit system',
       },
-      userId: (req as any).user?.id,
+      userId: (req as unknown).user?.id,
     });
 
     console.log('[TEST AUDIT] ✅ Test transition created successfully');

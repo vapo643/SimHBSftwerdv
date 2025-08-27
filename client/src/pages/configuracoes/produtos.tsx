@@ -70,7 +70,7 @@ export default function GestãoProdutos() {
     queryKey: ['produtos'],
     queryFn: async () => {
       const response = await api.get<Produto[]>('/api/produtos');
-      return Array.isArray(response) ? response : (response as any).data || [];
+      return Array.isArray(response) ? response : (response as unknown).data || [];
     },
   });
 
@@ -83,14 +83,14 @@ export default function GestãoProdutos() {
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
       showSuccessMessage('create', 'Produto');
       handleCloseDialog();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleApiError(error);
     },
   });
@@ -104,14 +104,14 @@ export default function GestãoProdutos() {
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
       showSuccessMessage('update', 'Produto');
       handleCloseDialog();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleApiError(error);
     },
   });
@@ -125,7 +125,7 @@ export default function GestãoProdutos() {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
       showSuccessMessage('delete', 'Produto');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleApiError(error);
     },
   });
@@ -416,7 +416,7 @@ export default function GestãoProdutos() {
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {produtos.map((produto: any) => (
+                {produtos.map((produto: unknown) => (
                   <Card
                     key={produto.id}
                     className="border border-gray-200 transition-all duration-200 hover:border-cyan-300 hover:shadow-lg dark:border-gray-700 dark:hover:border-cyan-600"

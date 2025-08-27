@@ -203,7 +203,7 @@ class SecurityLogger {
 export const securityLogger = new SecurityLogger();
 
 // Helper para extrair IP do request
-export function getClientIP(req: any): string {
+export function getClientIP(req: unknown): string {
   return (
     req.headers['x-forwarded-for']?.split(',')[0] ||
     req.headers['x-real-ip'] ||

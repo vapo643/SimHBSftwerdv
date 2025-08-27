@@ -12,7 +12,7 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
   /**
    * Converte usuário do Supabase para nossa interface padronizada
    */
-  private mapSupabaseUser(supabaseUser: any): ServerUser {
+  private mapSupabaseUser(supabaseUser: unknown): ServerUser {
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',

@@ -41,7 +41,7 @@ async function registrarAuditoriaPagamento(
   propostaId: string,
   userId: string,
   acao: string,
-  detalhes: any
+  detalhes: unknown
 ) {
   const now = new Date().toISOString();
   console.log(
@@ -332,7 +332,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     });
 
     // Processar os resultados para o formato esperado pelo frontend
-    const pagamentosFormatados = result.map((row: any) => {
+    const pagamentosFormatados = result.map((row: unknown) => {
       const { proposta, statusContextual, loja, produto } = row;
 
       // PAM V1.0 - Usar status contextual com fallback para status legado
@@ -973,7 +973,7 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
       );
 
       res.send(pdfBuffer);
-    } catch (clickSignError: any) {
+    } catch (clickSignError: unknown) {
       console.error('[PAGAMENTOS] Erro ao baixar CCB da ClickSign:', clickSignError);
 
       // Tratar erros específicos
@@ -1154,7 +1154,7 @@ router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: Authenticat
 
     // Buscar boletos da Inter usando SQL direto
     console.log('[DEBUG] Tentando buscar boletos para proposta:', id);
-    let boletos: any[] = [];
+    let boletos: unknown[] = [];
     try {
       const boletosResult = await db.execute(sql`
         SELECT 
@@ -1207,15 +1207,15 @@ router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: Authenticat
 
     console.log(`[PAGAMENTOS] ✅ Detalhes completos retornados para proposta: ${id}`);
     console.log(`[PAGAMENTOS DEBUG] Resposta enviada ao frontend - campos principais:`, {
-      hasClienteEmail: !!(respostaCompleta as any).clienteEmail,
-      hasClienteTelefone: !!(respostaCompleta as any).clienteTelefone,
-      hasClienteDataNascimento: !!(respostaCompleta as any).clienteDataNascimento,
-      hasClienteRenda: !!(respostaCompleta as any).clienteRenda,
-      hasPrazo: !!(respostaCompleta as any).prazo,
-      hasTaxaJuros: !!(respostaCompleta as any).taxaJuros,
-      hasFinalidade: !!(respostaCompleta as any).finalidade,
-      hasCcbGerado: !!(respostaCompleta as any).ccbGerado,
-      hasCaminhoCcbAssinado: !!(respostaCompleta as any).caminhoCcbAssinado,
+      hasClienteEmail: !!(respostaCompleta as unknown).clienteEmail,
+      hasClienteTelefone: !!(respostaCompleta as unknown).clienteTelefone,
+      hasClienteDataNascimento: !!(respostaCompleta as unknown).clienteDataNascimento,
+      hasClienteRenda: !!(respostaCompleta as unknown).clienteRenda,
+      hasPrazo: !!(respostaCompleta as unknown).prazo,
+      hasTaxaJuros: !!(respostaCompleta as unknown).taxaJuros,
+      hasFinalidade: !!(respostaCompleta as unknown).finalidade,
+      hasCcbGerado: !!(respostaCompleta as unknown).ccbGerado,
+      hasCaminhoCcbAssinado: !!(respostaCompleta as unknown).caminhoCcbAssinado,
     });
     res.json(respostaCompleta);
   } catch (error) {
@@ -1389,10 +1389,10 @@ router.post(
       });
     } catch (error) {
       console.error('[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:', error);
-      console.error('[PAGAMENTOS] ❌ Stack trace:', (error as any).stack);
+      console.error('[PAGAMENTOS] ❌ Stack trace:', (error as unknown).stack);
       res
         .status(500)
-        .json({ error: 'Erro ao confirmar veracidade', details: (error as any).message });
+        .json({ error: 'Erro ao confirmar veracidade', details: (error as unknown).message });
     }
   }
 );
@@ -1715,7 +1715,7 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
         actualFilePath = storagePath;
         console.log(`[PAGAMENTOS CCB-URL] ✅ Arquivo salvo e banco atualizado`);
-      } catch (downloadError: any) {
+      } catch (downloadError: unknown) {
         console.error(`[PAGAMENTOS CCB-URL] ❌ Erro ao baixar/salvar CCB:`, downloadError);
 
         // Se o erro é que o documento ainda não foi assinado, informar status específico

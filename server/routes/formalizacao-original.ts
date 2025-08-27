@@ -175,7 +175,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada:', error);
 
       // 🔄 FALLBACK: Se arquivo não existe, tentar regenerar CCB automaticamente
-      if ((error as any)?.status === 400 || error.message?.includes('Object not found')) {
+      if ((error as unknown)?.status === 400 || error.message?.includes('Object not found')) {
         console.log('🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...');
         try {
           const newCcb = await ccbGenerationService.generateCCB(proposalId);

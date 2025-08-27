@@ -104,7 +104,7 @@ class ClickSignServiceV3 {
   private async makeRequest<T>(
     method: string,
     endpoint: string,
-    body?: any
+    body?: unknown
   ): Promise<ClickSignV3Response<T>> {
     // Check rate limit
     if (this.rateLimitRemaining <= 0 && new Date() < this.rateLimitReset) {
@@ -248,7 +248,7 @@ class ClickSignServiceV3 {
   /**
    * Create a document batch (ClickSign v1 doesn't have envelopes, uses batches)
    */
-  async createDocumentBatch(documentData: any) {
+  async createDocumentBatch(documentData: unknown) {
     console.log(`[CLICKSIGN V1] 🔨 Creating document batch`);
     console.log(
       `[CLICKSIGN V1] Document data (content_base64 length):`,
@@ -273,11 +273,12 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
 
-    const response = await this.makeRequest<any>('POST', '/documents', requestBody);
+    const response = await this.makeRequest<unknown>('POST', '/documents', requestBody);
 
     console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
 
-    const document = (response as any).data?.document || (response as any).document || response;
+    const document =
+      (response as unknown).data?.document || (response as unknown).document || response;
     console.log(`[CLICKSIGN V1] ✅ Document created: ${document.key}`);
 
     return document;
@@ -300,7 +301,7 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] Request body being sent:`, JSON.stringify(requestBody, null, 2));
 
-    const response = await this.makeRequest<any>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/documents`,
       requestBody
@@ -360,9 +361,9 @@ class ClickSignServiceV3 {
     );
     console.log(`[CLICKSIGN V1] 🔐 Authentication methods requested:`, auths);
 
-    const response = await this.makeRequest<any>('POST', '/signers', requestBody);
+    const response = await this.makeRequest<unknown>('POST', '/signers', requestBody);
 
-    const signer = (response as any).data?.signer || (response as any).signer || response;
+    const signer = (response as unknown).data?.signer || (response as unknown).signer || response;
     console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
     console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
     console.log(`[CLICKSIGN V1] 🔐 Signer authentication methods returned:`, signer.auths);
@@ -393,7 +394,7 @@ class ClickSignServiceV3 {
     console.log(`[CLICKSIGN V1] 📡 POST /envelopes/${envelopeId}/signers`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
 
-    const response = await this.makeRequest<any>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/signers`,
       requestBody
@@ -438,7 +439,7 @@ class ClickSignServiceV3 {
       },
     };
 
-    const response = await this.makeRequest<any>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/requirements`,
       requestBody
@@ -452,7 +453,7 @@ class ClickSignServiceV3 {
    * Finish envelope (send for signature)
    */
   async finishEnvelope(envelopeId: string) {
-    const response = await this.makeRequest<any>('POST', `/envelopes/${envelopeId}/finish`, {});
+    const response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/finish`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope finished and sent for signature`);
     return response.data?.data || response.data;
@@ -462,7 +463,7 @@ class ClickSignServiceV3 {
    * Get envelope status
    */
   async getEnvelopeStatus(envelopeId: string) {
-    const response = await this.makeRequest<any>('GET', `/envelopes/${envelopeId}`);
+    const response = await this.makeRequest<unknown>('GET', `/envelopes/${envelopeId}`);
     return response.data?.data || response.data;
   }
 
@@ -470,7 +471,7 @@ class ClickSignServiceV3 {
    * Cancel envelope
    */
   async cancelEnvelope(envelopeId: string) {
-    const response = await this.makeRequest<any>('POST', `/envelopes/${envelopeId}/cancel`, {});
+    const response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/cancel`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope cancelled`);
     return response.data?.data || response.data;
@@ -480,7 +481,7 @@ class ClickSignServiceV3 {
    * Download signed document
    */
   async downloadDocument(envelopeId: string, documentId: string) {
-    const response = await this.makeRequest<any>(
+    const response = await this.makeRequest<unknown>(
       'GET',
       `/envelopes/${envelopeId}/documents/${documentId}/download`
     );
@@ -491,7 +492,7 @@ class ClickSignServiceV3 {
    * Configure webhook
    */
   async configureWebhook(webhookData: WebhookData) {
-    const response = await this.makeRequest<any>('POST', '/webhooks', {
+    const response = await this.makeRequest<unknown>('POST', '/webhooks', {
       webhook: webhookData,
     });
 
@@ -508,7 +509,7 @@ class ClickSignServiceV3 {
     phone: string,
     message?: string
   ) {
-    const response = await this.makeRequest<any>(
+    const response = await this.makeRequest<unknown>(
       'POST',
       `/envelopes/${envelopeId}/signers/${signerId}/whatsapp`,
       { phone, message }
@@ -532,9 +533,9 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] 📡 POST /lists`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
-    const response = await this.makeRequest<any>('POST', '/lists', requestBody);
+    const response = await this.makeRequest<unknown>('POST', '/lists', requestBody);
     console.log(`[CLICKSIGN V1] 📦 List response:`, JSON.stringify(response, null, 2));
-    const list = (response as any).data?.list || (response as any).list || response;
+    const list = (response as unknown).data?.list || (response as unknown).list || response;
     console.log(
       `[CLICKSIGN V1] ✅ List created with request_signature_key: ${list.request_signature_key}`
     );
@@ -550,7 +551,7 @@ class ClickSignServiceV3 {
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /notifications`);
-    const response = await this.makeRequest<any>('POST', '/notifications', requestBody);
+    const response = await this.makeRequest<unknown>('POST', '/notifications', requestBody);
     return response;
   }
 
@@ -629,7 +630,7 @@ class ClickSignServiceV3 {
           console.log(`[CLICKSIGN V1] Requirement body:`, JSON.stringify(requirementBody, null, 2));
 
           // Try to add requirement (may not be needed in v1, but won't hurt)
-          await this.makeRequest<any>('POST', '/requirements', requirementBody).catch((err) => {
+          await this.makeRequest<unknown>('POST', '/requirements', requirementBody).catch((err) => {
             console.log(
               `[CLICKSIGN V1] ⚠️ Requirements endpoint not available in v1, continuing...`
             );

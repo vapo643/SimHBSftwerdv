@@ -47,7 +47,7 @@ export async function updateStatusWithContext(
 
   try {
     // Executar em transação atômica
-    const result = await db.transaction(async (tx: any) => {
+    const result = await db.transaction(async (tx: unknown) => {
       console.log(`[DUPLA-ESCRITA] 🔄 Transação iniciada`);
 
       // 1. Buscar status atual para auditoria
@@ -208,7 +208,7 @@ export async function getStatusByContext(
  */
 export async function validateStatusConsistency(
   propostaId: string
-): Promise<{ isConsistent: boolean; details: any }> {
+): Promise<{ isConsistent: boolean; details: unknown }> {
   try {
     const [proposta] = await db
       .select({ status: propostas.status })
@@ -221,7 +221,7 @@ export async function validateStatusConsistency(
       .from(statusContextuais)
       .where(eq(statusContextuais.propostaId, propostaId));
 
-    const inconsistencias = contextosStatus.filter((cs: any) => {
+    const inconsistencias = contextosStatus.filter((cs: unknown) => {
       // Regras de validação por contexto
       if (cs.contexto === 'pagamentos' && proposta?.status === 'pago') {
         return cs.status !== 'pago' && cs.status !== 'EMPRESTIMO_PAGO';

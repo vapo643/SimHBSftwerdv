@@ -67,7 +67,7 @@ router.post('/test-queue', async (req: Request, res: Response) => {
         data: testData,
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[TEST QUEUE] ❌ Erro ao adicionar job:', error);
 
     return res.status(500).json({
@@ -93,7 +93,7 @@ router.get('/test-queue/status', async (req: Request, res: Response) => {
       status: 'operational',
       message: 'Fila operacional e pronta para receber jobs',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
       error: 'Erro ao verificar status',

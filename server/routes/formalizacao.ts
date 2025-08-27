@@ -18,7 +18,7 @@ router.post('/execute', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await proposalService.executeOperation('formalization', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[FORMALIZACAO] Error:', error);
     res.status(500).json({
       success: false,
@@ -35,7 +35,7 @@ router.get('/status/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await proposalService.executeOperation('get_status', { id: req.params.id });
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       success: false,
       error: error.message || 'Status check failed',

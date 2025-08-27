@@ -58,7 +58,7 @@ export class AuthService {
     email: string,
     password: string,
     req: Request
-  ): Promise<{ success: boolean; data?: any; error?: string }> {
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     try {
       const supabase = createServerSupabaseClient();
 
@@ -146,7 +146,7 @@ export class AuthService {
     email: string,
     password: string,
     name?: string
-  ): Promise<{ success: boolean; data?: any; error?: string; suggestions?: string[] }> {
+  ): Promise<{ success: boolean; data?: unknown; error?: string; suggestions?: string[] }> {
     try {
       // Validate password
       const passwordValidation = validatePassword(password, [email, name || '']);
@@ -336,7 +336,7 @@ export class AuthService {
   /**
    * Get user sessions
    */
-  async getUserSessions(userId: string, currentToken?: string): Promise<{ sessions: any[] }> {
+  async getUserSessions(userId: string, currentToken?: string): Promise<{ sessions: unknown[] }> {
     try {
       const sessions = await authRepository.getUserSessions(userId);
 
@@ -407,7 +407,7 @@ export class AuthService {
   /**
    * Get user profile
    */
-  async getUserProfile(userId: string): Promise<any> {
+  async getUserProfile(userId: string): Promise<unknown> {
     try {
       return await authRepository.getUserProfile(userId);
     } catch (error) {

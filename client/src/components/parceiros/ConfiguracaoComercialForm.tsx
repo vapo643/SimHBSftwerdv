@@ -95,7 +95,7 @@ const ConfiguracaoComercialForm: React.FC = () => {
     queryKey: ['tabelas-comerciais'],
     queryFn: async () => {
       const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
   });
 
@@ -104,7 +104,7 @@ const ConfiguracaoComercialForm: React.FC = () => {
     queryKey: ['produtos'],
     queryFn: async () => {
       const response = await api.get<Produto[]>('/api/produtos');
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
   });
 

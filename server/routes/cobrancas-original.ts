@@ -19,7 +19,7 @@ import { maskCPF, maskEmail, maskRG, maskTelefone } from '../utils/masking';
 const router = Router();
 
 // GET /api/cobrancas - Lista todas as propostas com informações de cobrança
-router.get('/', async (req: any, res) => {
+router.get('/', async (req: unknown, res) => {
   try {
     const { status, atraso } = req.query;
     const userRole = req.user?.role || '';
@@ -313,14 +313,14 @@ router.get('/', async (req: any, res) => {
       const em3Dias = new Date();
       em3Dias.setDate(hoje.getDate() + 3);
 
-      propostasFiltradas = propostasFiltradas.filter((p: any) => {
+      propostasFiltradas = propostasFiltradas.filter((p: unknown) => {
         // Inadimplentes ou em atraso
         if (p.status === 'inadimplente' || p.diasAtraso > 0) {
           return true;
         }
 
         // Parcelas que vencem nos próximos 3 dias
-        const temParcelaVencendoEm3Dias = p.parcelas.some((parcela: any) => {
+        const temParcelaVencendoEm3Dias = p.parcelas.some((parcela: unknown) => {
           if (parcela.status === 'pago') return false;
           const dataVencimento = parseISO(parcela.dataVencimento);
           return dataVencimento <= em3Dias && dataVencimento >= hoje;
@@ -495,7 +495,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
     }
 
     // Referências pessoais
-    const referencias: any[] = [];
+    const referencias: unknown[] = [];
 
     // Buscar observações/histórico
     const observacoesRaw = await db
@@ -629,7 +629,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
 router.patch(
   '/parcelas/:codigoSolicitacao/marcar-pago',
   jwtAuthMiddleware,
-  async (req: any, res) => {
+  async (req: unknown, res) => {
     try {
       const { codigoSolicitacao } = req.params;
       const userId = req.user?.id;
@@ -702,7 +702,7 @@ router.patch(
 );
 
 // POST /api/cobrancas/:propostaId/observacao - Adicionar observação
-router.post('/:propostaId/observacao', async (req: any, res) => {
+router.post('/:propostaId/observacao', async (req: unknown, res) => {
   try {
     const { propostaId } = req.params;
     const { observacao, tipoContato, statusPromessa, dataPromessaPagamento } = req.body;
@@ -734,7 +734,7 @@ router.post('/:propostaId/observacao', async (req: any, res) => {
 });
 
 // GET /api/cobrancas/inter-sumario - Obter sumário financeiro do Banco Inter
-router.get('/inter-sumario', async (req: any, res) => {
+router.get('/inter-sumario', async (req: unknown, res) => {
   try {
     const userRole = req.user?.role;
 
@@ -765,7 +765,7 @@ router.get('/inter-sumario', async (req: any, res) => {
 });
 
 // POST /api/cobrancas/inter-sync-all - Sincronizar todos os boletos de uma proposta com Banco Inter
-router.post('/inter-sync-all', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/inter-sync-all', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { propostaId } = req.body;
     const userRole = req.user?.role;
@@ -848,7 +848,7 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req: any, res) => {
                 break;
             }
 
-            const updateData: any = {
+            const updateData: unknown = {
               status: novoStatusParcela,
               updatedAt: new Date(),
             };
@@ -897,7 +897,7 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req: any, res) => {
 });
 
 // GET /api/cobrancas/inter-status/:codigoSolicitacao - Obter status individual do boleto no Banco Inter
-router.get('/inter-status/:codigoSolicitacao', async (req: any, res) => {
+router.get('/inter-status/:codigoSolicitacao', async (req: unknown, res) => {
   try {
     const { codigoSolicitacao } = req.params;
     const userRole = req.user?.role;
@@ -970,7 +970,7 @@ router.get('/inter-status/:codigoSolicitacao', async (req: any, res) => {
           `[INTER-STATUS] Atualizando parcela ${interBoleto.numeroParcela} para status: ${novoStatusParcela}`
         );
 
-        const updateData: any = {
+        const updateData: unknown = {
           status: novoStatusParcela,
           updatedAt: new Date(),
         };
@@ -1009,7 +1009,7 @@ router.get('/inter-status/:codigoSolicitacao', async (req: any, res) => {
 });
 
 // POST /api/cobrancas/sincronizar/:propostaId - Sincronizar status de todos os boletos de uma proposta
-router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { propostaId } = req.params;
     const userRole = req.user?.role;
@@ -1128,7 +1128,7 @@ router.get('/exportar/inadimplentes', async (req, res) => {
 router.post(
   '/boletos/:codigoSolicitacao/solicitar-prorrogacao',
   jwtAuthMiddleware,
-  async (req: any, res) => {
+  async (req: unknown, res) => {
     try {
       const { codigoSolicitacao } = req.params;
       const { novaDataVencimento, observacao } = req.body;
@@ -1266,7 +1266,7 @@ router.post(
             codigoSolicitacao,
             novaDataVencimento,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Se falhar, atualizar com erro
           await db
             .update(solicitacoesModificacao)
@@ -1312,7 +1312,7 @@ router.post(
 router.post(
   '/boletos/:codigoSolicitacao/solicitar-desconto',
   jwtAuthMiddleware,
-  async (req: any, res) => {
+  async (req: unknown, res) => {
     try {
       const { codigoSolicitacao } = req.params;
       const { tipoDesconto, valorDesconto, dataLimiteDesconto, observacao } = req.body;
@@ -1425,7 +1425,7 @@ router.post(
           const { interBankService } = await import('../services/interBankService');
 
           // Preparar payload para o Inter
-          const descontoPayload: any = {
+          const descontoPayload: unknown = {
             codigoDesconto: 'DESCONTO1',
             taxa: tipoDesconto === 'PERCENTUAL' ? valorDescontoNum : 0,
             valor: tipoDesconto === 'FIXO' ? valorDescontoNum : 0,
@@ -1460,7 +1460,7 @@ router.post(
             tipoDesconto,
             valorDesconto,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Se falhar, atualizar com erro
           await db
             .update(solicitacoesModificacao)
@@ -1506,7 +1506,7 @@ router.post(
  * GET /api/cobrancas/solicitacoes
  * Lista todas as solicitações pendentes de aprovação (apenas SUPERVISOR_COBRANCA e ADMINISTRADOR)
  */
-router.get('/solicitacoes', jwtAuthMiddleware, async (req: any, res) => {
+router.get('/solicitacoes', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const userRole = req.user?.role;
     const userId = req.user?.id;
@@ -1552,7 +1552,7 @@ router.get('/solicitacoes', jwtAuthMiddleware, async (req: any, res) => {
  * POST /api/cobrancas/solicitacoes/:id/aprovar
  * Aprova uma solicitação e executa a ação no Banco Inter
  */
-router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { id } = req.params;
     const { observacao } = req.body;
@@ -1606,14 +1606,14 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: any, res
     // Executar ação no Banco Inter
     try {
       const { interBankService } = await import('../services/interBankService');
-      const dados = solicitacao.dadosSolicitacao as any;
+      const dados = solicitacao.dadosSolicitacao as unknown;
 
       if (solicitacao.tipoSolicitacao === 'prorrogacao') {
         await interBankService.editarCobranca(solicitacao.codigoSolicitacao!, {
           dataVencimento: dados.novaDataVencimento,
         });
       } else if (solicitacao.tipoSolicitacao === 'desconto') {
-        const descontoPayload: any = {
+        const descontoPayload: unknown = {
           codigoDesconto: 'DESCONTO1',
           taxa: dados.tipoDesconto === 'PERCENTUAL' ? Number(dados.valorDesconto) : 0,
           valor: dados.tipoDesconto === 'FIXO' ? Number(dados.valorDesconto) : 0,
@@ -1640,7 +1640,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: any, res
         message: `Solicitação aprovada e ${solicitacao.tipoSolicitacao} executada com sucesso`,
         solicitacaoId: id,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Se falhar ao executar, manter como aprovado mas com erro
       await db
         .update(solicitacoesModificacao)
@@ -1669,7 +1669,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req: any, res
  * POST /api/cobrancas/solicitacoes/:id/rejeitar
  * Rejeita uma solicitação
  */
-router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { id } = req.params;
     const { motivo, observacao } = req.body;

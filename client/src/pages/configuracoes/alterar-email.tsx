@@ -75,14 +75,14 @@ export default function AlterarEmail() {
       });
 
       // In development, show the token
-      if ((data as any).debugToken) {
-        setVerificationToken((data as any).debugToken);
+      if ((data as unknown).debugToken) {
+        setVerificationToken((data as unknown).debugToken);
       }
 
       setPendingEmail(form.getValues('newEmail'));
       form.reset();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao alterar email',
         description: error.message || 'Ocorreu um erro ao processar sua solicitação',
@@ -111,7 +111,7 @@ export default function AlterarEmail() {
         window.location.href = '/login';
       }, 2000);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao verificar email',
         description: error.message || 'Token inválido ou expirado',

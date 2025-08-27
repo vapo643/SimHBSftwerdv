@@ -10,7 +10,7 @@ export class MonitoringService {
   /**
    * Get database statistics with formatting
    */
-  async getDatabaseStats(): Promise<any> {
+  async getDatabaseStats(): Promise<unknown> {
     try {
       const stats = await monitoringRepository.getDatabaseStats();
 
@@ -21,7 +21,7 @@ export class MonitoringService {
         totalRows: parseInt(stats.total_rows),
         timestamp: new Date().toISOString(),
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MONITORING_SERVICE] Error fetching database stats:', error);
       throw new Error('Failed to fetch database statistics');
     }
@@ -44,7 +44,7 @@ export class MonitoringService {
         totalSize: table.total_size,
         needsVacuum: parseInt(table.dead_rows || 0) > parseInt(table.row_count || 0) * 0.1,
       }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MONITORING_SERVICE] Error fetching table stats:', error);
       throw new Error('Failed to fetch table statistics');
     }
@@ -67,7 +67,7 @@ export class MonitoringService {
         size: index.index_size,
         efficiency: this.calculateIndexEfficiency(index),
       }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MONITORING_SERVICE] Error fetching index usage:', error);
       throw new Error('Failed to fetch index usage');
     }
@@ -78,9 +78,9 @@ export class MonitoringService {
    */
   async getActiveConnections(): Promise<{
     total: number;
-    connections: any[];
-    byState: any;
-    byApplication: any;
+    connections: unknown[];
+    byState: unknown;
+    byApplication: unknown;
   }> {
     try {
       const connections = await monitoringRepository.getActiveConnections();
@@ -89,14 +89,14 @@ export class MonitoringService {
       const byState = connections.reduce((acc, conn) => {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
         return acc;
-      }, {} as any);
+      }, {} as unknown);
 
       // Categorize by application
       const byApplication = connections.reduce((acc, conn) => {
         const app = conn.application_name || 'unknown';
         acc[app] = (acc[app] || 0) + 1;
         return acc;
-      }, {} as any);
+      }, {} as unknown);
 
       return {
         total: connections.length,
@@ -113,7 +113,7 @@ export class MonitoringService {
         byState,
         byApplication,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MONITORING_SERVICE] Error fetching connections:', error);
       throw new Error('Failed to fetch active connections');
     }
@@ -124,7 +124,7 @@ export class MonitoringService {
    */
   async checkHealth(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
-    checks: any;
+    checks: unknown;
     recommendations: string[];
   }> {
     try {
@@ -155,7 +155,7 @@ export class MonitoringService {
         checks: health.checks,
         recommendations,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MONITORING_SERVICE] Health check failed:', error);
       return {
         status: 'unhealthy',
@@ -168,7 +168,7 @@ export class MonitoringService {
   /**
    * Generate comprehensive monitoring report
    */
-  async generateReport(): Promise<any> {
+  async generateReport(): Promise<unknown> {
     try {
       const report = await monitoringRepository.generateReport();
 
@@ -183,7 +183,7 @@ export class MonitoringService {
         ...report,
         analysis,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MONITORING_SERVICE] Error generating report:', error);
       throw new Error('Failed to generate monitoring report');
     }
@@ -209,7 +209,7 @@ export class MonitoringService {
   /**
    * Helper: Calculate index efficiency
    */
-  private calculateIndexEfficiency(index: any): string {
+  private calculateIndexEfficiency(index: unknown): string {
     const scans = parseInt(index.index_scans || 0);
     const reads = parseInt(index.tuples_read || 0);
 
@@ -226,7 +226,7 @@ export class MonitoringService {
   /**
    * Helper: Analyze performance metrics
    */
-  private analyzePerformance(report: any): string {
+  private analyzePerformance(report: unknown): string {
     const connections = report.activeConnections;
 
     if (connections > 50) return 'high load';
@@ -237,18 +237,20 @@ export class MonitoringService {
   /**
    * Helper: Generate recommendations
    */
-  private generateRecommendations(report: any): string[] {
+  private generateRecommendations(report: unknown): string[] {
     const recommendations: string[] = [];
 
     // Check for unused indexes
-    const unusedIndexes = report.indexes.filter((idx: any) => parseInt(idx.index_scans || 0) === 0);
+    const unusedIndexes = report.indexes.filter(
+      (idx: unknown) => parseInt(idx.index_scans || 0) === 0
+    );
 
     if (unusedIndexes.length > 0) {
       recommendations.push(`${unusedIndexes.length} unused indexes detected`);
     }
 
     // Check for tables needing vacuum
-    const needsVacuum = report.tables.filter((table: any) => {
+    const needsVacuum = report.tables.filter((table: unknown) => {
       const dead = parseInt(table.dead_rows || 0);
       const live = parseInt(table.row_count || 0);
       return dead > live * 0.1;

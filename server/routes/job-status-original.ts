@@ -105,7 +105,7 @@ router.get(
         jobId,
         hint: 'O job pode ter expirado ou o ID está incorreto',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[JOB STATUS API] ❌ Erro ao consultar status:`, error);
       return res.status(500).json({
         error: 'Erro ao consultar status do job',

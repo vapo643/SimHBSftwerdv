@@ -161,7 +161,7 @@ const Dashboard: React.FC = () => {
     isLoading,
     error,
     refetch,
-  } = useQuery<{ success: boolean; data: any[]; total: number }>({
+  } = useQuery<{ success: boolean; data: unknown[]; total: number }>({
     queryKey: ['/api/propostas'],
     enabled: !!user, // Only fetch when user is authenticated
   });
@@ -178,7 +178,7 @@ const Dashboard: React.FC = () => {
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   // The apiClient automatically adds camelCase aliases for all snake_case keys
   const propostas = Array.isArray(propostasResponse?.data)
-    ? propostasResponse.data.map((p: any) => {
+    ? propostasResponse.data.map((p: unknown) => {
         console.log('[Dashboard] Processing proposal:', p);
         return {
           id: p.id,
@@ -533,7 +533,7 @@ const Dashboard: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            propostasFiltradas.map((proposta: any) => (
+            propostasFiltradas.map((proposta: unknown) => (
               <Card key={proposta.id} className="overflow-hidden transition-shadow hover:shadow-md">
                 <CardContent className="p-0">
                   <div className="flex items-center justify-between p-6">

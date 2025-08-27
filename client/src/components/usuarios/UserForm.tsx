@@ -59,7 +59,7 @@ const userSchema = z
 type UserFormData = z.infer<typeof userSchema>;
 
 interface UserFormProps {
-  initialData?: any;
+  initialData?: unknown;
   onSubmit: (data: UserFormData) => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -163,7 +163,7 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   const getLojaName = (lojaId: string) => {
-    const loja = availableStores.find((l: any) => l.id.toString() === lojaId);
+    const loja = availableStores.find((l: unknown) => l.id.toString() === lojaId);
     return loja ? loja.nomeLoja : 'Loja não encontrada';
   };
 
@@ -268,7 +268,7 @@ const UserForm: React.FC<UserFormProps> = ({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {partners.map((parceiro: any) => (
+                    {partners.map((parceiro: unknown) => (
                       <SelectItem key={parceiro.id} value={parceiro.id.toString()}>
                         {parceiro.razaoSocial}
                       </SelectItem>
@@ -317,7 +317,7 @@ const UserForm: React.FC<UserFormProps> = ({
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableStores.map((l: any) => (
+                      {availableStores.map((l: unknown) => (
                         <SelectItem key={l.id} value={l.id.toString()}>
                           {l.nomeLoja}
                         </SelectItem>
@@ -366,8 +366,8 @@ const UserForm: React.FC<UserFormProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {availableStores
-                      .filter((l: any) => !selectedLojas.includes(l.id.toString()))
-                      .map((l: any) => (
+                      .filter((l: unknown) => !selectedLojas.includes(l.id.toString()))
+                      .map((l: unknown) => (
                         <SelectItem key={l.id} value={l.id.toString()}>
                           {l.nomeLoja}
                         </SelectItem>

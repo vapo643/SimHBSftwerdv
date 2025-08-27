@@ -29,7 +29,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   async findByCpf(cpf: string): Promise<Proposal[]> {
     const results = await db.select().from(propostas).where(eq(propostas.clienteCpf, cpf));
 
-    return results.map((r: any) => this.toDomainEntity(r));
+    return results.map((r: unknown) => this.toDomainEntity(r));
   }
 
   /**
@@ -41,7 +41,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(eq(propostas.lojaId, parseInt(storeId)));
 
-    return results.map((r: any) => this.toDomainEntity(r));
+    return results.map((r: unknown) => this.toDomainEntity(r));
   }
 
   /**
@@ -50,7 +50,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   async findAll(): Promise<Proposal[]> {
     const results = await db.select().from(propostas).orderBy(propostas.createdAt);
 
-    return results.map((r: any) => this.toDomainEntity(r));
+    return results.map((r: unknown) => this.toDomainEntity(r));
   }
 
   /**
@@ -87,7 +87,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(eq(propostas.status, 'aguardando_analise'));
 
-    return results.map((r: any) => this.toDomainEntity(r));
+    return results.map((r: unknown) => this.toDomainEntity(r));
   }
 
   /**
@@ -103,7 +103,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .from(propostas)
       .where(and(eq(propostas.status, status), between(propostas.createdAt, startDate, endDate)));
 
-    return results.map((r: any) => this.toDomainEntity(r));
+    return results.map((r: unknown) => this.toDomainEntity(r));
   }
 
   /**
@@ -133,7 +133,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   /**
    * Convert database record to domain entity
    */
-  private toDomainEntity(record: any): Proposal {
+  private toDomainEntity(record: unknown): Proposal {
     const customerData = {
       name: record.clienteNome,
       cpf: record.clienteCpf,
@@ -180,7 +180,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   /**
    * Convert domain entity to database record
    */
-  private toPersistence(proposal: Proposal): any {
+  private toPersistence(proposal: Proposal): unknown {
     const customerData = proposal.getCustomerData();
     const loanConditions = proposal.getLoanConditions();
 

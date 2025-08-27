@@ -20,7 +20,7 @@ function snakeToCamel(str: string): string {
   return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
-function deepTransformDualCase(obj: any): any {
+function deepTransformDualCase(obj: unknown): unknown {
   if (obj === null || obj === undefined) {
     return obj;
   }
@@ -30,7 +30,7 @@ function deepTransformDualCase(obj: any): any {
   }
 
   if (typeof obj === 'object' && obj !== null) {
-    const result: any = {};
+    const result: Record<string, unknown> = {};
 
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -519,8 +519,8 @@ export async function apiClient<T = any>(
         typeof data === 'object' &&
         data !== null &&
         'message' in data &&
-        typeof (data as any).message === 'string'
-          ? (data as any).message
+        typeof (data as unknown).message === 'string'
+          ? (data as unknown).message
           : typeof data === 'string'
             ? data
             : `HTTP Error ${response.status}`;

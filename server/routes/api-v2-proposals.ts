@@ -5,7 +5,7 @@ router.get('/v2/proposals', async (req, res) => {
   try {
     const result = await proposalService.executeOperation('list_v2', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

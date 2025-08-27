@@ -40,7 +40,7 @@ interface BoletoSyncResult {
 }
 
 class BoletoStorageService {
-  private supabase: any;
+  private supabase: unknown;
 
   constructor() {
     this.supabase = supabaseAdmin;
@@ -124,7 +124,7 @@ class BoletoStorageService {
                     maxDelayMs: 5000,
                   }
                 );
-              } catch (downloadError: any) {
+              } catch (downloadError: unknown) {
                 console.error(
                   `[SYNC-FAILURE] Falha ao baixar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${downloadError.message}`
                 );
@@ -158,7 +158,7 @@ class BoletoStorageService {
                   });
                 uploadData = uploadResult.data;
                 uploadError = uploadResult.error;
-              } catch (storageError: any) {
+              } catch (storageError: unknown) {
                 console.error(
                   `[SYNC-FAILURE] Falha ao salvar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${storageError.message}`
                 );
@@ -184,7 +184,7 @@ class BoletoStorageService {
                 caminhoArquivo,
                 numeroParcela,
               };
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error(
                 `[BOLETO STORAGE] ❌ [Parcela ${numeroParcela}] Erro ao processar:`,
                 error.message
@@ -276,7 +276,7 @@ class BoletoStorageService {
       }
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[BOLETO STORAGE] ❌ Erro crítico na sincronização:`, error);
 
       result.success = false;
@@ -331,7 +331,7 @@ class BoletoStorageService {
         return [];
       }
 
-      return data?.map((file: any) => file.name) || [];
+      return data?.map((file: unknown) => file.name) || [];
     } catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao listar:`, error);
       return [];
@@ -448,7 +448,7 @@ class BoletoStorageService {
           console.log(
             `[CARNE DEBUG] ✅ Buffer de ${file.name} adicionado (${buffer.length} bytes)`
           );
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(`[CARNE DEBUG] ❌ Erro ao processar ${file.name}:`, error.message);
           errors.push(`${file.name}: ${error.message}`);
         }
@@ -483,7 +483,7 @@ class BoletoStorageService {
           });
 
           console.log(`[CARNE DEBUG] PDF ${i + 1} adicionado com ${pages.length} páginas`);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(`[CARNE DEBUG] ⚠️ Erro ao processar PDF ${i + 1}:`, error.message);
           // Continuar mesmo se um PDF falhar
         }
@@ -542,7 +542,7 @@ class BoletoStorageService {
         success: true,
         url: urlData.signedUrl,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[CARNE STORAGE] ❌ Erro crítico na geração do carnê:`, error);
 
       return {

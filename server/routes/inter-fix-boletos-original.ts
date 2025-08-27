@@ -124,7 +124,7 @@ router.post(
           });
 
           successCount++;
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(`[INTER FIX] ❌ Erro na parcela ${boleto.numeroParcela}:`, error.message);
 
           results.push({
@@ -150,7 +150,7 @@ router.post(
         failCount,
         detalhes: results,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[INTER FIX] ❌ Erro fatal:', error);
       return res.status(500).json({
         error: 'Erro ao regenerar boletos',

@@ -137,11 +137,11 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
 }
 
 // Helper functions para logging estruturado
-export const logInfo = (message: string, metadata?: any) => {
+export const logInfo = (message: string, metadata?: unknown) => {
   logger.info(message, metadata);
 };
 
-export const logError = (message: string, error: Error | any, metadata?: any) => {
+export const logError = (message: string, error: Error | any, metadata?: unknown) => {
   logger.error(message, {
     ...metadata,
     error: {
@@ -153,16 +153,16 @@ export const logError = (message: string, error: Error | any, metadata?: any) =>
   });
 };
 
-export const logWarn = (message: string, metadata?: any) => {
+export const logWarn = (message: string, metadata?: unknown) => {
   logger.warn(message, metadata);
 };
 
-export const logDebug = (message: string, metadata?: any) => {
+export const logDebug = (message: string, metadata?: unknown) => {
   logger.debug(message, metadata);
 };
 
 // Métricas básicas de logging
-export const logMetric = (metricName: string, value: number, unit: string, metadata?: any) => {
+export const logMetric = (metricName: string, value: number, unit: string, metadata?: unknown) => {
   logger.info('📊 Metric', {
     metric: metricName,
     value,
@@ -176,7 +176,7 @@ export const logMetric = (metricName: string, value: number, unit: string, metad
 export const logSecurity = (
   event: string,
   severity: 'low' | 'medium' | 'high' | 'critical',
-  metadata?: any
+  metadata?: unknown
 ) => {
   logger.warn(`🔒 Security Event: ${event}`, {
     severity,
@@ -191,7 +191,7 @@ export const logAudit = (
   action: string,
   userId: string | null,
   resource: string,
-  metadata?: any
+  metadata?: unknown
 ) => {
   logger.info('📝 Audit Log', {
     action,

@@ -65,7 +65,7 @@ const TabelasComerciais: React.FC = () => {
     queryKey: ['tabelas-comerciais-admin'],
     queryFn: async () => {
       const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
-      return Array.isArray(response) ? response : (response as any).data || [];
+      return Array.isArray(response) ? response : (response as unknown).data || [];
     },
   });
 
@@ -90,7 +90,7 @@ const TabelasComerciais: React.FC = () => {
         description: 'A tabela comercial foi adicionada ao sistema.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao criar tabela',
         description: error.message || 'Ocorreu um erro ao criar a tabela comercial.',
@@ -121,7 +121,7 @@ const TabelasComerciais: React.FC = () => {
         description: 'As alterações foram salvas.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao atualizar tabela',
         description: error.message || 'Ocorreu um erro ao atualizar a tabela comercial.',
@@ -145,7 +145,7 @@ const TabelasComerciais: React.FC = () => {
         description: 'A tabela comercial foi removida do sistema.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao excluir tabela',
         description: error.message || 'Ocorreu um erro ao excluir a tabela comercial.',

@@ -24,14 +24,14 @@ router.post('/retry', async (req: Request, res: Response) => {
       const { queues } = await import('../lib/mock-queue');
 
       // Criar uma fila de teste se não existir
-      if (!(queues as any).testRetry) {
+      if (!(queues as unknown).testRetry) {
         console.log('[TEST RETRY] 📦 Criando fila test-retry');
         const mockQueue = await import('../lib/mock-queue');
         // @ts-ignore
-        (queues as any).testRetry = new (mockQueue as any).MockQueue('test-retry');
+        (queues as unknown).testRetry = new (mockQueue as unknown).MockQueue('test-retry');
       }
 
-      const queue = (queues as any).testRetry;
+      const queue = (queues as unknown).testRetry;
 
       const testData = {
         type: 'TEST_RETRY_FAILURE',
@@ -107,7 +107,7 @@ router.post('/retry', async (req: Request, res: Response) => {
         hint: 'Observe os logs do worker para ver as tentativas de retry com backoff exponencial',
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[TEST RETRY] ❌ Erro ao adicionar job de teste:', error);
 
     return res.status(500).json({
@@ -134,7 +134,7 @@ router.get('/retry/status', async (req: Request, res: Response) => {
       message: 'Fila de teste de retry operacional',
       retryInfo: 'Jobs nesta fila sempre falham para demonstrar o mecanismo de retry',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
       error: 'Erro ao verificar status',

@@ -5,7 +5,7 @@ router.post('/intelligent-test', async (req, res) => {
   try {
     const result = await ccbTestService.executeOperation('intelligent_test', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

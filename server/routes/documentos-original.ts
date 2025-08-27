@@ -55,7 +55,7 @@ router.get(
           details: statusCode === 404 ? `Arquivo '${path}' não existe no storage` : undefined,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[DOCUMENTOS_CONTROLLER] Internal error:', error);
       res.status(500).json({
         error: 'Erro interno do servidor',
@@ -84,7 +84,7 @@ router.get(
 
       const result = await documentsService.getProposalDocuments(String(propostaId));
       res.json(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[DOCUMENTOS_CONTROLLER] Error listing documents:', error);
 
       const statusCode = error.message === 'Proposta não encontrada' ? 404 : 500;

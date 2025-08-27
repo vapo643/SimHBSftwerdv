@@ -22,7 +22,7 @@ export class CCBGenerationServiceV2 {
   /**
    * Gera CCB com sistema inteligente V2
    */
-  async generateCCB(propostaData: any): Promise<CCBGenerationResult> {
+  async generateCCB(propostaData: unknown): Promise<CCBGenerationResult> {
     try {
       console.log('🚀 [CCB V2] Iniciando geração inteligente para proposta:', propostaData.id);
 
@@ -73,7 +73,7 @@ export class CCBGenerationServiceV2 {
   /**
    * Valida dados da proposta
    */
-  private validatePropostaData(data: any): { valid: boolean; missingFields: string[] } {
+  private validatePropostaData(data: unknown): { valid: boolean; missingFields: string[] } {
     const requiredFields = ['id', 'clienteNome', 'clienteCpf', 'valor', 'prazo'];
 
     const missingFields = requiredFields.filter((field) => !data[field]);

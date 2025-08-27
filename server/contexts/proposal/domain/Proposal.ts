@@ -39,7 +39,7 @@ export interface DadosPagamento {
 export interface ProposalDomainEvent {
   aggregateId: string;
   eventType: string;
-  payload: any;
+  payload: unknown;
   occurredAt: Date;
 }
 
@@ -47,7 +47,7 @@ export class ProposalCreatedEvent implements ProposalDomainEvent {
   constructor(
     public aggregateId: string,
     public eventType: string = 'ProposalCreated',
-    public payload: any,
+    public payload: unknown,
     public occurredAt: Date = new Date()
   ) {}
 }
@@ -56,7 +56,7 @@ export class ProposalApprovedEvent implements ProposalDomainEvent {
   constructor(
     public aggregateId: string,
     public eventType: string = 'ProposalApproved',
-    public payload: any,
+    public payload: unknown,
     public occurredAt: Date = new Date()
   ) {}
 }
@@ -65,7 +65,7 @@ export class ProposalRejectedEvent implements ProposalDomainEvent {
   constructor(
     public aggregateId: string,
     public eventType: string = 'ProposalRejected',
-    public payload: any,
+    public payload: unknown,
     public occurredAt: Date = new Date()
   ) {}
 }
@@ -181,7 +181,7 @@ export class Proposal {
   }
 
   // Factory method para reconstituir do banco
-  static fromDatabase(data: any): Proposal {
+  static fromDatabase(data: unknown): Proposal {
     const proposal = new Proposal(
       data.id,
       data.cliente_data,
@@ -549,7 +549,7 @@ export class Proposal {
   /**
    * Converte o agregado para formato de persistência
    */
-  toPersistence(): any {
+  toPersistence(): unknown {
     return {
       id: this._id,
       status: this._status,

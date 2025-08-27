@@ -264,7 +264,7 @@ export class Proposal {
   }
 
   // Factory method to reconstruct from persistence
-  public static fromPersistence(data: any): Proposal {
+  public static fromPersistence(data: unknown): Proposal {
     const proposal = Object.create(Proposal.prototype);
     Object.assign(proposal, {
       id: data.id,

@@ -10,15 +10,15 @@ import { securityLogs } from '@shared/schema/security';
 import { sql, eq, and, desc, gte } from 'drizzle-orm';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
-export class SecurityRepository extends BaseRepository<any> {
+export class SecurityRepository extends BaseRepository<unknown> {
   constructor() {
-    super(securityLogs as any);
+    super(securityLogs as unknown);
   }
 
   /**
    * Get security metrics for dashboard
    */
-  async getSecurityMetrics(timeRange: string): Promise<any> {
+  async getSecurityMetrics(timeRange: string): Promise<unknown> {
     const startDate = this.getTimeRangeDate(timeRange);
 
     try {
@@ -102,7 +102,7 @@ export class SecurityRepository extends BaseRepository<any> {
     endpoint?: string;
     statusCode?: number;
     success?: boolean;
-    details?: any;
+    details?: unknown;
   }): Promise<any | undefined> {
     try {
       const result = await db
@@ -162,17 +162,17 @@ export class SecurityRepository extends BaseRepository<any> {
       }
 
       if (conditions.length > 0) {
-        query = query.where(and(...conditions)) as any;
+        query = query.where(and(...conditions)) as unknown;
       }
 
-      query = query.orderBy(desc(securityLogs.created_at)) as any;
+      query = query.orderBy(desc(securityLogs.created_at)) as unknown;
 
       if (filters.limit) {
-        query = query.limit(filters.limit) as any;
+        query = query.limit(filters.limit) as unknown;
       }
 
       if (filters.offset) {
-        query = query.offset(filters.offset) as any;
+        query = query.offset(filters.offset) as unknown;
       }
 
       return await query;
@@ -216,7 +216,7 @@ export class SecurityRepository extends BaseRepository<any> {
     totalEvents: number;
     eventsBySeverity: Record<string, number>;
     eventsByType: Record<string, number>;
-    trendData: any[];
+    trendData: unknown[];
   }> {
     const startDate = this.getTimeRangeDate(timeRange);
 

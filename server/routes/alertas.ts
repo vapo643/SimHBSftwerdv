@@ -18,7 +18,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const result = await alertService.executeOperation('list_alerts', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to fetch alerts',

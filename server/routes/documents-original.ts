@@ -24,7 +24,7 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
 
     const result = await documentsService.getProposalDocuments(String(propostaId));
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error);
 
     const statusCode = error.message === 'Proposta não encontrada' ? 404 : 500;
@@ -68,7 +68,7 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
         message: result.error || 'Erro no upload',
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[DOCUMENTS_CONTROLLER] Error uploading document:', error);
     res.status(500).json({
       message: 'Erro interno do servidor no upload',
@@ -95,7 +95,7 @@ export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Res
     res.status(501).json({
       message: 'Funcionalidade de exclusão não implementada',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[DOCUMENTS_CONTROLLER] Error deleting document:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao deletar documento',
@@ -122,7 +122,7 @@ export const getPropostaDocument = async (req: AuthenticatedRequest, res: Respon
     res.status(501).json({
       message: 'Funcionalidade não implementada',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[DOCUMENTS_CONTROLLER] Error fetching document:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar documento',

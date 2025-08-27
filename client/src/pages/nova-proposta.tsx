@@ -198,7 +198,7 @@ export default function NovaProposta() {
 
       setIsSearchingCpf(true);
       try {
-        const response: any = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
+        const response: unknown = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
           method: 'GET',
         });
 
@@ -361,20 +361,20 @@ export default function NovaProposta() {
         setLocation('/dashboard');
       }, 1500);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('[VALIDATION ERROR]', error);
 
       // Se houver erros de validação específicos, destacar os campos
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
         const validationErrors = error.response.data.errors;
 
-        validationErrors.forEach((err: any) => {
+        validationErrors.forEach((err: unknown) => {
           if (err.path && err.path.length > 0) {
             const fieldName = err.path[0];
             console.log(`[FIELD ERROR] ${fieldName}: ${err.message}`);
 
             // Mapear para os campos do formulário e definir erro específico
-            setError(fieldName as any, {
+            setError(fieldName as unknown, {
               type: 'server',
               message: err.message || `${fieldName} é inválido`,
             });

@@ -121,8 +121,8 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
 
     const validation = {
       totalFields: Object.keys(CCB_FIELD_MAPPING_V2).length,
-      pages: {} as any,
-      fields: [] as any[],
+      pages: {} as unknown,
+      fields: [] as unknown[],
     };
 
     // Agrupar campos por página

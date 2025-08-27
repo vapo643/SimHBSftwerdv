@@ -18,7 +18,7 @@ router.post('/test', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await ccbTestService.executeOperation('test_ccb', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       success: false,
       error: error.message || 'CCB test failed',

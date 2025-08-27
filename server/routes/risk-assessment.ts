@@ -5,7 +5,7 @@ router.post('/assess', async (req, res) => {
   try {
     const result = await simulatorService.executeOperation('risk_assessment', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

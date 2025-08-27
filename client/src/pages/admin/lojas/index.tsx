@@ -36,7 +36,7 @@ export default function LojasPage() {
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
       const response = await api.get<Loja[]>('/api/admin/lojas');
-      return Array.isArray(response) ? response : (response as any).data || [];
+      return Array.isArray(response) ? response : (response as unknown).data || [];
     },
   });
 
@@ -44,7 +44,7 @@ export default function LojasPage() {
   const createMutation = useMutation({
     mutationFn: async (data: InsertLoja) => {
       const response = await api.post<Loja>('/api/admin/lojas', data);
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       toast({
@@ -59,7 +59,7 @@ export default function LojasPage() {
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro',
         description: error.message || 'Erro ao criar loja',
@@ -72,7 +72,7 @@ export default function LojasPage() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateLoja }) => {
       const response = await api.put<Loja>(`/api/admin/lojas/${id}`, data);
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       toast({
@@ -87,7 +87,7 @@ export default function LojasPage() {
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro',
         description: error.message || 'Erro ao atualizar loja',
@@ -113,7 +113,7 @@ export default function LojasPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.system.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao Desativar',
         description: error.details || error.message || 'Erro ao desativar loja',

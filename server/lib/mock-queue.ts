@@ -13,7 +13,7 @@ import { clickSignService } from '../services/clickSignService';
 interface JobData {
   id: string;
   name: string;
-  data: any;
+  data: unknown;
   status: 'waiting' | 'active' | 'completed' | 'failed';
   progress: number;
   createdAt: Date;
@@ -25,10 +25,10 @@ interface JobData {
 class MockJob {
   id: string;
   name: string;
-  data: any;
+  data: unknown;
   progress: number = 0;
 
-  constructor(id: string, name: string, data: any) {
+  constructor(id: string, name: string, data: unknown) {
     this.id = id;
     this.name = name;
     this.data = data;
@@ -52,7 +52,7 @@ class MockQueue extends EventEmitter {
     console.log(`[DEV QUEUE] 📦 Created development queue: ${name}`);
   }
 
-  async add(jobName: string, data: any) {
+  async add(jobName: string, data: unknown) {
     const jobId = `${this.name}-${++this.jobCounter}`;
     const job = new MockJob(jobId, jobName, data);
 
@@ -97,7 +97,7 @@ class MockQueue extends EventEmitter {
 
     try {
       // REFATORAÇÃO: Executar a lógica REAL do worker baseado no tipo de fila
-      let result: any;
+      let result: unknown;
 
       // Criar um mock job com interface compatível
       const mockJob = {
@@ -136,14 +136,14 @@ class MockQueue extends EventEmitter {
       jobData.status = 'completed';
       jobData.completedAt = new Date();
       jobData.progress = 100;
-      (jobData as any).result = result; // Salvar o resultado para o getJob
+      (jobData as unknown).result = result; // Salvar o resultado para o getJob
 
       const duration = Date.now() - startTime;
       console.log(`[DEV QUEUE ${this.name}] ✅ Job ${jobId} completed in ${duration}ms`);
       console.log(`[DEV QUEUE ${this.name}] Result:`, result);
 
       this.emit('completed', { ...jobData, result });
-    } catch (error: any) {
+    } catch (error: unknown) {
       jobData.status = 'failed';
       jobData.failedReason = error.message || 'Unknown error';
       jobData.completedAt = new Date();
@@ -158,7 +158,7 @@ class MockQueue extends EventEmitter {
   /**
    * Processar jobs de PDF (carnê) - Lógica REAL do worker.ts
    */
-  private async processPdfJob(job: any) {
+  private async processPdfJob(job: unknown) {
     console.log(`[WORKER:PDF] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
     const startTime = Date.now();
 
@@ -210,7 +210,7 @@ class MockQueue extends EventEmitter {
   /**
    * Processar jobs de boleto - Lógica REAL do worker.ts
    */
-  private async processBoletoJob(job: any) {
+  private async processBoletoJob(job: unknown) {
     console.log(`[WORKER:BOLETO] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
     const startTime = Date.now();
 
@@ -310,7 +310,7 @@ class MockQueue extends EventEmitter {
   /**
    * Buscar um job pelo ID
    */
-  async getJob(jobId: string): Promise<any> {
+  async getJob(jobId: string): Promise<unknown> {
     const jobData = this.jobs.get(jobId);
     const mockJob = this.activeJobs.get(jobId);
 
@@ -319,10 +319,10 @@ class MockQueue extends EventEmitter {
     }
 
     // Adicionar propriedades extras para compatibilidade com o endpoint de status
-    const job = mockJob as any;
+    const job = mockJob as unknown;
     job.getState = async () => jobData.status;
     job.progress = jobData.progress;
-    job.returnvalue = jobData.status === 'completed' ? (jobData as any).result : null;
+    job.returnvalue = jobData.status === 'completed' ? (jobData as unknown).result : null;
     job.failedReason = jobData.failedReason;
     job.timestamp = jobData.createdAt.getTime();
     job.processedOn = jobData.processedAt?.getTime();
@@ -336,7 +336,7 @@ class MockWorker extends EventEmitter {
   private queueName: string;
   private processor: Function;
 
-  constructor(queueName: string, processor: Function, options?: any) {
+  constructor(queueName: string, processor: Function, options?: unknown) {
     super();
     this.queueName = queueName;
     this.processor = processor;
@@ -356,7 +356,7 @@ class MockWorker extends EventEmitter {
 
 // Mock Redis connection
 class MockRedis {
-  constructor(config: any) {
+  constructor(config: unknown) {
     console.log(`[DEV REDIS] 🔴 Mock Redis initialized (no actual connection)`);
   }
 

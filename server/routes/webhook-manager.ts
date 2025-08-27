@@ -5,7 +5,7 @@ router.post('/manage', async (req, res) => {
   try {
     const result = await integrationTestService.executeOperation('webhook_manager', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

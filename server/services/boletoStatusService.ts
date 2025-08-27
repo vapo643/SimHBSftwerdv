@@ -80,7 +80,7 @@ export class BoletoStatusService {
         : eq(interCollections.seuNumero, cobranca.seuNumero!);
 
       // Preparar dados de atualização
-      const updateData: any = {
+      const updateData: unknown = {
         updatedAt: new Date(),
       };
 

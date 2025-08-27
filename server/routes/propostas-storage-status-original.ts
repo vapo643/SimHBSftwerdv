@@ -63,8 +63,8 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
 
     // Filtrar apenas arquivos PDF de boletos
     const boletosNoStorage = (boletosFiles || [])
-      .filter((file: any) => file.name.endsWith('.pdf'))
-      .map((file: any) => file.name.replace('.pdf', ''));
+      .filter((file: unknown) => file.name.endsWith('.pdf'))
+      .map((file: unknown) => file.name.replace('.pdf', ''));
 
     const fileCount = boletosNoStorage.length;
 
@@ -83,7 +83,7 @@ router.get('/:id/storage-status', async (req: Request, res: Response) => {
 
     // Verificar se existe algum carnê
     const carneFile = (carneFiles || []).find(
-      (file: any) => file.name.startsWith('carne-') && file.name.endsWith('.pdf')
+      (file: unknown) => file.name.startsWith('carne-') && file.name.endsWith('.pdf')
     );
 
     const carneExists = !!carneFile;
@@ -213,7 +213,7 @@ router.get('/:id/sync-status', async (req: Request, res: Response) => {
     }
 
     // Contar PDFs sincronizados
-    const boletosSincronizados = (boletosFiles || []).filter((file: any) =>
+    const boletosSincronizados = (boletosFiles || []).filter((file: unknown) =>
       file.name.endsWith('.pdf')
     ).length;
 

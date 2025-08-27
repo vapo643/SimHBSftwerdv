@@ -190,10 +190,10 @@ export default function OWASPAssessment() {
 
       console.log('📊 Resposta do scan SAST:', response);
 
-      if (response && (response as any).success && (response as any).analysis) {
+      if (response && (response as unknown).success && (response as unknown).analysis) {
         // Adaptar o formato da resposta
-        const findings = (response as any).analysis.findings || [];
-        const formattedResults = findings.map((finding: any) => ({
+        const findings = (response as unknown).analysis.findings || [];
+        const formattedResults = findings.map((finding: unknown) => ({
           file: sastFilePath,
           line: finding.location?.start?.line || 0,
           column: finding.location?.start?.column || 0,
@@ -215,11 +215,11 @@ export default function OWASPAssessment() {
         console.error('❌ Erro na resposta SAST:', response);
         toast({
           title: 'Erro na análise',
-          description: (response as any).error || 'Nenhum resultado retornado',
+          description: (response as unknown).error || 'Nenhum resultado retornado',
           variant: 'destructive',
         });
       }
-    } catch (_error: any) {
+    } catch (_error: unknown) {
       console.error('❌ Erro ao executar SAST:', _error);
       toast({
         title: 'Erro ao conectar com Semgrep',
@@ -1412,7 +1412,7 @@ export default function OWASPAssessment() {
                             <Card key={index} className="p-4">
                               <div className="mb-2 flex items-center justify-between">
                                 <h4 className="font-medium">{assessment.practice}</h4>
-                                <Badge variant={getPriorityColor(assessment.priority) as any}>
+                                <Badge variant={getPriorityColor(assessment.priority) as unknown}>
                                   {assessment.priority}
                                 </Badge>
                               </div>
@@ -1480,7 +1480,7 @@ export default function OWASPAssessment() {
                           <h4 className="font-medium">{requirement.category}</h4>
                           <div className="flex space-x-2">
                             <Badge variant="outline">Level {requirement.level}</Badge>
-                            <Badge variant={getComplianceColor(requirement.compliance) as any}>
+                            <Badge variant={getComplianceColor(requirement.compliance) as unknown}>
                               {requirement.compliance}
                             </Badge>
                           </div>

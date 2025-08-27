@@ -14,14 +14,14 @@ export class TestService extends GenericService {
   /**
    * Execute test suites
    */
-  async executeTestSuite(suite: string, params: any): Promise<any> {
+  async executeTestSuite(suite: string, params: unknown): Promise<unknown> {
     return await this.executeOperation(`test_suite_${suite}`, params);
   }
 
   /**
    * Run validation tests
    */
-  async runValidationTests(type: string): Promise<any> {
+  async runValidationTests(type: string): Promise<unknown> {
     return await this.executeOperation(`validation_${type}`, {
       timestamp: new Date().toISOString(),
     });

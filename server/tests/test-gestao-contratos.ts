@@ -67,7 +67,7 @@ async function testAdminAccess() {
     }
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
@@ -105,7 +105,7 @@ async function testDiretorAccess() {
     );
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
@@ -134,7 +134,7 @@ async function testGerenteAccess() {
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
     return false;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.response?.status === 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Mensagem: ${error.response.data.message}${colors.reset}`);
@@ -174,7 +174,7 @@ async function testAtendenteAccess() {
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
     return false;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.response?.status === 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Bloqueado para ATENDENTE como esperado${colors.reset}`);
@@ -207,7 +207,7 @@ async function testNoTokenAccess() {
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 401${colors.reset}`
     );
     return false;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.response?.status === 401) {
       console.log(`${colors.green}✅ Status: 401 - Não autenticado corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Mensagem: ${error.response.data.message}${colors.reset}`);
@@ -248,7 +248,7 @@ async function testGetSpecificContract(contractId: string) {
     );
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.response?.status === 404) {
       console.log(`${colors.yellow}⚠️ Contrato ${contractId} não encontrado (404)${colors.reset}`);
     } else {
@@ -290,7 +290,7 @@ async function testSearchFilters() {
       console.log(`${colors.green}✅ Filtro aplicado com sucesso${colors.reset}`);
       console.log(`   - Contratos retornados: ${response.data.contratos?.length || 0}`);
       console.log(`   - Filtros aplicados:`, response.data.filtrosAplicados);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(`${colors.red}❌ Erro ao aplicar filtro: ${error.message}${colors.reset}`);
     }
   }

@@ -124,7 +124,7 @@ class ClickSignWebhookService {
   async processEvent(event: WebhookEvent): Promise<{
     processed: boolean;
     reason?: string;
-    proposalId?: any;
+    proposalId?: unknown;
     status?: string;
     documentKey?: string;
   }> {
@@ -194,7 +194,7 @@ class ClickSignWebhookService {
   /**
    * Handle auto_close event - MOST IMPORTANT
    */
-  private async handleAutoClose(proposta: any, data: WebhookEvent['data']) {
+  private async handleAutoClose(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] 🎉 AUTO_CLOSE for proposal: ${proposta.id}`);
 
     const now = getBrasiliaTimestamp();
@@ -294,7 +294,7 @@ class ClickSignWebhookService {
   /**
    * Handle document_closed event
    */
-  private async handleDocumentClosed(proposta: any, data: WebhookEvent['data']) {
+  private async handleDocumentClosed(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document closed for proposal: ${proposta.id}`);
 
     await storage.createPropostaLog({
@@ -311,7 +311,7 @@ class ClickSignWebhookService {
   /**
    * Handle cancel event
    */
-  private async handleCancel(proposta: any, data: WebhookEvent['data']) {
+  private async handleCancel(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document cancelled for proposal: ${proposta.id}`);
 
     await storage.updateProposta(proposta.id, {
@@ -332,7 +332,7 @@ class ClickSignWebhookService {
   /**
    * Handle deadline event
    */
-  private async handleDeadline(proposta: any, data: WebhookEvent['data']) {
+  private async handleDeadline(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] ⏰ Deadline alert for proposal: ${proposta.id}`);
 
     await storage.createPropostaLog({
@@ -349,7 +349,7 @@ class ClickSignWebhookService {
   /**
    * Handle upload event
    */
-  private async handleUpload(proposta: any, data: WebhookEvent['data']) {
+  private async handleUpload(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] 📤 Document uploaded for proposal: ${proposta.id}`);
 
     await storage.createPropostaLog({
@@ -366,7 +366,7 @@ class ClickSignWebhookService {
   /**
    * Handle sign event
    */
-  private async handleSign(proposta: any, data: WebhookEvent['data']) {
+  private async handleSign(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] ✍️ Document signed for proposal: ${proposta.id}`);
 
     const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
@@ -425,7 +425,7 @@ class ClickSignWebhookService {
   /**
    * Handle refusal event
    */
-  private async handleRefusal(proposta: any, data: WebhookEvent['data']) {
+  private async handleRefusal(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] ❌ Document refused for proposal: ${proposta.id}`);
 
     const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
@@ -448,7 +448,7 @@ class ClickSignWebhookService {
   /**
    * Handle document created event
    */
-  private async handleDocumentCreated(proposta: any, data: WebhookEvent['data']) {
+  private async handleDocumentCreated(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document created for proposal: ${proposta.id}`);
 
     await storage.createPropostaLog({
@@ -465,7 +465,7 @@ class ClickSignWebhookService {
   /**
    * Handle document signed event
    */
-  private async handleDocumentSigned(proposta: any, data: WebhookEvent['data']) {
+  private async handleDocumentSigned(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document signed for proposal: ${proposta.id}`);
 
     const updateData = {
@@ -495,7 +495,7 @@ class ClickSignWebhookService {
   /**
    * Handle document finished event (all signers completed)
    */
-  private async handleDocumentFinished(proposta: any, data: WebhookEvent['data']) {
+  private async handleDocumentFinished(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document finished for proposal: ${proposta.id}`);
 
     const finishedAt = getBrasiliaTimestamp();
@@ -521,7 +521,7 @@ class ClickSignWebhookService {
   /**
    * Handle document cancelled event
    */
-  private async handleDocumentCancelled(proposta: any, data: WebhookEvent['data']) {
+  private async handleDocumentCancelled(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document cancelled for proposal: ${proposta.id}`);
 
     const updateData = {
@@ -544,7 +544,7 @@ class ClickSignWebhookService {
   /**
    * Handle document refused event
    */
-  private async handleDocumentRefused(proposta: any, data: WebhookEvent['data']) {
+  private async handleDocumentRefused(proposta: unknown, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document refused for proposal: ${proposta.id}`);
 
     const updateData = {
@@ -567,7 +567,7 @@ class ClickSignWebhookService {
   /**
    * Trigger boleto generation after signature
    */
-  private async triggerBoletoGeneration(proposta: any) {
+  private async triggerBoletoGeneration(proposta: unknown) {
     try {
       console.log(`[CLICKSIGN → INTER] Triggering boleto generation for proposal: ${proposta.id}`);
 

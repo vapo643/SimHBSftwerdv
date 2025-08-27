@@ -152,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Feature Flags endpoint - retorna flags para o usuário atual
-  app.get('/api/features', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/features', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
     try {
       // Inicializa o serviço se necessário
       await featureFlagService.init();
@@ -206,7 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
   app.get(
     '/api/experimental/analytics',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Verifica se a feature flag está habilitada
@@ -528,7 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test endpoint para verificar correções de bugs
   app.get(
     '/api/test-data-flow',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -628,7 +628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Debug endpoint for RBAC validation
-  app.get('/api/debug/me', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/debug/me', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
     try {
       res.json({
         message: 'Debug endpoint - User profile from robust JWT middleware',
@@ -647,7 +647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New endpoint for formalization proposals (filtered by status)
   app.get(
     '/api/propostas/formalizacao',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -783,7 +783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para gerar CCB automaticamente
   app.post(
     '/api/propostas/:id/gerar-ccb',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -846,7 +846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug: Testar PDF simples e limpo
   app.get(
     '/api/debug/test-pdf',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const PDFDocument = (await import('pdfkit')).default;
@@ -892,7 +892,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug: Listar arquivos no bucket documents
   app.get(
     '/api/debug/storage-files',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -924,7 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get CCB signed URL
   app.get(
     '/api/propostas/:id/ccb-url',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -999,7 +999,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error('❌ [CCB URL] Caminho tentado:', ccbPath);
 
           // 🔄 FALLBACK: Regenerar CCB se não encontrado (conforme error_docs/storage_errors.md)
-          if ((urlError as any)?.status === 400 || urlError.message?.includes('Object not found')) {
+          if (
+            (urlError as unknown)?.status === 400 ||
+            urlError.message?.includes('Object not found')
+          ) {
             console.log('🔄 [CCB URL] Arquivo não encontrado, tentando regenerar CCB...');
             try {
               const { ccbGenerationService } = await import('./services/ccbGenerationService');
@@ -1054,7 +1057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     '/api/propostas/:id',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     timingNormalizerMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1422,7 +1425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint específico para associar documentos a uma proposta
   app.post(
     '/api/propostas/:id/documentos',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id: propostaId } = req.params;
@@ -1495,31 +1498,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PILAR 12 - PROGRESSIVE ENHANCEMENT
   // Rota para submissão de formulário tradicional (fallback)
   // ====================================
-  app.post('/nova-proposta', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
-    try {
-      console.log('📝 Progressive Enhancement: Form submission received');
+  app.post(
+    '/nova-proposta',
+    jwtAuthMiddleware as unknown,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        console.log('📝 Progressive Enhancement: Form submission received');
 
-      // Parse form data
-      const formData = {
-        clienteNome: req.body.clienteNome,
-        clienteCpf: req.body.clienteCpf,
-        clienteEmail: req.body.clienteEmail,
-        clienteTelefone: req.body.clienteTelefone,
-        clienteDataNascimento: req.body.clienteDataNascimento,
-        clienteRenda: req.body.clienteRenda,
-        valor: req.body.valor,
-        prazo: parseInt(req.body.prazo),
-        finalidade: req.body.finalidade,
-        garantia: req.body.garantia,
-        status: 'rascunho',
-      };
+        // Parse form data
+        const formData = {
+          clienteNome: req.body.clienteNome,
+          clienteCpf: req.body.clienteCpf,
+          clienteEmail: req.body.clienteEmail,
+          clienteTelefone: req.body.clienteTelefone,
+          clienteDataNascimento: req.body.clienteDataNascimento,
+          clienteRenda: req.body.clienteRenda,
+          valor: req.body.valor,
+          prazo: parseInt(req.body.prazo),
+          finalidade: req.body.finalidade,
+          garantia: req.body.garantia,
+          status: 'rascunho',
+        };
 
-      // Validate and create proposal
-      const validatedData = insertPropostaSchema.parse(formData);
-      const proposta = await storage.createProposta(validatedData);
+        // Validate and create proposal
+        const validatedData = insertPropostaSchema.parse(formData);
+        const proposta = await storage.createProposta(validatedData);
 
-      // For traditional form submission, redirect with success message
-      const successPage = `
+        // For traditional form submission, redirect with success message
+        const successPage = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
@@ -1561,12 +1567,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </html>
       `;
 
-      res.send(successPage);
-    } catch (error) {
-      console.error('Progressive Enhancement form error:', error);
+        res.send(successPage);
+      } catch (error) {
+        console.error('Progressive Enhancement form error:', error);
 
-      // Error page for traditional form submission
-      const errorPage = `
+        // Error page for traditional form submission
+        const errorPage = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
@@ -1605,13 +1611,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </html>
       `;
 
-      res.status(400).send(errorPage);
+        res.status(400).send(errorPage);
+      }
     }
-  });
+  );
 
   app.patch(
     '/api/propostas/:id',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1631,7 +1638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     '/api/propostas/status/:status',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const status = req.params.status;
@@ -1648,10 +1655,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
 
   // Document routes for proposals - REACTIVATED FOR DIAGNOSIS
-  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
+  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as unknown, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
-  //   jwtAuthMiddleware as any,
+  //   jwtAuthMiddleware as unknown,
   //   requireRoles(['ADMINISTRADOR', 'ANALISTA']),
   //   upload.single("file"),
   //   uploadPropostaDocument
@@ -1661,10 +1668,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
 
   // Rota para alternar status entre ativa/suspensa
-  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as any, togglePropostaStatus);
+  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as unknown, togglePropostaStatus);
 
   // Rota para buscar CCB assinada
-  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as any, getCcbAssinada);
+  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as unknown, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
   app.post('/api/setup-storage', async (req, res) => {
@@ -1913,7 +1920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple GET endpoint for all commercial tables (for dropdowns)
   app.get(
     '/api/tabelas-comerciais',
-    jwtAuthMiddleware as any,
+    jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Import database connection
@@ -2786,7 +2793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             if (parceiroId) {
               const tabelaParceiro = tabelasProduto.find(
-                (t: any) => t.tabela.parceiroId === parceiroId
+                (t: unknown) => t.tabela.parceiroId === parceiroId
               );
               if (tabelaParceiro) {
                 tabelaSelecionada = tabelaParceiro.tabela;
@@ -3029,7 +3036,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Build update object based on the step
-        const updateData: any = {};
+        const updateData: unknown = {};
 
         if (etapa === 'ccb_gerado') {
           updateData.ccbGerado = concluida;
@@ -3225,7 +3232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`
         );
         res.json(result);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Update status error:', error);
         if (error instanceof Error && error.message === 'Proposta não encontrada') {
           return res.status(404).json({ message: error.message });
@@ -3882,7 +3889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Extrair dados de endereço
-      const clienteData = (proposal.cliente_data as any) || {};
+      const clienteData = (proposal.cliente_data as unknown) || {};
 
       const debugInfo = {
         proposalId: id,

@@ -5,7 +5,7 @@ router.get('/trail/:id', async (req, res) => {
   try {
     const result = await auditService.executeOperation('get_trail', { id: req.params.id });
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

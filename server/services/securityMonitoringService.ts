@@ -54,7 +54,7 @@ interface SecurityMetrics {
 
 class SecurityMonitoringService {
   private static instance: SecurityMonitoringService;
-  private metricsCache: Map<string, { data: any; timestamp: number }> = new Map();
+  private metricsCache: Map<string, { data: unknown; timestamp: number }> = new Map();
   private readonly CACHE_TTL = 60000; // 1 minute cache
 
   private constructor() {}
@@ -132,8 +132,10 @@ class SecurityMonitoringService {
         .limit(1);
 
       // Calculate metrics
-      const threatMap = new Map(threatLogs.map((t: any) => [t.event_type, t.count]));
-      const recentThreatMap = new Map(recentThreatLogs.map((t: any) => [t.event_type, t.count]));
+      const threatMap = new Map(threatLogs.map((t: unknown) => [t.event_type, t.count]));
+      const recentThreatMap = new Map(
+        recentThreatLogs.map((t: unknown) => [t.event_type, t.count])
+      );
 
       const metrics: SecurityMetrics = {
         threats: {
@@ -197,7 +199,7 @@ class SecurityMonitoringService {
     description: string;
     ip_address?: string;
     severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    metadata?: any;
+    metadata?: unknown;
   }) {
     try {
       // await db.insert(securityLogs).values({
@@ -255,7 +257,7 @@ class SecurityMonitoringService {
     return errors[0]?.count || 0;
   }
 
-  private getCachedData(key: string): any | null {
+  private getCachedData(key: string): unknown | null {
     const cached = this.metricsCache.get(key);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
       return cached.data;
@@ -263,7 +265,7 @@ class SecurityMonitoringService {
     return null;
   }
 
-  private setCachedData(key: string, data: any): void {
+  private setCachedData(key: string, data: unknown): void {
     this.metricsCache.set(key, {
       data,
       timestamp: Date.now(),

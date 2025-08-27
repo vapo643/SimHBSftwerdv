@@ -5,7 +5,7 @@ import { requireAdmin } from '../lib/role-guards';
 import { securityLogger, SecurityEventType } from '../lib/security-logger';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
-export function setupSecurityRoutes(app: any) {
+export function setupSecurityRoutes(app: unknown) {
   // Health check de segurança
   app.get(
     '/api/security/health',
@@ -23,7 +23,7 @@ export function setupSecurityRoutes(app: any) {
           anomalies,
           lastUpdate: getBrasiliaTimestamp(),
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         res
           .status(500)
           .json({ message: 'Erro ao obter métricas de segurança', error: error.message });
@@ -54,7 +54,7 @@ export function setupSecurityRoutes(app: any) {
           analysis,
           generatedAt: getBrasiliaTimestamp(),
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         res.status(500).json({ message: 'Erro ao gerar relatório', error: error.message });
       }
     }
@@ -75,7 +75,7 @@ export function setupSecurityRoutes(app: any) {
 
         securityLogger.logEvent({
           type: type as SecurityEventType,
-          severity: severity as any,
+          severity: severity as unknown,
           userId: req.user?.id,
           userEmail: req.user?.email,
           endpoint: '/api/security/log-event',
@@ -84,7 +84,7 @@ export function setupSecurityRoutes(app: any) {
         });
 
         res.json({ message: 'Evento registrado com sucesso' });
-      } catch (error: any) {
+      } catch (error: unknown) {
         res.status(500).json({ message: 'Erro ao registrar evento', error: error.message });
       }
     }
@@ -99,7 +99,7 @@ export function setupSecurityRoutes(app: any) {
       try {
         const compliance = checkOWASPCompliance();
         res.json(compliance);
-      } catch (error: any) {
+      } catch (error: unknown) {
         res.status(500).json({ message: 'Erro ao verificar conformidade', error: error.message });
       }
     }
@@ -107,7 +107,7 @@ export function setupSecurityRoutes(app: any) {
 }
 
 // Calcula nível de risco baseado nas métricas
-function calculateRiskLevel(metrics: any): string {
+function calculateRiskLevel(metrics: unknown): string {
   const score =
     metrics.failedLogins * 2 +
     metrics.accessDenied * 3 +
@@ -121,7 +121,7 @@ function calculateRiskLevel(metrics: any): string {
 }
 
 // Gera recomendações baseadas nas métricas
-function generateRecommendations(metrics: any): string[] {
+function generateRecommendations(metrics: unknown): string[] {
   const recommendations: string[] = [];
 
   if (metrics.failedLogins > 100) {
@@ -152,7 +152,7 @@ function generateRecommendations(metrics: any): string[] {
 }
 
 // Identifica principais ameaças
-function identifyTopThreats(metrics: any): Array<{ type: string; count: number }> {
+function identifyTopThreats(metrics: unknown): Array<{ type: string; count: number }> {
   const threats = [
     { type: 'Brute Force Attempts', count: metrics.failedLogins },
     { type: 'Unauthorized Access', count: metrics.accessDenied },
@@ -167,7 +167,7 @@ function identifyTopThreats(metrics: any): Array<{ type: string; count: number }
 }
 
 // Verifica conformidade com OWASP Top 10
-function checkOWASPCompliance(): any {
+function checkOWASPCompliance(): unknown {
   return {
     timestamp: getBrasiliaTimestamp(),
     overallCompliance: '70%',

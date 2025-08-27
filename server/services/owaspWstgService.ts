@@ -261,7 +261,7 @@ export class OwaspWstgService {
    * Generate WSTG test report
    */
   static generateReport(testCases: WstgTestCase[]): {
-    summary: any;
+    summary: unknown;
     vulnerabilities: WstgTestCase[];
     recommendations: string[];
   } {

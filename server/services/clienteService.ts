@@ -13,7 +13,7 @@ export class ClienteService {
    */
   async getClientByCPF(cpf: string): Promise<{
     exists: boolean;
-    data?: any;
+    data?: unknown;
     message?: string;
   }> {
     try {
@@ -110,7 +110,7 @@ export class ClienteService {
   /**
    * Search address by CEP (Brazilian Postal Code)
    */
-  async getAddressByCEP(cep: string): Promise<any> {
+  async getAddressByCEP(cep: string): Promise<unknown> {
     try {
       const cleanCep = cep.replace(/\D/g, '');
 
@@ -167,7 +167,7 @@ export class ClienteService {
       }
 
       throw new Error('CEP não encontrado');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[CLIENTE_SERVICE] Error fetching CEP:', error);
       throw error;
     }

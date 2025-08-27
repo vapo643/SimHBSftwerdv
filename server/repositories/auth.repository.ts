@@ -222,7 +222,7 @@ export class AuthRepository extends BaseRepository<Session> {
   /**
    * Get user profile by ID
    */
-  async getUserProfile(userId: string): Promise<any> {
+  async getUserProfile(userId: string): Promise<unknown> {
     try {
       const [profile] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 

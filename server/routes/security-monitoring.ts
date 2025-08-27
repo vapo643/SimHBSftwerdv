@@ -177,7 +177,7 @@ router.get('/performance', async (req: AuthenticatedRequest, res) => {
         (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as table_count
     `);
 
-    const stats = databaseStats && databaseStats[0] ? (databaseStats[0] as any) : {};
+    const stats = databaseStats && databaseStats[0] ? (databaseStats[0] as unknown) : {};
 
     res.json({
       success: true,

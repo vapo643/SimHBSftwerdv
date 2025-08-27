@@ -49,7 +49,7 @@ export class UserService {
       const existingUser = await userRepository.emailExists(userData.email);
       if (existingUser) {
         const error = new Error('Um usuário com este email já existe');
-        (error as any).name = 'ConflictError';
+        (error as unknown).name = 'ConflictError';
         throw error;
       }
 
@@ -310,7 +310,7 @@ export class UserService {
   /**
    * Format user for response
    */
-  formatUserForResponse(user: UserWithAuth): any {
+  formatUserForResponse(user: UserWithAuth): unknown {
     return {
       id: user.id,
       name: user.full_name,
@@ -327,7 +327,7 @@ export class UserService {
   /**
    * Format multiple users for response
    */
-  formatUsersForResponse(users: UserWithAuth[]): any[] {
+  formatUsersForResponse(users: UserWithAuth[]): unknown[] {
     return users.map((user) => this.formatUserForResponse(user));
   }
 }

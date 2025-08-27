@@ -20,7 +20,7 @@ router.get('/test/circuit-breaker', async (req: AuthenticatedRequest, res) => {
       serviceStatus: result ? 'operational' : 'unavailable',
       circuitBreakerStatus: 'closed',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.message?.includes('circuit breaker is OPEN')) {
       console.log('[CIRCUIT TEST] ⚡ Inter Bank circuit breaker is OPEN');
       res.status(503).json({

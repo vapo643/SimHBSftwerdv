@@ -15,7 +15,7 @@ if (isDevelopment) {
     // Escutar eventos da fila mock
     const queue = queues.pdfProcessing;
 
-    queue.on('active', async (job: any) => {
+    queue.on('active', async (job: unknown) => {
       console.log(`[WORKER] Processando job ${job.id} com dados:`, job.data);
 
       // Simular processamento

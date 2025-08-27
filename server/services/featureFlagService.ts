@@ -218,7 +218,7 @@ class FeatureFlagService {
   /**
    * Obtém variante de uma flag (para A/B testing)
    */
-  async getVariant(flagName: string, context?: FeatureFlagContext): Promise<any> {
+  async getVariant(flagName: string, context?: FeatureFlagContext): Promise<unknown> {
     if (!this.initialized) {
       await this.init();
     }

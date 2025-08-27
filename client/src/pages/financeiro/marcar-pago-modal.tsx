@@ -32,7 +32,7 @@ import {
 interface MarcarPagoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposta: any;
+  proposta: unknown;
   onConfirm: () => void;
 }
 
@@ -53,7 +53,7 @@ export default function MarcarPagoModal({
       // BUG CORRIGIDO: Usar endpoint e parâmetros corretos do backend
       // Backend espera: PATCH /api/cobrancas/parcelas/:codigoSolicitacao/marcar-pago
       // Buscar codigoSolicitacao da primeira parcela não paga
-      const parcelaNaoPaga = proposta.parcelas?.find((p: any) => p.status !== 'pago');
+      const parcelaNaoPaga = proposta.parcelas?.find((p: unknown) => p.status !== 'pago');
 
       if (!parcelaNaoPaga?.codigoSolicitacao) {
         throw new Error('Nenhuma parcela elegível encontrada para marcação como paga');
@@ -100,7 +100,7 @@ export default function MarcarPagoModal({
       queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
       onConfirm();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao marcar como pago',
         description: error.message || 'Não foi possível marcar a proposta como paga.',

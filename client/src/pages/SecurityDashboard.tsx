@@ -428,7 +428,7 @@ export default function SecurityDashboard() {
 }
 
 // Componentes auxiliares
-function StatsCard({ title, value, icon, trend, critical }: any) {
+function StatsCard({ title, value, icon, trend, critical }: unknown) {
   return (
     <Card>
       <CardContent className="p-6">
@@ -455,7 +455,7 @@ function StatsCard({ title, value, icon, trend, critical }: any) {
   );
 }
 
-function VulnerabilitiesPanel({ vulnerabilities }: any) {
+function VulnerabilitiesPanel({ vulnerabilities }: unknown) {
   if (!vulnerabilities || vulnerabilities.length === 0) {
     return (
       <Card>
@@ -507,7 +507,7 @@ function VulnerabilitiesPanel({ vulnerabilities }: any) {
   );
 }
 
-function AnomaliesPanel({ anomalies }: any) {
+function AnomaliesPanel({ anomalies }: unknown) {
   return (
     <div className="space-y-4">
       <Card>
@@ -533,7 +533,7 @@ function AnomaliesPanel({ anomalies }: any) {
   );
 }
 
-function AttacksPanel({ metrics }: any) {
+function AttacksPanel({ metrics }: unknown) {
   return (
     <Card>
       <CardHeader>
@@ -567,7 +567,7 @@ function AttacksPanel({ metrics }: any) {
   );
 }
 
-function AttackPattern({ type, count, blocked }: any) {
+function AttackPattern({ type, count, blocked }: unknown) {
   const blockRate = count > 0 ? ((blocked / count) * 100).toFixed(0) : 100;
 
   return (
@@ -586,7 +586,7 @@ function AttackPattern({ type, count, blocked }: any) {
   );
 }
 
-function DependenciesPanel({ scans }: any) {
+function DependenciesPanel({ scans }: unknown) {
   return (
     <Card>
       <CardHeader>
@@ -596,7 +596,7 @@ function DependenciesPanel({ scans }: any) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {scans?.vulnerabilities?.map((dep: any) => (
+        {scans?.vulnerabilities?.map((dep: unknown) => (
           <div key={dep.cve} className="border-b py-4 last:border-0">
             <div className="flex items-start justify-between">
               <div>
@@ -624,7 +624,7 @@ function DependenciesPanel({ scans }: any) {
   );
 }
 
-function CodeAnalysisPanel({ findings }: any) {
+function CodeAnalysisPanel({ findings }: unknown) {
   return (
     <Card>
       <CardHeader>
@@ -634,7 +634,7 @@ function CodeAnalysisPanel({ findings }: any) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {findings?.map((finding: any) => (
+        {findings?.map((finding: unknown) => (
           <div key={finding.id} className="border-b py-4 last:border-0">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -665,7 +665,7 @@ function CodeAnalysisPanel({ findings }: any) {
   );
 }
 
-function SecurityTrendChart({ data }: any) {
+function SecurityTrendChart({ data }: unknown) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data}>
@@ -695,10 +695,10 @@ function SecurityTrendChart({ data }: any) {
   );
 }
 
-function VulnerabilityDistribution({ vulnerabilities }: any) {
+function VulnerabilityDistribution({ vulnerabilities }: unknown) {
   const data = vulnerabilities
     ? Object.entries(
-        vulnerabilities.reduce((acc: any, vuln: VulnerabilityReport) => {
+        vulnerabilities.reduce((acc: unknown, vuln: VulnerabilityReport) => {
           acc[vuln.severity] = (acc[vuln.severity] || 0) + 1;
           return acc;
         }, {})
@@ -733,7 +733,7 @@ function VulnerabilityDistribution({ vulnerabilities }: any) {
 }
 
 // Funções auxiliares
-function calculateSecurityScore(metrics: any, vulnerabilities: any): number {
+function calculateSecurityScore(metrics: unknown, vulnerabilities: unknown): number {
   if (!metrics || !vulnerabilities) return 100;
 
   let score = 100;
@@ -765,7 +765,7 @@ function getScoreColor(score: number): string {
   return '#dc2626';
 }
 
-function showCriticalAlert(data: any) {
+function showCriticalAlert(data: unknown) {
   // Implementar notificação do navegador ou toast
   console.error('ALERTA CRÍTICO:', data);
 }

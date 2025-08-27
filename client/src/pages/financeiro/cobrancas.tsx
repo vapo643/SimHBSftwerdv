@@ -165,7 +165,7 @@ export default function Cobrancas() {
 
   // PAM V1.0 Blueprint V2.0 - Estados para supervisor
   const [showSolicitacoesModal, setShowSolicitacoesModal] = useState(false);
-  const [selectedSolicitacao, setSelectedSolicitacao] = useState<any>(null);
+  const [selectedSolicitacao, setSelectedSolicitacao] = useState<unknown>(null);
   const [motivoRejeicao, setMotivoRejeicao] = useState('');
   const [observacaoSupervisor, setObservacaoSupervisor] = useState('');
 
@@ -226,7 +226,7 @@ export default function Cobrancas() {
         body: JSON.stringify({ novaDataVencimento, observacao }),
       });
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       console.log('[PAM V1.0 Blueprint V2.0] Solicitação de prorrogação enviada:', data);
       const isAutoApproved = data.autoApproved;
       toast({
@@ -242,7 +242,7 @@ export default function Cobrancas() {
       setNovaDataVencimento('');
       setObservacaoProrrogacao('');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar prorrogação:', error);
       toast({
         title: 'Erro ao solicitar prorrogação',
@@ -279,7 +279,7 @@ export default function Cobrancas() {
         body: JSON.stringify({ tipoDesconto, valorDesconto, dataLimiteDesconto, observacao }),
       });
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       console.log('[PAM V1.0 Blueprint V2.0] Solicitação de desconto enviada:', data);
       const isAutoApproved = data.autoApproved;
       toast({
@@ -296,7 +296,7 @@ export default function Cobrancas() {
       setDataLimiteDesconto('');
       setObservacaoDesconto('');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar desconto:', error);
       toast({
         title: 'Erro ao solicitar desconto',
@@ -313,7 +313,7 @@ export default function Cobrancas() {
     queryFn: async () => {
       const response = (await apiRequest('/api/cobrancas/solicitacoes?status=pendente', {
         method: 'GET',
-      })) as any[];
+      })) as unknown[];
       return response;
     },
   });
@@ -337,7 +337,7 @@ export default function Cobrancas() {
       setSelectedSolicitacao(null);
       setObservacaoSupervisor('');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao aprovar',
         description: error.response?.data?.message || 'Não foi possível aprovar a solicitação.',
@@ -373,7 +373,7 @@ export default function Cobrancas() {
       setMotivoRejeicao('');
       setObservacaoSupervisor('');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao rejeitar',
         description: error.response?.data?.message || 'Não foi possível rejeitar a solicitação.',
@@ -420,7 +420,7 @@ export default function Cobrancas() {
     queryFn: async () => {
       const response = (await apiRequest('/api/cobrancas/inter-sumario', {
         method: 'GET',
-      })) as any;
+      })) as unknown;
       return response;
     },
   });
@@ -459,7 +459,7 @@ export default function Cobrancas() {
             const response = (await apiRequest('/api/cobrancas/inter-sync-all', {
               method: 'POST',
               body: JSON.stringify({ propostaId: proposta.id }),
-            })) as any;
+            })) as unknown;
 
             if (response.atualizados) {
               totalAtualizados += response.atualizados;
@@ -1515,7 +1515,10 @@ export default function Cobrancas() {
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Canal de Contato</label>
-                <Select value={contactType} onValueChange={(value: any) => setContactType(value)}>
+                <Select
+                  value={contactType}
+                  onValueChange={(value: unknown) => setContactType(value)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1913,7 +1916,7 @@ export default function Cobrancas() {
 
               <div className="space-y-4 py-4">
                 {solicitacoesPendentes && solicitacoesPendentes.length > 0 ? (
-                  solicitacoesPendentes.map((solicitacao: any) => (
+                  solicitacoesPendentes.map((solicitacao: unknown) => (
                     <Card key={solicitacao.id} className="p-4">
                       <div className="space-y-3">
                         <div className="flex justify-between items-start">

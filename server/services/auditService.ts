@@ -161,7 +161,7 @@ export function isValidTransition(currentStatus: string, targetStatus: string): 
     pagamento_autorizado: ['pago', 'cancelado'],
   };
 
-  // Special case: any status can transition to 'cancelado' or 'suspensa'
+  // Special case: unknown status can transition to 'cancelado' or 'suspensa'
   if (targetStatus === 'cancelado' || targetStatus === 'suspensa') {
     return true;
   }

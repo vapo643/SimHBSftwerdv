@@ -42,7 +42,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         .where(eq(observacoesCobranca.propostaId, String(propostaId)))
         .orderBy(desc(observacoesCobranca.createdAt));
 
-      return data as any[];
+      return data as unknown[];
     } catch (error) {
       throw new Error(`Failed to fetch observacoes for proposta ${propostaId}: ${error}`);
     }

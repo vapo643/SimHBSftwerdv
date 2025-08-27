@@ -127,12 +127,12 @@ export default function Pagamentos() {
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [showSecurityVerificationModal, setShowSecurityVerificationModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [selectedPropostaForReview, setSelectedPropostaForReview] = useState<any>(null);
+  const [selectedPropostaForReview, setSelectedPropostaForReview] = useState<unknown>(null);
   const [showMarcarPagoModal, setShowMarcarPagoModal] = useState(false);
-  const [selectedPropostaForPago, setSelectedPropostaForPago] = useState<any>(null);
+  const [selectedPropostaForPago, setSelectedPropostaForPago] = useState<unknown>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [approvalObservation, setApprovalObservation] = useState('');
-  const [verificationData, setVerificationData] = useState<any>(null);
+  const [verificationData, setVerificationData] = useState<unknown>(null);
   const [paymentPassword, setPaymentPassword] = useState('');
   const [paymentObservation, setPaymentObservation] = useState('');
   const [mostrarPagos, setMostrarPagos] = useState(false);
@@ -239,7 +239,7 @@ export default function Pagamentos() {
       setPaymentObservation('');
       queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao confirmar desembolso',
         description: error.message || 'Verifique as validações de segurança.',
@@ -397,7 +397,7 @@ export default function Pagamentos() {
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
-  const formatBankAccount = (conta: any) => {
+  const formatBankAccount = (conta: unknown) => {
     return `${conta.banco} | Ag: ${conta.agencia} | Conta: ${conta.conta} (${conta.tipoConta})`;
   };
 
@@ -1196,42 +1196,46 @@ export default function Pagamentos() {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as any).ccbAssinada ? (
+                        {(verificacoes as unknown).ccbAssinada ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
                           className={
-                            (verificacoes as any).ccbAssinada ? 'text-green-700' : 'text-red-700'
+                            (verificacoes as unknown).ccbAssinada
+                              ? 'text-green-700'
+                              : 'text-red-700'
                           }
                         >
                           CCB Assinada e Localizada
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as any).boletosGerados ? (
+                        {(verificacoes as unknown).boletosGerados ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
                           className={
-                            (verificacoes as any).boletosGerados ? 'text-green-700' : 'text-red-700'
+                            (verificacoes as unknown).boletosGerados
+                              ? 'text-green-700'
+                              : 'text-red-700'
                           }
                         >
                           Boletos Registrados no Inter
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {(verificacoes as any).titularidadeConta ? (
+                        {(verificacoes as unknown).titularidadeConta ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <AlertCircle className="h-4 w-4 text-yellow-600" />
                         )}
                         <span
                           className={
-                            (verificacoes as any).titularidadeConta
+                            (verificacoes as unknown).titularidadeConta
                               ? 'text-green-700'
                               : 'text-yellow-700'
                           }
@@ -1251,7 +1255,7 @@ export default function Pagamentos() {
                       <CardTitle className="text-base">Documentação</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {(verificacoes as any).documentosCcb?.urlCcb ? (
+                      {(verificacoes as unknown).documentosCcb?.urlCcb ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -1295,7 +1299,7 @@ export default function Pagamentos() {
                                   variant: 'destructive',
                                 });
                               }
-                            } catch (error: any) {
+                            } catch (error: unknown) {
                               console.error('[CCB] Erro ao buscar CCB assinada:', error);
 
                               // Tratar erros específicos
@@ -1349,14 +1353,14 @@ export default function Pagamentos() {
                               <strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}
                             </p>
                           </>
-                        ) : (verificacoes as any).dadosPagamento?.destino?.pix ? (
+                        ) : (verificacoes as unknown).dadosPagamento?.destino?.pix ? (
                           <>
                             <p>
                               <strong>Tipo:</strong> PIX
                             </p>
                             <p>
                               <strong>Chave:</strong>{' '}
-                              {(verificacoes as any).dadosPagamento.destino.pix}
+                              {(verificacoes as unknown).dadosPagamento.destino.pix}
                             </p>
                           </>
                         ) : (
@@ -1446,8 +1450,8 @@ export default function Pagamentos() {
                 }}
                 disabled={
                   !paymentPassword ||
-                  !(verificacoes as any)?.ccbAssinada ||
-                  !(verificacoes as any)?.boletosGerados ||
+                  !(verificacoes as unknown)?.ccbAssinada ||
+                  !(verificacoes as unknown)?.boletosGerados ||
                   confirmarDesembolsoMutation.isPending
                 }
               >

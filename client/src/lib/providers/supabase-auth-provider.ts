@@ -34,7 +34,7 @@ export class SupabaseAuthProvider implements AuthProvider {
   /**
    * Converte sessão do Supabase para nossa interface padronizada
    */
-  private mapSupabaseSession(supabaseSession: any): Session {
+  private mapSupabaseSession(supabaseSession: unknown): Session {
     return {
       user: this.mapSupabaseUser(supabaseSession.user),
       accessToken: supabaseSession.access_token,
@@ -100,7 +100,7 @@ export class SupabaseAuthProvider implements AuthProvider {
 
   onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription {
     const { data: subscription } = this.supabase.auth.onAuthStateChange(
-      (event: any, session: any) => {
+      (event: unknown, session: unknown) => {
         const user = session?.user ? this.mapSupabaseUser(session.user) : null;
         callback(user);
       }

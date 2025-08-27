@@ -218,7 +218,7 @@ export class ProposalRepository implements IProposalRepository {
   /**
    * Mapeia dados do banco para o agregado Proposal
    */
-  private mapToDomain(row: any): Proposal {
+  private mapToDomain(row: unknown): Proposal {
     // ID já é string no banco
     const aggregateId = row.id;
 

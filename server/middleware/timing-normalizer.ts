@@ -106,7 +106,7 @@ class TimingNormalizer {
     return [...this.metrics];
   }
 
-  public getStatistics(endpoint?: string): any {
+  public getStatistics(endpoint?: string): unknown {
     let filteredMetrics = this.metrics;
 
     if (endpoint) {
@@ -168,7 +168,7 @@ class TimingNormalizer {
       const originalEnd = res.end;
       res.end = function (
         this: Response,
-        chunk?: any,
+        chunk?: unknown,
         encoding?: BufferEncoding | (() => void),
         cb?: () => void
       ) {

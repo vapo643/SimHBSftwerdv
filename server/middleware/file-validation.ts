@@ -43,7 +43,7 @@ interface FileValidationError {
     | 'FILE_TOO_LARGE'
     | 'MALICIOUS_CONTENT';
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 export class SecureFileValidator {

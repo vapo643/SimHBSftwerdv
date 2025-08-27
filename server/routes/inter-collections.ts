@@ -61,7 +61,7 @@ router.get(
                 numeroParcela: collection.numeroParcela,
                 totalParcelas: collection.totalParcelas,
               };
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error(
                 `[INTER COLLECTIONS] Error fetching details for ${collection.codigoSolicitacao}:`,
                 error
@@ -245,7 +245,7 @@ router.get(
 
         console.log(`[PDF STORAGE] ✅ Retornando PDF da API (${pdfBuffer.length} bytes)`);
         res.send(pdfBuffer);
-      } catch (apiError: any) {
+      } catch (apiError: unknown) {
         console.error(`[PDF STORAGE] ❌ Fallback API também falhou:`, apiError.message);
 
         if (apiError.message?.includes('circuit breaker')) {
@@ -262,7 +262,7 @@ router.get(
             "PDF não encontrado no storage nem na API. Use 'Atualizar Status' para sincronizar.",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[PDF STORAGE] Erro geral:', error);
       res.status(500).json({
         error: 'Erro interno',
@@ -289,7 +289,7 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
     const interService = interBankService;
 
     // Buscar collections na API do Inter
-    const filters: any = {};
+    const filters: unknown = {};
     if (status) filters.status = status as string;
     if (dataInicial) filters.dataInicial = dataInicial as string;
     if (dataFinal) filters.dataFinal = dataFinal as string;
@@ -299,12 +299,12 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
         filters.dataInicial ||
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       dataFinal: filters.dataFinal || new Date().toISOString().split('T')[0],
-      situacao: filters.status as any,
+      situacao: filters.status as unknown,
     });
 
     // Enriquecer com dados das propostas
     const enrichedCollections = await Promise.all(
-      collections.map(async (collection: any) => {
+      collections.map(async (collection: unknown) => {
         // Extrair propostaId do codigoSolicitacao (formato: SIMPIX-{propostaId}-{parcela})
         const parts = collection.codigoSolicitacao?.split('-');
         if (parts && parts.length >= 2 && parts[0] === 'SIMPIX') {

@@ -33,7 +33,7 @@ router.get('/teste', async (req, res) => {
  * POST /api/alertas/executar
  * Endpoint para executar verificação manual (apenas ADMINISTRADOR)
  */
-router.post('/executar', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/executar', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const userRole = req.user?.role;
 
@@ -69,7 +69,7 @@ router.post('/executar', jwtAuthMiddleware, async (req: any, res) => {
  * GET /api/alertas/notificacoes
  * Listar notificações do usuário
  */
-router.get('/notificacoes', jwtAuthMiddleware, async (req: any, res) => {
+router.get('/notificacoes', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const userEmail = req.user?.email;
     const { status, limite = 50 } = req.query;
@@ -96,7 +96,7 @@ router.get('/notificacoes', jwtAuthMiddleware, async (req: any, res) => {
     const localUserId = localUser.id.toString();
     console.log(`[ALERTAS] Mapeamento: ${userEmail} -> Local ID: ${localUserId}`);
 
-    let whereConditions: any = eq(notificacoes.userId, localUserId);
+    let whereConditions: unknown = eq(notificacoes.userId, localUserId);
 
     if (status) {
       whereConditions = and(whereConditions, eq(notificacoes.status, status));
@@ -136,7 +136,7 @@ router.get('/notificacoes', jwtAuthMiddleware, async (req: any, res) => {
  * POST /api/alertas/notificacoes/:id/marcar-lida
  * Marcar notificação como lida
  */
-router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { id } = req.params;
     const userEmail = req.user?.email;
@@ -184,7 +184,7 @@ router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req: any,
  * POST /api/alertas/notificacoes/marcar-todas-lidas
  * Marcar todas as notificações como lidas
  */
-router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const userEmail = req.user?.email;
 
@@ -237,7 +237,7 @@ router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req: a
  * DELETE /api/alertas/notificacoes/all
  * Limpar histórico de notificações (arquivar todas)
  */
-router.delete('/notificacoes/all', jwtAuthMiddleware, async (req: any, res) => {
+router.delete('/notificacoes/all', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const userEmail = req.user?.email;
 
@@ -292,7 +292,7 @@ router.delete('/notificacoes/all', jwtAuthMiddleware, async (req: any, res) => {
  * GET /api/alertas/regras
  * Listar regras de alertas (apenas ADMINISTRADOR)
  */
-router.get('/regras', jwtAuthMiddleware, async (req: any, res) => {
+router.get('/regras', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const userRole = req.user?.role;
 
@@ -319,7 +319,7 @@ router.get('/regras', jwtAuthMiddleware, async (req: any, res) => {
  * GET /api/alertas/historico
  * Visualizar histórico de execuções (apenas ADMINISTRADOR)
  */
-router.get('/historico', jwtAuthMiddleware, async (req: any, res) => {
+router.get('/historico', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const userRole = req.user?.role;
 

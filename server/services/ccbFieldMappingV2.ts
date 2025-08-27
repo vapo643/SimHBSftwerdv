@@ -398,7 +398,7 @@ export class FieldDetector {
   /**
    * Detecta e preenche campos automaticamente
    */
-  async detectAndFillFields(data: any, font: PDFFont): Promise<void> {
+  async detectAndFillFields(data: unknown, font: PDFFont): Promise<void> {
     for (const [fieldName, coord] of Object.entries(CCB_FIELD_MAPPING_V2)) {
       try {
         // Obter página correta
@@ -497,7 +497,7 @@ export class FieldDetector {
   /**
    * Obtém valor do campo dos dados
    */
-  private async getFieldValue(fieldName: string, data: any): Promise<string> {
+  private async getFieldValue(fieldName: string, data: unknown): Promise<string> {
     // Buscar configuração da empresa (vamos simular por enquanto)
     const configEmpresa = {
       razaoSocial: 'SIMPIX LTDA',
@@ -643,7 +643,7 @@ export class FieldDetector {
   /**
    * Gera campos de pagamento dinamicamente com cálculo de parcelas
    */
-  private generatePaymentFields(data: any): { [key: string]: string } {
+  private generatePaymentFields(data: unknown): { [key: string]: string } {
     const fields: { [key: string]: string } = {};
     const numParcelas = Math.min(data.prazo || 1, 6);
     const valorParcela = this.calculateParcela(data.valor, data.taxaJuros, data.prazo);
@@ -766,7 +766,7 @@ export class FieldDetector {
   /**
    * Formata endereço completo do cliente
    */
-  private formatarEnderecoCompleto(data: any): string {
+  private formatarEnderecoCompleto(data: unknown): string {
     // Se tiver endereço detalhado, usar
     if (data.clienteLogradouro) {
       const partes = [
@@ -801,7 +801,7 @@ export class FieldDetector {
   /**
    * Calcula valor total financiado
    */
-  private calcularTotalFinanciado(data: any): number {
+  private calcularTotalFinanciado(data: unknown): number {
     const valor = Number(data.valor) || 0;
     const tac = Number(data.valorTac || data.tacValor) || 50;
     const iof = Number(data.valorIof) || this.calcularIOF(valor, data.prazo);
@@ -812,7 +812,7 @@ export class FieldDetector {
   /**
    * Calcula valor líquido liberado
    */
-  private calcularLiquidoLiberado(data: any): number {
+  private calcularLiquidoLiberado(data: unknown): number {
     const valor = Number(data.valor) || 0;
     const tac = Number(data.valorTac || data.tacValor) || 50;
     const tarifaTed = Number(data.tarifaTed) || 10;

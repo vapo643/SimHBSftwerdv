@@ -14,7 +14,7 @@ export class SecurityService {
   /**
    * Get comprehensive security metrics for dashboard
    */
-  async getSecurityMetrics(timeRange: string = '1h'): Promise<any> {
+  async getSecurityMetrics(timeRange: string = '1h'): Promise<unknown> {
     try {
       // Get real metrics from database
       const dbMetrics = await securityRepository.getSecurityMetrics(timeRange);
@@ -80,7 +80,7 @@ export class SecurityService {
         .filter((v) => v.falsePositiveScore < 0.5)
         .sort((a, b) => {
           const severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-          return (severityOrder as any)[b.severity] - (severityOrder as any)[a.severity];
+          return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity];
         });
     } catch (error) {
       console.error('[SECURITY_SERVICE] Error getting vulnerabilities:', error);
@@ -128,7 +128,7 @@ export class SecurityService {
   /**
    * Get dependency scan results
    */
-  async getDependencyScanResults(): Promise<any> {
+  async getDependencyScanResults(): Promise<unknown> {
     try {
       const depScanner = getDependencyScanner();
       // Mock scan results since getLastScanResults doesn't exist yet
@@ -137,10 +137,10 @@ export class SecurityService {
 
       if (scanResults) {
         return {
-          lastScan: (scanResults as any).timestamp,
-          totalVulnerabilities: (scanResults as any).vulnerabilities?.length || 0,
-          bySeverity: this.groupBySeverity((scanResults as any).vulnerabilities || []),
-          vulnerabilities: (scanResults as any).vulnerabilities?.slice(0, 10) || [], // Top 10
+          lastScan: (scanResults as unknown).timestamp,
+          totalVulnerabilities: (scanResults as unknown).vulnerabilities?.length || 0,
+          bySeverity: this.groupBySeverity((scanResults as unknown).vulnerabilities || []),
+          vulnerabilities: (scanResults as unknown).vulnerabilities?.slice(0, 10) || [], // Top 10
         };
       }
 
@@ -162,8 +162,8 @@ export class SecurityService {
       // In a real implementation, this would call the actual scanner methods
       const findings = null;
 
-      if (findings && Array.isArray(findings) && (findings as any[]).length > 0) {
-        return (findings as any[]).map((finding: any) => ({
+      if (findings && Array.isArray(findings) && (findings as unknown[]).length > 0) {
+        return (findings as unknown[]).map((finding: unknown) => ({
           id: finding.id || `semgrep-${Math.random().toString(36).substr(2, 9)}`,
           rule: finding.rule_id,
           severity: finding.extra?.severity?.toUpperCase() || 'MEDIUM',
@@ -284,7 +284,7 @@ export class SecurityService {
   /**
    * Generate comprehensive security report
    */
-  async generateSecurityReport(): Promise<any> {
+  async generateSecurityReport(): Promise<unknown> {
     try {
       const metrics = await this.getSecurityMetrics('30d');
       const vulnerabilities = await this.getVulnerabilities();
@@ -333,7 +333,7 @@ export class SecurityService {
 
   // Private helper methods
 
-  private calculateAnomalyScore(statistics: any): number {
+  private calculateAnomalyScore(statistics: unknown): number {
     const totalEvents = statistics.totalEvents;
     const criticalEvents = statistics.eventsBySeverity.CRITICAL || 0;
     const highEvents = statistics.eventsBySeverity.HIGH || 0;
@@ -343,7 +343,7 @@ export class SecurityService {
     return Math.min(((criticalEvents * 3 + highEvents * 2) / totalEvents) * 100, 100);
   }
 
-  private categorizeAttacks(eventsByType: Record<string, number>): any {
+  private categorizeAttacks(eventsByType: Record<string, number>): unknown {
     return {
       sql: eventsByType.sql_injection || 0,
       xss: eventsByType.xss || 0,
@@ -352,7 +352,7 @@ export class SecurityService {
     };
   }
 
-  private categorizeBlocked(eventsByType: Record<string, number>): any {
+  private categorizeBlocked(eventsByType: Record<string, number>): unknown {
     const attacks = this.categorizeAttacks(eventsByType);
     return {
       sql: Math.floor(attacks.sql * 0.9),
@@ -362,7 +362,7 @@ export class SecurityService {
     };
   }
 
-  private generateTrendData(logs: any[], timeRange: string): any[] {
+  private generateTrendData(logs: unknown[], timeRange: string): unknown[] {
     const intervals = timeRange === '1h' ? 12 : 24;
     const trend = [];
 
@@ -377,7 +377,11 @@ export class SecurityService {
     return trend;
   }
 
-  private calculateOverallScore(metrics: any, vulnerabilities: any[], anomalies: any[]): number {
+  private calculateOverallScore(
+    metrics: unknown,
+    vulnerabilities: unknown[],
+    anomalies: unknown[]
+  ): number {
     let score = 100;
 
     // Deduct for vulnerabilities
@@ -398,10 +402,10 @@ export class SecurityService {
   }
 
   private generateRecommendations(
-    vulnerabilities: any[],
-    anomalies: any[],
-    dependencies: any,
-    codeIssues: any[]
+    vulnerabilities: unknown[],
+    anomalies: unknown[],
+    dependencies: unknown,
+    codeIssues: unknown[]
   ): string[] {
     const recommendations = [];
 
@@ -433,7 +437,7 @@ export class SecurityService {
 
   // Mock data methods for demo purposes
 
-  private getFallbackMetrics(timeRange: string): any {
+  private getFallbackMetrics(timeRange: string): unknown {
     return {
       totalRequests: 1247,
       suspiciousRequests: 23,
@@ -449,7 +453,7 @@ export class SecurityService {
     };
   }
 
-  private getMockVulnerabilities(): any[] {
+  private getMockVulnerabilities(): unknown[] {
     return [
       {
         id: 'vuln-001',
@@ -472,7 +476,7 @@ export class SecurityService {
     ];
   }
 
-  private getMockAnomalies(): any[] {
+  private getMockAnomalies(): unknown[] {
     return [
       {
         id: 'anom-001',
@@ -491,7 +495,7 @@ export class SecurityService {
     ];
   }
 
-  private getMockDependencyScan(): any {
+  private getMockDependencyScan(): unknown {
     return {
       lastScan: new Date(Date.now() - 60 * 60 * 1000),
       totalVulnerabilities: 12,
@@ -509,7 +513,7 @@ export class SecurityService {
     };
   }
 
-  private getMockSemgrepFindings(): any[] {
+  private getMockSemgrepFindings(): unknown[] {
     return [
       {
         id: 'semgrep-001',
@@ -539,19 +543,19 @@ export class SecurityService {
     return 'Anomalous Behavior';
   }
 
-  private calculateFalsePositiveScore(log: any): number {
+  private calculateFalsePositiveScore(log: unknown): number {
     // Simple heuristic - in practice this would be more sophisticated
     return Math.random() * 0.3; // Mock score
   }
 
-  private calculateConfidence(log: any): number {
+  private calculateConfidence(log: unknown): number {
     // Simple heuristic based on severity and metadata
     const severityScore =
-      ({ CRITICAL: 0.9, HIGH: 0.8, MEDIUM: 0.6, LOW: 0.4 } as any)[log.severity] || 0.5;
+      ({ CRITICAL: 0.9, HIGH: 0.8, MEDIUM: 0.6, LOW: 0.4 } as unknown)[log.severity] || 0.5;
     return severityScore + Math.random() * 0.1;
   }
 
-  private groupBySeverity(vulnerabilities: any[]): Record<string, number> {
+  private groupBySeverity(vulnerabilities: unknown[]): Record<string, number> {
     return vulnerabilities.reduce(
       (acc, vuln) => {
         const severity = vuln.severity || 'MEDIUM';

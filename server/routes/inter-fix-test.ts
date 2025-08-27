@@ -17,7 +17,7 @@ router.post('/run', async (req: Request, res: Response) => {
   try {
     const result = await interFixService.executeOperation('test_fix', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[INTER_FIX_TEST] Error:', error);
     res.status(500).json({
       success: false,
@@ -34,7 +34,7 @@ router.get('/status', async (req: Request, res: Response) => {
   try {
     const status = await interFixService.getStatus();
     res.json(status);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       success: false,
       error: error.message || 'Status check failed',

@@ -157,8 +157,8 @@ export async function jwtAuthMiddleware(
 
     let userId: string | undefined;
     let userEmail: string | undefined;
-    let data: any = null;
-    let error: any = null;
+    let data: unknown = null;
+    let error: unknown = null;
 
     // Auto-detect token type by checking JWT header
     let tokenType: 'supabase' | 'local' = 'local';
@@ -193,7 +193,7 @@ export async function jwtAuthMiddleware(
           userId = data.user.id;
           userEmail = data.user.email || '';
         }
-      } catch (supabaseError: any) {
+      } catch (supabaseError: unknown) {
         console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
         error = { message: supabaseError.message };
         data = null;
@@ -205,7 +205,7 @@ export async function jwtAuthMiddleware(
         const jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
 
-        const decoded = jwt.default.verify(token, JWT_SECRET) as any;
+        const decoded = jwt.default.verify(token, JWT_SECRET) as unknown;
         console.log('[JWT DEBUG] JWT decoded successfully:', {
           userId: decoded.userId,
           email: decoded.email,
@@ -218,7 +218,7 @@ export async function jwtAuthMiddleware(
         // Create mock data object for consistency
         data = { user: { id: userId, email: userEmail } };
         error = null;
-      } catch (jwtError: any) {
+      } catch (jwtError: unknown) {
         console.error('[JWT DEBUG] Local JWT verification failed:', jwtError.message);
         error = { message: jwtError.message };
         data = null;

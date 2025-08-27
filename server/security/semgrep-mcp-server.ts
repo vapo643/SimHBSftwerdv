@@ -64,8 +64,8 @@ interface ComponentSecurityContext {
   total_files: number;
   security_score: number;
   top_risks: SecurityRisk[];
-  dependencies: any;
-  attack_surface: any;
+  dependencies: unknown;
+  attack_surface: unknown;
   recommendations: string[];
 }
 
@@ -78,7 +78,7 @@ interface SecurityRisk {
 
 export class SemgrepMCPServer {
   private redis: Redis | null = null;
-  private memoryCache: Map<string, { data: any; expires: number }> = new Map();
+  private memoryCache: Map<string, { data: unknown; expires: number }> = new Map();
   private isScanning: boolean = false;
   private watchers: Map<string, chokidar.FSWatcher> = new Map();
   private cachePrefix = 'semgrep:mcp:';
@@ -256,7 +256,7 @@ export class SemgrepMCPServer {
       await this.addToHistory(filePath, processed);
 
       return processed;
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(`Semgrep scan failed for ${filePath}: ${error.message}`);
     }
   }
@@ -264,7 +264,7 @@ export class SemgrepMCPServer {
   /**
    * Análise de snippet de código em tempo real
    */
-  async analyzeSnippet(code: string, context: AnalysisContext): Promise<any> {
+  async analyzeSnippet(code: string, context: AnalysisContext): Promise<unknown> {
     const tempFile = await this.createTempFile(code, context.language || 'typescript');
 
     try {
@@ -306,7 +306,7 @@ export class SemgrepMCPServer {
   /**
    * Histórico de análises de segurança para um arquivo
    */
-  async getFileHistory(filePath: string, days: number = 30): Promise<any> {
+  async getFileHistory(filePath: string, days: number = 30): Promise<unknown> {
     const historyKey = `${this.cachePrefix}history:${filePath}`;
     // Por enquanto, retornar histórico vazio quando não há Redis
     const history = this.redis ? await this.redis.lrange(historyKey, 0, days) : [];
@@ -348,7 +348,7 @@ export class SemgrepMCPServer {
   /**
    * Executa Semgrep com argumentos especificados
    */
-  private async executeSemgrep(args: string[]): Promise<any> {
+  private async executeSemgrep(args: string[]): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const semgrep = spawn('semgrep', args);
       let stdout = '';
@@ -395,9 +395,9 @@ export class SemgrepMCPServer {
   /**
    * Processa resultados brutos do Semgrep
    */
-  private async processResults(rawResults: any, scanId: string): Promise<SemgrepResult> {
+  private async processResults(rawResults: unknown, scanId: string): Promise<SemgrepResult> {
     const findings: SecurityFinding[] =
-      rawResults.results?.map((result: any) => ({
+      rawResults.results?.map((result: unknown) => ({
         rule_id: result.check_id,
         file: result.path,
         line: result.start.line,
@@ -584,7 +584,7 @@ export class SemgrepMCPServer {
   /**
    * Verifica compliance
    */
-  private async checkCompliance(result: SemgrepResult): Promise<any> {
+  private async checkCompliance(result: SemgrepResult): Promise<unknown> {
     return {
       owasp_top_10: result.findings.filter((f) => f.owasp && f.owasp.length > 0).length === 0,
       cwe_sans_top_25: result.findings.filter((f) => f.cwe && f.cwe.length > 0).length === 0,
@@ -663,7 +663,7 @@ export class SemgrepMCPServer {
   /**
    * Analisa dependências
    */
-  private async analyzeDependencies(files: string[]): Promise<any> {
+  private async analyzeDependencies(files: string[]): Promise<unknown> {
     // Implementação futura - integração com Dependency-Check
     return {
       total: 0,
@@ -675,7 +675,7 @@ export class SemgrepMCPServer {
   /**
    * Calcula superfície de ataque
    */
-  private calculateAttackSurface(results: SemgrepResult[]): any {
+  private calculateAttackSurface(results: SemgrepResult[]): unknown {
     return {
       exposed_endpoints: 0,
       authentication_issues: results.filter((r) =>
@@ -709,7 +709,7 @@ export class SemgrepMCPServer {
   /**
    * Calcula tendências de segurança
    */
-  private calculateSecurityTrends(history: string[]): any {
+  private calculateSecurityTrends(history: string[]): unknown {
     // Análise simplificada de tendências
     return {
       improving: history.length > 1,
@@ -720,7 +720,7 @@ export class SemgrepMCPServer {
   /**
    * Identifica melhorias
    */
-  private identifyImprovements(history: string[]): any[] {
+  private identifyImprovements(history: string[]): unknown[] {
     return [];
   }
 }

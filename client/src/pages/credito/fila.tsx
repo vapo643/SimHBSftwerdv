@@ -159,7 +159,7 @@ const FilaAnalise: React.FC = () => {
       });
       return response;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       toast({
         title: 'Status alterado com sucesso',
         description: data?.message || 'Status alterado com sucesso',
@@ -287,7 +287,7 @@ const FilaAnalise: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Parceiros</SelectItem>
-                {parceiros?.map((p: any) => (
+                {parceiros?.map((p: unknown) => (
                   <SelectItem key={p.id} value={p.razaoSocial}>
                     {p.razaoSocial}
                   </SelectItem>

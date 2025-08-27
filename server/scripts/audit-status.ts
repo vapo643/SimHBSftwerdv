@@ -69,7 +69,7 @@ async function main() {
     // 5. Identificar status em uso que não estão no enum (problemas de integridade)
     console.log(`\n🔍 VERIFICAÇÃO DE INTEGRIDADE:`);
     const statusInUseNotInEnum = statusUsageResults.filter(
-      (result) => !allStatusValues.includes(result.status as any)
+      (result) => !allStatusValues.includes(result.status as unknown)
     );
 
     if (statusInUseNotInEnum.length > 0) {

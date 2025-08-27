@@ -63,7 +63,7 @@ export interface IStorage {
     statusAnterior?: string;
     statusNovo: string;
     observacao?: string;
-  }): Promise<any>;
+  }): Promise<unknown>;
 
   // Lojas
   getLojas(): Promise<Loja[]>;
@@ -212,7 +212,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Map the data to match the expected format, extracting from JSONB fields
-    return (data || []).map((p: any) => {
+    return (data || []).map((p: unknown) => {
       const clienteData = p.cliente_data || {};
       const condicoesData = p.condicoes_data || {};
 
@@ -392,32 +392,32 @@ export class DatabaseStorage implements IStorage {
       // Related entities (handling Supabase responses)
       loja: data.lojas
         ? {
-            id: (data.lojas as any).id,
-            nomeLoja: (data.lojas as any).nome_loja,
+            id: (data.lojas as unknown).id,
+            nomeLoja: (data.lojas as unknown).nome_loja,
           }
         : null,
       parceiro:
-        data.lojas && (data.lojas as any).parceiros
+        data.lojas && (data.lojas as unknown).parceiros
           ? {
-              id: (data.lojas as any).parceiros.id,
-              razaoSocial: (data.lojas as any).parceiros.razao_social,
+              id: (data.lojas as unknown).parceiros.id,
+              razaoSocial: (data.lojas as unknown).parceiros.razao_social,
             }
           : null,
       produto: data.produtos
         ? {
-            id: (data.produtos as any).id,
-            nomeProduto: (data.produtos as any).nome_produto,
-            tacValor: (data.produtos as any).tac_valor,
-            tacTipo: (data.produtos as any).tac_tipo,
+            id: (data.produtos as unknown).id,
+            nomeProduto: (data.produtos as unknown).nome_produto,
+            tacValor: (data.produtos as unknown).tac_valor,
+            tacTipo: (data.produtos as unknown).tac_tipo,
           }
         : null,
       tabelaComercial: data.tabelas_comerciais
         ? {
-            id: (data.tabelas_comerciais as any).id,
-            nomeTabela: (data.tabelas_comerciais as any).nome_tabela,
-            taxaJuros: (data.tabelas_comerciais as any).taxa_juros,
-            prazos: (data.tabelas_comerciais as any).prazos,
-            comissao: (data.tabelas_comerciais as any).comissao,
+            id: (data.tabelas_comerciais as unknown).id,
+            nomeTabela: (data.tabelas_comerciais as unknown).nome_tabela,
+            taxaJuros: (data.tabelas_comerciais as unknown).taxa_juros,
+            prazos: (data.tabelas_comerciais as unknown).prazos,
+            comissao: (data.tabelas_comerciais as unknown).comissao,
           }
         : null,
     };
@@ -429,14 +429,14 @@ export class DatabaseStorage implements IStorage {
       .from(propostas)
       .where(
         and(
-          eq(propostas.status, status as any),
+          eq(propostas.status, status as unknown),
           isNull(propostas.deletedAt) // Filter out soft-deleted records
         )
       )
       .orderBy(desc(propostas.createdAt));
   }
 
-  async createProposta(proposta: any): Promise<any> {
+  async createProposta(proposta: unknown): Promise<unknown> {
     // Transform the normalized data to JSONB format for the real database schema
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
     const supabase = createServerSupabaseAdminClient();
@@ -764,7 +764,7 @@ export class DatabaseStorage implements IStorage {
     statusAnterior?: string;
     statusNovo: string;
     observacao?: string;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const result = await db
       .insert(propostaLogs)
       .values({

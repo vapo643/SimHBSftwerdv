@@ -47,8 +47,8 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     // Deletar cada boleto existente
     if (boletosFiles && boletosFiles.length > 0) {
       const filesToDelete = boletosFiles
-        .filter((file: any) => file.name.endsWith('.pdf'))
-        .map((file: any) => `${boletosPath}${file.name}`);
+        .filter((file: unknown) => file.name.endsWith('.pdf'))
+        .map((file: unknown) => `${boletosPath}${file.name}`);
 
       if (filesToDelete.length > 0) {
         console.log(`[CORRIGIR SYNC] Deletando ${filesToDelete.length} boletos existentes`);
@@ -78,8 +78,8 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
 
     if (!carneListError && carneFiles && carneFiles.length > 0) {
       const carnesToDelete = carneFiles
-        .filter((file: any) => file.name.endsWith('.pdf'))
-        .map((file: any) => `${carnePath}${file.name}`);
+        .filter((file: unknown) => file.name.endsWith('.pdf'))
+        .map((file: unknown) => `${carnePath}${file.name}`);
 
       if (carnesToDelete.length > 0) {
         console.log(`[CORRIGIR SYNC] Deletando ${carnesToDelete.length} carnês existentes`);

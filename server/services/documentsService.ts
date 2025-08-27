@@ -13,7 +13,7 @@ export class DocumentsService {
   async getProposalDocuments(propostaId: string): Promise<{
     propostaId: string;
     totalDocuments: number;
-    documents: any[];
+    documents: unknown[];
   }> {
     try {
       // Get proposal to check CCB document
@@ -89,7 +89,7 @@ export class DocumentsService {
         totalDocuments: documents.length,
         documents,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error);
       throw error;
     }
@@ -100,10 +100,10 @@ export class DocumentsService {
    */
   async uploadDocument(
     propostaId: string,
-    file: any
+    file: unknown
   ): Promise<{
     success: boolean;
-    document?: any;
+    document?: unknown;
     error?: string;
   }> {
     try {
@@ -157,7 +157,7 @@ export class DocumentsService {
           category: 'supporting',
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[DOCUMENTS_SERVICE] Error uploading document:', error);
       return {
         success: false,
@@ -197,7 +197,7 @@ export class DocumentsService {
         filename: `documento-${path.split('/').pop()}`,
         contentType: 'application/pdf',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[DOCUMENTS_SERVICE] Error downloading document:', error);
       return {
         success: false,

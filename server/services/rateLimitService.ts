@@ -92,7 +92,7 @@ class RateLimitService {
    */
   async handleFailure(
     serviceId: string,
-    error: any,
+    error: unknown,
     customConfig?: Partial<RateLimitConfig>
   ): Promise<boolean> {
     const config = { ...this.defaultConfig, ...customConfig };
@@ -167,7 +167,7 @@ class RateLimitService {
     customConfig?: Partial<RateLimitConfig>
   ): Promise<T> {
     const config = { ...this.defaultConfig, ...customConfig };
-    let lastError: any;
+    let lastError: unknown;
 
     for (let attempt = 0; attempt < config.maxRetries; attempt++) {
       try {
@@ -201,12 +201,12 @@ class RateLimitService {
   /**
    * Obter estatísticas do rate limiting
    */
-  getStats(serviceId?: string): any {
+  getStats(serviceId?: string): unknown {
     if (serviceId) {
       return this.states.get(serviceId) || null;
     }
 
-    const stats: any = {};
+    const stats: unknown = {};
     this.states.forEach((state, id) => {
       stats[id] = {
         ...state,

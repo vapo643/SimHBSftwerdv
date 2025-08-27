@@ -5,7 +5,7 @@ router.post('/permissions', async (req, res) => {
   try {
     const result = await adminService.executeOperation('manage_permissions', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

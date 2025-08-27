@@ -156,7 +156,7 @@ export async function checkDatabaseHealth() {
     const health = {
       status: 'healthy',
       issues: [] as string[],
-      metrics: {} as any,
+      metrics: {} as unknown,
     };
 
     // Verificar conexões
@@ -167,7 +167,7 @@ export async function checkDatabaseHealth() {
         (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') as max_allowed
     `);
 
-    const conn = connStats[0] as any;
+    const conn = connStats[0] as unknown;
     health.metrics.connections = conn;
 
     if (conn.total > conn.max_allowed * 0.8) {
@@ -192,7 +192,7 @@ export async function checkDatabaseHealth() {
 
     health.metrics.table_bloat = bloat;
 
-    for (const table of bloat as any[]) {
+    for (const table of bloat as unknown[]) {
       if (table.dead_ratio > 20) {
         health.issues.push(`Tabela ${table.tablename} com ${table.dead_ratio}% de linhas mortas`);
         if (table.dead_ratio > 50) {
@@ -211,7 +211,7 @@ export async function checkDatabaseHealth() {
         AND query_start < now() - interval '5 minutes'
     `);
 
-    const longCount = (longQueries[0] as any).count;
+    const longCount = (longQueries[0] as unknown).count;
     if (longCount > 0) {
       health.issues.push(`${longCount} queries rodando há mais de 5 minutos`);
       health.status = 'warning';

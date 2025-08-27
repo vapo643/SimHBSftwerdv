@@ -5,7 +5,7 @@ router.get('/storage/status', async (req, res) => {
   try {
     const result = await propostasStorageService.executeOperation('storage_status', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

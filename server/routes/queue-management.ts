@@ -5,7 +5,7 @@ router.get('/queues', async (req, res) => {
   try {
     const result = await paymentsService.executeOperation('queue_management', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

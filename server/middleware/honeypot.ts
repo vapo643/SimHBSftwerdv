@@ -172,7 +172,7 @@ export function formHoneypotMiddleware(req: Request, res: Response, next: NextFu
 /**
  * Register honeypot endpoints
  */
-export function registerHoneypots(app: any) {
+export function registerHoneypots(app: unknown) {
   // Register all honeypot endpoints
   HONEYPOT_ENDPOINTS.forEach((endpoint) => {
     app.all(endpoint, honeypotHandler);

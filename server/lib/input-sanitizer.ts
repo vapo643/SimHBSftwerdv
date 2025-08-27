@@ -55,7 +55,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
     validateHeaders(req);
 
     next();
-  } catch (error: any) {
+  } catch (error: unknown) {
     securityLogger.logEvent({
       type: SecurityEventType.XSS_ATTEMPT,
       severity: 'HIGH',
@@ -76,12 +76,12 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
 /**
  * Sanitiza um objeto recursivamente
  */
-function sanitizeObject(obj: any, req: Request): any {
+function sanitizeObject(obj: unknown, req: Request): unknown {
   if (typeof obj !== 'object' || obj === null) {
     return sanitizeValue(obj, '', req);
   }
 
-  const sanitized: any = Array.isArray(obj) ? [] : {};
+  const sanitized: unknown = Array.isArray(obj) ? [] : {};
 
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
@@ -106,7 +106,7 @@ function sanitizeObject(obj: any, req: Request): any {
 /**
  * Sanitiza um valor individual
  */
-function sanitizeValue(value: any, fieldName: string, req: Request): any {
+function sanitizeValue(value: unknown, fieldName: string, req: Request): unknown {
   if (value === null || value === undefined) {
     return value;
   }
@@ -185,7 +185,7 @@ function sanitizeValue(value: any, fieldName: string, req: Request): any {
 /**
  * Validação especial para campos de alto risco
  */
-function validateHighRiskField(fieldName: string, value: any, req: Request): any {
+function validateHighRiskField(fieldName: string, value: unknown, req: Request): unknown {
   if (typeof value !== 'string') return value;
 
   const validators: Record<string, RegExp> = {

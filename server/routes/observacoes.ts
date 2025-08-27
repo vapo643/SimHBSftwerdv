@@ -37,7 +37,7 @@ const updateObservacaoSchema = z.object({
  *
  * PADRÃO ARQUITETURAL: Controller -> Service -> Repository -> DB
  */
-router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: any, res) => {
+router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { propostaId } = req.params;
     const { role } = req.user!;
@@ -73,7 +73,7 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: 
  *
  * PADRÃO ARQUITETURAL: Validação no Controller, lógica no Service
  */
-router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: any, res) => {
+router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { propostaId } = req.params;
     const { id: userId, email, role } = req.user!;
@@ -126,7 +126,7 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req:
  *
  * PADRÃO ARQUITETURAL: Permissões e validação no Controller, lógica no Service
  */
-router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: any, res) => {
+router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { observacaoId } = req.params;
     const { id: userId, role } = req.user!;
@@ -173,7 +173,7 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: any, res
  *
  * PADRÃO ARQUITETURAL: Autenticação/autorização no Controller, lógica no Service
  */
-router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: any, res) => {
+router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { observacaoId } = req.params;
     const { id: userId } = req.user!;
@@ -203,7 +203,7 @@ router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req: any, 
  *
  * PADRÃO ARQUITETURAL: Query params no Controller, processamento no Service
  */
-router.get('/observacoes', jwtAuthMiddleware, async (req: any, res) => {
+router.get('/observacoes', jwtAuthMiddleware, async (req: unknown, res) => {
   try {
     const { page = 1, limit = 10, proposta_id, usuario_id } = req.query;
     const { role } = req.user!;

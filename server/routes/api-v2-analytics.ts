@@ -5,7 +5,7 @@ router.get('/v2/analytics', async (req, res) => {
   try {
     const result = await analyticsService.executeOperation('analytics', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

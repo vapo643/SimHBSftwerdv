@@ -18,7 +18,7 @@ describe('Documents Routes Integration Test - PAM V4.0', () => {
   beforeAll(async () => {
     // Create test app instance
     app = express();
-    server = await registerRoutes(app as any); // Type assertion for test compatibility
+    server = await registerRoutes(app as unknown); // Type assertion for test compatibility
   });
 
   afterAll(async () => {

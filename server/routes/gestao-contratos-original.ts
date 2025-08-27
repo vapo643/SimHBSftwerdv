@@ -193,7 +193,7 @@ router.get(
       // Gerar URLs dos documentos assinados
       const supabaseAdmin = createServerSupabaseAdminClient();
       const contratosComUrls = await Promise.all(
-        contratos.map(async (contrato: any) => {
+        contratos.map(async (contrato: unknown) => {
           let urlCcbAssinado = null;
           let urlComprovantePagamento = null;
 
@@ -247,13 +247,13 @@ router.get(
       // Estatísticas gerais (útil para dashboard)
       const estatisticas = {
         totalContratos: contratosComUrls.length,
-        aguardandoPagamento: contratosComUrls.filter((c: any) => c.aguardandoPagamento).length,
-        pagos: contratosComUrls.filter((c: any) => c.dataPagamento).length,
-        valorTotalContratado: contratosComUrls.reduce((sum: number, c: any) => {
+        aguardandoPagamento: contratosComUrls.filter((c: unknown) => c.aguardandoPagamento).length,
+        pagos: contratosComUrls.filter((c: unknown) => c.dataPagamento).length,
+        valorTotalContratado: contratosComUrls.reduce((sum: number, c: unknown) => {
           const valor = parseFloat(c.valor || '0');
           return sum + valor;
         }, 0),
-        valorTotalLiberado: contratosComUrls.reduce((sum: number, c: any) => {
+        valorTotalLiberado: contratosComUrls.reduce((sum: number, c: unknown) => {
           const valor = parseFloat(c.valorLiquidoLiberado || '0');
           return sum + (c.dataPagamento ? valor : 0);
         }, 0),
@@ -421,7 +421,7 @@ router.get(
 /**
  * Função auxiliar para determinar o status de formalização
  */
-function determinarStatusFormalizacao(proposta: any): string {
+function determinarStatusFormalizacao(proposta: unknown): string {
   if (!proposta.ccbGerado) {
     return 'PENDENTE_GERACAO';
   }

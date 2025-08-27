@@ -58,7 +58,7 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
       const url = queryKey.join('/') as string;
       const response = await api.get(url);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (unauthorizedBehavior === 'returnNull' && error.message?.includes('401')) {
         return null;
       }
@@ -72,7 +72,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: 'throw' }),
 
       // RETRY STRATEGY - Exponential Backoff com error categorization
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Não fazer retry em erros de cliente (4xx) exceto 401
         if (error instanceof ApiError) {
           if (error.status >= 400 && error.status < 500 && error.status !== 401) {
@@ -127,7 +127,7 @@ export const queryClient = new QueryClient({
 
     mutations: {
       // Mutations não têm retry automático por padrão
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Retry apenas para operações idempotentes em erros de rede
         if (error instanceof ApiError && error.isRetryable) {
           return failureCount < 2;
@@ -157,8 +157,8 @@ export const queryClient = new QueryClient({
         });
 
         // Enviar para Sentry se disponível
-        if (typeof window !== 'undefined' && (window as any).Sentry) {
-          (window as any).Sentry.captureException(error, {
+        if (typeof window !== 'undefined' && (window as unknown).Sentry) {
+          (window as unknown).Sentry.captureException(error, {
             extra: { variables, context },
             tags: { type: 'mutation-error' },
           });

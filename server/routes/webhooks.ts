@@ -410,7 +410,7 @@ router.post('/inter', express.json(), async (req, res) => {
  */
 async function processInterWebhookEvent(
   codigoSolicitacao: string,
-  webhookData: any,
+  webhookData: unknown,
   startTime: number
 ) {
   console.log(`🔄 [WEBHOOK INTER] Processando evento para ${codigoSolicitacao}`);
@@ -453,7 +453,8 @@ async function processInterWebhookEvent(
     `);
 
     if (collection.length > 0) {
-      const { proposta_id, numero_parcela, total_parcelas, proposta_status } = collection[0] as any;
+      const { proposta_id, numero_parcela, total_parcelas, proposta_status } =
+        collection[0] as unknown;
 
       // Se foi pago, verificar se todas as parcelas foram pagas
       if (situacao === 'PAGO' || situacao === 'RECEBIDO') {
@@ -492,7 +493,7 @@ async function processInterWebhookEvent(
           AND (situacao = 'PAGO' OR situacao = 'RECEBIDO')
         `);
 
-        const totalPaidCount = (allPaid[0] as any)?.total_paid || 0;
+        const totalPaidCount = (allPaid[0] as unknown)?.total_paid || 0;
 
         // Se todas as parcelas foram pagas, atualizar status da proposta
         if (totalPaidCount === total_parcelas) {

@@ -230,7 +230,7 @@ export class CCBCoordinateCalibrator {
       Object.entries(testData).forEach(([fieldName, value]) => {
         const fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
         if (fieldPos && value) {
-          const font = (fieldPos as any).fontWeight === 'bold' ? helveticaBold : helvetica;
+          const font = (fieldPos as unknown).fontWeight === 'bold' ? helveticaBold : helvetica;
 
           // Desenhar o texto
           firstPage.drawText(value, {
@@ -325,7 +325,7 @@ export class CCBCoordinateCalibrator {
    * 📊 Gerar Relatório Completo de Calibração
    */
   async generateCalibrationReport(): Promise<{
-    templateAnalysis: any;
+    templateAnalysis: unknown;
     gridPath: string;
     recommendations: string[];
   }> {

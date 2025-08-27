@@ -201,15 +201,15 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                           ? new Date(log.created_at).toLocaleString('pt-BR')
                           : 'Data não disponível'}
                       </p>
-                      {log.profiles && (log.profiles as any).fullName && (
+                      {log.profiles && (log.profiles as unknown).fullName && (
                         <p className="mt-1 text-sm text-gray-300">
-                          <strong>Por:</strong> {(log.profiles as any).fullName} (
+                          <strong>Por:</strong> {(log.profiles as unknown).fullName} (
                           {log.profiles.role || 'Usuário'})
                         </p>
                       )}
 
                       {/* Destacar observação do ATENDENTE */}
-                      {(log as any).observacao && (
+                      {(log as unknown).observacao && (
                         <div
                           className={`mt-2 rounded border-l-2 p-2 text-sm ${
                             isAtendente
@@ -223,7 +223,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                             </span>
                           )}
                           <div className={isAtendente ? 'mt-1 italic' : 'mt-1'}>
-                            "{(log as any).observacao}"
+                            "{(log as unknown).observacao}"
                           </div>
                         </div>
                       )}

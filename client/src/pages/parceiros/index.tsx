@@ -51,7 +51,7 @@ const PartnersPage: React.FC = () => {
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
       const response = await api.get<Parceiro[]>('/api/parceiros');
-      return Array.isArray(response) ? response : (response as any).data || [];
+      return Array.isArray(response) ? response : (response as unknown).data || [];
     },
   });
 
@@ -59,7 +59,7 @@ const PartnersPage: React.FC = () => {
   const createMutation = useMutation({
     mutationFn: async (data: InsertParceiro) => {
       const response = await api.post<Parceiro>('/api/admin/parceiros', data);
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -83,7 +83,7 @@ const PartnersPage: React.FC = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertParceiro> }) => {
       const response = await api.put<Parceiro>(`/api/admin/parceiros/${id}`, data);
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });

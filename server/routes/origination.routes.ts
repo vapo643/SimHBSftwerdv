@@ -121,7 +121,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     }
 
     // Fix: parceiros should be a single object, not an array
-    const parceiro = lojaData.parceiros as any;
+    const parceiro = lojaData.parceiros as unknown;
 
     const userProfile = {
       id: profileData.id,

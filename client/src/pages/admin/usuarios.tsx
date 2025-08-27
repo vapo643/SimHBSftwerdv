@@ -53,8 +53,8 @@ const UsuariosPage: React.FC = () => {
       const data = response.data;
       return Array.isArray(data)
         ? data
-        : Array.isArray((data as any)?.data)
-          ? (data as any)?.data
+        : Array.isArray((data as unknown)?.data)
+          ? (data as unknown)?.data
           : [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -63,7 +63,7 @@ const UsuariosPage: React.FC = () => {
 
   // Mutation for creating new users
   const createUserMutation = useMutation({
-    mutationFn: async (userData: any) => {
+    mutationFn: async (userData: unknown) => {
       const apiData = {
         fullName: userData.nome,
         email: userData.email,
@@ -95,7 +95,7 @@ const UsuariosPage: React.FC = () => {
       setIsModalOpen(false);
       setSelectedUser(null);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('❌ [USER CREATE ERROR]:', error);
       console.error('❌ [ERROR DATA]:', error.data);
 
@@ -144,7 +144,7 @@ const UsuariosPage: React.FC = () => {
     },
   });
 
-  const handleCreateOrEdit = (userData: any) => {
+  const handleCreateOrEdit = (userData: unknown) => {
     if (selectedUser) {
       // TODO: Implement edit functionality when needed
       toast({

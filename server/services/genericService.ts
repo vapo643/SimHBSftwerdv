@@ -17,7 +17,7 @@ export class GenericService {
   /**
    * Execute a generic operation
    */
-  async executeOperation(operation: string, params?: any): Promise<any> {
+  async executeOperation(operation: string, params?: unknown): Promise<unknown> {
     try {
       console.log(`[${this.serviceName}] Executing ${operation}`, params);
 
@@ -31,7 +31,7 @@ export class GenericService {
       };
 
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[${this.serviceName}] Operation failed:`, error);
       throw new Error(`${this.serviceName} operation failed: ${error.message}`);
     }
@@ -52,7 +52,7 @@ export class GenericService {
         serviceName: this.serviceName,
         timestamp: new Date().toISOString(),
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[${this.serviceName}] Connection test failed:`, error);
       throw error;
     }
@@ -61,7 +61,7 @@ export class GenericService {
   /**
    * Get service status
    */
-  async getStatus(): Promise<any> {
+  async getStatus(): Promise<unknown> {
     return {
       serviceName: this.serviceName,
       status: 'operational',

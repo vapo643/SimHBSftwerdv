@@ -17,7 +17,7 @@ router.post('/execute', async (req: Request, res: Response) => {
   try {
     const result = await interFixService.executeOperation('fix_collections', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[INTER_FIX_COLLECTIONS] Error:', error);
     res.status(500).json({
       success: false,

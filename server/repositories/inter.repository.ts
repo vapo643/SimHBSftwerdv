@@ -71,7 +71,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     limit?: number;
     offset?: number;
   }): Promise<InterCollection[]> {
-    let query = db.select().from(interCollections) as any;
+    let query = db.select().from(interCollections) as unknown;
     const conditions = [];
 
     if (params.dataInicial && params.dataFinal) {
@@ -97,17 +97,17 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
+      query = query.where(and(...conditions)) as unknown;
     }
 
-    query = query.orderBy(desc(interCollections.createdAt)) as any;
+    query = query.orderBy(desc(interCollections.createdAt)) as unknown;
 
     if (params.limit) {
-      query = query.limit(params.limit) as any;
+      query = query.limit(params.limit) as unknown;
     }
 
     if (params.offset) {
-      query = query.offset(params.offset) as any;
+      query = query.offset(params.offset) as unknown;
     }
 
     return await query;
@@ -238,8 +238,8 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     mensagem: string;
     criadoPor: string;
     tipoAcao?: string;
-    dadosAcao?: any;
-  }): Promise<any> {
+    dadosAcao?: unknown;
+  }): Promise<unknown> {
     const result = await db
       .insert(historicoObservacoesCobranca)
       .values([
@@ -266,7 +266,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     statusAnterior?: string;
     atualizadoPor?: string;
     observacoes?: string;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const result = await db
       .insert(statusContextuais)
       .values([
@@ -314,7 +314,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     path: string,
     file: Buffer | Uint8Array,
     contentType: string
-  ): Promise<{ data: any; error: any }> {
+  ): Promise<{ data: unknown; error: unknown }> {
     return await supabaseAdmin.storage.from(bucket).upload(path, file, {
       contentType,
       upsert: true,
@@ -324,7 +324,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
   /**
    * Get download URL from storage
    */
-  async getStorageUrl(bucket: string, path: string): Promise<{ data: any; error: any }> {
+  async getStorageUrl(bucket: string, path: string): Promise<{ data: unknown; error: unknown }> {
     return supabaseAdmin.storage.from(bucket).createSignedUrl(path, 3600); // 1 hour expiry
   }
 }

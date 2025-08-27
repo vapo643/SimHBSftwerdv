@@ -48,7 +48,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       data: payments,
       total: payments.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PAGAMENTOS] Error getting payments:', error);
     res.status(500).json({
       error: 'Erro ao buscar pagamentos',
@@ -71,7 +71,7 @@ router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => 
       success: true,
       data: proposal,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.message.includes('não encontrada') || error.message.includes('não está pronta')) {
       return res.status(404).json({ error: error.message });
     }
@@ -127,7 +127,7 @@ router.post('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       message: 'Pagamento criado com sucesso',
       data: payment,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PAGAMENTOS] Error creating payment:', error);
 
     if (error.message.includes('já possui pagamento')) {
@@ -193,7 +193,7 @@ router.patch('/:id/status', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       message: `Status do pagamento alterado para: ${status}`,
       data: updatedPayment,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PAGAMENTOS] Error updating payment status:', error);
 
     if (error.message.includes('não encontrada')) {
@@ -249,7 +249,7 @@ router.get('/export/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       // For now, return JSON data
       res.json(exportData.data);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PAGAMENTOS] Error exporting payments:', error);
     res.status(500).json({
       error: 'Erro ao exportar dados de pagamentos',
@@ -270,7 +270,7 @@ router.get('/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedReque
       success: true,
       data: dashboard,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PAGAMENTOS] Error getting dashboard:', error);
     res.status(500).json({
       error: 'Erro ao carregar dashboard de pagamentos',
@@ -291,7 +291,7 @@ router.get('/filter-options/data', jwtAuthMiddleware, async (req: AuthenticatedR
       success: true,
       data: options,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PAGAMENTOS] Error getting filter options:', error);
     res.status(500).json({
       error: 'Erro ao carregar opções de filtro',
@@ -312,7 +312,7 @@ router.post('/validate', jwtAuthMiddleware, async (req: AuthenticatedRequest, re
       success: true,
       data: validation,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PAGAMENTOS] Error validating payment data:', error);
     res.status(500).json({
       error: 'Erro ao validar dados de pagamento',
@@ -356,7 +356,7 @@ router.post(
         filename: file.originalname,
         size: file.size,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[PAGAMENTOS] Error uploading document:', error);
       res.status(500).json({
         error: 'Erro ao fazer upload do documento',
@@ -369,7 +369,7 @@ router.post(
 /**
  * Helper function to convert data to CSV format
  */
-function convertToCSV(data: any[]): string {
+function convertToCSV(data: unknown[]): string {
   if (!data || data.length === 0) {
     return '';
   }

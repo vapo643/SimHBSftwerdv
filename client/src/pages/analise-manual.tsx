@@ -97,7 +97,7 @@ export default function AnaliseManual() {
       }
       return failureCount < 2;
     },
-  }) as { data: Proposta | undefined; isLoading: boolean; error: any; isError: boolean };
+  }) as { data: Proposta | undefined; isLoading: boolean; error: unknown; isError: boolean };
 
   const {
     register,
@@ -123,7 +123,7 @@ export default function AnaliseManual() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao salvar decisão',
         description: error.message || 'Tente novamente em alguns instantes.',

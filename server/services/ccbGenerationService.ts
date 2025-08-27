@@ -295,7 +295,7 @@ export class CCBGenerationService {
       console.log('📊 [CCB] Pagamento via:', dadosPagamento.banco || dadosPagamento.chavePix);
 
       // CORREÇÃO 3: Gerar parcelas se não existirem
-      let parcelas: any[] = [];
+      let parcelas: unknown[] = [];
       try {
         const parcelasResult = await db.execute(sql`
           SELECT 
@@ -1269,7 +1269,7 @@ export class CCBGenerationService {
         return null;
       }
 
-      const proposta = result[0] as any;
+      const proposta = result[0] as unknown;
 
       // AUDITORIA COMPLETA DOS DADOS
       console.log('📊 [CCB] ========== AUDITORIA COMPLETA DE DADOS ==========');

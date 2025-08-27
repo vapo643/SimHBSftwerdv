@@ -17,7 +17,7 @@ router.post('/run', async (req: Request, res: Response) => {
   try {
     const result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CCB_DIAGNOSTICS] Error:', error);
     res.status(500).json({
       success: false,
@@ -34,7 +34,7 @@ router.get('/test', async (req: Request, res: Response) => {
   try {
     const result = await ccbDiagnosticsService.testConnection();
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CCB_DIAGNOSTICS] Test failed:', error);
     res.status(500).json({
       success: false,
@@ -53,7 +53,7 @@ router.get('/report', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
     res.json(report);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CCB_DIAGNOSTICS] Report generation failed:', error);
     res.status(500).json({
       success: false,

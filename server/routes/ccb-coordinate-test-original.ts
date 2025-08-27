@@ -17,7 +17,7 @@ router.post('/run', async (req: Request, res: Response) => {
   try {
     const result = await ccbTestService.executeOperation('coordinate_test', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CCB_COORDINATE_TEST] Error:', error);
     res.status(500).json({
       success: false,

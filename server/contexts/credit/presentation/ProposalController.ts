@@ -63,13 +63,13 @@ export class ProposalController {
 
       // Transform dates if needed
       if (validatedData.customerData.birthDate) {
-        (validatedData.customerData as any).birthDate = new Date(
+        (validatedData.customerData as unknown).birthDate = new Date(
           validatedData.customerData.birthDate
         );
       }
 
       // Create proposal through application service
-      const proposal = await this.applicationService.createProposal(validatedData as any);
+      const proposal = await this.applicationService.createProposal(validatedData as unknown);
 
       // Return created proposal
       res.status(201).json({

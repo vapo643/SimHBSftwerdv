@@ -16,7 +16,7 @@ export interface PreApprovalResult {
   reason?: string;
   calculatedCommitment?: number;
   requiredFields?: string[];
-  fsmResult?: any;
+  fsmResult?: unknown;
 }
 
 interface ValidationResult {

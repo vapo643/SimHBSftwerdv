@@ -5,7 +5,7 @@ router.get('/v2/clients', async (req, res) => {
   try {
     const result = await clientService.executeOperation('list_v2', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

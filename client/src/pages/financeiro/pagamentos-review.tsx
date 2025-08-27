@@ -33,7 +33,7 @@ import { ptBR } from 'date-fns/locale';
 interface PaymentReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposta: any;
+  proposta: unknown;
   onConfirm: () => void;
 }
 
@@ -69,7 +69,7 @@ export default function PaymentReviewModal({
       console.log('✅ [REVIEW MODAL] Veracidade confirmada com sucesso:', data);
 
       // Verificar se foi uma resposta idempotente
-      if ((data as any).idempotent) {
+      if ((data as unknown).idempotent) {
         toast({
           title: 'Pagamento já autorizado',
           description: 'Este pagamento já foi autorizado anteriormente.',
@@ -89,7 +89,7 @@ export default function PaymentReviewModal({
       setShowConfirmDialog(false);
       queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('❌ [REVIEW MODAL] Erro ao confirmar veracidade:', error);
       toast({
         title: 'Erro ao confirmar veracidade',
@@ -137,7 +137,7 @@ export default function PaymentReviewModal({
       onConfirm();
       onClose();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erro ao marcar como pago',
         description: error.message || 'Não foi possível marcar a proposta como paga.',
@@ -181,7 +181,7 @@ export default function PaymentReviewModal({
           variant: 'destructive',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ [CCB VIEW] Erro:', error);
       toast({
         title: 'Erro ao abrir CCB',

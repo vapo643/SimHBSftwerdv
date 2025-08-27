@@ -90,7 +90,7 @@ async function testarProrrogarVencimento() {
     }
 
     return atualizacaoConfirmada;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('\n❌ Erro ao testar prorrogação:', error.response?.data || error.message);
     return false;
   }
@@ -190,7 +190,7 @@ async function testarDescontoQuitacao() {
     }
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(
       '\n❌ Erro ao testar desconto de quitação:',
       error.response?.data || error.message

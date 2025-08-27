@@ -5,7 +5,7 @@ let redisClient: Redis | null = null;
 
 // Verificar se estamos em desenvolvimento para usar cache in-memory
 const isDevelopment = process.env.NODE_ENV === 'development';
-const inMemoryCache = new Map<string, { value: any; expires: number }>();
+const inMemoryCache = new Map<string, { value: unknown; expires: number }>();
 
 /**
  * Inicializa o cliente Redis reutilizando a conexão existente

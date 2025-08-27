@@ -5,7 +5,7 @@ router.post('/create', async (req, res) => {
   try {
     const result = await backupService.executeOperation('create_backup', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

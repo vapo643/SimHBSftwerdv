@@ -59,7 +59,7 @@ router.get('/scan/*', async (req: Request, res: Response) => {
       file: filePath,
       analysis: result,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[MCP API] Scan error:', error);
     res.status(500).json({
       success: false,
@@ -93,7 +93,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       analysis: result,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[MCP API] Analysis error:', error);
     res.status(500).json({
       success: false,
@@ -120,7 +120,7 @@ router.get('/context/:component', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       context,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[MCP API] Context error:', error);
     res.status(500).json({
       success: false,
@@ -148,7 +148,7 @@ router.get('/history/*', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       history,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[MCP API] History error:', error);
     res.status(500).json({
       success: false,
@@ -173,18 +173,18 @@ router.get('/rules', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       rules: {
         total: rules.length,
-        by_severity: rules.reduce((acc: any, rule: any) => {
+        by_severity: rules.reduce((acc: unknown, rule: unknown) => {
           acc[rule.severity || 'unknown'] = (acc[rule.severity || 'unknown'] || 0) + 1;
           return acc;
         }, {}),
-        by_category: rules.reduce((acc: any, rule: any) => {
+        by_category: rules.reduce((acc: unknown, rule: unknown) => {
           acc[rule.category || 'unknown'] = (acc[rule.category || 'unknown'] || 0) + 1;
           return acc;
         }, {}),
         list: rules,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[MCP API] Rules error:', error);
     res.status(500).json({
       success: false,

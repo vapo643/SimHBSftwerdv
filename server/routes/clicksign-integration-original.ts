@@ -127,7 +127,7 @@ router.post(
       }
 
       // Parse client data from JSONB
-      const clienteData = proposta.clienteData as any;
+      const clienteData = proposta.clienteData as unknown;
       if (!clienteData || !clienteData.nome || !clienteData.email || !clienteData.cpf) {
         return res.status(400).json({
           message:
@@ -344,7 +344,7 @@ router.post(
       }
 
       // Parse client data from JSONB
-      const clienteData = proposta.clienteData as any;
+      const clienteData = proposta.clienteData as unknown;
       if (!clienteData || !clienteData.nome || !clienteData.email || !clienteData.cpf) {
         return res.status(400).json({
           message: 'Dados do cliente incompletos. Nome, email e CPF são obrigatórios.',

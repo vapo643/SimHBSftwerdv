@@ -117,7 +117,7 @@ export class CCBSyncService {
       );
 
       // Process in batch
-      const processingTasks = proposals.map((proposal: any) => ({
+      const processingTasks = proposals.map((proposal: unknown) => ({
         id: proposal.id as string,
         documentKey: (proposal.clicksign_document_id || proposal.clicksign_envelope_id) as string,
       }));

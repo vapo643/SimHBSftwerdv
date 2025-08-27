@@ -64,7 +64,7 @@ export class PagamentoService {
   /**
    * Get specific proposal for payment
    */
-  async getProposalForPayment(proposalId: string): Promise<any> {
+  async getProposalForPayment(proposalId: string): Promise<unknown> {
     const proposal = await pagamentoRepository.getProposalForPayment(proposalId);
 
     if (!proposal) {
@@ -89,7 +89,7 @@ export class PagamentoService {
   /**
    * Create new payment
    */
-  async createPayment(paymentData: any, userId: string): Promise<any> {
+  async createPayment(paymentData: unknown, userId: string): Promise<unknown> {
     // Validate payment data
     const validated = pagamentoSchema.parse(paymentData);
 
@@ -158,7 +158,7 @@ export class PagamentoService {
     status: string,
     userId: string,
     observacoes?: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     // Get current proposal
     const proposal = await pagamentoRepository.getProposalForPayment(proposalId);
     if (!proposal) {
@@ -239,7 +239,7 @@ export class PagamentoService {
     loja?: string;
     formato?: 'csv' | 'excel';
   }): Promise<{
-    data: any[];
+    data: unknown[];
     filename: string;
     contentType: string;
   }> {
@@ -291,8 +291,8 @@ export class PagamentoService {
    * Get payment statistics dashboard
    */
   async getPaymentsDashboard(): Promise<{
-    statistics: any;
-    recentPayments: any[];
+    statistics: unknown;
+    recentPayments: unknown[];
     pendingCount: number;
     totalValue: number;
   }> {
@@ -326,7 +326,7 @@ export class PagamentoService {
   /**
    * Validate payment data before processing
    */
-  async validatePaymentData(paymentData: any): Promise<{
+  async validatePaymentData(paymentData: unknown): Promise<{
     valid: boolean;
     errors: string[];
     warnings: string[];
@@ -369,8 +369,8 @@ export class PagamentoService {
    * Get available lojas and produtos for filters
    */
   async getFilterOptions(): Promise<{
-    lojas: any[];
-    produtos: any[];
+    lojas: unknown[];
+    produtos: unknown[];
     statusOptions: string[];
     formaPagamentoOptions: string[];
   }> {

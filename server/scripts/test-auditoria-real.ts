@@ -24,7 +24,7 @@ async function fazerLogin(): Promise<string> {
     } else {
       throw new Error('Token não retornado');
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('❌ Erro no login, tentando criar usuário admin...\n');
 
     // Tentar criar usuário admin se não existir
@@ -66,7 +66,7 @@ async function buscarPropostaComBoletos(
     });
 
     const collections = response.data.collections || [];
-    const boletoAtivo = collections.find((c: any) => c.isActive && c.situacao === 'A_RECEBER');
+    const boletoAtivo = collections.find((c: unknown) => c.isActive && c.situacao === 'A_RECEBER');
 
     if (!boletoAtivo) {
       throw new Error('Nenhum boleto ativo encontrado');
@@ -116,7 +116,7 @@ async function testarProrrogacaoComAuditoria(token: string, codigoSolicitacao: s
     console.log('\n');
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Erro na prorrogação:', error.response?.data || error.message);
     return false;
   }
@@ -188,7 +188,7 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     console.log('\n');
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Erro no desconto:', error.response?.data || error.message);
     return false;
   }

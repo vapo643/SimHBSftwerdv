@@ -82,9 +82,9 @@ export async function rlsAuthMiddleware(
         const { jwtAuthMiddleware } = await import('./jwt-auth-middleware.js');
 
         // Cast to any to avoid type conflicts in test environment
-        const testReq = req as any;
+        const testReq = req as unknown;
 
-        return jwtAuthMiddleware(testReq, res, async (err?: any) => {
+        return jwtAuthMiddleware(testReq, res, async (err?: unknown) => {
           if (err) {
             return res.status(401).json({ message: 'Invalid test token' });
           }

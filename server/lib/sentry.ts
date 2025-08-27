@@ -163,7 +163,7 @@ export function sentryTransactionMiddleware(req: Request, res: Response, next: N
 }
 
 // Helper para capturar exceções manuais
-export function captureException(error: Error, context?: any) {
+export function captureException(error: Error, context?: unknown) {
   logError('🔴 Capturing exception to Sentry', error, context);
   Sentry.captureException(error, {
     contexts: {
@@ -176,14 +176,14 @@ export function captureException(error: Error, context?: any) {
 export function captureMessage(
   message: string,
   level: Sentry.SeverityLevel = 'info',
-  context?: any
+  context?: unknown
 ) {
   logInfo(`📝 Capturing message to Sentry: ${message}`, context);
   Sentry.captureMessage(message, level);
 }
 
 // Helper para adicionar breadcrumbs
-export function addBreadcrumb(message: string, category: string, data?: any) {
+export function addBreadcrumb(message: string, category: string, data?: unknown) {
   Sentry.addBreadcrumb({
     message,
     category,
@@ -207,12 +207,13 @@ export const tracingHandler = () => (req: Request, res: Response, next: NextFunc
   next();
 };
 
-export const errorHandler = () => (err: any, req: Request, res: Response, next: NextFunction) => {
-  // Capturar apenas erros 500+
-  if (!err.status || err.status >= 500) {
-    Sentry.captureException(err);
-  }
-  next(err);
-};
+export const errorHandler =
+  () => (err: unknown, req: Request, res: Response, next: NextFunction) => {
+    // Capturar apenas erros 500+
+    if (!err.status || err.status >= 500) {
+      Sentry.captureException(err);
+    }
+    next(err);
+  };
 
 export default Sentry;

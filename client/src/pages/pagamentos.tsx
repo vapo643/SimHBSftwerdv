@@ -294,8 +294,8 @@ export default function Pagamentos() {
 
   // Sort propostas
   const sortedPropostas = [...filteredPropostas].sort((a, b) => {
-    let aVal: any;
-    let bVal: any;
+    let aVal: unknown;
+    let bVal: unknown;
 
     if (sortBy === 'valor' || sortBy === 'valorSolicitado' || sortBy === 'valorAprovado') {
       aVal = a.valorFinanciado || 0;

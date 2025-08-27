@@ -67,7 +67,7 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
 /**
  * Strips sensitive parameters from URLs in responses
  */
-export function sanitizeResponseUrls(data: any): any {
+export function sanitizeResponseUrls(data: unknown): unknown {
   if (typeof data === 'string') {
     // Remove token parameters from URLs
     return data.replace(/([?&])(token|jwt|auth|access_token|session)=[^&]*/gi, '$1');
@@ -78,7 +78,7 @@ export function sanitizeResponseUrls(data: any): any {
       return data.map((item) => sanitizeResponseUrls(item));
     }
 
-    const sanitized: any = {};
+    const sanitized: unknown = {};
     for (const [key, value] of Object.entries(data)) {
       sanitized[key] = sanitizeResponseUrls(value);
     }

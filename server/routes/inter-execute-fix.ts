@@ -17,7 +17,7 @@ router.post('/run', async (req: Request, res: Response) => {
   try {
     const result = await interExecuteService.executeOperation('execute_fix', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[INTER_EXECUTE_FIX] Error:', error);
     res.status(500).json({
       success: false,

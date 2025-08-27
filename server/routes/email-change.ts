@@ -17,7 +17,7 @@ router.post('/request', async (req: Request, res: Response) => {
   try {
     const result = await securityTestService.executeOperation('email_change_request', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       success: false,
       error: error.message || 'Email change request failed',
@@ -33,7 +33,7 @@ router.post('/confirm', async (req: Request, res: Response) => {
   try {
     const result = await securityTestService.executeOperation('email_change_confirm', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       success: false,
       error: error.message || 'Email change confirmation failed',

@@ -76,7 +76,7 @@ export function useUserFormData() {
   const fetchStoresByPartner = async (partnerId: number): Promise<Store[]> => {
     if (shouldUseClientSideFiltering && allStores) {
       // Client-side filtering: filter from pre-loaded data
-      return allStores.filter((store: any) => (store as any).parceiroId === partnerId);
+      return allStores.filter((store: unknown) => (store as unknown).parceiroId === partnerId);
     } else {
       // Server-side filtering: fetch on-demand
       const response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);

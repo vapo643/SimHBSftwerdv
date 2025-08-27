@@ -11,7 +11,7 @@ export class MonitoringRepository {
   /**
    * Get database statistics
    */
-  async getDatabaseStats(): Promise<any> {
+  async getDatabaseStats(): Promise<unknown> {
     try {
       const result = await db.execute(sql`
         SELECT 
@@ -106,10 +106,10 @@ export class MonitoringRepository {
    */
   async checkDatabaseHealth(): Promise<{
     isHealthy: boolean;
-    checks: any;
+    checks: unknown;
   }> {
     try {
-      const checks: any = {
+      const checks: unknown = {
         connection: false,
         tableAccess: false,
         writePermission: false,
@@ -147,7 +147,7 @@ export class MonitoringRepository {
   /**
    * Generate monitoring report
    */
-  async generateReport(): Promise<any> {
+  async generateReport(): Promise<unknown> {
     try {
       const [stats, tables, indexes, connections, health] = await Promise.all([
         this.getDatabaseStats(),

@@ -63,7 +63,7 @@ export class CreditAnalysisService {
   /**
    * Calculate credit score based on customer profile
    */
-  private calculateCreditScore(customerData: any, loanConditions: any): CreditScore {
+  private calculateCreditScore(customerData: unknown, loanConditions: unknown): CreditScore {
     let score = 600; // Base score
     const factors: string[] = [];
 
@@ -135,7 +135,7 @@ export class CreditAnalysisService {
   /**
    * Determine if proposal should be approved
    */
-  private shouldApprove(score: CreditScore, loanConditions: any): boolean {
+  private shouldApprove(score: CreditScore, loanConditions: unknown): boolean {
     // Auto-approve low risk
     if (score.risk === 'LOW') {
       return true;

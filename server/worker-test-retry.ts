@@ -73,7 +73,7 @@ testRetryWorker.on('failed', (job, err) => {
       ? Math.pow(2, attemptNumber - 1) *
         (typeof job.opts.backoff === 'number'
           ? job.opts.backoff
-          : (job.opts.backoff as any)?.delay || 1000)
+          : (job.opts.backoff as unknown)?.delay || 1000)
       : 0;
 
     console.log(`[TEST RETRY WORKER] 🔄 Retry será tentado em ${backoffDelay}ms`);

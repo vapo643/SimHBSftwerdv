@@ -5,7 +5,7 @@ router.all('/gateway/*', async (req, res) => {
   try {
     const result = await integrationTestService.executeOperation('api_gateway', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 
 interface EventoTrigger {
   tipo: string;
-  dados: any;
+  dados: unknown;
 }
 
 interface ProcessadorRegra {
@@ -31,7 +31,7 @@ interface NotificacaoData {
   tipo: string;
   prioridade: string;
   destinatarios: string[];
-  dados: any;
+  dados: unknown;
   linkRelacionado?: string;
 }
 
@@ -71,7 +71,7 @@ export class AlertasProativosService {
             )
           );
 
-        return resultado.map((r: any) => ({
+        return resultado.map((r: unknown) => ({
           tipo: 'alto_valor_vencimento_proximo',
           titulo: 'Proposta de Alto Valor Vencendo',
           mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - Valor Total: R$ ${parseFloat(r.valorTotal || 0).toFixed(2)} - Parcela ${r.numeroParcela} vence em ${format(new Date(r.dataVencimento), 'dd/MM/yyyy')}`,
@@ -112,7 +112,7 @@ export class AlertasProativosService {
           )
           .groupBy(propostas.id);
 
-        return resultado.map((r: any) => ({
+        return resultado.map((r: unknown) => ({
           tipo: 'atraso_longo_30_dias',
           titulo: 'Atraso Superior a 30 Dias',
           mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - ${r.parcelasVencidas} parcelas vencidas há mais de 30 dias - Total: R$ ${r.valorTotalVencido.toFixed(2)}`,
@@ -262,7 +262,7 @@ export class AlertasProativosService {
   /**
    * Verifica se o pagamento foi realizado após visualização do boleto
    */
-  private async verificarPagamentoAposVisualizacao(dados: any): Promise<void> {
+  private async verificarPagamentoAposVisualizacao(dados: unknown): Promise<void> {
     // Implementação futura
     console.log(`[ALERTAS PROATIVOS] Verificando pagamento após visualização:`, dados);
   }

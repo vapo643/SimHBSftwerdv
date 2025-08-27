@@ -58,7 +58,7 @@ const updatePropostaStatus = async ({
       motivoPendencia,
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(error.message || 'Falha ao atualizar status');
   }
 };

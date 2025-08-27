@@ -5,7 +5,7 @@ router.post('/forecast', async (req, res) => {
   try {
     const result = await reportingService.executeOperation('financial_forecast', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

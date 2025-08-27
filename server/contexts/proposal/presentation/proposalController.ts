@@ -36,7 +36,7 @@ export class ProposalController {
         '[ProposalController.create] Raw request body:',
         JSON.stringify(req.body, null, 2)
       );
-      console.log('[ProposalController.create] User context:', (req as any).user);
+      console.log('[ProposalController.create] User context:', (req as unknown).user);
 
       // Mapear body da requisição para DTO do caso de uso
       const dto = {
@@ -61,7 +61,7 @@ export class ProposalController {
         taxaJuros: parseFloat(req.body.taxaJuros),
         produtoId: req.body.produtoId,
         lojaId: req.body.lojaId,
-        atendenteId: req.body.atendenteId || (req as any).user?.id,
+        atendenteId: req.body.atendenteId || (req as unknown).user?.id,
       };
 
       console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));
@@ -72,7 +72,7 @@ export class ProposalController {
         success: true,
         data: result,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ProposalController.create] Error:', error);
 
       // Tratar erros de validação do domínio
@@ -138,7 +138,7 @@ export class ProposalController {
         success: true,
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ProposalController.getById] Error:', error);
 
       return res.status(500).json({
@@ -156,8 +156,8 @@ export class ProposalController {
       const { status, loja_id, atendente_id, cpf } = req.query;
 
       // Aplicar filtros baseados no role do usuário
-      const user = (req as any).user;
-      let criteria: any = {};
+      const user = (req as unknown).user;
+      let criteria: unknown = {};
 
       if (status) criteria.status = status as string;
       if (loja_id) criteria.lojaId = parseInt(loja_id as string);
@@ -194,7 +194,7 @@ export class ProposalController {
         data,
         total: data.length,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ProposalController.list] Error:', error);
 
       return res.status(500).json({
@@ -211,7 +211,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
       const { observacoes } = req.body;
-      const analistaId = (req as any).user?.id;
+      const analistaId = (req as unknown).user?.id;
 
       if (!analistaId) {
         return res.status(401).json({
@@ -232,7 +232,7 @@ export class ProposalController {
         success: true,
         message: 'Proposta aprovada com sucesso',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ProposalController.approve] Error:', error);
 
       if (error.message.includes('não encontrada')) {
@@ -266,7 +266,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
       const { motivo } = req.body;
-      const analistaId = (req as any).user?.id;
+      const analistaId = (req as unknown).user?.id;
 
       if (!analistaId) {
         return res.status(401).json({
@@ -294,7 +294,7 @@ export class ProposalController {
         success: true,
         message: 'Proposta rejeitada',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ProposalController.reject] Error:', error);
 
       if (error.message.includes('não encontrada')) {
@@ -355,7 +355,7 @@ export class ProposalController {
           cliente_data: latestProposal.clienteData,
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ProposalController.getByCpf] Error:', error);
 
       return res.status(500).json({
@@ -391,7 +391,7 @@ export class ProposalController {
         success: true,
         message: 'Proposta submetida para análise',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ProposalController.submitForAnalysis] Error:', error);
 
       if (error.message.includes('Apenas propostas em rascunho')) {

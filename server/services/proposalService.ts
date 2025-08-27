@@ -14,12 +14,12 @@ export class ProposalService extends GenericService {
   /**
    * Process proposal operations
    */
-  async processProposal(operation: string, data: any): Promise<any> {
+  async processProposal(operation: string, data: unknown): Promise<unknown> {
     try {
       console.log(`[PROPOSAL_SERVICE] Processing ${operation}`, data);
 
       return await this.executeOperation(operation, data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[PROPOSAL_SERVICE] Operation ${operation} failed:`, error);
       throw error;
     }
@@ -28,7 +28,7 @@ export class ProposalService extends GenericService {
   /**
    * Handle proposal lifecycle
    */
-  async handleLifecycle(action: string, proposalData: any): Promise<any> {
+  async handleLifecycle(action: string, proposalData: unknown): Promise<unknown> {
     return await this.executeOperation(`lifecycle_${action}`, proposalData);
   }
 }

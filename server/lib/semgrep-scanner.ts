@@ -296,12 +296,12 @@ rules:
   /**
    * Processar findings
    */
-  private parseFindings(results: any): SemgrepFinding[] {
+  private parseFindings(results: unknown): SemgrepFinding[] {
     const findings: SemgrepFinding[] = [];
 
     if (!results.results) return findings;
 
-    results.results.forEach((result: any) => {
+    results.results.forEach((result: unknown) => {
       findings.push({
         id: `SEMGREP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         rule: result.check_id,
@@ -357,7 +357,7 @@ rules:
   /**
    * Gerar sugestão de correção
    */
-  private generateFixSuggestion(result: any): string {
+  private generateFixSuggestion(result: unknown): string {
     const rule = result.check_id;
 
     const suggestions: Record<string, string> = {

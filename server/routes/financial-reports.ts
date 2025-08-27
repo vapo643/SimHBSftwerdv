@@ -5,7 +5,7 @@ router.get('/financial', async (req, res) => {
   try {
     const result = await reportingService.executeOperation('financial_reports', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

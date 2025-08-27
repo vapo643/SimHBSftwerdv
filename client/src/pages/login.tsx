@@ -35,7 +35,7 @@ const LoginPage: React.FC = () => {
     try {
       await signIn(data.email, data.password);
       setLocation('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Erro ao fazer login',
         description: error.message || 'Credenciais inválidas',

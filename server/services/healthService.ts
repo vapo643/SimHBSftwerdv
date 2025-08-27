@@ -20,10 +20,10 @@ export class HealthService {
     uptime: number;
     environment: string;
     version: string;
-    checks: any;
-    metrics?: any;
+    checks: unknown;
+    metrics?: unknown;
   }> {
-    const checks: any = {};
+    const checks: unknown = {};
     let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 
     // Database check
@@ -70,7 +70,7 @@ export class HealthService {
   /**
    * Check database connectivity and performance
    */
-  private async checkDatabase(): Promise<any> {
+  private async checkDatabase(): Promise<unknown> {
     const startTime = Date.now();
 
     try {
@@ -81,7 +81,7 @@ export class HealthService {
         status: latency < 100 ? 'healthy' : 'degraded',
         latency,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         status: 'unhealthy',
         error: error.message,
@@ -93,7 +93,7 @@ export class HealthService {
   /**
    * Check Supabase connectivity
    */
-  private async checkSupabase(): Promise<any> {
+  private async checkSupabase(): Promise<unknown> {
     const startTime = Date.now();
 
     try {
@@ -120,7 +120,7 @@ export class HealthService {
         status: latency < 200 ? 'healthy' : 'degraded',
         latency,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         status: 'unhealthy',
         error: error.message,
@@ -132,7 +132,7 @@ export class HealthService {
   /**
    * Check filesystem access
    */
-  private async checkFilesystem(): Promise<any> {
+  private async checkFilesystem(): Promise<unknown> {
     try {
       const testFile = '/tmp/health_check_test.txt';
 
@@ -149,7 +149,7 @@ export class HealthService {
         status: 'healthy',
         writable: true,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         status: 'unhealthy',
         writable: false,
@@ -161,7 +161,7 @@ export class HealthService {
   /**
    * Check memory usage
    */
-  private checkMemory(): any {
+  private checkMemory(): unknown {
     const totalMemory = os.totalmem();
     const freeMemory = os.freemem();
     const usedMemory = totalMemory - freeMemory;
@@ -178,8 +178,8 @@ export class HealthService {
   /**
    * Check external API availability (non-blocking)
    */
-  private async checkExternalApis(): Promise<any> {
-    const apis: any = {};
+  private async checkExternalApis(): Promise<unknown> {
+    const apis: unknown = {};
 
     // Check Banco Inter (if configured)
     if (process.env.INTER_CLIENT_ID) {
@@ -197,7 +197,7 @@ export class HealthService {
   /**
    * Get system metrics
    */
-  private getSystemMetrics(): any {
+  private getSystemMetrics(): unknown {
     const totalMemory = os.totalmem();
     const freeMemory = os.freemem();
     const usedMemory = totalMemory - freeMemory;
@@ -239,10 +239,10 @@ export class HealthService {
    */
   async getReadiness(): Promise<{
     ready: boolean;
-    checks: any;
+    checks: unknown;
     timestamp: string;
   }> {
-    const checks: any = {};
+    const checks: unknown = {};
 
     // Check database
     try {

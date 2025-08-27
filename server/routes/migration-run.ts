@@ -5,7 +5,7 @@ router.post('/run', async (req, res) => {
   try {
     const result = await migrationService.executeOperation('run_migration', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

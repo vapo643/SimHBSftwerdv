@@ -17,7 +17,7 @@ router.post('/run', async (req: Request, res: Response) => {
   try {
     const result = await ccbTestService.executeOperation('run_test', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CCB_TEST] Error:', error);
     res.status(500).json({
       success: false,
@@ -34,7 +34,7 @@ router.get('/status', async (req: Request, res: Response) => {
   try {
     const status = await ccbTestService.getStatus();
     res.json(status);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[CCB_TEST] Status check failed:', error);
     res.status(500).json({
       success: false,

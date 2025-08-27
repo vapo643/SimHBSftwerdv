@@ -83,7 +83,7 @@ export function useProposalEffects() {
         const response = (await apiRequest('/api/simular', {
           method: 'POST',
           body: JSON.stringify(payload),
-        })) as any; // Type assertion for now
+        })) as unknown; // Type assertion for now
 
         console.log('[FRONTEND] Resposta da nova API:', response);
 

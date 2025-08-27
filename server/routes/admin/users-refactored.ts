@@ -125,7 +125,7 @@ router.post(
       console.log(`✅ [Controller/Users] User created: ${newUser.email}`);
 
       return res.status(201).json(formattedUser);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle validation errors
       if (error instanceof z.ZodError) {
         const flatErrors = error.flatten();
@@ -299,7 +299,7 @@ router.get(
 
       // PADRÃO CORRETO: Service busca usuários por perfil
       const users = await userService.getUsersByRole(role);
-      const formattedUsers = userService.formatUsersForResponse(users as any);
+      const formattedUsers = userService.formatUsersForResponse(users as unknown);
 
       res.json(formattedUsers);
     } catch (error) {
@@ -336,7 +336,7 @@ router.get(
 
       // PADRÃO CORRETO: Service busca usuários por loja
       const users = await userService.getUsersByLoja(lojaId);
-      const formattedUsers = userService.formatUsersForResponse(users as any);
+      const formattedUsers = userService.formatUsersForResponse(users as unknown);
 
       res.json(formattedUsers);
     } catch (error) {

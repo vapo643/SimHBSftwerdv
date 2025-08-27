@@ -24,7 +24,7 @@ export class DocumentProcessingService {
     proposalId: string,
     source: ProcessingSource = ProcessingSource.MANUAL,
     documentKey?: string
-  ): Promise<{ success: boolean; message: string; details?: any }> {
+  ): Promise<{ success: boolean; message: string; details?: unknown }> {
     const startTime = Date.now();
 
     try {

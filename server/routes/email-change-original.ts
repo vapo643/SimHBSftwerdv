@@ -140,7 +140,7 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
       // In production, remove this line:
       debugToken: process.env.NODE_ENV === 'development' ? token : undefined,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.name === 'ZodError') {
       return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
     }
@@ -228,7 +228,7 @@ router.post('/verify-email-change', async (req, res) => {
     res.json({
       message: 'Email atualizado com sucesso. Por favor, faça login novamente com seu novo email.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.name === 'ZodError') {
       return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
     }

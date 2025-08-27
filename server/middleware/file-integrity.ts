@@ -30,7 +30,7 @@ export function fileIntegrityMiddleware(
   const originalJson = res.json;
 
   // Override send method to add integrity headers
-  res.send = function (data: any) {
+  res.send = function (data: unknown) {
     if (
       Buffer.isBuffer(data) &&
       res.getHeader('Content-Type')?.toString().includes('application/pdf')
@@ -57,8 +57,8 @@ export function fileIntegrityMiddleware(
       securityLogger.logEvent({
         type: SecurityEventType.DATA_ACCESS,
         severity: 'LOW',
-        userId: (req as any).user?.id,
-        userEmail: (req as any).user?.email,
+        userId: (req as unknown).user?.id,
+        userEmail: (req as unknown).user?.email,
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
@@ -75,7 +75,7 @@ export function fileIntegrityMiddleware(
   };
 
   // Override json method to add integrity for JSON downloads
-  res.json = function (data: any) {
+  res.json = function (data: unknown) {
     if (req.query.download === 'true' || req.headers['x-download-request'] === 'true') {
       const jsonString = JSON.stringify(data);
       const buffer = Buffer.from(jsonString, 'utf-8');
@@ -142,8 +142,8 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
         ? SecurityEventType.DATA_ACCESS
         : SecurityEventType.FILE_INTEGRITY_VIOLATION,
       severity: verification.valid ? 'LOW' : 'HIGH',
-      userId: (req as any).user?.id,
-      userEmail: (req as any).user?.email,
+      userId: (req as unknown).user?.id,
+      userEmail: (req as unknown).user?.email,
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
       endpoint: req.originalUrl,
@@ -159,7 +159,7 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       errors: verification.errors,
       storedAt: storedIntegrity.generatedAt,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       error: 'Erro ao verificar integridade do arquivo',
       message: error.message,

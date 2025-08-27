@@ -5,7 +5,7 @@ router.post('/listen', async (req, res) => {
   try {
     const result = await integrationTestService.executeOperation('event_listener', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -5,7 +5,7 @@ router.get('/:id/status', async (req, res) => {
   try {
     const result = await paymentsService.executeOperation('payment_status', { id: req.params.id });
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import TabelasComerciais from '@/pages/configuracoes/tabelas';
 
 declare global {
-  var jest: any;
+  var jest: unknown;
 }
 
 // Mock do DashboardLayout

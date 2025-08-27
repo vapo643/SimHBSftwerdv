@@ -5,7 +5,7 @@ router.post('/process', async (req, res) => {
   try {
     const result = await paymentsService.executeOperation('process_payment', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

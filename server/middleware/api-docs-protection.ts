@@ -48,8 +48,8 @@ export function apiDocsProtectionMiddleware(req: Request, res: Response, next: N
     securityLogger.logEvent({
       type: SecurityEventType.SUSPICIOUS_ACTIVITY,
       severity: 'MEDIUM',
-      userId: (req as any).user?.id,
-      userEmail: (req as any).user?.email,
+      userId: (req as unknown).user?.id,
+      userEmail: (req as unknown).user?.email,
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
       endpoint: req.originalUrl,
@@ -99,8 +99,8 @@ export function apiEnumerationProtectionMiddleware(
     securityLogger.logEvent({
       type: SecurityEventType.SUSPICIOUS_ACTIVITY,
       severity: 'HIGH',
-      userId: (req as any).user?.id,
-      userEmail: (req as any).user?.email,
+      userId: (req as unknown).user?.id,
+      userEmail: (req as unknown).user?.email,
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
       endpoint: req.originalUrl,
@@ -129,8 +129,8 @@ export function generateFakeApiDocs(req: Request, res: Response) {
   securityLogger.logEvent({
     type: SecurityEventType.SUSPICIOUS_ACTIVITY,
     severity: 'HIGH',
-    userId: (req as any).user?.id,
-    userEmail: (req as any).user?.email,
+    userId: (req as unknown).user?.id,
+    userEmail: (req as unknown).user?.email,
     ipAddress: getClientIP(req),
     userAgent: req.headers['user-agent'],
     endpoint: req.originalUrl,

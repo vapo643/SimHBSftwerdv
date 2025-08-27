@@ -21,7 +21,7 @@ export interface VulnerabilityReport {
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   endpoint?: string;
   description: string;
-  evidence: any;
+  evidence: unknown;
   recommendation: string;
   detectedAt: Date;
   cweId?: string;
@@ -87,10 +87,10 @@ export class AutonomousSecurityScanner {
    * Descobrir todos os endpoints da aplicação
    */
   private async discoverEndpoints() {
-    const routes: any[] = [];
+    const routes: unknown[] = [];
 
     // Extrair todas as rotas do Express
-    this.app._router.stack.forEach((middleware: any) => {
+    this.app._router.stack.forEach((middleware: unknown) => {
       if (middleware.route) {
         // Rota direta
         const methods = Object.keys(middleware.route.methods);
@@ -103,7 +103,7 @@ export class AutonomousSecurityScanner {
         });
       } else if (middleware.name === 'router') {
         // Sub-router
-        middleware.handle.stack.forEach((handler: any) => {
+        middleware.handle.stack.forEach((handler: unknown) => {
           if (handler.route) {
             const methods = Object.keys(handler.route.methods);
             methods.forEach((method) => {
@@ -167,14 +167,14 @@ export class AutonomousSecurityScanner {
    */
   private startContinuousMonitoring() {
     // Interceptar TODAS as requisições
-    this.app.use((req: Request, res: Response, next: any) => {
+    this.app.use((req: Request, res: Response, next: unknown) => {
       const startTime = Date.now();
       const reqData = this.captureRequestData(req);
 
       // Interceptar response
       const originalSend = res.send;
       const self = this;
-      res.send = function (data: any) {
+      res.send = function (data: unknown) {
         res.locals.responseTime = Date.now() - startTime;
         res.locals.responseSize = Buffer.byteLength(data);
 
@@ -217,7 +217,7 @@ export class AutonomousSecurityScanner {
   /**
    * Analisar requisição/resposta em tempo real
    */
-  private async analyzeRequestResponse(req: Request, res: Response, reqData: any) {
+  private async analyzeRequestResponse(req: Request, res: Response, reqData: unknown) {
     const responseTime = res.locals.responseTime;
     const responseSize = res.locals.responseSize;
     const statusCode = res.statusCode;
@@ -257,7 +257,7 @@ export class AutonomousSecurityScanner {
   /**
    * Detectar anomalias baseado no comportamento normal
    */
-  private detectAnomalies(data: any): string[] {
+  private detectAnomalies(data: unknown): string[] {
     const anomalies: string[] = [];
     const endpoint = data.endpoint;
     const normal = endpoint.normalBehavior;
@@ -309,7 +309,7 @@ export class AutonomousSecurityScanner {
   /**
    * Detectar padrões de ataque conhecidos e desconhecidos
    */
-  private detectAttackPatterns(reqData: any): AttackPattern[] {
+  private detectAttackPatterns(reqData: unknown): AttackPattern[] {
     const detectedAttacks: AttackPattern[] = [];
 
     // Converter todos os dados em string para análise
@@ -436,7 +436,7 @@ export class AutonomousSecurityScanner {
   /**
    * Análise comportamental por IP
    */
-  private async analyzeIPBehavior(ip: string, reqData: any) {
+  private async analyzeIPBehavior(ip: string, reqData: unknown) {
     if (!this.ipProfiles.has(ip)) {
       this.ipProfiles.set(ip, {
         firstSeen: new Date(),
@@ -481,7 +481,7 @@ export class AutonomousSecurityScanner {
   /**
    * Scanner de vulnerabilidades ativo
    */
-  private async scanForVulnerabilities(reqData: any, statusCode: number) {
+  private async scanForVulnerabilities(reqData: unknown, statusCode: number) {
     const vulnerabilities: VulnerabilityReport[] = [];
 
     // 1. Information Disclosure
@@ -717,11 +717,11 @@ export class AutonomousSecurityScanner {
 
   // Stubs para métodos complexos
   private initializeAttackPatterns() {}
-  private processLogForBaseline(log: any) {}
-  private handleAnomalies(anomalies: string[], reqData: any) {}
-  private handleAttacks(attacks: AttackPattern[], reqData: any) {}
+  private processLogForBaseline(log: unknown) {}
+  private handleAnomalies(anomalies: string[], reqData: unknown) {}
+  private handleAttacks(attacks: AttackPattern[], reqData: unknown) {}
   private blockIP(ip: string) {}
-  private extractPatterns(logs: any[]): AttackPattern[] {
+  private extractPatterns(logs: unknown[]): AttackPattern[] {
     return [];
   }
   private async scanSecurityConfiguration() {}

@@ -39,7 +39,7 @@ export interface ProposalDTO {
   updatedAt: Date;
   pendingReason?: string;
   observations?: string;
-  analysisResult?: any;
+  analysisResult?: unknown;
 }
 
 export class ProposalApplicationService {

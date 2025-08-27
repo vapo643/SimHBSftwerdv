@@ -148,7 +148,7 @@ export class PDFDownloader {
           const error = new Error(
             errorMessage || `HTTP ${response.status}: ${response.statusText}`
           );
-          (error as any).details = errorDetails;
+          (error as unknown).details = errorDetails;
           throw error;
         }
 

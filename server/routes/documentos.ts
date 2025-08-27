@@ -5,7 +5,7 @@ router.post('/upload', async (req, res) => {
   try {
     const result = await documentService.executeOperation('upload', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

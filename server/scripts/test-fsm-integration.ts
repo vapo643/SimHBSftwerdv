@@ -49,8 +49,8 @@ async function testIntegration() {
       };
 
       // Mock the getCurrentStatus function
-      const originalGetStatus = (global as any).getCurrentStatus;
-      (global as any).getCurrentStatus = async () => test.from;
+      const originalGetStatus = (global as unknown).getCurrentStatus;
+      (global as unknown).getCurrentStatus = async () => test.from;
 
       await transitionTo({
         propostaId: mockProposal.id,
@@ -61,7 +61,7 @@ async function testIntegration() {
       });
 
       // Restore original function
-      (global as any).getCurrentStatus = originalGetStatus;
+      (global as unknown).getCurrentStatus = originalGetStatus;
 
       if (test.shouldSucceed) {
         console.log(`✅ ${test.name}`);

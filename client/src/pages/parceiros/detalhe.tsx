@@ -56,7 +56,7 @@ const PartnerDetailPage: React.FC = () => {
     queryFn: async () => {
       if (!partnerId) throw new Error('Partner ID is required');
       const response = await api.get<Partner>(`/api/parceiros/${partnerId}`);
-      return (response as any).data || response;
+      return (response as unknown).data || response;
     },
     enabled: !!partnerId,
   });
@@ -68,7 +68,7 @@ const PartnerDetailPage: React.FC = () => {
     error: storesError,
   } = useStoresByPartner(partnerId, !!partnerId);
 
-  const handleAddStore = (data: any) => {
+  const handleAddStore = (data: unknown) => {
     console.log('Nova Loja Adicionada:', data);
     // Lógica para adicionar a loja ao parceiro no estado/backend será implementada na Fase 2
     setIsLojaModalOpen(false);

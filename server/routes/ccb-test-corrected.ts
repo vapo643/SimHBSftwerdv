@@ -5,7 +5,7 @@ router.post('/test-corrected', async (req, res) => {
   try {
     const result = await ccbTestService.executeOperation('test_corrected', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

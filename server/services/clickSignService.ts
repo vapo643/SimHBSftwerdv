@@ -79,7 +79,7 @@ interface ClickSignResult {
 
 class ClickSignService {
   private config: ClickSignConfig;
-  private apiBreaker: any;
+  private apiBreaker: unknown;
 
   constructor() {
     // SEMPRE usar API de produção - conforme solicitado pelo usuário
@@ -570,7 +570,7 @@ class ClickSignService {
   /**
    * Get document status
    */
-  async getDocumentStatus(documentKey: string): Promise<any> {
+  async getDocumentStatus(documentKey: string): Promise<unknown> {
     try {
       const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`
@@ -590,7 +590,7 @@ class ClickSignService {
   /**
    * Get signature list status
    */
-  async getListStatus(listKey: string): Promise<any> {
+  async getListStatus(listKey: string): Promise<unknown> {
     try {
       const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/lists/${listKey}?access_token=${this.config.apiToken}`

@@ -5,7 +5,7 @@ router.get('/monitor', async (req, res) => {
   try {
     const result = await auditService.executeOperation('api_monitor', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

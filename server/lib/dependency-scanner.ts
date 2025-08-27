@@ -188,14 +188,14 @@ export class DependencyScanner extends EventEmitter {
   /**
    * Processar vulnerabilidades do relatório
    */
-  private parseVulnerabilities(report: any): DependencyVulnerability[] {
+  private parseVulnerabilities(report: unknown): DependencyVulnerability[] {
     const vulnerabilities: DependencyVulnerability[] = [];
 
     if (!report.dependencies) return vulnerabilities;
 
-    report.dependencies.forEach((dep: any) => {
+    report.dependencies.forEach((dep: unknown) => {
       if (dep.vulnerabilities && dep.vulnerabilities.length > 0) {
-        dep.vulnerabilities.forEach((vuln: any) => {
+        dep.vulnerabilities.forEach((vuln: unknown) => {
           vulnerabilities.push({
             dependency: dep.fileName || dep.description,
             version: dep.version || 'unknown',
@@ -223,7 +223,7 @@ export class DependencyScanner extends EventEmitter {
   private mapSeverity(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     const normalized = severity.toUpperCase();
     if (['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(normalized)) {
-      return normalized as any;
+      return normalized as unknown;
     }
 
     // Mapear por score CVSS
@@ -241,7 +241,7 @@ export class DependencyScanner extends EventEmitter {
   /**
    * Gerar recomendação
    */
-  private generateRecommendation(vuln: any): string {
+  private generateRecommendation(vuln: unknown): string {
     const recommendations = [];
 
     if (vuln.name.includes('CVE')) {

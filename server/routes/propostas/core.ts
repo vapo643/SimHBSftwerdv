@@ -9,7 +9,7 @@ import { Router } from 'express';
 import { ProposalController } from '../../contexts/proposal/presentation/proposalController.js';
 
 // Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
-const auth = async (req: any, res: any, next: any) => {
+const auth = async (req: unknown, res: unknown, next: unknown) => {
   try {
     // Import dinâmico do middleware RLS - RETURN Promise não await
     const { rlsAuthMiddleware } = await import('../../lib/rls-setup.js');
@@ -26,30 +26,34 @@ const controller = new ProposalController();
 // ===== ROTAS PRINCIPAIS =====
 
 // GET /api/propostas - Listar propostas
-router.get('/', auth, (req: any, res: any) => controller.list(req, res));
+router.get('/', auth, (req: unknown, res: unknown) => controller.list(req, res));
 
 // GET /api/propostas/buscar-por-cpf/:cpf - Buscar por CPF (antes do /:id para evitar conflito)
-router.get('/buscar-por-cpf/:cpf', auth, (req: any, res: any) => controller.getByCpf(req, res));
+router.get('/buscar-por-cpf/:cpf', auth, (req: unknown, res: unknown) =>
+  controller.getByCpf(req, res)
+);
 
 // GET /api/propostas/:id - Buscar proposta por ID
-router.get('/:id', auth, (req: any, res: any) => controller.getById(req, res));
+router.get('/:id', auth, (req: unknown, res: unknown) => controller.getById(req, res));
 
 // POST /api/propostas - Criar nova proposta
-router.post('/', auth, (req: any, res: any) => controller.create(req, res));
+router.post('/', auth, (req: unknown, res: unknown) => controller.create(req, res));
 
 // PUT /api/propostas/:id/submit - Submeter para análise
-router.put('/:id/submit', auth, (req: any, res: any) => controller.submitForAnalysis(req, res));
+router.put('/:id/submit', auth, (req: unknown, res: unknown) =>
+  controller.submitForAnalysis(req, res)
+);
 
 // PUT /api/propostas/:id/approve - Aprovar proposta
-router.put('/:id/approve', auth, (req: any, res: any) => controller.approve(req, res));
+router.put('/:id/approve', auth, (req: unknown, res: unknown) => controller.approve(req, res));
 
 // PUT /api/propostas/:id/reject - Rejeitar proposta
-router.put('/:id/reject', auth, (req: any, res: any) => controller.reject(req, res));
+router.put('/:id/reject', auth, (req: unknown, res: unknown) => controller.reject(req, res));
 
 // ===== ROTAS LEGACY (mantidas temporariamente para compatibilidade) =====
 
 // GET /:id/observacoes - Logs de auditoria (manter original por enquanto)
-router.get('/:id/observacoes', auth, async (req: any, res: any) => {
+router.get('/:id/observacoes', auth, async (req: unknown, res: unknown) => {
   try {
     const propostaId = req.params.id;
     const { createServerSupabaseAdminClient } = await import('../../lib/supabase.js');
@@ -107,7 +111,7 @@ router.get('/:id/observacoes', auth, async (req: any, res: any) => {
 });
 
 // PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
-router.put('/:id/status', auth, async (req: any, res: any) => {
+router.put('/:id/status', auth, async (req: unknown, res: unknown) => {
   const { status } = req.body;
 
   // Mapear para os novos endpoints baseado no status

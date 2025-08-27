@@ -102,7 +102,7 @@ router.get('/vulnerabilities', async (req: Request, res: Response) => {
       .filter((v) => v.falsePositiveScore < 0.5)
       .sort((a, b) => {
         const severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-        return (severityOrder as any)[b.severity] - (severityOrder as any)[a.severity];
+        return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity];
       });
 
     res.json(filtered);
@@ -330,7 +330,7 @@ router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Respo
   try {
     const { id } = req.params;
     const { reason } = req.body;
-    const userId = (req as any).user.id;
+    const userId = (req as unknown).user.id;
 
     // Marcar como resolvido (implementar tabela se necessário)
     // await db.insert(security_alerts_resolved).values({
@@ -400,7 +400,7 @@ function getTimeRangeDate(timeRange: string): Date {
   }
 }
 
-function generateTrendData(logs: any[], timeRange: string): any[] {
+function generateTrendData(logs: unknown[], timeRange: string): unknown[] {
   // Gerar dados de tendência para gráficos
   const intervals = timeRange === '1h' ? 12 : 24; // 5min ou 1h intervals
   const trend = [];

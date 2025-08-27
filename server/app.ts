@@ -168,7 +168,7 @@ export async function createApp() {
   app.use(express.json());
 
   // Error handling
-  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
 

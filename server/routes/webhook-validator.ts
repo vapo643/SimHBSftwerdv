@@ -5,7 +5,7 @@ router.post('/validate', async (req, res) => {
   try {
     const result = await validationService.executeOperation('webhook_validator', req.body);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

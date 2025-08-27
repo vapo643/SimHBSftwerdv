@@ -5,7 +5,7 @@ router.get('/alerts', async (req, res) => {
   try {
     const result = await auditService.executeOperation('performance_alerts', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

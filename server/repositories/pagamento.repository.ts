@@ -187,7 +187,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     valorLiquido: number;
     valorIOF: number;
     valorTAC: number;
-    contaBancaria: any;
+    contaBancaria: unknown;
     formaPagamento: string;
     loja: string;
     produto: string;
@@ -265,9 +265,9 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     statusAnterior: string;
     statusNovo: string;
     contexto: string;
-    metadata?: any;
+    metadata?: unknown;
     usuarioId?: string;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const result = await db
       .insert(statusContextuais)
       .values({
@@ -349,7 +349,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     propostaId: string,
     userId: string,
     acao: string,
-    detalhes: any
+    detalhes: unknown
   ): Promise<void> {
     const now = getBrasiliaTimestamp();
     console.log(

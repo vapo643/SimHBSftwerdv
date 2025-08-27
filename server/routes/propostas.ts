@@ -32,7 +32,7 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
 
     // Return response
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Error handling
     console.error('Erro ao alterar status da proposta:', error);
 
@@ -79,7 +79,7 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
 
     // Return response
     res.json(ccbData);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Error handling
     console.error('Erro ao buscar CCB:', error);
 
@@ -126,7 +126,7 @@ export const getPropostasByStatus = async (req: AuthenticatedRequest, res: Respo
 
     const propostas = await propostaService.getPropostasByStatus(status);
     res.json(propostas);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao buscar propostas por status:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -155,7 +155,7 @@ export const getPropostasByUser = async (req: AuthenticatedRequest, res: Respons
 
     const propostas = await propostaService.getPropostasByUser(userId);
     res.json(propostas);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao buscar propostas por usuário:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -182,7 +182,7 @@ export const getPropostasByLoja = async (req: AuthenticatedRequest, res: Respons
 
     const propostas = await propostaService.getPropostasByLoja(lojaIdNumber);
     res.json(propostas);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao buscar propostas por loja:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -205,7 +205,7 @@ export const getPropostasPendingSignature = async (req: AuthenticatedRequest, re
 
     const propostas = await propostaService.getPropostasPendingSignature();
     res.json(propostas);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao buscar propostas pendentes de assinatura:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar propostas',
@@ -239,7 +239,7 @@ export const updateCcbPath = async (req: AuthenticatedRequest, res: Response) =>
 
     await propostaService.updateCcbPath(propostaId, ccbPath);
     res.json({ success: true, message: 'Caminho do CCB atualizado com sucesso' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao atualizar caminho do CCB:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao atualizar caminho do CCB',
@@ -268,7 +268,7 @@ export const markCcbGenerated = async (req: AuthenticatedRequest, res: Response)
 
     await propostaService.markCcbGenerated(propostaId);
     res.json({ success: true, message: 'CCB marcado como gerado' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao marcar CCB como gerado:', error);
     res.status(500).json({
       message: 'Erro interno do servidor',
@@ -298,7 +298,7 @@ export const markSignatureCompleted = async (req: AuthenticatedRequest, res: Res
 
     await propostaService.markSignatureCompleted(propostaId, clicksignKey);
     res.json({ success: true, message: 'Assinatura marcada como concluída' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao marcar assinatura como concluída:', error);
     res.status(500).json({
       message: 'Erro interno do servidor',
@@ -332,7 +332,7 @@ export const getPropostaWithDetails = async (req: AuthenticatedRequest, res: Res
     }
 
     res.json(proposta);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao buscar detalhes da proposta:', error);
     res.status(500).json({
       message: 'Erro interno do servidor ao buscar detalhes',

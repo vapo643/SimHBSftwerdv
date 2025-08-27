@@ -77,7 +77,7 @@ export class UserRepository extends BaseRepository<Profile> {
         auth_status: authUser
           ? {
               email_confirmed: !!authUser.email_confirmed_at,
-              banned_until: (authUser as any).banned_until || null,
+              banned_until: (authUser as unknown).banned_until || null,
             }
           : undefined,
       };
@@ -119,7 +119,7 @@ export class UserRepository extends BaseRepository<Profile> {
       auth_status: authUser?.user
         ? {
             email_confirmed: !!authUser.user.email_confirmed_at,
-            banned_until: (authUser.user as any).banned_until || null,
+            banned_until: (authUser.user as unknown).banned_until || null,
           }
         : undefined,
     } as UserWithAuth;

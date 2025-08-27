@@ -5,7 +5,7 @@ router.get('/', async (req, res) => {
   try {
     const result = await propostasCarneService.executeOperation('list_carne', req.query);
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

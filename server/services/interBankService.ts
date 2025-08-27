@@ -140,8 +140,8 @@ class InterBankService {
     token: string;
     expiresAt: number;
   } | null = null;
-  private tokenBreaker: any;
-  private apiBreaker: any;
+  private tokenBreaker: unknown;
+  private apiBreaker: unknown;
 
   constructor() {
     // Auto-detect if we're using production credentials based on presence of INTER_CONTA_CORRENTE
@@ -187,8 +187,8 @@ class InterBankService {
         async (
           endpoint: string,
           method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET',
-          data?: any,
-          headers?: any
+          data?: unknown,
+          headers?: unknown
         ) => {
           return this.makeRequestDirect(endpoint, method, data, headers);
         },
@@ -320,7 +320,7 @@ class InterBankService {
       console.log('[INTER] 🚀 Making mTLS request with Undici agent...');
 
       // Declare response variable to use throughout the method
-      let response: any;
+      let response: unknown;
 
       // Try using node fetch with undici dispatcher
       try {
@@ -373,7 +373,7 @@ class InterBankService {
         // Fallback to raw HTTPS request
         console.log('[INTER] 🔄 Falling back to raw HTTPS request...');
 
-        response = await new Promise<any>((resolve, reject) => {
+        response = await new Promise<unknown>((resolve, reject) => {
           const options = {
             hostname: tokenUrl.hostname,
             port: tokenUrl.port || 443,
@@ -466,9 +466,9 @@ class InterBankService {
   private async makeRequest(
     endpoint: string,
     method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET',
-    data?: any,
+    data?: unknown,
     additionalHeaders?: Record<string, string>
-  ): Promise<any> {
+  ): Promise<unknown> {
     this.initializeBreakers();
 
     try {
@@ -489,9 +489,9 @@ class InterBankService {
   private async makeRequestDirect(
     endpoint: string,
     method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET',
-    data?: any,
+    data?: unknown,
     additionalHeaders?: Record<string, string>
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const token = await this.getAccessToken();
       const url = new URL(`${this.config.apiUrl}${endpoint}`);
@@ -751,7 +751,7 @@ class InterBankService {
   /**
    * Get detailed collection information
    */
-  async recuperarCobranca(codigoSolicitacao: string): Promise<any> {
+  async recuperarCobranca(codigoSolicitacao: string): Promise<unknown> {
     try {
       console.log(`[INTER] 📋 Retrieving collection: ${codigoSolicitacao}`);
 
@@ -818,7 +818,7 @@ class InterBankService {
     tipoCobranca?: 'SIMPLES' | 'PARCELADO' | 'RECORRENTE';
     itensPorPagina?: number;
     paginaAtual?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     try {
       console.log(
         `[INTER] 🔍 Searching collections from ${filters.dataInicial} to ${filters.dataFinal}`
@@ -853,7 +853,7 @@ class InterBankService {
   async editarCobranca(
     codigoSolicitacao: string,
     updateData: Partial<CobrancaRequest>
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       console.log(`🔍 [AUDIT-INTER] ===== EDITANDO COBRANÇA =====`);
       console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
@@ -884,7 +884,7 @@ class InterBankService {
   async cancelarCobranca(
     codigoSolicitacao: string,
     motivoCancelamento: string = 'CANCELAMENTO_ADMINISTRATIVO'
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       console.log(`🔍 [AUDIT-INTER] ===== CANCELANDO COBRANÇA =====`);
       console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
@@ -1063,7 +1063,7 @@ class InterBankService {
       });
 
       throw new Error('PDF não encontrado na resposta da API - formato inesperado');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[INTER] ❌ Erro ao obter PDF:', error.message);
 
       // Tentar endpoints alternativos
@@ -1121,7 +1121,7 @@ class InterBankService {
    * Método de debug para analisar resposta da API
    * USADO PARA DIAGNOSTICAR O PROBLEMA DO PDF
    */
-  async debugPdfResponse(codigoSolicitacao: string): Promise<any> {
+  async debugPdfResponse(codigoSolicitacao: string): Promise<unknown> {
     console.log(`[INTER] 🔍 DEBUG MODE: Analisando resposta completa da API`);
 
     try {
@@ -1150,7 +1150,7 @@ class InterBankService {
       }
 
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;
     }
@@ -1163,7 +1163,7 @@ class InterBankService {
     dataInicial: string;
     dataFinal: string;
     filtrarDataPor?: 'VENCIMENTO' | 'EMISSAO' | 'PAGAMENTO';
-  }): Promise<any> {
+  }): Promise<unknown> {
     try {
       console.log(`[INTER] 📊 Getting collections summary`);
 
@@ -1189,7 +1189,7 @@ class InterBankService {
   /**
    * Setup webhook for collection events
    */
-  async configurarWebhook(webhookData: WebhookData): Promise<any> {
+  async configurarWebhook(webhookData: WebhookData): Promise<unknown> {
     try {
       console.log(`[INTER] 🔗 Setting up webhook: ${webhookData.url}`);
 
@@ -1206,7 +1206,7 @@ class InterBankService {
   /**
    * Get current webhook configuration
    */
-  async obterWebhook(): Promise<any> {
+  async obterWebhook(): Promise<unknown> {
     try {
       console.log(`[INTER] 🔗 Getting webhook configuration`);
 
@@ -1223,7 +1223,7 @@ class InterBankService {
   /**
    * Delete webhook
    */
-  async excluirWebhook(): Promise<any> {
+  async excluirWebhook(): Promise<unknown> {
     try {
       console.log(`[INTER] 🗑️ Deleting webhook`);
 
@@ -1240,7 +1240,7 @@ class InterBankService {
   /**
    * Simulate payment (sandbox only)
    */
-  async pagarCobrancaSandbox(codigoSolicitacao: string, valorPago: number): Promise<any> {
+  async pagarCobrancaSandbox(codigoSolicitacao: string, valorPago: number): Promise<unknown> {
     try {
       if (this.config.environment !== 'sandbox') {
         throw new Error('Payment simulation is only available in sandbox environment');
