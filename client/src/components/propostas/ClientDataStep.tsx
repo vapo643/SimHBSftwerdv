@@ -22,9 +22,7 @@ import {
   Smartphone,
   FileText,
   CheckCircle2,
-  XCircle,
   Loader2,
-  Save,
 } from 'lucide-react';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import { MaskedInput } from '@/components/ui/MaskedInput';
@@ -887,7 +885,9 @@ export function ClientDataStep() {
         <CardContent>
           <Tabs
             value={clientData.metodoPagamento}
-            onValueChange={(value: any) => updateClient({ metodoPagamento: value })}
+            onValueChange={(value: string) =>
+              updateClient({ metodoPagamento: value as 'pix' | 'conta_bancaria' })
+            }
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="conta_bancaria" data-testid="tab-conta-bancaria">

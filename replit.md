@@ -1,5 +1,5 @@
 ### Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management in financial institutions. Its primary purpose is to streamline the credit proposal lifecycle, encompassing creation, simulation, payment processing, and formalization tracking. Simpix offers a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a complete payment queue system. Built with banking-grade security and compliance in mind, Simpix aims to enhance operational efficiency and reduce manual tasks in financial operations by providing a robust, efficient, and compliant solution.
+Simpix is a full-stack TypeScript application designed to streamline the entire credit proposal lifecycle for financial institutions. It provides capabilities for credit proposal creation, simulation, payment processing, and formalization tracking. The project aims to enhance operational efficiency, reduce manual tasks, and address critical needs in the financial credit sector by offering a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a robust payment queue system.
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIDO (PAG) V2.0
@@ -117,7 +117,7 @@ Error handling: Create structured documentation for automatic consultation durin
 - Fóruns de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
 - Qualquer fonte que não possa ser claramente atribuída a uma organização ou a um especialista de reputação reconhecida.
 
-**3. Justificativa Estratégica (O "Porquê"):** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
+**3. Justificativa Estratégica (O "Porquê"):** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
 
 **4. Critério de Ativação de Pesquisa (O Princípio da Necessidade):** A sua capacidade de pesquisa é um recurso de alto custo e deve ser usada de forma cirúrgica.
 
@@ -132,54 +132,53 @@ Error handling: Create structured documentation for automatic consultation durin
   - Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
 
 ### System Architecture
-Simpix employs a modular monolith architecture using TypeScript for both frontend and backend.
+Simpix is a modular monolith application built with TypeScript, emphasizing security, performance, and maintainability across both frontend and backend.
 
-**Frontend:**
-- **Framework & Language**: React 18 with TypeScript.
-- **Routing**: Wouter.
-- **Styling**: Tailwind CSS, utilizing shadcn/ui components.
-- **State Management**: TanStack Query for server-side state, `useReducer` for complex local state.
-- **Form Management**: React Hook Form, integrated with Zod for validation.
+**UI/UX and Frontend Implementation:**
+- **Technology Stack**: React 18, Wouter for routing, Tailwind CSS, and shadcn/ui.
+- **State Management**: TanStack Query (server-side) and `useReducer` (local component state).
+- **Forms**: React Hook Form with Zod validation.
 - **Build Tool**: Vite.
 
-**Backend:**
-- **Framework & Language**: Express.js with TypeScript, following a RESTful API pattern.
-- **Database**: PostgreSQL, managed with Drizzle ORM, including soft deletes, sequential numeric IDs, and audit trails.
-- **Authentication & Authorization**: Supabase Auth handles JWT and custom Role-Based Access Control (RBAC).
-- **File Storage**: Secure private buckets via Supabase Storage.
+**Backend Implementation and Technical Architecture:**
+- **Core Framework**: Express.js with TypeScript.
+- **Database**: PostgreSQL via Drizzle ORM.
+- **Authentication & Authorization**: Supabase Auth (JWT-based) and custom Role-Based Access Control (RBAC).
+- **File Management**: Supabase Storage for secure private buckets.
 - **Asynchronous Processing**: BullMQ with Redis for job queuing.
-- **Caching**: Redis-based cache for commercial data (1-hour TTL, cache-aside strategy).
-- **Architecture**: Modular monolith design with domain-based decomposition (e.g., Auth, Users, Proposals, Payments, Integrations).
-- **Security**: Comprehensive measures including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
-- **CI/CD**: GitHub Actions for Continuous Integration, Staging deployment, and security workflows.
+- **Caching**: Redis-based cache (1-hour TTL, cache-aside pattern).
+- **Architectural Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments, Integrations).
+- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+- **CI/CD**: GitHub Actions for CI, staging deployments, and security workflows.
 - **Observability**: Winston for structured logging, Sentry for error tracking, health checks, and automated backups.
-- **Configuration**: Centralized module for system configuration.
-- **Feature Flags**: Unleash-client integration with a fallback mechanism.
-- **Core Functionality**:
-    - **Credit Simulation API**: Production-ready, capable of dynamic rate lookup, complex financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
-    - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
-    - **Payment Workflow**: Robust system supporting batch processing, multiple payment methods, formalization tracking, and dual-storage strategy.
-    - **Commercial Tables**: N:N relationship between products and rates, allowing personalized and general rates with hierarchical fallback.
-    - **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
-- **Testing**: Extensive test infrastructure with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Production-ready migration system using Drizzle-Kit, ensuring Zero Downtime (Expand/Contract) with automated rollback and tracking.
+- **Configuration**: Centralized configuration module.
+- **Feature Management**: Unleash-client for feature flagging.
+
+**Feature Specifications:**
+- **Credit Simulation API**: Dynamic rate lookup, complex financial calculations (IOF, TAC, CET using Newton-Raphson), automated payment schedule generation, and detailed audit logging.
+- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
+- **Payment Workflow**: Batch processing, multiple payment methods, formalization tracking, and dual-storage for data integrity.
+- **Commercial Tables**: Manages N:N relationships between products and rates, including hierarchical fallback.
+- **Status Management**: Centralized Finite State Machine (FSM) for strict transition validation and audit logging.
+- **Testing**: Extensive testing infrastructure with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
+- **Schema Migration**: Drizzle-Kit provides a production-ready migration system with Zero Downtime Expand/Contract, automated rollback, and tracking.
 
 ### External Dependencies
-- **Supabase**: Authentication, PostgreSQL Database, and File Storage.
-- **Drizzle ORM**: Type-safe ORM for PostgreSQL.
-- **TanStack Query**: Server-side data fetching and caching.
-- **React Hook Form**: Form state and validation.
+- **Supabase**: Authentication, PostgreSQL hosting, file storage.
+- **Drizzle ORM**: Type-safe PostgreSQL interactions.
+- **TanStack Query**: Frontend server-side data fetching and caching.
+- **React Hook Form**: Form state management and validation.
 - **Zod**: Schema validation.
-- **Tailwind CSS**: Styling.
-- **shadcn/ui**: Pre-built React components.
-- **Wouter**: React router.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **shadcn/ui**: Pre-built, customizable React components.
+- **Wouter**: Lightweight React routing library.
 - **Vite**: Frontend build tool.
 - **Express.js**: Backend web application framework.
 - **BullMQ**: High-performance Node.js job queue.
-- **Redis**: In-memory data store for caching and BullMQ.
-- **Winston**: Logging library.
+- **Redis**: In-memory data store for caching and BullMQ backend.
+- **Winston**: Structured logging.
 - **Sentry**: Error tracking and performance monitoring.
-- **Unleash-client**: Feature flag system.
-- **pdf-lib**: PDF document creation and modification.
-- **ClickSign**: Electronic signature capabilities.
+- **Unleash-client**: Feature flagging.
+- **pdf-lib**: Programmatic PDF creation and modification.
+- **ClickSign**: Electronic signature functionalities.
 - **Banco Inter API**: Automated boleto/PIX payment generation and tracking.

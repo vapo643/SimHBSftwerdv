@@ -4,11 +4,12 @@
  */
 
 import { Bell } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import { apiRequest } from '@/lib/queryClient';
 
+// Interface para tipagem de notificações
 interface Notificacao {
   id: number;
   tipo: string;
@@ -34,8 +35,14 @@ export function NotificationBell() {
     refetchOnWindowFocus: true,
   });
 
-  const notificacoes = (data as any)?.notificacoes || [];
-  const totalNaoLidas = (data as any)?.totalNaoLidas || 0;
+  // Tipagem específica da resposta da API de notificações
+  interface NotificationApiResponse {
+    notificacoes: Notificacao[];
+    totalNaoLidas: number;
+  }
+
+  const notificacoes = (data as NotificationApiResponse)?.notificacoes || [];
+  const totalNaoLidas = (data as NotificationApiResponse)?.totalNaoLidas || 0;
 
   // Mutação para marcar notificação como lida
   const marcarComoLidaMutation = useMutation({
@@ -121,7 +128,14 @@ export function NotificationBell() {
       {isDropdownOpen && (
         <>
           {/* Overlay para fechar dropdown ao clicar fora */}
-          <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsDropdownOpen(false)}
+            onKeyDown={(e) => e.key === 'Escape' && setIsDropdownOpen(false)}
+            role="button"
+            tabIndex={0}
+            aria-label="Fechar notificações"
+          />
 
           {/* Dropdown Component */}
           <NotificationDropdown

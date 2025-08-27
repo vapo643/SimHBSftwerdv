@@ -15,8 +15,9 @@ export function FeatureFlagExample() {
   const isMaintenanceMode = useFeatureFlag('maintenance-mode');
   const isReadOnlyMode = useFeatureFlag('read-only-mode');
   const hasExperimentalApi = useFeatureFlag('nova-api-experimental');
-  const hasAdvancedReports = useFeatureFlag('relatorios-avancados');
-  const hasPixInstant = useFeatureFlag('pagamento-pix-instant');
+  // Feature flags removidas: não utilizadas no componente atual
+  // const hasAdvancedReports = useFeatureFlag('relatorios-avancados');
+  // const hasPixInstant = useFeatureFlag('pagamento-pix-instant');
 
   // Query para buscar dados da API experimental (apenas se flag ativa)
   const {
