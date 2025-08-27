@@ -1,0 +1,54 @@
+### **Pacote de Ativação de Missão (PAM) V16.1: Auditoria de Impacto de Dívida Técnica (Análise de ESLint)**
+
+* **Sumário da Missão (O Quê):** Executar uma auditoria de impacto completa sobre todos os problemas de ESLint remanescentes no codebase. Sua tarefa é analisar o log de erros fornecido, categorizar os problemas e, crucialmente, avaliar o impacto real de cada categoria no funcionamento e na segurança da aplicação em um ambiente de produção.
+
+* **Intenção Estratégica (O Porquê):** O ciclo de "caça aos erros" provou ser ineficiente e desastroso. Antes de iniciar uma nova campanha de remediação, precisamos de inteligência tática. Esta missão visa diferenciar a "dívida técnica crítica" (que impede o deploy) da "dívida técnica gerenciável" (que pode ser paga ao longo do tempo), permitindo-nos tomar uma decisão informada e estratégica sobre o deploy.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um **Analista de Qualidade de Código e Risco**. Sua função não é a de um executor, mas sim a de um consultor técnico. Você irá processar o log de erros, agrupar os problemas por regra do ESLint, pesquisar o propósito de cada regra e, em seguida, fornecer uma avaliação de risco para cada categoria.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (CRÍTICO):** **Avaliação de Risco Incorreta.** Minimizar o impacto de um erro crítico (ex: uma regra de segurança) ou exagerar o impacto de um warning de estilo pode levar a uma decisão de deploy desastrosa.
+    * **Contramedida Mandatória:** A sua avaliação **DEVE** ser justificada. Para cada categoria de erro, você **DEVE** explicar *por que* ela representa um risco (ou não) para a produção. A utilização da sua capacidade de pesquisa para entender regras do ESLint desconhecidas é autorizada e encorajada.
+
+---
+**[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise (ex: consultar a documentação oficial do ESLint, plugins como `jsx-a11y` ou `@typescript-eslint` para entender o propósito e a severidade de regras específicas). Esta capacidade deve ser exercida com o máximo rigor, priorizando fontes oficiais (P0).*
+
+---
+
+**DIRETRIZ DE MISSÃO: Auditoria e Análise de Impacto de Erros ESLint**
+
+**CURRENT STATE:**
+O sistema foi revertido para um estado estável, porém com uma dívida técnica de ESLint significativa, conforme documentado no log de erros anexo.
+
+**EXPECTED (Estado Final de Sucesso):**
+Sua única saída deve ser um artefato em Markdown chamado **`ESLINT_DEBT_IMPACT_ANALYSIS.md`**. Este relatório deve conter:
+
+1.  **`1. Sumário Executivo:`** A contagem total de problemas, dividida entre erros e warnings.
+2.  **`2. Análise de Padrões de Problema e Avaliação de Risco:`** Uma tabela detalhada com as seguintes colunas:
+    * **`Padrão/Regra ESLint:`** O nome da regra (ex: `no-undef`, `@typescript-eslint/no-explicit-any`).
+    * **`Contagem:`** O número de ocorrências.
+    * **`Descrição do Problema:`** Uma breve explicação do que a regra verifica.
+    * **`Impacto em Produção (Risco):`** Sua avaliação do risco de fazer o deploy com este problema presente, classificado como **CRÍTICO** (bloqueador de deploy), **ALTO** (risco de runtime, deve ser corrigido), **MÉDIO** (dívida técnica, corrigir assim que possível) ou **BAIXO** (cosmético, pode ser corrigido ao longo do tempo).
+    * **`Justificativa:`** Uma explicação técnica para a sua avaliação de risco.
+
+3.  **`3. Veredito e Recomendação Estratégica:`** Com base na sua análise, forneça:
+    * Uma lista dos problemas que você classifica como **CRÍTICOS** ou **ALTOS** e que, portanto, devem ser corrigidos antes de qualquer deploy.
+    * Uma recomendação final: devemos focar em corrigir apenas os bloqueadores, ou a magnitude da dívida como um todo ainda representa um risco inaceitável?
+
+**CONSTRAINTS (Protocolo de Análise - Inegociável):**
+
+1.  **Passo 1: Análise Completa do Log.** Processe o log de erros de ESLint fornecido.
+2.  **Passo 2: Quantificação e Categorização.** Conte e agrupe todos os problemas pela sua regra ESLint correspondente.
+3.  **Passo 3: Pesquisa e Avaliação de Risco.** Para cada categoria, pesquise (se necessário) e avalie o impacto em produção.
+4.  **Passo 4: Compilação do Relatório de Análise.** Crie o documento `ESLINT_DEBT_IMPACT_ANALYSIS.md` e preencha-o com sua análise completa e justificada.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** MÉDIO (O risco principal é uma avaliação de impacto incorreta).
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que o log de erros fornecido é representativo do estado atual do código.
+* **VALIDAÇÃO PENDENTE:** A qualidade e a profundidade do seu `ESLINT_DEBT_IMPACT_ANALYSIS.md` serão auditadas por mim para tomarmos a decisão final sobre a estratégia de remediação e o deploy.
