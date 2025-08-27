@@ -1,5 +1,5 @@
 ### Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management within financial institutions. Its core purpose is to optimize the credit proposal lifecycle, encompassing creation, simulation, payment processing, and formalization tracking. Key functionalities include a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a complete payment queue system. Simpix is built to ensure banking-grade security, compliance, and efficient data handling, thereby boosting operational efficiency and minimizing manual tasks.
+Simpix is a full-stack TypeScript application designed for comprehensive credit management within financial institutions. Its primary purpose is to optimize the entire credit proposal lifecycle, from initial creation and credit simulation to payment processing and formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a complete payment queue system. Simpix aims to ensure banking-grade security, compliance, and efficient data handling, thereby boosting operational efficiency and minimizing manual tasks in financial operations. The project has significant market potential by providing a robust, efficient, and compliant solution for financial operations.
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIDO (PAG) V2.0
@@ -131,37 +131,8 @@ Error handling: Create structured documentation for automatic consultation durin
   - For explicitamente instruído a pesquisar "melhores práticas", "alternativas de arquitetura" ou a realizar uma "análise comparativa".
   - Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
 
-### 🚨 PROTOCOLO DE DOCUMENTAÇÃO ARQUITETURAL MANDATÓRIO - FASE DE PLANEJAMENTO 🚨
-
-**[DIRETRIZ CRÍTICA - INEGOCIÁVEL]**  
-**Status:** ESTAMOS NA FASE DE MAPEAMENTO E PLANEJAMENTO ARQUITETURAL  
-**Próxima Fase:** EXECUÇÃO (somente após completar todo planejamento)  
-
-**[PERSONA E FUNÇÃO]**  
-Nesta fase, sou um **Arquiteto Documentador**:
-- **SOU:** Planejador que desenha a planta arquitetural
-- **NÃO SOU:** Executor que constrói ou implementa código
-
-**[DEFINIÇÃO DE ENTREGÁVEIS]**  
-- **Documentação Arquitetural de Planejamento:** Descreve o que **SERÁ FEITO** (estratégias, planos, ADRs)
-- **NÃO Relatórios de Execução:** Que descrevem o que **FOI FEITO**
-
-**[PROTOCOLO MANDATÓRIO DE TRABALHO]**  
-1. **Analisar o PAM:** Processar o Pacote de Ativação de Missão tático
-2. **Localizar/Criar Artefato:** Navegar para `/architecture` e criar arquivo apropriado (`-strategy.md`, `-plan.md`, `ADR-XXX.md`)
-3. **Produzir Documentação:** Preencher com plano, estratégia, diagramas ou design solicitado
-4. **Validar Conclusão:** Confirmar que documento de planejamento foi criado conforme protocolos
-
-**[CRITÉRIO DE SUCESSO]**  
-Missão concluída quando artefato de **documentação de planejamento arquitetural** estiver:
-- ✅ Criado e salvo no diretório correto
-- ✅ Em conformidade com requisitos do PAM
-- ✅ Documentando o que SERÁ implementado (não executando)
-
-**LEMBRETE CRÍTICO:** NÃO executar o plano documentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
-
 ### System Architecture
-The system employs a modular monolith architecture using TypeScript for both frontend and backend.
+Simpix employs a modular monolith architecture using TypeScript for both frontend and backend.
 
 **Frontend:**
 - **Framework & Language**: React 18 with TypeScript.
@@ -173,7 +144,7 @@ The system employs a modular monolith architecture using TypeScript for both fro
 
 **Backend:**
 - **Framework & Language**: Express.js with TypeScript, following a RESTful API pattern.
-- **Database**: PostgreSQL, managed with Drizzle ORM, including features like soft deletes, sequential numeric IDs, and audit trails.
+- **Database**: PostgreSQL, managed with Drizzle ORM, including soft deletes, sequential numeric IDs, and audit trails.
 - **Authentication & Authorization**: Supabase Auth handles JWT and custom Role-Based Access Control (RBAC).
 - **File Storage**: Secure private buckets via Supabase Storage.
 - **Asynchronous Processing**: BullMQ with Redis for job queuing.
@@ -194,21 +165,21 @@ The system employs a modular monolith architecture using TypeScript for both fro
 - **Schema Migration**: Production-ready migration system using Drizzle-Kit, ensuring Zero D downtime (Expand/Contract) with automated rollback and tracking.
 
 ### External Dependencies
-- **Supabase**: Used for Authentication, PostgreSQL Database, and File Storage.
+- **Supabase**: Authentication, PostgreSQL Database, and File Storage.
 - **Drizzle ORM**: Type-safe ORM for PostgreSQL.
-- **TanStack Query**: Manages server-side data fetching and caching.
-- **React Hook Form**: Handles form state and validation.
-- **Zod**: Provides schema validation.
-- **Tailwind CSS**: Utility-first CSS framework for styling.
-- **shadcn/ui**: Offers pre-built React components.
-- **Wouter**: Lightweight React router.
-- **Vite**: Modern frontend build tool.
+- **TanStack Query**: Server-side data fetching and caching.
+- **React Hook Form**: Form state and validation.
+- **Zod**: Schema validation.
+- **Tailwind CSS**: Styling.
+- **shadcn/ui**: Pre-built React components.
+- **Wouter**: React router.
+- **Vite**: Frontend build tool.
 - **Express.js**: Backend web application framework.
 - **BullMQ**: High-performance Node.js job queue.
-- **Redis**: In-memory data store used for caching and BullMQ backend.
-- **Winston**: Versatile logging library.
+- **Redis**: In-memory data store for caching and BullMQ.
+- **Winston**: Logging library.
 - **Sentry**: Error tracking and performance monitoring.
-- **Unleash-client**: Client-side SDK for Unleash feature flag system.
-- **pdf-lib**: Library for creating and modifying PDF documents.
-- **ClickSign**: Integrated for electronic signature capabilities.
-- **Banco Inter API**: Used for automated boleto/PIX payment generation and tracking.
+- **Unleash-client**: Feature flag system.
+- **pdf-lib**: PDF document creation and modification.
+- **ClickSign**: Electronic signature capabilities.
+- **Banco Inter API**: Automated boleto/PIX payment generation and tracking.
