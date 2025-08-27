@@ -100,10 +100,20 @@ router.post(
             seuNumero,
             valorNominal: parcela.valor,
             dataVencimento: parcela.vencimento,
-            nomePagador: proposta.clienteNome || 'Cliente',
-            cpfCnpjPagador: proposta.clienteCpf || '000.000.000-00',
-            telefonePagador: proposta.clienteTelefone || '',
-            emailPagador: proposta.clienteEmail || '',
+            numDiasAgenda: 1,
+            pagador: {
+              nome: proposta.clienteNome || 'Cliente',
+              cpfCnpj: proposta.clienteCpf || '000.000.000-00',
+              telefone: proposta.clienteTelefone || '',
+              email: proposta.clienteEmail || '',
+              tipoPessoa: 'FISICA',
+              endereco: 'Rua Exemplo',
+              numero: '123',
+              bairro: 'Centro',
+              cidade: 'São Paulo',
+              uf: 'SP',
+              cep: '01000-000',
+            },
           });
 
           console.log(

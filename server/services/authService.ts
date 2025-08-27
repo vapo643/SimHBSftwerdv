@@ -385,7 +385,7 @@ export class AuthService {
           type: SecurityEventType.SESSION_TERMINATED,
           severity: 'MEDIUM',
           userId: userId,
-          userEmail: req.user?.email || '',
+          userEmail: req.user?.username || '',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,

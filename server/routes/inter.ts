@@ -238,7 +238,7 @@ router.patch(
       res.json({
         success: true,
         message: `${result.success.length} vencimentos prorrogados com sucesso`,
-        ...result,
+        data: result,
       });
     } catch (error: any) {
       console.error('[INTER] Batch extend failed:', error);

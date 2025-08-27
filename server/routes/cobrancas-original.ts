@@ -448,7 +448,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
       .select({
         // Seleção específica de campos (não spread)
         id: propostas.id,
-        numero: propostas.numero,
+        numeroContrato: propostas.id,
         status: propostas.status,
         clienteNome: propostas.clienteNome,
         clienteCpf: propostas.clienteCpf,
