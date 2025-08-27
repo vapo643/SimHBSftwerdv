@@ -118,12 +118,18 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    */
   async createCollection(data: Partial<InterCollection>): Promise<InterCollection> {
     const timestamp = getBrasiliaDate();
-    
+
     // Ensure required fields are present
-    if (!data.propostaId || !data.codigoSolicitacao || !data.seuNumero || !data.valorNominal || !data.dataVencimento) {
+    if (
+      !data.propostaId ||
+      !data.codigoSolicitacao ||
+      !data.seuNumero ||
+      !data.valorNominal ||
+      !data.dataVencimento
+    ) {
       throw new Error('Required fields missing for collection creation');
     }
-    
+
     const collectionData = {
       ...data,
       propostaId: data.propostaId!,
@@ -236,13 +242,15 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
   }): Promise<any> {
     const result = await db
       .insert(historicoObservacoesCobranca)
-      .values([{
-        propostaId: data.propostaId,
-        mensagem: data.mensagem,
-        criadoPor: data.criadoPor,
-        tipoAcao: data.tipoAcao,
-        dadosAcao: data.dadosAcao,
-      }])
+      .values([
+        {
+          propostaId: data.propostaId,
+          mensagem: data.mensagem,
+          criadoPor: data.criadoPor,
+          tipoAcao: data.tipoAcao,
+          dadosAcao: data.dadosAcao,
+        },
+      ])
       .returning();
 
     return result[0];
@@ -261,14 +269,16 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
   }): Promise<any> {
     const result = await db
       .insert(statusContextuais)
-      .values([{
-        propostaId: data.propostaId,
-        contexto: data.contexto,
-        status: data.status,
-        statusAnterior: data.statusAnterior,
-        atualizadoPor: data.atualizadoPor,
-        observacoes: data.observacoes,
-      }])
+      .values([
+        {
+          propostaId: data.propostaId,
+          contexto: data.contexto,
+          status: data.status,
+          statusAnterior: data.statusAnterior,
+          atualizadoPor: data.atualizadoPor,
+          observacoes: data.observacoes,
+        },
+      ])
       .returning();
 
     return result[0];

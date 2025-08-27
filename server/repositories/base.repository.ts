@@ -55,7 +55,11 @@ export abstract class BaseRepository<T> {
    * Create a new record
    */
   async create(data: Partial<T>): Promise<T> {
-    const { data: created, error } = await supabase.from(this.tableName).insert(data).select().single();
+    const { data: created, error } = await supabase
+      .from(this.tableName)
+      .insert(data)
+      .select()
+      .single();
 
     if (error) {
       throw new Error(`Failed to create ${this.tableName}: ${error.message}`);

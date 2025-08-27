@@ -276,23 +276,29 @@ export default function Pagamentos() {
   });
 
   // Filtrar pagamentos - Verificar se é array válido
-  const pagamentosFiltrados = Array.isArray(pagamentos) ? pagamentos.filter((pagamento) => {
-    // Se não há termo de busca, retorna todos
-    if (!searchTerm || searchTerm.trim() === '') {
-      return true;
-    }
+  const pagamentosFiltrados = Array.isArray(pagamentos)
+    ? pagamentos.filter((pagamento) => {
+        // Se não há termo de busca, retorna todos
+        if (!searchTerm || searchTerm.trim() === '') {
+          return true;
+        }
 
-    const matchesSearch =
-      pagamento.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pagamento.numeroContrato.includes(searchTerm) ||
-      pagamento.cpfCliente.includes(searchTerm) ||
-      pagamento.propostaId.includes(searchTerm);
+        const matchesSearch =
+          pagamento.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          pagamento.numeroContrato.includes(searchTerm) ||
+          pagamento.cpfCliente.includes(searchTerm) ||
+          pagamento.propostaId.includes(searchTerm);
 
-    return matchesSearch;
-  }) : [];
+        return matchesSearch;
+      })
+    : [];
 
   // Debug para ver o que está acontecendo
-  console.log('[PAGAMENTOS FRONTEND] Dados recebidos:', Array.isArray(pagamentos) ? pagamentos?.length : 'NOT_ARRAY', pagamentos);
+  console.log(
+    '[PAGAMENTOS FRONTEND] Dados recebidos:',
+    Array.isArray(pagamentos) ? pagamentos?.length : 'NOT_ARRAY',
+    pagamentos
+  );
   console.log('[PAGAMENTOS FRONTEND] Termo de busca:', searchTerm);
   console.log('[PAGAMENTOS FRONTEND] Dados filtrados:', pagamentosFiltrados?.length);
   if (Array.isArray(pagamentos) && pagamentos?.length > 0) {
@@ -301,22 +307,36 @@ export default function Pagamentos() {
 
   // Estatísticas
   const stats = {
-    aguardandoAprovacao: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'aguardando_aprovacao').length || 0 : 0,
-    aprovados: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'aprovado').length || 0 : 0,
-    emProcessamento: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'em_processamento').length || 0 : 0,
-    pagos: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'pago').length || 0 : 0,
-    rejeitados: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'rejeitado').length || 0 : 0,
-    valorTotalAguardando: Array.isArray(pagamentos) ? 
-      pagamentos
-        ?.filter((p) => p.status === 'aguardando_aprovacao')
-        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0 : 0,
-    valorTotalPago: Array.isArray(pagamentos) ?
-      pagamentos?.filter((p) => p.status === 'pago').reduce((acc, p) => acc + p.valorLiquido, 0) ||
-      0 : 0,
-    valorTotalProcessando: Array.isArray(pagamentos) ?
-      pagamentos
-        ?.filter((p) => p.status === 'em_processamento' || p.status === 'aprovado')
-        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0 : 0,
+    aguardandoAprovacao: Array.isArray(pagamentos)
+      ? pagamentos?.filter((p) => p.status === 'aguardando_aprovacao').length || 0
+      : 0,
+    aprovados: Array.isArray(pagamentos)
+      ? pagamentos?.filter((p) => p.status === 'aprovado').length || 0
+      : 0,
+    emProcessamento: Array.isArray(pagamentos)
+      ? pagamentos?.filter((p) => p.status === 'em_processamento').length || 0
+      : 0,
+    pagos: Array.isArray(pagamentos)
+      ? pagamentos?.filter((p) => p.status === 'pago').length || 0
+      : 0,
+    rejeitados: Array.isArray(pagamentos)
+      ? pagamentos?.filter((p) => p.status === 'rejeitado').length || 0
+      : 0,
+    valorTotalAguardando: Array.isArray(pagamentos)
+      ? pagamentos
+          ?.filter((p) => p.status === 'aguardando_aprovacao')
+          .reduce((acc, p) => acc + p.valorLiquido, 0) || 0
+      : 0,
+    valorTotalPago: Array.isArray(pagamentos)
+      ? pagamentos
+          ?.filter((p) => p.status === 'pago')
+          .reduce((acc, p) => acc + p.valorLiquido, 0) || 0
+      : 0,
+    valorTotalProcessando: Array.isArray(pagamentos)
+      ? pagamentos
+          ?.filter((p) => p.status === 'em_processamento' || p.status === 'aprovado')
+          .reduce((acc, p) => acc + p.valorLiquido, 0) || 0
+      : 0,
   };
 
   const getStatusColor = (status: string) => {
@@ -1183,7 +1203,9 @@ export default function Pagamentos() {
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
-                          className={(verificacoes as any).ccbAssinada ? 'text-green-700' : 'text-red-700'}
+                          className={
+                            (verificacoes as any).ccbAssinada ? 'text-green-700' : 'text-red-700'
+                          }
                         >
                           CCB Assinada e Localizada
                         </span>
@@ -1210,7 +1232,9 @@ export default function Pagamentos() {
                         )}
                         <span
                           className={
-                            (verificacoes as any).titularidadeConta ? 'text-green-700' : 'text-yellow-700'
+                            (verificacoes as any).titularidadeConta
+                              ? 'text-green-700'
+                              : 'text-yellow-700'
                           }
                         >
                           Titularidade da Conta
@@ -1332,7 +1356,8 @@ export default function Pagamentos() {
                               <strong>Tipo:</strong> PIX
                             </p>
                             <p>
-                              <strong>Chave:</strong> {(verificacoes as any).dadosPagamento.destino.pix}
+                              <strong>Chave:</strong>{' '}
+                              {(verificacoes as any).dadosPagamento.destino.pix}
                             </p>
                           </>
                         ) : (

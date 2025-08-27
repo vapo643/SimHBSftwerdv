@@ -70,7 +70,10 @@ testRetryWorker.on('failed', (job, err) => {
   if (attemptNumber < maxAttempts) {
     // Calcular delay do backoff exponencial
     const backoffDelay = job?.opts.backoff
-      ? Math.pow(2, attemptNumber - 1) * (typeof job.opts.backoff === 'number' ? job.opts.backoff : (job.opts.backoff as any)?.delay || 1000)
+      ? Math.pow(2, attemptNumber - 1) *
+        (typeof job.opts.backoff === 'number'
+          ? job.opts.backoff
+          : (job.opts.backoff as any)?.delay || 1000)
       : 0;
 
     console.log(`[TEST RETRY WORKER] 🔄 Retry será tentado em ${backoffDelay}ms`);

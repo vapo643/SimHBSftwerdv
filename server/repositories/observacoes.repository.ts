@@ -114,7 +114,6 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         statusPromessa: 'CANCELADO',
       })
       .where(eq(observacoesCobranca.id, id));
-
   }
 }
 

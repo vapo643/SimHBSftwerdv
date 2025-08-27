@@ -768,7 +768,12 @@ export default function Pagamentos() {
                   <div>
                     <Label htmlFor="metodoPagamento">Método de Pagamento</Label>
                     <Select
-                      onValueChange={(value) => form.setValue('metodoPagamento', value as 'ted' | 'pix' | 'boleto' | 'transferencia')}
+                      onValueChange={(value) =>
+                        form.setValue(
+                          'metodoPagamento',
+                          value as 'ted' | 'pix' | 'boleto' | 'transferencia'
+                        )
+                      }
                     >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Selecione o método" />

@@ -177,26 +177,28 @@ const Dashboard: React.FC = () => {
 
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   // The apiClient automatically adds camelCase aliases for all snake_case keys
-  const propostas = Array.isArray(propostasResponse?.data) ? propostasResponse.data.map((p: any) => {
-    console.log('[Dashboard] Processing proposal:', p);
-    return {
-      id: p.id,
-      status: p.status,
-      // Use camelCase properties directly (added by dual-key transformation)
-      nomeCliente: p.nomeCliente || p.clienteNome || p.cliente_nome, // Try all variations
-      cpfCliente: p.cpfCliente || p.clienteCpf || p.cliente_cpf, // Try all variations
-      valorSolicitado: p.valorSolicitado || p.valor,
-      prazo: p.prazo,
-      taxaJuros: p.taxaJuros || p.taxaJuros || p.taxa_juros,
-      produtoId: p.produtoId || p.produto_id,
-      lojaId: p.lojaId || p.loja_id,
-      createdAt: p.createdAt || p.created_at,
-      valorParcela: p.valorParcela || p.valor_parcela,
-      // Add contextual status for compatibility
-      statusContextual: p.status,
-      parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' },
-    };
-  }) : [];
+  const propostas = Array.isArray(propostasResponse?.data)
+    ? propostasResponse.data.map((p: any) => {
+        console.log('[Dashboard] Processing proposal:', p);
+        return {
+          id: p.id,
+          status: p.status,
+          // Use camelCase properties directly (added by dual-key transformation)
+          nomeCliente: p.nomeCliente || p.clienteNome || p.cliente_nome, // Try all variations
+          cpfCliente: p.cpfCliente || p.clienteCpf || p.cliente_cpf, // Try all variations
+          valorSolicitado: p.valorSolicitado || p.valor,
+          prazo: p.prazo,
+          taxaJuros: p.taxaJuros || p.taxaJuros || p.taxa_juros,
+          produtoId: p.produtoId || p.produto_id,
+          lojaId: p.lojaId || p.loja_id,
+          createdAt: p.createdAt || p.created_at,
+          valorParcela: p.valorParcela || p.valor_parcela,
+          // Add contextual status for compatibility
+          statusContextual: p.status,
+          parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' },
+        };
+      })
+    : [];
 
   // Fetch user metrics if user is ATENDENTE
   const { data: metricas } = useQuery<{
@@ -220,32 +222,41 @@ const Dashboard: React.FC = () => {
 
   // Filtrar propostas - HOOK SEMPRE EXECUTADO
   const propostasFiltradas = useMemo(() => {
-    return Array.isArray(propostasData) ? propostasData.filter((proposta) => {
-      const matchesSearch =
-        proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        proposta.id.includes(searchTerm) ||
-        proposta.cpfCliente?.includes(searchTerm);
+    return Array.isArray(propostasData)
+      ? propostasData.filter((proposta) => {
+          const matchesSearch =
+            proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            proposta.id.includes(searchTerm) ||
+            proposta.cpfCliente?.includes(searchTerm);
 
-      // PAM V1.0 - Usar status contextual com fallback
-      const statusFinal = proposta.statusContextual || proposta.status;
-      const matchesStatus = statusFilter === 'todos' || statusFinal === statusFilter;
+          // PAM V1.0 - Usar status contextual com fallback
+          const statusFinal = proposta.statusContextual || proposta.status;
+          const matchesStatus = statusFilter === 'todos' || statusFinal === statusFilter;
 
-      const matchesParceiro =
-        parceiroFilter === 'todos' || proposta.parceiro?.razaoSocial === parceiroFilter;
+          const matchesParceiro =
+            parceiroFilter === 'todos' || proposta.parceiro?.razaoSocial === parceiroFilter;
 
-      return matchesSearch && matchesStatus && matchesParceiro;
-    }) : [];
+          return matchesSearch && matchesStatus && matchesParceiro;
+        })
+      : [];
   }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
 
   // Estatísticas computadas - HOOK SEMPRE EXECUTADO
   const estatisticas = useMemo(() => {
     const total = propostasData.length;
-    const aprovadas = Array.isArray(propostasData) ? propostasData.filter((p) => p.status === 'aprovado').length : 0;
-    const pendentes = Array.isArray(propostasData) ? propostasData.filter(
-      (p) => p.status === 'aguardando_analise' || p.status === 'em_analise'
-    ).length : 0;
-    const rejeitadas = Array.isArray(propostasData) ? propostasData.filter((p) => p.status === 'rejeitado').length : 0;
-    const pendenciadas = Array.isArray(propostasData) ? propostasData.filter((p) => p.status === 'pendenciado').length : 0;
+    const aprovadas = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status === 'aprovado').length
+      : 0;
+    const pendentes = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status === 'aguardando_analise' || p.status === 'em_analise')
+          .length
+      : 0;
+    const rejeitadas = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status === 'rejeitado').length
+      : 0;
+    const pendenciadas = Array.isArray(propostasData)
+      ? propostasData.filter((p) => p.status === 'pendenciado').length
+      : 0;
     // Debug: log first few values to understand the data structure
     console.log(
       'DEBUG - First 3 proposals values:',

@@ -55,7 +55,11 @@ const UsuariosPage: React.FC = () => {
     queryFn: async () => {
       const response = await api.get('/api/admin/users');
       const data = response.data;
-      return Array.isArray(data) ? data : Array.isArray((data as any)?.data) ? (data as any)?.data : [];
+      return Array.isArray(data)
+        ? data
+        : Array.isArray((data as any)?.data)
+          ? (data as any)?.data
+          : [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -313,7 +317,9 @@ const UsuariosPage: React.FC = () => {
   // Calcular estatísticas dos usuários
   const userStats = {
     total: users.length,
-    administradores: Array.isArray(users) ? users.filter((u) => u.role === 'ADMINISTRADOR').length : 0,
+    administradores: Array.isArray(users)
+      ? users.filter((u) => u.role === 'ADMINISTRADOR').length
+      : 0,
     analistas: Array.isArray(users) ? users.filter((u) => u.role === 'ANALISTA').length : 0,
     atendentes: Array.isArray(users) ? users.filter((u) => u.role === 'ATENDENTE').length : 0,
     gerentes: Array.isArray(users) ? users.filter((u) => u.role === 'GERENTE').length : 0,
@@ -464,102 +470,105 @@ const UsuariosPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(users) && users.map((user) => {
-                      const initials = user.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')
-                        .toUpperCase()
-                        .slice(0, 2);
-                      const roleColor =
-                        {
-                          ADMINISTRADOR:
-                            'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200',
-                          ANALISTA:
-                            'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200',
-                          ATENDENTE:
-                            'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200',
-                          GERENTE:
-                            'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200',
-                          FINANCEIRO:
-                            'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200',
-                          DIRETOR:
-                            'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200',
-                        }[user.role] ||
-                        'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900 dark:text-gray-200';
+                    {Array.isArray(users) &&
+                      users.map((user) => {
+                        const initials = user.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2);
+                        const roleColor =
+                          {
+                            ADMINISTRADOR:
+                              'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200',
+                            ANALISTA:
+                              'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200',
+                            ATENDENTE:
+                              'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200',
+                            GERENTE:
+                              'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200',
+                            FINANCEIRO:
+                              'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200',
+                            DIRETOR:
+                              'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200',
+                          }[user.role] ||
+                          'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900 dark:text-gray-200';
 
-                      return (
-                        <TableRow
-                          key={user.id}
-                          className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
-                        >
-                          <TableCell className="py-4">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10 border-2 border-white shadow-md dark:border-gray-700">
-                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
-                                  {initials}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="font-semibold text-gray-900 dark:text-white">
-                                  {user.name}
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                                  <Calendar className="h-3 w-3" />
-                                  Criado em{' '}
-                                  {new Date(user.createdAt || Date.now()).toLocaleDateString(
-                                    'pt-BR'
-                                  )}
+                        return (
+                          <TableRow
+                            key={user.id}
+                            className="border-b border-gray-100 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
+                          >
+                            <TableCell className="py-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10 border-2 border-white shadow-md dark:border-gray-700">
+                                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
+                                    {initials}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">
+                                    {user.name}
+                                  </div>
+                                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <Calendar className="h-3 w-3" />
+                                    Criado em{' '}
+                                    {new Date(user.createdAt || Date.now()).toLocaleDateString(
+                                      'pt-BR'
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4 text-gray-400" />
-                              <span className="text-gray-600 dark:text-gray-300">{user.email}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <Badge
-                              className={`border px-3 py-1 text-xs font-semibold ${roleColor}`}
-                            >
-                              {user.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-                              <Badge className="border-green-200 bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200">
-                                Ativo
+                            </TableCell>
+                            <TableCell className="py-4">
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-gray-400" />
+                                <span className="text-gray-600 dark:text-gray-300">
+                                  {user.email}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4">
+                              <Badge
+                                className={`border px-3 py-1 text-xs font-semibold ${roleColor}`}
+                              >
+                                {user.role}
                               </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4">
-                            <div className="flex items-center justify-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openEditModal(user)}
-                                className="h-9 w-9 border-blue-200 p-0 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
-                                title="Editar usuário"
-                              >
-                                <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => toggleUserStatus(user.id)}
-                                className="h-9 w-9 border-red-200 p-0 hover:border-red-300 hover:bg-red-50 dark:border-red-700 dark:hover:bg-red-900/20"
-                                title="Desativar usuário"
-                              >
-                                <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                            </TableCell>
+                            <TableCell className="py-4">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+                                <Badge className="border-green-200 bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  Ativo
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openEditModal(user)}
+                                  className="h-9 w-9 border-blue-200 p-0 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
+                                  title="Editar usuário"
+                                >
+                                  <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => toggleUserStatus(user.id)}
+                                  className="h-9 w-9 border-red-200 p-0 hover:border-red-300 hover:bg-red-50 dark:border-red-700 dark:hover:bg-red-900/20"
+                                  title="Desativar usuário"
+                                >
+                                  <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                   </TableBody>
                 </Table>
               </div>

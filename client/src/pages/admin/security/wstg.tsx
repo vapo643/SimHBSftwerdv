@@ -141,7 +141,8 @@ export function WstgPage() {
             <div>
               <h2 className="text-2xl font-semibold">Overall Compliance</h2>
               <p className="text-muted-foreground">
-                {(status as any)?.completedTests || 0} of {(status as any)?.totalTests || 210} tests completed
+                {(status as any)?.completedTests || 0} of {(status as any)?.totalTests || 210} tests
+                completed
               </p>
             </div>
             <div

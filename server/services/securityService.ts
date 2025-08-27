@@ -546,7 +546,8 @@ export class SecurityService {
 
   private calculateConfidence(log: any): number {
     // Simple heuristic based on severity and metadata
-    const severityScore = ({ CRITICAL: 0.9, HIGH: 0.8, MEDIUM: 0.6, LOW: 0.4 } as any)[log.severity] || 0.5;
+    const severityScore =
+      ({ CRITICAL: 0.9, HIGH: 0.8, MEDIUM: 0.6, LOW: 0.4 } as any)[log.severity] || 0.5;
     return severityScore + Math.random() * 0.1;
   }
 

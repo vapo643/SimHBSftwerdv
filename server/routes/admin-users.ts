@@ -19,7 +19,7 @@ const router = Router();
 router.get('/users', async (req: Request, res: Response) => {
   try {
     console.log('[ADMIN USERS] Fetching all users...');
-    
+
     const allUsers = await db
       .select({
         id: users.id,
@@ -31,7 +31,7 @@ router.get('/users', async (req: Request, res: Response) => {
       .from(users);
 
     console.log('[ADMIN USERS] Found', allUsers.length, 'users');
-    
+
     res.json({
       success: true,
       data: allUsers,

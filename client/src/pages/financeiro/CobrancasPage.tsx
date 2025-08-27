@@ -571,24 +571,25 @@ export default function CobrancasPage() {
   };
 
   // Filtrar propostas localmente pela busca (lógica robusta para campos vazios)
-  const propostasFiltradas = Array.isArray(propostas) ? 
-    propostas?.filter((proposta: PropostaCobranca) => {
-      if (!searchTerm) return true; // Sem busca = mostrar todas
+  const propostasFiltradas = Array.isArray(propostas)
+    ? propostas?.filter((proposta: PropostaCobranca) => {
+        if (!searchTerm) return true; // Sem busca = mostrar todas
 
-      const search = searchTerm.toLowerCase();
+        const search = searchTerm.toLowerCase();
 
-      // Cria lista de campos pesquisáveis, removendo valores vazios/null/undefined
-      const searchableFields = [
-        proposta.nomeCliente,
-        proposta.cpfCliente,
-        proposta.numeroContrato,
-        proposta.id,
-        proposta.numero_proposta, // Adicionar campo de número da proposta
-      ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
+        // Cria lista de campos pesquisáveis, removendo valores vazios/null/undefined
+        const searchableFields = [
+          proposta.nomeCliente,
+          proposta.cpfCliente,
+          proposta.numeroContrato,
+          proposta.id,
+          proposta.numero_proposta, // Adicionar campo de número da proposta
+        ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
 
-      // Verifica se algum dos campos válidos contém o termo de busca
-      return searchableFields.some((field) => String(field).toLowerCase().includes(search));
-    }) : [];
+        // Verifica se algum dos campos válidos contém o termo de busca
+        return searchableFields.some((field) => String(field).toLowerCase().includes(search));
+      })
+    : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -1132,9 +1133,7 @@ export default function CobrancasPage() {
                         onClick={() => {
                           const codigo = boleto.codigoSolicitacao || '';
                           if (boletosParaProrrogar.includes(codigo)) {
-                            setBoletosParaProrrogar((prev) =>
-                              prev.filter((c) => c !== codigo)
-                            );
+                            setBoletosParaProrrogar((prev) => prev.filter((c) => c !== codigo));
                           } else if (codigo) {
                             setBoletosParaProrrogar((prev) => [...prev, codigo]);
                           }
@@ -1157,7 +1156,9 @@ export default function CobrancasPage() {
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Vencimento atual:{' '}
-                            {new Date(boleto.dataVencimento ?? new Date()).toLocaleDateString('pt-BR')}
+                            {new Date(boleto.dataVencimento ?? new Date()).toLocaleDateString(
+                              'pt-BR'
+                            )}
                           </p>
                         </div>
                       </div>
@@ -1419,8 +1420,9 @@ export default function CobrancasPage() {
                         }).format((debtInfo.valorRestante ?? 0) - novoValorQuitacao)}
                       </p>
                       <p className="text-xs text-green-600">
-                        ({((1 - novoValorQuitacao / (debtInfo.valorRestante ?? 1)) * 100).toFixed(1)}% de
-                        desconto)
+                        (
+                        {((1 - novoValorQuitacao / (debtInfo.valorRestante ?? 1)) * 100).toFixed(1)}
+                        % de desconto)
                       </p>
                     </div>
                   )}
@@ -1759,7 +1761,10 @@ export default function CobrancasPage() {
                               />
                             </div>
                             <div className="flex gap-2">
-                              <Select value={statusObservacao} onValueChange={(value: string) => setStatusObservacao(value as any)}>
+                              <Select
+                                value={statusObservacao}
+                                onValueChange={(value: string) => setStatusObservacao(value as any)}
+                              >
                                 <SelectTrigger className="w-[250px]">
                                   <SelectValue placeholder="Selecione o status" />
                                 </SelectTrigger>
@@ -1828,7 +1833,10 @@ export default function CobrancasPage() {
                                           {obs.tipoContato}
                                         </Badge>
                                         <span className="text-xs text-muted-foreground">
-                                          {format(new Date(obs.createdAt ?? new Date()), "dd/MM/yyyy 'às' HH:mm")}
+                                          {format(
+                                            new Date(obs.createdAt ?? new Date()),
+                                            "dd/MM/yyyy 'às' HH:mm"
+                                          )}
                                         </span>
                                       </div>
                                       <p className="mt-2 text-sm">{obs.observacao}</p>

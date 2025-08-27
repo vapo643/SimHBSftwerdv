@@ -2395,9 +2395,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `[${getBrasiliaTimestamp()}] ❌ ERRO ao buscar dados de formalização:`,
           error
         );
-        res
-          .status(500)
-          .json({ message: 'Erro ao buscar dados de formalização', error: (error as Error).message });
+        res.status(500).json({
+          message: 'Erro ao buscar dados de formalização',
+          error: (error as Error).message,
+        });
       }
     }
   );

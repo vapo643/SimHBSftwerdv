@@ -62,10 +62,10 @@ export default function AlterarEmail() {
   // Request email change mutation
   const changeEmailMutation = useMutation({
     mutationFn: async (data: EmailChangeFormData) => {
-      const response = await apiRequest('/api/auth/change-email', {
+      const response = (await apiRequest('/api/auth/change-email', {
         method: 'POST',
         body: JSON.stringify(data),
-      }) as EmailChangeResponse;
+      })) as EmailChangeResponse;
       return response;
     },
     onSuccess: (data) => {
