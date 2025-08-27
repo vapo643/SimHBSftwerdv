@@ -10,8 +10,8 @@ export class DocumentsService {
   /**
    * Get documents for a proposal
    */
-  async getProposalDocuments(propostaId: number): Promise<{
-    propostaId: number;
+  async getProposalDocuments(propostaId: string): Promise<{
+    propostaId: string;
     totalDocuments: number;
     documents: any[];
   }> {
@@ -60,25 +60,25 @@ export class DocumentsService {
           const signedUrl = await documentsRepository.generateSignedUrl(filePath, 3600);
 
           documents.push({
-            name: doc.nome_arquivo,
+            name: doc.nomeArquivo,
             url: signedUrl || doc.url, // Fallback to original URL
             type: doc.tipo || 'application/octet-stream',
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
-            uploadDate: doc.created_at,
+            uploadDate: doc.createdAt,
             category: 'supporting',
           });
         } catch (error) {
           console.error(
-            `[DOCUMENTS_SERVICE] Error generating signed URL for ${doc.nome_arquivo}:`,
+            `[DOCUMENTS_SERVICE] Error generating signed URL for ${doc.nomeArquivo}:`,
             error
           );
           // Fallback to original URL
           documents.push({
-            name: doc.nome_arquivo,
+            name: doc.nomeArquivo,
             url: doc.url,
             type: doc.tipo || 'application/octet-stream',
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
-            uploadDate: doc.created_at,
+            uploadDate: doc.createdAt,
             category: 'supporting',
           });
         }
@@ -99,7 +99,7 @@ export class DocumentsService {
    * Upload a document for a proposal
    */
   async uploadDocument(
-    propostaId: number,
+    propostaId: string,
     file: any
   ): Promise<{
     success: boolean;

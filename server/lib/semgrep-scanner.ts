@@ -443,7 +443,7 @@ rules:
       };
 
       try {
-        fs.watch(fullPath, { recursive: true }, watchCallback);
+        fs.watch(fullPath, { recursive: true }, watchCallback as fs.WatchListener<string>);
       } catch (error) {
         console.warn(`⚠️ [SEMGREP] Não foi possível monitorar diretório: ${fullPath}`, error);
       }

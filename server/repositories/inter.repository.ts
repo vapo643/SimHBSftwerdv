@@ -118,13 +118,24 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    */
   async createCollection(data: Partial<InterCollection>): Promise<InterCollection> {
     const timestamp = getBrasiliaDate();
+    
+    // Ensure required fields are present
+    if (!data.propostaId || !data.codigoSolicitacao || !data.seuNumero || !data.valorNominal || !data.dataVencimento) {
+      throw new Error('Required fields missing for collection creation');
+    }
+    
     const collectionData = {
       ...data,
+      propostaId: data.propostaId!,
+      codigoSolicitacao: data.codigoSolicitacao!,
+      seuNumero: data.seuNumero!,
+      valorNominal: data.valorNominal!,
+      dataVencimento: data.dataVencimento!,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
-    const result = await db.insert(interCollections).values(collectionData).returning();
+    const result = await db.insert(interCollections).values([collectionData]).returning();
 
     return result[0];
   }
@@ -174,7 +185,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     const result = await db
       .update(interCollections)
       .set({
-        deletedAt: getBrasiliaDate(),
+        isActive: false,
         updatedAt: getBrasiliaDate(),
       })
       .where(eq(interCollections.id, id))
@@ -205,7 +216,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .set({
         status,
         updatedAt: getBrasiliaDate(),
-        usuarioId: userId,
+        userId: userId,
       })
       .where(eq(propostas.id, proposalId))
       .returning();
