@@ -209,7 +209,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
           dadosSolicitacao: { motivo: data.motivo, detalhes: data.detalhes },
           solicitadoPorId: data.solicitado_por,
           solicitadoPorNome: 'Sistema', // Default value
-          solicitadoPorRole: 'system', // Default value  
+          solicitadoPorRole: 'system', // Default value
           status: 'pendente',
           createdAt: new Date(),
         })

@@ -1,5 +1,5 @@
 ### Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management within financial institutions. Its primary purpose is to optimize the entire credit proposal lifecycle, from initial creation and credit simulation to payment processing and formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a complete payment queue system. Simpix aims to ensure banking-grade security, compliance, and efficient data handling, thereby boosting operational efficiency and minimizing manual tasks in financial operations. The project has significant market potential by providing a robust, efficient, and compliant solution for financial operations.
+Simpix is a full-stack TypeScript application designed for comprehensive credit management in financial institutions. Its primary purpose is to streamline the credit proposal lifecycle, encompassing creation, simulation, payment processing, and formalization tracking. Simpix offers a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a complete payment queue system. Built with banking-grade security and compliance in mind, Simpix aims to enhance operational efficiency and reduce manual tasks in financial operations by providing a robust, efficient, and compliant solution.
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIDO (PAG) V2.0
@@ -162,7 +162,7 @@ Simpix employs a modular monolith architecture using TypeScript for both fronten
     - **Commercial Tables**: N:N relationship between products and rates, allowing personalized and general rates with hierarchical fallback.
     - **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
 - **Testing**: Extensive test infrastructure with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Production-ready migration system using Drizzle-Kit, ensuring Zero D downtime (Expand/Contract) with automated rollback and tracking.
+- **Schema Migration**: Production-ready migration system using Drizzle-Kit, ensuring Zero Downtime (Expand/Contract) with automated rollback and tracking.
 
 ### External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, and File Storage.

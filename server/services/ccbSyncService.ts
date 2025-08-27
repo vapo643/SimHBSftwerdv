@@ -76,7 +76,11 @@ class CCBSyncService {
       console.log(`[CCB SYNC] 📋 Found ${pendingProposals.length} CCBs to sync`);
 
       for (const proposal of pendingProposals) {
-        await this.syncSingleCCB(proposal.id as string, proposal.clicksignDocumentKey as string, proposal.clienteNome as string);
+        await this.syncSingleCCB(
+          proposal.id as string,
+          proposal.clicksignDocumentKey as string,
+          proposal.clienteNome as string
+        );
       }
 
       console.log('[CCB SYNC] ✅ Synchronization complete');

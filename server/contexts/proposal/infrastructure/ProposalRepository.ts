@@ -47,31 +47,33 @@ export class ProposalRepository implements IProposalRepository {
       const sequentialId = await this.getNextSequentialId();
       const numeroProposta = await this.getNextNumeroProposta();
 
-      await db.insert(propostas).values([{
-        id: proposal.id, // UUID do domínio
-        numeroProposta: numeroProposta, // ID sequencial começando em 300001
-        status: data.status,
-        clienteNome: data.cliente_data.nome,
-        clienteCpf: data.cliente_data.cpf,
-        clienteData: JSON.stringify(data.cliente_data),
-        valor: data.valor.toString(),
-        prazo: data.prazo,
-        taxaJuros: data.taxa_juros.toString(),
-        produtoId: data.produto_id,
-        tabelaComercialId: data.tabela_comercial_id,
-        lojaId: data.loja_id,
-        metodoPagamento: data.dados_pagamento?.metodo,
-        dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
-        dadosPagamentoBanco: data.dados_pagamento?.banco,
-        dadosPagamentoAgencia: data.dados_pagamento?.agencia,
-        dadosPagamentoConta: data.dados_pagamento?.conta,
-        dadosPagamentoPix: data.dados_pagamento?.pix_chave,
-        motivoPendencia: data.motivo_rejeicao,
-        observacoes: data.observacoes,
-        ccbDocumentoUrl: data.ccb_url,
-        createdAt: data.created_at,
-        // updatedAt campo removido - será atualizado automaticamente pelo schema
-      }]);
+      await db.insert(propostas).values([
+        {
+          id: proposal.id, // UUID do domínio
+          numeroProposta: numeroProposta, // ID sequencial começando em 300001
+          status: data.status,
+          clienteNome: data.cliente_data.nome,
+          clienteCpf: data.cliente_data.cpf,
+          clienteData: JSON.stringify(data.cliente_data),
+          valor: data.valor.toString(),
+          prazo: data.prazo,
+          taxaJuros: data.taxa_juros.toString(),
+          produtoId: data.produto_id,
+          tabelaComercialId: data.tabela_comercial_id,
+          lojaId: data.loja_id,
+          metodoPagamento: data.dados_pagamento?.metodo,
+          dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
+          dadosPagamentoBanco: data.dados_pagamento?.banco,
+          dadosPagamentoAgencia: data.dados_pagamento?.agencia,
+          dadosPagamentoConta: data.dados_pagamento?.conta,
+          dadosPagamentoPix: data.dados_pagamento?.pix_chave,
+          motivoPendencia: data.motivo_rejeicao,
+          observacoes: data.observacoes,
+          ccbDocumentoUrl: data.ccb_url,
+          createdAt: data.created_at,
+          // updatedAt campo removido - será atualizado automaticamente pelo schema
+        },
+      ]);
     }
 
     // Processar eventos de domínio

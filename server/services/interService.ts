@@ -349,7 +349,9 @@ export class InterService {
     for (const collection of collections) {
       try {
         // Get updated status from Inter
-        const details = await (interBankService as any).getCollectionDetails(collection.codigoSolicitacao);
+        const details = await (interBankService as any).getCollectionDetails(
+          collection.codigoSolicitacao
+        );
 
         // Update if changed
         if (details.situacao !== collection.situacao) {

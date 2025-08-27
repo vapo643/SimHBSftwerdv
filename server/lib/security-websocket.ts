@@ -58,8 +58,10 @@ export class SecurityWebSocketManager {
   private setupEventListeners() {
     // TODO: Implementar sistema de eventos para scanners de segurança
     // Por enquanto, apenas logamos que o sistema está pronto
-    console.log('🔌 [Security WS] Event listeners configurados (aguardando implementação de EventEmitter nos scanners)');
-    
+    console.log(
+      '🔌 [Security WS] Event listeners configurados (aguardando implementação de EventEmitter nos scanners)'
+    );
+
     // Enviar status inicial para clientes conectados
     setInterval(() => {
       this.broadcast({

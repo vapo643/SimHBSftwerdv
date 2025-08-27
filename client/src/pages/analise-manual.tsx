@@ -97,7 +97,7 @@ export default function AnaliseManual() {
       }
       return failureCount < 2;
     },
-  }) as { data: Proposta | undefined; isLoading: boolean; error: any; isError: boolean; };
+  }) as { data: Proposta | undefined; isLoading: boolean; error: any; isError: boolean };
 
   const {
     register,
@@ -597,7 +597,11 @@ export default function AnaliseManual() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div>
                     <Label htmlFor="status">Decisão</Label>
-                    <Select onValueChange={(value) => setValue('status', value as 'aprovado' | 'rejeitado' | 'solicitar_info')}>
+                    <Select
+                      onValueChange={(value) =>
+                        setValue('status', value as 'aprovado' | 'rejeitado' | 'solicitar_info')
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma decisão" />
                       </SelectTrigger>
@@ -747,7 +751,9 @@ export default function AnaliseManual() {
                     <Percent className="h-8 w-8 text-blue-600" />
                   </div>
                   <p className="text-sm font-medium text-gray-700">Taxa Sugerida</p>
-                  <p className="text-2xl font-bold text-blue-600">{creditAnalysis?.taxaSugerida}%</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {creditAnalysis?.taxaSugerida}%
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -764,7 +770,11 @@ export default function AnaliseManual() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                   <Label htmlFor="status">Decisão</Label>
-                  <Select onValueChange={(value) => setValue('status', value as 'aprovado' | 'rejeitado' | 'solicitar_info')}>
+                  <Select
+                    onValueChange={(value) =>
+                      setValue('status', value as 'aprovado' | 'rejeitado' | 'solicitar_info')
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma decisão" />
                     </SelectTrigger>

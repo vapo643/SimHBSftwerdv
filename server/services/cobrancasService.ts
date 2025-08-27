@@ -325,7 +325,7 @@ export class CobrancasService {
 
       // Get basic proposal counts
       const propostas = await cobrancasRepository.getPropostasCobranca({});
-      
+
       // Calculate basic metrics
       let valorTotalEmAtraso = 0;
       let quantidadeContratosEmAtraso = 0;
@@ -341,7 +341,7 @@ export class CobrancasService {
 
         // Get installments to check for overdue payments
         const parcelas = await cobrancasRepository.getParcelasProposta(prop.id);
-        
+
         let temParcelaVencida = false;
         for (const parcela of parcelas) {
           const dataVencimento = parseISO(parcela.dataVencimento);
@@ -359,13 +359,13 @@ export class CobrancasService {
       }
 
       // Calculate rates
-      const taxaInadimplencia = quantidadeTotalContratos > 0 
-        ? (quantidadeContratosEmAtraso / quantidadeTotalContratos) * 100 
-        : 0;
+      const taxaInadimplencia =
+        quantidadeTotalContratos > 0
+          ? (quantidadeContratosEmAtraso / quantidadeTotalContratos) * 100
+          : 0;
 
-      const percentualValorEmAtraso = valorTotalCarteira > 0 
-        ? (valorTotalEmAtraso / valorTotalCarteira) * 100 
-        : 0;
+      const percentualValorEmAtraso =
+        valorTotalCarteira > 0 ? (valorTotalEmAtraso / valorTotalCarteira) * 100 : 0;
 
       const kpis = {
         valorTotalEmAtraso,
