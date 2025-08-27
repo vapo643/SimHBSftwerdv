@@ -4,8 +4,8 @@ import { Redis } from 'ioredis';
 let redisClient: Redis | null = null;
 
 // Verificar se estamos em desenvolvimento para usar cache in-memory
-const _isDevelopment = process.env.NODE_ENV == 'development';
-const _inMemoryCache = new Map<string, { value: unknown; expires: number }>();
+const isDevelopment = process.env.NODE_ENV == 'development';
+const inMemoryCache = new Map<string, { value: unknown; expires: number }>();
 
 /**
  * Inicializa o cliente Redis reutilizando a conexão existente
@@ -29,7 +29,7 @@ export function initializeRedisClient(): Redis {
     });
   }
 
-  return redisClient; }
+  return redisClient;
 }
 
 /**
@@ -41,29 +41,29 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
   try {
     // Em desenvolvimento, usar cache in-memory
     if (isDevelopment) {
-      const _cached = inMemoryCache.get(key);
+      const cached = inMemoryCache.get(key);
       if (cached && cached.expires > Date.now()) {
         console.log(`[CACHE-MEMORY] 🎯 Cache HIT for key: ${key}`);
-        return cached.value as T; }
+        return cached.value as T;
       }
       console.log(`[CACHE-MEMORY] ❌ Cache MISS for key: ${key}`);
-      return null; }
+      return null;
     }
 
     // Em produção, usar Redis
-    const _client = initializeRedisClient();
-    const _data = await client.get(key);
+    const client = initializeRedisClient();
+    const data = await client.get(key);
 
-    if (_data) {
+    if (data) {
       console.log(`[CACHE-REDIS] 🎯 Cache HIT for key: ${key}`);
-      return JSON.parse(_data) as T; }
+      return JSON.parse(data) as T;
     }
 
     console.log(`[CACHE-REDIS] ❌ Cache MISS for key: ${key}`);
-    return null; }
+    return null;
   } catch (error) {
     console.error(`[CACHE] Error getting from cache for key ${key}:`, error);
-    return null; }
+    return null;
   }
 }
 
@@ -108,7 +108,7 @@ export async function setToCache<T>(
  */
 export async function invalidateCache(key: string): Promise<void> {
   try {
-    const _client = initializeRedisClient();
+    const client = initializeRedisClient();
     await client.del(key);
     console.log(`[CACHE] 🗑️ Invalidated cache key: ${key}`);
   } catch (error) {
@@ -122,8 +122,8 @@ export async function invalidateCache(key: string): Promise<void> {
  */
 export async function invalidateCachePattern(pattern: string): Promise<void> {
   try {
-    const _client = initializeRedisClient();
-    const _keys = await client.keys(pattern);
+    const client = initializeRedisClient();
+    const keys = await client.keys(pattern);
 
     if (keys.length > 0) {
       await client.del(...keys);
@@ -139,11 +139,11 @@ export async function invalidateCachePattern(pattern: string): Promise<void> {
  */
 export async function isCacheAvailable(): Promise<boolean> {
   try {
-    const _client = initializeRedisClient();
+    const client = initializeRedisClient();
     await client.ping();
-    return true; }
+    return true;
   } catch (error) {
     console.error('[CACHE] Redis is not available:', error);
-    return false; }
+    return false;
   }
 }

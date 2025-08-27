@@ -216,26 +216,26 @@ export async function validateStatusConsistency(
       .where(eq(propostas.id, propostaId))
       .limit(1);
 
-    const _contextosStatus = await db
+    const contextosStatus = await db
       .select()
       .from(statusContextuais)
       .where(eq(statusContextuais.propostaId, propostaId));
 
-    const _inconsistencias = contextosStatus.filter((cs) => {
+    const inconsistencias = contextosStatus.filter((cs) => {
       // Regras de validação por contexto
       if (cs.contexto == 'pagamentos' && proposta?.status == 'pago') {
-        return cs.status !== 'pago' && cs.status !== 'EMPRESTIMO_PAGO'; }
+        return cs.status !== 'pago' && cs.status !== 'EMPRESTIMO_PAGO';
       }
       if (
         cs.contexto == 'cobrancas' &&
         ['QUITADO', 'INADIMPLENTE'].includes(proposta?.status || '')
       ) {
-        return !['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(cs.status); }
+        return !['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(cs.status);
       }
-      return false; }
+      return false;
     });
 
-    const _isConsistent = inconsistencias.length == 0;
+    const isConsistent = inconsistencias.length == 0;
 
     if (!isConsistent) {
       console.warn(
@@ -245,12 +245,12 @@ export async function validateStatusConsistency(
     }
 
     return {
-  _isConsistent,
+      isConsistent,
       details: {
-  _propostaId,
+        propostaId,
         statusLegado: proposta?.status,
         statusContextuais: contextosStatus,
-  _inconsistencias,
+        inconsistencias,
       },
     };
   } catch (error) {

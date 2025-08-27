@@ -83,19 +83,19 @@ export class MonitoringService {
     byApplication: unknown;
   }> {
     try {
-      const _connections = await monitoringRepository.getActiveConnections();
+      const connections = await monitoringRepository.getActiveConnections();
 
       // Categorize by state
-      const _byState = connections.reduce((acc, conn) => {
+      const byState = connections.reduce((acc, conn) => {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
-        return acc; }
+        return acc;
       }, {} as unknown);
 
       // Categorize by application
-      const _byApplication = connections.reduce((acc, conn) => {
-        const _app = conn.application_name || 'unknown';
+      const byApplication = connections.reduce((acc, conn) => {
+        const app = conn.application_name || 'unknown';
         acc[app] = (acc[app] || 0) + 1;
-        return acc; }
+        return acc;
       }, {} as unknown);
 
       return {
@@ -110,8 +110,8 @@ export class MonitoringService {
           stateChangeTime: conn.state_change,
           currentQuery: conn.query?.substring(0, 100), // Truncate for safety
         })),
-  _byState,
-  _byApplication,
+        byState,
+        byApplication,
       };
     } catch (error) {
       console.error('[MONITORING_SERVICE] Error fetching connections:', error);

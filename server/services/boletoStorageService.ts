@@ -32,10 +32,10 @@ interface BoletoSyncResult {
   totalBoletos: number;
   boletosProcessados: number;
   boletosComErro: number;
-  erros: Record<string, unknown>[]>{
+  erros: {
     codigoSolicitacao: string;
     erro: string;
-  }>;
+  }[];
   caminhosPdf: string[];
 }
 
@@ -64,7 +64,7 @@ class BoletoStorageService {
 
     const result: BoletoSyncResult = {
       success: true,
-  _propostaId,
+      propostaId,
       totalBoletos: 0,
       boletosProcessados: 0,
       boletosComErro: 0,

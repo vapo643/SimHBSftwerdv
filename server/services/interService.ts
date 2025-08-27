@@ -13,7 +13,7 @@ import { z } from 'zod';
 import type { InterCollection, Proposta } from '@shared/schema';
 
 // Validation schemas
-const _createCollectionSchema = z.object({
+const createCollectionSchema = z.object({
   proposalId: z.string(),
   valorTotal: z.number().min(2.5).max(99999999.99),
   dataVencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -37,7 +37,7 @@ export class InterService {
    * Test Inter Bank connection
    */
   async testConnection(): Promise<boolean> {
-    return await interBankService.testConnection(); }
+    return await interBankService.testConnection();
   }
 
   /**
@@ -45,22 +45,22 @@ export class InterService {
    */
   async createCollection(data, userId?: string): Promise<InterCollection> {
     // Validate input
-    const _validated = createCollectionSchema.parse(_data);
+    const validated = createCollectionSchema.parse(data);
 
     // Check if proposal exists
-    const _proposal = await interRepository.getProposal(validated.proposalId);
+    const proposal = await interRepository.getProposal(validated.proposalId);
     if (!proposal) {
       throw new Error('Proposta não encontrada');
     }
 
     // Check for existing collection
-    const _existingCollection = await interRepository.findByProposalId(validated.proposalId);
+    const existingCollection = await interRepository.findByProposalId(validated.proposalId);
     if (existingCollection) {
       throw new Error('Já existe uma cobrança para esta proposta');
     }
 
     // Create collection in Inter Bank
-    const _interResult = await (interBankService as unknown).createCollection({
+    const interResult = await (interBankService as unknown).createCollection({
       seuNumero: `PROP-${validated.proposalId}`,
       valorNominal: validated.valorTotal,
       dataVencimento: validated.dataVencimento,
