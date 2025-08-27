@@ -26,25 +26,18 @@ import {
   Activity,
   Bug,
   Lock,
-  Eye,
-  TrendingUp,
   AlertCircle,
   CheckCircle,
   XCircle,
   Zap,
-  Target,
   FileSearch,
   Package,
 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import RefreshButton from '@/components/RefreshButton';
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,

@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
 
 // Interface para as feature flags
 interface FeatureFlags {
@@ -55,7 +54,7 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
     if (data && typeof data === 'object' && 'flags' in data) {
       setFlags((prevFlags) => ({
         ...prevFlags,
-        ...(data as any).flags,
+        ...(data as { flags: FeatureFlags }).flags,
       }));
     } else if (data && typeof data === 'object') {
       // Se data é diretamente o objeto de flags
@@ -85,19 +84,21 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
 
   // Verificar modo de manutenção
   useEffect(() => {
-    if (flags['maintenance-mode']) {
+    const maintenanceMode = flags['maintenance-mode'];
+    if (maintenanceMode) {
       console.warn('⚠️ MODO DE MANUTENÇÃO ATIVO');
       // Poderia redirecionar para página de manutenção aqui
     }
-  }, [flags['maintenance-mode']]);
+  }, [flags]);
 
   // Verificar modo read-only
   useEffect(() => {
-    if (flags['read-only-mode']) {
+    const readOnlyMode = flags['read-only-mode'];
+    if (readOnlyMode) {
       console.warn('⚠️ MODO SOMENTE LEITURA ATIVO');
       // Poderia desabilitar formulários globalmente aqui
     }
-  }, [flags['read-only-mode']]);
+  }, [flags]);
 
   const value: FeatureFlagContextType = {
     flags,

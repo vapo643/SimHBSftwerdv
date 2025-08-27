@@ -17,7 +17,6 @@ import {
   Users,
   FileText,
   Activity,
-  Lock,
   AlertCircle,
   RefreshCw,
   Search,

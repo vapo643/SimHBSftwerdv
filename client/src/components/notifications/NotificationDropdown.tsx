@@ -5,7 +5,6 @@
 
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Link } from 'wouter';
 import { AlertCircle, AlertTriangle, Info, CheckCircle, Clock, X } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -137,6 +136,24 @@ export function NotificationDropdown({
                     onClose();
                   }
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    // Marcar como lida
+                    if (notificacao.status === 'nao_lida') {
+                      onMarcarComoLida(notificacao.id);
+                    }
+
+                    // Navegar para o link se existir
+                    if (notificacao.linkRelacionado) {
+                      window.location.href = notificacao.linkRelacionado;
+                      onClose();
+                    }
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Notificação: ${notificacao.titulo}`}
                 data-testid={`notification-item-${notificacao.id}`}
               >
                 <div className="flex items-start gap-3">

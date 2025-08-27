@@ -1,5 +1,5 @@
 ### Overview
-Simpix is a full-stack TypeScript application designed to streamline the entire credit proposal lifecycle for financial institutions. It provides capabilities for credit proposal creation, simulation, payment processing, and formalization tracking. The project aims to enhance operational efficiency, reduce manual tasks, and address critical needs in the financial credit sector by offering a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a robust payment queue system.
+Simpix is a full-stack TypeScript application designed to streamline the credit proposal lifecycle for financial institutions. Its primary purpose is to enhance operational efficiency, reduce manual tasks, and address critical needs in the financial credit sector. Key capabilities include credit proposal creation, simulation, payment processing, and formalization tracking. The project delivers a production-ready credit simulation API, secure document management, template-driven PDF generation for credit contracts (Credit Cession Bills), and a robust payment queue system. The overarching business vision is to establish Simpix as the leading platform for credit lifecycle management, offering a robust, secure, and scalable solution that significantly reduces operational overhead and accelerates financial transactions.
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIDO (PAG) V2.0
@@ -132,12 +132,12 @@ Error handling: Create structured documentation for automatic consultation durin
   - Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
 
 ### System Architecture
-Simpix is a modular monolith application built with TypeScript, emphasizing security, performance, and maintainability across both frontend and backend.
+Simpix is a modular monolith TypeScript application, emphasizing security, performance, and maintainability.
 
 **UI/UX and Frontend Implementation:**
-- **Technology Stack**: React 18, Wouter for routing, Tailwind CSS, and shadcn/ui.
-- **State Management**: TanStack Query (server-side) and `useReducer` (local component state).
-- **Forms**: React Hook Form with Zod validation.
+- **Technology Stack**: React 18, Wouter for routing, Tailwind CSS, and shadcn/ui for component styling.
+- **State Management**: TanStack Query for server-side state and `useReducer` for local component state.
+- **Forms**: React Hook Form with Zod for validation.
 - **Build Tool**: Vite.
 
 **Backend Implementation and Technical Architecture:**
@@ -155,30 +155,30 @@ Simpix is a modular monolith application built with TypeScript, emphasizing secu
 - **Feature Management**: Unleash-client for feature flagging.
 
 **Feature Specifications:**
-- **Credit Simulation API**: Dynamic rate lookup, complex financial calculations (IOF, TAC, CET using Newton-Raphson), automated payment schedule generation, and detailed audit logging.
+- **Credit Simulation API**: Handles dynamic rate lookup, complex financial calculations (IOF, TAC, CET using Newton-Raphson), automated payment schedule generation, and detailed audit logging.
 - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
-- **Payment Workflow**: Batch processing, multiple payment methods, formalization tracking, and dual-storage for data integrity.
+- **Payment Workflow**: Supports batch processing, multiple payment methods, formalization tracking, and dual-storage for data integrity.
 - **Commercial Tables**: Manages N:N relationships between products and rates, including hierarchical fallback.
-- **Status Management**: Centralized Finite State Machine (FSM) for strict transition validation and audit logging.
-- **Testing**: Extensive testing infrastructure with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Drizzle-Kit provides a production-ready migration system with Zero Downtime Expand/Contract, automated rollback, and tracking.
+- **Status Management**: Utilizes a centralized Finite State Machine (FSM) for strict transition validation and audit logging.
+- **Testing**: Features an extensive testing infrastructure with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
+- **Schema Migration**: Drizzle-Kit provides a production-ready migration system with Zero D.T. Expand/Contract, automated rollback, and tracking.
 
 ### External Dependencies
-- **Supabase**: Authentication, PostgreSQL hosting, file storage.
-- **Drizzle ORM**: Type-safe PostgreSQL interactions.
-- **TanStack Query**: Frontend server-side data fetching and caching.
-- **React Hook Form**: Form state management and validation.
-- **Zod**: Schema validation.
-- **Tailwind CSS**: Utility-first CSS framework.
-- **shadcn/ui**: Pre-built, customizable React components.
-- **Wouter**: Lightweight React routing library.
-- **Vite**: Frontend build tool.
-- **Express.js**: Backend web application framework.
-- **BullMQ**: High-performance Node.js job queue.
-- **Redis**: In-memory data store for caching and BullMQ backend.
-- **Winston**: Structured logging.
-- **Sentry**: Error tracking and performance monitoring.
-- **Unleash-client**: Feature flagging.
-- **pdf-lib**: Programmatic PDF creation and modification.
-- **ClickSign**: Electronic signature functionalities.
-- **Banco Inter API**: Automated boleto/PIX payment generation and tracking.
+- **Supabase**: Authentication, PostgreSQL hosting, and file storage.
+- **Drizzle ORM**: For type-safe PostgreSQL interactions.
+- **TanStack Query**: For frontend server-side data fetching and caching.
+- **React Hook Form**: For form state management and validation.
+- **Zod**: For schema validation.
+- **Tailwind CSS**: For utility-first CSS styling.
+- **shadcn/ui**: For pre-built, customizable React components.
+- **Wouter**: For lightweight React routing.
+- **Vite**: For frontend build processes.
+- **Express.js**: As the backend web application framework.
+- **BullMQ**: For high-performance Node.js job queuing.
+- **Redis**: As an in-memory data store for caching and BullMQ backend.
+- **Winston**: For structured logging.
+- **Sentry**: For error tracking and performance monitoring.
+- **Unleash-client**: For feature flagging.
+- **pdf-lib**: For programmatic PDF creation and modification.
+- **ClickSign**: For electronic signature functionalities.
+- **Banco Inter API**: For automated boleto/PIX payment generation and tracking.

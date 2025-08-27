@@ -87,6 +87,15 @@ export function DocumentsStep() {
                 <div
                   className="hover:border-border/70 bg-muted/30 hover:bg-muted/50 cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors"
                   onClick={() => fileInputRef.current?.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      fileInputRef.current?.click();
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label="Fazer upload de documentos"
                 >
                   <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="mb-2 text-lg font-medium text-foreground">

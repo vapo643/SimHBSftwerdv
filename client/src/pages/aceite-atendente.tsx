@@ -13,7 +13,6 @@ import {
   User,
   Phone,
   Mail,
-  Calendar,
   DollarSign,
   Clock,
 } from 'lucide-react';

@@ -45,7 +45,12 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   // PAM V1.0: Query para buscar dados da proposta (verificar se tem CCB assinada)
   const { data: proposalData } = useQuery({
     queryKey: [`/api/propostas/${proposalId}`],
-    select: (data: any) => ({
+    select: (data: {
+      caminhoCcbAssinado?: string;
+      caminho_ccb_assinado?: string;
+      dataAssinatura?: string;
+      data_assinatura?: string;
+    }) => ({
       caminhoCcbAssinado: data?.caminhoCcbAssinado || data?.caminho_ccb_assinado,
       dataAssinatura: data?.dataAssinatura || data?.data_assinatura,
     }),
@@ -302,7 +307,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                           link.download = `CCB_Assinada_${proposalId}.pdf`;
                           link.click();
                         }
-                      } catch (error) {
+                      } catch (_error) {
                         toast({
                           title: 'Erro ao baixar',
                           description: 'Erro ao baixar CCB assinada',
