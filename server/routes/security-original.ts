@@ -1,7 +1,7 @@
 // Endpoints de Monitoramento de Segurança - OWASP A09
 import { Request, Response } from 'express';
-import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
-import { requireAdmin } from '../lib/role-guards';
+import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _requireAdmin } from '../lib/role-guards';
 import { securityLogger, SecurityEventType } from '../lib/security-logger';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
@@ -9,21 +9,22 @@ export function setupSecurityRoutes(app) {
   // Health check de segurança
   app.get(
     '/api/security/health',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
         const _metrics = securityLogger.getSecurityMetrics(24); // Últimas 24 horas
         const _anomalies = securityLogger.detectAnomalies();
 
         res.json({
-          timestamp: getBrasiliaTimestamp(),
+          timestamp: _getBrasiliaTimestamp(),
           status: anomalies.length == 0 ? 'healthy' : 'warning',
   _metrics,
   _anomalies,
-          lastUpdate: getBrasiliaTimestamp(),
+          lastUpdate: _getBrasiliaTimestamp(),
         });
-      } catch (error) {
+      }
+catch (error) {
         res
           .status(500)
           .json({ message: 'Erro ao obter métricas de segurança', error: error.message });
@@ -34,8 +35,8 @@ export function setupSecurityRoutes(app) {
   // Relatório detalhado de segurança
   app.get(
     '/api/security/report',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
         const _hours = parseInt(req.query.hours as string) || 24;
@@ -52,9 +53,10 @@ export function setupSecurityRoutes(app) {
           period: `${hours} hours`,
   _metrics,
   _analysis,
-          generatedAt: getBrasiliaTimestamp(),
+          generatedAt: _getBrasiliaTimestamp(),
         });
-      } catch (error) {
+      }
+catch (error) {
         res.status(500).json({ message: 'Erro ao gerar relatório', error: error.message });
       }
     }
@@ -63,8 +65,8 @@ export function setupSecurityRoutes(app) {
   // Log de evento de segurança manual (para testes)
   app.post(
     '/api/security/log-event',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
         const { type, severity, details } = req.body;
@@ -84,7 +86,8 @@ export function setupSecurityRoutes(app) {
         });
 
         res.json({ message: 'Evento registrado com sucesso' });
-      } catch (error) {
+      }
+catch (error) {
         res.status(500).json({ message: 'Erro ao registrar evento', error: error.message });
       }
     }
@@ -93,13 +96,14 @@ export function setupSecurityRoutes(app) {
   // Verificar status de conformidade OWASP
   app.get(
     '/api/security/owasp-compliance',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
         const _compliance = checkOWASPCompliance();
         res.json(compliance);
-      } catch (error) {
+      }
+catch (error) {
         res.status(500).json({ message: 'Erro ao verificar conformidade', error: error.message });
       }
     }
@@ -114,10 +118,10 @@ function calculateRiskLevel(metrics): string {
     metrics.rateLimitExceeded * 1 +
     metrics.criticalEvents * 5;
 
-  if (score == 0) return 'LOW'; }
-  if (score < 50) return 'MEDIUM'; }
-  if (score < 100) return 'HIGH'; }
-  return 'CRITICAL'; }
+  if (score == 0) return 'LOW';
+  if (score < 50) return 'MEDIUM';
+  if (score < 100) return 'HIGH';
+  return 'CRITICAL';
 }
 
 // Gera recomendações baseadas nas métricas
@@ -148,7 +152,7 @@ function generateRecommendations(metrics): string[] {
     recommendations.push('Sistema operando dentro dos parâmetros normais de segurança.');
   }
 
-  return recommendations; }
+  return recommendations;
 }
 
 // Identifica principais ameaças
@@ -169,7 +173,7 @@ function identifyTopThreats(metrics): Record<string, unknown>[]>{ type: string; 
 // Verifica conformidade com OWASP Top 10
 function checkOWASPCompliance(): unknown {
   return {
-    timestamp: getBrasiliaTimestamp(),
+    timestamp: _getBrasiliaTimestamp(),
     overallCompliance: '70%',
     categories: {
       A01_BrokenAccessControl: {

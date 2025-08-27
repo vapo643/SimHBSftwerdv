@@ -207,7 +207,7 @@ export class OWASPAssessmentService {
     ];
 
     await this.saveAssessment('samm_assessment.json', sampAssessments);
-    return sampAssessments; }
+    return sampAssessments;
   }
 
   // Fase 2: OWASP ASVS - Application Security Verification Standard
@@ -342,7 +342,7 @@ export class OWASPAssessmentService {
     ];
 
     await this.saveAssessment('asvs_requirements.json', asvsRequirements);
-    return asvsRequirements; }
+    return asvsRequirements;
   }
 
   // Salvar assessments em arquivos
@@ -391,7 +391,7 @@ export class OWASPAssessmentService {
       }
     }
 
-    return report; }
+    return report;
   }
 
   // Processar documento PDF OWASP
@@ -399,13 +399,14 @@ export class OWASPAssessmentService {
     filePath: string,
     framework: OWASPDocument['framework']
   ): Promise<void> {
-    console.log(`📄 Processing OWASP document: ${filePath} for framework: ${framework}`);
+    console.log(`📄 Processing OWASP document: ${filePath}
+for framework: ${framework}`);
 
     const document: OWASPDocument = {
       id: Date.now().toString(),
       type: 'PDF',
       title: framework == 'SAMM' ? 'SAMM Core v1.5 FINAL' : `OWASP ${framework} Document`,
-  _framework,
+      _framework,
       processedAt: new Date(),
       status: 'COMPLETED',
       metadata: {
@@ -463,6 +464,6 @@ export class OWASPAssessmentService {
       plan += '\n';
     });
 
-    return plan; }
+    return plan;
   }
 }

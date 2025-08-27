@@ -56,7 +56,8 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
         ...prevFlags,
         ...(data as { flags: FeatureFlags }).flags,
       }));
-    } else if (data && typeof data == 'object') {
+    }
+else if (data && typeof data == 'object') {
       // Se data é diretamente o objeto de flags
       setFlags((prevFlags) => ({
         ...prevFlags,

@@ -92,7 +92,7 @@ export function initSentry(app: Express) {
           eventId: event.event_id,
         });
 
-        return event; }
+        return event;
       },
 
       // Ignorar alguns erros comuns
@@ -185,10 +185,10 @@ export function captureMessage(
 // Helper para adicionar breadcrumbs
 export function addBreadcrumb(message: string, category: string, data?) {
   Sentry.addBreadcrumb({
-  _message,
-  _category,
+    _message,
+    _category,
     level: 'info',
-  _data,
+    _data,
     timestamp: Date.now() / 1000,
   });
 }
@@ -207,13 +207,12 @@ export const _tracingHandler = () => (req: Request, res: Response, next: NextFun
   next();
 };
 
-export const _errorHandler =
-  () => (err, req: Request, res: Response, next: NextFunction) => {
-    // Capturar apenas erros 500+
-    if (!err.status || err.status >= 500) {
-      Sentry.captureException(err);
-    }
-    next(err);
-  };
+export const _errorHandler = () => (err, req: Request, res: Response, next: NextFunction) => {
+  // Capturar apenas erros 500+
+  if (!err.status || err.status >= 500) {
+    Sentry.captureException(err);
+  }
+  next(err);
+};
 
 export default Sentry;

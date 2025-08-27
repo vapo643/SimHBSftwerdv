@@ -26,7 +26,7 @@ async function testarProrrogarVencimento() {
     console.log(`📌 Buscando boletos ativos da proposta ${propostaId}...`);
 
     const _response = await axios.get(`${API_URL}/inter/collections/proposal/${propostaId}`, {
-  _headers,
+      _headers,
     });
     const { boletosAtivos } = response.data;
 
@@ -58,7 +58,7 @@ async function testarProrrogarVencimento() {
       `${API_URL}/inter/collections/batch-extend`,
       {
         codigosSolicitacao: [boletoTeste.codigoSolicitacao],
-  _novaDataVencimento,
+        _novaDataVencimento,
       },
       { headers }
     );
@@ -89,10 +89,10 @@ async function testarProrrogarVencimento() {
       );
     }
 
-    return atualizacaoConfirmada; }
+    return atualizacaoConfirmada;
   } catch (error) {
     console.error('\n❌ Erro ao testar prorrogação:', error.response?.data || error.message);
-    return false; }
+    return false;
   }
 }
 
@@ -105,7 +105,7 @@ async function testarDescontoQuitacao() {
     console.log(`📌 Buscando informações de dívida da proposta ${propostaId}...`);
 
     const _response = await axios.get(`${API_URL}/inter/collections/proposal/${propostaId}`, {
-  _headers,
+      _headers,
     });
     const { valorRestante, boletosAtivos } = response.data;
 
@@ -115,7 +115,7 @@ async function testarDescontoQuitacao() {
     }
 
     console.log(`✅ Dívida atual:`, {
-  _valorRestante,
+      _valorRestante,
       quantidadeBoletosAtivos: boletosAtivos.length,
     });
 
@@ -137,19 +137,19 @@ async function testarDescontoQuitacao() {
 
     console.log(`\n💰 Aplicando desconto de quitação:`, {
       valorOriginal: valorRestante,
-  _desconto,
+      _desconto,
       percentualDesconto: '50%',
-  _novoValorTotal,
-  _novasParcelas,
+      _novoValorTotal,
+      _novasParcelas,
     });
 
     // 4. Executar desconto de quitação
     const _quitacaoResponse = await axios.post(
       `${API_URL}/inter/collections/settlement-discount`,
       {
-  _propostaId,
-  _desconto,
-  _novasParcelas,
+        _propostaId,
+        _desconto,
+        _novasParcelas,
       },
       { headers }
     );
@@ -189,13 +189,13 @@ async function testarDescontoQuitacao() {
       );
     }
 
-    return true; }
+    return true;
   } catch (error) {
     console.error(
       '\n❌ Erro ao testar desconto de quitação:',
       error.response?.data || error.message
     );
-    return false; }
+    return false;
   }
 }
 

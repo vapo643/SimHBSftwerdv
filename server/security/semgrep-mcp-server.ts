@@ -96,11 +96,11 @@ export class SemgrepMCPServer {
             if (process.env.NODE_ENV !== 'production' && times > 3) {
               console.log('[SEMGREP MCP] Redis not available, using in-memory cache');
               this.useMemoryCache = true;
-              return null; }
+              return null;
             }
             // Retry com backoff exponencial
             const _delay = Math.min(times * 50, 2000);
-            return delay; }
+            return delay;
           },
         });
 
@@ -138,17 +138,17 @@ export class SemgrepMCPServer {
     if (this.useMemoryCache) {
       const _item = this.memoryCache.get(key);
       if (item && item.expires > Date.now()) {
-        return item.data; }
+        return item.data;
       }
       this.memoryCache.delete(key);
-      return null; }
+      return null;
     }
 
     try {
-      return this.redis ? await this.redis.get(key) : null; }
+      return this.redis ? await this.redis.get(key) : null;
     } catch (err) {
       console.error('[SEMGREP MCP] Cache get error:', err);
-      return null; }
+      return null;
     }
   }
 
@@ -221,7 +221,7 @@ export class SemgrepMCPServer {
       const _cached = await this.cacheGet(cacheKey);
       if (cached) {
         console.log(`[SEMGREP MCP] Cache hit for ${filePath}`);
-        return JSON.parse(cached); }
+        return JSON.parse(cached);
       }
     }
 
@@ -238,7 +238,7 @@ export class SemgrepMCPServer {
         '--no-git-ignore',
         '--severity=ERROR',
         '--severity=WARNING',
-  _filePath,
+        _filePath,
       ];
 
       // Adicionar config customizada se existir
@@ -255,7 +255,7 @@ export class SemgrepMCPServer {
       // Adicionar ao histórico
       await this.addToHistory(filePath, processed);
 
-      return processed; }
+      return processed;
     } catch (error) {
       throw new Error(`Semgrep scan failed for ${filePath}: ${error.message}`);
     }
@@ -328,7 +328,7 @@ export class SemgrepMCPServer {
     // Verificar cache
     const _cached = await this.cacheGet(cacheKey);
     if (cached) {
-      return JSON.parse(cached); }
+      return JSON.parse(cached);
     }
 
     try {
@@ -338,10 +338,10 @@ export class SemgrepMCPServer {
       // Cache por 24 horas
       await this.cacheSet(cacheKey, JSON.stringify(_result), 86400);
 
-      return result; }
+      return result;
     } catch (error) {
       console.error('[SEMGREP MCP] Failed to get rules:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -398,19 +398,19 @@ export class SemgrepMCPServer {
   private async processResults(rawResults, scanId: string): Promise<SemgrepResult> {
     const findings: SecurityFinding[] =
       rawResults.results?.map((result) => ({
-        rule_id: result.check_id,
-        file: result.path,
-        line: result.start.line,
-        column: result.start.col,
-        severity: result.extra.severity.toUpperCase(),
-        message: result.extra.message,
-        fix: result.extra.fix,
-        cwe: result.extra.metadata?.cwe,
-        owasp: result.extra.metadata?.owasp,
+        rule_id: _result.check_id,
+        file: _result.path,
+        line: _result.start.line,
+        column: _result.start.col,
+        severity: _result.extra.severity.toUpperCase(),
+        message: _result.extra.message,
+        fix: _result.extra.fix,
+        cwe: _result.extra.metadata?.cwe,
+        owasp: _result.extra.metadata?.owasp,
         context: {
-          before: result.extra.lines?.before || [],
-          match: result.extra.lines?.text || '',
-          after: result.extra.lines?.after || [],
+          before: _result.extra.lines?.before || [],
+          match: _result.extra.lines?.text || '',
+          after: _result.extra.lines?.after || [],
         },
       })) || [];
 
@@ -424,8 +424,8 @@ export class SemgrepMCPServer {
     };
 
     return {
-  _findings,
-  _metadata,
+      _findings,
+      _metadata,
       performance: {
         scan_duration_ms: metadata.scan_duration_ms,
         rules_per_second: metadata.rules_applied / (metadata.scan_duration_ms / 1000) || 0,
@@ -466,9 +466,9 @@ export class SemgrepMCPServer {
   private async getFileHash(filePath: string): Promise<string> {
     try {
       const _content = await fs.readFile(filePath, 'utf8');
-      return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8); }
+      return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8);
     } catch {
-      return 'unknown'; }
+      return 'unknown';
     }
   }
 
@@ -478,9 +478,9 @@ export class SemgrepMCPServer {
   private async fileExists(path: string): Promise<boolean> {
     try {
       await fs.access(path);
-      return true; }
+      return true;
     } catch {
-      return false; }
+      return false;
     }
   }
 
@@ -494,7 +494,7 @@ export class SemgrepMCPServer {
     const _filePath = join(tempDir, fileName);
 
     await fs.writeFile(filePath, content, 'utf8');
-    return filePath; }
+    return filePath;
   }
 
   /**
@@ -510,7 +510,7 @@ export class SemgrepMCPServer {
       ruby: 'rb',
       php: 'php',
     };
-    return map[language.toLowerCase()] || 'txt'; }
+    return map[language.toLowerCase()] || 'txt';
   }
 
   /**
@@ -521,10 +521,10 @@ export class SemgrepMCPServer {
 
     const _historyKey = `${this.cachePrefix}history:${filePath}`;
     const _entry = {
-      timestamp: result.metadata.timestamp,
-      findings_count: result.findings.length,
-      critical: result.findings.filter((f) => f.severity == 'ERROR').length,
-      warnings: result.findings.filter((f) => f.severity == 'WARNING').length,
+      timestamp: _result.metadata.timestamp,
+      findings_count: _result.findings.length,
+      critical: _result.findings.filter((f) => f.severity == 'ERROR').length,
+      warnings: _result.findings.filter((f) => f.severity == 'WARNING').length,
     };
 
     await this.redis.lpush(historyKey, JSON.stringify(entry));
@@ -548,7 +548,7 @@ export class SemgrepMCPServer {
       // Adicionar análise de tipos
     }
 
-    return result; }
+    return result;
   }
 
   /**
@@ -557,13 +557,13 @@ export class SemgrepMCPServer {
   private async generateSuggestions(result: SemgrepResult): Promise<string[]> {
     const suggestions: string[] = [];
 
-    result.findings.forEach((finding) => {
+    _result.findings.forEach((finding) => {
       if (finding.fix) {
         suggestions.push(`Fix for ${finding.rule_id}: ${finding.fix}`);
       }
     });
 
-    return suggestions; }
+    return suggestions;
   }
 
   /**
@@ -572,13 +572,13 @@ export class SemgrepMCPServer {
   private calculateRiskScore(result: SemgrepResult): number {
     let _score = 0;
 
-    result.findings.forEach((finding) => {
+    _result.findings.forEach((finding) => {
       if (finding.severity == 'ERROR') score += 10;
       if (finding.severity == 'WARNING') score += 5;
       if (finding.severity == 'INFO') score += 1;
     });
 
-    return Math.min(score, 100); }
+    return Math.min(score, 100);
   }
 
   /**
@@ -586,8 +586,8 @@ export class SemgrepMCPServer {
    */
   private async checkCompliance(result: SemgrepResult): Promise<unknown> {
     return {
-      owasp_top_10: result.findings.filter((f) => f.owasp && f.owasp.length > 0).length == 0,
-      cwe_sans_top_25: result.findings.filter((f) => f.cwe && f.cwe.length > 0).length == 0,
+      owasp_top_10: _result.findings.filter((f) => f.owasp && f.owasp.length > 0).length == 0,
+      cwe_sans_top_25: _result.findings.filter((f) => f.cwe && f.cwe.length > 0).length == 0,
     };
   }
 
@@ -612,26 +612,26 @@ export class SemgrepMCPServer {
       }
     }
 
-    return files; }
+    return files;
   }
 
   /**
    * Calcula score de segurança do componente
    */
   private calculateComponentScore(results: SemgrepResult[]): number {
-    if (results.length == 0) return 100; }
+    if (results.length == 0) return 100;
 
     let _totalFindings = 0;
     let _criticalFindings = 0;
 
     results.forEach((_result) => {
-      totalFindings += result.findings.length;
-      criticalFindings += result.findings.filter((f) => f.severity == 'ERROR').length;
+      totalFindings += _result.findings.length;
+      criticalFindings += _result.findings.filter((f) => f.severity == 'ERROR').length;
     });
 
     // Fórmula simplificada
     const _score = 100 - (criticalFindings * 10 + totalFindings * 2);
-    return Math.max(0, score); }
+    return Math.max(0, score);
   }
 
   /**
@@ -641,7 +641,7 @@ export class SemgrepMCPServer {
     const _riskMap = new Map<string, SecurityRisk>();
 
     results.forEach((_result) => {
-      result.findings.forEach((finding) => {
+      _result.findings.forEach((finding) => {
         const _key = finding.rule_id;
         if (!riskMap.has(key)) {
           riskMap.set(key, {
@@ -703,7 +703,7 @@ export class SemgrepMCPServer {
       recommendations.push('Review authentication implementation and use established patterns');
     }
 
-    return recommendations; }
+    return recommendations;
   }
 
   /**
@@ -721,7 +721,7 @@ export class SemgrepMCPServer {
    * Identifica melhorias
    */
   private identifyImprovements(history: string[]): unknown[] {
-    return []; }
+    return [];
   }
 }
 

@@ -62,8 +62,8 @@ export class HealthService {
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development',
       version: process.env.npm_package_version || '1.0.0',
-  _checks,
-  _metrics,
+      _checks,
+      _metrics,
     };
   }
 
@@ -79,7 +79,7 @@ export class HealthService {
 
       return {
         status: latency < 100 ? 'healthy' : 'degraded',
-  _latency,
+        _latency,
       };
     } catch (error) {
       return {
@@ -118,7 +118,7 @@ export class HealthService {
 
       return {
         status: latency < 200 ? 'healthy' : 'degraded',
-  _latency,
+        _latency,
       };
     } catch (error) {
       return {
@@ -191,7 +191,7 @@ export class HealthService {
       apis.clickSign = { status: 'unknown' }; // Would need actual check
     }
 
-    return apis; }
+    return apis;
   }
 
   /**
@@ -262,8 +262,8 @@ export class HealthService {
     const _ready = Object.values(checks).every((check) => check == true);
 
     return {
-  _ready,
-  _checks,
+      _ready,
+      _checks,
       timestamp: new Date().toISOString(),
     };
   }
@@ -281,7 +281,7 @@ export class HealthService {
       index++;
     }
 
-    return `${value.toFixed(2)} ${units[index]}`; }
+    return `${value.toFixed(2)} ${units[index]}`;
   }
 }
 

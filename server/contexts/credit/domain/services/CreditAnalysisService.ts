@@ -73,10 +73,12 @@ export class CreditAnalysisService {
       if (debtToIncomeRatio < 0.3) {
         score += 100;
         factors.push('Excellent debt-to-income ratio');
-      } else if (debtToIncomeRatio < 0.5) {
+      }
+else if (debtToIncomeRatio < 0.5) {
         score += 50;
         factors.push('Good debt-to-income ratio');
-      } else {
+      }
+else {
         score -= 50;
         factors.push('High debt-to-income ratio');
       }
@@ -101,7 +103,8 @@ export class CreditAnalysisService {
     if (loanConditions.requestedAmount > 50000) {
       score -= 30;
       factors.push('High loan amount');
-    } else if (loanConditions.requestedAmount < 10000) {
+    }
+else if (loanConditions.requestedAmount < 10000) {
       score += 20;
       factors.push('Conservative loan amount');
     }
@@ -113,13 +116,16 @@ export class CreditAnalysisService {
     if (score >= 750) {
       risk = 'LOW';
       recommendation = 'APPROVE';
-    } else if (score >= 650) {
+    }
+else if (score >= 650) {
       risk = 'MEDIUM';
       recommendation = 'APPROVE';
-    } else if (score >= 550) {
+    }
+else if (score >= 550) {
       risk = 'HIGH';
       recommendation = 'MANUAL_REVIEW';
-    } else {
+    }
+else {
       risk = 'VERY_HIGH';
       recommendation = 'REJECT';
     }
@@ -138,43 +144,43 @@ export class CreditAnalysisService {
   private shouldApprove(score: CreditScore, loanConditions): boolean {
     // Auto-approve low risk
     if (score.risk == 'LOW') {
-      return true; }
+      return true;
     }
 
     // Auto-approve medium risk with conditions
     if (score.risk == 'MEDIUM' && loanConditions.requestedAmount <= 30000) {
-      return true; }
+      return true;
     }
 
     // All other cases require manual review or rejection
-    return false; }
+    return false;
   }
 
   /**
    * Calculate maximum approved amount based on income and score
    */
   private calculateMaxApprovedAmount(monthlyIncome: number, score: CreditScore): number {
-    if (!monthlyIncome) return 0; }
+    if (!monthlyIncome) return 0;
 
     let multiplier: number;
     switch (score.risk) {
       case 'LOW': {
         multiplier = 20;
-        break; }
+        break;
       case 'MEDIUM': {
         multiplier = 15;
-        break; }
+        break;
       case 'HIGH': {
         multiplier = 10;
-        break; }
+        break;
       case 'VERY_HIGH': {
         multiplier = 5;
-        break; }
+        break;
       default:
         multiplier = 10;
     }
 
-    return Math.floor(monthlyIncome * multiplier); }
+    return Math.floor(monthlyIncome * multiplier);
   }
 
   /**
@@ -183,15 +189,15 @@ export class CreditAnalysisService {
   private suggestOptimalTerms(risk: string): number[] {
     switch (risk) {
       case 'LOW': {
-        return [12, 24, 36, 48, 60, 72, 84]; }
+        return [12, 24, 36, 48, 60, 72, 84];
       case 'MEDIUM': {
-        return [12, 24, 36, 48, 60]; }
+        return [12, 24, 36, 48, 60];
       case 'HIGH': {
-        return [12, 24, 36]; }
+        return [12, 24, 36];
       case 'VERY_HIGH': {
-        return [12, 24]; }
+        return [12, 24];
       default:
-        return [12, 24, 36]; }
+        return [12, 24, 36];
     }
   }
 
@@ -213,7 +219,7 @@ export class CreditAnalysisService {
       baseDocuments.push('Certidão Negativa de Débitos', 'Referências Comerciais');
     }
 
-    return baseDocuments; }
+    return baseDocuments;
   }
 
   /**
@@ -225,9 +231,11 @@ export class CreditAnalysisService {
 
     if (approved) {
       observation += 'Proposta APROVADA com base nos critérios de análise automática. ';
-    } else if (score.recommendation == 'MANUAL_REVIEW') {
+    }
+else if (score.recommendation == 'MANUAL_REVIEW') {
       observation += 'Proposta requer ANÁLISE MANUAL devido ao perfil de risco. ';
-    } else {
+    }
+else {
       observation += 'Proposta NÃO APROVADA automaticamente. ';
     }
 
@@ -235,7 +243,7 @@ export class CreditAnalysisService {
       observation += `Fatores considerados: ${score.factors.join(', ')}.`;
     }
 
-    return observation; }
+    return observation;
   }
 
   /**
@@ -251,7 +259,7 @@ export class CreditAnalysisService {
       age--;
     }
 
-    return age; }
+    return age;
   }
 
   /**
@@ -264,6 +272,6 @@ export class CreditAnalysisService {
       HIGH: 'Alto',
       VERY_HIGH: 'Muito Alto',
     };
-    return translations[risk] || risk; }
+    return translations[risk] || risk;
   }
 }

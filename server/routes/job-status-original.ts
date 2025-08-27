@@ -6,7 +6,7 @@
  */
 
 import { Router } from 'express';
-import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireAnyRole } from '../lib/role-guards';
 import { queues } from '../lib/mock-queue';
 
@@ -18,7 +18,7 @@ const _router = Router();
  */
 router.get(
   '/:jobId/status',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {

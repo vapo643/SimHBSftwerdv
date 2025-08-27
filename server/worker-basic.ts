@@ -38,7 +38,7 @@ if (isDevelopment) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         console.log(`[WORKER] ✅ Job ${job.id} processado com sucesso`);
-        return { success: true, jobId: job.id, processedAt: new Date().toISOString() }; }
+        return { success: true, jobId: job.id, processedAt: new Date().toISOString() };
       },
       {
         connection: {

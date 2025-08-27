@@ -63,8 +63,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         LIMIT 1
       `);
 
-      if (!result || result.length == 0) {
-        return null; }
+      if (!result || _result.length == 0) {
+        return null;
       }
 
       const _row = result[0];
@@ -92,8 +92,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         LIMIT 1
       `);
 
-      if (!result || result.length == 0) {
-        return null; }
+      if (!result || _result.length == 0) {
+        return null;
       }
 
       const _row = result[0];
@@ -120,8 +120,8 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         LIMIT 1
       `);
 
-      if (!result || result.length == 0) {
-        return null; }
+      if (!result || _result.length == 0) {
+        return null;
       }
 
       const _row = result[0];
@@ -219,10 +219,10 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
     if (error) {
       console.error('Failed to create webhook log:', error);
       // Non-critical error, don't throw
-      return ''; }
+      return '';
     }
 
-    return data?.id || ''; }
+    return data?.id || '';
   }
 
   /**
@@ -234,7 +234,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
     error?: string
   ): Promise<void> {
     const updateData: unknown = {
-  _status,
+      _status,
       processed_at: new Date().toISOString(),
     };
 
@@ -267,10 +267,10 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
 
     if (error) {
       console.error('Failed to check webhook idempotency:', error);
-      return false; }
+      return false;
     }
 
-    return data && data.length > 0; }
+    return data && data.length > 0;
   }
 
   /**
@@ -287,7 +287,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
       throw new Error(`Failed to fetch webhook logs: ${error.message}`);
     }
 
-    return data as WebhookLog[]; }
+    return data as WebhookLog[];
   }
 
   /**
@@ -304,7 +304,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
       throw new Error(`Failed to fetch webhook logs for proposal: ${error.message}`);
     }
 
-    return data as WebhookLog[]; }
+    return data as WebhookLog[];
   }
 }
 

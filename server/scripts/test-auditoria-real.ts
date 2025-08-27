@@ -20,7 +20,7 @@ async function fazerLogin(): Promise<string> {
 
     if (response.data.token) {
       console.log('✅ Login realizado com sucesso!\n');
-      return response.data.token; }
+      return response.data.token;
     } else {
       throw new Error('Token não retornado');
     }
@@ -43,7 +43,7 @@ async function fazerLogin(): Promise<string> {
         password: 'admin123',
       });
 
-      return loginResponse.data.token; }
+      return loginResponse.data.token;
     } catch (createError) {
       console.error('❌ Erro ao criar usuário admin:', createError);
       throw new Error('Não foi possível autenticar');
@@ -115,10 +115,10 @@ async function testarProrrogacaoComAuditoria(token: string, codigoSolicitacao: s
     console.log(JSON.stringify(response.data, null, 2));
     console.log('\n');
 
-    return true; }
+    return true;
   } catch (error) {
     console.error('❌ Erro na prorrogação:', error.response?.data || error.message);
-    return false; }
+    return false;
   }
 }
 
@@ -142,7 +142,7 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
 
     if (!valorRestante || valorRestante <= 0) {
       console.log('❌ Valor restante não encontrado ou inválido');
-      return false; }
+      return false;
     }
 
     // Aplicar desconto de 30%
@@ -170,9 +170,9 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     const _response = await axios.post(
       `${API_URL}/inter/collections/settlement-discount`,
       {
-  _propostaId,
-  _desconto,
-  _novasParcelas,
+        _propostaId,
+        _desconto,
+        _novasParcelas,
       },
       {
         headers: {
@@ -187,10 +187,10 @@ async function testarDescontoComAuditoria(token: string, propostaId: string) {
     console.log(JSON.stringify(response.data, null, 2));
     console.log('\n');
 
-    return true; }
+    return true;
   } catch (error) {
     console.error('❌ Erro no desconto:', error.response?.data || error.message);
-    return false; }
+    return false;
   }
 }
 

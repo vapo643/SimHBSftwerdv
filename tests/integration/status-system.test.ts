@@ -98,7 +98,8 @@ describe('Sistema de Status FSM - Testes de Integração', () => {
         .returning({ id: propostas.id });
 
       console.log(`[TEST SETUP] ✅ Proposta de teste criada: ${testProposalId}`);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[TEST SETUP] ❌ Erro ao criar dados de teste:', error);
       throw error;
     }
@@ -294,10 +295,10 @@ describe('Sistema de Status FSM - Testes de Integração', () => {
         metadata: { teste: true },
       });
 
-      expect(result.success).toBe(true);
-      expect(result.statusLegado).toBe(novoStatus);
-      expect(result.statusContextual).toBe(novoStatus);
-      expect(result.contexto).toBe(contexto);
+      expect(_result.success).toBe(true);
+      expect(_result.statusLegado).toBe(novoStatus);
+      expect(_result.statusContextual).toBe(novoStatus);
+      expect(_result.contexto).toBe(contexto);
 
       // Verificar que ambas as tabelas foram atualizadas
       const [propostaAtualizada] = await db

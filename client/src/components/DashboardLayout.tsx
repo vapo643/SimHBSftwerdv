@@ -54,7 +54,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     };
 
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape); }
+    return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
   // Fechar menu ao navegar (mobile)
@@ -74,7 +74,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
         description: 'Você foi desconectado do sistema.',
       });
       // A lógica de redirecionamento será tratada pelo listener de auth
-    } catch {
+    }
+catch {
       toast({
         title: 'Erro ao fazer logout',
         description: 'Tente novamente em alguns instantes.',
@@ -161,7 +162,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
 
                       case 'ANALISTA': {
                         // ANALISTA: APENAS Fila de Análise
-                        return ['📋 Fila de Análise'].includes(item.name); }
+                        return ['📋 Fila de Análise'].includes(item.name);
 
                       case 'FINANCEIRO': {
                         // FINANCEIRO: Sem acesso ao workflow principal

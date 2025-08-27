@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   type AuthenticatedRequest,
   _invalidateAllUserTokens,
   _trackUserToken,
@@ -14,38 +14,38 @@ const _router = Router();
 
 // Helper function to parse user agent for better display
 function parseUserAgent(userAgent: string): string {
-  if (!userAgent) return 'Dispositivo desconhecido'; }
+  if (!userAgent) return 'Dispositivo desconhecido';
 
   // Check for mobile devices first
   if (/mobile/i.test(userAgent)) {
-    if (/android/i.test(userAgent)) return 'Android Device'; }
-    if (/iphone/i.test(userAgent)) return 'iPhone'; }
-    if (/ipad/i.test(userAgent)) return 'iPad'; }
-    return 'Mobile Device'; }
+    if (/android/i.test(userAgent)) return 'Android Device';
+    if (/iphone/i.test(userAgent)) return 'iPhone';
+    if (/ipad/i.test(userAgent)) return 'iPad';
+    return 'Mobile Device';
   }
 
   // Check for desktop browsers
   if (/windows/i.test(userAgent)) {
-    if (/edge/i.test(userAgent)) return 'Windows - Edge'; }
-    if (/chrome/i.test(userAgent)) return 'Windows - Chrome'; }
-    if (/firefox/i.test(userAgent)) return 'Windows - Firefox'; }
-    return 'Windows PC'; }
+    if (/edge/i.test(userAgent)) return 'Windows - Edge';
+    if (/chrome/i.test(userAgent)) return 'Windows - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Windows - Firefox';
+    return 'Windows PC';
   }
 
   if (/macintosh/i.test(userAgent)) {
-    if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari'; }
-    if (/chrome/i.test(userAgent)) return 'Mac - Chrome'; }
-    if (/firefox/i.test(userAgent)) return 'Mac - Firefox'; }
-    return 'Mac'; }
+    if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari';
+    if (/chrome/i.test(userAgent)) return 'Mac - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Mac - Firefox';
+    return 'Mac';
   }
 
   if (/linux/i.test(userAgent)) {
-    if (/chrome/i.test(userAgent)) return 'Linux - Chrome'; }
-    if (/firefox/i.test(userAgent)) return 'Linux - Firefox'; }
-    return 'Linux'; }
+    if (/chrome/i.test(userAgent)) return 'Linux - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Linux - Firefox';
+    return 'Linux';
   }
 
-  return 'Dispositivo desconhecido'; }
+  return 'Dispositivo desconhecido';
 }
 
 // POST /api/auth/login
@@ -105,7 +105,8 @@ router.post('/login', async (req, res) => {
   _userAgent,
   _expiresAt,
           });
-        } catch (sessionError) {
+        }
+catch (sessionError) {
           console.error('Failed to create session record:', sessionError);
           // Don't fail login if session tracking fails
         }
@@ -131,7 +132,8 @@ router.post('/login', async (req, res) => {
       user: data.user,
       session: data.session,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Login failed' });
   }
@@ -170,14 +172,15 @@ router.post('/register', async (req, res) => {
       user: data.user,
       session: data.session,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Register error:', error);
     res.status(500).json({ message: 'Registration failed' });
   }
 });
 
 // POST /api/auth/logout
-router.post('/logout', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/logout', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const _supabase = createServerSupabaseClient();
     const { error } = await _supabase.auth.signOut();
@@ -187,7 +190,8 @@ router.post('/logout', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     }
 
     res.json({ message: 'Logged out successfully' });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({ message: 'Logout failed' });
   }
@@ -195,7 +199,7 @@ router.post('/logout', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
 
 // PASSO 2 - ASVS 6.2.3: Change Password with Current Password Verification
 // POST /api/auth/change-password
-router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/change-password', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
@@ -289,7 +293,8 @@ router.post('/change-password', jwtAuthMiddleware, async (req: AuthenticatedRequ
       message: 'Senha alterada com sucesso. Por favor, faça login novamente.',
       requiresRelogin: true,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Change password error:', error);
     res.status(500).json({ message: 'Erro ao alterar senha' });
   }
@@ -334,7 +339,8 @@ router.post('/forgot-password', async (req, res) => {
       message:
         'Se o email existe em nosso sistema, você receberá instruções para redefinir sua senha.',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Password reset error:', error);
     res.status(500).json({ message: 'Erro ao processar solicitação' });
   }
@@ -342,7 +348,7 @@ router.post('/forgot-password', async (req, res) => {
 
 // ASVS 7.4.3 - List user sessions
 // GET /api/auth/sessions
-router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/sessions', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
       return res.*);
@@ -365,7 +371,8 @@ router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res
     }));
 
     res.json({ sessions: formattedSessions });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Error fetching user sessions:', error);
     res.status(500).json({ message: 'Erro ao buscar sessões' });
   }
@@ -373,7 +380,7 @@ router.get('/sessions', jwtAuthMiddleware, async (req: AuthenticatedRequest, res
 
 // ASVS 7.4.3 - Delete a specific session
 // DELETE /api/auth/sessions/:sessionId
-router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user?.id) {
       return res.*);
@@ -415,7 +422,8 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Authenticat
     });
 
     res.json({ message: 'Sessão encerrada com sucesso' });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Error deleting session:', error);
     res.status(500).json({ message: 'Erro ao encerrar sessão' });
   }
@@ -423,7 +431,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Authenticat
 
 // User profile endpoint for RBAC context
 // GET /api/auth/profile
-router.get('/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/profile', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user) {
       return res.*);
@@ -436,7 +444,8 @@ router.get('/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       full_name: req.user.full_name,
       loja_id: req.user.loja_id,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ message: 'Erro interno do servidor' });
   }

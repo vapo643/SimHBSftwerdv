@@ -211,7 +211,8 @@ export default function OWASPAssessment() {
         });
 
         console.log(`✅ SAST concluído: ${formattedResults.length} problemas encontrados`);
-      } else {
+      }
+else {
         console.error('❌ Erro na resposta SAST:',_response);
         toast({
           title: 'Erro na análise',
@@ -219,14 +220,16 @@ export default function OWASPAssessment() {
           variant: 'destructive',
         });
       }
-    } catch (_error) {
+    }
+catch (_error) {
       console.error('❌ Erro ao executar SAST:', _error);
       toast({
         title: 'Erro ao conectar com Semgrep',
         description: _error.message || 'Erro de conexão',
         variant: 'destructive',
       });
-    } finally {
+    }
+finally {
       setSastScanning(false);
     }
   };
@@ -256,7 +259,8 @@ export default function OWASPAssessment() {
       document.body.removeChild(a);
 
       toast({ title: 'Relatório baixado com sucesso' });
-    } catch (_error) {
+    }
+catch (_error) {
       toast({ title: 'Erro ao baixar relatório', variant: 'destructive' });
     }
   };

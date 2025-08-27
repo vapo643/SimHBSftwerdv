@@ -37,7 +37,7 @@ export class CSRFProtection {
     const _signature = hmac.digest('hex');
 
     // Return token: signature.randomValue.timestamp
-    return `${signature}.${randomValue}.${timestamp}`; }
+    return `${signature}.${randomValue}.${timestamp}`;
   }
 
   /**
@@ -45,13 +45,13 @@ export class CSRFProtection {
    */
   static validateToken(token: string, sessionId: string): boolean {
     if (!token || !sessionId) {
-      return false; }
+      return false;
     }
 
     try {
       const _parts = token.split('.');
       if (parts.length !== 3) {
-        return false; }
+        return false;
       }
 
       const [signature, randomValue, timestamp] = parts;
@@ -60,7 +60,7 @@ export class CSRFProtection {
       const _tokenTime = parseInt(timestamp);
       const _now = Date.now();
       if (now - tokenTime > 60 * 60 * 1000) {
-        return false; }
+        return false;
       }
 
       // Recreate message
@@ -78,7 +78,7 @@ export class CSRFProtection {
       );
     } catch (error) {
       console.error('[CSRF] Token validation error:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -89,7 +89,7 @@ export class CSRFProtection {
     return (req: CSRFRequest, res: Response, next: NextFunction) => {
       // Skip for non-authenticated requests
       if (!req.user?.id) {
-        return next(); }
+        return next();
       }
 
       // Generate token bound to user session
@@ -119,12 +119,12 @@ export class CSRFProtection {
     return (req: CSRFRequest, res: Response, next: NextFunction) => {
       // Skip for GET, HEAD, OPTIONS requests
       if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-        return next(); }
+        return next();
       }
 
       // Skip for non-authenticated requests
       if (!req.user?.id) {
-        return next(); }
+        return next();
       }
 
       const _sessionId = req.user.id;
@@ -202,7 +202,7 @@ export class CSRFProtection {
     return (req: Request, res: Response, next: NextFunction) => {
       // Skip for GET, HEAD, OPTIONS requests
       if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-        return next(); }
+        return next();
       }
 
       // Check for X-Requested-With header (AJAX indicator)
@@ -214,19 +214,19 @@ export class CSRFProtection {
         requestedWith == 'XMLHttpRequest' ||
         (contentType && contentType.includes('application/json'))
       ) {
-        return next(); }
+        return next();
       }
 
       // Allow form submissions
       if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
-        return next(); }
+        return next();
       }
 
       console.warn('[CSRF] Request missing custom headers:', {
         method: req.method,
         path: req.path,
-  _contentType,
-  _requestedWith,
+        _contentType,
+        _requestedWith,
         userAgent: req.headers['user-agent'],
       });
 

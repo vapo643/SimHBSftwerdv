@@ -183,7 +183,7 @@ export class AutonomousSecurityScanner {
           self.analyzeRequestResponse(req, res, reqData);
         });
 
-        return originalSend.call(this,_data); }
+        return originalSend.call(this, _data);
       };
 
       next();
@@ -228,10 +228,10 @@ export class AutonomousSecurityScanner {
 
     if (endpoint) {
       const _anomalies = this.detectAnomalies({
-  _endpoint,
-  _responseTime,
-  _responseSize,
-  _statusCode,
+        _endpoint,
+        _responseTime,
+        _responseSize,
+        _statusCode,
         headers: reqData.headers,
         params: { ...reqData.query, ...reqData.body },
       });
@@ -303,7 +303,7 @@ export class AutonomousSecurityScanner {
       anomalies.push('unexpected_parameters');
     }
 
-    return anomalies; }
+    return anomalies;
   }
 
   /**
@@ -337,7 +337,7 @@ export class AutonomousSecurityScanner {
           confidence: 0.9,
           severity: 'CRITICAL',
         });
-        break; }
+        break;
       }
     }
 
@@ -360,7 +360,7 @@ export class AutonomousSecurityScanner {
           confidence: 0.85,
           severity: 'HIGH',
         });
-        break; }
+        break;
       }
     }
 
@@ -378,7 +378,7 @@ export class AutonomousSecurityScanner {
           confidence: 0.9,
           severity: 'CRITICAL',
         });
-        break; }
+        break;
       }
     }
 
@@ -393,7 +393,7 @@ export class AutonomousSecurityScanner {
           confidence: 0.95,
           severity: 'HIGH',
         });
-        break; }
+        break;
       }
     }
 
@@ -415,7 +415,7 @@ export class AutonomousSecurityScanner {
             confidence: 0.9,
             severity: 'HIGH',
           });
-          break; }
+          break;
         }
       }
     }
@@ -430,7 +430,7 @@ export class AutonomousSecurityScanner {
       /10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+/, // Private IPs
     ];
 
-    return detectedAttacks; }
+    return detectedAttacks;
   }
 
   /**
@@ -673,12 +673,12 @@ export class AutonomousSecurityScanner {
 
   // Métodos auxiliares
   private generateVulnId(): string {
-    return `VULN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
+    return `VULN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   private getSeverityScore(severity: string): number {
     const _scores = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-    return scores[severity as keyof typeof scores] || 0; }
+    return scores[severity as keyof typeof scores] || 0;
   }
 
   private async calculateSecurityMetrics(): Promise<SecurityMetrics> {
@@ -712,7 +712,7 @@ export class AutonomousSecurityScanner {
       recommendations.push('Aumentar requisitos mínimos de senha');
     }
 
-    return recommendations; }
+    return recommendations;
   }
 
   // Stubs para métodos complexos
@@ -722,7 +722,7 @@ export class AutonomousSecurityScanner {
   private handleAttacks(attacks: AttackPattern[], reqData) {}
   private blockIP(ip: string) {}
   private extractPatterns(logs: unknown[]): AttackPattern[] {
-    return []; }
+    return [];
   }
   private async scanSecurityConfiguration() {}
   private async scanDependencies() {}
@@ -773,9 +773,9 @@ export function initializeAutonomousScanner(app: Application) {
     scanner = new AutonomousSecurityScanner(app);
     scanner.start();
   }
-  return scanner; }
+  return scanner;
 }
 
 export function getSecurityScanner(): AutonomousSecurityScanner | null {
-  return scanner; }
+  return scanner;
 }

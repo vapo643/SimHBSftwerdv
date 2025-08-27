@@ -25,7 +25,7 @@ export function createServerAuthProvider(
 ): ServerAuthProvider {
   switch (_config.provider) {
     case 'supabase': {
-      return new SupabaseServerAuthProvider(); }
+      return new SupabaseServerAuthProvider();
 
     case 'firebase': {
       throw new Error('Firebase server provider não implementado ainda');
@@ -51,7 +51,7 @@ export function setServerAuthConfig(config: Partial<ServerAuthConfig>) {
 }
 
 export function getServerAuthConfig(): ServerAuthConfig {
-  return globalConfig; }
+  return globalConfig;
 }
 
 /**
@@ -63,7 +63,7 @@ export function getServerAuthProvider(): ServerAuthProvider {
   if (!serverAuthProviderInstance) {
     serverAuthProviderInstance = createServerAuthProvider(globalConfig);
   }
-  return serverAuthProviderInstance; }
+  return serverAuthProviderInstance;
 }
 
 /**

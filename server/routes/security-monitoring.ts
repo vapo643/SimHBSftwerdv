@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 import { db } from '../lib/_supabase.js';
 import { users, propostas, statusContextuais } from '../../shared/schema.js';
@@ -9,7 +9,7 @@ import { getBrasiliaTimestamp } from '../lib/timezone.js';
 const _router = Router();
 
 // Middleware de autenticação
-router.use(jwtAuthMiddleware);
+router.use(_jwtAuthMiddleware);
 
 // GET /api/security-monitoring/real-time - Métricas de segurança em tempo real
 router.get('/real-time', async (req: AuthenticatedRequest, res) => {
@@ -58,13 +58,13 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
 
     // Construir resposta com dados reais
     const _metrics = {
-      timestamp: getBrasiliaTimestamp(),
+      timestamp: _getBrasiliaTimestamp(),
       authentication: {
         activeUsers: Math.min(5, totalUsers[0]?.count || 0), // Simula usuários ativos
         totalUsers: totalUsers[0]?.count || 0,
         newUsersToday: newUsersToday[0]?.count || 0,
         sessionsActive: Math.min(5, totalUsers[0]?.count || 0), // Simula sessões ativas
-        lastLoginActivity: getBrasiliaTimestamp(),
+        lastLoginActivity: _getBrasiliaTimestamp(),
       },
       systemActivity: {
         proposalsToday: proposalsToday[0]?.count || 0,
@@ -72,7 +72,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         proposalsByStatus: proposalStats.reduce(
           (acc, stat) => {
             acc[stat.status] = stat.count;
-            return acc; }
+            return acc;
           },
           {} as Record<string, number>
         ),
@@ -81,7 +81,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         usersByRole: usersByRole.reduce(
           (acc, role) => {
             acc[role.role] = role.count;
-            return acc; }
+            return acc;
           },
           {} as Record<string, number>
         ),
@@ -98,7 +98,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         firewallStatus: 'Active',
         ddosProtection: true,
         backupStatus: 'Daily backups enabled',
-        lastBackup: getBrasiliaTimestamp(),
+        lastBackup: _getBrasiliaTimestamp(),
       },
       compliance: {
         owaspASVSLevel1: 100, // Alcançamos 100% conforme auditoria

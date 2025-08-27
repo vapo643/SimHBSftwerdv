@@ -78,7 +78,7 @@ class ClickSignWebhookService {
 
     if (currentTime - webhookTime > this.maxTimestampAge) {
       console.error('[CLICKSIGN WEBHOOK] Request timestamp too old');
-      return false; }
+      return false;
     }
 
     // Validate HMAC signature
@@ -94,7 +94,7 @@ class ClickSignWebhookService {
       console.error('[CLICKSIGN WEBHOOK] Invalid signature');
     }
 
-    return isValid; }
+    return isValid;
   }
 
   /**
@@ -104,7 +104,7 @@ class ClickSignWebhookService {
     const _key = `${eventId}_${Date.now()}`;
 
     if (this.processedEvents.has(key)) {
-      return true; }
+      return true;
     }
 
     this.processedEvents.add(key);
@@ -115,7 +115,7 @@ class ClickSignWebhookService {
       this.processedEvents = new Set(entries.slice(-500));
     }
 
-    return false; }
+    return false;
   }
 
   /**
@@ -143,35 +143,35 @@ class ClickSignWebhookService {
 
     if (!proposta) {
       console.warn('[CLICKSIGN WEBHOOK] No proposal found for event');
-      return { processed: false, reason: 'Proposal not found' }; }
+      return { processed: false, reason: 'Proposal not found' }
     }
 
     // Process based on event type (API v1/v2)
     switch (eventType) {
       case 'auto_close': {
-        return await this.handleAutoClose(proposta, eventData); }
+        return await this.handleAutoClose(proposta, eventData);
 
       case 'document_closed': {
-        return await this.handleDocumentClosed(proposta, eventData); }
+        return await this.handleDocumentClosed(proposta, eventData);
 
       case 'cancel': {
-        return await this.handleCancel(proposta, eventData); }
+        return await this.handleCancel(proposta, eventData);
 
       case 'deadline': {
-        return await this.handleDeadline(proposta, eventData); }
+        return await this.handleDeadline(proposta, eventData);
 
       case 'upload': {
-        return await this.handleUpload(proposta, eventData); }
+        return await this.handleUpload(proposta, eventData);
 
       case 'sign': {
-        return await this.handleSign(proposta, eventData); }
+        return await this.handleSign(proposta, eventData);
 
       case 'refusal': {
-        return await this.handleRefusal(proposta, eventData); }
+        return await this.handleRefusal(proposta, eventData);
 
       default:
         console.log(`[CLICKSIGN WEBHOOK] Unhandled event type: ${eventType}`);
-        return { processed: true, reason: 'Event type not handled' }; }
+        return { processed: true, reason: 'Event type not handled' }
     }
   }
 
@@ -183,12 +183,13 @@ class ClickSignWebhookService {
     const _listKey = data.list?.key;
 
     if (documentKey) {
-      return await storage.getPropostaByClickSignKey('document', documentKey); }
-    } else if (listKey) {
-      return await storage.getPropostaByClickSignKey('list', listKey); }
+      return await storage.getPropostaByClickSignKey('document', documentKey);
+    }
+else if (listKey) {
+      return await storage.getPropostaByClickSignKey('list', listKey);
     }
 
-    return null; }
+    return null;
   }
 
   /**
@@ -197,7 +198,7 @@ class ClickSignWebhookService {
   private async handleAutoClose(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] 🎉 AUTO_CLOSE for proposal: ${proposta.id}`);
 
-    const _now = getBrasiliaTimestamp();
+    const _now = _getBrasiliaTimestamp();
 
     // Update proposal with signature completion
     const _updateData = {
@@ -259,12 +260,14 @@ class ClickSignWebhookService {
           statusNovo: 'ASSINATURA_CONCLUIDA',
           observacao: `📄 CCB assinado baixado e armazenado no Storage: ${processingResult.details?.storagePath || 'caminho disponível'}`,
         });
-      } else {
+      }
+else {
         console.error(
           `[WEBHOOK-ERROR] Falha ao processar documento assinado para proposta ${proposta.id}: ${processingResult.message}`
         );
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error(
         `[WEBHOOK-ERROR] Erro crítico ao processar documento assinado para proposta ${proposta.id}:`,
         error
@@ -305,7 +308,7 @@ class ClickSignWebhookService {
       observacao: '📄 Documento finalizado e pronto para download',
     });
 
-    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }; }
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }
   }
 
   /**
@@ -326,7 +329,7 @@ class ClickSignWebhookService {
       observacao: '❌ Documento cancelado no ClickSign',
     });
 
-    return { processed: true, proposalId: proposta.id, status: 'cancelled' }; }
+    return { processed: true, proposalId: proposta.id, status: 'cancelled' }
   }
 
   /**
@@ -343,7 +346,7 @@ class ClickSignWebhookService {
       observacao: '⏰ Alerta de prazo - Documento próximo do vencimento',
     });
 
-    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }; }
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }
   }
 
   /**
@@ -360,7 +363,7 @@ class ClickSignWebhookService {
       observacao: '📤 Documento carregado no ClickSign com sucesso',
     });
 
-    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }; }
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }
   }
 
   /**
@@ -411,7 +414,8 @@ class ClickSignWebhookService {
           observacao: `📄 CCB processado e armazenado após assinatura${signerInfo}`,
         });
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error(
         `[WEBHOOK-ERROR] Erro ao processar documento após assinatura para proposta ${proposta.id}:`,
         error
@@ -419,7 +423,7 @@ class ClickSignWebhookService {
       // Erro não bloqueia o webhook - será processado posteriormente
     }
 
-    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }; }
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key }
   }
 
   /**
@@ -442,7 +446,7 @@ class ClickSignWebhookService {
       observacao: `❌ Documento recusado${signerInfo}`,
     });
 
-    return { processed: true, proposalId: proposta.id, status: 'refused' }; }
+    return { processed: true, proposalId: proposta.id, status: 'refused' }
   }
 
   /**
@@ -459,7 +463,7 @@ class ClickSignWebhookService {
       observacao: 'Documento CCB criado no ClickSign',
     });
 
-    return { processed: true, proposalId: proposta.id }; }
+    return { processed: true, proposalId: proposta.id }
   }
 
   /**
@@ -489,7 +493,7 @@ class ClickSignWebhookService {
     // Trigger boleto generation
     await this.triggerBoletoGeneration(proposta);
 
-    return { processed: true, proposalId: proposta.id, status: 'signed' }; }
+    return { processed: true, proposalId: proposta.id, status: 'signed' }
   }
 
   /**
@@ -498,7 +502,7 @@ class ClickSignWebhookService {
   private async handleDocumentFinished(proposta, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document finished for proposal: ${proposta.id}`);
 
-    const _finishedAt = getBrasiliaTimestamp();
+    const _finishedAt = _getBrasiliaTimestamp();
 
     const _updateData = {
       clicksignStatus: 'finished',
@@ -515,7 +519,7 @@ class ClickSignWebhookService {
       observacao: 'Processo de assinatura finalizado - todos os signatários assinaram',
     });
 
-    return { processed: true, proposalId: proposta.id, status: 'finished' }; }
+    return { processed: true, proposalId: proposta.id, status: 'finished' }
   }
 
   /**
@@ -538,7 +542,7 @@ class ClickSignWebhookService {
       observacao: 'Assinatura do CCB cancelada no ClickSign',
     });
 
-    return { processed: true, proposalId: proposta.id, status: 'cancelled' }; }
+    return { processed: true, proposalId: proposta.id, status: 'cancelled' }
   }
 
   /**
@@ -561,7 +565,7 @@ class ClickSignWebhookService {
       observacao: `Assinatura recusada por: ${data.signer?.email || 'signatário'}`,
     });
 
-    return { processed: true, proposalId: proposta.id, status: 'refused' }; }
+    return { processed: true, proposalId: proposta.id, status: 'refused' }
   }
 
   /**
@@ -719,7 +723,8 @@ class ClickSignWebhookService {
               `[CLICKSIGN → INTER] ✅ Boleto ${parcelaNumero} created: ${createResponse.codigoSolicitacao}`
             );
           }
-        } catch (error) {
+        }
+catch (error) {
           console.error(`[CLICKSIGN → INTER] ❌ Error creating boleto ${i + 1}:`, error);
           failedBoletos.push(i + 1);
         }
@@ -745,7 +750,8 @@ class ClickSignWebhookService {
           observacao: `Erro ao gerar ${failedBoletos.length} boletos (parcelas: ${failedBoletos.join(', ')})`,
         });
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CLICKSIGN → INTER] ❌ Error generating boletos:`, error);
 
       await storage.createPropostaLog({
@@ -764,7 +770,7 @@ class ClickSignWebhookService {
   private calculateDueDate(days: number): string {
     const _date = new Date();
     date.setDate(date.getDate() + days);
-    return date.toISOString().split('T')[0]; }
+    return date.toISOString().split('T')[0];
   }
 
   /**
@@ -773,7 +779,7 @@ class ClickSignWebhookService {
   private calculateDueDateByMonth(monthNumber: number): string {
     const _date = new Date();
     date.setMonth(date.getMonth() + monthNumber);
-    return date.toISOString().split('T')[0]; }
+    return date.toISOString().split('T')[0];
   }
 
   /**
@@ -781,7 +787,7 @@ class ClickSignWebhookService {
    */
   private formatDateBR(dateString: string): string {
     const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`; }
+    return `${day}/${month}/${year}`;
   }
 }
 

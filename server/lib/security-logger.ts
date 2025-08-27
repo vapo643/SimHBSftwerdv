@@ -86,7 +86,7 @@ class SecurityLogger {
   logEvent(event: Omit<SecurityEvent, 'timestamp'>) {
     const securityEvent: SecurityEvent = {
       ...event,
-      timestamp: getBrasiliaTimestamp(),
+      timestamp: _getBrasiliaTimestamp(),
       // Sanitizar dados sensíveis
       details: this.sanitizeDetails(event.details),
     };
@@ -102,13 +102,15 @@ class SecurityLogger {
 
     // Diferentes níveis de log baseado na severidade
     switch (event.severity) {
-      case 'CRITICAL': {
+      case 'CRITICAL':
       case 'HIGH': {
         console.error(`🚨 [SECURITY] ${logMessage}`);
-        break; }
+        break;
+      }
       case 'MEDIUM': {
         console.warn(`⚠️ [SECURITY] ${logMessage}`);
-        break; }
+        break;
+      }
       default:
         log(`🔒 [SECURITY] ${logMessage}`);
     }
@@ -124,11 +126,11 @@ class SecurityLogger {
     if (event.ipAddress) parts.push(`ip=${event.ipAddress}`);
     if (event.endpoint) parts.push(`endpoint=${event.endpoint}`);
 
-    return parts.join(' | '); }
+    return parts.join(' | ');
   }
 
   private sanitizeDetails(details?: Record<string, any>): Record<string, any> | undefined {
-    if (!details) return undefined; }
+    if (!details) return undefined;
 
     const _sanitized = { ...details };
     const _sensitiveKeys = ['password', 'senha', 'token', 'secret', 'key', 'cpf', 'rg', 'card'];
@@ -139,7 +141,7 @@ class SecurityLogger {
       }
     });
 
-    return sanitized; }
+    return sanitized;
   }
 
   // Análise de segurança
@@ -195,7 +197,7 @@ class SecurityLogger {
       anomalies.push(`IPs suspeitos detectados: ${metrics.suspiciousIPs.join(', ')}`);
     }
 
-    return anomalies; }
+    return anomalies;
   }
 }
 

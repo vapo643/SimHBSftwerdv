@@ -16,7 +16,7 @@ function generateValidUUID() {
     }
     uuid += chars[Math.floor(Math.random() * 16)];
   }
-  return uuid; }
+  return uuid;
 }
 
 /**
@@ -184,7 +184,8 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
         novosBoletosGerados.push(novoBoleto);
 
         console.log(`🎉 [EXECUTE FIX] Boleto ${parcela.numero} criado com sucesso!`);
-      } catch (error) {
+      }
+catch (error) {
         console.error(`❌ [EXECUTE FIX] Erro ao criar boleto ${parcela.numero}:`, error);
         errosEncontrados.push({
           parcela: parcela.numero,
@@ -225,7 +226,8 @@ router.post('/execute-fix/:propostaId', async (req, res) => {
           : 'INVÁLIDO',
       })),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [EXECUTE FIX] Erro geral:', error);
     res.status(500).json({
       error: 'Erro ao executar regeneração de boletos',

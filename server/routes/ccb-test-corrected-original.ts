@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { CCBGenerationServiceV2 } from '../services/ccbGenerationServiceV2';
 import { db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
@@ -16,7 +16,7 @@ const _router = Router();
  * POST /api/ccb-corrected/test/:propostaId
  * Testa geração de CCB com mapeamento corrigido
  */
-router.post('/test/:propostaId', jwtAuthMiddleware, async (req, res) => {
+router.post('/test/:propostaId', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
     const { useTestData } = req.body;
@@ -102,22 +102,22 @@ router.post('/test/:propostaId', jwtAuthMiddleware, async (req, res) => {
     const _service = new CCBGenerationServiceV2();
     const _result = await service.generateCCB(propostaData);
 
-    if (!result.success || !result.pdfBytes) {
+    if (!_result.success || !_result.pdfBytes) {
       return res.status(500).json({
         success: false,
-        error: result.error || 'Falha na geração do CCB',
-        logs: result.logs,
+        error: _result.error || 'Falha na geração do CCB',
+        logs: _result.logs,
       });
     }
 
     // Salvar no storage
-    const _filePath = await service.saveCCBToStorage(result.pdfBytes, propostaId);
+    const _filePath = await service.saveCCBToStorage(_result.pdfBytes, propostaId);
 
     if (!filePath) {
       return res.status(500).json({
         success: false,
         error: 'Falha ao salvar CCB no storage',
-        logs: result.logs,
+        logs: _result.logs,
       });
     }
 
@@ -125,7 +125,7 @@ router.post('/test/:propostaId', jwtAuthMiddleware, async (req, res) => {
     const _publicUrl = await service.getCCBPublicUrl(filePath);
 
     // Analisar logs para feedback
-    const _logs = result.logs || [];
+    const _logs = _result.logs || [];
     const _stats = {
       totalFields: logs.length,
       successFields: logs.filter((l) => l.includes('✓')).length,
@@ -143,19 +143,18 @@ router.post('/test/:propostaId', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-  _filePath,
-  _publicUrl,
-  _logs,
-  _stats,
+      _filePath,
+      _publicUrl,
+      _logs,
+      _stats,
       analysis: {
         completeness: Math.round((stats.successFields / stats.totalFields) * 100) + '%',
-        quality:
-          stats.errorFields == 0 ? 'Excelente' : stats.warningFields > 3 ? 'Regular' : 'Boa',
+        quality: stats.errorFields == 0 ? 'Excelente' : stats.warningFields > 3 ? 'Regular' : 'Boa',
         missingData: logs
           .filter((l) => l.includes('Sem valor'))
           .map((l) => {
             const _match = l.match(/Campo (\w+): Sem valor/);
-            return match ? match[1] : null; }
+            return match ? match[1] : null;
           })
           .filter(Boolean),
       },
@@ -173,7 +172,7 @@ router.post('/test/:propostaId', jwtAuthMiddleware, async (req, res) => {
  * GET /api/ccb-corrected/field-mapping
  * Retorna o mapeamento atual de campos
  */
-router.get('/field-mapping', jwtAuthMiddleware, async (req, res) => {
+router.get('/field-mapping', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _mapping = {
       page1: {
@@ -221,7 +220,7 @@ router.get('/field-mapping', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-  _mapping,
+      _mapping,
       summary: {
         totalFields: 29,
         correctedFields: 12,
@@ -241,7 +240,7 @@ router.get('/field-mapping', jwtAuthMiddleware, async (req, res) => {
  * POST /api/ccb-corrected/validate-proposal/:propostaId
  * Valida se uma proposta tem todos os dados necessários
  */
-router.post('/validate-proposal/:propostaId', jwtAuthMiddleware, async (req, res) => {
+router.post('/validate-proposal/:propostaId', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
 

@@ -4,7 +4,7 @@ import { AuthenticatedRequest } from '../../shared/types/express';
 /**
  * Guard que requer permissões de ADMINISTRADOR
  */
-export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+export function _requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   if (!req.user) {
     res.status(401).json({ message: 'Usuário não autenticado' });
     return;

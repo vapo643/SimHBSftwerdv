@@ -120,7 +120,7 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
 
 // Gera ID único para rastreamento de requisições
 function generateRequestId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // Configuração CORS segura
@@ -133,7 +133,7 @@ export function setupCORS() {
 
   // Allow any Replit URL in development
   const _isReplitUrl = (origin: string) => {
-    return origin.includes('.replit.dev') || origin.includes('.repl.co'); }
+    return origin.includes('.replit.dev') || origin.includes('.repl.co');
   };
 
   return {
@@ -143,7 +143,7 @@ export function setupCORS() {
     ) => {
       // Permite requisições sem origin (ex: Postman, apps mobile)
       if (!origin) {
-        return callback(null, true); }
+        return callback(null, true);
       }
 
       // Allow configured origins or any Replit URL in development

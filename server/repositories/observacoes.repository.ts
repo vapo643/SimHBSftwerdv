@@ -42,7 +42,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         .where(eq(observacoesCobranca.propostaId, String(propostaId)))
         .orderBy(desc(observacoesCobranca.createdAt));
 
-      return data as unknown[]; }
+      return data as unknown[];
     } catch (error) {
       throw new Error(`Failed to fetch observacoes for proposta ${propostaId}: ${error}`);
     }
@@ -61,7 +61,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         .insert(observacoesCobranca)
         .values({
           propostaId: String(propostaId),
-  _observacao,
+          _observacao,
           userId: usuarioId,
           userName: 'Sistema',
           createdAt: new Date(),
@@ -72,7 +72,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         throw new Error(`Failed to create observacao: No data returned`);
       }
 
-      return data as unknown as Observacao; }
+      return data as unknown as Observacao;
     } catch (error) {
       throw new Error(`Failed to create observacao: ${error}`);
     }
@@ -97,10 +97,10 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
 
     return {
       data: result as unknown as Observacao[],
-      total: result.length,
-  _page,
-  _limit,
-      totalPages: Math.ceil(result.length / limit),
+      total: _result.length,
+      _page,
+      _limit,
+      totalPages: Math.ceil(_result.length / limit),
     };
   }
 

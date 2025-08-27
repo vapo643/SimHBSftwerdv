@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
     });
 
-    return () => subscription.unsubscribe(); }
+    return () => subscription.unsubscribe();
   }, [setLocation]);
 
   if (loading) {

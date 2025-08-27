@@ -52,17 +52,17 @@ function generateChallenge(): { challenge: string; answer: string } {
     case '+': {
       answer = a + b;
       challenge = `${a} + ${b}`;
-      break; }
+      break;
     case '-': {
       answer = Math.max(a, b) - Math.min(a, b);
       challenge = `${Math.max(a, b)} - ${Math.min(a, b)}`;
-      break; }
+      break;
     default:
       answer = a + b;
       challenge = `${a} + ${b}`;
   }
 
-  return { challenge, answer: answer.toString() }; }
+  return { challenge, answer: answer.toString() }
 }
 
 /**
@@ -72,7 +72,7 @@ function getClientFingerprint(req: Request): string {
   const _ip = getClientIP(req);
   const _userAgent = req.headers['user-agent'] || 'unknown';
   const _fingerprint = `${ip}:${userAgent}`;
-  return createHash('sha256').update(fingerprint).digest('hex'); }
+  return createHash('sha256').update(fingerprint).digest('hex');
 }
 
 /**
@@ -81,7 +81,7 @@ function getClientFingerprint(req: Request): string {
 export function antiAutomationMiddleware(req: Request, res: Response, next: NextFunction) {
   // Skip for authenticated users with valid sessions
   if (req.user?.id) {
-    return next(); }
+    return next();
   }
 
   const _fingerprint = getClientFingerprint(req);
@@ -95,8 +95,9 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
     if (existingChallenge.answer == challengeAnswer.toString()) {
       // Correct answer, allow request
       challengeStore.delete(fingerprint);
-      return next(); }
-    } else {
+      return next();
+    }
+else {
       // Wrong answer
       existingChallenge.attempts++;
 
@@ -159,5 +160,5 @@ export function antiAutomationLight(req: Request, res: Response, next: NextFunct
 
   // Simple request counting (use Redis in production)
   // This is a placeholder - implement proper request counting
-  return next(); }
+  return next();
 }

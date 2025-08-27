@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireAnyRole } from '../lib/role-guards';
 import { interBankService } from '../services/interBankService';
 import { db } from '../lib/supabase';
@@ -14,7 +14,7 @@ const _router = Router();
  */
 router.post(
   '/regenerate/:propostaId',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -124,7 +124,8 @@ router.post(
           });
 
           successCount++;
-        } catch (error) {
+        }
+catch (error) {
           console.error(`[INTER FIX] ❌ Erro na parcela ${boleto.numeroParcela}:`, error.message);
 
           results.push({
@@ -150,7 +151,8 @@ router.post(
   _failCount,
         detalhes: results,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER FIX] ❌ Erro fatal:', error);
       return res.status(500).json({
         error: 'Erro ao regenerar boletos',

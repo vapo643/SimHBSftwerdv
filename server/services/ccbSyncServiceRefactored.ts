@@ -123,7 +123,7 @@ export class CCBSyncService {
       }));
 
       const _results = await documentProcessingService.processBatch(
-  _processingTasks,
+        _processingTasks,
         ProcessingSource.POLLING
       );
 
@@ -208,14 +208,14 @@ export class CCBSyncService {
       console.log(`[CCB SYNC] 🔧 Manual sync triggered for proposal ${proposalId}`);
 
       const _result = await documentProcessingService.processSignedDocument(
-  _proposalId,
+        _proposalId,
         ProcessingSource.MANUAL
       );
 
-      return result.success; }
+      return _result.success;
     } catch (error) {
       console.error(`[CCB SYNC] ❌ Manual sync failed for ${proposalId}:`, error);
-      return false; }
+      return false;
     }
   }
 }

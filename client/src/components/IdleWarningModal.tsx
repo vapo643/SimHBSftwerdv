@@ -41,7 +41,7 @@ export function IdleWarningModal({
         });
       }, 1000);
 
-      return () => clearInterval(interval); }
+      return () => clearInterval(interval);
     }
   }, [isOpen, warningTimeoutSeconds, onLogout]);
 

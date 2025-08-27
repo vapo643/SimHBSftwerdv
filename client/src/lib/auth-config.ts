@@ -23,7 +23,7 @@ const defaultConfig: AuthConfig = {
 export function createAuthProvider(config: AuthConfig = defaultConfig): AuthProvider {
   switch (_config.provider) {
     case 'supabase': {
-      return new SupabaseAuthProvider(); }
+      return new SupabaseAuthProvider();
 
     case 'firebase': {
       // Implementação futura

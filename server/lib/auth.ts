@@ -42,7 +42,8 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
 
     req.user = validationResult.user;
     next();
-  } catch (error) {
+  }
+catch (error) {
     console.error('Auth middleware error:', error);
     return res.*);
   }
@@ -57,5 +58,5 @@ export async function authMiddlewareWithBypass(
   res: Response,
   next: NextFunction
 ) {
-  return authMiddleware(req, res, next); }
+  return authMiddleware(req, res, next);
 }

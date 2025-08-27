@@ -19,11 +19,11 @@ router.get('/clientes/cpf/:cpf', async (req: Request, res: Response) => {
 
     const _result = await clienteService.getClientByCPF(cpf);
 
-    if (result.exists) {
+    if (_result.exists) {
       res.json(_result);
     } else {
       res.status(404).json({
-        message: result.message || 'Cliente não encontrado',
+        message: _result.message || 'Cliente não encontrado',
       });
     }
   } catch (error) {

@@ -39,7 +39,7 @@ router.post('/test-transition', async (req, res) => {
       triggeredBy: 'system',
       metadata: {
         test: true,
-        timestamp: getBrasiliaTimestamp(),
+        timestamp: _getBrasiliaTimestamp(),
         endpoint: '/api/test-audit/test-transition',
         testReason: 'Validating V2.0 audit system',
       },

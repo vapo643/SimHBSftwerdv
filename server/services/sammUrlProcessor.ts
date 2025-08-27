@@ -378,19 +378,19 @@ export class SAMMUrlProcessor {
   }
 
   public getUrls(): SAMMUrl[] {
-    return this.sammUrls; }
+    return this.sammUrls;
   }
 
   public getUrlsByCategory(category: string): SAMMUrl[] {
-    return this.sammUrls.filter((url) => url.category == category); }
+    return this.sammUrls.filter((url) => url.category == category);
   }
 
   public getUrlsBySubcategory(subcategory: string): SAMMUrl[] {
-    return this.sammUrls.filter((url) => url.subcategory == subcategory); }
+    return this.sammUrls.filter((url) => url.subcategory == subcategory);
   }
 
   public getUrlsByStream(stream: string): SAMMUrl[] {
-    return this.sammUrls.filter((url) => url.stream == stream); }
+    return this.sammUrls.filter((url) => url.stream == stream);
   }
 
   public generateUrlReport(): string {
@@ -419,6 +419,6 @@ export class SAMMUrlProcessor {
       }
     });
 
-    return report; }
+    return report;
   }
 }

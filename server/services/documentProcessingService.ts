@@ -155,11 +155,13 @@ export class DocumentProcessingService {
         console.log(
           `✅ [DOCUMENT PROCESSING] Document for proposal ${proposalId} processed via WEBHOOK in ${processingTime}ms`
         );
-      } else if (source == ProcessingSource.POLLING) {
+      }
+else if (source == ProcessingSource.POLLING) {
         console.warn(
           `⚠️ [DOCUMENT PROCESSING] Document for proposal ${proposalId} processed via POLLING FALLBACK in ${processingTime}ms`
         );
-      } else {
+      }
+else {
         console.log(
           `✅ [DOCUMENT PROCESSING] Document for proposal ${proposalId} processed via ${source} in ${processingTime}ms`
         );
@@ -175,7 +177,8 @@ export class DocumentProcessingService {
   _processingTime,
         },
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error(
         `❌ [DOCUMENT PROCESSING] Error processing document for proposal ${proposalId}:`,
         error
@@ -202,7 +205,8 @@ export class DocumentProcessingService {
             NOW()
           )
         `);
-      } catch (logError) {
+      }
+catch (logError) {
         console.error('Failed to log error:', logError);
       }
 
@@ -233,8 +237,8 @@ export class DocumentProcessingService {
 
     return results.map((_result, index) => ({
       proposalId: proposals[index].id,
-      success: result.status == 'fulfilled' ? result.value.success : false,
-      message: result.status == 'fulfilled' ? result.value.message : 'Processing failed',
+      success: _result.status == 'fulfilled' ? _result.value.success : false,
+      message: _result.status == 'fulfilled' ? _result.value.message : 'Processing failed',
     }));
   }
 }

@@ -149,11 +149,11 @@ export class CCBGridGenerator {
 
       if (uploadError) {
         console.error('❌ [CCB GRID] Erro no upload:', uploadError);
-        return { success: false, error: 'Erro ao fazer upload do PDF' }; }
+        return { success: false, error: 'Erro ao fazer upload do PDF' };
       }
 
       console.log(`✅ [CCB GRID] Grade gerada! Arquivo: ${filePath}`);
-      return { success: true, pdfPath: filePath }; }
+      return { success: true, pdfPath: filePath };
     } catch (error) {
       console.error('❌ [CCB GRID] Erro na geração:', error);
       return {
@@ -171,10 +171,10 @@ export class CCBGridGenerator {
       const _supabaseAdmin = createServerSupabaseAdminClient();
       const { data } = supabaseAdmin.storage.from('documents').getPublicUrl(filePath);
 
-      return data?.publicUrl || null; }
+      return data?.publicUrl || null;
     } catch (error) {
       console.error('❌ [CCB GRID] Erro ao obter URL pública:', error);
-      return null; }
+      return null;
     }
   }
 }

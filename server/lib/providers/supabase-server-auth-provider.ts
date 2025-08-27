@@ -25,7 +25,7 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
     try {
       const {
         data: { user },
-  _error,
+        _error,
       } = await this._supabase.auth.getUser(token);
 
       if (error || !user) {
@@ -51,9 +51,9 @@ export class SupabaseServerAuthProvider implements ServerAuthProvider {
     try {
       // Para Supabase, precisaríamos de um token administrativo para buscar usuário por ID
       // Por agora, retornamos null pois essa operação requer privilégios admin
-      return null; }
+      return null;
     } catch (error) {
-      return null; }
+      return null;
     }
   }
 }

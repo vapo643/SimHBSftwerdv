@@ -57,8 +57,8 @@ export class CCBGenerationServiceV2 {
 
       return {
         success: true,
-  _pdfBytes,
-  _logs,
+        _pdfBytes,
+        _logs,
       };
     } catch (error) {
       console.error('❌ [CCB V2] Erro na geração:', error);
@@ -96,7 +96,7 @@ export class CCBGenerationServiceV2 {
 
     return {
       valid: missingFields.length == 0,
-  _missingFields,
+      _missingFields,
     };
   }
 
@@ -115,14 +115,14 @@ export class CCBGenerationServiceV2 {
 
       if (error) {
         console.error('❌ [CCB V2] Erro ao salvar no storage:', error);
-        return null; }
+        return null;
       }
 
       console.log('✅ [CCB V2] CCB salvo no storage:', filePath);
-      return filePath; }
+      return filePath;
     } catch (error) {
       console.error('❌ [CCB V2] Erro ao salvar CCB:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -135,13 +135,13 @@ export class CCBGenerationServiceV2 {
 
       if (!data?.publicUrl) {
         console.error('❌ [CCB V2] Erro ao gerar URL pública');
-        return null; }
+        return null;
       }
 
-      return data.publicUrl; }
+      return data.publicUrl;
     } catch (error) {
       console.error('❌ [CCB V2] Erro ao obter URL:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -161,10 +161,10 @@ export class CCBGenerationServiceV2 {
       //   .where(eq(interCollections.propostaId, propostaId))
       //   .limit(1);
 
-      return null; }
+      return null;
     } catch (error) {
       console.error('❌ [CCB V2] Erro ao buscar linha digitável:', error);
-      return null; }
+      return null;
     }
   }
 }

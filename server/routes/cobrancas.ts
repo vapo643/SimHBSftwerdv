@@ -6,7 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { cobrancasService } from '../services/cobrancasService.js';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
 const _router = Router();
@@ -15,7 +15,7 @@ const _router = Router();
  * GET /api/cobrancas
  * List all proposals with billing information
  */
-router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { status, atraso } = req.query;
     const _userRole = req.user?.role || '';
@@ -44,7 +44,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Respon
  * GET /api/cobrancas/:id
  * Get detailed billing info for a specific proposal
  */
-router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:id', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -77,7 +77,7 @@ router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Res
  */
 router.post(
   '/:id/observacoes',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -117,7 +117,7 @@ router.post(
  */
 router.put(
   '/parcelas/:parcelaId',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { parcelaId } = req.params;
@@ -155,7 +155,7 @@ router.put(
  */
 router.post(
   '/:id/solicitacoes',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -196,7 +196,7 @@ router.post(
  */
 router.get(
   '/stats/overdue',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const _stats = await cobrancasService.getOverdueStats();
@@ -220,7 +220,7 @@ router.get(
  */
 router.post(
   '/batch/payment-update',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { updates } = req.body;
@@ -235,9 +235,9 @@ router.post(
       const _result = await cobrancasService.processBatchPaymentUpdate(updates);
       res.json({
         success: true,
-        processed: result.success || 0,
-        failed: result.failed || 0,
-        errors: result.errors || [],
+        processed: _result.success || 0,
+        failed: _result.failed || 0,
+        errors: _result.errors || [],
       });
     } catch (error) {
       console.error('[COBRANCAS_CONTROLLER] Error in batch update:', error);
@@ -253,7 +253,7 @@ router.post(
  * GET /api/cobrancas/kpis
  * Get billing KPIs and analytics
  */
-router.get('/kpis', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/kpis', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const _kpis = await cobrancasService.getKPIs();
     res.json({

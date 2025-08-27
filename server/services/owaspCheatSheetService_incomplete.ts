@@ -180,7 +180,7 @@ export class OwaspCheatSheetService {
     // Note: In production, all 111 cheat sheets would be fully implemented here
     // Each following the same pattern with specific recommendations for Simpix
 
-    return results; }
+    return results;
   }
 
   /**
@@ -205,8 +205,8 @@ export class OwaspCheatSheetService {
     remainingUrls.forEach((url) => {
       const _name = this.extractCheatSheetName(url);
       remaining.push({
-  _url,
-  _name,
+        _url,
+        _name,
         status: 'processed',
         processedAt: new Date(),
         recommendations: [
@@ -227,7 +227,7 @@ export class OwaspCheatSheetService {
       });
     });
 
-    return remaining; }
+    return remaining;
   }
 
   static getComplianceSummary(): {
@@ -249,12 +249,12 @@ export class OwaspCheatSheetService {
     const _criticalGaps = 0; // NO CRITICAL GAPS - ALL BANKING SECURITY COVERED
 
     return {
-  _totalCheatSheets,
-  _implemented,
-  _partial,
-  _notImplemented,
-  _compliancePercentage,
-  _criticalGaps,
+      _totalCheatSheets,
+      _implemented,
+      _partial,
+      _notImplemented,
+      _compliancePercentage,
+      _criticalGaps,
     };
   }
 
@@ -265,8 +265,8 @@ export class OwaspCheatSheetService {
     const _name = this.extractCheatSheetName(url);
 
     return {
-  _url,
-  _name,
+      _url,
+      _name,
       status: 'processed',
       processedAt: new Date(),
       recommendations: [],
@@ -276,8 +276,8 @@ export class OwaspCheatSheetService {
   private static extractCheatSheetName(url: string): string {
     const _match = url.match(/cheatsheets\/(.+)_Cheat_Sheet\.html/);
     if (match) {
-      return match[1].replace(/_/g, ' '); }
+      return match[1].replace(/_/g, ' ');
     }
-    return 'Unknown'; }
+    return 'Unknown';
   }
 }

@@ -75,8 +75,8 @@ export class PropostaService {
     // 5. Use FSM for status transition validation
     try {
       await transitionTo({
-  _propostaId,
-  _novoStatus,
+        _propostaId,
+        _novoStatus,
         userId: userId || 'sistema',
         contexto: 'geral',
         observacoes: `Status ${novoStatus == 'suspensa' ? 'suspenso' : 'reativado'} pelo usuário`,
@@ -104,7 +104,7 @@ export class PropostaService {
 
     return {
       success: true,
-  _propostaId,
+      _propostaId,
       statusAnterior: proposta.status,
       statusNovo: novoStatus,
       message:
@@ -192,7 +192,7 @@ export class PropostaService {
     console.log(`[CCB] ❌ CCB não encontrada para proposta ${propostaId}`);
 
     const _debugInfo = {
-  _propostaId,
+      _propostaId,
       caminhosSalvos: proposta.caminhoCcbAssinado,
       clicksignKey: proposta.clicksignDocumentKey,
       ccbGerado: proposta.ccbGerado,
@@ -208,28 +208,28 @@ export class PropostaService {
    * Get propostas by status
    */
   async getPropostasByStatus(status: string): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByStatus(status); }
+    return await propostaRepository.getPropostasByStatus(status);
   }
 
   /**
    * Get propostas by user
    */
   async getPropostasByUser(userId: string): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByUser(userId); }
+    return await propostaRepository.getPropostasByUser(userId);
   }
 
   /**
    * Get propostas by loja
    */
   async getPropostasByLoja(lojaId: number): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByLoja(lojaId); }
+    return await propostaRepository.getPropostasByLoja(lojaId);
   }
 
   /**
    * Get propostas pending signature
    */
   async getPropostasPendingSignature(): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasPendingSignature(); }
+    return await propostaRepository.getPropostasPendingSignature();
   }
 
   /**
@@ -257,7 +257,7 @@ export class PropostaService {
    * Get proposta with full details
    */
   async getPropostaWithDetails(propostaId: string): Promise<PropostaWithDetails | null> {
-    return await propostaRepository.getPropostaWithDetails(propostaId); }
+    return await propostaRepository.getPropostaWithDetails(propostaId);
   }
 }
 

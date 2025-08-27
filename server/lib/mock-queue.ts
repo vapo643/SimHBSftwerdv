@@ -80,7 +80,7 @@ class MockQueue extends EventEmitter {
       this.processJob(jobId);
     }, 100);
 
-    return job; }
+    return job;
   }
 
   private async processJob(jobId: string) {
@@ -113,21 +113,21 @@ class MockQueue extends EventEmitter {
       switch (this.name) {
         case 'pdf-processing': {
           result = await this.processPdfJob(mockJob);
-          break; }
+          break;
 
         case 'boleto-sync': {
           result = await this.processBoletoJob(mockJob);
-          break; }
+          break;
 
         case 'document-processing': {
           // TODO: Implementar quando necessário
           result = { success: true, message: 'Document processing not yet implemented' };
-          break; }
+          break;
 
         case 'notifications': {
           // TODO: Implementar quando necessário
           result = { success: true, message: 'Notification processing not yet implemented' };
-          break; }
+          break;
 
         default:
           throw new Error(`Unknown queue: ${this.name}`);
@@ -143,7 +143,8 @@ class MockQueue extends EventEmitter {
       console.log(`[DEV QUEUE ${this.name}] Result:`,_result);
 
       this.emit('completed', { ...jobData, result });
-    } catch (error) {
+    }
+catch (error) {
       jobData.status = 'failed';
       jobData.failedReason = error.message || 'Unknown error';
       jobData.completedAt = new Date();
@@ -195,12 +196,13 @@ class MockQueue extends EventEmitter {
 
         case 'MERGE_PDFS': {
           console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
-          return { success: true, message: 'PDF merge not yet implemented' }; }
+          return { success: true, message: 'PDF merge not yet implemented' }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    } catch (error) {
+    }
+catch (error) {
       const _errorDuration = Date.now() - startTime;
       console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
       throw error;
@@ -231,7 +233,7 @@ class MockQueue extends EventEmitter {
 
           const _syncDuration = Date.now() - startTime;
           console.log(
-            `[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`
+            `[WORKER:BOLETO] ✅ Synced ${_result.boletosProcessados}/${_result.totalBoletos} boletos in ${syncDuration}ms`
           );
 
           // Se foi um fallback de PDF específico, log adicional
@@ -242,12 +244,12 @@ class MockQueue extends EventEmitter {
           }
 
           return {
-            success: result.success,
-            propostaId: result.propostaId,
-            totalBoletos: result.totalBoletos,
-            boletosProcessados: result.boletosProcessados,
-            boletosComErro: result.boletosComErro,
-            erros: result.erros,
+            success: _result.success,
+            propostaId: _result.propostaId,
+            totalBoletos: _result.totalBoletos,
+            boletosProcessados: _result.boletosProcessados,
+            boletosComErro: _result.boletosComErro,
+            erros: _result.erros,
             processingTime: syncDuration,
             requestedPdf: job.data.requestedPdf, // Incluir PDF solicitado se foi fallback
           };
@@ -282,7 +284,8 @@ class MockQueue extends EventEmitter {
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    } catch (error) {
+    }
+catch (error) {
       const _boletoErrorDuration = Date.now() - startTime;
       console.error(
         `[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`,
@@ -304,7 +307,7 @@ class MockQueue extends EventEmitter {
       counts[job.status]++;
     });
 
-    return counts; }
+    return counts;
   }
 
   /**
@@ -315,7 +318,7 @@ class MockQueue extends EventEmitter {
     const _mockJob = this.activeJobs.get(jobId);
 
     if (!jobData || !mockJob) {
-      return null; }
+      return null;
     }
 
     // Adicionar propriedades extras para compatibilidade com o endpoint de status
@@ -328,7 +331,7 @@ class MockQueue extends EventEmitter {
     job.processedOn = jobData.processedAt?.getTime();
     job.finishedOn = jobData.completedAt?.getTime();
 
-    return job; }
+    return job;
   }
 }
 
@@ -403,13 +406,13 @@ export const _queues = {
 export function getQueue(queueName: string): MockQueue {
   switch (queueName) {
     case 'pdf-processing': {
-      return pdfProcessingQueue; }
+      return pdfProcessingQueue;
     case 'boleto-sync': {
-      return boletoSyncQueue; }
+      return boletoSyncQueue;
     case 'document-processing': {
-      return documentQueue; }
+      return documentQueue;
     case 'notifications': {
-      return notificationQueue; }
+      return notificationQueue;
     default:
       throw new Error(`Queue ${queueName} not found`);
   }
@@ -435,7 +438,8 @@ export async function checkQueuesHealth() {
         notification: results[3],
       },
     };
-  } catch (error) {
+  }
+catch (error) {
     console.error('[DEV QUEUE] Health check failed:', error);
     return {
       healthy: false,

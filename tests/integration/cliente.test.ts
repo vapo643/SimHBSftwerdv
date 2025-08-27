@@ -137,7 +137,8 @@ describe('API de Busca de Cliente por CPF', () => {
       console.log(`  - Store ID: ${testStoreId}`);
       console.log(`  - CPF Teste: ${testCpf}`);
       console.log(`  - Proposta ID: ${testPropostaId}`);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[TEST SETUP] ❌ Erro ao configurar ambiente de teste:', error);
       throw error;
     }

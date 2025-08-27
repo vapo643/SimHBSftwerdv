@@ -29,7 +29,7 @@ export function initializeRedisClient(): Redis {
     });
   }
 
-  return redisClient; }
+  return redisClient;
 }
 
 /**
@@ -44,10 +44,10 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
       const _cached = inMemoryCache.get(key);
       if (cached && cached.expires > Date.now()) {
         console.log(`[CACHE-MEMORY] 🎯 Cache HIT for key: ${key}`);
-        return cached.value as T; }
+        return cached.value as T;
       }
       console.log(`[CACHE-MEMORY] ❌ Cache MISS for key: ${key}`);
-      return null; }
+      return null;
     }
 
     // Em produção, usar Redis
@@ -56,14 +56,14 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
 
     if (_data) {
       console.log(`[CACHE-REDIS] 🎯 Cache HIT for key: ${key}`);
-      return JSON.parse(_data) as T; }
+      return JSON.parse(_data) as T;
     }
 
     console.log(`[CACHE-REDIS] ❌ Cache MISS for key: ${key}`);
-    return null; }
+    return null;
   } catch (error) {
     console.error(`[CACHE] Error getting from cache for key ${key}:`, error);
-    return null; }
+    return null;
   }
 }
 
@@ -82,7 +82,7 @@ export async function setToCache<T>(
     // Em desenvolvimento, usar cache in-memory
     if (isDevelopment) {
       inMemoryCache.set(key, {
-  _value,
+        _value,
         expires: Date.now() + ttlInSeconds * 1000,
       });
       console.log(`[CACHE-MEMORY] 💾 Stored in cache with key: ${key} (TTL: ${ttlInSeconds}s)`);
@@ -141,9 +141,9 @@ export async function isCacheAvailable(): Promise<boolean> {
   try {
     const _client = initializeRedisClient();
     await client.ping();
-    return true; }
+    return true;
   } catch (error) {
     console.error('[CACHE] Redis is not available:', error);
-    return false; }
+    return false;
   }
 }

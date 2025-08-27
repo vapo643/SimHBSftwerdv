@@ -107,7 +107,7 @@ export async function updateStatusWithContext(
             statusAnterior: statusContextualExistente.status,
             atualizadoEm: new Date(),
             atualizadoPor: userId || 'sistema',
-  _observacoes,
+            _observacoes,
             metadata: metadata
               ? sql`${JSON.stringify(metadata)}::jsonb`
               : statusContextualExistente.metadata,
@@ -116,12 +116,12 @@ export async function updateStatusWithContext(
       } else {
         console.log(`[DUPLA-ESCRITA] ➕ Criando novo status contextual...`);
         await tx.insert(statusContextuais).values({
-  _propostaId,
-  _contexto,
+          _propostaId,
+          _contexto,
           status: novoStatus,
-  _statusAnterior,
+          _statusAnterior,
           atualizadoPor: userId || 'sistema',
-  _observacoes,
+          _observacoes,
           metadata: metadata ? sql`${JSON.stringify(metadata)}::jsonb` : null,
         });
       }
@@ -129,9 +129,9 @@ export async function updateStatusWithContext(
       // 5. Registrar no log de auditoria
       console.log(`[DUPLA-ESCRITA] 📜 Registrando auditoria...`);
       await tx.insert(propostaLogs).values({
-  _propostaId,
+        _propostaId,
         autorId: userId || 'sistema',
-  _statusAnterior,
+        _statusAnterior,
         statusNovo: novoStatus,
         observacao: `[${contexto.toUpperCase()}] ${observacoes || 'Status atualizado via dupla escrita'}`,
       });
@@ -143,12 +143,12 @@ export async function updateStatusWithContext(
         success: true,
         statusLegado: novoStatus,
         statusContextual: novoStatus,
-  _contexto,
+        _contexto,
         timestamp: new Date(),
       };
     });
 
-    return result; }
+    return result;
   } catch (error) {
     const _duration = Date.now() - startTime;
     console.error(`[DUPLA-ESCRITA] ❌ Erro na transação após ${duration}ms:`, error);
@@ -157,7 +157,7 @@ export async function updateStatusWithContext(
       success: false,
       statusLegado: '',
       statusContextual: '',
-  _contexto,
+      _contexto,
       timestamp: new Date(),
       error: error instanceof Error ? error.message : 'Erro desconhecido',
     };
@@ -184,7 +184,7 @@ export async function getStatusByContext(
 
     if (statusContextual) {
       console.log(`[STATUS-CONTEXT] ✅ Status contextual encontrado: ${statusContextual.status}`);
-      return statusContextual.status; }
+      return statusContextual.status;
     }
 
     // Fallback para status legado
@@ -195,10 +195,10 @@ export async function getStatusByContext(
       .where(eq(propostas.id, propostaId))
       .limit(1);
 
-    return propostaLegada?.status || null; }
+    return propostaLegada?.status || null;
   } catch (error) {
     console.error(`[STATUS-CONTEXT] ❌ Erro ao buscar status:`, error);
-    return null; }
+    return null;
   }
 }
 
@@ -224,15 +224,15 @@ export async function validateStatusConsistency(
     const _inconsistencias = contextosStatus.filter((cs) => {
       // Regras de validação por contexto
       if (cs.contexto == 'pagamentos' && proposta?.status == 'pago') {
-        return cs.status !== 'pago' && cs.status !== 'EMPRESTIMO_PAGO'; }
+        return cs.status !== 'pago' && cs.status !== 'EMPRESTIMO_PAGO';
       }
       if (
         cs.contexto == 'cobrancas' &&
         ['QUITADO', 'INADIMPLENTE'].includes(proposta?.status || '')
       ) {
-        return !['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(cs.status); }
+        return !['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(cs.status);
       }
-      return false; }
+      return false;
     });
 
     const _isConsistent = inconsistencias.length == 0;
@@ -245,12 +245,12 @@ export async function validateStatusConsistency(
     }
 
     return {
-  _isConsistent,
+      _isConsistent,
       details: {
-  _propostaId,
+        _propostaId,
         statusLegado: proposta?.status,
         statusContextuais: contextosStatus,
-  _inconsistencias,
+        _inconsistencias,
       },
     };
   } catch (error) {

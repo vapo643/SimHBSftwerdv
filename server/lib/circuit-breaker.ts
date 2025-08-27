@@ -90,7 +90,7 @@ export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<u
     console.log(`[CIRCUIT_BREAKER] 🚫 ${name} rejected request - circuit is OPEN`);
   });
 
-  return breaker; }
+  return breaker;
 }
 
 /**
@@ -110,9 +110,9 @@ export function isCircuitBreakerOpen(error): boolean {
  */
 export function formatCircuitBreakerError(error, serviceName: string): string {
   if (isCircuitBreakerOpen(error)) {
-    return `[CIRCUIT_BREAKER] Circuit for ${serviceName} is OPEN. Job failed immediately to protect the system.`; }
+    return `[CIRCUIT_BREAKER] Circuit for ${serviceName} is OPEN. Job failed immediately to protect the system.`;
   }
-  return `[CIRCUIT_BREAKER] ${serviceName} error: ${error.message || error}`; }
+  return `[CIRCUIT_BREAKER] ${serviceName} error: ${error.message || error}`;
 }
 
 /**
@@ -133,7 +133,7 @@ export function getCircuitBreakerStats(breaker: CircuitBreaker): {
 
   return {
     state: breaker.opened ? 'OPEN' : breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
-  _stats,
+    _stats,
     healthCheck: {
       requests: totalRequests,
       errorPercentage: Math.round(errorPercentage),

@@ -35,7 +35,7 @@ export function apiDocsProtectionMiddleware(req: Request, res: Response, next: N
 
   // Allow in development
   if (_config.enableApiDocs) {
-    return next(); }
+    return next();
   }
 
   // Check if requesting a documentation endpoint
@@ -81,7 +81,7 @@ export function apiEnumerationProtectionMiddleware(
 
   // Only apply in production/staging
   if (_config.name == 'development') {
-    return next(); }
+    return next();
   }
 
   // Detect potential enumeration attempts

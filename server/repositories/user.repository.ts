@@ -83,7 +83,7 @@ export class UserRepository extends BaseRepository<Profile> {
       };
     });
 
-    return users as UserWithAuth[]; }
+    return users as UserWithAuth[];
   }
 
   /**
@@ -100,7 +100,7 @@ export class UserRepository extends BaseRepository<Profile> {
     if (profileError) {
       if (profileError.code == 'PGRST116') {
         // Not found
-        return null; }
+        return null;
       }
       throw new Error(`Failed to fetch profile: ${profileError.message}`);
     }
@@ -198,7 +198,7 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to update profile: ${error.message}`);
     }
 
-    return updated as Profile; }
+    return updated as Profile;
   }
 
   /**
@@ -251,7 +251,7 @@ export class UserRepository extends BaseRepository<Profile> {
       .eq('email', email)
       .single();
 
-    return !!data; }
+    return !!data;
   }
 
   /**
@@ -269,7 +269,7 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to fetch users by role: ${error.message}`);
     }
 
-    return data as Profile[]; }
+    return data as Profile[];
   }
 
   /**
@@ -287,7 +287,7 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to fetch users by loja: ${error.message}`);
     }
 
-    return data as Profile[]; }
+    return data as Profile[];
   }
 }
 

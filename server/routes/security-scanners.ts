@@ -6,13 +6,13 @@
 import { Router, Request, Response } from 'express';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
 const _router = Router();
 
 // Middleware for admin access
-const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
+const __requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -23,13 +23,13 @@ const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
 };
 
 // Apply authentication middleware
-router.use(jwtAuthMiddleware);
+router.use(_jwtAuthMiddleware);
 
 /**
  * GET /api/security-scanners/sca/latest
  * Get latest OWASP Dependency Check report
  */
-router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/sca/latest', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Common paths where dependency-check reports might be stored
     const _reportPaths = [
@@ -49,7 +49,7 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
         const _data = await fs.readFile(fullPath, 'utf-8');
         reportData = JSON.parse(_data);
         reportPath = path;
-        break; }
+        break;
       } catch (e) {
         // Continue trying other paths
       }
@@ -109,10 +109,10 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
       success: true,
       data: {
         reportFound: true,
-  _vulnerabilities,
+        _vulnerabilities,
         lastScan: reportData.reportDate || new Date().toISOString(),
         projectInfo: reportData.projectInfo || {},
-  _reportPath,
+        _reportPath,
       },
     });
   } catch (error) {
@@ -128,7 +128,7 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
  * POST /api/security-scanners/sca/run
  * Trigger new dependency check scan
  */
-router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/sca/run', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Check if script exists first
     const _scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');

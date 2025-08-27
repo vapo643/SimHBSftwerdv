@@ -28,7 +28,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         newActualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
           ? 'dark'
           : 'light';
-      } else {
+      }
+else {
         newActualTheme = theme;
       }
 
@@ -51,7 +52,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const _mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const _handler = () => updateTheme();
       mediaQuery.addEventListener('change', handler);
-      return () => mediaQuery.removeEventListener('change', handler); }
+      return () => mediaQuery.removeEventListener('change', handler);
     }
   }, [theme]);
 

@@ -116,7 +116,8 @@ async function criarBoletosReais(propostaId: string) {
 
         console.log(`   ✅ Banco atualizado com código REAL`);
         successCount++;
-      } catch (error) {
+      }
+catch (error) {
         console.error(`   ❌ Erro na parcela ${boleto.numeroParcela}:`, error);
         failCount++;
       }
@@ -125,7 +126,8 @@ async function criarBoletosReais(propostaId: string) {
     console.log(`\n✅ PROCESSO CONCLUÍDO!`);
     console.log(`   Sucesso: ${successCount} boletos`);
     console.log(`   Falhas: ${failCount} boletos`);
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ ERRO FATAL:', error);
     process.exit(1);
   }

@@ -23,7 +23,7 @@ let _count = 0;
 
 function genId() {
   count = (count + 1) % Number.MAX_SAFE_INTEGER;
-  return count.toString(); }
+  return count.toString();
 }
 
 type ActionType = typeof _actionTypes;
@@ -89,7 +89,8 @@ export const _reducer = (state: State, action: Action): State => {
       // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId);
-      } else {
+      }
+else {
         state.toasts.forEach((toast) => {
           addToRemoveQueue(toast.id);
         });

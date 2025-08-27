@@ -50,13 +50,16 @@ async function checkProductsTac() {
         nullTacProducts.forEach((p) => {
           console.log(`   - ID: ${p.id} | Nome: ${p.nomeProduto}`);
         });
-      } else {
+      }
+else {
         console.log('\n✅ Todos os produtos já possuem configuração de TAC!');
       }
-    } else {
+    }
+else {
       console.log('\n⚠️ Nenhum produto encontrado no banco de dados.');
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro ao verificar produtos:', error);
     process.exit(1);
   }

@@ -136,7 +136,7 @@ export class AlertasProativosService {
       processar: async () => {
         // Esta regra será acionada via webhook da ClickSign
         // Por enquanto retorna vazio
-        return []; }
+        return [];
       },
     });
   }
@@ -220,7 +220,8 @@ export class AlertasProativosService {
   _totalNotificacoesCriadas,
           Date.now() - inicioExecucao
         );
-      } catch (error) {
+      }
+catch (error) {
         console.error(`[ALERTAS PROATIVOS] Erro ao processar regra ${nomeRegra}:`, error);
         await this.registrarExecucao(
   _nomeRegra,
@@ -273,13 +274,13 @@ export class AlertasProativosService {
   private obterRolesDestino(nomeRegra: string): string[] {
     switch (nomeRegra) {
       case 'alto_valor_vencimento_proximo': {
-        return ['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA', 'FINANCEIRO']; }
+        return ['ADMINISTRADOR', 'COBRANCA', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
       case 'atraso_longo_30_dias': {
-        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA', 'FINANCEIRO']; }
+        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA', 'FINANCEIRO'];
       case 'boleto_visualizado_nao_pago': {
-        return ['ADMINISTRADOR', 'COBRANCA']; }
+        return ['ADMINISTRADOR', 'COBRANCA'];
       default:
-        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA']; }
+        return ['ADMINISTRADOR', 'SUPERVISOR_COBRANCA'];
     }
   }
 
@@ -319,7 +320,8 @@ export class AlertasProativosService {
 
         await db.insert(historicoExecucoesAlertas).values(historico);
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[ALERTAS PROATIVOS] Erro ao registrar histórico:`, error);
     }
   }
@@ -338,7 +340,8 @@ export class AlertasProativosService {
         sucesso: true,
         mensagem: 'Serviço de Alertas Proativos está funcionando corretamente',
       };
-    } catch (error) {
+    }
+catch (error) {
       return {
         sucesso: false,
         mensagem: `Erro ao testar serviço: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,

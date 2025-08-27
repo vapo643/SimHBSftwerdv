@@ -50,7 +50,7 @@ export function createServerSupabaseClient(accessToken?: string) {
     });
   }
 
-  return client; }
+  return client;
 }
 
 // Database connection using Drizzle with Supabase

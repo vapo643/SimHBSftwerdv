@@ -70,12 +70,13 @@ const _pdfWorker = new Worker(
           console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
           // Implementation for generic PDF merging
           // TODO: Implement when needed
-          return { success: true, message: 'PDF merge not yet implemented' }; }
+          return { success: true, message: 'PDF merge not yet implemented' }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    } catch (error) {
+    }
+catch (error) {
       const _errorDuration = Date.now() - startTime;
       console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
       throw error; // Re-throw to trigger retry
@@ -107,16 +108,16 @@ const _boletoWorker = new Worker(
 
           const _syncDuration = Date.now() - startTime;
           console.log(
-            `[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`
+            `[WORKER:BOLETO] ✅ Synced ${_result.boletosProcessados}/${_result.totalBoletos} boletos in ${syncDuration}ms`
           );
 
           return {
-            success: result.success,
-            propostaId: result.propostaId,
-            totalBoletos: result.totalBoletos,
-            boletosProcessados: result.boletosProcessados,
-            boletosComErro: result.boletosComErro,
-            erros: result.erros,
+            success: _result.success,
+            propostaId: _result.propostaId,
+            totalBoletos: _result.totalBoletos,
+            boletosProcessados: _result.boletosProcessados,
+            boletosComErro: _result.boletosComErro,
+            erros: _result.erros,
             processingTime: syncDuration,
           };
 
@@ -152,7 +153,8 @@ const _boletoWorker = new Worker(
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    } catch (error) {
+    }
+catch (error) {
       const _boletoErrorDuration = Date.now() - startTime;
       console.error(
         `[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`,
@@ -176,17 +178,18 @@ const _documentWorker = new Worker(
         case 'UPLOAD_TO_CLICKSIGN': {
           console.log(`[WORKER:DOC] 📤 Uploading document to ClickSign`);
           // TODO: Implement ClickSign upload
-          return { success: true, message: 'ClickSign upload not yet implemented' }; }
+          return { success: true, message: 'ClickSign upload not yet implemented' }
 
         case 'DOWNLOAD_SIGNED_DOCUMENT': {
           console.log(`[WORKER:DOC] 📥 Downloading signed document from ClickSign`);
           // TODO: Implement ClickSign download
-          return { success: true, message: 'ClickSign download not yet implemented' }; }
+          return { success: true, message: 'ClickSign download not yet implemented' }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    } catch (error) {
+    }
+catch (error) {
       const _duration = Date.now() - startTime;
       console.error(`[WORKER:DOC] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;
@@ -207,17 +210,18 @@ const _notificationWorker = new Worker(
         case 'SEND_EMAIL': {
           console.log(`[WORKER:NOTIFY] 📧 Sending email notification`);
           // TODO: Implement email sending
-          return { success: true, message: 'Email notification not yet implemented' }; }
+          return { success: true, message: 'Email notification not yet implemented' }
 
         case 'WEBHOOK': {
           console.log(`[WORKER:NOTIFY] 🔔 Sending webhook notification`);
           // TODO: Implement webhook
-          return { success: true, message: 'Webhook not yet implemented' }; }
+          return { success: true, message: 'Webhook not yet implemented' }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    } catch (error) {
+    }
+catch (error) {
       const _duration = Date.now() - startTime;
       console.error(`[WORKER:NOTIFY] ❌ Job ${job.id} failed after ${duration}ms:`, error);
       throw error;

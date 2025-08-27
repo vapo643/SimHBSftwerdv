@@ -10,21 +10,21 @@ import path from 'path';
  * Converte coordenadas do topo da página para o sistema de coordenadas PDF (base)
  */
 export function yFromTop(pageHeight: number, pixelsFromTop: number): number {
-  return pageHeight - pixelsFromTop; }
+  return pageHeight - pixelsFromTop;
 }
 
 /**
  * Converte polegadas para pontos
  */
 export function inchesToPoints(inches: number): number {
-  return inches * 72; }
+  return inches * 72;
 }
 
 /**
  * Converte pontos para polegadas
  */
 export function pointsToInches(points: number): number {
-  return points / 72; }
+  return points / 72;
 }
 
 /**
@@ -79,7 +79,7 @@ export function addCoordinateLabel(
  * Calcula a largura de um texto com uma fonte específica
  */
 export function getTextWidth(text: string, font: PDFFont, fontSize: number): number {
-  return font.widthOfTextAtSize(text, fontSize); }
+  return font.widthOfTextAtSize(text, fontSize);
 }
 
 /**
@@ -92,7 +92,7 @@ export function getCenteredX(
   pageWidth: number
 ): number {
   const _textWidth = getTextWidth(text, font, fontSize);
-  return (pageWidth - textWidth) / 2; }
+  return (pageWidth - textWidth) / 2;
 }
 
 /**
@@ -105,7 +105,7 @@ export function getRightAlignedX(
   rightMargin: number
 ): number {
   const _textWidth = getTextWidth(text, font, fontSize);
-  return rightMargin - textWidth; }
+  return rightMargin - textWidth;
 }
 
 /**
@@ -163,7 +163,7 @@ export async function generateTestCoordinatesPDF(
   await fs.writeFile(outputPath, pdfBytes);
 
   console.log(`✅ PDF de teste de coordenadas gerado: ${outputPath}`);
-  return outputPath; }
+  return outputPath;
 }
 
 /**
@@ -175,7 +175,7 @@ export function validateCoordinates(
   pageWidth: number,
   pageHeight: number
 ): boolean {
-  return x >= 0 && x <= pageWidth && y >= 0 && y <= pageHeight; }
+  return x >= 0 && x <= pageWidth && y >= 0 && y <= pageHeight;
 }
 
 /**
@@ -206,7 +206,7 @@ export const COORDINATE_REGIONS = {
  * Útil se você está medindo em uma tela com DPI específico
  */
 export function screenPixelsToPoints(pixels: number, screenDPI: number = 96): number {
-  return (pixels / screenDPI) * 72; }
+  return (pixels / screenDPI) * 72;
 }
 
 /**
@@ -224,5 +224,5 @@ export function adjustCoordinatesForMargins(
   let _adjustedX = Math.max(margin, Math.min(x, pageWidth - textWidth - margin));
   let _adjustedY = Math.max(margin, Math.min(y, pageHeight - textHeight - margin));
 
-  return { x: adjustedX, y: adjustedY }; }
+  return { x: adjustedX, y: adjustedY }
 }

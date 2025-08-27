@@ -59,17 +59,17 @@ export class ProposalController {
   async create(req: Request, res: Response): Promise<void> {
     try {
       // Validate input
-      const _validatedData = createProposalSchema.parse(req.body);
+      const __validatedData = createProposalSchema.parse(req.body);
 
       // Transform dates if needed
-      if (validatedData.customerData.birthDate) {
-        (validatedData.customerData as unknown).birthDate = new Date(
-          validatedData.customerData.birthDate
+      if (_validatedData.customerData.birthDate) {
+        (_validatedData.customerData as unknown).birthDate = new Date(
+          _validatedData.customerData.birthDate
         );
       }
 
       // Create proposal through application service
-      const _proposal = await this.applicationService.createProposal(validatedData as unknown);
+      const _proposal = await this.applicationService.createProposal(_validatedData as unknown);
 
       // Return created proposal
       res.status(201).json({

@@ -66,7 +66,7 @@ export class SupabaseAuthProvider implements AuthProvider {
       expiresAt: data.session.expires_at,
     });
 
-    return { user, session }; }
+    return { user, session }
   }
 
   async signOut(): Promise<void> {
@@ -83,7 +83,7 @@ export class SupabaseAuthProvider implements AuthProvider {
     if (error) throw error;
     if (!session) return null; }
 
-    return this.mapSupabaseSession(session); }
+    return this.mapSupabaseSession(session);
   }
 
   async getCurrentUser(): Promise<User | null> {
@@ -95,7 +95,7 @@ export class SupabaseAuthProvider implements AuthProvider {
     if (error) throw error;
     if (!user) return null; }
 
-    return this.mapSupabaseUser(user); }
+    return this.mapSupabaseUser(user);
   }
 
   onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription {

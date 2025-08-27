@@ -36,7 +36,7 @@ export class CCBGenerationService {
   async generateCCB(
     proposalId: string
   ): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
-    return this.generateCCBWithAdjustments(proposalId, []); }
+    return this.generateCCBWithAdjustments(proposalId, []);
   }
 
   /**
@@ -53,7 +53,7 @@ export class CCBGenerationService {
       // 1. Buscar dados da proposta
       const _proposalData = await this.getProposalData(proposalId);
       if (!proposalData) {
-        return { success: false, error: 'Proposta não encontrada ou dados incompletos' }; }
+        return { success: false, error: 'Proposta não encontrada ou dados incompletos' };
       }
 
       console.log('📄 [CCB] Dados da proposta carregados:', {
@@ -581,7 +581,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] Endereço básico renderizado:',
-  _enderecoBasico,
+          _enderecoBasico,
           'em X:',
           USER_CCB_COORDINATES.enderecoCliente.x,
           'Y:',
@@ -602,7 +602,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] CEP renderizado:',
-  _cepFormatado,
+          _cepFormatado,
           'em X:',
           USER_CCB_COORDINATES.cepCliente.x,
           'Y:',
@@ -623,7 +623,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] Cidade renderizada:',
-  _cidadeValue,
+          _cidadeValue,
           'em X:',
           USER_CCB_COORDINATES.cidadeCliente.x,
           'Y:',
@@ -644,7 +644,7 @@ export class CCBGenerationService {
         });
         console.log(
           '📊 [CCB] UF renderizada:',
-  _ufValue,
+          _ufValue,
           'em X:',
           USER_CCB_COORDINATES.ufCliente.x,
           'Y:',
@@ -1160,7 +1160,7 @@ export class CCBGenerationService {
 
       if (uploadError) {
         console.error('❌ [CCB] Erro no upload:', uploadError);
-        return { success: false, error: 'Erro ao fazer upload do PDF' }; }
+        return { success: false, error: 'Erro ao fazer upload do PDF' };
       }
 
       // 8. Atualizar banco de dados
@@ -1195,7 +1195,7 @@ export class CCBGenerationService {
       console.log(`✅ [CCB] Dados preenchidos: Nome, CPF e Valor`);
       console.log(`✅ [CCB] Próximo passo: Ajustar coordenadas conforme feedback visual`);
 
-      return { success: true, pdfPath: filePath }; }
+      return { success: true, pdfPath: filePath };
     } catch (error) {
       console.error('❌ [CCB] Erro na geração:', error);
       return {
@@ -1264,9 +1264,9 @@ export class CCBGenerationService {
         WHERE p.id = ${proposalId}
       `);
 
-      if (!result || result.length == 0) {
+      if (!result || _result.length == 0) {
         console.error('❌ [CCB] Proposta não encontrada');
-        return null; }
+        return null;
       }
 
       const _proposta = result[0] as unknown;
@@ -1303,7 +1303,7 @@ export class CCBGenerationService {
       // Validar dados obrigatórios
       if (!proposta.cliente_data || !proposta.condicoes_data) {
         console.error('❌ [CCB] Dados incompletos: cliente_data ou condicoes_data ausentes');
-        return null; }
+        return null;
       }
 
       // Retornar TODOS os dados para uso na geração
@@ -1322,7 +1322,7 @@ export class CCBGenerationService {
       };
     } catch (error) {
       console.error('❌ [CCB] Erro ao buscar dados da proposta:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -1330,37 +1330,37 @@ export class CCBGenerationService {
    * Formata CPF
    */
   private formatCPF(cpf?: string): string {
-    if (!cpf) return ''; }
+    if (!cpf) return '';
     const _cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   }
 
   /**
    * Formata CNPJ
    */
   private formatCNPJ(cnpj?: string): string {
-    if (!cnpj) return ''; }
+    if (!cnpj) return '';
     const _cleaned = cnpj.replace(/\D/g, '');
-    return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'); }
+    return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
   }
 
   /**
    * Formata tipo de conta
    */
   private formatTipoConta(tipo?: string): string {
-    if (!tipo) return 'Corrente'; }
-    if (tipo == 'conta_corrente') return 'Corrente'; }
-    if (tipo == 'conta_poupanca') return 'Poupança'; }
-    return tipo; }
+    if (!tipo) return 'Corrente';
+    if (tipo == 'conta_corrente') return 'Corrente';
+    if (tipo == 'conta_poupanca') return 'Poupança';
+    return tipo;
   }
 
   /**
    * Formata CEP
    */
   private formatCEP(cep?: string): string {
-    if (!cep) return ''; }
+    if (!cep) return '';
     const _cleaned = cep.replace(/\D/g, '');
-    return cleaned.replace(/(\d{5})(\d{3})/, '$1-$2'); }
+    return cleaned.replace(/(\d{5})(\d{3})/, '$1-$2');
   }
 
   /**
@@ -1381,10 +1381,10 @@ export class CCBGenerationService {
       const _supabaseAdmin = createServerSupabaseAdminClient();
       const { data } = supabaseAdmin.storage.from('documents').getPublicUrl(filePath);
 
-      return data?.publicUrl || null; }
+      return data?.publicUrl || null;
     } catch (error) {
       console.error('❌ [CCB] Erro ao obter URL pública:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -1400,10 +1400,10 @@ export class CCBGenerationService {
       `);
 
       const _proposal = result[0];
-      return proposal?.ccb_gerado == true && !!proposal?.caminho_ccb; }
+      return proposal?.ccb_gerado == true && !!proposal?.caminho_ccb;
     } catch (error) {
       console.error('❌ [CCB] Erro ao verificar status:', error);
-      return false; }
+      return false;
     }
   }
 }

@@ -33,7 +33,7 @@ class MockAuthProvider implements AuthProvider {
   }
 
   onAuthStateChange(callback: any) {
-    return { unsubscribe: () => {} };
+    return { unsubscribe: () => {}};
   }
 
   async getAccessToken() {
@@ -61,8 +61,8 @@ describe('Pilar 5 - Padrão Aberto - Auth Abstraction', () => {
       password: 'password',
     });
 
-    expect(result.user.email).toBe('test@example.com');
-    expect(result.session.accessToken).toBe('mock-token');
+    expect(_result.user.email).toBe('test@example.com');
+    expect(_result.session.accessToken).toBe('mock-token');
   });
 
   it('deve obter sessão atual usando o provider abstraído', async () => {

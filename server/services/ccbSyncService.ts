@@ -108,7 +108,7 @@ class CCBSyncService {
 
       if (!pdfBuffer || pdfBuffer.length == 0) {
         console.log(`[CCB SYNC] ⚠️ Empty PDF received for ${proposalId}`);
-        return false as boolean; }
+        return false as boolean;
       }
 
       // Create a clean filename
@@ -131,7 +131,7 @@ class CCBSyncService {
 
       if (uploadError) {
         console.error(`[CCB SYNC] ❌ Upload error for ${proposalId}:`, uploadError);
-        return false; }
+        return false;
       }
 
       // Update the database with the storage path
@@ -144,10 +144,10 @@ class CCBSyncService {
       `);
 
       console.log(`[CCB SYNC] ✅ Successfully synced CCB for ${proposalId}`);
-      return true; }
+      return true;
     } catch (error) {
       console.error(`[CCB SYNC] ❌ Error syncing CCB for ${proposalId}:`, error);
-      return false; }
+      return false;
     }
   }
 
@@ -174,17 +174,17 @@ class CCBSyncService {
 
       if (!proposal) {
         console.log(`[CCB SYNC] ❌ Proposal ${proposalId} not found`);
-        return false; }
+        return false;
       }
 
       if (!proposal.clicksignDocumentKey) {
         console.log(`[CCB SYNC] ❌ Proposal ${proposalId} has no ClickSign key`);
-        return false; }
+        return false;
       }
 
       if (!proposal.assinaturaEletronicaConcluida) {
         console.log(`[CCB SYNC] ⚠️ Proposal ${proposalId} not signed yet`);
-        return false; }
+        return false;
       }
 
       return await this.syncSingleCCB(
@@ -194,7 +194,7 @@ class CCBSyncService {
       );
     } catch (error) {
       console.error(`[CCB SYNC] ❌ Error force syncing ${proposalId}:`, error);
-      return false; }
+      return false;
     }
   }
 }

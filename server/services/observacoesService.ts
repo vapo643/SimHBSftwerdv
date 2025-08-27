@@ -13,7 +13,7 @@ export class ObservacoesService {
    */
   async getObservacoesByProposta(propostaId: number): Promise<Observacao[]> {
     try {
-      return await observacoesRepository.findByPropostaId(propostaId); }
+      return await observacoesRepository.findByPropostaId(propostaId);
     } catch (error) {
       console.error(
         `[ObservacoesService] Error fetching observacoes for proposta ${propostaId}:`,
@@ -43,7 +43,7 @@ export class ObservacoesService {
       }
 
       const _created = await observacoesRepository.createWithUser(
-  _propostaId,
+        _propostaId,
         observacao.trim(),
         usuarioId
       );
@@ -61,7 +61,7 @@ export class ObservacoesService {
         details: { propostaId, action: 'CREATE' },
       });
 
-      return created; }
+      return created;
     } catch (error) {
       console.error('[ObservacoesService] Error creating observacao:', error);
       throw error instanceof Error ? error : new Error('Erro ao criar observação');
@@ -81,7 +81,7 @@ export class ObservacoesService {
       if (page < 1) page = 1;
       if (limit < 1 || limit > 100) limit = 10;
 
-      return await observacoesRepository.findPaginated(page, limit, filters); }
+      return await observacoesRepository.findPaginated(page, limit, filters);
     } catch (error) {
       console.error('[ObservacoesService] Error fetching paginated observacoes:', error);
       throw new Error('Erro ao buscar observações paginadas');
@@ -173,7 +173,7 @@ export class ObservacoesService {
         details: { observacaoId, action: 'UPDATE' },
       });
 
-      return updated; }
+      return updated;
     } catch (error) {
       console.error(`[ObservacoesService] Error updating observacao ${observacaoId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao atualizar observação');

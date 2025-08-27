@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { createServerSupabaseClient } from '../../client/src/lib/supabase';
 import { storage } from '../storage';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
@@ -50,7 +50,7 @@ setInterval(
  * POST /api/auth/change-email
  * Request email change - sends verification to new email
  */
-router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/change-email', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { newEmail, password } = emailChangeSchema.parse(req.body);
     const _userId = req.user!.id;
@@ -140,7 +140,8 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
       // In production, remove this line:
       debugToken: process.env.NODE_ENV == 'development' ? token : undefined,
     });
-  } catch (error) {
+  }
+catch (error) {
     if (error.name == 'ZodError') {
       return res.*);
     }
@@ -193,7 +194,7 @@ router.post('/verify-email-change', async (req, res) => {
       .from('profiles')
       .update({
         email: tokenData.newEmail,
-        updated_at: getBrasiliaTimestamp(),
+        updated_at: _getBrasiliaTimestamp(),
       })
       .eq('id', tokenData.userId);
 
@@ -228,7 +229,8 @@ router.post('/verify-email-change', async (req, res) => {
     res.json({
       message: 'Email atualizado com sucesso. Por favor, faça login novamente com seu novo email.',
     });
-  } catch (error) {
+  }
+catch (error) {
     if (error.name == 'ZodError') {
       return res.*);
     }
@@ -242,7 +244,7 @@ router.post('/verify-email-change', async (req, res) => {
  * GET /api/auth/email-change-status
  * Check if user has pending email change
  */
-router.get('/email-change-status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/email-change-status', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   const _userId = req.user!.id;
 
   // Check for pending email changes
@@ -254,7 +256,7 @@ router.get('/email-change-status', jwtAuthMiddleware, async (req: AuthenticatedR
     if (data.userId == userId && data.expiresAt > new Date()) {
       hasPendingChange = true;
       newEmail = data.newEmail;
-      break; }
+      break;
     }
   }
 

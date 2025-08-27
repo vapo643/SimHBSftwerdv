@@ -15,7 +15,7 @@ export class TestService extends GenericService {
    * Execute test suites
    */
   async executeTestSuite(suite: string, params): Promise<unknown> {
-    return await this.executeOperation(`test_suite_${suite}`, params); }
+    return await this.executeOperation(`test_suite_${suite}`, params);
   }
 
   /**

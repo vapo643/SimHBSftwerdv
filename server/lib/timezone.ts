@@ -10,14 +10,14 @@ export const BRASILIA_TIMEZONE = 'America/Sao_Paulo';
  * Retorna a data/hora atual no horário de Brasília
  */
 export function getBrasiliaDate(): Date {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: BRASILIA_TIMEZONE })); }
+  return new Date(new Date().toLocaleString('en-US', { timeZone: BRASILIA_TIMEZONE }));
 }
 
 /**
  * Converte uma data para o horário de Brasília
  */
 export function toBrasiliaDate(date: Date): Date {
-  return new Date(date.toLocaleString('en-US', { timeZone: BRASILIA_TIMEZONE })); }
+  return new Date(date.toLocaleString('en-US', { timeZone: BRASILIA_TIMEZONE }));
 }
 
 /**
@@ -25,13 +25,13 @@ export function toBrasiliaDate(date: Date): Date {
  */
 export function formatBrazilianDate(date?: Date): string {
   const _brasiliaDate = date ? toBrasiliaDate(date) : getBrasiliaDate();
-  return brasiliaDate.toLocaleDateString('pt-BR', { timeZone: BRASILIA_TIMEZONE }); }
+  return brasiliaDate.toLocaleDateString('pt-BR', { timeZone: BRASILIA_TIMEZONE });
 }
 
 /**
  * Formata uma data com hora no padrão brasileiro (dd/mm/aaaa hh:mm:ss)
  */
-export function formatBrazilianDateTime(date?: Date): string {
+export function _formatBrazilianDateTime(date?: Date): string {
   const _brasiliaDate = date ? toBrasiliaDate(date) : getBrasiliaDate();
   return brasiliaDate.toLocaleString('pt-BR', {
     timeZone: BRASILIA_TIMEZONE,
@@ -47,7 +47,7 @@ export function formatBrazilianDateTime(date?: Date): string {
 /**
  * Retorna timestamp no horário de Brasília para logs
  */
-export function getBrasiliaTimestamp(): string {
+export function _getBrasiliaTimestamp(): string {
   const _now = getBrasiliaDate();
   return now.toISOString().replace('Z', '-03:00'); // Ajusta para mostrar fuso correto
 }
@@ -56,12 +56,12 @@ export function getBrasiliaTimestamp(): string {
  * Converte string ISO para horário de Brasília
  */
 export function parseISOToBrasilia(isoString: string): Date {
-  return toBrasiliaDate(new Date(isoString)); }
+  return toBrasiliaDate(new Date(isoString));
 }
 
 /**
  * Gera data de aprovação no horário de Brasília
  */
 export function generateApprovalDate(): string {
-  return getBrasiliaDate().toISOString(); }
+  return getBrasiliaDate().toISOString();
 }

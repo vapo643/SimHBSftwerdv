@@ -41,10 +41,10 @@ export class AuthRepository extends BaseRepository<Session> {
         })
         .returning();
 
-      return session; }
+      return session;
     } catch (error) {
       console.error('[AUTH_REPO] Error creating session:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -60,7 +60,7 @@ export class AuthRepository extends BaseRepository<Session> {
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
       console.error('[AUTH_REPO] Error getting user sessions:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -82,7 +82,7 @@ export class AuthRepository extends BaseRepository<Session> {
         .orderBy(desc(userSessions.lastActivityAt));
     } catch (error) {
       console.error('[AUTH_REPO] Error getting active sessions:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -96,10 +96,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return result.length > 0; }
+      return _result.length > 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error deleting session:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -113,10 +113,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.userId, userId))
         .returning();
 
-      return result.length; }
+      return _result.length;
     } catch (error) {
       console.error('[AUTH_REPO] Error deleting user sessions:', error);
-      return 0; }
+      return 0;
     }
   }
 
@@ -133,10 +133,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return result.length > 0; }
+      return _result.length > 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error deactivating session:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -153,10 +153,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return result.length > 0; }
+      return _result.length > 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error updating session activity:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -177,10 +177,10 @@ export class AuthRepository extends BaseRepository<Session> {
         )
         .limit(1);
 
-      return !!session; }
+      return !!session;
     } catch (error) {
       console.error('[AUTH_REPO] Error checking session validity:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -194,10 +194,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(sql`${userSessions.expiresAt} < NOW()`)
         .returning();
 
-      return result.length; }
+      return _result.length;
     } catch (error) {
       console.error('[AUTH_REPO] Error cleaning up expired sessions:', error);
-      return 0; }
+      return 0;
     }
   }
 
@@ -212,10 +212,10 @@ export class AuthRepository extends BaseRepository<Session> {
         .where(eq(userSessions.token, token))
         .limit(1);
 
-      return session || null; }
+      return session || null;
     } catch (error) {
       console.error('[AUTH_REPO] Error getting session by token:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -226,10 +226,10 @@ export class AuthRepository extends BaseRepository<Session> {
     try {
       const [profile] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 
-      return profile || null; }
+      return profile || null;
     } catch (error) {
       console.error('[AUTH_REPO] Error getting user profile:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -249,10 +249,10 @@ export class AuthRepository extends BaseRepository<Session> {
           )
         );
 
-      return result[0]?.count || 0; }
+      return result[0]?.count || 0;
     } catch (error) {
       console.error('[AUTH_REPO] Error counting active sessions:', error);
-      return 0; }
+      return 0;
     }
   }
 }

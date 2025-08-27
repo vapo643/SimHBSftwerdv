@@ -158,26 +158,26 @@ export class Proposal {
   ): Proposal {
     const _id = uuidv4();
     const _proposal = new Proposal(
-  _id,
-  _clienteData,
-  _valor,
-  _prazo,
-  _taxaJuros,
-  _produtoId,
-  _lojaId,
+      _id,
+      _clienteData,
+      _valor,
+      _prazo,
+      _taxaJuros,
+      _produtoId,
+      _lojaId,
       atendenteId
     );
 
     proposal.addEvent(
       new ProposalCreatedEvent(id, 'ProposalCreated', {
-  _clienteData,
-  _valor,
-  _prazo,
-  _taxaJuros,
+        _clienteData,
+        _valor,
+        _prazo,
+        _taxaJuros,
       })
     );
 
-    return proposal; }
+    return proposal;
   }
 
   // Factory method para reconstituir do banco
@@ -203,7 +203,7 @@ export class Proposal {
     proposal._tabelaComercialId = data.tabela_comercial_id;
     proposal._parceiroId = data.parceiro_id;
 
-    return proposal; }
+    return proposal;
   }
 
   // ======= INVARIANTES DE NEGÓCIO =======
@@ -239,7 +239,7 @@ export class Proposal {
     const _cleanCPF = cpf.replace(/\D/g, '');
 
     // Verifica se tem 11 dígitos
-    if (cleanCPF.length !== 11) return false; }
+    if (cleanCPF.length !== 11) return false;
 
     // Em desenvolvimento, permite CPFs de teste (sequências repetidas)
     if (process.env.NODE_ENV == 'development' && /^(\d)\1{10}$/.test(cleanCPF)) {
@@ -247,7 +247,7 @@ export class Proposal {
     }
 
     // Verifica se todos os dígitos são iguais (apenas em produção)
-    if (/^(\d)\1{10}$/.test(cleanCPF)) return false; }
+    if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
 
     // Validação dos dígitos verificadores
     let _sum = 0;
@@ -256,7 +256,7 @@ export class Proposal {
     }
     let _digit = 11 - (sum % 11);
     if (digit >= 10) digit = 0;
-    if (digit !== parseInt(cleanCPF.charAt(9))) return false; }
+    if (digit !== parseInt(cleanCPF.charAt(9))) return false;
 
     sum = 0;
     for (let _i = 0; i < 10; i++) {
@@ -264,9 +264,9 @@ export class Proposal {
     }
     digit = 11 - (sum % 11);
     if (digit >= 10) digit = 0;
-    if (digit !== parseInt(cleanCPF.charAt(10))) return false; }
+    if (digit !== parseInt(cleanCPF.charAt(10))) return false;
 
-    return true; }
+    return true;
   }
 
   // ======= COMANDOS (MÉTODOS DE NEGÓCIO) =======
@@ -311,8 +311,8 @@ export class Proposal {
 
     this.addEvent(
       new ProposalApprovedEvent(this._id, 'ProposalApproved', {
-  _analistaId,
-  _observacoes,
+        _analistaId,
+        _observacoes,
       })
     );
   }
@@ -335,8 +335,8 @@ export class Proposal {
 
     this.addEvent(
       new ProposalRejectedEvent(this._id, 'ProposalRejected', {
-  _analistaId,
-  _motivo,
+        _analistaId,
+        _motivo,
       })
     );
   }
@@ -446,21 +446,21 @@ export class Proposal {
     const _numberOfPayments = this._prazo;
 
     if (monthlyRate == 0) {
-      return principal / numberOfPayments; }
+      return principal / numberOfPayments;
     }
 
     const _payment =
       (principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) /
       (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
 
-    return Math.round(payment * 100) / 100; }
+    return Math.round(payment * 100) / 100;
   }
 
   /**
    * Calcula o valor total a ser pago
    */
   calculateTotalAmount(): number {
-    return this.calculateMonthlyPayment() * this._prazo; }
+    return this.calculateMonthlyPayment() * this._prazo;
   }
 
   /**
@@ -473,61 +473,61 @@ export class Proposal {
     const _custoTotal = valorTotal + (tac || 0);
     const _cet = (custoTotal / this._valor - 1) * 100;
 
-    return Math.round(cet * 100) / 100; }
+    return Math.round(cet * 100) / 100;
   }
 
   // ======= GETTERS =======
 
   get id(): string {
-    return this._id; }
+    return this._id;
   }
   get status(): ProposalStatus {
-    return this._status; }
+    return this._status;
   }
   get clienteData(): ClienteData {
-    return this._clienteData; }
+    return this._clienteData;
   }
   get valor(): number {
-    return this._valor; }
+    return this._valor;
   }
   get prazo(): number {
-    return this._prazo; }
+    return this._prazo;
   }
   get taxaJuros(): number {
-    return this._taxaJuros; }
+    return this._taxaJuros;
   }
   get produtoId(): number | undefined {
-    return this._produtoId; }
+    return this._produtoId;
   }
   get tabelaComercialId(): number | undefined {
-    return this._tabelaComercialId; }
+    return this._tabelaComercialId;
   }
   get lojaId(): number | undefined {
-    return this._lojaId; }
+    return this._lojaId;
   }
   get parceiroId(): number | undefined {
-    return this._parceiroId; }
+    return this._parceiroId;
   }
   get atendenteId(): string | undefined {
-    return this._atendenteId; }
+    return this._atendenteId;
   }
   get dadosPagamento(): DadosPagamento | undefined {
-    return this._dadosPagamento; }
+    return this._dadosPagamento;
   }
   get motivoRejeicao(): string | undefined {
-    return this._motivoRejeicao; }
+    return this._motivoRejeicao;
   }
   get observacoes(): string | undefined {
-    return this._observacoes; }
+    return this._observacoes;
   }
   get ccbUrl(): string | undefined {
-    return this._ccbUrl; }
+    return this._ccbUrl;
   }
   get createdAt(): Date {
-    return this._createdAt; }
+    return this._createdAt;
   }
   get updatedAt(): Date {
-    return this._updatedAt; }
+    return this._updatedAt;
   }
 
   // ======= DOMAIN EVENTS =======
@@ -537,7 +537,7 @@ export class Proposal {
   }
 
   getUncommittedEvents(): ProposalDomainEvent[] {
-    return this._events; }
+    return this._events;
   }
 
   markEventsAsCommitted(): void {

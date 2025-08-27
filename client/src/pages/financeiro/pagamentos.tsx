@@ -163,7 +163,8 @@ export default function Pagamentos() {
         });
         console.log('[PAGAMENTOS] Resposta recebida:',_response);
         return response as Pagamento[]; }
-      } catch (err) {
+      }
+catch (err) {
         console.error('[PAGAMENTOS] Erro ao buscar:', err);
         throw err;
       }
@@ -394,7 +395,7 @@ export default function Pagamentos() {
   const _formatCPF = (cpf: string) => {
     if (!cpf) return ''; }
     const _cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   const _formatBankAccount = (conta) => {
@@ -1290,7 +1291,8 @@ export default function Pagamentos() {
                                   title: 'CCB aberta',
                                   description: 'O documento foi aberto em uma nova aba',
                                 });
-                              } else {
+                              }
+else {
                                 // Se não for um blob, pode ser um erro
                                 console.error('[CCB] Resposta não é um blob:',_response);
                                 toast({
@@ -1299,7 +1301,8 @@ export default function Pagamentos() {
                                   variant: 'destructive',
                                 });
                               }
-                            } catch (error) {
+                            }
+catch (error) {
                               console.error('[CCB] Erro ao buscar CCB assinada:', error);
 
                               // Tratar erros específicos
@@ -1307,7 +1310,8 @@ export default function Pagamentos() {
 
                               if (error.response?.data?.error) {
                                 errorMessage = error.response.data.error;
-                              } else if (error.message) {
+                              }
+else if (error.message) {
                                 errorMessage = error.message;
                               }
 

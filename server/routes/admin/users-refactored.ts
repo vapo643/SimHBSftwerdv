@@ -8,8 +8,8 @@
 
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { jwtAuthMiddleware, AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
-import { requireAdmin } from '../../lib/role-guards.js';
+import { _jwtAuthMiddleware, AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
+import { _requireAdmin } from '../../lib/role-guards.js';
 import { userService } from '../../services/userService-refactored.js';
 import { UserDataSchema } from '../../../shared/types/user.js';
 
@@ -19,9 +19,9 @@ const _router = Router();
 function getClientIP(req: Request): string {
   const _forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded == 'string') {
-    return forwarded.split(',')[0].trim(); }
+    return forwarded.split(',')[0].trim();
   }
-  return req.connection?.remoteAddress || req.socket?.remoteAddress || 'Unknown'; }
+  return req.connection?.remoteAddress || req.socket?.remoteAddress || 'Unknown';
 }
 
 /**
@@ -33,8 +33,8 @@ function getClientIP(req: Request): string {
  */
 router.get(
   '/',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       console.log('📋 [Controller/Users] Fetching all users');
@@ -48,7 +48,8 @@ router.get(
       console.log(`✅ [Controller/Users] Retrieved ${formattedUsers.length} users`);
 
       res.json(formattedUsers);
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [Controller/Users] Error fetching users:', error);
       res.status(500).json({
         message: error instanceof Error ? error.message : 'Erro ao buscar usuários',
@@ -65,8 +66,8 @@ router.get(
  */
 router.get(
   '/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -89,7 +90,8 @@ router.get(
       const _formattedUser = userService.formatUserForResponse(user);
 
       res.json(formattedUser);
-    } catch (error) {
+    }
+catch (error) {
       console.error(`❌ [Controller/Users] Error fetching user ${req.params.id}:`, error);
       res.status(500).json({
         message: error instanceof Error ? error.message : 'Erro ao buscar usuário',
@@ -106,26 +108,27 @@ router.get(
  */
 router.post(
   '/',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       console.log('📝 [Controller/Users] Creating new user');
       console.log('📝 [Controller/Users] Request by:', req.user?.email);
 
       // Validate input data
-      const _validatedData = UserDataSchema.parse(req.body);
+      const __validatedData = UserDataSchema.parse(req.body);
       const _clientIp = getClientIP(req);
 
       // PADRÃO CORRETO: Service gerencia toda lógica de negócio
-      const _newUser = await userService.createUser(validatedData, req.user?.id, clientIp);
+      const _newUser = await userService.createUser(_validatedData, req.user?.id, clientIp);
 
       const _formattedUser = userService.formatUserForResponse(newUser);
 
       console.log(`✅ [Controller/Users] User created: ${newUser.email}`);
 
       return res.*);
-    } catch (error) {
+    }
+catch (error) {
       // Handle validation errors
       if (error instanceof z.ZodError) {
         const _flatErrors = error.flatten();
@@ -134,7 +137,8 @@ router.post(
         let _errorMessage = 'Dados de entrada inválidos';
         if (flatErrors.fieldErrors.password) {
           errorMessage = 'Erro de validação de senha - Verifique os requisitos de segurança';
-        } else if (flatErrors.fieldErrors.role) {
+        }
+else if (flatErrors.fieldErrors.role) {
           errorMessage = 'Perfil de usuário inválido';
         }
 
@@ -176,8 +180,8 @@ router.post(
  */
 router.put(
   '/:id/deactivate',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const _userId = req.params.id;
@@ -203,14 +207,15 @@ router.put(
       console.log(`⚠️ [Controller/Users] User deactivated: ${userId}`);
 
       res.json({
-        message: result.message,
+        message: _result.message,
         deactivatedUser: {
-          id: result.user.id,
-          name: result.user.full_name,
-          role: result.user.role,
+          id: _result.user.id,
+          name: _result.user.full_name,
+          role: _result.user.role,
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [Controller/Users] Error deactivating user:', error);
 
       const _statusCode =
@@ -235,8 +240,8 @@ router.put(
  */
 router.put(
   '/:id/reactivate',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const _userId = req.params.id;
@@ -262,9 +267,10 @@ router.put(
       console.log(`✅ [Controller/Users] User reactivated: ${userId}`);
 
       res.json({
-        message: result.message,
+        message: _result.message,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [Controller/Users] Error reactivating user:', error);
 
       const _statusCode =
@@ -285,8 +291,8 @@ router.put(
  */
 router.get(
   '/role/:role',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { role } = req.params;
@@ -302,7 +308,8 @@ router.get(
       const _formattedUsers = userService.formatUsersForResponse(users as unknown);
 
       res.json(formattedUsers);
-    } catch (error) {
+    }
+catch (error) {
       console.error(
         `❌ [Controller/Users] Error fetching users by role ${req.params.role}:`,
         error
@@ -322,13 +329,13 @@ router.get(
  */
 router.get(
   '/loja/:lojaId',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const _lojaId = parseInt(req.params.lojaId);
 
-      if (isNaN(lojaId)) {
+      if (_isNaN(lojaId)) {
         return res.status(400).json({
           message: 'ID da loja inválido',
         });
@@ -339,7 +346,8 @@ router.get(
       const _formattedUsers = userService.formatUsersForResponse(users as unknown);
 
       res.json(formattedUsers);
-    } catch (error) {
+    }
+catch (error) {
       console.error(
         `❌ [Controller/Users] Error fetching users by loja ${req.params.lojaId}:`,
         error

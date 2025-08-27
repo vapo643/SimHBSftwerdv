@@ -60,7 +60,7 @@ export default function SessoesAtivas() {
         },
       });
       if (!response.ok) throw new Error('Erro ao encerrar sessão');
-      return response.json(); }
+      return response.json();
     },
     onSuccess: () => {
       toast({

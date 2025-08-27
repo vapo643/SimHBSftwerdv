@@ -84,10 +84,10 @@ export class CCBCoordinateCalibrator {
       console.log(`   - Dimensões: ${width}x${height}`);
 
       return {
-  _hasAcroForms,
+        _hasAcroForms,
         fields: formFields,
         pageSize: { width, height },
-  _recommendations,
+        _recommendations,
       };
     } catch (error) {
       console.error('❌ [CALIBRATOR] Erro no diagnóstico:', error);
@@ -197,7 +197,7 @@ export class CCBCoordinateCalibrator {
       await fs.writeFile(outputPath, pdfBytes);
 
       console.log(`✅ [CALIBRATOR] Grid de calibração salvo: ${outputPath}`);
-      return outputPath; }
+      return outputPath;
     } catch (error) {
       console.error('❌ [CALIBRATOR] Erro ao gerar grid:', error);
       throw error;
@@ -237,7 +237,7 @@ export class CCBCoordinateCalibrator {
             x: fieldPos.x,
             y: fieldPos.y,
             size: fieldPos.fontSize,
-  _font,
+            _font,
             color: testColor,
           });
 
@@ -257,7 +257,7 @@ export class CCBCoordinateCalibrator {
       await fs.writeFile(outputPath, pdfBytes);
 
       console.log(`✅ [CALIBRATOR] Teste de campos salvo: ${outputPath}`);
-      return outputPath; }
+      return outputPath;
     } catch (error) {
       console.error('❌ [CALIBRATOR] Erro no teste:', error);
       throw error;
@@ -288,9 +288,9 @@ export class CCBCoordinateCalibrator {
 
       console.log('✅ [CALIBRATOR] Calibração inteligente concluída');
       return {
-  _originalPath,
-  _adjustedPath,
-  _recommendations,
+        _originalPath,
+        _adjustedPath,
+        _recommendations,
       };
     } catch (error) {
       console.error('❌ [CALIBRATOR] Erro na calibração inteligente:', error);
@@ -304,7 +304,7 @@ export class CCBCoordinateCalibrator {
   private applyIntelligentAdjustments(data: FieldTestData): FieldTestData {
     // Por enquanto retorna os dados originais
     // Implementar lógica de ajuste baseada em análise de layout
-    return { ...data }; }
+    return { ...data };
   }
 
   /**
@@ -318,7 +318,7 @@ export class CCBCoordinateCalibrator {
     recommendations.push('📏 Considere ajustar tamanhos de fonte se texto não couber');
     recommendations.push('🔄 Teste com diferentes conjuntos de dados');
 
-    return recommendations; }
+    return recommendations;
   }
 
   /**
@@ -353,9 +353,9 @@ export class CCBCoordinateCalibrator {
 
       console.log('✅ [CALIBRATOR] Relatório completo gerado');
       return {
-  _templateAnalysis,
-  _gridPath,
-  _recommendations,
+        _templateAnalysis,
+        _gridPath,
+        _recommendations,
       };
     } catch (error) {
       console.error('❌ [CALIBRATOR] Erro no relatório:', error);

@@ -65,7 +65,8 @@ export async function multiTenantMiddleware(
     );
 
     next();
-  } catch (error) {
+  }
+catch (error) {
     console.error('Multi-tenant middleware error:', error);
     return res.*);
   }

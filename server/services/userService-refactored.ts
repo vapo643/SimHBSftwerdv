@@ -17,7 +17,7 @@ export class UserService {
    */
   async getAllUsers(): Promise<UserWithAuth[]> {
     try {
-      return await userRepository.getAllUsersWithAuth(); }
+      return await userRepository.getAllUsersWithAuth();
     } catch (error) {
       console.error('[UserService] Error fetching users:', error);
       throw new Error('Erro ao buscar usuários');
@@ -29,7 +29,7 @@ export class UserService {
    */
   async getUserById(userId: string): Promise<UserWithAuth | null> {
     try {
-      return await userRepository.getUserWithAuth(userId); }
+      return await userRepository.getUserWithAuth(userId);
     } catch (error) {
       console.error(`[UserService] Error fetching user ${userId}:`, error);
       throw new Error('Erro ao buscar usuário');
@@ -75,7 +75,7 @@ export class UserService {
 
       console.log(`✅ [UserService] User created successfully: ${newUser.email}`);
 
-      return newUser; }
+      return newUser;
     } catch (error) {
       console.error('[UserService] Error creating user:', error);
       throw error;
@@ -253,7 +253,7 @@ export class UserService {
         },
       });
 
-      return updatedProfile; }
+      return updatedProfile;
     } catch (error) {
       console.error(`[UserService] Error updating user ${userId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao atualizar usuário');
@@ -265,7 +265,7 @@ export class UserService {
    */
   async getUsersByRole(role: string): Promise<Profile[]> {
     try {
-      return await userRepository.getUsersByRole(role); }
+      return await userRepository.getUsersByRole(role);
     } catch (error) {
       console.error(`[UserService] Error fetching users by role ${role}:`, error);
       throw new Error('Erro ao buscar usuários por perfil');
@@ -277,7 +277,7 @@ export class UserService {
    */
   async getUsersByLoja(lojaId: number): Promise<Profile[]> {
     try {
-      return await userRepository.getUsersByLoja(lojaId); }
+      return await userRepository.getUsersByLoja(lojaId);
     } catch (error) {
       console.error(`[UserService] Error fetching users by loja ${lojaId}:`, error);
       throw new Error('Erro ao buscar usuários por loja');
@@ -298,7 +298,7 @@ export class UserService {
       throw new Error('Gerentes devem estar associados a pelo menos uma loja');
     }
 
-    // DIRETOR and ADMINISTRADOR should not have loja associations
+    // DIRETOR and ADMINISTRADOR should not have loja _associations
     if (
       (userData.role == 'DIRETOR' || userData.role == 'ADMINISTRADOR') &&
       (userData.lojaId || userData.lojaIds)
@@ -328,7 +328,7 @@ export class UserService {
    * Format multiple users for response
    */
   formatUsersForResponse(users: UserWithAuth[]): unknown[] {
-    return users.map((user) => this.formatUserForResponse(user)); }
+    return users.map((user) => this.formatUserForResponse(user));
   }
 }
 
@@ -337,5 +337,5 @@ export const _userService = new UserService();
 
 // Export createUser function for backwards compatibility
 export async function createUser(userData: z.infer<typeof UserDataSchema>) {
-  return userService.createUser(userData); }
+  return userService.createUser(userData);
 }

@@ -68,7 +68,7 @@ const _emprestimoSchema = z.object({
     .min(1, 'Valor é obrigatório')
     .transform((val) => {
       const _num = parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'));
-      if (isNaN(num) || num < 100) throw new Error('Valor mínimo é R$ 100,00');
+      if (_isNaN(num) || num < 100) throw new Error('Valor mínimo é R$ 100,00');
       if (num > 1000000) throw new Error('Valor máximo é R$ 1.000.000,00');
       return num; }
     }),
@@ -77,7 +77,7 @@ const _emprestimoSchema = z.object({
     .min(1, 'Prazo é obrigatório')
     .transform((val) => {
       const _num = parseInt(val);
-      if (isNaN(num) || num < 1) throw new Error('Prazo mínimo é 1 mês');
+      if (_isNaN(num) || num < 1) throw new Error('Prazo mínimo é 1 mês');
       if (num > 120) throw new Error('Prazo máximo é 120 meses');
       return num; }
     }),
@@ -147,7 +147,8 @@ export default function NovaProposta() {
             description: 'Seus dados anteriores foram restaurados.',
           });
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error('Erro ao recuperar dados:', error);
         // Em caso de erro, limpa o localStorage corrompido
         localStorage.removeItem('proposta_temp');
@@ -164,7 +165,8 @@ export default function NovaProposta() {
         try {
           const _parsed = JSON.parse(saved);
           return parsed.enviada == true; }
-        } catch {
+        }
+catch {
           return false; }
         }
       }
@@ -185,7 +187,7 @@ export default function NovaProposta() {
       };
       localStorage.setItem('proposta_temp', JSON.stringify(tempData));
     });
-    return () => subscription.unsubscribe(); }
+    return () => subscription.unsubscribe();
   }, [watch]);
 
   // BUSCA POR CPF: Buscar dados de propostas anteriores do mesmo CPF
@@ -236,9 +238,11 @@ export default function NovaProposta() {
             description: 'Os dados do cliente foram preenchidos com base em propostas anteriores.',
           });
         }
-      } catch (error) {
+      }
+catch (error) {
         console.log('Nenhuma proposta anterior encontrada para este CPF');
-      } finally {
+      }
+finally {
         setIsSearchingCpf(false);
       }
     },
@@ -386,13 +390,15 @@ export default function NovaProposta() {
           description: 'Verifique os campos destacados em vermelho abaixo.',
           variant: 'destructive',
         });
-      } else if (error.response?.data?.message) {
+      }
+else if (error.response?.data?.message) {
         toast({
           title: 'Erro na validação',
           description: error.response.data.message,
           variant: 'destructive',
         });
-      } else {
+      }
+else {
         toast({
           title: 'Erro ao criar proposta',
           description: error.message || 'Tente novamente em alguns instantes.',

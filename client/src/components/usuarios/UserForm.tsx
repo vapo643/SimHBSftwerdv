@@ -115,8 +115,9 @@ const UserForm: React.FC<UserFormProps> = ({
 
     if (canFilterClientSide) {
       // Client-side filtering: use pre-loaded data
-      return getStoresByPartner(parseInt(selectedParceiroId)); }
-    } else {
+      return getStoresByPartner(parseInt(selectedParceiroId));
+    }
+else {
       // Server-side filtering: use on-demand data
       return serverStores; }
     }

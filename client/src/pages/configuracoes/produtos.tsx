@@ -137,7 +137,8 @@ export default function GestãoProdutos() {
         id: editingProduct.id,
         data: formData,
       });
-    } else {
+    }
+else {
       createMutation.mutate(formData);
     }
   };

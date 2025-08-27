@@ -79,10 +79,10 @@ class BoletoStorageService {
       if (!collections || collections.length == 0) {
         console.log(`[BOLETO STORAGE] ⚠️ Nenhum boleto encontrado para proposta ${propostaId}`);
         console.timeEnd(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);
-        return result; }
+        return result;
       }
 
-      result.totalBoletos = collections.length;
+      _result.totalBoletos = collections.length;
       const _totalLotes = Math.ceil(collections.length / BATCH_SIZE);
       console.log(
         `[BOLETO STORAGE] 📊 Encontrados ${collections.length} boletos para processar em ${totalLotes} lotes`
@@ -124,7 +124,8 @@ class BoletoStorageService {
                     maxDelayMs: 5000,
                   }
                 );
-              } catch (downloadError) {
+              }
+catch (downloadError) {
                 console.error(
                   `[SYNC-FAILURE] Falha ao baixar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${downloadError.message}`
                 );
@@ -158,7 +159,8 @@ class BoletoStorageService {
                   });
                 uploadData = uploadResult.data;
                 uploadError = uploadResult.error;
-              } catch (storageError) {
+              }
+catch (storageError) {
                 console.error(
                   `[SYNC-FAILURE] Falha ao salvar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${storageError.message}`
                 );
@@ -184,7 +186,8 @@ class BoletoStorageService {
   _caminhoArquivo,
   _numeroParcela,
               };
-            } catch (error) {
+            }
+catch (error) {
               console.error(
                 `[BOLETO STORAGE] ❌ [Parcela ${numeroParcela}] Erro ao processar:`,
                 error.message
@@ -205,11 +208,12 @@ class BoletoStorageService {
         // Processar resultados do lote
         resultadosLote.forEach((resultado) => {
           if (resultado.success) {
-            result.boletosProcessados++;
-            result.caminhosPdf.push(resultado.caminhoArquivo!);
-          } else {
-            result.boletosComErro++;
-            result.erros.push({
+            _result.boletosProcessados++;
+            _result.caminhosPdf.push(resultado.caminhoArquivo!);
+          }
+else {
+            _result.boletosComErro++;
+            _result.erros.push({
               codigoSolicitacao: resultado.codigoSolicitacao,
               erro: resultado.erro!,
             });
@@ -230,10 +234,10 @@ class BoletoStorageService {
       }
 
       // 3. Determinar sucesso geral
-      result.success = result.boletosProcessados > 0;
+      _result.success = _result.boletosProcessados > 0;
 
       // STATUS V2.0: Se todos os boletos foram processados com sucesso, atualizar status
-      if (result.success && result.boletosProcessados == result.totalBoletos) {
+      if (_result.success && _result.boletosProcessados == _result.totalBoletos) {
         // Buscar status atual da proposta
         const _proposta = await storage.getPropostaById(propostaId);
 
@@ -251,8 +255,8 @@ class BoletoStorageService {
           metadata: {
             service: 'boletoStorageService',
             action: 'sincronizarBoletosDaProposta',
-            totalBoletos: result.totalBoletos,
-            boletosProcessados: result.boletosProcessados,
+            totalBoletos: _result.totalBoletos,
+            boletosProcessados: _result.boletosProcessados,
             timestamp: new Date().toISOString(),
           },
         });
@@ -264,28 +268,29 @@ class BoletoStorageService {
       console.timeEnd(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);
 
       console.log(`[BOLETO STORAGE] 📊 SINCRONIZAÇÃO CONCLUÍDA:`);
-      console.log(`[BOLETO STORAGE]   - Total: ${result.totalBoletos} boletos`);
-      console.log(`[BOLETO STORAGE]   - Processados com sucesso: ${result.boletosProcessados}`);
-      console.log(`[BOLETO STORAGE]   - Com erro: ${result.boletosComErro}`);
+      console.log(`[BOLETO STORAGE]   - Total: ${_result.totalBoletos} boletos`);
+      console.log(`[BOLETO STORAGE]   - Processados com sucesso: ${_result.boletosProcessados}`);
+      console.log(`[BOLETO STORAGE]   - Com erro: ${_result.boletosComErro}`);
       console.log(
-        `[BOLETO STORAGE]   - Taxa de sucesso: ${((result.boletosProcessados / result.totalBoletos) * 100).toFixed(1)}%`
+        `[BOLETO STORAGE]   - Taxa de sucesso: ${((_result.boletosProcessados / _result.totalBoletos) * 100).toFixed(1)}%`
       );
 
-      if (result.erros.length > 0) {
-        console.log(`[BOLETO STORAGE] ⚠️ Erros encontrados:`, result.erros);
+      if (_result.erros.length > 0) {
+        console.log(`[BOLETO STORAGE] ⚠️ Erros encontrados:`, _result.erros);
       }
 
-      return result; }
-    } catch (error) {
+      return result;
+    }
+catch (error) {
       console.error(`[BOLETO STORAGE] ❌ Erro crítico na sincronização:`, error);
 
-      result.success = false;
-      result.erros.push({
+      _result.success = false;
+      _result.erros.push({
         codigoSolicitacao: 'GERAL',
         erro: error.message || 'Erro crítico desconhecido',
       });
 
-      return result; }
+      return result;
     }
   }
 
@@ -305,13 +310,14 @@ class BoletoStorageService {
 
       if (error) {
         console.error(`[BOLETO STORAGE] Erro ao verificar existência:`, error);
-        return false; }
+        return false;
       }
 
-      return data && data.length > 0; }
-    } catch (error) {
+      return data && data.length > 0;
+    }
+catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao verificar boleto:`, error);
-      return false; }
+      return false;
     }
   }
 
@@ -328,13 +334,14 @@ class BoletoStorageService {
 
       if (error) {
         console.error(`[BOLETO STORAGE] Erro ao listar boletos:`, error);
-        return []; }
+        return [];
       }
 
-      return data?.map((file) => file.name) || []; }
-    } catch (error) {
+      return data?.map((file) => file.name) || [];
+    }
+catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao listar:`, error);
-      return []; }
+      return [];
     }
   }
 
@@ -346,7 +353,7 @@ class BoletoStorageService {
       const _boletos = await this.listarBoletosSalvos(propostaId);
 
       if (boletos.length == 0) {
-        return true; }
+        return true;
       }
 
       const _caminhos = boletos.map(
@@ -357,14 +364,15 @@ class BoletoStorageService {
 
       if (error) {
         console.error(`[BOLETO STORAGE] Erro ao limpar boletos:`, error);
-        return false; }
+        return false;
       }
 
       console.log(`[BOLETO STORAGE] ${caminhos.length} boletos removidos`);
-      return true; }
-    } catch (error) {
+      return true;
+    }
+catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao limpar:`, error);
-      return false; }
+      return false;
     }
   }
 
@@ -448,7 +456,8 @@ class BoletoStorageService {
           console.log(
             `[CARNE DEBUG] ✅ Buffer de ${file.name} adicionado (${buffer.length} bytes)`
           );
-        } catch (error) {
+        }
+catch (error) {
           console.error(`[CARNE DEBUG] ❌ Erro ao processar ${file.name}:`, error.message);
           errors.push(`${file.name}: ${error.message}`);
         }
@@ -483,7 +492,8 @@ class BoletoStorageService {
           });
 
           console.log(`[CARNE DEBUG] PDF ${i + 1} adicionado com ${pages.length} páginas`);
-        } catch (error) {
+        }
+catch (error) {
           console.error(`[CARNE DEBUG] ⚠️ Erro ao processar PDF ${i + 1}:`, error.message);
           // Continuar mesmo se um PDF falhar
         }
@@ -542,7 +552,8 @@ class BoletoStorageService {
         success: true,
         url: urlData.signedUrl,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CARNE STORAGE] ❌ Erro crítico na geração do carnê:`, error);
 
       return {
@@ -556,7 +567,7 @@ class BoletoStorageService {
    * Delay helper para evitar rate limiting
    */
   private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms)); }
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

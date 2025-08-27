@@ -12,13 +12,13 @@ import { getSemgrepScanner } from '../lib/semgrep-scanner';
 import { db } from '../lib/supabase';
 import { security_logs } from '../../shared/schema';
 import { sql } from 'drizzle-orm';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
-import { requireAdmin, requireManagerOrAdmin } from '../lib/role-guards';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _requireAdmin, requireManagerOrAdmin } from '../lib/role-guards';
 
 const _router = Router();
 
 // Middleware de autenticação para todas as rotas
-router.use(jwtAuthMiddleware);
+router.use(_jwtAuthMiddleware);
 
 /**
  * GET /api/security/metrics
@@ -55,7 +55,8 @@ router.get('/metrics', async (req: Request, res: Response) => {
     };
 
     res.json(mockMetrics);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter métricas:', error);
     res.status(500).json({ error: 'Erro ao obter métricas' });
   }
@@ -102,11 +103,12 @@ router.get('/vulnerabilities', async (req: Request, res: Response) => {
       .filter((v) => v.falsePositiveScore < 0.5)
       .sort((a, b) => {
         const _severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-        return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity]; }
+        return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity];
       });
 
     res.json(filtered);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter vulnerabilidades:', error);
     res.status(500).json({ error: 'Erro ao obter vulnerabilidades' });
   }
@@ -149,7 +151,8 @@ router.get('/anomalies', async (req: Request, res: Response) => {
       .filter((a) => a.confidence > 0.7);
 
     res.json(filtered);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter anomalias:', error);
     res.status(500).json({ error: 'Erro ao obter anomalias' });
   }
@@ -200,7 +203,8 @@ router.get('/dependency-scan', async (req: Request, res: Response) => {
     };
 
     res.json(mockData);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter scan de dependências:', error);
     res.status(500).json({ error: 'Erro ao obter scan de dependências' });
   }
@@ -250,7 +254,8 @@ router.get('/semgrep-findings', async (req: Request, res: Response) => {
     ];
 
     res.json(mockFindings);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter findings do Semgrep:', error);
     res.status(500).json({ error: 'Erro ao obter findings' });
   }
@@ -260,7 +265,7 @@ router.get('/semgrep-findings', async (req: Request, res: Response) => {
  * POST /api/security/scan
  * Executar scan manual
  */
-router.post('/scan', requireAdmin, async (req: Request, res: Response) => {
+router.post('/scan', _requireAdmin, async (req: Request, res: Response) => {
   try {
     const { type } = req.body;
 
@@ -269,24 +274,25 @@ router.post('/scan', requireAdmin, async (req: Request, res: Response) => {
         const _vulnScanner = getSecurityScanner();
         // Executar scan
         res.json({ message: 'Scan de vulnerabilidades iniciado' });
-        break; }
+        break;
 
       case 'dependency': {
         const _depScanner = getDependencyScanner();
         depScanner.runScan();
         res.json({ message: 'Scan de dependências iniciado' });
-        break; }
+        break;
 
       case 'code': {
         const _codeScanner = getSemgrepScanner();
         codeScanner.runScan();
         res.json({ message: 'Análise de código iniciada' });
-        break; }
+        break;
 
       default:
         res.status(400).json({ error: 'Tipo de scan inválido' });
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao iniciar scan:', error);
     res.status(500).json({ error: 'Erro ao iniciar scan' });
   }
@@ -316,7 +322,8 @@ router.get('/alerts/active', async (req: Request, res: Response) => {
       .limit(50);
 
     res.json(alerts);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter alertas:', error);
     res.status(500).json({ error: 'Erro ao obter alertas' });
   }
@@ -326,7 +333,7 @@ router.get('/alerts/active', async (req: Request, res: Response) => {
  * POST /api/security/alerts/:id/resolve
  * Resolver alerta
  */
-router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Response) => {
+router.post('/alerts/:id/resolve', _requireAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
@@ -341,7 +348,8 @@ router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Respo
     // });
 
     res.json({ message: 'Alerta resolvido' });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao resolver alerta:', error);
     res.status(500).json({ error: 'Erro ao resolver alerta' });
   }
@@ -351,7 +359,7 @@ router.post('/alerts/:id/resolve', requireAdmin, async (req: Request, res: Respo
  * GET /api/security/report
  * Relatório completo de segurança
  */
-router.get('/report', requireAdmin, async (req: Request, res: Response) => {
+router.get('/report', _requireAdmin, async (req: Request, res: Response) => {
   try {
     const _scanner = getSecurityScanner();
     const _vulnDetector = getVulnerabilityDetector();
@@ -377,7 +385,8 @@ router.get('/report', requireAdmin, async (req: Request, res: Response) => {
     };
 
     res.json(report);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao gerar relatório:', error);
     res.status(500).json({ error: 'Erro ao gerar relatório' });
   }
@@ -388,15 +397,15 @@ function getTimeRangeDate(timeRange: string): Date {
   const _now = new Date();
   switch (timeRange) {
     case '1h': {
-      return new Date(now.getTime() - 60 * 60 * 1000); }
+      return new Date(now.getTime() - 60 * 60 * 1000);
     case '24h': {
-      return new Date(now.getTime() - 24 * 60 * 60 * 1000); }
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
     case '7d': {
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); }
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     case '30d': {
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); }
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     default:
-      return new Date(now.getTime() - 60 * 60 * 1000); }
+      return new Date(now.getTime() - 60 * 60 * 1000);
   }
 }
 
@@ -413,7 +422,7 @@ function generateTrendData(logs: unknown[], timeRange: string): unknown[] {
     });
   }
 
-  return trend; }
+  return trend;
 }
 
 function calculateOverallScore(): number {

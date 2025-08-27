@@ -396,7 +396,7 @@ export const CCB_COMPLETE_MAPPING = {
  * (mais intuitivo para posicionamento visual)
  */
 export function yFromTop(pageHeight: number, pixelsFromTop: number): number {
-  return pageHeight - pixelsFromTop; }
+  return pageHeight - pixelsFromTop;
 }
 
 /**
@@ -472,7 +472,7 @@ export function numberToWords(value: number): string {
 
   // Implementação simplificada - retorna apenas o valor formatado
   // Em produção, usar biblioteca como 'extenso' ou similar
-  return `${formatCurrency(value)} (${Math.floor(value)} reais)`; }
+  return `${formatCurrency(value)} (${Math.floor(value)} reais)`;
 }
 
 /**

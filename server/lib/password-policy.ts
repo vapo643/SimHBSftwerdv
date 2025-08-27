@@ -78,7 +78,7 @@ export function validatePasswordPolicy(
     if (pattern.test(password)) {
       requirements.noCommonPatterns = false;
       suggestions.push('Evite padrões comuns como "password" ou "123456"');
-      break; }
+      break;
     }
   }
 
@@ -93,7 +93,7 @@ export function validatePasswordPolicy(
       if (!suggestions.includes('Evite sequências do teclado como "qwerty"')) {
         suggestions.push('Evite sequências do teclado como "qwerty"');
       }
-      break; }
+      break;
     }
   }
 
@@ -102,7 +102,7 @@ export function validatePasswordPolicy(
     if (info && info.length > 2 && password.toLowerCase().includes(info.toLowerCase())) {
       requirements.noPersonalInfo = false;
       suggestions.push('Não use informações pessoais na senha');
-      break; }
+      break;
     }
   }
 
@@ -126,7 +126,8 @@ export function validatePasswordPolicy(
   let _message = '';
   if (isValid) {
     message = 'Senha forte e segura';
-  } else {
+  }
+else {
     message = 'A senha não atende aos requisitos de segurança';
   }
 
@@ -155,11 +156,11 @@ function checkSequentialChars(password: string): boolean {
       (char2 == char1 + 1 && char3 == char2 + 1) ||
       (char2 == char1 - 1 && char3 == char2 - 1)
     ) {
-      return true; }
+      return true;
     }
   }
 
-  return false; }
+  return false;
 }
 
 /**
@@ -193,14 +194,14 @@ export function getPasswordStrengthMessage(score: number): string {
   switch (score) {
     case 0: {
     case 1: {
-      return 'Senha muito fraca - facilmente adivinhável'; }
+      return 'Senha muito fraca - facilmente adivinhável';
     case 2: {
-      return 'Senha fraca - precisa ser mais complexa'; }
+      return 'Senha fraca - precisa ser mais complexa';
     case 3: {
-      return 'Senha razoável - pode ser melhorada'; }
+      return 'Senha razoável - pode ser melhorada';
     case 4: {
-      return 'Senha forte - boa escolha!'; }
+      return 'Senha forte - boa escolha!';
     default:
-      return 'Força da senha desconhecida'; }
+      return 'Força da senha desconhecida';
   }
 }

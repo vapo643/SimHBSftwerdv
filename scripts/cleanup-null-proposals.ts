@@ -72,13 +72,15 @@ async function cleanupNullProposals() {
 
     if (remainingCorrupted.length == 0) {
       console.log('🎉 [SUCESSO] Limpeza concluída! Sistema restaurado à integridade total.');
-    } else {
+    }
+else {
       console.log('⚠️ [ATENÇÃO] Ainda existem propostas corrompidas no sistema:');
       remainingCorrupted.forEach((proposta) => {
         console.log(`   - ID: ${proposta.id} (Nome: ${proposta.clienteNome || 'NULL'})`);
       });
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [ERRO] Falha na limpeza de propostas:', error);
     throw error;
   }
@@ -102,7 +104,8 @@ async function verifyDataIntegrity() {
     console.log(
       `📈 Taxa de integridade: ${((validPropostas.length / totalPropostas.length) * 100).toFixed(2)}%`
     );
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [ERRO] Falha na verificação de integridade:', error);
   }
 }

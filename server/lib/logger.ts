@@ -33,7 +33,7 @@ const _logger = winston.createLogger({
                 if (Object.keys(metadata).length > 0) {
                   msg += ` ${JSON.stringify(metadata)}`;
                 }
-                return msg; }
+                return msg;
               })
             )
           : winston.format.json(),
@@ -83,7 +83,7 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
 
   // Log inicial da requisição
   logger.info('📥 Request received', {
-  _correlationId,
+    _correlationId,
     method: req.method,
     url: req.url,
     path: req.path,
@@ -100,20 +100,20 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
 
     // Log do response
     logger.info('📤 Request completed', {
-  _correlationId,
+      _correlationId,
       method: req.method,
       url: req.url,
       statusCode: res.statusCode,
-  _duration,
+      _duration,
       responseSize: Buffer.byteLength(JSON.stringify(_data)),
     });
 
     // Alertar para requisições lentas
     if (duration > 1000) {
       logger.warn('⚠️ Slow request detected', {
-  _correlationId,
+        _correlationId,
         url: req.url,
-  _duration,
+        _duration,
         threshold: 1000,
       });
     }
@@ -121,16 +121,16 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
     // Alertar para erros
     if (res.statusCode >= 400) {
       logger.error('❌ Request error', {
-  _correlationId,
+        _correlationId,
         method: req.method,
         url: req.url,
         statusCode: res.statusCode,
-  _duration,
+        _duration,
         error: data,
       });
     }
 
-    return originalSend.call(this,_data); }
+    return originalSend.call(this, _data);
   };
 
   next();
@@ -165,8 +165,8 @@ export const _logDebug = (message: string, metadata?) => {
 export const _logMetric = (metricName: string, value: number, unit: string, metadata?) => {
   logger.info('📊 Metric', {
     metric: metricName,
-  _value,
-  _unit,
+    _value,
+    _unit,
     timestamp: new Date().toISOString(),
     ...metadata,
   });
@@ -179,8 +179,8 @@ export const _logSecurity = (
   metadata?: unknown
 ) => {
   logger.warn(`🔒 Security Event: ${event}`, {
-  _severity,
-  _event,
+    _severity,
+    _event,
     timestamp: new Date().toISOString(),
     ...metadata,
   });
@@ -194,9 +194,9 @@ export const _logAudit = (
   metadata?: unknown
 ) => {
   logger.info('📝 Audit Log', {
-  _action,
-  _userId,
-  _resource,
+    _action,
+    _userId,
+    _resource,
     timestamp: new Date().toISOString(),
     ...metadata,
   });

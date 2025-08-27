@@ -73,7 +73,8 @@ async function checkPreconditions(sql: postgres.Sql) {
     logger.info('✅ Tabela de tracking de migrações verificada');
 
     return true;
-  } catch (error) {
+  }
+catch (error) {
     logger.error('❌ Falha nas pré-condições:', error);
     return false;
   }
@@ -176,7 +177,8 @@ async function runMigration() {
     logger.info('');
 
     return true;
-  } catch (error: any) {
+  }
+catch (error: any) {
     const executionTime = Date.now() - startTime;
     logger.error('❌ Erro na migração:', error);
 
@@ -186,7 +188,8 @@ async function runMigration() {
         INSERT INTO __drizzle_migrations (hash, created_at, success, error_message, execution_time_ms)
         VALUES (${'failed_' + Date.now()}, NOW(), false, ${error.message}, ${executionTime})
       `;
-    } catch (logError) {
+    }
+catch (logError) {
       logger.error('Erro ao registrar falha:', logError);
     }
 
@@ -198,7 +201,8 @@ async function runMigration() {
     logger.error('');
 
     process.exit(1);
-  } finally {
+  }
+finally {
     await sql.end();
     logger.info('🔌 Conexão com banco encerrada');
   }

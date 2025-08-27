@@ -6,7 +6,7 @@
 
 import express from 'express';
 import { interService } from '../services/interService.js';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 import { z } from 'zod';
@@ -30,7 +30,7 @@ const _searchCollectionsSchema = z.object({
  * Test Inter Bank API connection
  * GET /api/inter/test
  */
-router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/test', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     console.log(`[INTER] Testing connection for user: ${req.user?.email}`);
 
@@ -39,9 +39,10 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
     res.json({
       success: isConnected,
       environment: process.env.NODE_ENV == 'production' ? 'production' : 'sandbox',
-      timestamp: getBrasiliaTimestamp(),
+      timestamp: _getBrasiliaTimestamp(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER] Connection test failed:', error);
     res.status(500).json({
       success: false,
@@ -55,7 +56,7 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
  * Create a new collection (boleto/PIX)
  * POST /api/inter/collections
  */
-router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/collections', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // Check user permissions
     if (req.user?.role !== 'ADMINISTRADOR' && req.user?.role !== 'FINANCEIRO') {
@@ -71,7 +72,8 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
   _collection,
       message: 'Cobrança criada com sucesso',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER] Failed to create collection:', error);
 
     if (error.message == 'Proposta não encontrada') {
@@ -93,7 +95,7 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
  * Search collections with filters
  * GET /api/inter/collections/search
  */
-router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/collections/search', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // Validate query parameters
     const _params = searchCollectionsSchema.parse(req.query);
@@ -104,7 +106,8 @@ router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRe
       success: true,
       ...result,
     });
-  } catch (error) {
+  }
+catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         error: 'Parâmetros inválidos',
@@ -126,7 +129,7 @@ router.get('/collections/search', jwtAuthMiddleware, async (req: AuthenticatedRe
  */
 router.get(
   '/collections/:codigoSolicitacao',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { codigoSolicitacao } = req.params;
@@ -137,7 +140,8 @@ router.get(
         success: true,
         collection: details,
       });
-    } catch (error) {
+    }
+catch (error) {
       if (error.message == 'Cobrança não encontrada') {
         return res.*);
       }
@@ -157,7 +161,7 @@ router.get(
  */
 router.delete(
   '/collections/:codigoSolicitacao',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       // Check user permissions
@@ -185,7 +189,8 @@ router.delete(
         message: 'Cobrança cancelada com sucesso',
   _collection,
       });
-    } catch (error) {
+    }
+catch (error) {
       if (error.message == 'Cobrança não encontrada') {
         return res.*);
       }
@@ -205,7 +210,7 @@ router.delete(
  */
 router.patch(
   '/collections/batch-extend',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       // Check user permissions
@@ -237,10 +242,11 @@ router.patch(
 
       res.json({
         success: true,
-        message: `${result.success.length} vencimentos prorrogados com sucesso`,
+        message: `${_result.success.length} vencimentos prorrogados com sucesso`,
         data: result,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER] Batch extend failed:', error);
       res.status(500).json({
         error: 'Erro ao prorrogar vencimentos',
@@ -256,7 +262,7 @@ router.patch(
  */
 router.get(
   '/collections/:codigoSolicitacao/pdf',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { codigoSolicitacao } = req.params;
@@ -269,7 +275,8 @@ router.get(
         `attachment; filename="boleto-${codigoSolicitacao}.pdf"`
       );
       res.send(pdfBuffer);
-    } catch (error) {
+    }
+catch (error) {
       if (error.message == 'Cobrança não encontrada') {
         return res.*);
       }
@@ -296,7 +303,8 @@ router.post('/webhook', async (req, res) => {
 
     // Return immediately to acknowledge receipt
     res.status(200).json({ success: true });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER WEBHOOK] Processing failed:', error);
     // Still return success to prevent webhook retries
     res.status(200).json({ success: true });
@@ -307,7 +315,7 @@ router.post('/webhook', async (req, res) => {
  * Manually sync collections status
  * POST /api/inter/sync
  */
-router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/sync', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // Check user permissions
     if (req.user?.role !== 'ADMINISTRADOR') {
@@ -320,10 +328,11 @@ router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =
 
     res.json({
       success: true,
-      message: `Sincronização concluída: ${result.updated} atualizadas, ${result.errors} erros`,
+      message: `Sincronização concluída: ${_result.updated} atualizadas, ${_result.errors} erros`,
       ...result,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER] Sync failed:', error);
     res.status(500).json({
       error: 'Erro ao sincronizar cobranças',
@@ -336,7 +345,7 @@ router.post('/sync', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =
  * Get collection statistics
  * GET /api/inter/statistics
  */
-router.get('/statistics', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/statistics', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const _stats = await interService.getCollectionStatistics();
 
@@ -344,7 +353,8 @@ router.get('/statistics', jwtAuthMiddleware, async (req: AuthenticatedRequest, r
       success: true,
       statistics: stats,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER] Get statistics failed:', error);
     res.status(500).json({
       error: 'Erro ao obter estatísticas',

@@ -180,7 +180,8 @@ export default function SecurityDashboard() {
       return () => {
         ws.close();
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('🔌 [SecurityDashboard] Failed to create WebSocket connection:', error);
     }
   }, [queryClient]);
@@ -755,7 +756,7 @@ function calculateSecurityScore(metrics, vulnerabilities): number {
   if (metrics.anomalyScore > 50) score -= 15;
   if (metrics.blockedRequests > metrics.totalRequests * 0.1) score -= 20;
 
-  return Math.max(0, Math.min(100, score)); }
+  return Math.max(0, Math.min(100, score));
 }
 
 function getScoreColor(score: number): string {

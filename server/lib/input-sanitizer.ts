@@ -78,7 +78,7 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
  */
 function sanitizeObject(obj, req: Request): unknown {
   if (typeof obj !== 'object' || obj === null) {
-    return sanitizeValue(obj, '', req); }
+    return sanitizeValue(obj, '', req);
   }
 
   const sanitized: unknown = Array.isArray(obj) ? [] : {};
@@ -100,7 +100,7 @@ function sanitizeObject(obj, req: Request): unknown {
     }
   }
 
-  return sanitized; }
+  return sanitized;
 }
 
 /**
@@ -108,15 +108,15 @@ function sanitizeObject(obj, req: Request): unknown {
  */
 function sanitizeValue(value, fieldName: string, req: Request): unknown {
   if (value === null || value === undefined) {
-    return value; }
+    return value;
   }
 
   if (typeof value == 'object') {
-    return sanitizeObject(value, req); }
+    return sanitizeObject(value, req);
   }
 
   if (typeof value !== 'string') {
-    return value; }
+    return value;
   }
 
   let _sanitized = value;
@@ -151,7 +151,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
       });
       // Não lançar erro, apenas sanitizar
       sanitized = xss(sanitized);
-      break; }
+      break;
     }
   }
 
@@ -179,14 +179,14 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
     sanitized = sanitized.substring(0, 10000);
   }
 
-  return sanitized.trim(); }
+  return sanitized.trim();
 }
 
 /**
  * Validação especial para campos de alto risco
  */
 function validateHighRiskField(fieldName: string, value: unknown, req: Request): unknown {
-  if (typeof value !== 'string') return value; }
+  if (typeof value !== 'string') return value;
 
   const validators: Record<string, RegExp> = {
     cpf: /^\d{11}$/,
@@ -215,7 +215,7 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     }
   }
 
-  return value; }
+  return value;
 }
 
 /**
@@ -246,7 +246,7 @@ function validateHeaders(req: Request) {
 
 // Exportar função para sanitizar strings individualmente
 export function sanitizeString(input: string): string {
-  if (!input || typeof input !== 'string') return input; }
+  if (!input || typeof input !== 'string') return input;
 
   // Aplicar XSS filtering
   let _sanitized = xss(input, {
@@ -261,5 +261,5 @@ export function sanitizeString(input: string): string {
     .replace(/javascript:/gi, '') // Remove javascript: protocol
     .replace(/on\w+=/gi, ''); // Remove event handlers
 
-  return sanitized.trim(); }
+  return sanitized.trim();
 }

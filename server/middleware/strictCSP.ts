@@ -19,7 +19,7 @@ export class StrictCSP {
    * Generate cryptographically secure nonce
    */
   static generateNonce(): string {
-    return crypto.randomBytes(16).toString('base64'); }
+    return crypto.randomBytes(16).toString('base64');
   }
 
   /**
@@ -161,21 +161,21 @@ export class StrictCSP {
   static validateInlineScript(scriptContent: string, nonce: string): boolean {
     // Check if script tag includes the correct nonce
     const _noncePattern = new RegExp(`nonce=["']${nonce}["']`);
-    return noncePattern.test(scriptContent); }
+    return noncePattern.test(scriptContent);
   }
 
   /**
    * Generate safe inline script with nonce
    */
   static generateInlineScript(scriptContent: string, nonce: string): string {
-    return `<script nonce="${nonce}">${scriptContent}</script>`; }
+    return `<script nonce="${nonce}">${scriptContent}</script>`;
   }
 
   /**
    * Generate safe inline style with nonce
    */
   static generateInlineStyle(styleContent: string, nonce: string): string {
-    return `<style nonce="${nonce}">${styleContent}</style>`; }
+    return `<style nonce="${nonce}">${styleContent}</style>`;
   }
 }
 

@@ -159,24 +159,25 @@ function FormalizacaoList() {
   const _parseJsonbField = (field, fieldName: string, propostaId: string) => {
     // Se é null, undefined ou vazio, retornar objeto vazio
     if (!field || field == 'null' || field == 'undefined') {
-      return {}; }
+      return {}
     }
 
     if (typeof field == 'string' && field.trim() !== '') {
       try {
-        return JSON.parse(field); }
-      } catch (e) {
+        return JSON.parse(field);
+      }
+catch (e) {
         console.warn(`Erro ao fazer parse de ${fieldName} para proposta ${propostaId}:`, e);
-        return {}; }
+        return {}
       }
     }
 
     // Se já é um objeto, retornar como está
     if (typeof field == 'object') {
-      return field || {}; }
+      return field || {}
     }
 
-    return {}; }
+    return {}
   };
 
   const {
@@ -217,7 +218,7 @@ function FormalizacaoList() {
 
   const _formatDate = (dateString: string) => {
     if (!dateString) return 'N/A'; }
-    return new Date(dateString).toLocaleDateString('pt-BR'); }
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const _getStatusColor = (status: string) => {
@@ -536,7 +537,8 @@ export default function Formalizacao() {
           totalBoletos: collectionsData?.length || 0,
         });
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao verificar status do carnê:', error);
       setCarneStatus({
         exists: false,
@@ -614,10 +616,12 @@ export default function Formalizacao() {
       }
 
       return response; }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[STORAGE STATUS] Erro ao verificar status:', error);
       return null; }
-    } finally {
+    }
+finally {
       setCheckingStorage(false);
     }
   };
@@ -714,12 +718,12 @@ export default function Formalizacao() {
 
   const _formatDate = (dateString: string) => {
     if (!dateString) return 'N/A'; }
-    return new Date(dateString).toLocaleDateString('pt-BR'); }
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const _formatDateTime = (dateString: string) => {
     if (!dateString) return 'N/A'; }
-    return new Date(dateString).toLocaleString('pt-BR'); }
+    return new Date(dateString).toLocaleString('pt-BR');
   };
 
   // Função para gerar CCB
@@ -742,7 +746,8 @@ export default function Formalizacao() {
         // Recarregar dados para atualizar status ccbGerado
         refetch();
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao gerar CCB:', error);
       toast({
         title: 'Erro',
@@ -772,7 +777,8 @@ export default function Formalizacao() {
         // Abrir em nova aba
         window.open(response.publicUrl, '_blank');
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao visualizar CCB:', error);
       toast({
         title: 'Erro',
@@ -804,14 +810,16 @@ export default function Formalizacao() {
         await checkClickSignStatus(propostaId);
         refetch();
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao enviar para ClickSign:', error);
       toast({
         title: 'Erro',
         description: error.message || 'Erro ao enviar CCB para ClickSign.',
         variant: 'destructive',
       });
-    } finally {
+    }
+finally {
       setLoadingClickSign(false);
     }
   };
@@ -824,7 +832,8 @@ export default function Formalizacao() {
       console.log('📡 [CLICKSIGN] Status retornado:',_response);
       setClickSignData(_response);
       return response; }
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [CLICKSIGN] Erro ao consultar status:', error);
       return null; }
     }
@@ -847,7 +856,8 @@ export default function Formalizacao() {
   React.useEffect(() => {
     if (initialClickSignData?.signUrl) {
       setClickSignData(initialClickSignData as ClickSignData);
-    } else if (!clickSignData?.signUrl) {
+    }
+else if (!clickSignData?.signUrl) {
       // 🛡️ PROTEÇÃO: Só reseta se não tem link local
       setClickSignData(null);
     }
@@ -910,11 +920,14 @@ export default function Formalizacao() {
       .subscribe((status) => {
         if (status == 'SUBSCRIBED') {
           console.log('✅ [REALTIME] Conectado ao canal de atualizações');
-        } else if (status == 'CHANNEL_ERROR') {
+        }
+else if (status == 'CHANNEL_ERROR') {
           console.error('❌ [REALTIME] Erro ao conectar ao canal');
-        } else if (status == 'TIMED_OUT') {
+        }
+else if (status == 'TIMED_OUT') {
           console.error('⏱️ [REALTIME] Timeout ao conectar');
-        } else if (status == 'CLOSED') {
+        }
+else if (status == 'CLOSED') {
           console.log('🔌 [REALTIME] Canal fechado');
         }
       });
@@ -1339,7 +1352,8 @@ export default function Formalizacao() {
                                               description:
                                                 'Contrato enviado para ClickSign com sucesso!',
                                             });
-                                          } catch (error) {
+                                          }
+catch (error) {
                                             console.error('❌ [CLICKSIGN] Erro ao enviar:', error);
                                             toast({
                                               title: 'Erro',
@@ -1348,7 +1362,8 @@ export default function Formalizacao() {
                                                 'Erro ao enviar para ClickSign',
                                               variant: 'destructive',
                                             });
-                                          } finally {
+                                          }
+finally {
                                             setLoadingClickSign(false);
                                           }
                                         }}
@@ -1486,7 +1501,8 @@ export default function Formalizacao() {
                                                 ['/api/clicksign/status', propostaId],
                                                 response
                                               );
-                                            } catch (error) {
+                                            }
+catch (error) {
                                               console.error(
                                                 '❌ [CLICKSIGN] Erro ao regenerar:',
                                                 error
@@ -1498,7 +1514,8 @@ export default function Formalizacao() {
                                                   'Erro ao regenerar link',
                                                 variant: 'destructive',
                                               });
-                                            } finally {
+                                            }
+finally {
                                               setLoadingClickSign(false);
                                             }
                                           }}
@@ -1642,7 +1659,8 @@ export default function Formalizacao() {
                                               ],
                                             }),
                                           ]);
-                                        } catch (error) {
+                                        }
+catch (error) {
                                           console.error('[INTER] Erro ao gerar boleto:', error);
 
                                           // Verificar se é erro de boleto duplicado
@@ -1664,7 +1682,8 @@ export default function Formalizacao() {
                                             queryClient.invalidateQueries({
                                               queryKey: ['/api/inter/collections', proposta.id],
                                             });
-                                          } else {
+                                          }
+else {
                                             toast({
                                               title: 'Erro',
                                               description:
@@ -1675,7 +1694,8 @@ export default function Formalizacao() {
                                               variant: 'destructive',
                                             });
                                           }
-                                        } finally {
+                                        }
+finally {
                                           setLoadingInter(false);
                                         }
                                       }}
@@ -1803,7 +1823,8 @@ export default function Formalizacao() {
                                                             await checkStorageStatus();
                                                           }, 3000);
                                                         }
-                                                      } catch (error) {
+                                                      }
+catch (error) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
@@ -1811,7 +1832,8 @@ export default function Formalizacao() {
                                                             'Erro ao corrigir sincronização',
                                                           variant: 'destructive',
                                                         });
-                                                      } finally {
+                                                      }
+finally {
                                                         setLoadingCarne(false);
                                                       }
                                                     }}
@@ -1871,14 +1893,16 @@ export default function Formalizacao() {
                                                           await checkCarneStatus();
                                                           await checkStorageStatus();
                                                         }
-                                                      } catch (error) {
+                                                      }
+catch (error) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
                                                             error.message || 'Erro ao gerar carnê',
                                                           variant: 'destructive',
                                                         });
-                                                      } finally {
+                                                      }
+finally {
                                                         setLoadingCarne(false);
                                                       }
                                                     }}
@@ -1938,7 +1962,8 @@ export default function Formalizacao() {
                                                         // Recarregar status
                                                         await checkStorageStatus();
                                                       }
-                                                    } catch (error) {
+                                                    }
+catch (error) {
                                                       toast({
                                                         title: 'Erro',
                                                         description:
@@ -1946,7 +1971,8 @@ export default function Formalizacao() {
                                                           'Erro ao sincronizar boletos',
                                                         variant: 'destructive',
                                                       });
-                                                    } finally {
+                                                    }
+finally {
                                                       setLoadingCarne(false);
                                                     }
                                                   }}
@@ -2223,12 +2249,14 @@ export default function Formalizacao() {
                                                           description:
                                                             'Arquivo salvo na pasta de Downloads',
                                                         });
-                                                      } else {
+                                                      }
+else {
                                                         throw new Error(
                                                           `Erro ${response.status}: ${response.statusText}`
                                                         );
                                                       }
-                                                    } catch (error) {
+                                                    }
+catch (error) {
                                                       console.error('[PDF DOWNLOAD] Erro:', error);
 
                                                       // SEMPRE informar que o PDF está disponível e pode tentar novamente
@@ -2289,14 +2317,16 @@ export default function Formalizacao() {
                                                   title: 'Status atualizado!',
                                                   description: `${response.updated} boletos atualizados, ${response.removed} códigos inválidos removidos`,
                                                 });
-                                              } else {
+                                              }
+else {
                                                 toast({
                                                   title: 'Sem atualizações',
                                                   description:
                                                     response.message || 'Status já está atualizado',
                                                 });
                                               }
-                                            } catch (error) {
+                                            }
+catch (error) {
                                               console.error('[REALTIME UPDATE] Erro:', error);
                                               toast({
                                                 title: 'Erro',
@@ -2351,17 +2381,20 @@ export default function Formalizacao() {
                                                     a.click();
                                                     window.URL.revokeObjectURL(url);
                                                     document.body.removeChild(a);
-                                                  } else {
+                                                  }
+else {
                                                     throw new Error('Erro ao baixar PDF');
                                                   }
-                                                } else {
+                                                }
+else {
                                                   toast({
                                                     title: 'Erro',
                                                     description: 'Código do boleto não encontrado',
                                                     variant: 'destructive',
                                                   });
                                                 }
-                                              } else {
+                                              }
+else {
                                                 toast({
                                                   title: 'Sem boletos',
                                                   description:
@@ -2369,7 +2402,8 @@ export default function Formalizacao() {
                                                   variant: 'default',
                                                 });
                                               }
-                                            } catch (error) {
+                                            }
+catch (error) {
                                               toast({
                                                 title: 'Erro',
                                                 description: 'Erro ao baixar PDF do boleto',
@@ -2403,7 +2437,8 @@ export default function Formalizacao() {
                                                   description:
                                                     statusInfo || 'Nenhum boleto encontrado',
                                                 });
-                                              } else {
+                                              }
+else {
                                                 toast({
                                                   title: 'Sem boletos',
                                                   description:
@@ -2411,7 +2446,8 @@ export default function Formalizacao() {
                                                   variant: 'default',
                                                 });
                                               }
-                                            } catch (error) {
+                                            }
+catch (error) {
                                               console.error(
                                                 '[INTER] Erro ao consultar boletos:',
                                                 error
@@ -2561,7 +2597,8 @@ export default function Formalizacao() {
                                           }
                                           setCcbUrl(response.publicUrl || '');
                                           setShowCcbViewer(true);
-                                        } catch (error) {
+                                        }
+catch (error) {
                                           toast({
                                             title: 'Erro',
                                             description: 'Erro ao visualizar CCB',
@@ -2644,7 +2681,8 @@ export default function Formalizacao() {
                                             description:
                                               'Contrato enviado para ClickSign com sucesso!',
                                           });
-                                        } catch (error) {
+                                        }
+catch (error) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro no envio com biometria:',
                                             error
@@ -2656,7 +2694,8 @@ export default function Formalizacao() {
                                               'Erro ao enviar para ClickSign',
                                             variant: 'destructive',
                                           });
-                                        } finally {
+                                        }
+finally {
                                           setLoadingClickSign(false);
                                         }
                                       }}
@@ -2757,7 +2796,8 @@ export default function Formalizacao() {
                                             description:
                                               'Novo link de assinatura gerado com sucesso!',
                                           });
-                                        } catch (error) {
+                                        }
+catch (error) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro ao regenerar (seção 2):',
                                             error
@@ -2775,7 +2815,8 @@ export default function Formalizacao() {
                                                 'Token do ClickSign precisa ser atualizado. Entre em contato com o administrador.',
                                               variant: 'destructive',
                                             });
-                                          } else if (
+                                          }
+else if (
                                             error.response?.status == 400 &&
                                             error.response?.data?.action ==
                                               'CHECK_CLICKSIGN_SERVICE'
@@ -2787,7 +2828,8 @@ export default function Formalizacao() {
                                                 'Problema com o serviço ClickSign. Tente novamente em alguns minutos.',
                                               variant: 'destructive',
                                             });
-                                          } else {
+                                          }
+else {
                                             toast({
                                               title: 'Erro',
                                               description:
@@ -2796,7 +2838,8 @@ export default function Formalizacao() {
                                               variant: 'destructive',
                                             });
                                           }
-                                        } finally {
+                                        }
+finally {
                                           setLoadingClickSign(false);
                                         }
                                       }}

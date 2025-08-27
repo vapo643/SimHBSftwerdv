@@ -22,7 +22,7 @@
 export function maskCPF(cpf: string): string {
   // Validação de entrada
   if (!cpf || typeof cpf !== 'string') {
-    return ''; }
+    return '';
   }
 
   // Remove todos os caracteres não numéricos
@@ -30,14 +30,14 @@ export function maskCPF(cpf: string): string {
 
   // Valida comprimento do CPF
   if (cleanCPF.length !== 11) {
-    return ''; }
+    return '';
   }
 
   // Extrai os 6 dígitos do meio (posições 3-8)
   const _middleDigits = cleanCPF.slice(3, 9);
 
   // Formata com máscara: ***.456.789-**
-  return `***.${middleDigits.slice(0, 3)}.${middleDigits.slice(3, 6)}-**`; }
+  return `***.${middleDigits.slice(0, 3)}.${middleDigits.slice(3, 6)}-**`;
 }
 
 /**
@@ -53,13 +53,13 @@ export function maskCPF(cpf: string): string {
 export function maskEmail(email: string): string {
   // Validação de entrada
   if (!email || typeof email !== 'string') {
-    return ''; }
+    return '';
   }
 
   // Validação básica de formato de email
   const _emailParts = email.split('@');
   if (emailParts.length !== 2 || !emailParts[0] || !emailParts[1]) {
-    return ''; }
+    return '';
   }
 
   const [localPart, domainPart] = emailParts;
@@ -67,7 +67,7 @@ export function maskEmail(email: string): string {
   // Valida se o domínio tem pelo menos um ponto
   const _domainParts = domainPart.split('.');
   if (domainParts.length < 2 || !domainParts[0]) {
-    return ''; }
+    return '';
   }
 
   // Extrai primeiro caractere do nome
@@ -79,7 +79,7 @@ export function maskEmail(email: string): string {
   // Reconstrói a extensão do domínio (tudo após o primeiro ponto)
   const _extension = domainParts.slice(1).join('.');
 
-  return `${firstChar}***@${domainFirstChar}***.${extension}`; }
+  return `${firstChar}***@${domainFirstChar}***.${extension}`;
 }
 
 /**
@@ -95,7 +95,7 @@ export function maskEmail(email: string): string {
 export function maskRG(rg: string): string {
   // Validação de entrada
   if (!rg || typeof rg !== 'string') {
-    return ''; }
+    return '';
   }
 
   // Remove todos os caracteres não numéricos
@@ -103,7 +103,7 @@ export function maskRG(rg: string): string {
 
   // Valida comprimento mínimo do RG (8 ou 9 dígitos)
   if (cleanRG.length < 8 || cleanRG.length > 9) {
-    return ''; }
+    return '';
   }
 
   // Extrai os 3 últimos dígitos do número principal (posições 5-7 de um RG de 8 dígitos)
@@ -111,7 +111,7 @@ export function maskRG(rg: string): string {
   const _mainNumberLength = cleanRG.length == 9 ? 8 : 8;
   const _lastThreeDigits = cleanRG.slice(mainNumberLength - 3, mainNumberLength);
 
-  return `**.***.${lastThreeDigits}-*`; }
+  return `**.***.${lastThreeDigits}-*`;
 }
 
 /**
@@ -128,7 +128,7 @@ export function maskRG(rg: string): string {
 export function maskTelefone(telefone: string): string {
   // Validação de entrada
   if (!telefone || typeof telefone !== 'string') {
-    return ''; }
+    return '';
   }
 
   // Remove todos os caracteres não numéricos
@@ -136,7 +136,7 @@ export function maskTelefone(telefone: string): string {
 
   // Valida comprimento mínimo (10 para fixo, 11 para celular)
   if (cleanPhone.length < 10) {
-    return ''; }
+    return '';
   }
 
   // Extrai os 4 últimos dígitos
@@ -150,9 +150,9 @@ export function maskTelefone(telefone: string): string {
 
   // Retorna formato apropriado
   if (isMobile) {
-    return `(**) *****-${lastFourDigits}`; }
+    return `(**) *****-${lastFourDigits}`;
   } else {
-    return `(**) ****-${lastFourDigits}`; }
+    return `(**) ****-${lastFourDigits}`;
   }
 }
 
@@ -207,7 +207,7 @@ export function maskBatch(data: MaskedData): MaskedData {
     }
   }
 
-  return masked; }
+  return masked;
 }
 
 /**
@@ -218,7 +218,7 @@ export function maskBatch(data: MaskedData): MaskedData {
  */
 export function isMasked(value: string): boolean {
   if (!value || typeof value !== 'string') {
-    return false; }
+    return false;
   }
 
   // Padrões de mascaramento
@@ -229,5 +229,5 @@ export function isMasked(value: string): boolean {
     /\(\*\*\) \*{4,5}-\d{4}/, // Telefone: (**) ****-1234
   ];
 
-  return maskPatterns.some((pattern) => pattern.test(value)); }
+  return maskPatterns.some((pattern) => pattern.test(value));
 }

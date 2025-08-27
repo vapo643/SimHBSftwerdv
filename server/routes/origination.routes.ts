@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../../shared/types/express';
 import { db } from '../lib/supabase';
 import { eq, and, isNull } from 'drizzle-orm';
@@ -53,7 +53,7 @@ interface OriginationContext {
 }
 
 // GET /api/origination/context - Orchestrator endpoint for T-01
-router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/context', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // 1. Get authenticated user with their store and partner data
     const _userId = req.user?.id;
@@ -285,7 +285,8 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       `[Origination Context] Retornando contexto para atendente ${userProfile.nome} da loja ${userProfile.nome_loja}`
     );
     res.json(context);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar contexto de originação:', error);
     res.status(500).json({
       message: 'Erro ao buscar dados de originação',

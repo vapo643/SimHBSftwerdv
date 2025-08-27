@@ -11,7 +11,7 @@ import { Request, Response, NextFunction } from 'express';
 export interface AuthenticatedRequest extends Request {
   /**
    * Dados completos do usuário autenticado
-   * Preenchido pelo jwtAuthMiddleware após validação
+   * Preenchido pelo _jwtAuthMiddleware após validação
    * Compatible com interface global do Express
    */
   user?: {

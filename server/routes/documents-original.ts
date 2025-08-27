@@ -57,15 +57,15 @@ export const _uploadPropostaDocument = async (req: AuthenticatedRequest, res: Re
 
     const _result = await documentsService.uploadDocument(String(propostaId), file);
 
-    if (result.success) {
+    if (_result.success) {
       res.json({
         success: true,
-        document: result.document,
+        document: _result.document,
       });
     } else {
-      const _statusCode = result.error == 'Proposta não encontrada' ? 404 : 400;
+      const _statusCode = _result.error == 'Proposta não encontrada' ? 404 : 400;
       res.status(statusCode).json({
-        message: result.error || 'Erro no upload',
+        message: _result.error || 'Erro no upload',
       });
     }
   } catch (error) {

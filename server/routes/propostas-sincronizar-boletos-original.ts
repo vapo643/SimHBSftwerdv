@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { db } from '../lib/supabase';
 import { propostas, interCollections } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
-import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 
 import { interBankService } from '../services/interBankService';
 import { boletoStorageService } from '../services/boletoStorageService';
@@ -15,7 +15,7 @@ const _router = Router();
  */
 router.post(
   '/:id/sincronizar-boletos',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
@@ -72,7 +72,7 @@ router.post(
               const _result = { success: true, url: 'placeholder' }; // FIXED: Service call disabled
               // await boletoStorageService.uploadFile(propostaId, collection.codigoSolicitacao, pdfBuffer);
 
-              if (result.success) {
+              if (_result.success) {
                 console.log(
                   `[PAM V1.0 SYNC] ✅ Boleto ${collection.codigoSolicitacao} salvo no Storage`
                 );
@@ -80,7 +80,7 @@ router.post(
               } else {
                 console.error(
                   `[PAM V1.0 SYNC] ❌ Erro ao salvar boleto ${collection.codigoSolicitacao}:`,
-                  'Service error' // result.error
+                  'Service error' // _result.error
                 );
                 erros++;
               }

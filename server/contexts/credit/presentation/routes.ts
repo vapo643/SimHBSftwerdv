@@ -46,7 +46,7 @@ export function createCreditRoutes(): Router {
   router.get('/proposals/store/:storeId', boundController.getByStore);
   router.get('/proposals/cpf/:cpf', boundController.getByCpf);
 
-  return router; }
+  return router;
 }
 
 // Export for legacy compatibility if needed

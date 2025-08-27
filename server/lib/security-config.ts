@@ -54,7 +54,7 @@ export const _generalApiLimiter = rateLimit({
   legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
   // Identifica usuário por IP
   keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'anonymous'; }
+    return req.ip || req.connection.remoteAddress || 'anonymous';
   },
   // Handler customizado para quando o limite é excedido
   handler: (req, res) => {
@@ -80,7 +80,7 @@ export const _authApiLimiter = rateLimit({
     // Para rotas de auth, considere tanto IP quanto email (se disponível)
     const _email = req.body?.email;
     const _ip = req.ip || req.connection.remoteAddress || 'anonymous';
-    return email ? `${ip}-${email}` : ip; }
+    return email ? `${ip}-${email}` : ip;
   },
   handler: (req, res) => {
     const _email = req.body?.email;
@@ -112,7 +112,7 @@ export const _criticalApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'anonymous'; }
+    return req.ip || req.connection.remoteAddress || 'anonymous';
   },
   handler: (req, res) => {
     log(`🚨 Critical API rate limit exceeded for IP: ${req.ip} on ${req.path}`);

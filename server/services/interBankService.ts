@@ -190,7 +190,7 @@ class InterBankService {
           data?: unknown,
           headers?: unknown
         ) => {
-          return this.makeRequestDirect(endpoint, method,_data, headers); }
+          return this.makeRequestDirect(endpoint, method, _data, headers);
         },
         { ...INTER_BREAKER_OPTIONS, name: 'interApiBreaker' }
       );
@@ -204,7 +204,7 @@ class InterBankService {
     this.initializeBreakers();
 
     try {
-      return await this.tokenBreaker.fire(); }
+      return await this.tokenBreaker.fire();
     } catch (error) {
       if (isCircuitBreakerOpen(error)) {
         console.log(formatCircuitBreakerError(error, 'Inter Token API'));
@@ -221,7 +221,7 @@ class InterBankService {
     try {
       // Check if we have a valid cached token
       if (this.tokenCache && Date.now() < this.tokenCache.expiresAt) {
-        return this.tokenCache.token; }
+        return this.tokenCache.token;
       }
 
       console.log('[INTER] 🔑 Requesting new access token...');
@@ -366,7 +366,7 @@ class InterBankService {
         }
 
         // Return early if fetch succeeded
-        return response; }
+        return response;
       } catch (fetchError) {
         console.error(`[INTER] ❌ Fetch error: ${(fetchError as Error).message}`);
 
@@ -406,7 +406,7 @@ class InterBankService {
                 text: async () => data,
                 json: async () => {
                   try {
-                    return JSON.parse(_data); }
+                    return JSON.parse(_data);
                   } catch (e) {
                     throw new Error('Invalid JSON response');
                   }
@@ -453,7 +453,7 @@ class InterBankService {
       console.log(
         `[INTER] ✅ Access token obtained successfully (expires in ${tokenData.expires_in}s)`
       );
-      return tokenData.access_token; }
+      return tokenData.access_token;
     } catch (error) {
       console.error('[INTER] ❌ Failed to get access token:', error);
       throw error;
@@ -472,7 +472,7 @@ class InterBankService {
     this.initializeBreakers();
 
     try {
-      return await this.apiBreaker.fire(endpoint, method,_data, additionalHeaders); }
+      return await this.apiBreaker.fire(endpoint, method, _data, additionalHeaders);
     } catch (error) {
       if (isCircuitBreakerOpen(error)) {
         console.log(formatCircuitBreakerError(error, 'Inter API'));
@@ -511,7 +511,9 @@ class InterBankService {
         // Fix certificate format if needed
         if (cert.includes('-----BEGIN CERTIFICATE-----') && !cert.includes('\n')) {
           console.log('[INTER] 📋 Certificate is single-line PEM, adding line breaks...');
-          const _certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
+          const _certMatch = cert.match(
+            /-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/
+          );
           if (certMatch && certMatch[1]) {
             const _base64Content = certMatch[1].trim();
             const _formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
@@ -706,15 +708,15 @@ class InterBankService {
 
       if (!this._config.clientId || !this._config.clientSecret) {
         console.log('[INTER] ❌ No client credentials configured');
-        return false; }
+        return false;
       }
 
       await this.getAccessToken();
       console.log('[INTER] ✅ Connection test successful');
-      return true; }
+      return true;
     } catch (error) {
       console.error('[INTER] ❌ Connection test failed:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -741,7 +743,7 @@ class InterBankService {
       );
 
       console.log(`[INTER] ✅ Collection created successfully: ${response.codigoSolicitacao}`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to create collection:', error);
       throw error;
@@ -777,7 +779,7 @@ class InterBankService {
       console.log(`[INTER] 📊 Código de barras: ${enrichedData.codigoBarras}`);
       console.log(`[INTER] 📊 PIX disponível: ${enrichedData.pixCopiaECola ? 'Sim' : 'Não'}`);
 
-      return enrichedData; }
+      return enrichedData;
     } catch (error) {
       console.error('[INTER] ❌ Failed to retrieve collection:', error);
       throw error;
@@ -791,10 +793,10 @@ class InterBankService {
     try {
       // Por enquanto, retornar null - em produção, usar biblioteca QR code
       console.log(`[INTER] ⚠️ QR Code generation not implemented yet`);
-      return null; }
+      return null;
     } catch (error) {
       console.error('[INTER] ❌ Failed to generate QR code:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -840,7 +842,7 @@ class InterBankService {
       const _response = await this.makeRequest(`/cobranca/v3/cobrancas?${queryParams.toString()}`);
 
       console.log(`[INTER] ✅ Found ${response.totalElementos} collections`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to search collections:', error);
       throw error;
@@ -871,7 +873,7 @@ class InterBankService {
       });
       console.log(`🔍 [AUDIT-INTER] ==== FIM EDIÇÃO ====`);
 
-      return response; }
+      return response;
     } catch (error) {
       console.error('🔍 [AUDIT-INTER] ❌ Erro ao editar cobrança:', error);
       throw error;
@@ -899,7 +901,7 @@ class InterBankService {
       console.log(`🔍 [AUDIT-INTER] Resposta do Cancelamento:`, JSON.stringify(_response, null, 2));
       console.log(`🔍 [AUDIT-INTER] ==== FIM CANCELAMENTO ====`);
 
-      return response; }
+      return response;
     } catch (error) {
       console.error('🔍 [AUDIT-INTER] ❌ Erro ao cancelar cobrança:', error);
       throw error;
@@ -925,7 +927,7 @@ class InterBankService {
       const _response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
         'GET',
-  _null,
+        _null,
         {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -963,7 +965,7 @@ class InterBankService {
             );
             base64String = response[field];
             foundField = field;
-            break; }
+            break;
           }
         }
 
@@ -993,7 +995,7 @@ class InterBankService {
               );
               base64String = response[key];
               foundField = key;
-              break; }
+              break;
             }
           }
         }
@@ -1016,14 +1018,14 @@ class InterBankService {
           const _pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
-            return pdfBuffer; }
+            return pdfBuffer;
           } else {
             console.log(
               `[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`,
               pdfBuffer.slice(0, 20)
             );
             // Tentar retornar mesmo assim
-            return pdfBuffer; }
+            return pdfBuffer;
           }
         }
       }
@@ -1034,7 +1036,7 @@ class InterBankService {
         const _pdfMagic = response.slice(0, 5).toString('utf8');
         if (pdfMagic.startsWith('%PDF')) {
           console.log(`[INTER] ✅ PDF binário válido (${response.length} bytes)`);
-          return response; }
+          return response;
         }
       }
 
@@ -1047,7 +1049,7 @@ class InterBankService {
 
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
-            return pdfBuffer; }
+            return pdfBuffer;
           }
         } catch (decodeError) {
           console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);
@@ -1069,7 +1071,7 @@ class InterBankService {
       // Tentar endpoints alternativos
       if (!error.message?.includes('não encontrado na API')) {
         console.log('[INTER] 🔄 Tentando endpoints alternativos...');
-        return this.tentarEndpointsAlternativos(codigoSolicitacao); }
+        return this.tentarEndpointsAlternativos(codigoSolicitacao);
       }
 
       throw error;
@@ -1099,7 +1101,7 @@ class InterBankService {
         // Processar resposta similar ao método principal
         if (typeof response == 'object' && response.pdf) {
           console.log(`[INTER] ✅ PDF encontrado em endpoint alternativo!`);
-          return Buffer.from(response.pdf, 'base64'); }
+          return Buffer.from(response.pdf, 'base64');
         }
 
         if (
@@ -1107,7 +1109,7 @@ class InterBankService {
           response.slice(0, 5).toString('utf8').startsWith('%PDF')
         ) {
           console.log(`[INTER] ✅ PDF binário encontrado em endpoint alternativo!`);
-          return response; }
+          return response;
         }
       } catch (err) {
         console.log(`[INTER] ❌ Endpoint ${endpoint} falhou`);
@@ -1149,7 +1151,7 @@ class InterBankService {
         }
       }
 
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;
@@ -1179,7 +1181,7 @@ class InterBankService {
       );
 
       console.log(`[INTER] ✅ Summary retrieved successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to get summary:', error);
       throw error;
@@ -1196,7 +1198,7 @@ class InterBankService {
       const _response = await this.makeRequest('/webhook', 'PUT', webhookData);
 
       console.log(`[INTER] ✅ Webhook configured successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to configure webhook:', error);
       throw error;
@@ -1213,7 +1215,7 @@ class InterBankService {
       const _response = await this.makeRequest('/webhook');
 
       console.log(`[INTER] ✅ Webhook configuration retrieved`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to get webhook:', error);
       throw error;
@@ -1230,7 +1232,7 @@ class InterBankService {
       const _response = await this.makeRequest('/webhook', 'DELETE');
 
       console.log(`[INTER] ✅ Webhook deleted successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to delete webhook:', error);
       throw error;
@@ -1255,7 +1257,7 @@ class InterBankService {
       );
 
       console.log(`[INTER] ✅ Payment simulated successfully`);
-      return response; }
+      return response;
     } catch (error) {
       console.error('[INTER] ❌ Failed to simulate payment:', error);
       throw error;
@@ -1426,7 +1428,7 @@ class InterBankService {
       const _result = await this.emitirCobranca(cobrancaData);
 
       console.log(`[INTER] ✅ Collection created for proposal successfully`);
-      return result; }
+      return result;
     } catch (error) {
       console.error('[INTER] ❌ Failed to create collection for proposal:', error);
       throw error;

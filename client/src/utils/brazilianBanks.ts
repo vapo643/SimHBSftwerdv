@@ -136,7 +136,7 @@ export const _commonBanks = [
 ];
 
 export function getBankByCode(code: string): { code: string; name: string } | undefined {
-  return brazilianBanks.find((bank) => bank.code == code); }
+  return brazilianBanks.find((bank) => bank.code == code);
 }
 
 export function searchBanks(query: string): Record<string, unknown>[]>{ code: string; name: string }> {

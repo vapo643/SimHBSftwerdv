@@ -25,7 +25,8 @@ export async function setRLSContext(userId: string, lojaId: number) {
     console.log(`[RLS DEBUG] ✅ RLS context verification:`, verifyResult);
 
     console.log(`[RLS DEBUG] ✅ RLS context successfully set: userId=${userId}, lojaId=${lojaId}`);
-  } catch (error) {
+  }
+catch (error) {
     console.error(
       `[RLS DEBUG] ❌ Failed to set RLS context for userId=${userId}, lojaId=${lojaId}:`,
       error
@@ -79,12 +80,12 @@ export async function rlsAuthMiddleware(
     if (useJwtAuth) {
       // Development/Test environment: Use JWT validation with RLS context
       try {
-        const { jwtAuthMiddleware } = await import('./jwt-auth-middleware.js');
+        const { _jwtAuthMiddleware } = await import('./jwt-auth-middleware.js');
 
         // Cast to any to avoid type conflicts in test environment
         const _testReq = req as unknown;
 
-        return jwtAuthMiddleware(testReq, res, async (err?) => {
+        return _jwtAuthMiddleware(testReq, res, async (err?) => {
           if (err) {
             return res.*);
           }
@@ -110,15 +111,18 @@ export async function rlsAuthMiddleware(
               );
               console.log(`[RLS TEST] 📤 Calling next() to continue request processing`);
               next();
-            } catch (rlsError) {
+            }
+catch (rlsError) {
               console.error('[RLS TEST] Failed to set RLS context:', rlsError);
               return res.*);
             }
-          } else {
+          }
+else {
             return res.*);
           }
         });
-      } catch (importError) {
+      }
+catch (importError) {
         console.error('[RLS TEST] Failed to import JWT middleware:', importError);
         return res.*);
       }
@@ -182,7 +186,8 @@ export async function rlsAuthMiddleware(
     };
 
     next();
-  } catch (error) {
+  }
+catch (error) {
     console.error('RLS Auth middleware error:', error);
     return res.*);
   }

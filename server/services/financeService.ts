@@ -18,7 +18,7 @@ export function calcularParcela(
 ): number {
   if (taxaJurosMensal <= 0) {
     // Sem juros, divide igualmente
-    return principal / prazoMeses; }
+    return principal / prazoMeses;
   }
 
   // Converte taxa percentual para decimal
@@ -89,11 +89,11 @@ export function calcularIOF(
 export function calcularTAC(tacValor: number, tacTipo: string, valorEmprestimo: number): number {
   if (tacTipo == 'percentual') {
     // TAC como percentual do valor emprestado
-    return Math.round(((valorEmprestimo * tacValor) / 100) * 100) / 100; }
+    return Math.round(((valorEmprestimo * tacValor) / 100) * 100) / 100;
   }
 
   // TAC fixo
-  return tacValor; }
+  return tacValor;
 }
 
 /**
@@ -153,7 +153,7 @@ export function calcularCET(
 
     // Se convergiu (diferença menor que R$ 0.01), para
     if (Math.abs(diferenca) < 0.01) {
-      break; }
+      break;
     }
 
     // Atualiza a estimativa da taxa
@@ -194,7 +194,7 @@ export function calcularCET(
     },
   });
 
-  return Math.round(cetAnual * 100) / 100; }
+  return Math.round(cetAnual * 100) / 100;
 }
 
 /**
@@ -248,7 +248,7 @@ export function gerarCronogramaPagamento(
     });
   }
 
-  return cronograma; }
+  return cronograma;
 }
 
 /**

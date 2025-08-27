@@ -38,9 +38,10 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
       try {
         const _response = await api.get(`/api/propostas/${propostaId}/observacoes`);
         return response.data; }
-      } catch (error) {
+      }
+catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
-        return { logs: [] }; }
+        return { logs: [] }
       }
     },
     enabled: !!propostaId,
@@ -139,19 +140,22 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
                   textColor = 'text-yellow-400';
                   dotColor = 'bg-yellow-500';
                   icon = <AlertTriangle className="mr-1 inline h-4 w-4" />;
-                } else if (isResubmit) {
+                }
+else if (isResubmit) {
                   bgColor = 'bg-indigo-900/20';
                   borderColor = 'border border-indigo-600';
                   textColor = 'text-indigo-400';
                   dotColor = 'bg-indigo-500';
                   icon = <Send className="mr-1 inline h-4 w-4" />;
-                } else if (isApproval) {
+                }
+else if (isApproval) {
                   bgColor = 'bg-green-900/20';
                   borderColor = 'border border-green-600';
                   textColor = 'text-green-400';
                   dotColor = 'bg-green-500';
                   icon = <CheckCircle className="mr-1 inline h-4 w-4" />;
-                } else if (isRejection) {
+                }
+else if (isRejection) {
                   bgColor = 'bg-red-900/20';
                   borderColor = 'border border-red-600';
                   textColor = 'text-red-400';

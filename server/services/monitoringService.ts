@@ -88,14 +88,14 @@ export class MonitoringService {
       // Categorize by state
       const _byState = connections.reduce((acc, conn) => {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
-        return acc; }
+        return acc;
       }, {} as unknown);
 
       // Categorize by application
       const _byApplication = connections.reduce((acc, conn) => {
         const _app = conn.application_name || 'unknown';
         acc[app] = (acc[app] || 0) + 1;
-        return acc; }
+        return acc;
       }, {} as unknown);
 
       return {
@@ -110,8 +110,8 @@ export class MonitoringService {
           stateChangeTime: conn.state_change,
           currentQuery: conn.query?.substring(0, 100), // Truncate for safety
         })),
-  _byState,
-  _byApplication,
+        _byState,
+        _byApplication,
       };
     } catch (error) {
       console.error('[MONITORING_SERVICE] Error fetching connections:', error);
@@ -151,9 +151,9 @@ export class MonitoringService {
       }
 
       return {
-  _status,
+        _status,
         checks: health.checks,
-  _recommendations,
+        _recommendations,
       };
     } catch (error) {
       console.error('[MONITORING_SERVICE] Health check failed:', error);
@@ -181,7 +181,7 @@ export class MonitoringService {
 
       return {
         ...report,
-  _analysis,
+        _analysis,
       };
     } catch (error) {
       console.error('[MONITORING_SERVICE] Error generating report:', error);
@@ -203,7 +203,7 @@ export class MonitoringService {
       index++;
     }
 
-    return `${value.toFixed(2)} ${units[index]}`; }
+    return `${value.toFixed(2)} ${units[index]}`;
   }
 
   /**
@@ -213,14 +213,14 @@ export class MonitoringService {
     const _scans = parseInt(index.index_scans || 0);
     const _reads = parseInt(index.tuples_read || 0);
 
-    if (scans == 0) return 'unused'; }
-    if (reads == 0) return 'efficient'; }
+    if (scans == 0) return 'unused';
+    if (reads == 0) return 'efficient';
 
     const _ratio = reads / scans;
-    if (ratio < 10) return 'very efficient'; }
-    if (ratio < 100) return 'efficient'; }
-    if (ratio < 1000) return 'moderate'; }
-    return 'inefficient'; }
+    if (ratio < 10) return 'very efficient';
+    if (ratio < 100) return 'efficient';
+    if (ratio < 1000) return 'moderate';
+    return 'inefficient';
   }
 
   /**
@@ -229,9 +229,9 @@ export class MonitoringService {
   private analyzePerformance(report): string {
     const _connections = report.activeConnections;
 
-    if (connections > 50) return 'high load'; }
-    if (connections > 20) return 'moderate load'; }
-    return 'normal'; }
+    if (connections > 50) return 'high load';
+    if (connections > 20) return 'moderate load';
+    return 'normal';
   }
 
   /**
@@ -241,9 +241,7 @@ export class MonitoringService {
     const recommendations: string[] = [];
 
     // Check for unused indexes
-    const _unusedIndexes = report.indexes.filter(
-      (idx) => parseInt(idx.index_scans || 0) == 0
-    );
+    const _unusedIndexes = report.indexes.filter((idx) => parseInt(idx.index_scans || 0) == 0);
 
     if (unusedIndexes.length > 0) {
       recommendations.push(`${unusedIndexes.length} unused indexes detected`);
@@ -253,14 +251,14 @@ export class MonitoringService {
     const _needsVacuum = report.tables.filter((table) => {
       const _dead = parseInt(table.dead_rows || 0);
       const _live = parseInt(table.row_count || 0);
-      return dead > live * 0.1; }
+      return dead > live * 0.1;
     });
 
     if (needsVacuum.length > 0) {
       recommendations.push(`${needsVacuum.length} tables need vacuum`);
     }
 
-    return recommendations; }
+    return recommendations;
   }
 }
 

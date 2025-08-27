@@ -11,6 +11,6 @@ export class GetProposalByIdUseCase {
   constructor(private proposalRepository: IProposalRepository) {}
 
   async execute(id: string): Promise<Proposal | null> {
-    return await this.proposalRepository.findById(id); }
+    return await this.proposalRepository.findById(id);
   }
 }

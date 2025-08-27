@@ -6,7 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { documentsService } from '../services/documentsService.js';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { requireAnyRole } from '../lib/role-guards.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
@@ -18,7 +18,7 @@ const _router = Router();
  */
 router.get(
   '/download',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -32,7 +32,7 @@ router.get(
 
       const _result = await documentsService.downloadDocument(path);
 
-      if (result.success) {
+      if (_result.success) {
         // Check if it's a JSON request or redirect
         const _acceptHeader = req.headers.accept || '';
         const _isJsonRequest = acceptHeader.includes('application/json');
@@ -40,18 +40,18 @@ router.get(
         if (isJsonRequest) {
           // Return URL as JSON for requests with Authorization header
           res.json({
-            url: result.url,
-            filename: result.filename,
-            contentType: result.contentType,
+            url: _result.url,
+            filename: _result.filename,
+            contentType: _result.contentType,
           });
         } else {
           // Redirect to signed URL (legacy behavior)
-          res.redirect(result.url!);
+          res.redirect(_result.url!);
         }
       } else {
-        const _statusCode = result.error?.includes('não encontrado') ? 404 : 500;
+        const _statusCode = _result.error?.includes('não encontrado') ? 404 : 500;
         res.status(statusCode).json({
-          error: result.error,
+          error: _result.error,
           details: statusCode == 404 ? `Arquivo '${path}' não existe no storage` : undefined,
         });
       }
@@ -70,7 +70,7 @@ router.get(
  */
 router.get(
   '/list/:propostaId',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res: Response) => {
     try {

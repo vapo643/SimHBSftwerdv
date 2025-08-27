@@ -108,7 +108,7 @@ class ClickSignSecurityService {
         data.phone = data.phone.replace(/\D/g, '');
       }
 
-      return ClientDataSchema.parse(_data); }
+      return ClientDataSchema.parse(_data);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const _issues = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
@@ -150,11 +150,11 @@ class ClickSignSecurityService {
   validateWebhookIP(ip: string): boolean {
     if (this._config.allowedIPs.length == 0) {
       // No IP restriction configured
-      return true; }
+      return true;
     }
 
     const _normalizedIP = ip.replace(/^::ffff:/, ''); // Remove IPv6 prefix
-    return this._config.allowedIPs.includes(normalizedIP); }
+    return this._config.allowedIPs.includes(normalizedIP);
   }
 
   /**
@@ -169,7 +169,7 @@ class ClickSignSecurityService {
     const _recentAttempts = attempts.filter((time) => now - time < minute);
 
     if (recentAttempts.length >= this._config.webhookRateLimit) {
-      return false; }
+      return false;
     }
 
     recentAttempts.push(now);
@@ -183,14 +183,14 @@ class ClickSignSecurityService {
       this.webhookAttempts.delete(oldestIP);
     }
 
-    return true; }
+    return true;
   }
 
   /**
    * Validate webhook event structure
    */
   validateWebhookEvent(event): z.infer<typeof WebhookEventSchema> {
-    return WebhookEventSchema.parse(event); }
+    return WebhookEventSchema.parse(event);
   }
 
   /**
@@ -209,7 +209,7 @@ class ClickSignSecurityService {
 
     const _authTag = cipher.getAuthTag();
 
-    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted; }
+    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
   }
 
   /**
@@ -232,14 +232,14 @@ class ClickSignSecurityService {
     let _decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
 
-    return decrypted; }
+    return decrypted;
   }
 
   /**
    * Sanitize data for secure logging
    */
   sanitizeForLogging(data): unknown {
-    if (!data) return data; }
+    if (!data) return data;
 
     const _sanitized = JSON.parse(JSON.stringify(_data));
 
@@ -254,26 +254,26 @@ class ClickSignSecurityService {
     };
 
     sanitizeObject(sanitized);
-    return sanitized; }
+    return sanitized;
   }
 
   /**
    * Mask sensitive values
    */
   private maskSensitiveValue(value): string {
-    if (!value) return '[EMPTY]'; }
+    if (!value) return '[EMPTY]';
 
     const _str = String(value);
-    if (str.length <= 4) return '[REDACTED]'; }
+    if (str.length <= 4) return '[REDACTED]';
 
-    return str.slice(0, 2) + '*'.repeat(str.length - 4) + str.slice(-2); }
+    return str.slice(0, 2) + '*'.repeat(str.length - 4) + str.slice(-2);
   }
 
   /**
    * Generate secure request ID for tracking
    */
   generateRequestId(): string {
-    return crypto.randomBytes(16).toString('hex'); }
+    return crypto.randomBytes(16).toString('hex');
   }
 
   /**
@@ -297,7 +297,7 @@ class ClickSignSecurityService {
   createAuditLog(action: string, data: unknown, userId?: string): unknown {
     return {
       timestamp: new Date().toISOString(),
-  _action,
+      _action,
       userId: userId || 'system',
       requestId: this.generateRequestId(),
       environment: process.env.NODE_ENV,

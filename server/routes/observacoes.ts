@@ -8,7 +8,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { observacoesService } from '../services/observacoesService';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { getClientIP } from '../lib/security-logger';
 
 const _router = Router();
@@ -37,7 +37,7 @@ const _updateObservacaoSchema = z.object({
  *
  * PADRÃO ARQUITETURAL: Controller -> Service -> Repository -> DB
  */
-router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, res) => {
+router.get('/propostas/:propostaId/observacoes', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
     const { role } = req.user!;
@@ -73,7 +73,7 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, 
  *
  * PADRÃO ARQUITETURAL: Validação no Controller, lógica no Service
  */
-router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, res) => {
+router.post('/propostas/:propostaId/observacoes', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
     const { id: userId, email, role } = req.user!;
@@ -87,13 +87,13 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
     }
 
     // Validar dados de entrada
-    const _validatedData = createObservacaoSchema.parse(req.body);
+    const __validatedData = createObservacaoSchema.parse(req.body);
     const _clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Controller chama Service com dados validados
     const _novaObservacao = await observacoesService.createObservacao(
       Number(propostaId),
-      validatedData.observacao,
+      _validatedData.observacao,
       _userId,
       clientIp
     );
@@ -126,19 +126,19 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
  *
  * PADRÃO ARQUITETURAL: Permissões e validação no Controller, lógica no Service
  */
-router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => {
+router.put('/observacoes/:observacaoId', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { observacaoId } = req.params;
     const { id: userId, role } = req.user!;
 
     // Validar dados
-    const _validatedData = updateObservacaoSchema.parse(req.body);
+    const __validatedData = updateObservacaoSchema.parse(req.body);
     const _clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Service cuida da lógica de negócio e validações
     const _observacaoAtualizada = await observacoesService.updateObservacao(
       Number(observacaoId),
-      validatedData.observacao,
+      _validatedData.observacao,
       _userId,
       clientIp
     );
@@ -173,7 +173,7 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => 
  *
  * PADRÃO ARQUITETURAL: Autenticação/autorização no Controller, lógica no Service
  */
-router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => {
+router.delete('/observacoes/:observacaoId', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { observacaoId } = req.params;
     const { id: userId } = req.user!;
@@ -203,7 +203,7 @@ router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) 
  *
  * PADRÃO ARQUITETURAL: Query params no Controller, processamento no Service
  */
-router.get('/observacoes', jwtAuthMiddleware, async (req, res) => {
+router.get('/observacoes', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { page = 1, limit = 10, proposta_id, usuario_id } = req.query;
     const { role } = req.user!;

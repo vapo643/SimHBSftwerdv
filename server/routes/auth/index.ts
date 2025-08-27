@@ -6,7 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { authService } from '../../services/authService.js';
-import { jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware } from '../../lib/jwt-auth-middleware.js';
 import { getClientIP } from '../../lib/security-logger.js';
 import { AuthenticatedRequest } from '../../../shared/types/express';
 
@@ -28,12 +28,14 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const _result = await authService.login(email, password, req);
 
-    if (result.success) {
-      res.json(result.data);
-    } else {
-      res.status(401).json({ message: result.error });
+    if (_result.success) {
+      res.json(_result.data);
     }
-  } catch (error) {
+else {
+      res.status(401).json({ message: _result.error });
+    }
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Login error:', error);
     res.status(500).json({ message: 'Login failed' });
   }
@@ -55,15 +57,17 @@ router.post('/register', async (req: Request, res: Response) => {
 
     const _result = await authService.register(email, password, name);
 
-    if (result.success) {
-      res.json(result.data);
-    } else {
+    if (_result.success) {
+      res.json(_result.data);
+    }
+else {
       res.status(400).json({
-        message: result.error,
-        suggestions: result.suggestions,
+        message: _result.error,
+        suggestions: _result.suggestions,
       });
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Register error:', error);
     res.status(500).json({ message: 'Registration failed' });
   }
@@ -73,16 +77,18 @@ router.post('/register', async (req: Request, res: Response) => {
  * POST /api/auth/logout
  * User logout endpoint
  */
-router.post('/logout', jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.post('/logout', _jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
     const _result = await authService.logout();
 
-    if (result.success) {
+    if (_result.success) {
       res.json({ message: 'Logged out successfully' });
-    } else {
-      res.status(400).json({ message: result.error });
     }
-  } catch (error) {
+else {
+      res.status(400).json({ message: _result.error });
+    }
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Logout error:', error);
     res.status(500).json({ message: 'Logout failed' });
   }
@@ -92,7 +98,7 @@ router.post('/logout', jwtAuthMiddleware, async (req: Request, res: Response) =>
  * POST /api/auth/change-password
  * Change user password with current password verification
  */
-router.post('/change-password', jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.post('/change-password', _jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
     const _authReq = req as AuthenticatedRequest;
     const { currentPassword, newPassword, confirmPassword } = authReq.body;
@@ -124,18 +130,20 @@ router.post('/change-password', jwtAuthMiddleware, async (req: Request, res: Res
       req
     );
 
-    if (result.success) {
+    if (_result.success) {
       res.json({
         message: 'Senha alterada com sucesso. Por favor, faça login novamente.',
-        requiresRelogin: result.requiresRelogin,
-      });
-    } else {
-      res.status(401).json({
-        message: result.error,
-        suggestions: result.suggestions,
+        requiresRelogin: _result.requiresRelogin,
       });
     }
-  } catch (error) {
+else {
+      res.status(401).json({
+        message: _result.error,
+        suggestions: _result.suggestions,
+      });
+    }
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Change password error:', error);
     res.status(500).json({ message: 'Erro ao alterar senha' });
   }
@@ -156,8 +164,9 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     }
 
     const _result = await authService.requestPasswordReset(email, req);
-    res.json({ message: result.message });
-  } catch (error) {
+    res.json({ message: _result.message });
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Password reset error:', error);
     res.status(500).json({ message: 'Erro ao processar solicitação' });
   }
@@ -167,7 +176,7 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
  * GET /api/auth/sessions
  * List all user sessions
  */
-router.get('/sessions', jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.get('/sessions', _jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
     const _authReq = req as AuthenticatedRequest;
 
@@ -179,7 +188,8 @@ router.get('/sessions', jwtAuthMiddleware, async (req: Request, res: Response) =
     const _result = await authService.getUserSessions(authReq.user.id, currentToken);
 
     res.json(_result);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Error fetching sessions:', error);
     res.status(500).json({ message: 'Erro ao buscar sessões' });
   }
@@ -189,7 +199,7 @@ router.get('/sessions', jwtAuthMiddleware, async (req: Request, res: Response) =
  * DELETE /api/auth/sessions/:sessionId
  * Terminate a specific session
  */
-router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.delete('/sessions/:sessionId', _jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
     const _authReq = req as AuthenticatedRequest;
     const { sessionId } = authReq.params;
@@ -200,12 +210,14 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Request, re
 
     const _result = await authService.deleteSession(authReq.user.id, sessionId, authReq);
 
-    if (result.success) {
+    if (_result.success) {
       res.json({ message: 'Sessão encerrada com sucesso' });
-    } else {
-      res.status(404).json({ message: result.error || 'Sessão não encontrada' });
     }
-  } catch (error) {
+else {
+      res.status(404).json({ message: _result.error || 'Sessão não encontrada' });
+    }
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Error deleting session:', error);
     res.status(500).json({ message: 'Erro ao encerrar sessão' });
   }
@@ -215,7 +227,7 @@ router.delete('/sessions/:sessionId', jwtAuthMiddleware, async (req: Request, re
  * GET /api/auth/profile
  * Get current user profile
  */
-router.get('/profile', jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.get('/profile', _jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
     const _authReq = req as AuthenticatedRequest;
 
@@ -230,7 +242,8 @@ router.get('/profile', jwtAuthMiddleware, async (req: Request, res: Response) =>
       full_name: authReq.user.full_name,
       loja_id: authReq.user.loja_id,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Error fetching profile:', error);
     res.status(500).json({ message: 'Erro interno do servidor' });
   }
@@ -240,7 +253,7 @@ router.get('/profile', jwtAuthMiddleware, async (req: Request, res: Response) =>
  * GET /api/auth/validate
  * Validate current session
  */
-router.get('/validate', jwtAuthMiddleware, async (req: Request, res: Response) => {
+router.get('/validate', _jwtAuthMiddleware, async (req: Request, res: Response) => {
   try {
     const _authReq = req as AuthenticatedRequest;
 
@@ -259,7 +272,8 @@ router.get('/validate', jwtAuthMiddleware, async (req: Request, res: Response) =
         role: authReq.user.role,
       },
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[AUTH_CONTROLLER] Error validating session:', error);
     res.status(500).json({
       valid: false,

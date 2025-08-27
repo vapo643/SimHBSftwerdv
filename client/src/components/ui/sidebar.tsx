@@ -78,7 +78,8 @@ const _SidebarProvider = React.forwardRef<
         const _openState = typeof value == 'function' ? value(open) : value;
         if (setOpenProp) {
           setOpenProp(openState);
-        } else {
+        }
+else {
           _setOpen(openState);
         }
 
@@ -90,7 +91,7 @@ const _SidebarProvider = React.forwardRef<
 
     // Helper to toggle the sidebar.
     const _toggleSidebar = React.useCallback(() => {
-      return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open); }
+      return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
     }, [isMobile, setOpen, setOpenMobile]);
 
     // Adds a keyboard shortcut to toggle the sidebar.
@@ -103,7 +104,7 @@ const _SidebarProvider = React.forwardRef<
       };
 
       window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown); }
+      return () => window.removeEventListener('keydown', handleKeyDown);
     }, [toggleSidebar]);
 
     // We add a state so that we can do data-state="expanded" or "collapsed".

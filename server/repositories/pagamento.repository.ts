@@ -63,7 +63,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
         case 'hoje': {
           startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
           endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-          break; }
+          break;
         case 'semana': {
           const _startOfWeek = new Date(now);
           startOfWeek.setDate(now.getDate() - now.getDay());
@@ -73,11 +73,11 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
           endOfWeek.setHours(23, 59, 59, 999);
           startDate = startOfWeek;
           endDate = endOfWeek;
-          break; }
+          break;
         case 'mes': {
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-          break; }
+          break;
         default:
           startDate = new Date(0);
           endDate = new Date();
@@ -106,7 +106,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(and(...conditions))
       .orderBy(desc(propostas.updatedAt));
 
-    return await query; }
+    return await query;
   }
 
   /**
@@ -172,7 +172,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(and(eq(propostas.id, proposalId), sql`${propostas.deletedAt} IS NULL`))
       .limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -212,7 +212,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, data.propostaId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -233,7 +233,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -254,7 +254,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -278,7 +278,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       })
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -325,21 +325,21 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .where(and(...conditions))
       .orderBy(desc(propostas.updatedAt));
 
-    return await query; }
+    return await query;
   }
 
   /**
    * Get all lojas for filters
    */
   async getAllLojas(): Promise<Loja[]> {
-    return await db.select().from(lojas).where(eq(lojas.isActive, true)); }
+    return await db.select().from(lojas).where(eq(lojas.isActive, true));
   }
 
   /**
    * Get all produtos for filters
    */
   async getAllProdutos(): Promise<Produto[]> {
-    return await db.select().from(produtos).where(eq(produtos.isActive, true)); }
+    return await db.select().from(produtos).where(eq(produtos.isActive, true));
   }
 
   /**
@@ -351,7 +351,7 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     acao: string,
     detalhes: unknown
   ): Promise<void> {
-    const _now = getBrasiliaTimestamp();
+    const _now = _getBrasiliaTimestamp();
     console.log(
       `[AUDITORIA PAGAMENTO] ${now} - Proposta: ${propostaId}, User: ${userId}, Ação: ${acao}`,
       detalhes

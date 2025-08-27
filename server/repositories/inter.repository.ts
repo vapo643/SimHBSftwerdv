@@ -33,7 +33,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.propostaId, proposalId))
       .limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -46,7 +46,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -110,7 +110,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       query = query.offset(params.offset) as unknown;
     }
 
-    return await query; }
+    return await query;
   }
 
   /**
@@ -143,7 +143,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
 
     const _result = await db.insert(interCollections).values([collectionData]).returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -162,7 +162,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.id, id))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -181,7 +181,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -197,7 +197,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .where(eq(interCollections.id, id))
       .returning();
 
-    return result.length > 0; }
+    return _result.length > 0;
   }
 
   /**
@@ -206,7 +206,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
   async getProposal(proposalId: string): Promise<Proposta | undefined> {
     const _result = await db.select().from(propostas).where(eq(propostas.id, proposalId)).limit(1);
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -220,14 +220,14 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     const _result = await db
       .update(propostas)
       .set({
-  _status,
+        _status,
         updatedAt: getBrasiliaDate(),
         userId: userId,
       })
       .where(eq(propostas.id, proposalId))
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -253,7 +253,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       ])
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -281,7 +281,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       ])
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   /**
@@ -316,7 +316,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     contentType: string
   ): Promise<{ data: unknown; error: unknown }> {
     return await supabaseAdmin.storage.from(bucket).upload(path, file, {
-  _contentType,
+      _contentType,
       upsert: true,
     });
   }

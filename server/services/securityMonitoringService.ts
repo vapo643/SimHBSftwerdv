@@ -63,13 +63,13 @@ class SecurityMonitoringService {
     if (!SecurityMonitoringService.instance) {
       SecurityMonitoringService.instance = new SecurityMonitoringService();
     }
-    return SecurityMonitoringService.instance; }
+    return SecurityMonitoringService.instance;
   }
 
   async getSecurityMetrics(): Promise<SecurityMetrics> {
     const _cacheKey = 'security-metrics';
     const _cached = this.getCachedData(cacheKey);
-    if (cached) return cached; }
+    if (cached) return cached;
 
     const _now = new Date();
     const _oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -133,9 +133,7 @@ class SecurityMonitoringService {
 
       // Calculate metrics
       const _threatMap = new Map(threatLogs.map((t) => [t.event_type, t.count]));
-      const _recentThreatMap = new Map(
-        recentThreatLogs.map((t) => [t.event_type, t.count])
-      );
+      const _recentThreatMap = new Map(recentThreatLogs.map((t) => [t.event_type, t.count]));
 
       const metrics: SecurityMetrics = {
         threats: {
@@ -176,7 +174,7 @@ class SecurityMonitoringService {
           },
         },
         system: {
-          lastSecurityScan: getBrasiliaTimestamp(),
+          lastSecurityScan: _getBrasiliaTimestamp(),
           encryptionStatus: 'AES-256 (Active)',
           backupStatus: 'Daily backups enabled',
           certificateExpiry: 365, // Would check actual cert
@@ -186,7 +184,7 @@ class SecurityMonitoringService {
       };
 
       this.setCachedData(cacheKey, metrics);
-      return metrics; }
+      return metrics;
     } catch (error) {
       console.error('[SECURITY MONITORING] Error getting metrics:', error);
       throw error;
@@ -226,21 +224,21 @@ class SecurityMonitoringService {
         .orderBy(desc(securityLogs.created_at))
         .limit(limit);
 
-      return alerts; }
+      return alerts;
     } catch (error) {
       console.error('[SECURITY MONITORING] Error getting alerts:', error);
-      return []; }
+      return [];
     }
   }
 
   private async getAverageResponseTime(): Promise<number> {
     // In production, this would come from APM tools
-    return Math.floor(Math.random() * (200 - 50) + 50); }
+    return Math.floor(Math.random() * (200 - 50) + 50);
   }
 
   private async getSlowQueriesCount(): Promise<number> {
     // Would query actual performance logs
-    return 0; }
+    return 0;
   }
 
   private async getApiErrorsCount(since: Date): Promise<number> {
@@ -254,20 +252,20 @@ class SecurityMonitoringService {
         )
       );
 
-    return errors[0]?.count || 0; }
+    return errors[0]?.count || 0;
   }
 
   private getCachedData(key: string): unknown | null {
     const _cached = this.metricsCache.get(key);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-      return cached.data; }
+      return cached.data;
     }
-    return null; }
+    return null;
   }
 
   private setCachedData(key: string, data): void {
     this.metricsCache.set(key, {
-  _data,
+      _data,
       timestamp: Date.now(),
     });
   }

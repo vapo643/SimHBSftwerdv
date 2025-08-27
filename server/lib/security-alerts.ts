@@ -347,7 +347,7 @@ export class SecurityMonitor {
       success: true,
       details: {
         alertType: data.type,
-  _alertId,
+        _alertId,
         ...data.metadata,
       },
     });
@@ -375,14 +375,14 @@ export class SecurityMonitor {
    * Get active alerts
    */
   getActiveAlerts(): SecurityAlert[] {
-    return Array.from(activeAlerts.values()).filter((alert) => !alert.resolved); }
+    return Array.from(activeAlerts.values()).filter((alert) => !alert.resolved);
   }
 
   /**
    * Get alert history
    */
   getAlertHistory(limit: number = 100): SecurityAlert[] {
-    return alertHistory.slice(-limit); }
+    return alertHistory.slice(-limit);
   }
 
   /**
@@ -391,14 +391,14 @@ export class SecurityMonitor {
   resolveAlert(alertId: string, resolvedBy: string): boolean {
     const _alert = activeAlerts.get(alertId);
     if (!alert) {
-      return false; }
+      return false;
     }
 
     alert.resolved = true;
     alert.resolvedAt = new Date();
     alert.resolvedBy = resolvedBy;
 
-    return true; }
+    return true;
   }
 }
 

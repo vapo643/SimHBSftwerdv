@@ -27,7 +27,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .orderBy(desc(propostaDocumentos.createdAt));
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting proposal documents:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -42,10 +42,10 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
-      return proposta || null; }
+      return proposta || null;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting proposal by ID:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -72,10 +72,10 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         })
         .returning();
 
-      return document; }
+      return document;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error creating document:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -89,10 +89,10 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .where(eq(propostaDocumentos.id, documentId))
         .returning();
 
-      return result.length > 0; }
+      return _result.length > 0;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error deleting document:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -107,10 +107,10 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .where(eq(propostaDocumentos.id, documentId))
         .limit(1);
 
-      return document || null; }
+      return document || null;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting document by ID:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -128,21 +128,21 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
       const { data, error } = await _supabase.storage
         .from('documents')
         .upload(filePath, fileBuffer, {
-  _contentType,
+          _contentType,
           upsert: false,
         });
 
       if (error) {
         console.error('[DOCUMENTS_REPO] Upload error:', error);
-        return null; }
+        return null;
       }
 
       const { data: publicUrl } = _supabase.storage.from('documents').getPublicUrl(filePath);
 
-      return publicUrl; }
+      return publicUrl;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error uploading to storage:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -159,13 +159,13 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
 
       if (error) {
         console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
-        return null; }
+        return null;
       }
 
-      return data.signedUrl; }
+      return data.signedUrl;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
-      return null; }
+      return null;
     }
   }
 }

@@ -16,7 +16,7 @@ const _fetchLogs = async (propostaId: string | undefined) => {
   if (!response.ok) {
     throw new Error('Erro ao carregar histórico');
   }
-  return response.json(); }
+  return response.json();
 };
 
 const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ propostaId }) => {

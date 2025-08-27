@@ -147,7 +147,8 @@ export default function LojasPage() {
   const _handleSubmit = (data: InsertLoja | UpdateLoja) => {
     if (modalMode == 'edit' && selectedLoja) {
       updateMutation.mutate({ id: selectedLoja.id, data: data as UpdateLoja });
-    } else {
+    }
+else {
       createMutation.mutate(data as InsertLoja);
     }
   };

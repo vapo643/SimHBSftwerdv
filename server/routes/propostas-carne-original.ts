@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireAnyRole } from '../lib/role-guards';
 import { pdfMergeService } from '../services/pdfMergeService';
 import { db } from '../lib/supabase';
@@ -17,7 +17,7 @@ const _router = Router();
  */
 router.post(
   '/:id/gerar-carne',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -172,7 +172,7 @@ router.post(
  */
 router.get(
   '/:id/carne-pdf',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     // Redirecionar para o novo fluxo
@@ -192,7 +192,7 @@ router.get(
  */
 router.get(
   '/:id/carne-pdf/download',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -256,7 +256,7 @@ router.get(
  */
 router.post(
   '/:id/sincronizar-boletos',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {

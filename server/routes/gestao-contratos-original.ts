@@ -7,7 +7,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireRoles } from '../lib/role-guards';
 import { storage } from '../storage';
 import { db } from '../lib/supabase';
@@ -43,7 +43,7 @@ const _router = Router();
  */
 router.get(
   '/contratos',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   requireRoles(['ADMINISTRADOR', 'DIRETOR']), // Apenas ADMIN e DIRETOR
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -251,11 +251,11 @@ router.get(
         pagos: contratosComUrls.filter((c) => c.dataPagamento).length,
         valorTotalContratado: contratosComUrls.reduce((sum: number, c) => {
           const _valor = parseFloat(c.valor || '0');
-          return sum + valor; }
+          return sum + valor;
         }, 0),
         valorTotalLiberado: contratosComUrls.reduce((sum: number, c) => {
           const _valor = parseFloat(c.valorLiquidoLiberado || '0');
-          return sum + (c.dataPagamento ? valor : 0); }
+          return sum + (c.dataPagamento ? valor : 0);
         }, 0),
       };
 
@@ -272,7 +272,8 @@ router.get(
           limite: parseInt(limite as string),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CONTRATOS] Erro ao buscar contratos:', error);
 
       // Log de erro
@@ -314,7 +315,7 @@ router.get(
  */
 router.get(
   '/contratos/:id',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   requireRoles(['ADMINISTRADOR', 'DIRETOR']),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -401,7 +402,8 @@ router.get(
           statusFormalizacao: determinarStatusFormalizacao(contratoData),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[CONTRATOS] Erro ao buscar detalhes do contrato:', error);
 
       res.status(500).json({
@@ -423,22 +425,22 @@ router.get(
  */
 function determinarStatusFormalizacao(proposta): string {
   if (!proposta.ccbGerado) {
-    return 'PENDENTE_GERACAO'; }
+    return 'PENDENTE_GERACAO';
   }
 
   if (!proposta.assinaturaEletronicaConcluida) {
-    return 'AGUARDANDO_ASSINATURA'; }
+    return 'AGUARDANDO_ASSINATURA';
   }
 
   if (!proposta.dataPagamento) {
-    return 'AGUARDANDO_PAGAMENTO'; }
+    return 'AGUARDANDO_PAGAMENTO';
   }
 
   if (proposta.status == 'pago') {
-    return 'CONCLUIDO'; }
+    return 'CONCLUIDO';
   }
 
-  return 'EM_PROCESSAMENTO'; }
+  return 'EM_PROCESSAMENTO';
 }
 
 export default router;

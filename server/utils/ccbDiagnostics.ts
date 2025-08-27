@@ -32,17 +32,17 @@ export async function diagnoseAcroForms() {
         fields.push(fieldName);
       });
 
-      return { hasAcroForms: true, fields }; }
+      return { hasAcroForms: true, fields };
     } else {
       console.log('❌ NENHUM AcroForm detectado. Prossiga para a FASE 2 (Mapeamento Manual).');
-      return { hasAcroForms: false, fields: [] }; }
+      return { hasAcroForms: false, fields: [] };
     }
   } catch (error) {
     console.error(
       '⚠️ Erro ao analisar o PDF (pode ser XFA ou protegido). Prossiga para a FASE 2.',
       error
     );
-    return { hasAcroForms: false, fields: [], error }; }
+    return { hasAcroForms: false, fields: [], error };
   }
 }
 
@@ -181,7 +181,7 @@ export async function generateCoordinateGridPDF() {
   console.log(`   3. Use o zoom para identificar as coordenadas exatas de cada campo`);
   console.log(`   4. Anote as coordenadas X,Y onde cada texto deve ser inserido`);
 
-  return outputPath; }
+  return outputPath;
 }
 
 /**
@@ -283,5 +283,5 @@ export async function testCoordinateMapping() {
   await fs.writeFile(outputPath, pdfBytes);
   console.log(`✅ PDF de teste gerado: ${outputPath}`);
 
-  return outputPath; }
+  return outputPath;
 }

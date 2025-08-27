@@ -168,10 +168,12 @@ class ClickSignServiceV3 {
         // Empty response (common for 204 No Content or some 202 responses)
         console.log(`[CLICKSIGN V1] Empty response body for status ${response.status}`);
         data = { status: response.status };
-      } else {
+      }
+else {
         try {
           data = JSON.parse(responseText);
-        } catch (parseError) {
+        }
+catch (parseError) {
           console.error(`[CLICKSIGN V1] ❌ Failed to parse JSON response!`);
           console.error(
             `[CLICKSIGN V1] Response text (first 1000 chars): ${responseText.substring(0, 1000)}`
@@ -197,8 +199,9 @@ class ClickSignServiceV3 {
         );
       }
 
-      return { data }; }
-    } catch (error) {
+      return { data }
+    }
+catch (error) {
       console.error(`[CLICKSIGN V1] ❌ Request failed:`, error);
       throw error;
     }
@@ -218,12 +221,12 @@ class ClickSignServiceV3 {
     if (base64Content.startsWith('data:')) {
       const _parts = base64Content.split(',');
       if (parts.length == 2) {
-        return `${prefix}${parts[1]}`; }
+        return `${prefix}${parts[1]}`;
       }
     }
 
     // Add prefix if it's pure Base64
-    return `${prefix}${base64Content}`; }
+    return `${prefix}${base64Content}`;
   }
 
   /**
@@ -242,7 +245,7 @@ class ClickSignServiceV3 {
     }
 
     console.log(`[CLICKSIGN V1] ✅ CPF format check passed: ${cleanCpf}`);
-    return cleanCpf; }
+    return cleanCpf;
   }
 
   /**
@@ -281,7 +284,7 @@ class ClickSignServiceV3 {
       (response as unknown).data?.document || (response as unknown).document || response;
     console.log(`[CLICKSIGN V1] ✅ Document created: ${document.key}`);
 
-    return document; }
+    return document;
   }
 
   /**
@@ -312,7 +315,7 @@ class ClickSignServiceV3 {
     const _document = response.data?.data || response.data;
     console.log(`[CLICKSIGN V1] ✅ Document added to envelope: ${document.id}`);
 
-    return document; }
+    return document;
   }
 
   /**
@@ -368,7 +371,7 @@ class ClickSignServiceV3 {
     console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
     console.log(`[CLICKSIGN V1] 🔐 Signer authentication methods returned:`, signer.auths);
 
-    return signer; }
+    return signer;
   }
 
   /**
@@ -402,7 +405,7 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] ✅ STEP 2 COMPLETE: Signer added to envelope`);
     console.log(`[CLICKSIGN V1] Response:`, JSON.stringify(_response, null, 2));
-    return response.data; }
+    return response.data;
   }
 
   /**
@@ -446,7 +449,7 @@ class ClickSignServiceV3 {
     );
 
     console.log(`[CLICKSIGN V1] ✅ Requirement added: ${requirementData.type}`);
-    return response.data?.data || response.data; }
+    return response.data?.data || response.data;
   }
 
   /**
@@ -456,7 +459,7 @@ class ClickSignServiceV3 {
     const _response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/finish`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope finished and sent for signature`);
-    return response.data?.data || response.data; }
+    return response.data?.data || response.data;
   }
 
   /**
@@ -464,7 +467,7 @@ class ClickSignServiceV3 {
    */
   async getEnvelopeStatus(envelopeId: string) {
     const _response = await this.makeRequest<unknown>('GET', `/envelopes/${envelopeId}`);
-    return response.data?.data || response.data; }
+    return response.data?.data || response.data;
   }
 
   /**
@@ -474,7 +477,7 @@ class ClickSignServiceV3 {
     const _response = await this.makeRequest<unknown>('POST', `/envelopes/${envelopeId}/cancel`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope cancelled`);
-    return response.data?.data || response.data; }
+    return response.data?.data || response.data;
   }
 
   /**
@@ -485,7 +488,7 @@ class ClickSignServiceV3 {
       'GET',
       `/envelopes/${envelopeId}/documents/${documentId}/download`
     );
-    return response.data; }
+    return response.data;
   }
 
   /**
@@ -497,7 +500,7 @@ class ClickSignServiceV3 {
     });
 
     console.log(`[CLICKSIGN V1] ✅ Webhook configured`);
-    return response.data; }
+    return response.data;
   }
 
   /**
@@ -516,7 +519,7 @@ class ClickSignServiceV3 {
     );
 
     console.log(`[CLICKSIGN V1] ✅ WhatsApp notification sent`);
-    return response.data; }
+    return response.data;
   }
 
   /**
@@ -539,7 +542,7 @@ class ClickSignServiceV3 {
     console.log(
       `[CLICKSIGN V1] ✅ List created with request_signature_key: ${list.request_signature_key}`
     );
-    return list; }
+    return list;
   }
 
   /**
@@ -552,7 +555,7 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] 📡 POST /notifications`);
     const _response = await this.makeRequest<unknown>('POST', '/notifications', requestBody);
-    return response; }
+    return response;
   }
 
   /**
@@ -635,7 +638,8 @@ class ClickSignServiceV3 {
               `[CLICKSIGN V1] ⚠️ Requirements endpoint not available in v1, continuing...`
             );
           });
-        } catch (err) {
+        }
+catch (err) {
           console.log(`[CLICKSIGN V1] ⚠️ Could not add requirement, continuing with standard flow`);
         }
       }
@@ -660,7 +664,8 @@ class ClickSignServiceV3 {
         requestSignatureKey: list.request_signature_key || '',
         status: 'sent',
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error(`[CLICKSIGN V1] ❌ Failed to send CCB for signature:`, error);
       throw error;
     }
@@ -673,10 +678,11 @@ class ClickSignServiceV3 {
     try {
       await this.makeRequest('GET', '/envelopes?limit=1');
       console.log(`[CLICKSIGN V1] ✅ Connection test successful`);
-      return true; }
-    } catch (error) {
+      return true;
+    }
+catch (error) {
       console.error(`[CLICKSIGN V1] ❌ Connection test failed:`, error);
-      return false; }
+      return false;
     }
   }
 }

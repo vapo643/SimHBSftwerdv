@@ -75,7 +75,8 @@ describe('Pré-Aprovação - Negação Automática por Comprometimento de Renda'
       console.log(`  - Store ID: ${testStoreId}`);
       console.log(`  - Product ID: ${testProductId}`);
       console.log(`  - Commercial Table ID: ${testCommercialTableId}`);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[TEST SETUP] ❌ Erro ao configurar ambiente de teste:', error);
       throw error;
     }

@@ -24,8 +24,8 @@ export function generateFileHashes(buffer: Buffer): FileIntegrityInfo {
   const _sha512 = createHash('sha512').update(buffer).digest('hex');
 
   return {
-  _sha256,
-  _sha512,
+    _sha256,
+    _sha512,
     size: buffer.length,
     generatedAt: new Date(),
   };
@@ -50,7 +50,7 @@ export async function generateStreamHashes(stream: Readable): Promise<FileIntegr
       resolve({
         sha256: sha256Hash.digest('hex'),
         sha512: sha512Hash.digest('hex'),
-  _size,
+        _size,
         generatedAt: new Date(),
       });
     });
@@ -83,7 +83,7 @@ export function verifyFileIntegrity(
 
   return {
     valid: errors.length == 0,
-  _errors,
+    _errors,
   };
 }
 
@@ -95,7 +95,7 @@ export function generateSRIHash(
   algorithm: 'sha256' | 'sha384' | 'sha512' = 'sha384'
 ): string {
   const _hash = createHash(algorithm).update(buffer).digest('base64');
-  return `${algorithm}-${hash}`; }
+  return `${algorithm}-${hash}`;
 }
 
 /**
@@ -108,7 +108,7 @@ export function storeFileIntegrity(fileId: string, integrity: FileIntegrityInfo)
 }
 
 export function getFileIntegrity(fileId: string): FileIntegrityInfo | undefined {
-  return integrityStore.get(fileId); }
+  return integrityStore.get(fileId);
 }
 
 /**

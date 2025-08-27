@@ -21,7 +21,7 @@ export class SecurityWebSocketManager {
 
   constructor(server: HTTPServer) {
     this.wss = new WebSocketServer({
-  _server,
+      _server,
       path: '/ws/security',
     });
 
@@ -97,9 +97,9 @@ export function setupSecurityWebSocket(server: HTTPServer): SecurityWebSocketMan
   if (!wsManager) {
     wsManager = new SecurityWebSocketManager(server);
   }
-  return wsManager; }
+  return wsManager;
 }
 
 export function getSecurityWebSocketManager(): SecurityWebSocketManager | null {
-  return wsManager; }
+  return wsManager;
 }

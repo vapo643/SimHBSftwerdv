@@ -70,20 +70,20 @@ export function urlTokenValidator(req: Request, res: Response, next: NextFunctio
 export function sanitizeResponseUrls(data): unknown {
   if (typeof data == 'string') {
     // Remove token parameters from URLs
-    return data.replace(/([?&])(token|jwt|auth|access_token|session)=[^&]*/gi, '$1'); }
+    return data.replace(/([?&])(token|jwt|auth|access_token|session)=[^&]*/gi, '$1');
   }
 
   if (typeof data == 'object' && data !== null) {
     if (Array.isArray(_data)) {
-      return data.map((item) => sanitizeResponseUrls(item)); }
+      return data.map((item) => sanitizeResponseUrls(item));
     }
 
     const sanitized: unknown = {};
     for (const [key, value] of Object.entries(_data)) {
       sanitized[key] = sanitizeResponseUrls(value);
     }
-    return sanitized; }
+    return sanitized;
   }
 
-  return data; }
+  return data;
 }

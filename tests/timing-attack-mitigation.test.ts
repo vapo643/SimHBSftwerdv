@@ -6,7 +6,7 @@ import type { Express } from 'express';
 
 // Mock dependencies
 vi.mock('../server/lib/jwt-auth-middleware', () => ({
-  jwtAuthMiddleware: (req: any, res: any, next: any) => {
+  _jwtAuthMiddleware: (req: any, res: any, next: any) => {
     req.user = {
       id: 'test-user-id',
       email: 'test@example.com',
@@ -34,7 +34,8 @@ vi.mock('../server/storage', () => ({
             10
           ); // 10ms for valid ID (RLS check)
         });
-      } else {
+      }
+else {
         return new Promise((resolve) => {
           setTimeout(() => resolve(undefined), 2); // 2ms for invalid ID (fast fail)
         });

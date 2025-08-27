@@ -11,7 +11,7 @@ export const _createServerSupabaseClient = () => {
     throw new Error('Missing Supabase environment variables');
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey); }
+  return createClient(supabaseUrl, supabaseAnonKey);
 };
 
 // Função para criar ou retornar a instância única do cliente para o lado do cliente (React)

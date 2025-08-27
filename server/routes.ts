@@ -2,12 +2,12 @@ import type { Express, NextFunction, Response } from 'express';
 import { createServer, type Server } from 'http';
 import { storage } from './storage';
 import { createServerSupabaseClient } from '../client/src/lib/supabase';
-import { jwtAuthMiddleware } from './lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from './lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../shared/types/express';
 import { db } from './lib/supabase';
 import { eq } from 'drizzle-orm';
 import {
-  _requireAdmin,
+  __requireAdmin,
   _requireManagerOrAdmin,
   _requireAnyRole,
   _requireRoles,
@@ -62,7 +62,7 @@ import testRetryRoutes from './routes/test-retry';
 import testAuditRoutes from './routes/test-audit';
 import {
   _getBrasiliaDate,
-  _formatBrazilianDateTime,
+  __formatBrazilianDateTime,
   _generateApprovalDate,
   _getBrasiliaTimestamp,
 } from './lib/timezone';
@@ -77,7 +77,7 @@ import featureFlagService from './services/featureFlagService';
 
 const _upload = multer({ storage: multer.memoryStorage() });
 
-// Admin middleware is now replaced by requireAdmin guard
+// Admin middleware is now replaced by _requireAdmin guard
 
 // Helper function to parse user agent and extract device information
 function parseUserAgent(userAgent: string): string {
@@ -145,14 +145,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/health', (req, res) => {
     res.json({
       status: 'ok',
-      timestamp: getBrasiliaTimestamp(),
+      timestamp: _getBrasiliaTimestamp(),
       security: 'enabled',
       rateLimit: 'active',
     });
   });
 
   // Feature Flags endpoint - retorna flags para o usuário atual
-  app.get('/api/features', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/features', _jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
     try {
       // Inicializa o serviço se necessário
       await featureFlagService.init();
@@ -188,7 +188,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: context.userRole,
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       // Em caso de erro, retorna flags desabilitadas
       res.json({
@@ -206,7 +207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
   app.get(
     '/api/experimental/analytics',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Verifica se a feature flag está habilitada
@@ -264,7 +265,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           experimental: true,
           message: 'API experimental - dados podem mudar',
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           error: 'Internal server error',
@@ -334,7 +336,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? '🎉 TODAS AS CORREÇÕES VALIDADAS - Debate Máximo RESOLVIDO!'
           : '❌ Ainda há validações falhando - veja detalhes acima',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.json({
         RELATORIO_FINAL: '[ERRO]',
         error: 'Falha na execução da auditoria',
@@ -433,7 +436,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ? '🎉 TODAS AS CORREÇÕES VALIDADAS - Debate Máximo RESOLVIDO!'
             : '❌ Ainda há campos faltantes - necessário criar nova proposta de teste',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         RELATORIO_FINAL: '[ERRO]',
@@ -520,7 +524,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ? '✅ TODAS AS CORREÇÕES VALIDADAS - Gerar CCB para confirmar PDF'
             : '❌ CORREÇÕES INCOMPLETAS - Verificar campos faltantes',
       });
-    } catch (error) {
+    }
+catch (error) {
       res.status(500).json({ error: 'Erro na auditoria' });
     }
   });
@@ -528,7 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test endpoint para verificar correções de bugs
   app.get(
     '/api/test-data-flow',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -620,7 +625,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         res.json(resultado);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro ao testar fluxo de dados' });
       }
@@ -628,14 +634,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Debug endpoint for RBAC validation
-  app.get('/api/debug/me', jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/debug/me', _jwtAuthMiddleware as unknown, async (req: AuthenticatedRequest, res) => {
     try {
       res.json({
         message: 'Debug endpoint - User profile from robust JWT middleware',
         user: req.user,
-        timestamp: getBrasiliaTimestamp(),
+        timestamp: _getBrasiliaTimestamp(),
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Debug endpoint failed' });
     }
@@ -647,7 +654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New endpoint for formalization proposals (filtered by status)
   app.get(
     '/api/propostas/formalizacao',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -689,7 +696,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // ATENDENTE sees only proposals they created
           _query = _query.eq('user_id', _userId);
           console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${_userId}`);
-        } else if (_userRole == 'GERENTE') {
+        }
+else if (_userRole == 'GERENTE') {
           // GERENTE sees all proposals from their store
           _query = _query.eq('loja_id', _userLojaId);
           console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${_userLojaId}`);
@@ -726,11 +734,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (typeof proposta.cliente_data == 'string') {
             try {
               _clienteData = JSON.parse(proposta.cliente_data);
-            } catch (e) {
+            }
+catch (e) {
               console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
               clienteData = {};
             }
-          } else {
+          }
+else {
             _clienteData = proposta.cliente_data || {};
           }
 
@@ -738,14 +748,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (typeof proposta.condicoes_data == 'string') {
             try {
               _condicoesData = JSON.parse(proposta.condicoes_data);
-            } catch (e) {
+            }
+catch (e) {
               console.warn(
                 `Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`,
                 e
               );
               condicoesData = {};
             }
-          } else {
+          }
+else {
             _condicoesData = proposta.condicoes_data || {};
           }
 
@@ -768,10 +780,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Retornando ${formalizacaoPropostas.length} propostas em formalização via RLS`
+          `[${_getBrasiliaTimestamp()}] Retornando ${formalizacaoPropostas.length} propostas em formalização via RLS`
         );
         res.json(formalizacaoPropostas);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           message: 'Erro ao buscar propostas de formalização',
@@ -783,7 +796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para gerar CCB automaticamente
   app.post(
     '/api/propostas/:id/gerar-ccb',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -823,20 +836,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         try {
           const _result = await ccbGenerationService.generateCCB(id);
-          if (!result.success) {
+          if (!_result.success) {
             throw new Error("Error");
           }
-          console.log(`[CCB] CCB gerada com sucesso usando template CORRETO: ${result.pdfPath}`);
+          console.log(`[CCB] CCB gerada com sucesso usando template CORRETO: ${_result.pdfPath}`);
           res.json({
             success: true,
             message: 'CCB gerada com sucesso usando template personalizado',
-            caminho: result.pdfPath,
+            caminho: _result.pdfPath,
           });
-        } catch (error) {
+        }
+catch (error) {
           console.error(error);
           return res.status(500).json({error: "Error"});
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro interno do servidor' });
       }
@@ -846,7 +861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug: Testar PDF simples e limpo
   app.get(
     '/api/debug/test-pdf',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _PDFDocument = (await import('pdfkit')).default;
@@ -871,7 +886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         doc.fontSize(16).text('DOCUMENTO DE TESTE');
         doc.moveDown();
         doc.fontSize(12).text('Este é um PDF de teste gerado pelo sistema.');
-        doc.text('Data: ' + formatBrazilianDateTime(getBrasiliaDate()));
+        doc.text('Data: ' + _formatBrazilianDateTime(getBrasiliaDate()));
 
         doc.end();
 
@@ -882,7 +897,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename="teste-simples.pdf"');
         res.send(pdfBuffer);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro ao criar PDF teste' });
       }
@@ -892,7 +908,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug: Listar arquivos no bucket documents
   app.get(
     '/api/debug/storage-files',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
@@ -914,7 +930,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           files: files || [],
           count: files?.length || 0,
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro interno' });
       }
@@ -924,7 +941,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get CCB signed URL
   app.get(
     '/api/propostas/:id/ccb-url',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -957,7 +974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Sempre buscar arquivos no storage para garantir versão mais recente
         const { data: files } = await _supabase.storage
           .from('documents')
-          .list(`ccb/${id}`, { sortBy: { column: 'created_at', order: 'desc' } });
+          .list(`ccb/${id}`, { sortBy: { column: 'created_at', order: 'desc' }});
 
         let _ccbPath = proposta.caminho_ccb; // Fallback para caminho do banco
 
@@ -974,10 +991,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!ccbPath || latestPath !== ccbPath) {
             ccbPath = latestPath;
             console.log(`[CCB URL] ✅ Usando arquivo mais recente: ${ccbPath}`);
-          } else {
+          }
+else {
             console.log(`[CCB URL] ✅ Banco está atualizado com a versão mais recente`);
           }
-        } else {
+        }
+else {
           console.log(`[CCB URL] ⚠️ Nenhum arquivo encontrado no storage para CCB/${id}`);
         }
 
@@ -1028,7 +1047,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   });
                 }
               }
-            } catch (regenError) {
+            }
+catch (regenError) {
               console.error(error);
             }
           }
@@ -1048,7 +1068,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           filename: `CCB-${id}.pdf`,
           contentType: 'application/pdf',
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao buscar CCB' });
       }
@@ -1057,7 +1078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     '/api/propostas/:id',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
   _timingNormalizerMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1133,7 +1154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(propostas.id, idParam))
             .limit(1);
 
-          if (!result || result.length == 0) {
+          if (!result || _result.length == 0) {
             console.log(
               `🔐 [ATENDENTE BLOCKED] User ${user?.id} denied access to proposta ${idParam} - RLS policy blocked or not found`
             );
@@ -1181,7 +1202,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               documentos?.map((d) => d.nome_arquivo)
             );
             console.log(`🔍 [ANÁLISE] ==============================`);
-          } else {
+          }
+else {
             console.log(`🔍 [ANÁLISE] Erro ao listar arquivos no bucket:`, listError?.message);
           }
 
@@ -1208,7 +1230,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (documentsIndex !== -1) {
                   // Extrair caminho após '/documents/'
                   filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-                } else {
+                }
+else {
                   // Fallback: construir caminho baseado no nome do arquivo
                   const _fileName = doc.nome_arquivo;
                   filePath = `proposta-${idParam}/${fileName}`;
@@ -1232,7 +1255,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     url_visualizacao: signedUrlData.signedUrl,
                   });
                   console.log(`🔍 [ANÁLISE] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
-                } else {
+                }
+else {
                   console.log(
                     `🔍 [ANÁLISE] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`,
                     urlError?.message
@@ -1247,7 +1271,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     uploadDate: doc.created_at,
                   }); // Adiciona sem URL em caso de erro
                 }
-              } catch (error) {
+              }
+catch (error) {
                 console.log(
                   `🔍 [ANÁLISE] ❌ Erro ao processar documento ${doc.nome_arquivo}:`,
                   error
@@ -1292,7 +1317,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
 
           res.json(formattedProposta);
-        } else {
+        }
+else {
           // Para outros roles (ADMIN, GERENTE, ANALISTA), usar método original sem RLS
           const _proposta = await storage.getPropostaById(idParam);
 
@@ -1342,7 +1368,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (documentsIndex !== -1) {
                   // Extrair caminho após '/documents/'
                   filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-                } else {
+                }
+else {
                   // Fallback: construir caminho baseado no nome do arquivo
                   const _fileName = doc.nome_arquivo;
                   filePath = `proposta-${idParam}/${fileName}`;
@@ -1368,7 +1395,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   console.log(
                     `🔍 [ANÁLISE-OUTROS] ✅ URL gerada para documento: ${doc.nome_arquivo}`
                   );
-                } else {
+                }
+else {
                   console.log(
                     `🔍 [ANÁLISE-OUTROS] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`,
                     urlError?.message
@@ -1383,7 +1411,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     uploadDate: doc.created_at,
                   }); // Adiciona sem URL em caso de erro
                 }
-              } catch (error) {
+              }
+catch (error) {
                 console.log(
                   `🔍 [ANÁLISE-OUTROS] ❌ Erro ao processar documento ${doc.nome_arquivo}:`,
                   error
@@ -1411,7 +1440,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
           res.json(propostaComDocumentos);
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch proposta' });
       }
@@ -1425,7 +1455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint específico para associar documentos a uma proposta
   app.post(
     '/api/propostas/:id/documentos',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id: propostaId } = req.params;
@@ -1468,12 +1498,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             if (insertError) {
               console.error(error);
-            } else {
+            }
+else {
               console.log(
                 `[DEBUG] Documento ${fileName} associado com sucesso à proposta ${propostaId}`
               );
             }
-          } catch (docError) {
+          }
+catch (docError) {
             console.error(error);
           }
         }
@@ -1483,7 +1515,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: `${documentos.length} documentos associados com sucesso`,
           proposalId: propostaId,
         });
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           console.error(error);
           return res.status(500).json({error: "Error"});
@@ -1500,7 +1533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========================
   app.post(
     '/nova-proposta',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         console.log('📝 Progressive Enhancement: Form submission received');
@@ -1521,8 +1554,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         // Validate and create proposal
-        const _validatedData = insertPropostaSchema.parse(formData);
-        const _proposta = await storage.createProposta(validatedData);
+        const __validatedData = insertPropostaSchema.parse(formData);
+        const _proposta = await storage.createProposta(_validatedData);
 
         // For traditional form submission, redirect with success message
         const _successPage = `
@@ -1533,11 +1566,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Proposta Enviada - Simpix</title>
             <style>
-                body { font-family: Arial, sans-serif; padding: 2rem; background: #f9fafb; }
-                .container { max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                .success { color: #16a34a; text-align: center; }
-                .button { display: inline-block; padding: 0.75rem 1.5rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin-top: 1rem; }
-                .details { background: #f3f4f6; padding: 1rem; border-radius: 6px; margin-top: 1rem; }
+                body { font-family: Arial, sans-serif; padding: 2rem; background: #f9fafb;
+                .container { max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                .success { color: #16a34a; text-align: center;
+                .button { display: inline-block; padding: 0.75rem 1.5rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin-top: 1rem;
+                .details { background: #f3f4f6; padding: 1rem; border-radius: 6px; margin-top: 1rem;
             </style>
         </head>
         <body>
@@ -1568,7 +1601,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
 
         res.send(successPage);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
 
         // Error page for traditional form submission
@@ -1580,10 +1614,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Erro - Simpix</title>
             <style>
-                body { font-family: Arial, sans-serif; padding: 2rem; background: #f9fafb; }
-                .container { max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                .error { color: #dc2626; text-align: center; }
-                .button { display: inline-block; padding: 0.75rem 1.5rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin-top: 1rem; }
+                body { font-family: Arial, sans-serif; padding: 2rem; background: #f9fafb;
+                .container { max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                .error { color: #dc2626; text-align: center;
+                .button { display: inline-block; padding: 0.75rem 1.5rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin-top: 1rem;
             </style>
         </head>
         <body>
@@ -1618,15 +1652,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch(
     '/api/propostas/:id',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
   _requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _id = parseInt(req.params.id);
-        const _validatedData = updatePropostaSchema.parse(req.body);
-        const _proposta = await storage.updateProposta(id, validatedData);
+        const __validatedData = updatePropostaSchema.parse(req.body);
+        const _proposta = await storage.updateProposta(id, _validatedData);
         res.json(proposta);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -1638,13 +1673,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     '/api/propostas/status/:status',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _status = req.params.status;
         const _propostas = await storage.getPropostasByStatus(status);
         res.json(propostas);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch propostas' });
       }
@@ -1655,10 +1691,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
 
   // Document routes for proposals - REACTIVATED FOR DIAGNOSIS
-  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as unknown, getPropostaDocuments);
+  app.get('/api/propostas/:id/documents', _jwtAuthMiddleware as unknown, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
-  //   jwtAuthMiddleware as unknown,
+  //   _jwtAuthMiddleware as unknown,
   //   requireRoles(['ADMINISTRADOR', 'ANALISTA']),
   //   upload.single("file"),
   //   uploadPropostaDocument
@@ -1668,10 +1704,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
 
   // Rota para alternar status entre ativa/suspensa
-  app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as unknown, togglePropostaStatus);
+  app.put('/api/propostas/:id/toggle-status', _jwtAuthMiddleware as unknown, togglePropostaStatus);
 
   // Rota para buscar CCB assinada
-  app.get('/api/propostas/:id/ccb', jwtAuthMiddleware as unknown, getCcbAssinada);
+  app.get('/api/propostas/:id/ccb', _jwtAuthMiddleware as unknown, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
   app.post('/api/setup-storage', async (req, res) => {
@@ -1726,7 +1762,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bucket: bucket,
         allBuckets: buckets.map((b) => b.name).concat(['documents']),
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         message: 'Erro interno',
@@ -1738,7 +1775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload route for proposal documents during creation
   app.post(
     '/api/upload',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     upload.single('file'),
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1791,7 +1828,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           size: file.size,
           type: file.mimetype,
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro interno no upload' });
       }
@@ -1810,7 +1848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Buscar tabelas comerciais disponíveis com lógica hierárquica
   app.get(
     '/api/tabelas-comerciais-disponiveis',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { produtoId, parceiroId } = req.query;
@@ -1826,14 +1864,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _produtoIdNum = parseInt(produtoId as string);
         const _parceiroIdNum = parseInt(parceiroId as string);
 
-        if (isNaN(produtoIdNum) || isNaN(parceiroIdNum)) {
+        if (_isNaN(produtoIdNum) || _isNaN(parceiroIdNum)) {
           return res.status(400).json({
             message: 'produtoId e parceiroId devem ser números válidos',
           });
         }
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Buscando tabelas comerciais para produto ${produtoIdNum} e parceiro ${parceiroIdNum}`
+          `[${_getBrasiliaTimestamp()}] Buscando tabelas comerciais para produto ${produtoIdNum} e parceiro ${parceiroIdNum}`
         );
 
         // Import database connection
@@ -1869,13 +1907,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // STEP 2: Validação - Se encontrou tabelas personalizadas, retorna apenas elas
         if (tabelasPersonalizadas && tabelasPersonalizadas.length > 0) {
           console.log(
-            `[${getBrasiliaTimestamp()}] Encontradas ${tabelasPersonalizadas.length} tabelas personalizadas`
+            `[${_getBrasiliaTimestamp()}] Encontradas ${tabelasPersonalizadas.length} tabelas personalizadas`
           );
           return res.status(500).json({error: "Error"});
         }
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Nenhuma tabela personalizada encontrada, buscando tabelas gerais`
+          `[${_getBrasiliaTimestamp()}] Nenhuma tabela personalizada encontrada, buscando tabelas gerais`
         );
 
         // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
@@ -1905,10 +1943,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // STEP 4: Resultado Final
         const _resultado = tabelasGerais || [];
-        console.log(`[${getBrasiliaTimestamp()}] Encontradas ${resultado.length} tabelas gerais`);
+        console.log(`[${_getBrasiliaTimestamp()}] Encontradas ${resultado.length} tabelas gerais`);
 
         res.json(resultado);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           message: 'Erro interno do servidor',
@@ -1920,7 +1959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple GET endpoint for all commercial tables (for dropdowns)
   app.get(
     '/api/tabelas-comerciais',
-    jwtAuthMiddleware as unknown,
+    _jwtAuthMiddleware as unknown,
     async (req: AuthenticatedRequest, res) => {
       try {
         // Import database connection
@@ -1939,23 +1978,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For each table, get associated products
         const _tabelasWithProducts = await Promise.all(
           tabelas.map(async (tabela) => {
-            const _associations = await db
+            const __associations = await db
               .select({ produtoId: produtoTabelaComercial.produtoId })
               .from(produtoTabelaComercial)
               .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
 
             return {
               ...tabela,
-              produtoIds: associations.map((a) => a.produtoId),
+              produtoIds: _associations.map((a) => a.produtoId),
             };
           })
         );
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`
+          `[${_getBrasiliaTimestamp()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`
         );
         res.json(tabelasWithProducts);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           message: 'Erro ao buscar tabelas comerciais',
@@ -1967,8 +2007,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for creating commercial tables (N:N structure)
   app.post(
     '/api/admin/tabelas-comerciais',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -1987,7 +2027,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero').default(0),
         });
 
-        const _validatedData = createTabelaSchema.parse(req.body);
+        const __validatedData = createTabelaSchema.parse(req.body);
 
         // TRANSACTION: Create table and associate products
         const _result = await db.transaction(async (tx) => {
@@ -1995,30 +2035,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const [newTabela] = await tx
             .insert(tabelasComerciais)
             .values({
-              nomeTabela: validatedData.nomeTabela,
-              taxaJuros: validatedData.taxaJuros.toString(),
-              prazos: validatedData.prazos,
-              parceiroId: validatedData.parceiroId || null,
-              comissao: validatedData.comissao.toString(),
+              nomeTabela: _validatedData.nomeTabela,
+              taxaJuros: _validatedData.taxaJuros.toString(),
+              prazos: _validatedData.prazos,
+              parceiroId: _validatedData.parceiroId || null,
+              comissao: _validatedData.comissao.toString(),
             })
             .returning();
 
           // Step 2: Associate products via junction table
-          const _associations = validatedData.produtoIds.map((produtoId) => ({
+          const __associations = _validatedData.produtoIds.map((produtoId) => ({
   _produtoId,
             tabelaComercialId: newTabela.id,
           }));
 
-          await tx.insert(produtoTabelaComercial).values(associations);
+          await tx.insert(produtoTabelaComercial).values(_associations);
 
-          return newTabela; }
+          return newTabela;
         });
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Nova tabela comercial criada com ${validatedData.produtoIds.length} produtos: ${result.id}`
+          `[${_getBrasiliaTimestamp()}] Nova tabela comercial criada com ${_validatedData.produtoIds.length} produtos: ${_result.id}`
         );
         res.status(201).json(_result);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -2031,8 +2072,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for updating commercial tables (N:N structure)
   app.put(
     '/api/admin/tabelas-comerciais/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2040,8 +2081,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { z } = await import('zod');
         const { eq } = await import('drizzle-orm');
 
-        const _tabelaId = parseInt(req.params.id);
-        if (isNaN(tabelaId)) {
+        const __tabelaId = parseInt(req.params.id);
+        if (_isNaN(_tabelaId)) {
           return res.status(500).json({error: "Error"});
         }
 
@@ -2057,7 +2098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           comissao: z.number().min(0, 'Comissão deve ser maior ou igual a zero').default(0),
         });
 
-        const _validatedData = updateTabelaSchema.parse(req.body);
+        const __validatedData = updateTabelaSchema.parse(req.body);
 
         // TRANSACTION: Update table and reassociate products
         const _result = await db.transaction(async (tx) => {
@@ -2065,40 +2106,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const [updatedTabela] = await tx
             .update(tabelasComerciais)
             .set({
-              nomeTabela: validatedData.nomeTabela,
-              taxaJuros: validatedData.taxaJuros.toString(),
-              prazos: validatedData.prazos,
-              parceiroId: validatedData.parceiroId || null,
-              comissao: validatedData.comissao.toString(),
+              nomeTabela: _validatedData.nomeTabela,
+              taxaJuros: _validatedData.taxaJuros.toString(),
+              prazos: _validatedData.prazos,
+              parceiroId: _validatedData.parceiroId || null,
+              comissao: _validatedData.comissao.toString(),
             })
-            .where(eq(tabelasComerciais.id, tabelaId))
+            .where(eq(tabelasComerciais.id, _tabelaId))
             .returning();
 
           if (!updatedTabela) {
             throw new Error("Error");
           }
 
-          // Step 2: Delete existing product associations
+          // Step 2: Delete existing product _associations
           await tx
             .delete(produtoTabelaComercial)
-            .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
+            .where(eq(produtoTabelaComercial.tabelaComercialId, _tabelaId));
 
-          // Step 3: Create new product associations
-          const _associations = validatedData.produtoIds.map((produtoId) => ({
+          // Step 3: Create new product _associations
+          const __associations = _validatedData.produtoIds.map((produtoId) => ({
   _produtoId,
-            tabelaComercialId: tabelaId,
+            tabelaComercialId: _tabelaId,
           }));
 
-          await tx.insert(produtoTabelaComercial).values(associations);
+          await tx.insert(produtoTabelaComercial).values(_associations);
 
-          return updatedTabela; }
+          return updatedTabela;
         });
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Tabela comercial atualizada com ${validatedData.produtoIds.length} produtos: ${result.id}`
+          `[${_getBrasiliaTimestamp()}] Tabela comercial atualizada com ${_validatedData.produtoIds.length} produtos: ${_result.id}`
         );
         res.json(_result);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -2114,41 +2156,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for deleting commercial tables
   app.delete(
     '/api/admin/tabelas-comerciais/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
         const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
         const { eq } = await import('drizzle-orm');
 
-        const _tabelaId = parseInt(req.params.id);
-        if (isNaN(tabelaId)) {
+        const __tabelaId = parseInt(req.params.id);
+        if (_isNaN(_tabelaId)) {
           return res.status(500).json({error: "Error"});
         }
 
-        // TRANSACTION: Delete table and its associations
+        // TRANSACTION: Delete table and its _associations
         await db.transaction(async (tx) => {
-          // Step 1: Delete product associations
+          // Step 1: Delete product _associations
           await tx
             .delete(produtoTabelaComercial)
-            .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
+            .where(eq(produtoTabelaComercial.tabelaComercialId, _tabelaId));
 
           // Step 2: Soft delete the commercial table
           const _result = await tx
             .update(tabelasComerciais)
             .set({ deletedAt: new Date() })
-            .where(eq(tabelasComerciais.id, tabelaId))
+            .where(eq(tabelasComerciais.id, _tabelaId))
             .returning();
 
-          if (result.length == 0) {
+          if (_result.length == 0) {
             throw new Error("Error");
           }
         });
 
-        console.log(`[${getBrasiliaTimestamp()}] Tabela comercial deletada: ${tabelaId}`);
+        console.log(`[${_getBrasiliaTimestamp()}] Tabela comercial deletada: ${_tabelaId}`);
         res.status(204).send();
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof Error && error.message == 'Tabela comercial não encontrada') {
           return res.status(500).json({error: "Error"});
         }
@@ -2169,12 +2212,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint for formalization data - Using Supabase direct to avoid Drizzle orderSelectedFields error
   app.get(
     '/api/propostas/:id/formalizacao',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _propostaId = req.params.id;
         console.log(
-          `[${getBrasiliaTimestamp()}] 🔍 INICIO - Buscando dados de formalização para proposta: ${propostaId}`
+          `[${_getBrasiliaTimestamp()}] 🔍 INICIO - Buscando dados de formalização para proposta: ${propostaId}`
         );
 
         if (!propostaId) {
@@ -2185,7 +2228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const _supabase = createServerSupabaseAdminClient();
 
-        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
+        console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
 
         // Buscar proposta usando Supabase diretamente - incluindo numeroProposta
         const { data: proposta, error: propostaError } = await supabase
@@ -2194,8 +2237,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .eq('id', propostaId)
           .single();
 
-        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 2 - Proposta encontrada:`, !!proposta);
-        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 2.1 - Dados da proposta:`, {
+        console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 2 - Proposta encontrada:`, !!proposta);
+        console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 2.1 - Dados da proposta:`, {
           id: proposta?.id,
           status: proposta?.status,
           tabela_comercial_id: proposta?.tabela_comercial_id,
@@ -2205,13 +2248,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (propostaError || !proposta) {
           console.log(
-            `[${getBrasiliaTimestamp()}] ❌ Proposta ${propostaId} não encontrada:`,
+            `[${_getBrasiliaTimestamp()}] ❌ Proposta ${propostaId} não encontrada:`,
             propostaError?.message
           );
           return res.status(500).json({error: "Error"});
         }
 
-        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 3 - Buscando documentos...`);
+        console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 3 - Buscando documentos...`);
 
         // Buscar documentos da proposta
         const { data: documentos, error: docError } = await supabase
@@ -2220,11 +2263,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .eq('proposta_id', propostaId);
 
         console.log(
-          `[${getBrasiliaTimestamp()}] 🔍 STEP 4 - Documentos encontrados:`,
+          `[${_getBrasiliaTimestamp()}] 🔍 STEP 4 - Documentos encontrados:`,
           documentos?.length || 0
         );
         console.log(
-          `[${getBrasiliaTimestamp()}] 🔍 STEP 4.1 - Estrutura dos documentos:`,
+          `[${_getBrasiliaTimestamp()}] 🔍 STEP 4.1 - Estrutura dos documentos:`,
           documentos
         );
 
@@ -2232,7 +2275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let _documentosComUrls = [];
         if (documentos && documentos.length > 0) {
           console.log(
-            `[${getBrasiliaTimestamp()}] 🔍 STEP 4.2 - Gerando URLs assinadas para ${documentos.length} documentos...`
+            `[${_getBrasiliaTimestamp()}] 🔍 STEP 4.2 - Gerando URLs assinadas para ${documentos.length} documentos...`
           );
 
           for (const doc of documentos) {
@@ -2251,7 +2294,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (documentsIndex !== -1) {
                 // Extrair caminho após '/documents/'
                 filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-              } else {
+              }
+else {
                 // Fallback: construir caminho baseado no nome do arquivo
                 const _fileName = doc.nome_arquivo;
                 filePath = `proposta-${propostaId}/${fileName}`;
@@ -2275,14 +2319,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   url_visualizacao: signedUrlData.signedUrl,
                 });
                 console.log(
-                  `[${getBrasiliaTimestamp()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`
+                  `[${_getBrasiliaTimestamp()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`
                 );
-              } else {
+              }
+else {
                 console.log(
-                  `[${getBrasiliaTimestamp()}] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`,
+                  `[${_getBrasiliaTimestamp()}] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`,
                   urlError?.message
                 );
-                console.log(`[${getBrasiliaTimestamp()}] ❌ Caminho tentado: ${filePath}`);
+                console.log(`[${_getBrasiliaTimestamp()}] ❌ Caminho tentado: ${filePath}`);
                 documentosComUrls.push({
                   ...doc,
                   // Mesmo sem URL, mapear para formato esperado
@@ -2292,9 +2337,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   uploadDate: doc.created_at,
                 }); // Adiciona sem URL em caso de erro
               }
-            } catch (error) {
+            }
+catch (error) {
               console.log(
-                `[${getBrasiliaTimestamp()}] ❌ Erro ao processar documento ${doc.nome_arquivo}:`,
+                `[${_getBrasiliaTimestamp()}] ❌ Erro ao processar documento ${doc.nome_arquivo}:`,
                 error
               );
               documentosComUrls.push({
@@ -2312,13 +2358,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Buscar taxa de juros da tabela comercial se existir
         let _taxaJurosTabela = null;
         console.log(
-          `[${getBrasiliaTimestamp()}] 🔍 STEP 5 - Verificando tabela_comercial_id:`,
+          `[${_getBrasiliaTimestamp()}] 🔍 STEP 5 - Verificando tabela_comercial_id:`,
           proposta.tabela_comercial_id
         );
 
         if (proposta.tabela_comercial_id) {
           console.log(
-            `[${getBrasiliaTimestamp()}] 🔍 STEP 5.1 - Buscando tabela comercial ID:`,
+            `[${_getBrasiliaTimestamp()}] 🔍 STEP 5.1 - Buscando tabela comercial ID:`,
             proposta.tabela_comercial_id
           );
 
@@ -2329,7 +2375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .single();
 
           console.log(
-            `[${getBrasiliaTimestamp()}] 🔍 STEP 5.2 - Resultado da consulta tabela comercial:`,
+            `[${_getBrasiliaTimestamp()}] 🔍 STEP 5.2 - Resultado da consulta tabela comercial:`,
             {
               data: tabelaComercial,
               error: tabelaError?.message,
@@ -2340,23 +2386,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (tabelaComercial && !tabelaError) {
             taxaJurosTabela = tabelaComercial.taxa_juros;
             console.log(
-              `[${getBrasiliaTimestamp()}] ✅ Taxa de juros encontrada:`,
+              `[${_getBrasiliaTimestamp()}] ✅ Taxa de juros encontrada:`,
   _taxaJurosTabela,
               `% da tabela "${tabelaComercial.nome_tabela}"`
             );
-          } else {
+          }
+else {
             console.log(
-              `[${getBrasiliaTimestamp()}] ❌ Erro ao buscar tabela comercial:`,
+              `[${_getBrasiliaTimestamp()}] ❌ Erro ao buscar tabela comercial:`,
               tabelaError?.message
             );
           }
-        } else {
+        }
+else {
           console.log(
-            `[${getBrasiliaTimestamp()}] ⚠️ AVISO: Proposta ${propostaId} não possui tabela_comercial_id`
+            `[${_getBrasiliaTimestamp()}] ⚠️ AVISO: Proposta ${propostaId} não possui tabela_comercial_id`
           );
         }
 
-        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 6 - Processando dados JSONB...`);
+        console.log(`[${_getBrasiliaTimestamp()}] 🔍 STEP 6 - Processando dados JSONB...`);
 
         // Parse dos dados JSONB antes de retornar
         const _propostaProcessada = {
@@ -2378,7 +2426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         console.log(
-          `[${getBrasiliaTimestamp()}] ✅ SUCESSO - Dados de formalização retornados para proposta ${propostaId}:`,
+          `[${_getBrasiliaTimestamp()}] ✅ SUCESSO - Dados de formalização retornados para proposta ${propostaId}:`,
           {
             id: propostaProcessada.id,
             status: propostaProcessada.status,
@@ -2397,9 +2445,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         res.json(propostaProcessada);
-      } catch (error) {
+      }
+catch (error) {
         console.error(
-          `[${getBrasiliaTimestamp()}] ❌ ERRO ao buscar dados de formalização:`,
+          `[${_getBrasiliaTimestamp()}] ❌ ERRO ao buscar dados de formalização:`,
           error
         );
         res.status(500).json({
@@ -2430,7 +2479,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { isNull } = await import('drizzle-orm');
       const _allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
       res.json(allParceiros);
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao buscar parceiros' });
     }
@@ -2444,7 +2494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { eq } = await import('drizzle-orm');
 
       const _parceiroId = parseInt(req.params.id);
-      if (isNaN(parceiroId)) {
+      if (_isNaN(parceiroId)) {
         return res.status(500).json({error: "Error"});
       }
 
@@ -2455,7 +2505,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json(parceiro);
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao buscar parceiro' });
     }
@@ -2464,19 +2515,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for partners - POST create
   app.post(
     '/api/admin/parceiros',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
         const { parceiros, insertParceiroSchema } = await import('../shared/schema');
         const { z } = await import('zod');
 
-        const _validatedData = insertParceiroSchema.parse(req.body);
-        const [newParceiro] = await db.insert(parceiros).values(validatedData).returning();
+        const __validatedData = insertParceiroSchema.parse(req.body);
+        const [newParceiro] = await db.insert(parceiros).values(_validatedData).returning();
 
         res.status(201).json(newParceiro);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -2489,8 +2541,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for partners - PUT update
   app.put(
     '/api/admin/parceiros/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2499,14 +2551,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { z } = await import('zod');
 
         const _parceiroId = parseInt(req.params.id);
-        if (isNaN(parceiroId)) {
+        if (_isNaN(parceiroId)) {
           return res.status(500).json({error: "Error"});
         }
 
-        const _validatedData = updateParceiroSchema.parse(req.body);
+        const __validatedData = updateParceiroSchema.parse(req.body);
         const [updatedParceiro] = await db
           .update(parceiros)
-          .set(validatedData)
+          .set(_validatedData)
           .where(eq(parceiros.id, parceiroId))
           .returning();
 
@@ -2515,7 +2567,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         res.json(updatedParceiro);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -2528,8 +2581,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint for partners - DELETE
   app.delete(
     '/api/admin/parceiros/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import('../server/lib/supabase');
@@ -2537,7 +2590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { eq, and, isNull } = await import('drizzle-orm');
 
         const _parceiroId = parseInt(req.params.id);
-        if (isNaN(parceiroId)) {
+        if (_isNaN(parceiroId)) {
           return res.status(500).json({error: "Error"});
         }
 
@@ -2570,7 +2623,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(eq(parceiros.id, parceiroId));
 
         res.status(204).send();
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao excluir parceiro' });
       }
@@ -2582,7 +2636,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const _produtos = await buscarTodosProdutos();
       res.json(produtos);
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao buscar produtos' });
     }
@@ -2621,7 +2676,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[PRODUTOS API] Produto criado:', novoProduto);
 
       res.status(201).json(novoProduto);
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao criar produto' });
     }
@@ -2652,7 +2708,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tacTipo: tacTipo ?? 'fixo',
       });
       res.json(produtoAtualizado);
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao atualizar produto' });
     }
@@ -2664,7 +2721,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await deletarProduto(id);
       res.status(204).send(); // 204 No Content on successful deletion
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
 
       // Check if it's a dependency error
@@ -2690,12 +2748,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     taxaDeJurosMensal: number
   ): number => {
     if (taxaDeJurosMensal <= 0) {
-      return valorSolicitado / prazoEmMeses; }
+      return valorSolicitado / prazoEmMeses;
     }
     const _i = taxaDeJurosMensal / 100; // Convertendo a taxa percentual para decimal
     const _pmt =
       (valorSolicitado * (i * Math.pow(1 + i, prazoEmMeses))) / (Math.pow(1 + i, prazoEmMeses) - 1);
-    return parseFloat(pmt.toFixed(2)); }
+    return parseFloat(pmt.toFixed(2));
   };
 
   // Rota para simular crédito COM DADOS REAIS DO BANCO
@@ -2753,7 +2811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (tabelaPadrao.length > 0) {
               taxaJurosMensal = parseFloat(tabelaPadrao[0].taxaJuros);
               console.log('[SIMULAÇÃO] Usando tabela padrão do parceiro:', {
-                tabelaId: parceiroData.tabelaComercialPadraoId,
+                _tabelaId: parceiroData.tabelaComercialPadraoId,
                 taxaJuros: taxaJurosMensal,
               });
             }
@@ -2863,7 +2921,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       return res.status(500).json({error: "Error"});
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       return res.status(500).json({
         error: 'Erro ao processar simulação',
@@ -2885,7 +2944,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint GET para simulação de crédito
   // Server time endpoint for reliable timestamp source
   app.get('/api/server-time', (req, res) => {
-    res.json({ now: getBrasiliaTimestamp() });
+    res.json({ now: _getBrasiliaTimestamp() });
   });
 
   app.get('/api/simulacao', (req, res) => {
@@ -2894,7 +2953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const _valorSolicitado = parseFloat(valor as string);
     const _prazoEmMeses = parseInt(prazo as string);
 
-    if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
+    if (_isNaN(valorSolicitado) || _isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
       return res.status(500).json({error: "Error"});
     }
 
@@ -2951,7 +3010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update proposal formalization step
   app.patch(
     '/api/propostas/:id/etapa-formalizacao',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -3015,7 +3074,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
           console.log(`✅ [ETAPA DEBUG] Permission granted for CCB generation`);
-        } else {
+        }
+else {
           // Other steps (ClickSign, Biometry) only ATENDENTE of the same store
           console.log(
             `🔍 [ETAPA DEBUG] Checking other steps permissions - Role: ${req.user?.role}, LojaId: ${req.user?.loja_id}, PropostaLojaId: ${proposta.lojaId}`
@@ -3043,35 +3103,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Automatically generate CCB when marked as complete
           if (concluida && !proposta.ccbGerado) {
-            console.log(`[${getBrasiliaTimestamp()}] Gerando CCB para proposta ${id}`);
+            console.log(`[${_getBrasiliaTimestamp()}] Gerando CCB para proposta ${id}`);
 
             try {
               const { ccbGenerationService } = await import('./services/ccbGenerationService');
               const _result = await ccbGenerationService.generateCCB(id);
-              if (!result.success) {
+              if (!_result.success) {
                 throw new Error("Error");
               }
-              updateData.caminhoCcbAssinado = result.pdfPath;
-              console.log(`[${getBrasiliaTimestamp()}] CCB gerada com sucesso: ${result.pdfPath}`);
-            } catch (error) {
+              updateData.caminhoCcbAssinado = _result.pdfPath;
+              console.log(`[${_getBrasiliaTimestamp()}] CCB gerada com sucesso: ${_result.pdfPath}`);
+            }
+catch (error) {
               console.error(error);
               // Don't fail the entire request if CCB generation fails
             }
           }
-        } else if (etapa == 'assinatura_eletronica') {
+        }
+else if (etapa == 'assinatura_eletronica') {
           updateData.assinaturaEletronicaConcluida = concluida;
 
           // TODO: Integrate with ClickSign when marked as complete
           if (concluida && !proposta.assinaturaEletronicaConcluida) {
-            console.log(`[${getBrasiliaTimestamp()}] Enviando para ClickSign - proposta ${id}`);
+            console.log(`[${_getBrasiliaTimestamp()}] Enviando para ClickSign - proposta ${id}`);
           }
-        } else if (etapa == 'biometria') {
+        }
+else if (etapa == 'biometria') {
           updateData.biometriaConcluida = concluida;
 
           // Generate boletos when biometry is complete
           if (concluida && !proposta.biometriaConcluida) {
             // TODO: Generate payment boletos
-            console.log(`[${getBrasiliaTimestamp()}] Gerando boletos para proposta ${id}`);
+            console.log(`[${_getBrasiliaTimestamp()}] Gerando boletos para proposta ${id}`);
           }
         }
 
@@ -3119,21 +3182,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
               },
             });
             console.log(
-              `[${getBrasiliaTimestamp()}] Transição de status validada e executada com sucesso`
+              `[${_getBrasiliaTimestamp()}] Transição de status validada e executada com sucesso`
             );
-          } catch (error) {
+          }
+catch (error) {
             if (error instanceof InvalidTransitionError) {
               console.error(
-                `[${getBrasiliaTimestamp()}] Transição de status inválida: ${error.message}`
+                `[${_getBrasiliaTimestamp()}] Transição de status inválida: ${error.message}`
               );
               // Não retornamos erro 409 aqui pois é uma operação interna após conclusão de etapas
               // O sistema deveria estar em um estado válido para esta transição
-            } else {
+            }
+else {
               console.error(error);
             }
           }
 
-          console.log(`[${getBrasiliaTimestamp()}] Proposta ${id} pronta para pagamento`);
+          console.log(`[${_getBrasiliaTimestamp()}] Proposta ${id} pronta para pagamento`);
         }
 
         res.json({
@@ -3142,7 +3207,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   _concluida,
           proposta: updatedProposta,
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           message: 'Erro ao atualizar etapa de formalização',
@@ -3154,7 +3220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update proposal status - REAL IMPLEMENTATION WITH AUDIT TRAIL
   app.put(
     '/api/propostas/:id/status',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3205,7 +3271,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 statusAnterior: currentProposta.status,
               },
             });
-          } catch (error) {
+          }
+catch (error) {
             if (error instanceof InvalidTransitionError) {
               // Retornar 409 Conflict para transições inválidas
               throw { statusCode: 409, message: error.message };
@@ -3225,14 +3292,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Skip comunicacaoLogs for now - focus on propostaLogs for audit
           // This will be implemented later for client communication tracking
 
-          return updatedProposta; }
+          return updatedProposta;
         });
 
         console.log(
-          `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`
+          `[${_getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${_result.status} para ${status}`
         );
         res.json(_result);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         if (error instanceof Error && error.message == 'Proposta não encontrada') {
           return res.status(500).json({error: "Error"});
@@ -3250,7 +3318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Dashboard stats
-  app.get('/api/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/dashboard/stats', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const _allPropostas = await storage.getPropostas();
 
@@ -3262,7 +3330,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(stats);
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Failed to fetch stats' });
     }
@@ -3272,14 +3341,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all stores managed by a specific manager
   app.get(
     '/api/gerentes/:gerenteId/lojas',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _gerenteId = parseInt(req.params.gerenteId);
         const _lojaIds = await storage.getLojasForGerente(gerenteId);
         res.json(lojaIds);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch stores for manager' });
       }
@@ -3289,14 +3359,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all managers for a specific store
   app.get(
     '/api/lojas/:lojaId/gerentes',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _lojaId = parseInt(req.params.lojaId);
         const _gerenteIds = await storage.getGerentesForLoja(lojaId);
         res.json(gerenteIds);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch managers for store' });
       }
@@ -3306,14 +3377,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add a manager to a store
   app.post(
     '/api/gerente-lojas',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _validatedData = insertGerenteLojaSchema.parse(req.body);
-        const _relationship = await storage.addGerenteToLoja(validatedData);
+        const __validatedData = insertGerenteLojaSchema.parse(req.body);
+        const _relationship = await storage.addGerenteToLoja(_validatedData);
         res.json(relationship);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -3326,15 +3398,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Remove a manager from a store
   app.delete(
     '/api/gerente-lojas/:gerenteId/:lojaId',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _gerenteId = parseInt(req.params.gerenteId);
         const _lojaId = parseInt(req.params.lojaId);
         await storage.removeGerenteFromLoja(gerenteId, lojaId);
         res.json({ message: 'Manager removed from store successfully' });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to remove manager from store' });
       }
@@ -3344,14 +3417,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all relationships for a specific manager
   app.get(
     '/api/gerentes/:gerenteId/relationships',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _gerenteId = parseInt(req.params.gerenteId);
         const _relationships = await storage.getGerenteLojas(gerenteId);
         res.json(relationships);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch manager relationships' });
       }
@@ -3376,7 +3450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Now allows ADMINISTRADOR, DIRETOR, and GERENTE to create users
   app.get(
     '/api/admin/system/metadata',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3392,7 +3466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _totalLojas = result[0]?.count || 0;
 
         res.json({ totalLojas });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao buscar metadados do sistema' });
       }
@@ -3402,7 +3477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get lojas by parceiro ID for server-side filtering
   app.get(
     '/api/admin/parceiros/:parceiroId/lojas',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -3411,14 +3486,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { eq } = await import('drizzle-orm');
 
         const _parceiroId = parseInt(req.params.parceiroId);
-        if (isNaN(parceiroId)) {
+        if (_isNaN(parceiroId)) {
           return res.status(500).json({error: "Error"});
         }
 
         const _lojasResult = await db.select().from(lojas).where(eq(lojas.parceiroId, parceiroId));
 
         res.json(lojasResult);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao buscar lojas do parceiro' });
       }
@@ -3430,13 +3506,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET all active lojas
   app.get(
     '/api/admin/lojas',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
         const _lojas = await storage.getLojas();
         res.json(lojas);
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao buscar lojas' });
       }
@@ -3447,7 +3524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/lojas/:id', timingNormalizerMiddleware, async (req, res) => {
     try {
       const _id = parseInt(req.params.id);
-      if (isNaN(id)) {
+      if (_isNaN(id)) {
         return res.status(500).json({error: "Error"});
       }
 
@@ -3457,7 +3534,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json(loja);
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro ao buscar loja' });
     }
@@ -3466,14 +3544,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST create new loja
   app.post(
     '/api/admin/lojas',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const _validatedData = insertLojaSchema.strict().parse(req.body);
-        const _newLoja = await storage.createLoja(validatedData);
+        const __validatedData = insertLojaSchema.strict().parse(req.body);
+        const _newLoja = await storage.createLoja(_validatedData);
         res.status(201).json(newLoja);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -3486,24 +3565,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PUT update loja
   app.put(
     '/api/admin/lojas/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _id = parseInt(req.params.id);
-        if (isNaN(id)) {
+        if (_isNaN(id)) {
           return res.status(500).json({error: "Error"});
         }
 
-        const _validatedData = updateLojaSchema.strict().parse(req.body);
-        const _updatedLoja = await storage.updateLoja(id, validatedData);
+        const __validatedData = updateLojaSchema.strict().parse(req.body);
+        const _updatedLoja = await storage.updateLoja(id, _validatedData);
 
         if (!updatedLoja) {
           return res.status(500).json({error: "Error"});
         }
 
         res.json(updatedLoja);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof z.ZodError) {
           return res.status(500).json({error: "Error"});
         }
@@ -3516,12 +3596,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DELETE soft delete loja (set is_active = false)
   app.delete(
     '/api/admin/lojas/:id',
-  _jwtAuthMiddleware,
-  _requireAdmin,
+  __jwtAuthMiddleware,
+  __requireAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _id = parseInt(req.params.id);
-        if (isNaN(id)) {
+        if (_isNaN(id)) {
           return res.status(500).json({error: "Error"});
         }
 
@@ -3544,7 +3624,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Perform soft delete
         await storage.deleteLoja(id);
         res.json({ message: 'Loja desativada com sucesso' });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao desativar loja' });
       }
@@ -3552,7 +3633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // User profile endpoint for RBAC context
-  app.get('/api/auth/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/profile', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(500).json({error: "Error"});
@@ -3565,7 +3646,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         full_name: req.user!.full_name,
         loja_id: req.user!.loja_id,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
@@ -3581,18 +3663,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         status: 'healthy',
-        timestamp: getBrasiliaTimestamp(),
+        timestamp: _getBrasiliaTimestamp(),
         checks: {
           getUsers: { status: 'ok', count: users.length },
           getLojas: { status: 'ok', count: lojas.length },
           getUsersWithDetails: { status: 'ok', count: usersWithDetails.length },
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         status: 'unhealthy',
-        timestamp: getBrasiliaTimestamp(),
+        timestamp: _getBrasiliaTimestamp(),
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -3615,7 +3698,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: error ? 'error' : 'ok',
             error: error?.message || null,
           };
-        } catch (err) {
+        }
+catch (err) {
           checks[table] = {
             status: 'error',
             error: err instanceof Error ? err.message : 'Unknown error',
@@ -3627,14 +3711,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(allHealthy ? 200 : 500).json({
         status: allHealthy ? 'healthy' : 'unhealthy',
-        timestamp: getBrasiliaTimestamp(),
+        timestamp: _getBrasiliaTimestamp(),
         tables: checks,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         status: 'unhealthy',
-        timestamp: getBrasiliaTimestamp(),
+        timestamp: _getBrasiliaTimestamp(),
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -3652,7 +3737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     '/api/upload',
     upload.single('file'),
   _secureFileValidationMiddleware,
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
         const _file = req.file;
@@ -3702,7 +3787,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           size: file.size,
           type: file.mimetype,
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           message: 'Erro interno do servidor no upload',
@@ -3759,7 +3845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/alertas', alertasRouter);
 
   // Register Monitoring routes (Admin only)
-  app.use('/api/monitoring', jwtAuthMiddleware, requireAdmin, monitoringRoutes);
+  app.use('/api/monitoring', _jwtAuthMiddleware, _requireAdmin, monitoringRoutes);
 
   // Register CCB V2 Intelligent Test routes
   app.use('/api/ccb-test-v2', ccbIntelligentTestRoutes);
@@ -3855,20 +3941,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { ccbGenerationService } = await import('./services/ccbGenerationService');
       const _result = await ccbGenerationService.generateCCB(proposalId);
 
-      if (!result.success) {
+      if (!_result.success) {
         return res.status(500).json({
           success: false,
-          error: result.error,
+          error: _result.error,
         });
       }
 
-      console.log('✅ [CCB TEST] CCB generated successfully:', result.pdfPath);
+      console.log('✅ [CCB TEST] CCB generated successfully:', _result.pdfPath);
       res.json({
         success: true,
         message: 'CCB gerado com sucesso para teste',
-        pdfPath: result.pdfPath,
+        pdfPath: _result.pdfPath,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         success: false,
@@ -3926,7 +4013,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🧪 [CCB DEBUG] UF:', debugInfo.expectedRendering.uf);
 
       return res.status(500).json({error: "Error"});
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       return res.status(500).json({error: "Error"});
     }
@@ -3979,7 +4067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/owasp', owaspRoutes);
 
   // ✅ PROJETO CÉRBERO - Endpoints simplificados para SCA e SAST
-  app.get('/api/security/run-sca', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/security/run-sca', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       console.log('🔍 [SCA] Executando análise SCA...');
 
@@ -3991,7 +4079,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const _fs = await import('fs/promises');
         const _data = await fs.readFile(reportPath, 'utf-8');
         reportData = JSON.parse(_data);
-      } catch (e) {
+      }
+catch (e) {
         console.error(error);
         return res.status(500).json({error: "Error"});
       }
@@ -4029,7 +4118,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timestamp: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         success: false,
@@ -4038,7 +4128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/security/run-sast', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/security/run-sast', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       console.log('🔍 [SAST] Executando análise SAST...');
 
@@ -4082,7 +4172,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: sastResults,
         timestamp: new Date().toISOString(),
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         success: false,
@@ -4140,7 +4231,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         status: health,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error(error);
       res.status(500).json({
         success: false,
@@ -4151,7 +4243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(
     '/api/test/job-queue',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -4172,8 +4264,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userId: req.user?.id,
               timestamp: new Date().toISOString(),
             });
-            break; }
-
+            break;
+          }
           case 'boleto': {
             queueName = 'boleto-sync';
             job = await queues.boletoSync.add('TEST_BOLETO_JOB', {
@@ -4182,8 +4274,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userId: req.user?.id,
               timestamp: new Date().toISOString(),
             });
-            break; }
-
+            break;
+          }
           default:
             queueName = 'pdf-processing';
             job = await queues.pdfProcessing.add('TEST_GENERIC_JOB', {
@@ -4215,7 +4307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           queuesHealth: health,
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           success: false,
@@ -4229,7 +4322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para verificar status das filas
   app.get(
     '/api/test/queue-status',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -4242,7 +4335,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timestamp: new Date().toISOString(),
           queues: health,
         });
-      } catch (error) {
+      }
+catch (error) {
         console.error(error);
         res.status(500).json({
           success: false,
@@ -4254,5 +4348,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ================ END JOB QUEUE TEST ================
 
   const _httpServer = createServer(app);
-  return httpServer; }
+  return httpServer;
 }

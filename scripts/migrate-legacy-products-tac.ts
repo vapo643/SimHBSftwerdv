@@ -82,7 +82,8 @@ async function migrateLegacyProductsTac() {
     console.log(`   Valor TAC aplicado: R$ 50,00`);
     console.log(`   Tipo TAC aplicado: fixo`);
     console.log(`   Timestamp: ${new Date().toISOString()}`);
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [MIGRAÇÃO TAC] Erro durante a migração:', error);
     process.exit(1);
   }

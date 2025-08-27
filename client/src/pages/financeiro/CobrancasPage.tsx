@@ -182,7 +182,7 @@ export default function CobrancasPage() {
     onSuccess: (result: MutationResponse) => {
       toast({
         title: 'Sucesso',
-        description: result.message || 'Vencimento(s) prorrogado(s) com sucesso',
+        description: _result.message || 'Vencimento(s) prorrogado(s) com sucesso',
       });
       setShowProrrogarModal(false);
       setBoletosParaProrrogar([]);
@@ -208,7 +208,7 @@ export default function CobrancasPage() {
     onSuccess: (result: MutationResponse) => {
       toast({
         title: 'Sucesso',
-        description: result.message || 'Desconto de quitação aplicado com sucesso',
+        description: _result.message || 'Desconto de quitação aplicado com sucesso',
       });
       setShowDescontoModal(false);
       setEtapaDesconto(1);
@@ -320,7 +320,8 @@ export default function CobrancasPage() {
               description: 'A lista de cobranças foi atualizada com novos boletos',
               duration: 2000,
             });
-          } else if (payload.eventType == 'UPDATE') {
+          }
+else if (payload.eventType == 'UPDATE') {
             // Se o boleto foi cancelado
             if (payload.new?.situacao == 'CANCELADO' && payload.old?.situacao !== 'CANCELADO') {
               console.log(
@@ -346,11 +347,14 @@ export default function CobrancasPage() {
       .subscribe((status) => {
         if (status == 'SUBSCRIBED') {
           console.log('✅ [REALTIME] Conectado ao canal de atualizações de cobranças');
-        } else if (status == 'CHANNEL_ERROR') {
+        }
+else if (status == 'CHANNEL_ERROR') {
           console.error('❌ [REALTIME] Erro ao conectar ao canal');
-        } else if (status == 'TIMED_OUT') {
+        }
+else if (status == 'TIMED_OUT') {
           console.error('⏱️ [REALTIME] Timeout ao conectar');
-        } else if (status == 'CLOSED') {
+        }
+else if (status == 'CLOSED') {
           console.log('🔌 [REALTIME] Canal fechado');
         }
       });
@@ -403,7 +407,8 @@ export default function CobrancasPage() {
           if (response.syncStatus == 'em_andamento' && pollCount < 20) {
             setIsPolling(true);
             setPollCount((prev) => prev + 1);
-          } else {
+          }
+else {
             setIsPolling(false);
             if (pollCount >= 20) {
               console.log(`[PAM V1.0 POLLING] Limite de tentativas atingido (20)`);
@@ -416,7 +421,8 @@ export default function CobrancasPage() {
             }
           }
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error('[PAM V1.0 POLLING] Erro ao verificar status:', error);
         setSyncStatus('falhou');
         setIsPolling(false);
@@ -463,14 +469,16 @@ export default function CobrancasPage() {
         title: 'Sucesso',
         description: 'Observação salva com sucesso',
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao salvar observação:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar a observação',
         variant: 'destructive',
       });
-    } finally {
+    }
+finally {
       setSalvandoObservacao(false);
     }
   };
@@ -518,7 +526,8 @@ export default function CobrancasPage() {
       if (doc.length == 11) {
         // CPF
         return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`; }
-      } else if (doc.length == 14) {
+      }
+else if (doc.length == 14) {
         // CNPJ
         return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`; }
       }
@@ -562,7 +571,8 @@ export default function CobrancasPage() {
         title: 'Exportação concluída',
         description: `${data.total} registros exportados com sucesso.`,
       });
-    } catch (error) {
+    }
+catch (error) {
       toast({
         title: 'Erro na exportação',
         description: 'Não foi possível exportar os dados.',
@@ -588,7 +598,7 @@ export default function CobrancasPage() {
         ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
 
         // Verifica se algum dos campos válidos contém o termo de busca
-        return searchableFields.some((field) => String(field).toLowerCase().includes(search)); }
+        return searchableFields.some((field) => String(field).toLowerCase().includes(search));
       })
     : [];
 
@@ -687,16 +697,16 @@ export default function CobrancasPage() {
     if (proposta.interSituacao) {
       const _situacao = proposta.interSituacao.toUpperCase();
       if (situacao == 'RECEBIDO' || situacao == 'MARCADO_RECEBIDO') {
-        return { text: 'Pago', color: 'text-green-600' }; }
+        return { text: 'Pago', color: 'text-green-600' }
       }
       if (situacao == 'CANCELADO' || situacao == 'EXPIRADO' || situacao == 'FALHA_EMISSAO') {
-        return { text: 'Cancelado', color: 'text-gray-600' }; }
+        return { text: 'Cancelado', color: 'text-gray-600' }
       }
     }
 
     // Se o status local indica pago
     if (proposta.status == 'quitado' || proposta.status == 'pago') {
-      return { text: 'Pago', color: 'text-green-600' }; }
+      return { text: 'Pago', color: 'text-green-600' }
     }
 
     // Calcular baseado na data de vencimento
@@ -706,7 +716,7 @@ export default function CobrancasPage() {
       : null;
 
     if (!dataVencimento) {
-      return { text: 'Sem vencimento', color: 'text-gray-500' }; }
+      return { text: 'Sem vencimento', color: 'text-gray-500' }
     }
 
     // Se já venceu
@@ -719,21 +729,21 @@ export default function CobrancasPage() {
 
     // Se vence hoje
     if (isToday(dataVencimento)) {
-      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' }; }
+      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' }
     }
 
     // Se vence nos próximos 7 dias
     const _diasParaVencer = differenceInDays(dataVencimento, hoje);
     if (diasParaVencer > 0 && diasParaVencer <= 7) {
-      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' }; }
+      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' }
     }
 
     // Para todos os outros casos, mostrar a data de vencimento
     if (isFuture(dataVencimento)) {
-      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' }; }
+      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' }
     }
 
-    return { text: 'Em dia', color: 'text-green-600' }; }
+    return { text: 'Em dia', color: 'text-green-600' }
   };
 
   return (
@@ -1135,7 +1145,8 @@ export default function CobrancasPage() {
                           const _codigo = boleto.codigoSolicitacao || '';
                           if (boletosParaProrrogar.includes(codigo)) {
                             setBoletosParaProrrogar((prev) => prev.filter((c) => c !== codigo));
-                          } else if (codigo) {
+                          }
+else if (codigo) {
                             setBoletosParaProrrogar((prev) => [...prev, codigo]);
                           }
                         }}
@@ -1534,13 +1545,15 @@ export default function CobrancasPage() {
                   onClick={() => {
                     if (etapaDesconto == 1 && debtInfo) {
                       setEtapaDesconto(2);
-                    } else if (
+                    }
+else if (
                       etapaDesconto == 2 &&
                       novoValorQuitacao > 0 &&
                       novasParcelas.length > 0
                     ) {
                       setEtapaDesconto(3);
-                    } else {
+                    }
+else {
                       toast({
                         title: 'Erro',
                         description: 'Configure todos os campos necessários',
@@ -1906,7 +1919,8 @@ export default function CobrancasPage() {
                                       title: 'Download iniciado',
                                       description: 'O carnê já estava pronto.',
                                     });
-                                  } else if (response.jobId) {
+                                  }
+else if (response.jobId) {
                                     // CENÁRIO 2: Novo carnê está a ser gerado. Iniciar polling.
                                     console.log(
                                       '[CARNE] Geração de novo carnê iniciada. Job ID:',
@@ -1920,13 +1934,15 @@ export default function CobrancasPage() {
 
                                     // TODO: Implementar polling para aguardar conclusão
                                     // (Polling será implementado em iteração futura conforme necessário)
-                                  } else {
+                                  }
+else {
                                     // CENÁRIO DE ERRO: Resposta inesperada
                                     throw new Error(
                                       'Resposta da API inválida - sem data.url nem jobId.'
                                     );
                                   }
-                                } else {
+                                }
+else {
                                   toast({
                                     title: 'Erro na geração',
                                     description:
@@ -1934,7 +1950,8 @@ export default function CobrancasPage() {
                                     variant: 'destructive',
                                   });
                                 }
-                              } catch (error) {
+                              }
+catch (error) {
                                 toast({
                                   title: 'Erro ao gerar carnê',
                                   description: 'Não foi possível gerar o carnê consolidado',
@@ -1973,7 +1990,8 @@ export default function CobrancasPage() {
                                 queryClient.invalidateQueries({
                                   queryKey: ['/api/cobrancas/ficha', selectedPropostaId],
                                 });
-                              } catch (error) {
+                              }
+catch (error) {
                                 toast({
                                   title: 'Erro na sincronização',
                                   description: 'Não foi possível sincronizar com o Banco Inter',
@@ -2033,7 +2051,8 @@ export default function CobrancasPage() {
                                         onClick={() => {
                                           if (parcela.pixCopiaECola) {
                                             copyToClipboard(parcela.pixCopiaECola, 'PIX');
-                                          } else {
+                                          }
+else {
                                             toast({
                                               title: 'PIX não disponível',
                                               description:
@@ -2090,7 +2109,8 @@ export default function CobrancasPage() {
                                         title: 'PDF aberto',
                                         description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
                                       });
-                                    } catch (error) {
+                                    }
+catch (error) {
                                       console.error(
                                         '[PDF VIEW] Erro ao abrir PDF individual:',
                                         error
@@ -2106,13 +2126,15 @@ export default function CobrancasPage() {
                                             "O PDF ainda não foi sincronizado. Tente 'Atualizar Status' primeiro.",
                                           variant: 'destructive',
                                         });
-                                      } else if (error?.message?.includes('BOLETO_NOT_FOUND')) {
+                                      }
+else if (error?.message?.includes('BOLETO_NOT_FOUND')) {
                                         toast({
                                           title: 'Boleto não encontrado',
                                           description: 'Boleto não encontrado no sistema do banco.',
                                           variant: 'destructive',
                                         });
-                                      } else if (
+                                      }
+else if (
                                         error?.message?.includes('401') ||
                                         error?.message?.includes('Token')
                                       ) {
@@ -2121,7 +2143,8 @@ export default function CobrancasPage() {
                                           description: 'Sessão expirada. Faça login novamente.',
                                           variant: 'destructive',
                                         });
-                                      } else {
+                                      }
+else {
                                         toast({
                                           title: 'Erro ao abrir PDF',
                                           description: 'Não foi possível abrir o PDF do boleto.',
@@ -2185,7 +2208,8 @@ export default function CobrancasPage() {
                                             queryKey: ['/api/cobrancas/kpis'],
                                           });
                                         }
-                                      } catch (error) {
+                                      }
+catch (error) {
                                         console.error('Erro ao marcar como pago:', error);
                                         toast({
                                           title: 'Erro',

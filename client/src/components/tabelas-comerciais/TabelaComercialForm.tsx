@@ -43,10 +43,10 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
   const [selectedProducts, setSelectedProducts] = useState<number[]>(initialData?.produtoIds || []);
 
   const {
-  _register,
-  _handleSubmit,
+    _register,
+    _handleSubmit,
     formState: { errors },
-  _setValue,
+    _setValue,
   } = useForm<TabelaFormData>({
     resolver: zodResolver(tabelaSchema),
     defaultValues: {
@@ -63,7 +63,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     queryKey: ['/api/produtos'],
     queryFn: async () => {
       const _response = (await apiRequest('/api/produtos', { method: 'GET' })) as Produto[];
-      return response.filter((p: Produto) => p.isActive); }
+      return response.filter((p: Produto) => p.isActive);
     },
   });
 

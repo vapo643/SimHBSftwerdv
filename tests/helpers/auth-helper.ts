@@ -89,7 +89,8 @@ export async function createTestUser(overrides: Partial<TestUser> = {}): Promise
       ...defaultUser,
       id: data.user.id,
     };
-  } catch (error) {
+  }
+catch (error) {
     console.error(`[AUTH HELPER] ❌ Failed to create test user:`, error);
     console.log(`[AUTH HELPER] 🔄 Using fallback approach for tests...`);
 
@@ -146,7 +147,8 @@ export async function loginTestUser(app: Express, user: TestUser): Promise<strin
     throw new Error(
       `Authentication failed - Status: ${response.status}, Body: ${JSON.stringify(response.body)}`
     );
-  } catch (error) {
+  }
+catch (error) {
     console.error(`[AUTH HELPER] ❌ Auth process failed:`, error);
     throw error;
   }
@@ -204,10 +206,12 @@ export async function deleteTestUser(userId: string): Promise<void> {
     if (error) {
       console.warn(`[AUTH HELPER] ⚠️ Could not delete test user: ${error.message}`);
       // Don't throw error - cleanup is best effort
-    } else {
+    }
+else {
       console.log(`[AUTH HELPER] ✅ Test user deleted: ${userId}`);
     }
-  } catch (error) {
+  }
+catch (error) {
     console.warn(`[AUTH HELPER] ⚠️ Error during test user cleanup:`, error);
     // Don't throw - cleanup should not fail tests
   }
@@ -239,7 +243,8 @@ export async function authenticatedRequest(
     await deleteTestUser(client.user.id);
 
     return response;
-  } catch (error) {
+  }
+catch (error) {
     // Cleanup even on error
     await deleteTestUser(client.user.id);
     throw error;

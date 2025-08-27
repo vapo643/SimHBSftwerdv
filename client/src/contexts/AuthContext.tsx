@@ -62,7 +62,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAccessToken(null);
       setShowIdleWarning(false);
       setError(null);
-    } catch (error) {
+    }
+catch (error) {
       console.error('Error during idle logout:', error);
     }
   }, []);
@@ -104,23 +105,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.log('🔐 [AUTH RESTORED] User profile loaded with valid token');
             setUser(userData.user);
             setError(null);
-          } else {
+          }
+else {
             throw new Error('Invalid user data received');
           }
-        } catch (apiError) {
+        }
+catch (apiError) {
           console.error('Error fetching profile data:', apiError);
           setError(apiError as Error);
           setUser(null);
         }
-      } else {
+      }
+else {
         setUser(null);
         setError(null);
       }
-    } catch (authError) {
+    }
+catch (authError) {
       console.error('Error checking authentication:', authError);
       setError(authError as Error);
       setUser(null);
-    } finally {
+    }
+finally {
       setIsLoading(false);
     }
   };
@@ -145,11 +151,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(userData.user);
           setError(null);
         }
-      } else {
+      }
+else {
         setUser(null);
         setError(null);
       }
-    } catch (err) {
+    }
+catch (err) {
       console.error('Error refetching user:', err);
       setError(err as Error);
       // Keep existing user data on error (conservative strategy)
@@ -160,7 +168,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const _supabase = getSupabase();
 
     // Get initial session
-    _supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+    _supabase.auth.getSession().then(({ data: { session: initialSession }}) => {
       setSession(initialSession);
       setAccessToken(initialSession?.access_token || null);
       fetchUserProfile(initialSession);
@@ -181,7 +189,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (event == 'SIGNED_IN' || event == 'TOKEN_REFRESHED') {
           fetchUserProfile(currentSession);
-        } else if (event == 'SIGNED_OUT') {
+        }
+else if (event == 'SIGNED_OUT') {
           setUser(null);
           setError(null);
           setIsLoading(false);

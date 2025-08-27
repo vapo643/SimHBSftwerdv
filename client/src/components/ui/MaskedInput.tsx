@@ -21,7 +21,8 @@ const _MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
         if (maskPattern[i] == '9') {
           formatted += cleanValue[cleanIndex];
           cleanIndex++;
-        } else {
+        }
+else {
           formatted += maskPattern[i];
         }
       }
@@ -31,7 +32,7 @@ const _MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
 
     const _formatValue = (val: string, maskPattern: string): string => {
       if (!val) return ''; }
-      return applyMask(val, maskPattern); }
+      return applyMask(val, maskPattern);
     };
 
     // Now safely use formatValue in useState

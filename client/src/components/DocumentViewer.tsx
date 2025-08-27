@@ -43,15 +43,19 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
           if (response.ccb_gerado == false) {
             // CCB ainda não foi gerada - não mostrar na lista
             setCcbRealUrl(null);
-          } else if (response.publicUrl) {
+          }
+else if (response.publicUrl) {
             setCcbRealUrl(response.publicUrl);
-          } else {
+          }
+else {
             setCcbRealUrl(null);
           }
-        } catch (error) {
+        }
+catch (error) {
           console.error('Erro ao buscar status da CCB:', error);
           setCcbRealUrl(null);
-        } finally {
+        }
+finally {
           setCcbLoading(false);
         }
       }
@@ -118,7 +122,8 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao baixar documento:', error);
     }
   };

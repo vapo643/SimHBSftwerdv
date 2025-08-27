@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { interBankService } from '../services/interBankService';
 import { db } from '../lib/supabase';
 import { interCollections, propostas } from '@shared/schema';
@@ -14,7 +14,7 @@ const _router = Router();
  */
 router.post(
   '/fix-collections/:propostaId',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { propostaId } = req.params;
@@ -137,7 +137,8 @@ router.post(
             .returning();
 
           novosBoletosGerados.push(novoBoleto[0]);
-        } catch (error) {
+        }
+catch (error) {
           console.error(`❌ [FIX COLLECTIONS] Erro ao criar boleto ${parcela.numero}:`, error);
         }
       }
@@ -166,7 +167,8 @@ router.post(
           vencimento: b.dataVencimento,
         })),
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [FIX COLLECTIONS] Erro geral:', error);
       res.status(500).json({
         error: 'Erro ao regenerar boletos',

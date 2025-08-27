@@ -63,7 +63,8 @@ async function checkRollbackSafety(sql: postgres.Sql): Promise<boolean> {
     }
 
     return true;
-  } catch (error) {
+  }
+catch (error) {
     logger.error('❌ Erro ao verificar segurança:', error);
     return false;
   }
@@ -131,7 +132,8 @@ async function generateRollbackSQL(
     // Por segurança, não gerar rollback automático para operações complexas
     logger.warn('⚠️ Rollback automático não disponível - rollback manual necessário');
     return null;
-  } catch (error) {
+  }
+catch (error) {
     logger.error('Erro ao gerar rollback automático:', error);
     return null;
   }
@@ -232,7 +234,8 @@ async function rollbackMigration(steps: number = 1) {
 
           logger.info(`✅ Revertida com sucesso: ${migration.hash}`);
           successCount++;
-        } else {
+        }
+else {
           // Tentar gerar rollback automático
           const generatedSQL = await generateRollbackSQL(sql, migration.hash);
 
@@ -240,13 +243,15 @@ async function rollbackMigration(steps: number = 1) {
             await sql.unsafe(generatedSQL);
             logger.info(`✅ Rollback automático executado: ${migration.hash}`);
             successCount++;
-          } else {
+          }
+else {
             logger.warn(`⚠️ Arquivo de rollback não encontrado para ${migration.hash}`);
             logger.warn('Rollback manual pode ser necessário');
             failureCount++;
           }
         }
-      } catch (error: any) {
+      }
+catch (error: any) {
         logger.error(`❌ Erro ao reverter ${migration.hash}:`, error.message);
         failureCount++;
 
@@ -290,7 +295,8 @@ async function rollbackMigration(steps: number = 1) {
     }
 
     return failureCount == 0;
-  } catch (error: any) {
+  }
+catch (error: any) {
     logger.error('💥 Erro fatal no rollback:', error);
 
     // Registrar erro crítico
@@ -299,12 +305,14 @@ async function rollbackMigration(steps: number = 1) {
         INSERT INTO __drizzle_migrations (hash, created_at, success, error_message)
         VALUES (${'rollback_critical_' + Date.now()}, NOW(), false, ${error.message})
       `;
-    } catch (logError) {
+    }
+catch (logError) {
       logger.error('Erro ao registrar falha crítica:', logError);
     }
 
     return false;
-  } finally {
+  }
+finally {
     await sql.end();
     logger.info('🔌 Conexão com banco encerrada');
   }
@@ -319,7 +327,7 @@ if (!process.env.DATABASE_URL) {
 
 // Obter número de steps do argumento
 const steps = parseInt(process.argv[2] || '1');
-if (isNaN(steps) || steps < 1) {
+if (_isNaN(steps) || steps < 1) {
   logger.error('❌ Número de steps inválido');
   logger.error('Uso: tsx scripts/rollback.ts [número_de_steps]');
   logger.error('Exemplo: tsx scripts/rollback.ts 2');
@@ -344,7 +352,8 @@ rollbackMigration(steps)
     if (success) {
       logger.info('✅ Rollback concluído com sucesso!');
       process.exit(0);
-    } else {
+    }
+else {
       logger.error('❌ Rollback concluído com erros');
       process.exit(1);
     }

@@ -58,7 +58,7 @@ export class PagamentoService {
 
     console.log(`[PAGAMENTOS DEBUG] Found ${proposals.length} proposals for payment`);
 
-    return proposals; }
+    return proposals;
   }
 
   /**
@@ -83,7 +83,7 @@ export class PagamentoService {
       );
     }
 
-    return proposal; }
+    return proposal;
   }
 
   /**
@@ -104,7 +104,7 @@ export class PagamentoService {
     // Create payment record
     const _updatedProposal = await pagamentoRepository.createPayment({
       ...validated,
-  _userId,
+      _userId,
     });
 
     if (!updatedProposal) {
@@ -147,7 +147,7 @@ export class PagamentoService {
       }
     }
 
-    return updatedProposal; }
+    return updatedProposal;
   }
 
   /**
@@ -169,8 +169,8 @@ export class PagamentoService {
 
     // Update payment status
     const _updatedProposal = await pagamentoRepository.updatePaymentStatus(
-  _proposalId,
-  _status,
+      _proposalId,
+      _status,
       userId
     );
 
@@ -180,24 +180,24 @@ export class PagamentoService {
 
     // Audit status change
     await pagamentoRepository.auditPaymentAction(
-  _proposalId,
-  _userId,
+      _proposalId,
+      _userId,
       `PAGAMENTO_STATUS_${status.toUpperCase()}`,
       {
-  _statusAnterior,
+        _statusAnterior,
         statusNovo: status,
-  _observacoes,
+        _observacoes,
       }
     );
 
     // Create status contextual record
     await pagamentoRepository.createStatusContextual({
       propostaId: proposalId,
-  _statusAnterior,
+      _statusAnterior,
       statusNovo: status,
       contexto: `Status de pagamento alterado: ${statusAnterior} → ${status}`,
       metadata: {
-  _observacoes,
+        _observacoes,
         timestamp: new Date().toISOString(),
       },
       usuarioId: userId,
@@ -226,7 +226,7 @@ export class PagamentoService {
       }
     }
 
-    return updatedProposal; }
+    return updatedProposal;
   }
 
   /**
@@ -279,7 +279,7 @@ export class PagamentoService {
 
     return {
       data: exportData,
-  _filename,
+      _filename,
       contentType:
         filters.formato == 'excel'
           ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -312,14 +312,14 @@ export class PagamentoService {
     );
 
     const _totalValue = recentPayments.reduce((sum, payment) => {
-      return sum + (payment.proposta.valorLiquido || 0); }
+      return sum + (payment.proposta.valorLiquido || 0);
     }, 0);
 
     return {
-  _statistics,
+      _statistics,
       recentPayments: recent,
       pendingCount: pendingPayments.length,
-  _totalValue,
+      _totalValue,
     };
   }
 
@@ -360,8 +360,8 @@ export class PagamentoService {
 
     return {
       valid: errors.length == 0,
-  _errors,
-  _warnings,
+      _errors,
+      _warnings,
     };
   }
 
@@ -380,8 +380,8 @@ export class PagamentoService {
     ]);
 
     return {
-  _lojas,
-  _produtos,
+      _lojas,
+      _produtos,
       statusOptions: ['todos', 'aprovado', 'processando_pagamento', 'pago', 'pagamento_rejeitado'],
       formaPagamentoOptions: ['ted', 'pix', 'doc'],
     };

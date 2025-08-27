@@ -25,7 +25,7 @@ export const _criarProduto = async (data: {
       tacTipo: data.tacTipo || 'fixo',
     })
     .returning();
-  return novoProduto; }
+  return novoProduto;
 };
 
 export const _atualizarProduto = async (
@@ -47,7 +47,7 @@ export const _atualizarProduto = async (
     })
     .where(eq(produtos.id, parseInt(id)))
     .returning();
-  return produtoAtualizado; }
+  return produtoAtualizado;
 };
 
 export const _verificarProdutoEmUso = async (id: string) => {
@@ -58,7 +58,7 @@ export const _verificarProdutoEmUso = async (id: string) => {
     where: eq(produtoTabelaComercial.produtoId, produtoId),
   });
 
-  return dependencias.length > 0; }
+  return dependencias.length > 0;
 };
 
 export const _deletarProduto = async (id: string, deletedBy?: string) => {

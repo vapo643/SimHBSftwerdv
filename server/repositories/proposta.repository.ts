@@ -60,7 +60,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
-      return (proposta as unknown) || null; }
+      return (proposta as unknown) || null;
     } catch (error) {
       throw new Error(
         `Failed to fetch proposta: ${error instanceof Error ? error.message : String(error)}`
@@ -87,12 +87,12 @@ export class PropostaRepository extends BaseRepository<Proposta> {
     if (error) {
       if (error.code == 'PGRST116') {
         // Not found
-        return null; }
+        return null;
       }
       throw new Error(`Failed to fetch proposta with details: ${error.message}`);
     }
 
-    return data as PropostaWithDetails; }
+    return data as PropostaWithDetails;
   }
 
   /**
@@ -127,7 +127,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
       throw new Error(`Failed to fetch propostas by status: ${error.message}`);
     }
 
-    return data as Proposta[]; }
+    return data as Proposta[];
   }
 
   /**
@@ -145,7 +145,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
       throw new Error(`Failed to fetch propostas by user: ${error.message}`);
     }
 
-    return data as Proposta[]; }
+    return data as Proposta[];
   }
 
   /**
@@ -163,7 +163,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
       throw new Error(`Failed to fetch propostas by loja: ${error.message}`);
     }
 
-    return data as Proposta[]; }
+    return data as Proposta[];
   }
 
   /**
@@ -202,7 +202,7 @@ export class PropostaRepository extends BaseRepository<Proposta> {
       throw new Error(`Failed to fetch propostas pending signature: ${error.message}`);
     }
 
-    return data as Proposta[]; }
+    return data as Proposta[];
   }
 
   /**
@@ -273,10 +273,10 @@ export class PropostaRepository extends BaseRepository<Proposta> {
 
     if (error) {
       console.error('Failed to generate signed URL:', error);
-      return null; }
+      return null;
     }
 
-    return data?.signedUrl || null; }
+    return data?.signedUrl || null;
   }
 
   /**
@@ -291,10 +291,10 @@ export class PropostaRepository extends BaseRepository<Proposta> {
 
     if (error) {
       console.error('Failed to check CCB existence:', error);
-      return false; }
+      return false;
     }
 
-    return data && data.length > 0; }
+    return data && data.length > 0;
   }
 }
 

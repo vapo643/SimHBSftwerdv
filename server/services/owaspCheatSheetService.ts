@@ -2610,7 +2610,7 @@ export class OwaspCheatSheetService {
       ],
     });
 
-    return results; }
+    return results;
   }
 
   /**
@@ -2637,13 +2637,13 @@ export class OwaspCheatSheetService {
     const _criticalGaps = 1; // Only MFA is critical gap
 
     return {
-  _totalCheatSheets,
-  _implemented,
-  _partial,
-  _notImplemented,
-  _notApplicable,
-  _compliancePercentage,
-  _criticalGaps,
+      _totalCheatSheets,
+      _implemented,
+      _partial,
+      _notImplemented,
+      _notApplicable,
+      _compliancePercentage,
+      _criticalGaps,
     };
   }
 
@@ -2654,8 +2654,8 @@ export class OwaspCheatSheetService {
     const _name = this.extractCheatSheetName(url);
 
     return {
-  _url,
-  _name,
+      _url,
+      _name,
       status: 'processed',
       processedAt: new Date(),
       recommendations: [],
@@ -2665,8 +2665,8 @@ export class OwaspCheatSheetService {
   private static extractCheatSheetName(url: string): string {
     const _match = url.match(/cheatsheets\/(.+)_Cheat_Sheet\.html/);
     if (match) {
-      return match[1].replace(/_/g, ' '); }
+      return match[1].replace(/_/g, ' ');
     }
-    return 'Unknown'; }
+    return 'Unknown';
   }
 }

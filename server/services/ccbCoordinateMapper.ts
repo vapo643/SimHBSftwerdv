@@ -27,7 +27,7 @@ export function applyCoordinateAdjustments(adjustments: CoordinateAdjustment[]) 
     }
   }
 
-  return adjustedMapping; }
+  return adjustedMapping;
 }
 
 /**
@@ -77,7 +77,7 @@ export function generatePositionReport(pageHeight: number): string {
     );
   });
 
-  return report.join('\n'); }
+  return report.join('\n');
 }
 
 /**
@@ -96,5 +96,5 @@ export function validateCoordinates(pageWidth: number, pageHeight: number): stri
     }
   });
 
-  return issues; }
+  return issues;
 }

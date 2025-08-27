@@ -59,9 +59,11 @@ async function testOriginationEndpoint() {
     let userId: string;
     if (signUpError && !signUpError.message.includes('already been registered')) {
       throw signUpError;
-    } else if (authData?.user) {
+    }
+else if (authData?.user) {
       userId = authData.user.id;
-    } else {
+    }
+else {
       // Get existing user
       const { data: users } = await _supabase.auth.admin.listUsers();
       const existingUser = users.users.find((u) => u.email == testEmail);
@@ -204,7 +206,8 @@ async function testOriginationEndpoint() {
     console.log(JSON.stringify(contextData.limites, null, 2));
 
     console.log('\n✅ Teste concluído com sucesso!');
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ Erro durante o teste:', error);
     process.exit(1);
   }

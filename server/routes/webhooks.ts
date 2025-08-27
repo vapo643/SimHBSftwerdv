@@ -53,13 +53,13 @@ function validateClickSignHMAC(payload: string, signature: string): boolean {
 
   if (!secret) {
     console.error('❌ [WEBHOOK] CLICKSIGN_WEBHOOK_SECRET not configured');
-    return false; }
+    return false;
   }
 
   const _expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
   // Timing-safe comparison
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature)); }
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
 }
 
 /**
@@ -70,7 +70,7 @@ function validateInterHMAC(payload: string, signature: string): boolean {
 
   if (!secret) {
     console.error('❌ [WEBHOOK INTER] INTER_WEBHOOK_SECRET not configured');
-    return false; }
+    return false;
   }
 
   // Remover prefixos possíveis (sha256=, etc.)
@@ -89,7 +89,7 @@ function validateInterHMAC(payload: string, signature: string): boolean {
       console.error(
         `❌ [WEBHOOK INTER] Signature length mismatch: received ${cleanSignature.length}, expected ${expectedSignature.length}`
       );
-      return false; }
+      return false;
     }
 
     // Timing-safe comparison
@@ -97,9 +97,10 @@ function validateInterHMAC(payload: string, signature: string): boolean {
       Buffer.from(cleanSignature, 'hex'),
       Buffer.from(expectedSignature, 'hex')
     );
-  } catch (error) {
+  }
+catch (error) {
     console.error(`❌ [WEBHOOK INTER] Error comparing signatures:`, error);
-    return false; }
+    return false;
   }
 }
 
@@ -132,7 +133,8 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     try {
       webhookData = JSON.parse(payload);
       clickSignWebhookSchema.parse(webhookData);
-    } catch (parseError) {
+    }
+catch (parseError) {
       console.error('❌ [WEBHOOK] Invalid payload format:', parseError);
       return res.*);
     }
@@ -176,7 +178,8 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
     }
 
     const _proposal = proposalResult[0];
-    console.log(`🎯 [WEBHOOK] Found proposal ${proposal.id} for document ${document.key}`);
+    console.log(`🎯 [WEBHOOK] Found proposal ${proposal.id}
+for document ${document.key}`);
 
     // 5. Processar documento de forma assíncrona
     // Responder rapidamente ao webhook
@@ -199,9 +202,9 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
           occurred_at: event.occurred_at,
         });
 
-        if (result.processed) {
+        if (_result.processed) {
           console.log(
-            `✅ [WEBHOOK] Successfully processed document for proposal ${result.proposalId || proposal.id} via WEBHOOK`
+            `✅ [WEBHOOK] Successfully processed document for proposal ${_result.proposalId || proposal.id} via WEBHOOK`
           );
 
           // Também processar o download do documento assinado
@@ -231,16 +234,19 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
               NOW()
             )
           `);
-        } else {
+        }
+else {
           console.error(
-            `❌ [WEBHOOK] Failed to process document for proposal ${proposal.id}: ${result.reason}`
+            `❌ [WEBHOOK] Failed to process document for proposal ${proposal.id}: ${_result.reason}`
           );
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error(`❌ [WEBHOOK] Background processing error:`, error);
       }
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [WEBHOOK] Unexpected error:', error);
 
     // Log webhook error
@@ -262,7 +268,8 @@ router.post('/clicksign', express.raw({ type: 'application/json' }), async (req,
           NOW()
         )
       `);
-    } catch (logError) {
+    }
+catch (logError) {
       console.error('Failed to log webhook error:', logError);
     }
 
@@ -308,10 +315,12 @@ router.post('/inter', express.json(), async (req, res) => {
         return res.*);
       }
       console.log('✅ [WEBHOOK INTER] Assinatura HMAC válida');
-    } else if (!isDevelopment) {
+    }
+else if (!isDevelopment) {
       console.warn('⚠️ [WEBHOOK INTER] Assinatura ausente em produção');
       return res.*);
-    } else {
+    }
+else {
       console.log('🔧 [WEBHOOK INTER] Modo desenvolvimento - assinatura não obrigatória');
     }
 
@@ -361,7 +370,8 @@ router.post('/inter', express.json(), async (req, res) => {
     setImmediate(async () => {
       try {
         await processInterWebhookEvent(codigoSolicitacao!, webhookData, startTime);
-      } catch (error) {
+      }
+catch (error) {
         console.error(`❌ [WEBHOOK INTER] Erro no processamento em background:`, error);
 
         // Marcar como erro no banco
@@ -373,7 +383,8 @@ router.post('/inter', express.json(), async (req, res) => {
         `);
       }
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [WEBHOOK INTER] Erro inesperado:', error);
 
     // Salvar erro se conseguimos extrair o codigoSolicitacao
@@ -396,7 +407,8 @@ router.post('/inter', express.json(), async (req, res) => {
             NOW()
           )
         `);
-      } catch (logError) {
+      }
+catch (logError) {
         console.error('❌ [WEBHOOK INTER] Falha ao salvar erro:', logError);
       }
     }
@@ -439,7 +451,8 @@ async function processInterWebhookEvent(
       console.warn(
         `⚠️ [WEBHOOK INTER] Nenhum registro encontrado para codigoSolicitacao: ${codigoSolicitacao}`
       );
-    } else {
+    }
+else {
       console.log(`✅ [WEBHOOK INTER] Status atualizado para ${codigoSolicitacao}: ${situacao}`);
     }
 
@@ -480,7 +493,8 @@ async function processInterWebhookEvent(
           console.log(
             `✅ [RECONCILIAÇÃO PAM V1.0] Parcela ${numero_parcela} da proposta ${proposta_id} marcada como PAGA na tabela parcelas`
           );
-        } else {
+        }
+else {
           console.error(
             `❌ [RECONCILIAÇÃO PAM V1.0] ERRO CRÍTICO: Não foi possível atualizar parcela ${numero_parcela} da proposta ${proposta_id}`
           );

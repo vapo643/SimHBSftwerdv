@@ -37,7 +37,7 @@ export class InterService {
    * Test Inter Bank connection
    */
   async testConnection(): Promise<boolean> {
-    return await interBankService.testConnection(); }
+    return await interBankService.testConnection();
   }
 
   /**
@@ -94,7 +94,7 @@ export class InterService {
       situacao: interResult.situacao,
       linhaDigitavel: interResult.linhaDigitavel,
       pixCopiaECola: interResult.pix?.pixCopiaECola,
-      dataEmissao: getBrasiliaTimestamp(),
+      dataEmissao: _getBrasiliaTimestamp(),
       // Store additional data in metadata field if needed
     });
 
@@ -110,7 +110,7 @@ export class InterService {
       dadosAcao: { codigoSolicitacao: interResult.codigoSolicitacao, usuarioId: userId },
     });
 
-    return collection; }
+    return collection;
   }
 
   /**
@@ -206,7 +206,7 @@ export class InterService {
       dadosAcao: { motivo, usuarioId: userId },
     });
 
-    return updated!; }
+    return updated!;
   }
 
   /**
@@ -261,7 +261,8 @@ export class InterService {
           success: true,
   _novaDataVencimento,
         });
-      } catch (error) {
+      }
+catch (error) {
         errors.push({
   _codigoSolicitacao,
           error: error.message,
@@ -269,7 +270,7 @@ export class InterService {
       }
     }
 
-    return { success: results, errors }; }
+    return { success: results, errors }
   }
 
   /**
@@ -289,7 +290,7 @@ export class InterService {
     const _path = `collections/${collection.propostaId}/${codigoSolicitacao}.pdf`;
     await interRepository.uploadToStorage('private-documents', path, pdfBuffer, 'application/pdf');
 
-    return pdfBuffer; }
+    return pdfBuffer;
   }
 
   /**
@@ -308,7 +309,7 @@ export class InterService {
     // Update status
     await interRepository.updateByCodigoSolicitacao(codigoSolicitacao, {
   _situacao,
-      dataSituacao: getBrasiliaTimestamp(),
+      dataSituacao: _getBrasiliaTimestamp(),
     });
 
     // Handle payment confirmation
@@ -372,13 +373,14 @@ export class InterService {
             });
           }
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error(`Error syncing collection ${collection.codigoSolicitacao}:`, error);
         errors++;
       }
     }
 
-    return { updated, errors }; }
+    return { updated, errors }
   }
 
   /**
@@ -404,21 +406,21 @@ export class InterService {
       switch (collection.situacao) {
         case 'A_RECEBER': {
           stats.pendentes++;
-          break; }
+          break;
         case 'RECEBIDO': {
           stats.recebidas++;
           stats.valorRecebido += valor;
-          break; }
+          break;
         case 'CANCELADO': {
           stats.canceladas++;
-          break; }
+          break;
         case 'EXPIRADO': {
           stats.expiradas++;
-          break; }
+          break;
       }
     }
 
-    return stats; }
+    return stats;
   }
 }
 

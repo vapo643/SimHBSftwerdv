@@ -32,7 +32,8 @@ const _fetchProposta = async (id: string | undefined) => {
     console.log('[Análise] Proposta carregada:', response.data);
     // A API retorna {success: true, data: {...}}, precisamos apenas do data
     return response.data?.data || response.data; }
-  } catch (error) {
+  }
+catch (error) {
     console.error('[Análise] Erro ao carregar proposta:', error);
     throw new Error('Proposta não encontrada');
   }
@@ -58,7 +59,8 @@ const _updatePropostaStatus = async ({
   _motivoPendencia,
     });
     return response.data; }
-  } catch (error) {
+  }
+catch (error) {
     throw new Error(error.message || 'Falha ao atualizar status');
   }
 };

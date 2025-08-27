@@ -99,7 +99,8 @@ export async function cleanTestDatabase(): Promise<void> {
 
     const duration = Date.now() - startTime;
     console.log(`[TEST DB] ✅ Database cleaned successfully in ${duration}ms`);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[TEST DB] ❌ Error during database cleanup:', error);
 
     // Fallback: Try to clean tables individually in reverse dependency order
@@ -127,7 +128,8 @@ export async function cleanTestDatabase(): Promise<void> {
         try {
           await db.execute(sql.raw(`DELETE FROM "${table}"`));
           console.log(`[TEST DB] ✓ Cleaned table: ${table}`);
-        } catch (e) {
+        }
+catch (e) {
           console.warn(`[TEST DB] ⚠️ Could not clean table ${table}:`, e);
         }
       }
@@ -152,7 +154,8 @@ export async function cleanTestDatabase(): Promise<void> {
         try {
           await db.execute(sql.raw(`DELETE FROM "${table}"`));
           console.log(`[TEST DB] ✓ Cleaned table: ${table}`);
-        } catch (e) {
+        }
+catch (e) {
           // These might fail if they have data referenced by other tables
           // We continue anyway as they're less critical for tests
           console.debug(`[TEST DB] Skipped table ${table}`);
@@ -160,7 +163,8 @@ export async function cleanTestDatabase(): Promise<void> {
       }
 
       console.log('[TEST DB] ✅ Fallback cleanup completed');
-    } catch (fallbackError) {
+    }
+catch (fallbackError) {
       console.error('[TEST DB] ❌ Fallback cleanup also failed:', fallbackError);
       throw fallbackError;
     }
@@ -370,10 +374,12 @@ export async function setupTestEnvironment(): Promise<{
       testProductId,
       testCommercialTableId,
     };
-  } catch (error) {
+  }
+catch (error) {
     console.error('[TEST DB] ❌ Error setting up test environment:', error);
     throw error;
-  } finally {
+  }
+finally {
     // Always close the direct connection
     if (directDb!) {
       await directDb.end();
@@ -402,7 +408,8 @@ export async function verifyCleanDatabase(): Promise<boolean> {
     }
 
     return isClean;
-  } catch (error) {
+  }
+catch (error) {
     console.error('[TEST DB] ❌ Error verifying database state:', error);
     return false;
   }

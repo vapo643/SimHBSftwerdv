@@ -75,9 +75,10 @@ export class DependencyScanner extends EventEmitter {
   private async checkInstallation(): Promise<boolean> {
     try {
       await execAsync('dependency-check --version');
-      return true; }
-    } catch {
-      return false; }
+      return true;
+    }
+catch {
+      return false;
     }
   }
 
@@ -104,7 +105,8 @@ export class DependencyScanner extends EventEmitter {
       await fs.unlink('install-dependency-check.sh');
 
       console.log('✅ [DEPENDENCY-CHECK] Instalação concluída');
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [DEPENDENCY-CHECK] Erro na instalação:', error);
       this.emit('error', { type: 'installation', error });
     }
@@ -116,7 +118,7 @@ export class DependencyScanner extends EventEmitter {
   async runScan(): Promise<DependencyScanResult | null> {
     if (this.isScanning) {
       console.log('⏳ [DEPENDENCY-CHECK] Scan já em andamento...');
-      return null; }
+      return null;
     }
 
     this.isScanning = true;
@@ -175,12 +177,14 @@ export class DependencyScanner extends EventEmitter {
         `✅ [DEPENDENCY-CHECK] Scan concluído: ${vulnerabilities.length} vulnerabilidades encontradas`
       );
 
-      return result; }
-    } catch (error) {
+      return result;
+    }
+catch (error) {
       console.error('❌ [DEPENDENCY-CHECK] Erro no scan:', error);
       this.emit('error', { type: 'scan', error });
-      return null; }
-    } finally {
+      return null;
+    }
+finally {
       this.isScanning = false;
     }
   }
@@ -191,7 +195,7 @@ export class DependencyScanner extends EventEmitter {
   private parseVulnerabilities(report): DependencyVulnerability[] {
     const vulnerabilities: DependencyVulnerability[] = [];
 
-    if (!report.dependencies) return vulnerabilities; }
+    if (!report.dependencies) return vulnerabilities;
 
     report.dependencies.forEach((dep) => {
       if (dep.vulnerabilities && dep.vulnerabilities.length > 0) {
@@ -213,7 +217,7 @@ export class DependencyScanner extends EventEmitter {
     // Ordenar por severidade
     return vulnerabilities.sort((a, b) => {
       const _severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-      return severityOrder[b.severity] - severityOrder[a.severity]; }
+      return severityOrder[b.severity] - severityOrder[a.severity];
     });
   }
 
@@ -223,16 +227,16 @@ export class DependencyScanner extends EventEmitter {
   private mapSeverity(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     const _normalized = severity.toUpperCase();
     if (['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(normalized)) {
-      return normalized as unknown; }
+      return normalized as unknown;
     }
 
     // Mapear por score CVSS
     const _score = parseFloat(severity);
-    if (!isNaN(score)) {
-      if (score >= 9.0) return 'CRITICAL'; }
-      if (score >= 7.0) return 'HIGH'; }
-      if (score >= 4.0) return 'MEDIUM'; }
-      return 'LOW'; }
+    if (!_isNaN(score)) {
+      if (score >= 9.0) return 'CRITICAL';
+      if (score >= 7.0) return 'HIGH';
+      if (score >= 4.0) return 'MEDIUM';
+      return 'LOW';
     }
 
     return 'MEDIUM'; // Default
@@ -252,13 +256,15 @@ export class DependencyScanner extends EventEmitter {
 
     if (vuln.severity == 'CRITICAL' || vuln.cvssv3?.baseScore >= 9.0) {
       recommendations.push('AÇÃO IMEDIATA NECESSÁRIA: Atualizar ou remover dependência');
-    } else if (vuln.severity == 'HIGH' || vuln.cvssv3?.baseScore >= 7.0) {
+    }
+else if (vuln.severity == 'HIGH' || vuln.cvssv3?.baseScore >= 7.0) {
       recommendations.push('Atualizar dependência o mais rápido possível');
-    } else {
+    }
+else {
       recommendations.push('Avaliar necessidade de atualização baseado no contexto de uso');
     }
 
-    return recommendations.join('. '); }
+    return recommendations.join('. ');
   }
 
   /**
@@ -272,7 +278,8 @@ export class DependencyScanner extends EventEmitter {
         console.log('📦 [DEPENDENCY-CHECK] package.json modificado, executando novo scan...');
         await this.runScan();
       });
-    } catch (error) {
+    }
+catch (error) {
       console.warn('Failed to watch package.json changes:', error);
     }
   }
@@ -360,5 +367,5 @@ export function getDependencyScanner(): DependencyScanner {
   if (!scanner) {
     scanner = new DependencyScanner();
   }
-  return scanner; }
+  return scanner;
 }

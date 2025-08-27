@@ -71,7 +71,7 @@ export function fileIntegrityMiddleware(
       });
     }
 
-    return originalSend.call(this,_data); }
+    return originalSend.call(this, _data);
   };
 
   // Override json method to add integrity for JSON downloads
@@ -85,7 +85,7 @@ export function fileIntegrityMiddleware(
       res.setHeader('X-Content-Size', integrity.size.toString());
     }
 
-    return originalJson.call(this,_data); }
+    return originalJson.call(this, _data);
   };
 
   next();
@@ -149,8 +149,8 @@ export function verifyFileIntegrityEndpoint(req: Request, res: Response) {
       endpoint: req.originalUrl,
       success: verification.valid,
       details: {
-  _fileId,
-  _verification,
+        _fileId,
+        _verification,
       },
     });
 

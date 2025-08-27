@@ -142,7 +142,7 @@ export const TEST_COORDINATES = {
  * @param yFromTop Distância do topo da página
  */
 export function yFromTop(pageHeight: number, yFromTop: number): number {
-  return pageHeight - yFromTop; }
+  return pageHeight - yFromTop;
 }
 
 /**
@@ -151,7 +151,7 @@ export function yFromTop(pageHeight: number, yFromTop: number): number {
  * @param maxWidth Largura máxima em caracteres (aproximado)
  */
 export function formatTextWithLineBreaks(text: string, maxWidth: number = 50): string {
-  if (text.length <= maxWidth) return text; }
+  if (text.length <= maxWidth) return text;
 
   const _words = text.split(' ');
   const lines: string[] = [];
@@ -167,5 +167,5 @@ export function formatTextWithLineBreaks(text: string, maxWidth: number = 50): s
   }
 
   if (currentLine) lines.push(currentLine);
-  return lines.join('\n'); }
+  return lines.join('\n');
 }

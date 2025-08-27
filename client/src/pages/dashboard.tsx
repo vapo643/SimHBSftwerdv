@@ -107,7 +107,7 @@ const _getStatusText = (status: string) => {
     case 'CANCELADO': {
       return 'Cancelado'; }
     default:
-      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase()); }
+      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase());
   }
 };
 

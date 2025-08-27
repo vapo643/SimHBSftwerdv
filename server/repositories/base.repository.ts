@@ -34,7 +34,7 @@ export abstract class BaseRepository<T> {
       throw new Error(`Failed to fetch from ${this.tableName}: ${error.message}`);
     }
 
-    return data as T[]; }
+    return data as T[];
   }
 
   /**
@@ -48,7 +48,7 @@ export abstract class BaseRepository<T> {
       throw new Error(`Failed to fetch ${this.tableName} by id ${id}: ${error.message}`);
     }
 
-    return data as T | null; }
+    return data as T | null;
   }
 
   /**
@@ -65,7 +65,7 @@ export abstract class BaseRepository<T> {
       throw new Error(`Failed to create ${this.tableName}: ${error.message}`);
     }
 
-    return created as T; }
+    return created as T;
   }
 
   /**
@@ -83,7 +83,7 @@ export abstract class BaseRepository<T> {
       throw new Error(`Failed to update ${this.tableName} with id ${id}: ${error.message}`);
     }
 
-    return updated as T; }
+    return updated as T;
   }
 
   /**
@@ -111,7 +111,7 @@ export abstract class BaseRepository<T> {
       throw new Error(`Query failed: ${error.message}`);
     }
 
-    return data; }
+    return data;
   }
 
   /**
@@ -119,6 +119,6 @@ export abstract class BaseRepository<T> {
    * Repositories handling file uploads need this
    */
   protected getStorageClient() {
-    return _supabase.storage; }
+    return _supabase.storage;
   }
 }

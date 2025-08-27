@@ -187,7 +187,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
   // Validate required configuration
   validateConfig(config);
 
-  return config; }
+  return config;
 }
 
 /**
@@ -206,7 +206,8 @@ function validateConfig(config: EnvironmentConfig): void {
 
   for (const field of required) {
     if (!config[field as keyof EnvironmentConfig]) {
-      throw new Error(`Missing required configuration: ${field} for environment ${_config.name}`);
+      throw new Error(`Missing required configuration: ${field}
+for environment ${_config.name}`);
     }
   }
 

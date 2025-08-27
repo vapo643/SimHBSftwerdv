@@ -164,7 +164,7 @@ export class PreApprovalService {
 
     // Taxa zero = parcela simples (sem juros)
     if (taxa == 0) {
-      return valor / prazo; }
+      return valor / prazo;
     }
 
     // Price formula para parcela fixa
@@ -173,7 +173,7 @@ export class PreApprovalService {
       (valor * (taxaMensal * Math.pow(1 + taxaMensal, prazo))) /
       (Math.pow(1 + taxaMensal, prazo) - 1);
 
-    return parcela; }
+    return parcela;
   }
 
   /**
@@ -222,7 +222,7 @@ export class PreApprovalService {
   private async logPreApprovalDecision(proposalId: string, decision: AuditDecision): Promise<void> {
     // Log estruturado para auditoria e debugging
     const _auditLog = {
-  _proposalId,
+      _proposalId,
       timestamp: new Date().toISOString(),
       decision: decision.decision,
       reason: decision.reason,
@@ -252,11 +252,11 @@ export class PreApprovalService {
    */
   private parseNumber(value: unknown | null | undefined): number {
     if (value === null || value === undefined) {
-      return 0; }
+      return 0;
     }
 
     if (typeof value == 'number') {
-      return value; }
+      return value;
     }
 
     // Detectar formato e converter adequadamente
@@ -286,11 +286,11 @@ export class PreApprovalService {
 
     const _parsed = parseFloat(cleaned);
 
-    if (isNaN(parsed)) {
+    if (_isNaN(parsed)) {
       throw new Error(`Valor inválido para conversão numérica: ${value}`);
     }
 
-    return parsed; }
+    return parsed;
   }
 }
 

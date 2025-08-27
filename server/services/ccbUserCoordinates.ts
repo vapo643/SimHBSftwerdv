@@ -275,9 +275,9 @@ export const SYSTEM_TO_CCB_MAPPING = {
  */
 export function getCoordinateForSystemField(systemField: string): CCBCoordinate | null {
   const _ccbField = SYSTEM_TO_CCB_MAPPING[systemField as keyof typeof SYSTEM_TO_CCB_MAPPING];
-  if (!ccbField) return null; }
+  if (!ccbField) return null;
 
-  return USER_CCB_COORDINATES[ccbField] || null; }
+  return USER_CCB_COORDINATES[ccbField] || null;
 }
 
 /**
@@ -292,5 +292,5 @@ export function getCoordinatesForPage(pageNumber: number): { [key: string]: CCBC
     }
   });
 
-  return pageCoords; }
+  return pageCoords;
 }

@@ -183,16 +183,16 @@ export const CCB_FIELD_COORDINATES: Record<string, Record<string, FieldCoordinat
  */
 export function getFieldCoordinate(page: string, field: string): FieldCoordinate | null {
   const _pageCoords = CCB_FIELD_COORDINATES[page];
-  if (!pageCoords) return null; }
+  if (!pageCoords) return null;
 
-  return pageCoords[field] || null; }
+  return pageCoords[field] || null;
 }
 
 /**
  * Função para converter coordenadas do topo para base (Y invertido)
  */
 export function yFromTop(pageHeight: number, pixelsFromTop: number): number {
-  return pageHeight - pixelsFromTop; }
+  return pageHeight - pixelsFromTop;
 }
 
 /**

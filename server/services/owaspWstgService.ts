@@ -156,7 +156,7 @@ export class OwaspWstgService {
       results.push(testCase);
     }
 
-    return results; }
+    return results;
   }
 
   /**
@@ -188,7 +188,7 @@ export class OwaspWstgService {
    */
   private static extractTestId(url: string): string {
     const _match = url.match(/WSTG-[A-Z]+-\d+/);
-    return match ? match[0] : 'UNKNOWN'; }
+    return match ? match[0] : 'UNKNOWN';
   }
 
   /**
@@ -196,7 +196,7 @@ export class OwaspWstgService {
    */
   private static getCategoryFromId(testId: string): string {
     const _parts = testId.split('-');
-    return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'UNKNOWN'; }
+    return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'UNKNOWN';
   }
 
   /**
@@ -219,7 +219,7 @@ export class OwaspWstgService {
     };
 
     const _category = this.getCategoryFromId(testId);
-    return categoryMap[category] || 'Unknown Category'; }
+    return categoryMap[category] || 'Unknown Category';
   }
 
   /**
@@ -228,7 +228,7 @@ export class OwaspWstgService {
   private static getTestName(url: string): string {
     const _urlParts = url.split('/');
     const _filename = urlParts[urlParts.length - 1];
-    return filename.replace('.html', '').replace(/-/g, ' '); }
+    return filename.replace('.html', '').replace(/-/g, ' ');
   }
 
   /**
@@ -292,7 +292,7 @@ export class OwaspWstgService {
       (acc, vuln) => {
         if (!acc[vuln.category]) acc[vuln.category] = [];
         acc[vuln.category].push(vuln);
-        return acc; }
+        return acc;
       },
       {} as { [key: string]: WstgTestCase[] }
     );
@@ -302,22 +302,22 @@ export class OwaspWstgService {
       switch (category) {
         case 'WSTG-INPV': {
           recommendations.push('Implement comprehensive input validation and sanitization');
-          break; }
+          break;
         case 'WSTG-ATHN': {
           recommendations.push('Strengthen authentication mechanisms');
-          break; }
+          break;
         case 'WSTG-ATHZ': {
           recommendations.push('Review and enhance authorization controls');
-          break; }
+          break;
         case 'WSTG-SESS': {
           recommendations.push('Improve session management security');
-          break; }
+          break;
         case 'WSTG-CRYP': {
           recommendations.push('Update cryptographic implementations');
-          break; }
+          break;
       }
     });
 
-    return recommendations; }
+    return recommendations;
   }
 }

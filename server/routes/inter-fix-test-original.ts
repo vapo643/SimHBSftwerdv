@@ -121,7 +121,8 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
           .returning();
 
         novosBoletosGerados.push(novoBoleto);
-      } catch (error) {
+      }
+catch (error) {
         console.error(`❌ [TEST FIX] Erro ao criar boleto ${parcela.numero}:`, error);
         errosEncontrados.push({
           parcela: parcela.numero,
@@ -155,7 +156,8 @@ router.get('/test-fix-collections/:propostaId', async (req, res) => {
   _errosEncontrados,
       totalBoletosCriados: novosBoletosGerados.length,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('❌ [TEST FIX] Erro:', error);
     res.status(500).json({
       error: 'Erro ao analisar boletos',

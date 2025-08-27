@@ -1,6 +1,6 @@
 // OWASP Assessment API Routes
 import { Router } from 'express';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 import { OWASPAssessmentService } from '../services/owaspAssessmentService.js';
 import { SAMMUrlProcessor } from '../services/sammUrlProcessor.js';
@@ -53,7 +53,7 @@ const _upload = multer({
 });
 
 // Helper function to check admin role
-const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
+const __requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -64,10 +64,10 @@ const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
 };
 
 // Middleware de autenticação para todas as rotas OWASP
-router.use(jwtAuthMiddleware);
+router.use(_jwtAuthMiddleware);
 
 // GET /api/owasp/samm - OWASP SAMM Assessment
-router.get('/samm', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/samm', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _assessment = await owaspService.processSAMMAssessment();
     res.json({
@@ -85,7 +85,7 @@ router.get('/samm', requireAdmin, async (req: AuthenticatedRequest, res) => {
 });
 
 // GET /api/owasp/samm/report - OWASP SAMM Maturity Report
-router.get('/samm/report', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/samm/report', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _report = await owaspService.generateSAMMMaturityReport();
     res.setHeader('Content-Type', 'text/markdown');
@@ -101,7 +101,7 @@ router.get('/samm/report', requireAdmin, async (req: AuthenticatedRequest, res) 
 });
 
 // GET /api/owasp/asvs - OWASP ASVS Requirements
-router.get('/asvs', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/asvs', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _requirements = await owaspService.processASVSRequirements();
     res.json({
@@ -119,7 +119,7 @@ router.get('/asvs', requireAdmin, async (req: AuthenticatedRequest, res) => {
 });
 
 // GET /api/owasp/strategic-plan - Plano Estratégico Completo
-router.get('/strategic-plan', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/strategic-plan', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _plan = await owaspService.generateStrategicPlan();
     res.setHeader('Content-Type', 'text/markdown');
@@ -137,7 +137,7 @@ router.get('/strategic-plan', requireAdmin, async (req: AuthenticatedRequest, re
 // POST /api/owasp/upload - Upload OWASP Document (PDF)
 router.post(
   '/upload',
-  _requireAdmin,
+  __requireAdmin,
   upload.single('owaspDocument'),
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -165,7 +165,7 @@ router.post(
           filename: req.file.filename,
           originalName: req.file.originalname,
           size: req.file.size,
-  _framework,
+          _framework,
           processedAt: new Date().toISOString(),
         },
       });
@@ -180,7 +180,7 @@ router.post(
 );
 
 // GET /api/owasp/status - Status do Assessment OWASP
-router.get('/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/status', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Calcular status baseado nos assessments existentes
     const _sammAssessment = await owaspService.processSAMMAssessment();
@@ -204,12 +204,12 @@ router.get('/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
       success: true,
       data: {
         overall: {
-  _sammMaturityScore,
-  _asvsComplianceScore,
+          _sammMaturityScore,
+          _asvsComplianceScore,
           overallSecurityScore: Math.round((sammMaturityScore + asvsComplianceScore) / 2),
         },
         priorities: {
-  _highPriorityGaps,
+          _highPriorityGaps,
           nonCompliantRequirements: nonCompliantASVS,
         },
         phases: {
@@ -231,14 +231,14 @@ router.get('/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
 });
 
 // GET /api/owasp/samm/urls - Retorna todas as URLs do SAMM
-router.get('/samm/urls', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/samm/urls', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _urls = sammUrlProcessor.getUrls();
     res.json({
       success: true,
       data: {
         totalUrls: urls.length,
-  _urls,
+        _urls,
         categories: [
           'Model',
           'Governance',
@@ -261,7 +261,7 @@ router.get('/samm/urls', requireAdmin, async (req: AuthenticatedRequest, res) =>
 });
 
 // POST /api/owasp/samm/process-pdf - Processa o PDF do SAMM v1.5
-router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/samm/process-pdf', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Processar o PDF já copiado para owasp_documents
     const _pdfPath = path.join(process.cwd(), 'owasp_documents', 'SAMM_Core_V1-5_FINAL.pdf');
@@ -288,7 +288,7 @@ router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest,
 });
 
 // GET /api/owasp/cheatsheets - OWASP Cheat Sheets Analysis
-router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/cheatsheets', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
     res.json({
@@ -297,7 +297,7 @@ router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) 
         totalCheatSheets: cheatsheets.length,
         processedCheatSheets: cheatsheets.filter((cs: CheatSheet) => cs.status == 'processed')
           .length,
-  _cheatsheets,
+        _cheatsheets,
         summary: {
           totalRecommendations: cheatsheets.reduce(
             (sum: number, cs: CheatSheet) => sum + (cs.recommendations?.length || 0),
@@ -306,8 +306,8 @@ router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) 
           criticalRecommendations: cheatsheets.reduce(
             (sum: number, cs: CheatSheet) =>
               sum +
-              (cs.recommendations?.filter((r: Recommendation) => r.priority == 'critical')
-                .length || 0),
+              (cs.recommendations?.filter((r: Recommendation) => r.priority == 'critical').length ||
+                0),
             0
           ),
           implementedItems: cheatsheets.reduce(
@@ -331,64 +331,68 @@ router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) 
 });
 
 // GET /api/owasp/cheatsheets/recommendations - Get All Security Recommendations
-router.get('/cheatsheets/recommendations', requireAdmin, async (req: AuthenticatedRequest, res) => {
-  try {
-    const _cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
-    const _allRecommendations = cheatsheets.flatMap((cs: CheatSheet) => cs.recommendations || []);
+router.get(
+  '/cheatsheets/recommendations',
+  _requireAdmin,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const _cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
+      const _allRecommendations = cheatsheets.flatMap((cs: CheatSheet) => cs.recommendations || []);
 
-    // Group by category and priority
-    const _byCategory = allRecommendations.reduce(
-      (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
-        if (!acc[rec.category]) acc[rec.category] = [];
-        acc[rec.category].push(rec);
-        return acc; }
-      },
-      {} as Record<string, Recommendation[]>
-    );
-
-    const _byPriority = allRecommendations.reduce(
-      (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
-        if (!acc[rec.priority]) acc[rec.priority] = [];
-        acc[rec.priority].push(rec);
-        return acc; }
-      },
-      {} as Record<string, Recommendation[]>
-    );
-
-    res.json({
-      success: true,
-      data: {
-        totalRecommendations: allRecommendations.length,
-  _byCategory,
-  _byPriority,
-        summary: {
-          critical: byPriority.critical?.length || 0,
-          high: byPriority.high?.length || 0,
-          medium: byPriority.medium?.length || 0,
-          low: byPriority.low?.length || 0,
-          implemented: allRecommendations.filter(
-            (r: Recommendation) => r.currentStatus == 'implemented'
-          ).length,
-          partial: allRecommendations.filter((r: Recommendation) => r.currentStatus == 'partial')
-            .length,
-          notImplemented: allRecommendations.filter(
-            (r: Recommendation) => r.currentStatus == 'not_implemented'
-          ).length,
+      // Group by category and priority
+      const _byCategory = allRecommendations.reduce(
+        (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
+          if (!acc[rec.category]) acc[rec.category] = [];
+          acc[rec.category].push(rec);
+          return acc;
         },
-      },
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error('[OWASP RECOMMENDATIONS] Analysis error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erro ao processar recomendações de segurança',
-    });
+        {} as Record<string, Recommendation[]>
+      );
+
+      const _byPriority = allRecommendations.reduce(
+        (acc: Record<string, Recommendation[]>, rec: Recommendation) => {
+          if (!acc[rec.priority]) acc[rec.priority] = [];
+          acc[rec.priority].push(rec);
+          return acc;
+        },
+        {} as Record<string, Recommendation[]>
+      );
+
+      res.json({
+        success: true,
+        data: {
+          totalRecommendations: allRecommendations.length,
+          _byCategory,
+          _byPriority,
+          summary: {
+            critical: byPriority.critical?.length || 0,
+            high: byPriority.high?.length || 0,
+            medium: byPriority.medium?.length || 0,
+            low: byPriority.low?.length || 0,
+            implemented: allRecommendations.filter(
+              (r: Recommendation) => r.currentStatus == 'implemented'
+            ).length,
+            partial: allRecommendations.filter((r: Recommendation) => r.currentStatus == 'partial')
+              .length,
+            notImplemented: allRecommendations.filter(
+              (r: Recommendation) => r.currentStatus == 'not_implemented'
+            ).length,
+          },
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('[OWASP RECOMMENDATIONS] Analysis error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Erro ao processar recomendações de segurança',
+      });
+    }
   }
-});
+);
 
 // POST /api/owasp/wstg/process - Process WSTG URLs
-router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/wstg/process', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _wstgData = await import('../data/wstg-urls.json');
     const allUrls: string[] = [];
@@ -427,7 +431,7 @@ router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res
 });
 
 // GET /api/owasp/wstg/status - Get WSTG compliance status
-router.get('/wstg/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/wstg/status', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const _status = OwaspWstgService.getComplianceStatus();
     res.json({

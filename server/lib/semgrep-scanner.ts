@@ -172,9 +172,10 @@ rules:
   private async checkInstallation(): Promise<boolean> {
     try {
       await execAsync('semgrep --version');
-      return true; }
-    } catch {
-      return false; }
+      return true;
+    }
+catch {
+      return false;
     }
   }
 
@@ -188,7 +189,8 @@ rules:
       // Instalar via pip
       await execAsync('pip install semgrep');
       console.log('✅ [SEMGREP] Instalação concluída');
-    } catch (error) {
+    }
+catch (error) {
       console.error('❌ [SEMGREP] Erro na instalação:', error);
       this.emit('error', { type: 'installation', error });
     }
@@ -213,7 +215,7 @@ rules:
   async runScan(): Promise<SemgrepScanResult | null> {
     if (this.isScanning) {
       console.log('⏳ [SEMGREP] Scan já em andamento...');
-      return null; }
+      return null;
     }
 
     this.isScanning = true;
@@ -283,12 +285,14 @@ rules:
       // Limpar arquivo temporário
       await fsPromises.unlink(resultsPath).catch(() => {});
 
-      return result; }
-    } catch (error) {
+      return result;
+    }
+catch (error) {
       console.error('❌ [SEMGREP] Erro no scan:', error);
       this.emit('error', { type: 'scan', error });
-      return null; }
-    } finally {
+      return null;
+    }
+finally {
       this.isScanning = false;
     }
   }
@@ -299,28 +303,28 @@ rules:
   private parseFindings(results): SemgrepFinding[] {
     const findings: SemgrepFinding[] = [];
 
-    if (!results.results) return findings; }
+    if (!results.results) return findings;
 
     results.results.forEach((result) => {
       findings.push({
         id: `SEMGREP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        rule: result.check_id,
-        severity: this.mapSeverity(result.extra.severity),
-        file: result.path,
-        line: result.start.line,
-        column: result.start.col,
-        message: result.extra.message,
-        code: result.extra.lines || '',
-        category: this.categorizeRule(result.check_id),
-        cweId: result.extra.metadata?.cwe,
-        owaspId: result.extra.metadata?.owasp,
-        fixSuggestion: result.extra.fix || this.generateFixSuggestion(_result),
+        rule: _result.check_id,
+        severity: this.mapSeverity(_result.extra.severity),
+        file: _result.path,
+        line: _result.start.line,
+        column: _result.start.col,
+        message: _result.extra.message,
+        code: _result.extra.lines || '',
+        category: this.categorizeRule(_result.check_id),
+        cweId: _result.extra.metadata?.cwe,
+        owaspId: _result.extra.metadata?.owasp,
+        fixSuggestion: _result.extra.fix || this.generateFixSuggestion(_result),
       });
     });
 
     return findings.sort((a, b) => {
       const _severityOrder = { ERROR: 3, WARNING: 2, INFO: 1 };
-      return severityOrder[b.severity] - severityOrder[a.severity]; }
+      return severityOrder[b.severity] - severityOrder[a.severity];
     });
   }
 
@@ -332,12 +336,12 @@ rules:
       case 'ERROR': {
       case 'CRITICAL': {
       case 'HIGH': {
-        return 'ERROR'; }
+        return 'ERROR';
       case 'WARNING': {
       case 'MEDIUM': {
-        return 'WARNING'; }
+        return 'WARNING';
       default:
-        return 'INFO'; }
+        return 'INFO';
     }
   }
 
@@ -345,20 +349,20 @@ rules:
    * Categorizar regra
    */
   private categorizeRule(ruleId: string): string {
-    if (ruleId.includes('sql')) return 'SQL Injection'; }
-    if (ruleId.includes('xss')) return 'Cross-Site Scripting'; }
-    if (ruleId.includes('jwt') || ruleId.includes('auth')) return 'Authentication'; }
-    if (ruleId.includes('secret') || ruleId.includes('key')) return 'Secrets'; }
-    if (ruleId.includes('injection')) return 'Injection'; }
-    if (ruleId.includes('crypto')) return 'Cryptography'; }
-    return 'Security'; }
+    if (ruleId.includes('sql')) return 'SQL Injection';
+    if (ruleId.includes('xss')) return 'Cross-Site Scripting';
+    if (ruleId.includes('jwt') || ruleId.includes('auth')) return 'Authentication';
+    if (ruleId.includes('secret') || ruleId.includes('key')) return 'Secrets';
+    if (ruleId.includes('injection')) return 'Injection';
+    if (ruleId.includes('crypto')) return 'Cryptography';
+    return 'Security';
   }
 
   /**
    * Gerar sugestão de correção
    */
   private generateFixSuggestion(result): string {
-    const _rule = result.check_id;
+    const _rule = _result.check_id;
 
     const suggestions: Record<string, string> = {
       'simpix-jwt-token-exposure':
@@ -367,14 +371,14 @@ rules:
         'Mova secrets para variáveis de ambiente. Use process.env.NOME_DA_VARIAVEL',
       'simpix-unsafe-sql': 'Use prepared statements ou query builders como Drizzle ORM',
       'simpix-missing-auth-check':
-        'Adicione middleware de autenticação: app.post("/rota", jwtAuthMiddleware, handler)',
+        'Adicione middleware de autenticação: app.post("/rota", _jwtAuthMiddleware, handler)',
       'javascript.express.security.audit.xss.ejs.var-in-script-tag':
         'Escape dados do usuário antes de inserir no HTML',
       'javascript.lang.security.audit.path-traversal':
         'Valide e sanitize caminhos de arquivo. Use path.join() e verifique se está dentro do diretório esperado',
     };
 
-    return suggestions[rule] || 'Revise o código para corrigir a vulnerabilidade identificada'; }
+    return suggestions[rule] || 'Revise o código para corrigir a vulnerabilidade identificada';
   }
 
   /**
@@ -444,7 +448,8 @@ rules:
 
       try {
         fs.watch(fullPath, { recursive: true }, watchCallback as fs.WatchListener<string>);
-      } catch (error) {
+      }
+catch (error) {
         console.warn(`⚠️ [SEMGREP] Não foi possível monitorar diretório: ${fullPath}`, error);
       }
     });
@@ -473,7 +478,8 @@ rules:
         console.log(`⚠️  [SEMGREP] ${findings.length} problemas em ${filePath}`);
         this.emit('incremental-findings', { file: filePath, findings });
       }
-    } catch (error) {
+    }
+catch (error) {
       // Ignorar erros em scans incrementais
     }
   }
@@ -533,5 +539,5 @@ export function getSemgrepScanner(): SemgrepScanner {
   if (!scanner) {
     scanner = new SemgrepScanner();
   }
-  return scanner; }
+  return scanner;
 }

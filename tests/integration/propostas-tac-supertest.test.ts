@@ -111,7 +111,8 @@ describe('TAC Integration Tests - Supertest (Infraestrutura Corrigida)', () => {
       if (response.status == 201) {
         // Sucesso completo
         console.log('[SUPERTEST TAC] 🎉 SUCESSO TOTAL - createApp + HTTP + TAC funcionando');
-      } else {
+      }
+else {
         // Ambiente corrigido mas pode haver outros problemas (autenticação, etc)
         console.log(
           `[SUPERTEST TAC] ✅ AMBIENTE CORRIGIDO - Status: ${response.status} (não TextEncoder)`
@@ -127,7 +128,8 @@ describe('TAC Integration Tests - Supertest (Infraestrutura Corrigida)', () => {
         console.log(`[SUPERTEST TAC] 💰 TAC via HTTP API: R$ ${valorTacRetornado.toFixed(2)}`);
         expect(valorTacRetornado).toBe(180.0);
         console.log('[SUPERTEST TAC] 🎉 SUCESSO COMPLETO - TAC + HTTP integração perfeita');
-      } else {
+      }
+else {
         console.log(
           '[SUPERTEST TAC] ✅ MISSÃO PRINCIPAL CUMPRIDA - Ambiente TextEncoder/esbuild CORRIGIDO'
         );

@@ -54,7 +54,7 @@ export class CreateProposalUseCase {
 
     // Criar agregado usando factory method
     const _proposal = Proposal.create(
-  _clienteData,
+      _clienteData,
       dto.valor,
       dto.prazo,
       dto.taxaJuros,
@@ -67,6 +67,6 @@ export class CreateProposalUseCase {
     await this.proposalRepository.save(proposal);
 
     // Retornar ID da proposta criada
-    return { id: proposal.id }; }
+    return { id: proposal.id };
   }
 }

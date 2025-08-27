@@ -202,7 +202,7 @@ export default function Pagamentos() {
           }),
         })
       );
-      return Promise.all(promises); }
+      return Promise.all(promises);
     },
     onSuccess: () => {
       toast({
@@ -231,7 +231,7 @@ export default function Pagamentos() {
 
   const _formatDate = (dateString: string) => {
     if (!dateString) return 'N/A'; }
-    return new Date(dateString).toLocaleDateString('pt-BR'); }
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   const _getStatusColor = (status: string) => {
@@ -300,17 +300,21 @@ export default function Pagamentos() {
     if (sortBy == 'valor' || sortBy == 'valorSolicitado' || sortBy == 'valorAprovado') {
       aVal = a.valorFinanciado || 0;
       bVal = b.valorFinanciado || 0;
-    } else if (sortBy == 'clienteNome') {
+    }
+else if (sortBy == 'clienteNome') {
       aVal = a.nomeCliente;
       bVal = b.nomeCliente;
-    } else if (sortBy == 'dataAprovacao') {
+    }
+else if (sortBy == 'dataAprovacao') {
       aVal = new Date(a.dataAprovacao || a.dataRequisicao || 0);
       bVal = new Date(b.dataAprovacao || b.dataRequisicao || 0);
-    } else if (sortBy == 'prazo') {
+    }
+else if (sortBy == 'prazo') {
       // We don't have prazo in the new structure, use dataRequisicao as fallback
       aVal = new Date(a.dataRequisicao || 0);
       bVal = new Date(b.dataRequisicao || 0);
-    } else {
+    }
+else {
       // Default fallback
       aVal = a.status;
       bVal = b.status;
@@ -318,7 +322,8 @@ export default function Pagamentos() {
 
     if (sortOrder == 'asc') {
       return aVal > bVal ? 1 : -1; }
-    } else {
+    }
+else {
       return aVal < bVal ? 1 : -1; }
     }
   });
@@ -332,7 +337,8 @@ export default function Pagamentos() {
   const _handleSelectAll = () => {
     if (selectedPropostas.length == sortedPropostas.length) {
       setSelectedPropostas([]);
-    } else {
+    }
+else {
       setSelectedPropostas(sortedPropostas.map((p) => p.id));
     }
   };
@@ -570,7 +576,7 @@ export default function Pagamentos() {
                     {formatCurrency(
                       selectedPropostas.reduce((sum, id) => {
                         const _proposta = sortedPropostas.find((p) => p.id == id);
-                        return sum + (proposta?.valorFinanciado || 0); }
+                        return sum + (proposta?.valorFinanciado || 0);
                       }, 0)
                     )}
                   </span>

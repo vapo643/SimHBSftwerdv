@@ -24,13 +24,13 @@ export class GenericService {
       // Generic response based on operation type
       const _response = {
         success: true,
-  _operation,
+        _operation,
         timestamp: new Date().toISOString(),
         data: params,
         serviceName: this.serviceName,
       };
 
-      return response; }
+      return response;
     } catch (error) {
       console.error(`[${this.serviceName}] Operation failed:`, error);
       throw new Error(`${this.serviceName} operation failed: ${error.message}`);

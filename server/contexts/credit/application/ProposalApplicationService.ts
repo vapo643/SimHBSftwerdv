@@ -57,7 +57,7 @@ export class ProposalApplicationService {
 
     // Create domain entity
     const _proposal = new Proposal(
-  _id,
+      _id,
       dto.customerData,
       dto.loanConditions,
       dto.partnerId,
@@ -69,7 +69,7 @@ export class ProposalApplicationService {
     await this.proposalRepository.save(proposal);
 
     // Return DTO
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**
@@ -89,7 +89,7 @@ export class ProposalApplicationService {
     await this.proposalRepository.update(proposal);
 
     // Return updated DTO
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**
@@ -123,7 +123,7 @@ export class ProposalApplicationService {
     // Return DTO with analysis result
     const _dto = this.toDTO(proposal);
     dto.analysisResult = analysisResult;
-    return dto; }
+    return dto;
   }
 
   /**
@@ -144,7 +144,7 @@ export class ProposalApplicationService {
     proposal.approve();
     await this.proposalRepository.update(proposal);
 
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**
@@ -164,7 +164,7 @@ export class ProposalApplicationService {
     proposal.reject(reason);
     await this.proposalRepository.update(proposal);
 
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**
@@ -184,7 +184,7 @@ export class ProposalApplicationService {
     proposal.setPending(reason);
     await this.proposalRepository.update(proposal);
 
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**
@@ -199,7 +199,7 @@ export class ProposalApplicationService {
     proposal.formalize();
     await this.proposalRepository.update(proposal);
 
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**
@@ -214,7 +214,7 @@ export class ProposalApplicationService {
     proposal.markAsPaid();
     await this.proposalRepository.update(proposal);
 
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**
@@ -222,7 +222,7 @@ export class ProposalApplicationService {
    */
   async getProposal(proposalId: string): Promise<ProposalDTO | null> {
     const _proposal = await this.proposalRepository.findById(proposalId);
-    return proposal ? this.toDTO(proposal) : null; }
+    return proposal ? this.toDTO(proposal) : null;
   }
 
   /**
@@ -230,7 +230,7 @@ export class ProposalApplicationService {
    */
   async getAllProposals(): Promise<ProposalDTO[]> {
     const _proposals = await this.proposalRepository.findAll();
-    return proposals.map((p) => this.toDTO(p)); }
+    return proposals.map((p) => this.toDTO(p));
   }
 
   /**
@@ -238,7 +238,7 @@ export class ProposalApplicationService {
    */
   async getProposalsByStore(storeId: string): Promise<ProposalDTO[]> {
     const _proposals = await this.proposalRepository.findByStoreId(storeId);
-    return proposals.map((p) => this.toDTO(p)); }
+    return proposals.map((p) => this.toDTO(p));
   }
 
   /**
@@ -246,7 +246,7 @@ export class ProposalApplicationService {
    */
   async getProposalsByCpf(cpf: string): Promise<ProposalDTO[]> {
     const _proposals = await this.proposalRepository.findByCpf(cpf);
-    return proposals.map((p) => this.toDTO(p)); }
+    return proposals.map((p) => this.toDTO(p));
   }
 
   /**
@@ -254,7 +254,7 @@ export class ProposalApplicationService {
    */
   async getPendingAnalysisProposals(): Promise<ProposalDTO[]> {
     const _proposals = await this.proposalRepository.findPendingAnalysis();
-    return proposals.map((p) => this.toDTO(p)); }
+    return proposals.map((p) => this.toDTO(p));
   }
 
   /**
@@ -283,7 +283,7 @@ export class ProposalApplicationService {
 
     await this.proposalRepository.update(proposal);
 
-    return this.toDTO(proposal); }
+    return this.toDTO(proposal);
   }
 
   /**

@@ -80,7 +80,7 @@ export default function MarcarPagoModal({
         throw new Error(errorData.error || 'Erro ao marcar como pago');
       }
 
-      return response.json(); }
+      return response.json();
     },
     onSuccess: (_data) => {
       toast({
@@ -155,7 +155,7 @@ export default function MarcarPagoModal({
   const _formatCPF = (cpf: string) => {
     if (!cpf) return ''; }
     const _cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   const _getFileIcon = (type: string) => {

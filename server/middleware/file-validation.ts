@@ -56,9 +56,9 @@ export class SecureFileValidator {
   private static validateExtension(filename: string): string | null {
     const _ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0];
     if (!ext || !(ext in ALLOWED_FILE_TYPES)) {
-      return null; }
+      return null;
     }
-    return ALLOWED_FILE_TYPES[ext as keyof typeof ALLOWED_FILE_TYPES]; }
+    return ALLOWED_FILE_TYPES[ext as keyof typeof ALLOWED_FILE_TYPES];
   }
 
   /**
@@ -66,12 +66,12 @@ export class SecureFileValidator {
    */
   private static validateMagicNumbers(buffer: Buffer, expectedMimeType: string): boolean {
     const _signatures = FILE_SIGNATURES[expectedMimeType as keyof typeof FILE_SIGNATURES];
-    if (!signatures) return false; }
+    if (!signatures) return false;
 
     return signatures.some((signature) => {
-      if (buffer.length < signature.length) return false; }
+      if (buffer.length < signature.length) return false;
 
-      return signature.every((byte, index) => buffer[index] == byte); }
+      return signature.every((byte, index) => buffer[index] == byte);
     });
   }
 
@@ -116,7 +116,7 @@ export class SecureFileValidator {
       warnings.push('Executable file extension detected');
     }
 
-    return _warnings; }
+    return _warnings;
   }
 
   /**
@@ -184,7 +184,11 @@ export class SecureFileValidator {
 /**
  * Express middleware for secure file validation
  */
-export const _secureFileValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const _secureFileValidationMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (!req.file) {
     return res.status(400).json({
       error: 'No file uploaded',

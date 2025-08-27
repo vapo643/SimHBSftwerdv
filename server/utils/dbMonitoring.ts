@@ -22,7 +22,7 @@ export async function getDatabaseStats() {
         current_timestamp as checked_at
     `);
 
-    return stats[0]; }
+    return stats[0];
   } catch (error) {
     console.error('Erro ao buscar estatísticas do banco:', error);
     throw error;
@@ -50,11 +50,11 @@ export async function getSlowQueries(limit = 10) {
       LIMIT ${limit}
     `);
 
-    return queries; }
+    return queries;
   } catch (error) {
     // pg_stat_statements pode não estar habilitado
     console.warn('pg_stat_statements não disponível');
-    return []; }
+    return [];
   }
 }
 
@@ -80,7 +80,7 @@ export async function getTableStats() {
       ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     `);
 
-    return stats; }
+    return stats;
   } catch (error) {
     console.error('Erro ao buscar estatísticas das tabelas:', error);
     throw error;
@@ -106,7 +106,7 @@ export async function getIndexUsage() {
       ORDER BY idx_scan DESC
     `);
 
-    return usage; }
+    return usage;
   } catch (error) {
     console.error('Erro ao buscar uso de índices:', error);
     throw error;
@@ -141,7 +141,7 @@ export async function getActiveConnections() {
       ORDER BY query_start DESC
     `);
 
-    return connections; }
+    return connections;
   } catch (error) {
     console.error('Erro ao buscar conexões ativas:', error);
     throw error;
@@ -217,7 +217,7 @@ export async function checkDatabaseHealth() {
       health.status = 'warning';
     }
 
-    return health; }
+    return health;
   } catch (error) {
     console.error('Erro ao verificar saúde do banco:', error);
     return {

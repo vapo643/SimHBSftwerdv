@@ -110,7 +110,7 @@ export function WstgPage() {
 
   const _getCategoryProgress = (category: WstgCategory) => {
     if (category.totalTests == 0) return 0; }
-    return Math.round((category.completedTests / category.totalTests) * 100); }
+    return Math.round((category.completedTests / category.totalTests) * 100);
   };
 
   if (isLoading) {

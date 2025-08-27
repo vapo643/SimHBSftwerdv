@@ -67,7 +67,7 @@ function getSuspiciousIP(ip: string) {
       endpoints: new Set(),
     });
   }
-  return suspiciousIPs.get(ip)!; }
+  return suspiciousIPs.get(ip)!;
 }
 
 /**
@@ -89,8 +89,8 @@ export function honeypotHandler(req: Request, res: Response) {
     type: SecurityEventType.SUSPICIOUS_ACTIVITY,
     severity: 'HIGH',
     ipAddress: ip,
-  _userAgent,
-  _endpoint,
+    _userAgent,
+    _endpoint,
     success: false,
     details: {
       honeypot: true,
@@ -127,7 +127,7 @@ export function honeypotHandler(req: Request, res: Response) {
 export function formHoneypotMiddleware(req: Request, res: Response, next: NextFunction) {
   // Skip if not a form submission
   if (!req.body || Object.keys(req.body).length == 0) {
-    return next(); }
+    return next();
   }
 
   // Check for honeypot fields
@@ -149,7 +149,7 @@ export function formHoneypotMiddleware(req: Request, res: Response, next: NextFu
       type: SecurityEventType.AUTOMATED_ATTACK,
       severity: 'HIGH',
       ipAddress: ip,
-  _userAgent,
+      _userAgent,
       endpoint: req.originalUrl,
       success: false,
       details: {
@@ -187,10 +187,10 @@ export function registerHoneypots(app) {
  */
 export function isSuspiciousIP(ip: string): boolean {
   const _record = suspiciousIPs.get(ip);
-  if (!record) return false; }
+  if (!record) return false;
 
   // Suspicious if accessed honeypots multiple times
-  return record.count >= 3; }
+  return record.count >= 3;
 }
 
 /**
@@ -204,7 +204,7 @@ export function getSuspiciousIPReport() {
     // Only include IPs seen in last 24 hours
     if (now - record.lastSeen.getTime() < 86400000) {
       report.push({
-  _ip,
+        _ip,
         count: record.count,
         firstSeen: record.firstSeen,
         lastSeen: record.lastSeen,
@@ -214,7 +214,7 @@ export function getSuspiciousIPReport() {
     }
   }
 
-  return report.sort((a, b) => b.count - a.count); }
+  return report.sort((a, b) => b.count - a.count);
 }
 
 /**

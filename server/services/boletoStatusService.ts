@@ -17,7 +17,7 @@ import { transitionTo, InvalidTransitionError } from './statusFsmService';
 // Usando import dinâmico para evitar ciclo de dependência
 const _getInterService = async () => {
   const { interBankService } = await import('./interBankService');
-  return interBankService; }
+  return interBankService;
 };
 
 // Mapeamento de status do Inter para nosso sistema
@@ -90,17 +90,17 @@ export class BoletoStatusService {
           updateData.situacao = 'RECEBIDO';
           updateData.valorPago = cobranca.valorRecebido?.toString();
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
-          break; }
+          break;
 
         case 'cobranca-vencida': {
           updateData.situacao = 'ATRASADO';
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
-          break; }
+          break;
 
         case 'cobranca-cancelada': {
           updateData.situacao = 'CANCELADO';
           updateData.dataSituacao = cobranca.dataHoraSituacao || new Date().toISOString();
-          break; }
+          break;
 
         default:
           // Para outros eventos, usar o status direto se disponível
@@ -125,7 +125,8 @@ export class BoletoStatusService {
         message: `Status atualizado: ${updateData.situacao}`,
         updatedCount: 1,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[STATUS SERVICE] ❌ Erro ao processar webhook:', error);
       return {
         success: false,
@@ -197,13 +198,15 @@ export class BoletoStatusService {
               .where(eq(interCollections.codigoSolicitacao, cobranca.codigoSolicitacao));
 
             updatedCount++;
-          } else {
+          }
+else {
             console.log(`[STATUS SERVICE] ✅ Status já atualizado: ${novoStatus}`);
           }
 
           // Delay para evitar rate limit (200ms entre requisições)
           await new Promise((resolve) => setTimeout(resolve, 200));
-        } catch (error) {
+        }
+catch (error) {
           const _errorMsg = `Erro ao sincronizar ${cobranca.codigoSolicitacao}: ${(error as Error).message}`;
           console.error(`[STATUS SERVICE] ❌ ${errorMsg}`);
           errors.push(errorMsg);
@@ -219,7 +222,8 @@ export class BoletoStatusService {
   _updatedCount,
         errors: errors.length > 0 ? errors : undefined,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[STATUS SERVICE] ❌ Erro fatal na sincronização:', error);
       return {
         success: false,
@@ -240,7 +244,8 @@ export class BoletoStatusService {
 
       const _propostaId = parts[1];
       await this.verificarQuitacaoProposta(propostaId);
-    } catch (error) {
+    }
+catch (error) {
       console.error('[STATUS SERVICE] ❌ Erro ao verificar quitação:', error);
     }
   }
@@ -275,11 +280,13 @@ export class BoletoStatusService {
           },
         });
         console.log(`[STATUS SERVICE] ✅ Status QUITADO atualizado com sucesso`);
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.error(`[STATUS SERVICE] ⚠️ Transição de status inválida: ${error.message}`);
           // Não re-lançar o erro pois é uma operação em background
-        } else {
+        }
+else {
           console.error(`[STATUS SERVICE] ❌ Erro ao atualizar status: ${error}`);
           throw error;
         }
@@ -319,7 +326,8 @@ export class BoletoStatusService {
         message: `Status atualizado: ${detalhes.cobranca.situacao}`,
         updatedCount: 1,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[STATUS SERVICE] ❌ Erro ao sincronizar boleto:', error);
       return {
         success: false,

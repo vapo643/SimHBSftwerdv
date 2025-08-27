@@ -22,7 +22,8 @@ export async function apiRequest(
     if (method == 'GET') {
       const _blob = (await api.get(url, { responseType: 'blob' })) as Blob;
       return blob; }
-    } else {
+    }
+else {
       throw new Error(`Blob responseType not supported for method: ${method}`);
     }
   }
@@ -31,17 +32,21 @@ export async function apiRequest(
   if (method == 'GET') {
     const _response = await api.get(url);
     return response.data; }
-  } else if (method == 'POST') {
+  }
+else if (method == 'POST') {
     const _response = await api.post(url, body);
     return response.data; }
-  } else if (method == 'PUT') {
+  }
+else if (method == 'PUT') {
     const _response = await api.put(url, body);
     return response.data; }
-  } else if (method == 'PATCH') {
+  }
+else if (method == 'PATCH') {
     // PAM V1.0 - HOTFIX: Adicionar suporte para PATCH
     const _response = await api.patch(url, body);
     return response.data; }
-  } else if (method == 'DELETE') {
+  }
+else if (method == 'DELETE') {
     const _response = await api.delete(url);
     return response.data; }
   }
@@ -58,7 +63,8 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
       const _url = queryKey.join('/') as string;
       const _response = await api.get(url);
       return response.data; }
-    } catch (error) {
+    }
+catch (error) {
       if (unauthorizedBehavior == 'returnNull' && error.message?.includes('401')) {
         return null; }
       }
@@ -137,7 +143,7 @@ export const _queryClient = new QueryClient({
 
       retryDelay: (attemptIndex) => {
         // Retry mais rápido para mutations
-        return Math.min(1000 * Math.pow(1.5, attemptIndex), 5000); }
+        return Math.min(1000 * Math.pow(1.5, attemptIndex), 5000);
       },
 
       // Error handling para mutations

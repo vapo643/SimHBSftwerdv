@@ -140,7 +140,8 @@ const PartnersPage: React.FC = () => {
     if (selectedPartner) {
       // Update existing partner
       updateMutation.mutate({ id: selectedPartner.id, data: completeData });
-    } else {
+    }
+else {
       // Create new partner
       createMutation.mutate(completeData);
     }

@@ -66,13 +66,13 @@ async function testAdminAccess() {
       console.log(`   - URL CCB: ${primeiroContrato.urlCcbAssinado ? 'Presente' : 'Ausente'}`);
     }
 
-    return true; }
+    return true;
   } catch (error) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
     );
-    return false; }
+    return false;
   }
 }
 
@@ -104,13 +104,13 @@ async function testDiretorAccess() {
       `${colors.green}✅ Contratos retornados: ${response.data.contratos?.length || 0}${colors.reset}`
     );
 
-    return true; }
+    return true;
   } catch (error) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
     );
-    return false; }
+    return false;
   }
 }
 
@@ -133,7 +133,7 @@ async function testGerenteAccess() {
     console.log(
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
-    return false; }
+    return false;
   } catch (error) {
     if (error.response?.status == 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
@@ -144,12 +144,12 @@ async function testGerenteAccess() {
       console.log(
         `${colors.green}✅ Role do usuário: ${error.response.data.userRole}${colors.reset}`
       );
-      return true; }
+      return true;
     } else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
-      return false; }
+      return false;
     }
   }
 }
@@ -173,17 +173,17 @@ async function testAtendenteAccess() {
     console.log(
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
-    return false; }
+    return false;
   } catch (error) {
     if (error.response?.status == 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Bloqueado para ATENDENTE como esperado${colors.reset}`);
-      return true; }
+      return true;
     } else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
-      return false; }
+      return false;
     }
   }
 }
@@ -206,17 +206,17 @@ async function testNoTokenAccess() {
     console.log(
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 401${colors.reset}`
     );
-    return false; }
+    return false;
   } catch (error) {
     if (error.response?.status == 401) {
       console.log(`${colors.green}✅ Status: 401 - Não autenticado corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Mensagem: ${error.response.data.message}${colors.reset}`);
-      return true; }
+      return true;
     } else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
-      return false; }
+      return false;
     }
   }
 }
@@ -247,7 +247,7 @@ async function testGetSpecificContract(contractId: string) {
       `   - URLs de documentos presentes: ${response.data.contrato?.urlCcbAssinado ? 'Sim' : 'Não'}`
     );
 
-    return true; }
+    return true;
   } catch (error) {
     if (error.response?.status == 404) {
       console.log(`${colors.yellow}⚠️ Contrato ${contractId} não encontrado (404)${colors.reset}`);
@@ -256,7 +256,7 @@ async function testGetSpecificContract(contractId: string) {
         `${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`
       );
     }
-    return false; }
+    return false;
   }
 }
 
@@ -295,7 +295,7 @@ async function testSearchFilters() {
     }
   }
 
-  return true; }
+  return true;
 }
 
 /**

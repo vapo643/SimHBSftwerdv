@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware, type AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware, type AuthenticatedRequest } from '../../lib/jwt-auth-middleware.js';
 import { db, supabase } from '../../lib/_supabase.js';
 import {
   _propostas,
@@ -74,7 +74,7 @@ const _pagamentoSchema = z.object({
 });
 
 // Buscar pagamentos
-router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, periodo, incluir_pagos } = req.query;
     const _userId = req.user?.id;
@@ -196,7 +196,8 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     if (boletosDetalhados.length == 0) {
       console.log('[PAGAMENTOS DEBUG] Nenhuma proposta com boletos encontrada');
       console.log(`[PAGAMENTOS DEBUG] ===========================`);
-    } else {
+    }
+else {
       // Extrair e validar os IDs das propostas
       const _propostaIds = boletosDetalhados
         .map((item) => item.propostaId)
@@ -204,7 +205,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           // Validação extra para garantir que são UUIDs válidos
           const _uuidRegex =
             /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-          return id && uuidRegex.test(id); }
+          return id && uuidRegex.test(id);
         });
 
       console.log(`[PAGAMENTOS DEBUG] IDs válidos de propostas: ${propostaIds.length}`);
@@ -309,10 +310,10 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     // Filtrar apenas as propostas que têm boletos
     const _result = propostasElegiveis.filter((p) => propostasComBoletosSet.has(p.proposta.id));
 
-    console.log(`[PAGAMENTOS DEBUG] Total propostas encontradas: ${result.length}`);
+    console.log(`[PAGAMENTOS DEBUG] Total propostas encontradas: ${_result.length}`);
 
     // Debug: mostrar detalhes de todas as propostas encontradas
-    result.forEach((row, index) => {
+    _result.forEach((row, index) => {
       console.log(`[PAGAMENTOS DEBUG] Proposta ${index + 1}:`, {
         id: row.proposta.id,
         clienteNome: row.proposta.clienteNome,
@@ -332,7 +333,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     });
 
     // Processar os resultados para o formato esperado pelo frontend
-    const _pagamentosFormatados = result.map((row) => {
+    const _pagamentosFormatados = _result.map((row) => {
       const { proposta, statusContextual, loja, produto } = row;
 
       // PAM V1.0 - Usar status contextual com fallback para status legado
@@ -362,23 +363,30 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       // Status System V2.0 (prioritário)
       if (statusAtual == 'BOLETOS_EMITIDOS') {
         statusFrontend = 'em_processamento'; // CORRIGIDO: BOLETOS_EMITIDOS é elegível para pagamento
-      } else if (statusAtual == 'PAGAMENTO_PENDENTE') {
+      }
+else if (statusAtual == 'PAGAMENTO_PENDENTE') {
         statusFrontend = 'aguardando_pagamento';
-      } else if (statusAtual == 'QUITADO') {
+      }
+else if (statusAtual == 'QUITADO') {
         statusFrontend = 'pago';
-      } else if (statusAtual == 'PAGAMENTO_CONFIRMADO') {
+      }
+else if (statusAtual == 'PAGAMENTO_CONFIRMADO') {
         statusFrontend = 'pago';
       }
       // Status legados V1.0 (compatibilidade)
       else if (statusAtual == 'pago') {
         statusFrontend = 'pago';
-      } else if (statusAtual == 'aprovado') {
+      }
+else if (statusAtual == 'aprovado') {
         statusFrontend = 'aprovado';
-      } else if (statusAtual == 'pronto_pagamento') {
+      }
+else if (statusAtual == 'pronto_pagamento') {
         statusFrontend = 'em_processamento';
-      } else if (statusAtual == 'rejeitado') {
+      }
+else if (statusAtual == 'rejeitado') {
         statusFrontend = 'rejeitado';
-      } else if (statusAtual == 'cancelado') {
+      }
+else if (statusAtual == 'cancelado') {
         statusFrontend = 'cancelado';
       }
 
@@ -449,7 +457,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         loja: pagamentoFormatado.loja,
       });
 
-      return pagamentoFormatado; }
+      return pagamentoFormatado;
     });
 
     // Aplicar filtros
@@ -491,13 +499,13 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         const _dataReq = new Date(p.dataRequisicao);
         switch (periodo) {
           case 'hoje': {
-            return isToday(dataReq); }
+            return isToday(dataReq);
           case 'semana': {
-            return isThisWeek(dataReq); }
+            return isThisWeek(dataReq);
           case 'mes': {
-            return isThisMonth(dataReq); }
+            return isThisMonth(dataReq);
           default:
-            return true; }
+            return true;
         }
       });
       console.log(
@@ -515,14 +523,15 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 
     res.json(pagamentosFiltrados);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar pagamentos:', error);
     res.status(500).json({ error: 'Erro ao buscar pagamentos' });
   }
 });
 
 // Aprovar pagamento
-router.post('/:id/aprovar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/aprovar', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { observacao } = req.body;
@@ -560,7 +569,8 @@ router.post('/:id/aprovar', jwtAuthMiddleware, async (req: AuthenticatedRequest,
           dataAprovacao: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof InvalidTransitionError) {
         return res.status(409).json({
           error: 'Transição de status inválida',
@@ -571,14 +581,15 @@ router.post('/:id/aprovar', jwtAuthMiddleware, async (req: AuthenticatedRequest,
     }
 
     res.json({ message: 'Pagamento aprovado com sucesso' });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao aprovar pagamento:', error);
     res.status(500).json({ error: 'Erro ao aprovar pagamento' });
   }
 });
 
 // Rejeitar pagamento
-router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/rejeitar', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { motivo } = req.body;
@@ -614,7 +625,8 @@ router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest
           dataRejeicao: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof InvalidTransitionError) {
         return res.status(409).json({
           error: 'Transição de status inválida',
@@ -625,14 +637,15 @@ router.post('/:id/rejeitar', jwtAuthMiddleware, async (req: AuthenticatedRequest
     }
 
     res.json({ message: 'Pagamento rejeitado com sucesso' });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao rejeitar pagamento:', error);
     res.status(500).json({ error: 'Erro ao rejeitar pagamento' });
   }
 });
 
 // Processar pagamento
-router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/processar', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const { comprovante } = req.body;
@@ -663,7 +676,8 @@ router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedReques
           comprovante: comprovante || null,
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       if (error instanceof InvalidTransitionError) {
         return res.status(409).json({
           error: 'Transição de status inválida',
@@ -685,7 +699,8 @@ router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedReques
     console.log(`[PAGAMENTOS] Pagamento processado para proposta ${id}`);
 
     res.json({ success: true, message: 'Pagamento processado com sucesso' });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[PAGAMENTOS] Erro ao processar pagamento:', error);
     res.status(500).json({ error: 'Erro ao processar pagamento' });
   }
@@ -694,7 +709,7 @@ router.post('/:id/processar', jwtAuthMiddleware, async (req: AuthenticatedReques
 // Nova rota para verificar documentos CCB antes do pagamento
 router.get(
   '/:id/verificar-documentos',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
@@ -747,7 +762,8 @@ router.get(
       };
 
       res.json(verificacoes);
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao verificar documentos:', error);
       res.status(500).json({ error: 'Erro ao verificar documentos' });
     }
@@ -757,7 +773,7 @@ router.get(
 // Nova rota para confirmar pagamento com segurança máxima
 router.post(
   '/:id/confirmar-desembolso',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
@@ -818,7 +834,8 @@ router.post(
             },
           },
         });
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof InvalidTransitionError) {
           return res.status(409).json({
             error: 'Transição de status inválida',
@@ -859,7 +876,8 @@ router.post(
         status: 'DESEMBOLSADO',
         timestamp: new Date().toISOString(),
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao confirmar desembolso:', error);
       res.status(500).json({ error: 'Erro ao confirmar desembolso' });
     }
@@ -867,7 +885,7 @@ router.post(
 );
 
 // Rota para buscar CCB assinada (primeiro tenta Supabase Storage, depois ClickSign)
-router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-assinada', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const _userId = req.user?.id;
@@ -920,7 +938,8 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
         }
 
         console.log(`[PAGAMENTOS] ⚠️ CCB não encontrada no Storage, tentando ClickSign...`);
-      } catch (storageError) {
+      }
+catch (storageError) {
         console.error('[PAGAMENTOS] Erro ao buscar do Storage:', storageError);
       }
     }
@@ -959,7 +978,8 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
           .where(eq(propostas.id, id));
 
         console.log(`[PAGAMENTOS] ✅ CCB salva no Storage e caminho atualizado no banco`);
-      } else {
+      }
+else {
         console.error('[PAGAMENTOS] Erro ao salvar no Storage:', uploadError);
       }
 
@@ -973,7 +993,8 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
       );
 
       res.send(pdfBuffer);
-    } catch (clickSignError) {
+    }
+catch (clickSignError) {
       console.error('[PAGAMENTOS] Erro ao baixar CCB da ClickSign:', clickSignError);
 
       // Tratar erros específicos
@@ -989,14 +1010,15 @@ router.get('/:id/ccb-assinada', jwtAuthMiddleware, async (req: AuthenticatedRequ
         details: clickSignError.message,
       });
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('[PAGAMENTOS] Erro ao buscar CCB assinada:', error);
     res.status(500).json({ error: 'Erro ao buscar CCB assinada' });
   }
 });
 
 // Rota para verificar status de armazenamento da CCB
-router.get('/:id/ccb-storage-status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-storage-status', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
@@ -1069,14 +1091,15 @@ router.get('/:id/ccb-storage-status', jwtAuthMiddleware, async (req: Authenticat
           ? 'CCB assinada mas não está no Storage. Use o endpoint /ccb-url para baixar e armazenar.'
           : 'CCB disponível no Storage',
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[PAGAMENTOS] Erro ao verificar status da CCB:', error);
     res.status(500).json({ error: 'Erro ao verificar status' });
   }
 });
 
 // Rota para buscar detalhes completos da proposta
-router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/detalhes-completos', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const _userId = req.user?.id;
@@ -1167,7 +1190,8 @@ router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: Authenticat
       `);
       boletos = boletosResult;
       console.log('[DEBUG] Boletos encontrados:', boletos.length);
-    } catch (boletoError) {
+    }
+catch (boletoError) {
       console.error('[DEBUG] ERRO ao buscar boletos:', boletoError);
       boletos = [];
     }
@@ -1218,7 +1242,8 @@ router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: Authenticat
       hasCaminhoCcbAssinado: !!(respostaCompleta as unknown).caminhoCcbAssinado,
     });
     res.json(respostaCompleta);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[PAGAMENTOS] Erro ao buscar detalhes completos:', error);
     res.status(500).json({ error: 'Erro ao buscar detalhes da proposta' });
   }
@@ -1227,7 +1252,7 @@ router.get('/:id/detalhes-completos', jwtAuthMiddleware, async (req: Authenticat
 // Rota para confirmar veracidade e autorizar pagamento
 router.post(
   '/:id/confirmar-veracidade',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
@@ -1387,7 +1412,8 @@ router.post(
           dataAutorizacao: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:', error);
       console.error('[PAGAMENTOS] ❌ Stack trace:', (error as unknown).stack);
       res
@@ -1400,7 +1426,7 @@ router.post(
 // Rota para marcar pagamento como pago
 router.post(
   '/:id/marcar-pago',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   upload.single('comprovante'),
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -1497,7 +1523,8 @@ router.post(
 
           comprovanteUrl = urlData.publicUrl;
           console.log(`[PAGAMENTOS] ✅ [AUDIT] Upload concluído - URL: ${comprovanteUrl}`);
-        } catch (error) {
+        }
+catch (error) {
           console.error(`[PAGAMENTOS] ❌ [AUDIT] Erro no processamento do arquivo:`, error);
           return res.status(500).json({
             error: 'Erro ao processar arquivo de comprovante',
@@ -1522,7 +1549,8 @@ router.post(
             dataMarcacao: new Date().toISOString(),
           },
         });
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof InvalidTransitionError) {
           return res.status(409).json({
             error: 'Transição de status inválida',
@@ -1593,7 +1621,8 @@ router.post(
           dataMarcacao: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[PAGAMENTOS] ❌ [AUDIT] Erro ao marcar como pago:', error);
       res.status(500).json({ error: 'Erro ao marcar pagamento como pago' });
     }
@@ -1601,7 +1630,7 @@ router.post(
 );
 
 // Rota para obter URL assinada do Supabase Storage para CCB - Com Cache Inteligente
-router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.get('/:id/ccb-url', _jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
@@ -1715,7 +1744,8 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
         actualFilePath = storagePath;
         console.log(`[PAGAMENTOS CCB-URL] ✅ Arquivo salvo e banco atualizado`);
-      } catch (downloadError) {
+      }
+catch (downloadError) {
         console.error(`[PAGAMENTOS CCB-URL] ❌ Erro ao baixar/salvar CCB:`, downloadError);
 
         // Se o erro é que o documento ainda não foi assinado, informar status específico
@@ -1763,7 +1793,8 @@ router.get('/:id/ccb-url', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       expiresIn: 3600,
       cached: fileExists,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[PAGAMENTOS CCB-URL] ❌ Erro não tratado:', error);
     res.status(500).json({
       error: 'Erro ao processar solicitação',

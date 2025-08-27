@@ -85,7 +85,7 @@ export function trackUserToken(userId: string, token: string): void {
  * Middleware de autenticação JWT robusto com fallback de segurança
  * Implementa validação completa e bloqueia usuários órfãos
  */
-export async function jwtAuthMiddleware(
+export async function _jwtAuthMiddleware(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
@@ -171,7 +171,8 @@ export async function jwtAuthMiddleware(
           tokenType = 'supabase';
         }
       }
-    } catch (e) {
+    }
+catch (e) {
       // If header parsing fails, default to local
       tokenType = 'local';
     }
@@ -193,12 +194,14 @@ export async function jwtAuthMiddleware(
           userId = data.user.id;
           userEmail = data.user.email || '';
         }
-      } catch (supabaseError) {
+      }
+catch (supabaseError) {
         console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
         error = { message: supabaseError.message };
         data = null;
       }
-    } else {
+    }
+else {
       // Use local JWT validation for local tokens
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
@@ -216,9 +219,10 @@ export async function jwtAuthMiddleware(
         userEmail = decoded.email || '';
 
         // Create mock data object for consistency
-        data = { user: { id: userId, email: userEmail } };
+        data = { user: { id: userId, email: userEmail }};
         error = null;
-      } catch (jwtError) {
+      }
+catch (jwtError) {
         console.error('[JWT DEBUG] Local JWT verification failed:', jwtError.message);
         error = { message: jwtError.message };
         data = null;
@@ -313,7 +317,8 @@ export async function jwtAuthMiddleware(
     };
 
     next();
-  } catch (error) {
+  }
+catch (error) {
     console.error('JWT Auth middleware error:', error);
     res.status(500).json({ message: 'Erro interno de autenticação' });
   }
@@ -321,7 +326,7 @@ export async function jwtAuthMiddleware(
 
 /**
  * Legacy function - maintained for backward compatibility
- * @deprecated Use jwtAuthMiddleware directly
+ * @deprecated Use _jwtAuthMiddleware directly
  */
 export async function extractRoleFromToken(authToken: string): Promise<string | null> {
   try {
@@ -330,7 +335,7 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
     const { data, error } = await _supabase.auth.getUser(authToken);
 
     if (error || !data.user) {
-      return null; }
+      return null;
     }
 
     const _supabaseAdmin = createServerSupabaseAdminClient();
@@ -341,9 +346,10 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
       .eq('id', data.user.id)
       .single();
 
-    return profile?.role || null; }
-  } catch (error) {
+    return profile?.role || null;
+  }
+catch (error) {
     console.error('Error extracting role from token:', error);
-    return null; }
+    return null;
   }
 }

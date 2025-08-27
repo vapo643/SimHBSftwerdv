@@ -61,11 +61,12 @@ export function enforceRoutePermissions(
         const [key, value] = queryParam.split('=');
         if (req.query[key] == value) {
           allowedRoles = roles;
-          break; }
+          break;
         }
-      } else {
+      }
+else {
         allowedRoles = roles;
-        break; }
+        break;
       }
     }
   }
@@ -73,7 +74,7 @@ export function enforceRoutePermissions(
   // Se não encontrou permissões específicas, verificar rotas genéricas
   if (!allowedRoles) {
     // Rotas públicas ou não mapeadas passam (serão validadas pelos guards específicos)
-    return next(); }
+    return next();
   }
 
   // Verificar se o usuário tem permissão
@@ -144,30 +145,30 @@ export function requireFinanceiro(
  * Guard para ATENDENTE ver apenas suas propostas
  */
 export function filterProposalsByRole(proposals: unknown[], user): unknown[] {
-  if (!user || !user.role) return []; }
+  if (!user || !user.role) return [];
 
   switch (user.role) {
     case 'ATENDENTE': {
       // ATENDENTE vê apenas suas próprias propostas
-      return proposals.filter((p) => p.userId == user.id); }
+      return proposals.filter((p) => p.userId == user.id);
 
     case 'ANALISTA': {
       // ANALISTA vê apenas propostas em análise
-      return proposals.filter((p) => ['aguardando_analise', 'em_analise'].includes(p.status)); }
+      return proposals.filter((p) => ['aguardando_analise', 'em_analise'].includes(p.status));
 
     case 'FINANCEIRO': {
       // FINANCEIRO vê apenas propostas aprovadas/pagamento
-      return proposals.filter((p) => ['aprovado', 'pronto_pagamento', 'pago'].includes(p.status)); }
+      return proposals.filter((p) => ['aprovado', 'pronto_pagamento', 'pago'].includes(p.status));
 
     case 'GERENTE': {
       // GERENTE vê todas da sua loja (já filtrado por RLS)
-      return proposals; }
+      return proposals;
 
     case 'ADMINISTRADOR': {
       // ADMIN vê tudo
-      return proposals; }
+      return proposals;
 
     default:
-      return []; }
+      return [];
   }
 }

@@ -90,11 +90,13 @@ export const _handleApiError = (error) => {
     if (data?.userMessage) {
       userMessage = data.userMessage;
     }
-  } else if (error.code) {
+  }
+else if (error.code) {
     // Erro de rede ou outro erro com código
     errorCode = error.code == 'ERR_NETWORK' ? 'NETWORK_ERROR' : error.code;
     technicalMessage = error.message;
-  } else if (error.message) {
+  }
+else if (error.message) {
     // Erro genérico com mensagem
     technicalMessage = error.message;
   }

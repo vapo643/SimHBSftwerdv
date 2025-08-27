@@ -134,21 +134,21 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
     const _result = await db.select().from(users).where(eq(users.id, id)).limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const _result = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async createUser(user: InsertUser): Promise<User> {
     const _result = await db.insert(users).values(user).returning();
-    return result[0]; }
+    return result[0];
   }
 
   async getUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(users.name); }
+    return await db.select().from(users).orderBy(users.name);
   }
 
   async getUsersWithDetails(): Promise<any[]> {
@@ -171,8 +171,9 @@ export class DatabaseStorage implements IStorage {
         throw new Error(`Erro ao buscar usuários: ${error.message}`);
       }
 
-      return users || []; }
-    } catch (error) {
+      return users || [];
+    }
+catch (error) {
       console.error('Critical error in getUsersWithDetails:', error);
       throw error;
     }
@@ -306,7 +307,7 @@ export class DatabaseStorage implements IStorage {
 
     if (error || !data) {
       console.error('Error fetching proposta by id:', error);
-      return undefined; }
+      return undefined;
     }
 
     // Buscar documentos associados à proposta
@@ -330,7 +331,8 @@ export class DatabaseStorage implements IStorage {
           if (documentsIndex !== -1) {
             // Extrair caminho após '/documents/'
             filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-          } else {
+          }
+else {
             // Fallback: tentar extrair filename e reconstruir
             const _urlParts = doc.url.split('/');
             const _fileName = urlParts[urlParts.length - 1];
@@ -356,7 +358,8 @@ export class DatabaseStorage implements IStorage {
             uploadDate: doc.created_at,
             category: 'supporting',
           });
-        } catch (error) {
+        }
+catch (error) {
           console.error(`Erro ao gerar URL assinada para documento ${doc.nome_arquivo}:`, error);
           // Fallback para URL original
           documentosAnexados.push({
@@ -519,7 +522,7 @@ export class DatabaseStorage implements IStorage {
 
     // Documents will be uploaded and associated separately via /api/propostas/:id/documentos endpoint
 
-    return data; }
+    return data;
   }
 
   async updateProposta(id, proposta: UpdateProposta): Promise<Proposta> {
@@ -532,9 +535,11 @@ export class DatabaseStorage implements IStorage {
       let contexto: 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral' = 'geral';
       if (['pago', 'pagamento_autorizado', 'PAGAMENTO_CONFIRMADO'].includes(proposta.status)) {
         contexto = 'pagamentos';
-      } else if (['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(proposta.status)) {
+      }
+else if (['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(proposta.status)) {
         contexto = 'cobrancas';
-      } else if (['CCB_GERADA', 'CCB_ASSINADA', 'ASSINATURA_PENDENTE'].includes(proposta.status)) {
+      }
+else if (['CCB_GERADA', 'CCB_ASSINADA', 'ASSINATURA_PENDENTE'].includes(proposta.status)) {
         contexto = 'formalizacao';
       }
 
@@ -547,7 +552,8 @@ export class DatabaseStorage implements IStorage {
           observacoes: 'Atualização via storage.updateProposta',
           metadata: { origem: 'storage-service' },
         });
-      } catch (error) {
+      }
+catch (error) {
         if (error instanceof InvalidTransitionError) {
           // Re-lançar com mensagem mais clara para storage
           throw new Error(`Transição de status inválida: ${error.message}`);
@@ -565,12 +571,12 @@ export class DatabaseStorage implements IStorage {
           .set(otherFields)
           .where(eq(propostas.id, propostaId))
           .returning();
-        return updateResult[0]; }
+        return updateResult[0];
       }
 
       // Retornar proposta atualizada
       const [updated] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
-      return updated; }
+      return updated;
     }
 
     // Se não houver mudança de status, fazer update normal
@@ -579,7 +585,7 @@ export class DatabaseStorage implements IStorage {
       .set(proposta)
       .where(eq(propostas.id, propostaId))
       .returning();
-    return result[0]; }
+    return result[0];
   }
 
   async deleteProposta(id, deletedBy?: string): Promise<void> {
@@ -615,17 +621,17 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async createLoja(loja: InsertLoja): Promise<Loja> {
     const _result = await db.insert(lojas).values(loja).returning();
-    return result[0]; }
+    return result[0];
   }
 
   async updateLoja(id: number, loja: UpdateLoja): Promise<Loja> {
     const _result = await db.update(lojas).set(loja).where(eq(lojas.id, id)).returning();
-    return result[0]; }
+    return result[0];
   }
 
   async deleteLoja(id: number, deletedBy?: string): Promise<void> {
@@ -662,7 +668,8 @@ export class DatabaseStorage implements IStorage {
         hasPropostas: propostasCount.length > 0,
         hasGerentes: gerentesCount.length > 0,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('Error checking loja dependencies:', error);
       return {
         hasUsers: false,
@@ -674,7 +681,7 @@ export class DatabaseStorage implements IStorage {
 
   // Gerente-Lojas Relationships
   async getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]> {
-    return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId)); }
+    return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId));
   }
 
   async getLojasForGerente(gerenteId: number): Promise<number[]> {
@@ -682,7 +689,7 @@ export class DatabaseStorage implements IStorage {
       .select({ lojaId: gerenteLojas.lojaId })
       .from(gerenteLojas)
       .where(eq(gerenteLojas.gerenteId, gerenteId));
-    return result.map((r) => r.lojaId); }
+    return _result.map((r) => r.lojaId);
   }
 
   async getGerentesForLoja(lojaId: number): Promise<number[]> {
@@ -690,12 +697,12 @@ export class DatabaseStorage implements IStorage {
       .select({ gerenteId: gerenteLojas.gerenteId })
       .from(gerenteLojas)
       .where(eq(gerenteLojas.lojaId, lojaId));
-    return result.map((r) => r.gerenteId); }
+    return _result.map((r) => r.gerenteId);
   }
 
   async addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas> {
     const _result = await db.insert(gerenteLojas).values(relationship).returning();
-    return result[0]; }
+    return result[0];
   }
 
   async removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void> {
@@ -714,19 +721,19 @@ export class DatabaseStorage implements IStorage {
     switch (keyType) {
       case 'document': {
         whereCondition = eq(propostas.clicksignDocumentKey, key);
-        break; }
+        break;
       case 'list': {
         whereCondition = eq(propostas.clicksignListKey, key);
-        break; }
+        break;
       case 'signer': {
         whereCondition = eq(propostas.clicksignSignerKey, key);
-        break; }
+        break;
       default:
         throw new Error(`Invalid keyType: ${keyType}`);
     }
 
     const _result = await db.select().from(propostas).where(whereCondition).limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async getCcbUrl(propostaId: string): Promise<string | null> {
@@ -738,7 +745,7 @@ export class DatabaseStorage implements IStorage {
       const _proposta = await this.getPropostaById(propostaId);
       if (!proposta || !proposta.caminhoCcbAssinado) {
         console.log(`[CLICKSIGN] No CCB path found for proposal: ${propostaId}`);
-        return null; }
+        return null;
       }
 
       // Generate signed URL for CCB document
@@ -748,13 +755,14 @@ export class DatabaseStorage implements IStorage {
 
       if (signedUrlError) {
         console.error(`[CLICKSIGN] Error generating signed URL for CCB:`, signedUrlError);
-        return null; }
+        return null;
       }
 
-      return signedUrlData.signedUrl; }
-    } catch (error) {
+      return signedUrlData.signedUrl;
+    }
+catch (error) {
       console.error(`[CLICKSIGN] Error getting CCB URL:`, error);
-      return null; }
+      return null;
     }
   }
 
@@ -776,7 +784,7 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   // ==== INTER BANK METHODS ====
@@ -784,7 +792,7 @@ export class DatabaseStorage implements IStorage {
   // Inter Bank Collections
   async createInterCollection(collection: InsertInterCollection): Promise<InterCollection> {
     const _result = await db.insert(interCollections).values(collection).returning();
-    return result[0]; }
+    return result[0];
   }
 
   async getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined> {
@@ -793,7 +801,7 @@ export class DatabaseStorage implements IStorage {
       .from(interCollections)
       .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]> {
@@ -812,7 +820,7 @@ export class DatabaseStorage implements IStorage {
       .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async updateInterCollection(
@@ -824,7 +832,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
-    return result[0]; }
+    return result[0];
   }
 
   async getInterCollections(): Promise<InterCollection[]> {
@@ -841,7 +849,7 @@ export class DatabaseStorage implements IStorage {
     await db.update(interWebhooks).set({ isActive: false });
 
     const _result = await db.insert(interWebhooks).values(webhook).returning();
-    return result[0]; }
+    return result[0];
   }
 
   async getActiveInterWebhook(): Promise<InterWebhook | undefined> {
@@ -850,7 +858,7 @@ export class DatabaseStorage implements IStorage {
       .from(interWebhooks)
       .where(eq(interWebhooks.isActive, true))
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async updateInterWebhook(
@@ -862,7 +870,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interWebhooks.id, id))
       .returning();
-    return result[0]; }
+    return result[0];
   }
 
   async deleteInterWebhook(id: number): Promise<void> {
@@ -872,7 +880,7 @@ export class DatabaseStorage implements IStorage {
   // Inter Bank Callbacks
   async createInterCallback(callback: InsertInterCallback): Promise<InterCallback> {
     const _result = await db.insert(interCallbacks).values(callback).returning();
-    return result[0]; }
+    return result[0];
   }
 
   async getUnprocessedInterCallbacks(): Promise<InterCallback[]> {
@@ -937,7 +945,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)))
       .orderBy(desc(userSessions.lastActivityAt));
 
-    return sessions; }
+    return sessions;
   }
 
   async deleteSession(sessionId: string): Promise<void> {
@@ -957,7 +965,8 @@ export class DatabaseStorage implements IStorage {
             not(eq(userSessions.id, exceptSessionId))
           )
         );
-    } else {
+    }
+else {
       // Delete all sessions
       await db
         .update(userSessions)

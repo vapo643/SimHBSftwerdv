@@ -863,7 +863,7 @@ export function ClientDataStep() {
                 const _value = parseFloat(
                   e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
                 );
-                updateClient({ clienteDividasExistentes: isNaN(value) ? undefined : value });
+                updateClient({ clienteDividasExistentes: _isNaN(value) ? undefined : value });
               }}
               placeholder="R$ 0,00"
               data-testid="input-dividas-existentes"

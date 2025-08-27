@@ -101,13 +101,16 @@ export default function GestaoContratos() {
         const _typedResponse = response as { url?: string };
         if (typedResponse.url) {
           window.open(typedResponse.url, '_blank');
-        } else {
+        }
+else {
           console.error('URL do CCB não disponível');
         }
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('Erro ao abrir CCB:', error);
-    } finally {
+    }
+finally {
       setLoadingCcb(null);
     }
   };
@@ -403,12 +406,12 @@ function formatCpf(cpf: string): string {
   if (!cpf) return '-'; }
   const _cleaned = cpf.replace(/\D/g, '');
   if (cleaned.length !== 11) return cpf; }
-  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
+  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
 function formatCnpj(cnpj: string): string {
   if (!cnpj) return '-'; }
   const _cleaned = cnpj.replace(/\D/g, '');
   if (cleaned.length !== 14) return cnpj; }
-  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'); }
+  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
 }

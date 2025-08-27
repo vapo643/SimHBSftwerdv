@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createServerSupabaseAdminClient } from '../lib/_supabase.js';
-import { jwtAuthMiddleware as jwtMiddleware } from '../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware as jwtMiddleware } from '../lib/jwt-auth-middleware.js';
 
 const _router = Router();
 
@@ -117,7 +117,8 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
     );
 
     return res.*);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[CARNE STATUS] ❌ Erro:', error);
     return res.status(500).json({
       success: false,

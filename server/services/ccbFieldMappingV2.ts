@@ -356,7 +356,7 @@ export class CoordinateAdjuster {
       coord.y >= 0 &&
       coord.y <= 842; // A4 height
 
-    return hasValue && inBounds; }
+    return hasValue && inBounds;
   }
 
   /**
@@ -377,7 +377,7 @@ export class CoordinateAdjuster {
       adjusted.size = Math.min(adjusted.size || 10, 9);
     }
 
-    return adjusted; }
+    return adjusted;
   }
 }
 
@@ -414,7 +414,7 @@ export class FieldDetector {
         const _adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, coord);
 
         // Obter valor do campo
-        const _value = await this.getFieldValue(fieldName,_data);
+        const _value = await this.getFieldValue(fieldName, _data);
         if (!value) {
           this.log(`Campo ${fieldName}: Sem valor para preencher`);
           continue;
@@ -491,7 +491,7 @@ export class FieldDetector {
     }
 
     if (currentLine) lines.push(currentLine);
-    return lines; }
+    return lines;
   }
 
   /**
@@ -637,7 +637,7 @@ export class FieldDetector {
       ...this.generatePaymentFields(_data),
     };
 
-    return await Promise.resolve(fieldMap[fieldName] || ''); }
+    return await Promise.resolve(fieldMap[fieldName] || '');
   }
 
   /**
@@ -665,16 +665,16 @@ export class FieldDetector {
       fields[`linhaDigitavel${i}`] = '';
     }
 
-    return fields; }
+    return fields;
   }
 
   /**
    * Formata valor monetário
    */
   private formatCurrency(value: number | string): string {
-    if (!value) return 'R$ 0,00'; }
+    if (!value) return 'R$ 0,00';
     const _num = typeof value == 'string' ? parseFloat(value) : value;
-    return `R$ ${num.toFixed(2).replace('.', ',')}`; }
+    return `R$ ${num.toFixed(2).replace('.', ',')}`;
   }
 
   /**
@@ -699,14 +699,14 @@ export class FieldDetector {
 
     // Adiciona meses para calcular vencimento
     data.setMonth(data.getMonth() + mesesAdicionais);
-    return data.toLocaleDateString('pt-BR'); }
+    return data.toLocaleDateString('pt-BR');
   }
 
   /**
    * Extrai código do banco do nome
    */
   private extractBankCode(bankName: string): string {
-    if (!bankName) return ''; }
+    if (!bankName) return '';
 
     const bankCodes: { [key: string]: string } = {
       'banco do brasil': '001',
@@ -730,37 +730,37 @@ export class FieldDetector {
 
     // Busca direta
     if (bankCodes[normalizedBank]) {
-      return bankCodes[normalizedBank]; }
+      return bankCodes[normalizedBank];
     }
 
     // Busca parcial
     for (const [name, code] of Object.entries(bankCodes)) {
       if (normalizedBank.includes(name)) {
-        return code; }
+        return code;
       }
     }
 
-    return ''; }
+    return '';
   }
 
   /**
    * Formata número da conta com agência e dígito
    */
   private formatAccountNumber(agencia: string, conta: string, digito?: string): string {
-    if (!agencia && !conta) return ''; }
+    if (!agencia && !conta) return '';
 
     const _agenciaFormatted = agencia || '';
     const _contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : '';
 
     if (agenciaFormatted && contaFormatted) {
-      return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`; }
+      return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`;
     } else if (agenciaFormatted) {
-      return `Ag: ${agenciaFormatted}`; }
+      return `Ag: ${agenciaFormatted}`;
     } else if (contaFormatted) {
-      return `C/C: ${contaFormatted}`; }
+      return `C/C: ${contaFormatted}`;
     }
 
-    return ''; }
+    return '';
   }
 
   /**
@@ -778,24 +778,24 @@ export class FieldDetector {
         data.clienteCep ? `CEP ${data.clienteCep}` : '',
       ].filter(Boolean);
 
-      return partes.join(', '); }
+      return partes.join(', ');
     }
 
     // Senão, usar campo legado
-    return data.clienteEndereco || ''; }
+    return data.clienteEndereco || '';
   }
 
   /**
    * Calcula IOF
    */
   private calcularIOF(valor: number, prazo: number): number {
-    if (!valor || !prazo) return 0; }
+    if (!valor || !prazo) return 0;
 
     // IOF = 0,38% + 0,0082% ao dia
     const _iofFixo = valor * 0.0038;
     const _iofDiario = valor * 0.000082 * (prazo * 30); // Aproximado
 
-    return iofFixo + iofDiario; }
+    return iofFixo + iofDiario;
   }
 
   /**
@@ -806,7 +806,7 @@ export class FieldDetector {
     const _tac = Number(data.valorTac || data.tacValor) || 50;
     const _iof = Number(data.valorIof) || this.calcularIOF(valor, data.prazo);
 
-    return valor + tac + iof; }
+    return valor + tac + iof;
   }
 
   /**
@@ -818,25 +818,25 @@ export class FieldDetector {
     const _tarifaTed = Number(data.tarifaTed) || 10;
     const _taxaCredito = Number(data.taxaCredito) || 50;
 
-    return valor - tac - tarifaTed - taxaCredito; }
+    return valor - tac - tarifaTed - taxaCredito;
   }
 
   /**
    * Calcula taxa anual a partir da mensal
    */
   private calcularTaxaAnual(taxaMensal: number): number {
-    if (!taxaMensal) return 0; }
+    if (!taxaMensal) return 0;
 
     // Taxa anual = ((1 + taxa_mensal)^12 - 1) * 100
-    return (Math.pow(1 + taxaMensal / 100, 12) - 1) * 100; }
+    return (Math.pow(1 + taxaMensal / 100, 12) - 1) * 100;
   }
 
   /**
    * Formata percentual
    */
   private formatPercentual(valor: number): string {
-    if (!valor) return '0,00%'; }
-    return `${valor.toFixed(2).replace('.', ',')}%`; }
+    if (!valor) return '0,00%';
+    return `${valor.toFixed(2).replace('.', ',')}%`;
   }
 
   /**
@@ -845,7 +845,7 @@ export class FieldDetector {
   private async buscarLinhaDigitavel(propostaId: string): Promise<string> {
     // TODO: Implementar busca real na tabela inter_collections
     // Por enquanto retorna vazio
-    return ''; }
+    return '';
   }
 
   /**
@@ -868,7 +868,7 @@ export class FieldDetector {
     // Calcula CET anual
     const _cetAnual = (Math.pow(1 + cetMensal / 100, 12) - 1) * 100;
 
-    return `${cetMensal.toFixed(2)}% a.m. / ${cetAnual.toFixed(2)}% a.a.`; }
+    return `${cetMensal.toFixed(2)}% a.m. / ${cetAnual.toFixed(2)}% a.a.`;
   }
 
   /**
@@ -883,18 +883,18 @@ export class FieldDetector {
     const _principal = typeof valor == 'string' ? parseFloat(valor) : valor;
     const _taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
 
-    if (!principal || !prazo) return 0; }
+    if (!principal || !prazo) return 0;
 
     // Se não tiver taxa, retorna divisão simples
     if (!taxa) {
-      return principal / prazo; }
+      return principal / prazo;
     }
 
     // Tabela Price: P = V * (i * (1+i)^n) / ((1+i)^n - 1)
     const _i = taxa / 100; // Taxa em decimal
     const _parcela = (principal * (i * Math.pow(1 + i, prazo))) / (Math.pow(1 + i, prazo) - 1);
 
-    return parcela; }
+    return parcela;
   }
 
   /**
@@ -908,7 +908,7 @@ export class FieldDetector {
    * Obtém logs do processo
    */
   getLogs(): string[] {
-    return this.logs; }
+    return this.logs;
   }
 }
 
@@ -941,25 +941,25 @@ export class FallbackSystem {
       () => {
         if (primaryCoord.fallbackX && primaryCoord.fallbackY) {
           return this.tryFill(
-  _page,
+            _page,
             { ...primaryCoord, x: primaryCoord.fallbackX, y: primaryCoord.fallbackY },
-  _value,
+            _value,
             font
           );
         }
-        return false; }
+        return false;
       },
     ];
 
     for (const strategy of strategies) {
       if (await strategy()) {
         console.log(`✓ Campo ${fieldName} preenchido com sucesso`);
-        return true; }
+        return true;
       }
     }
 
     console.error(`✗ Falha ao preencher campo ${fieldName} após todas as tentativas`);
-    return false; }
+    return false;
   }
 
   /**
@@ -979,9 +979,9 @@ export class FallbackSystem {
         font: font,
         color: rgb(0, 0, 0),
       });
-      return true; }
+      return true;
     } catch (error) {
-      return false; }
+      return false;
     }
   }
 }

@@ -6,7 +6,7 @@ import type { Express } from 'express';
 
 // Mock the auth middleware
 vi.mock('../../server/lib/jwt-auth-middleware', () => ({
-  jwtAuthMiddleware: (req: any, res: any, next: any) => {
+  _jwtAuthMiddleware: (req: any, res: any, next: any) => {
     req.user = {
       id: '123',
       email: 'test@example.com',
@@ -18,7 +18,7 @@ vi.mock('../../server/lib/jwt-auth-middleware', () => ({
 
 // Mock the role guards
 vi.mock('../../server/lib/role-guards', () => ({
-  requireAdmin: (req: any, res: any, next: any) => next(),
+  _requireAdmin: (req: any, res: any, next: any) => next(),
   requireManagerOrAdmin: (req: any, res: any, next: any) => next(),
   requireAnyRole: (req: any, res: any, next: any) => next(),
 }));

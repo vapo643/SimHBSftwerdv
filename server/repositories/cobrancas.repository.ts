@@ -46,7 +46,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .select()
         .from(propostas)
         .leftJoin(
-  _statusContextuais,
+          _statusContextuais,
           and(
             eq(statusContextuais.propostaId, propostas.id),
             eq(statusContextuais.contexto, 'cobranca')
@@ -54,10 +54,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         )
         .where(whereConditions);
 
-      return result; }
+      return result;
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching proposals:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -73,7 +73,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .orderBy(parcelas.numeroParcela);
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching installments:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -89,7 +89,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(interCollections.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -115,7 +115,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(observacoesCobranca.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching observations:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -140,10 +140,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         })
         .returning();
 
-      return observation; }
+      return observation;
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error creating observation:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -171,10 +171,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(parcelas.id, parcelaId))
         .returning();
 
-      return result.length > 0; }
+      return _result.length > 0;
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error updating installment:', error);
-      return false; }
+      return false;
     }
   }
 
@@ -190,7 +190,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(solicitacoesModificacao.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching modification requests:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -219,10 +219,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         })
         .returning();
 
-      return request; }
+      return request;
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error creating modification request:', error);
-      return null; }
+      return null;
     }
   }
 
@@ -239,7 +239,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .limit(50); // Limit recent logs
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching logs:', error);
-      return []; }
+      return [];
     }
   }
 
@@ -261,10 +261,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
           )
         );
 
-      return result[0]?.count || 0; }
+      return result[0]?.count || 0;
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error counting overdue:', error);
-      return 0; }
+      return 0;
     }
   }
 
@@ -278,7 +278,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   ): Promise<boolean> {
     try {
       const updates: unknown = {
-  _status,
+        _status,
         updatedAt: new Date(),
       };
 
@@ -292,10 +292,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .where(eq(propostas.id, String(propostaId)))
         .returning();
 
-      return result.length > 0; }
+      return _result.length > 0;
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error updating proposal status:', error);
-      return false; }
+      return false;
     }
   }
 }

@@ -210,7 +210,8 @@ const EditarPropostaPendenciada: React.FC = () => {
         console.log('🔍 RESPOSTA DA API:',_response);
         console.log('🔍 DADOS EXTRAÍDOS:', response.data);
         return response.data as PropostaData; }
-      } catch (error) {
+      }
+catch (error) {
         console.error('🔍 ERRO NA QUERY:', error);
         throw error;
       }

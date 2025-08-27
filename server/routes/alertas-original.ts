@@ -8,7 +8,7 @@ import { alertasProativosService } from '../services/alertasProativosService';
 import { db } from '../lib/supabase';
 import { notificacoes, regrasAlertas, historicoExecucoesAlertas, users } from '@shared/schema';
 import { eq, and, desc, inArray, sql } from 'drizzle-orm';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 
 const _router = Router();
 
@@ -33,7 +33,7 @@ router.get('/teste', async (req, res) => {
  * POST /api/alertas/executar
  * Endpoint para executar verificação manual (apenas ADMINISTRADOR)
  */
-router.post('/executar', jwtAuthMiddleware, async (req, res) => {
+router.post('/executar', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _userRole = req.user?.role;
 
@@ -69,7 +69,7 @@ router.post('/executar', jwtAuthMiddleware, async (req, res) => {
  * GET /api/alertas/notificacoes
  * Listar notificações do usuário
  */
-router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
+router.get('/notificacoes', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _userEmail = req.user?.email;
     const { status, limite = 50 } = req.query;
@@ -136,7 +136,7 @@ router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
  * POST /api/alertas/notificacoes/:id/marcar-lida
  * Marcar notificação como lida
  */
-router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req, res) => {
+router.post('/notificacoes/:id/marcar-lida', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const _userEmail = req.user?.email;
@@ -184,7 +184,7 @@ router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req, res)
  * POST /api/alertas/notificacoes/marcar-todas-lidas
  * Marcar todas as notificações como lidas
  */
-router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req, res) => {
+router.post('/notificacoes/marcar-todas-lidas', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _userEmail = req.user?.email;
 
@@ -237,7 +237,7 @@ router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req, r
  * DELETE /api/alertas/notificacoes/all
  * Limpar histórico de notificações (arquivar todas)
  */
-router.delete('/notificacoes/all', jwtAuthMiddleware, async (req, res) => {
+router.delete('/notificacoes/all', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _userEmail = req.user?.email;
 
@@ -292,7 +292,7 @@ router.delete('/notificacoes/all', jwtAuthMiddleware, async (req, res) => {
  * GET /api/alertas/regras
  * Listar regras de alertas (apenas ADMINISTRADOR)
  */
-router.get('/regras', jwtAuthMiddleware, async (req, res) => {
+router.get('/regras', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _userRole = req.user?.role;
 
@@ -319,7 +319,7 @@ router.get('/regras', jwtAuthMiddleware, async (req, res) => {
  * GET /api/alertas/historico
  * Visualizar histórico de execuções (apenas ADMINISTRADOR)
  */
-router.get('/historico', jwtAuthMiddleware, async (req, res) => {
+router.get('/historico', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _userRole = req.user?.role;
 

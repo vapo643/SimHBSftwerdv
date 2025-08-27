@@ -17,7 +17,7 @@ import { getSupabase } from './supabase';
  * This ensures compatibility with both backend (snake_case) and frontend (camelCase) conventions
  */
 function snakeToCamel(str: string): string {
-  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()); }
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
 function deepTransformDualCase(obj): unknown {
@@ -26,7 +26,7 @@ function deepTransformDualCase(obj): unknown {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map((item) => deepTransformDualCase(item)); }
+    return obj.map((item) => deepTransformDualCase(item));
   }
 
   if (typeof obj == 'object' && obj !== null) {
@@ -198,7 +198,8 @@ class TokenManager {
         try {
           const _payload = JSON.parse(atob(tokenParts[1]));
           this.tokenExpiry = payload.exp;
-        } catch {
+        }
+catch {
           // If we can't decode, set a conservative expiry (30 minutes from now)
           this.tokenExpiry = Math.floor(Date.now() / 1000) + 1800;
         }
@@ -207,7 +208,8 @@ class TokenManager {
       this.cachedToken = session.access_token;
       console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken.length}`);
       return this.cachedToken; }
-    } catch (error) {
+    }
+catch (error) {
       console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
       this.clearCache();
       return null; }
@@ -306,7 +308,8 @@ class RequestManager {
         clearTimeout(timeoutId);
 
         return response; }
-      } catch (error) {
+      }
+catch (error) {
         lastError = error as Error;
 
         // Clear any pending timeout
@@ -401,9 +404,11 @@ export async function apiClient<T = any>(
     if (body instanceof FormData) {
       // FormData should be passed directly
       requestConfig.body = body;
-    } else if (typeof body == 'string') {
+    }
+else if (typeof body == 'string') {
       requestConfig.body = body;
-    } else {
+    }
+else {
       requestConfig.body = JSON.stringify(body);
     }
   }
@@ -424,9 +429,11 @@ export async function apiClient<T = any>(
     // For blob responses, directly return the blob
     if (responseType == 'blob') {
       data = (await response.blob()) as T;
-    } else if (responseType == 'text') {
+    }
+else if (responseType == 'text') {
       data = (await response.text()) as T;
-    } else {
+    }
+else {
       // Default JSON handling
       if (contentType && contentType.includes('application/json')) {
         const _jsonData = await response.json();
@@ -435,13 +442,16 @@ export async function apiClient<T = any>(
         if (fullUrl.includes('/api/')) {
           data = deepTransformDualCase(jsonData);
           console.log('[API Client] After dual-key transformation:',_data);
-        } else {
+        }
+else {
           data = jsonData;
         }
-      } else if (response.status == 204 || response.status == 205) {
+      }
+else if (response.status == 204 || response.status == 205) {
         // No content responses
         data = null as T;
-      } else {
+      }
+else {
         // Try to parse as text for error messages
         const _text = await response.text();
         data = (text || null) as T;
@@ -475,21 +485,26 @@ export async function apiClient<T = any>(
             // Handle different response types based on responseType option
             if (responseType == 'blob') {
               retryData = (await retryResponse.blob()) as T;
-            } else if (responseType == 'text') {
+            }
+else if (responseType == 'text') {
               retryData = (await retryResponse.text()) as T;
-            } else {
+            }
+else {
               // Default JSON handling
               if (retryContentType && retryContentType.includes('application/json')) {
                 const _retryJsonData = await retryResponse.json();
                 // Apply dual-key transformation for /api/ endpoints
                 if (fullUrl.includes('/api/')) {
                   retryData = deepTransformDualCase(retryJsonData);
-                } else {
+                }
+else {
                   retryData = retryJsonData;
                 }
-              } else if (retryResponse.status == 204 || retryResponse.status == 205) {
+              }
+else if (retryResponse.status == 204 || retryResponse.status == 205) {
                 retryData = null as T;
-              } else {
+              }
+else {
                 const _retryText = await retryResponse.text();
                 retryData = (retryText || null) as T;
               }
@@ -508,7 +523,8 @@ export async function apiClient<T = any>(
                 headers: retryResponse.headers,
               } as ApiResponse<T>;
             }
-          } catch (_retryError) {
+          }
+catch (_retryError) {
             // If retry fails, fall through to original error handling
           }
         }
@@ -546,7 +562,8 @@ export async function apiClient<T = any>(
       statusText: response.statusText,
       headers: response.headers,
     } as ApiResponse<T>;
-  } catch (error) {
+  }
+catch (error) {
     // Re-throw ApiError instances
     if (error instanceof ApiError) {
       throw error;

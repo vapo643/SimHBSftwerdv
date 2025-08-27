@@ -19,7 +19,7 @@ import { getBrasiliaTimestamp } from '../server/lib/timezone';
 
 async function migrateStatusV2() {
   console.log('🚀 [MIGRAÇÃO V2.0] Iniciando migração de status...');
-  console.log('📅 Timestamp:', getBrasiliaTimestamp());
+  console.log('📅 Timestamp:', _getBrasiliaTimestamp());
 
   try {
     // 1. Buscar estatísticas atuais
@@ -191,13 +191,15 @@ async function migrateStatusV2() {
       console.warn(
         `⚠️ AVISO: ${integrityRow.inconsistentes} propostas com possível inconsistência detectada`
       );
-    } else {
+    }
+else {
       console.log('✅ Todas as propostas estão consistentes!');
     }
 
     console.log('\n✅ [MIGRAÇÃO V2.0] Migração concluída com sucesso!');
-    console.log('📅 Finalizado em:', getBrasiliaTimestamp());
-  } catch (error) {
+    console.log('📅 Finalizado em:', _getBrasiliaTimestamp());
+  }
+catch (error) {
     console.error('❌ [MIGRAÇÃO V2.0] Erro durante migração:', error);
     process.exit(1);
   }

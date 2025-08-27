@@ -14,7 +14,8 @@ const _auth = async (req, res: unknown, next) => {
     // Import dinâmico do middleware RLS - RETURN Promise não await
     const { rlsAuthMiddleware } = await import('../../lib/rls-setup.js');
     return rlsAuthMiddleware(req, res, next); // ← RETURN não AWAIT
-  } catch (error) {
+  }
+catch (error) {
     console.error('[RLS WRAPPER] Error in auth middleware:', error);
     next(error);
   }
@@ -104,7 +105,8 @@ router.get('/:id/observacoes', auth, async (req, res) => {
       logs: transformedLogs,
       total: transformedLogs.length,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Error fetching proposal audit logs:', error);
     res.json({ logs: [] });
   }
@@ -116,11 +118,13 @@ router.put('/:id/status', auth, async (req, res) => {
 
   // Mapear para os novos endpoints baseado no status
   if (status == 'aprovado') {
-    return controller.approve(req, res); }
-  } else if (status == 'rejeitado') {
-    return controller.reject(req, res); }
-  } else if (status == 'aguardando_analise') {
-    return controller.submitForAnalysis(req, res); }
+    return controller.approve(req, res);
+  }
+else if (status == 'rejeitado') {
+    return controller.reject(req, res);
+  }
+else if (status == 'aguardando_analise') {
+    return controller.submitForAnalysis(req, res);
   }
 
   // Para outros status, retornar erro por enquanto

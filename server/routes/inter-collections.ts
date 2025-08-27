@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import type { AuthenticatedRequest } from '../../shared/types/express';
 import { requireAnyRole } from '../lib/role-guards';
 import { interBankService } from '../services/interBankService';
@@ -16,7 +16,7 @@ const _router = Router();
  */
 router.get(
   '/:propostaId',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -61,7 +61,8 @@ router.get(
                 numeroParcela: collection.numeroParcela,
                 totalParcelas: collection.totalParcelas,
               };
-            } catch (error) {
+            }
+catch (error) {
               console.error(
                 `[INTER COLLECTIONS] Error fetching details for ${collection.codigoSolicitacao}:`,
                 error
@@ -90,10 +91,12 @@ router.get(
           `[INTER COLLECTIONS] Found ${updatedCollections.length} collections for proposal ${propostaId}`
         );
         res.json(updatedCollections);
-      } else {
+      }
+else {
         res.json([]);
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[INTER COLLECTIONS] Error:', error);
       res.status(500).json({ error: 'Erro ao buscar boletos' });
     }
@@ -106,7 +109,7 @@ router.get(
  */
 router.get(
   '/:propostaId/:codigoSolicitacao/pdf',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -167,7 +170,8 @@ router.get(
         if (realCollection.length > 0) {
           realCodigoSolicitacao = realCollection[0].codigoSolicitacao;
           console.log(`[PDF STORAGE] UUID real encontrado: ${realCodigoSolicitacao}`);
-        } else {
+        }
+else {
           console.log(
             `[PDF STORAGE] ⚠️ UUID real não encontrado para parcela ${collection[0].numeroParcela}`
           );
@@ -203,10 +207,12 @@ router.get(
 
           // Redirecionar para URL assinada para visualização inline
           return res.*);
-        } else {
+        }
+else {
           console.error(`[PDF STORAGE] ❌ Erro ao gerar URL assinada:`, signedUrlError);
         }
-      } else {
+      }
+else {
         console.log(
           `[PDF STORAGE] ⚠️ PDF não encontrado no storage para UUID real: ${realCodigoSolicitacao}`
         );
@@ -245,7 +251,8 @@ router.get(
 
         console.log(`[PDF STORAGE] ✅ Retornando PDF da API (${pdfBuffer.length} bytes)`);
         res.send(pdfBuffer);
-      } catch (apiError) {
+      }
+catch (apiError) {
         console.error(`[PDF STORAGE] ❌ Fallback API também falhou:`, apiError.message);
 
         if (apiError.message?.includes('circuit breaker')) {
@@ -262,7 +269,8 @@ router.get(
             "PDF não encontrado no storage nem na API. Use 'Atualizar Status' para sincronizar.",
         });
       }
-    } catch (error) {
+    }
+catch (error) {
       console.error('[PDF STORAGE] Erro geral:', error);
       res.status(500).json({
         error: 'Erro interno',
@@ -276,7 +284,7 @@ router.get(
  * Listar todos os boletos (para tela de cobranças)
  * GET /api/inter/collections
  */
-router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
+router.get('/', _jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, dataInicial, dataFinal } = req.query;
 
@@ -331,12 +339,13 @@ router.get('/', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
           }
         }
 
-        return collection; }
+        return collection;
       })
     );
 
     res.json(enrichedCollections);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER COLLECTIONS] Error listing collections:', error);
     res.status(500).json({ error: 'Erro ao listar boletos' });
   }

@@ -28,7 +28,7 @@ async function main() {
     // 2. Criar mapa para fácil acesso (status -> count)
     const _statusCountMap = new Map<string, number>();
     statusUsageResults.forEach((_result) => {
-      statusCountMap.set(result.status, Number(result.count));
+      statusCountMap.set(_result.status, Number(_result.count));
     });
 
     // 3. Extrair todos os valores do statusEnum
@@ -69,14 +69,14 @@ async function main() {
     // 5. Identificar status em uso que não estão no enum (problemas de integridade)
     console.log(`\n🔍 VERIFICAÇÃO DE INTEGRIDADE:`);
     const _statusInUseNotInEnum = statusUsageResults.filter(
-      (_result) => !allStatusValues.includes(result.status as unknown)
+      (_result) => !allStatusValues.includes(_result.status as unknown)
     );
 
     if (statusInUseNotInEnum.length > 0) {
       console.log(`\n⚠️  PROBLEMAS DETECTADOS:`);
       console.log(`   Status em uso que NÃO estão no enum:`);
       statusInUseNotInEnum.forEach((_result) => {
-        console.log(`   - "${result.status}" (${result.count} propostas) ❌`);
+        console.log(`   - "${_result.status}" (${_result.count} propostas) ❌`);
       });
     } else {
       console.log(`   ✅ Todos os status em uso estão definidos no enum`);

@@ -56,8 +56,9 @@ export class CobrancasService {
         })
       );
 
-      return processedPropostas; }
-    } catch (error) {
+      return processedPropostas;
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error fetching proposals:', error);
       throw new Error('Erro ao buscar propostas de cobrança');
     }
@@ -106,7 +107,8 @@ export class CobrancasService {
   _logs,
   _paymentSummary,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error fetching proposal details:', error);
       throw error;
     }
@@ -132,8 +134,9 @@ export class CobrancasService {
       // Log action (to be implemented in repository if needed)
       console.log(`[COBRANCAS_SERVICE] Observation added for proposal ${data.proposta_id}`);
 
-      return observation; }
-    } catch (error) {
+      return observation;
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error adding observation:', error);
       throw error;
     }
@@ -154,8 +157,9 @@ export class CobrancasService {
         throw new Error('Erro ao atualizar status da parcela');
       }
 
-      return success; }
-    } catch (error) {
+      return success;
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error updating installment:', error);
       throw error;
     }
@@ -181,8 +185,9 @@ export class CobrancasService {
       // Log action (to be implemented in repository if needed)
       console.log(`[COBRANCAS_SERVICE] Modification requested for proposal ${data.proposta_id}`);
 
-      return request; }
-    } catch (error) {
+      return request;
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error requesting modification:', error);
       throw error;
     }
@@ -210,7 +215,8 @@ export class CobrancasService {
   _total,
   _byDaysOverdue,
       };
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error getting overdue stats:', error);
       throw error;
     }
@@ -304,18 +310,21 @@ export class CobrancasService {
 
           if (_result) {
             success++;
-          } else {
+          }
+else {
             failed++;
             errors.push({ parcelaId: update.parcelaId, error: 'Update failed' });
           }
-        } catch (error) {
+        }
+catch (error) {
           failed++;
           errors.push({ parcelaId: update.parcelaId, error: error.message });
         }
       }
 
-      return { success, failed, errors }; }
-    } catch (error) {
+      return { success, failed, errors }
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error in batch update:', error);
       throw error;
     }
@@ -382,8 +391,9 @@ export class CobrancasService {
       };
 
       console.log('[COBRANCAS_SERVICE] KPIs calculated:', kpis);
-      return kpis; }
-    } catch (error) {
+      return kpis;
+    }
+catch (error) {
       console.error('[COBRANCAS_SERVICE] Error calculating KPIs:', error);
       throw new Error('Erro ao calcular KPIs de cobrança');
     }

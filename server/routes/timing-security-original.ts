@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
+import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
 import { timingNormalizer } from '../middleware/timing-normalizer.js';
-import { requireAdmin } from '../lib/role-guards.js';
+import { _requireAdmin } from '../lib/role-guards.js';
 
 const _router = Router();
 
 // Aplicar autenticação a todas as rotas
-router.use(jwtAuthMiddleware);
+router.use(_jwtAuthMiddleware);
 
 // GET /api/timing-security/metrics - Obter métricas de timing
-router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/metrics', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const { endpoint } = req.query;
 
@@ -34,7 +34,8 @@ router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
         vulnerabilityAssessment.isVulnerable = true;
         vulnerabilityAssessment.riskLevel = 'HIGH';
         vulnerabilityAssessment.details = `Variance detectada: actual=${actualTimeVariance.toFixed(2)}ms, normalized=${totalTimeVariance.toFixed(2)}ms`;
-      } else if (actualTimeVariance > 5) {
+      }
+else if (actualTimeVariance > 5) {
         vulnerabilityAssessment.riskLevel = 'MEDIUM';
         vulnerabilityAssessment.details = `Variance moderada detectada: ${actualTimeVariance.toFixed(2)}ms`;
       }
@@ -47,14 +48,15 @@ router.get('/metrics', requireAdmin, async (req: AuthenticatedRequest, res) => {
   _vulnerabilityAssessment,
       recentMetrics: metrics.slice(-50), // Últimas 50 métricas
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter métricas de timing:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
 // GET /api/timing-security/config - Obter configurações atuais
-router.get('/config', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/config', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Como configs é privado, vou retornar informações sobre configuração
     const _configInfo = {
@@ -73,14 +75,15 @@ router.get('/config', requireAdmin, async (req: AuthenticatedRequest, res) => {
     };
 
     res.json(configInfo);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter configuração:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
 // POST /api/timing-security/test - Executar teste de timing attack
-router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/test', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const { endpoint = '/api/propostas/1', iterations = 100 } = req.body;
 
@@ -149,14 +152,15 @@ router.post('/test', requireAdmin, async (req: AuthenticatedRequest, res) => {
   _assessment,
       completedAt: new Date().toISOString(),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao executar teste:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
 // POST /api/timing-security/simulate-attack - Simular timing attack real
-router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/simulate-attack', _requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const { targetEndpoint = '/api/propostas', validIds = [], invalidIds = [] } = req.body;
 
@@ -234,7 +238,8 @@ router.post('/simulate-attack', requireAdmin, async (req: AuthenticatedRequest, 
     }
 
     res.json(attackSimulation);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao simular attack:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }

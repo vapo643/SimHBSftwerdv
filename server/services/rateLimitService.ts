@@ -125,7 +125,10 @@ class RateLimitService {
       );
     } else {
       // Delay menor para outros erros
-      state.currentDelay = Math.min(_config.baseDelayMs * state.failureCount, _config.maxDelayMs / 2);
+      state.currentDelay = Math.min(
+        _config.baseDelayMs * state.failureCount,
+        _config.maxDelayMs / 2
+      );
 
       console.log(
         `[RATE LIMIT] ⚠️ Erro detectado. Delay: ${state.currentDelay}ms (tentativa ${state.failureCount}/${_config.maxRetries})`
@@ -180,7 +183,7 @@ class RateLimitService {
         // Registrar sucesso
         this.handleSuccess(serviceId);
 
-        return result; }
+        return result;
       } catch (error) {
         lastError = error;
         console.error(`[RATE LIMIT] Tentativa ${attempt + 1}/${_config.maxRetries} falhou:`, error);
@@ -189,7 +192,7 @@ class RateLimitService {
         const _shouldRetry = await this.handleFailure(serviceId, error, config);
 
         if (!shouldRetry) {
-          break; }
+          break;
         }
       }
     }
@@ -203,7 +206,7 @@ class RateLimitService {
    */
   getStats(serviceId?: string): unknown {
     if (serviceId) {
-      return this.states.get(serviceId) || null; }
+      return this.states.get(serviceId) || null;
     }
 
     const stats: unknown = {};
@@ -214,7 +217,7 @@ class RateLimitService {
       };
     });
 
-    return stats; }
+    return stats;
   }
 
   /**

@@ -36,7 +36,7 @@ export class TacCalculationService {
       // Passo 2: Se cliente cadastrado, retornar 0 (isenção)
       if (isClienteCadastrado) {
         console.log(`[TAC] Cliente ${clienteCpf} é cadastrado - TAC isenta`);
-        return 0; }
+        return 0;
       }
 
       // Passo 3: Buscar configuração de TAC do produto
@@ -52,7 +52,7 @@ export class TacCalculationService {
       if (!produto || produto.length == 0) {
         console.error(`[TAC] Produto ${produtoId} não encontrado`);
         // Retorna 0 se produto não encontrado para não bloquear o fluxo
-        return 0; }
+        return 0;
       }
 
       // Passo 4: Calcular TAC baseado no tipo
@@ -65,11 +65,11 @@ export class TacCalculationService {
         `[TAC] TAC calculada para produto ${produtoId}: R$ ${tacCalculada.toFixed(2)} (tipo: ${tacTipo}, valor base: ${tacValor})`
       );
 
-      return tacCalculada; }
+      return tacCalculada;
     } catch (error) {
       console.error(`[TAC] Erro ao calcular TAC:`, error);
       // Em caso de erro, retorna 0 para não bloquear o fluxo
-      return 0; }
+      return 0;
     }
   }
 
@@ -115,11 +115,11 @@ export class TacCalculationService {
         console.log(`[TAC] Cliente ${cpf} não é cadastrado - primeira operação`);
       }
 
-      return isRegistered; }
+      return isRegistered;
     } catch (error) {
       console.error(`[TAC] Erro ao verificar se cliente é cadastrado:`, error);
       // Em caso de erro, considera como não cadastrado para aplicar TAC
-      return false; }
+      return false;
     }
   }
 
@@ -139,22 +139,22 @@ export class TacCalculationService {
   ): number {
     // Validação de entrada
     if (tacValor <= 0) {
-      return 0; }
+      return 0;
     }
 
     // Cálculo baseado no tipo
     if (tacTipo == 'fixo') {
       // TAC fixo: retorna o valor direto
-      return tacValor; }
+      return tacValor;
     } else if (tacTipo == 'percentual') {
       // TAC percentual: calcula porcentagem sobre o valor do empréstimo
       const _tacCalculada = (valorEmprestimo * tacValor) / 100;
       // Arredonda para 2 casas decimais
-      return Math.round(tacCalculada * 100) / 100; }
+      return Math.round(tacCalculada * 100) / 100;
     } else {
       console.warn(`[TAC] Tipo de TAC desconhecido: ${tacTipo}. Usando valor fixo como padrão.`);
       // Fallback para tipo fixo se tipo desconhecido
-      return tacValor; }
+      return tacValor;
     }
   }
 }

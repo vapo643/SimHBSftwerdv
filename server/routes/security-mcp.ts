@@ -5,7 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { semgrepMCPServer } from '../security/semgrep-mcp-server';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 
 const _router = Router();
 
@@ -35,7 +35,7 @@ router.get('/test-validation', async (req, res) => {
 });
 
 // Aplicar autenticação em todas as outras rotas
-router.use(jwtAuthMiddleware);
+router.use(_jwtAuthMiddleware);
 
 /**
  * GET /api/security/mcp/scan/*
@@ -118,7 +118,7 @@ router.get('/context/:component', async (req: Request, res: Response) => {
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-  _context,
+      _context,
     });
   } catch (error) {
     console.error('[MCP API] Context error:', error);
@@ -146,7 +146,7 @@ router.get('/history/*', async (req: Request, res: Response) => {
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
-  _history,
+      _history,
     });
   } catch (error) {
     console.error('[MCP API] History error:', error);
@@ -175,11 +175,11 @@ router.get('/rules', async (req: Request, res: Response) => {
         total: rules.length,
         by_severity: rules.reduce((acc, rule) => {
           acc[rule.severity || 'unknown'] = (acc[rule.severity || 'unknown'] || 0) + 1;
-          return acc; }
+          return acc;
         }, {}),
         by_category: rules.reduce((acc, rule) => {
           acc[rule.category || 'unknown'] = (acc[rule.category || 'unknown'] || 0) + 1;
-          return acc; }
+          return acc;
         }, {}),
         list: rules,
       },

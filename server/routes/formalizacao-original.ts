@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { ccbGenerationService } from '../services/ccbGenerationService';
 import { supabase } from '../lib/supabase';
 import { db } from '../lib/supabase';
@@ -22,7 +22,7 @@ const _generateCCBSchema = z.object({
  * GET /api/formalizacao/:proposalId/status
  * Retorna status completo da formalização
  */
-router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/status', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -44,7 +44,7 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
       WHERE id = ${proposalId}
     `);
 
-    if (!result || result.length == 0) {
+    if (!result || _result.length == 0) {
       return res.status(404).json({
         error: 'Proposta não encontrada',
       });
@@ -83,7 +83,7 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
  * POST /api/formalizacao/generate-ccb
  * Gera CCB usando template PDF
  */
-router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
+router.post('/generate-ccb', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _validation = generateCCBSchema.safeParse(req.body);
 
@@ -107,19 +107,19 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
     // Gerar CCB
     const _result = await ccbGenerationService.generateCCB(proposalId);
 
-    if (!result.success) {
+    if (!_result.success) {
       return res.status(500).json({
-        error: result.error || 'Erro ao gerar CCB',
+        error: _result.error || 'Erro ao gerar CCB',
       });
     }
 
     // Obter URL pública para visualização
-    const _publicUrl = await ccbGenerationService.getPublicUrl(result.pdfPath!);
+    const _publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
 
     res.json({
       success: true,
       message: 'CCB gerado com sucesso',
-      pdfPath: result.pdfPath,
+      pdfPath: _result.pdfPath,
       _publicUrl,
     });
   } catch (error) {
@@ -134,7 +134,7 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
  * GET /api/formalizacao/:proposalId/ccb
  * Retorna URL do CCB ORIGINAL para visualização
  */
-router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/ccb', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -147,7 +147,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       WHERE id = ${proposalId}
     `);
 
-    if (!result || result.length == 0) {
+    if (!result || _result.length == 0) {
       return res.status(404).json({
         error: 'Proposta não encontrada',
       });
@@ -217,7 +217,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
  * POST /api/formalizacao/:proposalId/regenerate-ccb
  * Regenera CCB (substitui o anterior)
  */
-router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) => {
+router.post('/:proposalId/regenerate-ccb', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -234,19 +234,19 @@ router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) =
     // Gerar novo CCB
     const _result = await ccbGenerationService.generateCCB(proposalId);
 
-    if (!result.success) {
+    if (!_result.success) {
       return res.status(500).json({
-        error: result.error || 'Erro ao regenerar CCB',
+        error: _result.error || 'Erro ao regenerar CCB',
       });
     }
 
     // Obter URL pública
-    const _publicUrl = await ccbGenerationService.getPublicUrl(result.pdfPath!);
+    const _publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
 
     res.json({
       success: true,
       message: 'CCB regenerado com sucesso',
-      pdfPath: result.pdfPath,
+      pdfPath: _result.pdfPath,
       _publicUrl,
     });
   } catch (error) {
@@ -261,7 +261,7 @@ router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) =
  * GET /api/formalizacao/:proposalId/timeline
  * Retorna timeline de eventos da formalização
  */
-router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
+router.get('/:proposalId/timeline', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -298,7 +298,7 @@ router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
  */
 router.get(
   '/:proposalId/ccb-assinada',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { proposalId } = req.params;
@@ -323,7 +323,7 @@ router.get(
       WHERE id = ${proposalId}
     `);
 
-      if (!result || result.length == 0) {
+      if (!result || _result.length == 0) {
         return res.status(404).json({
           error: 'Proposta não encontrada',
         });

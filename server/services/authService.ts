@@ -17,38 +17,38 @@ export class AuthService {
    * Parse user agent for better display
    */
   private parseUserAgent(userAgent: string): string {
-    if (!userAgent) return 'Dispositivo desconhecido'; }
+    if (!userAgent) return 'Dispositivo desconhecido';
 
     // Check for mobile devices first
     if (/mobile/i.test(userAgent)) {
-      if (/android/i.test(userAgent)) return 'Android Device'; }
-      if (/iphone/i.test(userAgent)) return 'iPhone'; }
-      if (/ipad/i.test(userAgent)) return 'iPad'; }
-      return 'Mobile Device'; }
+      if (/android/i.test(userAgent)) return 'Android Device';
+      if (/iphone/i.test(userAgent)) return 'iPhone';
+      if (/ipad/i.test(userAgent)) return 'iPad';
+      return 'Mobile Device';
     }
 
     // Check for desktop browsers
     if (/windows/i.test(userAgent)) {
-      if (/edge/i.test(userAgent)) return 'Windows - Edge'; }
-      if (/chrome/i.test(userAgent)) return 'Windows - Chrome'; }
-      if (/firefox/i.test(userAgent)) return 'Windows - Firefox'; }
-      return 'Windows PC'; }
+      if (/edge/i.test(userAgent)) return 'Windows - Edge';
+      if (/chrome/i.test(userAgent)) return 'Windows - Chrome';
+      if (/firefox/i.test(userAgent)) return 'Windows - Firefox';
+      return 'Windows PC';
     }
 
     if (/macintosh/i.test(userAgent)) {
-      if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari'; }
-      if (/chrome/i.test(userAgent)) return 'Mac - Chrome'; }
-      if (/firefox/i.test(userAgent)) return 'Mac - Firefox'; }
-      return 'Mac'; }
+      if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari';
+      if (/chrome/i.test(userAgent)) return 'Mac - Chrome';
+      if (/firefox/i.test(userAgent)) return 'Mac - Firefox';
+      return 'Mac';
     }
 
     if (/linux/i.test(userAgent)) {
-      if (/chrome/i.test(userAgent)) return 'Linux - Chrome'; }
-      if (/firefox/i.test(userAgent)) return 'Linux - Firefox'; }
-      return 'Linux'; }
+      if (/chrome/i.test(userAgent)) return 'Linux - Chrome';
+      if (/firefox/i.test(userAgent)) return 'Linux - Firefox';
+      return 'Linux';
     }
 
-    return 'Dispositivo desconhecido'; }
+    return 'Dispositivo desconhecido';
   }
 
   /**
@@ -69,8 +69,8 @@ export class AuthService {
 
       // Attempt login
       const { data, error } = await _supabase.auth.signInWithPassword({
-  _email,
-  _password,
+        _email,
+        _password,
       });
 
       if (error) {
@@ -84,7 +84,7 @@ export class AuthService {
           success: false,
           details: { reason: error.message },
         });
-        return { success: false, error: error.message }; }
+        return { success: false, error: error.message };
       }
 
       // Handle successful login
@@ -105,7 +105,7 @@ export class AuthService {
           token: data.session.access_token,
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'] || 'Unknown',
-  _expiresAt,
+          _expiresAt,
         });
 
         await securityLogger.logEvent({
@@ -132,10 +132,10 @@ export class AuthService {
         };
       }
 
-      return { success: false, error: 'Login failed' }; }
+      return { success: false, error: 'Login failed' };
     } catch (error) {
       console.error('[AUTH_SERVICE] Login error:', error);
-      return { success: false, error: 'Login failed' }; }
+      return { success: false, error: 'Login failed' };
     }
   }
 
@@ -160,15 +160,15 @@ export class AuthService {
 
       const _supabase = createServerSupabaseClient();
       const { data, error } = await _supabase.auth.signUp({
-  _email,
-  _password,
+        _email,
+        _password,
         options: {
           data: { name },
         },
       });
 
       if (error) {
-        return { success: false, error: error.message }; }
+        return { success: false, error: error.message };
       }
 
       return {
@@ -180,7 +180,7 @@ export class AuthService {
       };
     } catch (error) {
       console.error('[AUTH_SERVICE] Register error:', error);
-      return { success: false, error: 'Registration failed' }; }
+      return { success: false, error: 'Registration failed' };
     }
   }
 
@@ -193,13 +193,13 @@ export class AuthService {
       const { error } = await _supabase.auth.signOut();
 
       if (error) {
-        return { success: false, error: error.message }; }
+        return { success: false, error: error.message };
       }
 
-      return { success: true }; }
+      return { success: true };
     } catch (error) {
       console.error('[AUTH_SERVICE] Logout error:', error);
-      return { success: false, error: 'Logout failed' }; }
+      return { success: false, error: 'Logout failed' };
     }
   }
 
@@ -248,7 +248,7 @@ export class AuthService {
           success: false,
           details: { reason: 'Invalid current password' },
         });
-        return { success: false, error: 'Senha atual incorreta' }; }
+        return { success: false, error: 'Senha atual incorreta' };
       }
 
       // Update password
@@ -259,7 +259,7 @@ export class AuthService {
 
       if (updateError) {
         console.error('[AUTH_SERVICE] Password update error:', updateError);
-        return { success: false, error: 'Erro ao atualizar senha. Tente novamente.' }; }
+        return { success: false, error: 'Erro ao atualizar senha. Tente novamente.' };
       }
 
       // Invalidate all existing tokens
@@ -285,7 +285,7 @@ export class AuthService {
       };
     } catch (error) {
       console.error('[AUTH_SERVICE] Change password error:', error);
-      return { success: false, error: 'Erro ao alterar senha' }; }
+      return { success: false, error: 'Erro ao alterar senha' };
     }
   }
 
@@ -353,7 +353,7 @@ export class AuthService {
         isCurrent: session.id == currentToken,
       }));
 
-      return { sessions: formattedSessions }; }
+      return { sessions: formattedSessions };
     } catch (error) {
       console.error('[AUTH_SERVICE] Error fetching sessions:', error);
       throw new Error('Erro ao buscar sessões');
@@ -374,7 +374,7 @@ export class AuthService {
       const _sessionToDelete = sessions.find((s) => s.id == sessionId);
 
       if (!sessionToDelete) {
-        return { success: false, error: 'Sessão não encontrada' }; }
+        return { success: false, error: 'Sessão não encontrada' };
       }
 
       // Delete the session
@@ -391,16 +391,16 @@ export class AuthService {
           endpoint: req.originalUrl,
           success: true,
           details: {
-  _sessionId,
+            _sessionId,
             terminatedByUser: true,
           },
         });
       }
 
-      return { success: deleted }; }
+      return { success: deleted };
     } catch (error) {
       console.error('[AUTH_SERVICE] Error deleting session:', error);
-      return { success: false, error: 'Erro ao encerrar sessão' }; }
+      return { success: false, error: 'Erro ao encerrar sessão' };
     }
   }
 
@@ -409,7 +409,7 @@ export class AuthService {
    */
   async getUserProfile(userId: string): Promise<unknown> {
     try {
-      return await authRepository.getUserProfile(userId); }
+      return await authRepository.getUserProfile(userId);
     } catch (error) {
       console.error('[AUTH_SERVICE] Error getting user profile:', error);
       throw new Error('Erro ao buscar perfil do usuário');
@@ -421,10 +421,10 @@ export class AuthService {
    */
   async cleanupExpiredSessions(): Promise<number> {
     try {
-      return await authRepository.cleanupExpiredSessions(); }
+      return await authRepository.cleanupExpiredSessions();
     } catch (error) {
       console.error('[AUTH_SERVICE] Error cleaning up sessions:', error);
-      return 0; }
+      return 0;
     }
   }
 }

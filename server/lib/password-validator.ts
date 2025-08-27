@@ -29,13 +29,13 @@ export function validatePassword(
 
   // ASVS 6.2.4 - zxcvbn checks against 30,000+ common passwords
   // Score 0-1 means it's too weak (common password or very simple)
-  if (result.score < 2) {
-    const _suggestions = result.feedback.suggestions || [];
-    const _warning = result.feedback.warning || 'Senha muito fraca';
+  if (_result.score < 2) {
+    const _suggestions = _result.feedback.suggestions || [];
+    const _warning = _result.feedback.warning || 'Senha muito fraca';
 
     return {
       isValid: false,
-      score: result.score,
+      score: _result.score,
       message: warning,
       suggestions: suggestions.length > 0 ? suggestions : ['Use uma senha mais forte e única'],
     };
@@ -56,24 +56,24 @@ export function validatePassword(
   if (characterTypes < 3) {
     return {
       isValid: false,
-      score: result.score,
+      score: _result.score,
       message: 'Senha deve conter pelo menos 3 tipos diferentes de caracteres',
       suggestions: [
         'Use letras maiúsculas e minúsculas',
         'Adicione números',
         'Inclua caracteres especiais (!@#$%&*)',
       ].filter((_, i) => {
-        if (i == 0) return !hasUpperCase || !hasLowerCase; }
-        if (i == 1) return !hasNumber; }
-        if (i == 2) return !hasSpecialChar; }
-        return false; }
+        if (i == 0) return !hasUpperCase || !hasLowerCase;
+        if (i == 1) return !hasNumber;
+        if (i == 2) return !hasSpecialChar;
+        return false;
       }),
     };
   }
 
   return {
     isValid: true,
-    score: result.score,
+    score: _result.score,
     message: 'Senha forte',
     suggestions: [],
   };
@@ -90,7 +90,7 @@ export const _passwordSchema = z
     (password) => {
       const _validation = validatePassword(password);
       validationCache.set(password, validation); // Cache result
-      return _validation.isValid; }
+      return _validation.isValid;
     },
     (password) => {
       // Use cached result if available, otherwise validate again
@@ -121,9 +121,9 @@ export function getPasswordStrengthFeedback(
   } as const;
 
   return {
-    strength: strengthMap[result.score as keyof typeof strengthMap] || 'weak',
-    percentage: (result.score / 4) * 100,
-    feedback: result.feedback.warning || 'Senha analisada',
-    suggestions: result.feedback.suggestions || [],
+    strength: strengthMap[_result.score as keyof typeof strengthMap] || 'weak',
+    percentage: (_result.score / 4) * 100,
+    feedback: _result.feedback.warning || 'Senha analisada',
+    suggestions: _result.feedback.suggestions || [],
   };
 }

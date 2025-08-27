@@ -13,7 +13,7 @@ import {
 } from '@shared/schema';
 import { eq, and, sql, desc, gte, lte, inArray, or, not } from 'drizzle-orm';
 import { format, parseISO, differenceInDays, isAfter } from 'date-fns';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
+import { _jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { maskCPF, maskEmail, maskRG, maskTelefone } from '../utils/masking';
 
 const _router = Router();
@@ -220,10 +220,12 @@ router.get('/', async (req, res) => {
           if (parcela.status == 'pago') {
             parcelasPagas++;
             valorTotalPago += Number(parcela.valorParcela);
-          } else if (vencida) {
+          }
+else if (vencida) {
             parcelasVencidas++;
             valorTotalVencido += Number(parcela.valorParcela);
-          } else {
+          }
+else {
             parcelasPendentes++;
             valorTotalPendente += Number(parcela.valorParcela);
           }
@@ -249,7 +251,8 @@ router.get('/', async (req, res) => {
         let _statusCobranca = 'em_dia';
         if (parcelasPagas == parcelasData.length && parcelasData.length > 0) {
           statusCobranca = 'quitado';
-        } else if (parcelasVencidas > 0) {
+        }
+else if (parcelasVencidas > 0) {
           statusCobranca = 'inadimplente';
         }
 
@@ -316,26 +319,28 @@ router.get('/', async (req, res) => {
       propostasFiltradas = propostasFiltradas.filter((p) => {
         // Inadimplentes ou em atraso
         if (p.status == 'inadimplente' || p.diasAtraso > 0) {
-          return true; }
+          return true;
         }
 
         // Parcelas que vencem nos próximos 3 dias
         const _temParcelaVencendoEm3Dias = p.parcelas.some((parcela) => {
-          if (parcela.status == 'pago') return false; }
+          if (parcela.status == 'pago') return false;
           const _dataVencimento = parseISO(parcela.dataVencimento);
-          return dataVencimento <= em3Dias && dataVencimento >= hoje; }
+          return dataVencimento <= em3Dias && dataVencimento >= hoje;
         });
 
-        return temParcelaVencendoEm3Dias; }
+        return temParcelaVencendoEm3Dias;
       });
     }
 
     // Aplicar filtros manuais da interface (se não for usuário de cobrança ou se for filtro adicional)
     if (status == 'inadimplente') {
       propostasFiltradas = propostasFiltradas.filter((p) => p.status == 'inadimplente');
-    } else if (status == 'em_dia') {
+    }
+else if (status == 'em_dia') {
       propostasFiltradas = propostasFiltradas.filter((p) => p.status == 'em_dia');
-    } else if (status == 'quitado') {
+    }
+else if (status == 'quitado') {
       propostasFiltradas = propostasFiltradas.filter((p) => p.status == 'quitado');
     }
 
@@ -343,7 +348,8 @@ router.get('/', async (req, res) => {
       propostasFiltradas = propostasFiltradas.filter(
         (p) => p.diasAtraso >= 1 && p.diasAtraso <= 15
       );
-    } else if (atraso == '30+') {
+    }
+else if (atraso == '30+') {
       propostasFiltradas = propostasFiltradas.filter((p) => p.diasAtraso > 30);
     }
 
@@ -364,7 +370,8 @@ router.get('/', async (req, res) => {
     });
 
     res.json(propostasFiltradas);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar propostas de cobrança:', error);
     res.status(500).json({ message: 'Erro ao buscar propostas de cobrança' });
   }
@@ -432,7 +439,8 @@ router.get('/kpis', async (req, res) => {
   _quantidadeTotalContratos,
       taxaInadimplencia: taxaInadimplencia.toFixed(2),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao calcular KPIs:', error);
     res.status(500).json({ message: 'Erro ao calcular KPIs' });
   }
@@ -619,7 +627,8 @@ router.get('/:propostaId/ficha', async (req, res) => {
     };
 
     res.json(ficha);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao buscar ficha do cliente:', error);
     res.status(500).json({ message: 'Erro ao buscar ficha do cliente' });
   }
@@ -628,7 +637,7 @@ router.get('/:propostaId/ficha', async (req, res) => {
 // PAM V1.0 - FASE 3: Endpoint para marcar parcela como paga manualmente
 router.patch(
   '/parcelas/:codigoSolicitacao/marcar-pago',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req, res) => {
     try {
       const { codigoSolicitacao } = req.params;
@@ -694,7 +703,8 @@ router.patch(
   _codigoSolicitacao,
         numeroParcela: boletoInter.numeroParcela,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[COBRANCAS] Erro ao marcar parcela como paga:', error);
       res.status(500).json({ error: 'Erro ao processar solicitação' });
     }
@@ -727,7 +737,8 @@ router.post('/:propostaId/observacao', async (req, res) => {
       .returning();
 
     res.json(novaObservacao[0]);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao adicionar observação:', error);
     res.status(500).json({ message: 'Erro ao adicionar observação' });
   }
@@ -758,14 +769,15 @@ router.get('/inter-sumario', async (req, res) => {
     });
 
     res.json(sumario);
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter sumário do Inter:', error);
     res.status(500).json({ message: 'Erro ao obter sumário financeiro' });
   }
 });
 
 // POST /api/cobrancas/inter-sync-all - Sincronizar todos os boletos de uma proposta com Banco Inter
-router.post('/inter-sync-all', jwtAuthMiddleware, async (req, res) => {
+router.post('/inter-sync-all', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.body;
     const _userRole = req.user?.role;
@@ -831,21 +843,21 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req, res) => {
               case 'RECEBIDO': // Pagamento confirmado
               case 'MARCADO_RECEBIDO': // Marcado como recebido manualmente
                 novoStatusParcela = 'pago';
-                break; }
+                break;
               case 'CANCELADO': // Boleto cancelado
               case 'EXPIRADO': // Boleto expirado
               case 'FALHA_EMISSAO': // Falha na emissão
                 novoStatusParcela = 'cancelado';
-                break; }
+                break;
               case 'ATRASADO': // Vencido e em atraso
               case 'PROTESTO': // Em protesto
                 novoStatusParcela = 'vencido';
-                break; }
+                break;
               case 'A_RECEBER': // Aguardando pagamento
               case 'EM_PROCESSAMENTO': // Processando
               default:
                 novoStatusParcela = 'pendente';
-                break; }
+                break;
             }
 
             const updateData: unknown = {
@@ -870,7 +882,8 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req, res) => {
 
           atualizados++;
         }
-      } catch (error) {
+      }
+catch (error) {
         console.error(
           `[INTER-SYNC-ALL] Erro ao sincronizar boleto ${boleto.codigoSolicitacao}:`,
           error
@@ -890,7 +903,8 @@ router.post('/inter-sync-all', jwtAuthMiddleware, async (req, res) => {
   _atualizados,
   _erros,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[INTER-SYNC-ALL] Erro:', error);
     res.status(500).json({ message: 'Erro ao sincronizar boletos' });
   }
@@ -948,22 +962,22 @@ router.get('/inter-status/:codigoSolicitacao', async (req, res) => {
           case 'RECEBIDO': {
           case 'MARCADO_RECEBIDO': {
             novoStatusParcela = 'pago';
-            break; }
+            break;
           case 'CANCELADO': {
           case 'EXPIRADO': {
           case 'FALHA_EMISSAO': {
             novoStatusParcela = 'cancelado';
-            break; }
+            break;
           case 'VENCIDO': {
           case 'ATRASADO': {
           case 'PROTESTO': {
             novoStatusParcela = 'vencido';
-            break; }
+            break;
           case 'A_RECEBER': {
           case 'EM_PROCESSAMENTO': {
           default:
             novoStatusParcela = 'pendente';
-            break; }
+            break;
         }
 
         console.log(
@@ -1002,14 +1016,15 @@ router.get('/inter-status/:codigoSolicitacao', async (req, res) => {
       linhaDigitavel: cobranca?.boleto?.linhaDigitavel,
       codigoBarras: cobranca?.boleto?.codigoBarras,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao obter status do boleto:', error);
     res.status(500).json({ message: 'Erro ao obter status do boleto' });
   }
 });
 
 // POST /api/cobrancas/sincronizar/:propostaId - Sincronizar status de todos os boletos de uma proposta
-router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req, res) => {
+router.post('/sincronizar/:propostaId', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { propostaId } = req.params;
     const _userRole = req.user?.role;
@@ -1031,12 +1046,13 @@ router.post('/sincronizar/:propostaId', jwtAuthMiddleware, async (req, res) => {
     console.log(`[SYNC] Resultado:`,_result);
 
     res.json({
-      success: result.success,
-      message: result.message,
-      atualizacoes: result.updatedCount,
-      erros: result.errors,
+      success: _result.success,
+      message: _result.message,
+      atualizacoes: _result.updatedCount,
+      erros: _result.errors,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SYNC] Erro ao sincronizar:', error);
     res.status(500).json({
       success: false,
@@ -1077,7 +1093,7 @@ router.get('/exportar/inadimplentes', async (req, res) => {
       // Encontrar parcelas vencidas
       const _parcelasVencidas = parcelasData.filter((parcela) => {
         const _dataVencimento = parseISO(parcela.dataVencimento);
-        return isAfter(hoje, dataVencimento) && parcela.status !== 'pago'; }
+        return isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
       });
 
       if (parcelasVencidas.length > 0) {
@@ -1113,7 +1129,8 @@ router.get('/exportar/inadimplentes', async (req, res) => {
       total: inadimplentes.length,
       dataExportacao: format(new Date(), 'dd/MM/yyyy HH:mm'),
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('Erro ao exportar inadimplentes:', error);
     res.status(500).json({ message: 'Erro ao exportar inadimplentes' });
   }
@@ -1127,7 +1144,7 @@ router.get('/exportar/inadimplentes', async (req, res) => {
  */
 router.post(
   '/boletos/:codigoSolicitacao/solicitar-prorrogacao',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req, res) => {
     try {
       const { codigoSolicitacao } = req.params;
@@ -1155,7 +1172,7 @@ router.post(
 
       // Validar formato da data
       const _dataVencimento = new Date(novaDataVencimento);
-      if (isNaN(dataVencimento.getTime())) {
+      if (_isNaN(dataVencimento.getTime())) {
         return res.status(400).json({
           error: 'Data inválida',
           message: 'Formato de data inválido',
@@ -1266,7 +1283,8 @@ router.post(
   _codigoSolicitacao,
   _novaDataVencimento,
           });
-        } catch (error) {
+        }
+catch (error) {
           // Se falhar, atualizar com erro
           await db
             .update(solicitacoesModificacao)
@@ -1295,7 +1313,8 @@ router.post(
   _codigoSolicitacao,
   _novaDataVencimento,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[PRORROGAR] Erro geral:', error);
       res.status(500).json({
         error: 'Erro interno',
@@ -1311,7 +1330,7 @@ router.post(
  */
 router.post(
   '/boletos/:codigoSolicitacao/solicitar-desconto',
-  _jwtAuthMiddleware,
+  __jwtAuthMiddleware,
   async (req, res) => {
     try {
       const { codigoSolicitacao } = req.params;
@@ -1347,7 +1366,7 @@ router.post(
 
       // Validar valor do desconto
       const _valorDescontoNum = Number(valorDesconto);
-      if (isNaN(valorDescontoNum) || valorDescontoNum <= 0) {
+      if (_isNaN(valorDescontoNum) || valorDescontoNum <= 0) {
         return res.status(400).json({
           error: 'Valor inválido',
           message: 'Valor do desconto deve ser um número positivo',
@@ -1460,7 +1479,8 @@ router.post(
   _tipoDesconto,
   _valorDesconto,
           });
-        } catch (error) {
+        }
+catch (error) {
           // Se falhar, atualizar com erro
           await db
             .update(solicitacoesModificacao)
@@ -1490,7 +1510,8 @@ router.post(
   _tipoDesconto,
   _valorDesconto,
       });
-    } catch (error) {
+    }
+catch (error) {
       console.error('[DESCONTO] Erro geral:', error);
       res.status(500).json({
         error: 'Erro interno',
@@ -1506,7 +1527,7 @@ router.post(
  * GET /api/cobrancas/solicitacoes
  * Lista todas as solicitações pendentes de aprovação (apenas SUPERVISOR_COBRANCA e ADMINISTRADOR)
  */
-router.get('/solicitacoes', jwtAuthMiddleware, async (req, res) => {
+router.get('/solicitacoes', _jwtAuthMiddleware, async (req, res) => {
   try {
     const _userRole = req.user?.role;
     const _userId = req.user?.id;
@@ -1539,7 +1560,8 @@ router.get('/solicitacoes', jwtAuthMiddleware, async (req, res) => {
       .orderBy(desc(solicitacoesModificacao.createdAt));
 
     res.json(solicitacoes);
-  } catch (error) {
+  }
+catch (error) {
     console.error('[SOLICITAÇÕES] Erro ao buscar:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -1552,7 +1574,7 @@ router.get('/solicitacoes', jwtAuthMiddleware, async (req, res) => {
  * POST /api/cobrancas/solicitacoes/:id/aprovar
  * Aprova uma solicitação e executa a ação no Banco Inter
  */
-router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => {
+router.post('/solicitacoes/:id/aprovar', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { observacao } = req.body;
@@ -1612,7 +1634,8 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => 
         await interBankService.editarCobranca(solicitacao.codigoSolicitacao!, {
           dataVencimento: dados.novaDataVencimento,
         });
-      } else if (solicitacao.tipoSolicitacao == 'desconto') {
+      }
+else if (solicitacao.tipoSolicitacao == 'desconto') {
         const descontoPayload: unknown = {
           codigoDesconto: 'DESCONTO1',
           taxa: dados.tipoDesconto == 'PERCENTUAL' ? Number(dados.valorDesconto) : 0,
@@ -1640,7 +1663,8 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => 
         message: `Solicitação aprovada e ${solicitacao.tipoSolicitacao} executada com sucesso`,
         solicitacaoId: id,
       });
-    } catch (error) {
+    }
+catch (error) {
       // Se falhar ao executar, manter como aprovado mas com erro
       await db
         .update(solicitacoesModificacao)
@@ -1656,7 +1680,8 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => 
         detalhes: error.message,
       });
     }
-  } catch (error) {
+  }
+catch (error) {
     console.error('[APROVAR] Erro geral:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -1669,7 +1694,7 @@ router.post('/solicitacoes/:id/aprovar', jwtAuthMiddleware, async (req, res) => 
  * POST /api/cobrancas/solicitacoes/:id/rejeitar
  * Rejeita uma solicitação
  */
-router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req, res) => {
+router.post('/solicitacoes/:id/rejeitar', _jwtAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { motivo, observacao } = req.body;
@@ -1734,7 +1759,8 @@ router.post('/solicitacoes/:id/rejeitar', jwtAuthMiddleware, async (req, res) =>
       solicitacaoId: id,
   _motivo,
     });
-  } catch (error) {
+  }
+catch (error) {
     console.error('[REJEITAR] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',

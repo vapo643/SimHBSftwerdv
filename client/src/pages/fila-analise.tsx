@@ -73,9 +73,9 @@ export default function FilaAnalise() {
 
   const _getPriorityBadge = (valor: string) => {
     const _valorNum = parseFloat(valor);
-    if (valorNum > 100000) return { label: 'Alta', variant: 'destructive' as const }; }
-    if (valorNum > 50000) return { label: 'Média', variant: 'secondary' as const }; }
-    return { label: 'Baixa', variant: 'outline' as const }; }
+    if (valorNum > 100000) return { label: 'Alta', variant: 'destructive' as const }
+    if (valorNum > 50000) return { label: 'Média', variant: 'secondary' as const }
+    return { label: 'Baixa', variant: 'outline' as const }
   };
 
   const _formatCurrency = (value: string) => {
@@ -114,13 +114,13 @@ export default function FilaAnalise() {
     ?.sort((a, b) => {
       switch (ordenacao) {
         case 'data_desc': {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); }
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         case 'data_asc': {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); }
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         case 'valor_desc': {
-          return parseFloat(b.valor) - parseFloat(a.valor); }
+          return parseFloat(b.valor) - parseFloat(a.valor);
         case 'valor_asc': {
-          return parseFloat(a.valor) - parseFloat(b.valor); }
+          return parseFloat(a.valor) - parseFloat(b.valor);
         case 'prioridade': {
           const _getPriorityValue = (valor: string) => {
             const _num = parseFloat(valor);
@@ -128,7 +128,7 @@ export default function FilaAnalise() {
             if (num > 50000) return 2; }
             return 1; }
           };
-          return getPriorityValue(b.valor) - getPriorityValue(a.valor); }
+          return getPriorityValue(b.valor) - getPriorityValue(a.valor);
         default:
           return 0; }
       }
