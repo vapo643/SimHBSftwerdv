@@ -73,9 +73,9 @@ export default function FilaAnalise() {
 
   const _getPriorityBadge = (valor: string) => {
     const _valorNum = parseFloat(valor);
-    if (valorNum > 100000) return { label: 'Alta', variant: 'destructive' as const }
-    if (valorNum > 50000) return { label: 'Média', variant: 'secondary' as const }
-    return { label: 'Baixa', variant: 'outline' as const }
+    if (valorNum > 100000) return { label: 'Alta', variant: 'destructive' as const }; }
+    if (valorNum > 50000) return { label: 'Média', variant: 'secondary' as const }; }
+    return { label: 'Baixa', variant: 'outline' as const }; }
   };
 
   const _formatCurrency = (value: string) => {
@@ -109,28 +109,28 @@ export default function FilaAnalise() {
         matchesPrioridade = prioridade == prioridadeFilter;
       }
 
-      return matchesStatus && matchesBusca && matchesValor && matchesPrioridade;
+      return matchesStatus && matchesBusca && matchesValor && matchesPrioridade; }
     })
     ?.sort((a, b) => {
       switch (ordenacao) {
         case 'data_desc': {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); }
         case 'data_asc': {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); }
         case 'valor_desc': {
-          return parseFloat(b.valor) - parseFloat(a.valor);
+          return parseFloat(b.valor) - parseFloat(a.valor); }
         case 'valor_asc': {
-          return parseFloat(a.valor) - parseFloat(b.valor);
+          return parseFloat(a.valor) - parseFloat(b.valor); }
         case 'prioridade': {
           const _getPriorityValue = (valor: string) => {
             const _num = parseFloat(valor);
-            if (num > 100000) return 3;
-            if (num > 50000) return 2;
-            return 1;
+            if (num > 100000) return 3; }
+            if (num > 50000) return 2; }
+            return 1; }
           };
-          return getPriorityValue(b.valor) - getPriorityValue(a.valor);
+          return getPriorityValue(b.valor) - getPriorityValue(a.valor); }
         default:
-          return 0;
+          return 0; }
       }
     });
 
@@ -145,7 +145,7 @@ export default function FilaAnalise() {
 
   // Estatísticas
   const _getStats = () => {
-    if (!propostas) return null;
+    if (!propostas) return null; }
 
     const _aguardando = propostas.filter((p) => p.status == 'aguardando_analise').length;
     const _emAnalise = propostas.filter((p) => p.status == 'em_analise').length;
@@ -431,7 +431,7 @@ export default function FilaAnalise() {
                             {(() => {
                               const _statusFinal = proposta.statusContextual || proposta.status;
                               const _statusInfo = getStatusBadge(statusFinal);
-                              return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+                              return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>; }
                             })()}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">

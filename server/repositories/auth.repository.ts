@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { profiles, userSessions } from '@shared/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import type { Session } from '@shared/schema';
@@ -41,11 +41,10 @@ export class AuthRepository extends BaseRepository<Session> {
         })
         .returning();
 
-      return session;
-    }
-catch (error) {
+      return session; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error creating session:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -59,10 +58,9 @@ catch (error) {
         .from(userSessions)
         .where(eq(userSessions.userId, userId))
         .orderBy(desc(userSessions.lastActivityAt));
-    }
-catch (error) {
+    } catch (error) {
       console.error('[AUTH_REPO] Error getting user sessions:', error);
-      return [];
+      return []; }
     }
   }
 
@@ -82,10 +80,9 @@ catch (error) {
           )
         )
         .orderBy(desc(userSessions.lastActivityAt));
-    }
-catch (error) {
+    } catch (error) {
       console.error('[AUTH_REPO] Error getting active sessions:', error);
-      return [];
+      return []; }
     }
   }
 
@@ -94,16 +91,15 @@ catch (error) {
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     try {
-      const result = await db
+      const _result = await db
         .delete(userSessions)
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return _result.length > 0;
-    }
-catch (error) {
+      return result.length > 0; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error deleting session:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -112,16 +108,15 @@ catch (error) {
    */
   async deleteUserSessions(userId: string): Promise<number> {
     try {
-      const result = await db
+      const _result = await db
         .delete(userSessions)
         .where(eq(userSessions.userId, userId))
         .returning();
 
-      return _result.length;
-    }
-catch (error) {
+      return result.length; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error deleting user sessions:', error);
-      return 0;
+      return 0; }
     }
   }
 
@@ -130,7 +125,7 @@ catch (error) {
    */
   async deactivateSession(sessionId: string): Promise<boolean> {
     try {
-      const result = await db
+      const _result = await db
         .update(userSessions)
         .set({
           isActive: false,
@@ -138,11 +133,10 @@ catch (error) {
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return _result.length > 0;
-    }
-catch (error) {
+      return result.length > 0; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error deactivating session:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -151,7 +145,7 @@ catch (error) {
    */
   async updateSessionActivity(sessionId: string): Promise<boolean> {
     try {
-      const result = await db
+      const _result = await db
         .update(userSessions)
         .set({
           lastActivityAt: new Date(),
@@ -159,11 +153,10 @@ catch (error) {
         .where(eq(userSessions.id, sessionId))
         .returning();
 
-      return _result.length > 0;
-    }
-catch (error) {
+      return result.length > 0; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error updating session activity:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -184,11 +177,10 @@ catch (error) {
         )
         .limit(1);
 
-      return !!session;
-    }
-catch (error) {
+      return !!session; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error checking session validity:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -197,16 +189,15 @@ catch (error) {
    */
   async cleanupExpiredSessions(): Promise<number> {
     try {
-      const result = await db
+      const _result = await db
         .delete(userSessions)
         .where(sql`${userSessions.expiresAt} < NOW()`)
         .returning();
 
-      return _result.length;
-    }
-catch (error) {
+      return result.length; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error cleaning up expired sessions:', error);
-      return 0;
+      return 0; }
     }
   }
 
@@ -221,11 +212,10 @@ catch (error) {
         .where(eq(userSessions.token, token))
         .limit(1);
 
-      return session || null;
-    }
-catch (error) {
+      return session || null; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error getting session by token:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -236,11 +226,10 @@ catch (error) {
     try {
       const [profile] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 
-      return profile || null;
-    }
-catch (error) {
+      return profile || null; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error getting user profile:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -249,7 +238,7 @@ catch (error) {
    */
   async countActiveSessions(userId: string): Promise<number> {
     try {
-      const result = await db
+      const _result = await db
         .select({ count: sql<number>`count(*)` })
         .from(userSessions)
         .where(
@@ -260,13 +249,12 @@ catch (error) {
           )
         );
 
-      return _result[0]?.count || 0;
-    }
-catch (error) {
+      return result[0]?.count || 0; }
+    } catch (error) {
       console.error('[AUTH_REPO] Error counting active sessions:', error);
-      return 0;
+      return 0; }
     }
   }
 }
 
-export const authRepository = new AuthRepository();
+export const _authRepository = new AuthRepository();

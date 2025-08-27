@@ -98,8 +98,7 @@ describe('Sistema de Status FSM - Testes de Integração', () => {
         .returning({ id: propostas.id });
 
       console.log(`[TEST SETUP] ✅ Proposta de teste criada: ${testProposalId}`);
-    }
-catch (error) {
+    } catch (error) {
       console.error('[TEST SETUP] ❌ Erro ao criar dados de teste:', error);
       throw error;
     }
@@ -172,14 +171,14 @@ catch (error) {
       // APROVADO → CCB_GERADA
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.CCBGERADA,
+        novoStatus: ProposalStatus.CCB_GERADA,
         userId: testUserId,
       });
 
       // CCB_GERADA → AGUARDANDO_ASSINATURA
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.AGUARDANDOASSINATURA,
+        novoStatus: ProposalStatus.AGUARDANDO_ASSINATURA,
         userId: testUserId,
         observacoes: 'CCB enviada para assinatura',
       });
@@ -218,17 +217,17 @@ catch (error) {
       // Primeiro vamos para ASSINATURA_CONCLUIDA através de transições válidas
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.CCBGERADA,
+        novoStatus: ProposalStatus.CCB_GERADA,
         userId: testUserId,
       });
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.AGUARDANDOASSINATURA,
+        novoStatus: ProposalStatus.AGUARDANDO_ASSINATURA,
         userId: testUserId,
       });
       await transitionTo({
         propostaId: testProposalId,
-        novoStatus: ProposalStatus.ASSINATURACONCLUIDA,
+        novoStatus: ProposalStatus.ASSINATURA_CONCLUIDA,
         userId: testUserId,
       });
 
@@ -295,10 +294,10 @@ catch (error) {
         metadata: { teste: true },
       });
 
-      expect(_result.success).toBe(true);
-      expect(_result.statusLegado).toBe(novoStatus);
-      expect(_result.statusContextual).toBe(novoStatus);
-      expect(_result.contexto).toBe(contexto);
+      expect(result.success).toBe(true);
+      expect(result.statusLegado).toBe(novoStatus);
+      expect(result.statusContextual).toBe(novoStatus);
+      expect(result.contexto).toBe(contexto);
 
       // Verificar que ambas as tabelas foram atualizadas
       const [propostaAtualizada] = await db

@@ -156,40 +156,40 @@ export class Proposal {
     lojaId?: number,
     atendenteId?: string
   ): Proposal {
-    const id = uuidv4();
-    const proposal = new Proposal(
-      id,
-      clienteData,
-      valor,
-      prazo,
-      taxaJuros,
-      produtoId,
-      lojaId,
+    const _id = uuidv4();
+    const _proposal = new Proposal(
+  _id,
+  _clienteData,
+  _valor,
+  _prazo,
+  _taxaJuros,
+  _produtoId,
+  _lojaId,
       atendenteId
     );
 
     proposal.addEvent(
       new ProposalCreatedEvent(id, 'ProposalCreated', {
-        clienteData,
-        valor,
-        prazo,
-        taxaJuros,
+  _clienteData,
+  _valor,
+  _prazo,
+  _taxaJuros,
       })
     );
 
-    return proposal;
+    return proposal; }
   }
 
   // Factory method para reconstituir do banco
   static fromDatabase(data): Proposal {
-    const proposal = new Proposal(
+    const _proposal = new Proposal(
       data.id,
-      data.clientedata,
+      data.cliente_data,
       data.valor,
       data.prazo,
-      data.taxajuros,
-      data.produtoid,
-      data.lojaid,
+      data.taxa_juros,
+      data.produto_id,
+      data.loja_id,
       data.atendente_id
     );
 
@@ -203,7 +203,7 @@ export class Proposal {
     proposal._tabelaComercialId = data.tabela_comercial_id;
     proposal._parceiroId = data.parceiro_id;
 
-    return proposal;
+    return proposal; }
   }
 
   // ======= INVARIANTES DE NEGÓCIO =======
@@ -236,10 +236,10 @@ export class Proposal {
 
   private isValidCPF(cpf: string): boolean {
     // Remove caracteres não numéricos
-    const cleanCPF = cpf.replace(/\D/g, '');
+    const _cleanCPF = cpf.replace(/\D/g, '');
 
     // Verifica se tem 11 dígitos
-    if (cleanCPF.length !== 11) return false;
+    if (cleanCPF.length !== 11) return false; }
 
     // Em desenvolvimento, permite CPFs de teste (sequências repetidas)
     if (process.env.NODE_ENV == 'development' && /^(\d)\1{10}$/.test(cleanCPF)) {
@@ -247,7 +247,7 @@ export class Proposal {
     }
 
     // Verifica se todos os dígitos são iguais (apenas em produção)
-    if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
+    if (/^(\d)\1{10}$/.test(cleanCPF)) return false; }
 
     // Validação dos dígitos verificadores
     let _sum = 0;
@@ -256,7 +256,7 @@ export class Proposal {
     }
     let _digit = 11 - (sum % 11);
     if (digit >= 10) digit = 0;
-    if (digit !== parseInt(cleanCPF.charAt(9))) return false;
+    if (digit !== parseInt(cleanCPF.charAt(9))) return false; }
 
     sum = 0;
     for (let _i = 0; i < 10; i++) {
@@ -264,9 +264,9 @@ export class Proposal {
     }
     digit = 11 - (sum % 11);
     if (digit >= 10) digit = 0;
-    if (digit !== parseInt(cleanCPF.charAt(10))) return false;
+    if (digit !== parseInt(cleanCPF.charAt(10))) return false; }
 
-    return true;
+    return true; }
   }
 
   // ======= COMANDOS (MÉTODOS DE NEGÓCIO) =======
@@ -293,9 +293,9 @@ export class Proposal {
 
     // Verificar comprometimento de renda antes de aprovar
     if (this._clienteData.renda_mensal && this._clienteData.dividas_existentes !== undefined) {
-      const valorParcela = this.calculateMonthlyPayment();
-      const comprometimentoTotal = (this._clienteData.dividas_existentes || 0) + valorParcela;
-      const percentualComprometimento =
+      const _valorParcela = this.calculateMonthlyPayment();
+      const _comprometimentoTotal = (this._clienteData.dividas_existentes || 0) + valorParcela;
+      const _percentualComprometimento =
         (comprometimentoTotal / this._clienteData.renda_mensal) * 100;
 
       if (percentualComprometimento > LIMITE_COMPROMETIMENTO_RENDA) {
@@ -310,9 +310,9 @@ export class Proposal {
     this._updatedAt = new Date();
 
     this.addEvent(
-      new ProposalApprovedEvent(this.id, 'ProposalApproved', {
-        analistaId,
-        observacoes,
+      new ProposalApprovedEvent(this._id, 'ProposalApproved', {
+  _analistaId,
+  _observacoes,
       })
     );
   }
@@ -334,9 +334,9 @@ export class Proposal {
     this._updatedAt = new Date();
 
     this.addEvent(
-      new ProposalRejectedEvent(this.id, 'ProposalRejected', {
-        analistaId,
-        motivo,
+      new ProposalRejectedEvent(this._id, 'ProposalRejected', {
+  _analistaId,
+  _motivo,
       })
     );
   }
@@ -441,26 +441,26 @@ export class Proposal {
    * Calcula o valor da parcela mensal
    */
   calculateMonthlyPayment(): number {
-    const principal = this._valor;
-    const monthlyRate = this._taxaJuros / 100;
-    const numberOfPayments = this._prazo;
+    const _principal = this._valor;
+    const _monthlyRate = this._taxaJuros / 100;
+    const _numberOfPayments = this._prazo;
 
     if (monthlyRate == 0) {
-      return principal / numberOfPayments;
+      return principal / numberOfPayments; }
     }
 
-    const payment =
+    const _payment =
       (principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) /
       (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
 
-    return Math.round(payment * 100) / 100;
+    return Math.round(payment * 100) / 100; }
   }
 
   /**
    * Calcula o valor total a ser pago
    */
   calculateTotalAmount(): number {
-    return this.calculateMonthlyPayment() * this._prazo;
+    return this.calculateMonthlyPayment() * this._prazo; }
   }
 
   /**
@@ -469,65 +469,65 @@ export class Proposal {
   calculateCET(tac?: number): number {
     // Implementação simplificada do CET
     // Em produção, usar cálculo completo segundo regulação BACEN
-    const valorTotal = this.calculateTotalAmount();
-    const custoTotal = valorTotal + (tac || 0);
-    const cet = (custoTotal / this._valor - 1) * 100;
+    const _valorTotal = this.calculateTotalAmount();
+    const _custoTotal = valorTotal + (tac || 0);
+    const _cet = (custoTotal / this._valor - 1) * 100;
 
-    return Math.round(cet * 100) / 100;
+    return Math.round(cet * 100) / 100; }
   }
 
   // ======= GETTERS =======
 
   get id(): string {
-    return this._id;
+    return this._id; }
   }
   get status(): ProposalStatus {
-    return this._status;
+    return this._status; }
   }
   get clienteData(): ClienteData {
-    return this._clienteData;
+    return this._clienteData; }
   }
   get valor(): number {
-    return this._valor;
+    return this._valor; }
   }
   get prazo(): number {
-    return this._prazo;
+    return this._prazo; }
   }
   get taxaJuros(): number {
-    return this._taxaJuros;
+    return this._taxaJuros; }
   }
   get produtoId(): number | undefined {
-    return this._produtoId;
+    return this._produtoId; }
   }
   get tabelaComercialId(): number | undefined {
-    return this._tabelaComercialId;
+    return this._tabelaComercialId; }
   }
   get lojaId(): number | undefined {
-    return this._lojaId;
+    return this._lojaId; }
   }
   get parceiroId(): number | undefined {
-    return this._parceiroId;
+    return this._parceiroId; }
   }
   get atendenteId(): string | undefined {
-    return this._atendenteId;
+    return this._atendenteId; }
   }
   get dadosPagamento(): DadosPagamento | undefined {
-    return this._dadosPagamento;
+    return this._dadosPagamento; }
   }
   get motivoRejeicao(): string | undefined {
-    return this._motivoRejeicao;
+    return this._motivoRejeicao; }
   }
   get observacoes(): string | undefined {
-    return this._observacoes;
+    return this._observacoes; }
   }
   get ccbUrl(): string | undefined {
-    return this._ccbUrl;
+    return this._ccbUrl; }
   }
   get createdAt(): Date {
-    return this._createdAt;
+    return this._createdAt; }
   }
   get updatedAt(): Date {
-    return this._updatedAt;
+    return this._updatedAt; }
   }
 
   // ======= DOMAIN EVENTS =======
@@ -537,7 +537,7 @@ export class Proposal {
   }
 
   getUncommittedEvents(): ProposalDomainEvent[] {
-    return this._events;
+    return this._events; }
   }
 
   markEventsAsCommitted(): void {
@@ -551,23 +551,23 @@ export class Proposal {
    */
   toPersistence(): unknown {
     return {
-      id: this.id,
-      status: this.status,
-      cliente_data: this.clienteData,
-      valor: this.valor,
-      prazo: this.prazo,
-      taxa_juros: this.taxaJuros,
-      produto_id: this.produtoId,
-      tabela_comercial_id: this.tabelaComercialId,
-      loja_id: this.lojaId,
-      parceiro_id: this.parceiroId,
-      atendente_id: this.atendenteId,
-      dados_pagamento: this.dadosPagamento,
-      motivo_rejeicao: this.motivoRejeicao,
-      observacoes: this.observacoes,
-      ccb_url: this.ccbUrl,
-      created_at: this.createdAt,
-      updated_at: this.updatedAt,
+      id: this._id,
+      status: this._status,
+      cliente_data: this._clienteData,
+      valor: this._valor,
+      prazo: this._prazo,
+      taxa_juros: this._taxaJuros,
+      produto_id: this._produtoId,
+      tabela_comercial_id: this._tabelaComercialId,
+      loja_id: this._lojaId,
+      parceiro_id: this._parceiroId,
+      atendente_id: this._atendenteId,
+      dados_pagamento: this._dadosPagamento,
+      motivo_rejeicao: this._motivoRejeicao,
+      observacoes: this._observacoes,
+      ccb_url: this._ccbUrl,
+      created_at: this._createdAt,
+      updated_at: this._updatedAt,
     };
   }
 }

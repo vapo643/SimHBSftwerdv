@@ -40,7 +40,7 @@ async function testApiValidation() {
 
   return {
     teste1: testeInvalido1,
-    baseUrl: BASEURL,
+    baseUrl: BASE_URL,
   };
 }
 
@@ -49,6 +49,6 @@ testApiValidation()
     console.log('\n✅ Configuração de teste preparada');
     console.log('🔄 Continuando com testes via bash...');
   })
-  .catch ((error) => {
+  .catch((error) => {
     console.error('\n💥 Erro na preparação:', error);
   });

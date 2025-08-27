@@ -19,11 +19,9 @@ async function testarAlertas() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     console.log('🎯 [TESTE] Sistema deve ter gerado notificações baseadas em dados reais');
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [TESTE] Erro na execução:', error);
-  }
-finally {
+  } finally {
     process.exit(0);
   }
 }

@@ -14,10 +14,10 @@
  */
 
 import {
-  createCircuitBreaker,
+  _createCircuitBreaker,
   CLICKSIGN_BREAKER_OPTIONS,
-  isCircuitBreakerOpen,
-  formatCircuitBreakerError,
+  _isCircuitBreakerOpen,
+  _formatCircuitBreakerError,
 } from '../lib/circuit-breaker';
 
 interface ClickSignConfig {
@@ -36,7 +36,7 @@ interface ClientData {
 interface ClickSignDocument {
   key: string;
   filename: string;
-  uploads: Array<{
+  uploads: Record<string, unknown>[]>{
     key: string;
     created_at: string;
     original_name: string;
@@ -61,7 +61,7 @@ interface ClickSignList {
   key: string;
   name: string;
   status: string;
-  signers: Array<{
+  signers: Record<string, unknown>[]>{
     key: string;
     email: string;
     sign_url: string;
@@ -90,13 +90,13 @@ class ClickSignService {
     };
 
     console.log('[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)');
-    console.log('[CLICKSIGN V1] API URL:', this.config.apiUrl);
+    console.log('[CLICKSIGN V1] API URL:', this._config.apiUrl);
     console.log(
       '[CLICKSIGN V1] Token configured:',
-      this.config.apiToken ? `${this.config.apiToken.substring(0, 12)}...` : 'NOT CONFIGURED'
+      this._config.apiToken ? `${this._config.apiToken.substring(0, 12)}...` : 'NOT CONFIGURED'
     );
 
-    if (!this.config.apiToken) {
+    if (!this._config.apiToken) {
       console.warn('[CLICKSIGN] ⚠️ API token not configured. ClickSign integration will not work.');
     }
 
@@ -110,7 +110,7 @@ class ClickSignService {
     if (!this.apiBreaker) {
       this.apiBreaker = createCircuitBreaker(
         async (url: string, options?: RequestInit) => {
-          return this.fetchDirect(url, options);
+          return this.fetchDirect(url, options); }
         },
         { ...CLICKSIGN_BREAKER_OPTIONS, name: 'clickSignApiBreaker' }
       );
@@ -125,9 +125,8 @@ class ClickSignService {
     this.initializeBreaker();
 
     try {
-      return await this.apiBreaker.fire(url, options);
-    }
-catch (error) {
+      return await this.apiBreaker.fire(url, options); }
+    } catch (error) {
       if (isCircuitBreakerOpen(error)) {
         console.log(formatCircuitBreakerError(error, 'ClickSign API'));
         throw new Error('ClickSign API temporarily unavailable - circuit breaker is OPEN');
@@ -140,7 +139,7 @@ catch (error) {
    * Direct fetch (called by circuit breaker)
    */
   private async fetchDirect(url: string, options?: RequestInit): Promise<Response> {
-    return fetch(url, options);
+    return fetch(url, options); }
   }
 
   /**
@@ -148,24 +147,23 @@ catch (error) {
    */
   async testConnection(): Promise<boolean> {
     try {
-      if (!this.config.apiToken) {
+      if (!this._config.apiToken) {
         console.log('[CLICKSIGN] ❌ No API token configured');
-        return false;
+        return false; }
       }
 
-      const response = await this.fetchWithBreaker(
-        `${this.config.apiUrl}/account?access_token=${this.config.apiToken}`
+      const _response = await this.fetchWithBreaker(
+        `${this._config.apiUrl}/account?access_token=${this._config.apiToken}`
       );
-      const success = response.ok;
+      const _success = response.ok;
 
       console.log(
         `[CLICKSIGN] ${success ? '✅' : '❌'} Connection test: ${response.status} ${response.statusText}`
       );
-      return success;
-    }
-catch (error) {
+      return success; }
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Connection test failed:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -176,14 +174,14 @@ catch (error) {
     try {
       console.log(`[CLICKSIGN] 📤 Uploading document: ${filename}`);
 
-      const formData = new FormData();
-      const blob = new Blob([fileBuffer], { type: 'application/pdf' });
+      const _formData = new FormData();
+      const _blob = new Blob([fileBuffer], { type: 'application/pdf' });
       formData.append('document[archive]', blob, filename);
       formData.append('document[path]', `/CCB/${filename}`);
       formData.append('document[content_type]', 'application/pdf');
 
-      const response = await this.fetchWithBreaker(
-        `${this.config.apiUrl}/documents?access_token=${this.config.apiToken}`,
+      const _response = await this.fetchWithBreaker(
+        `${this._config.apiUrl}/documents?access_token=${this._config.apiToken}`,
         {
           method: 'POST',
           body: formData,
@@ -191,16 +189,15 @@ catch (error) {
       );
 
       if (!response.ok) {
-        const errorData = await response.text();
+        const _errorData = await response.text();
         throw new Error(`ClickSign upload failed: ${response.status} - ${errorData}`);
       }
 
       const document: ClickSignDocument = await response.json();
       console.log(`[CLICKSIGN] ✅ Document uploaded successfully: ${document.key}`);
 
-      return document;
-    }
-catch (error) {
+      return document; }
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Document upload failed:', error);
       throw error;
     }
@@ -213,7 +210,7 @@ catch (error) {
     try {
       console.log(`[CLICKSIGN] 📥 Downloading signed document: ${documentKey}`);
 
-      if (!this.config.apiToken) {
+      if (!this._config.apiToken) {
         throw new Error('ClickSign API token not configured');
       }
 
@@ -222,7 +219,7 @@ catch (error) {
       }
 
       // Strategy: Try multiple endpoints based on ClickSign documentation
-      const endpoints = [
+      const _endpoints = [
         `/downloads/${documentKey}`, // Original attempt
         `/documents/${documentKey}/download`, // Standard RESTful pattern
         `/documents/${documentKey}`, // Simple document access
@@ -235,19 +232,19 @@ catch (error) {
       );
 
       for (let _i = 0; i < endpoints.length; i++) {
-        const endpoint = endpoints[i];
-        const downloadUrl = `${this.config.apiUrl}${endpoint}?access_token=${this.config.apiToken}`;
+        const _endpoint = endpoints[i];
+        const _downloadUrl = `${this._config.apiUrl}${endpoint}?access_token=${this._config.apiToken}`;
 
         console.log(
-          `[CLICKSIGN] 🔗 Attempt ${i + 1}/${endpoints.length}: ${this.config.apiUrl}${endpoint}?access_token=***`
+          `[CLICKSIGN] 🔗 Attempt ${i + 1}/${endpoints.length}: ${this._config.apiUrl}${endpoint}?access_token=***`
         );
 
         try {
-          const response = await this.fetchWithBreaker(downloadUrl, {
+          const _response = await this.fetchWithBreaker(downloadUrl, {
             method: 'GET',
             headers: {
               Accept: 'application/pdf',
-              Authorization: `Bearer ${this.config.apiToken}`,
+              Authorization: `Bearer ${this._config.apiToken}`,
               'User-Agent': 'Simpix-Integration/1.0',
             },
           });
@@ -257,27 +254,25 @@ catch (error) {
           );
 
           if (response.ok) {
-            const contentType = response.headers.get('content-type');
+            const _contentType = response.headers.get('content-type');
 
             // Check if it's actually a PDF
             if (contentType && contentType.includes('application/pdf')) {
-              const arrayBuffer = await response.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
+              const _arrayBuffer = await response.arrayBuffer();
+              const _buffer = Buffer.from(arrayBuffer);
 
               // Validate PDF magic bytes
               if (buffer.length > 4 && buffer.toString('ascii', 0, 4) == '%PDF') {
                 console.log(
                   `[CLICKSIGN] ✅ SUCCESS! Document downloaded via endpoint ${endpoint}: ${buffer.length} bytes`
                 );
-                return buffer;
-              }
-else {
+                return buffer; }
+              } else {
                 console.log(`[CLICKSIGN] ⚠️ Response not a valid PDF from ${endpoint}`);
               }
-            }
-else if (contentType && contentType.includes('application/json')) {
+            } else if (contentType && contentType.includes('application/json')) {
               // Could be JSON with download URL
-              const jsonResponse = await response.json();
+              const _jsonResponse = await response.json();
               console.log(
                 `[CLICKSIGN] 📋 JSON Response from ${endpoint}:`,
                 JSON.stringify(jsonResponse, null, 2)
@@ -285,7 +280,7 @@ else if (contentType && contentType.includes('application/json')) {
 
               // Check document status
               if (jsonResponse.document) {
-                const doc = jsonResponse.document;
+                const _doc = jsonResponse.document;
                 console.log(`[CLICKSIGN] 📊 Document status: ${doc.status}`);
 
                 if (doc.status == 'running') {
@@ -295,7 +290,7 @@ else if (contentType && contentType.includes('application/json')) {
                 }
 
                 // Check for various download URL patterns
-                const downloadUrl =
+                const _downloadUrl =
                   jsonResponse.download_url ||
                   jsonResponse.downloadUrl ||
                   doc.download_url ||
@@ -308,46 +303,40 @@ else if (contentType && contentType.includes('application/json')) {
                     `[CLICKSIGN] 🔗 Found PDF URL in JSON: ${downloadUrl.substring(0, 100)}...`
                   );
 
-                  const pdfResponse = await this.fetchWithBreaker(downloadUrl);
+                  const _pdfResponse = await this.fetchWithBreaker(downloadUrl);
                   if (pdfResponse.ok) {
-                    const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+                    const _pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
                     if (pdfBuffer.length > 4 && pdfBuffer.toString('ascii', 0, 4) == '%PDF') {
                       console.log(
                         `[CLICKSIGN] ✅ SUCCESS! PDF downloaded from URL: ${pdfBuffer.length} bytes`
                       );
-                      return pdfBuffer;
-                    }
-else {
+                      return pdfBuffer; }
+                    } else {
                       console.log(`[CLICKSIGN] ⚠️ Downloaded file is not a valid PDF`);
                     }
-                  }
-else {
+                  } else {
                     console.log(
                       `[CLICKSIGN] ❌ Failed to download from URL: ${pdfResponse.status}`
                     );
                   }
-                }
-else {
+                } else {
                   console.log(`[CLICKSIGN] ⚠️ No download URL found in JSON response`);
                 }
               }
-            }
-else {
-              const textResponse = await response.text();
+            } else {
+              const _textResponse = await response.text();
               console.log(
                 `[CLICKSIGN] 📄 Text response from ${endpoint}:`,
                 textResponse.substring(0, 200)
               );
             }
-          }
-else {
-            const errorText = await response.text();
+          } else {
+            const _errorText = await response.text();
             console.log(
               `[CLICKSIGN] ❌ Endpoint ${endpoint} failed: ${response.status} - ${errorText.substring(0, 200)}`
             );
           }
-        }
-catch (endpointError) {
+        } catch (endpointError) {
           console.log(
             `[CLICKSIGN] ❌ Error with endpoint ${endpoint}:`,
             endpointError instanceof Error ? endpointError.message : endpointError
@@ -364,28 +353,26 @@ catch (endpointError) {
       console.log(`[CLICKSIGN] 🔍 All download endpoints failed. Checking document existence...`);
 
       try {
-        const checkUrl = `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`;
-        const checkResponse = await this.fetchWithBreaker(checkUrl, {
+        const _checkUrl = `${this._config.apiUrl}/documents/${documentKey}?access_token=${this._config.apiToken}`;
+        const _checkResponse = await this.fetchWithBreaker(checkUrl, {
           method: 'GET',
           headers: {
             Accept: 'application/json',
-            Authorization: `Bearer ${this.config.apiToken}`,
+            Authorization: `Bearer ${this._config.apiToken}`,
           },
         });
 
         if (checkResponse.ok) {
-          const docInfo = await checkResponse.json();
+          const _docInfo = await checkResponse.json();
           console.log(`[CLICKSIGN] 📋 Document info:`, JSON.stringify(docInfo, null, 2));
 
           if (docInfo.status && docInfo.status !== 'signed') {
             throw new Error(`Document is not ready for download. Status: ${docInfo.status}`);
           }
-        }
-else {
+        } else {
           console.log(`[CLICKSIGN] ❌ Document check failed: ${checkResponse.status}`);
         }
-      }
-catch (checkError) {
+      } catch (checkError) {
         console.log(
           `[CLICKSIGN] ⚠️ Could not check document status:`,
           checkError instanceof Error ? checkError.message : checkError
@@ -395,8 +382,7 @@ catch (checkError) {
       throw new Error(
         `Failed to download document from any endpoint. Document key: ${documentKey}`
       );
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Document download failed:', error);
       throw error;
     }
@@ -409,7 +395,7 @@ catch (error) {
     try {
       console.log(`[CLICKSIGN] 👤 Creating signer for: ${clientData.email}`);
 
-      const payload = {
+      const _payload = {
         signer: {
           email: clientData.email,
           phone: clientData.phone || '',
@@ -421,8 +407,8 @@ catch (error) {
         },
       };
 
-      const response = await this.fetchWithBreaker(
-        `${this.config.apiUrl}/signers?access_token=${this.config.apiToken}`,
+      const _response = await this.fetchWithBreaker(
+        `${this._config.apiUrl}/signers?access_token=${this._config.apiToken}`,
         {
           method: 'POST',
           headers: {
@@ -433,16 +419,15 @@ catch (error) {
       );
 
       if (!response.ok) {
-        const errorData = await response.text();
+        const _errorData = await response.text();
         throw new Error(`ClickSign signer creation failed: ${response.status} - ${errorData}`);
       }
 
       const signer: ClickSignSigner = await response.json();
       console.log(`[CLICKSIGN] ✅ Signer created successfully: ${signer.key}`);
 
-      return signer;
-    }
-catch (error) {
+      return signer; }
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Signer creation failed:', error);
       throw error;
     }
@@ -459,7 +444,7 @@ catch (error) {
     try {
       console.log(`[CLICKSIGN] 📋 Creating signature list for document: ${documentKey}`);
 
-      const payload = {
+      const _payload = {
         list: {
           document_key: documentKey,
           name: `CCB - ${clientName}`,
@@ -472,8 +457,8 @@ catch (error) {
         },
       };
 
-      const response = await this.fetchWithBreaker(
-        `${this.config.apiUrl}/lists?access_token=${this.config.apiToken}`,
+      const _response = await this.fetchWithBreaker(
+        `${this._config.apiUrl}/lists?access_token=${this._config.apiToken}`,
         {
           method: 'POST',
           headers: {
@@ -484,16 +469,15 @@ catch (error) {
       );
 
       if (!response.ok) {
-        const errorData = await response.text();
+        const _errorData = await response.text();
         throw new Error(`ClickSign list creation failed: ${response.status} - ${errorData}`);
       }
 
       const list: ClickSignList = await response.json();
       console.log(`[CLICKSIGN] ✅ Signature list created successfully: ${list.key}`);
 
-      return list;
-    }
-catch (error) {
+      return list; }
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Signature list creation failed:', error);
       throw error;
     }
@@ -506,7 +490,7 @@ catch (error) {
     try {
       console.log(`[CLICKSIGN] ➕ Adding signer ${signerKey} to list ${listKey}`);
 
-      const payload = {
+      const _payload = {
         request_signature: {
           list_key: listKey,
           signer_key: signerKey,
@@ -516,8 +500,8 @@ catch (error) {
         },
       };
 
-      const response = await this.fetchWithBreaker(
-        `${this.config.apiUrl}/list/${listKey}/request_signature?access_token=${this.config.apiToken}`,
+      const _response = await this.fetchWithBreaker(
+        `${this._config.apiUrl}/list/${listKey}/request_signature?access_token=${this._config.apiToken}`,
         {
           method: 'POST',
           headers: {
@@ -528,18 +512,17 @@ catch (error) {
       );
 
       if (!response.ok) {
-        const errorData = await response.text();
+        const _errorData = await response.text();
         throw new Error(`ClickSign add signer failed: ${response.status} - ${errorData}`);
       }
 
-      const result = await response.json();
-      const signUrl = _result.request_signature?.url || '';
+      const _result = await response.json();
+      const _signUrl = result.request_signature?.url || '';
 
       console.log(`[CLICKSIGN] ✅ Signer added to list successfully. Sign URL: ${signUrl}`);
 
-      return signUrl;
-    }
-catch (error) {
+      return signUrl; }
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Add signer to list failed:', error);
       throw error;
     }
@@ -559,16 +542,16 @@ catch (error) {
       );
 
       // Step 1: Upload document
-      const document = await this.uploadDocument(ccbBuffer, filename);
+      const _document = await this.uploadDocument(ccbBuffer, filename);
 
       // Step 2: Create signer
-      const signer = await this.createSigner(clientData);
+      const _signer = await this.createSigner(clientData);
 
       // Step 3: Create signature list
-      const list = await this.createSignatureList(document.key, signer.key, clientData.name);
+      const _list = await this.createSignatureList(document.key, signer.key, clientData.name);
 
       // Step 4: Add signer to list and get signing URL
-      const signUrl = await this.addSignerToList(list.key, signer.key);
+      const _signUrl = await this.addSignerToList(list.key, signer.key);
 
       console.log(`[CLICKSIGN] ✅ Complete workflow finished successfully`);
 
@@ -578,8 +561,7 @@ catch (error) {
         listKey: list.key,
         signUrl: signUrl,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Complete workflow failed:', error);
       throw error;
     }
@@ -590,17 +572,16 @@ catch (error) {
    */
   async getDocumentStatus(documentKey: string): Promise<unknown> {
     try {
-      const response = await this.fetchWithBreaker(
-        `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`
+      const _response = await this.fetchWithBreaker(
+        `${this._config.apiUrl}/documents/${documentKey}?access_token=${this._config.apiToken}`
       );
 
       if (!response.ok) {
         throw new Error(`Failed to get document status: ${response.status}`);
       }
 
-      return await response.json();
-    }
-catch (error) {
+      return await response.json(); }
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Get document status failed:', error);
       throw error;
     }
@@ -611,17 +592,16 @@ catch (error) {
    */
   async getListStatus(listKey: string): Promise<unknown> {
     try {
-      const response = await this.fetchWithBreaker(
-        `${this.config.apiUrl}/lists/${listKey}?access_token=${this.config.apiToken}`
+      const _response = await this.fetchWithBreaker(
+        `${this._config.apiUrl}/lists/${listKey}?access_token=${this._config.apiToken}`
       );
 
       if (!response.ok) {
         throw new Error(`Failed to get list status: ${response.status}`);
       }
 
-      return await response.json();
-    }
-catch (error) {
+      return await response.json(); }
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Get list status failed:', error);
       throw error;
     }
@@ -629,4 +609,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const clickSignService = new ClickSignService();
+export const _clickSignService = new ClickSignService();

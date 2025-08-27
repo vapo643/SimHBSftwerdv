@@ -8,5 +8,5 @@
 import SecurityDashboard from '@/pages/SecurityDashboard';
 
 export default function MonitoramentoAvancadoPage() {
-  return <SecurityDashboard />;
+  return <SecurityDashboard />; }
 }

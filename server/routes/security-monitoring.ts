@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { users, propostas, statusContextuais } from '../../shared/schema.js';
 import { eq, gte, and, count, desc, sql } from 'drizzle-orm';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
-const router = Router();
+const _router = Router();
 
 // Middleware de autenticação
 router.use(jwtAuthMiddleware);
@@ -14,32 +14,32 @@ router.use(jwtAuthMiddleware);
 // GET /api/security-monitoring/real-time - Métricas de segurança em tempo real
 router.get('/real-time', async (req: AuthenticatedRequest, res) => {
   try {
-    const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const _now = new Date();
+    const _oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const _oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const _thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     // Métricas de autenticação reais
-    const totalUsers = await db.select({ count: count() }).from(users);
+    const _totalUsers = await db.select({ count: count() }).from(users);
 
-    const newUsersToday = await db
+    const _newUsersToday = await db
       .select({ count: count() })
       .from(users)
       .where(gte(users.createdAt, oneDayAgo));
 
     // Métricas de propostas (atividade do sistema)
-    const proposalsToday = await db
+    const _proposalsToday = await db
       .select({ count: count() })
       .from(propostas)
       .where(gte(propostas.createdAt, oneDayAgo));
 
-    const proposalsMonth = await db
+    const _proposalsMonth = await db
       .select({ count: count() })
       .from(propostas)
       .where(gte(propostas.createdAt, thirtyDaysAgo));
 
     // Análise de status das propostas
-    const proposalStats = await db
+    const _proposalStats = await db
       .select({
         status: propostas.status,
         count: count(),
@@ -48,7 +48,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
       .groupBy(propostas.status);
 
     // Usuários por papel (análise de acesso)
-    const usersByRole = await db
+    const _usersByRole = await db
       .select({
         role: users.role,
         count: count(),
@@ -57,14 +57,14 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
       .groupBy(users.role);
 
     // Construir resposta com dados reais
-    const metrics = {
-      timestamp: _getBrasiliaTimestamp(),
+    const _metrics = {
+      timestamp: getBrasiliaTimestamp(),
       authentication: {
         activeUsers: Math.min(5, totalUsers[0]?.count || 0), // Simula usuários ativos
         totalUsers: totalUsers[0]?.count || 0,
         newUsersToday: newUsersToday[0]?.count || 0,
         sessionsActive: Math.min(5, totalUsers[0]?.count || 0), // Simula sessões ativas
-        lastLoginActivity: _getBrasiliaTimestamp(),
+        lastLoginActivity: getBrasiliaTimestamp(),
       },
       systemActivity: {
         proposalsToday: proposalsToday[0]?.count || 0,
@@ -72,7 +72,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         proposalsByStatus: proposalStats.reduce(
           (acc, stat) => {
             acc[stat.status] = stat.count;
-            return acc;
+            return acc; }
           },
           {} as Record<string, number>
         ),
@@ -81,7 +81,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         usersByRole: usersByRole.reduce(
           (acc, role) => {
             acc[role.role] = role.count;
-            return acc;
+            return acc; }
           },
           {} as Record<string, number>
         ),
@@ -98,7 +98,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         firewallStatus: 'Active',
         ddosProtection: true,
         backupStatus: 'Daily backups enabled',
-        lastBackup: _getBrasiliaTimestamp(),
+        lastBackup: getBrasiliaTimestamp(),
       },
       compliance: {
         owaspASVSLevel1: 100, // Alcançamos 100% conforme auditoria
@@ -121,8 +121,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
       success: true,
       data: metrics,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[SECURITY MONITORING] Error:', error);
     res.status(500).json({
       success: false,
@@ -135,7 +134,7 @@ catch (error) {
 router.get('/alerts', async (req: AuthenticatedRequest, res) => {
   try {
     // Por enquanto, retornar alertas simulados baseados em atividade real
-    const recentActivity = await db
+    const _recentActivity = await db
       .select({
         user_id: propostas.userId,
         created_at: propostas.createdAt,
@@ -145,12 +144,12 @@ router.get('/alerts', async (req: AuthenticatedRequest, res) => {
       .orderBy(desc(propostas.createdAt))
       .limit(10);
 
-    const alerts = recentActivity.map((activity, index) => ({
+    const _alerts = recentActivity.map((activity, index) => ({
       id: `alert-${index}`,
       type: 'info',
       severity: 'LOW',
       message: `Nova proposta criada com status: ${activity.status}`,
-      timestamp: activity.createdat,
+      timestamp: activity.created_at,
       resolved: true,
     }));
 
@@ -158,8 +157,7 @@ router.get('/alerts', async (req: AuthenticatedRequest, res) => {
       success: true,
       data: alerts,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[SECURITY MONITORING] Alerts error:', error);
     res.status(500).json({
       success: false,
@@ -172,14 +170,14 @@ catch (error) {
 router.get('/performance', async (req: AuthenticatedRequest, res) => {
   try {
     // Métricas de performance baseadas em dados reais
-    const databaseStats = await db.execute(sql`
+    const _databaseStats = await db.execute(sql`
       SELECT 
-        pg_database_size(current_database()) as databasesize,
-        (SELECT count(*) FROM pg_stat_activity) as activeconnections,
+        pg_database_size(current_database()) as database_size,
+        (SELECT count(*) FROM pg_stat_activity) as active_connections,
         (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as table_count
     `);
 
-    const stats = databaseStats && databaseStats[0] ? (databaseStats[0] as unknown) : {};
+    const _stats = databaseStats && databaseStats[0] ? (databaseStats[0] as unknown) : {};
 
     res.json({
       success: true,
@@ -203,8 +201,7 @@ router.get('/performance', async (req: AuthenticatedRequest, res) => {
         },
       },
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[SECURITY MONITORING] Performance error:', error);
     res.status(500).json({
       success: false,

@@ -34,7 +34,7 @@ function ProposalForm() {
       const _response = await apiRequest('/api/origination/context', {
         method: 'GET',
       });
-      return response;
+      return response; }
     },
   });
 
@@ -193,8 +193,7 @@ function ProposalForm() {
 
             console.log(`[DEBUG] Documento ${doc.name} enviado com sucesso:`, uploadResponse);
             uploadedDocuments.push(fileName);
-          }
-catch (uploadError) {
+          } catch (uploadError) {
             console.error(`[ERROR] Falha ao enviar documento ${doc.name}:`, uploadError);
             throw new Error(`Falha ao enviar documento ${doc.name}. Tente novamente.`);
           }
@@ -212,15 +211,14 @@ catch (uploadError) {
             console.log(
               `[DEBUG] ${uploadedDocuments.length} documentos associados à proposta ${propostaId}`
             );
-          }
-catch (associationError) {
+          } catch (associationError) {
             console.error(`[ERROR] Falha ao associar documentos:`, associationError);
             // Não falhar a operação, documentos já estão no storage
           }
         }
       }
 
-      return propostaResponse;
+      return propostaResponse; }
     },
     onSuccess: (_data) => {
       toast({

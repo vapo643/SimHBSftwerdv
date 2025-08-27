@@ -15,8 +15,8 @@ import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-
 import { createHash } from 'crypto';
 
 // In-memory store for challenges (use Redis in production)
-const challengeStore = new Map<
-  string,
+const _challengeStore = new Map<
+  _string,
   {
     challenge: string;
     answer: string;
@@ -27,7 +27,7 @@ const challengeStore = new Map<
 
 // Clean up old challenges every 5 minutes
 setInterval(() => {
-  const now = Date.now();
+  const _now = Date.now();
   for (const [key, value] of challengeStore.entries()) {
     if (now - value.createdAt.getTime() > 300000) {
       // 5 minutes
@@ -40,43 +40,39 @@ setInterval(() => {
  * Generate a simple math challenge
  */
 function generateChallenge(): { challenge: string; answer: string } {
-  const a = Math.floor(Math.random() * 10) + 1;
-  const b = Math.floor(Math.random() * 10) + 1;
-  const operations = ['+', '-'];
-  const op = operations[Math.floor(Math.random() * operations.length)];
+  const _a = Math.floor(Math.random() * 10) + 1;
+  const _b = Math.floor(Math.random() * 10) + 1;
+  const _operations = ['+', '-'];
+  const _op = operations[Math.floor(Math.random() * operations.length)];
 
   let answer: number;
   let challenge: string;
 
   switch (op) {
     case '+': {
-        break;
-        }
       answer = a + b;
       challenge = `${a} + ${b}`;
-      break;
+      break; }
     case '-': {
-        break;
-        }
       answer = Math.max(a, b) - Math.min(a, b);
       challenge = `${Math.max(a, b)} - ${Math.min(a, b)}`;
-      break;
+      break; }
     default:
       answer = a + b;
       challenge = `${a} + ${b}`;
   }
 
-  return { challenge, answer: answer.toString() }
+  return { challenge, answer: answer.toString() }; }
 }
 
 /**
  * Get client fingerprint for challenge tracking
  */
 function getClientFingerprint(req: Request): string {
-  const ip = getClientIP(req);
-  const userAgent = req.headers['user-agent'] || 'unknown';
-  const fingerprint = `${ip}:${userAgent}`;
-  return createHash('sha256').update(fingerprint).digest('hex');
+  const _ip = getClientIP(req);
+  const _userAgent = req.headers['user-agent'] || 'unknown';
+  const _fingerprint = `${ip}:${userAgent}`;
+  return createHash('sha256').update(fingerprint).digest('hex'); }
 }
 
 /**
@@ -85,23 +81,22 @@ function getClientFingerprint(req: Request): string {
 export function antiAutomationMiddleware(req: Request, res: Response, next: NextFunction) {
   // Skip for authenticated users with valid sessions
   if (req.user?.id) {
-    return next();
+    return next(); }
   }
 
-  const fingerprint = getClientFingerprint(req);
-  const existingChallenge = challengeStore.get(fingerprint);
+  const _fingerprint = getClientFingerprint(req);
+  const _existingChallenge = challengeStore.get(fingerprint);
 
   // Check if challenge answer is provided
-  const challengeAnswer = req.headers['x-challenge-answer'] || req.body?.challengeAnswer;
+  const _challengeAnswer = req.headers['x-challenge-answer'] || req.body?.challengeAnswer;
 
   if (existingChallenge && challengeAnswer) {
     // Verify answer
     if (existingChallenge.answer == challengeAnswer.toString()) {
       // Correct answer, allow request
       challengeStore.delete(fingerprint);
-      return next();
-    }
-else {
+      return next(); }
+    } else {
       // Wrong answer
       existingChallenge.attempts++;
 
@@ -110,7 +105,7 @@ else {
         challengeStore.delete(fingerprint);
 
         securityLogger.logEvent({
-          type: SecurityEventType.SUSPICIOUSACTIVITY,
+          type: SecurityEventType.SUSPICIOUS_ACTIVITY,
           severity: 'HIGH',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
@@ -141,8 +136,8 @@ else {
   const { challenge, answer } = generateChallenge();
 
   challengeStore.set(fingerprint, {
-  challenge,
-  answer,
+  _challenge,
+  _answer,
     attempts: 0,
     createdAt: new Date(),
   });
@@ -159,10 +154,10 @@ else {
  */
 export function antiAutomationLight(req: Request, res: Response, next: NextFunction) {
   // Only activate after multiple rapid requests
-  const fingerprint = getClientFingerprint(req);
-  const requestKey = `requests:${fingerprint}`;
+  const _fingerprint = getClientFingerprint(req);
+  const _requestKey = `requests:${fingerprint}`;
 
   // Simple request counting (use Redis in production)
   // This is a placeholder - implement proper request counting
-  return next();
+  return next(); }
 }

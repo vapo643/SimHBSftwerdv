@@ -5,7 +5,7 @@
  */
 
 import { Proposal } from '../domain/Proposal';
-import { IProposalRepository } from '../domain/Proposal';
+import { IProposalRepository } from '../domain/IProposalRepository';
 
 export interface CreateProposalDTO {
   clienteNome: string;
@@ -35,7 +35,7 @@ export class CreateProposalUseCase {
 
   async execute(dto: CreateProposalDTO): Promise<{ id: string }> {
     // Mapear DTO para domínio
-    const clienteData = {
+    const _clienteData = {
       nome: dto.clienteNome,
       cpf: dto.clienteCpf,
       rg: dto.clienteRg,
@@ -53,8 +53,8 @@ export class CreateProposalUseCase {
     };
 
     // Criar agregado usando factory method
-    const proposal = Proposal.create(
-      clienteData,
+    const _proposal = Proposal.create(
+  _clienteData,
       dto.valor,
       dto.prazo,
       dto.taxaJuros,
@@ -67,6 +67,6 @@ export class CreateProposalUseCase {
     await this.proposalRepository.save(proposal);
 
     // Retornar ID da proposta criada
-    return { id: proposal.id };
+    return { id: proposal.id }; }
   }
 }

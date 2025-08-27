@@ -1,18 +1,17 @@
 // Endpoint temporário para observações - será integrado no futuro
 import { Request, Response } from 'express';
 
-export const getPropostaObservacoes = async (req: Request, res: Response) => {
+export const _getPropostaObservacoes = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
     // Por enquanto retorna array vazio - preparado para futuras observações
-    const observacoes = {
+    const _observacoes = {
       observacoes: [],
     };
 
     res.json(observacoes);
-  }
-catch (error) {
+  } catch (error) {
     console.error('Error fetching proposal observations:', error);
     res.status(500).json({ error: 'Failed to fetch observations' });
   }

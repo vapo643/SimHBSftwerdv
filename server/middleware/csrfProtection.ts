@@ -10,14 +10,14 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { AuthenticatedRequest } from '../../shared/types/express';
-import { config } from '../lib/config.js';
+import { config } from '../lib/_config.js';
 
 interface CSRFRequest extends AuthenticatedRequest {
   csrfToken?: string;
 }
 
 export class CSRFProtection {
-  private static readonly CSRF_SECRET = config.security.csrfSecret;
+  private static readonly CSRF_SECRET = _config.security.csrfSecret;
   private static readonly CSRF_COOKIE_NAME = '__Secure-CSRF-Token';
   private static readonly CSRF_HEADER_NAME = 'X-CSRF-Token';
 
@@ -25,19 +25,19 @@ export class CSRFProtection {
    * Generate CSRF token using HMAC with session binding
    */
   static generateToken(sessionId: string): string {
-    const randomValue = crypto.randomBytes(32).toString('hex');
-    const timestamp = Date.now().toString();
+    const _randomValue = crypto.randomBytes(32).toString('hex');
+    const _timestamp = Date.now().toString();
 
     // Create message with session binding
-    const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
+    const _message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
 
     // Generate HMAC
-    const hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
+    const _hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
     hmac.update(message);
-    const signature = hmac.digest('hex');
+    const _signature = hmac.digest('hex');
 
     // Return token: signature.randomValue.timestamp
-    return `${signature}.${randomValue}.${timestamp}`;
+    return `${signature}.${randomValue}.${timestamp}`; }
   }
 
   /**
@@ -45,41 +45,40 @@ export class CSRFProtection {
    */
   static validateToken(token: string, sessionId: string): boolean {
     if (!token || !sessionId) {
-      return false;
+      return false; }
     }
 
     try {
-      const parts = token.split('.');
+      const _parts = token.split('.');
       if (parts.length !== 3) {
-        return false;
+        return false; }
       }
 
       const [signature, randomValue, timestamp] = parts;
 
       // Check token age (max 1 hour)
-      const tokenTime = parseInt(timestamp);
-      const now = Date.now();
+      const _tokenTime = parseInt(timestamp);
+      const _now = Date.now();
       if (now - tokenTime > 60 * 60 * 1000) {
-        return false;
+        return false; }
       }
 
       // Recreate message
-      const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
+      const _message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}!${timestamp}`;
 
       // Verify HMAC
-      const hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
+      const _hmac = crypto.createHmac('sha256', this.CSRF_SECRET);
       hmac.update(message);
-      const expectedSignature = hmac.digest('hex');
+      const _expectedSignature = hmac.digest('hex');
 
       // Constant-time comparison
       return crypto.timingSafeEqual(
         Buffer.from(signature, 'hex'),
         Buffer.from(expectedSignature, 'hex')
       );
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CSRF] Token validation error:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -90,18 +89,18 @@ catch (error) {
     return (req: CSRFRequest, res: Response, next: NextFunction) => {
       // Skip for non-authenticated requests
       if (!req.user?.id) {
-        return next();
+        return next(); }
       }
 
       // Generate token bound to user session
-      const sessionId = req.user.id;
-      const csrfToken = CSRFProtection.generateToken(sessionId);
+      const _sessionId = req.user.id;
+      const _csrfToken = CSRFProtection.generateToken(sessionId);
 
       // Set token in response for client access
       req.csrfToken = csrfToken;
 
       // Set secure cookie for double-submit pattern
-      res.cookie(CSRFProtection.CSRF_COOKIENAME, csrfToken, {
+      res.cookie(CSRFProtection.CSRF_COOKIE_NAME, csrfToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV == 'production',
         sameSite: 'strict',
@@ -120,15 +119,15 @@ catch (error) {
     return (req: CSRFRequest, res: Response, next: NextFunction) => {
       // Skip for GET, HEAD, OPTIONS requests
       if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-        return next();
+        return next(); }
       }
 
       // Skip for non-authenticated requests
       if (!req.user?.id) {
-        return next();
+        return next(); }
       }
 
-      const sessionId = req.user.id;
+      const _sessionId = req.user.id;
 
       // Get token from header (primary method)
       let _token = req.headers[CSRFProtection.CSRF_HEADER_NAME] as string;
@@ -139,7 +138,7 @@ catch (error) {
       }
 
       // Get token from cookie for double-submit validation
-      const cookieToken = req.cookies[CSRFProtection.CSRF_COOKIE_NAME];
+      const _cookieToken = req.cookies[CSRFProtection.CSRF_COOKIE_NAME];
 
       // Validate token presence
       if (!token) {
@@ -203,31 +202,31 @@ catch (error) {
     return (req: Request, res: Response, next: NextFunction) => {
       // Skip for GET, HEAD, OPTIONS requests
       if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-        return next();
+        return next(); }
       }
 
       // Check for X-Requested-With header (AJAX indicator)
-      const requestedWith = req.headers['x-requested-with'];
-      const contentType = req.headers['content-type'];
+      const _requestedWith = req.headers['x-requested-with'];
+      const _contentType = req.headers['content-type'];
 
       // Allow requests with proper AJAX headers or form content
       if (
         requestedWith == 'XMLHttpRequest' ||
         (contentType && contentType.includes('application/json'))
       ) {
-        return next();
+        return next(); }
       }
 
       // Allow form submissions
       if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
-        return next();
+        return next(); }
       }
 
       console.warn('[CSRF] Request missing custom headers:', {
         method: req.method,
         path: req.path,
-        contentType,
-        requestedWith,
+  _contentType,
+  _requestedWith,
         userAgent: req.headers['user-agent'],
       });
 
@@ -243,13 +242,13 @@ catch (error) {
 /**
  * Export middleware functions for easy use
  */
-export const generateCSRFToken = CSRFProtection.generateMiddleware();
-export const validateCSRFToken = CSRFProtection.validateMiddleware();
-export const requireCustomHeaders = CSRFProtection.requireCustomHeaders();
+export const _generateCSRFToken = CSRFProtection.generateMiddleware();
+export const _validateCSRFToken = CSRFProtection.validateMiddleware();
+export const _requireCustomHeaders = CSRFProtection.requireCustomHeaders();
 
 /**
  * Combined CSRF protection middleware
  */
-export const csrfProtection = [generateCSRFToken, validateCSRFToken];
+export const _csrfProtection = [generateCSRFToken, validateCSRFToken];
 
 export default CSRFProtection;

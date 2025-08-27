@@ -118,16 +118,13 @@ export function ClientDataStep() {
             title: 'CEP encontrado!',
             description: 'Endereço preenchido automaticamente.',
           });
-        }
-else {
+        } else {
           setError('cep', 'CEP não encontrado');
         }
-      }
-catch (error) {
+      } catch (error) {
         console.error('Erro ao buscar CEP:', error);
         setError('cep', 'Erro ao buscar CEP');
-      }
-finally {
+      } finally {
         setLoadingCep(false);
       }
     },
@@ -197,11 +194,9 @@ finally {
             });
           }
         }
-      }
-catch (error) {
+      } catch (error) {
         console.error('Erro ao buscar dados do cliente:', error);
-      }
-finally {
+      } finally {
         setLoadingCpfData(false);
       }
     },
@@ -868,7 +863,7 @@ finally {
                 const _value = parseFloat(
                   e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
                 );
-                updateClient({ clienteDividasExistentes: _isNaN(value) ? undefined : value });
+                updateClient({ clienteDividasExistentes: isNaN(value) ? undefined : value });
               }}
               placeholder="R$ 0,00"
               data-testid="input-dividas-existentes"

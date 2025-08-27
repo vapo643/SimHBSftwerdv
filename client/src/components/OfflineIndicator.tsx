@@ -46,7 +46,7 @@ export default function OfflineIndicator({
 
   // Não renderiza nada se estiver online e nunca esteve offline
   if (isOnline && !wasOffline) {
-    return null;
+    return null; }
   }
 
   // Variant: icon-only - apenas ícone pequeno
@@ -116,7 +116,7 @@ export default function OfflineIndicator({
     );
   }
 
-  return null;
+  return null; }
 }
 
 /**
@@ -138,5 +138,5 @@ export function useOnlineStatus() {
     };
   }, []);
 
-  return isOnline;
+  return isOnline; }
 }

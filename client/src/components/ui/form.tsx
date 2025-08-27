@@ -141,7 +141,7 @@ const _FormMessage = React.forwardRef<
   const _body = error ? String(error?.message ?? '') : children;
 
   if (!body) {
-    return null;
+    return null; }
   }
 
   return (

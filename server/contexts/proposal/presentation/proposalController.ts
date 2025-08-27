@@ -29,51 +29,59 @@ export class ProposalController {
    */
   async create(req: Request, res: Response): Promise<Response> {
     try {
-      const useCase = new CreateProposalUseCase(this.repository);
+      const _useCase = new CreateProposalUseCase(this.repository);
 
       // DEBUG: Log request body for troubleshooting
       console.log(
         '[ProposalController.create] Raw request body:',
         JSON.stringify(req.body, null, 2)
       );
-      console.log('[ProposalController.create] User context:', (req as any).user);
+      console.log('[ProposalController.create] User context:', (req as unknown).user);
 
       // Mapear body da requisição para DTO do caso de uso
-      const dto = {
+      const _dto = {
         clienteNome: req.body.clienteNome,
         clienteCpf: req.body.clienteCpf,
         clienteRg: req.body.clienteRg,
-        clienteEmail: req.body.clienteEmail || null,
-        clienteTelefone: req.body.clienteTelefone || null,
-        clienteDataNascimento: req.body.clienteDataNascimento || null,
-        clienteEnderecoLogradouro: req.body.clienteEnderecoLogradouro || null,
-        clienteEnderecoNumero: req.body.clienteEnderecoNumero || null,
-        clienteEnderecoComplemento: req.body.clienteEnderecoComplemento || null,
-        clienteEnderecoBairro: req.body.clienteEnderecoBairro || null,
-        clienteEnderecoCidade: req.body.clienteEnderecoCidade || null,
-        clienteEnderecoUf: req.body.clienteEnderecoUf || null,
-        clienteEnderecoCep: req.body.clienteEnderecoCep || null,
+        clienteEmail: req.body.clienteEmail,
+        clienteTelefone: req.body.clienteTelefone,
+        clienteEndereco: req.body.clienteEndereco,
+        clienteCidade: req.body.clienteCidade,
+        clienteEstado: req.body.clienteEstado || req.body.clienteUf,
+        clienteCep: req.body.clienteCep,
+        clienteDataNascimento: req.body.clienteDataNascimento,
+        clienteRendaMensal: req.body.clienteRenda ? parseFloat(req.body.clienteRenda) : undefined,
+        clienteEmpregador: req.body.clienteEmpregador || req.body.clienteEmpresaNome,
+        clienteTempoEmprego: req.body.clienteTempoEmprego,
+        clienteDividasExistentes: req.body.clienteDividasExistentes
+          ? parseFloat(req.body.clienteDividasExistentes)
+          : undefined,
+        valor: parseFloat(req.body.valor),
+        prazo: parseInt(req.body.prazo),
+        taxaJuros: parseFloat(req.body.taxaJuros),
         produtoId: req.body.produtoId,
-        valorSolicitado: req.body.valorSolicitado,
-        numeroParcelas: req.body.numeroParcelas,
-        tabelaComercialId: req.body.tabelaComercialId,
-        observacoes: req.body.observacoes || null,
-        // Contexto do atendente (extraído do JWT)
-        atendenteId: (req as any).user?.id,
-        lojaId: (req as any).user?.loja_id,
+        lojaId: req.body.lojaId,
+        atendenteId: req.body.atendenteId || (req as unknown).user?.id,
       };
 
-      const result = await useCase.execute(dto);
+      console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));
+
+      const _result = await useCase.execute(dto);
 
       return res.status(201).json({
         success: true,
         data: result,
-        message: 'Proposta criada com sucesso',
       });
     } catch (error) {
-      console.error('[ProposalController.create] Error creating proposal:', error);
+      console.error('[ProposalController.create] Error:', error);
 
-      if (error instanceof Error) {
+      // Tratar erros de validação do domínio
+      if (
+        error.message.includes('CPF inválido') ||
+        error.message.includes('Valor do empréstimo') ||
+        error.message.includes('Prazo deve estar') ||
+        error.message.includes('Taxa de juros')
+      ) {
         return res.status(400).json({
           success: false,
           error: error.message,
@@ -82,7 +90,7 @@ export class ProposalController {
 
       return res.status(500).json({
         success: false,
-        error: 'Erro interno do servidor',
+        error: 'Erro ao criar proposta',
       });
     }
   }
@@ -92,126 +100,50 @@ export class ProposalController {
    */
   async getById(req: Request, res: Response): Promise<Response> {
     try {
-      const useCase = new GetProposalByIdUseCase(this.repository);
-      const proposalId = parseInt(req.params.id, 10);
+      const { id } = req.params;
+      const _useCase = new GetProposalByIdUseCase(this.repository);
 
-      if (isNaN(proposalId)) {
-        return res.status(400).json({
-          success: false,
-          error: 'ID da proposta deve ser um número',
-        });
-      }
+      const _proposal = await useCase.execute(id);
 
-      const result = await useCase.execute({ id: proposalId });
-
-      if (!result) {
+      if (!proposal) {
         return res.status(404).json({
           success: false,
           error: 'Proposta não encontrada',
         });
       }
 
-      return res.status(200).json({
+      // Serializar agregado para resposta
+      const _data = {
+        id: proposal.id,
+        status: proposal.status,
+        cliente_data: proposal.clienteData,
+        valor: proposal.valor,
+        prazo: proposal.prazo,
+        taxa_juros: proposal.taxaJuros,
+        produto_id: proposal.produtoId,
+        loja_id: proposal.lojaId,
+        atendente_id: proposal.atendenteId,
+        dados_pagamento: proposal.dadosPagamento,
+        motivo_rejeicao: proposal.motivoRejeicao,
+        observacoes: proposal.observacoes,
+        ccb_url: proposal.ccbUrl,
+        created_at: proposal.createdAt,
+        updated_at: proposal.updatedAt,
+        // Cálculos do agregado
+        valor_parcela: proposal.calculateMonthlyPayment(),
+        valor_total: proposal.calculateTotalAmount(),
+      };
+
+      return res.json({
         success: true,
-        data: result,
+        _data,
       });
     } catch (error) {
       console.error('[ProposalController.getById] Error:', error);
 
       return res.status(500).json({
         success: false,
-        error: 'Erro interno do servidor',
-      });
-    }
-  }
-
-  /**
-   * Aprovar proposta
-   */
-  async approve(req: Request, res: Response): Promise<Response> {
-    try {
-      const useCase = new ApproveProposalUseCase(this.repository);
-      const proposalId = parseInt(req.params.id, 10);
-
-      if (isNaN(proposalId)) {
-        return res.status(400).json({
-          success: false,
-          error: 'ID da proposta deve ser um número',
-        });
-      }
-
-      const dto = {
-        id: proposalId,
-        userId: (req as any).user?.id,
-        observacoes: req.body.observacoes || null,
-      };
-
-      const result = await useCase.execute(dto);
-
-      return res.status(200).json({
-        success: true,
-        data: result,
-        message: 'Proposta aprovada com sucesso',
-      });
-    } catch (error) {
-      console.error('[ProposalController.approve] Error:', error);
-
-      if (error instanceof Error) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro interno do servidor',
-      });
-    }
-  }
-
-  /**
-   * Rejeitar proposta
-   */
-  async reject(req: Request, res: Response): Promise<Response> {
-    try {
-      const useCase = new RejectProposalUseCase(this.repository);
-      const proposalId = parseInt(req.params.id, 10);
-
-      if (isNaN(proposalId)) {
-        return res.status(400).json({
-          success: false,
-          error: 'ID da proposta deve ser um número',
-        });
-      }
-
-      const dto = {
-        id: proposalId,
-        userId: (req as any).user?.id,
-        motivo: req.body.motivo || 'Não especificado',
-        observacoes: req.body.observacoes || null,
-      };
-
-      const result = await useCase.execute(dto);
-
-      return res.status(200).json({
-        success: true,
-        data: result,
-        message: 'Proposta rejeitada com sucesso',
-      });
-    } catch (error) {
-      console.error('[ProposalController.reject] Error:', error);
-
-      if (error instanceof Error) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro interno do servidor',
+        error: 'Erro ao buscar proposta',
       });
     }
   }
@@ -221,36 +153,258 @@ export class ProposalController {
    */
   async list(req: Request, res: Response): Promise<Response> {
     try {
-      // Implementar filtros e paginação conforme necessário
-      const filters = {
-        status: req.query.status as string,
-        lojaId: req.query.lojaId ? parseInt(req.query.lojaId as string, 10) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-        offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
-      };
+      const { status, loja_id, atendente_id, cpf } = req.query;
 
-      // Por enquanto, retornar lista vazia
-      // Implementar caso de uso ListProposalsUseCase quando necessário
-      
-      return res.status(200).json({
+      // Aplicar filtros baseados no role do usuário
+      const _user = (req as unknown).user;
+      let criteria: unknown = {};
+
+      if (status) criteria.status = status as string;
+      if (loja_id) criteria.lojaId = parseInt(loja_id as string);
+      if (cpf) criteria.cpf = cpf as string;
+
+      // Se for ATENDENTE, filtrar apenas suas propostas
+      if (user?.role == 'ATENDENTE') {
+        criteria.atendenteId = user.id;
+      } else if (atendente_id) {
+        criteria.atendenteId = atendente_id as string;
+      }
+
+      const _proposals = await this.repository.findByCriteria(criteria);
+
+      // Serializar lista de agregados
+      const _data = proposals.map((proposal) => ({
+        id: proposal.id,
+        status: proposal.status,
+        cliente_nome: proposal.clienteData.nome,
+        cliente_cpf: proposal.clienteData.cpf,
+        valor: proposal.valor,
+        prazo: proposal.prazo,
+        taxa_juros: proposal.taxaJuros,
+        produto_id: proposal.produtoId,
+        loja_id: proposal.lojaId,
+        atendente_id: proposal.atendenteId,
+        created_at: proposal.createdAt,
+        updated_at: proposal.updatedAt,
+        valor_parcela: proposal.calculateMonthlyPayment(),
+      }));
+
+      return res.json({
         success: true,
-        data: [],
-        pagination: {
-          limit: filters.limit,
-          offset: filters.offset,
-          total: 0,
-        },
+        _data,
+        total: data.length,
       });
     } catch (error) {
       console.error('[ProposalController.list] Error:', error);
 
       return res.status(500).json({
         success: false,
-        error: 'Erro interno do servidor',
+        error: 'Erro ao listar propostas',
+      });
+    }
+  }
+
+  /**
+   * Aprovar proposta
+   */
+  async approve(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const { observacoes } = req.body;
+      const _analistaId = (req as unknown).user?.id;
+
+      if (!analistaId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Usuário não autenticado',
+        });
+      }
+
+      const _useCase = new ApproveProposalUseCase(this.repository);
+
+      await useCase.execute({
+        proposalId: id,
+        _analistaId,
+        _observacoes,
+      });
+
+      return res.json({
+        success: true,
+        message: 'Proposta aprovada com sucesso',
+      });
+    } catch (error) {
+      console.error('[ProposalController.approve] Error:', error);
+
+      if (error.message.includes('não encontrada')) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (
+        error.message.includes('Apenas propostas em análise') ||
+        error.message.includes('Comprometimento de renda')
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao aprovar proposta',
+      });
+    }
+  }
+
+  /**
+   * Rejeitar proposta
+   */
+  async reject(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const { motivo } = req.body;
+      const _analistaId = (req as unknown).user?.id;
+
+      if (!analistaId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Usuário não autenticado',
+        });
+      }
+
+      if (!motivo) {
+        return res.status(400).json({
+          success: false,
+          error: 'Motivo da rejeição é obrigatório',
+        });
+      }
+
+      const _useCase = new RejectProposalUseCase(this.repository);
+
+      await useCase.execute({
+        proposalId: id,
+        _analistaId,
+        _motivo,
+      });
+
+      return res.json({
+        success: true,
+        message: 'Proposta rejeitada',
+      });
+    } catch (error) {
+      console.error('[ProposalController.reject] Error:', error);
+
+      if (error.message.includes('não encontrada')) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (
+        error.message.includes('Apenas propostas em análise') ||
+        error.message.includes('Motivo da rejeição')
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao rejeitar proposta',
+      });
+    }
+  }
+
+  /**
+   * Buscar proposta por CPF (última proposta do cliente)
+   */
+  async getByCpf(req: Request, res: Response): Promise<Response> {
+    try {
+      const { cpf } = req.params;
+
+      if (!cpf) {
+        return res.status(400).json({
+          success: false,
+          error: 'CPF é obrigatório',
+        });
+      }
+
+      const _proposals = await this.repository.findByCPF(cpf);
+
+      if (!proposals || proposals.length == 0) {
+        return res.json({
+          success: true,
+          data: null,
+        });
+      }
+
+      // Retornar a proposta mais recente
+      const _latestProposal = proposals.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      )[0];
+
+      return res.json({
+        success: true,
+        data: {
+          cliente_data: latestProposal.clienteData,
+        },
+      });
+    } catch (error) {
+      console.error('[ProposalController.getByCpf] Error:', error);
+
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao buscar dados por CPF',
+      });
+    }
+  }
+
+  /**
+   * Submeter proposta para análise
+   */
+  async submitForAnalysis(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+
+      const _proposal = await this.repository.findById(id);
+
+      if (!proposal) {
+        return res.status(404).json({
+          success: false,
+          error: 'Proposta não encontrada',
+        });
+      }
+
+      // Usar método do agregado
+      proposal.submitForAnalysis();
+
+      // Persistir mudança
+      await this.repository.save(proposal);
+
+      return res.json({
+        success: true,
+        message: 'Proposta submetida para análise',
+      });
+    } catch (error) {
+      console.error('[ProposalController.submitForAnalysis] Error:', error);
+
+      if (error.message.includes('Apenas propostas em rascunho')) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao submeter proposta',
       });
     }
   }
 }
-
-// Export singleton instance
-export const proposalController = new ProposalController();

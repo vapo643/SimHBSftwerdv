@@ -60,9 +60,8 @@ export class PropostaRepository extends BaseRepository<Proposta> {
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
-      return (proposta as unknown) || null;
-    }
-catch (error) {
+      return (proposta as unknown) || null; }
+    } catch (error) {
       throw new Error(
         `Failed to fetch proposta: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -78,7 +77,7 @@ catch (error) {
       .select(
         `
         *,
-        user:profiles!propostas_user_id_fkey(id, fullname, email),
+        user:profiles!propostas_user_id_fkey(id, full_name, email),
         loja:lojas!propostas_loja_id_fkey(id, nome)
       `
       )
@@ -88,12 +87,12 @@ catch (error) {
     if (error) {
       if (error.code == 'PGRST116') {
         // Not found
-        return null;
+        return null; }
       }
       throw new Error(`Failed to fetch proposta with details: ${error.message}`);
     }
 
-    return data as PropostaWithDetails;
+    return data as PropostaWithDetails; }
   }
 
   /**
@@ -128,7 +127,7 @@ catch (error) {
       throw new Error(`Failed to fetch propostas by status: ${error.message}`);
     }
 
-    return data as Proposta[];
+    return data as Proposta[]; }
   }
 
   /**
@@ -146,7 +145,7 @@ catch (error) {
       throw new Error(`Failed to fetch propostas by user: ${error.message}`);
     }
 
-    return data as Proposta[];
+    return data as Proposta[]; }
   }
 
   /**
@@ -164,7 +163,7 @@ catch (error) {
       throw new Error(`Failed to fetch propostas by loja: ${error.message}`);
     }
 
-    return data as Proposta[];
+    return data as Proposta[]; }
   }
 
   /**
@@ -203,7 +202,7 @@ catch (error) {
       throw new Error(`Failed to fetch propostas pending signature: ${error.message}`);
     }
 
-    return data as Proposta[];
+    return data as Proposta[]; }
   }
 
   /**
@@ -274,10 +273,10 @@ catch (error) {
 
     if (error) {
       console.error('Failed to generate signed URL:', error);
-      return null;
+      return null; }
     }
 
-    return data?.signedUrl || null;
+    return data?.signedUrl || null; }
   }
 
   /**
@@ -292,12 +291,12 @@ catch (error) {
 
     if (error) {
       console.error('Failed to check CCB existence:', error);
-      return false;
+      return false; }
     }
 
-    return data && data.length > 0;
+    return data && data.length > 0; }
   }
 }
 
 // Export singleton instance
-export const propostaRepository = new PropostaRepository();
+export const _propostaRepository = new PropostaRepository();

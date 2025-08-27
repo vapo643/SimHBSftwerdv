@@ -1,28 +1,28 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
-import { createServerSupabaseClient } from '../lib/supabase';
+import { createServerSupabaseClient } from '../../client/src/lib/supabase';
 import { storage } from '../storage';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
 import { randomBytes } from 'crypto';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
-const router = Router();
+const _router = Router();
 
 // Schema for email change request
-const emailChangeSchema = z.object({
+const _emailChangeSchema = z.object({
   newEmail: z.string().email('Email inválido'),
   password: z.string().min(1, 'Senha é obrigatória'),
 });
 
 // Schema for email change verification
-const verifyEmailChangeSchema = z.object({
+const _verifyEmailChangeSchema = z.object({
   token: z.string().min(1, 'Token é obrigatório'),
 });
 
 // In-memory store for email change tokens (in production, use Redis or database)
-const emailChangeTokens = new Map<
-  string,
+const _emailChangeTokens = new Map<
+  _string,
   {
     userId: string;
     oldEmail: string;
@@ -35,8 +35,8 @@ const emailChangeTokens = new Map<
 // Clean up expired tokens every hour
 setInterval(
   () => {
-    const now = new Date();
-    const entries = Array.from(emailChangeTokens.entries());
+    const _now = new Date();
+    const _entries = Array.from(emailChangeTokens.entries());
     for (const [token, data] of entries) {
       if (data.expiresAt < now) {
         emailChangeTokens.delete(token);
@@ -53,8 +53,8 @@ setInterval(
 router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { newEmail, password } = emailChangeSchema.parse(req.body);
-    const userId = req.user!.id;
-    const currentEmail = req.user!.email;
+    const _userId = req.user!.id;
+    const _currentEmail = req.user!.email;
 
     // Check if new email is same as current
     if (newEmail.toLowerCase() == (currentEmail || '').toLowerCase()) {
@@ -64,17 +64,17 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     }
 
     // Verify user's password
-    const supabase = createServerSupabaseClient();
+    const _supabase = createServerSupabaseClient();
     const { error: signInError } = await _supabase.auth.signInWithPassword({
       email: currentEmail || '',
-  password,
+  _password,
     });
 
     if (signInError) {
       securityLogger.logEvent({
-        type: SecurityEventType.INVALIDCREDENTIALS,
+        type: SecurityEventType.INVALID_CREDENTIALS,
         severity: 'MEDIUM',
-  userId,
+  _userId,
         userEmail: currentEmail || '',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -103,17 +103,17 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     }
 
     // Generate verification token
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date();
+    const _token = randomBytes(32).toString('hex');
+    const _expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiry
 
     // Store token
     emailChangeTokens.set(token, {
-  userId,
+  _userId,
       oldEmail: currentEmail || '',
-  newEmail,
+  _newEmail,
       createdAt: new Date(),
-  expiresAt,
+  _expiresAt,
     });
 
     // In a real implementation, send emails here:
@@ -124,9 +124,9 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     // TODO: Integrate with email service (SendGrid, AWS SES, etc.)
 
     securityLogger.logEvent({
-      type: SecurityEventType.EMAIL_CHANGEREQUESTED,
+      type: SecurityEventType.EMAIL_CHANGE_REQUESTED,
       severity: 'MEDIUM',
-  userId,
+  _userId,
       userEmail: currentEmail,
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
@@ -140,10 +140,9 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
       // In production, remove this line:
       debugToken: process.env.NODE_ENV == 'development' ? token : undefined,
     });
-  }
-catch (error) {
+  } catch (error) {
     if (error.name == 'ZodError') {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     console.error('Email change error:', error);
@@ -160,7 +159,7 @@ router.post('/verify-email-change', async (req, res) => {
     const { token } = verifyEmailChangeSchema.parse(req.body);
 
     // Get token data
-    const tokenData = emailChangeTokens.get(token);
+    const _tokenData = emailChangeTokens.get(token);
     if (!tokenData) {
       return res.status(400).json({
         error: 'Token inválido ou expirado',
@@ -175,7 +174,7 @@ router.post('/verify-email-change', async (req, res) => {
       });
     }
 
-    const supabase = createServerSupabaseClient();
+    const _supabase = createServerSupabaseClient();
 
     // Update user's email in auth
     const { error: updateAuthError } = await _supabase.auth.admin.updateUserById(tokenData.userId, {
@@ -194,7 +193,7 @@ router.post('/verify-email-change', async (req, res) => {
       .from('profiles')
       .update({
         email: tokenData.newEmail,
-        updated_at: _getBrasiliaTimestamp(),
+        updated_at: getBrasiliaTimestamp(),
       })
       .eq('id', tokenData.userId);
 
@@ -212,7 +211,7 @@ router.post('/verify-email-change', async (req, res) => {
 
     // Log the successful change
     securityLogger.logEvent({
-      type: SecurityEventType.EMAILCHANGED,
+      type: SecurityEventType.EMAIL_CHANGED,
       severity: 'HIGH',
       userId: tokenData.userId,
       userEmail: tokenData.oldEmail,
@@ -229,10 +228,9 @@ router.post('/verify-email-change', async (req, res) => {
     res.json({
       message: 'Email atualizado com sucesso. Por favor, faça login novamente com seu novo email.',
     });
-  }
-catch (error) {
+  } catch (error) {
     if (error.name == 'ZodError') {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     console.error('Email verification error:', error);
@@ -245,23 +243,23 @@ catch (error) {
  * Check if user has pending email change
  */
 router.get('/email-change-status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-  const userId = req.user!.id;
+  const _userId = req.user!.id;
 
   // Check for pending email changes
   let _hasPendingChange = false;
   let newEmail: string | undefined;
 
-  const entries = Array.from(emailChangeTokens.entries());
+  const _entries = Array.from(emailChangeTokens.entries());
   for (const [_, data] of entries) {
     if (data.userId == userId && data.expiresAt > new Date()) {
       hasPendingChange = true;
       newEmail = data.newEmail;
-      break;
+      break; }
     }
   }
 
   res.json({
-  hasPendingChange,
+  _hasPendingChange,
     newEmail: hasPendingChange ? newEmail : null,
   });
 });

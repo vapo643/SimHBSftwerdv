@@ -10,7 +10,7 @@ import { CreditAnalysisService } from '../domain/services/CreditAnalysisService'
 import { z } from 'zod';
 
 // Input validation schemas
-const createProposalSchema = z.object({
+const _createProposalSchema = z.object({
   customerData: z.object({
     name: z.string().min(1),
     cpf: z.string().regex(/^\d{11}$/),
@@ -47,8 +47,8 @@ export class ProposalController {
 
   constructor() {
     // Initialize dependencies
-    const repository = new ProposalRepositoryImpl();
-    const creditAnalysisService = new CreditAnalysisService();
+    const _repository = new ProposalRepositoryImpl();
+    const _creditAnalysisService = new CreditAnalysisService();
     this.applicationService = new ProposalApplicationService(repository, creditAnalysisService);
   }
 
@@ -59,17 +59,17 @@ export class ProposalController {
   async create(req: Request, res: Response): Promise<void> {
     try {
       // Validate input
-      const __validatedData = createProposalSchema.parse(req.body);
+      const _validatedData = createProposalSchema.parse(req.body);
 
       // Transform dates if needed
-      if (_validatedData.customerData.birthDate) {
-        (_validatedData.customerData as unknown).birthDate = new Date(
-          _validatedData.customerData.birthDate
+      if (validatedData.customerData.birthDate) {
+        (validatedData.customerData as unknown).birthDate = new Date(
+          validatedData.customerData.birthDate
         );
       }
 
       // Create proposal through application service
-      const proposal = await this.applicationService.createProposal(_validatedData as unknown);
+      const _proposal = await this.applicationService.createProposal(validatedData as unknown);
 
       // Return created proposal
       res.status(201).json({
@@ -77,22 +77,19 @@ export class ProposalController {
         data: proposal,
         message: 'Proposal created successfully',
       });
-    }
-catch (error) {
+    } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({
           success: false,
           error: 'Validation error',
           details: error.errors,
         });
-      }
-else if (error instanceof Error) {
+      } else if (error instanceof Error) {
         res.status(500).json({
           success: false,
           error: error.message,
         });
-      }
-else {
+      } else {
         res.status(500).json({
           success: false,
           error: 'Internal server error',
@@ -109,7 +106,7 @@ else {
     try {
       const { id } = req.params;
 
-      const proposal = await this.applicationService.getProposal(id);
+      const _proposal = await this.applicationService.getProposal(id);
 
       if (!proposal) {
         res.status(404).json({
@@ -123,8 +120,7 @@ else {
         success: true,
         data: proposal,
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -138,15 +134,14 @@ catch (error) {
    */
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const proposals = await this.applicationService.getAllProposals();
+      const _proposals = await this.applicationService.getAllProposals();
 
       res.json({
         success: true,
         data: proposals,
         total: proposals.length,
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -162,15 +157,14 @@ catch (error) {
     try {
       const { id } = req.params;
 
-      const proposal = await this.applicationService.submitForAnalysis(id);
+      const _proposal = await this.applicationService.submitForAnalysis(id);
 
       res.json({
         success: true,
         data: proposal,
         message: 'Proposal submitted for analysis',
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -186,15 +180,14 @@ catch (error) {
     try {
       const { id } = req.params;
 
-      const proposal = await this.applicationService.analyzeProposal(id);
+      const _proposal = await this.applicationService.analyzeProposal(id);
 
       res.json({
         success: true,
         data: proposal,
         message: 'Proposal analyzed successfully',
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -210,15 +203,14 @@ catch (error) {
     try {
       const { id } = req.params;
 
-      const proposal = await this.applicationService.approveProposal(id);
+      const _proposal = await this.applicationService.approveProposal(id);
 
       res.json({
         success: true,
         data: proposal,
         message: 'Proposal approved',
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -243,15 +235,14 @@ catch (error) {
         return;
       }
 
-      const proposal = await this.applicationService.rejectProposal(id, reason);
+      const _proposal = await this.applicationService.rejectProposal(id, reason);
 
       res.json({
         success: true,
         data: proposal,
         message: 'Proposal rejected',
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -276,15 +267,14 @@ catch (error) {
         return;
       }
 
-      const proposal = await this.applicationService.setPendingProposal(id, reason);
+      const _proposal = await this.applicationService.setPendingProposal(id, reason);
 
       res.json({
         success: true,
         data: proposal,
         message: 'Proposal set as pending',
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -300,15 +290,14 @@ catch (error) {
     try {
       const { id } = req.params;
 
-      const proposal = await this.applicationService.formalizeProposal(id);
+      const _proposal = await this.applicationService.formalizeProposal(id);
 
       res.json({
         success: true,
         data: proposal,
         message: 'Proposal formalized',
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -324,15 +313,14 @@ catch (error) {
     try {
       const { id } = req.params;
 
-      const proposal = await this.applicationService.markProposalAsPaid(id);
+      const _proposal = await this.applicationService.markProposalAsPaid(id);
 
       res.json({
         success: true,
         data: proposal,
         message: 'Proposal marked as paid',
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -348,15 +336,14 @@ catch (error) {
     try {
       const { storeId } = req.params;
 
-      const proposals = await this.applicationService.getProposalsByStore(storeId);
+      const _proposals = await this.applicationService.getProposalsByStore(storeId);
 
       res.json({
         success: true,
         data: proposals,
         total: proposals.length,
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -372,15 +359,14 @@ catch (error) {
     try {
       const { cpf } = req.params;
 
-      const proposals = await this.applicationService.getProposalsByCpf(cpf);
+      const _proposals = await this.applicationService.getProposalsByCpf(cpf);
 
       res.json({
         success: true,
         data: proposals,
         total: proposals.length,
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -394,15 +380,14 @@ catch (error) {
    */
   async getPendingAnalysis(req: Request, res: Response): Promise<void> {
     try {
-      const proposals = await this.applicationService.getPendingAnalysisProposals();
+      const _proposals = await this.applicationService.getPendingAnalysisProposals();
 
       res.json({
         success: true,
         data: proposals,
         total: proposals.length,
       });
-    }
-catch (error) {
+    } catch (error) {
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',

@@ -136,10 +136,10 @@ export const _commonBanks = [
 ];
 
 export function getBankByCode(code: string): { code: string; name: string } | undefined {
-  return brazilianBanks.find((bank) => bank.code == code);
+  return brazilianBanks.find((bank) => bank.code == code); }
 }
 
-export function searchBanks(query: string): Array<{ code: string; name: string }> {
+export function searchBanks(query: string): Record<string, unknown>[]>{ code: string; name: string }> {
   const _lowerQuery = query.toLowerCase();
   return brazilianBanks.filter(
     (bank) => bank.code.includes(query) || bank.name.toLowerCase().includes(lowerQuery)

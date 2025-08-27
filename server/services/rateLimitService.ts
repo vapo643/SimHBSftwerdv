@@ -35,7 +35,7 @@ class RateLimitService {
     serviceId: string,
     customConfig?: Partial<RateLimitConfig>
   ): Promise<void> {
-    const config = { ...this.defaultConfig, ...customConfig };
+    const _config = { ...this.defaultConfig, ...customConfig };
 
     // Inicializar estado se não existir
     if (!this.states.has(serviceId)) {
@@ -44,12 +44,12 @@ class RateLimitService {
         windowStart: Date.now(),
         lastRequestTime: 0,
         failureCount: 0,
-        currentDelay: config.baseDelayMs,
+        currentDelay: _config.baseDelayMs,
       });
     }
 
-    const state = this.states.get(serviceId)!;
-    const now = Date.now();
+    const _state = this.states.get(serviceId)!;
+    const _now = Date.now();
 
     // Reset janela se passou 1 segundo
     if (now - state.windowStart >= 1000) {
@@ -58,8 +58,8 @@ class RateLimitService {
     }
 
     // Verificar limite de taxa
-    if (state.requestCount >= config.maxRequestsPerSecond) {
-      const waitTime = 1000 - (now - state.windowStart);
+    if (state.requestCount >= _config.maxRequestsPerSecond) {
+      const _waitTime = 1000 - (now - state.windowStart);
       if (waitTime > 0) {
         console.log(
           `[RATE LIMIT] ⏳ Aguardando ${waitTime}ms para respeitar limite de ${_config.maxRequestsPerSecond} req/s`
@@ -73,11 +73,11 @@ class RateLimitService {
     }
 
     // Aplicar delay mínimo entre requests
-    const timeSinceLastRequest = now - state.lastRequestTime;
-    const minDelay = 1000 / config.maxRequestsPerSecond; // 200ms para 5 req/s
+    const _timeSinceLastRequest = now - state.lastRequestTime;
+    const _minDelay = 1000 / _config.maxRequestsPerSecond; // 200ms para 5 req/s
 
     if (timeSinceLastRequest < minDelay) {
-      const delayNeeded = minDelay - timeSinceLastRequest;
+      const _delayNeeded = minDelay - timeSinceLastRequest;
       console.log(`[RATE LIMIT] ⏱️ Delay mínimo de ${delayNeeded}ms entre requests`);
       await new Promise((resolve) => setTimeout(resolve, delayNeeded));
     }
@@ -95,7 +95,7 @@ class RateLimitService {
     error: unknown,
     customConfig?: Partial<RateLimitConfig>
   ): Promise<boolean> {
-    const config = { ...this.defaultConfig, ...customConfig };
+    const _config = { ...this.defaultConfig, ...customConfig };
 
     if (!this.states.has(serviceId)) {
       this.states.set(serviceId, {
@@ -103,33 +103,29 @@ class RateLimitService {
         windowStart: Date.now(),
         lastRequestTime: 0,
         failureCount: 0,
-        currentDelay: config.baseDelayMs,
+        currentDelay: _config.baseDelayMs,
       });
     }
 
-    const state = this.states.get(serviceId)!;
+    const _state = this.states.get(serviceId)!;
     state.failureCount++;
 
     // Verificar se é erro de rate limit (429) ou similar
-    const isRateLimitError =
+    const _isRateLimitError =
       error?.response?.status == 429 ||
       error?.message?.includes('rate limit') ||
       error?.message?.includes('too many requests');
 
     if (isRateLimitError) {
       // Backoff exponencial para erros de rate limit
-      state.currentDelay = Math.min(state.currentDelay * 2, config.maxDelayMs);
+      state.currentDelay = Math.min(state.currentDelay * 2, _config.maxDelayMs);
 
       console.log(
         `[RATE LIMIT] 🔴 Rate limit atingido! Backoff: ${state.currentDelay}ms (tentativa ${state.failureCount}/${_config.maxRetries})`
       );
-    }
-else {
+    } else {
       // Delay menor para outros erros
-      state.currentDelay = Math.min(
-        config.baseDelayMs * state.failureCount,
-        config.maxDelayMs / 2
-      );
+      state.currentDelay = Math.min(_config.baseDelayMs * state.failureCount, _config.maxDelayMs / 2);
 
       console.log(
         `[RATE LIMIT] ⚠️ Erro detectado. Delay: ${state.currentDelay}ms (tentativa ${state.failureCount}/${_config.maxRetries})`
@@ -137,7 +133,7 @@ else {
     }
 
     // Verificar se deve continuar tentando
-    if (state.failureCount >= config.maxRetries) {
+    if (state.failureCount >= _config.maxRetries) {
       console.error(
         `[RATE LIMIT] ❌ Máximo de tentativas (${_config.maxRetries}) atingido para ${serviceId}`
       );
@@ -154,7 +150,7 @@ else {
    * Reset estado após sucesso
    */
   handleSuccess(serviceId: string): void {
-    const state = this.states.get(serviceId);
+    const _state = this.states.get(serviceId);
     if (state) {
       state.failureCount = 0;
       state.currentDelay = this.defaultConfig.baseDelayMs;
@@ -170,31 +166,30 @@ else {
     fn: () => Promise<T>,
     customConfig?: Partial<RateLimitConfig>
   ): Promise<T> {
-    const config = { ...this.defaultConfig, ...customConfig };
+    const _config = { ...this.defaultConfig, ...customConfig };
     let lastError: unknown;
 
-    for (let _attempt = 0; attempt < config.maxRetries; attempt++) {
+    for (let _attempt = 0; attempt < _config.maxRetries; attempt++) {
       try {
         // Aguardar rate limit
         await this.waitForRateLimit(serviceId, config);
 
         // Executar função
-        const result = await fn();
+        const _result = await fn();
 
         // Registrar sucesso
         this.handleSuccess(serviceId);
 
-        return _result;
-      }
-catch (error) {
+        return result; }
+      } catch (error) {
         lastError = error;
         console.error(`[RATE LIMIT] Tentativa ${attempt + 1}/${_config.maxRetries} falhou:`, error);
 
         // Verificar se deve tentar novamente
-        const shouldRetry = await this.handleFailure(serviceId, error, config);
+        const _shouldRetry = await this.handleFailure(serviceId, error, config);
 
         if (!shouldRetry) {
-          break;
+          break; }
         }
       }
     }
@@ -208,7 +203,7 @@ catch (error) {
    */
   getStats(serviceId?: string): unknown {
     if (serviceId) {
-      return this.states.get(serviceId) || null;
+      return this.states.get(serviceId) || null; }
     }
 
     const stats: unknown = {};
@@ -219,7 +214,7 @@ catch (error) {
       };
     });
 
-    return stats;
+    return stats; }
   }
 
   /**
@@ -232,4 +227,4 @@ catch (error) {
 }
 
 // Singleton
-export const rateLimitService = new RateLimitService();
+export const _rateLimitService = new RateLimitService();

@@ -59,8 +59,7 @@ async function exemploTestePratico() {
     console.log("   // Se valor está muito baixo:");  
     console.log("   valorEmprestimo: { x: 200, y: 590, size: 12 } // aumentou Y");
 
-  }
-catch (error) {
+  } catch (error) {
     console.error("❌ Erro no teste:", error);
   }
 }

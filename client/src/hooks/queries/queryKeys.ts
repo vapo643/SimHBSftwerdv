@@ -76,8 +76,8 @@ export const _invalidationPatterns = {
   // When a user is created/updated/deleted
   onUserChange: [
     queryKeys.users.all,
-    queryKeys.partners.all, // Partners might have user _associations
-    queryKeys.stores.all, // Stores might have user _associations
+    queryKeys.partners.all, // Partners might have user associations
+    queryKeys.stores.all, // Stores might have user associations
   ],
 
   // When a partner is created/updated/deleted

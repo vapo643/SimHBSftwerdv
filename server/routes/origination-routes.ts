@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { originationService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/originate', async (req, res) => {
   try {
-    const result = await originationService.executeOperation('originate', req.body);
+    const _result = await originationService.executeOperation('originate', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -17,19 +17,19 @@ export class DocumentsService {
   }> {
     try {
       // Get proposal to check CCB document
-      const proposta = await documentsRepository.getProposalById(propostaId);
+      const _proposta = await documentsRepository.getProposalById(propostaId);
 
       if (!proposta) {
         throw new Error('Proposta não encontrada');
       }
 
-      const documents = [];
+      const _documents = [];
 
       // Add CCB if exists
       if (proposta.ccb_documento_url) {
         documents.push({
           name: 'CCB - Cédula de Crédito Bancário',
-          url: proposta.ccb_documentourl,
+          url: proposta.ccb_documento_url,
           type: 'application/pdf',
           category: 'ccb',
           uploadDate: 'Sistema',
@@ -38,27 +38,26 @@ export class DocumentsService {
       }
 
       // Get other documents
-      const propostaDocuments = await documentsRepository.getProposalDocuments(propostaId);
+      const _propostaDocuments = await documentsRepository.getProposalDocuments(propostaId);
 
       for (const doc of propostaDocuments) {
         try {
           // Extract file path from URL
-          const documentsIndex = doc.url.indexOf('/documents/');
+          const _documentsIndex = doc.url.indexOf('/documents/');
           let filePath;
 
           if (documentsIndex !== -1) {
             filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-          }
-else {
-            const urlParts = doc.url.split('/');
-            const fileName = urlParts[urlParts.length - 1];
+          } else {
+            const _urlParts = doc.url.split('/');
+            const _fileName = urlParts[urlParts.length - 1];
             filePath = `proposta-${propostaId}/${fileName}`;
           }
 
           console.log(`[DOCUMENTS_SERVICE] Generating signed URL for: ${filePath}`);
 
           // Generate signed URL
-          const signedUrl = await documentsRepository.generateSignedUrl(filePath, 3600);
+          const _signedUrl = await documentsRepository.generateSignedUrl(filePath, 3600);
 
           documents.push({
             name: doc.nomeArquivo,
@@ -68,8 +67,7 @@ else {
             uploadDate: doc.createdAt,
             category: 'supporting',
           });
-        }
-catch (error) {
+        } catch (error) {
           console.error(
             `[DOCUMENTS_SERVICE] Error generating signed URL for ${doc.nomeArquivo}:`,
             error
@@ -87,12 +85,11 @@ catch (error) {
       }
 
       return {
-        propostaId,
+        _propostaId,
         totalDocuments: documents.length,
-        documents,
+        _documents,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[DOCUMENTS_SERVICE] Error getting proposal documents:', error);
       throw error;
     }
@@ -111,7 +108,7 @@ catch (error) {
   }> {
     try {
       // Verify proposal exists
-      const proposta = await documentsRepository.getProposalById(propostaId);
+      const _proposta = await documentsRepository.getProposalById(propostaId);
 
       if (!proposta) {
         return {
@@ -121,13 +118,13 @@ catch (error) {
       }
 
       // Generate unique file name
-      const timestamp = Date.now();
-      const fileName = `${timestamp}-${file.originalname}`;
-      const filePath = `proposta-${propostaId}/${fileName}`;
+      const _timestamp = Date.now();
+      const _fileName = `${timestamp}-${file.originalname}`;
+      const _filePath = `proposta-${propostaId}/${fileName}`;
 
       // Upload to storage
-      const uploadResult = await documentsRepository.uploadToStorage(
-        filePath,
+      const _uploadResult = await documentsRepository.uploadToStorage(
+        _filePath,
         file.buffer,
         file.mimetype
       );
@@ -140,7 +137,7 @@ catch (error) {
       }
 
       // Save document record
-      const document = await documentsRepository.createDocument({
+      const _document = await documentsRepository.createDocument({
         proposta_id: propostaId,
         nome_arquivo: file.originalname,
         url: uploadResult.publicUrl,
@@ -160,8 +157,7 @@ catch (error) {
           category: 'supporting',
         },
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[DOCUMENTS_SERVICE] Error uploading document:', error);
       return {
         success: false,
@@ -183,10 +179,10 @@ catch (error) {
     try {
       console.log(`[DOCUMENTS_SERVICE] Downloading document: ${path}`);
 
-      const signedUrl = await documentsRepository.generateSignedUrl(path, 3600);
+      const _signedUrl = await documentsRepository.generateSignedUrl(path, 3600);
 
       if (!signedUrl) {
-        const isNotFound = path.includes('not-found');
+        const _isNotFound = path.includes('not-found');
         return {
           success: false,
           error: isNotFound ? 'Documento não encontrado' : 'Erro ao acessar documento',
@@ -201,8 +197,7 @@ catch (error) {
         filename: `documento-${path.split('/').pop()}`,
         contentType: 'application/pdf',
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[DOCUMENTS_SERVICE] Error downloading document:', error);
       return {
         success: false,
@@ -212,4 +207,4 @@ catch (error) {
   }
 }
 
-export const documentsService = new DocumentsService();
+export const _documentsService = new DocumentsService();

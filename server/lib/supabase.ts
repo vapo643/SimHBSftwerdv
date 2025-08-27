@@ -3,9 +3,9 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@shared/schema';
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-const databaseUrl = process.env.DATABASE_URL || '';
+const _supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+const _databaseUrl = process.env.DATABASE_URL || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
@@ -16,7 +16,7 @@ if (!databaseUrl) {
 }
 
 // Server-side Supabase client - properly isolated from client-side singleton
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const _supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // NOVA FUNÇÃO para operações Admin:
 export function createServerSupabaseAdminClient() {
@@ -34,7 +34,7 @@ export function createServerSupabaseAdminClient() {
 
 // FUNÇÃO ANTI-FRÁGIL para operações com RLS (autenticadas):
 export function createServerSupabaseClient(accessToken?: string) {
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
+  const _client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -50,7 +50,7 @@ export function createServerSupabaseClient(accessToken?: string) {
     });
   }
 
-  return client;
+  return client; }
 }
 
 // Database connection using Drizzle with Supabase
@@ -61,7 +61,7 @@ if (databaseUrl.includes('_supabase.com')) {
   console.log('✅ Database: Configuring Supabase connection...');
 
   // Use transaction pooler port and SSL
-  let correctedUrl = databaseUrl;
+  let _correctedUrl = databaseUrl;
   if (!correctedUrl.includes('sslmode=')) {
     correctedUrl += correctedUrl.includes('?') ? '&sslmode=require' : '?sslmode=require';
   }
@@ -77,21 +77,19 @@ if (databaseUrl.includes('_supabase.com')) {
     connect_timeout: 10,
   });
   console.log('✅ Database: Connection configured (lazy)');
-}
-else {
+} else {
   dbClient = postgres(databaseUrl);
 }
 
-const client = dbClient;
-export const db = drizzle(client, { schema });
+const _client = dbClient;
+export const _db = drizzle(client, { schema });
 
 // Test database connection asynchronously
 setTimeout(async () => {
   try {
     await client`SELECT 1`;
     console.log('✅ Database: Connection test successful');
-  }
-catch (error) {
+  } catch (error) {
     console.warn('⚠️  Database: Connection test failed -', (error as Error).message);
     console.warn('⚠️  Database: Check DATABASE_URL credentials in Secrets');
     console.warn('⚠️  Database: App will continue using Supabase REST API only');

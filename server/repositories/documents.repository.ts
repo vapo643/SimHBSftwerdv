@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db, createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { db, createServerSupabaseAdminClient } from '../lib/_supabase.js';
 import { propostaDocumentos, propostas } from '@shared/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import type { PropostaDocumento } from '@shared/schema';
@@ -25,10 +25,9 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
         .from(propostaDocumentos)
         .where(eq(propostaDocumentos.propostaId, propostaId))
         .orderBy(desc(propostaDocumentos.createdAt));
-    }
-catch (error) {
+    } catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting proposal documents:', error);
-      return [];
+      return []; }
     }
   }
 
@@ -43,11 +42,10 @@ catch (error) {
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
-      return proposta || null;
-    }
-catch (error) {
+      return proposta || null; }
+    } catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting proposal by ID:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -65,8 +63,8 @@ catch (error) {
       const [document] = await db
         .insert(propostaDocumentos)
         .values({
-          propostaId: documentData.propostaid,
-          nomeArquivo: documentData.nomearquivo,
+          propostaId: documentData.proposta_id,
+          nomeArquivo: documentData.nome_arquivo,
           url: documentData.url,
           tipo: documentData.tipo,
           tamanho: documentData.tamanho,
@@ -74,11 +72,10 @@ catch (error) {
         })
         .returning();
 
-      return document;
-    }
-catch (error) {
+      return document; }
+    } catch (error) {
       console.error('[DOCUMENTS_REPO] Error creating document:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -87,16 +84,15 @@ catch (error) {
    */
   async deleteDocument(documentId: number): Promise<boolean> {
     try {
-      const result = await db
+      const _result = await db
         .delete(propostaDocumentos)
         .where(eq(propostaDocumentos.id, documentId))
         .returning();
 
-      return _result.length > 0;
-    }
-catch (error) {
+      return result.length > 0; }
+    } catch (error) {
       console.error('[DOCUMENTS_REPO] Error deleting document:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -111,11 +107,10 @@ catch (error) {
         .where(eq(propostaDocumentos.id, documentId))
         .limit(1);
 
-      return document || null;
-    }
-catch (error) {
+      return document || null; }
+    } catch (error) {
       console.error('[DOCUMENTS_REPO] Error getting document by ID:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -128,27 +123,26 @@ catch (error) {
     contentType: string
   ): Promise<{ publicUrl: string } | null> {
     try {
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       const { data, error } = await _supabase.storage
         .from('documents')
         .upload(filePath, fileBuffer, {
-          contentType,
+  _contentType,
           upsert: false,
         });
 
       if (error) {
         console.error('[DOCUMENTS_REPO] Upload error:', error);
-        return null;
+        return null; }
       }
 
       const { data: publicUrl } = _supabase.storage.from('documents').getPublicUrl(filePath);
 
-      return publicUrl;
-    }
-catch (error) {
+      return publicUrl; }
+    } catch (error) {
       console.error('[DOCUMENTS_REPO] Error uploading to storage:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -157,7 +151,7 @@ catch (error) {
    */
   async generateSignedUrl(path: string, expiresIn: number = 3600): Promise<string | null> {
     try {
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       const { data, error } = await _supabase.storage
         .from('documents')
@@ -165,16 +159,15 @@ catch (error) {
 
       if (error) {
         console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
-        return null;
+        return null; }
       }
 
-      return data.signedUrl;
-    }
-catch (error) {
+      return data.signedUrl; }
+    } catch (error) {
       console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
-      return null;
+      return null; }
     }
   }
 }
 
-export const documentsRepository = new DocumentsRepository();
+export const _documentsRepository = new DocumentsRepository();

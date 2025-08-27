@@ -136,7 +136,7 @@ interface SimulationResult {
   custoEfetivoTotal: string;
   comissao?: string;
   comissaoPercentual?: string;
-  cronogramaPagamento?: Array<{
+  cronogramaPagamento?: Record<string, unknown>[]>{
     parcela: number;
     dataVencimento: string;
     valorParcela: number;
@@ -197,10 +197,10 @@ type ProposalAction =
   | { type: 'ADD_DOCUMENT'; payload: Document }
   | { type: 'REMOVE_DOCUMENT'; payload: string }
   | { type: 'ADD_REFERENCE'; payload: PersonalReference }
-  | { type: 'UPDATE_REFERENCE'; payload: { index: number; reference: PersonalReference }}
+  | { type: 'UPDATE_REFERENCE'; payload: { index: number; reference: PersonalReference } }
   | { type: 'REMOVE_REFERENCE'; payload: number }
   | { type: 'SET_STEP'; payload: number }
-  | { type: 'SET_ERROR'; payload: { field: string; message: string }}
+  | { type: 'SET_ERROR'; payload: { field: string; message: string } }
   | { type: 'CLEAR_ERRORS' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'RESET' };
@@ -382,10 +382,10 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
       };
 
     case 'RESET': {
-      return initialState;
+      return initialState; }
 
     default:
-      return state;
+      return state; }
   }
 }
 
@@ -419,7 +419,7 @@ export function useProposal() {
     throw new Error('useProposal must be used within a ProposalProvider');
   }
 
-  return context;
+  return context; }
 }
 
 // Helper hook for common operations
@@ -453,16 +453,16 @@ export function useProposalActions() {
       dispatch({ type: 'ADD_REFERENCE', payload: reference }),
 
     updateReference: (index: number, reference: PersonalReference) =>
-      dispatch({ type: 'UPDATE_REFERENCE', payload: { index, reference }}),
+      dispatch({ type: 'UPDATE_REFERENCE', payload: { index, reference } }),
 
     removeReference: (index: number) => dispatch({ type: 'REMOVE_REFERENCE', payload: index }),
 
     setStep: (step: number) => dispatch({ type: 'SET_STEP', payload: step }),
 
     setError: (field: string, message: string) =>
-      dispatch({ type: 'SET_ERROR', payload: { field, message }}),
+      dispatch({ type: 'SET_ERROR', payload: { field, message } }),
 
-    clearError: (field: string) => dispatch({ type: 'SET_ERROR', payload: { field, message: '' }}),
+    clearError: (field: string) => dispatch({ type: 'SET_ERROR', payload: { field, message: '' } }),
 
     clearErrors: () => dispatch({ type: 'CLEAR_ERRORS' }),
 

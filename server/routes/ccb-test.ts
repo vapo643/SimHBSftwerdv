@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { ccbTestService } from '../services/genericService';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb/test
@@ -16,10 +16,9 @@ const router = Router();
  */
 router.post('/test', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const result = await ccbTestService.executeOperation('test_ccb', req.body);
+    const _result = await ccbTestService.executeOperation('test_ccb', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'CCB test failed',

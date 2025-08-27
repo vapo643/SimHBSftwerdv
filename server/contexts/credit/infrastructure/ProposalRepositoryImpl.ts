@@ -5,59 +5,59 @@
 
 import { eq, and, between, sql } from 'drizzle-orm';
 import { db } from '../../../lib/supabase';
-import { propostas } from '@shared/schema';
+import { propostas } from '../../../../shared/schema';
 import { Proposal } from '../domain/aggregates/Proposal';
-import { IProposalRepository } from '../domain/aggregates/Proposal';
+import { IProposalRepository } from '../domain/repositories/IProposalRepository';
 
 export class ProposalRepositoryImpl implements IProposalRepository {
   /**
    * Find proposal by ID
    */
   async findById(id: string): Promise<Proposal | null> {
-    const result = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
+    const _result = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
-    if (_result.length == 0) {
-      return null;
+    if (result.length == 0) {
+      return null; }
     }
 
-    return this.toDomainEntity(result[0]);
+    return this.toDomainEntity(result[0]); }
   }
 
   /**
    * Find proposals by CPF
    */
   async findByCpf(cpf: string): Promise<Proposal[]> {
-    const results = await db.select().from(propostas).where(eq(propostas.clienteCpf, cpf));
+    const _results = await db.select().from(propostas).where(eq(propostas.clienteCpf, cpf));
 
-    return _results.map((r) => this.toDomainEntity(r));
+    return results.map((r) => this.toDomainEntity(r)); }
   }
 
   /**
    * Find proposals by store ID
    */
   async findByStoreId(storeId: string): Promise<Proposal[]> {
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(eq(propostas.lojaId, parseInt(storeId)));
 
-    return _results.map((r) => this.toDomainEntity(r));
+    return results.map((r) => this.toDomainEntity(r)); }
   }
 
   /**
    * Find all proposals
    */
   async findAll(): Promise<Proposal[]> {
-    const results = await db.select().from(propostas).orderBy(propostas.createdAt);
+    const _results = await db.select().from(propostas).orderBy(propostas.createdAt);
 
-    return _results.map((r) => this.toDomainEntity(r));
+    return results.map((r) => this.toDomainEntity(r)); }
   }
 
   /**
    * Save a new proposal
    */
   async save(proposal: Proposal): Promise<void> {
-    const data = this.toPersistence(proposal);
+    const _data = this.toPersistence(proposal);
 
     await db.insert(propostas).values(_data);
   }
@@ -66,7 +66,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
    * Update an existing proposal
    */
   async update(proposal: Proposal): Promise<void> {
-    const data = this.toPersistence(proposal);
+    const _data = this.toPersistence(proposal);
 
     await db.update(propostas).set(_data).where(eq(propostas.id, proposal.getId()));
   }
@@ -82,12 +82,12 @@ export class ProposalRepositoryImpl implements IProposalRepository {
    * Find proposals pending analysis
    */
   async findPendingAnalysis(): Promise<Proposal[]> {
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(eq(propostas.status, 'aguardando_analise'));
 
-    return _results.map((r) => this.toDomainEntity(r));
+    return results.map((r) => this.toDomainEntity(r)); }
   }
 
   /**
@@ -98,43 +98,43 @@ export class ProposalRepositoryImpl implements IProposalRepository {
     startDate: Date,
     endDate: Date
   ): Promise<Proposal[]> {
-    const results = await db
+    const _results = await db
       .select()
       .from(propostas)
       .where(and(eq(propostas.status, status), between(propostas.createdAt, startDate, endDate)));
 
-    return _results.map((r) => this.toDomainEntity(r));
+    return results.map((r) => this.toDomainEntity(r)); }
   }
 
   /**
    * Count proposals by status
    */
   async countByStatus(status: string): Promise<number> {
-    const result = await db
+    const _result = await db
       .select({ count: sql<number>`count(*)` })
       .from(propostas)
       .where(eq(propostas.status, status));
 
-    return _result[0]?.count || 0;
+    return result[0]?.count || 0; }
   }
 
   /**
    * Get total amount by status
    */
   async getTotalAmountByStatus(status: string): Promise<number> {
-    const result = await db
+    const _result = await db
       .select({ total: sql<number>`sum(valor)` })
       .from(propostas)
       .where(eq(propostas.status, status));
 
-    return _result[0]?.total || 0;
+    return result[0]?.total || 0; }
   }
 
   /**
    * Convert database record to domain entity
    */
   private toDomainEntity(record): Proposal {
-    const customerData = {
+    const _customerData = {
       name: record.clienteNome,
       cpf: record.clienteCpf,
       email: record.clienteEmail,
@@ -150,7 +150,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       occupation: record.clienteOcupacao,
     };
 
-    const loanConditions = {
+    const _loanConditions = {
       requestedAmount: record.valor,
       term: record.prazo,
       purpose: record.finalidade,
@@ -165,8 +165,8 @@ export class ProposalRepositoryImpl implements IProposalRepository {
     return Proposal.fromPersistence({
       id: record.id,
       status: record.status,
-      customerData,
-      loanConditions,
+  _customerData,
+  _loanConditions,
       partnerId: record.parceiroId?.toString(),
       storeId: record.lojaId?.toString(),
       productId: record.produtoId?.toString(),
@@ -181,8 +181,8 @@ export class ProposalRepositoryImpl implements IProposalRepository {
    * Convert domain entity to database record
    */
   private toPersistence(proposal: Proposal): unknown {
-    const customerData = proposal.getCustomerData();
-    const loanConditions = proposal.getLoanConditions();
+    const _customerData = proposal.getCustomerData();
+    const _loanConditions = proposal.getLoanConditions();
 
     return {
       id: proposal.getId(),

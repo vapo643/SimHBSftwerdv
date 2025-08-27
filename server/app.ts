@@ -23,7 +23,7 @@ export async function createApp() {
   // FASE 0 - Initialize Sentry BEFORE creating app (conforme PAM V1.0)
   initializeSentry();
 
-  const app = express();
+  const _app = express();
 
   // FASE 0 - Initialize Sentry error tracking (legacy compatibility)
   initSentry(app);
@@ -32,7 +32,7 @@ export async function createApp() {
   // FASE 0 - Request logging middleware
   app.use(requestLoggingMiddleware);
   logInfo('📊 Observability layer initialized', {
-    sentry: !!process.env.SENTRYDSN,
+    sentry: !!process.env.SENTRY_DSN,
     logging: true,
   });
 
@@ -43,7 +43,7 @@ export async function createApp() {
   app.set('trust proxy', process.env.NODE_ENV == 'production' ? 1 : ['127.0.0.1', '::1']);
 
   // Configure CORS - OWASP ASVS V13.2.1
-  const corsOptions = setupCORS();
+  const _corsOptions = setupCORS();
   app.use(cors(corsOptions));
   log('🔒 [SECURITY] CORS protection configured - ASVS V13.2.1');
 
@@ -55,15 +55,14 @@ export async function createApp() {
   app.use(express.urlencoded({ extended: true }));
 
   // Enhanced OWASP Security Headers
-  if (config.security.enableHelmet) {
+  if (_config.security.enableHelmet) {
     app.use(setupSecurityHeaders());
     app.use(additionalSecurityHeaders);
     // Apply appropriate CSP based on environment
     if (process.env.NODE_ENV !== 'development') {
       app.use(strictCSP);
       log('🔒 [SECURITY] Enhanced security headers and strict CSP activated');
-    }
-else {
+    } else {
       // Development mode uses basic helmet CSP only (more permissive for Vite/React)
       log('🔧 [DEV] Using basic CSP configuration optimized for Vite development');
     }
@@ -84,9 +83,9 @@ else {
   // Rate Limiting - Configuração por ambiente
   if (process.env.NODE_ENV !== 'test') {
     // Configurações diferentes por ambiente
-    const isDevelopment = process.env.NODE_ENV == 'development';
+    const _isDevelopment = process.env.NODE_ENV == 'development';
 
-    const generalApiLimiter = rateLimit({
+    const _generalApiLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
       max: isDevelopment ? 10000 : 1000, // 10k dev, 1k prod (muito mais permissivo)
       message: {
@@ -99,7 +98,7 @@ else {
       legacyHeaders: false,
       handler: (req, res) => {
         securityLogger.logEvent({
-          type: SecurityEventType.RATE_LIMITEXCEEDED,
+          type: SecurityEventType.RATE_LIMIT_EXCEEDED,
           severity: isDevelopment ? 'LOW' : 'MEDIUM',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
@@ -107,7 +106,7 @@ else {
           success: false,
           details: {
             type: 'general_api',
-            environment: process.env.NODEENV,
+            environment: process.env.NODE_ENV,
             limit: isDevelopment ? 10000 : 1000,
           },
         });
@@ -120,7 +119,7 @@ else {
       },
     });
 
-    const authLimiter = rateLimit({
+    const _authLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
       max: isDevelopment ? 1000 : 20, // 1000 dev, 20 prod (muito mais permissivo)
       skipSuccessfulRequests: true,
@@ -134,7 +133,7 @@ else {
       legacyHeaders: false,
       handler: (req, res) => {
         securityLogger.logEvent({
-          type: SecurityEventType.BRUTE_FORCEDETECTED,
+          type: SecurityEventType.BRUTE_FORCE_DETECTED,
           severity: isDevelopment ? 'LOW' : 'HIGH',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
@@ -142,7 +141,7 @@ else {
           success: false,
           details: {
             type: 'authentication_brute_force',
-            environment: process.env.NODEENV,
+            environment: process.env.NODE_ENV,
             limit: isDevelopment ? 1000 : 20,
           },
         });
@@ -160,8 +159,7 @@ else {
 
     if (isDevelopment) {
       log('🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos');
-    }
-else {
+    } else {
       log('🔒 [PROD] Rate limiting configurado para produção - limites seguros');
     }
   }
@@ -171,8 +169,8 @@ else {
 
   // Error handling
   app.use((err, req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
+    const _status = err.status || err.statusCode || 500;
+    const _message = err.message || 'Internal Server Error';
 
     if (status == 500) {
       console.error(`[express] Error:`, err);

@@ -5,7 +5,7 @@
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { propostas } from '@shared/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 
@@ -26,11 +26,10 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
         .orderBy(desc(propostas.createdAt))
         .limit(1);
 
-      return proposta || null;
-    }
-catch (error) {
+      return proposta || null; }
+    } catch (error) {
       console.error('[CLIENTE_REPO] Error finding client by CPF:', error);
-      return null;
+      return null; }
     }
   }
 
@@ -44,10 +43,9 @@ catch (error) {
         .from(propostas)
         .where(eq(propostas.clienteCpf, cpf))
         .orderBy(desc(propostas.createdAt));
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CLIENTE_REPO] Error getting proposals by CPF:', error);
-      return [];
+      return []; }
     }
   }
 
@@ -56,18 +54,17 @@ catch (error) {
    */
   async clientExists(cpf: string): Promise<boolean> {
     try {
-      const result = await db
+      const _result = await db
         .select({ count: sql<number>`count(*)` })
         .from(propostas)
         .where(eq(propostas.clienteCpf, cpf));
 
-      return (result[0]?.count || 0) > 0;
-    }
-catch (error) {
+      return (result[0]?.count || 0) > 0; }
+    } catch (error) {
       console.error('[CLIENTE_REPO] Error checking client existence:', error);
-      return false;
+      return false; }
     }
   }
 }
 
-export const clienteRepository = new ClienteRepository();
+export const _clienteRepository = new ClienteRepository();

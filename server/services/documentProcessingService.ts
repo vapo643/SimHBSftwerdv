@@ -25,7 +25,7 @@ export class DocumentProcessingService {
     source: ProcessingSource = ProcessingSource.MANUAL,
     documentKey?: string
   ): Promise<{ success: boolean; message: string; details?: unknown }> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       console.log(
@@ -33,14 +33,14 @@ export class DocumentProcessingService {
       );
 
       // 1. Buscar dados da proposta
-      const proposalResult = await db.execute(sql`
+      const _proposalResult = await db.execute(sql`
         SELECT 
-  id,
-          clientenome,
-          clicksign_envelopeid,
-          clicksign_documentid,
-          ccbgerado,
-          caminho_ccbassinado,
+  _id,
+          cliente_nome,
+          clicksign_envelope_id,
+          clicksign_document_id,
+          ccb_gerado,
+          caminho_ccb_assinado,
           status
         FROM propostas 
         WHERE id = ${proposalId}
@@ -54,8 +54,8 @@ export class DocumentProcessingService {
         };
       }
 
-      const proposal = proposalResult[0];
-      const clickSignDocId =
+      const _proposal = proposalResult[0];
+      const _clickSignDocId =
         documentKey || proposal.clicksign_document_id || proposal.clicksign_envelope_id;
 
       if (!clickSignDocId) {
@@ -71,7 +71,7 @@ export class DocumentProcessingService {
       // 2. Verificar se já foi processado (evitar duplicação)
       if (proposal.caminho_ccb_assinado) {
         // Verificar se o arquivo existe no Storage
-        const storagePath = proposal.caminho_ccb_assinado as string;
+        const _storagePath = proposal.caminho_ccb_assinado as string;
         const { data: fileExists } = await _supabase.storage
           .from('documents')
           .list(storagePath.substring(0, storagePath.lastIndexOf('/')), {
@@ -93,7 +93,7 @@ export class DocumentProcessingService {
 
       // 3. Baixar documento do ClickSign
       console.log(`📥 [DOCUMENT PROCESSING] Downloading document ${clickSignDocId} from ClickSign`);
-      const pdfBuffer = await this.clickSignService.downloadSignedDocument(
+      const _pdfBuffer = await this.clickSignService.downloadSignedDocument(
         clickSignDocId as string
       );
 
@@ -102,8 +102,8 @@ export class DocumentProcessingService {
       }
 
       // 4. Salvar no Supabase Storage - PAM V1.0: Organizar CCBs assinadas em pasta dedicada
-      const fileName = `ccb_assinada_${proposalId}_${Date.now()}.pdf`;
-      const storagePath = `ccb/assinadas/${fileName}`;
+      const _fileName = `ccb_assinada_${proposalId}_${Date.now()}.pdf`;
+      const _storagePath = `ccb/assinadas/${fileName}`;
 
       console.log(`💾 [DOCUMENT PROCESSING] Saving to Storage: ${storagePath}`);
       const { error: uploadError } = await _supabase.storage
@@ -130,18 +130,18 @@ export class DocumentProcessingService {
       // 6. Criar log de processamento
       await db.execute(sql`
         INSERT INTO proposta_logs (
-          propostaid,
-  acao,
-  detalhes,
-          usuarioid,
+          proposta_id,
+  _acao,
+  _detalhes,
+          usuario_id,
           criado_em
         ) VALUES (
           ${proposalId},
           ${'CCB_ASSINADA_PROCESSADA'},
           ${JSON.stringify({
-  source,
+  _source,
             documentKey: clickSignDocId,
-  storagePath,
+  _storagePath,
             processingTime: Date.now() - startTime,
           })},
           ${null},
@@ -149,19 +149,17 @@ export class DocumentProcessingService {
         )
       `);
 
-      const processingTime = Date.now() - startTime;
+      const _processingTime = Date.now() - startTime;
 
       if (source == ProcessingSource.WEBHOOK) {
         console.log(
           `✅ [DOCUMENT PROCESSING] Document for proposal ${proposalId} processed via WEBHOOK in ${processingTime}ms`
         );
-      }
-else if (source == ProcessingSource.POLLING) {
+      } else if (source == ProcessingSource.POLLING) {
         console.warn(
           `⚠️ [DOCUMENT PROCESSING] Document for proposal ${proposalId} processed via POLLING FALLBACK in ${processingTime}ms`
         );
-      }
-else {
+      } else {
         console.log(
           `✅ [DOCUMENT PROCESSING] Document for proposal ${proposalId} processed via ${source} in ${processingTime}ms`
         );
@@ -171,14 +169,13 @@ else {
         success: true,
         message: 'Documento processado com sucesso',
         details: {
-  proposalId,
-  storagePath,
-  source,
-  processingTime,
+  _proposalId,
+  _storagePath,
+  _source,
+  _processingTime,
         },
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error(
         `❌ [DOCUMENT PROCESSING] Error processing document for proposal ${proposalId}:`,
         error
@@ -188,16 +185,16 @@ catch (error) {
       try {
         await db.execute(sql`
           INSERT INTO proposta_logs (
-            propostaid,
-  acao,
-  detalhes,
-            usuarioid,
+            proposta_id,
+  _acao,
+  _detalhes,
+            usuario_id,
             criado_em
           ) VALUES (
             ${proposalId},
             ${'ERRO_PROCESSAR_CCB'},
             ${JSON.stringify({
-  source,
+  _source,
               error: error instanceof Error ? error.message : 'Unknown error',
               timestamp: new Date().toISOString(),
             })},
@@ -205,8 +202,7 @@ catch (error) {
             NOW()
           )
         `);
-      }
-catch (logError) {
+      } catch (logError) {
         console.error('Failed to log error:', logError);
       }
 
@@ -224,24 +220,24 @@ catch (logError) {
    * Processa múltiplos documentos em lote
    */
   async processBatch(
-    proposals: Array<{ id: string; documentKey?: string }>,
+    proposals: Record<string, unknown>[]>{ id: string; documentKey?: string }>,
     source: ProcessingSource
-  ): Promise<Array<{ proposalId: string; success: boolean; message: string }>> {
+  ): Promise<Record<string, unknown>[]>{ proposalId: string; success: boolean; message: string }>> {
     console.log(
       `🔄 [DOCUMENT PROCESSING] Processing batch of ${proposals.length} documents via ${source}`
     );
 
-    const results = await Promise.allSettled(
+    const _results = await Promise.allSettled(
       proposals.map((p) => this.processSignedDocument(p.id, source, p.documentKey))
     );
 
-    return _results.map((result, index) => ({
+    return results.map((_result, index) => ({
       proposalId: proposals[index].id,
-      success: _result.status == 'fulfilled' ? _result.value.success : false,
-      message: _result.status == 'fulfilled' ? _result.value.message : 'Processing failed',
+      success: result.status == 'fulfilled' ? result.value.success : false,
+      message: result.status == 'fulfilled' ? result.value.message : 'Processing failed',
     }));
   }
 }
 
 // Singleton instance
-export const documentProcessingService = new DocumentProcessingService();
+export const _documentProcessingService = new DocumentProcessingService();

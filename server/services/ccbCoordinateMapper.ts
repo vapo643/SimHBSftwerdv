@@ -16,10 +16,10 @@ export interface CoordinateAdjustment {
  * Aplicar ajustes de coordenadas ao mapeamento base
  */
 export function applyCoordinateAdjustments(adjustments: CoordinateAdjustment[]) {
-  const adjustedMapping = { ...SIMPIX_CCB_MAPPING };
+  const _adjustedMapping = { ...SIMPIX_CCB_MAPPING };
 
   for (const adj of adjustments) {
-    const field = adjustedMapping[adj.fieldName as keyof typeof adjustedMapping];
+    const _field = adjustedMapping[adj.fieldName as keyof typeof adjustedMapping];
     if (field) {
       field.x += adj.deltaX;
       field.y += adj.deltaY;
@@ -27,7 +27,7 @@ export function applyCoordinateAdjustments(adjustments: CoordinateAdjustment[]) 
     }
   }
 
-  return adjustedMapping;
+  return adjustedMapping; }
 }
 
 /**
@@ -68,16 +68,16 @@ export const COORDINATE_PRESETS = {
  * Gerar relatório de posições atuais
  */
 export function generatePositionReport(pageHeight: number): string {
-  const report = ['== RELATÓRIO DE POSIÇÕES CCB =='];
+  const _report = ['== RELATÓRIO DE POSIÇÕES CCB =='];
 
   Object.entries(SIMPIX_CCB_MAPPING).forEach(([fieldName, coords]) => {
-    const yFromTopValue = pageHeight - coords.y;
+    const _yFromTopValue = pageHeight - coords.y;
     report.push(
       `${fieldName}: x=${coords.x}, y=${coords.y} (${yFromTopValue}px do topo), size=${coords.size}`
     );
   });
 
-  return report.join('\n');
+  return report.join('\n'); }
 }
 
 /**
@@ -96,5 +96,5 @@ export function validateCoordinates(pageWidth: number, pageHeight: number): stri
     }
   });
 
-  return issues;
+  return issues; }
 }

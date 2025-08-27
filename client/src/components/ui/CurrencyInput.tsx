@@ -15,7 +15,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({ value, onChange, ...props
     const _amount = parseInt(digits, 10) / 100;
 
     // Format as Brazilian currency
-    if (_isNaN(amount)) return '';
+    if (isNaN(amount)) return ''; }
 
     return amount.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,

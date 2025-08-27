@@ -19,16 +19,16 @@ export interface AuthenticatedRequest extends Request {
 // Interface já definida acima
 
 // Token blacklist para segurança aprimorada (SAMM Optimization)
-const tokenBlacklist = new Set<string>();
+const _tokenBlacklist = new Set<string>();
 const TOKEN_BLACKLIST_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hora
 
 // Rate limiting por usuário (SAMM Optimization)
-const userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
+const _userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
 const MAX_AUTH_ATTEMPTS = 10;
 const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 
 // User token tracking for invalidation on account deactivation
-const userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
+const _userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
 
 // Limpar blacklist periodicamente
 setInterval(() => {
@@ -42,7 +42,7 @@ setInterval(() => {
 export function addToBlacklist(token: string): void {
   tokenBlacklist.add(token);
   securityLogger.logEvent({
-    type: SecurityEventType.TOKENBLACKLISTED,
+    type: SecurityEventType.TOKEN_BLACKLISTED,
     severity: 'LOW',
     success: true,
     details: { reason: 'Token added to blacklist' },
@@ -54,14 +54,14 @@ export function addToBlacklist(token: string): void {
  * Também usado para ASVS 8.3.7 - Account Deactivation
  */
 export function invalidateAllUserTokens(userId: string): void {
-  const tokens = userTokens.get(userId);
+  const _tokens = userTokens.get(userId);
   if (tokens && tokens.size > 0) {
     tokens.forEach((token) => tokenBlacklist.add(token));
     userTokens.delete(userId);
     securityLogger.logEvent({
-      type: SecurityEventType.TOKENBLACKLISTED,
+      type: SecurityEventType.TOKEN_BLACKLISTED,
       severity: 'HIGH',
-  userId,
+  _userId,
       success: true,
       details: {
         reason: 'All user tokens invalidated - token rotation',
@@ -85,7 +85,7 @@ export function trackUserToken(userId: string, token: string): void {
  * Middleware de autenticação JWT robusto com fallback de segurança
  * Implementa validação completa e bloqueia usuários órfãos
  */
-export async function _jwtAuthMiddleware(
+export async function jwtAuthMiddleware(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
@@ -100,7 +100,7 @@ export async function _jwtAuthMiddleware(
     console.log('[JWT DEBUG] Referer:', req.headers.referer);
 
     // Step a: Validate JWT token
-    const authHeader = req.headers.authorization;
+    const _authHeader = req.headers.authorization;
     console.log('[JWT DEBUG] Header Auth presente:', !!authHeader);
     console.log('[JWT DEBUG] Header começa com Bearer:', authHeader?.startsWith('Bearer '));
 
@@ -119,7 +119,7 @@ export async function _jwtAuthMiddleware(
         console.error('[JWT AUTH - PDF DOWNLOAD] Missing or invalid auth header');
       }
       securityLogger.logEvent({
-        type: SecurityEventType.TOKENINVALID,
+        type: SecurityEventType.TOKEN_INVALID,
         severity: 'MEDIUM',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -127,10 +127,10 @@ export async function _jwtAuthMiddleware(
         success: false,
         details: { reason: 'Missing or invalid authorization header' },
       });
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.*);
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const _token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Debug logging para PDF downloads - token info
     if (req.path.includes('/pdf')) {
@@ -144,7 +144,7 @@ export async function _jwtAuthMiddleware(
     // SAMM Optimization: Check token blacklist
     if (tokenBlacklist.has(token)) {
       securityLogger.logEvent({
-        type: SecurityEventType.TOKENINVALID,
+        type: SecurityEventType.TOKEN_INVALID,
         severity: 'HIGH',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -152,7 +152,7 @@ export async function _jwtAuthMiddleware(
         success: false,
         details: { reason: 'Token is blacklisted' },
       });
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.*);
     }
 
     let userId: string | undefined;
@@ -163,16 +163,15 @@ export async function _jwtAuthMiddleware(
     // Auto-detect token type by checking JWT header
     let tokenType: 'supabase' | 'local' = 'local';
     try {
-      const tokenParts = token.split('.');
+      const _tokenParts = token.split('.');
       if (tokenParts.length == 3) {
-        const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
+        const _header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
         // Supabase tokens have 'kid' (Key ID) in header
         if (header.kid) {
           tokenType = 'supabase';
         }
       }
-    }
-catch (e) {
+    } catch (e) {
       // If header parsing fails, default to local
       tokenType = 'local';
     }
@@ -184,8 +183,8 @@ catch (e) {
       try {
         console.log('[JWT DEBUG] Using Supabase token validation');
         const { createServerSupabaseAdminClient } = await import('./supabase');
-        const supabase = createServerSupabaseAdminClient();
-        const supabaseResult = await _supabase.auth.getUser(token);
+        const _supabase = createServerSupabaseAdminClient();
+        const _supabaseResult = await _supabase.auth.getUser(token);
 
         data = supabaseResult.data;
         error = supabaseResult.error;
@@ -194,21 +193,19 @@ catch (e) {
           userId = data.user.id;
           userEmail = data.user.email || '';
         }
-      }
-catch (supabaseError) {
+      } catch (supabaseError) {
         console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
         error = { message: supabaseError.message };
         data = null;
       }
-    }
-else {
+    } else {
       // Use local JWT validation for local tokens
       try {
         console.log('[JWT DEBUG] Using local JWT validation');
-        const jwt = await import('jsonwebtoken');
+        const _jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
 
-        const decoded = jwt.default.verify(token, JWT_SECRET) as unknown;
+        const _decoded = jwt.default.verify(token, JWT_SECRET) as unknown;
         console.log('[JWT DEBUG] JWT decoded successfully:', {
           userId: decoded.userId,
           email: decoded.email,
@@ -219,10 +216,9 @@ else {
         userEmail = decoded.email || '';
 
         // Create mock data object for consistency
-        data = { user: { id: userId, email: userEmail }};
+        data = { user: { id: userId, email: userEmail } };
         error = null;
-      }
-catch (jwtError) {
+      } catch (jwtError) {
         console.error('[JWT DEBUG] Local JWT verification failed:', jwtError.message);
         error = { message: jwtError.message };
         data = null;
@@ -255,7 +251,7 @@ catch (jwtError) {
       securityLogger.logEvent({
         type: error?.message?.includes('expired')
           ? SecurityEventType.TOKEN_EXPIRED
-          : SecurityEventType.TOKENINVALID,
+          : SecurityEventType.TOKEN_INVALID,
         severity: 'MEDIUM',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -263,7 +259,7 @@ catch (jwtError) {
         success: false,
         details: { reason: error?.message || 'Invalid token' },
       });
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.*);
     }
 
     // Step c: Query profiles table using direct DB connection (bypasses RLS)
@@ -271,7 +267,7 @@ catch (jwtError) {
     const { profiles } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
 
-    const profileResult = await db
+    const _profileResult = await db
       .select({
         id: profiles.id,
         fullName: profiles.fullName,
@@ -286,10 +282,10 @@ catch (jwtError) {
     if (!profileResult.length) {
       console.error('Profile query failed: No profile found for user', userId);
       securityLogger.logEvent({
-        type: SecurityEventType.ACCESSDENIED,
+        type: SecurityEventType.ACCESS_DENIED,
         severity: 'HIGH',
-  userId,
-  userEmail,
+  _userId,
+  _userEmail,
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
@@ -302,7 +298,7 @@ catch (jwtError) {
       });
     }
 
-    const profile = profileResult[0];
+    const _profile = profileResult[0];
 
     // Track the current token for this user (for token rotation)
     trackUserToken(userId, token);
@@ -317,8 +313,7 @@ catch (jwtError) {
     };
 
     next();
-  }
-catch (error) {
+  } catch (error) {
     console.error('JWT Auth middleware error:', error);
     res.status(500).json({ message: 'Erro interno de autenticação' });
   }
@@ -326,19 +321,19 @@ catch (error) {
 
 /**
  * Legacy function - maintained for backward compatibility
- * @deprecated Use _jwtAuthMiddleware directly
+ * @deprecated Use jwtAuthMiddleware directly
  */
 export async function extractRoleFromToken(authToken: string): Promise<string | null> {
   try {
     const { createServerSupabaseAdminClient } = await import('./supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const _supabase = createServerSupabaseAdminClient();
     const { data, error } = await _supabase.auth.getUser(authToken);
 
     if (error || !data.user) {
-      return null;
+      return null; }
     }
 
-    const supabaseAdmin = createServerSupabaseAdminClient();
+    const _supabaseAdmin = createServerSupabaseAdminClient();
 
     const { data: profile } = await supabaseAdmin
       .from('profiles')
@@ -346,13 +341,9 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
       .eq('id', data.user.id)
       .single();
 
-    return profile?.role || null;
-  }
-catch (error) {
+    return profile?.role || null; }
+  } catch (error) {
     console.error('Error extracting role from token:', error);
-    return null;
+    return null; }
   }
 }
-
-// Export alias for consistency
-export const jwtAuthMiddleware = _jwtAuthMiddleware;

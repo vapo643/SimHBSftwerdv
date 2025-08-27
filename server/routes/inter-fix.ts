@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { interFixService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/inter-fix/execute
@@ -15,10 +15,9 @@ const router = Router();
  */
 router.post('/execute', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation('execute_fix', req.body);
+    const _result = await interFixService.executeOperation('execute_fix', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[INTER_FIX] Error:', error);
     res.status(500).json({
       success: false,
@@ -33,10 +32,9 @@ catch (error) {
  */
 router.post('/boletos', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation('fix_boletos', req.body);
+    const _result = await interFixService.executeOperation('fix_boletos', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[INTER_FIX] Boletos fix failed:', error);
     res.status(500).json({
       success: false,
@@ -51,10 +49,9 @@ catch (error) {
  */
 router.post('/collections', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation('fix_collections', req.body);
+    const _result = await interFixService.executeOperation('fix_collections', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[INTER_FIX] Collections fix failed:', error);
     res.status(500).json({
       success: false,
@@ -69,10 +66,9 @@ catch (error) {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.testConnection();
+    const _result = await interFixService.testConnection();
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[INTER_FIX] Test failed:', error);
     res.status(500).json({
       success: false,

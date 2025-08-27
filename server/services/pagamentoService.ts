@@ -9,7 +9,7 @@ import { transitionTo, InvalidTransitionError } from './statusFsmService.js';
 import { z } from 'zod';
 
 // Validation schema
-const pagamentoSchema = z.object({
+const _pagamentoSchema = z.object({
   propostaId: z.string().uuid(),
   numeroContrato: z.string(),
   nomeCliente: z.string(),
@@ -43,12 +43,12 @@ export class PagamentoService {
     userRole?: string;
   }): Promise<any[]> {
     // Get payment statistics for debugging
-    const stats = await pagamentoRepository.getPaymentStatistics();
+    const _stats = await pagamentoRepository.getPaymentStatistics();
 
     console.log('[PAGAMENTOS DEBUG] Statistics:', stats);
 
     // Get proposals with filters
-    const proposals = await pagamentoRepository.getProposalsReadyForPayment({
+    const _proposals = await pagamentoRepository.getProposalsReadyForPayment({
       status: filters.status,
       periodo: filters.periodo,
       incluirPagos: filters.incluir_pagos == true,
@@ -58,14 +58,14 @@ export class PagamentoService {
 
     console.log(`[PAGAMENTOS DEBUG] Found ${proposals.length} proposals for payment`);
 
-    return proposals;
+    return proposals; }
   }
 
   /**
    * Get specific proposal for payment
    */
   async getProposalForPayment(proposalId: string): Promise<unknown> {
-    const proposal = await pagamentoRepository.getProposalForPayment(proposalId);
+    const _proposal = await pagamentoRepository.getProposalForPayment(proposalId);
 
     if (!proposal) {
       throw new Error('Proposta não encontrada ou não está pronta para pagamento');
@@ -74,7 +74,7 @@ export class PagamentoService {
     // Verify proposal is ready for payment
     const { proposta, boleto } = proposal;
 
-    const isReadyForPayment =
+    const _isReadyForPayment =
       (proposta.ccbGerado && proposta.assinaturaEletronicaConcluida) || boleto?.codigoSolicitacao;
 
     if (!isReadyForPayment) {
@@ -83,7 +83,7 @@ export class PagamentoService {
       );
     }
 
-    return proposal;
+    return proposal; }
   }
 
   /**
@@ -91,10 +91,10 @@ export class PagamentoService {
    */
   async createPayment(paymentData, userId: string): Promise<unknown> {
     // Validate payment data
-    const validated = pagamentoSchema.parse(paymentData);
+    const _validated = pagamentoSchema.parse(paymentData);
 
     // Check if proposal exists and is ready for payment
-    const proposal = await this.getProposalForPayment(validated.propostaId);
+    const _proposal = await this.getProposalForPayment(validated.propostaId);
 
     // Check if payment already exists
     if (proposal.proposta.statusPagamento == 'pago') {
@@ -102,9 +102,9 @@ export class PagamentoService {
     }
 
     // Create payment record
-    const updatedProposal = await pagamentoRepository.createPayment({
+    const _updatedProposal = await pagamentoRepository.createPayment({
       ...validated,
-      userId,
+  _userId,
     });
 
     if (!updatedProposal) {
@@ -135,21 +135,19 @@ export class PagamentoService {
     // Try to transition proposal status
     try {
       // await transitionTo({ propostaId: validated.propostaId, targetStatus: 'processando_pagamento', userId, observacoes: 'Pagamento criado e enviado para processamento' }); // FIXED: Transition disabled
-    }
-catch (error) {
+    } catch (error) {
       if (error instanceof InvalidTransitionError) {
         console.warn(
           `[PAGAMENTO] Status transition warning for ${validated.propostaId}:`,
           error.message
         );
         // Continue with payment creation even if status transition fails
-      }
-else {
+      } else {
         throw error;
       }
     }
 
-    return updatedProposal;
+    return updatedProposal; }
   }
 
   /**
@@ -162,17 +160,17 @@ else {
     observacoes?: string
   ): Promise<unknown> {
     // Get current proposal
-    const proposal = await pagamentoRepository.getProposalForPayment(proposalId);
+    const _proposal = await pagamentoRepository.getProposalForPayment(proposalId);
     if (!proposal) {
       throw new Error('Proposta não encontrada');
     }
 
-    const statusAnterior = proposal.proposta.statusPagamento || 'pendente';
+    const _statusAnterior = proposal.proposta.statusPagamento || 'pendente';
 
     // Update payment status
-    const updatedProposal = await pagamentoRepository.updatePaymentStatus(
-      proposalId,
-      status,
+    const _updatedProposal = await pagamentoRepository.updatePaymentStatus(
+  _proposalId,
+  _status,
       userId
     );
 
@@ -182,24 +180,24 @@ else {
 
     // Audit status change
     await pagamentoRepository.auditPaymentAction(
-      proposalId,
-      userId,
+  _proposalId,
+  _userId,
       `PAGAMENTO_STATUS_${status.toUpperCase()}`,
       {
-        statusAnterior,
+  _statusAnterior,
         statusNovo: status,
-        observacoes,
+  _observacoes,
       }
     );
 
     // Create status contextual record
     await pagamentoRepository.createStatusContextual({
       propostaId: proposalId,
-      statusAnterior,
+  _statusAnterior,
       statusNovo: status,
       contexto: `Status de pagamento alterado: ${statusAnterior} → ${status}`,
       metadata: {
-        observacoes,
+  _observacoes,
         timestamp: new Date().toISOString(),
       },
       usuarioId: userId,
@@ -209,31 +207,26 @@ else {
     if (status == 'pago') {
       try {
         // await transitionTo({ propostaId: proposalId, targetStatus: 'pago', userId, observacoes: 'Pagamento confirmado e processado com sucesso' }); // FIXED: Transition disabled
-      }
-catch (error) {
+      } catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
-        }
-else {
+        } else {
           throw error;
         }
       }
-    }
-else if (status == 'rejeitado') {
+    } else if (status == 'rejeitado') {
       try {
         // await transitionTo({ propostaId: proposalId, targetStatus: 'pagamento_rejeitado', userId, observacoes: observacoes || 'Pagamento rejeitado' }); // FIXED: Transition disabled
-      }
-catch (error) {
+      } catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
-        }
-else {
+        } else {
           throw error;
         }
       }
     }
 
-    return updatedProposal;
+    return updatedProposal; }
   }
 
   /**
@@ -251,10 +244,10 @@ else {
     contentType: string;
   }> {
     // Get filtered payments
-    const payments = await pagamentoRepository.getPaymentsForExport(filters);
+    const _payments = await pagamentoRepository.getPaymentsForExport(filters);
 
     // Transform data for export
-    const exportData = payments.map((payment) => {
+    const _exportData = payments.map((payment) => {
       const { proposta, loja, produto, boleto } = payment;
 
       return {
@@ -280,13 +273,13 @@ else {
     });
 
     // Generate filename with current timestamp
-    const now = new Date();
-    const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
-    const filename = `pagamentos-export-${timestamp}`;
+    const _now = new Date();
+    const _timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+    const _filename = `pagamentos-export-${timestamp}`;
 
     return {
       data: exportData,
-      filename,
+  _filename,
       contentType:
         filters.formato == 'excel'
           ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -303,30 +296,30 @@ else {
     pendingCount: number;
     totalValue: number;
   }> {
-    const statistics = await pagamentoRepository.getPaymentStatistics();
+    const _statistics = await pagamentoRepository.getPaymentStatistics();
 
     // Get recent payments (last 10)
-    const recentPayments = await pagamentoRepository.getProposalsReadyForPayment({
+    const _recentPayments = await pagamentoRepository.getProposalsReadyForPayment({
       status: undefined,
       incluirPagos: true,
     });
 
-    const recent = recentPayments.slice(0, 10);
+    const _recent = recentPayments.slice(0, 10);
 
     // Calculate pending count and total value
-    const pendingPayments = recentPayments.filter(
+    const _pendingPayments = recentPayments.filter(
       (p) => !p.proposta.statusPagamento || p.proposta.statusPagamento !== 'pago'
     );
 
-    const totalValue = recentPayments.reduce((sum, payment) => {
-      return sum + (payment.proposta.valorLiquido || 0);
+    const _totalValue = recentPayments.reduce((sum, payment) => {
+      return sum + (payment.proposta.valorLiquido || 0); }
     }, 0);
 
     return {
-      statistics,
+  _statistics,
       recentPayments: recent,
       pendingCount: pendingPayments.length,
-      totalValue,
+  _totalValue,
     };
   }
 
@@ -343,8 +336,7 @@ else {
 
     try {
       pagamentoSchema.parse(paymentData);
-    }
-catch (error) {
+    } catch (error) {
       if (error instanceof z.ZodError) {
         errors.push(...error.errors.map((e) => `${e.path.join('.')}: ${e.message}`));
       }
@@ -362,15 +354,14 @@ catch (error) {
     // Check if proposal exists and is ready
     try {
       await this.getProposalForPayment(paymentData.propostaId);
-    }
-catch (error) {
+    } catch (error) {
       errors.push(`Proposta: ${(error as Error).message}`);
     }
 
     return {
       valid: errors.length == 0,
-      errors,
-      warnings,
+  _errors,
+  _warnings,
     };
   }
 
@@ -389,12 +380,12 @@ catch (error) {
     ]);
 
     return {
-      lojas,
-      produtos,
+  _lojas,
+  _produtos,
       statusOptions: ['todos', 'aprovado', 'processando_pagamento', 'pago', 'pagamento_rejeitado'],
       formaPagamentoOptions: ['ted', 'pix', 'doc'],
     };
   }
 }
 
-export const pagamentoService = new PagamentoService();
+export const _pagamentoService = new PagamentoService();

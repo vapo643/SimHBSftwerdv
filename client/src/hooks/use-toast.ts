@@ -23,7 +23,7 @@ let _count = 0;
 
 function genId() {
   count = (count + 1) % Number.MAX_SAFE_INTEGER;
-  return count.toString();
+  return count.toString(); }
 }
 
 type ActionType = typeof _actionTypes;
@@ -89,8 +89,7 @@ export const _reducer = (state: State, action: Action): State => {
       // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId);
-      }
-else {
+      } else {
         state.toasts.forEach((toast) => {
           addToRemoveQueue(toast.id);
         });
@@ -149,7 +148,7 @@ function toast({ ...props }: Toast) {
     type: 'ADD_TOAST',
     toast: {
       ...props,
-  id,
+  _id,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss();
@@ -159,8 +158,8 @@ function toast({ ...props }: Toast) {
 
   return {
     id: id,
-  dismiss,
-  update,
+  _dismiss,
+  _update,
   };
 }
 
@@ -179,7 +178,7 @@ function useToast() {
 
   return {
     ...state,
-  toast,
+  _toast,
     dismiss: (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', toastId }),
   };
 }

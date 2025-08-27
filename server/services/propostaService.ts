@@ -5,9 +5,9 @@
  */
 
 import {
-  propostaRepository,
-  Proposta,
-  PropostaWithDetails,
+  _propostaRepository,
+  _Proposta,
+  _PropostaWithDetails,
 } from '../repositories/proposta.repository';
 import { transitionTo, InvalidTransitionError } from './statusFsmService';
 
@@ -53,7 +53,7 @@ export class PropostaService {
     const { propostaId, userId, userRole } = request;
 
     // 1. Fetch current proposta
-    const proposta = await propostaRepository.getPropostaById(propostaId);
+    const _proposta = await propostaRepository.getPropostaById(propostaId);
 
     if (!proposta) {
       throw new Error('Proposta não encontrada');
@@ -70,13 +70,13 @@ export class PropostaService {
     }
 
     // 4. Determine new status
-    const novoStatus = proposta.status == 'suspensa' ? 'aguardando_analise' : 'suspensa';
+    const _novoStatus = proposta.status == 'suspensa' ? 'aguardando_analise' : 'suspensa';
 
     // 5. Use FSM for status transition validation
     try {
       await transitionTo({
-        propostaId,
-        novoStatus,
+  _propostaId,
+  _novoStatus,
         userId: userId || 'sistema',
         contexto: 'geral',
         observacoes: `Status ${novoStatus == 'suspensa' ? 'suspenso' : 'reativado'} pelo usuário`,
@@ -87,8 +87,7 @@ export class PropostaService {
           motivoSuspensao: novoStatus == 'suspensa' ? 'Ação manual do usuário' : null,
         },
       });
-    }
-catch (error) {
+    } catch (error) {
       if (error instanceof InvalidTransitionError) {
         throw new Error(error.message);
       }
@@ -105,7 +104,7 @@ catch (error) {
 
     return {
       success: true,
-      propostaId,
+  _propostaId,
       statusAnterior: proposta.status,
       statusNovo: novoStatus,
       message:
@@ -122,7 +121,7 @@ catch (error) {
     console.log(`[CCB] Buscando CCB para proposta: ${propostaId}`);
 
     // Fetch proposta with ClickSign data
-    const proposta = await propostaRepository.getPropostaById(propostaId);
+    const _proposta = await propostaRepository.getPropostaById(propostaId);
 
     if (!proposta) {
       throw new Error('Proposta não encontrada');
@@ -135,7 +134,7 @@ catch (error) {
       try {
         console.log(`[CCB] Tentando gerar URL para caminho: ${proposta.caminhoCcbAssinado}`);
 
-        const signedUrl = await propostaRepository.generateCcbSignedUrl(
+        const _signedUrl = await propostaRepository.generateCcbSignedUrl(
           proposta.caminhoCcbAssinado
         );
 
@@ -150,18 +149,17 @@ catch (error) {
             caminho: proposta.caminhoCcbAssinado,
           };
         }
-      }
-catch (error) {
+      } catch (error) {
         console.error('[CCB] Erro ao buscar CCB pelo caminho salvo:', error);
       }
     }
 
     // PRIORITY 2: Try legacy path for compatibility
     try {
-      const legacyPath = `proposta-${propostaId}/ccb-assinada.pdf`;
+      const _legacyPath = `proposta-${propostaId}/ccb-assinada.pdf`;
       console.log(`[CCB] Tentando caminho legado: ${legacyPath}`);
 
-      const signedUrl = await propostaRepository.generateCcbSignedUrl(legacyPath);
+      const _signedUrl = await propostaRepository.generateCcbSignedUrl(legacyPath);
 
       if (signedUrl) {
         console.log(`[CCB] ✅ URL legada gerada com sucesso`);
@@ -173,8 +171,7 @@ catch (error) {
           fonte: 'storage_legado',
         };
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CCB] Erro ao buscar no Storage legado:', error);
     }
 
@@ -194,8 +191,8 @@ catch (error) {
     // CCB not found
     console.log(`[CCB] ❌ CCB não encontrada para proposta ${propostaId}`);
 
-    const debugInfo = {
-      propostaId,
+    const _debugInfo = {
+  _propostaId,
       caminhosSalvos: proposta.caminhoCcbAssinado,
       clicksignKey: proposta.clicksignDocumentKey,
       ccbGerado: proposta.ccbGerado,
@@ -211,28 +208,28 @@ catch (error) {
    * Get propostas by status
    */
   async getPropostasByStatus(status: string): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByStatus(status);
+    return await propostaRepository.getPropostasByStatus(status); }
   }
 
   /**
    * Get propostas by user
    */
   async getPropostasByUser(userId: string): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByUser(userId);
+    return await propostaRepository.getPropostasByUser(userId); }
   }
 
   /**
    * Get propostas by loja
    */
   async getPropostasByLoja(lojaId: number): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasByLoja(lojaId);
+    return await propostaRepository.getPropostasByLoja(lojaId); }
   }
 
   /**
    * Get propostas pending signature
    */
   async getPropostasPendingSignature(): Promise<Proposta[]> {
-    return await propostaRepository.getPropostasPendingSignature();
+    return await propostaRepository.getPropostasPendingSignature(); }
   }
 
   /**
@@ -260,9 +257,9 @@ catch (error) {
    * Get proposta with full details
    */
   async getPropostaWithDetails(propostaId: string): Promise<PropostaWithDetails | null> {
-    return await propostaRepository.getPropostaWithDetails(propostaId);
+    return await propostaRepository.getPropostaWithDetails(propostaId); }
   }
 }
 
 // Export singleton instance
-export const propostaService = new PropostaService();
+export const _propostaService = new PropostaService();

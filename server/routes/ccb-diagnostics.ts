@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { ccbTestService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.get('/diagnostics', async (req, res) => {
   try {
-    const result = await ccbTestService.executeOperation('diagnostics', req.query);
+    const _result = await ccbTestService.executeOperation('diagnostics', req.query);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

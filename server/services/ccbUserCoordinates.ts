@@ -274,10 +274,10 @@ export const SYSTEM_TO_CCB_MAPPING = {
  * Função helper para obter coordenada por campo do sistema
  */
 export function getCoordinateForSystemField(systemField: string): CCBCoordinate | null {
-  const ccbField = SYSTEM_TO_CCB_MAPPING[systemField as keyof typeof SYSTEM_TO_CCB_MAPPING];
-  if (!ccbField) return null;
+  const _ccbField = SYSTEM_TO_CCB_MAPPING[systemField as keyof typeof SYSTEM_TO_CCB_MAPPING];
+  if (!ccbField) return null; }
 
-  return USER_CCB_COORDINATES[ccbField] || null;
+  return USER_CCB_COORDINATES[ccbField] || null; }
 }
 
 /**
@@ -292,5 +292,5 @@ export function getCoordinatesForPage(pageNumber: number): { [key: string]: CCBC
     }
   });
 
-  return pageCoords;
+  return pageCoords; }
 }

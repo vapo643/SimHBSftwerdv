@@ -70,11 +70,11 @@ export function useProposalEffects() {
 
         // Prepare payload for new API
         const _payload = {
-          valorEmprestimo,
+          _valorEmprestimo,
           prazoMeses: debouncedPrazo,
           produtoId: state.loanData.produtoId,
           parceiroId: state.context?.atendente?.loja?.parceiro?.id || null,
-          diasCarencia, // Pass grace period to API for proper calculation
+          _diasCarencia, // Pass grace period to API for proper calculation
         };
 
         console.log('[FRONTEND] Enviando simulação para nova API:', payload);
@@ -110,11 +110,10 @@ export function useProposalEffects() {
             diasCarencia > 0
               ? String(valorEmprestimo * (response.taxaJurosMensal / 100 / 30) * diasCarencia)
               : '0',
-          diasCarencia,
+          _diasCarencia,
           parametrosUtilizados: response.parametrosUtilizados,
         });
-      }
-catch (error) {
+      } catch (error) {
         console.error('Erro na simulação:', error);
         setError('simulation', 'Erro ao calcular simulação');
 
@@ -124,8 +123,7 @@ catch (error) {
             description: error.message,
             variant: 'destructive',
           });
-        }
-else {
+        } else {
           toast({
             title: 'Erro na simulação',
             description: 'Não foi possível calcular a simulação. Tente novamente.',
@@ -139,12 +137,12 @@ else {
   }, [
     state.loanData.produtoId,
     state.loanData.tabelaComercialId,
-    debouncedValorSolicitado,
-    debouncedPrazo,
+    _debouncedValorSolicitado,
+    _debouncedPrazo,
     state.loanData.incluirTac,
     state.loanData.dataCarencia,
     state.context,
-    toast,
+    _toast,
   ]);
 
   // Validation effect for limits
@@ -160,11 +158,9 @@ else {
 
     if (valor < valorMinimo) {
       setError('valorSolicitado', `Valor mínimo: R$ ${valorMinimo.toLocaleString('pt-BR')}`);
-    }
-else if (valor > valorMaximo) {
+    } else if (valor > valorMaximo) {
       setError('valorSolicitado', `Valor máximo: R$ ${valorMaximo.toLocaleString('pt-BR')}`);
-    }
-else {
+    } else {
       setError('valorSolicitado', '');
     }
   }, [state.loanData.valorSolicitado, state.context]);
@@ -179,11 +175,9 @@ else {
 
     if (state.loanData.prazo < prazoMinimo) {
       setError('prazo', `Prazo mínimo: ${prazoMinimo} meses`);
-    }
-else if (state.loanData.prazo > prazoMaximo) {
+    } else if (state.loanData.prazo > prazoMaximo) {
       setError('prazo', `Prazo máximo: ${prazoMaximo} meses`);
-    }
-else {
+    } else {
       setError('prazo', '');
     }
   }, [state.loanData.prazo, state.context]);

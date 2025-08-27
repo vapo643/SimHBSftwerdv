@@ -35,20 +35,20 @@ export function IdleWarningModal({
             // Tempo esgotado, fazer logout automático
             clearInterval(interval);
             onLogout();
-            return 0;
+            return 0; }
           }
-          return prev - 1;
+          return prev - 1; }
         });
       }, 1000);
 
-      return () => clearInterval(interval);
+      return () => clearInterval(interval); }
     }
   }, [isOpen, warningTimeoutSeconds, onLogout]);
 
   const _formatTime = (seconds: number): string => {
     const _minutes = Math.floor(seconds / 60);
     const _remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`; }
   };
 
   return (

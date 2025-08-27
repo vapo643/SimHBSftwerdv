@@ -17,9 +17,8 @@ export class UserService {
    */
   async getAllUsers(): Promise<UserWithAuth[]> {
     try {
-      return await userRepository.getAllUsersWithAuth();
-    }
-catch (error) {
+      return await userRepository.getAllUsersWithAuth(); }
+    } catch (error) {
       console.error('[UserService] Error fetching users:', error);
       throw new Error('Erro ao buscar usuários');
     }
@@ -30,9 +29,8 @@ catch (error) {
    */
   async getUserById(userId: string): Promise<UserWithAuth | null> {
     try {
-      return await userRepository.getUserWithAuth(userId);
-    }
-catch (error) {
+      return await userRepository.getUserWithAuth(userId); }
+    } catch (error) {
       console.error(`[UserService] Error fetching user ${userId}:`, error);
       throw new Error('Erro ao buscar usuário');
     }
@@ -48,9 +46,9 @@ catch (error) {
   ): Promise<UserWithAuth> {
     try {
       // Check if email already exists
-      const existingUser = await userRepository.emailExists(userData.email);
+      const _existingUser = await userRepository.emailExists(userData.email);
       if (existingUser) {
-        const error = new Error('Um usuário com este email já existe');
+        const _error = new Error('Um usuário com este email já existe');
         (error as unknown).name = 'ConflictError';
         throw error;
       }
@@ -59,11 +57,11 @@ catch (error) {
       this.validateRoleRequirements(userData);
 
       // Create user in repository
-      const newUser = await userRepository.createUser(userData);
+      const _newUser = await userRepository.createUser(userData);
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.USERCREATED,
+        type: SecurityEventType.USER_CREATED,
         severity: 'MEDIUM',
         success: true,
         userEmail: newUser.email,
@@ -77,9 +75,8 @@ catch (error) {
 
       console.log(`✅ [UserService] User created successfully: ${newUser.email}`);
 
-      return newUser;
-    }
-catch (error) {
+      return newUser; }
+    } catch (error) {
       console.error('[UserService] Error creating user:', error);
       throw error;
     }
@@ -102,7 +99,7 @@ catch (error) {
       }
 
       // Get user info before deactivation
-      const userToDeactivate = await userRepository.getUserWithAuth(targetUserId);
+      const _userToDeactivate = await userRepository.getUserWithAuth(targetUserId);
       if (!userToDeactivate) {
         throw new Error('Usuário não encontrado');
       }
@@ -115,7 +112,7 @@ catch (error) {
       // Prevent deactivating admin users (additional business rule)
       if (userToDeactivate.role == 'ADMINISTRADOR') {
         // Could add additional check here to see if this is the last admin
-        const admins = await userRepository.getUsersByRole('ADMINISTRADOR');
+        const _admins = await userRepository.getUsersByRole('ADMINISTRADOR');
         if (admins.length <= 2) {
           throw new Error('Não é possível desativar o último administrador do sistema');
         }
@@ -129,7 +126,7 @@ catch (error) {
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.USERDEACTIVATED,
+        type: SecurityEventType.USER_DEACTIVATED,
         severity: 'HIGH',
         userId: targetUserId,
         userEmail: deactivatedByEmail,
@@ -139,7 +136,7 @@ catch (error) {
         success: true,
         details: {
           deactivatedUserRole: userToDeactivate.role,
-          deactivatedUserName: userToDeactivate.fullname,
+          deactivatedUserName: userToDeactivate.full_name,
           deactivatedBy: deactivatedByUserId,
           message: 'User account deactivated and all sessions invalidated',
         },
@@ -151,8 +148,7 @@ catch (error) {
         user: userToDeactivate,
         message: 'Usuário desativado com sucesso. Todas as sessões foram invalidadas.',
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[UserService] Error deactivating user ${targetUserId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao desativar usuário');
     }
@@ -170,7 +166,7 @@ catch (error) {
   ): Promise<{ message: string }> {
     try {
       // Get user info before reactivation
-      const userToReactivate = await userRepository.getUserWithAuth(targetUserId);
+      const _userToReactivate = await userRepository.getUserWithAuth(targetUserId);
       if (!userToReactivate) {
         throw new Error('Usuário não encontrado');
       }
@@ -188,7 +184,7 @@ catch (error) {
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.USERREACTIVATED,
+        type: SecurityEventType.USER_REACTIVATED,
         severity: 'HIGH',
         userId: targetUserId,
         userEmail: reactivatedByEmail,
@@ -198,7 +194,7 @@ catch (error) {
         success: true,
         details: {
           reactivatedUserRole: userToReactivate.role,
-          reactivatedUserName: userToReactivate.fullname,
+          reactivatedUserName: userToReactivate.full_name,
           reactivatedBy: reactivatedByUserId,
           message: 'User account reactivated',
         },
@@ -209,8 +205,7 @@ catch (error) {
       return {
         message: 'Usuário reativado com sucesso.',
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[UserService] Error reactivating user ${targetUserId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao reativar usuário');
     }
@@ -227,7 +222,7 @@ catch (error) {
   ): Promise<Profile> {
     try {
       // Check if user exists
-      const existingUser = await userRepository.getUserWithAuth(userId);
+      const _existingUser = await userRepository.getUserWithAuth(userId);
       if (!existingUser) {
         throw new Error('Usuário não encontrado');
       }
@@ -236,7 +231,7 @@ catch (error) {
       if (updateData.role && updateData.role !== existingUser.role) {
         // Check if trying to remove last admin
         if (existingUser.role == 'ADMINISTRADOR') {
-          const admins = await userRepository.getUsersByRole('ADMINISTRADOR');
+          const _admins = await userRepository.getUsersByRole('ADMINISTRADOR');
           if (admins.length <= 1) {
             throw new Error('Não é possível remover o último administrador do sistema');
           }
@@ -244,11 +239,11 @@ catch (error) {
       }
 
       // Update profile
-      const updatedProfile = await userRepository.updateProfile(userId, updateData);
+      const _updatedProfile = await userRepository.updateProfile(userId, updateData);
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATAACCESS,
+        type: SecurityEventType.DATA_ACCESS,
         severity: 'LOW',
         success: true,
         ipAddress: userIp,
@@ -258,9 +253,8 @@ catch (error) {
         },
       });
 
-      return updatedProfile;
-    }
-catch (error) {
+      return updatedProfile; }
+    } catch (error) {
       console.error(`[UserService] Error updating user ${userId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao atualizar usuário');
     }
@@ -271,9 +265,8 @@ catch (error) {
    */
   async getUsersByRole(role: string): Promise<Profile[]> {
     try {
-      return await userRepository.getUsersByRole(role);
-    }
-catch (error) {
+      return await userRepository.getUsersByRole(role); }
+    } catch (error) {
       console.error(`[UserService] Error fetching users by role ${role}:`, error);
       throw new Error('Erro ao buscar usuários por perfil');
     }
@@ -284,9 +277,8 @@ catch (error) {
    */
   async getUsersByLoja(lojaId: number): Promise<Profile[]> {
     try {
-      return await userRepository.getUsersByLoja(lojaId);
-    }
-catch (error) {
+      return await userRepository.getUsersByLoja(lojaId); }
+    } catch (error) {
       console.error(`[UserService] Error fetching users by loja ${lojaId}:`, error);
       throw new Error('Erro ao buscar usuários por loja');
     }
@@ -306,7 +298,7 @@ catch (error) {
       throw new Error('Gerentes devem estar associados a pelo menos uma loja');
     }
 
-    // DIRETOR and ADMINISTRADOR should not have loja _associations
+    // DIRETOR and ADMINISTRADOR should not have loja associations
     if (
       (userData.role == 'DIRETOR' || userData.role == 'ADMINISTRADOR') &&
       (userData.lojaId || userData.lojaIds)
@@ -321,14 +313,14 @@ catch (error) {
   formatUserForResponse(user: UserWithAuth): unknown {
     return {
       id: user.id,
-      name: user.fullname,
+      name: user.full_name,
       email: user.email,
       role: user.role,
-      lojaId: user.lojaid,
-      lojaIds: user.lojaids,
+      lojaId: user.loja_id,
+      lojaIds: user.loja_ids,
       status: user.deleted_at ? 'inactive' : 'active',
-      createdAt: user.createdat,
-      updatedAt: user.updatedat,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
     };
   }
 
@@ -336,14 +328,14 @@ catch (error) {
    * Format multiple users for response
    */
   formatUsersForResponse(users: UserWithAuth[]): unknown[] {
-    return users.map((user) => this.formatUserForResponse(user));
+    return users.map((user) => this.formatUserForResponse(user)); }
   }
 }
 
 // Export singleton instance
-export const userService = new UserService();
+export const _userService = new UserService();
 
 // Export createUser function for backwards compatibility
 export async function createUser(userData: z.infer<typeof UserDataSchema>) {
-  return userService.createUser(userData);
+  return userService.createUser(userData); }
 }

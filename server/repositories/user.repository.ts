@@ -69,21 +69,21 @@ export class UserRepository extends BaseRepository<Profile> {
     }
 
     // Join auth users with profiles
-    const users = profiles.map((profile) => {
-      const authUser = authUsers.users.find((user) => user.id == profile.id);
+    const _users = profiles.map((profile) => {
+      const _authUser = authUsers.users.find((user) => user.id == profile.id);
       return {
         ...profile,
         email: authUser?.email || 'N/A',
         auth_status: authUser
           ? {
-              email_confirmed: !!authUser.email_confirmedat,
+              email_confirmed: !!authUser.email_confirmed_at,
               banned_until: (authUser as unknown).banned_until || null,
             }
           : undefined,
       };
     });
 
-    return users as UserWithAuth[];
+    return users as UserWithAuth[]; }
   }
 
   /**
@@ -100,7 +100,7 @@ export class UserRepository extends BaseRepository<Profile> {
     if (profileError) {
       if (profileError.code == 'PGRST116') {
         // Not found
-        return null;
+        return null; }
       }
       throw new Error(`Failed to fetch profile: ${profileError.message}`);
     }
@@ -118,7 +118,7 @@ export class UserRepository extends BaseRepository<Profile> {
       email: authUser?.user?.email || 'N/A',
       auth_status: authUser?.user
         ? {
-            email_confirmed: !!authUser.user.email_confirmedat,
+            email_confirmed: !!authUser.user.email_confirmed_at,
             banned_until: (authUser.user as unknown).banned_until || null,
           }
         : undefined,
@@ -173,8 +173,7 @@ export class UserRepository extends BaseRepository<Profile> {
           banned_until: undefined,
         },
       } as UserWithAuth;
-    }
-catch (error) {
+    } catch (error) {
       // Rollback auth user if profile creation failed
       await this.supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       throw error;
@@ -199,7 +198,7 @@ catch (error) {
       throw new Error(`Failed to update profile: ${error.message}`);
     }
 
-    return updated as Profile;
+    return updated as Profile; }
   }
 
   /**
@@ -252,7 +251,7 @@ catch (error) {
       .eq('email', email)
       .single();
 
-    return !!data;
+    return !!data; }
   }
 
   /**
@@ -270,7 +269,7 @@ catch (error) {
       throw new Error(`Failed to fetch users by role: ${error.message}`);
     }
 
-    return data as Profile[];
+    return data as Profile[]; }
   }
 
   /**
@@ -288,9 +287,9 @@ catch (error) {
       throw new Error(`Failed to fetch users by loja: ${error.message}`);
     }
 
-    return data as Profile[];
+    return data as Profile[]; }
   }
 }
 
 // Export singleton instance
-export const userRepository = new UserRepository();
+export const _userRepository = new UserRepository();

@@ -66,7 +66,7 @@ export default function AlterarEmail() {
         method: 'POST',
         body: JSON.stringify(_data),
       })) as EmailChangeResponse;
-      return response;
+      return response; }
     },
     onSuccess: (_data) => {
       toast({
@@ -98,7 +98,7 @@ export default function AlterarEmail() {
         method: 'POST',
         body: JSON.stringify({ token }),
       });
-      return response;
+      return response; }
     },
     onSuccess: () => {
       toast({

@@ -9,9 +9,9 @@ import { clickSignServiceV3 } from '../services/clickSignServiceV3.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { createServerSupabaseAdminClient } from '../lib/_supabase.js';
 
-const router = express.Router();
+const _router = express.Router();
 
 /**
  * Test ClickSign API Token
@@ -19,7 +19,7 @@ const router = express.Router();
  */
 router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     // Only ADMINISTRADOR can test tokens
     if (userRole !== 'ADMINISTRADOR') {
@@ -29,9 +29,9 @@ router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: Authenticated
     }
 
     // Test token using PRODUCTION ClickSign API (legal signatures only)
-    const testUrl = `https://app.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`;
+    const _testUrl = `https://app.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`;
 
-    const response = await fetch(testUrl, {
+    const _response = await fetch(testUrl, {
       method: 'GET',
       headers: {
         Accept: 'application/vnd.api+json',
@@ -39,7 +39,7 @@ router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: Authenticated
       },
     });
 
-    const data = await response.json();
+    const _data = await response.json();
 
     if (response.ok) {
       res.json({
@@ -49,8 +49,7 @@ router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: Authenticated
         envelopes_count: data.meta?.record_count || 0,
         message: 'Assinaturas com validade jurídica',
       });
-    }
-else {
+    } else {
       res.status(response.status).json({
         success: false,
         status: 'Token inválido - API de PRODUÇÃO',
@@ -58,8 +57,7 @@ else {
         error: data,
       });
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CLICKSIGN] ❌ Error testing token:', error);
     res.status(500).json({
       success: false,
@@ -75,12 +73,12 @@ catch (error) {
  */
 router.post(
   '/propostas/:id/clicksign/regenerar',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
-      const userId = req.user?.id;
-      const userRole = req.user?.role;
+      const _userId = req.user?.id;
+      const _userRole = req.user?.role;
 
       console.log(
         `[CLICKSIGN] 🔄 Regenerating signature link - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`
@@ -94,7 +92,7 @@ router.post(
       }
 
       // Create Supabase client for storage operations
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       // Import database dependencies
       const { db } = await import('../lib/supabase');
@@ -105,7 +103,7 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.status(401).json({error: "Unauthorized"});
+        return res.*);
       }
 
       // Verificar se CCB foi gerado
@@ -120,8 +118,7 @@ router.post(
         try {
           console.log(`[CLICKSIGN] 🗑️ Cancelling previous envelope: ${proposta.clicksignListKey}`);
           await clickSignServiceV3.cancelEnvelope(proposta.clicksignListKey);
-        }
-catch (error) {
+        } catch (error) {
           console.log(
             `[CLICKSIGN] ⚠️ Could not cancel previous envelope:`,
             error instanceof Error ? error.message : error
@@ -130,7 +127,7 @@ catch (error) {
       }
 
       // Parse client data from JSONB
-      const clienteData = proposta.clienteData as unknown;
+      const _clienteData = proposta.clienteData as unknown;
       if (!clienteData || !clienteData.nome || !clienteData.email || !clienteData.cpf) {
         return res.status(400).json({
           message:
@@ -148,11 +145,11 @@ catch (error) {
 
         // Generate new CCB using TEMPLATE SERVICE (pdf-lib)
         const { ccbGenerationService } = await import('../services/ccbGenerationService');
-        const result = await ccbGenerationService.generateCCB(propostaId);
-        if (!_result.success) {
-          throw new Error(`Erro ao gerar CCB: ${_result.error}`);
+        const _result = await ccbGenerationService.generateCCB(propostaId);
+        if (!result.success) {
+          throw new Error(`Erro ao gerar CCB: ${result.error}`);
         }
-        const ccbPath = _result.pdfPath!;
+        const _ccbPath = result.pdfPath!;
 
         // Update proposal with new CCB path
         await db
@@ -169,12 +166,11 @@ catch (error) {
           throw new Error(`Erro ao baixar CCB: ${downloadError?.message || 'Unknown error'}`);
         }
 
-        const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
+        const _ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
         pdfBase64 = ccbBuffer.toString('base64');
 
         console.log(`[CLICKSIGN] ✅ New CCB generated: ${ccbPath}`);
-      }
-else {
+      } else {
         // Try to read existing CCB from Supabase Storage
         try {
           const { data: ccbData, error: downloadError } = await _supabase.storage
@@ -185,25 +181,24 @@ else {
             throw new Error(`Erro ao baixar CCB: ${downloadError?.message || 'File not found'}`);
           }
 
-          const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
+          const _ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
           pdfBase64 = ccbBuffer.toString('base64');
 
           console.log(
             `[CLICKSIGN] ✅ Using existing CCB from Supabase: ${proposta.caminhoCcbAssinado}`
           );
-        }
-catch (fileError) {
+        } catch (fileError) {
           console.log(
             `[CLICKSIGN] ⚠️ Existing CCB file not found, generating new one: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`
           );
 
           // Generate new CCB using TEMPLATE SERVICE (pdf-lib)
           const { ccbGenerationService } = await import('../services/ccbGenerationService');
-          const result = await ccbGenerationService.generateCCB(propostaId);
-          if (!_result.success) {
-            throw new Error(`Erro ao gerar CCB: ${_result.error}`);
+          const _result = await ccbGenerationService.generateCCB(propostaId);
+          if (!result.success) {
+            throw new Error(`Erro ao gerar CCB: ${result.error}`);
           }
-          const ccbPath = _result.pdfPath!;
+          const _ccbPath = result.pdfPath!;
 
           // Update proposal with new CCB path
           await db
@@ -222,7 +217,7 @@ catch (fileError) {
             );
           }
 
-          const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
+          const _ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
           pdfBase64 = ccbBuffer.toString('base64');
 
           console.log(`[CLICKSIGN] ✅ New CCB regenerated: ${ccbPath}`);
@@ -230,7 +225,7 @@ catch (fileError) {
       }
 
       // Gerar novo link usando o mesmo fluxo
-      const result = await clickSignServiceV3.sendCCBForSignature(propostaId, pdfBase64, {
+      const _result = await clickSignServiceV3.sendCCBForSignature(propostaId, pdfBase64, {
         name: clienteData.nome,
         email: clienteData.email,
         cpf: clienteData.cpf,
@@ -242,10 +237,10 @@ catch (fileError) {
       await db
         .update(propostas)
         .set({
-          clicksignListKey: _result.requestSignatureKey || '',
-          clicksignDocumentKey: _result.documentKey || '',
-          clicksignSignerKey: _result.signerId || '',
-          clicksignSignUrl: _result.signUrl || '',
+          clicksignListKey: result.requestSignatureKey || '',
+          clicksignDocumentKey: result.documentKey || '',
+          clicksignSignerKey: result.signerId || '',
+          clicksignSignUrl: result.signUrl || '',
           clicksignStatus: 'pending',
           clicksignSentAt: new Date(),
           assinaturaEletronicaConcluida: false, // Reset status
@@ -256,12 +251,11 @@ catch (fileError) {
 
       res.json({
         success: true,
-        signUrl: _result.signUrl,
-        envelopeId: _result.documentKey, // Keep as envelopeId for frontend compatibility
+        signUrl: result.signUrl,
+        envelopeId: result.documentKey, // Keep as envelopeId for frontend compatibility
         message: 'Novo link de assinatura gerado com sucesso',
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CLICKSIGN] ❌ Error regenerating signature link:', error);
 
       // Tratamento específico para erro de autenticação
@@ -298,16 +292,16 @@ catch (error) {
  */
 router.post(
   '/propostas/:id/clicksign/enviar',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
       const { useBiometricAuth = false } = req.body;
-      const userId = req.user?.id;
-      const userRole = req.user?.role;
+      const _userId = req.user?.id;
+      const _userRole = req.user?.role;
 
       console.log(
-        `[CLICKSIGN] ${_getBrasiliaTimestamp()} - Iniciando envio para ClickSign - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`
+        `[CLICKSIGN] ${getBrasiliaTimestamp()} - Iniciando envio para ClickSign - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`
       );
       console.log(`[CLICKSIGN] Biometria Facial: ${useBiometricAuth ? 'ATIVADA' : 'DESATIVADA'}`);
 
@@ -328,7 +322,7 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.status(401).json({error: "Unauthorized"});
+        return res.*);
       }
 
       console.log(
@@ -350,7 +344,7 @@ router.post(
       }
 
       // Parse client data from JSONB
-      const clienteData = proposta.clienteData as unknown;
+      const _clienteData = proposta.clienteData as unknown;
       if (!clienteData || !clienteData.nome || !clienteData.email || !clienteData.cpf) {
         return res.status(400).json({
           message: 'Dados do cliente incompletos. Nome, email e CPF são obrigatórios.',
@@ -363,11 +357,11 @@ router.post(
 
       // Verificar se arquivo CCB existe
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       // Extrair caminho correto do CCB
       let _ccbPath = proposta.caminhoCcbAssinado;
-      const documentsIndex = ccbPath.indexOf('/documents/');
+      const _documentsIndex = ccbPath.indexOf('/documents/');
       if (documentsIndex !== -1) {
         ccbPath = ccbPath.substring(documentsIndex + '/documents/'.length);
       }
@@ -387,15 +381,15 @@ router.post(
       }
 
       // Convert file to base64 with Data URI format
-      const arrayBuffer = await ccbFile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const base64Raw = buffer.toString('base64');
-      const base64Content = `data:application/pdf;base64,${base64Raw}`;
+      const _arrayBuffer = await ccbFile.arrayBuffer();
+      const _buffer = Buffer.from(arrayBuffer);
+      const _base64Raw = buffer.toString('base64');
+      const _base64Content = `data:application/pdf;base64,${base64Raw}`;
 
       console.log(`[CLICKSIGN] CCB convertido para base64, tamanho: ${base64Content.length} chars`);
 
       // Preparar dados para ClickSign
-      const envelopeData = {
+      const _envelopeData = {
         name: `Contrato CCB - Proposta ${propostaId}`,
         locale: 'pt-BR',
         auto_close: false,
@@ -403,12 +397,12 @@ router.post(
         block_after_refusal: true,
       };
 
-      const documentData = {
+      const _documentData = {
         content: base64Content,
         filename: `CCB-${propostaId}.pdf`,
       };
 
-      const signerData = {
+      const _signerData = {
         name: clienteData.nome,
         email: clienteData.email,
         phone: clienteData.telefone || '',
@@ -420,7 +414,7 @@ router.post(
       console.log(`[CLICKSIGN] Enviando para ClickSign API...`);
 
       // Chamar ClickSign API
-      const result = await clickSignServiceV3.sendCCBForSignature(propostaId, base64Content, {
+      const _result = await clickSignServiceV3.sendCCBForSignature(propostaId, base64Content, {
         name: clienteData.nome,
         email: clienteData.email,
         phone: clienteData.telefone || '',
@@ -429,16 +423,16 @@ router.post(
         useBiometricAuth: useBiometricAuth,
       });
 
-      console.log(`[CLICKSIGN] ✅ Sucesso! Documento criado: ${_result.documentKey}`);
+      console.log(`[CLICKSIGN] ✅ Sucesso! Documento criado: ${result.documentKey}`);
 
       // PAM V1.0 - Atualizar dados ClickSign (sem mudança de status principal)
       await db
         .update(propostas)
         .set({
-          clicksignListKey: _result.requestSignatureKey || '', // Using request signature key
-          clicksignDocumentKey: _result.documentKey || '',
-          clicksignSignerKey: _result.signerId || '',
-          clicksignSignUrl: _result.signUrl || '',
+          clicksignListKey: result.requestSignatureKey || '', // Using request signature key
+          clicksignDocumentKey: result.documentKey || '',
+          clicksignSignerKey: result.signerId || '',
+          clicksignSignUrl: result.signUrl || '',
           clicksignStatus: 'pending',
           clicksignSentAt: new Date(),
         })
@@ -447,25 +441,24 @@ router.post(
       // Log de auditoria
       const { propostaLogs } = await import('../../shared/schema');
       await db.insert(propostaLogs).values({
-  propostaId,
+  _propostaId,
         autorId: userId || '',
         statusNovo: 'clicksign_enviado',
-        observacao: `Contrato enviado para ClickSign. Documento: ${_result.documentKey}`,
+        observacao: `Contrato enviado para ClickSign. Documento: ${result.documentKey}`,
       });
 
       console.log(`[CLICKSIGN] ✅ Proposta atualizada e log registrado`);
 
       res.json({
         message: 'Contrato enviado para ClickSign com sucesso',
-        envelopeId: _result.documentKey, // Keep as envelopeId for frontend compatibility
-        documentKey: _result.documentKey || '',
-        signerKey: _result.signerId || '',
-        signUrl: _result.signUrl || '',
+        envelopeId: result.documentKey, // Keep as envelopeId for frontend compatibility
+        documentKey: result.documentKey || '',
+        signerKey: result.signerId || '',
+        signUrl: result.signUrl || '',
         status: 'pending',
-        createdAt: _getBrasiliaTimestamp(),
+        createdAt: getBrasiliaTimestamp(),
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[CLICKSIGN] ❌ Erro ao enviar para ClickSign:`, error);
 
       res.status(500).json({
@@ -482,7 +475,7 @@ catch (error) {
  */
 router.get(
   '/propostas/:id/clicksign/status',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
@@ -505,7 +498,7 @@ router.get(
         .where(eq(propostas.id, propostaId));
 
       if (!proposta) {
-        return res.status(401).json({error: "Unauthorized"});
+        return res.*);
       }
 
       if (!proposta.clicksignListKey) {
@@ -517,7 +510,7 @@ router.get(
 
       // Buscar status atualizado no ClickSign
       try {
-        const envelopeStatus = await clickSignServiceV3.getEnvelopeStatus(
+        const _envelopeStatus = await clickSignServiceV3.getEnvelopeStatus(
           proposta.clicksignListKey
         );
 
@@ -526,22 +519,20 @@ router.get(
           status: envelopeStatus.status,
           signUrl: proposta.clicksignSignUrl,
           completed: proposta.assinaturaEletronicaConcluida,
-          lastUpdated: _getBrasiliaTimestamp(),
+          lastUpdated: getBrasiliaTimestamp(),
         });
-      }
-catch (error) {
+      } catch (error) {
         // Se der erro na API do ClickSign, retorna dados do banco
         res.json({
           envelopeId: proposta.clicksignListKey, // Frontend expects envelopeId
           status: proposta.clicksignStatus || 'unknown',
           signUrl: proposta.clicksignSignUrl,
           completed: proposta.assinaturaEletronicaConcluida,
-          lastUpdated: _getBrasiliaTimestamp(),
+          lastUpdated: getBrasiliaTimestamp(),
           note: 'Status do banco de dados (ClickSign API indisponível)',
         });
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[CLICKSIGN] Erro ao consultar status:`, error);
       res.status(500).json({
         message: 'Erro ao consultar status do ClickSign',

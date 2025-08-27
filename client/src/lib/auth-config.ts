@@ -12,8 +12,8 @@ import { SupabaseAuthProvider } from './providers/supabase-auth-provider';
 const defaultConfig: AuthConfig = {
   provider: (import.meta.env.VITE_AUTH_PROVIDER as AuthConfig['provider']) || 'supabase',
   options: {
-    supabaseUrl: import.meta.env.VITE_SUPABASEURL,
-    supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANONKEY,
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
   },
 };
 
@@ -23,7 +23,7 @@ const defaultConfig: AuthConfig = {
 export function createAuthProvider(config: AuthConfig = defaultConfig): AuthProvider {
   switch (_config.provider) {
     case 'supabase': {
-      return new SupabaseAuthProvider();
+      return new SupabaseAuthProvider(); }
 
     case 'firebase': {
       // Implementação futura
@@ -52,7 +52,7 @@ export function setAuthConfig(config: Partial<AuthConfig>) {
 }
 
 export function getAuthConfig(): AuthConfig {
-  return globalConfig;
+  return globalConfig; }
 }
 
 /**
@@ -64,7 +64,7 @@ export function getAuthProvider(): AuthProvider {
   if (!authProviderInstance) {
     authProviderInstance = createAuthProvider(globalConfig);
   }
-  return authProviderInstance;
+  return authProviderInstance; }
 }
 
 /**

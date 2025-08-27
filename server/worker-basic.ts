@@ -4,7 +4,7 @@
  * Adaptado para funcionar com mock queue em desenvolvimento
  */
 
-const isDevelopment = process.env.NODE_ENV == 'development';
+const _isDevelopment = process.env.NODE_ENV == 'development';
 
 if (isDevelopment) {
   // Usar mock queue em desenvolvimento
@@ -13,7 +13,7 @@ if (isDevelopment) {
   // Importar o mock queue
   import('./lib/mock-queue').then(({ queues }) => {
     // Escutar eventos da fila mock
-    const queue = queues.pdfProcessing;
+    const _queue = queues.pdfProcessing;
 
     queue.on('active', async (job) => {
       console.log(`[WORKER] Processando job ${job.id} com dados:`, job.data);
@@ -26,11 +26,10 @@ if (isDevelopment) {
 
     console.log('[WORKER] 🚀 Processo worker iniciado. Aguardando jobs...');
   });
-}
-else {
+} else {
   // Usar BullMQ real em produção
   import('bullmq').then(({ Worker }) => {
-    const worker = new Worker(
+    const _worker = new Worker(
       'pdf-processing',
       async (job) => {
         console.log(`[WORKER] Processando job ${job.id} com dados:`, job.data);
@@ -39,13 +38,13 @@ else {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         console.log(`[WORKER] ✅ Job ${job.id} processado com sucesso`);
-        return { success: true, jobId: job.id, processedAt: new Date().toISOString() };
+        return { success: true, jobId: job.id, processedAt: new Date().toISOString() }; }
       },
       {
         connection: {
           host: process.env.REDIS_HOST || 'localhost',
           port: parseInt(process.env.REDIS_PORT || '6379'),
-          password: process.env.REDISPASSWORD,
+          password: process.env.REDIS_PASSWORD,
         },
       }
     );

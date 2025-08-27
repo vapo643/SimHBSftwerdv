@@ -76,8 +76,7 @@ export default function PaymentReviewModal({
           className: 'bg-blue-50 border-blue-200',
         });
         setVeracidadeConfirmada(true);
-      }
-else {
+      } else {
         toast({
           title: '✅ Veracidade Confirmada',
           description: 'Pagamento autorizado. Agora você pode proceder com o pagamento.',
@@ -118,7 +117,7 @@ else {
         body: formData,
       });
 
-      return response;
+      return response; }
     },
     onSuccess: () => {
       toast({
@@ -175,16 +174,14 @@ else {
           title: 'CCB aberta',
           description: `Documento ${response.nome} aberto em nova aba.`,
         });
-      }
-else {
+      } else {
         toast({
           title: 'CCB não disponível',
           description: 'URL do documento não foi encontrada.',
           variant: 'destructive',
         });
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('❌ [CCB VIEW] Erro:', error);
       toast({
         title: 'Erro ao abrir CCB',
@@ -202,13 +199,13 @@ catch (error) {
   };
 
   const _formatCPF = (cpf: string) => {
-    if (!cpf) return '';
+    if (!cpf) return ''; }
     const _cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); }
   };
 
   if (!proposta) {
-    return null;
+    return null; }
   }
 
   return (

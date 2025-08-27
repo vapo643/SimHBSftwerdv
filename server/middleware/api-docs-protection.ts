@@ -31,22 +31,22 @@ const API_DOC_ENDPOINTS = [
  * Middleware to protect API documentation endpoints
  */
 export function apiDocsProtectionMiddleware(req: Request, res: Response, next: NextFunction) {
-  const config = getEnvironmentConfig();
+  const _config = getEnvironmentConfig();
 
   // Allow in development
-  if (config.enableApiDocs) {
-    return next();
+  if (_config.enableApiDocs) {
+    return next(); }
   }
 
   // Check if requesting a documentation endpoint
-  const isDocEndpoint = API_DOC_ENDPOINTS.some((endpoint) =>
+  const _isDocEndpoint = API_DOC_ENDPOINTS.some((endpoint) =>
     req.path.toLowerCase().startsWith(endpoint)
   );
 
   if (isDocEndpoint) {
     // Log attempted access
     securityLogger.logEvent({
-      type: SecurityEventType.SUSPICIOUSACTIVITY,
+      type: SecurityEventType.SUSPICIOUS_ACTIVITY,
       severity: 'MEDIUM',
       userId: (req as unknown).user?.id,
       userEmail: (req as unknown).user?.email,
@@ -56,7 +56,7 @@ export function apiDocsProtectionMiddleware(req: Request, res: Response, next: N
       success: false,
       details: {
         reason: 'API documentation access attempt',
-        environment: config.name,
+        environment: _config.name,
       },
     });
 
@@ -77,27 +77,27 @@ export function apiEnumerationProtectionMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  const config = getEnvironmentConfig();
+  const _config = getEnvironmentConfig();
 
   // Only apply in production/staging
-  if (config.name == 'development') {
-    return next();
+  if (_config.name == 'development') {
+    return next(); }
   }
 
   // Detect potential enumeration attempts
-  const suspiciousPatterns = [
+  const _suspiciousPatterns = [
     /\/api\/v\d+\/\*/, // Wildcard attempts
     /\/api\/.*\?.*test.*=/i, // Test parameters
     /\/api\/.*\?.*debug.*=/i, // Debug parameters
     /\/api\/.*\.\.\//, // Directory traversal
   ];
 
-  const isSuspicious = suspiciousPatterns.some((pattern) => pattern.test(req.originalUrl));
+  const _isSuspicious = suspiciousPatterns.some((pattern) => pattern.test(req.originalUrl));
 
   if (isSuspicious) {
     // Log enumeration attempt
     securityLogger.logEvent({
-      type: SecurityEventType.SUSPICIOUSACTIVITY,
+      type: SecurityEventType.SUSPICIOUS_ACTIVITY,
       severity: 'HIGH',
       userId: (req as unknown).user?.id,
       userEmail: (req as unknown).user?.email,
@@ -127,7 +127,7 @@ export function apiEnumerationProtectionMiddleware(
 export function generateFakeApiDocs(req: Request, res: Response) {
   // Log access attempt
   securityLogger.logEvent({
-    type: SecurityEventType.SUSPICIOUSACTIVITY,
+    type: SecurityEventType.SUSPICIOUS_ACTIVITY,
     severity: 'HIGH',
     userId: (req as unknown).user?.id,
     userEmail: (req as unknown).user?.email,

@@ -9,11 +9,10 @@ import { join } from 'path';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const router = Router();
+const _router = Router();
 
 // Middleware for admin access
-import { _requireAdmin as requireAdmin } from "../lib/role-guards";
-const __requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
+const _requireAdmin = (req: AuthenticatedRequest, res: unknown, next) => {
   if (req.user?.role !== 'ADMINISTRADOR') {
     return res.status(403).json({
       success: false,
@@ -30,11 +29,10 @@ router.use(jwtAuthMiddleware);
  * GET /api/security-scanners/sca/latest
  * Get latest OWASP Dependency Check report
  */
-import { _requireAdmin as requireAdmin } from "../lib/role-guards";
 router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Common paths where dependency-check reports might be stored
-    const reportPaths = [
+    const _reportPaths = [
       'dependency-check-report.json',
       '.security/dependency-check-report.json',
       'reports/dependency-check-report.json',
@@ -47,13 +45,12 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
     // Try to find the report in common locations
     for (const path of reportPaths) {
       try {
-        const fullPath = join(process.cwd(), path);
-        const data = await fs.readFile(fullPath, 'utf-8');
+        const _fullPath = join(process.cwd(), path);
+        const _data = await fs.readFile(fullPath, 'utf-8');
         reportData = JSON.parse(_data);
         reportPath = path;
-        break;
-      }
-catch (e) {
+        break; }
+      } catch (e) {
         // Continue trying other paths
       }
     }
@@ -78,7 +75,7 @@ catch (e) {
     }
 
     // Parse vulnerability counts from report
-    const vulnerabilities = {
+    const _vulnerabilities = {
       critical: 0,
       high: 0,
       medium: 0,
@@ -96,14 +93,11 @@ catch (e) {
             // Check CVSS score or severity
             if (vuln.cvssv3?.baseScore >= 9.0 || vuln.cvssv2?.score >= 9.0) {
               vulnerabilities.critical++;
-            }
-else if (vuln.cvssv3?.baseScore >= 7.0 || vuln.cvssv2?.score >= 7.0) {
+            } else if (vuln.cvssv3?.baseScore >= 7.0 || vuln.cvssv2?.score >= 7.0) {
               vulnerabilities.high++;
-            }
-else if (vuln.cvssv3?.baseScore >= 4.0 || vuln.cvssv2?.score >= 4.0) {
+            } else if (vuln.cvssv3?.baseScore >= 4.0 || vuln.cvssv2?.score >= 4.0) {
               vulnerabilities.medium++;
-            }
-else {
+            } else {
               vulnerabilities.low++;
             }
           });
@@ -115,14 +109,13 @@ else {
       success: true,
       data: {
         reportFound: true,
-        vulnerabilities,
+  _vulnerabilities,
         lastScan: reportData.reportDate || new Date().toISOString(),
         projectInfo: reportData.projectInfo || {},
-        reportPath,
+  _reportPath,
       },
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[SCA] Error reading dependency check report:', error);
     res.status(500).json({
       success: false,
@@ -135,16 +128,14 @@ catch (error) {
  * POST /api/security-scanners/sca/run
  * Trigger new dependency check scan
  */
-import { _requireAdmin as requireAdmin } from "../lib/role-guards";
 router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     // Check if script exists first
-    const scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
+    const _scriptPath = join(process.cwd(), '.security/run-dependency-check.sh');
 
     try {
       await fs.access(scriptPath);
-    }
-catch (e) {
+    } catch (e) {
       return res.status(500).json({
         success: false,
         error: 'Script de análise não encontrado',
@@ -153,7 +144,7 @@ catch (e) {
 
     const { exec } = await import('child_process');
     const { promisify } = await import('util');
-    const execAsync = promisify(exec);
+    const _execAsync = promisify(exec);
 
     // Send immediate response
     res.json({
@@ -169,11 +160,10 @@ catch (e) {
         console.log('[SCA] Analysis completed:', stdout);
         if (stderr) console.error('[SCA] Warnings:', stderr);
       })
-      .catch ((error) => {
+      .catch((error) => {
         console.error('[SCA] Analysis failed:', error);
       });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[SCA] Error running dependency check:', error);
     res.status(500).json({
       success: false,

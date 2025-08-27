@@ -10,7 +10,7 @@ import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
 import { requireAnyRole } from '../lib/role-guards.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/documentos/download
@@ -18,8 +18,8 @@ const router = Router();
  */
 router.get(
   '/download',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { path } = req.query;
@@ -30,35 +30,32 @@ router.get(
         });
       }
 
-      const result = await documentsService.downloadDocument(path);
+      const _result = await documentsService.downloadDocument(path);
 
-      if (_result.success) {
+      if (result.success) {
         // Check if it's a JSON request or redirect
-        const acceptHeader = req.headers.accept || '';
-        const isJsonRequest = acceptHeader.includes('application/json');
+        const _acceptHeader = req.headers.accept || '';
+        const _isJsonRequest = acceptHeader.includes('application/json');
 
         if (isJsonRequest) {
           // Return URL as JSON for requests with Authorization header
           res.json({
-            url: _result.url,
-            filename: _result.filename,
-            contentType: _result.contentType,
+            url: result.url,
+            filename: result.filename,
+            contentType: result.contentType,
           });
-        }
-else {
+        } else {
           // Redirect to signed URL (legacy behavior)
-          res.redirect(_result.url!);
+          res.redirect(result.url!);
         }
-      }
-else {
-        const statusCode = _result.error?.includes('não encontrado') ? 404 : 500;
+      } else {
+        const _statusCode = result.error?.includes('não encontrado') ? 404 : 500;
         res.status(statusCode).json({
-          error: _result.error,
+          error: result.error,
           details: statusCode == 404 ? `Arquivo '${path}' não existe no storage` : undefined,
         });
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('[DOCUMENTOS_CONTROLLER] Internal error:', error);
       res.status(500).json({
         error: 'Erro interno do servidor',
@@ -73,8 +70,8 @@ catch (error) {
  */
 router.get(
   '/list/:propostaId',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { propostaId } = req.params;
@@ -85,13 +82,12 @@ router.get(
         });
       }
 
-      const result = await documentsService.getProposalDocuments(String(propostaId));
+      const _result = await documentsService.getProposalDocuments(String(propostaId));
       res.json(_result);
-    }
-catch (error) {
+    } catch (error) {
       console.error('[DOCUMENTOS_CONTROLLER] Error listing documents:', error);
 
-      const statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
+      const _statusCode = error.message == 'Proposta não encontrada' ? 404 : 500;
       res.status(statusCode).json({
         error: error.message || 'Erro ao listar documentos',
       });

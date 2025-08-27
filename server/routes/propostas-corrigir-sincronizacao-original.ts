@@ -3,7 +3,7 @@ import { supabase, db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const router = Router();
+const _router = Router();
 
 /**
  * Endpoint para Correção de Sincronização
@@ -27,7 +27,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     }
 
     // Passo 1: Deletar boletos existentes no Storage
-    const boletosPath = `propostas/${id}/boletos/`;
+    const _boletosPath = `propostas/${id}/boletos/`;
 
     // Listar todos os boletos existentes
     const { data: boletosFiles, error: listError } = await _supabase.storage
@@ -46,7 +46,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
 
     // Deletar cada boleto existente
     if (boletosFiles && boletosFiles.length > 0) {
-      const filesToDelete = boletosFiles
+      const _filesToDelete = boletosFiles
         .filter((file) => file.name.endsWith('.pdf'))
         .map((file) => `${boletosPath}${file.name}`);
 
@@ -67,7 +67,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     }
 
     // Passo 2: Deletar carnês existentes
-    const carnePath = `propostas/${id}/carnes/`;
+    const _carnePath = `propostas/${id}/carnes/`;
 
     const { data: carneFiles, error: carneListError } = await _supabase.storage
       .from('documents')
@@ -77,7 +77,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
       });
 
     if (!carneListError && carneFiles && carneFiles.length > 0) {
-      const carnesToDelete = carneFiles
+      const _carnesToDelete = carneFiles
         .filter((file) => file.name.endsWith('.pdf'))
         .map((file) => `${carnePath}${file.name}`);
 
@@ -97,13 +97,13 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
     // Passo 3: Adicionar job à fila de sincronização
     const { boletoSyncQueue } = await import('../lib/mock-queue');
 
-    const jobData = {
+    const _jobData = {
       propostaId: id,
       forceSync: true, // Forçar re-sincronização
       timestamp: new Date().toISOString(),
     };
 
-    const job = await boletoSyncQueue.add('sync-boletos', jobData);
+    const _job = await boletoSyncQueue.add('sync-boletos', jobData);
 
     console.log(`[CORRIGIR SYNC] Job de re-sincronização adicionado: ${job.id}`);
 
@@ -113,8 +113,7 @@ router.post('/:id/corrigir-sincronizacao', async (req: Request, res: Response) =
       jobId: job.id,
       filesDeleted: (boletosFiles?.length || 0) + (carneFiles?.length || 0),
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CORRIGIR SYNC] Erro:', error);
     return res.status(500).json({
       error: 'Erro ao corrigir sincronização',

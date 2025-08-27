@@ -211,8 +211,7 @@ export default function OWASPAssessment() {
         });
 
         console.log(`✅ SAST concluído: ${formattedResults.length} problemas encontrados`);
-      }
-else {
+      } else {
         console.error('❌ Erro na resposta SAST:',_response);
         toast({
           title: 'Erro na análise',
@@ -220,16 +219,14 @@ else {
           variant: 'destructive',
         });
       }
-    }
-catch (_error) {
+    } catch (_error) {
       console.error('❌ Erro ao executar SAST:', _error);
       toast({
         title: 'Erro ao conectar com Semgrep',
         description: _error.message || 'Erro de conexão',
         variant: 'destructive',
       });
-    }
-finally {
+    } finally {
       setSastScanning(false);
     }
   };
@@ -259,8 +256,7 @@ finally {
       document.body.removeChild(a);
 
       toast({ title: 'Relatório baixado com sucesso' });
-    }
-catch (_error) {
+    } catch (_error) {
       toast({ title: 'Erro ao baixar relatório', variant: 'destructive' });
     }
   };
@@ -268,28 +264,28 @@ catch (_error) {
   const _getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'HIGH': {
-        return 'destructive';
+        return 'destructive'; }
       case 'MEDIUM': {
-        return 'secondary';
+        return 'secondary'; }
       case 'LOW': {
-        return 'outline';
+        return 'outline'; }
       default:
-        return 'outline';
+        return 'outline'; }
     }
   };
 
   const _getComplianceColor = (compliance: string) => {
     switch (compliance) {
       case 'COMPLIANT': {
-        return 'default';
+        return 'default'; }
       case 'PARTIAL': {
-        return 'secondary';
+        return 'secondary'; }
       case 'NON_COMPLIANT': {
-        return 'destructive';
+        return 'destructive'; }
       case 'NOT_APPLICABLE': {
-        return 'outline';
+        return 'outline'; }
       default:
-        return 'outline';
+        return 'outline'; }
     }
   };
 

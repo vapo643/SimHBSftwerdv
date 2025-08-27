@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { ccbDiagnosticsService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb-diagnostics/run
@@ -15,10 +15,9 @@ const router = Router();
  */
 router.post('/run', async (req: Request, res: Response) => {
   try {
-    const result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
+    const _result = await ccbDiagnosticsService.executeOperation('run_diagnostics', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CCB_DIAGNOSTICS] Error:', error);
     res.status(500).json({
       success: false,
@@ -33,10 +32,9 @@ catch (error) {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const result = await ccbDiagnosticsService.testConnection();
+    const _result = await ccbDiagnosticsService.testConnection();
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CCB_DIAGNOSTICS] Test failed:', error);
     res.status(500).json({
       success: false,
@@ -51,12 +49,11 @@ catch (error) {
  */
 router.get('/report', async (req: Request, res: Response) => {
   try {
-    const report = await ccbDiagnosticsService.executeOperation('generate_report', {
+    const _report = await ccbDiagnosticsService.executeOperation('generate_report', {
       timestamp: new Date().toISOString(),
     });
     res.json(report);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CCB_DIAGNOSTICS] Report generation failed:', error);
     res.status(500).json({
       success: false,

@@ -59,8 +59,7 @@ async function testarSimulacao() {
         );
       });
     }
-  }
-catch (error: any) {
+  } catch (error: any) {
     console.error('❌ Erro no Cenário 1:', error.response?.data || error.message);
   }
 
@@ -88,8 +87,7 @@ catch (error: any) {
     console.log(`  • Taxa de Juros: ${resultado2.parametrosUtilizados.taxaJurosMensal}%`);
     console.log(`  • TAC Tipo: ${resultado2.parametrosUtilizados.tacTipo}`);
     console.log(`  • TAC Valor: R$ ${resultado2.parametrosUtilizados.tacValor}`);
-  }
-catch (error: any) {
+  } catch (error: any) {
     console.error('❌ Erro no Cenário 2:', error.response?.data || error.message);
   }
 
@@ -106,13 +104,11 @@ catch (error: any) {
     });
 
     console.log('❌ Deveria ter retornado erro!');
-  }
-catch (error: any) {
+  } catch (error: any) {
     if (error.response?.status == 400) {
       console.log('✅ Validação funcionando corretamente!');
       console.log(`  • Erro capturado: ${error.response.data.error}`);
-    }
-else {
+    } else {
       console.error('❌ Erro inesperado:', error.message);
     }
   }
@@ -127,7 +123,7 @@ console.log('Iniciando testes da API de simulação...\n');
 console.log('⚠️  Certifique-se de que o servidor está rodando na porta 5000\n');
 
 setTimeout(() => {
-  testarSimulacao().catch (console.error);
+  testarSimulacao().catch(console.error);
 }, 2000);
 
 export { testarSimulacao };

@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { propostasCarneService } from '../services/proposalService.js';
-const router = Router();
+const _router = Router();
 router.post('/check', async (req, res) => {
   try {
-    const result = await propostasCarneService.executeOperation('check_carne', req.body);
+    const _result = await propostasCarneService.executeOperation('check_carne', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

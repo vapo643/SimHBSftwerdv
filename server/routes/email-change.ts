@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { securityTestService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/email-change/request
@@ -15,10 +15,9 @@ const router = Router();
  */
 router.post('/request', async (req: Request, res: Response) => {
   try {
-    const result = await securityTestService.executeOperation('email_change_request', req.body);
+    const _result = await securityTestService.executeOperation('email_change_request', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Email change request failed',
@@ -32,10 +31,9 @@ catch (error) {
  */
 router.post('/confirm', async (req: Request, res: Response) => {
   try {
-    const result = await securityTestService.executeOperation('email_change_confirm', req.body);
+    const _result = await securityTestService.executeOperation('email_change_confirm', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Email change confirmation failed',

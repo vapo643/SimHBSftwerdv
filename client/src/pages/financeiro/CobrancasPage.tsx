@@ -137,7 +137,7 @@ export default function CobrancasPage() {
   const [novoValorQuitacao, setNovoValorQuitacao] = useState(0);
   const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
   const [novasParcelas, setNovasParcelas] = useState<
-    Array<{ valor: number; dataVencimento: string }>
+    Record<string, unknown>[]>{ valor: number; dataVencimento: string }>
   >([]);
 
   // Estados para Prorrogar Vencimento (seleção múltipla)
@@ -182,7 +182,7 @@ export default function CobrancasPage() {
     onSuccess: (result: MutationResponse) => {
       toast({
         title: 'Sucesso',
-        description: _result.message || 'Vencimento(s) prorrogado(s) com sucesso',
+        description: result.message || 'Vencimento(s) prorrogado(s) com sucesso',
       });
       setShowProrrogarModal(false);
       setBoletosParaProrrogar([]);
@@ -208,7 +208,7 @@ export default function CobrancasPage() {
     onSuccess: (result: MutationResponse) => {
       toast({
         title: 'Sucesso',
-        description: _result.message || 'Desconto de quitação aplicado com sucesso',
+        description: result.message || 'Desconto de quitação aplicado com sucesso',
       });
       setShowDescontoModal(false);
       setEtapaDesconto(1);
@@ -236,7 +236,7 @@ export default function CobrancasPage() {
       if (statusFilter !== 'todos') params.append('status', statusFilter);
       if (atrasoFilter !== 'todos') params.append('atraso', atrasoFilter);
 
-      return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>;
+      return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>; }
     },
   });
 
@@ -320,8 +320,7 @@ export default function CobrancasPage() {
               description: 'A lista de cobranças foi atualizada com novos boletos',
               duration: 2000,
             });
-          }
-else if (payload.eventType == 'UPDATE') {
+          } else if (payload.eventType == 'UPDATE') {
             // Se o boleto foi cancelado
             if (payload.new?.situacao == 'CANCELADO' && payload.old?.situacao !== 'CANCELADO') {
               console.log(
@@ -347,14 +346,11 @@ else if (payload.eventType == 'UPDATE') {
       .subscribe((status) => {
         if (status == 'SUBSCRIBED') {
           console.log('✅ [REALTIME] Conectado ao canal de atualizações de cobranças');
-        }
-else if (status == 'CHANNEL_ERROR') {
+        } else if (status == 'CHANNEL_ERROR') {
           console.error('❌ [REALTIME] Erro ao conectar ao canal');
-        }
-else if (status == 'TIMED_OUT') {
+        } else if (status == 'TIMED_OUT') {
           console.error('⏱️ [REALTIME] Timeout ao conectar');
-        }
-else if (status == 'CLOSED') {
+        } else if (status == 'CLOSED') {
           console.log('🔌 [REALTIME] Canal fechado');
         }
       });
@@ -407,8 +403,7 @@ else if (status == 'CLOSED') {
           if (response.syncStatus == 'em_andamento' && pollCount < 20) {
             setIsPolling(true);
             setPollCount((prev) => prev + 1);
-          }
-else {
+          } else {
             setIsPolling(false);
             if (pollCount >= 20) {
               console.log(`[PAM V1.0 POLLING] Limite de tentativas atingido (20)`);
@@ -421,8 +416,7 @@ else {
             }
           }
         }
-      }
-catch (error) {
+      } catch (error) {
         console.error('[PAM V1.0 POLLING] Erro ao verificar status:', error);
         setSyncStatus('falhou');
         setIsPolling(false);
@@ -469,16 +463,14 @@ catch (error) {
         title: 'Sucesso',
         description: 'Observação salva com sucesso',
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error('Erro ao salvar observação:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar a observação',
         variant: 'destructive',
       });
-    }
-finally {
+    } finally {
       setSalvandoObservacao(false);
     }
   };
@@ -521,18 +513,17 @@ finally {
 
   // Função para mascarar CPF/CNPJ
   const _maskDocument = (doc: string) => {
-    if (!doc) return '';
+    if (!doc) return ''; }
     if (!showCpf) {
       if (doc.length == 11) {
         // CPF
-        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`;
-      }
-else if (doc.length == 14) {
+        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`; }
+      } else if (doc.length == 14) {
         // CNPJ
-        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`;
+        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`; }
       }
     }
-    return doc;
+    return doc; }
   };
 
   // Função para exportar inadimplentes
@@ -571,8 +562,7 @@ else if (doc.length == 14) {
         title: 'Exportação concluída',
         description: `${data.total} registros exportados com sucesso.`,
       });
-    }
-catch (error) {
+    } catch (error) {
       toast({
         title: 'Erro na exportação',
         description: 'Não foi possível exportar os dados.',
@@ -598,33 +588,33 @@ catch (error) {
         ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
 
         // Verifica se algum dos campos válidos contém o termo de busca
-        return searchableFields.some((field) => String(field).toLowerCase().includes(search));
+        return searchableFields.some((field) => String(field).toLowerCase().includes(search)); }
       })
     : [];
 
   const _getStatusColor = (status: string) => {
     switch (status) {
       case 'em_dia': {
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800'; }
       case 'inadimplente': {
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800'; }
       case 'quitado': {
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800'; }
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'; }
     }
   };
 
   const _getParcelaStatusColor = (status: string) => {
     switch (status) {
       case 'pago': {
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800'; }
       case 'vencido': {
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800'; }
       case 'pendente': {
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800'; }
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'; }
     }
   };
 
@@ -632,35 +622,27 @@ catch (error) {
   const _getInterBankStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
       case 'RECEBIDO': {
-        break;
-      }
       case 'MARCADO_RECEBIDO': {
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800'; }
       case 'CANCELADO': {
-        break;
-      }
       case 'EXPIRADO': {
       case 'FALHA_EMISSAO': {
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'; }
       case 'ATRASADO': {
-        break;
-      }
       case 'PROTESTO': {
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800'; }
       case 'A_RECEBER': {
-        break;
-      }
       case 'EM_PROCESSAMENTO': {
       case 'EMITIDO': {
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800'; }
       case 'pago': {
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800'; }
       case 'vencido': {
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800'; }
       case 'pendente': {
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800'; }
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'; }
     }
   };
 
@@ -674,37 +656,29 @@ catch (error) {
     if (interSituacao) {
       switch (interSituacao.toUpperCase()) {
         case 'RECEBIDO': {
-        break;
-      }
         case 'MARCADO_RECEBIDO': {
         case 'PAGO': // PAM V1.0 - FASE 1: Reconhecer "PAGO" como status válido
-          return 'Pago';
+          return 'Pago'; }
         case 'CANCELADO': {
-        break;
-      }
         case 'EXPIRADO': {
         case 'FALHA_EMISSAO': {
-          return 'Cancelado';
+          return 'Cancelado'; }
         case 'ATRASADO': {
-        break;
-      }
         case 'PROTESTO': {
-          return 'Vencido';
+          return 'Vencido'; }
         case 'A_RECEBER': {
-        break;
-      }
         case 'EM_PROCESSAMENTO': {
         case 'EMITIDO': {
-          return 'Pendente';
+          return 'Pendente'; }
         default:
-          return interSituacao;
+          return interSituacao; }
       }
     }
 
     // Fallback para status local
-    if (localStatus == 'pago') return 'Pago';
-    if (vencida) return 'Vencido';
-    return 'Pendente';
+    if (localStatus == 'pago') return 'Pago'; }
+    if (vencida) return 'Vencido'; }
+    return 'Pendente'; }
   };
 
   // Função para calcular o Status de Vencimento inteligente
@@ -713,16 +687,16 @@ catch (error) {
     if (proposta.interSituacao) {
       const _situacao = proposta.interSituacao.toUpperCase();
       if (situacao == 'RECEBIDO' || situacao == 'MARCADO_RECEBIDO') {
-        return { text: 'Pago', color: 'text-green-600' }
+        return { text: 'Pago', color: 'text-green-600' }; }
       }
       if (situacao == 'CANCELADO' || situacao == 'EXPIRADO' || situacao == 'FALHA_EMISSAO') {
-        return { text: 'Cancelado', color: 'text-gray-600' }
+        return { text: 'Cancelado', color: 'text-gray-600' }; }
       }
     }
 
     // Se o status local indica pago
     if (proposta.status == 'quitado' || proposta.status == 'pago') {
-      return { text: 'Pago', color: 'text-green-600' }
+      return { text: 'Pago', color: 'text-green-600' }; }
     }
 
     // Calcular baseado na data de vencimento
@@ -732,7 +706,7 @@ catch (error) {
       : null;
 
     if (!dataVencimento) {
-      return { text: 'Sem vencimento', color: 'text-gray-500' }
+      return { text: 'Sem vencimento', color: 'text-gray-500' }; }
     }
 
     // Se já venceu
@@ -745,21 +719,21 @@ catch (error) {
 
     // Se vence hoje
     if (isToday(dataVencimento)) {
-      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' }
+      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' }; }
     }
 
     // Se vence nos próximos 7 dias
     const _diasParaVencer = differenceInDays(dataVencimento, hoje);
     if (diasParaVencer > 0 && diasParaVencer <= 7) {
-      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' }
+      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' }; }
     }
 
     // Para todos os outros casos, mostrar a data de vencimento
     if (isFuture(dataVencimento)) {
-      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' }
+      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' }; }
     }
 
-    return { text: 'Em dia', color: 'text-green-600' }
+    return { text: 'Em dia', color: 'text-green-600' }; }
   };
 
   return (
@@ -989,7 +963,7 @@ catch (error) {
                         <TableCell>
                           {(() => {
                             const _statusInfo = getStatusVencimento(proposta);
-                            return <span className={statusInfo.color}>{statusInfo.text}</span>;
+                            return <span className={statusInfo.color}>{statusInfo.text}</span>; }
                           })()}
                         </TableCell>
                         <TableCell>
@@ -1161,8 +1135,7 @@ catch (error) {
                           const _codigo = boleto.codigoSolicitacao || '';
                           if (boletosParaProrrogar.includes(codigo)) {
                             setBoletosParaProrrogar((prev) => prev.filter((c) => c !== codigo));
-                          }
-else if (codigo) {
+                          } else if (codigo) {
                             setBoletosParaProrrogar((prev) => [...prev, codigo]);
                           }
                         }}
@@ -1561,15 +1534,13 @@ else if (codigo) {
                   onClick={() => {
                     if (etapaDesconto == 1 && debtInfo) {
                       setEtapaDesconto(2);
-                    }
-else if (
+                    } else if (
                       etapaDesconto == 2 &&
                       novoValorQuitacao > 0 &&
                       novasParcelas.length > 0
                     ) {
                       setEtapaDesconto(3);
-                    }
-else {
+                    } else {
                       toast({
                         title: 'Erro',
                         description: 'Configure todos os campos necessários',
@@ -1935,8 +1906,7 @@ else {
                                       title: 'Download iniciado',
                                       description: 'O carnê já estava pronto.',
                                     });
-                                  }
-else if (response.jobId) {
+                                  } else if (response.jobId) {
                                     // CENÁRIO 2: Novo carnê está a ser gerado. Iniciar polling.
                                     console.log(
                                       '[CARNE] Geração de novo carnê iniciada. Job ID:',
@@ -1950,15 +1920,13 @@ else if (response.jobId) {
 
                                     // TODO: Implementar polling para aguardar conclusão
                                     // (Polling será implementado em iteração futura conforme necessário)
-                                  }
-else {
+                                  } else {
                                     // CENÁRIO DE ERRO: Resposta inesperada
                                     throw new Error(
                                       'Resposta da API inválida - sem data.url nem jobId.'
                                     );
                                   }
-                                }
-else {
+                                } else {
                                   toast({
                                     title: 'Erro na geração',
                                     description:
@@ -1966,8 +1934,7 @@ else {
                                     variant: 'destructive',
                                   });
                                 }
-                              }
-catch (error) {
+                              } catch (error) {
                                 toast({
                                   title: 'Erro ao gerar carnê',
                                   description: 'Não foi possível gerar o carnê consolidado',
@@ -2006,8 +1973,7 @@ catch (error) {
                                 queryClient.invalidateQueries({
                                   queryKey: ['/api/cobrancas/ficha', selectedPropostaId],
                                 });
-                              }
-catch (error) {
+                              } catch (error) {
                                 toast({
                                   title: 'Erro na sincronização',
                                   description: 'Não foi possível sincronizar com o Banco Inter',
@@ -2067,8 +2033,7 @@ catch (error) {
                                         onClick={() => {
                                           if (parcela.pixCopiaECola) {
                                             copyToClipboard(parcela.pixCopiaECola, 'PIX');
-                                          }
-else {
+                                          } else {
                                             toast({
                                               title: 'PIX não disponível',
                                               description:
@@ -2125,8 +2090,7 @@ else {
                                         title: 'PDF aberto',
                                         description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
                                       });
-                                    }
-catch (error) {
+                                    } catch (error) {
                                       console.error(
                                         '[PDF VIEW] Erro ao abrir PDF individual:',
                                         error
@@ -2142,15 +2106,13 @@ catch (error) {
                                             "O PDF ainda não foi sincronizado. Tente 'Atualizar Status' primeiro.",
                                           variant: 'destructive',
                                         });
-                                      }
-else if (error?.message?.includes('BOLETO_NOT_FOUND')) {
+                                      } else if (error?.message?.includes('BOLETO_NOT_FOUND')) {
                                         toast({
                                           title: 'Boleto não encontrado',
                                           description: 'Boleto não encontrado no sistema do banco.',
                                           variant: 'destructive',
                                         });
-                                      }
-else if (
+                                      } else if (
                                         error?.message?.includes('401') ||
                                         error?.message?.includes('Token')
                                       ) {
@@ -2159,8 +2121,7 @@ else if (
                                           description: 'Sessão expirada. Faça login novamente.',
                                           variant: 'destructive',
                                         });
-                                      }
-else {
+                                      } else {
                                         toast({
                                           title: 'Erro ao abrir PDF',
                                           description: 'Não foi possível abrir o PDF do boleto.',
@@ -2224,8 +2185,7 @@ else {
                                             queryKey: ['/api/cobrancas/kpis'],
                                           });
                                         }
-                                      }
-catch (error) {
+                                      } catch (error) {
                                         console.error('Erro ao marcar como pago:', error);
                                         toast({
                                           title: 'Erro',

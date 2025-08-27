@@ -9,7 +9,7 @@
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 import fs from 'fs/promises';
 import path from 'path';
-import { CCB_COMPLETEMAPPING, FieldPosition, yFromTop } from './ccbFieldMappingComplete';
+import { CCB_COMPLETE_MAPPING, FieldPosition, yFromTop } from './ccbFieldMappingComplete';
 
 export interface CalibrationResult {
   success: boolean;
@@ -44,12 +44,12 @@ export class CCBCoordinateCalibrator {
     try {
       console.log('🔍 [CALIBRATOR] Iniciando diagnóstico completo do template...');
 
-      const templateBytes = await fs.readFile(this.templatePath);
-      const pdfDoc = await PDFDocument.load(templateBytes);
+      const _templateBytes = await fs.readFile(this.templatePath);
+      const _pdfDoc = await PDFDocument.load(templateBytes);
 
       // Verificar AcroForms
-      const form = pdfDoc.getForm();
-      const hasAcroForms = form && form.getFields().length > 0;
+      const _form = pdfDoc.getForm();
+      const _hasAcroForms = form && form.getFields().length > 0;
       const formFields: string[] = [];
 
       if (hasAcroForms) {
@@ -59,7 +59,7 @@ export class CCBCoordinateCalibrator {
       }
 
       // Obter dimensões da página
-      const firstPage = pdfDoc.getPages()[0];
+      const _firstPage = pdfDoc.getPages()[0];
       const { width, height } = firstPage.getSize();
 
       // Gerar recomendações
@@ -70,8 +70,7 @@ export class CCBCoordinateCalibrator {
           '✅ Template possui AcroForms - considere usar preenchimento automático'
         );
         recommendations.push('💡 Use os nomes dos campos para mapeamento direto');
-      }
-else {
+      } else {
         recommendations.push('📍 Template requer mapeamento manual de coordenadas');
         recommendations.push('🎯 Use ferramentas de calibração visual para posicionamento');
       }
@@ -85,13 +84,12 @@ else {
       console.log(`   - Dimensões: ${width}x${height}`);
 
       return {
-        hasAcroForms,
+  _hasAcroForms,
         fields: formFields,
         pageSize: { width, height },
-        recommendations,
+  _recommendations,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('❌ [CALIBRATOR] Erro no diagnóstico:', error);
       throw error;
     }
@@ -112,19 +110,19 @@ catch (error) {
       // Garantir que diretório existe
       await fs.mkdir(this.outputDir, { recursive: true });
 
-      const templateBytes = await fs.readFile(this.templatePath);
-      const pdfDoc = await PDFDocument.load(templateBytes);
-      const firstPage = pdfDoc.getPages()[0];
+      const _templateBytes = await fs.readFile(this.templatePath);
+      const _pdfDoc = await PDFDocument.load(templateBytes);
+      const _firstPage = pdfDoc.getPages()[0];
       const { width, height } = firstPage.getSize();
 
       // Fontes para o grid
-      const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const _helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const _helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
       // Cores do grid
-      const gridColor = rgb(0.2, 0.6, 1.0); // Azul claro
-      const textColor = rgb(0.8, 0.0, 0.0); // Vermelho
-      const highlightColor = rgb(0.0, 0.8, 0.0); // Verde
+      const _gridColor = rgb(0.2, 0.6, 1.0); // Azul claro
+      const _textColor = rgb(0.8, 0.0, 0.0); // Vermelho
+      const _highlightColor = rgb(0.0, 0.8, 0.0); // Verde
 
       // Desenhar grid vertical
       for (let _x = 0; x <= width; x += gridSpacing) {
@@ -171,7 +169,7 @@ catch (error) {
       // Destacar campos específicos se solicitado
       if (highlightFields.length > 0) {
         highlightFields.forEach((fieldName) => {
-          const fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
+          const _fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
           if (fieldPos) {
             // Desenhar círculo de destaque
             firstPage.drawCircle({
@@ -194,14 +192,13 @@ catch (error) {
       }
 
       // Salvar PDF de calibração
-      const outputPath = path.join(this.outputDir, `calibration_grid_${Date.now()}.pdf`);
-      const pdfBytes = await pdfDoc.save();
+      const _outputPath = path.join(this.outputDir, `calibration_grid_${Date.now()}.pdf`);
+      const _pdfBytes = await pdfDoc.save();
       await fs.writeFile(outputPath, pdfBytes);
 
       console.log(`✅ [CALIBRATOR] Grid de calibração salvo: ${outputPath}`);
-      return outputPath;
-    }
-catch (error) {
+      return outputPath; }
+    } catch (error) {
       console.error('❌ [CALIBRATOR] Erro ao gerar grid:', error);
       throw error;
     }
@@ -217,30 +214,30 @@ catch (error) {
 
       await fs.mkdir(this.outputDir, { recursive: true });
 
-      const templateBytes = await fs.readFile(this.templatePath);
-      const pdfDoc = await PDFDocument.load(templateBytes);
-      const firstPage = pdfDoc.getPages()[0];
+      const _templateBytes = await fs.readFile(this.templatePath);
+      const _pdfDoc = await PDFDocument.load(templateBytes);
+      const _firstPage = pdfDoc.getPages()[0];
       const { height } = firstPage.getSize();
 
       // Fontes
-      const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const _helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const _helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
       // Cor de teste (azul escuro para destacar dos dados reais)
-      const testColor = rgb(0.0, 0.0, 0.8);
+      const _testColor = rgb(0.0, 0.0, 0.8);
 
       // Desenhar dados de teste
       Object.entries(testData).forEach(([fieldName, value]) => {
-        const fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
+        const _fieldPos = CCB_COMPLETE_MAPPING[fieldName as keyof typeof CCB_COMPLETE_MAPPING];
         if (fieldPos && value) {
-          const font = (fieldPos as unknown).fontWeight == 'bold' ? helveticaBold : helvetica;
+          const _font = (fieldPos as unknown).fontWeight == 'bold' ? helveticaBold : helvetica;
 
           // Desenhar o texto
           firstPage.drawText(value, {
             x: fieldPos.x,
             y: fieldPos.y,
             size: fieldPos.fontSize,
-            font,
+  _font,
             color: testColor,
           });
 
@@ -255,14 +252,13 @@ catch (error) {
       });
 
       // Salvar PDF de teste
-      const outputPath = path.join(this.outputDir, `field_test_${Date.now()}.pdf`);
-      const pdfBytes = await pdfDoc.save();
+      const _outputPath = path.join(this.outputDir, `field_test_${Date.now()}.pdf`);
+      const _pdfBytes = await pdfDoc.save();
       await fs.writeFile(outputPath, pdfBytes);
 
       console.log(`✅ [CALIBRATOR] Teste de campos salvo: ${outputPath}`);
-      return outputPath;
-    }
-catch (error) {
+      return outputPath; }
+    } catch (error) {
       console.error('❌ [CALIBRATOR] Erro no teste:', error);
       throw error;
     }
@@ -281,23 +277,22 @@ catch (error) {
       console.log('⚡ [CALIBRATOR] Iniciando calibração inteligente...');
 
       // Gerar versão original
-      const originalPath = await this.testFieldPositions(sampleData);
+      const _originalPath = await this.testFieldPositions(sampleData);
 
       // Aplicar ajustes heurísticos baseados em padrões comuns
-      const adjustedData = this.applyIntelligentAdjustments(sampleData);
-      const adjustedPath = await this.testFieldPositions(adjustedData);
+      const _adjustedData = this.applyIntelligentAdjustments(sampleData);
+      const _adjustedPath = await this.testFieldPositions(adjustedData);
 
       // Gerar recomendações
-      const recommendations = this.generateRecommendations(sampleData);
+      const _recommendations = this.generateRecommendations(sampleData);
 
       console.log('✅ [CALIBRATOR] Calibração inteligente concluída');
       return {
-        originalPath,
-        adjustedPath,
-        recommendations,
+  _originalPath,
+  _adjustedPath,
+  _recommendations,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('❌ [CALIBRATOR] Erro na calibração inteligente:', error);
       throw error;
     }
@@ -309,7 +304,7 @@ catch (error) {
   private applyIntelligentAdjustments(data: FieldTestData): FieldTestData {
     // Por enquanto retorna os dados originais
     // Implementar lógica de ajuste baseada em análise de layout
-    return { ...data };
+    return { ...data }; }
   }
 
   /**
@@ -323,7 +318,7 @@ catch (error) {
     recommendations.push('📏 Considere ajustar tamanhos de fonte se texto não couber');
     recommendations.push('🔄 Teste com diferentes conjuntos de dados');
 
-    return recommendations;
+    return recommendations; }
   }
 
   /**
@@ -338,17 +333,17 @@ catch (error) {
       console.log('📊 [CALIBRATOR] Gerando relatório completo...');
 
       // Análise do template
-      const templateAnalysis = await this.diagnoseTemplate();
+      const _templateAnalysis = await this.diagnoseTemplate();
 
       // Grid de calibração
-      const gridPath = await this.generateCalibrationGrid(50, true, [
+      const _gridPath = await this.generateCalibrationGrid(50, true, [
         'devedorNome',
         'devedorCpf',
         'valorPrincipal',
       ]);
 
       // Recomendações específicas
-      const recommendations = [
+      const _recommendations = [
         '🎯 Use o grid de calibração para ajustar posições visualmente',
         '📱 Teste com dados reais de diferentes comprimentos',
         '🖨️ Considere diferenças entre visualização e impressão',
@@ -358,12 +353,11 @@ catch (error) {
 
       console.log('✅ [CALIBRATOR] Relatório completo gerado');
       return {
-        templateAnalysis,
-        gridPath,
-        recommendations,
+  _templateAnalysis,
+  _gridPath,
+  _recommendations,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('❌ [CALIBRATOR] Erro no relatório:', error);
       throw error;
     }
@@ -371,4 +365,4 @@ catch (error) {
 }
 
 // Instância singleton
-export const ccbCoordinateCalibrator = new CCBCoordinateCalibrator();
+export const _ccbCoordinateCalibrator = new CCBCoordinateCalibrator();

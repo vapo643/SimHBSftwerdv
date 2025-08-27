@@ -21,7 +21,7 @@ export class SecurityWebSocketManager {
 
   constructor(server: HTTPServer) {
     this.wss = new WebSocketServer({
-      server,
+  _server,
       path: '/ws/security',
     });
 
@@ -73,7 +73,7 @@ export class SecurityWebSocketManager {
   }
 
   private broadcast(message: SecurityWebSocketMessage) {
-    const messageStr = JSON.stringify(message);
+    const _messageStr = JSON.stringify(message);
 
     this.clients.forEach((ws) => {
       if (ws.readyState == WebSocket.OPEN) {
@@ -97,9 +97,9 @@ export function setupSecurityWebSocket(server: HTTPServer): SecurityWebSocketMan
   if (!wsManager) {
     wsManager = new SecurityWebSocketManager(server);
   }
-  return wsManager;
+  return wsManager; }
 }
 
 export function getSecurityWebSocketManager(): SecurityWebSocketManager | null {
-  return wsManager;
+  return wsManager; }
 }

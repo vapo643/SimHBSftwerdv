@@ -9,7 +9,7 @@
  * @module scripts/migrate-legacy-products-tac
  */
 
-import { db } from '../server/lib/supabase.js';
+import { db } from '../server/lib/_supabase.js';
 import { produtos } from '../shared/schema.js';
 import { isNull } from 'drizzle-orm';
 
@@ -82,8 +82,7 @@ async function migrateLegacyProductsTac() {
     console.log(`   Valor TAC aplicado: R$ 50,00`);
     console.log(`   Tipo TAC aplicado: fixo`);
     console.log(`   Timestamp: ${new Date().toISOString()}`);
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [MIGRAÇÃO TAC] Erro durante a migração:', error);
     process.exit(1);
   }
@@ -98,7 +97,7 @@ console.log('   MIGRAÇÃO DE DADOS - TAC PRODUTOS LEGADOS   ');
 console.log('═══════════════════════════════════════════════');
 console.log('');
 
-migrateLegacyProductsTac().catch ((error) => {
+migrateLegacyProductsTac().catch((error) => {
   console.error('❌ [MIGRAÇÃO TAC] Erro fatal:', error);
   process.exit(1);
 });

@@ -10,7 +10,7 @@ import { notificacoes, regrasAlertas, historicoExecucoesAlertas, users } from '@
 import { eq, and, desc, inArray, sql } from 'drizzle-orm';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/alertas/teste
@@ -18,10 +18,9 @@ const router = Router();
  */
 router.get('/teste', async (req, res) => {
   try {
-    const resultado = await alertasProativosService.testarServico();
+    const _resultado = await alertasProativosService.testarServico();
     res.json(resultado);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS TESTE] Erro:', error);
     res.status(500).json({
       sucesso: false,
@@ -36,7 +35,7 @@ catch (error) {
  */
 router.post('/executar', jwtAuthMiddleware, async (req, res) => {
   try {
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     // Apenas ADMINISTRADOR pode executar manualmente
     if (userRole !== 'ADMINISTRADOR') {
@@ -49,7 +48,7 @@ router.post('/executar', jwtAuthMiddleware, async (req, res) => {
     console.log(`[ALERTAS] Execução manual solicitada por: ${req.user?.email}`);
 
     // Executar verificação em background
-    alertasProativosService.executarVerificacaoDiaria().catch ((error) => {
+    alertasProativosService.executarVerificacaoDiaria().catch((error) => {
       console.error('[ALERTAS] Erro na execução manual:', error);
     });
 
@@ -57,8 +56,7 @@ router.post('/executar', jwtAuthMiddleware, async (req, res) => {
       success: true,
       message: 'Verificação de alertas iniciada em background',
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS EXECUTAR] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -73,7 +71,7 @@ catch (error) {
  */
 router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
   try {
-    const userEmail = req.user?.email;
+    const _userEmail = req.user?.email;
     const { status, limite = 50 } = req.query;
 
     if (!userEmail) {
@@ -95,7 +93,7 @@ router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const localUserId = localUser.id.toString();
+    const _localUserId = localUser.id.toString();
     console.log(`[ALERTAS] Mapeamento: ${userEmail} -> Local ID: ${localUserId}`);
 
     let whereConditions: unknown = eq(notificacoes.userId, localUserId);
@@ -104,7 +102,7 @@ router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
       whereConditions = and(whereConditions, eq(notificacoes.status, status));
     }
 
-    const listaNotificacoes = await db
+    const _listaNotificacoes = await db
       .select()
       .from(notificacoes)
       .where(whereConditions)
@@ -125,8 +123,7 @@ router.get('/notificacoes', jwtAuthMiddleware, async (req, res) => {
       notificacoes: listaNotificacoes,
       totalNaoLidas: naoLidas || 0,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS NOTIFICACOES] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -142,7 +139,7 @@ catch (error) {
 router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const userEmail = req.user?.email;
+    const _userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
@@ -161,7 +158,7 @@ router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req, res)
       });
     }
 
-    const localUserId = localUser.id.toString();
+    const _localUserId = localUser.id.toString();
 
     await db
       .update(notificacoes)
@@ -174,8 +171,7 @@ router.post('/notificacoes/:id/marcar-lida', jwtAuthMiddleware, async (req, res)
 
     console.log(`[ALERTAS] Notificação ${id} marcada como lida para usuário ${userEmail}`);
     res.json({ success: true });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS MARCAR LIDA] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -190,7 +186,7 @@ catch (error) {
  */
 router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req, res) => {
   try {
-    const userEmail = req.user?.email;
+    const _userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
@@ -209,9 +205,9 @@ router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req, r
       });
     }
 
-    const localUserId = localUser.id.toString();
+    const _localUserId = localUser.id.toString();
 
-    const resultado = await db
+    const _resultado = await db
       .update(notificacoes)
       .set({
         status: 'lida',
@@ -228,8 +224,7 @@ router.post('/notificacoes/marcar-todas-lidas', jwtAuthMiddleware, async (req, r
       success: true,
       count: resultado.length,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS MARCAR TODAS] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -244,7 +239,7 @@ catch (error) {
  */
 router.delete('/notificacoes/all', jwtAuthMiddleware, async (req, res) => {
   try {
-    const userEmail = req.user?.email;
+    const _userEmail = req.user?.email;
 
     if (!userEmail) {
       return res.status(401).json({
@@ -263,10 +258,10 @@ router.delete('/notificacoes/all', jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const localUserId = localUser.id.toString();
+    const _localUserId = localUser.id.toString();
 
     // Marcar todas as notificações como arquivadas
-    const resultado = await db
+    const _resultado = await db
       .update(notificacoes)
       .set({
         status: 'arquivada',
@@ -284,8 +279,7 @@ router.delete('/notificacoes/all', jwtAuthMiddleware, async (req, res) => {
       message: 'Histórico de notificações limpo com sucesso',
       notificacoesArquivadas: resultado.length,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS LIMPAR HISTÓRICO] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -300,7 +294,7 @@ catch (error) {
  */
 router.get('/regras', jwtAuthMiddleware, async (req, res) => {
   try {
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     if (userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
@@ -309,11 +303,10 @@ router.get('/regras', jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const regras = await db.select().from(regrasAlertas).orderBy(regrasAlertas.nome);
+    const _regras = await db.select().from(regrasAlertas).orderBy(regrasAlertas.nome);
 
     res.json(regras);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS REGRAS] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',
@@ -328,7 +321,7 @@ catch (error) {
  */
 router.get('/historico', jwtAuthMiddleware, async (req, res) => {
   try {
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     if (userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
@@ -337,7 +330,7 @@ router.get('/historico', jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const historico = await db
+    const _historico = await db
       .select({
         id: historicoExecucoesAlertas.id,
         regraId: historicoExecucoesAlertas.regraId,
@@ -354,8 +347,7 @@ router.get('/historico', jwtAuthMiddleware, async (req, res) => {
       .limit(100);
 
     res.json(historico);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[ALERTAS HISTORICO] Erro:', error);
     res.status(500).json({
       error: 'Erro interno',

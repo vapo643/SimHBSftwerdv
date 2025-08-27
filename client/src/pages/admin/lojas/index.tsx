@@ -36,7 +36,7 @@ export default function LojasPage() {
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
       const _response = await api.get<Loja[]>('/api/admin/lojas');
-      return Array.isArray(_response) ? response : (response as unknown).data || [];
+      return Array.isArray(_response) ? response : (response as unknown).data || []; }
     },
   });
 
@@ -44,7 +44,7 @@ export default function LojasPage() {
   const _createMutation = useMutation({
     mutationFn: async (data: InsertLoja) => {
       const _response = await api.post<Loja>('/api/admin/lojas',_data);
-      return (response as unknown).data || response;
+      return (response as unknown).data || response; }
     },
     onSuccess: () => {
       toast({
@@ -72,7 +72,7 @@ export default function LojasPage() {
   const _updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateLoja }) => {
       const _response = await api.put<Loja>(`/api/admin/lojas/${id}`,_data);
-      return (response as unknown).data || response;
+      return (response as unknown).data || response; }
     },
     onSuccess: () => {
       toast({
@@ -100,7 +100,7 @@ export default function LojasPage() {
   const _deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       const _response = await api.delete(`/api/admin/lojas/${id}`);
-      return response.data;
+      return response.data; }
     },
     onSuccess: () => {
       toast({
@@ -147,8 +147,7 @@ export default function LojasPage() {
   const _handleSubmit = (data: InsertLoja | UpdateLoja) => {
     if (modalMode == 'edit' && selectedLoja) {
       updateMutation.mutate({ id: selectedLoja.id, data: data as UpdateLoja });
-    }
-else {
+    } else {
       createMutation.mutate(data as InsertLoja);
     }
   };

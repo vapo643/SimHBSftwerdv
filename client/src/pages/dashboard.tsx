@@ -47,34 +47,34 @@ const _getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
     case 'CCB_GERADA': {
-      return 'bg-blue-100 text-blue-800 border-blue-200';
+      return 'bg-blue-100 text-blue-800 border-blue-200'; }
     case 'AGUARDANDO_ASSINATURA': {
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200'; }
     case 'ASSINATURA_CONCLUIDA': {
-      return 'bg-green-100 text-green-800 border-green-200';
+      return 'bg-green-100 text-green-800 border-green-200'; }
     case 'BOLETOS_EMITIDOS': {
-      return 'bg-purple-100 text-purple-800 border-purple-200';
+      return 'bg-purple-100 text-purple-800 border-purple-200'; }
     // Status antigos mantidos para compatibilidade
     case 'APROVADO': {
-      return 'bg-green-100 text-green-800 border-green-200';
+      return 'bg-green-100 text-green-800 border-green-200'; }
     case 'EM_ANALISE': {
-      return 'bg-blue-100 text-blue-800 border-blue-200';
+      return 'bg-blue-100 text-blue-800 border-blue-200'; }
     case 'AGUARDANDO_ANALISE': {
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200'; }
     case 'PENDENCIADO': {
-      return 'bg-orange-100 text-orange-800 border-orange-200';
+      return 'bg-orange-100 text-orange-800 border-orange-200'; }
     case 'REJEITADO': {
-      return 'bg-red-100 text-red-800 border-red-200';
+      return 'bg-red-100 text-red-800 border-red-200'; }
     case 'PAGO': {
-      return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      return 'bg-emerald-100 text-emerald-800 border-emerald-200'; }
     case 'PRONTO_PAGAMENTO': {
-      return 'bg-purple-100 text-purple-800 border-purple-200';
+      return 'bg-purple-100 text-purple-800 border-purple-200'; }
     case 'RASCUNHO': {
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-gray-100 text-gray-800 border-gray-200'; }
     case 'CANCELADO': {
-      return 'bg-slate-100 text-slate-800 border-slate-200';
+      return 'bg-slate-100 text-slate-800 border-slate-200'; }
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-gray-100 text-gray-800 border-gray-200'; }
   }
 };
 
@@ -82,32 +82,32 @@ const _getStatusText = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
     case 'CCB_GERADA': {
-      return 'CCB Gerada';
+      return 'CCB Gerada'; }
     case 'AGUARDANDO_ASSINATURA': {
-      return 'Aguardando Assinatura';
+      return 'Aguardando Assinatura'; }
     case 'ASSINATURA_CONCLUIDA': {
-      return 'Assinatura Concluída';
+      return 'Assinatura Concluída'; }
     case 'BOLETOS_EMITIDOS': {
-      return 'Boletos Emitidos';
+      return 'Boletos Emitidos'; }
     // Status antigos mantidos para compatibilidade
     case 'AGUARDANDO_ANALISE': {
-      return 'Aguardando Análise';
+      return 'Aguardando Análise'; }
     case 'EM_ANALISE': {
-      return 'Em Análise';
+      return 'Em Análise'; }
     case 'PRONTO_PAGAMENTO': {
-      return 'Pronto para Pagamento';
+      return 'Pronto para Pagamento'; }
     case 'APROVADO': {
-      return 'Aprovado';
+      return 'Aprovado'; }
     case 'REJEITADO': {
-      return 'Rejeitado';
+      return 'Rejeitado'; }
     case 'PENDENCIADO': {
-      return 'Pendenciado';
+      return 'Pendenciado'; }
     case 'PAGO': {
-      return 'Pago';
+      return 'Pago'; }
     case 'CANCELADO': {
-      return 'Cancelado';
+      return 'Cancelado'; }
     default:
-      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase());
+      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase()); }
   }
 };
 
@@ -115,29 +115,27 @@ const _getStatusIcon = (status: string) => {
   switch (status.toUpperCase()) {
     // Status V2.0
     case 'CCB_GERADA': {
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-4 w-4" />; }
     case 'AGUARDANDO_ASSINATURA': {
-      return <Clock className="h-4 w-4" />;
+      return <Clock className="h-4 w-4" />; }
     case 'ASSINATURA_CONCLUIDA': {
-      return <CheckCircle2 className="h-4 w-4" />;
+      return <CheckCircle2 className="h-4 w-4" />; }
     case 'BOLETOS_EMITIDOS': {
-      return <Banknote className="h-4 w-4" />;
+      return <Banknote className="h-4 w-4" />; }
     // Status antigos mantidos para compatibilidade
     case 'APROVADO': {
-      return <CheckCircle2 className="h-4 w-4" />;
+      return <CheckCircle2 className="h-4 w-4" />; }
     case 'REJEITADO': {
-      return <XCircle className="h-4 w-4" />;
+      return <XCircle className="h-4 w-4" />; }
     case 'EM_ANALISE': {
-        break;
-      }
     case 'AGUARDANDO_ANALISE': {
-      return <Clock className="h-4 w-4" />;
+      return <Clock className="h-4 w-4" />; }
     case 'PENDENCIADO': {
-      return <AlertCircle className="h-4 w-4" />;
+      return <AlertCircle className="h-4 w-4" />; }
     case 'PAGO': {
-      return <Banknote className="h-4 w-4" />;
+      return <Banknote className="h-4 w-4" />; }
     default:
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-4 w-4" />; }
   }
 };
 
@@ -238,7 +236,7 @@ const Dashboard: React.FC = () => {
           const _matchesParceiro =
             parceiroFilter == 'todos' || proposta.parceiro?.razaoSocial == parceiroFilter;
 
-          return matchesSearch && matchesStatus && matchesParceiro;
+          return matchesSearch && matchesStatus && matchesParceiro; }
         })
       : [];
   }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
@@ -275,7 +273,7 @@ const Dashboard: React.FC = () => {
         typeof p.valorSolicitado == 'string'
           ? parseFloat(p.valorSolicitado.replace(/[^\d,.-]/g, '').replace(',', '.'))
           : Number(p.valorSolicitado) || 0;
-      return acc + valor;
+      return acc + valor; }
     }, 0);
     const _valorMedio = total > 0 ? valorTotal / total : 0;
 
@@ -283,7 +281,7 @@ const Dashboard: React.FC = () => {
     const _statusCounts = propostasData.reduce(
       (acc, p) => {
         acc[p.status] = (acc[p.status] || 0) + 1;
-        return acc;
+        return acc; }
       },
       {} as Record<string, number>
     );

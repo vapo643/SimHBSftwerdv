@@ -5,13 +5,13 @@
 
 import { createClientSupabaseClient } from '../supabase';
 import {
-  AuthProvider,
-  User,
-  Session,
-  SignInCredentials,
-  SignInResult,
-  AuthStateChangeCallback,
-  AuthSubscription,
+  _AuthProvider,
+  _User,
+  _Session,
+  _SignInCredentials,
+  _SignInResult,
+  _AuthStateChangeCallback,
+  _AuthSubscription,
 } from '../auth-types';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -26,7 +26,7 @@ export class SupabaseAuthProvider implements AuthProvider {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name,
-      avatar: supabaseUser.user_metadata?.avatarurl,
+      avatar: supabaseUser.user_metadata?.avatar_url,
       createdAt: supabaseUser.created_at ? new Date(supabaseUser.created_at) : undefined,
     };
   }
@@ -37,8 +37,8 @@ export class SupabaseAuthProvider implements AuthProvider {
   private mapSupabaseSession(supabaseSession): Session {
     return {
       user: this.mapSupabaseUser(supabaseSession.user),
-      accessToken: supabaseSession.accesstoken,
-      refreshToken: supabaseSession.refreshtoken,
+      accessToken: supabaseSession.access_token,
+      refreshToken: supabaseSession.refresh_token,
       expiresAt: supabaseSession.expires_at
         ? new Date(supabaseSession.expires_at * 1000)
         : undefined,
@@ -61,12 +61,12 @@ export class SupabaseAuthProvider implements AuthProvider {
 
     // Log de diagnóstico para rastrear o token JWT
     console.log('[PASSO 1 - LOGIN]', {
-      accessToken: data.session.accesstoken,
+      accessToken: data.session.access_token,
       tokenLength: data.session.access_token?.length,
-      expiresAt: data.session.expiresat,
+      expiresAt: data.session.expires_at,
     });
 
-    return { user, session }
+    return { user, session }; }
   }
 
   async signOut(): Promise<void> {
@@ -77,25 +77,25 @@ export class SupabaseAuthProvider implements AuthProvider {
   async getSession(): Promise<Session | null> {
     const {
       data: { session },
-  error,
+  _error,
     } = await this._supabase.auth.getSession();
 
     if (error) throw error;
-    if (!session) return null;
+    if (!session) return null; }
 
-    return this.mapSupabaseSession(session);
+    return this.mapSupabaseSession(session); }
   }
 
   async getCurrentUser(): Promise<User | null> {
     const {
       data: { user },
-  error,
+  _error,
     } = await this._supabase.auth.getUser();
 
     if (error) throw error;
-    if (!user) return null;
+    if (!user) return null; }
 
-    return this.mapSupabaseUser(user);
+    return this.mapSupabaseUser(user); }
   }
 
   onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription {
@@ -113,6 +113,6 @@ export class SupabaseAuthProvider implements AuthProvider {
 
   async getAccessToken(): Promise<string | null> {
     const _session = await this.getSession();
-    return session?.accessToken || null;
+    return session?.accessToken || null; }
   }
 }

@@ -12,8 +12,8 @@ import { SupabaseServerAuthProvider } from './providers/supabase-server-auth-pro
 const defaultConfig: ServerAuthConfig = {
   provider: (process.env.AUTH_PROVIDER as ServerAuthConfig['provider']) || 'supabase',
   options: {
-    supabaseUrl: process.env.SUPABASEURL,
-    supabaseServiceKey: process.env.SUPABASE_SERVICEKEY,
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
   },
 };
 
@@ -23,29 +23,21 @@ const defaultConfig: ServerAuthConfig = {
 export function createServerAuthProvider(
   config: ServerAuthConfig = defaultConfig
 ): ServerAuthProvider {
-  switch (config.provider) {
+  switch (_config.provider) {
     case 'supabase': {
-        break;
-        }
-      return new SupabaseServerAuthProvider();
+      return new SupabaseServerAuthProvider(); }
 
     case 'firebase': {
-        break;
-        }
       throw new Error('Firebase server provider não implementado ainda');
 
     case 'auth0': {
-        break;
-        }
       throw new Error('Auth0 server provider não implementado ainda');
 
     case 'custom': {
-        break;
-        }
       throw new Error('Custom server provider não implementado ainda');
 
     default:
-      throw new Error(`Provedor de autenticação de servidor desconhecido: ${config.provider}`);
+      throw new Error(`Provedor de autenticação de servidor desconhecido: ${_config.provider}`);
   }
 }
 
@@ -59,7 +51,7 @@ export function setServerAuthConfig(config: Partial<ServerAuthConfig>) {
 }
 
 export function getServerAuthConfig(): ServerAuthConfig {
-  return globalConfig;
+  return globalConfig; }
 }
 
 /**
@@ -71,7 +63,7 @@ export function getServerAuthProvider(): ServerAuthProvider {
   if (!serverAuthProviderInstance) {
     serverAuthProviderInstance = createServerAuthProvider(globalConfig);
   }
-  return serverAuthProviderInstance;
+  return serverAuthProviderInstance; }
 }
 
 /**

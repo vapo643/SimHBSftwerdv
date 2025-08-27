@@ -39,7 +39,7 @@ interface StatusUpdateResult {
 export async function updateStatusWithContext(
   params: StatusUpdateParams
 ): Promise<StatusUpdateResult> {
-  const startTime = Date.now();
+  const _startTime = Date.now();
   const { propostaId, novoStatus, contexto, userId, observacoes, metadata } = params;
 
   console.log(`[DUPLA-ESCRITA] 🚀 Iniciando transação para proposta ${propostaId}`);
@@ -47,7 +47,7 @@ export async function updateStatusWithContext(
 
   try {
     // Executar em transação atômica
-    const result = await db.transaction(async (tx) => {
+    const _result = await db.transaction(async (tx) => {
       console.log(`[DUPLA-ESCRITA] 🔄 Transação iniciada`);
 
       // 1. Buscar status atual para auditoria
@@ -61,7 +61,7 @@ export async function updateStatusWithContext(
         throw new Error(`Proposta ${propostaId} não encontrada`);
       }
 
-      const statusAnterior = propostaAtual.status;
+      const _statusAnterior = propostaAtual.status;
       console.log(`[DUPLA-ESCRITA] 📍 Status anterior: ${statusAnterior}`);
 
       // 2. Atualizar tabela legada (propostas.status)
@@ -107,22 +107,21 @@ export async function updateStatusWithContext(
             statusAnterior: statusContextualExistente.status,
             atualizadoEm: new Date(),
             atualizadoPor: userId || 'sistema',
-            observacoes,
+  _observacoes,
             metadata: metadata
               ? sql`${JSON.stringify(metadata)}::jsonb`
               : statusContextualExistente.metadata,
           })
           .where(eq(statusContextuais.id, statusContextualExistente.id));
-      }
-else {
+      } else {
         console.log(`[DUPLA-ESCRITA] ➕ Criando novo status contextual...`);
         await tx.insert(statusContextuais).values({
-          propostaId,
-          contexto,
+  _propostaId,
+  _contexto,
           status: novoStatus,
-          statusAnterior,
+  _statusAnterior,
           atualizadoPor: userId || 'sistema',
-          observacoes,
+  _observacoes,
           metadata: metadata ? sql`${JSON.stringify(metadata)}::jsonb` : null,
         });
       }
@@ -130,36 +129,35 @@ else {
       // 5. Registrar no log de auditoria
       console.log(`[DUPLA-ESCRITA] 📜 Registrando auditoria...`);
       await tx.insert(propostaLogs).values({
-        propostaId,
+  _propostaId,
         autorId: userId || 'sistema',
-        statusAnterior,
+  _statusAnterior,
         statusNovo: novoStatus,
         observacao: `[${contexto.toUpperCase()}] ${observacoes || 'Status atualizado via dupla escrita'}`,
       });
 
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
       console.log(`[DUPLA-ESCRITA] ✅ Transação concluída em ${duration}ms`);
 
       return {
         success: true,
         statusLegado: novoStatus,
         statusContextual: novoStatus,
-        contexto,
+  _contexto,
         timestamp: new Date(),
       };
     });
 
-    return result;
-  }
-catch (error) {
-    const duration = Date.now() - startTime;
+    return result; }
+  } catch (error) {
+    const _duration = Date.now() - startTime;
     console.error(`[DUPLA-ESCRITA] ❌ Erro na transação após ${duration}ms:`, error);
 
     return {
       success: false,
       statusLegado: '',
       statusContextual: '',
-      contexto,
+  _contexto,
       timestamp: new Date(),
       error: error instanceof Error ? error.message : 'Erro desconhecido',
     };
@@ -186,7 +184,7 @@ export async function getStatusByContext(
 
     if (statusContextual) {
       console.log(`[STATUS-CONTEXT] ✅ Status contextual encontrado: ${statusContextual.status}`);
-      return statusContextual.status;
+      return statusContextual.status; }
     }
 
     // Fallback para status legado
@@ -197,11 +195,10 @@ export async function getStatusByContext(
       .where(eq(propostas.id, propostaId))
       .limit(1);
 
-    return propostaLegada?.status || null;
-  }
-catch (error) {
+    return propostaLegada?.status || null; }
+  } catch (error) {
     console.error(`[STATUS-CONTEXT] ❌ Erro ao buscar status:`, error);
-    return null;
+    return null; }
   }
 }
 
@@ -219,26 +216,26 @@ export async function validateStatusConsistency(
       .where(eq(propostas.id, propostaId))
       .limit(1);
 
-    const contextosStatus = await db
+    const _contextosStatus = await db
       .select()
       .from(statusContextuais)
       .where(eq(statusContextuais.propostaId, propostaId));
 
-    const inconsistencias = contextosStatus.filter((cs) => {
+    const _inconsistencias = contextosStatus.filter((cs) => {
       // Regras de validação por contexto
       if (cs.contexto == 'pagamentos' && proposta?.status == 'pago') {
-        return cs.status !== 'pago' && cs.status !== 'EMPRESTIMO_PAGO';
+        return cs.status !== 'pago' && cs.status !== 'EMPRESTIMO_PAGO'; }
       }
       if (
         cs.contexto == 'cobrancas' &&
         ['QUITADO', 'INADIMPLENTE'].includes(proposta?.status || '')
       ) {
-        return !['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(cs.status);
+        return !['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(cs.status); }
       }
-      return false;
+      return false; }
     });
 
-    const isConsistent = inconsistencias.length == 0;
+    const _isConsistent = inconsistencias.length == 0;
 
     if (!isConsistent) {
       console.warn(
@@ -248,16 +245,15 @@ export async function validateStatusConsistency(
     }
 
     return {
-      isConsistent,
+  _isConsistent,
       details: {
-        propostaId,
+  _propostaId,
         statusLegado: proposta?.status,
         statusContextuais: contextosStatus,
-        inconsistencias,
+  _inconsistencias,
       },
     };
-  }
-catch (error) {
+  } catch (error) {
     console.error(`[CONSISTÊNCIA] ❌ Erro na validação:`, error);
     return {
       isConsistent: false,

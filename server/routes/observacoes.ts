@@ -11,10 +11,10 @@ import { observacoesService } from '../services/observacoesService';
 import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
 import { getClientIP } from '../lib/security-logger';
 
-const router = Router();
+const _router = Router();
 
 // Schema para validação do corpo da requisição
-const createObservacaoSchema = z.object({
+const _createObservacaoSchema = z.object({
   observacao: z.string().min(1, 'Observação é obrigatória').max(1000, 'Observação muito longa'),
   tipo_acao: z
     .enum([
@@ -27,7 +27,7 @@ const createObservacaoSchema = z.object({
     .optional(),
 });
 
-const updateObservacaoSchema = z.object({
+const _updateObservacaoSchema = z.object({
   observacao: z.string().min(1, 'Observação é obrigatória').max(1000, 'Observação muito longa'),
 });
 
@@ -51,15 +51,14 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req, 
     }
 
     // PADRÃO CORRETO: Controller chama Service, não acessa DB
-    const observacoes = await observacoesService.getObservacoesByProposta(Number(propostaId));
+    const _observacoes = await observacoesService.getObservacoesByProposta(Number(propostaId));
 
     res.json({
       success: true,
-      observacoes,
+      _observacoes,
       total: observacoes.length,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [Controller/Observações] Erro ao buscar histórico:', error);
     res.status(500).json({
       success: false,
@@ -88,14 +87,14 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
     }
 
     // Validar dados de entrada
-    const __validatedData = createObservacaoSchema.parse(req.body);
-    const clientIp = getClientIP(req);
+    const _validatedData = createObservacaoSchema.parse(req.body);
+    const _clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Controller chama Service com dados validados
-    const novaObservacao = await observacoesService.createObservacao(
+    const _novaObservacao = await observacoesService.createObservacao(
       Number(propostaId),
-      _validatedData.observacao,
-      userId,
+      validatedData.observacao,
+      _userId,
       clientIp
     );
 
@@ -104,8 +103,7 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req,
       observacao: novaObservacao,
       message: 'Observação criada com sucesso',
     });
-  }
-catch (error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -134,14 +132,14 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => 
     const { id: userId, role } = req.user!;
 
     // Validar dados
-    const __validatedData = updateObservacaoSchema.parse(req.body);
-    const clientIp = getClientIP(req);
+    const _validatedData = updateObservacaoSchema.parse(req.body);
+    const _clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Service cuida da lógica de negócio e validações
-    const observacaoAtualizada = await observacoesService.updateObservacao(
+    const _observacaoAtualizada = await observacoesService.updateObservacao(
       Number(observacaoId),
-      _validatedData.observacao,
-      userId,
+      validatedData.observacao,
+      _userId,
       clientIp
     );
 
@@ -150,8 +148,7 @@ router.put('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) => 
       observacao: observacaoAtualizada,
       message: 'Observação atualizada com sucesso',
     });
-  }
-catch (error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -162,7 +159,7 @@ catch (error) {
 
     console.error('❌ [Controller/Observações] Erro ao atualizar observação:', error);
 
-    const statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
+    const _statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
     res.status(statusCode).json({
       success: false,
       message: error instanceof Error ? error.message : 'Erro ao atualizar observação',
@@ -180,7 +177,7 @@ router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) 
   try {
     const { observacaoId } = req.params;
     const { id: userId } = req.user!;
-    const clientIp = getClientIP(req);
+    const _clientIp = getClientIP(req);
 
     // PADRÃO CORRETO: Service gerencia permissões específicas e lógica
     await observacoesService.deleteObservacao(Number(observacaoId), userId, clientIp);
@@ -189,11 +186,10 @@ router.delete('/observacoes/:observacaoId', jwtAuthMiddleware, async (req, res) 
       success: true,
       message: 'Observação deletada com sucesso',
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [Controller/Observações] Erro ao deletar observação:', error);
 
-    const statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
+    const _statusCode = error instanceof Error && error.message.includes('permissão') ? 403 : 500;
     res.status(statusCode).json({
       success: false,
       message: error instanceof Error ? error.message : 'Erro ao deletar observação',
@@ -209,7 +205,7 @@ catch (error) {
  */
 router.get('/observacoes', jwtAuthMiddleware, async (req, res) => {
   try {
-    const { page = 1, limit = 10, propostaid, usuario_id } = req.query;
+    const { page = 1, limit = 10, proposta_id, usuario_id } = req.query;
     const { role } = req.user!;
 
     // Verificar permissões
@@ -226,7 +222,7 @@ router.get('/observacoes', jwtAuthMiddleware, async (req, res) => {
     if (usuario_id) filters.usuario_id = usuario_id;
 
     // PADRÃO CORRETO: Service processa a lógica de paginação
-    const result = await observacoesService.getObservacoesPaginated(
+    const _result = await observacoesService.getObservacoesPaginated(
       Number(page),
       Number(limit),
       filters
@@ -236,8 +232,7 @@ router.get('/observacoes', jwtAuthMiddleware, async (req, res) => {
       success: true,
       ...result,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [Controller/Observações] Erro ao listar observações:', error);
     res.status(500).json({
       success: false,

@@ -25,7 +25,7 @@ const MOCK_TOKENS = {
 };
 
 // Cores para output no console
-const colors = {
+const _colors = {
   green: '\x1b[32m',
   red: '\x1b[31m',
   yellow: '\x1b[33m',
@@ -42,7 +42,7 @@ async function testAdminAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const response = await axios.get(APIENDPOINT, {
+    const _response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.ADMIN,
         'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ async function testAdminAccess() {
 
     // Validar estrutura da resposta
     if (response.data.contratos && response.data.contratos.length > 0) {
-      const primeiroContrato = response.data.contratos[0];
+      const _primeiroContrato = response.data.contratos[0];
       console.log(`\n${colors.green}✅ Estrutura do contrato válida:${colors.reset}`);
       console.log(`   - ID: ${primeiroContrato.id}`);
       console.log(`   - Cliente: ${primeiroContrato.clienteNome}`);
@@ -66,14 +66,13 @@ async function testAdminAccess() {
       console.log(`   - URL CCB: ${primeiroContrato.urlCcbAssinado ? 'Presente' : 'Ausente'}`);
     }
 
-    return true;
-  }
-catch (error) {
+    return true; }
+  } catch (error) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
     );
-    return false;
+    return false; }
   }
 }
 
@@ -86,7 +85,7 @@ async function testDiretorAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const response = await axios.get(APIENDPOINT, {
+    const _response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.DIRETOR,
         'Content-Type': 'application/json',
@@ -105,14 +104,13 @@ async function testDiretorAccess() {
       `${colors.green}✅ Contratos retornados: ${response.data.contratos?.length || 0}${colors.reset}`
     );
 
-    return true;
-  }
-catch (error) {
+    return true; }
+  } catch (error) {
     console.log(`${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`);
     console.log(
       `${colors.red}❌ Mensagem: ${error.response?.data?.message || error.message}${colors.reset}`
     );
-    return false;
+    return false; }
   }
 }
 
@@ -125,7 +123,7 @@ async function testGerenteAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const response = await axios.get(APIENDPOINT, {
+    const _response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.GERENTE,
         'Content-Type': 'application/json',
@@ -135,9 +133,8 @@ async function testGerenteAccess() {
     console.log(
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
-    return false;
-  }
-catch (error) {
+    return false; }
+  } catch (error) {
     if (error.response?.status == 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Mensagem: ${error.response.data.message}${colors.reset}`);
@@ -147,13 +144,12 @@ catch (error) {
       console.log(
         `${colors.green}✅ Role do usuário: ${error.response.data.userRole}${colors.reset}`
       );
-      return true;
-    }
-else {
+      return true; }
+    } else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
-      return false;
+      return false; }
     }
   }
 }
@@ -167,7 +163,7 @@ async function testAtendenteAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const response = await axios.get(APIENDPOINT, {
+    const _response = await axios.get(API_ENDPOINT, {
       headers: {
         Authorization: MOCK_TOKENS.ATENDENTE,
         'Content-Type': 'application/json',
@@ -177,19 +173,17 @@ async function testAtendenteAccess() {
     console.log(
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 403${colors.reset}`
     );
-    return false;
-  }
-catch (error) {
+    return false; }
+  } catch (error) {
     if (error.response?.status == 403) {
       console.log(`${colors.green}✅ Status: 403 - Acesso NEGADO corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Bloqueado para ATENDENTE como esperado${colors.reset}`);
-      return true;
-    }
-else {
+      return true; }
+    } else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
-      return false;
+      return false; }
     }
   }
 }
@@ -203,7 +197,7 @@ async function testNoTokenAccess() {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const response = await axios.get(APIENDPOINT, {
+    const _response = await axios.get(API_ENDPOINT, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -212,19 +206,17 @@ async function testNoTokenAccess() {
     console.log(
       `${colors.red}❌ FALHA: Status ${response.status} - Deveria retornar 401${colors.reset}`
     );
-    return false;
-  }
-catch (error) {
+    return false; }
+  } catch (error) {
     if (error.response?.status == 401) {
       console.log(`${colors.green}✅ Status: 401 - Não autenticado corretamente${colors.reset}`);
       console.log(`${colors.green}✅ Mensagem: ${error.response.data.message}${colors.reset}`);
-      return true;
-    }
-else {
+      return true; }
+    } else {
       console.log(
         `${colors.red}❌ Erro inesperado: ${error.response?.status || error.message}${colors.reset}`
       );
-      return false;
+      return false; }
     }
   }
 }
@@ -238,7 +230,7 @@ async function testGetSpecificContract(contractId: string) {
   console.log(`${colors.blue}===========================${colors.reset}`);
 
   try {
-    const response = await axios.get(`${API_ENDPOINT}/${contractId}`, {
+    const _response = await axios.get(`${API_ENDPOINT}/${contractId}`, {
       headers: {
         Authorization: MOCK_TOKENS.ADMIN,
         'Content-Type': 'application/json',
@@ -255,18 +247,16 @@ async function testGetSpecificContract(contractId: string) {
       `   - URLs de documentos presentes: ${response.data.contrato?.urlCcbAssinado ? 'Sim' : 'Não'}`
     );
 
-    return true;
-  }
-catch (error) {
+    return true; }
+  } catch (error) {
     if (error.response?.status == 404) {
       console.log(`${colors.yellow}⚠️ Contrato ${contractId} não encontrado (404)${colors.reset}`);
-    }
-else {
+    } else {
       console.log(
         `${colors.red}❌ Erro: ${error.response?.status || error.message}${colors.reset}`
       );
     }
-    return false;
+    return false; }
   }
 }
 
@@ -278,7 +268,7 @@ async function testSearchFilters() {
   console.log(`${colors.blue}TESTE 7: Testar filtros de busca${colors.reset}`);
   console.log(`${colors.blue}===========================${colors.reset}`);
 
-  const filters = [
+  const _filters = [
     { dataInicio: '2025-01-01', dataFim: '2025-01-31' },
     { lojaId: '1' },
     { status: 'pago' },
@@ -289,7 +279,7 @@ async function testSearchFilters() {
     try {
       console.log(`\n${colors.yellow}Testando filtro: ${JSON.stringify(filter)}${colors.reset}`);
 
-      const response = await axios.get(APIENDPOINT, {
+      const _response = await axios.get(API_ENDPOINT, {
         headers: {
           Authorization: MOCK_TOKENS.DIRETOR,
           'Content-Type': 'application/json',
@@ -300,13 +290,12 @@ async function testSearchFilters() {
       console.log(`${colors.green}✅ Filtro aplicado com sucesso${colors.reset}`);
       console.log(`   - Contratos retornados: ${response.data.contratos?.length || 0}`);
       console.log(`   - Filtros aplicados:`, response.data.filtrosAplicados);
-    }
-catch (error) {
+    } catch (error) {
       console.log(`${colors.red}❌ Erro ao aplicar filtro: ${error.message}${colors.reset}`);
     }
   }
 
-  return true;
+  return true; }
 }
 
 /**
@@ -319,7 +308,7 @@ async function runAllTests() {
   console.log(`\nEndpoint: ${API_ENDPOINT}`);
   console.log(`Timestamp: ${new Date().toISOString()}\n`);
 
-  const results = [];
+  const _results = [];
 
   // Executar testes sequencialmente
   results.push(await testAdminAccess());
@@ -338,16 +327,15 @@ async function runAllTests() {
   console.log(`${colors.yellow}║           RESUMO DOS TESTES              ║${colors.reset}`);
   console.log(`${colors.yellow}╚════════════════════════════════════════╝${colors.reset}`);
 
-  const passed = results.filter((r) => r == true).length;
-  const failed = results.filter((r) => r == false).length;
+  const _passed = results.filter((r) => r == true).length;
+  const _failed = results.filter((r) => r == false).length;
 
   console.log(`\nTestes aprovados: ${colors.green}${passed}${colors.reset}`);
   console.log(`Testes falhados: ${colors.red}${failed}${colors.reset}`);
 
   if (failed == 0) {
     console.log(`\n${colors.green}✅ TODOS OS TESTES PASSARAM!${colors.reset}\n`);
-  }
-else {
+  } else {
     console.log(`\n${colors.red}❌ ALGUNS TESTES FALHARAM${colors.reset}\n`);
   }
 }
@@ -387,7 +375,7 @@ function printInstructions() {
 // Executar se chamado diretamente
 if (require.main == module) {
   printInstructions();
-  runAllTests().catch (console.error);
+  runAllTests().catch(console.error);
 }
 
 export { runAllTests, testAdminAccess, testDiretorAccess };

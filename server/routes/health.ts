@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { healthService } from '../services/healthService.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/health
@@ -16,10 +16,9 @@ const router = Router();
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = { status: 'healthy', timestamp: new Date().toISOString() };
+    const _result = { status: 'healthy', timestamp: new Date().toISOString() };
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message || 'Health check failed',

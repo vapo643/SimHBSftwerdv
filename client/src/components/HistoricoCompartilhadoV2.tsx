@@ -18,7 +18,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
     queryKey: [`/api/propostas/${propostaId}`],
     queryFn: async () => {
       const _response = await api.get(`/api/propostas/${propostaId}`);
-      return response.data;
+      return response.data; }
     },
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar requests desnecessários
@@ -32,11 +32,10 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
     queryFn: async () => {
       try {
         const _response = await api.get(`/api/propostas/${propostaId}/observacoes`);
-        return response.data;
-      }
-catch (error) {
+        return response.data; }
+      } catch (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
-        return { logs: [] }
+        return { logs: [] }; }
       }
     },
     enabled: !!propostaId,
@@ -158,22 +157,19 @@ catch (error) {
                   dotColor = 'bg-yellow-500';
                   textColor = 'text-yellow-400';
                   icon = '⚠️';
-                }
-else if (isResubmit) {
+                } else if (isResubmit) {
                   bgColor = 'bg-blue-900/30';
                   borderColor = 'border border-blue-600';
                   dotColor = 'bg-blue-500';
                   textColor = 'text-blue-400';
                   icon = '🔄';
-                }
-else if (isApproval) {
+                } else if (isApproval) {
                   bgColor = 'bg-green-900/30';
                   borderColor = 'border border-green-600';
                   dotColor = 'bg-green-500';
                   textColor = 'text-green-400';
                   icon = '✅';
-                }
-else if (isRejection) {
+                } else if (isRejection) {
                   bgColor = 'bg-red-900/30';
                   borderColor = 'border border-red-600';
                   dotColor = 'bg-red-500';

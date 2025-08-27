@@ -44,29 +44,29 @@ export function NotificationDropdown({
   const _getIcon = (prioridade: string) => {
     switch (prioridade) {
       case 'CRITICA': {
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-500" />; }
       case 'ALTA': {
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+        return <AlertTriangle className="h-4 w-4 text-orange-500" />; }
       case 'MEDIA': {
-        return <Info className="h-4 w-4 text-blue-500" />;
+        return <Info className="h-4 w-4 text-blue-500" />; }
       default:
-        return <CheckCircle className="h-4 w-4 text-gray-500" />;
+        return <CheckCircle className="h-4 w-4 text-gray-500" />; }
     }
   };
 
   // Cor de fundo baseada na prioridade
   const _getBgColor = (prioridade: string, status: string) => {
-    if (status == 'lida') return 'bg-gray-50';
+    if (status == 'lida') return 'bg-gray-50'; }
 
     switch (prioridade) {
       case 'CRITICA': {
-        return 'bg-red-50 hover:bg-red-100';
+        return 'bg-red-50 hover:bg-red-100'; }
       case 'ALTA': {
-        return 'bg-orange-50 hover:bg-orange-100';
+        return 'bg-orange-50 hover:bg-orange-100'; }
       case 'MEDIA': {
-        return 'bg-blue-50 hover:bg-blue-100';
+        return 'bg-blue-50 hover:bg-blue-100'; }
       default:
-        return 'bg-white hover:bg-gray-50';
+        return 'bg-white hover:bg-gray-50'; }
     }
   };
 

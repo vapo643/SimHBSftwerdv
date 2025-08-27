@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { testRetryService } from '../services/testService.js';
-const router = Router();
+const _router = Router();
 router.post('/retry', async (req, res) => {
   try {
-    const result = await testRetryService.executeOperation('retry', req.body);
+    const _result = await testRetryService.executeOperation('retry', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

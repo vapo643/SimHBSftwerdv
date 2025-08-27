@@ -55,19 +55,19 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
    */
   async findProposalByClickSignDocument(documentKey: string): Promise<Proposal | null> {
     try {
-      const result = await db.execute(sql`
-        SELECT id, clientenome, status, clicksign_documentid, clicksign_envelope_id
+      const _result = await db.execute(sql`
+        SELECT id, cliente_nome, status, clicksign_document_id, clicksign_envelope_id
         FROM propostas 
         WHERE clicksign_document_id = ${documentKey}
            OR clicksign_envelope_id = ${documentKey}
         LIMIT 1
       `);
 
-      if (!result || _result.length == 0) {
-        return null;
+      if (!result || result.length == 0) {
+        return null; }
       }
 
-      const row = result[0];
+      const _row = result[0];
       return {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
@@ -75,8 +75,7 @@ export class WebhookRepository extends BaseRepository<WebhookLog> {
         clicksignDocumentId: row.clicksign_document_id as string | undefined,
         clicksignEnvelopeId: row.clicksign_envelope_id as string | undefined,
       };
-    }
-catch (error) {
+    } catch (error) {
       throw new Error(`Failed to find proposal by ClickSign document: ${error.message}`);
     }
   }
@@ -86,26 +85,25 @@ catch (error) {
    */
   async findProposalByNossoNumero(nossoNumero: string): Promise<Proposal | null> {
     try {
-      const result = await db.execute(sql`
-        SELECT id, clientenome, status, nosso_numero
+      const _result = await db.execute(sql`
+        SELECT id, cliente_nome, status, nosso_numero
         FROM propostas 
         WHERE nosso_numero = ${nossoNumero}
         LIMIT 1
       `);
 
-      if (!result || _result.length == 0) {
-        return null;
+      if (!result || result.length == 0) {
+        return null; }
       }
 
-      const row = result[0];
+      const _row = result[0];
       return {
         id: row.id as string,
         clienteNome: row.cliente_nome as string,
         status: row.status as string,
         nossoNumero: row.nosso_numero as string | undefined,
       };
-    }
-catch (error) {
+    } catch (error) {
       throw new Error(`Failed to find proposal by nosso_numero: ${error.message}`);
     }
   }
@@ -115,18 +113,18 @@ catch (error) {
    */
   async findPaymentByNossoNumero(nossoNumero: string): Promise<Payment | null> {
     try {
-      const result = await db.execute(sql`
-        SELECT id, nossonumero, valorpago, datapagamento, status, proposta_id
+      const _result = await db.execute(sql`
+        SELECT id, nosso_numero, valor_pago, data_pagamento, status, proposta_id
         FROM pagamentos 
         WHERE nosso_numero = ${nossoNumero}
         LIMIT 1
       `);
 
-      if (!result || _result.length == 0) {
-        return null;
+      if (!result || result.length == 0) {
+        return null; }
       }
 
-      const row = result[0];
+      const _row = result[0];
       return {
         id: row.id as string,
         nossoNumero: row.nosso_numero as string,
@@ -135,8 +133,7 @@ catch (error) {
         status: row.status as string,
         propostaId: row.proposta_id as string,
       };
-    }
-catch (error) {
+    } catch (error) {
       throw new Error(`Failed to find payment by nosso_numero: ${error.message}`);
     }
   }
@@ -164,8 +161,7 @@ catch (error) {
           updated_at = NOW()
         WHERE id = ${propostaId}
       `);
-    }
-catch (error) {
+    } catch (error) {
       throw new Error(`Failed to update proposal signature status: ${error.message}`);
     }
   }
@@ -193,8 +189,7 @@ catch (error) {
           updated_at = NOW()
         WHERE id = ${paymentId}
       `);
-    }
-catch (error) {
+    } catch (error) {
       throw new Error(`Failed to update payment status: ${error.message}`);
     }
   }
@@ -224,10 +219,10 @@ catch (error) {
     if (error) {
       console.error('Failed to create webhook log:', error);
       // Non-critical error, don't throw
-      return '';
+      return ''; }
     }
 
-    return data?.id || '';
+    return data?.id || ''; }
   }
 
   /**
@@ -239,7 +234,7 @@ catch (error) {
     error?: string
   ): Promise<void> {
     const updateData: unknown = {
-      status,
+  _status,
       processed_at: new Date().toISOString(),
     };
 
@@ -272,10 +267,10 @@ catch (error) {
 
     if (error) {
       console.error('Failed to check webhook idempotency:', error);
-      return false;
+      return false; }
     }
 
-    return data && data.length > 0;
+    return data && data.length > 0; }
   }
 
   /**
@@ -292,7 +287,7 @@ catch (error) {
       throw new Error(`Failed to fetch webhook logs: ${error.message}`);
     }
 
-    return data as WebhookLog[];
+    return data as WebhookLog[]; }
   }
 
   /**
@@ -309,9 +304,9 @@ catch (error) {
       throw new Error(`Failed to fetch webhook logs for proposal: ${error.message}`);
     }
 
-    return data as WebhookLog[];
+    return data as WebhookLog[]; }
   }
 }
 
 // Export singleton instance
-export const webhookRepository = new WebhookRepository();
+export const _webhookRepository = new WebhookRepository();

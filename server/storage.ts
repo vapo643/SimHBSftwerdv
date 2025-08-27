@@ -1,18 +1,18 @@
 import {
-  users,
-  userSessions,
-  propostas,
-  propostaLogs,
-  gerenteLojas,
-  lojas,
-  parceiros,
-  produtos,
-  tabelasComerciais,
-  profiles,
-  auditDeleteLog,
-  interCollections,
-  interWebhooks,
-  interCallbacks,
+  _users,
+  _userSessions,
+  _propostas,
+  _propostaLogs,
+  _gerenteLojas,
+  _lojas,
+  _parceiros,
+  _produtos,
+  _tabelasComerciais,
+  _profiles,
+  _auditDeleteLog,
+  _interCollections,
+  _interWebhooks,
+  _interCallbacks,
   type User,
   type InsertUser,
   type Proposta,
@@ -115,7 +115,7 @@ export interface IStorage {
     expiresAt: Date;
   }): Promise<void>;
   getUserSessions(userId: string): Promise<
-    Array<{
+    Record<string, unknown>[]>{
       id: string;
       userId: string;
       ipAddress: string | null;
@@ -133,37 +133,37 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
-    return _result[0];
+    const _result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0]; }
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    return _result[0];
+    const _result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0]; }
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(user).returning();
-    return _result[0];
+    const _result = await db.insert(users).values(user).returning();
+    return result[0]; }
   }
 
   async getUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(users.name);
+    return await db.select().from(users).orderBy(users.name); }
   }
 
   async getUsersWithDetails(): Promise<any[]> {
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const _supabase = createServerSupabaseAdminClient();
 
     try {
       const { data: users, error } = await _supabase.from('profiles').select(`
-  id,
-          fullname,
-  role,
-          lojaid,
+  _id,
+          full_name,
+  _role,
+          loja_id,
           auth_user:auth.users!inner(email),
-          loja:lojas(id, nomeloja, parceiroid, parceiro:parceiros(id, razao_social)),
-          gerente_lojas(lojaid, loja:lojas(id, nomeloja, parceiroid, parceiro:parceiros(id, razao_social)))
+          loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)),
+          gerente_lojas(loja_id, loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)))
         `);
 
       if (error) {
@@ -171,9 +171,8 @@ export class DatabaseStorage implements IStorage {
         throw new Error(`Erro ao buscar usuários: ${error.message}`);
       }
 
-      return users || [];
-    }
-catch (error) {
+      return users || []; }
+    } catch (error) {
       console.error('Critical error in getUsersWithDetails:', error);
       throw error;
     }
@@ -182,23 +181,23 @@ catch (error) {
   async getPropostas(): Promise<any[]> {
     // Using raw SQL to handle the actual database schema with JSONB fields
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const _supabase = createServerSupabaseAdminClient();
 
     const { data, error } = await supabase
       .from('propostas')
       .select(
         `
-  id,
-  status,
-        clientedata,
-        condicoesdata,
-        lojaid,
-        createdat,
+  _id,
+  _status,
+        cliente_data,
+        condicoes_data,
+        loja_id,
+        created_at,
         lojas!inner (
-  id,
-          nomeloja,
+  _id,
+          nome_loja,
           parceiros!inner (
-  id,
+  _id,
             razao_social
           )
         )
@@ -214,13 +213,13 @@ catch (error) {
 
     // Map the data to match the expected format, extracting from JSONB fields
     return (data || []).map((p) => {
-      const clienteData = p.cliente_data || {};
-      const condicoesData = p.condicoes_data || {};
+      const _clienteData = p.cliente_data || {};
+      const _condicoesData = p.condicoes_data || {};
 
       // Debug: log raw data for first few proposals
       if (data && data.indexOf(p) < 3) {
         console.log(`[DEBUG] Proposta ${p.id}:`, {
-  condicoesData,
+  _condicoesData,
           valorRaw: condicoesData.valor,
           valorParsed: parseFloat(condicoesData.valor) || 0,
         });
@@ -235,21 +234,21 @@ catch (error) {
         telefoneCliente: clienteData.telefone,
         valorSolicitado: parseFloat(condicoesData.valor) || 0,
         prazo: condicoesData.prazo,
-        lojaId: p.lojaid,
-        createdAt: p.createdat,
-        updatedAt: p.createdat,
+        lojaId: p.loja_id,
+        createdAt: p.created_at,
+        updatedAt: p.created_at,
         loja:
           p.lojas && p.lojas[0]
             ? {
                 id: p.lojas[0].id,
-                nomeLoja: p.lojas[0].nomeloja,
+                nomeLoja: p.lojas[0].nome_loja,
               }
             : null,
         parceiro:
           p.lojas && p.lojas[0] && p.lojas[0].parceiros && p.lojas[0].parceiros[0]
             ? {
                 id: p.lojas[0].parceiros[0].id,
-                razaoSocial: p.lojas[0].parceiros[0].razaosocial,
+                razaoSocial: p.lojas[0].parceiros[0].razao_social,
               }
             : null,
       };
@@ -259,44 +258,44 @@ catch (error) {
   async getPropostaById(id): Promise<any | undefined> {
     // Using Supabase to handle JSONB fields properly
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const _supabase = createServerSupabaseAdminClient();
 
     const { data, error } = await supabase
       .from('propostas')
       .select(
         `
-  id,
-  status,
-        clientedata,
-        condicoesdata,  
-        lojaid,
-        createdat,
-        produtoid,
-        tabela_comercialid,
-        userid,
-        ccb_documentourl,
-        analistaid,
-        dataanalise,
-        motivopendencia,
+  _id,
+  _status,
+        cliente_data,
+        condicoes_data,  
+        loja_id,
+        created_at,
+        produto_id,
+        tabela_comercial_id,
+        user_id,
+        ccb_documento_url,
+        analista_id,
+        data_analise,
+        motivo_pendencia,
         lojas (
-  id,
-          nomeloja,
+  _id,
+          nome_loja,
           parceiros (
-  id,
+  _id,
             razao_social
           )
         ),
         produtos (
-  id,
-          nomeproduto,
-          tacvalor,
+  _id,
+          nome_produto,
+          tac_valor,
           tac_tipo
         ),
         tabelas_comerciais (
-  id,
-          nometabela,
-          taxajuros,
-  prazos,
+  _id,
+          nome_tabela,
+          taxa_juros,
+  _prazos,
           comissao
         )
       `
@@ -307,7 +306,7 @@ catch (error) {
 
     if (error || !data) {
       console.error('Error fetching proposta by id:', error);
-      return undefined;
+      return undefined; }
     }
 
     // Buscar documentos associados à proposta
@@ -318,24 +317,23 @@ catch (error) {
       .order('created_at', { ascending: false });
 
     // Formatear documentos para o frontend com URLs assinadas
-    const documentosAnexados = [];
+    const _documentosAnexados = [];
     if (documentos && documentos.length > 0) {
       for (const doc of documentos) {
         try {
           // Construir o caminho do arquivo no storage: proposta-{id}/{timestamp}-{fileName}
           // A URL salva contém o caminho completo: https://xxx._supabase.co/storage/v1/object/public/documents/proposta-{id}/{fileName}
           // Extrair o caminho após '/documents/'
-          const documentsIndex = doc.url.indexOf('/documents/');
+          const _documentsIndex = doc.url.indexOf('/documents/');
           let filePath;
 
           if (documentsIndex !== -1) {
             // Extrair caminho após '/documents/'
             filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-          }
-else {
+          } else {
             // Fallback: tentar extrair filename e reconstruir
-            const urlParts = doc.url.split('/');
-            const fileName = urlParts[urlParts.length - 1];
+            const _urlParts = doc.url.split('/');
+            const _fileName = urlParts[urlParts.length - 1];
             filePath = `proposta-${String(id)}/${fileName}`;
           }
 
@@ -351,23 +349,22 @@ else {
           }
 
           documentosAnexados.push({
-            name: doc.nomearquivo,
+            name: doc.nome_arquivo,
             url: signError ? doc.url : signedUrl.signedUrl, // Fallback para URL original se houver erro
             type: doc.tipo || 'application/octet-stream',
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
-            uploadDate: doc.createdat,
+            uploadDate: doc.created_at,
             category: 'supporting',
           });
-        }
-catch (error) {
+        } catch (error) {
           console.error(`Erro ao gerar URL assinada para documento ${doc.nome_arquivo}:`, error);
           // Fallback para URL original
           documentosAnexados.push({
-            name: doc.nomearquivo,
+            name: doc.nome_arquivo,
             url: doc.url,
             type: doc.tipo || 'application/octet-stream',
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
-            uploadDate: doc.createdat,
+            uploadDate: doc.created_at,
             category: 'supporting',
           });
         }
@@ -382,43 +379,43 @@ catch (error) {
       clienteData: data.cliente_data || {},
       condicoesData: data.condicoes_data || {},
       // Additional fields for display and logic
-      motivoPendencia: data.motivopendencia,
+      motivoPendencia: data.motivo_pendencia,
       documentosAnexados: documentosAnexados, // Now includes real documents
-      produtoId: data.produtoid,
-      tabelaComercialId: data.tabela_comercialid,
-      lojaId: data.lojaid,
-      userId: data.userid,
-      createdAt: data.createdat,
-      ccbDocumentoUrl: data.ccb_documentourl,
-      analistaId: data.analistaid,
-      dataAnalise: data.dataanalise,
+      produtoId: data.produto_id,
+      tabelaComercialId: data.tabela_comercial_id,
+      lojaId: data.loja_id,
+      userId: data.user_id,
+      createdAt: data.created_at,
+      ccbDocumentoUrl: data.ccb_documento_url,
+      analistaId: data.analista_id,
+      dataAnalise: data.data_analise,
       // Related entities (handling Supabase responses)
       loja: data.lojas
         ? {
             id: (data.lojas as unknown).id,
-            nomeLoja: (data.lojas as unknown).nomeloja,
+            nomeLoja: (data.lojas as unknown).nome_loja,
           }
         : null,
       parceiro:
         data.lojas && (data.lojas as unknown).parceiros
           ? {
               id: (data.lojas as unknown).parceiros.id,
-              razaoSocial: (data.lojas as unknown).parceiros.razaosocial,
+              razaoSocial: (data.lojas as unknown).parceiros.razao_social,
             }
           : null,
       produto: data.produtos
         ? {
             id: (data.produtos as unknown).id,
-            nomeProduto: (data.produtos as unknown).nomeproduto,
-            tacValor: (data.produtos as unknown).tacvalor,
-            tacTipo: (data.produtos as unknown).tactipo,
+            nomeProduto: (data.produtos as unknown).nome_produto,
+            tacValor: (data.produtos as unknown).tac_valor,
+            tacTipo: (data.produtos as unknown).tac_tipo,
           }
         : null,
       tabelaComercial: data.tabelas_comerciais
         ? {
             id: (data.tabelas_comerciais as unknown).id,
-            nomeTabela: (data.tabelas_comerciais as unknown).nometabela,
-            taxaJuros: (data.tabelas_comerciais as unknown).taxajuros,
+            nomeTabela: (data.tabelas_comerciais as unknown).nome_tabela,
+            taxaJuros: (data.tabelas_comerciais as unknown).taxa_juros,
             prazos: (data.tabelas_comerciais as unknown).prazos,
             comissao: (data.tabelas_comerciais as unknown).comissao,
           }
@@ -442,11 +439,11 @@ catch (error) {
   async createProposta(proposta): Promise<unknown> {
     // Transform the normalized data to JSONB format for the real database schema
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const _supabase = createServerSupabaseAdminClient();
 
     // Use the JSONB objects directly from the incoming data
-    const clienteData = proposta.clienteData || {};
-    const condicoesData = proposta.condicoesData || {};
+    const _clienteData = proposta.clienteData || {};
+    const _condicoesData = proposta.condicoesData || {};
 
     // Insert with the real database schema
     // ⚡ PAM V1.0 CORREÇÃO - DUPLA ESCRITA: JSON + Colunas Relacionais
@@ -483,19 +480,19 @@ catch (error) {
         garantia: proposta.garantia || condicoesData.garantia,
 
         // Dados de pagamento também nas colunas dedicadas
-        metodo_pagamento: proposta.metodopagamento,
-        dados_pagamento_banco: proposta.dados_pagamentobanco,
-        dados_pagamento_agencia: proposta.dados_pagamentoagencia,
-        dados_pagamento_conta: proposta.dados_pagamentoconta,
-        dados_pagamento_digito: proposta.dados_pagamentodigito,
-        dados_pagamento_tipo: proposta.dados_pagamentotipo,
-        dados_pagamento_pix: proposta.dados_pagamentopix,
-        dados_pagamento_tipo_pix: proposta.dados_pagamento_tipopix,
-        dados_pagamento_pix_banco: proposta.dados_pagamento_pixbanco,
-        dados_pagamento_pix_nome_titular: proposta.dados_pagamento_pix_nometitular,
-        dados_pagamento_pix_cpf_titular: proposta.dados_pagamento_pix_cpftitular,
-        dados_pagamento_nome_titular: proposta.dados_pagamento_nometitular,
-        dados_pagamento_cpf_titular: proposta.dados_pagamento_cpftitular,
+        metodo_pagamento: proposta.metodo_pagamento,
+        dados_pagamento_banco: proposta.dados_pagamento_banco,
+        dados_pagamento_agencia: proposta.dados_pagamento_agencia,
+        dados_pagamento_conta: proposta.dados_pagamento_conta,
+        dados_pagamento_digito: proposta.dados_pagamento_digito,
+        dados_pagamento_tipo: proposta.dados_pagamento_tipo,
+        dados_pagamento_pix: proposta.dados_pagamento_pix,
+        dados_pagamento_tipo_pix: proposta.dados_pagamento_tipo_pix,
+        dados_pagamento_pix_banco: proposta.dados_pagamento_pix_banco,
+        dados_pagamento_pix_nome_titular: proposta.dados_pagamento_pix_nome_titular,
+        dados_pagamento_pix_cpf_titular: proposta.dados_pagamento_pix_cpf_titular,
+        dados_pagamento_nome_titular: proposta.dados_pagamento_nome_titular,
+        dados_pagamento_cpf_titular: proposta.dados_pagamento_cpf_titular,
       })
       .select()
       .single();
@@ -508,12 +505,12 @@ catch (error) {
     console.log(`[DEBUG] Proposta ${data.id} criada com sucesso`);
     console.log(`✅ [PAM V1.0] CORREÇÃO CRÍTICA EXECUTADA - DADOS FINANCEIROS PERSISTIDOS:`, {
       id: data.id,
-      cliente_nome: data.clientenome,
+      cliente_nome: data.cliente_nome,
       valor: data.valor,
-      valor_total_financiado: data.valor_totalfinanciado,
+      valor_total_financiado: data.valor_total_financiado,
       prazo: data.prazo,
-      valor_tac: data.valortac,
-      valor_iof: data.valoriof,
+      valor_tac: data.valor_tac,
+      valor_iof: data.valor_iof,
       finalidade: data.finalidade,
       garantia: data.garantia,
       condicoes_data_valor: data.condicoes_data?.valor,
@@ -522,12 +519,12 @@ catch (error) {
 
     // Documents will be uploaded and associated separately via /api/propostas/:id/documentos endpoint
 
-    return data;
+    return data; }
   }
 
   async updateProposta(id, proposta: UpdateProposta): Promise<Proposta> {
     // propostas.id is text field (UUID), not numeric
-    const propostaId = typeof id == 'number' ? id.toString() : id;
+    const _propostaId = typeof id == 'number' ? id.toString() : id;
 
     // PAM V1.0 - Se houver mudança de status, usar FSM para validação
     if (proposta.status) {
@@ -535,25 +532,22 @@ catch (error) {
       let contexto: 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral' = 'geral';
       if (['pago', 'pagamento_autorizado', 'PAGAMENTO_CONFIRMADO'].includes(proposta.status)) {
         contexto = 'pagamentos';
-      }
-else if (['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(proposta.status)) {
+      } else if (['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(proposta.status)) {
         contexto = 'cobrancas';
-      }
-else if (['CCB_GERADA', 'CCB_ASSINADA', 'ASSINATURA_PENDENTE'].includes(proposta.status)) {
+      } else if (['CCB_GERADA', 'CCB_ASSINADA', 'ASSINATURA_PENDENTE'].includes(proposta.status)) {
         contexto = 'formalizacao';
       }
 
       try {
         await transitionTo({
-  propostaId,
+  _propostaId,
           novoStatus: proposta.status,
           userId: 'storage-service',
-  contexto,
+  _contexto,
           observacoes: 'Atualização via storage.updateProposta',
           metadata: { origem: 'storage-service' },
         });
-      }
-catch (error) {
+      } catch (error) {
         if (error instanceof InvalidTransitionError) {
           // Re-lançar com mensagem mais clara para storage
           throw new Error(`Transição de status inválida: ${error.message}`);
@@ -562,35 +556,35 @@ catch (error) {
       }
 
       // Atualizar outros campos se necessário
-      const otherFields = { ...proposta };
+      const _otherFields = { ...proposta };
       delete otherFields.status;
 
       if (Object.keys(otherFields).length > 0) {
-        const updateResult = await db
+        const _updateResult = await db
           .update(propostas)
           .set(otherFields)
           .where(eq(propostas.id, propostaId))
           .returning();
-        return updateResult[0];
+        return updateResult[0]; }
       }
 
       // Retornar proposta atualizada
       const [updated] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
-      return updated;
+      return updated; }
     }
 
     // Se não houver mudança de status, fazer update normal
-    const result = await db
+    const _result = await db
       .update(propostas)
       .set(proposta)
       .where(eq(propostas.id, propostaId))
       .returning();
-    return _result[0];
+    return result[0]; }
   }
 
   async deleteProposta(id, deletedBy?: string): Promise<void> {
     // propostas.id is text field (UUID), not numeric
-    const propostaId = typeof id == 'number' ? id.toString() : id;
+    const _propostaId = typeof id == 'number' ? id.toString() : id;
     // Soft delete - set deleted_at timestamp
     await db.update(propostas).set({ deletedAt: new Date() }).where(eq(propostas.id, propostaId));
   }
@@ -610,7 +604,7 @@ catch (error) {
   }
 
   async getLojaById(id: number): Promise<Loja | undefined> {
-    const result = await db
+    const _result = await db
       .select()
       .from(lojas)
       .where(
@@ -621,17 +615,17 @@ catch (error) {
         )
       )
       .limit(1);
-    return _result[0];
+    return result[0]; }
   }
 
   async createLoja(loja: InsertLoja): Promise<Loja> {
-    const result = await db.insert(lojas).values(loja).returning();
-    return _result[0];
+    const _result = await db.insert(lojas).values(loja).returning();
+    return result[0]; }
   }
 
   async updateLoja(id: number, loja: UpdateLoja): Promise<Loja> {
-    const result = await db.update(lojas).set(loja).where(eq(lojas.id, id)).returning();
-    return _result[0];
+    const _result = await db.update(lojas).set(loja).where(eq(lojas.id, id)).returning();
+    return result[0]; }
   }
 
   async deleteLoja(id: number, deletedBy?: string): Promise<void> {
@@ -650,14 +644,14 @@ catch (error) {
   ): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
     try {
       // Check if there are proposals associated with this store (excluding soft-deleted)
-      const propostasCount = await db
+      const _propostasCount = await db
         .select({ id: propostas.id })
         .from(propostas)
         .where(and(eq(propostas.lojaId, id), isNull(propostas.deletedAt)))
         .limit(1);
 
       // Check if there are manager-store relationships
-      const gerentesCount = await db
+      const _gerentesCount = await db
         .select({ id: gerenteLojas.gerenteId })
         .from(gerenteLojas)
         .where(eq(gerenteLojas.lojaId, id))
@@ -668,8 +662,7 @@ catch (error) {
         hasPropostas: propostasCount.length > 0,
         hasGerentes: gerentesCount.length > 0,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('Error checking loja dependencies:', error);
       return {
         hasUsers: false,
@@ -681,28 +674,28 @@ catch (error) {
 
   // Gerente-Lojas Relationships
   async getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]> {
-    return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId));
+    return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId)); }
   }
 
   async getLojasForGerente(gerenteId: number): Promise<number[]> {
-    const result = await db
+    const _result = await db
       .select({ lojaId: gerenteLojas.lojaId })
       .from(gerenteLojas)
       .where(eq(gerenteLojas.gerenteId, gerenteId));
-    return _result.map((r) => r.lojaId);
+    return result.map((r) => r.lojaId); }
   }
 
   async getGerentesForLoja(lojaId: number): Promise<number[]> {
-    const result = await db
+    const _result = await db
       .select({ gerenteId: gerenteLojas.gerenteId })
       .from(gerenteLojas)
       .where(eq(gerenteLojas.lojaId, lojaId));
-    return _result.map((r) => r.gerenteId);
+    return result.map((r) => r.gerenteId); }
   }
 
   async addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas> {
-    const result = await db.insert(gerenteLojas).values(relationship).returning();
-    return _result[0];
+    const _result = await db.insert(gerenteLojas).values(relationship).returning();
+    return result[0]; }
   }
 
   async removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void> {
@@ -721,51 +714,47 @@ catch (error) {
     switch (keyType) {
       case 'document': {
         whereCondition = eq(propostas.clicksignDocumentKey, key);
-        break;
-      }
+        break; }
       case 'list': {
         whereCondition = eq(propostas.clicksignListKey, key);
-        break;
-      }
+        break; }
       case 'signer': {
         whereCondition = eq(propostas.clicksignSignerKey, key);
-        break;
-      }
+        break; }
       default:
         throw new Error(`Invalid keyType: ${keyType}`);
     }
 
-    const result = await db.select().from(propostas).where(whereCondition).limit(1);
-    return _result[0];
+    const _result = await db.select().from(propostas).where(whereCondition).limit(1);
+    return result[0]; }
   }
 
   async getCcbUrl(propostaId: string): Promise<string | null> {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       // Get proposal to find CCB file path
-      const proposta = await this.getPropostaById(propostaId);
+      const _proposta = await this.getPropostaById(propostaId);
       if (!proposta || !proposta.caminhoCcbAssinado) {
         console.log(`[CLICKSIGN] No CCB path found for proposal: ${propostaId}`);
-        return null;
+        return null; }
       }
 
       // Generate signed URL for CCB document
-      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
         .from('documents')
         .createSignedUrl(proposta.caminhoCcbAssinado, 3600); // 1 hour expiry
 
       if (signedUrlError) {
         console.error(`[CLICKSIGN] Error generating signed URL for CCB:`, signedUrlError);
-        return null;
+        return null; }
       }
 
-      return signedUrlData.signedUrl;
-    }
-catch (error) {
+      return signedUrlData.signedUrl; }
+    } catch (error) {
       console.error(`[CLICKSIGN] Error getting CCB URL:`, error);
-      return null;
+      return null; }
     }
   }
 
@@ -776,7 +765,7 @@ catch (error) {
     statusNovo: string;
     observacao?: string;
   }): Promise<unknown> {
-    const result = await db
+    const _result = await db
       .insert(propostaLogs)
       .values({
         propostaId: log.propostaId,
@@ -787,24 +776,24 @@ catch (error) {
       })
       .returning();
 
-    return _result[0];
+    return result[0]; }
   }
 
   // ==== INTER BANK METHODS ====
 
   // Inter Bank Collections
   async createInterCollection(collection: InsertInterCollection): Promise<InterCollection> {
-    const result = await db.insert(interCollections).values(collection).returning();
-    return _result[0];
+    const _result = await db.insert(interCollections).values(collection).returning();
+    return result[0]; }
   }
 
   async getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined> {
-    const result = await db
+    const _result = await db
       .select()
       .from(interCollections)
       .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
       .limit(1);
-    return _result[0];
+    return result[0]; }
   }
 
   async getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]> {
@@ -818,24 +807,24 @@ catch (error) {
   async getInterCollectionByCodigoSolicitacao(
     codigoSolicitacao: string
   ): Promise<InterCollection | undefined> {
-    const result = await db
+    const _result = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
-    return _result[0];
+    return result[0]; }
   }
 
   async updateInterCollection(
     codigoSolicitacao: string,
     updates: UpdateInterCollection
   ): Promise<InterCollection> {
-    const result = await db
+    const _result = await db
       .update(interCollections)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
-    return _result[0];
+    return result[0]; }
   }
 
   async getInterCollections(): Promise<InterCollection[]> {
@@ -851,29 +840,29 @@ catch (error) {
     // Deactivate existing webhooks first
     await db.update(interWebhooks).set({ isActive: false });
 
-    const result = await db.insert(interWebhooks).values(webhook).returning();
-    return _result[0];
+    const _result = await db.insert(interWebhooks).values(webhook).returning();
+    return result[0]; }
   }
 
   async getActiveInterWebhook(): Promise<InterWebhook | undefined> {
-    const result = await db
+    const _result = await db
       .select()
       .from(interWebhooks)
       .where(eq(interWebhooks.isActive, true))
       .limit(1);
-    return _result[0];
+    return result[0]; }
   }
 
   async updateInterWebhook(
     id: number,
     updates: Partial<InsertInterWebhook>
   ): Promise<InterWebhook> {
-    const result = await db
+    const _result = await db
       .update(interWebhooks)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interWebhooks.id, id))
       .returning();
-    return _result[0];
+    return result[0]; }
   }
 
   async deleteInterWebhook(id: number): Promise<void> {
@@ -882,8 +871,8 @@ catch (error) {
 
   // Inter Bank Callbacks
   async createInterCallback(callback: InsertInterCallback): Promise<InterCallback> {
-    const result = await db.insert(interCallbacks).values(callback).returning();
-    return _result[0];
+    const _result = await db.insert(interCallbacks).values(callback).returning();
+    return result[0]; }
   }
 
   async getUnprocessedInterCallbacks(): Promise<InterCallback[]> {
@@ -929,7 +918,7 @@ catch (error) {
   }
 
   async getUserSessions(userId: string): Promise<
-    Array<{
+    Record<string, unknown>[]>{
       id: string;
       userId: string;
       token: string;
@@ -942,13 +931,13 @@ catch (error) {
       isActive: boolean;
     }>
   > {
-    const sessions = await db
+    const _sessions = await db
       .select()
       .from(userSessions)
       .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)))
       .orderBy(desc(userSessions.lastActivityAt));
 
-    return sessions;
+    return sessions; }
   }
 
   async deleteSession(sessionId: string): Promise<void> {
@@ -968,8 +957,7 @@ catch (error) {
             not(eq(userSessions.id, exceptSessionId))
           )
         );
-    }
-else {
+    } else {
       // Delete all sessions
       await db
         .update(userSessions)
@@ -986,4 +974,4 @@ else {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const _storage = new DatabaseStorage();

@@ -53,8 +53,7 @@ async function testCalibrationSystem() {
     console.log("   - GET  /api/ccb-calibration/report");
     console.log("   - POST /api/ccb-calibration/quick-test");
     
-  }
-catch (error) {
+  } catch (error) {
     console.error("❌ Erro no teste:", error);
   }
 }

@@ -33,39 +33,39 @@ class TimingNormalizer {
   }
 
   public setConfig(pattern: string, config: TimingConfig): void {
-    this.configs.set(pattern, { ...config, enabled: config.enabled ?? true });
+    this.configs.set(pattern, { ...config, enabled: _config.enabled ?? true });
   }
 
   private matchesPattern(path: string, pattern: string): boolean {
-    if (pattern == 'default') return true;
+    if (pattern == 'default') return true; }
 
     // Converter pattern do Express para regex
-    const regexPattern = pattern
+    const _regexPattern = pattern
       .replace(/:\w+/g, '[^/]+') // :id -> [^/]+
       .replace(/\*/g, '.*') // * -> .*
       .replace(/\//g, '\\/'); // escape /
 
-    const regex = new RegExp(`^${regexPattern}$`);
-    return regex.test(path);
+    const _regex = new RegExp(`^${regexPattern}$`);
+    return regex.test(path); }
   }
 
   private getConfigForEndpoint(method: string, path: string): TimingConfig {
     // Buscar configuração específica
-    const entries = Array.from(this.configs.entries());
+    const _entries = Array.from(this.configs.entries());
     for (const [pattern, config] of entries) {
       if (pattern !== 'default' && this.matchesPattern(path, pattern)) {
-        return config;
+        return config; }
       }
     }
 
     // Fallback para configuração padrão
-    return this.configs.get('default') || { baselineMs: 15, jitterRange: 3 };
+    return this.configs.get('default') || { baselineMs: 15, jitterRange: 3 }; }
   }
 
   private generateSecureJitter(range: number): number {
     // Usar crypto.randomBytes para jitter criptograficamente seguro
-    const randomBytes = crypto.randomBytes(4);
-    const randomValue = randomBytes.readUInt32BE(0) / 0xffffffff; // Normalizar para 0-1
+    const _randomBytes = crypto.randomBytes(4);
+    const _randomValue = randomBytes.readUInt32BE(0) / 0xffffffff; // Normalizar para 0-1
     return (randomValue - 0.5) * 2 * range; // Converter para ±range
   }
 
@@ -88,8 +88,8 @@ class TimingNormalizer {
       endpoint: req.route?.path || req.path,
       method: req.method,
       status: res.statusCode,
-      actualTime,
-      artificialDelay,
+  _actualTime,
+  _artificialDelay,
       totalTime: actualTime + artificialDelay,
       timestamp: new Date().toISOString(),
     };
@@ -103,7 +103,7 @@ class TimingNormalizer {
   }
 
   public getMetrics(): TimingMetrics[] {
-    return [...this.metrics];
+    return [...this.metrics]; }
   }
 
   public getStatistics(endpoint?: string): unknown {
@@ -114,18 +114,18 @@ class TimingNormalizer {
     }
 
     if (filteredMetrics.length == 0) {
-      return { count: 0 };
+      return { count: 0 }; }
     }
 
-    const actualTimes = filteredMetrics.map((m) => m.actualTime);
-    const totalTimes = filteredMetrics.map((m) => m.totalTime);
+    const _actualTimes = filteredMetrics.map((m) => m.actualTime);
+    const _totalTimes = filteredMetrics.map((m) => m.totalTime);
 
     actualTimes.sort((a, b) => a - b);
     totalTimes.sort((a, b) => a - b);
 
-    const percentile = (arr: number[], p: number) => {
-      const index = Math.ceil((arr.length * p) / 100) - 1;
-      return arr[index] || 0;
+    const _percentile = (arr: number[], p: number) => {
+      const _index = Math.ceil((arr.length * p) / 100) - 1;
+      return arr[index] || 0; }
     };
 
     return {
@@ -151,34 +151,34 @@ class TimingNormalizer {
 
   public middleware() {
     return async (req: Request, res: Response, next: NextFunction) => {
-      const config = this.getConfigForEndpoint(req.method, req.path);
+      const _config = this.getConfigForEndpoint(req.method, req.path);
 
       console.log(
-        `🚀 [TIMING MIDDLEWARE] ${req.method} ${req.path} - Config: baseline=${config.baselineMs}ms, jitter=±${config.jitterRange}ms, enabled=${config.enabled}`
+        `🚀 [TIMING MIDDLEWARE] ${req.method} ${req.path} - Config: baseline=${_config.baselineMs}ms, jitter=±${_config.jitterRange}ms, enabled=${_config.enabled}`
       );
 
-      if (!config.enabled) {
+      if (!_config.enabled) {
         console.log(`⏭️ [TIMING MIDDLEWARE] Skipping ${req.path} - disabled`);
-        return next();
+        return next(); }
       }
 
-      const startTime = process.hrtime.bigint();
+      const _startTime = process.hrtime.bigint();
 
       // Interceptar o final da resposta usando res.end (mais confiável)
-      const originalEnd = res.end;
+      const _originalEnd = res.end;
       res.end = function (
         this: Response,
         chunk?: unknown,
         encoding?: BufferEncoding | (() => void),
         cb?: () => void
       ) {
-        const endTime = process.hrtime.bigint();
-        const actualTimeMs = Number(endTime - startTime) / 1_000_000; // Convert to milliseconds
+        const _endTime = process.hrtime.bigint();
+        const _actualTimeMs = Number(endTime - startTime) / 1_000_000; // Convert to milliseconds
 
         // Calcular delay necessário
-        const jitter = timingNormalizer.generateSecureJitter(config.jitterRange);
-        const targetTime = config.baselineMs + jitter;
-        const delayNeeded = Math.max(0, targetTime - actualTimeMs);
+        const _jitter = timingNormalizer.generateSecureJitter(_config.jitterRange);
+        const _targetTime = _config.baselineMs + jitter;
+        const _delayNeeded = Math.max(0, targetTime - actualTimeMs);
 
         console.log(
           `🕐 [TIMING] ${req.method} ${req.path}: actual=${actualTimeMs.toFixed(2)}ms, target=${targetTime.toFixed(2)}ms, delay=${delayNeeded.toFixed(2)}ms`
@@ -193,7 +193,7 @@ class TimingNormalizer {
           originalEnd.call(this, chunk, encoding as BufferEncoding, cb as () => void);
         }, Math.round(delayNeeded));
 
-        return this;
+        return this; }
       };
 
       next();
@@ -202,11 +202,11 @@ class TimingNormalizer {
 }
 
 // Singleton instance
-export const timingNormalizer = new TimingNormalizer();
+export const _timingNormalizer = new TimingNormalizer();
 
 // Debug: Create middleware instance with logging
 console.log('🚀 [TIMING MIDDLEWARE] Creating middleware instance...');
-export const timingNormalizerMiddleware = timingNormalizer.middleware();
+export const _timingNormalizerMiddleware = timingNormalizer.middleware();
 console.log('🚀 [TIMING MIDDLEWARE] Middleware instance created and exported');
 
 // Export para debugging/monitoring

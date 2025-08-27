@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { propostasStorageService } from '../services/proposalService.js';
-const router = Router();
+const _router = Router();
 router.get('/storage/status', async (req, res) => {
   try {
-    const result = await propostasStorageService.executeOperation('storage_status', req.query);
+    const _result = await propostasStorageService.executeOperation('storage_status', req.query);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

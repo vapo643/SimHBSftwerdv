@@ -4,7 +4,7 @@
  * PAM V1.0 - Service layer implementation
  */
 
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { createClient } from '@supabase/supabase-js';
 import os from 'os';
 import fs from 'fs';
@@ -54,7 +54,7 @@ export class HealthService {
     checks.externalApis = await this.checkExternalApis();
 
     // Metrics
-    const metrics = this.getSystemMetrics();
+    const _metrics = this.getSystemMetrics();
 
     return {
       status: overallStatus,
@@ -62,8 +62,8 @@ export class HealthService {
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development',
       version: process.env.npm_package_version || '1.0.0',
-      checks,
-      metrics,
+  _checks,
+  _metrics,
     };
   }
 
@@ -71,18 +71,17 @@ export class HealthService {
    * Check database connectivity and performance
    */
   private async checkDatabase(): Promise<unknown> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       await db.execute(sql`SELECT 1`);
-      const latency = Date.now() - startTime;
+      const _latency = Date.now() - startTime;
 
       return {
         status: latency < 100 ? 'healthy' : 'degraded',
-        latency,
+  _latency,
       };
-    }
-catch (error) {
+    } catch (error) {
       return {
         status: 'unhealthy',
         error: error.message,
@@ -95,11 +94,11 @@ catch (error) {
    * Check Supabase connectivity
    */
   private async checkSupabase(): Promise<unknown> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+      const _supabaseUrl = process.env.SUPABASE_URL;
+      const _supabaseKey = process.env.SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseKey) {
         return {
@@ -108,10 +107,10 @@ catch (error) {
         };
       }
 
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      const _supabase = createClient(supabaseUrl, supabaseKey);
       const { error } = await _supabase.from('propostas').select('count').limit(1);
 
-      const latency = Date.now() - startTime;
+      const _latency = Date.now() - startTime;
 
       if (error) {
         throw error;
@@ -119,10 +118,9 @@ catch (error) {
 
       return {
         status: latency < 200 ? 'healthy' : 'degraded',
-        latency,
+  _latency,
       };
-    }
-catch (error) {
+    } catch (error) {
       return {
         status: 'unhealthy',
         error: error.message,
@@ -136,7 +134,7 @@ catch (error) {
    */
   private async checkFilesystem(): Promise<unknown> {
     try {
-      const testFile = '/tmp/health_check_test.txt';
+      const _testFile = '/tmp/health_check_test.txt';
 
       // Test write
       await fs.promises.writeFile(testFile, 'health check');
@@ -151,8 +149,7 @@ catch (error) {
         status: 'healthy',
         writable: true,
       };
-    }
-catch (error) {
+    } catch (error) {
       return {
         status: 'unhealthy',
         writable: false,
@@ -165,10 +162,10 @@ catch (error) {
    * Check memory usage
    */
   private checkMemory(): unknown {
-    const totalMemory = os.totalmem();
-    const freeMemory = os.freemem();
-    const usedMemory = totalMemory - freeMemory;
-    const usagePercentage = (usedMemory / totalMemory) * 100;
+    const _totalMemory = os.totalmem();
+    const _freeMemory = os.freemem();
+    const _usedMemory = totalMemory - freeMemory;
+    const _usagePercentage = (usedMemory / totalMemory) * 100;
 
     return {
       status: usagePercentage < 90 ? 'healthy' : 'unhealthy',
@@ -194,16 +191,16 @@ catch (error) {
       apis.clickSign = { status: 'unknown' }; // Would need actual check
     }
 
-    return apis;
+    return apis; }
   }
 
   /**
    * Get system metrics
    */
   private getSystemMetrics(): unknown {
-    const totalMemory = os.totalmem();
-    const freeMemory = os.freemem();
-    const usedMemory = totalMemory - freeMemory;
+    const _totalMemory = os.totalmem();
+    const _freeMemory = os.freemem();
+    const _usedMemory = totalMemory - freeMemory;
 
     return {
       cpu: {
@@ -251,8 +248,7 @@ catch (error) {
     try {
       await db.execute(sql`SELECT 1`);
       checks.database = true;
-    }
-catch {
+    } catch {
       checks.database = false;
     }
 
@@ -263,11 +259,11 @@ catch {
       process.env.SUPABASE_ANON_KEY
     );
 
-    const ready = Object.values(checks).every((check) => check == true);
+    const _ready = Object.values(checks).every((check) => check == true);
 
     return {
-      ready,
-      checks,
+  _ready,
+  _checks,
       timestamp: new Date().toISOString(),
     };
   }
@@ -276,7 +272,7 @@ catch {
    * Helper: Format bytes to human readable
    */
   private formatBytes(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB'];
+    const _units = ['B', 'KB', 'MB', 'GB'];
     let _index = 0;
     let _value = bytes;
 
@@ -285,8 +281,8 @@ catch {
       index++;
     }
 
-    return `${value.toFixed(2)} ${units[index]}`;
+    return `${value.toFixed(2)} ${units[index]}`; }
   }
 }
 
-export const healthService = new HealthService();
+export const _healthService = new HealthService();

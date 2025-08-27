@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { configService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/update', async (req, res) => {
   try {
-    const result = await configService.executeOperation('update_config', req.body);
+    const _result = await configService.executeOperation('update_config', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

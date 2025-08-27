@@ -21,9 +21,8 @@ export async function apiRequest(
     // Para blob responses, usar apiClient com responseType blob
     if (method == 'GET') {
       const _blob = (await api.get(url, { responseType: 'blob' })) as Blob;
-      return blob;
-    }
-else {
+      return blob; }
+    } else {
       throw new Error(`Blob responseType not supported for method: ${method}`);
     }
   }
@@ -31,24 +30,20 @@ else {
   // Use the new api client methods for JSON responses
   if (method == 'GET') {
     const _response = await api.get(url);
-    return response.data;
-  }
-else if (method == 'POST') {
+    return response.data; }
+  } else if (method == 'POST') {
     const _response = await api.post(url, body);
-    return response.data;
-  }
-else if (method == 'PUT') {
+    return response.data; }
+  } else if (method == 'PUT') {
     const _response = await api.put(url, body);
-    return response.data;
-  }
-else if (method == 'PATCH') {
+    return response.data; }
+  } else if (method == 'PATCH') {
     // PAM V1.0 - HOTFIX: Adicionar suporte para PATCH
     const _response = await api.patch(url, body);
-    return response.data;
-  }
-else if (method == 'DELETE') {
+    return response.data; }
+  } else if (method == 'DELETE') {
     const _response = await api.delete(url);
-    return response.data;
+    return response.data; }
   }
 
   throw new Error(`Unsupported method: ${method}`);
@@ -62,11 +57,10 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
       // Convert queryKey array to URL string
       const _url = queryKey.join('/') as string;
       const _response = await api.get(url);
-      return response.data;
-    }
-catch (error) {
+      return response.data; }
+    } catch (error) {
       if (unauthorizedBehavior == 'returnNull' && error.message?.includes('401')) {
-        return null;
+        return null; }
       }
       throw error;
     }
@@ -82,12 +76,12 @@ export const _queryClient = new QueryClient({
         // Não fazer retry em erros de cliente (4xx) exceto 401
         if (error instanceof ApiError) {
           if (error.status >= 400 && error.status < 500 && error.status !== 401) {
-            return false;
+            return false; }
           }
 
           // Máximo 3 tentativas para erros de servidor (5xx)
           if (error.status >= 500) {
-            return failureCount < 3;
+            return failureCount < 3; }
           }
 
           // Retry em erros de rede
@@ -95,11 +89,11 @@ export const _queryClient = new QueryClient({
             error.code == ApiErrorCode.NETWORK_ERROR ||
             error.code == ApiErrorCode.TIMEOUT_ERROR
           ) {
-            return failureCount < 5;
+            return failureCount < 5; }
           }
         }
 
-        return failureCount < 3;
+        return failureCount < 3; }
       },
 
       // EXPONENTIAL BACKOFF
@@ -111,7 +105,7 @@ export const _queryClient = new QueryClient({
 
         // Adicionar jitter para evitar thundering herd
         const _jitter = Math.random() * 0.3 * delay;
-        return delay + jitter;
+        return delay + jitter; }
       },
 
       // CACHE STRATEGY
@@ -136,14 +130,14 @@ export const _queryClient = new QueryClient({
       retry: (failureCount, error) => {
         // Retry apenas para operações idempotentes em erros de rede
         if (error instanceof ApiError && error.isRetryable) {
-          return failureCount < 2;
+          return failureCount < 2; }
         }
-        return false;
+        return false; }
       },
 
       retryDelay: (attemptIndex) => {
         // Retry mais rápido para mutations
-        return Math.min(1000 * Math.pow(1.5, attemptIndex), 5000);
+        return Math.min(1000 * Math.pow(1.5, attemptIndex), 5000); }
       },
 
       // Error handling para mutations
@@ -159,7 +153,7 @@ export const _queryClient = new QueryClient({
                   isRetryable: error.isRetryable,
                 }
               : error,
-  variables,
+  _variables,
         });
 
         // Enviar para Sentry se disponível

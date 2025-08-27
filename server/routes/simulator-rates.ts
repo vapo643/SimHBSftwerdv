@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { simulatorService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.get('/rates', async (req, res) => {
   try {
-    const result = await simulatorService.executeOperation('get_rates', req.query);
+    const _result = await simulatorService.executeOperation('get_rates', req.query);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

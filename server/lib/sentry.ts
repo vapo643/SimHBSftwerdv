@@ -24,13 +24,13 @@ declare global {
 
 // Função principal de inicialização do Sentry (conforme PAM V1.0)
 export function initializeSentry() {
-  if (!config.observability.sentryDsn) {
+  if (!_config.observability.sentryDsn) {
     logInfo('⚠️ Sentry DSN not configured - error tracking disabled');
     return;
   }
 
   Sentry.init({
-    dsn: config.observability.sentryDsn,
+    dsn: _config.observability.sentryDsn,
     integrations: [nodeProfilingIntegration()],
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
@@ -44,7 +44,7 @@ export function initializeSentry() {
 
 // Configuração do Sentry (função legada, mantida para compatibilidade)
 export function initSentry(app: Express) {
-  const sentryDsn = config.observability.sentryDsn;
+  const _sentryDsn = _config.observability.sentryDsn;
 
   try {
     Sentry.init({
@@ -89,10 +89,10 @@ export function initSentry(app: Express) {
 
         // Log local do erro para auditoria
         logError('🔴 Error sent to Sentry', hint.originalException || hint.syntheticException, {
-          eventId: event.eventid,
+          eventId: event.event_id,
         });
 
-        return event;
+        return event; }
       },
 
       // Ignorar alguns erros comuns
@@ -111,10 +111,9 @@ export function initSentry(app: Express) {
 
     logInfo('✅ Sentry initialized successfully', {
       dsn: sentryDsn ? sentryDsn.substring(0, 20) + '...' : 'not configured',
-      environment: process.env.NODEENV,
+      environment: process.env.NODE_ENV,
     });
-  }
-catch (error) {
+  } catch (error) {
     logError('❌ Failed to initialize Sentry', error);
   }
 }
@@ -139,22 +138,21 @@ export function sentryUserContext(req: Request, res: Response, next: NextFunctio
 
 // Middleware para capturar transações
 export function sentryTransactionMiddleware(req: Request, res: Response, next: NextFunction) {
-  const transaction = Sentry.startInactiveSpan({
+  const _transaction = Sentry.startInactiveSpan({
     op: 'http.server',
     name: `${req.method} ${req.route?.path || req.path}`,
   });
 
   if (transaction) {
     // Atualizar para API atual do Sentry v8
-    const transactionName = `${req.method} ${req.route?.path || req.path}`;
+    const _transactionName = `${req.method} ${req.route?.path || req.path}`;
     Sentry.getCurrentScope().setContext('transaction', { name: transactionName });
 
     res.on('finish', () => {
       transaction.setAttribute('http.status_code', res.statusCode.toString());
       if (res.statusCode >= 400) {
         transaction.setStatus({ code: 2, message: 'Error' }); // UNKNOWN status
-      }
-else {
+      } else {
         transaction.setStatus({ code: 1, message: 'OK' }); // OK status
       }
       transaction.end();
@@ -187,16 +185,16 @@ export function captureMessage(
 // Helper para adicionar breadcrumbs
 export function addBreadcrumb(message: string, category: string, data?) {
   Sentry.addBreadcrumb({
-    message,
-    category,
+  _message,
+  _category,
     level: 'info',
-    data,
+  _data,
     timestamp: Date.now() / 1000,
   });
 }
 
 // Exportar handlers do Sentry (nova API v8)
-export const requestHandler = () => (req: Request, res: Response, next: NextFunction) => {
+export const _requestHandler = () => (req: Request, res: Response, next: NextFunction) => {
   // Request handler básico
   if (req.correlationId) {
     Sentry.setTag('correlation_id', req.correlationId);
@@ -204,17 +202,18 @@ export const requestHandler = () => (req: Request, res: Response, next: NextFunc
   next();
 };
 
-export const tracingHandler = () => (req: Request, res: Response, next: NextFunction) => {
+export const _tracingHandler = () => (req: Request, res: Response, next: NextFunction) => {
   // Tracing handler básico
   next();
 };
 
-export const errorHandler = () => (err, req: Request, res: Response, next: NextFunction) => {
-  // Capturar apenas erros 500+
-  if (!err.status || err.status >= 500) {
-    Sentry.captureException(err);
-  }
-  next(err);
-};
+export const _errorHandler =
+  () => (err, req: Request, res: Response, next: NextFunction) => {
+    // Capturar apenas erros 500+
+    if (!err.status || err.status >= 500) {
+      Sentry.captureException(err);
+    }
+    next(err);
+  };
 
 export default Sentry;

@@ -38,7 +38,7 @@ export function FeatureFlagExample() {
         throw new Error('Failed to fetch experimental analytics');
       }
 
-      return responseData.json();
+      return responseData.json(); }
     },
     retry: 1,
   });

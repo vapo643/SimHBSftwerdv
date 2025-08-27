@@ -147,7 +147,7 @@ export default function Pagamentos() {
     queryKey: ['/api/pagamentos'],
     queryFn: async () => {
       const _response = await apiRequest('/api/pagamentos');
-      return response as Pagamento[];
+      return response as Pagamento[]; }
     },
   });
 
@@ -170,7 +170,7 @@ export default function Pagamentos() {
           observacoesFormalização: data.observacoes,
         }),
       });
-      return response;
+      return response; }
     },
     onSuccess: () => {
       toast({
@@ -202,7 +202,7 @@ export default function Pagamentos() {
           }),
         })
       );
-      return Promise.all(promises);
+      return Promise.all(promises); }
     },
     onSuccess: () => {
       toast({
@@ -230,8 +230,8 @@ export default function Pagamentos() {
   };
 
   const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    if (!dateString) return 'N/A'; }
+    return new Date(dateString).toLocaleDateString('pt-BR'); }
   };
 
   const _getStatusColor = (status: string) => {
@@ -245,7 +245,7 @@ export default function Pagamentos() {
       QUITADO: 'bg-green-600',
       pago: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
   };
 
   const _getStatusText = (status: string) => {
@@ -259,7 +259,7 @@ export default function Pagamentos() {
       QUITADO: 'Quitado',
       pago: 'Pago',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status;
+    return statusTexts[status as keyof typeof statusTexts] || status; }
   };
 
   const _getMethodText = (method: string) => {
@@ -269,7 +269,7 @@ export default function Pagamentos() {
       pix: 'PIX',
       boleto: 'Boleto',
     };
-    return methodTexts[method as keyof typeof methodTexts] || method;
+    return methodTexts[method as keyof typeof methodTexts] || method; }
   };
 
   // Backend now filters by V2.0 status including BOLETOS_EMITIDOS
@@ -289,7 +289,7 @@ export default function Pagamentos() {
 
     const _matchesStatus = filterStatus == 'all' || proposta.status == filterStatus;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus; }
   });
 
   // Sort propostas
@@ -300,31 +300,26 @@ export default function Pagamentos() {
     if (sortBy == 'valor' || sortBy == 'valorSolicitado' || sortBy == 'valorAprovado') {
       aVal = a.valorFinanciado || 0;
       bVal = b.valorFinanciado || 0;
-    }
-else if (sortBy == 'clienteNome') {
+    } else if (sortBy == 'clienteNome') {
       aVal = a.nomeCliente;
       bVal = b.nomeCliente;
-    }
-else if (sortBy == 'dataAprovacao') {
+    } else if (sortBy == 'dataAprovacao') {
       aVal = new Date(a.dataAprovacao || a.dataRequisicao || 0);
       bVal = new Date(b.dataAprovacao || b.dataRequisicao || 0);
-    }
-else if (sortBy == 'prazo') {
+    } else if (sortBy == 'prazo') {
       // We don't have prazo in the new structure, use dataRequisicao as fallback
       aVal = new Date(a.dataRequisicao || 0);
       bVal = new Date(b.dataRequisicao || 0);
-    }
-else {
+    } else {
       // Default fallback
       aVal = a.status;
       bVal = b.status;
     }
 
     if (sortOrder == 'asc') {
-      return aVal > bVal ? 1 : -1;
-    }
-else {
-      return aVal < bVal ? 1 : -1;
+      return aVal > bVal ? 1 : -1; }
+    } else {
+      return aVal < bVal ? 1 : -1; }
     }
   });
 
@@ -337,8 +332,7 @@ else {
   const _handleSelectAll = () => {
     if (selectedPropostas.length == sortedPropostas.length) {
       setSelectedPropostas([]);
-    }
-else {
+    } else {
       setSelectedPropostas(sortedPropostas.map((p) => p.id));
     }
   };
@@ -576,7 +570,7 @@ else {
                     {formatCurrency(
                       selectedPropostas.reduce((sum, id) => {
                         const _proposta = sortedPropostas.find((p) => p.id == id);
-                        return sum + (proposta?.valorFinanciado || 0);
+                        return sum + (proposta?.valorFinanciado || 0); }
                       }, 0)
                     )}
                   </span>

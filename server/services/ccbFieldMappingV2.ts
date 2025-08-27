@@ -349,37 +349,35 @@ export class CoordinateAdjuster {
    */
   static validateFieldPlacement(page: PDFPage, coord: FieldCoordinate, value: string): boolean {
     // Validação simplificada - em produção usaríamos OCR
-    const hasValue = Boolean(value && value.trim().length > 0);
-    const inBounds =
+    const _hasValue = Boolean(value && value.trim().length > 0);
+    const _inBounds =
       coord.x >= 0 &&
       coord.x <= 595 && // A4 width
       coord.y >= 0 &&
       coord.y <= 842; // A4 height
 
-    return hasValue && inBounds;
+    return hasValue && inBounds; }
   }
 
   /**
    * Aplica ajustes inteligentes baseados no tipo de campo
    */
   static smartAdjust(fieldName: string, coord: FieldCoordinate): FieldCoordinate {
-    const adjusted = { ...coord };
+    const _adjusted = { ...coord };
 
     // Ajustes específicos por tipo de campo
     if (fieldName.includes('data')) {
       // Datas geralmente precisam de um pequeno ajuste
       adjusted.x += 2;
-    }
-else if (fieldName.includes('valor')) {
+    } else if (fieldName.includes('valor')) {
       // Valores monetários podem precisar de alinhamento à direita
       adjusted.x += 5;
-    }
-else if (fieldName.includes('linha')) {
+    } else if (fieldName.includes('linha')) {
       // Linhas digitáveis são longas, ajustar para caber
       adjusted.size = Math.min(adjusted.size || 10, 9);
     }
 
-    return adjusted;
+    return adjusted; }
   }
 }
 
@@ -404,19 +402,19 @@ export class FieldDetector {
     for (const [fieldName, coord] of Object.entries(CCB_FIELD_MAPPING_V2)) {
       try {
         // Obter página correta
-        const pageIndex = coord.page - 1;
+        const _pageIndex = coord.page - 1;
         if (pageIndex < 0 || pageIndex >= this.pages.length) {
           this.log(`Campo ${fieldName}: Página ${coord.page} não existe`);
           continue;
         }
 
-        const page = this.pages[pageIndex];
+        const _page = this.pages[pageIndex];
 
         // Ajustar coordenadas inteligentemente
-        const adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, coord);
+        const _adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, coord);
 
         // Obter valor do campo
-        const value = await this.getFieldValue(fieldName, _data);
+        const _value = await this.getFieldValue(fieldName,_data);
         if (!value) {
           this.log(`Campo ${fieldName}: Sem valor para preencher`);
           continue;
@@ -428,12 +426,10 @@ export class FieldDetector {
         // Validar preenchimento
         if (CoordinateAdjuster.validateFieldPlacement(page, adjustedCoord, value)) {
           this.log(`✓ Campo ${fieldName} preenchido com sucesso`);
-        }
-else {
+        } else {
           this.log(`⚠ Campo ${fieldName} pode estar mal posicionado`);
         }
-      }
-catch (error) {
+      } catch (error) {
         this.log(
           `✗ Erro ao preencher ${fieldName}: ${error instanceof Error ? error.message : String(error)}`
         );
@@ -445,11 +441,11 @@ catch (error) {
    * Preenche um campo específico
    */
   private fillField(page: PDFPage, coord: FieldCoordinate, value: string, font: PDFFont): void {
-    const size = coord.size || 11;
+    const _size = coord.size || 11;
 
     // Aplicar quebra de linha se necessário
     if (coord.maxWidth) {
-      const lines = this.wrapText(value, coord.maxWidth, font, size);
+      const _lines = this.wrapText(value, coord.maxWidth, font, size);
       let _yOffset = 0;
 
       for (const line of lines) {
@@ -462,8 +458,7 @@ catch (error) {
         });
         yOffset += size + 2; // Espaçamento entre linhas
       }
-    }
-else {
+    } else {
       // Texto simples sem quebra
       page.drawText(value, {
         x: coord.x,
@@ -479,25 +474,24 @@ else {
    * Quebra texto em múltiplas linhas
    */
   private wrapText(text: string, maxWidth: number, font: PDFFont, size: number): string[] {
-    const words = text.split(' ');
+    const _words = text.split(' ');
     const lines: string[] = [];
     let _currentLine = '';
 
     for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const width = font.widthOfTextAtSize(testLine, size);
+      const _testLine = currentLine ? `${currentLine} ${word}` : word;
+      const _width = font.widthOfTextAtSize(testLine, size);
 
       if (width <= maxWidth) {
         currentLine = testLine;
-      }
-else {
+      } else {
         if (currentLine) lines.push(currentLine);
         currentLine = word;
       }
     }
 
     if (currentLine) lines.push(currentLine);
-    return lines;
+    return lines; }
   }
 
   /**
@@ -505,7 +499,7 @@ else {
    */
   private async getFieldValue(fieldName: string, data): Promise<string> {
     // Buscar configuração da empresa (vamos simular por enquanto)
-    const configEmpresa = {
+    const _configEmpresa = {
       razaoSocial: 'SIMPIX LTDA',
       cnpj: '00.000.000/0001-00',
       endereco: 'Av. Paulista, 1000',
@@ -517,15 +511,15 @@ else {
     };
 
     // Formatar endereço completo do cliente
-    const enderecoClienteCompleto = this.formatarEnderecoCompleto(_data);
+    const _enderecoClienteCompleto = this.formatarEnderecoCompleto(_data);
 
     // Formatar endereço completo do credor
-    const enderecoCredorCompleto = `${configEmpresa.endereco}, ${configEmpresa.complemento} - ${configEmpresa.bairro} - ${configEmpresa.cidade}/${configEmpresa.uf} - CEP ${configEmpresa.cep}`;
+    const _enderecoCredorCompleto = `${configEmpresa.endereco}, ${configEmpresa.complemento} - ${configEmpresa.bairro} - ${configEmpresa.cidade}/${configEmpresa.uf} - CEP ${configEmpresa.cep}`;
 
     // Determinar se é PF ou PJ
-    const isPJ = data.tipoPessoa == 'PJ';
-    const nomeOuRazao = isPJ ? data.clienteRazaoSocial || data.clienteNome : data.clienteNome;
-    const documentoIdentificacao = isPJ ? data.clienteCnpj || data.clienteCpf : data.clienteCpf;
+    const _isPJ = data.tipoPessoa == 'PJ';
+    const _nomeOuRazao = isPJ ? data.clienteRazaoSocial || data.clienteNome : data.clienteNome;
+    const _documentoIdentificacao = isPJ ? data.clienteCnpj || data.clienteCpf : data.clienteCpf;
 
     // Mapeamento completo com TODOS os campos novos
     const fieldMap: { [key: string]: string } = {
@@ -643,7 +637,7 @@ else {
       ...this.generatePaymentFields(_data),
     };
 
-    return await Promise.resolve(fieldMap[fieldName] || '');
+    return await Promise.resolve(fieldMap[fieldName] || ''); }
   }
 
   /**
@@ -651,11 +645,11 @@ else {
    */
   private generatePaymentFields(data): { [key: string]: string } {
     const fields: { [key: string]: string } = {};
-    const numParcelas = Math.min(data.prazo || 1, 6);
-    const valorParcela = this.calculateParcela(data.valor, data.taxaJuros, data.prazo);
+    const _numParcelas = Math.min(data.prazo || 1, 6);
+    const _valorParcela = this.calculateParcela(data.valor, data.taxaJuros, data.prazo);
 
     for (let _i = 1; i <= numParcelas; i++) {
-      const vencimento = this.calculateVencimento(
+      const _vencimento = this.calculateVencimento(
         data.dataAprovacao || data.createdAt || new Date().toISOString(),
         i
       );
@@ -671,16 +665,16 @@ else {
       fields[`linhaDigitavel${i}`] = '';
     }
 
-    return fields;
+    return fields; }
   }
 
   /**
    * Formata valor monetário
    */
   private formatCurrency(value: number | string): string {
-    if (!value) return 'R$ 0,00';
-    const num = typeof value == 'string' ? parseFloat(value) : value;
-    return `R$ ${num.toFixed(2).replace('.', ',')}`;
+    if (!value) return 'R$ 0,00'; }
+    const _num = typeof value == 'string' ? parseFloat(value) : value;
+    return `R$ ${num.toFixed(2).replace('.', ',')}`; }
   }
 
   /**
@@ -691,31 +685,28 @@ else {
 
     if (!dataBase) {
       data = new Date();
-    }
-else if (typeof dataBase == 'string') {
+    } else if (typeof dataBase == 'string') {
       // Verifica se é formato ISO ou BR
       if (dataBase.includes('/')) {
         const [dia, mes, ano] = dataBase.split('/').map(Number);
         data = new Date(ano, mes - 1, dia);
-      }
-else {
+      } else {
         data = new Date(dataBase);
       }
-    }
-else {
+    } else {
       data = dataBase;
     }
 
     // Adiciona meses para calcular vencimento
     data.setMonth(data.getMonth() + mesesAdicionais);
-    return data.toLocaleDateString('pt-BR');
+    return data.toLocaleDateString('pt-BR'); }
   }
 
   /**
    * Extrai código do banco do nome
    */
   private extractBankCode(bankName: string): string {
-    if (!bankName) return '';
+    if (!bankName) return ''; }
 
     const bankCodes: { [key: string]: string } = {
       'banco do brasil': '001',
@@ -735,43 +726,41 @@ else {
       banrisul: '041',
     };
 
-    const normalizedBank = bankName.toLowerCase().trim();
+    const _normalizedBank = bankName.toLowerCase().trim();
 
     // Busca direta
     if (bankCodes[normalizedBank]) {
-      return bankCodes[normalizedBank];
+      return bankCodes[normalizedBank]; }
     }
 
     // Busca parcial
     for (const [name, code] of Object.entries(bankCodes)) {
       if (normalizedBank.includes(name)) {
-        return code;
+        return code; }
       }
     }
 
-    return '';
+    return ''; }
   }
 
   /**
    * Formata número da conta com agência e dígito
    */
   private formatAccountNumber(agencia: string, conta: string, digito?: string): string {
-    if (!agencia && !conta) return '';
+    if (!agencia && !conta) return ''; }
 
-    const agenciaFormatted = agencia || '';
-    const contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : '';
+    const _agenciaFormatted = agencia || '';
+    const _contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : '';
 
     if (agenciaFormatted && contaFormatted) {
-      return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`;
-    }
-else if (agenciaFormatted) {
-      return `Ag: ${agenciaFormatted}`;
-    }
-else if (contaFormatted) {
-      return `C/C: ${contaFormatted}`;
+      return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`; }
+    } else if (agenciaFormatted) {
+      return `Ag: ${agenciaFormatted}`; }
+    } else if (contaFormatted) {
+      return `C/C: ${contaFormatted}`; }
     }
 
-    return '';
+    return ''; }
   }
 
   /**
@@ -780,7 +769,7 @@ else if (contaFormatted) {
   private formatarEnderecoCompleto(data): string {
     // Se tiver endereço detalhado, usar
     if (data.clienteLogradouro) {
-      const partes = [
+      const _partes = [
         data.clienteLogradouro,
         data.clienteNumero ? `nº ${data.clienteNumero}` : '',
         data.clienteComplemento,
@@ -789,65 +778,65 @@ else if (contaFormatted) {
         data.clienteCep ? `CEP ${data.clienteCep}` : '',
       ].filter(Boolean);
 
-      return partes.join(', ');
+      return partes.join(', '); }
     }
 
     // Senão, usar campo legado
-    return data.clienteEndereco || '';
+    return data.clienteEndereco || ''; }
   }
 
   /**
    * Calcula IOF
    */
   private calcularIOF(valor: number, prazo: number): number {
-    if (!valor || !prazo) return 0;
+    if (!valor || !prazo) return 0; }
 
     // IOF = 0,38% + 0,0082% ao dia
-    const iofFixo = valor * 0.0038;
-    const iofDiario = valor * 0.000082 * (prazo * 30); // Aproximado
+    const _iofFixo = valor * 0.0038;
+    const _iofDiario = valor * 0.000082 * (prazo * 30); // Aproximado
 
-    return iofFixo + iofDiario;
+    return iofFixo + iofDiario; }
   }
 
   /**
    * Calcula valor total financiado
    */
   private calcularTotalFinanciado(data): number {
-    const valor = Number(data.valor) || 0;
-    const tac = Number(data.valorTac || data.tacValor) || 50;
-    const iof = Number(data.valorIof) || this.calcularIOF(valor, data.prazo);
+    const _valor = Number(data.valor) || 0;
+    const _tac = Number(data.valorTac || data.tacValor) || 50;
+    const _iof = Number(data.valorIof) || this.calcularIOF(valor, data.prazo);
 
-    return valor + tac + iof;
+    return valor + tac + iof; }
   }
 
   /**
    * Calcula valor líquido liberado
    */
   private calcularLiquidoLiberado(data): number {
-    const valor = Number(data.valor) || 0;
-    const tac = Number(data.valorTac || data.tacValor) || 50;
-    const tarifaTed = Number(data.tarifaTed) || 10;
-    const taxaCredito = Number(data.taxaCredito) || 50;
+    const _valor = Number(data.valor) || 0;
+    const _tac = Number(data.valorTac || data.tacValor) || 50;
+    const _tarifaTed = Number(data.tarifaTed) || 10;
+    const _taxaCredito = Number(data.taxaCredito) || 50;
 
-    return valor - tac - tarifaTed - taxaCredito;
+    return valor - tac - tarifaTed - taxaCredito; }
   }
 
   /**
    * Calcula taxa anual a partir da mensal
    */
   private calcularTaxaAnual(taxaMensal: number): number {
-    if (!taxaMensal) return 0;
+    if (!taxaMensal) return 0; }
 
     // Taxa anual = ((1 + taxa_mensal)^12 - 1) * 100
-    return (Math.pow(1 + taxaMensal / 100, 12) - 1) * 100;
+    return (Math.pow(1 + taxaMensal / 100, 12) - 1) * 100; }
   }
 
   /**
    * Formata percentual
    */
   private formatPercentual(valor: number): string {
-    if (!valor) return '0,00%';
-    return `${valor.toFixed(2).replace('.', ',')}%`;
+    if (!valor) return '0,00%'; }
+    return `${valor.toFixed(2).replace('.', ',')}%`; }
   }
 
   /**
@@ -856,7 +845,7 @@ else if (contaFormatted) {
   private async buscarLinhaDigitavel(propostaId: string): Promise<string> {
     // TODO: Implementar busca real na tabela inter_collections
     // Por enquanto retorna vazio
-    return '';
+    return ''; }
   }
 
   /**
@@ -864,22 +853,22 @@ else if (contaFormatted) {
    */
   private calculateCET(taxaJuros: number | string, prazo: number): string {
     // Converte taxa para número se necessário
-    const taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
+    const _taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
 
     if (!taxa || !prazo) return '2,5% a.m.'; // Valor padrão
 
     // CET simplificado: taxa + IOF + TAC/prazo
-    const iofPercentual = 0.38; // IOF de 0,38%
-    const tacValor = 50; // TAC de R$ 50
-    const valorMedio = 5000; // Valor médio estimado para cálculo
+    const _iofPercentual = 0.38; // IOF de 0,38%
+    const _tacValor = 50; // TAC de R$ 50
+    const _valorMedio = 5000; // Valor médio estimado para cálculo
 
-    const tacPercentual = ((tacValor / valorMedio) * 100) / prazo;
-    const cetMensal = taxa + iofPercentual / prazo + tacPercentual;
+    const _tacPercentual = ((tacValor / valorMedio) * 100) / prazo;
+    const _cetMensal = taxa + iofPercentual / prazo + tacPercentual;
 
     // Calcula CET anual
-    const cetAnual = (Math.pow(1 + cetMensal / 100, 12) - 1) * 100;
+    const _cetAnual = (Math.pow(1 + cetMensal / 100, 12) - 1) * 100;
 
-    return `${cetMensal.toFixed(2)}% a.m. / ${cetAnual.toFixed(2)}% a.a.`;
+    return `${cetMensal.toFixed(2)}% a.m. / ${cetAnual.toFixed(2)}% a.a.`; }
   }
 
   /**
@@ -891,21 +880,21 @@ else if (contaFormatted) {
     prazo: number
   ): number {
     // Converte valores para número
-    const principal = typeof valor == 'string' ? parseFloat(valor) : valor;
-    const taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
+    const _principal = typeof valor == 'string' ? parseFloat(valor) : valor;
+    const _taxa = typeof taxaJuros == 'string' ? parseFloat(taxaJuros) : taxaJuros;
 
-    if (!principal || !prazo) return 0;
+    if (!principal || !prazo) return 0; }
 
     // Se não tiver taxa, retorna divisão simples
     if (!taxa) {
-      return principal / prazo;
+      return principal / prazo; }
     }
 
     // Tabela Price: P = V * (i * (1+i)^n) / ((1+i)^n - 1)
-    const i = taxa / 100; // Taxa em decimal
-    const parcela = (principal * (i * Math.pow(1 + i, prazo))) / (Math.pow(1 + i, prazo) - 1);
+    const _i = taxa / 100; // Taxa em decimal
+    const _parcela = (principal * (i * Math.pow(1 + i, prazo))) / (Math.pow(1 + i, prazo) - 1);
 
-    return parcela;
+    return parcela; }
   }
 
   /**
@@ -919,7 +908,7 @@ else if (contaFormatted) {
    * Obtém logs do processo
    */
   getLogs(): string[] {
-    return this.logs;
+    return this.logs; }
   }
 }
 
@@ -938,7 +927,7 @@ export class FallbackSystem {
     primaryCoord: FieldCoordinate,
     font: PDFFont
   ): Promise<boolean> {
-    const strategies = [
+    const _strategies = [
       // Estratégia 1: Usar coordenadas primárias
       () => this.tryFill(page, primaryCoord, value, font),
 
@@ -952,25 +941,25 @@ export class FallbackSystem {
       () => {
         if (primaryCoord.fallbackX && primaryCoord.fallbackY) {
           return this.tryFill(
-            page,
+  _page,
             { ...primaryCoord, x: primaryCoord.fallbackX, y: primaryCoord.fallbackY },
-            value,
+  _value,
             font
           );
         }
-        return false;
+        return false; }
       },
     ];
 
     for (const strategy of strategies) {
       if (await strategy()) {
         console.log(`✓ Campo ${fieldName} preenchido com sucesso`);
-        return true;
+        return true; }
       }
     }
 
     console.error(`✗ Falha ao preencher campo ${fieldName} após todas as tentativas`);
-    return false;
+    return false; }
   }
 
   /**
@@ -990,10 +979,9 @@ export class FallbackSystem {
         font: font,
         color: rgb(0, 0, 0),
       });
-      return true;
-    }
-catch (error) {
-      return false;
+      return true; }
+    } catch (error) {
+      return false; }
     }
   }
 }

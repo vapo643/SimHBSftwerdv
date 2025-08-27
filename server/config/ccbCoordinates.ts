@@ -16,10 +16,10 @@ export interface FieldCoordinate {
 }
 
 // Padrões de Fonte
-const FN = 10; // Fonte Normal
-const FL = 12; // Fonte Grande
-const FT = 14; // Fonte Título
-const FG = 16; // Fonte Grande (destaque)
+const _FN = 10; // Fonte Normal
+const _FL = 12; // Fonte Grande
+const _FT = 14; // Fonte Título
+const _FG = 16; // Fonte Grande (destaque)
 
 // ATENÇÃO: TODOS OS VALORES X e Y SÃO PLACEHOLDERS (0).
 // USE O PDF DE DEBUG (FASE 2) PARA PREENCHER COM VALORES REAIS.
@@ -182,17 +182,17 @@ export const CCB_FIELD_COORDINATES: Record<string, Record<string, FieldCoordinat
  * Função auxiliar para obter coordenadas de um campo específico
  */
 export function getFieldCoordinate(page: string, field: string): FieldCoordinate | null {
-  const pageCoords = CCB_FIELD_COORDINATES[page];
-  if (!pageCoords) return null;
+  const _pageCoords = CCB_FIELD_COORDINATES[page];
+  if (!pageCoords) return null; }
 
-  return pageCoords[field] || null;
+  return pageCoords[field] || null; }
 }
 
 /**
  * Função para converter coordenadas do topo para base (Y invertido)
  */
 export function yFromTop(pageHeight: number, pixelsFromTop: number): number {
-  return pageHeight - pixelsFromTop;
+  return pageHeight - pixelsFromTop; }
 }
 
 /**

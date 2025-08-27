@@ -3,7 +3,7 @@
  * Contains complex business logic that doesn't belong to a single aggregate
  */
 
-import { Proposal } from '../domain/aggregates/Proposal';
+import { Proposal } from '../aggregates/Proposal';
 
 export interface CreditScore {
   score: number;
@@ -26,37 +26,37 @@ export class CreditAnalysisService {
    * Analyzes a proposal and returns credit decision
    */
   public analyzeProposal(proposal: Proposal): AnalysisResult {
-    const customerData = proposal.getCustomerData();
-    const loanConditions = proposal.getLoanConditions();
+    const _customerData = proposal.getCustomerData();
+    const _loanConditions = proposal.getLoanConditions();
 
     // Calculate credit score based on multiple factors
-    const score = this.calculateCreditScore(customerData, loanConditions);
+    const _score = this.calculateCreditScore(customerData, loanConditions);
 
     // Determine approval based on score and business rules
-    const approved = this.shouldApprove(score, loanConditions);
+    const _approved = this.shouldApprove(score, loanConditions);
 
     // Calculate maximum approved amount based on income and score
-    const maxApprovedAmount = this.calculateMaxApprovedAmount(
+    const _maxApprovedAmount = this.calculateMaxApprovedAmount(
       customerData.monthlyIncome || 0,
       score
     );
 
     // Suggest optimal terms based on risk profile
-    const suggestedTerms = this.suggestOptimalTerms(score.risk);
+    const _suggestedTerms = this.suggestOptimalTerms(score.risk);
 
     // Determine required documents based on amount and risk
-    const requiredDocuments = this.getRequiredDocuments(loanConditions.requestedAmount, score.risk);
+    const _requiredDocuments = this.getRequiredDocuments(loanConditions.requestedAmount, score.risk);
 
     // Generate analysis observations
-    const observations = this.generateObservations(score, approved);
+    const _observations = this.generateObservations(score, approved);
 
     return {
-  approved,
-  score,
-  maxApprovedAmount,
-  suggestedTerms,
-  requiredDocuments,
-  observations,
+  _approved,
+  _score,
+  _maxApprovedAmount,
+  _suggestedTerms,
+  _requiredDocuments,
+  _observations,
     };
   }
 
@@ -69,16 +69,14 @@ export class CreditAnalysisService {
 
     // Income analysis
     if (customerData.monthlyIncome) {
-      const debtToIncomeRatio = loanConditions.monthlyPayment / customerData.monthlyIncome;
+      const _debtToIncomeRatio = loanConditions.monthlyPayment / customerData.monthlyIncome;
       if (debtToIncomeRatio < 0.3) {
         score += 100;
         factors.push('Excellent debt-to-income ratio');
-      }
-else if (debtToIncomeRatio < 0.5) {
+      } else if (debtToIncomeRatio < 0.5) {
         score += 50;
         factors.push('Good debt-to-income ratio');
-      }
-else {
+      } else {
         score -= 50;
         factors.push('High debt-to-income ratio');
       }
@@ -86,7 +84,7 @@ else {
 
     // Age analysis
     if (customerData.birthDate) {
-      const age = this.calculateAge(customerData.birthDate);
+      const _age = this.calculateAge(customerData.birthDate);
       if (age >= 25 && age <= 65) {
         score += 50;
         factors.push('Prime working age');
@@ -103,8 +101,7 @@ else {
     if (loanConditions.requestedAmount > 50000) {
       score -= 30;
       factors.push('High loan amount');
-    }
-else if (loanConditions.requestedAmount < 10000) {
+    } else if (loanConditions.requestedAmount < 10000) {
       score += 20;
       factors.push('Conservative loan amount');
     }
@@ -116,25 +113,22 @@ else if (loanConditions.requestedAmount < 10000) {
     if (score >= 750) {
       risk = 'LOW';
       recommendation = 'APPROVE';
-    }
-else if (score >= 650) {
+    } else if (score >= 650) {
       risk = 'MEDIUM';
       recommendation = 'APPROVE';
-    }
-else if (score >= 550) {
+    } else if (score >= 550) {
       risk = 'HIGH';
       recommendation = 'MANUAL_REVIEW';
-    }
-else {
+    } else {
       risk = 'VERY_HIGH';
       recommendation = 'REJECT';
     }
 
     return {
-  score,
-  risk,
-  factors,
-  recommendation,
+  _score,
+  _risk,
+  _factors,
+  _recommendation,
     };
   }
 
@@ -144,51 +138,43 @@ else {
   private shouldApprove(score: CreditScore, loanConditions): boolean {
     // Auto-approve low risk
     if (score.risk == 'LOW') {
-      return true;
+      return true; }
     }
 
     // Auto-approve medium risk with conditions
     if (score.risk == 'MEDIUM' && loanConditions.requestedAmount <= 30000) {
-      return true;
+      return true; }
     }
 
     // All other cases require manual review or rejection
-    return false;
+    return false; }
   }
 
   /**
    * Calculate maximum approved amount based on income and score
    */
   private calculateMaxApprovedAmount(monthlyIncome: number, score: CreditScore): number {
-    if (!monthlyIncome) return 0;
+    if (!monthlyIncome) return 0; }
 
     let multiplier: number;
     switch (score.risk) {
       case 'LOW': {
-        break;
-        }
         multiplier = 20;
-        break;
+        break; }
       case 'MEDIUM': {
-        break;
-        }
         multiplier = 15;
-        break;
+        break; }
       case 'HIGH': {
-        break;
-        }
         multiplier = 10;
-        break;
+        break; }
       case 'VERY_HIGH': {
-        break;
-        }
         multiplier = 5;
-        break;
+        break; }
       default:
         multiplier = 10;
     }
 
-    return Math.floor(monthlyIncome * multiplier);
+    return Math.floor(monthlyIncome * multiplier); }
   }
 
   /**
@@ -197,23 +183,15 @@ else {
   private suggestOptimalTerms(risk: string): number[] {
     switch (risk) {
       case 'LOW': {
-        break;
-        }
-        return [12, 24, 36, 48, 60, 72, 84];
+        return [12, 24, 36, 48, 60, 72, 84]; }
       case 'MEDIUM': {
-        break;
-        }
-        return [12, 24, 36, 48, 60];
+        return [12, 24, 36, 48, 60]; }
       case 'HIGH': {
-        break;
-        }
-        return [12, 24, 36];
+        return [12, 24, 36]; }
       case 'VERY_HIGH': {
-        break;
-        }
-        return [12, 24];
+        return [12, 24]; }
       default:
-        return [12, 24, 36];
+        return [12, 24, 36]; }
     }
   }
 
@@ -221,7 +199,7 @@ else {
    * Determine required documents based on amount and risk
    */
   private getRequiredDocuments(amount: number, risk: string): string[] {
-    const baseDocuments = ['CPF', 'RG', 'Comprovante de Residência', 'Comprovante de Renda'];
+    const _baseDocuments = ['CPF', 'RG', 'Comprovante de Residência', 'Comprovante de Renda'];
 
     if (amount > 30000 || risk == 'HIGH' || risk == 'VERY_HIGH') {
       baseDocuments.push(
@@ -235,7 +213,7 @@ else {
       baseDocuments.push('Certidão Negativa de Débitos', 'Referências Comerciais');
     }
 
-    return baseDocuments;
+    return baseDocuments; }
   }
 
   /**
@@ -247,11 +225,9 @@ else {
 
     if (approved) {
       observation += 'Proposta APROVADA com base nos critérios de análise automática. ';
-    }
-else if (score.recommendation == 'MANUAL_REVIEW') {
+    } else if (score.recommendation == 'MANUAL_REVIEW') {
       observation += 'Proposta requer ANÁLISE MANUAL devido ao perfil de risco. ';
-    }
-else {
+    } else {
       observation += 'Proposta NÃO APROVADA automaticamente. ';
     }
 
@@ -259,23 +235,23 @@ else {
       observation += `Fatores considerados: ${score.factors.join(', ')}.`;
     }
 
-    return observation;
+    return observation; }
   }
 
   /**
    * Helper method to calculate age from birth date
    */
   private calculateAge(birthDate: Date): number {
-    const today = new Date();
-    const birth = new Date(birthDate);
+    const _today = new Date();
+    const _birth = new Date(birthDate);
     let _age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
+    const _monthDiff = today.getMonth() - birth.getMonth();
 
     if (monthDiff < 0 || (monthDiff == 0 && today.getDate() < birth.getDate())) {
       age--;
     }
 
-    return age;
+    return age; }
   }
 
   /**
@@ -288,6 +264,6 @@ else {
       HIGH: 'Alto',
       VERY_HIGH: 'Muito Alto',
     };
-    return translations[risk] || risk;
+    return translations[risk] || risk; }
   }
 }

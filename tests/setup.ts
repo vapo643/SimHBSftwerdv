@@ -20,8 +20,7 @@ config({ path: path.resolve(process.cwd(), '.env.test') });
 if (process.env.TEST_DATABASE_URL) {
   process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
   console.log('[TEST SETUP] ✅ Using isolated test database from TEST_DATABASE_URL');
-}
-else {
+} else {
   console.warn('[TEST SETUP] ⚠️ TEST_DATABASE_URL not found in .env.test');
   console.warn('[TEST SETUP] ⚠️ Please configure a dedicated test database in .env.test');
 }

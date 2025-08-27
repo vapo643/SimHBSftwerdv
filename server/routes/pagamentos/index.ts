@@ -12,14 +12,14 @@ import { z } from 'zod';
 import multer from 'multer';
 
 // Multer configuration for file uploads
-const upload = multer({
+const _upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB
   },
 });
 
-const router = Router();
+const _router = Router();
 
 /**
  * Get payments list with filters
@@ -28,18 +28,18 @@ const router = Router();
 router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { status, periodo, incluir_pagos } = req.query;
-    const userId = req.user?.id;
-    const userRole = req.user?.role;
+    const _userId = req.user?.id;
+    const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
-    const payments = await pagamentoService.getPayments({
+    const _payments = await pagamentoService.getPayments({
       status: status as string,
       periodo: periodo as string,
       incluir_pagos: incluir_pagos == 'true',
-  userId,
+  _userId,
       userRole: userRole || undefined,
     });
 
@@ -48,8 +48,7 @@ router.get('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       data: payments,
       total: payments.length,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[PAGAMENTOS] Error getting payments:', error);
     res.status(500).json({
       error: 'Erro ao buscar pagamentos',
@@ -66,16 +65,15 @@ router.get('/:id', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => 
   try {
     const { id } = req.params;
 
-    const proposal = await pagamentoService.getProposalForPayment(id);
+    const _proposal = await pagamentoService.getProposalForPayment(id);
 
     res.json({
       success: true,
       data: proposal,
     });
-  }
-catch (error) {
+  } catch (error) {
     if (error.message.includes('não encontrada') || error.message.includes('não está pronta')) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     console.error('[PAGAMENTOS] Error getting proposal:', error);
@@ -92,11 +90,11 @@ catch (error) {
  */
 router.post('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.user?.id;
-    const userRole = req.user?.role;
+    const _userId = req.user?.id;
+    const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     // Check user permissions
@@ -107,7 +105,7 @@ router.post('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 
     // Validate payment data
-    const validation = await pagamentoService.validatePaymentData(req.body);
+    const _validation = await pagamentoService.validatePaymentData(req.body);
 
     if (!validation.valid) {
       return res.status(400).json({
@@ -122,23 +120,22 @@ router.post('/', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     }
 
     // Create payment
-    const payment = await pagamentoService.createPayment(req.body, userId);
+    const _payment = await pagamentoService.createPayment(req.body, userId);
 
     res.status(201).json({
       success: true,
       message: 'Pagamento criado com sucesso',
       data: payment,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[PAGAMENTOS] Error creating payment:', error);
 
     if (error.message.includes('já possui pagamento')) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     if (error.message.includes('não encontrada') || error.message.includes('não está pronta')) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     res.status(500).json({
@@ -156,11 +153,11 @@ router.patch('/:id/status', jwtAuthMiddleware, async (req: AuthenticatedRequest,
   try {
     const { id } = req.params;
     const { status, observacoes } = req.body;
-    const userId = req.user?.id;
-    const userRole = req.user?.role;
+    const _userId = req.user?.id;
+    const _userRole = req.user?.role;
 
     if (!userId) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     // Check user permissions
@@ -172,22 +169,22 @@ router.patch('/:id/status', jwtAuthMiddleware, async (req: AuthenticatedRequest,
     }
 
     if (!status) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     // Validate status
-    const validStatuses = ['processando', 'pago', 'rejeitado', 'cancelado'];
+    const _validStatuses = ['processando', 'pago', 'rejeitado', 'cancelado'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         error: 'Status inválido',
-  validStatuses,
+  _validStatuses,
       });
     }
 
-    const updatedPayment = await pagamentoService.updatePaymentStatus(
-  id,
-  status,
-  userId,
+    const _updatedPayment = await pagamentoService.updatePaymentStatus(
+  _id,
+  _status,
+  _userId,
       observacoes
     );
 
@@ -196,12 +193,11 @@ router.patch('/:id/status', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       message: `Status do pagamento alterado para: ${status}`,
       data: updatedPayment,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[PAGAMENTOS] Error updating payment status:', error);
 
     if (error.message.includes('não encontrada')) {
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     res.status(500).json({
@@ -218,7 +214,7 @@ catch (error) {
 router.get('/export/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { dataInicio, dataFim, status, loja, formato = 'csv' } = req.query;
-    const userRole = req.user?.role;
+    const _userRole = req.user?.role;
 
     // Check user permissions
     if (!['ADMINISTRADOR', 'GERENTE'].includes(userRole || '')) {
@@ -227,7 +223,7 @@ router.get('/export/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       });
     }
 
-    const filters = {
+    const _filters = {
       dataInicio: dataInicio as string,
       dataFim: dataFim as string,
       status: status ? (status as string).split(',') : undefined,
@@ -235,7 +231,7 @@ router.get('/export/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       formato: formato as 'csv' | 'excel',
     };
 
-    const exportData = await pagamentoService.exportPayments(filters);
+    const _exportData = await pagamentoService.exportPayments(filters);
 
     // Set response headers for download
     res.setHeader('Content-Type', exportData.contentType);
@@ -246,16 +242,14 @@ router.get('/export/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
     // For CSV format, convert data to CSV string
     if (formato == 'csv') {
-      const csv = convertToCSV(exportData.data);
+      const _csv = convertToCSV(exportData.data);
       res.send(csv);
-    }
-else {
+    } else {
       // For Excel format, you would need to implement Excel generation
       // For now, return JSON data
       res.json(exportData.data);
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('[PAGAMENTOS] Error exporting payments:', error);
     res.status(500).json({
       error: 'Erro ao exportar dados de pagamentos',
@@ -270,14 +264,13 @@ catch (error) {
  */
 router.get('/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const dashboard = await pagamentoService.getPaymentsDashboard();
+    const _dashboard = await pagamentoService.getPaymentsDashboard();
 
     res.json({
       success: true,
       data: dashboard,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[PAGAMENTOS] Error getting dashboard:', error);
     res.status(500).json({
       error: 'Erro ao carregar dashboard de pagamentos',
@@ -292,14 +285,13 @@ catch (error) {
  */
 router.get('/filter-options/data', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const options = await pagamentoService.getFilterOptions();
+    const _options = await pagamentoService.getFilterOptions();
 
     res.json({
       success: true,
       data: options,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[PAGAMENTOS] Error getting filter options:', error);
     res.status(500).json({
       error: 'Erro ao carregar opções de filtro',
@@ -314,14 +306,13 @@ catch (error) {
  */
 router.post('/validate', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const validation = await pagamentoService.validatePaymentData(req.body);
+    const _validation = await pagamentoService.validatePaymentData(req.body);
 
     res.json({
       success: true,
       data: validation,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[PAGAMENTOS] Error validating payment data:', error);
     res.status(500).json({
       error: 'Erro ao validar dados de pagamento',
@@ -336,20 +327,20 @@ catch (error) {
  */
 router.post(
   '/:id/documents',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   upload.single('document'),
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.id;
-      const file = req.file;
+      const _userId = req.user?.id;
+      const _file = req.file;
 
       if (!userId) {
-        return res.status(401).json({error: "Unauthorized"});
+        return res.*);
       }
 
       if (!file) {
-        return res.status(401).json({error: "Unauthorized"});
+        return res.*);
       }
 
       // TODO: Implement document upload logic
@@ -365,8 +356,7 @@ router.post(
         filename: file.originalname,
         size: file.size,
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error('[PAGAMENTOS] Error uploading document:', error);
       res.status(500).json({
         error: 'Erro ao fazer upload do documento',
@@ -381,29 +371,29 @@ catch (error) {
  */
 function convertToCSV(data: unknown[]): string {
   if (!data || data.length == 0) {
-    return '';
+    return ''; }
   }
 
-  const headers = Object.keys(data[0]);
-  const csvRows = [];
+  const _headers = Object.keys(data[0]);
+  const _csvRows = [];
 
   // Add headers
   csvRows.push(headers.join(','));
 
   // Add data rows
   for (const row of data) {
-    const values = headers.map((header) => {
-      const value = row[header];
+    const _values = headers.map((header) => {
+      const _value = row[header];
       // Escape values that contain commas or quotes
       if (typeof value == 'string' && (value.includes(',') || value.includes('"'))) {
-        return `"${value.replace(/"/g, '""')}"`;
+        return `"${value.replace(/"/g, '""')}"`; }
       }
-      return value;
+      return value; }
     });
     csvRows.push(values.join(','));
   }
 
-  return csvRows.join('\n');
+  return csvRows.join('\n'); }
 }
 
 export default router;

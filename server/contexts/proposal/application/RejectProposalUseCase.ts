@@ -4,7 +4,7 @@
  * Orquestra a rejeição de uma proposta por um analista
  */
 
-import { IProposalRepository } from '../domain/Proposal';
+import { IProposalRepository } from '../domain/IProposalRepository';
 
 export interface RejectProposalDTO {
   proposalId: string;
@@ -17,7 +17,7 @@ export class RejectProposalUseCase {
 
   async execute(dto: RejectProposalDTO): Promise<void> {
     // Buscar agregado
-    const proposal = await this.proposalRepository.findById(dto.proposalId);
+    const _proposal = await this.proposalRepository.findById(dto.proposalId);
 
     if (!proposal) {
       throw new Error(`Proposta ${dto.proposalId} não encontrada`);

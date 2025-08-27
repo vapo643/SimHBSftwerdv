@@ -38,7 +38,7 @@ export function useUserFormData() {
     queryKey: queryKeys.system.metadata(),
     queryFn: async () => {
       const _response = await api.get<SystemMetadata>('/api/admin/system/metadata');
-      return 'data' in response ? response.data : (response as SystemMetadata);
+      return 'data' in response ? response.data : (response as SystemMetadata); }
     },
   });
 
@@ -51,7 +51,7 @@ export function useUserFormData() {
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
       const _response = await api.get<Partner[]>('/api/parceiros');
-      return 'data' in response ? response.data : (response as Partner[]);
+      return 'data' in response ? response.data : (response as Partner[]); }
     },
   });
 
@@ -67,7 +67,7 @@ export function useUserFormData() {
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
       const _response = await api.get<Store[]>('/api/admin/lojas');
-      return 'data' in response ? response.data : (response as Store[]);
+      return 'data' in response ? response.data : (response as Store[]); }
     },
     enabled: shouldUseClientSideFiltering == true, // Only fetch if using client-side filtering
   });
@@ -76,12 +76,11 @@ export function useUserFormData() {
   const _fetchStoresByPartner = async (partnerId: number): Promise<Store[]> => {
     if (shouldUseClientSideFiltering && allStores) {
       // Client-side filtering: filter from pre-loaded data
-      return allStores.filter((store) => (store as unknown).parceiroId == partnerId);
-    }
-else {
+      return allStores.filter((store) => (store as unknown).parceiroId == partnerId); }
+    } else {
       // Server-side filtering: fetch on-demand
       const _response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);
-      return 'data' in response ? response.data : (response as Store[]);
+      return 'data' in response ? response.data : (response as Store[]); }
     }
   };
 
@@ -97,18 +96,18 @@ else {
     // Data
     partners: partners || [],
     allStores: shouldUseClientSideFiltering ? allStores || [] : [],
-  metadata,
+  _metadata,
 
     // Loading states (granular)
-  isLoading,
-  isMetadataLoading,
-  isPartnersLoading,
+  _isLoading,
+  _isMetadataLoading,
+  _isPartnersLoading,
     isAllStoresLoading: shouldUseClientSideFiltering ? isAllStoresLoading : false,
 
     // Error states (granular)
-  error,
-  metadataError,
-  partnersError,
+  _error,
+  _metadataError,
+  _partnersError,
     allStoresError: shouldUseClientSideFiltering ? allStoresError : null,
 
     // Filtering strategy info
@@ -116,14 +115,14 @@ else {
     totalLojas: metadata?.totalLojas || 0,
 
     // Methods
-  fetchStoresByPartner,
+  _fetchStoresByPartner,
 
     // Helper methods for UI
     getStoresByPartner: (partnerId: number) => {
       if (shouldUseClientSideFiltering && allStores) {
-        return allStores.filter((store) => store.parceiroId == partnerId);
+        return allStores.filter((store) => store.parceiroId == partnerId); }
       }
-      return [];
+      return []; }
     },
 
     // Data readiness flags
@@ -137,9 +136,9 @@ export function useStoresByPartner(partnerId: number | null, enabled = true) {
   return useQuery({
     queryKey: partnerId ? queryKeys.stores.byPartner(partnerId) : [],
     queryFn: async () => {
-      if (!partnerId) return [];
+      if (!partnerId) return []; }
       const _response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);
-      return 'data' in response ? response.data : (response as Store[]);
+      return 'data' in response ? response.data : (response as Store[]); }
     },
     enabled: enabled && !!partnerId,
   });

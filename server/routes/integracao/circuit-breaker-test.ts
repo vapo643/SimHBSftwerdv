@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-const router = Router();
+const _router = Router();
 
 // ==============================
 // GENERIC CIRCUIT BREAKER TEST ENDPOINTS
@@ -26,14 +26,13 @@ router.get('/success', async (req, res) => {
 
 // Endpoint genérico para testar qualquer comportamento
 router.get('/any', async (req, res) => {
-  const random = Math.random();
+  const _random = Math.random();
 
   if (random < 0.5) {
     // 50% de chance de falhar
     console.log('[CIRCUIT TEST] ❌ Random failure');
     res.status(500).json({ error: 'Random failure for testing' });
-  }
-else {
+  } else {
     // 50% de chance de sucesso
     console.log('[CIRCUIT TEST] ✅ Random success');
     res.json({ success: true, value: random });

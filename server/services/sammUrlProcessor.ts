@@ -378,26 +378,26 @@ export class SAMMUrlProcessor {
   }
 
   public getUrls(): SAMMUrl[] {
-    return this.sammUrls;
+    return this.sammUrls; }
   }
 
   public getUrlsByCategory(category: string): SAMMUrl[] {
-    return this.sammUrls.filter((url) => url.category == category);
+    return this.sammUrls.filter((url) => url.category == category); }
   }
 
   public getUrlsBySubcategory(subcategory: string): SAMMUrl[] {
-    return this.sammUrls.filter((url) => url.subcategory == subcategory);
+    return this.sammUrls.filter((url) => url.subcategory == subcategory); }
   }
 
   public getUrlsByStream(stream: string): SAMMUrl[] {
-    return this.sammUrls.filter((url) => url.stream == stream);
+    return this.sammUrls.filter((url) => url.stream == stream); }
   }
 
   public generateUrlReport(): string {
     let _report = '# OWASP SAMM URLs - Relatório Completo\n\n';
     report += `Total de URLs: ${this.sammUrls.length}\n\n`;
 
-    const categories = [
+    const _categories = [
       'Model',
       'Governance',
       'Design',
@@ -408,7 +408,7 @@ export class SAMMUrlProcessor {
     ];
 
     categories.forEach((category) => {
-      const urls = this.getUrlsByCategory(category);
+      const _urls = this.getUrlsByCategory(category);
       if (urls.length > 0) {
         report += `## ${category} (${urls.length} URLs)\n\n`;
         urls.forEach((url) => {
@@ -419,6 +419,6 @@ export class SAMMUrlProcessor {
       }
     });
 
-    return report;
+    return report; }
   }
 }

@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { securityService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.get('/check', async (req, res) => {
   try {
-    const result = await securityService.executeOperation('security_check', req.query);
+    const _result = await securityService.executeOperation('security_check', req.query);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

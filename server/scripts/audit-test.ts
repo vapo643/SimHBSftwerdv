@@ -9,7 +9,7 @@ const API_URL = 'http://localhost:5000/api';
 const AUTH_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1Njc5ZmQzOC1hZjRiLTQxZWQtYjJiYS00NjY5ZWVhMTNhMjQiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTcyNzQ0ODk5Nn0.1zGlOk5_ikLDQvbP5lL2BX-ySwQaRnRs6d17xPYb2Vo';
 
-const headers = {
+const _headers = {
   Authorization: `Bearer ${AUTH_TOKEN}`,
   'Content-Type': 'application/json',
   Cookie: `jwt=${AUTH_TOKEN}`,
@@ -22,11 +22,11 @@ async function testarProrrogarVencimento() {
 
   try {
     // 1. Buscar boletos ativos de uma proposta de teste
-    const propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
+    const _propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
     console.log(`📌 Buscando boletos ativos da proposta ${propostaId}...`);
 
-    const response = await axios.get(`${API_URL}/inter/collections/proposal/${propostaId}`, {
-      headers,
+    const _response = await axios.get(`${API_URL}/inter/collections/proposal/${propostaId}`, {
+  _headers,
     });
     const { boletosAtivos } = response.data;
 
@@ -38,7 +38,7 @@ async function testarProrrogarVencimento() {
     console.log(`✅ Encontrados ${boletosAtivos.length} boletos ativos`);
 
     // 2. Selecionar o primeiro boleto para prorrogação
-    const boletoTeste = boletosAtivos[0];
+    const _boletoTeste = boletosAtivos[0];
     console.log(`\n📝 Boleto selecionado para teste:`, {
       codigoSolicitacao: boletoTeste.codigoSolicitacao,
       numeroParcela: boletoTeste.numeroParcela,
@@ -47,18 +47,18 @@ async function testarProrrogarVencimento() {
     });
 
     // 3. Definir nova data de vencimento (30 dias a mais)
-    const dataAtual = new Date(boletoTeste.dataVencimento);
+    const _dataAtual = new Date(boletoTeste.dataVencimento);
     dataAtual.setDate(dataAtual.getDate() + 30);
-    const novaDataVencimento = dataAtual.toISOString().split('T')[0];
+    const _novaDataVencimento = dataAtual.toISOString().split('T')[0];
 
     console.log(`\n🚀 Prorrogando vencimento para ${novaDataVencimento}...`);
 
     // 4. Executar prorrogação
-    const prorrogacaoResponse = await axios.patch(
+    const _prorrogacaoResponse = await axios.patch(
       `${API_URL}/inter/collections/batch-extend`,
       {
         codigosSolicitacao: [boletoTeste.codigoSolicitacao],
-        novaDataVencimento,
+  _novaDataVencimento,
       },
       { headers }
     );
@@ -69,13 +69,13 @@ async function testarProrrogarVencimento() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     console.log('\n🔍 Verificando atualização na API do Inter...');
-    const verificacaoResponse = await axios.get(
+    const _verificacaoResponse = await axios.get(
       `${API_URL}/inter/collections/${boletoTeste.codigoSolicitacao}`,
       { headers }
     );
 
-    const dataVencimentoVerificada = verificacaoResponse.data.data?.cobranca?.dataVencimento;
-    const atualizacaoConfirmada = dataVencimentoVerificada == novaDataVencimento;
+    const _dataVencimentoVerificada = verificacaoResponse.data.data?.cobranca?.dataVencimento;
+    const _atualizacaoConfirmada = dataVencimentoVerificada == novaDataVencimento;
 
     console.log('\n📊 RESULTADO DA VALIDAÇÃO END-TO-END:');
     console.log('  - Data enviada:', novaDataVencimento);
@@ -89,11 +89,10 @@ async function testarProrrogarVencimento() {
       );
     }
 
-    return atualizacaoConfirmada;
-  }
-catch (error) {
+    return atualizacaoConfirmada; }
+  } catch (error) {
     console.error('\n❌ Erro ao testar prorrogação:', error.response?.data || error.message);
-    return false;
+    return false; }
   }
 }
 
@@ -102,11 +101,11 @@ async function testarDescontoQuitacao() {
 
   try {
     // 1. Buscar proposta com múltiplos boletos ativos
-    const propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
+    const _propostaId = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
     console.log(`📌 Buscando informações de dívida da proposta ${propostaId}...`);
 
-    const response = await axios.get(`${API_URL}/inter/collections/proposal/${propostaId}`, {
-      headers,
+    const _response = await axios.get(`${API_URL}/inter/collections/proposal/${propostaId}`, {
+  _headers,
     });
     const { valorRestante, boletosAtivos } = response.data;
 
@@ -116,41 +115,41 @@ async function testarDescontoQuitacao() {
     }
 
     console.log(`✅ Dívida atual:`, {
-      valorRestante,
+  _valorRestante,
       quantidadeBoletosAtivos: boletosAtivos.length,
     });
 
     // 2. Aplicar desconto de 50%
-    const desconto = valorRestante * 0.5;
-    const novoValorTotal = valorRestante - desconto;
+    const _desconto = valorRestante * 0.5;
+    const _novoValorTotal = valorRestante - desconto;
 
     // 3. Criar 2 novas parcelas
-    const hoje = new Date();
-    const parcela1Data = new Date(hoje);
+    const _hoje = new Date();
+    const _parcela1Data = new Date(hoje);
     parcela1Data.setDate(parcela1Data.getDate() + 30);
-    const parcela2Data = new Date(hoje);
+    const _parcela2Data = new Date(hoje);
     parcela2Data.setDate(parcela2Data.getDate() + 60);
 
-    const novasParcelas = [
+    const _novasParcelas = [
       { valor: novoValorTotal / 2, dataVencimento: parcela1Data.toISOString().split('T')[0] },
       { valor: novoValorTotal / 2, dataVencimento: parcela2Data.toISOString().split('T')[0] },
     ];
 
     console.log(`\n💰 Aplicando desconto de quitação:`, {
       valorOriginal: valorRestante,
-      desconto,
+  _desconto,
       percentualDesconto: '50%',
-      novoValorTotal,
-      novasParcelas,
+  _novoValorTotal,
+  _novasParcelas,
     });
 
     // 4. Executar desconto de quitação
-    const quitacaoResponse = await axios.post(
+    const _quitacaoResponse = await axios.post(
       `${API_URL}/inter/collections/settlement-discount`,
       {
-        propostaId,
-        desconto,
-        novasParcelas,
+  _propostaId,
+  _desconto,
+  _novasParcelas,
       },
       { headers }
     );
@@ -164,12 +163,12 @@ async function testarDescontoQuitacao() {
       for (const novoBoleto of quitacaoResponse.data.novosBoletosData) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const verificacaoResponse = await axios.get(
+        const _verificacaoResponse = await axios.get(
           `${API_URL}/inter/collections/${novoBoleto.codigoSolicitacao}`,
           { headers }
         );
 
-        const boletoVerificado = verificacaoResponse.data.data?.cobranca;
+        const _boletoVerificado = verificacaoResponse.data.data?.cobranca;
 
         console.log(`\n  Boleto ${novoBoleto.parcela}:`, {
           codigoSolicitacao: novoBoleto.codigoSolicitacao,
@@ -190,21 +189,20 @@ async function testarDescontoQuitacao() {
       );
     }
 
-    return true;
-  }
-catch (error) {
+    return true; }
+  } catch (error) {
     console.error(
       '\n❌ Erro ao testar desconto de quitação:',
       error.response?.data || error.message
     );
-    return false;
+    return false; }
   }
 }
 
 // Executar testes
 async function executarAuditoria() {
-  const resultadoProrrogacao = await testarProrrogarVencimento();
-  const resultadoQuitacao = await testarDescontoQuitacao();
+  const _resultadoProrrogacao = await testarProrrogarVencimento();
+  const _resultadoQuitacao = await testarDescontoQuitacao();
 
   console.log('\n\n🏁 ==== RELATÓRIO FINAL DA AUDITORIA ====');
   console.log('\n✅ Prorrogar Vencimento:', resultadoProrrogacao ? 'SUCESSO' : 'FALHA');
@@ -214,5 +212,5 @@ async function executarAuditoria() {
 
 // Aguardar servidor estar pronto e executar
 setTimeout(() => {
-  executarAuditoria().catch (console.error);
+  executarAuditoria().catch(console.error);
 }, 3000);

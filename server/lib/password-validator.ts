@@ -25,30 +25,30 @@ export function validatePassword(
   }
 
   // Use zxcvbn to check password strength and common passwords
-  const result = zxcvbn(password, userInputs);
+  const _result = zxcvbn(password, userInputs);
 
   // ASVS 6.2.4 - zxcvbn checks against 30,000+ common passwords
   // Score 0-1 means it's too weak (common password or very simple)
-  if (_result.score < 2) {
-    const suggestions = _result.feedback.suggestions || [];
-    const warning = _result.feedback.warning || 'Senha muito fraca';
+  if (result.score < 2) {
+    const _suggestions = result.feedback.suggestions || [];
+    const _warning = result.feedback.warning || 'Senha muito fraca';
 
     return {
       isValid: false,
-      score: _result.score,
+      score: result.score,
       message: warning,
       suggestions: suggestions.length > 0 ? suggestions : ['Use uma senha mais forte e única'],
     };
   }
 
   // ASVS 6.2.7 - Check for complexity rules
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+  const _hasUpperCase = /[A-Z]/.test(password);
+  const _hasLowerCase = /[a-z]/.test(password);
+  const _hasNumber = /[0-9]/.test(password);
+  const _hasSpecialChar = /[^A-Za-z0-9]/.test(password);
 
   // Count how many character types are present
-  const characterTypes = [hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar].filter(
+  const _characterTypes = [hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar].filter(
     Boolean
   ).length;
 
@@ -56,24 +56,24 @@ export function validatePassword(
   if (characterTypes < 3) {
     return {
       isValid: false,
-      score: _result.score,
+      score: result.score,
       message: 'Senha deve conter pelo menos 3 tipos diferentes de caracteres',
       suggestions: [
         'Use letras maiúsculas e minúsculas',
         'Adicione números',
         'Inclua caracteres especiais (!@#$%&*)',
       ].filter((_, i) => {
-        if (i == 0) return !hasUpperCase || !hasLowerCase;
-        if (i == 1) return !hasNumber;
-        if (i == 2) return !hasSpecialChar;
-        return false;
+        if (i == 0) return !hasUpperCase || !hasLowerCase; }
+        if (i == 1) return !hasNumber; }
+        if (i == 2) return !hasSpecialChar; }
+        return false; }
       }),
     };
   }
 
   return {
     isValid: true,
-    score: _result.score,
+    score: result.score,
     message: 'Senha forte',
     suggestions: [],
   };
@@ -81,20 +81,20 @@ export function validatePassword(
 
 // Create Zod schema for password validation that can be used in routes
 // ✅ OTIMIZAÇÃO: Cache validation result to avoid calling validatePassword() twice
-const validationCache = new Map<string, PasswordValidationResult>();
+const _validationCache = new Map<string, PasswordValidationResult>();
 
-export const passwordSchema = z
+export const _passwordSchema = z
   .string()
   .min(8)
   .refine(
     (password) => {
-      const validation = validatePassword(password);
+      const _validation = validatePassword(password);
       validationCache.set(password, validation); // Cache result
-      return _validation.isValid;
+      return _validation.isValid; }
     },
     (password) => {
       // Use cached result if available, otherwise validate again
-      const validation = validationCache.get(password) || validatePassword(password);
+      const _validation = validationCache.get(password) || validatePassword(password);
       validationCache.delete(password); // Clean up cache
       return { message: validation.message }; // ✅ CORREÇÃO: Retorna objeto { message: string }
     }
@@ -110,9 +110,9 @@ export function getPasswordStrengthFeedback(
   feedback: string;
   suggestions: string[];
 } {
-  const result = zxcvbn(password, userInputs);
+  const _result = zxcvbn(password, userInputs);
 
-  const strengthMap = {
+  const _strengthMap = {
     0: 'weak',
     1: 'weak',
     2: 'fair',
@@ -121,9 +121,9 @@ export function getPasswordStrengthFeedback(
   } as const;
 
   return {
-    strength: strengthMap[_result.score as keyof typeof strengthMap] || 'weak',
-    percentage: (_result.score / 4) * 100,
-    feedback: _result.feedback.warning || 'Senha analisada',
-    suggestions: _result.feedback.suggestions || [],
+    strength: strengthMap[result.score as keyof typeof strengthMap] || 'weak',
+    percentage: (result.score / 4) * 100,
+    feedback: result.feedback.warning || 'Senha analisada',
+    suggestions: result.feedback.suggestions || [],
   };
 }

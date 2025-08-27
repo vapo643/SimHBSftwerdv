@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm';
 // Import the queue system (using mock in development)
 import { queues } from '../lib/mock-queue';
 
-const router = Router();
+const _router = Router();
 
 /**
  * REFATORADO: Endpoint para SOLICITAR geração de carnê (PRODUTOR)
@@ -17,13 +17,13 @@ const router = Router();
  */
 router.post(
   '/:id/gerar-carne',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const { codigosSolicitacao } = req.body; // Lista opcional de códigos para carnê parcial
-      const userId = req.user?.id;
+      const _userId = req.user?.id;
 
       console.log(`[CARNE API - PRODUCER] 🎯 Solicitação de carnê para proposta: ${id}`);
       console.log(`[CARNE API - PRODUCER] 👤 Usuário: ${userId}`);
@@ -43,7 +43,7 @@ router.post(
 
       // Validar se a proposta existe
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       const { data: proposta, error } = await supabase
         .from('propostas')
@@ -66,7 +66,7 @@ router.post(
       console.log(`[CARNE API - PRODUCER] 🔍 Verificando se já existe carnê no Storage...`);
 
       // PAM V1.0 - DIAGNÓSTICO APROFUNDADO: Log do caminho e resultado EXATO
-      const gearCarneStoragePath = `propostas/${id}/carnes`;
+      const _gearCarneStoragePath = `propostas/${id}/carnes`;
       console.log(
         `[PAM V1.0 DIAGNÓSTICO] 🔍 /gerar-carne CAMINHO_EXATO: "${gearCarneStoragePath}"`
       );
@@ -94,8 +94,8 @@ router.post(
 
       if (!listError && existingFiles && existingFiles.length > 0) {
         // Carnê já existe - retornar URL do arquivo existente
-        const fileName = existingFiles[0].name;
-        const filePath = `propostas/${id}/carnes/${fileName}`;
+        const _fileName = existingFiles[0].name;
+        const _filePath = `propostas/${id}/carnes/${fileName}`;
 
         console.log(`[CARNE API - PRODUCER] ✅ Carnê já existe: ${fileName}`);
 
@@ -132,11 +132,11 @@ router.post(
       // NOVO: Adicionar job à fila em vez de processar sincronamente
       console.log(`[CARNE API - PRODUCER] 📥 Adicionando job à fila pdf-processing...`);
 
-      const job = await queues.pdfProcessing.add('GENERATE_CARNE', {
+      const _job = await queues.pdfProcessing.add('GENERATE_CARNE', {
         type: 'GENERATE_CARNE',
         propostaId: id,
         userId: userId,
-        clienteNome: proposta.clientenome,
+        clienteNome: proposta.cliente_nome,
         codigosSolicitacao: codigosSolicitacao, // Lista opcional para carnê parcial
         timestamp: new Date().toISOString(),
       });
@@ -152,12 +152,11 @@ router.post(
         data: {
           propostaId: id,
           propostaNumero: `PROP-${proposta.id}`,
-          clienteNome: proposta.clientenome,
+          clienteNome: proposta.cliente_nome,
           hint: 'Use o jobId para consultar o status em /api/jobs/{jobId}/status',
         },
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[CARNE API - PRODUCER] ❌ Erro ao solicitar carnê:`, error);
       return res.status(500).json({
         error: 'Erro ao solicitar geração de carnê',
@@ -173,8 +172,8 @@ catch (error) {
  */
 router.get(
   '/:id/carne-pdf',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     // Redirecionar para o novo fluxo
     console.log(`[CARNE API] ⚠️ DEPRECATED: Redirecionando para novo endpoint assíncrono`);
@@ -193,8 +192,8 @@ router.get(
  */
 router.get(
   '/:id/carne-pdf/download',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
@@ -209,7 +208,7 @@ router.get(
       }
 
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       const { data: proposta, error } = await supabase
         .from('propostas')
@@ -224,7 +223,7 @@ router.get(
       }
 
       // Gerar o carnê
-      const pdfBuffer = await pdfMergeService.gerarCarneParaProposta(id);
+      const _pdfBuffer = await pdfMergeService.gerarCarneParaProposta(id);
 
       // Configurar headers para download direto
       res.setHeader('Content-Type', 'application/pdf');
@@ -239,8 +238,7 @@ router.get(
 
       // Enviar PDF diretamente
       res.send(pdfBuffer);
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[CARNE API] ❌ Erro no download direto:`, error);
 
       return res.status(500).json({
@@ -258,12 +256,12 @@ catch (error) {
  */
 router.post(
   '/:id/sincronizar-boletos',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.id;
+      const _userId = req.user?.id;
 
       console.log(
         `[BOLETO SYNC API - PRODUCER] 🎯 Solicitação de sincronização para proposta: ${id}`
@@ -279,7 +277,7 @@ router.post(
 
       // Validar se a proposta existe
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const _supabase = createServerSupabaseAdminClient();
 
       const { data: proposta, error } = await supabase
         .from('propostas')
@@ -299,11 +297,11 @@ router.post(
       // NOVO: Adicionar job à fila boleto-sync em vez de processar sincronamente
       console.log(`[BOLETO SYNC API - PRODUCER] 📥 Adicionando job à fila boleto-sync...`);
 
-      const job = await queues.boletoSync.add('SYNC_BOLETOS', {
+      const _job = await queues.boletoSync.add('SYNC_BOLETOS', {
         type: 'SYNC_BOLETOS',
         propostaId: id,
         userId: userId,
-        clienteNome: proposta.clientenome,
+        clienteNome: proposta.cliente_nome,
         timestamp: new Date().toISOString(),
       });
 
@@ -318,12 +316,11 @@ router.post(
         data: {
           propostaId: id,
           propostaNumero: `PROP-${proposta.id}`,
-          clienteNome: proposta.clientenome,
+          clienteNome: proposta.cliente_nome,
           hint: 'Use o jobId para consultar o status em /api/jobs/{jobId}/status',
         },
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[BOLETO SYNC API - PRODUCER] ❌ Erro ao solicitar sincronização:`, error);
       return res.status(500).json({
         error: 'Erro ao solicitar sincronização',

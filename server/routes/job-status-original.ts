@@ -10,7 +10,7 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-mi
 import { requireAnyRole } from '../lib/role-guards';
 import { queues } from '../lib/mock-queue';
 
-const router = Router();
+const _router = Router();
 
 /**
  * Endpoint para consultar o status de um job
@@ -18,8 +18,8 @@ const router = Router();
  */
 router.get(
   '/:jobId/status',
-  jwtAuthMiddleware,
-  requireAnyRole,
+  _jwtAuthMiddleware,
+  _requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { jobId } = req.params;
@@ -41,25 +41,22 @@ router.get(
       if (jobId.startsWith('pdf-processing')) {
         queueName = 'pdf-processing';
         job = await queues.pdfProcessing.getJob(jobId);
-      }
-else if (jobId.startsWith('boleto-sync')) {
+      } else if (jobId.startsWith('boleto-sync')) {
         queueName = 'boleto-sync';
         job = await queues.boletoSync.getJob(jobId);
-      }
-else if (jobId.startsWith('document-processing')) {
+      } else if (jobId.startsWith('document-processing')) {
         queueName = 'document-processing';
         job = await queues.document.getJob(jobId);
-      }
-else if (jobId.startsWith('notifications')) {
+      } else if (jobId.startsWith('notifications')) {
         queueName = 'notifications';
         job = await queues.notification.getJob(jobId);
       }
 
       if (job) {
         // Job encontrado - retornar dados reais
-        const state = await job.getState();
-        const progress = job.progress;
-        const returnvalue = job.returnvalue;
+        const _state = await job.getState();
+        const _progress = job.progress;
+        const _returnvalue = job.returnvalue;
 
         console.log(`[JOB STATUS API] 📊 Job ${jobId} - Status: ${state}, Progress: ${progress}%`);
 
@@ -77,8 +74,7 @@ else if (jobId.startsWith('notifications')) {
             size: returnvalue.size,
             timestamp: new Date().toISOString(),
           };
-        }
-else if (state == 'failed') {
+        } else if (state == 'failed') {
           responseData = {
             success: false,
             error: job.failedReason || 'Erro desconhecido no processamento',
@@ -88,7 +84,7 @@ else if (state == 'failed') {
 
         return res.json({
           success: true,
-          jobId,
+          _jobId,
           queue: queueName,
           status: state,
           progress: progress || 0,
@@ -106,11 +102,10 @@ else if (state == 'failed') {
 
       return res.status(404).json({
         error: 'Job não encontrado',
-        jobId,
+        _jobId,
         hint: 'O job pode ter expirado ou o ID está incorreto',
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[JOB STATUS API] ❌ Erro ao consultar status:`, error);
       return res.status(500).json({
         error: 'Erro ao consultar status do job',

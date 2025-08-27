@@ -90,13 +90,11 @@ export const _handleApiError = (error) => {
     if (data?.userMessage) {
       userMessage = data.userMessage;
     }
-  }
-else if (error.code) {
+  } else if (error.code) {
     // Erro de rede ou outro erro com código
     errorCode = error.code == 'ERR_NETWORK' ? 'NETWORK_ERROR' : error.code;
     technicalMessage = error.message;
-  }
-else if (error.message) {
+  } else if (error.message) {
     // Erro genérico com mensagem
     technicalMessage = error.message;
   }
@@ -115,7 +113,7 @@ else if (error.message) {
   return {
     code: errorCode,
     userMessage: finalUserMessage,
-  technicalMessage,
+  _technicalMessage,
     originalError: error,
   };
 };
@@ -127,7 +125,7 @@ export const _validateApiResponse = (response) => {
   if (!response || (response as unknown).error) {
     throw new Error((response as unknown)?.error?.message || 'Resposta inválida da API');
   }
-  return response;
+  return response; }
 };
 
 /**

@@ -47,7 +47,7 @@ export class InvalidTransitionError extends Error {
     public readonly toStatus: string,
     message?: string
   ) {
-    const errorMessage =
+    const _errorMessage =
       message || `Transição inválida: não é permitido mudar de "${fromStatus}" para "${toStatus}"`;
     super(errorMessage);
     this.name = 'InvalidTransitionError';
@@ -79,46 +79,46 @@ const transitionGraph: Record<string, string[]> = {
   // Aprovado - próximo passo é gerar CCB, aguardar documentação ou cancelar
   // NÃO pode voltar para REJEITADO após aprovação (regra de negócio)
   [ProposalStatus.APROVADO]: [
-    ProposalStatus.CCBGERADA,
-    ProposalStatus.AGUARDANDODOCUMENTACAO,
+    ProposalStatus.CCB_GERADA,
+    ProposalStatus.AGUARDANDO_DOCUMENTACAO,
     ProposalStatus.CANCELADO,
     ProposalStatus.SUSPENSA,
   ],
 
   // CCB gerada - enviada para assinatura
-  [ProposalStatus.CCB_GERADA]: [ProposalStatus.AGUARDANDOASSINATURA, ProposalStatus.SUSPENSA],
+  [ProposalStatus.CCB_GERADA]: [ProposalStatus.AGUARDANDO_ASSINATURA, ProposalStatus.SUSPENSA],
 
   // Aguardando assinatura - pode ser assinada ou suspensa
   [ProposalStatus.AGUARDANDO_ASSINATURA]: [
-    ProposalStatus.ASSINATURACONCLUIDA,
+    ProposalStatus.ASSINATURA_CONCLUIDA,
     ProposalStatus.SUSPENSA,
   ],
 
   // Assinatura concluída - boletos são emitidos
-  [ProposalStatus.ASSINATURA_CONCLUIDA]: [ProposalStatus.BOLETOSEMITIDOS, ProposalStatus.SUSPENSA],
+  [ProposalStatus.ASSINATURA_CONCLUIDA]: [ProposalStatus.BOLETOS_EMITIDOS, ProposalStatus.SUSPENSA],
 
   // Boletos emitidos - aguardando autorização de pagamento
-  [ProposalStatus.BOLETOS_EMITIDOS]: [ProposalStatus.PAGAMENTOAUTORIZADO, ProposalStatus.SUSPENSA],
+  [ProposalStatus.BOLETOS_EMITIDOS]: [ProposalStatus.PAGAMENTO_AUTORIZADO, ProposalStatus.SUSPENSA],
 
   // Status de documentação
   [ProposalStatus.AGUARDANDO_DOCUMENTACAO]: [
-    ProposalStatus.DOCUMENTACAOCOMPLETA,
+    ProposalStatus.DOCUMENTACAO_COMPLETA,
     ProposalStatus.SUSPENSA,
   ],
 
   [ProposalStatus.DOCUMENTACAO_COMPLETA]: [
-    ProposalStatus.ASSINATURAPENDENTE,
-    ProposalStatus.CCBGERADA,
+    ProposalStatus.ASSINATURA_PENDENTE,
+    ProposalStatus.CCB_GERADA,
     ProposalStatus.SUSPENSA,
   ],
 
   [ProposalStatus.ASSINATURA_PENDENTE]: [
-    ProposalStatus.ASSINATURACONCLUIDA,
+    ProposalStatus.ASSINATURA_CONCLUIDA,
     ProposalStatus.SUSPENSA,
   ],
 
   // Status de pagamento
-  [ProposalStatus.AGUARDANDO_PAGAMENTO]: [ProposalStatus.PAGOTOTAL, ProposalStatus.SUSPENSA],
+  [ProposalStatus.AGUARDANDO_PAGAMENTO]: [ProposalStatus.PAGO_TOTAL, ProposalStatus.SUSPENSA],
 
   // Estados finais - não podem transicionar
   [ProposalStatus.PAGAMENTO_AUTORIZADO]: [], // Estado final de sucesso
@@ -130,14 +130,14 @@ const transitionGraph: Record<string, string[]> = {
   [ProposalStatus.SUSPENSA]: [
     ProposalStatus.RASCUNHO,
     ProposalStatus.APROVADO,
-    ProposalStatus.CCBGERADA,
-    ProposalStatus.AGUARDANDOASSINATURA,
-    ProposalStatus.ASSINATURACONCLUIDA,
-    ProposalStatus.BOLETOSEMITIDOS,
-    ProposalStatus.AGUARDANDODOCUMENTACAO,
-    ProposalStatus.DOCUMENTACAOCOMPLETA,
-    ProposalStatus.ASSINATURAPENDENTE,
-    ProposalStatus.AGUARDANDOPAGAMENTO,
+    ProposalStatus.CCB_GERADA,
+    ProposalStatus.AGUARDANDO_ASSINATURA,
+    ProposalStatus.ASSINATURA_CONCLUIDA,
+    ProposalStatus.BOLETOS_EMITIDOS,
+    ProposalStatus.AGUARDANDO_DOCUMENTACAO,
+    ProposalStatus.DOCUMENTACAO_COMPLETA,
+    ProposalStatus.ASSINATURA_PENDENTE,
+    ProposalStatus.AGUARDANDO_PAGAMENTO,
   ],
 };
 
@@ -157,19 +157,19 @@ interface TransitionParams {
  * Valida se uma transição de status é permitida
  */
 export function validateTransition(fromStatus: string, toStatus: string): boolean {
-  const allowedTransitions = transitionGraph[fromStatus];
+  const _allowedTransitions = transitionGraph[fromStatus];
 
   // Se não há regras definidas para o status atual, não permite transição
   if (!allowedTransitions) {
     console.warn(`[FSM] Status não mapeado no grafo: ${fromStatus}`);
-    return false;
+    return false; }
   }
 
-  return allowedTransitions.includes(toStatus);
+  return allowedTransitions.includes(toStatus); }
 }
 
 // Alias para compatibilidade interna
-const isTransitionValid = validateTransition;
+const _isTransitionValid = validateTransition;
 
 /**
  * Função principal para realizar transição de status com validação FSM
@@ -200,7 +200,7 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
       throw new Error(`Proposta ${propostaId} não encontrada no banco de dados`);
     }
 
-    const statusAtual = propostaAtual.status;
+    const _statusAtual = propostaAtual.status;
     console.log(`[FSM] 📍 Status atual: ${statusAtual}`);
 
     // 2. Se o status não mudou, não fazer nada
@@ -213,8 +213,8 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     if (!isTransitionValid(statusAtual, novoStatus)) {
       console.error(`[FSM] ❌ Transição inválida: ${statusAtual} → ${novoStatus}`);
       throw new InvalidTransitionError(
-        statusAtual,
-        novoStatus,
+  _statusAtual,
+  _novoStatus,
         `A transição de "${statusAtual}" para "${novoStatus}" não é permitida pelas regras de negócio`
       );
     }
@@ -224,11 +224,11 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
     // 4. Delegar a escrita para updateStatusWithContext
     console.log(`[FSM] 📝 Delegando escrita para updateStatusWithContext`);
 
-    const result = await updateStatusWithContext({
-      propostaId,
-      novoStatus,
-      contexto,
-      userId,
+    const _result = await updateStatusWithContext({
+  _propostaId,
+  _novoStatus,
+  _contexto,
+  _userId,
       observacoes: observacoes || `Transição FSM: ${statusAtual} → ${novoStatus}`,
       metadata: {
         ...metadata,
@@ -241,13 +241,12 @@ export async function transitionTo(params: TransitionParams): Promise<void> {
       },
     });
 
-    if (!_result.success) {
-      throw new Error(`Falha ao atualizar status: ${_result.error}`);
+    if (!result.success) {
+      throw new Error(`Falha ao atualizar status: ${result.error}`);
     }
 
     console.log(`[FSM] ✅ Transição concluída com sucesso`);
-  }
-catch (error) {
+  } catch (error) {
     // Re-lançar InvalidTransitionError sem modificação
     if (error instanceof InvalidTransitionError) {
       throw error;
@@ -267,15 +266,15 @@ catch (error) {
  * Função auxiliar para obter as transições possíveis a partir de um status
  */
 export function getPossibleTransitions(fromStatus: string): string[] {
-  return transitionGraph[fromStatus] || [];
+  return transitionGraph[fromStatus] || []; }
 }
 
 /**
  * Função auxiliar para verificar se um status é final (sem transições possíveis)
  */
 export function isFinalStatus(status: string): boolean {
-  const transitions = transitionGraph[status];
-  return Array.isArray(transitions) && transitions.length == 0;
+  const _transitions = transitionGraph[status];
+  return Array.isArray(transitions) && transitions.length == 0; }
 }
 
 /**

@@ -5,7 +5,7 @@
  */
 
 import { authRepository } from '../repositories/auth.repository.js';
-import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { createServerSupabaseClient, createServerSupabaseAdminClient } from '../lib/_supabase.js';
 import { validatePassword } from '../lib/password-validator.js';
 import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger.js';
 import { invalidateAllUserTokens, trackUserToken } from '../lib/jwt-auth-middleware.js';
@@ -17,38 +17,38 @@ export class AuthService {
    * Parse user agent for better display
    */
   private parseUserAgent(userAgent: string): string {
-    if (!userAgent) return 'Dispositivo desconhecido';
+    if (!userAgent) return 'Dispositivo desconhecido'; }
 
     // Check for mobile devices first
     if (/mobile/i.test(userAgent)) {
-      if (/android/i.test(userAgent)) return 'Android Device';
-      if (/iphone/i.test(userAgent)) return 'iPhone';
-      if (/ipad/i.test(userAgent)) return 'iPad';
-      return 'Mobile Device';
+      if (/android/i.test(userAgent)) return 'Android Device'; }
+      if (/iphone/i.test(userAgent)) return 'iPhone'; }
+      if (/ipad/i.test(userAgent)) return 'iPad'; }
+      return 'Mobile Device'; }
     }
 
     // Check for desktop browsers
     if (/windows/i.test(userAgent)) {
-      if (/edge/i.test(userAgent)) return 'Windows - Edge';
-      if (/chrome/i.test(userAgent)) return 'Windows - Chrome';
-      if (/firefox/i.test(userAgent)) return 'Windows - Firefox';
-      return 'Windows PC';
+      if (/edge/i.test(userAgent)) return 'Windows - Edge'; }
+      if (/chrome/i.test(userAgent)) return 'Windows - Chrome'; }
+      if (/firefox/i.test(userAgent)) return 'Windows - Firefox'; }
+      return 'Windows PC'; }
     }
 
     if (/macintosh/i.test(userAgent)) {
-      if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari';
-      if (/chrome/i.test(userAgent)) return 'Mac - Chrome';
-      if (/firefox/i.test(userAgent)) return 'Mac - Firefox';
-      return 'Mac';
+      if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari'; }
+      if (/chrome/i.test(userAgent)) return 'Mac - Chrome'; }
+      if (/firefox/i.test(userAgent)) return 'Mac - Firefox'; }
+      return 'Mac'; }
     }
 
     if (/linux/i.test(userAgent)) {
-      if (/chrome/i.test(userAgent)) return 'Linux - Chrome';
-      if (/firefox/i.test(userAgent)) return 'Linux - Firefox';
-      return 'Linux';
+      if (/chrome/i.test(userAgent)) return 'Linux - Chrome'; }
+      if (/firefox/i.test(userAgent)) return 'Linux - Firefox'; }
+      return 'Linux'; }
     }
 
-    return 'Dispositivo desconhecido';
+    return 'Dispositivo desconhecido'; }
   }
 
   /**
@@ -60,7 +60,7 @@ export class AuthService {
     req: Request
   ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     try {
-      const supabase = createServerSupabaseClient();
+      const _supabase = createServerSupabaseClient();
 
       // Check if user already has active sessions
       const {
@@ -69,13 +69,13 @@ export class AuthService {
 
       // Attempt login
       const { data, error } = await _supabase.auth.signInWithPassword({
-        email,
-        password,
+  _email,
+  _password,
       });
 
       if (error) {
         await securityLogger.logEvent({
-          type: SecurityEventType.LOGINFAILURE,
+          type: SecurityEventType.LOGIN_FAILURE,
           severity: 'MEDIUM',
           userEmail: email,
           ipAddress: getClientIP(req),
@@ -84,7 +84,7 @@ export class AuthService {
           success: false,
           details: { reason: error.message },
         });
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }; }
       }
 
       // Handle successful login
@@ -96,20 +96,20 @@ export class AuthService {
         trackUserToken(data.user.id, data.session.access_token);
 
         // Create session record
-        const expiresAt = new Date();
+        const _expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 1);
 
         await authRepository.createSession({
-          id: data.session.accesstoken,
+          id: data.session.access_token,
           userId: data.user.id,
-          token: data.session.accesstoken,
+          token: data.session.access_token,
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'] || 'Unknown',
-          expiresAt,
+  _expiresAt,
         });
 
         await securityLogger.logEvent({
-          type: SecurityEventType.LOGINSUCCESS,
+          type: SecurityEventType.LOGIN_SUCCESS,
           severity: 'LOW',
           userId: data.user.id,
           userEmail: email,
@@ -132,11 +132,10 @@ export class AuthService {
         };
       }
 
-      return { success: false, error: 'Login failed' };
-    }
-catch (error) {
+      return { success: false, error: 'Login failed' }; }
+    } catch (error) {
       console.error('[AUTH_SERVICE] Login error:', error);
-      return { success: false, error: 'Login failed' };
+      return { success: false, error: 'Login failed' }; }
     }
   }
 
@@ -150,7 +149,7 @@ catch (error) {
   ): Promise<{ success: boolean; data?: unknown; error?: string; suggestions?: string[] }> {
     try {
       // Validate password
-      const passwordValidation = validatePassword(password, [email, name || '']);
+      const _passwordValidation = validatePassword(password, [email, name || '']);
       if (!passwordValidation.isValid) {
         return {
           success: false,
@@ -159,17 +158,17 @@ catch (error) {
         };
       }
 
-      const supabase = createServerSupabaseClient();
+      const _supabase = createServerSupabaseClient();
       const { data, error } = await _supabase.auth.signUp({
-        email,
-        password,
+  _email,
+  _password,
         options: {
           data: { name },
         },
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }; }
       }
 
       return {
@@ -179,10 +178,9 @@ catch (error) {
           session: data.session,
         },
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[AUTH_SERVICE] Register error:', error);
-      return { success: false, error: 'Registration failed' };
+      return { success: false, error: 'Registration failed' }; }
     }
   }
 
@@ -191,18 +189,17 @@ catch (error) {
    */
   async logout(): Promise<{ success: boolean; error?: string }> {
     try {
-      const supabase = createServerSupabaseClient();
+      const _supabase = createServerSupabaseClient();
       const { error } = await _supabase.auth.signOut();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }; }
       }
 
-      return { success: true };
-    }
-catch (error) {
+      return { success: true }; }
+    } catch (error) {
       console.error('[AUTH_SERVICE] Logout error:', error);
-      return { success: false, error: 'Logout failed' };
+      return { success: false, error: 'Logout failed' }; }
     }
   }
 
@@ -223,7 +220,7 @@ catch (error) {
   }> {
     try {
       // Validate new password
-      const passwordValidation = validatePassword(newPassword, [userEmail]);
+      const _passwordValidation = validatePassword(newPassword, [userEmail]);
       if (!passwordValidation.isValid) {
         return {
           success: false,
@@ -233,7 +230,7 @@ catch (error) {
       }
 
       // Verify current password
-      const supabase = createServerSupabaseClient();
+      const _supabase = createServerSupabaseClient();
       const { error: signInError } = await _supabase.auth.signInWithPassword({
         email: userEmail,
         password: currentPassword,
@@ -241,7 +238,7 @@ catch (error) {
 
       if (signInError) {
         await securityLogger.logEvent({
-          type: SecurityEventType.PASSWORD_CHANGEFAILED,
+          type: SecurityEventType.PASSWORD_CHANGE_FAILED,
           severity: 'HIGH',
           userId: userId,
           userEmail: userEmail,
@@ -251,25 +248,25 @@ catch (error) {
           success: false,
           details: { reason: 'Invalid current password' },
         });
-        return { success: false, error: 'Senha atual incorreta' };
+        return { success: false, error: 'Senha atual incorreta' }; }
       }
 
       // Update password
-      const supabaseAdmin = createServerSupabaseAdminClient();
+      const _supabaseAdmin = createServerSupabaseAdminClient();
       const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         password: newPassword,
       });
 
       if (updateError) {
         console.error('[AUTH_SERVICE] Password update error:', updateError);
-        return { success: false, error: 'Erro ao atualizar senha. Tente novamente.' };
+        return { success: false, error: 'Erro ao atualizar senha. Tente novamente.' }; }
       }
 
       // Invalidate all existing tokens
       invalidateAllUserTokens(userId);
 
       await securityLogger.logEvent({
-        type: SecurityEventType.PASSWORDCHANGED,
+        type: SecurityEventType.PASSWORD_CHANGED,
         severity: 'HIGH',
         userId: userId,
         userEmail: userEmail,
@@ -286,10 +283,9 @@ catch (error) {
         success: true,
         requiresRelogin: true,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[AUTH_SERVICE] Change password error:', error);
-      return { success: false, error: 'Erro ao alterar senha' };
+      return { success: false, error: 'Erro ao alterar senha' }; }
     }
   }
 
@@ -301,7 +297,7 @@ catch (error) {
     req: Request
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const supabase = createServerSupabaseClient();
+      const _supabase = createServerSupabaseClient();
 
       // Always return the same message to prevent user enumeration
       const { error } = await _supabase.auth.resetPasswordForEmail(email, {
@@ -310,7 +306,7 @@ catch (error) {
 
       // Log the attempt
       await securityLogger.logEvent({
-        type: SecurityEventType.PASSWORD_RESETREQUEST,
+        type: SecurityEventType.PASSWORD_RESET_REQUEST,
         severity: 'MEDIUM',
         userEmail: email,
         ipAddress: getClientIP(req),
@@ -328,8 +324,7 @@ catch (error) {
         message:
           'Se o email existe em nosso sistema, você receberá instruções para redefinir sua senha.',
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[AUTH_SERVICE] Password reset error:', error);
       return {
         success: false,
@@ -343,10 +338,10 @@ catch (error) {
    */
   async getUserSessions(userId: string, currentToken?: string): Promise<{ sessions: unknown[] }> {
     try {
-      const sessions = await authRepository.getUserSessions(userId);
+      const _sessions = await authRepository.getUserSessions(userId);
 
       // Format sessions for frontend display
-      const formattedSessions = sessions.map((session) => ({
+      const _formattedSessions = sessions.map((session) => ({
         id: session.id,
         ipAddress: session.ipAddress || 'Desconhecido',
         userAgent: session.userAgent || 'Desconhecido',
@@ -358,9 +353,8 @@ catch (error) {
         isCurrent: session.id == currentToken,
       }));
 
-      return { sessions: formattedSessions };
-    }
-catch (error) {
+      return { sessions: formattedSessions }; }
+    } catch (error) {
       console.error('[AUTH_SERVICE] Error fetching sessions:', error);
       throw new Error('Erro ao buscar sessões');
     }
@@ -376,19 +370,19 @@ catch (error) {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // Verify the session belongs to the user
-      const sessions = await authRepository.getUserSessions(userId);
-      const sessionToDelete = sessions.find((s) => s.id == sessionId);
+      const _sessions = await authRepository.getUserSessions(userId);
+      const _sessionToDelete = sessions.find((s) => s.id == sessionId);
 
       if (!sessionToDelete) {
-        return { success: false, error: 'Sessão não encontrada' };
+        return { success: false, error: 'Sessão não encontrada' }; }
       }
 
       // Delete the session
-      const deleted = await authRepository.deleteSession(sessionId);
+      const _deleted = await authRepository.deleteSession(sessionId);
 
       if (deleted) {
         await securityLogger.logEvent({
-          type: SecurityEventType.SESSIONTERMINATED,
+          type: SecurityEventType.SESSION_TERMINATED,
           severity: 'MEDIUM',
           userId: userId,
           userEmail: req.user?.username || '',
@@ -397,17 +391,16 @@ catch (error) {
           endpoint: req.originalUrl,
           success: true,
           details: {
-            sessionId,
+  _sessionId,
             terminatedByUser: true,
           },
         });
       }
 
-      return { success: deleted };
-    }
-catch (error) {
+      return { success: deleted }; }
+    } catch (error) {
       console.error('[AUTH_SERVICE] Error deleting session:', error);
-      return { success: false, error: 'Erro ao encerrar sessão' };
+      return { success: false, error: 'Erro ao encerrar sessão' }; }
     }
   }
 
@@ -416,9 +409,8 @@ catch (error) {
    */
   async getUserProfile(userId: string): Promise<unknown> {
     try {
-      return await authRepository.getUserProfile(userId);
-    }
-catch (error) {
+      return await authRepository.getUserProfile(userId); }
+    } catch (error) {
       console.error('[AUTH_SERVICE] Error getting user profile:', error);
       throw new Error('Erro ao buscar perfil do usuário');
     }
@@ -429,13 +421,12 @@ catch (error) {
    */
   async cleanupExpiredSessions(): Promise<number> {
     try {
-      return await authRepository.cleanupExpiredSessions();
-    }
-catch (error) {
+      return await authRepository.cleanupExpiredSessions(); }
+    } catch (error) {
       console.error('[AUTH_SERVICE] Error cleaning up sessions:', error);
-      return 0;
+      return 0; }
     }
   }
 }
 
-export const authService = new AuthService();
+export const _authService = new AuthService();

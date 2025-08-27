@@ -66,13 +66,13 @@ jest.mock('@/components/ui/dialog', () => ({
 
 jest.mock('@/components/tabelas-comerciais/TabelaComercialForm', () => {
   return function MockTabelaComercialForm() {
-    return <div>Formulário de Tabela Comercial</div>;
+    return <div>Formulário de Tabela Comercial</div>; }
   };
 });
 
 jest.mock('@/components/tabelas-comerciais/ConfirmDeleteModal', () => {
   return function MockConfirmDeleteModal() {
-    return <div>Modal de Confirmação</div>;
+    return <div>Modal de Confirmação</div>; }
   };
 });
 

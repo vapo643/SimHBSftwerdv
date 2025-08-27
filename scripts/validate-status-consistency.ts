@@ -113,8 +113,7 @@ async function validateStatusConsistency(): Promise<ValidationResult> {
             `  ${colors.yellow}⚠ Proposta órfã: ${proposta.id} (sem registro contextual)${colors.reset}`
           );
         }
-      }
-else {
+      } else {
         totalComContexto++;
 
         // Comparar status
@@ -161,8 +160,7 @@ else {
       console.log(
         `${colors.green}Verificadas ${allPropostas.length} propostas. Nenhuma inconsistência encontrada.${colors.reset}`
       );
-    }
-else {
+    } else {
       console.log(`${colors.red}${colors.bright}❌ [INCONSISTÊNCIAS DETECTADAS]${colors.reset}`);
       console.log(
         `${colors.red}Encontradas ${inconsistencias.length} inconsistências em ${allPropostas.length} propostas.${colors.reset}`
@@ -204,8 +202,7 @@ else {
       inconsistencias,
       propostasOrfas,
     };
-  }
-catch (error) {
+  } catch (error) {
     console.error(`${colors.red}${colors.bright}❌ ERRO NA VALIDAÇÃO:${colors.reset}`);
     console.error(error);
     throw error;
@@ -241,8 +238,7 @@ async function validateByContext(contexto: string): Promise<void> {
     console.log(
       `  ${colors.red}⚠ Duplicatas encontradas: ${duplicates.length} propostas com múltiplos registros${colors.reset}`
     );
-  }
-else {
+  } else {
     console.log(`  ${colors.green}✓ Nenhuma duplicata encontrada${colors.reset}`);
   }
 }
@@ -263,14 +259,13 @@ async function main() {
     await validateByContext('formalizacao');
 
     // Determinar código de saída
-    const exitCode = _result.inconsistencias.length > 0 ? 1 : 0;
+    const exitCode = result.inconsistencias.length > 0 ? 1 : 0;
 
     console.log(
       `\n${colors.bright}Script finalizado com código de saída: ${exitCode}${colors.reset}`
     );
     process.exit(exitCode);
-  }
-catch (error) {
+  } catch (error) {
     console.error(
       `${colors.red}${colors.bright}Erro fatal na execução do script:${colors.reset}`,
       error
@@ -282,7 +277,7 @@ catch (error) {
 // Executar se chamado diretamente
 // Em ES modules, usamos import.meta.url
 if (import.meta.url == `file://${process.argv[1]}`) {
-  main().catch (console.error);
+  main().catch(console.error);
 }
 
 export { validateStatusConsistency, validateByContext };

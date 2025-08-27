@@ -1,7 +1,7 @@
 // Endpoints de Monitoramento de Segurança - OWASP A09
 import { Request, Response } from 'express';
 import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware';
-import { _requireAdmin } from '../lib/role-guards';
+import { requireAdmin } from '../lib/role-guards';
 import { securityLogger, SecurityEventType } from '../lib/security-logger';
 import { getBrasiliaTimestamp } from '../lib/timezone';
 
@@ -9,23 +9,21 @@ export function setupSecurityRoutes(app) {
   // Health check de segurança
   app.get(
     '/api/security/health',
-  jwtAuthMiddleware,
-import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _jwtAuthMiddleware,
   _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const metrics = securityLogger.getSecurityMetrics(24); // Últimas 24 horas
-        const anomalies = securityLogger.detectAnomalies();
+        const _metrics = securityLogger.getSecurityMetrics(24); // Últimas 24 horas
+        const _anomalies = securityLogger.detectAnomalies();
 
         res.json({
-          timestamp: _getBrasiliaTimestamp(),
+          timestamp: getBrasiliaTimestamp(),
           status: anomalies.length == 0 ? 'healthy' : 'warning',
-  metrics,
-  anomalies,
-          lastUpdate: _getBrasiliaTimestamp(),
+  _metrics,
+  _anomalies,
+          lastUpdate: getBrasiliaTimestamp(),
         });
-      }
-catch (error) {
+      } catch (error) {
         res
           .status(500)
           .json({ message: 'Erro ao obter métricas de segurança', error: error.message });
@@ -36,16 +34,15 @@ catch (error) {
   // Relatório detalhado de segurança
   app.get(
     '/api/security/report',
-  jwtAuthMiddleware,
-import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _jwtAuthMiddleware,
   _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const hours = parseInt(req.query.hours as string) || 24;
-        const metrics = securityLogger.getSecurityMetrics(hours);
+        const _hours = parseInt(req.query.hours as string) || 24;
+        const _metrics = securityLogger.getSecurityMetrics(hours);
 
         // Análise adicional
-        const analysis = {
+        const _analysis = {
           riskLevel: calculateRiskLevel(metrics),
           recommendations: generateRecommendations(metrics),
           topThreats: identifyTopThreats(metrics),
@@ -53,12 +50,11 @@ import { _requireAdmin as requireAdmin } from "../lib/role-guards";
 
         res.json({
           period: `${hours} hours`,
-  metrics,
-  analysis,
-          generatedAt: _getBrasiliaTimestamp(),
+  _metrics,
+  _analysis,
+          generatedAt: getBrasiliaTimestamp(),
         });
-      }
-catch (error) {
+      } catch (error) {
         res.status(500).json({ message: 'Erro ao gerar relatório', error: error.message });
       }
     }
@@ -67,15 +63,14 @@ catch (error) {
   // Log de evento de segurança manual (para testes)
   app.post(
     '/api/security/log-event',
-  jwtAuthMiddleware,
-import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _jwtAuthMiddleware,
   _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
         const { type, severity, details } = req.body;
 
         if (!type || !severity) {
-          return res.status(401).json({error: "Unauthorized"});
+          return res.*);
         }
 
         securityLogger.logEvent({
@@ -85,12 +80,11 @@ import { _requireAdmin as requireAdmin } from "../lib/role-guards";
           userEmail: req.user?.email,
           endpoint: '/api/security/log-event',
           success: true,
-  details,
+  _details,
         });
 
         res.json({ message: 'Evento registrado com sucesso' });
-      }
-catch (error) {
+      } catch (error) {
         res.status(500).json({ message: 'Erro ao registrar evento', error: error.message });
       }
     }
@@ -99,15 +93,13 @@ catch (error) {
   // Verificar status de conformidade OWASP
   app.get(
     '/api/security/owasp-compliance',
-  jwtAuthMiddleware,
-import { _requireAdmin as requireAdmin } from "../lib/role-guards";
+  _jwtAuthMiddleware,
   _requireAdmin,
     (req: AuthenticatedRequest, res: Response) => {
       try {
-        const compliance = checkOWASPCompliance();
+        const _compliance = checkOWASPCompliance();
         res.json(compliance);
-      }
-catch (error) {
+      } catch (error) {
         res.status(500).json({ message: 'Erro ao verificar conformidade', error: error.message });
       }
     }
@@ -116,16 +108,16 @@ catch (error) {
 
 // Calcula nível de risco baseado nas métricas
 function calculateRiskLevel(metrics): string {
-  const score =
+  const _score =
     metrics.failedLogins * 2 +
     metrics.accessDenied * 3 +
     metrics.rateLimitExceeded * 1 +
     metrics.criticalEvents * 5;
 
-  if (score == 0) return 'LOW';
-  if (score < 50) return 'MEDIUM';
-  if (score < 100) return 'HIGH';
-  return 'CRITICAL';
+  if (score == 0) return 'LOW'; }
+  if (score < 50) return 'MEDIUM'; }
+  if (score < 100) return 'HIGH'; }
+  return 'CRITICAL'; }
 }
 
 // Gera recomendações baseadas nas métricas
@@ -156,12 +148,12 @@ function generateRecommendations(metrics): string[] {
     recommendations.push('Sistema operando dentro dos parâmetros normais de segurança.');
   }
 
-  return recommendations;
+  return recommendations; }
 }
 
 // Identifica principais ameaças
-function identifyTopThreats(metrics): Array<{ type: string; count: number }> {
-  const threats = [
+function identifyTopThreats(metrics): Record<string, unknown>[]>{ type: string; count: number }> {
+  const _threats = [
     { type: 'Brute Force Attempts', count: metrics.failedLogins },
     { type: 'Unauthorized Access', count: metrics.accessDenied },
     { type: 'DoS Attempts', count: metrics.rateLimitExceeded },
@@ -177,7 +169,7 @@ function identifyTopThreats(metrics): Array<{ type: string; count: number }> {
 // Verifica conformidade com OWASP Top 10
 function checkOWASPCompliance(): unknown {
   return {
-    timestamp: _getBrasiliaTimestamp(),
+    timestamp: getBrasiliaTimestamp(),
     overallCompliance: '70%',
     categories: {
       A01_BrokenAccessControl: {

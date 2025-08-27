@@ -62,26 +62,26 @@ describe('PreApprovalService - Regra de Negócio de Comprometimento de Renda', (
       const result = await preApprovalService.checkIncomeCommitment(proposalData);
 
       console.log('[TEST] 🔍 Resultado da análise:');
-      console.log(`  - Rejected: ${_result.rejected}`);
-      console.log(`  - Status: ${_result.status}`);
-      console.log(`  - Reason: ${_result.reason}`);
-      console.log(`  - Calculated Commitment: ${_result.calculatedCommitment?.toFixed(1)}%`);
+      console.log(`  - Rejected: ${result.rejected}`);
+      console.log(`  - Status: ${result.status}`);
+      console.log(`  - Reason: ${result.reason}`);
+      console.log(`  - Calculated Commitment: ${result.calculatedCommitment?.toFixed(1)}%`);
 
       // ASSERÇÕES CRÍTICAS: Validar regra de negócio
-      expect(_result.rejected).toBe(true);
-      expect(_result.status).toBe('rejeitado');
-      expect(_result.reason).toContain('Comprometimento de renda');
-      expect(_result.reason).toContain('25%');
-      expect(_result.calculatedCommitment).toBeGreaterThan(25);
-      expect(_result.calculatedCommitment).toBeLessThan(30); // Sanity check
+      expect(result.rejected).toBe(true);
+      expect(result.status).toBe('rejeitado');
+      expect(result.reason).toContain('Comprometimento de renda');
+      expect(result.reason).toContain('25%');
+      expect(result.calculatedCommitment).toBeGreaterThan(25);
+      expect(result.calculatedCommitment).toBeLessThan(30); // Sanity check
 
       // Validar que não há outros flags conflitantes
-      expect(_result.approved).toBeFalsy();
-      expect(_result.pendingData).toBeFalsy();
-      expect(_result.error).toBeFalsy();
+      expect(result.approved).toBeFalsy();
+      expect(result.pendingData).toBeFalsy();
+      expect(result.error).toBeFalsy();
 
       console.log('[TEST] ✅ Teste de rejeição concluído com sucesso!');
-      console.log(`  - Comprometimento calculado: ${_result.calculatedCommitment?.toFixed(1)}%`);
+      console.log(`  - Comprometimento calculado: ${result.calculatedCommitment?.toFixed(1)}%`);
       console.log('  - Regra de 25% funcionando corretamente');
     });
   });
@@ -123,25 +123,25 @@ describe('PreApprovalService - Regra de Negócio de Comprometimento de Renda', (
       const result = await preApprovalService.checkIncomeCommitment(proposalData);
 
       console.log('[TEST] 🔍 Resultado da análise:');
-      console.log(`  - Approved: ${_result.approved}`);
-      console.log(`  - Rejected: ${_result.rejected}`);
-      console.log(`  - Reason: ${_result.reason}`);
-      console.log(`  - Calculated Commitment: ${_result.calculatedCommitment?.toFixed(1)}%`);
+      console.log(`  - Approved: ${result.approved}`);
+      console.log(`  - Rejected: ${result.rejected}`);
+      console.log(`  - Reason: ${result.reason}`);
+      console.log(`  - Calculated Commitment: ${result.calculatedCommitment?.toFixed(1)}%`);
 
       // ASSERÇÕES: Deve ser aprovado automaticamente
-      expect(_result.approved).toBe(true);
-      expect(_result.rejected).toBe(false);
-      expect(_result.reason).toContain('dentro do limite');
-      expect(_result.calculatedCommitment).toBeLessThan(25);
-      expect(_result.calculatedCommitment).toBeGreaterThan(10); // Sanity check
+      expect(result.approved).toBe(true);
+      expect(result.rejected).toBe(false);
+      expect(result.reason).toContain('dentro do limite');
+      expect(result.calculatedCommitment).toBeLessThan(25);
+      expect(result.calculatedCommitment).toBeGreaterThan(10); // Sanity check
 
       // Validar que não há outros flags conflitantes
-      expect(_result.pendingData).toBeFalsy();
-      expect(_result.error).toBeFalsy();
-      expect(_result.status).toBeFalsy(); // Status só é definido para rejeições
+      expect(result.pendingData).toBeFalsy();
+      expect(result.error).toBeFalsy();
+      expect(result.status).toBeFalsy(); // Status só é definido para rejeições
 
       console.log('[TEST] ✅ Teste de aprovação concluído com sucesso!');
-      console.log(`  - Comprometimento calculado: ${_result.calculatedCommitment?.toFixed(1)}%`);
+      console.log(`  - Comprometimento calculado: ${result.calculatedCommitment?.toFixed(1)}%`);
       console.log('  - Proposta corretamente aprovada na pré-análise');
     });
   });
@@ -172,16 +172,16 @@ describe('PreApprovalService - Regra de Negócio de Comprometimento de Renda', (
       const result = await preApprovalService.checkIncomeCommitment(proposalData);
 
       console.log('[TEST] 🔍 Resultado no limite:');
-      console.log(`  - Calculated Commitment: ${_result.calculatedCommitment?.toFixed(1)}%`);
-      console.log(`  - Approved: ${_result.approved}`);
-      console.log(`  - Rejected: ${_result.rejected}`);
+      console.log(`  - Calculated Commitment: ${result.calculatedCommitment?.toFixed(1)}%`);
+      console.log(`  - Approved: ${result.approved}`);
+      console.log(`  - Rejected: ${result.rejected}`);
 
       // Devido ao cálculo real com juros 0%, resulta em ~26.7%
       // Como > 25%, deve ser rejeitado conforme regra de negócio
-      expect(_result.calculatedCommitment).toBeGreaterThan(25);
-      expect(_result.calculatedCommitment).toBeLessThan(30);
-      expect(_result.rejected).toBe(true); // > 25% = rejeitado
-      expect(_result.approved).toBeFalsy();
+      expect(result.calculatedCommitment).toBeGreaterThan(25);
+      expect(result.calculatedCommitment).toBeLessThan(30);
+      expect(result.rejected).toBe(true); // > 25% = rejeitado
+      expect(result.approved).toBeFalsy();
 
       console.log('[TEST] ✅ Teste do limite concluído!');
       console.log('  - Comprometimento de 25% corretamente aprovado');
@@ -210,17 +210,17 @@ describe('PreApprovalService - Regra de Negócio de Comprometimento de Renda', (
       const result = await preApprovalService.checkIncomeCommitment(proposalData);
 
       console.log('[TEST] 🔍 Resultado com dados incompletos:');
-      console.log(`  - Pending Data: ${_result.pendingData}`);
-      console.log(`  - Status: ${_result.status}`);
-      console.log(`  - Reason: ${_result.reason}`);
+      console.log(`  - Pending Data: ${result.pendingData}`);
+      console.log(`  - Status: ${result.status}`);
+      console.log(`  - Reason: ${result.reason}`);
 
       // Deve marcar como dados pendentes, não como erro
-      expect(_result.pendingData).toBe(true);
-      expect(_result.status).toBe('pendente');
-      expect(_result.reason).toContain('obrigatórios');
-      expect(_result.rejected).toBe(false);
-      expect(_result.approved).toBeFalsy(); // undefined or false
-      expect(_result.error).toBeFalsy();
+      expect(result.pendingData).toBe(true);
+      expect(result.status).toBe('pendente');
+      expect(result.reason).toContain('obrigatórios');
+      expect(result.rejected).toBe(false);
+      expect(result.approved).toBeFalsy(); // undefined or false
+      expect(result.error).toBeFalsy();
 
       console.log('[TEST] ✅ Teste de dados incompletos concluído!');
       console.log('  - Dados incompletos tratados adequadamente');
@@ -252,16 +252,16 @@ describe('PreApprovalService - Regra de Negócio de Comprometimento de Renda', (
       const expectedRange = { min: 920, max: 980 };
       const renda = 5000;
       const dividasExistentes = 0;
-      const parcela = (_result.calculatedCommitment! / 100) * renda - dividasExistentes;
+      const parcela = (result.calculatedCommitment! / 100) * renda - dividasExistentes;
 
       console.log('[TEST] 🔍 Validação do cálculo:');
       console.log(`  - Parcela calculada: R$ ${parcela.toFixed(2)}`);
       console.log(`  - Range esperado: R$ ${expectedRange.min} - R$ ${expectedRange.max}`);
-      console.log(`  - Comprometimento: ${_result.calculatedCommitment?.toFixed(1)}%`);
+      console.log(`  - Comprometimento: ${result.calculatedCommitment?.toFixed(1)}%`);
 
       expect(parcela).toBeGreaterThanOrEqual(expectedRange.min);
       expect(parcela).toBeLessThanOrEqual(expectedRange.max);
-      expect(_result.approved).toBe(true); // Deve ser aprovado (< 25%)
+      expect(result.approved).toBe(true); // Deve ser aprovado (< 25%)
 
       console.log('[TEST] ✅ Cálculo de parcela validado!');
       console.log('  - Fórmula Price funcionando corretamente');

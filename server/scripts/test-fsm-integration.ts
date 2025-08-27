@@ -10,7 +10,7 @@ async function testIntegration() {
   console.log('🧪 Testing FSM Integration After Refactoring');
   console.log('='.repeat(50));
 
-  const testCases = [
+  const _testCases = [
     {
       name: 'Valid transition: rascunho → aguardando_analise',
       from: 'rascunho',
@@ -43,13 +43,13 @@ async function testIntegration() {
   for (const test of testCases) {
     try {
       // Simulate a transition
-      const mockProposal = {
+      const _mockProposal = {
         id: 'test-' + Date.now(),
         status: test.from,
       };
 
       // Mock the getCurrentStatus function
-      const originalGetStatus = (global as unknown).getCurrentStatus;
+      const _originalGetStatus = (global as unknown).getCurrentStatus;
       (global as unknown).getCurrentStatus = async () => test.from;
 
       await transitionTo({
@@ -66,24 +66,20 @@ async function testIntegration() {
       if (test.shouldSucceed) {
         console.log(`✅ ${test.name}`);
         passed++;
-      }
-else {
+      } else {
         console.log(`❌ ${test.name} - Expected to fail but succeeded`);
         failed++;
       }
-    }
-catch (error) {
+    } catch (error) {
       if (error instanceof InvalidTransitionError) {
         if (!test.shouldSucceed) {
           console.log(`✅ ${test.name} - Correctly rejected`);
           passed++;
-        }
-else {
+        } else {
           console.log(`❌ ${test.name} - Unexpected rejection: ${error.message}`);
           failed++;
         }
-      }
-else {
+      } else {
         console.log(`❌ ${test.name} - Unexpected error: ${error}`);
         failed++;
       }
@@ -98,21 +94,19 @@ else {
   const { execSync } = await import('child_process');
 
   try {
-    const result = execSync(
+    const _result = execSync(
       'grep -rn "updateStatusWithContext" server --include="*.ts" | grep -v "status-context-helper.ts" | grep -v "statusFsmService.ts" | wc -l',
       { encoding: 'utf-8' }
     ).trim();
 
-    const count = parseInt(_result);
+    const _count = parseInt(_result);
 
     if (count == 0) {
       console.log('✅ No remaining updateStatusWithContext calls found');
-    }
-else {
+    } else {
       console.log(`⚠️ Found ${count} remaining updateStatusWithContext calls`);
     }
-  }
-catch (error) {
+  } catch (error) {
     console.log('❌ Error checking for remaining calls:', error);
   }
 
@@ -124,4 +118,4 @@ catch (error) {
 }
 
 // Run the test
-testIntegration().catch (console.error);
+testIntegration().catch(console.error);

@@ -159,25 +159,24 @@ function FormalizacaoList() {
   const _parseJsonbField = (field, fieldName: string, propostaId: string) => {
     // Se é null, undefined ou vazio, retornar objeto vazio
     if (!field || field == 'null' || field == 'undefined') {
-      return {}
+      return {}; }
     }
 
     if (typeof field == 'string' && field.trim() !== '') {
       try {
-        return JSON.parse(field);
-      }
-catch (e) {
+        return JSON.parse(field); }
+      } catch (e) {
         console.warn(`Erro ao fazer parse de ${fieldName} para proposta ${propostaId}:`, e);
-        return {}
+        return {}; }
       }
     }
 
     // Se já é um objeto, retornar como está
     if (typeof field == 'object') {
-      return field || {}
+      return field || {}; }
     }
 
-    return {}
+    return {}; }
   };
 
   const {
@@ -199,7 +198,7 @@ catch (e) {
       }));
 
       console.log('Propostas com dados parseados:', propostsWithParsedData);
-      return propostsWithParsedData;
+      return propostsWithParsedData; }
     },
   });
 
@@ -217,8 +216,8 @@ catch (e) {
   };
 
   const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    if (!dateString) return 'N/A'; }
+    return new Date(dateString).toLocaleDateString('pt-BR'); }
   };
 
   const _getStatusColor = (status: string) => {
@@ -230,7 +229,7 @@ catch (e) {
       BOLETOS_EMITIDOS: 'bg-orange-500',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
   };
 
   const _getStatusText = (status: string) => {
@@ -242,7 +241,7 @@ catch (e) {
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status;
+    return statusTexts[status as keyof typeof statusTexts] || status; }
   };
 
   // Backend already handles all permission filtering
@@ -283,11 +282,11 @@ catch (e) {
   };
 
   const _getTitle = () => {
-    return 'Propostas em Formalização';
+    return 'Propostas em Formalização'; }
   };
 
   const _getDescription = () => {
-    return 'Acompanhe o processo de formalização das propostas aprovadas';
+    return 'Acompanhe o processo de formalização das propostas aprovadas'; }
   };
 
   return (
@@ -537,8 +536,7 @@ export default function Formalizacao() {
           totalBoletos: collectionsData?.length || 0,
         });
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('Erro ao verificar status do carnê:', error);
       setCarneStatus({
         exists: false,
@@ -557,7 +555,7 @@ catch (error) {
     queryKey: ['/api/propostas', propostaId, 'formalizacao'],
     queryFn: async (): Promise<Proposta> => {
       const _response = (await apiRequest(`/api/propostas/${propostaId}/formalizacao`)) as Proposta;
-      return response;
+      return response; }
     },
     enabled: !!propostaId,
     staleTime: 1 * 60 * 1000, // Cache por 1 minuto
@@ -615,13 +613,11 @@ catch (error) {
         setCarneTotalBoletos(totalBoletos);
       }
 
-      return response;
-    }
-catch (error) {
+      return response; }
+    } catch (error) {
       console.error('[STORAGE STATUS] Erro ao verificar status:', error);
-      return null;
-    }
-finally {
+      return null; }
+    } finally {
       setCheckingStorage(false);
     }
   };
@@ -630,13 +626,13 @@ finally {
   const { data: collectionsData } = useQuery<any[]>({
     queryKey: ['/api/inter/collections', propostaId],
     queryFn: async (): Promise<any[]> => {
-      if (!propostaId) return [];
+      if (!propostaId) return []; }
       console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
       const _response = (await apiRequest(`/api/inter/collections/${propostaId}`)) as unknown[];
       console.log(
         `[INTER QUERY] Boletos encontrados: ${Array.isArray(_response) ? response.length : 0}`
       );
-      return Array.isArray(_response) ? response : [];
+      return Array.isArray(_response) ? response : []; }
     },
     enabled:
       !!propostaId &&
@@ -684,7 +680,7 @@ finally {
         method: 'PATCH',
         body: JSON.stringify(_data),
       });
-      return response;
+      return response; }
     },
     onSuccess: () => {
       toast({
@@ -717,13 +713,13 @@ finally {
   };
 
   const _formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    if (!dateString) return 'N/A'; }
+    return new Date(dateString).toLocaleDateString('pt-BR'); }
   };
 
   const _formatDateTime = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('pt-BR');
+    if (!dateString) return 'N/A'; }
+    return new Date(dateString).toLocaleString('pt-BR'); }
   };
 
   // Função para gerar CCB
@@ -746,8 +742,7 @@ finally {
         // Recarregar dados para atualizar status ccbGerado
         refetch();
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('Erro ao gerar CCB:', error);
       toast({
         title: 'Erro',
@@ -777,8 +772,7 @@ catch (error) {
         // Abrir em nova aba
         window.open(response.publicUrl, '_blank');
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('Erro ao visualizar CCB:', error);
       toast({
         title: 'Erro',
@@ -810,16 +804,14 @@ catch (error) {
         await checkClickSignStatus(propostaId);
         refetch();
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('Erro ao enviar para ClickSign:', error);
       toast({
         title: 'Erro',
         description: error.message || 'Erro ao enviar CCB para ClickSign.',
         variant: 'destructive',
       });
-    }
-finally {
+    } finally {
       setLoadingClickSign(false);
     }
   };
@@ -831,11 +823,10 @@ finally {
       const _response = (await apiRequest(`/api/clicksign/status/${propostaId}`)) as ClickSignData;
       console.log('📡 [CLICKSIGN] Status retornado:',_response);
       setClickSignData(_response);
-      return response;
-    }
-catch (error) {
+      return response; }
+    } catch (error) {
       console.error('❌ [CLICKSIGN] Erro ao consultar status:', error);
-      return null;
+      return null; }
     }
   };
 
@@ -856,8 +847,7 @@ catch (error) {
   React.useEffect(() => {
     if (initialClickSignData?.signUrl) {
       setClickSignData(initialClickSignData as ClickSignData);
-    }
-else if (!clickSignData?.signUrl) {
+    } else if (!clickSignData?.signUrl) {
       // 🛡️ PROTEÇÃO: Só reseta se não tem link local
       setClickSignData(null);
     }
@@ -920,14 +910,11 @@ else if (!clickSignData?.signUrl) {
       .subscribe((status) => {
         if (status == 'SUBSCRIBED') {
           console.log('✅ [REALTIME] Conectado ao canal de atualizações');
-        }
-else if (status == 'CHANNEL_ERROR') {
+        } else if (status == 'CHANNEL_ERROR') {
           console.error('❌ [REALTIME] Erro ao conectar ao canal');
-        }
-else if (status == 'TIMED_OUT') {
+        } else if (status == 'TIMED_OUT') {
           console.error('⏱️ [REALTIME] Timeout ao conectar');
-        }
-else if (status == 'CLOSED') {
+        } else if (status == 'CLOSED') {
           console.log('🔌 [REALTIME] Canal fechado');
         }
       });
@@ -948,7 +935,7 @@ else if (status == 'CLOSED') {
       BOLETOS_EMITIDOS: 90,
       pago: 100,
     };
-    return statusMap[status as keyof typeof statusMap] || 0;
+    return statusMap[status as keyof typeof statusMap] || 0; }
   };
 
   const _getStatusColor = (status: string) => {
@@ -960,7 +947,7 @@ else if (status == 'CLOSED') {
       BOLETOS_EMITIDOS: 'bg-orange-500',
       PAGAMENTO_CONFIRMADO: 'bg-green-600',
     };
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500';
+    return statusColors[status as keyof typeof statusColors] || 'bg-gray-500'; }
   };
 
   const _getStatusText = (status: string) => {
@@ -972,7 +959,7 @@ else if (status == 'CLOSED') {
       BOLETOS_EMITIDOS: 'Boletos Emitidos',
       PAGAMENTO_CONFIRMADO: 'Pagamento Confirmado',
     };
-    return statusTexts[status as keyof typeof statusTexts] || status;
+    return statusTexts[status as keyof typeof statusTexts] || status; }
   };
 
   // AGORA toda a lógica condicional pode vir aqui, APÓS todos os hooks
@@ -980,7 +967,7 @@ else if (status == 'CLOSED') {
   // 🔧 CORREÇÃO CRÍTICA: Lógica condicional APÓS todos os hooks
   // Se não tem ID, mostrar lista de propostas
   if (!propostaId) {
-    return <FormalizacaoList />;
+    return <FormalizacaoList />; }
   }
 
   const _getFormalizationSteps = (proposta: Proposta) => [
@@ -1149,12 +1136,12 @@ else if (status == 'CLOSED') {
 
   // Título unificado para todos os roles
   const _getTitle = () => {
-    return `Formalização - Proposta #${proposta.id}`;
+    return `Formalização - Proposta #${proposta.id}`; }
   };
 
   // Destino unificado do botão voltar
   const _getBackLocation = () => {
-    return '/formalizacao';
+    return '/formalizacao'; }
   };
 
   // 🔧 SEGURANÇA: Verificação de permissão agora é feita no BACKEND via RLS
@@ -1352,8 +1339,7 @@ else if (status == 'CLOSED') {
                                               description:
                                                 'Contrato enviado para ClickSign com sucesso!',
                                             });
-                                          }
-catch (error) {
+                                          } catch (error) {
                                             console.error('❌ [CLICKSIGN] Erro ao enviar:', error);
                                             toast({
                                               title: 'Erro',
@@ -1362,8 +1348,7 @@ catch (error) {
                                                 'Erro ao enviar para ClickSign',
                                               variant: 'destructive',
                                             });
-                                          }
-finally {
+                                          } finally {
                                             setLoadingClickSign(false);
                                           }
                                         }}
@@ -1501,8 +1486,7 @@ finally {
                                                 ['/api/clicksign/status', propostaId],
                                                 response
                                               );
-                                            }
-catch (error) {
+                                            } catch (error) {
                                               console.error(
                                                 '❌ [CLICKSIGN] Erro ao regenerar:',
                                                 error
@@ -1514,8 +1498,7 @@ catch (error) {
                                                   'Erro ao regenerar link',
                                                 variant: 'destructive',
                                               });
-                                            }
-finally {
+                                            } finally {
                                               setLoadingClickSign(false);
                                             }
                                           }}
@@ -1659,8 +1642,7 @@ finally {
                                               ],
                                             }),
                                           ]);
-                                        }
-catch (error) {
+                                        } catch (error) {
                                           console.error('[INTER] Erro ao gerar boleto:', error);
 
                                           // Verificar se é erro de boleto duplicado
@@ -1682,8 +1664,7 @@ catch (error) {
                                             queryClient.invalidateQueries({
                                               queryKey: ['/api/inter/collections', proposta.id],
                                             });
-                                          }
-else {
+                                          } else {
                                             toast({
                                               title: 'Erro',
                                               description:
@@ -1694,8 +1675,7 @@ else {
                                               variant: 'destructive',
                                             });
                                           }
-                                        }
-finally {
+                                        } finally {
                                           setLoadingInter(false);
                                         }
                                       }}
@@ -1823,8 +1803,7 @@ finally {
                                                             await checkStorageStatus();
                                                           }, 3000);
                                                         }
-                                                      }
-catch (error) {
+                                                      } catch (error) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
@@ -1832,8 +1811,7 @@ catch (error) {
                                                             'Erro ao corrigir sincronização',
                                                           variant: 'destructive',
                                                         });
-                                                      }
-finally {
+                                                      } finally {
                                                         setLoadingCarne(false);
                                                       }
                                                     }}
@@ -1893,16 +1871,14 @@ finally {
                                                           await checkCarneStatus();
                                                           await checkStorageStatus();
                                                         }
-                                                      }
-catch (error) {
+                                                      } catch (error) {
                                                         toast({
                                                           title: 'Erro',
                                                           description:
                                                             error.message || 'Erro ao gerar carnê',
                                                           variant: 'destructive',
                                                         });
-                                                      }
-finally {
+                                                      } finally {
                                                         setLoadingCarne(false);
                                                       }
                                                     }}
@@ -1962,8 +1938,7 @@ finally {
                                                         // Recarregar status
                                                         await checkStorageStatus();
                                                       }
-                                                    }
-catch (error) {
+                                                    } catch (error) {
                                                       toast({
                                                         title: 'Erro',
                                                         description:
@@ -1971,8 +1946,7 @@ catch (error) {
                                                           'Erro ao sincronizar boletos',
                                                         variant: 'destructive',
                                                       });
-                                                    }
-finally {
+                                                    } finally {
                                                       setLoadingCarne(false);
                                                     }
                                                   }}
@@ -2249,14 +2223,12 @@ finally {
                                                           description:
                                                             'Arquivo salvo na pasta de Downloads',
                                                         });
-                                                      }
-else {
+                                                      } else {
                                                         throw new Error(
                                                           `Erro ${response.status}: ${response.statusText}`
                                                         );
                                                       }
-                                                    }
-catch (error) {
+                                                    } catch (error) {
                                                       console.error('[PDF DOWNLOAD] Erro:', error);
 
                                                       // SEMPRE informar que o PDF está disponível e pode tentar novamente
@@ -2317,16 +2289,14 @@ catch (error) {
                                                   title: 'Status atualizado!',
                                                   description: `${response.updated} boletos atualizados, ${response.removed} códigos inválidos removidos`,
                                                 });
-                                              }
-else {
+                                              } else {
                                                 toast({
                                                   title: 'Sem atualizações',
                                                   description:
                                                     response.message || 'Status já está atualizado',
                                                 });
                                               }
-                                            }
-catch (error) {
+                                            } catch (error) {
                                               console.error('[REALTIME UPDATE] Erro:', error);
                                               toast({
                                                 title: 'Erro',
@@ -2381,20 +2351,17 @@ catch (error) {
                                                     a.click();
                                                     window.URL.revokeObjectURL(url);
                                                     document.body.removeChild(a);
-                                                  }
-else {
+                                                  } else {
                                                     throw new Error('Erro ao baixar PDF');
                                                   }
-                                                }
-else {
+                                                } else {
                                                   toast({
                                                     title: 'Erro',
                                                     description: 'Código do boleto não encontrado',
                                                     variant: 'destructive',
                                                   });
                                                 }
-                                              }
-else {
+                                              } else {
                                                 toast({
                                                   title: 'Sem boletos',
                                                   description:
@@ -2402,8 +2369,7 @@ else {
                                                   variant: 'default',
                                                 });
                                               }
-                                            }
-catch (error) {
+                                            } catch (error) {
                                               toast({
                                                 title: 'Erro',
                                                 description: 'Erro ao baixar PDF do boleto',
@@ -2437,8 +2403,7 @@ catch (error) {
                                                   description:
                                                     statusInfo || 'Nenhum boleto encontrado',
                                                 });
-                                              }
-else {
+                                              } else {
                                                 toast({
                                                   title: 'Sem boletos',
                                                   description:
@@ -2446,8 +2411,7 @@ else {
                                                   variant: 'default',
                                                 });
                                               }
-                                            }
-catch (error) {
+                                            } catch (error) {
                                               console.error(
                                                 '[INTER] Erro ao consultar boletos:',
                                                 error
@@ -2506,7 +2470,7 @@ catch (error) {
                             </div>
                           );
                         }
-                        return null;
+                        return null; }
                       }
 
                       // Caso contrário, mostra a timeline normal
@@ -2597,8 +2561,7 @@ catch (error) {
                                           }
                                           setCcbUrl(response.publicUrl || '');
                                           setShowCcbViewer(true);
-                                        }
-catch (error) {
+                                        } catch (error) {
                                           toast({
                                             title: 'Erro',
                                             description: 'Erro ao visualizar CCB',
@@ -2681,8 +2644,7 @@ catch (error) {
                                             description:
                                               'Contrato enviado para ClickSign com sucesso!',
                                           });
-                                        }
-catch (error) {
+                                        } catch (error) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro no envio com biometria:',
                                             error
@@ -2694,8 +2656,7 @@ catch (error) {
                                               'Erro ao enviar para ClickSign',
                                             variant: 'destructive',
                                           });
-                                        }
-finally {
+                                        } finally {
                                           setLoadingClickSign(false);
                                         }
                                       }}
@@ -2796,8 +2757,7 @@ finally {
                                             description:
                                               'Novo link de assinatura gerado com sucesso!',
                                           });
-                                        }
-catch (error) {
+                                        } catch (error) {
                                           console.error(
                                             '❌ [CLICKSIGN] Erro ao regenerar (seção 2):',
                                             error
@@ -2815,8 +2775,7 @@ catch (error) {
                                                 'Token do ClickSign precisa ser atualizado. Entre em contato com o administrador.',
                                               variant: 'destructive',
                                             });
-                                          }
-else if (
+                                          } else if (
                                             error.response?.status == 400 &&
                                             error.response?.data?.action ==
                                               'CHECK_CLICKSIGN_SERVICE'
@@ -2828,8 +2787,7 @@ else if (
                                                 'Problema com o serviço ClickSign. Tente novamente em alguns minutos.',
                                               variant: 'destructive',
                                             });
-                                          }
-else {
+                                          } else {
                                             toast({
                                               title: 'Erro',
                                               description:
@@ -2838,8 +2796,7 @@ else {
                                               variant: 'destructive',
                                             });
                                           }
-                                        }
-finally {
+                                        } finally {
                                           setLoadingClickSign(false);
                                         }
                                       }}

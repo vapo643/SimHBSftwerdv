@@ -13,7 +13,7 @@ import { z } from 'zod';
 import type { InterCollection, Proposta } from '@shared/schema';
 
 // Validation schemas
-const createCollectionSchema = z.object({
+const _createCollectionSchema = z.object({
   proposalId: z.string(),
   valorTotal: z.number().min(2.5).max(99999999.99),
   dataVencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -37,7 +37,7 @@ export class InterService {
    * Test Inter Bank connection
    */
   async testConnection(): Promise<boolean> {
-    return await interBankService.testConnection();
+    return await interBankService.testConnection(); }
   }
 
   /**
@@ -45,22 +45,22 @@ export class InterService {
    */
   async createCollection(data, userId?: string): Promise<InterCollection> {
     // Validate input
-    const validated = createCollectionSchema.parse(_data);
+    const _validated = createCollectionSchema.parse(_data);
 
     // Check if proposal exists
-    const proposal = await interRepository.getProposal(validated.proposalId);
+    const _proposal = await interRepository.getProposal(validated.proposalId);
     if (!proposal) {
       throw new Error('Proposta não encontrada');
     }
 
     // Check for existing collection
-    const existingCollection = await interRepository.findByProposalId(validated.proposalId);
+    const _existingCollection = await interRepository.findByProposalId(validated.proposalId);
     if (existingCollection) {
       throw new Error('Já existe uma cobrança para esta proposta');
     }
 
     // Create collection in Inter Bank
-    const interResult = await (interBankService as unknown).createCollection({
+    const _interResult = await (interBankService as unknown).createCollection({
       seuNumero: `PROP-${validated.proposalId}`,
       valorNominal: validated.valorTotal,
       dataVencimento: validated.dataVencimento,
@@ -85,7 +85,7 @@ export class InterService {
     });
 
     // Save collection to database
-    const collection = await interRepository.createCollection({
+    const _collection = await interRepository.createCollection({
       propostaId: validated.proposalId,
       codigoSolicitacao: interResult.codigoSolicitacao,
       seuNumero: interResult.seuNumero,
@@ -94,7 +94,7 @@ export class InterService {
       situacao: interResult.situacao,
       linhaDigitavel: interResult.linhaDigitavel,
       pixCopiaECola: interResult.pix?.pixCopiaECola,
-      dataEmissao: _getBrasiliaTimestamp(),
+      dataEmissao: getBrasiliaTimestamp(),
       // Store additional data in metadata field if needed
     });
 
@@ -110,7 +110,7 @@ export class InterService {
       dadosAcao: { codigoSolicitacao: interResult.codigoSolicitacao, usuarioId: userId },
     });
 
-    return collection;
+    return collection; }
   }
 
   /**
@@ -121,23 +121,23 @@ export class InterService {
     totalPages: number;
     currentPage: number;
   }> {
-    const limit = parseInt(params.limit || '10');
-    const page = parseInt(params.page || '1');
-    const offset = (page - 1) * limit;
+    const _limit = parseInt(params.limit || '10');
+    const _page = parseInt(params.page || '1');
+    const _offset = (page - 1) * limit;
 
-    const collections = await interRepository.searchCollections({
+    const _collections = await interRepository.searchCollections({
       ...params,
-  limit,
-  offset,
+  _limit,
+  _offset,
     });
 
     // Get total count for pagination
-    const allCollections = await interRepository.searchCollections(params);
-    const totalPages = Math.ceil(allCollections.length / limit);
+    const _allCollections = await interRepository.searchCollections(params);
+    const _totalPages = Math.ceil(allCollections.length / limit);
 
     return {
-  collections,
-  totalPages,
+  _collections,
+  _totalPages,
       currentPage: page,
     };
   }
@@ -147,13 +147,13 @@ export class InterService {
    */
   async getCollectionDetails(codigoSolicitacao: string): Promise<unknown> {
     // Get from database
-    const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
+    const _collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
     if (!collection) {
       throw new Error('Cobrança não encontrada');
     }
 
     // Get updated info from Inter Bank
-    const interDetails = await (interBankService as unknown).getCollectionDetails(
+    const _interDetails = await (interBankService as unknown).getCollectionDetails(
       codigoSolicitacao
     );
 
@@ -167,7 +167,7 @@ export class InterService {
 
     return {
       ...collection,
-  interDetails,
+  _interDetails,
     };
   }
 
@@ -180,7 +180,7 @@ export class InterService {
     userId?: string
   ): Promise<InterCollection> {
     // Get collection
-    const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
+    const _collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
     if (!collection) {
       throw new Error('Cobrança não encontrada');
     }
@@ -189,7 +189,7 @@ export class InterService {
     await (interBankService as unknown).cancelCollection(codigoSolicitacao, motivo);
 
     // Update database
-    const updated = await interRepository.updateByCodigoSolicitacao(codigoSolicitacao, {
+    const _updated = await interRepository.updateByCodigoSolicitacao(codigoSolicitacao, {
       situacao: 'CANCELADO',
       motivoCancelamento: motivo,
     });
@@ -206,7 +206,7 @@ export class InterService {
       dadosAcao: { motivo, usuarioId: userId },
     });
 
-    return updated!;
+    return updated!; }
   }
 
   /**
@@ -220,24 +220,24 @@ export class InterService {
     success: unknown[];
     errors: unknown[];
   }> {
-    const results = [];
-    const errors = [];
+    const _results = [];
+    const _errors = [];
 
     for (const codigoSolicitacao of codigosSolicitacao) {
       try {
         // Get collection
-        const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
+        const _collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
         if (!collection) {
           errors.push({
-  codigoSolicitacao,
+  _codigoSolicitacao,
             error: 'Cobrança não encontrada',
           });
           continue;
         }
 
         // Extend in Inter Bank
-        const extended = await (interBankService as unknown).extendDueDate(
-  codigoSolicitacao,
+        const _extended = await (interBankService as unknown).extendDueDate(
+  _codigoSolicitacao,
           novaDataVencimento
         );
 
@@ -257,20 +257,19 @@ export class InterService {
         });
 
         results.push({
-  codigoSolicitacao,
+  _codigoSolicitacao,
           success: true,
-  novaDataVencimento,
+  _novaDataVencimento,
         });
-      }
-catch (error) {
+      } catch (error) {
         errors.push({
-  codigoSolicitacao,
+  _codigoSolicitacao,
           error: error.message,
         });
       }
     }
 
-    return { success: results, errors }
+    return { success: results, errors }; }
   }
 
   /**
@@ -278,19 +277,19 @@ catch (error) {
    */
   async generateCollectionPDF(codigoSolicitacao: string): Promise<Buffer> {
     // Get collection details
-    const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
+    const _collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
     if (!collection) {
       throw new Error('Cobrança não encontrada');
     }
 
     // Generate PDF from Inter Bank
-    const pdfBuffer = await (interBankService as unknown).downloadCollectionPDF(codigoSolicitacao);
+    const _pdfBuffer = await (interBankService as unknown).downloadCollectionPDF(codigoSolicitacao);
 
     // Save to storage
-    const path = `collections/${collection.propostaId}/${codigoSolicitacao}.pdf`;
+    const _path = `collections/${collection.propostaId}/${codigoSolicitacao}.pdf`;
     await interRepository.uploadToStorage('private-documents', path, pdfBuffer, 'application/pdf');
 
-    return pdfBuffer;
+    return pdfBuffer; }
   }
 
   /**
@@ -300,7 +299,7 @@ catch (error) {
     const { codigoSolicitacao, situacao } = webhookData;
 
     // Update collection status
-    const collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
+    const _collection = await interRepository.findByCodigoSolicitacao(codigoSolicitacao);
     if (!collection) {
       console.error(`Collection not found for webhook: ${codigoSolicitacao}`);
       return;
@@ -308,8 +307,8 @@ catch (error) {
 
     // Update status
     await interRepository.updateByCodigoSolicitacao(codigoSolicitacao, {
-  situacao,
-      dataSituacao: _getBrasiliaTimestamp(),
+  _situacao,
+      dataSituacao: getBrasiliaTimestamp(),
     });
 
     // Handle payment confirmation
@@ -327,10 +326,10 @@ catch (error) {
       });
 
       // Queue for further processing
-      const queue = getQueue('payment-processing');
+      const _queue = getQueue('payment-processing');
       await queue.add('process-payment', {
         propostaId: collection.propostaId,
-  codigoSolicitacao,
+  _codigoSolicitacao,
         valorPago: collection.valorNominal,
       });
     }
@@ -347,12 +346,12 @@ catch (error) {
     let _errors = 0;
 
     // Get collections pending payment
-    const collections = await interRepository.getCollectionsPendingPayment(100);
+    const _collections = await interRepository.getCollectionsPendingPayment(100);
 
     for (const collection of collections) {
       try {
         // Get updated status from Inter
-        const details = await (interBankService as unknown).getCollectionDetails(
+        const _details = await (interBankService as unknown).getCollectionDetails(
           collection.codigoSolicitacao
         );
 
@@ -373,23 +372,22 @@ catch (error) {
             });
           }
         }
-      }
-catch (error) {
+      } catch (error) {
         console.error(`Error syncing collection ${collection.codigoSolicitacao}:`, error);
         errors++;
       }
     }
 
-    return { updated, errors }
+    return { updated, errors }; }
   }
 
   /**
    * Get collection statistics
    */
   async getCollectionStatistics(): Promise<unknown> {
-    const collections = await interRepository.searchCollections({});
+    const _collections = await interRepository.searchCollections({});
 
-    const stats = {
+    const _stats = {
       total: collections.length,
       pendentes: 0,
       recebidas: 0,
@@ -400,36 +398,28 @@ catch (error) {
     };
 
     for (const collection of collections) {
-      const valor = parseFloat(collection.valorNominal);
+      const _valor = parseFloat(collection.valorNominal);
       stats.valorTotal += valor;
 
       switch (collection.situacao) {
         case 'A_RECEBER': {
-        break;
-        }
           stats.pendentes++;
-          break;
+          break; }
         case 'RECEBIDO': {
-        break;
-        }
           stats.recebidas++;
           stats.valorRecebido += valor;
-          break;
+          break; }
         case 'CANCELADO': {
-        break;
-        }
           stats.canceladas++;
-          break;
+          break; }
         case 'EXPIRADO': {
-        break;
-        }
           stats.expiradas++;
-          break;
+          break; }
       }
     }
 
-    return stats;
+    return stats; }
   }
 }
 
-export const interService = new InterService();
+export const _interService = new InterService();

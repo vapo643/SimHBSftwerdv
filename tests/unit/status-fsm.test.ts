@@ -40,14 +40,14 @@ describe('Status FSM Unit Tests', () => {
       // AGUARDANDO_DOCUMENTACAO -> DOCUMENTACAO_COMPLETA
       expect(
         validateTransition(
-          ProposalStatus.AGUARDANDODOCUMENTACAO,
+          ProposalStatus.AGUARDANDO_DOCUMENTACAO,
           ProposalStatus.DOCUMENTACAO_COMPLETA
         )
       ).toBe(true);
 
       // DOCUMENTACAO_COMPLETA -> ASSINATURA_PENDENTE
       expect(
-        validateTransition(ProposalStatus.DOCUMENTACAOCOMPLETA, ProposalStatus.ASSINATURA_PENDENTE)
+        validateTransition(ProposalStatus.DOCUMENTACAO_COMPLETA, ProposalStatus.ASSINATURA_PENDENTE)
       ).toBe(true);
     });
   });
@@ -74,7 +74,7 @@ describe('Status FSM Unit Tests', () => {
 
     it('should reject backward transition from PAGO_TOTAL to AGUARDANDO_PAGAMENTO', () => {
       const isValid = validateTransition(
-        ProposalStatus.PAGOTOTAL,
+        ProposalStatus.PAGO_TOTAL,
         ProposalStatus.AGUARDANDO_PAGAMENTO
       );
       expect(isValid).toBe(false);

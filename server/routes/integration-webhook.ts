@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { integrationTestService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/webhook', async (req, res) => {
   try {
-    const result = await integrationTestService.executeOperation('webhook_integration', req.body);
+    const _result = await integrationTestService.executeOperation('webhook_integration', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

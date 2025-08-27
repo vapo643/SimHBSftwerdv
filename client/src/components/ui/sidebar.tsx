@@ -43,7 +43,7 @@ function useSidebar() {
     throw new Error('useSidebar must be used within a SidebarProvider.');
   }
 
-  return context;
+  return context; }
 }
 
 const _SidebarProvider = React.forwardRef<
@@ -78,8 +78,7 @@ const _SidebarProvider = React.forwardRef<
         const _openState = typeof value == 'function' ? value(open) : value;
         if (setOpenProp) {
           setOpenProp(openState);
-        }
-else {
+        } else {
           _setOpen(openState);
         }
 
@@ -91,7 +90,7 @@ else {
 
     // Helper to toggle the sidebar.
     const _toggleSidebar = React.useCallback(() => {
-      return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
+      return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open); }
     }, [isMobile, setOpen, setOpenMobile]);
 
     // Adds a keyboard shortcut to toggle the sidebar.
@@ -104,7 +103,7 @@ else {
       };
 
       window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown); }
     }, [toggleSidebar]);
 
     // We add a state so that we can do data-state="expanded" or "collapsed".
@@ -558,7 +557,7 @@ const _SidebarMenuButton = React.forwardRef<
     );
 
     if (!tooltip) {
-      return button;
+      return button; }
     }
 
     if (typeof tooltip == 'string') {
@@ -641,7 +640,7 @@ const _SidebarMenuSkeleton = React.forwardRef<
 >(({ className, showIcon = false, ...props }, ref) => {
   // Random width between 50 to 90%.
   const _width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`;
+    return `${Math.floor(Math.random() * 40) + 50}%`; }
   }, []);
 
   return (

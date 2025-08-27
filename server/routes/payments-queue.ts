@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { paymentsService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/enqueue', async (req, res) => {
   try {
-    const result = await paymentsService.executeOperation('enqueue_payment', req.body);
+    const _result = await paymentsService.executeOperation('enqueue_payment', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

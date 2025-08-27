@@ -70,7 +70,7 @@ export default function GestãoProdutos() {
     queryKey: ['produtos'],
     queryFn: async () => {
       const _response = await api.get<Produto[]>('/api/produtos');
-      return Array.isArray(_response) ? response : (response as unknown).data || [];
+      return Array.isArray(_response) ? response : (response as unknown).data || []; }
     },
   });
 
@@ -83,7 +83,7 @@ export default function GestãoProdutos() {
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return (response as unknown).data || response;
+      return (response as unknown).data || response; }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
@@ -104,7 +104,7 @@ export default function GestãoProdutos() {
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
-      return (response as unknown).data || response;
+      return (response as unknown).data || response; }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['produtos'] });
@@ -137,8 +137,7 @@ export default function GestãoProdutos() {
         id: editingProduct.id,
         data: formData,
       });
-    }
-else {
+    } else {
       createMutation.mutate(formData);
     }
   };

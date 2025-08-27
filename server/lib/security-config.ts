@@ -11,7 +11,7 @@ import { log } from '../vite';
 // ========================
 // CONFIGURAÇÕES DO HELMET
 // ========================
-export const helmetConfig = {
+export const _helmetConfig = {
   // Content Security Policy - Previne XSS e injection attacks
   contentSecurityPolicy: {
     directives: {
@@ -43,7 +43,7 @@ export const helmetConfig = {
 // ========================
 
 // Rate Limit Geral para toda a API: 100 requisições por 15 minutos
-export const generalApiLimiter = rateLimit({
+export const _generalApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 100, // Máximo 100 requisições por janela de tempo
   message: {
@@ -54,7 +54,7 @@ export const generalApiLimiter = rateLimit({
   legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
   // Identifica usuário por IP
   keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'anonymous';
+    return req.ip || req.connection.remoteAddress || 'anonymous'; }
   },
   // Handler customizado para quando o limite é excedido
   handler: (req, res) => {
@@ -67,7 +67,7 @@ export const generalApiLimiter = rateLimit({
 });
 
 // Rate Limit Restritivo para Rotas de Autenticação: 5 requisições por 15 minutos
-export const authApiLimiter = rateLimit({
+export const _authApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 5, // Máximo 5 tentativas de login por janela de tempo
   message: {
@@ -78,12 +78,12 @@ export const authApiLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => {
     // Para rotas de auth, considere tanto IP quanto email (se disponível)
-    const email = req.body?.email;
-    const ip = req.ip || req.connection.remoteAddress || 'anonymous';
-    return email ? `${ip}-${email}` : ip;
+    const _email = req.body?.email;
+    const _ip = req.ip || req.connection.remoteAddress || 'anonymous';
+    return email ? `${ip}-${email}` : ip; }
   },
   handler: (req, res) => {
-    const email = req.body?.email;
+    const _email = req.body?.email;
     log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''}`);
     res.status(429).json({
       error: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
@@ -92,7 +92,7 @@ export const authApiLimiter = rateLimit({
   },
   // Skip para rotas que não são de autenticação crítica
   skip: (req) => {
-    const path = req.path;
+    const _path = req.path;
     return !(
       path.includes('/login') ||
       path.includes('/register') ||
@@ -102,7 +102,7 @@ export const authApiLimiter = rateLimit({
 });
 
 // Rate Limit Extra-Restritivo para APIs críticas (opcional)
-export const criticalApiLimiter = rateLimit({
+export const _criticalApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 10, // Máximo 10 requisições por janela de tempo
   message: {
@@ -112,7 +112,7 @@ export const criticalApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'anonymous';
+    return req.ip || req.connection.remoteAddress || 'anonymous'; }
   },
   handler: (req, res) => {
     log(`🚨 Critical API rate limit exceeded for IP: ${req.ip} on ${req.path}`);
@@ -126,7 +126,7 @@ export const criticalApiLimiter = rateLimit({
 // ========================
 // CONFIGURAÇÕES DE PAYLOAD
 // ========================
-export const payloadLimits = {
+export const _payloadLimits = {
   json: '10mb', // Limite para JSON payload
   urlencoded: '10mb', // Limite para URL encoded payload
 } as const;
@@ -135,8 +135,8 @@ export const payloadLimits = {
 // LOGS DE SEGURANÇA
 // ========================
 export function logSecurityEvent(event: string, details) {
-  const timestamp = new Date().toISOString();
-  const logMessage = `🛡️ [SECURITY] ${timestamp} - ${event}: ${JSON.stringify(details)}`;
+  const _timestamp = new Date().toISOString();
+  const _logMessage = `🛡️ [SECURITY] ${timestamp} - ${event}: ${JSON.stringify(details)}`;
   log(logMessage);
 
   // Em produção, você pode enviar estes logs para um serviço de monitoramento

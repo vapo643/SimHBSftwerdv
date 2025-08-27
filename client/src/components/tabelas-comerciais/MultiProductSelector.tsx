@@ -44,7 +44,7 @@ export function MultiProductSelector({
 
   const _getProductName = (produtoId: number) => {
     const _produto = availableProducts.find((p) => p.id == produtoId);
-    return produto?.nomeProduto || `Produto ${produtoId}`;
+    return produto?.nomeProduto || `Produto ${produtoId}`; }
   };
 
   return (

@@ -2,7 +2,7 @@ import { db } from '../lib/supabase';
 import { produtos, tabelasComerciais, produtoTabelaComercial } from '../../shared/schema';
 import { eq, desc } from 'drizzle-orm';
 
-export const buscarTodosProdutos = async () => {
+export const _buscarTodosProdutos = async () => {
   const { isNull } = await import('drizzle-orm');
   return await db.query.produtos.findMany({
     where: isNull(produtos.deletedAt),
@@ -10,7 +10,7 @@ export const buscarTodosProdutos = async () => {
   });
 };
 
-export const criarProduto = async (data: {
+export const _criarProduto = async (data: {
   nome: string;
   status: 'Ativo' | 'Inativo';
   tacValor?: number;
@@ -25,10 +25,10 @@ export const criarProduto = async (data: {
       tacTipo: data.tacTipo || 'fixo',
     })
     .returning();
-  return novoProduto;
+  return novoProduto; }
 };
 
-export const atualizarProduto = async (
+export const _atualizarProduto = async (
   id: string,
   data: {
     nome: string;
@@ -47,25 +47,25 @@ export const atualizarProduto = async (
     })
     .where(eq(produtos.id, parseInt(id)))
     .returning();
-  return produtoAtualizado;
+  return produtoAtualizado; }
 };
 
-export const verificarProdutoEmUso = async (id: string) => {
-  const produtoId = parseInt(id);
+export const _verificarProdutoEmUso = async (id: string) => {
+  const _produtoId = parseInt(id);
 
   // Check if product is referenced in produto_tabela_comercial junction table
-  const dependencias = await db.query.produtoTabelaComercial.findMany({
+  const _dependencias = await db.query.produtoTabelaComercial.findMany({
     where: eq(produtoTabelaComercial.produtoId, produtoId),
   });
 
-  return dependencias.length > 0;
+  return dependencias.length > 0; }
 };
 
-export const deletarProduto = async (id: string, deletedBy?: string) => {
-  const produtoId = parseInt(id);
+export const _deletarProduto = async (id: string, deletedBy?: string) => {
+  const _produtoId = parseInt(id);
 
   // Check for dependencies first
-  const emUso = await verificarProdutoEmUso(id);
+  const _emUso = await verificarProdutoEmUso(id);
   if (emUso) {
     throw new Error(
       'Este produto não pode ser excluído pois está a ser utilizado por uma ou mais Tabelas Comerciais.'

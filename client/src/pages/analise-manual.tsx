@@ -93,9 +93,9 @@ export default function AnaliseManual() {
     retry: (failureCount, error) => {
       // Only retry on network errors, not on 404s
       if (error instanceof Error && error.message.includes('404')) {
-        return false;
+        return false; }
       }
-      return failureCount < 2;
+      return failureCount < 2; }
     },
   }) as { data: Proposta | undefined; isLoading: boolean; error: unknown; isError: boolean };
 
@@ -148,7 +148,7 @@ export default function AnaliseManual() {
   };
 
   const _formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString('pt-BR'); }
   };
 
   // Enhanced credit analysis logic
@@ -188,18 +188,15 @@ export default function AnaliseManual() {
       risco = 'Baixo';
       riscoColor = 'green';
       taxaSugerida = 1.8;
-    }
-else if (score >= 650) {
+    } else if (score >= 650) {
       risco = 'Médio';
       riscoColor = 'yellow';
       taxaSugerida = 2.5;
-    }
-else if (score >= 550) {
+    } else if (score >= 550) {
       risco = 'Alto';
       riscoColor = 'orange';
       taxaSugerida = 4.2;
-    }
-else {
+    } else {
       risco = 'Muito Alto';
       riscoColor = 'red';
       taxaSugerida = 6.5;
@@ -229,7 +226,7 @@ else {
       const _timer = setTimeout(() => {
         setAnalysisProgress((prev) => Math.min(100, prev + 10));
       }, 200);
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer); }
     }
   }, [analysisStarted, analysisProgress]);
 

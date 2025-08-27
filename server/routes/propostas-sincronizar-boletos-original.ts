@@ -7,7 +7,7 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-mi
 import { interBankService } from '../services/interBankService';
 import { boletoStorageService } from '../services/boletoStorageService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * PAM V1.0 - Endpoint para sincronizar boletos do Banco Inter para o Storage
@@ -15,7 +15,7 @@ const router = Router();
  */
 router.post(
   '/:id/sincronizar-boletos',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
@@ -37,7 +37,7 @@ router.post(
       }
 
       // Buscar todas as collections (boletos) da proposta
-      const collections = await db
+      const _collections = await db
         .select()
         .from(interCollections)
         .where(eq(interCollections.propostaId, propostaId));
@@ -62,43 +62,39 @@ router.post(
           console.log(`[PAM V1.0 SYNC] Processando boleto ${collection.codigoSolicitacao}`);
 
           // Baixar PDF do Banco Inter
-          const pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
+          const _pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
 
           if (pdfBuffer && pdfBuffer.length > 0) {
             // Verificar se é um PDF válido
-            const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+            const _pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
             if (pdfMagic.startsWith('%PDF')) {
               // Salvar no Storage usando o serviço
-              const result = { success: true, url: 'placeholder' }; // FIXED: Service call disabled
+              const _result = { success: true, url: 'placeholder' }; // FIXED: Service call disabled
               // await boletoStorageService.uploadFile(propostaId, collection.codigoSolicitacao, pdfBuffer);
 
-              if (_result.success) {
+              if (result.success) {
                 console.log(
                   `[PAM V1.0 SYNC] ✅ Boleto ${collection.codigoSolicitacao} salvo no Storage`
                 );
                 boletosProcessados++;
-              }
-else {
+              } else {
                 console.error(
                   `[PAM V1.0 SYNC] ❌ Erro ao salvar boleto ${collection.codigoSolicitacao}:`,
-                  'Service error' // _result.error
+                  'Service error' // result.error
                 );
                 erros++;
               }
-            }
-else {
+            } else {
               console.error(
                 `[PAM V1.0 SYNC] PDF inválido para boleto ${collection.codigoSolicitacao}`
               );
               erros++;
             }
-          }
-else {
+          } else {
             console.error(`[PAM V1.0 SYNC] PDF vazio para boleto ${collection.codigoSolicitacao}`);
             erros++;
           }
-        }
-catch (error) {
+        } catch (error) {
           console.error(
             `[PAM V1.0 SYNC] Erro ao processar boleto ${collection.codigoSolicitacao}:`,
             error
@@ -113,16 +109,15 @@ catch (error) {
 
       return res.json({
         success: true,
-        boletosProcessados,
-        erros,
+        _boletosProcessados,
+        _erros,
         total: collections.length,
         message:
           erros > 0
             ? `${boletosProcessados} boletos sincronizados, ${erros} falharam`
             : `Todos os ${boletosProcessados} boletos foram sincronizados com sucesso`,
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error('[PAM V1.0 SYNC] Erro geral na sincronização:', error);
       return res.status(500).json({
         success: false,

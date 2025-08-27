@@ -68,18 +68,18 @@ const _emprestimoSchema = z.object({
     .min(1, 'Valor é obrigatório')
     .transform((val) => {
       const _num = parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'));
-      if (_isNaN(num) || num < 100) throw new Error('Valor mínimo é R$ 100,00');
+      if (isNaN(num) || num < 100) throw new Error('Valor mínimo é R$ 100,00');
       if (num > 1000000) throw new Error('Valor máximo é R$ 1.000.000,00');
-      return num;
+      return num; }
     }),
   prazo: z
     .string()
     .min(1, 'Prazo é obrigatório')
     .transform((val) => {
       const _num = parseInt(val);
-      if (_isNaN(num) || num < 1) throw new Error('Prazo mínimo é 1 mês');
+      if (isNaN(num) || num < 1) throw new Error('Prazo mínimo é 1 mês');
       if (num > 120) throw new Error('Prazo máximo é 120 meses');
-      return num;
+      return num; }
     }),
   finalidade: z.string().min(1, 'Finalidade é obrigatória'),
   garantia: z.string().min(1, 'Garantia é obrigatória'),
@@ -147,8 +147,7 @@ export default function NovaProposta() {
             description: 'Seus dados anteriores foram restaurados.',
           });
         }
-      }
-catch (error) {
+      } catch (error) {
         console.error('Erro ao recuperar dados:', error);
         // Em caso de erro, limpa o localStorage corrompido
         localStorage.removeItem('proposta_temp');
@@ -164,13 +163,12 @@ catch (error) {
       if (saved) {
         try {
           const _parsed = JSON.parse(saved);
-          return parsed.enviada == true;
-        }
-catch {
-          return false;
+          return parsed.enviada == true; }
+        } catch {
+          return false; }
         }
       }
-      return false;
+      return false; }
     };
 
     const _subscription = watch((_data) => {
@@ -187,7 +185,7 @@ catch {
       };
       localStorage.setItem('proposta_temp', JSON.stringify(tempData));
     });
-    return () => subscription.unsubscribe();
+    return () => subscription.unsubscribe(); }
   }, [watch]);
 
   // BUSCA POR CPF: Buscar dados de propostas anteriores do mesmo CPF
@@ -238,11 +236,9 @@ catch {
             description: 'Os dados do cliente foram preenchidos com base em propostas anteriores.',
           });
         }
-      }
-catch (error) {
+      } catch (error) {
         console.log('Nenhuma proposta anterior encontrada para este CPF');
-      }
-finally {
+      } finally {
         setIsSearchingCpf(false);
       }
     },
@@ -390,15 +386,13 @@ finally {
           description: 'Verifique os campos destacados em vermelho abaixo.',
           variant: 'destructive',
         });
-      }
-else if (error.response?.data?.message) {
+      } else if (error.response?.data?.message) {
         toast({
           title: 'Erro na validação',
           description: error.response.data.message,
           variant: 'destructive',
         });
-      }
-else {
+      } else {
         toast({
           title: 'Erro ao criar proposta',
           description: error.message || 'Tente novamente em alguns instantes.',
@@ -414,7 +408,7 @@ else {
       formData.append('file', file);
 
       const _response = await api.post('/api/upload', formData);
-      return response.data;
+      return response.data; }
     },
     onSuccess: (_data) => {
       const _currentDocs = watch('documentos') || [];

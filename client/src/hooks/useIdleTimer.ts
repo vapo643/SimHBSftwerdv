@@ -18,9 +18,9 @@ const DEFAULT_EVENTS = [
 ];
 
 export function useIdleTimer({
-  timeout,
-  onIdle,
-  events = DEFAULTEVENTS,
+  _timeout,
+  _onIdle,
+  events = DEFAULT_EVENTS,
   throttle = 500,
 }: UseIdleTimerOptions) {
   const _timeoutId = useRef<NodeJS.Timeout | null>(null);
@@ -102,8 +102,7 @@ export function useIdleTimer({
       if (document.visibilityState == 'visible') {
         // Usuário voltou para a tab, reseta o timer
         resetTimer();
-      }
-else {
+      } else {
         // Usuário saiu da tab, para o timer (opcional)
         // Mantemos o timer rodando para que a inatividade seja contada
         console.log('🔍 [IDLE TIMER] Tab became hidden, timer continues');
@@ -119,8 +118,8 @@ else {
 
   return {
     isIdle: isIdle.current,
-    resetTimer,
-    stopTimer,
-    startTimer,
+    _resetTimer,
+    _stopTimer,
+    _startTimer,
   };
 }

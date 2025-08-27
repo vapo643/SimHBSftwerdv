@@ -20,12 +20,12 @@ export interface FileIntegrityInfo {
  * Generate integrity hashes for a file buffer
  */
 export function generateFileHashes(buffer: Buffer): FileIntegrityInfo {
-  const sha256 = createHash('sha256').update(buffer).digest('hex');
-  const sha512 = createHash('sha512').update(buffer).digest('hex');
+  const _sha256 = createHash('sha256').update(buffer).digest('hex');
+  const _sha512 = createHash('sha512').update(buffer).digest('hex');
 
   return {
-    sha256,
-    sha512,
+  _sha256,
+  _sha512,
     size: buffer.length,
     generatedAt: new Date(),
   };
@@ -35,8 +35,8 @@ export function generateFileHashes(buffer: Buffer): FileIntegrityInfo {
  * Generate integrity hashes for a stream
  */
 export async function generateStreamHashes(stream: Readable): Promise<FileIntegrityInfo> {
-  const sha256Hash = createHash('sha256');
-  const sha512Hash = createHash('sha512');
+  const _sha256Hash = createHash('sha256');
+  const _sha512Hash = createHash('sha512');
   let _size = 0;
 
   return new Promise((resolve, reject) => {
@@ -50,7 +50,7 @@ export async function generateStreamHashes(stream: Readable): Promise<FileIntegr
       resolve({
         sha256: sha256Hash.digest('hex'),
         sha512: sha512Hash.digest('hex'),
-        size,
+  _size,
         generatedAt: new Date(),
       });
     });
@@ -67,7 +67,7 @@ export function verifyFileIntegrity(
   expectedHashes: Partial<FileIntegrityInfo>
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
-  const actualHashes = generateFileHashes(buffer);
+  const _actualHashes = generateFileHashes(buffer);
 
   if (expectedHashes.sha256 && actualHashes.sha256 !== expectedHashes.sha256) {
     errors.push('SHA-256 hash mismatch');
@@ -83,7 +83,7 @@ export function verifyFileIntegrity(
 
   return {
     valid: errors.length == 0,
-    errors,
+  _errors,
   };
 }
 
@@ -94,21 +94,21 @@ export function generateSRIHash(
   buffer: Buffer,
   algorithm: 'sha256' | 'sha384' | 'sha512' = 'sha384'
 ): string {
-  const hash = createHash(algorithm).update(buffer).digest('base64');
-  return `${algorithm}-${hash}`;
+  const _hash = createHash(algorithm).update(buffer).digest('base64');
+  return `${algorithm}-${hash}`; }
 }
 
 /**
  * Store file integrity metadata (in production, use database)
  */
-const integrityStore = new Map<string, FileIntegrityInfo>();
+const _integrityStore = new Map<string, FileIntegrityInfo>();
 
 export function storeFileIntegrity(fileId: string, integrity: FileIntegrityInfo): void {
   integrityStore.set(fileId, integrity);
 }
 
 export function getFileIntegrity(fileId: string): FileIntegrityInfo | undefined {
-  return integrityStore.get(fileId);
+  return integrityStore.get(fileId); }
 }
 
 /**

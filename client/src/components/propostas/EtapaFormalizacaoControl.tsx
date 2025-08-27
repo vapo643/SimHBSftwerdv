@@ -35,7 +35,7 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
   _etapa,
         concluida: novaConcluida,
       });
-      return response;
+      return response; }
     },
     onSuccess: () => {
       toast({

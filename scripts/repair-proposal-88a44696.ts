@@ -66,8 +66,7 @@ async function repairProposal() {
       try {
         dadosEncontrados = JSON.parse(proposta.clienteData);
         console.log('✅ Dados encontrados em cliente_data!');
-      }
-catch (e) {
+      } catch (e) {
         console.log('⚠️ cliente_data não é JSON válido');
       }
     }
@@ -84,8 +83,7 @@ catch (e) {
           dadosEncontrados = condicoesJson;
           console.log('✅ Dados encontrados em condicoes_data!');
         }
-      }
-catch (e) {
+      } catch (e) {
         console.log('⚠️ condicoes_data não é JSON válido');
       }
     }
@@ -178,13 +176,11 @@ catch (e) {
     if (reparoComSucesso) {
       console.log('\n🎉 SUCESSO! Proposta reparada com êxito!');
       console.log('🔧 PAM V1.0 - FASE 1 CONCLUÍDA');
-    }
-else {
+    } else {
       console.error('\n❌ FALHA! Reparo não funcionou conforme esperado');
       process.exit(1);
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('💥 ERRO CRÍTICO durante reparo:', error);
     process.exit(1);
   }
@@ -196,7 +192,7 @@ repairProposal()
     console.log('\n✅ Script de reparo finalizado com sucesso');
     process.exit(0);
   })
-  .catch ((error) => {
+  .catch((error) => {
     console.error('\n💥 Script de reparo falhou:', error);
     process.exit(1);
   });

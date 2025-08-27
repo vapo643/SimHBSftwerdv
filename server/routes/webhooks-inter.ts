@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import webhookService from '../services/webhookService.js';
-const router = Router();
+const _router = Router();
 router.post('/inter', async (req, res) => {
   try {
-    const result = { success: true, data: req.body }; // FIXED: Webhook processing placeholder
+    const _result = { success: true, data: req.body }; // FIXED: Webhook processing placeholder
     res.json({ success: true });
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

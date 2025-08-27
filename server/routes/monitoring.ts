@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { monitoringService } from '../services/monitoringService.js';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/monitoring/stats
@@ -16,10 +16,9 @@ const router = Router();
  */
 router.get('/stats', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const stats = await monitoringService.getDatabaseStats();
+    const _stats = await monitoringService.getDatabaseStats();
     res.json({ success: true, data: stats });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[MONITORING] Error fetching stats:', error);
     res.status(500).json({
       success: false,
@@ -34,10 +33,9 @@ catch (error) {
  */
 router.get('/tables', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const stats = await monitoringService.getTableStats();
+    const _stats = await monitoringService.getTableStats();
     res.json({ success: true, data: stats });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[MONITORING] Error fetching table stats:', error);
     res.status(500).json({
       success: false,
@@ -52,10 +50,9 @@ catch (error) {
  */
 router.get('/indexes', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const usage = await monitoringService.getIndexUsage();
+    const _usage = await monitoringService.getIndexUsage();
     res.json({ success: true, data: usage });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[MONITORING] Error fetching index usage:', error);
     res.status(500).json({
       success: false,
@@ -70,10 +67,9 @@ catch (error) {
  */
 router.get('/connections', async (req: Request, res: Response) => {
   try {
-    const connections = await monitoringService.getActiveConnections();
+    const _connections = await monitoringService.getActiveConnections();
     res.json({ success: true, data: connections });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[MONITORING] Error fetching connections:', error);
     res.status(500).json({
       success: false,
@@ -88,11 +84,10 @@ catch (error) {
  */
 router.get('/health', async (req: Request, res: Response) => {
   try {
-    const health = await monitoringService.checkHealth();
-    const statusCode = health.status == 'healthy' ? 200 : health.status == 'degraded' ? 503 : 500;
+    const _health = await monitoringService.checkHealth();
+    const _statusCode = health.status == 'healthy' ? 200 : health.status == 'degraded' ? 503 : 500;
     res.status(statusCode).json({ success: true, data: health });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[MONITORING] Error checking health:', error);
     res.status(500).json({
       success: false,
@@ -107,10 +102,9 @@ catch (error) {
  */
 router.get('/report', async (req: Request, res: Response) => {
   try {
-    const report = await monitoringService.generateReport();
+    const _report = await monitoringService.generateReport();
     res.json({ success: true, data: report });
-  }
-catch (error) {
+  } catch (error) {
     console.error('[MONITORING] Error generating report:', error);
     res.status(500).json({
       success: false,

@@ -4,7 +4,7 @@ import { AuthenticatedRequest } from '../../shared/types/express';
 /**
  * Guard que requer permissões de ADMINISTRADOR
  */
-export function _requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   if (!req.user) {
     res.status(401).json({ message: 'Usuário não autenticado' });
     return;
@@ -35,7 +35,7 @@ export function requireManagerOrAdmin(
     return;
   }
 
-  const allowedRoles = ['GERENTE', 'ADMINISTRADOR'];
+  const _allowedRoles = ['GERENTE', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
       message: 'Acesso negado. Permissões de gerente ou administrador requeridas.',
@@ -57,7 +57,7 @@ export function requireAnyRole(req: AuthenticatedRequest, res: Response, next: N
     return;
   }
 
-  const allowedRoles = ['ATENDENTE', 'GERENTE', 'ADMINISTRADOR'];
+  const _allowedRoles = ['ATENDENTE', 'GERENTE', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
       message: 'Acesso negado. Usuário deve ter um perfil válido.',

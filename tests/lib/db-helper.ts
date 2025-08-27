@@ -99,8 +99,7 @@ export async function cleanTestDatabase(): Promise<void> {
 
     const duration = Date.now() - startTime;
     console.log(`[TEST DB] ✅ Database cleaned successfully in ${duration}ms`);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[TEST DB] ❌ Error during database cleanup:', error);
 
     // Fallback: Try to clean tables individually in reverse dependency order
@@ -128,8 +127,7 @@ catch (error) {
         try {
           await db.execute(sql.raw(`DELETE FROM "${table}"`));
           console.log(`[TEST DB] ✓ Cleaned table: ${table}`);
-        }
-catch (e) {
+        } catch (e) {
           console.warn(`[TEST DB] ⚠️ Could not clean table ${table}:`, e);
         }
       }
@@ -154,8 +152,7 @@ catch (e) {
         try {
           await db.execute(sql.raw(`DELETE FROM "${table}"`));
           console.log(`[TEST DB] ✓ Cleaned table: ${table}`);
-        }
-catch (e) {
+        } catch (e) {
           // These might fail if they have data referenced by other tables
           // We continue anyway as they're less critical for tests
           console.debug(`[TEST DB] Skipped table ${table}`);
@@ -163,8 +160,7 @@ catch (e) {
       }
 
       console.log('[TEST DB] ✅ Fallback cleanup completed');
-    }
-catch (fallbackError) {
+    } catch (fallbackError) {
       console.error('[TEST DB] ❌ Fallback cleanup also failed:', fallbackError);
       throw fallbackError;
     }
@@ -271,7 +267,7 @@ export async function setupTestEnvironment(): Promise<{
     // 3. Create test partner using raw SQL (with timestamp for uniqueness)
     console.log('[TEST DB] 🏢 Creating test partner...');
     const partnerResult = await directDb`
-      INSERT INTO parceiros (razaosocial, cnpj)
+      INSERT INTO parceiros (razao_social, cnpj)
       VALUES (
         'Test Partner Company',
         ${`1234567800019${timestamp.toString().slice(-1)}`}
@@ -285,7 +281,7 @@ export async function setupTestEnvironment(): Promise<{
     // 3. Create test store using raw SQL
     console.log('[TEST DB] 🏪 Creating test store...');
     const storeResult = await directDb`
-      INSERT INTO lojas (nomeloja, parceiroid, endereco)
+      INSERT INTO lojas (nome_loja, parceiro_id, endereco)
       VALUES (
         'Test Store',
         ${testPartnerId},
@@ -298,7 +294,7 @@ export async function setupTestEnvironment(): Promise<{
     // 5. Create test product using raw SQL (with timestamp for uniqueness)
     console.log('[TEST DB] 📦 Creating test product...');
     const productResult = await directDb`
-      INSERT INTO produtos (nomeproduto, is_active)
+      INSERT INTO produtos (nome_produto, is_active)
       VALUES (
         ${`Test Product ${timestamp}`},
         true
@@ -310,7 +306,7 @@ export async function setupTestEnvironment(): Promise<{
     // 6. Create test commercial table using raw SQL (with timestamp for uniqueness)
     console.log('[TEST DB] 📊 Creating test commercial table...');
     const commercialTableResult = await directDb`
-      INSERT INTO tabelas_comerciais (nometabela, taxajuros, prazos, comissao)
+      INSERT INTO tabelas_comerciais (nome_tabela, taxa_juros, prazos, comissao)
       VALUES (
         ${`Test Commercial Table ${timestamp}`},
         '1.99',
@@ -325,7 +321,7 @@ export async function setupTestEnvironment(): Promise<{
     console.log(`[TEST DB] 👤 Creating user profile for testUserId: ${testUserId}...`);
 
     const profileInsertResult = await directDb`
-      INSERT INTO profiles (id, role, lojaid, full_name)
+      INSERT INTO profiles (id, role, loja_id, full_name)
       VALUES (
         ${testUserId},
         'ATENDENTE',
@@ -334,16 +330,16 @@ export async function setupTestEnvironment(): Promise<{
       )
       ON CONFLICT (id) DO UPDATE SET
         role = 'ATENDENTE',
-        loja_id = EXCLUDED.lojaid,
+        loja_id = EXCLUDED.loja_id,
         full_name = 'Integration Test User'
-      RETURNING id, role, lojaid, full_name
+      RETURNING id, role, loja_id, full_name
     `;
 
     console.log(`[TEST DB] ✅ Profile insertion result:`, profileInsertResult[0]);
 
     // Verify the profile was created by querying it back
     const verifyProfile = await directDb`
-      SELECT id, role, lojaid, full_name 
+      SELECT id, role, loja_id, full_name 
       FROM profiles 
       WHERE id = ${testUserId}
     `;
@@ -354,12 +350,12 @@ export async function setupTestEnvironment(): Promise<{
     // 7. Create gerente_lojas association for RLS
     console.log('[TEST DB] 🔗 Creating store manager association...');
     await directDb`
-      INSERT INTO gerente_lojas (gerenteid, loja_id)
+      INSERT INTO gerente_lojas (gerente_id, loja_id)
       VALUES (
         ${dbUserId},
         ${testStoreId}
       )
-      ON CONFLICT (gerenteid, loja_id) DO NOTHING
+      ON CONFLICT (gerente_id, loja_id) DO NOTHING
     `;
 
     const duration = Date.now() - startTime;
@@ -374,12 +370,10 @@ export async function setupTestEnvironment(): Promise<{
       testProductId,
       testCommercialTableId,
     };
-  }
-catch (error) {
+  } catch (error) {
     console.error('[TEST DB] ❌ Error setting up test environment:', error);
     throw error;
-  }
-finally {
+  } finally {
     // Always close the direct connection
     if (directDb!) {
       await directDb.end();
@@ -408,8 +402,7 @@ export async function verifyCleanDatabase(): Promise<boolean> {
     }
 
     return isClean;
-  }
-catch (error) {
+  } catch (error) {
     console.error('[TEST DB] ❌ Error verifying database state:', error);
     return false;
   }

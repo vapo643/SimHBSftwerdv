@@ -41,10 +41,10 @@ async function testarDuplaEscrita() {
       },
     });
 
-    console.log(`   Resultado: ${_result.success ? '✅ SUCESSO' : '❌ FALHA'}`);
+    console.log(`   Resultado: ${result.success ? '✅ SUCESSO' : '❌ FALHA'}`);
 
-    if (!_result.success) {
-      console.log(`   Erro: ${_result.error}`);
+    if (!result.success) {
+      console.log(`   Erro: ${result.error}`);
       return;
     }
 
@@ -96,13 +96,11 @@ async function testarDuplaEscrita() {
     console.log('='.repeat(60));
     console.log(`Dupla Escrita Transacional: ${isConsistent ? '✅ FUNCIONANDO' : '❌ COM FALHA'}`);
     console.log(`Tabela status_contextuais: ✅ CRIADA`);
-    console.log(`Transações Atômicas: ${_result.success ? '✅ IMPLEMENTADAS' : '❌ FALHARAM'}`);
+    console.log(`Transações Atômicas: ${result.success ? '✅ IMPLEMENTADAS' : '❌ FALHARAM'}`);
     console.log('='.repeat(60));
-  }
-catch (error) {
+  } catch (error) {
     console.error('\n❌ ERRO NO TESTE:', error);
-  }
-finally {
+  } finally {
     process.exit(0);
   }
 }

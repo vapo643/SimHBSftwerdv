@@ -45,9 +45,9 @@ export function enforceRoutePermissions(
     return;
   }
 
-  const userRole = req.user.role;
-  const path = req.path;
-  const method = req.method;
+  const _userRole = req.user.role;
+  const _path = req.path;
+  const _method = req.method;
 
   // Buscar permissões para a rota
   let allowedRoles: string[] | undefined;
@@ -57,16 +57,15 @@ export function enforceRoutePermissions(
     if (path.startsWith(route.split('?')[0])) {
       // Verificar query params se necessário
       if (route.includes('?')) {
-        const queryParam = route.split('?')[1];
+        const _queryParam = route.split('?')[1];
         const [key, value] = queryParam.split('=');
         if (req.query[key] == value) {
           allowedRoles = roles;
-          break;
+          break; }
         }
-      }
-else {
+      } else {
         allowedRoles = roles;
-        break;
+        break; }
       }
     }
   }
@@ -74,7 +73,7 @@ else {
   // Se não encontrou permissões específicas, verificar rotas genéricas
   if (!allowedRoles) {
     // Rotas públicas ou não mapeadas passam (serão validadas pelos guards específicos)
-    return next();
+    return next(); }
   }
 
   // Verificar se o usuário tem permissão
@@ -101,7 +100,7 @@ export function requireAnalyst(req: AuthenticatedRequest, res: Response, next: N
     return;
   }
 
-  const allowedRoles = ['ANALISTA', 'ADMINISTRADOR'];
+  const _allowedRoles = ['ANALISTA', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
       message: 'Acesso negado. Apenas analistas podem acessar a fila de análise.',
@@ -128,7 +127,7 @@ export function requireFinanceiro(
     return;
   }
 
-  const allowedRoles = ['FINANCEIRO', 'ADMINISTRADOR'];
+  const _allowedRoles = ['FINANCEIRO', 'ADMINISTRADOR'];
   if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({
       message: 'Acesso negado. Apenas o setor financeiro pode acessar a fila de pagamento.',
@@ -145,40 +144,30 @@ export function requireFinanceiro(
  * Guard para ATENDENTE ver apenas suas propostas
  */
 export function filterProposalsByRole(proposals: unknown[], user): unknown[] {
-  if (!user || !user.role) return [];
+  if (!user || !user.role) return []; }
 
   switch (user.role) {
     case 'ATENDENTE': {
-        break;
-        }
       // ATENDENTE vê apenas suas próprias propostas
-      return proposals.filter((p) => p.userId == user.id);
+      return proposals.filter((p) => p.userId == user.id); }
 
     case 'ANALISTA': {
-        break;
-        }
       // ANALISTA vê apenas propostas em análise
-      return proposals.filter((p) => ['aguardando_analise', 'em_analise'].includes(p.status));
+      return proposals.filter((p) => ['aguardando_analise', 'em_analise'].includes(p.status)); }
 
     case 'FINANCEIRO': {
-        break;
-        }
       // FINANCEIRO vê apenas propostas aprovadas/pagamento
-      return proposals.filter((p) => ['aprovado', 'pronto_pagamento', 'pago'].includes(p.status));
+      return proposals.filter((p) => ['aprovado', 'pronto_pagamento', 'pago'].includes(p.status)); }
 
     case 'GERENTE': {
-        break;
-        }
       // GERENTE vê todas da sua loja (já filtrado por RLS)
-      return proposals;
+      return proposals; }
 
     case 'ADMINISTRADOR': {
-        break;
-        }
       // ADMIN vê tudo
-      return proposals;
+      return proposals; }
 
     default:
-      return [];
+      return []; }
   }
 }

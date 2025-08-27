@@ -17,11 +17,11 @@ export class SecurityService {
   async getSecurityMetrics(timeRange: string = '1h'): Promise<unknown> {
     try {
       // Get real metrics from database
-      const dbMetrics = await securityRepository.getSecurityMetrics(timeRange);
-      const statistics = await securityRepository.getSecurityStatistics(timeRange);
+      const _dbMetrics = await securityRepository.getSecurityMetrics(timeRange);
+      const _statistics = await securityRepository.getSecurityStatistics(timeRange);
 
       // Generate trend data
-      const trendData = this.generateTrendData([], timeRange);
+      const _trendData = this.generateTrendData([], timeRange);
 
       // Combine with additional calculated metrics
       return {
@@ -36,13 +36,12 @@ export class SecurityService {
         trend: trendData,
         attacks: this.categorizeAttacks(statistics.eventsByType),
         blocked: this.categorizeBlocked(statistics.eventsByType),
-  timeRange,
+  _timeRange,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error getting metrics:', error);
       // Return fallback data to ensure dashboard functionality
-      return this.getFallbackMetrics(timeRange);
+      return this.getFallbackMetrics(timeRange); }
     }
   }
 
@@ -52,7 +51,7 @@ catch (error) {
   async getVulnerabilities(): Promise<any[]> {
     try {
       // Get vulnerabilities from security logs
-      const recentLogs = await securityRepository.getSecurityLogs({
+      const _recentLogs = await securityRepository.getSecurityLogs({
         eventType: 'vulnerability',
         startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
         severity: ['HIGH', 'CRITICAL'],
@@ -60,7 +59,7 @@ catch (error) {
       });
 
       // Transform logs to vulnerability format
-      const vulnerabilities = recentLogs.map((log, index) => ({
+      const _vulnerabilities = recentLogs.map((log, index) => ({
         id: log.id,
         type: this.inferVulnerabilityType(log.eventType || 'unknown'),
         severity: log.severity,
@@ -73,20 +72,19 @@ catch (error) {
 
       // Add mock data for demo purposes if no real data exists
       if (vulnerabilities.length == 0) {
-        return this.getMockVulnerabilities();
+        return this.getMockVulnerabilities(); }
       }
 
       // Filter by false positive score and sort by severity
       return vulnerabilities
         .filter((v) => v.falsePositiveScore < 0.5)
         .sort((a, b) => {
-          const severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-          return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity];
+          const _severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+          return (severityOrder as unknown)[b.severity] - (severityOrder as unknown)[a.severity]; }
         });
-    }
-catch (error) {
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error getting vulnerabilities:', error);
-      return this.getMockVulnerabilities();
+      return this.getMockVulnerabilities(); }
     }
   }
 
@@ -96,14 +94,14 @@ catch (error) {
   async getAnomalies(): Promise<any[]> {
     try {
       // Get anomaly events from security logs
-      const anomalyLogs = await securityRepository.getSecurityLogs({
+      const _anomalyLogs = await securityRepository.getSecurityLogs({
         eventType: 'anomaly',
         startDate: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24h
         limit: 20,
       });
 
       // Transform to anomaly format
-      const anomalies = anomalyLogs.map((log) => ({
+      const _anomalies = anomalyLogs.map((log) => ({
         id: log.id,
         type: this.inferAnomalyType(log.eventType || 'unknown'),
         confidence: this.calculateConfidence(log),
@@ -114,17 +112,16 @@ catch (error) {
 
       // Add mock data if no real anomalies exist
       if (anomalies.length == 0) {
-        return this.getMockAnomalies();
+        return this.getMockAnomalies(); }
       }
 
       // Filter by confidence and recency
       return anomalies
         .filter((a) => new Date(a.timestamp).getTime() > Date.now() - 86400000) // Last 24h
         .filter((a) => a.confidence > 0.7);
-    }
-catch (error) {
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error getting anomalies:', error);
-      return this.getMockAnomalies();
+      return this.getMockAnomalies(); }
     }
   }
 
@@ -133,10 +130,10 @@ catch (error) {
    */
   async getDependencyScanResults(): Promise<unknown> {
     try {
-      const depScanner = getDependencyScanner();
+      const _depScanner = getDependencyScanner();
       // Mock scan results since getLastScanResults doesn't exist yet
       // In a real implementation, this would call the actual scanner methods
-      const scanResults = null;
+      const _scanResults = null;
 
       if (scanResults) {
         return {
@@ -148,11 +145,10 @@ catch (error) {
       }
 
       // Return mock data for demo
-      return this.getMockDependencyScan();
-    }
-catch (error) {
+      return this.getMockDependencyScan(); }
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error getting dependency scan:', error);
-      return this.getMockDependencyScan();
+      return this.getMockDependencyScan(); }
     }
   }
 
@@ -161,15 +157,15 @@ catch (error) {
    */
   async getSemgrepFindings(): Promise<any[]> {
     try {
-      const codeScanner = getSemgrepScanner();
+      const _codeScanner = getSemgrepScanner();
       // Mock findings since getLastScanResults doesn't exist yet
       // In a real implementation, this would call the actual scanner methods
-      const findings = null;
+      const _findings = null;
 
       if (findings && Array.isArray(findings) && (findings as unknown[]).length > 0) {
         return (findings as unknown[]).map((finding) => ({
           id: finding.id || `semgrep-${Math.random().toString(36).substr(2, 9)}`,
-          rule: finding.ruleid,
+          rule: finding.rule_id,
           severity: finding.extra?.severity?.toUpperCase() || 'MEDIUM',
           file: finding.path,
           line: finding.start?.line,
@@ -181,11 +177,10 @@ catch (error) {
       }
 
       // Return mock findings for demo
-      return this.getMockSemgrepFindings();
-    }
-catch (error) {
+      return this.getMockSemgrepFindings(); }
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error getting Semgrep findings:', error);
-      return this.getMockSemgrepFindings();
+      return this.getMockSemgrepFindings(); }
     }
   }
 
@@ -196,21 +191,17 @@ catch (error) {
     try {
       switch (type) {
         case 'vulnerability': {
-        break;
-        }
-          const vulnScanner = getSecurityScanner();
+          const _vulnScanner = getSecurityScanner();
           // Execute vulnerability scan
           await securityRepository.logSecurityEvent({
             eventType: 'scan_initiated',
             severity: 'MEDIUM',
             details: { scanType: type, description: 'Vulnerability scan initiated' },
           });
-          return { success: true, message: 'Scan de vulnerabilidades iniciado' }
+          return { success: true, message: 'Scan de vulnerabilidades iniciado' }; }
 
         case 'dependency': {
-        break;
-        }
-          const depScanner = getDependencyScanner();
+          const _depScanner = getDependencyScanner();
           if (depScanner.runScan) {
             await depScanner.runScan();
           }
@@ -219,12 +210,10 @@ catch (error) {
             severity: 'MEDIUM',
             details: { scanType: type, description: 'Dependency scan initiated' },
           });
-          return { success: true, message: 'Scan de dependências iniciado' }
+          return { success: true, message: 'Scan de dependências iniciado' }; }
 
         case 'code': {
-        break;
-        }
-          const codeScanner = getSemgrepScanner();
+          const _codeScanner = getSemgrepScanner();
           if (codeScanner.runScan) {
             await codeScanner.runScan();
           }
@@ -233,13 +222,12 @@ catch (error) {
             severity: 'MEDIUM',
             details: { scanType: type, description: 'Code analysis scan initiated' },
           });
-          return { success: true, message: 'Análise de código iniciada' }
+          return { success: true, message: 'Análise de código iniciada' }; }
 
         default:
-          return { success: false, message: 'Tipo de scan inválido' }
+          return { success: false, message: 'Tipo de scan inválido' }; }
       }
-    }
-catch (error) {
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error executing scan:', error);
       await securityRepository.logSecurityEvent({
         eventType: 'scan_error',
@@ -250,7 +238,7 @@ catch (error) {
           description: `Error executing ${type} scan`,
         },
       });
-      return { success: false, message: 'Erro ao executar scan' }
+      return { success: false, message: 'Erro ao executar scan' }; }
     }
   }
 
@@ -259,11 +247,10 @@ catch (error) {
    */
   async getActiveAlerts(): Promise<any[]> {
     try {
-      return await securityRepository.getActiveAlerts();
-    }
-catch (error) {
+      return await securityRepository.getActiveAlerts(); }
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error getting active alerts:', error);
-      return [];
+      return []; }
     }
   }
 
@@ -272,26 +259,25 @@ catch (error) {
    */
   async resolveAlert(alertId: string, userId: string, reason?: string): Promise<boolean> {
     try {
-      const resolved = await securityRepository.resolveAlert(alertId, userId, reason);
+      const _resolved = await securityRepository.resolveAlert(alertId, userId, reason);
 
       if (resolved) {
         await securityRepository.logSecurityEvent({
           eventType: 'alert_resolved',
           severity: 'LOW',
-  userId,
+  _userId,
           details: {
-  alertId,
-  reason,
+  _alertId,
+  _reason,
             description: `Security alert ${alertId} resolved by ${userId}`,
           },
         });
       }
 
-      return resolved;
-    }
-catch (error) {
+      return resolved; }
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error resolving alert:', error);
-      return false;
+      return false; }
     }
   }
 
@@ -300,13 +286,13 @@ catch (error) {
    */
   async generateSecurityReport(): Promise<unknown> {
     try {
-      const metrics = await this.getSecurityMetrics('30d');
-      const vulnerabilities = await this.getVulnerabilities();
-      const anomalies = await this.getAnomalies();
-      const dependencyResults = await this.getDependencyScanResults();
-      const codeResults = await this.getSemgrepFindings();
+      const _metrics = await this.getSecurityMetrics('30d');
+      const _vulnerabilities = await this.getVulnerabilities();
+      const _anomalies = await this.getAnomalies();
+      const _dependencyResults = await this.getDependencyScanResults();
+      const _codeResults = await this.getSemgrepFindings();
 
-      const report = {
+      const _report = {
         generatedAt: new Date(),
         summary: {
           overallScore: this.calculateOverallScore(metrics, vulnerabilities, anomalies),
@@ -320,9 +306,9 @@ catch (error) {
         dependencies: dependencyResults,
         codeAnalysis: codeResults,
         recommendations: this.generateRecommendations(
-  vulnerabilities,
-  anomalies,
-  dependencyResults,
+  _vulnerabilities,
+  _anomalies,
+  _dependencyResults,
           codeResults
         ),
       };
@@ -338,9 +324,8 @@ catch (error) {
         },
       });
 
-      return report;
-    }
-catch (error) {
+      return report; }
+    } catch (error) {
       console.error('[SECURITY_SERVICE] Error generating report:', error);
       throw error;
     }
@@ -349,13 +334,13 @@ catch (error) {
   // Private helper methods
 
   private calculateAnomalyScore(statistics): number {
-    const totalEvents = statistics.totalEvents;
-    const criticalEvents = statistics.eventsBySeverity.CRITICAL || 0;
-    const highEvents = statistics.eventsBySeverity.HIGH || 0;
+    const _totalEvents = statistics.totalEvents;
+    const _criticalEvents = statistics.eventsBySeverity.CRITICAL || 0;
+    const _highEvents = statistics.eventsBySeverity.HIGH || 0;
 
-    if (totalEvents == 0) return 0;
+    if (totalEvents == 0) return 0; }
 
-    return Math.min(((criticalEvents * 3 + highEvents * 2) / totalEvents) * 100, 100);
+    return Math.min(((criticalEvents * 3 + highEvents * 2) / totalEvents) * 100, 100); }
   }
 
   private categorizeAttacks(eventsByType: Record<string, number>): unknown {
@@ -368,7 +353,7 @@ catch (error) {
   }
 
   private categorizeBlocked(eventsByType: Record<string, number>): unknown {
-    const attacks = this.categorizeAttacks(eventsByType);
+    const _attacks = this.categorizeAttacks(eventsByType);
     return {
       sql: Math.floor(attacks.sql * 0.9),
       xss: Math.floor(attacks.xss * 0.85),
@@ -378,8 +363,8 @@ catch (error) {
   }
 
   private generateTrendData(logs: unknown[], timeRange: string): unknown[] {
-    const intervals = timeRange == '1h' ? 12 : 24;
-    const trend = [];
+    const _intervals = timeRange == '1h' ? 12 : 24;
+    const _trend = [];
 
     for (let _i = 0; i < intervals; i++) {
       trend.push({
@@ -389,7 +374,7 @@ catch (error) {
       });
     }
 
-    return trend;
+    return trend; }
   }
 
   private calculateOverallScore(
@@ -409,11 +394,11 @@ catch (error) {
 
     // Factor in blocked vs total requests
     if (metrics.totalRequests > 0) {
-      const blockRate = (metrics.blockedRequests / metrics.totalRequests) * 100;
+      const _blockRate = (metrics.blockedRequests / metrics.totalRequests) * 100;
       if (blockRate > 10) score -= 15; // Too many blocks might indicate issues
     }
 
-    return Math.max(score, 0);
+    return Math.max(score, 0); }
   }
 
   private generateRecommendations(
@@ -422,7 +407,7 @@ catch (error) {
     dependencies: unknown,
     codeIssues: unknown[]
   ): string[] {
-    const recommendations = [];
+    const _recommendations = [];
 
     if (vulnerabilities.filter((v) => v.severity == 'CRITICAL').length > 0) {
       recommendations.push('Corrigir vulnerabilidades críticas imediatamente');
@@ -447,7 +432,7 @@ catch (error) {
       'Aumentar cobertura de testes de segurança automatizados'
     );
 
-    return recommendations;
+    return recommendations; }
   }
 
   // Mock data methods for demo purposes
@@ -545,17 +530,17 @@ catch (error) {
   }
 
   private inferVulnerabilityType(message: string): string {
-    if (message.toLowerCase().includes('sql')) return 'SQL Injection';
-    if (message.toLowerCase().includes('xss')) return 'XSS';
-    if (message.toLowerCase().includes('csrf')) return 'CSRF';
-    return 'Security Issue';
+    if (message.toLowerCase().includes('sql')) return 'SQL Injection'; }
+    if (message.toLowerCase().includes('xss')) return 'XSS'; }
+    if (message.toLowerCase().includes('csrf')) return 'CSRF'; }
+    return 'Security Issue'; }
   }
 
   private inferAnomalyType(message: string): string {
-    if (message.toLowerCase().includes('login')) return 'Unusual Login Pattern';
+    if (message.toLowerCase().includes('login')) return 'Unusual Login Pattern'; }
     if (message.toLowerCase().includes('rate') || message.toLowerCase().includes('spike'))
-      return 'API Rate Spike';
-    return 'Anomalous Behavior';
+      return 'API Rate Spike'; }
+    return 'Anomalous Behavior'; }
   }
 
   private calculateFalsePositiveScore(log): number {
@@ -565,21 +550,21 @@ catch (error) {
 
   private calculateConfidence(log): number {
     // Simple heuristic based on severity and metadata
-    const severityScore =
+    const _severityScore =
       ({ CRITICAL: 0.9, HIGH: 0.8, MEDIUM: 0.6, LOW: 0.4 } as unknown)[log.severity] || 0.5;
-    return severityScore + Math.random() * 0.1;
+    return severityScore + Math.random() * 0.1; }
   }
 
   private groupBySeverity(vulnerabilities: unknown[]): Record<string, number> {
     return vulnerabilities.reduce(
       (acc, vuln) => {
-        const severity = vuln.severity || 'MEDIUM';
+        const _severity = vuln.severity || 'MEDIUM';
         acc[severity] = (acc[severity] || 0) + 1;
-        return acc;
+        return acc; }
       },
       {} as Record<string, number>
     );
   }
 }
 
-export const securityService = new SecurityService();
+export const _securityService = new SecurityService();

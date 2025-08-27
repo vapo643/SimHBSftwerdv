@@ -55,10 +55,9 @@ export function inputSanitizerMiddleware(req: Request, res: Response, next: Next
     validateHeaders(req);
 
     next();
-  }
-catch (error) {
+  } catch (error) {
     securityLogger.logEvent({
-      type: SecurityEventType.XSSATTEMPT,
+      type: SecurityEventType.XSS_ATTEMPT,
       severity: 'HIGH',
       ipAddress: getClientIP(req),
       userAgent: req.headers['user-agent'],
@@ -79,7 +78,7 @@ catch (error) {
  */
 function sanitizeObject(obj, req: Request): unknown {
   if (typeof obj !== 'object' || obj === null) {
-    return sanitizeValue(obj, '', req);
+    return sanitizeValue(obj, '', req); }
   }
 
   const sanitized: unknown = Array.isArray(obj) ? [] : {};
@@ -95,14 +94,13 @@ function sanitizeObject(obj, req: Request): unknown {
       // Validação extra para campos de alto risco
       if (HIGH_RISK_FIELDS.includes(key.toLowerCase())) {
         sanitized[key] = validateHighRiskField(key, obj[key], req);
-      }
-else {
+      } else {
         sanitized[key] = sanitizeValue(obj[key], key, req);
       }
     }
   }
 
-  return sanitized;
+  return sanitized; }
 }
 
 /**
@@ -110,15 +108,15 @@ else {
  */
 function sanitizeValue(value, fieldName: string, req: Request): unknown {
   if (value === null || value === undefined) {
-    return value;
+    return value; }
   }
 
   if (typeof value == 'object') {
-    return sanitizeObject(value, req);
+    return sanitizeObject(value, req); }
   }
 
   if (typeof value !== 'string') {
-    return value;
+    return value; }
   }
 
   let _sanitized = value;
@@ -127,7 +125,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
   for (const pattern of SQL_INJECTION_PATTERNS) {
     if (pattern.test(value)) {
       securityLogger.logEvent({
-        type: SecurityEventType.SQL_INJECTIONATTEMPT,
+        type: SecurityEventType.SQL_INJECTION_ATTEMPT,
         severity: 'CRITICAL',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -143,7 +141,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
   for (const pattern of XSS_PATTERNS) {
     if (pattern.test(value)) {
       securityLogger.logEvent({
-        type: SecurityEventType.XSSATTEMPT,
+        type: SecurityEventType.XSS_ATTEMPT,
         severity: 'HIGH',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -153,7 +151,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
       });
       // Não lançar erro, apenas sanitizar
       sanitized = xss(sanitized);
-      break;
+      break; }
     }
   }
 
@@ -161,7 +159,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
   for (const pattern of PATH_TRAVERSAL_PATTERNS) {
     if (pattern.test(value)) {
       securityLogger.logEvent({
-        type: SecurityEventType.XSSATTEMPT,
+        type: SecurityEventType.XSS_ATTEMPT,
         severity: 'HIGH',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -181,14 +179,14 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
     sanitized = sanitized.substring(0, 10000);
   }
 
-  return sanitized.trim();
+  return sanitized.trim(); }
 }
 
 /**
  * Validação especial para campos de alto risco
  */
 function validateHighRiskField(fieldName: string, value: unknown, req: Request): unknown {
-  if (typeof value !== 'string') return value;
+  if (typeof value !== 'string') return value; }
 
   const validators: Record<string, RegExp> = {
     cpf: /^\d{11}$/,
@@ -198,14 +196,14 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     rg: /^[0-9A-Za-z.-]+$/,
   };
 
-  const validator = validators[fieldName.toLowerCase()];
+  const _validator = validators[fieldName.toLowerCase()];
   if (validator) {
     // Remove caracteres especiais para validação
-    const cleanValue = value.replace(/\D/g, '');
+    const _cleanValue = value.replace(/\D/g, '');
 
     if (!validator.test(fieldName == 'email' ? value : cleanValue)) {
       securityLogger.logEvent({
-        type: SecurityEventType.XSSATTEMPT,
+        type: SecurityEventType.XSS_ATTEMPT,
         severity: 'MEDIUM',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
@@ -217,22 +215,22 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     }
   }
 
-  return value;
+  return value; }
 }
 
 /**
  * Valida headers HTTP suspeitos
  */
 function validateHeaders(req: Request) {
-  const suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
+  const _suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
 
   for (const header of suspiciousHeaders) {
     if (req.headers[header]) {
-      const value = req.headers[header] as string;
+      const _value = req.headers[header] as string;
       // Validar se o header contém valores suspeitos
       if (value.includes('..') || value.includes('://')) {
         securityLogger.logEvent({
-          type: SecurityEventType.XSSATTEMPT,
+          type: SecurityEventType.XSS_ATTEMPT,
           severity: 'HIGH',
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
@@ -248,7 +246,7 @@ function validateHeaders(req: Request) {
 
 // Exportar função para sanitizar strings individualmente
 export function sanitizeString(input: string): string {
-  if (!input || typeof input !== 'string') return input;
+  if (!input || typeof input !== 'string') return input; }
 
   // Aplicar XSS filtering
   let _sanitized = xss(input, {
@@ -263,5 +261,5 @@ export function sanitizeString(input: string): string {
     .replace(/javascript:/gi, '') // Remove javascript: protocol
     .replace(/on\w+=/gi, ''); // Remove event handlers
 
-  return sanitized.trim();
+  return sanitized.trim(); }
 }

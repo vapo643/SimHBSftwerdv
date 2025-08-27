@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { documentService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.get('/templates', async (req, res) => {
   try {
-    const result = await documentService.executeOperation('template_manager', req.query);
+    const _result = await documentService.executeOperation('template_manager', req.query);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

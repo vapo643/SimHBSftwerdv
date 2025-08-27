@@ -43,19 +43,15 @@ export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
           if (response.ccb_gerado == false) {
             // CCB ainda não foi gerada - não mostrar na lista
             setCcbRealUrl(null);
-          }
-else if (response.publicUrl) {
+          } else if (response.publicUrl) {
             setCcbRealUrl(response.publicUrl);
-          }
-else {
+          } else {
             setCcbRealUrl(null);
           }
-        }
-catch (error) {
+        } catch (error) {
           console.error('Erro ao buscar status da CCB:', error);
           setCcbRealUrl(null);
-        }
-finally {
+        } finally {
           setCcbLoading(false);
         }
       }
@@ -84,30 +80,30 @@ finally {
     const _nameExt = name?.toLowerCase() || '';
     const _fileType = type?.toLowerCase() || '';
     if (fileType.includes('pdf') || nameExt.endsWith('.pdf'))
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-4 w-4" />; }
     if (
       fileType.includes('image') ||
       nameExt.endsWith('.jpg') ||
       nameExt.endsWith('.jpeg') ||
       nameExt.endsWith('.png')
     )
-      return <Image className="h-4 w-4" />;
-    return <FileIcon className="h-4 w-4" />;
+      return <Image className="h-4 w-4" />; }
+    return <FileIcon className="h-4 w-4" />; }
   };
 
   const _getFileTypeLabel = (type?: string, name?: string) => {
     const _nameExt = name?.toLowerCase() || '';
     const _fileType = type?.toLowerCase() || '';
-    if (fileType.includes('pdf') || nameExt.endsWith('.pdf')) return 'PDF';
+    if (fileType.includes('pdf') || nameExt.endsWith('.pdf')) return 'PDF'; }
     if (
       fileType.includes('image') ||
       nameExt.endsWith('.jpg') ||
       nameExt.endsWith('.jpeg') ||
       nameExt.endsWith('.png')
     )
-      return 'Imagem';
-    if (fileType.includes('doc')) return 'DOC';
-    return 'Arquivo';
+      return 'Imagem'; }
+    if (fileType.includes('doc')) return 'DOC'; }
+    return 'Arquivo'; }
   };
 
   const _handleDownload = async (url: string, filename: string) => {
@@ -122,8 +118,7 @@ finally {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
-    }
-catch (error) {
+    } catch (error) {
       console.error('Erro ao baixar documento:', error);
     }
   };

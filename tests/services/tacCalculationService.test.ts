@@ -20,7 +20,7 @@ vi.mock('../../server/lib/_supabase.js', () => ({
 }));
 
 // Import do mock após declaração
-import { db } from '../../server/lib/supabase.js';
+import { db } from '../../server/lib/_supabase.js';
 
 describe('TacCalculationService', () => {
   // Mock setup - cria chain de métodos para simular Drizzle query builder

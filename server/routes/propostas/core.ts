@@ -9,20 +9,19 @@ import { Router } from 'express';
 import { ProposalController } from '../../contexts/proposal/presentation/proposalController.js';
 
 // Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
-const auth = async (req, res: unknown, next) => {
+const _auth = async (req, res: unknown, next) => {
   try {
     // Import dinâmico do middleware RLS - RETURN Promise não await
     const { rlsAuthMiddleware } = await import('../../lib/rls-setup.js');
     return rlsAuthMiddleware(req, res, next); // ← RETURN não AWAIT
-  }
-catch (error) {
+  } catch (error) {
     console.error('[RLS WRAPPER] Error in auth middleware:', error);
     next(error);
   }
 };
 
-const router = Router();
-const controller = new ProposalController();
+const _router = Router();
+const _controller = new ProposalController();
 
 // ==== ROTAS PRINCIPAIS ====
 
@@ -56,22 +55,22 @@ router.put('/:id/reject', auth, (req, res) => controller.reject(req, res));
 // GET /:id/observacoes - Logs de auditoria (manter original por enquanto)
 router.get('/:id/observacoes', auth, async (req, res) => {
   try {
-    const propostaId = req.params.id;
+    const _propostaId = req.params.id;
     const { createServerSupabaseAdminClient } = await import('../../lib/_supabase.js');
-    const supabase = createServerSupabaseAdminClient();
+    const _supabase = createServerSupabaseAdminClient();
 
     const { data: logs, error } = await supabase
       .from('proposta_logs')
       .select(
         `
-  id,
-  observacao,
-        statusanterior,
-        statusnovo,
-        createdat,
-        autorid,
+  _id,
+  _observacao,
+        status_anterior,
+        status_novo,
+        created_at,
+        autor_id,
         profiles!proposta_logs_autor_id_fkey (
-          fullname,
+          full_name,
           role
         )
       `
@@ -81,10 +80,10 @@ router.get('/:id/observacoes', auth, async (req, res) => {
 
     if (error) {
       console.warn('Erro ao buscar logs de auditoria:', error);
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
-    const transformedLogs =
+    const _transformedLogs =
       logs?.map((log) => ({
         id: log.id,
         acao:
@@ -92,21 +91,20 @@ router.get('/:id/observacoes', auth, async (req, res) => {
             ? 'reenvio_atendente'
             : `mudanca_status_${log.status_novo}`,
         detalhes: log.observacao,
-        status_anterior: log.statusanterior,
-        status_novo: log.statusnovo,
-        data_acao: log.createdat,
-        autor_id: log.autorid,
+        status_anterior: log.status_anterior,
+        status_novo: log.status_novo,
+        data_acao: log.created_at,
+        autor_id: log.autor_id,
         profiles: log.profiles,
         observacao: log.observacao,
-        created_at: log.createdat,
+        created_at: log.created_at,
       })) || [];
 
     res.json({
       logs: transformedLogs,
       total: transformedLogs.length,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('Error fetching proposal audit logs:', error);
     res.json({ logs: [] });
   }
@@ -118,13 +116,11 @@ router.put('/:id/status', auth, async (req, res) => {
 
   // Mapear para os novos endpoints baseado no status
   if (status == 'aprovado') {
-    return controller.approve(req, res);
-  }
-else if (status == 'rejeitado') {
-    return controller.reject(req, res);
-  }
-else if (status == 'aguardando_analise') {
-    return controller.submitForAnalysis(req, res);
+    return controller.approve(req, res); }
+  } else if (status == 'rejeitado') {
+    return controller.reject(req, res); }
+  } else if (status == 'aguardando_analise') {
+    return controller.submitForAnalysis(req, res); }
   }
 
   // Para outros status, retornar erro por enquanto

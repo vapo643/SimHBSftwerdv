@@ -55,8 +55,8 @@ export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<u
   asyncFunction: T,
   options: CircuitBreaker.Options
 ): CircuitBreaker<any[], any> {
-  const breaker = new CircuitBreaker(asyncFunction, options);
-  const name = options.name || 'UnnamedBreaker';
+  const _breaker = new CircuitBreaker(asyncFunction, options);
+  const _name = options.name || 'UnnamedBreaker';
 
   // Event listeners for monitoring
   breaker.on('open', () => {
@@ -90,7 +90,7 @@ export function createCircuitBreaker<T extends (...args: unknown[]) => Promise<u
     console.log(`[CIRCUIT_BREAKER] 🚫 ${name} rejected request - circuit is OPEN`);
   });
 
-  return breaker;
+  return breaker; }
 }
 
 /**
@@ -110,9 +110,9 @@ export function isCircuitBreakerOpen(error): boolean {
  */
 export function formatCircuitBreakerError(error, serviceName: string): string {
   if (isCircuitBreakerOpen(error)) {
-    return `[CIRCUIT_BREAKER] Circuit for ${serviceName} is OPEN. Job failed immediately to protect the system.`;
+    return `[CIRCUIT_BREAKER] Circuit for ${serviceName} is OPEN. Job failed immediately to protect the system.`; }
   }
-  return `[CIRCUIT_BREAKER] ${serviceName} error: ${error.message || error}`;
+  return `[CIRCUIT_BREAKER] ${serviceName} error: ${error.message || error}`; }
 }
 
 /**
@@ -127,13 +127,13 @@ export function getCircuitBreakerStats(breaker: CircuitBreaker): {
     isHealthy: boolean;
   };
 } {
-  const stats = breaker.stats;
-  const totalRequests = stats.fires;
-  const errorPercentage = totalRequests > 0 ? (stats.failures / totalRequests) * 100 : 0;
+  const _stats = breaker.stats;
+  const _totalRequests = stats.fires;
+  const _errorPercentage = totalRequests > 0 ? (stats.failures / totalRequests) * 100 : 0;
 
   return {
     state: breaker.opened ? 'OPEN' : breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
-    stats,
+  _stats,
     healthCheck: {
       requests: totalRequests,
       errorPercentage: Math.round(errorPercentage),

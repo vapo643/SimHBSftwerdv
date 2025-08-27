@@ -17,7 +17,7 @@ export class ClienteService {
     message?: string;
   }> {
     try {
-      const cleanCPF = cpf.replace(/\D/g, '');
+      const _cleanCPF = cpf.replace(/\D/g, '');
 
       if (!cleanCPF || cleanCPF.length !== 11) {
         return {
@@ -71,7 +71,7 @@ export class ClienteService {
       }
 
       // Search in database
-      const clientData = await clienteRepository.findByCPF(cleanCPF);
+      const _clientData = await clienteRepository.findByCPF(cleanCPF);
 
       if (!clientData) {
         console.log(`[CLIENTE_SERVICE] No client found for CPF: ${cleanCPF}`);
@@ -82,7 +82,7 @@ export class ClienteService {
       }
 
       // Apply PII masking
-      const maskedData = {
+      const _maskedData = {
         ...clientData,
         cpf: maskCPF(clientData.cpf),
         email: clientData.email ? maskEmail(clientData.email) : '',
@@ -101,8 +101,7 @@ export class ClienteService {
         exists: true,
         data: maskedData,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CLIENTE_SERVICE] Error getting client by CPF:', error);
       throw new Error('Erro ao buscar dados do cliente');
     }
@@ -113,14 +112,14 @@ catch (error) {
    */
   async getAddressByCEP(cep: string): Promise<unknown> {
     try {
-      const cleanCep = cep.replace(/\D/g, '');
+      const _cleanCep = cep.replace(/\D/g, '');
 
       if (cleanCep.length !== 8) {
         throw new Error('CEP inválido');
       }
 
       // Try multiple CEP APIs
-      const apis = [
+      const _apis = [
         `https://viacep.com.br/ws/${cleanCep}/json/`,
         `https://brasilapi.com.br/api/cep/v2/${cleanCep}`,
         `https://cep.awesomeapi.com.br/json/${cleanCep}`,
@@ -128,9 +127,9 @@ catch (error) {
 
       for (const apiUrl of apis) {
         try {
-          const response = await fetch(apiUrl);
+          const _response = await fetch(apiUrl);
           if (response.ok) {
-            const data = await response.json();
+            const _data = await response.json();
 
             // Normalize response from different APIs
             if (apiUrl.includes('viacep')) {
@@ -143,8 +142,7 @@ catch (error) {
                   cep: data.cep || cleanCep,
                 };
               }
-            }
-else if (apiUrl.includes('brasilapi')) {
+            } else if (apiUrl.includes('brasilapi')) {
               return {
                 logradouro: data.street || '',
                 bairro: data.neighborhood || '',
@@ -152,8 +150,7 @@ else if (apiUrl.includes('brasilapi')) {
                 estado: data.state || '',
                 cep: data.cep || cleanCep,
               };
-            }
-else if (apiUrl.includes('awesomeapi')) {
+            } else if (apiUrl.includes('awesomeapi')) {
               return {
                 logradouro: data.address || '',
                 bairro: data.district || '',
@@ -163,20 +160,18 @@ else if (apiUrl.includes('awesomeapi')) {
               };
             }
           }
-        }
-catch (apiError) {
+        } catch (apiError) {
           console.log(`[CLIENTE_SERVICE] API ${apiUrl} failed, trying next...`);
           continue;
         }
       }
 
       throw new Error('CEP não encontrado');
-    }
-catch (error) {
+    } catch (error) {
       console.error('[CLIENTE_SERVICE] Error fetching CEP:', error);
       throw error;
     }
   }
 }
 
-export const clienteService = new ClienteService();
+export const _clienteService = new ClienteService();

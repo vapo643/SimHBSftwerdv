@@ -53,13 +53,13 @@ class MockQueue extends EventEmitter {
   }
 
   async add(jobName: string, data) {
-    const jobId = `${this.name}-${++this.jobCounter}`;
-    const job = new MockJob(jobId, jobName,_data);
+    const _jobId = `${this.name}-${++this.jobCounter}`;
+    const _job = new MockJob(jobId, jobName,_data);
 
     const jobData: JobData = {
       id: jobId,
       name: jobName,
-  data,
+  _data,
       status: 'waiting',
       progress: 0,
       createdAt: new Date(),
@@ -70,7 +70,7 @@ class MockQueue extends EventEmitter {
 
     console.log(`[DEV QUEUE ${this.name}] ➕ Added job ${jobId}:`, {
       name: jobName,
-  data,
+  _data,
     });
 
     this.emit('waiting', job);
@@ -80,11 +80,11 @@ class MockQueue extends EventEmitter {
       this.processJob(jobId);
     }, 100);
 
-    return job;
+    return job; }
   }
 
   private async processJob(jobId: string) {
-    const jobData = this.jobs.get(jobId);
+    const _jobData = this.jobs.get(jobId);
     if (!jobData) return;
 
     jobData.status = 'active';
@@ -93,14 +93,14 @@ class MockQueue extends EventEmitter {
     console.log(`[DEV QUEUE ${this.name}] 🔄 Processing job ${jobId}`);
     console.log(`[DEV QUEUE ${this.name}] Executando lógica REAL do worker...`);
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       // REFATORAÇÃO: Executar a lógica REAL do worker baseado no tipo de fila
       let result: unknown;
 
       // Criar um mock job com interface compatível
-      const mockJob = {
+      const _mockJob = {
         id: jobId,
         data: jobData.data,
         updateProgress: async (progress: number) => {
@@ -113,22 +113,22 @@ class MockQueue extends EventEmitter {
       switch (this.name) {
         case 'pdf-processing': {
           result = await this.processPdfJob(mockJob);
-          break;
-        }
+          break; }
+
         case 'boleto-sync': {
           result = await this.processBoletoJob(mockJob);
-          break;
-        }
+          break; }
+
         case 'document-processing': {
           // TODO: Implementar quando necessário
           result = { success: true, message: 'Document processing not yet implemented' };
-          break;
-        }
+          break; }
+
         case 'notifications': {
           // TODO: Implementar quando necessário
           result = { success: true, message: 'Notification processing not yet implemented' };
-          break;
-        }
+          break; }
+
         default:
           throw new Error(`Unknown queue: ${this.name}`);
       }
@@ -138,18 +138,17 @@ class MockQueue extends EventEmitter {
       jobData.progress = 100;
       (jobData as unknown).result = result; // Salvar o resultado para o getJob
 
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
       console.log(`[DEV QUEUE ${this.name}] ✅ Job ${jobId} completed in ${duration}ms`);
-      console.log(`[DEV QUEUE ${this.name}] Result:`, result);
+      console.log(`[DEV QUEUE ${this.name}] Result:`,_result);
 
       this.emit('completed', { ...jobData, result });
-    }
-catch (error) {
+    } catch (error) {
       jobData.status = 'failed';
       jobData.failedReason = error.message || 'Unknown error';
       jobData.completedAt = new Date();
 
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
       console.error(`[DEV QUEUE ${this.name}] ❌ Job ${jobId} failed after ${duration}ms:`, error);
 
       this.emit('failed', { ...jobData, error });
@@ -161,31 +160,29 @@ catch (error) {
    */
   private async processPdfJob(job) {
     console.log(`[WORKER:PDF] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       switch (job.data.type) {
         case 'GENERATE_CARNE': {
-        break;
-        }
           console.log(`[WORKER:PDF] 📚 Generating carnê for proposal ${job.data.propostaId}`);
 
           await job.updateProgress(10);
 
           // Gerar o carnê usando o serviço real
-          const pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
+          const _pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
 
           await job.updateProgress(70);
 
           // Salvar no storage
-          const signedUrl = await pdfMergeService.salvarCarneNoStorage(
+          const _signedUrl = await pdfMergeService.salvarCarneNoStorage(
             job.data.propostaId,
             pdfBuffer
           );
 
           await job.updateProgress(100);
 
-          const pdfDuration = Date.now() - startTime;
+          const _pdfDuration = Date.now() - startTime;
           console.log(`[WORKER:PDF] ✅ Carnê generated successfully in ${pdfDuration}ms`);
 
           return {
@@ -198,15 +195,13 @@ catch (error) {
 
         case 'MERGE_PDFS': {
           console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
-          return { success: true, message: 'PDF merge not yet implemented' };
-        }
+          return { success: true, message: 'PDF merge not yet implemented' }; }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    }
-catch (error) {
-      const errorDuration = Date.now() - startTime;
+    } catch (error) {
+      const _errorDuration = Date.now() - startTime;
       console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
       throw error;
     }
@@ -215,28 +210,26 @@ catch (error) {
   /**
    * Processar jobs de boleto - Lógica REAL do worker.ts
    */
-  private async processBoletoJob(job: any) {
+  private async processBoletoJob(job) {
     console.log(`[WORKER:BOLETO] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       switch (job.data.type) {
         case 'SYNC_BOLETOS': {
-          break;
-        }
         case 'SYNC_PROPOSAL_BOLETOS': // PAM V1.0 - Suporte para fallback assíncrono de PDFs
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
 
           await job.updateProgress(10);
 
           // Sincronizar boletos usando o serviço real
-          const result = await boletoStorageService.sincronizarBoletosDaProposta(
+          const _result = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
 
           await job.updateProgress(100);
 
-          const syncDuration = Date.now() - startTime;
+          const _syncDuration = Date.now() - startTime;
           console.log(
             `[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`
           );
@@ -265,34 +258,32 @@ catch (error) {
           );
 
           await job.updateProgress(10);
-          const syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
+          const _syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
             job.data.propostaId
           );
 
           await job.updateProgress(50);
 
-          const carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
+          const _carneResult = await boletoStorageService.gerarCarneDoStorage(job.data.propostaId);
 
           await job.updateProgress(100);
 
-          const fullDuration = Date.now() - startTime;
+          const _fullDuration = Date.now() - startTime;
           console.log(`[WORKER:BOLETO] ✅ Full carnê process completed in ${fullDuration}ms`);
 
           return {
             success: carneResult.success,
             propostaId: job.data.propostaId,
-            syncResult,
+  _syncResult,
             carneUrl: carneResult.url,
             processingTime: fullDuration,
           };
-        }
 
         default:
           throw new Error(`Unknown job type: ${job.data.type}`);
       }
-    }
-catch (error) {
-      const boletoErrorDuration = Date.now() - startTime;
+    } catch (error) {
+      const _boletoErrorDuration = Date.now() - startTime;
       console.error(
         `[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`,
         error
@@ -302,7 +293,7 @@ catch (error) {
   }
 
   async getJobCounts() {
-    const counts = {
+    const _counts = {
       waiting: 0,
       active: 0,
       completed: 0,
@@ -313,31 +304,31 @@ catch (error) {
       counts[job.status]++;
     });
 
-    return counts;
+    return counts; }
   }
 
   /**
    * Buscar um job pelo ID
    */
   async getJob(jobId: string): Promise<unknown> {
-    const jobData = this.jobs.get(jobId);
-    const mockJob = this.activeJobs.get(jobId);
+    const _jobData = this.jobs.get(jobId);
+    const _mockJob = this.activeJobs.get(jobId);
 
     if (!jobData || !mockJob) {
-      return null;
+      return null; }
     }
 
     // Adicionar propriedades extras para compatibilidade com o endpoint de status
-    const job = mockJob as any;
+    const _job = mockJob as unknown;
     job.getState = async () => jobData.status;
     job.progress = jobData.progress;
-    job.returnvalue = jobData.status == 'completed' ? (jobData as any).result : null;
+    job.returnvalue = jobData.status == 'completed' ? (jobData as unknown).result : null;
     job.failedReason = jobData.failedReason;
     job.timestamp = jobData.createdAt.getTime();
     job.processedOn = jobData.processedAt?.getTime();
     job.finishedOn = jobData.completedAt?.getTime();
 
-    return job;
+    return job; }
   }
 }
 
@@ -377,7 +368,7 @@ class MockRedis {
 }
 
 // Default queue options
-const defaultQueueOptions = {
+const _defaultQueueOptions = {
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -395,13 +386,13 @@ const defaultQueueOptions = {
 };
 
 // Create mock queues
-export const pdfProcessingQueue = new MockQueue('pdf-processing');
-export const boletoSyncQueue = new MockQueue('boleto-sync');
-export const documentQueue = new MockQueue('document-processing');
-export const notificationQueue = new MockQueue('notifications');
+export const _pdfProcessingQueue = new MockQueue('pdf-processing');
+export const _boletoSyncQueue = new MockQueue('boleto-sync');
+export const _documentQueue = new MockQueue('document-processing');
+export const _notificationQueue = new MockQueue('notifications');
 
 // Export all queues
-export const queues = {
+export const _queues = {
   pdfProcessing: pdfProcessingQueue,
   boletoSync: boletoSyncQueue,
   document: documentQueue,
@@ -412,21 +403,13 @@ export const queues = {
 export function getQueue(queueName: string): MockQueue {
   switch (queueName) {
     case 'pdf-processing': {
-        break;
-        }
-      return pdfProcessingQueue;
+      return pdfProcessingQueue; }
     case 'boleto-sync': {
-        break;
-        }
-      return boletoSyncQueue;
+      return boletoSyncQueue; }
     case 'document-processing': {
-        break;
-        }
-      return documentQueue;
+      return documentQueue; }
     case 'notifications': {
-        break;
-        }
-      return notificationQueue;
+      return notificationQueue; }
     default:
       throw new Error(`Queue ${queueName} not found`);
   }
@@ -435,7 +418,7 @@ export function getQueue(queueName: string): MockQueue {
 // Health check function
 export async function checkQueuesHealth() {
   try {
-    const results = await Promise.all([
+    const _results = await Promise.all([
       pdfProcessingQueue.getJobCounts(),
       boletoSyncQueue.getJobCounts(),
       documentQueue.getJobCounts(),
@@ -452,8 +435,7 @@ export async function checkQueuesHealth() {
         notification: results[3],
       },
     };
-  }
-catch (error) {
+  } catch (error) {
     console.error('[DEV QUEUE] Health check failed:', error);
     return {
       healthy: false,

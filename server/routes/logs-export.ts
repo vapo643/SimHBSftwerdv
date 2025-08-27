@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { auditService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/export', async (req, res) => {
   try {
-    const result = await auditService.executeOperation('export_logs', req.body);
+    const _result = await auditService.executeOperation('export_logs', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

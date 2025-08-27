@@ -29,7 +29,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    */
   async findByPropostaId(propostaId: number): Promise<Observacao[]> {
     try {
-      const data = await db
+      const _data = await db
         .select({
           id: observacoesCobranca.id,
           proposta_id: observacoesCobranca.propostaId,
@@ -42,9 +42,8 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         .where(eq(observacoesCobranca.propostaId, String(propostaId)))
         .orderBy(desc(observacoesCobranca.createdAt));
 
-      return data as unknown[];
-    }
-catch (error) {
+      return data as unknown[]; }
+    } catch (error) {
       throw new Error(`Failed to fetch observacoes for proposta ${propostaId}: ${error}`);
     }
   }
@@ -62,7 +61,7 @@ catch (error) {
         .insert(observacoesCobranca)
         .values({
           propostaId: String(propostaId),
-          observacao,
+  _observacao,
           userId: usuarioId,
           userName: 'Sistema',
           createdAt: new Date(),
@@ -73,9 +72,8 @@ catch (error) {
         throw new Error(`Failed to create observacao: No data returned`);
       }
 
-      return data as unknown as Observacao;
-    }
-catch (error) {
+      return data as unknown as Observacao; }
+    } catch (error) {
       throw new Error(`Failed to create observacao: ${error}`);
     }
   }
@@ -84,9 +82,9 @@ catch (error) {
    * Get observacoes with pagination
    */
   async findPaginated(page: number = 1, limit: number = 10, filters?: Record<string, any>) {
-    const offset = (page - 1) * limit;
+    const _offset = (page - 1) * limit;
 
-    const result = await db
+    const _result = await db
       .select()
       .from(observacoesCobranca)
       .where(isNull(observacoesCobranca.dataPromessaPagamento))
@@ -99,10 +97,10 @@ catch (error) {
 
     return {
       data: result as unknown as Observacao[],
-      total: _result.length,
-      page,
-      limit,
-      totalPages: Math.ceil(_result.length / limit),
+      total: result.length,
+  _page,
+  _limit,
+      totalPages: Math.ceil(result.length / limit),
     };
   }
 
@@ -120,4 +118,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const observacoesRepository = new ObservacoesRepository();
+export const _observacoesRepository = new ObservacoesRepository();

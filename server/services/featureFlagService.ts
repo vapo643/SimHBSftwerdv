@@ -1,13 +1,13 @@
 import {
-  initialize,
+  _initialize,
   isEnabled as unleashIsEnabled,
-  startUnleash,
-  getVariant,
+  _startUnleash,
+  _getVariant,
 } from 'unleash-client';
 import winston from 'winston';
 
 // Logger configurado para o serviço
-const logger = winston.createLogger({
+const _logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   defaultMeta: { service: 'feature-flags' },
@@ -109,18 +109,18 @@ class FeatureFlagService {
       }
 
       // Inicializa o cliente Unleash
-      const unleash = initialize({
-        url: this.config.url,
-        appName: this.config.appName,
-        environment: this.config.environment,
-        customHeaders: this.config.customHeaders,
-        refreshInterval: this.config.refreshInterval,
-        disableMetrics: this.config.disableMetrics,
+      const _unleash = initialize({
+        url: this._config.url,
+        appName: this._config.appName,
+        environment: this._config.environment,
+        customHeaders: this._config.customHeaders,
+        refreshInterval: this._config.refreshInterval,
+        disableMetrics: this._config.disableMetrics,
       });
 
       // Aguarda conexão inicial
       await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
+        const _timeout = setTimeout(() => {
           logger.warn('Unleash connection timeout, using fallback flags');
           resolve();
         }, 5000);
@@ -142,9 +142,8 @@ class FeatureFlagService {
       });
 
       this.initialized = true;
-      logger.info(`Feature flag service initialized for ${this.config.environment}`);
-    }
-catch (error) {
+      logger.info(`Feature flag service initialized for ${this._config.environment}`);
+    } catch (error) {
       logger.error('Failed to initialize feature flags:', error);
       this.initialized = true; // Marca como inicializado para usar fallback
     }
@@ -167,34 +166,33 @@ catch (error) {
     }
 
     // Merge contexto com padrão
-    const fullContext = {
+    const _fullContext = {
       ...this.defaultContext,
       ...context,
-      appName: this.config.appName,
-      environment: this.config.environment,
+      appName: this._config.appName,
+      environment: this._config.environment,
     };
 
     try {
       // Em modo fallback, retorna valor do mapa
       if (process.env.NODE_ENV == 'test' || process.env.UNLEASH_DISABLED == 'true') {
-        const fallbackValue = this.fallbackFlags.get(flagName) ?? false;
+        const _fallbackValue = this.fallbackFlags.get(flagName) ?? false;
         logger.debug(`Flag ${flagName} (fallback): ${fallbackValue}`);
-        return fallbackValue;
+        return fallbackValue; }
       }
 
       // Verifica no Unleash (com contexto sanitizado)
-      const sanitizedContext = {
+      const _sanitizedContext = {
         ...fullContext,
         userRole: fullContext.userRole || undefined, // Convert null to undefined
       };
-      const enabled = unleashIsEnabled(flagName, sanitizedContext);
+      const _enabled = unleashIsEnabled(flagName, sanitizedContext);
       logger.debug(`Flag ${flagName}: ${enabled}`, { context: sanitizedContext });
-      return enabled;
-    }
-catch (error) {
+      return enabled; }
+    } catch (error) {
       logger.error(`Error checking flag ${flagName}:`, error);
       // Em caso de erro, usa fallback
-      return this.fallbackFlags.get(flagName) ?? false;
+      return this.fallbackFlags.get(flagName) ?? false; }
     }
   }
 
@@ -205,7 +203,7 @@ catch (error) {
     flagNames: string[],
     context?: FeatureFlagContext
   ): Promise<Record<string, boolean>> {
-    const _results: Record<string, boolean> = {};
+    const results: Record<string, boolean> = {};
 
     // Executa verificações em paralelo
     await Promise.all(
@@ -214,7 +212,7 @@ catch (error) {
       })
     );
 
-    return _results;
+    return results; }
   }
 
   /**
@@ -225,30 +223,29 @@ catch (error) {
       await this.init();
     }
 
-    const fullContext = {
+    const _fullContext = {
       ...this.defaultContext,
       ...context,
-      appName: this.config.appName,
-      environment: this.config.environment,
+      appName: this._config.appName,
+      environment: this._config.environment,
     };
 
     try {
       if (process.env.NODE_ENV == 'test' || process.env.UNLEASH_DISABLED == 'true') {
-        return { name: 'disabled', enabled: false };
+        return { name: 'disabled', enabled: false }; }
       }
 
       // Sanitizar contexto para o Unleash
-      const sanitizedContext = {
+      const _sanitizedContext = {
         ...fullContext,
         userRole: fullContext.userRole || undefined, // Convert null to undefined
       };
-      const variant = getVariant(flagName, sanitizedContext);
+      const _variant = getVariant(flagName, sanitizedContext);
       logger.debug(`Variant for ${flagName}:`, variant);
-      return variant;
-    }
-catch (error) {
+      return variant; }
+    } catch (error) {
       logger.error(`Error getting variant for ${flagName}:`, error);
-      return { name: 'disabled', enabled: false };
+      return { name: 'disabled', enabled: false }; }
     }
   }
 
@@ -264,7 +261,7 @@ catch (error) {
    * Retorna todas as flags disponíveis (para debug/admin)
    */
   getAllFlags(): string[] {
-    return Array.from(this.fallbackFlags.keys());
+    return Array.from(this.fallbackFlags.keys()); }
   }
 
   /**
@@ -281,13 +278,13 @@ catch (error) {
 }
 
 // Singleton instance
-export const featureFlagService = new FeatureFlagService();
+export const _featureFlagService = new FeatureFlagService();
 
 // Export helper functions para uso direto
-export const isEnabled = (flagName: string, context?: FeatureFlagContext) =>
+export const _isEnabled = (flagName: string, context?: FeatureFlagContext) =>
   featureFlagService.isEnabled(flagName, context);
 
-export const checkMultipleFlags = (flagNames: string[], context?: FeatureFlagContext) =>
+export const _checkMultipleFlags = (flagNames: string[], context?: FeatureFlagContext) =>
   featureFlagService.checkMultiple(flagNames, context);
 
 export default featureFlagService;

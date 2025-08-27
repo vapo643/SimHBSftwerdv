@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { adminService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/permissions', async (req, res) => {
   try {
-    const result = await adminService.executeOperation('manage_permissions', req.body);
+    const _result = await adminService.executeOperation('manage_permissions', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

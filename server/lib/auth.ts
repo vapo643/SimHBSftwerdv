@@ -17,35 +17,34 @@ export interface AuthRequest extends Request {
  */
 export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const authHeader = req.headers.authorization;
+    const _authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('Auth middleware: No token provided');
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
-    const token = authHeader.split(' ')[1];
+    const _token = authHeader.split(' ')[1];
 
     if (!token || token == 'undefined' || token == 'null') {
       console.log('Auth middleware: Invalid token format');
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     // Usa a camada de abstração em vez de chamar Supabase diretamente
-    const authProvider = getServerAuthProvider();
-    const validationResult = await authProvider.validateToken(token);
+    const _authProvider = getServerAuthProvider();
+    const _validationResult = await authProvider.validateToken(token);
 
     if (!validationResult.valid) {
       console.log('Auth middleware: Token validation failed');
-      return res.status(401).json({error: "Unauthorized"});
+      return res.*);
     }
 
     req.user = validationResult.user;
     next();
-  }
-catch (error) {
+  } catch (error) {
     console.error('Auth middleware error:', error);
-    return res.status(401).json({error: "Unauthorized"});
+    return res.*);
   }
 }
 
@@ -58,5 +57,5 @@ export async function authMiddlewareWithBypass(
   res: Response,
   next: NextFunction
 ) {
-  return authMiddleware(req, res, next);
+  return authMiddleware(req, res, next); }
 }

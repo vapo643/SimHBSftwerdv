@@ -73,8 +73,7 @@ async function checkPreconditions(sql: postgres.Sql) {
     logger.info('✅ Tabela de tracking de migrações verificada');
 
     return true;
-  }
-catch (error) {
+  } catch (error) {
     logger.error('❌ Falha nas pré-condições:', error);
     return false;
   }
@@ -92,7 +91,7 @@ async function createBackupPoint(sql: postgres.Sql) {
   // Em produção, usar pg_dump ou snapshot do provedor cloud
   // Aqui apenas registramos o ponto
   await sql`
-    INSERT INTO __drizzle_migrations (hash, createdat, success, error_message)
+    INSERT INTO __drizzle_migrations (hash, created_at, success, error_message)
     VALUES (${backupName}, NOW(), true, 'BACKUP_POINT')
   `;
 
@@ -162,7 +161,7 @@ async function runMigration() {
     // Registrar sucesso
     const executionTime = Date.now() - startTime;
     await sql`
-      INSERT INTO __drizzle_migrations (hash, createdat, success, execution_time_ms)
+      INSERT INTO __drizzle_migrations (hash, created_at, success, execution_time_ms)
       VALUES (${'migration_' + Date.now()}, NOW(), true, ${executionTime})
     `;
 
@@ -177,19 +176,17 @@ async function runMigration() {
     logger.info('');
 
     return true;
-  }
-catch (error: any) {
+  } catch (error: any) {
     const executionTime = Date.now() - startTime;
     logger.error('❌ Erro na migração:', error);
 
     // Registrar falha
     try {
       await sql`
-        INSERT INTO __drizzle_migrations (hash, createdat, success, errormessage, execution_time_ms)
+        INSERT INTO __drizzle_migrations (hash, created_at, success, error_message, execution_time_ms)
         VALUES (${'failed_' + Date.now()}, NOW(), false, ${error.message}, ${executionTime})
       `;
-    }
-catch (logError) {
+    } catch (logError) {
       logger.error('Erro ao registrar falha:', logError);
     }
 
@@ -201,8 +198,7 @@ catch (logError) {
     logger.error('');
 
     process.exit(1);
-  }
-finally {
+  } finally {
     await sql.end();
     logger.info('🔌 Conexão com banco encerrada');
   }
@@ -230,7 +226,7 @@ runMigration()
       process.exit(0);
     }
   })
-  .catch ((error) => {
+  .catch((error) => {
     logger.error('💥 Erro fatal no processo de migração:', error);
     process.exit(1);
   });

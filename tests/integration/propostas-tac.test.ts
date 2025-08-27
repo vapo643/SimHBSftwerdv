@@ -67,8 +67,7 @@ describe('Integração: Fluxo de TAC nas Propostas', () => {
       console.log(`  - User ID: ${testUserId}`);
       console.log(`  - Product ID: ${testProductId}`);
       console.log(`  - Store ID: ${testStoreId}`);
-    }
-catch (error) {
+    } catch (error) {
       console.error('[TEST SETUP] ❌ Erro ao criar ambiente de teste:', error);
       throw error;
     }

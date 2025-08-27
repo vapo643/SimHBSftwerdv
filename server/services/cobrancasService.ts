@@ -21,24 +21,24 @@ export class CobrancasService {
       console.log('🔍 [COBRANCAS_SERVICE] Fetching proposals with filters:', filters);
 
       // Get proposals from repository
-      const propostas = await cobrancasRepository.getPropostasCobranca(filters);
+      const _propostas = await cobrancasRepository.getPropostasCobranca(filters);
 
       // Process each proposal
-      const processedPropostas = await Promise.all(
+      const _processedPropostas = await Promise.all(
         propostas.map(async (proposta) => {
           const { propostas: prop } = proposta;
 
           // Get installments
-          const parcelas = await cobrancasRepository.getParcelasProposta(prop.id);
+          const _parcelas = await cobrancasRepository.getParcelasProposta(prop.id);
 
           // Get Inter collections
-          const collections = await cobrancasRepository.getInterCollections(prop.id);
+          const _collections = await cobrancasRepository.getInterCollections(prop.id);
 
           // Calculate payment summary
-          const paymentSummary = this.calculatePaymentSummary(parcelas);
+          const _paymentSummary = this.calculatePaymentSummary(parcelas);
 
           // Apply PII masking
-          const maskedData = {
+          const _maskedData = {
             ...prop,
             clienteCpf: prop.clienteCpf ? maskCPF(prop.clienteCpf) : null,
             clienteEmail: prop.clienteEmail ? maskEmail(prop.clienteEmail) : null,
@@ -48,17 +48,16 @@ export class CobrancasService {
 
           return {
             ...maskedData,
-  parcelas,
+  _parcelas,
             interCollections: collections,
-  paymentSummary,
+  _paymentSummary,
             statusContextual: proposta.statusContextuais?.status || prop.status,
           };
         })
       );
 
-      return processedPropostas;
-    }
-catch (error) {
+      return processedPropostas; }
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error fetching proposals:', error);
       throw new Error('Erro ao buscar propostas de cobrança');
     }
@@ -71,7 +70,7 @@ catch (error) {
     try {
       // Get proposal details
       const [propostaData] = await cobrancasRepository.getPropostasCobranca({});
-      const proposta = propostaData?.propostas;
+      const _proposta = propostaData?.propostas;
 
       if (!proposta) {
         throw new Error('Proposta não encontrada');
@@ -87,10 +86,10 @@ catch (error) {
       ]);
 
       // Calculate payment summary
-      const paymentSummary = this.calculatePaymentSummary(parcelas);
+      const _paymentSummary = this.calculatePaymentSummary(parcelas);
 
       // Apply masking
-      const maskedProposta = {
+      const _maskedProposta = {
         ...proposta,
         clienteCpf: proposta.clienteCpf ? maskCPF(proposta.clienteCpf) : null,
         clienteEmail: proposta.clienteEmail ? maskEmail(proposta.clienteEmail) : null,
@@ -100,15 +99,14 @@ catch (error) {
 
       return {
         proposta: maskedProposta,
-  parcelas,
+  _parcelas,
         interCollections: collections,
-  observacoes,
-  solicitacoes,
-  logs,
-  paymentSummary,
+  _observacoes,
+  _solicitacoes,
+  _logs,
+  _paymentSummary,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error fetching proposal details:', error);
       throw error;
     }
@@ -124,7 +122,7 @@ catch (error) {
     created_by: string;
   }): Promise<unknown> {
     try {
-      const observation = await cobrancasRepository.createObservacao(_data);
+      const _observation = await cobrancasRepository.createObservacao(_data);
 
       if (!observation) {
         throw new Error('Erro ao criar observação');
@@ -134,9 +132,8 @@ catch (error) {
       // Log action (to be implemented in repository if needed)
       console.log(`[COBRANCAS_SERVICE] Observation added for proposal ${data.proposta_id}`);
 
-      return observation;
-    }
-catch (error) {
+      return observation; }
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error adding observation:', error);
       throw error;
     }
@@ -151,15 +148,14 @@ catch (error) {
     updateData?: unknown
   ): Promise<boolean> {
     try {
-      const success = await cobrancasRepository.updateParcelaStatus(parcelaId, status, updateData);
+      const _success = await cobrancasRepository.updateParcelaStatus(parcelaId, status, updateData);
 
       if (!success) {
         throw new Error('Erro ao atualizar status da parcela');
       }
 
-      return success;
-    }
-catch (error) {
+      return success; }
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error updating installment:', error);
       throw error;
     }
@@ -176,7 +172,7 @@ catch (error) {
     solicitado_por: string;
   }): Promise<unknown> {
     try {
-      const request = await cobrancasRepository.createSolicitacaoModificacao(_data);
+      const _request = await cobrancasRepository.createSolicitacaoModificacao(_data);
 
       if (!request) {
         throw new Error('Erro ao criar solicitação de modificação');
@@ -185,9 +181,8 @@ catch (error) {
       // Log action (to be implemented in repository if needed)
       console.log(`[COBRANCAS_SERVICE] Modification requested for proposal ${data.proposta_id}`);
 
-      return request;
-    }
-catch (error) {
+      return request; }
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error requesting modification:', error);
       throw error;
     }
@@ -201,10 +196,10 @@ catch (error) {
     byDaysOverdue: unknown[];
   }> {
     try {
-      const total = await cobrancasRepository.getOverdueCount();
+      const _total = await cobrancasRepository.getOverdueCount();
 
       // TODO: Implement detailed overdue breakdown by days
-      const byDaysOverdue = [
+      const _byDaysOverdue = [
         { range: '1-30 dias', count: 0 },
         { range: '31-60 dias', count: 0 },
         { range: '61-90 dias', count: 0 },
@@ -212,11 +207,10 @@ catch (error) {
       ];
 
       return {
-  total,
-  byDaysOverdue,
+  _total,
+  _byDaysOverdue,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error getting overdue stats:', error);
       throw error;
     }
@@ -239,28 +233,28 @@ catch (error) {
       };
     }
 
-    const today = new Date();
-    const parcelasPagas = parcelas.filter((p) => p.status_pagamento == 'pago');
-    const parcelasPendentes = parcelas.filter((p) => p.status_pagamento == 'pendente');
-    const parcelasVencidas = parcelasPendentes.filter(
+    const _today = new Date();
+    const _parcelasPagas = parcelas.filter((p) => p.status_pagamento == 'pago');
+    const _parcelasPendentes = parcelas.filter((p) => p.status_pagamento == 'pendente');
+    const _parcelasVencidas = parcelasPendentes.filter(
       (p) => p.data_vencimento && isAfter(today, parseISO(p.data_vencimento))
     );
 
-    const valorTotal = parcelas.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0);
-    const valorPago = parcelasPagas.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0);
-    const valorPendente = valorTotal - valorPago;
+    const _valorTotal = parcelas.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0);
+    const _valorPago = parcelasPagas.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0);
+    const _valorPendente = valorTotal - valorPago;
 
-    const proximaParcela = parcelasPendentes
+    const _proximaParcela = parcelasPendentes
       .filter((p) => p.data_vencimento && isAfter(parseISO(p.data_vencimento), today))
       .sort(
         (a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()
       )[0];
 
-    const parcelaMaisVencida = parcelasVencidas.sort(
+    const _parcelaMaisVencida = parcelasVencidas.sort(
       (a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()
     )[0];
 
-    const diasAtraso = parcelaMaisVencida?.data_vencimento
+    const _diasAtraso = parcelaMaisVencida?.data_vencimento
       ? differenceInDays(today, parseISO(parcelaMaisVencida.data_vencimento))
       : 0;
 
@@ -269,11 +263,11 @@ catch (error) {
       parcelasPagas: parcelasPagas.length,
       parcelasPendentes: parcelasPendentes.length,
       parcelasVencidas: parcelasVencidas.length,
-  valorTotal,
-  valorPago,
-  valorPendente,
+  _valorTotal,
+  _valorPago,
+  _valorPendente,
       proximoVencimento: proximaParcela?.data_vencimento || null,
-  diasAtraso,
+  _diasAtraso,
     };
   }
 
@@ -281,7 +275,7 @@ catch (error) {
    * Process batch payment update
    */
   async processBatchPaymentUpdate(
-    updates: Array<{
+    updates: Record<string, unknown>[]>{
       parcelaId: number;
       status: string;
       dataPagamento?: string;
@@ -299,7 +293,7 @@ catch (error) {
 
       for (const update of updates) {
         try {
-          const result = await cobrancasRepository.updateParcelaStatus(
+          const _result = await cobrancasRepository.updateParcelaStatus(
             update.parcelaId,
             update.status,
             {
@@ -310,21 +304,18 @@ catch (error) {
 
           if (_result) {
             success++;
-          }
-else {
+          } else {
             failed++;
             errors.push({ parcelaId: update.parcelaId, error: 'Update failed' });
           }
-        }
-catch (error) {
+        } catch (error) {
           failed++;
           errors.push({ parcelaId: update.parcelaId, error: error.message });
         }
       }
 
-      return { success, failed, errors }
-    }
-catch (error) {
+      return { success, failed, errors }; }
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error in batch update:', error);
       throw error;
     }
@@ -337,7 +328,7 @@ catch (error) {
       console.log('[COBRANCAS_SERVICE] Calculating KPIs...');
 
       // Get basic proposal counts
-      const propostas = await cobrancasRepository.getPropostasCobranca({});
+      const _propostas = await cobrancasRepository.getPropostasCobranca({});
 
       // Calculate basic metrics
       let _valorTotalEmAtraso = 0;
@@ -345,7 +336,7 @@ catch (error) {
       let _valorTotalCarteira = 0;
       let _quantidadeTotalContratos = propostas.length;
 
-      const hoje = new Date();
+      const _hoje = new Date();
 
       // Process each proposal to calculate detailed metrics
       for (const proposta of propostas) {
@@ -353,12 +344,12 @@ catch (error) {
         valorTotalCarteira += Number(prop.valorTotalFinanciado) || 0;
 
         // Get installments to check for overdue payments
-        const parcelas = await cobrancasRepository.getParcelasProposta(prop.id);
+        const _parcelas = await cobrancasRepository.getParcelasProposta(prop.id);
 
         let _temParcelaVencida = false;
         for (const parcela of parcelas) {
-          const dataVencimento = parseISO(parcela.dataVencimento);
-          const vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
+          const _dataVencimento = parseISO(parcela.dataVencimento);
+          const _vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
 
           if (vencida) {
             valorTotalEmAtraso += Number(parcela.valorParcela);
@@ -372,32 +363,31 @@ catch (error) {
       }
 
       // Calculate rates
-      const taxaInadimplencia =
+      const _taxaInadimplencia =
         quantidadeTotalContratos > 0
           ? (quantidadeContratosEmAtraso / quantidadeTotalContratos) * 100
           : 0;
 
-      const percentualValorEmAtraso =
+      const _percentualValorEmAtraso =
         valorTotalCarteira > 0 ? (valorTotalEmAtraso / valorTotalCarteira) * 100 : 0;
 
-      const kpis = {
-  valorTotalEmAtraso,
-  quantidadeContratosEmAtraso,
-  valorTotalCarteira,
-  quantidadeTotalContratos,
+      const _kpis = {
+  _valorTotalEmAtraso,
+  _quantidadeContratosEmAtraso,
+  _valorTotalCarteira,
+  _quantidadeTotalContratos,
         taxaInadimplencia: Number(taxaInadimplencia.toFixed(2)),
         percentualValorEmAtraso: Number(percentualValorEmAtraso.toFixed(2)),
         dataAtualizacao: format(hoje, 'yyyy-MM-dd HH:mm:ss'),
       };
 
       console.log('[COBRANCAS_SERVICE] KPIs calculated:', kpis);
-      return kpis;
-    }
-catch (error) {
+      return kpis; }
+    } catch (error) {
       console.error('[COBRANCAS_SERVICE] Error calculating KPIs:', error);
       throw new Error('Erro ao calcular KPIs de cobrança');
     }
   }
 }
 
-export const cobrancasService = new CobrancasService();
+export const _cobrancasService = new CobrancasService();

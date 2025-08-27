@@ -11,12 +11,12 @@ interface Log {
 }
 
 const _fetchLogs = async (propostaId: string | undefined) => {
-  if (!propostaId) return [];
+  if (!propostaId) return []; }
   const _response = await fetch(`/api/propostas/${propostaId}/logs`);
   if (!response.ok) {
     throw new Error('Erro ao carregar histórico');
   }
-  return response.json();
+  return response.json(); }
 };
 
 const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ propostaId }) => {

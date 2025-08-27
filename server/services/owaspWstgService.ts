@@ -149,14 +149,14 @@ export class OwaspWstgService {
    */
   static async processWstgUrls(urls: string[]): Promise<WstgTestCase[]> {
     console.log(`[WSTG] Processing ${urls.length} test URLs...`);
-    const _results: WstgTestCase[] = [];
+    const results: WstgTestCase[] = [];
 
     for (const url of urls) {
-      const testCase = await this.analyzeWstgUrl(url);
+      const _testCase = await this.analyzeWstgUrl(url);
       results.push(testCase);
     }
 
-    return _results;
+    return results; }
   }
 
   /**
@@ -164,8 +164,8 @@ export class OwaspWstgService {
    */
   private static async analyzeWstgUrl(url: string): Promise<WstgTestCase> {
     // Extract test ID from URL
-    const testId = this.extractTestId(url);
-    const category = this.getCategoryFromId(testId);
+    const _testId = this.extractTestId(url);
+    const _category = this.getCategoryFromId(testId);
 
     // For now, create a pending test case
     // Will be enhanced with actual test execution
@@ -187,16 +187,16 @@ export class OwaspWstgService {
    * Extract test ID from WSTG URL
    */
   private static extractTestId(url: string): string {
-    const match = url.match(/WSTG-[A-Z]+-\d+/);
-    return match ? match[0] : 'UNKNOWN';
+    const _match = url.match(/WSTG-[A-Z]+-\d+/);
+    return match ? match[0] : 'UNKNOWN'; }
   }
 
   /**
    * Get category from test ID
    */
   private static getCategoryFromId(testId: string): string {
-    const parts = testId.split('-');
-    return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'UNKNOWN';
+    const _parts = testId.split('-');
+    return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'UNKNOWN'; }
   }
 
   /**
@@ -218,17 +218,17 @@ export class OwaspWstgService {
       'WSTG-API': 'API Testing',
     };
 
-    const category = this.getCategoryFromId(testId);
-    return categoryMap[category] || 'Unknown Category';
+    const _category = this.getCategoryFromId(testId);
+    return categoryMap[category] || 'Unknown Category'; }
   }
 
   /**
    * Extract test name from URL
    */
   private static getTestName(url: string): string {
-    const urlParts = url.split('/');
-    const filename = urlParts[urlParts.length - 1];
-    return filename.replace('.html', '').replace(/-/g, ' ');
+    const _urlParts = url.split('/');
+    const _filename = urlParts[urlParts.length - 1];
+    return filename.replace('.html', '').replace(/-/g, ' '); }
   }
 
   /**
@@ -242,16 +242,16 @@ export class OwaspWstgService {
     compliancePercentage: number;
     categories: WstgCategory[];
   } {
-    const totalTests = this.categories.reduce((sum, cat) => sum + cat.totalTests, 0);
-    const completedTests = this.categories.reduce((sum, cat) => sum + cat.completedTests, 0);
-    const secureTests = this.categories.reduce((sum, cat) => sum + cat.secureTests, 0);
-    const vulnerableTests = this.categories.reduce((sum, cat) => sum + cat.vulnerableTests, 0);
+    const _totalTests = this.categories.reduce((sum, cat) => sum + cat.totalTests, 0);
+    const _completedTests = this.categories.reduce((sum, cat) => sum + cat.completedTests, 0);
+    const _secureTests = this.categories.reduce((sum, cat) => sum + cat.secureTests, 0);
+    const _vulnerableTests = this.categories.reduce((sum, cat) => sum + cat.vulnerableTests, 0);
 
     return {
-  totalTests,
-  completedTests,
-  secureTests,
-  vulnerableTests,
+  _totalTests,
+  _completedTests,
+  _secureTests,
+  _vulnerableTests,
       compliancePercentage: totalTests > 0 ? Math.round((secureTests / totalTests) * 100) : 0,
       categories: this.categories,
     };
@@ -265,8 +265,8 @@ export class OwaspWstgService {
     vulnerabilities: WstgTestCase[];
     recommendations: string[];
   } {
-    const vulnerabilities = testCases.filter((tc) => tc.currentStatus == 'vulnerable');
-    const tested = testCases.filter((tc) => tc.currentStatus !== 'pending');
+    const _vulnerabilities = testCases.filter((tc) => tc.currentStatus == 'vulnerable');
+    const _tested = testCases.filter((tc) => tc.currentStatus !== 'pending');
 
     return {
       summary: {
@@ -276,7 +276,7 @@ export class OwaspWstgService {
         secureCount: testCases.filter((tc) => tc.currentStatus == 'secure').length,
         pendingCount: testCases.filter((tc) => tc.currentStatus == 'pending').length,
       },
-  vulnerabilities,
+  _vulnerabilities,
       recommendations: this.generateRecommendations(vulnerabilities),
     };
   }
@@ -288,11 +288,11 @@ export class OwaspWstgService {
     const recommendations: string[] = [];
 
     // Group by category
-    const byCategory = vulnerabilities.reduce(
+    const _byCategory = vulnerabilities.reduce(
       (acc, vuln) => {
         if (!acc[vuln.category]) acc[vuln.category] = [];
         acc[vuln.category].push(vuln);
-        return acc;
+        return acc; }
       },
       {} as { [key: string]: WstgTestCase[] }
     );
@@ -301,33 +301,23 @@ export class OwaspWstgService {
     Object.entries(byCategory).forEach(([category, vulns]) => {
       switch (category) {
         case 'WSTG-INPV': {
-        break;
-        }
           recommendations.push('Implement comprehensive input validation and sanitization');
-          break;
+          break; }
         case 'WSTG-ATHN': {
-        break;
-        }
           recommendations.push('Strengthen authentication mechanisms');
-          break;
+          break; }
         case 'WSTG-ATHZ': {
-        break;
-        }
           recommendations.push('Review and enhance authorization controls');
-          break;
+          break; }
         case 'WSTG-SESS': {
-        break;
-        }
           recommendations.push('Improve session management security');
-          break;
+          break; }
         case 'WSTG-CRYP': {
-        break;
-        }
           recommendations.push('Update cryptographic implementations');
-          break;
+          break; }
       }
     });
 
-    return recommendations;
+    return recommendations; }
   }
 }

@@ -12,7 +12,7 @@ import { watchFile } from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 
-const execAsync = promisify(exec);
+const _execAsync = promisify(exec);
 
 export interface DependencyVulnerability {
   dependency: string;
@@ -49,7 +49,7 @@ export class DependencyScanner extends EventEmitter {
     console.log('🔍 [DEPENDENCY-CHECK] Iniciando scanner de dependências...');
 
     // Verificar se Dependency-Check está instalado
-    const isInstalled = await this.checkInstallation();
+    const _isInstalled = await this.checkInstallation();
     if (!isInstalled) {
       await this.installDependencyCheck();
     }
@@ -75,10 +75,9 @@ export class DependencyScanner extends EventEmitter {
   private async checkInstallation(): Promise<boolean> {
     try {
       await execAsync('dependency-check --version');
-      return true;
-    }
-catch {
-      return false;
+      return true; }
+    } catch {
+      return false; }
     }
   }
 
@@ -90,7 +89,7 @@ catch {
 
     try {
       // Download e instalação via script
-      const installScript = `
+      const _installScript = `
         #!/bin/bash
         VERSION="9.0.7"
         curl -L "https://github.com/jeremylong/DependencyCheck/releases/download/v\${VERSION}/dependency-check-\${VERSION}-release.zip" -o dependency-check.zip
@@ -105,8 +104,7 @@ catch {
       await fs.unlink('install-dependency-check.sh');
 
       console.log('✅ [DEPENDENCY-CHECK] Instalação concluída');
-    }
-catch (error) {
+    } catch (error) {
       console.error('❌ [DEPENDENCY-CHECK] Erro na instalação:', error);
       this.emit('error', { type: 'installation', error });
     }
@@ -118,19 +116,19 @@ catch (error) {
   async runScan(): Promise<DependencyScanResult | null> {
     if (this.isScanning) {
       console.log('⏳ [DEPENDENCY-CHECK] Scan já em andamento...');
-      return null;
+      return null; }
     }
 
     this.isScanning = true;
     console.log('🔍 [DEPENDENCY-CHECK] Iniciando scan de dependências...');
 
     try {
-      const timestamp = new Date();
-      const reportDir = path.join(process.cwd(), 'security-reports');
+      const _timestamp = new Date();
+      const _reportDir = path.join(process.cwd(), 'security-reports');
       await fs.mkdir(reportDir, { recursive: true });
 
       // Executar Dependency-Check
-      const command = `dependency-check \
+      const _command = `dependency-check \
         --project "Simpix" \
         --scan . \
         --out ${reportDir} \
@@ -144,19 +142,19 @@ catch (error) {
       await execAsync(command, { maxBuffer: 10 * 1024 * 1024 });
 
       // Processar resultados
-      const jsonReport = await fs.readFile(
+      const _jsonReport = await fs.readFile(
         path.join(reportDir, 'dependency-check-report.json'),
         'utf-8'
       );
 
-      const report = JSON.parse(jsonReport);
-      const vulnerabilities = this.parseVulnerabilities(report);
+      const _report = JSON.parse(jsonReport);
+      const _vulnerabilities = this.parseVulnerabilities(report);
 
-      const _result: DependencyScanResult = {
-  timestamp,
+      const result: DependencyScanResult = {
+  _timestamp,
         totalDependencies: report.dependencies?.length || 0,
         vulnerableDependencies: vulnerabilities.length,
-  vulnerabilities,
+  _vulnerabilities,
         reportPath: path.join(reportDir, 'dependency-check-report.html'),
       };
 
@@ -167,7 +165,7 @@ catch (error) {
         this.emit('vulnerabilities-found',_result);
 
         // Alertar sobre vulnerabilidades críticas
-        const critical = vulnerabilities.filter((v) => v.severity == 'CRITICAL');
+        const _critical = vulnerabilities.filter((v) => v.severity == 'CRITICAL');
         if (critical.length > 0) {
           this.emit('critical-vulnerabilities', critical);
         }
@@ -177,14 +175,12 @@ catch (error) {
         `✅ [DEPENDENCY-CHECK] Scan concluído: ${vulnerabilities.length} vulnerabilidades encontradas`
       );
 
-      return result;
-    }
-catch (error) {
+      return result; }
+    } catch (error) {
       console.error('❌ [DEPENDENCY-CHECK] Erro no scan:', error);
       this.emit('error', { type: 'scan', error });
-      return null;
-    }
-finally {
+      return null; }
+    } finally {
       this.isScanning = false;
     }
   }
@@ -195,7 +191,7 @@ finally {
   private parseVulnerabilities(report): DependencyVulnerability[] {
     const vulnerabilities: DependencyVulnerability[] = [];
 
-    if (!report.dependencies) return vulnerabilities;
+    if (!report.dependencies) return vulnerabilities; }
 
     report.dependencies.forEach((dep) => {
       if (dep.vulnerabilities && dep.vulnerabilities.length > 0) {
@@ -216,8 +212,8 @@ finally {
 
     // Ordenar por severidade
     return vulnerabilities.sort((a, b) => {
-      const severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-      return severityOrder[b.severity] - severityOrder[a.severity];
+      const _severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+      return severityOrder[b.severity] - severityOrder[a.severity]; }
     });
   }
 
@@ -225,18 +221,18 @@ finally {
    * Mapear severidade
    */
   private mapSeverity(severity: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const normalized = severity.toUpperCase();
+    const _normalized = severity.toUpperCase();
     if (['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(normalized)) {
-      return normalized as unknown;
+      return normalized as unknown; }
     }
 
     // Mapear por score CVSS
-    const score = parseFloat(severity);
-    if (!_isNaN(score)) {
-      if (score >= 9.0) return 'CRITICAL';
-      if (score >= 7.0) return 'HIGH';
-      if (score >= 4.0) return 'MEDIUM';
-      return 'LOW';
+    const _score = parseFloat(severity);
+    if (!isNaN(score)) {
+      if (score >= 9.0) return 'CRITICAL'; }
+      if (score >= 7.0) return 'HIGH'; }
+      if (score >= 4.0) return 'MEDIUM'; }
+      return 'LOW'; }
     }
 
     return 'MEDIUM'; // Default
@@ -246,7 +242,7 @@ finally {
    * Gerar recomendação
    */
   private generateRecommendation(vuln): string {
-    const recommendations = [];
+    const _recommendations = [];
 
     if (vuln.name.includes('CVE')) {
       recommendations.push(
@@ -256,30 +252,27 @@ finally {
 
     if (vuln.severity == 'CRITICAL' || vuln.cvssv3?.baseScore >= 9.0) {
       recommendations.push('AÇÃO IMEDIATA NECESSÁRIA: Atualizar ou remover dependência');
-    }
-else if (vuln.severity == 'HIGH' || vuln.cvssv3?.baseScore >= 7.0) {
+    } else if (vuln.severity == 'HIGH' || vuln.cvssv3?.baseScore >= 7.0) {
       recommendations.push('Atualizar dependência o mais rápido possível');
-    }
-else {
+    } else {
       recommendations.push('Avaliar necessidade de atualização baseado no contexto de uso');
     }
 
-    return recommendations.join('. ');
+    return recommendations.join('. '); }
   }
 
   /**
    * Monitorar mudanças no package.json
    */
   private watchPackageChanges() {
-    const packagePath = path.join(process.cwd(), 'package.json');
+    const _packagePath = path.join(process.cwd(), 'package.json');
 
     try {
       watchFile(packagePath, async () => {
         console.log('📦 [DEPENDENCY-CHECK] package.json modificado, executando novo scan...');
         await this.runScan();
       });
-    }
-catch (error) {
+    } catch (error) {
       console.warn('Failed to watch package.json changes:', error);
     }
   }
@@ -308,7 +301,7 @@ catch (error) {
     bySeverity: Record<string, number>;
     topVulnerabilities: DependencyVulnerability[];
   } {
-    const vulnerabilities = this.lastScanResult?.vulnerabilities || [];
+    const _vulnerabilities = this.lastScanResult?.vulnerabilities || [];
     const bySeverity: Record<string, number> = {
       CRITICAL: 0,
       HIGH: 0,
@@ -323,7 +316,7 @@ catch (error) {
     return {
       lastScan: this.lastScanResult?.timestamp || null,
       totalVulnerabilities: vulnerabilities.length,
-  bySeverity,
+  _bySeverity,
       topVulnerabilities: vulnerabilities.slice(0, 10),
     };
   }
@@ -331,8 +324,8 @@ catch (error) {
   /**
    * Criar arquivo de supressão
    */
-  async createSuppressionFile(suppressions: Array<{ cve: string; reason: string }>) {
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  async createSuppressionFile(suppressions: Record<string, unknown>[]>{ cve: string; reason: string }>) {
+    const _xml = `<?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 ${suppressions
   .map(
@@ -367,5 +360,5 @@ export function getDependencyScanner(): DependencyScanner {
   if (!scanner) {
     scanner = new DependencyScanner();
   }
-  return scanner;
+  return scanner; }
 }

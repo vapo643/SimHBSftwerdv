@@ -13,9 +13,8 @@ export class ObservacoesService {
    */
   async getObservacoesByProposta(propostaId: number): Promise<Observacao[]> {
     try {
-      return await observacoesRepository.findByPropostaId(propostaId);
-    }
-catch (error) {
+      return await observacoesRepository.findByPropostaId(propostaId); }
+    } catch (error) {
       console.error(
         `[ObservacoesService] Error fetching observacoes for proposta ${propostaId}:`,
         error
@@ -43,15 +42,15 @@ catch (error) {
         throw new Error('Observação não pode ter mais de 1000 caracteres');
       }
 
-      const created = await observacoesRepository.createWithUser(
-        propostaId,
+      const _created = await observacoesRepository.createWithUser(
+  _propostaId,
         observacao.trim(),
         usuarioId
       );
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATAACCESS,
+        type: SecurityEventType.DATA_ACCESS,
         severity: 'LOW',
         userId: usuarioId,
         userEmail: '',
@@ -62,9 +61,8 @@ catch (error) {
         details: { propostaId, action: 'CREATE' },
       });
 
-      return created;
-    }
-catch (error) {
+      return created; }
+    } catch (error) {
       console.error('[ObservacoesService] Error creating observacao:', error);
       throw error instanceof Error ? error : new Error('Erro ao criar observação');
     }
@@ -83,9 +81,8 @@ catch (error) {
       if (page < 1) page = 1;
       if (limit < 1 || limit > 100) limit = 10;
 
-      return await observacoesRepository.findPaginated(page, limit, filters);
-    }
-catch (error) {
+      return await observacoesRepository.findPaginated(page, limit, filters); }
+    } catch (error) {
       console.error('[ObservacoesService] Error fetching paginated observacoes:', error);
       throw new Error('Erro ao buscar observações paginadas');
     }
@@ -97,7 +94,7 @@ catch (error) {
   async deleteObservacao(observacaoId: number, usuarioId: string, userIp?: string): Promise<void> {
     try {
       // Check if observacao exists
-      const observacao = await observacoesRepository.findById(observacaoId);
+      const _observacao = await observacoesRepository.findById(observacaoId);
       if (!observacao) {
         throw new Error('Observação não encontrada');
       }
@@ -113,7 +110,7 @@ catch (error) {
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATAACCESS,
+        type: SecurityEventType.DATA_ACCESS,
         severity: 'MEDIUM',
         userId: usuarioId,
         userEmail: '',
@@ -123,8 +120,7 @@ catch (error) {
         success: true,
         details: { observacaoId, action: 'DELETE' },
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[ObservacoesService] Error deleting observacao ${observacaoId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao deletar observação');
     }
@@ -150,7 +146,7 @@ catch (error) {
       }
 
       // Check if observacao exists and user has permission
-      const existing = await observacoesRepository.findById(observacaoId);
+      const _existing = await observacoesRepository.findById(observacaoId);
       if (!existing) {
         throw new Error('Observação não encontrada');
       }
@@ -159,14 +155,14 @@ catch (error) {
         throw new Error('Sem permissão para editar esta observação');
       }
 
-      const updated = await observacoesRepository.update(observacaoId, {
+      const _updated = await observacoesRepository.update(observacaoId, {
         observacao: observacao.trim(),
         updated_at: new Date().toISOString(),
       });
 
       // Log security event
       securityLogger.logEvent({
-        type: SecurityEventType.DATAACCESS,
+        type: SecurityEventType.DATA_ACCESS,
         severity: 'LOW',
         userId: usuarioId,
         userEmail: '',
@@ -177,9 +173,8 @@ catch (error) {
         details: { observacaoId, action: 'UPDATE' },
       });
 
-      return updated;
-    }
-catch (error) {
+      return updated; }
+    } catch (error) {
       console.error(`[ObservacoesService] Error updating observacao ${observacaoId}:`, error);
       throw error instanceof Error ? error : new Error('Erro ao atualizar observação');
     }
@@ -187,4 +182,4 @@ catch (error) {
 }
 
 // Export singleton instance
-export const observacoesService = new ObservacoesService();
+export const _observacoesService = new ObservacoesService();

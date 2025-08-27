@@ -19,8 +19,7 @@ async function testHealthCheck() {
     const response = await fetch(`${API_BASE}/health`, { headers });
     const data = await response.json();
     console.log('✅ Health Check:', data);
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ Health Check falhou:', error);
   }
 }
@@ -48,12 +47,10 @@ async function testFileAnalysis() {
           console.log(`    Arquivo: ${finding.file}:${finding.line}`);
         });
       }
-    }
-else {
+    } else {
       console.error('❌ Análise falhou:', data.error);
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ Erro na análise:', error);
   }
 }
@@ -70,12 +67,11 @@ async function testCodeSnippetAnalysis() {
       const query = \`SELECT * FROM users WHERE email = '\${email}' AND password = '\${password}'\`;
       const result = await db.query(query);
       
-      if (_result.rows.length > 0) {
-        const user = _result.rows[0];
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
         console.log('User CPF:', user.cpf); // PII exposure
         res.json({ token: Math.random().toString(36) }); // Weak token
-      }
-else {
+      } else {
         res.status(401).json({ error: 'Invalid credentials' });
       }
     });
@@ -109,12 +105,10 @@ else {
           console.log(`  - ${suggestion}`);
         });
       }
-    }
-else {
+    } else {
       console.error('❌ Análise falhou:', data.error);
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ Erro na análise:', error);
   }
 }
@@ -146,12 +140,10 @@ async function testComponentContext() {
           console.log(`  - ${rec}`);
         });
       }
-    }
-else {
+    } else {
       console.error('❌ Contexto falhou:', data.error);
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ Erro no contexto:', error);
   }
 }
@@ -168,12 +160,10 @@ async function testActiveRules() {
       console.log(`  - Total: ${data.rules.total}`);
       console.log('  - Por severidade:', data.rules.by_severity);
       console.log('  - Por categoria:', data.rules.by_category);
-    }
-else {
+    } else {
       console.error('❌ Listagem falhou:', data.error);
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ Erro nas regras:', error);
   }
 }
@@ -202,7 +192,7 @@ async function runAllTests() {
 
 // Executar testes se rodado diretamente
 if (require.main == module) {
-  runAllTests().catch (console.error);
+  runAllTests().catch(console.error);
 }
 
 export { runAllTests };

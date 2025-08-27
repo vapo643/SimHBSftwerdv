@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { clientService } from '../services/genericService';
-const router = Router();
+const _router = Router();
 router.post('/preferences', async (req, res) => {
   try {
-    const result = await clientService.executeOperation('user_preferences', req.body);
+    const _result = await clientService.executeOperation('user_preferences', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

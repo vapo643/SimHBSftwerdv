@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { clienteService } from '../services/clienteService.js';
 
-const router = Router();
+const _router = Router();
 
 /**
  * GET /api/clientes/cpf/:cpf
@@ -17,18 +17,16 @@ router.get('/clientes/cpf/:cpf', async (req: Request, res: Response) => {
   try {
     const { cpf } = req.params;
 
-    const result = await clienteService.getClientByCPF(cpf);
+    const _result = await clienteService.getClientByCPF(cpf);
 
-    if (_result.exists) {
+    if (result.exists) {
       res.json(_result);
-    }
-else {
+    } else {
       res.status(404).json({
-        message: _result.message || 'Cliente não encontrado',
+        message: result.message || 'Cliente não encontrado',
       });
     }
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CLIENTE_CONTROLLER] Error fetching client by CPF:', error);
     res.status(500).json({
       error: 'Erro ao buscar dados do cliente',
@@ -44,19 +42,16 @@ router.get('/cep/:cep', async (req: Request, res: Response) => {
   try {
     const { cep } = req.params;
 
-    const address = await clienteService.getAddressByCEP(cep);
+    const _address = await clienteService.getAddressByCEP(cep);
     res.json(address);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CLIENTE_CONTROLLER] Error fetching CEP:', error);
 
     if (error.message == 'CEP inválido') {
       res.status(400).json({ error: error.message });
-    }
-else if (error.message == 'CEP não encontrado') {
+    } else if (error.message == 'CEP não encontrado') {
       res.status(404).json({ error: error.message });
-    }
-else {
+    } else {
       res.status(500).json({ error: 'Erro ao buscar CEP' });
     }
   }

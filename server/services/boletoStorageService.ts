@@ -32,7 +32,7 @@ interface BoletoSyncResult {
   totalBoletos: number;
   boletosProcessados: number;
   boletosComErro: number;
-  erros: Array<{
+  erros: Record<string, unknown>[]>{
     codigoSolicitacao: string;
     erro: string;
   }>;
@@ -62,9 +62,9 @@ class BoletoStorageService {
     // Iniciar medição de tempo total
     console.time(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);
 
-    const _result: BoletoSyncResult = {
+    const result: BoletoSyncResult = {
       success: true,
-  propostaId,
+  _propostaId,
       totalBoletos: 0,
       boletosProcessados: 0,
       boletosComErro: 0,
@@ -74,24 +74,24 @@ class BoletoStorageService {
 
     try {
       // 1. Buscar todos os códigos de solicitação da proposta
-      const collections = await storage.getInterCollectionsByProposalId(propostaId);
+      const _collections = await storage.getInterCollectionsByProposalId(propostaId);
 
       if (!collections || collections.length == 0) {
         console.log(`[BOLETO STORAGE] ⚠️ Nenhum boleto encontrado para proposta ${propostaId}`);
         console.timeEnd(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);
-        return _result;
+        return result; }
       }
 
-      _result.totalBoletos = collections.length;
-      const totalLotes = Math.ceil(collections.length / BATCH_SIZE);
+      result.totalBoletos = collections.length;
+      const _totalLotes = Math.ceil(collections.length / BATCH_SIZE);
       console.log(
         `[BOLETO STORAGE] 📊 Encontrados ${collections.length} boletos para processar em ${totalLotes} lotes`
       );
 
       // 2. Processar boletos em lotes paralelos
       for (let _i = 0; i < collections.length; i += BATCH_SIZE) {
-        const loteAtual = Math.floor(i / BATCH_SIZE) + 1;
-        const batch = collections.slice(i, i + BATCH_SIZE);
+        const _loteAtual = Math.floor(i / BATCH_SIZE) + 1;
+        const _batch = collections.slice(i, i + BATCH_SIZE);
 
         console.log(
           `[BOLETO STORAGE] 🔄 Processando lote ${loteAtual}/${totalLotes} (${batch.length} boletos em paralelo)`
@@ -99,7 +99,7 @@ class BoletoStorageService {
         console.time(`[BOLETO STORAGE] ⏱️ Lote ${loteAtual}`);
 
         // Processar lote em paralelo usando Promise.all
-        const resultadosLote = await Promise.all(
+        const _resultadosLote = await Promise.all(
           batch.map(async (collection) => {
             const { codigoSolicitacao, numeroParcela } = collection;
 
@@ -124,8 +124,7 @@ class BoletoStorageService {
                     maxDelayMs: 5000,
                   }
                 );
-              }
-catch (downloadError) {
+              } catch (downloadError) {
                 console.error(
                   `[SYNC-FAILURE] Falha ao baixar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${downloadError.message}`
                 );
@@ -144,14 +143,14 @@ catch (downloadError) {
               );
 
               // 2.2. Definir caminho no Storage
-              const caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
+              const _caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
 
               // 2.3. Upload para Supabase Storage - COM BLINDAGEM
               console.log(`[BOLETO STORAGE] 📤 [Parcela ${numeroParcela}] Fazendo upload...`);
 
               let uploadData, uploadError;
               try {
-                const uploadResult = await this.supabase.storage
+                const _uploadResult = await this._supabase.storage
                   .from('documents')
                   .upload(caminhoArquivo, pdfBuffer, {
                     contentType: 'application/pdf',
@@ -159,8 +158,7 @@ catch (downloadError) {
                   });
                 uploadData = uploadResult.data;
                 uploadError = uploadResult.error;
-              }
-catch (storageError) {
+              } catch (storageError) {
                 console.error(
                   `[SYNC-FAILURE] Falha ao salvar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${storageError.message}`
                 );
@@ -182,12 +180,11 @@ catch (storageError) {
 
               return {
                 success: true,
-  codigoSolicitacao,
-  caminhoArquivo,
-  numeroParcela,
+  _codigoSolicitacao,
+  _caminhoArquivo,
+  _numeroParcela,
               };
-            }
-catch (error) {
+            } catch (error) {
               console.error(
                 `[BOLETO STORAGE] ❌ [Parcela ${numeroParcela}] Erro ao processar:`,
                 error.message
@@ -195,9 +192,9 @@ catch (error) {
 
               return {
                 success: false,
-  codigoSolicitacao,
+  _codigoSolicitacao,
                 erro: error.message || 'Erro desconhecido',
-  numeroParcela,
+  _numeroParcela,
               };
             }
           })
@@ -208,12 +205,11 @@ catch (error) {
         // Processar resultados do lote
         resultadosLote.forEach((resultado) => {
           if (resultado.success) {
-            _result.boletosProcessados++;
-            _result.caminhosPdf.push(resultado.caminhoArquivo!);
-          }
-else {
-            _result.boletosComErro++;
-            _result.erros.push({
+            result.boletosProcessados++;
+            result.caminhosPdf.push(resultado.caminhoArquivo!);
+          } else {
+            result.boletosComErro++;
+            result.erros.push({
               codigoSolicitacao: resultado.codigoSolicitacao,
               erro: resultado.erro!,
             });
@@ -234,12 +230,12 @@ else {
       }
 
       // 3. Determinar sucesso geral
-      _result.success = _result.boletosProcessados > 0;
+      result.success = result.boletosProcessados > 0;
 
       // STATUS V2.0: Se todos os boletos foram processados com sucesso, atualizar status
-      if (_result.success && _result.boletosProcessados == _result.totalBoletos) {
+      if (result.success && result.boletosProcessados == result.totalBoletos) {
         // Buscar status atual da proposta
-        const proposta = await storage.getPropostaById(propostaId);
+        const _proposta = await storage.getPropostaById(propostaId);
 
         // Atualizar status para BOLETOS_EMITIDOS
         await storage.updateProposta(propostaId, {
@@ -255,8 +251,8 @@ else {
           metadata: {
             service: 'boletoStorageService',
             action: 'sincronizarBoletosDaProposta',
-            totalBoletos: _result.totalBoletos,
-            boletosProcessados: _result.boletosProcessados,
+            totalBoletos: result.totalBoletos,
+            boletosProcessados: result.boletosProcessados,
             timestamp: new Date().toISOString(),
           },
         });
@@ -268,29 +264,28 @@ else {
       console.timeEnd(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);
 
       console.log(`[BOLETO STORAGE] 📊 SINCRONIZAÇÃO CONCLUÍDA:`);
-      console.log(`[BOLETO STORAGE]   - Total: ${_result.totalBoletos} boletos`);
-      console.log(`[BOLETO STORAGE]   - Processados com sucesso: ${_result.boletosProcessados}`);
-      console.log(`[BOLETO STORAGE]   - Com erro: ${_result.boletosComErro}`);
+      console.log(`[BOLETO STORAGE]   - Total: ${result.totalBoletos} boletos`);
+      console.log(`[BOLETO STORAGE]   - Processados com sucesso: ${result.boletosProcessados}`);
+      console.log(`[BOLETO STORAGE]   - Com erro: ${result.boletosComErro}`);
       console.log(
-        `[BOLETO STORAGE]   - Taxa de sucesso: ${((_result.boletosProcessados / _result.totalBoletos) * 100).toFixed(1)}%`
+        `[BOLETO STORAGE]   - Taxa de sucesso: ${((result.boletosProcessados / result.totalBoletos) * 100).toFixed(1)}%`
       );
 
-      if (_result.erros.length > 0) {
-        console.log(`[BOLETO STORAGE] ⚠️ Erros encontrados:`, _result.erros);
+      if (result.erros.length > 0) {
+        console.log(`[BOLETO STORAGE] ⚠️ Erros encontrados:`, result.erros);
       }
 
-      return _result;
-    }
-catch (error) {
+      return result; }
+    } catch (error) {
       console.error(`[BOLETO STORAGE] ❌ Erro crítico na sincronização:`, error);
 
-      _result.success = false;
-      _result.erros.push({
+      result.success = false;
+      result.erros.push({
         codigoSolicitacao: 'GERAL',
         erro: error.message || 'Erro crítico desconhecido',
       });
 
-      return _result;
+      return result; }
     }
   }
 
@@ -299,9 +294,9 @@ catch (error) {
    */
   async verificarBoletoExiste(propostaId: string, codigoSolicitacao: string): Promise<boolean> {
     try {
-      const caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
+      const _caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
 
-      const { data, error } = await this.supabase.storage
+      const { data, error } = await this._supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 1,
@@ -310,14 +305,13 @@ catch (error) {
 
       if (error) {
         console.error(`[BOLETO STORAGE] Erro ao verificar existência:`, error);
-        return false;
+        return false; }
       }
 
-      return data && data.length > 0;
-    }
-catch (error) {
+      return data && data.length > 0; }
+    } catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao verificar boleto:`, error);
-      return false;
+      return false; }
     }
   }
 
@@ -326,7 +320,7 @@ catch (error) {
    */
   async listarBoletosSalvos(propostaId: string): Promise<string[]> {
     try {
-      const { data, error } = await this.supabase.storage
+      const { data, error } = await this._supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 100,
@@ -334,14 +328,13 @@ catch (error) {
 
       if (error) {
         console.error(`[BOLETO STORAGE] Erro ao listar boletos:`, error);
-        return [];
+        return []; }
       }
 
-      return data?.map((file) => file.name) || [];
-    }
-catch (error) {
+      return data?.map((file) => file.name) || []; }
+    } catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao listar:`, error);
-      return [];
+      return []; }
     }
   }
 
@@ -350,29 +343,28 @@ catch (error) {
    */
   async limparBoletosSalvos(propostaId: string): Promise<boolean> {
     try {
-      const boletos = await this.listarBoletosSalvos(propostaId);
+      const _boletos = await this.listarBoletosSalvos(propostaId);
 
       if (boletos.length == 0) {
-        return true;
+        return true; }
       }
 
-      const caminhos = boletos.map(
+      const _caminhos = boletos.map(
         (nome) => `propostas/${propostaId}/boletos/emitidos_pendentes/${nome}`
       );
 
-      const { data, error } = await this.supabase.storage.from('documents').remove(caminhos);
+      const { data, error } = await this._supabase.storage.from('documents').remove(caminhos);
 
       if (error) {
         console.error(`[BOLETO STORAGE] Erro ao limpar boletos:`, error);
-        return false;
+        return false; }
       }
 
       console.log(`[BOLETO STORAGE] ${caminhos.length} boletos removidos`);
-      return true;
-    }
-catch (error) {
+      return true; }
+    } catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao limpar:`, error);
-      return false;
+      return false; }
     }
   }
 
@@ -392,7 +384,7 @@ catch (error) {
         `[CARNE DEBUG] Listando ficheiros em propostas/${propostaId}/boletos/emitidos_pendentes/`
       );
 
-      const { data: files, error: listError } = await this.supabase.storage
+      const { data: files, error: listError } = await this._supabase.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
           limit: 100,
@@ -418,14 +410,14 @@ catch (error) {
       const errors: string[] = [];
 
       for (let _i = 0; i < files.length; i++) {
-        const file = files[i];
-        const filePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${file.name}`;
+        const _file = files[i];
+        const _filePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${file.name}`;
 
         try {
           console.log(`[CARNE DEBUG] Baixando ficheiro: ${file.name}`);
 
           // Download do ficheiro
-          const { data: fileData, error: downloadError } = await this.supabase.storage
+          const { data: fileData, error: downloadError } = await this._supabase.storage
             .from('documents')
             .download(filePath);
 
@@ -440,11 +432,11 @@ catch (error) {
           }
 
           // Converter Blob para Buffer
-          const arrayBuffer = await fileData.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
+          const _arrayBuffer = await fileData.arrayBuffer();
+          const _buffer = Buffer.from(arrayBuffer);
 
           // Validar PDF
-          const pdfMagic = buffer.slice(0, 5).toString('ascii');
+          const _pdfMagic = buffer.slice(0, 5).toString('ascii');
           if (!pdfMagic.startsWith('%PDF')) {
             console.log(
               `[CARNE DEBUG] ⚠️ Ficheiro ${file.name} não é PDF válido. Magic bytes: ${pdfMagic}`
@@ -456,8 +448,7 @@ catch (error) {
           console.log(
             `[CARNE DEBUG] ✅ Buffer de ${file.name} adicionado (${buffer.length} bytes)`
           );
-        }
-catch (error) {
+        } catch (error) {
           console.error(`[CARNE DEBUG] ❌ Erro ao processar ${file.name}:`, error.message);
           errors.push(`${file.name}: ${error.message}`);
         }
@@ -473,27 +464,26 @@ catch (error) {
       );
 
       // 3. LÓGICA DE FUSÃO COM PDF-LIB
-      const mergedPdf = await PDFDocument.create();
+      const _mergedPdf = await PDFDocument.create();
       let _totalPages = 0;
 
       for (let _i = 0; i < pdfBuffers.length; i++) {
         try {
           console.log(`[CARNE DEBUG] Processando PDF ${i + 1} de ${pdfBuffers.length}...`);
 
-          const pdfDoc = await PDFDocument.load(pdfBuffers[i], {
+          const _pdfDoc = await PDFDocument.load(pdfBuffers[i], {
             ignoreEncryption: true,
             throwOnInvalidObject: false,
           });
 
-          const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+          const _pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
           pages.forEach((page) => {
             mergedPdf.addPage(page);
             totalPages++;
           });
 
           console.log(`[CARNE DEBUG] PDF ${i + 1} adicionado com ${pages.length} páginas`);
-        }
-catch (error) {
+        } catch (error) {
           console.error(`[CARNE DEBUG] ⚠️ Erro ao processar PDF ${i + 1}:`, error.message);
           // Continuar mesmo se um PDF falhar
         }
@@ -505,24 +495,24 @@ catch (error) {
       }
 
       // Gerar buffer do PDF final
-      const mergedPdfBytes = await mergedPdf.save();
-      const mergedBuffer = Buffer.from(mergedPdfBytes);
+      const _mergedPdfBytes = await mergedPdf.save();
+      const _mergedBuffer = Buffer.from(mergedPdfBytes);
 
       console.log(
         `[CARNE DEBUG] Fusão concluída com sucesso. Tamanho do carnê: ${mergedBuffer.length} bytes. Iniciando upload para o Storage...`
       );
 
       // 4. UPLOAD DO CARNÊ
-      const timestamp = new Date()
+      const _timestamp = new Date()
         .toISOString()
         .replace(/[:.]/g, '-')
         .replace('T', '_')
         .split('Z')[0];
-      const carnePath = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
+      const _carnePath = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
 
       console.log(`[CARNE DEBUG] Fazendo upload para: ${carnePath}`);
 
-      const { data: uploadData, error: uploadError } = await this.supabase.storage
+      const { data: uploadData, error: uploadError } = await this._supabase.storage
         .from('documents')
         .upload(carnePath, mergedBuffer, {
           contentType: 'application/pdf',
@@ -537,7 +527,7 @@ catch (error) {
       console.log(`[CARNE DEBUG] Upload do carnê concluído. Gerando URL assinada...`);
 
       // 5. GERAR URL ASSINADA
-      const { data: urlData, error: urlError } = await this.supabase.storage
+      const { data: urlData, error: urlError } = await this._supabase.storage
         .from('documents')
         .createSignedUrl(carnePath, 86400); // URL válida por 24 horas
 
@@ -552,8 +542,7 @@ catch (error) {
         success: true,
         url: urlData.signedUrl,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error(`[CARNE STORAGE] ❌ Erro crítico na geração do carnê:`, error);
 
       return {
@@ -567,9 +556,9 @@ catch (error) {
    * Delay helper para evitar rate limiting
    */
   private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms)); }
   }
 }
 
 // Exportar instância singleton
-export const boletoStorageService = new BoletoStorageService();
+export const _boletoStorageService = new BoletoStorageService();

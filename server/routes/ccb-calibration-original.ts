@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { ccbCalibrationService } from '../services/genericService';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb-calibration/calibrate
@@ -15,10 +15,9 @@ const router = Router();
  */
 router.post('/calibrate', async (req: Request, res: Response) => {
   try {
-    const result = await ccbCalibrationService.executeOperation('calibrate', req.body);
+    const _result = await ccbCalibrationService.executeOperation('calibrate', req.body);
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CCB_CALIBRATION] Error:', error);
     res.status(500).json({
       success: false,
@@ -33,10 +32,9 @@ catch (error) {
  */
 router.get('/test', async (req: Request, res: Response) => {
   try {
-    const result = await ccbCalibrationService.testConnection();
+    const _result = await ccbCalibrationService.testConnection();
     res.json(_result);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CCB_CALIBRATION] Test failed:', error);
     res.status(500).json({
       success: false,
@@ -51,10 +49,9 @@ catch (error) {
  */
 router.get('/status', async (req: Request, res: Response) => {
   try {
-    const status = await ccbCalibrationService.getStatus();
+    const _status = await ccbCalibrationService.getStatus();
     res.json(status);
-  }
-catch (error) {
+  } catch (error) {
     console.error('[CCB_CALIBRATION] Status check failed:', error);
     res.status(500).json({
       success: false,

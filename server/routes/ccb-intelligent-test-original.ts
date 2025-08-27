@@ -9,7 +9,7 @@ import { db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const router = Router();
+const _router = Router();
 
 /**
  * POST /api/ccb-test-v2/generate/:propostaId
@@ -44,8 +44,7 @@ router.post('/generate/:propostaId', jwtAuthMiddleware, async (req, res) => {
         dadosPagamentoNomeTitular: 'João da Silva Teste',
         dadosPagamentoCpfTitular: '123.456.789-00',
       };
-    }
-else {
+    } else {
       // Buscar dados reais
       const [proposta] = await db
         .select()
@@ -64,47 +63,46 @@ else {
     }
 
     // Gerar CCB com sistema inteligente
-    const service = new CCBGenerationServiceV2();
-    const result = await service.generateCCB(propostaData);
+    const _service = new CCBGenerationServiceV2();
+    const _result = await service.generateCCB(propostaData);
 
-    if (!_result.success || !_result.pdfBytes) {
+    if (!result.success || !result.pdfBytes) {
       return res.status(500).json({
         success: false,
         error: 'Falha na geração do CCB',
-        logs: _result.logs,
+        logs: result.logs,
       });
     }
 
     // Salvar no storage
-    const filePath = await service.saveCCBToStorage(_result.pdfBytes, propostaId);
+    const _filePath = await service.saveCCBToStorage(result.pdfBytes, propostaId);
 
     if (!filePath) {
       return res.status(500).json({
         success: false,
         error: 'Falha ao salvar CCB no storage',
-        logs: _result.logs,
+        logs: result.logs,
       });
     }
 
     // Gerar URL temporária
-    const publicUrl = await service.getCCBPublicUrl(filePath);
+    const _publicUrl = await service.getCCBPublicUrl(filePath);
 
     console.log(`✅ Teste CCB V2: Sucesso para proposta ${propostaId}`);
 
     res.json({
       success: true,
-      filePath,
-      publicUrl,
-      logs: _result.logs,
+      _filePath,
+      _publicUrl,
+      logs: result.logs,
       stats: {
-        totalLogs: _result.logs?.length || 0,
-        successLogs: _result.logs?.filter((l) => l.includes('✓')).length || 0,
-        warningLogs: _result.logs?.filter((l) => l.includes('⚠')).length || 0,
-        errorLogs: _result.logs?.filter((l) => l.includes('✗') || l.includes('❌')).length || 0,
+        totalLogs: result.logs?.length || 0,
+        successLogs: result.logs?.filter((l) => l.includes('✓')).length || 0,
+        warningLogs: result.logs?.filter((l) => l.includes('⚠')).length || 0,
+        errorLogs: result.logs?.filter((l) => l.includes('✗') || l.includes('❌')).length || 0,
       },
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ Erro no teste CCB V2:', error);
     res.status(500).json({
       success: false,
@@ -121,7 +119,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
   try {
     const { CCB_FIELD_MAPPING_V2 } = await import('../services/ccbFieldMappingV2');
 
-    const validation = {
+    const _validation = {
       totalFields: Object.keys(CCB_FIELD_MAPPING_V2).length,
       pages: {} as unknown,
       fields: [] as unknown[],
@@ -129,7 +127,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
 
     // Agrupar campos por página
     for (const [fieldName, coord] of Object.entries(CCB_FIELD_MAPPING_V2)) {
-      const pageNum = coord.page;
+      const _pageNum = coord.page;
 
       if (!validation.pages[pageNum]) {
         validation.pages[pageNum] = {
@@ -153,7 +151,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      validation,
+      _validation,
       summary: {
         totalFields: validation.totalFields,
         totalPages: Object.keys(validation.pages).length,
@@ -163,8 +161,7 @@ router.get('/validate-coordinates', jwtAuthMiddleware, async (req, res) => {
         })),
       },
     });
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro ao validar coordenadas',
@@ -187,11 +184,11 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    const { CCB_FIELD_MAPPINGV2, CoordinateAdjuster } = await import(
+    const { CCB_FIELD_MAPPING_V2, CoordinateAdjuster } = await import(
       '../services/ccbFieldMappingV2'
     );
 
-    const fieldCoord = CCB_FIELD_MAPPING_V2[fieldName];
+    const _fieldCoord = CCB_FIELD_MAPPING_V2[fieldName];
 
     if (!fieldCoord) {
       return res.status(404).json({
@@ -201,11 +198,11 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
     }
 
     // Simular ajuste inteligente
-    const adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, fieldCoord);
+    const _adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, fieldCoord);
 
     res.json({
       success: true,
-      fieldName,
+      _fieldName,
       original: {
         x: fieldCoord.x,
         y: fieldCoord.y,
@@ -223,12 +220,11 @@ router.post('/test-field-detection', jwtAuthMiddleware, async (req, res) => {
         deltaY: adjustedCoord.y - fieldCoord.y,
         sizeChanged: adjustedCoord.size !== fieldCoord.size,
       },
-      testValue,
+      _testValue,
       label: fieldCoord.label,
       maxWidth: fieldCoord.maxWidth,
     });
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro ao testar detecção',
@@ -242,7 +238,7 @@ catch (error) {
  */
 router.get('/comparison', jwtAuthMiddleware, async (req, res) => {
   try {
-    const comparison = {
+    const _comparison = {
       v1: {
         description: 'Sistema original com coordenadas fixas',
         pros: ['Simples e direto', 'Rápido para casos padrão'],
@@ -269,10 +265,9 @@ router.get('/comparison', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      comparison,
+      _comparison,
     });
-  }
-catch (error) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro na comparação',

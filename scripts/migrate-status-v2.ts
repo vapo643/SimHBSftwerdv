@@ -19,7 +19,7 @@ import { getBrasiliaTimestamp } from '../server/lib/timezone';
 
 async function migrateStatusV2() {
   console.log('🚀 [MIGRAÇÃO V2.0] Iniciando migração de status...');
-  console.log('📅 Timestamp:', _getBrasiliaTimestamp());
+  console.log('📅 Timestamp:', getBrasiliaTimestamp());
 
   try {
     // 1. Buscar estatísticas atuais
@@ -28,9 +28,9 @@ async function migrateStatusV2() {
     const stats = await db.execute(sql`
       SELECT 
         COUNT(*) as total,
-        COUNT(CASE WHEN ccb_gerado = true THEN 1 END) as comccb,
+        COUNT(CASE WHEN ccb_gerado = true THEN 1 END) as com_ccb,
         COUNT(CASE WHEN assinatura_eletronica_concluida = true THEN 1 END) as assinadas,
-        COUNT(CASE WHEN clicksign_document_key IS NOT NULL THEN 1 END) as noclicksign,
+        COUNT(CASE WHEN clicksign_document_key IS NOT NULL THEN 1 END) as no_clicksign,
         COUNT(DISTINCT ic.proposta_id) as com_boletos
       FROM propostas p
       LEFT JOIN inter_collections ic ON p.id = ic.proposta_id
@@ -112,10 +112,10 @@ async function migrateStatusV2() {
     const auditResult = await db.execute(sql`
       INSERT INTO status_transitions (
         id,
-        propostaid,
-        fromstatus,
-        tostatus,
-        triggeredby,
+        proposta_id,
+        from_status,
+        to_status,
+        triggered_by,
         metadata,
         created_at
       )
@@ -129,8 +129,8 @@ async function migrateStatusV2() {
           'migration_script', 'migrate-status-v2.ts',
           'migration_date', NOW(),
           'previous_flags', jsonb_build_object(
-            'ccb_gerado', p.ccbgerado,
-            'assinatura_eletronica_concluida', p.assinatura_eletronicaconcluida,
+            'ccb_gerado', p.ccb_gerado,
+            'assinatura_eletronica_concluida', p.assinatura_eletronica_concluida,
             'biometria_concluida', p.biometria_concluida
           )
         ),
@@ -191,15 +191,13 @@ async function migrateStatusV2() {
       console.warn(
         `⚠️ AVISO: ${integrityRow.inconsistentes} propostas com possível inconsistência detectada`
       );
-    }
-else {
+    } else {
       console.log('✅ Todas as propostas estão consistentes!');
     }
 
     console.log('\n✅ [MIGRAÇÃO V2.0] Migração concluída com sucesso!');
-    console.log('📅 Finalizado em:', _getBrasiliaTimestamp());
-  }
-catch (error) {
+    console.log('📅 Finalizado em:', getBrasiliaTimestamp());
+  } catch (error) {
     console.error('❌ [MIGRAÇÃO V2.0] Erro durante migração:', error);
     process.exit(1);
   }
@@ -211,7 +209,7 @@ migrateStatusV2()
     console.log('\n🎉 Script finalizado com sucesso!');
     process.exit(0);
   })
-  .catch ((error) => {
+  .catch((error) => {
     console.error('\n❌ Erro fatal:', error);
     process.exit(1);
   });

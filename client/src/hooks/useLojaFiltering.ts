@@ -39,7 +39,7 @@ export function useLojaFiltering(selectedParceiroId?): UseLojaFilteringResult {
     queryFn: async () => {
       const _response = await fetchWithToken('/api/admin/system/metadata');
       if (!response.ok) throw new Error('Failed to fetch metadata');
-      return response.json();
+      return response.json(); }
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -62,7 +62,7 @@ export function useLojaFiltering(selectedParceiroId?): UseLojaFilteringResult {
     queryFn: async () => {
       const _response = await fetchWithToken('/api/lojas');
       if (!response.ok) throw new Error('Failed to fetch lojas');
-      return response.json();
+      return response.json(); }
     },
     enabled: filteringMode == 'client-side',
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
@@ -78,7 +78,7 @@ export function useLojaFiltering(selectedParceiroId?): UseLojaFilteringResult {
     queryFn: async () => {
       const _response = await fetchWithToken(`/api/admin/parceiros/${parceiroId}/lojas`);
       if (!response.ok) throw new Error('Failed to fetch parceiro lojas');
-      return response.json();
+      return response.json(); }
     },
     enabled: filteringMode == 'server-side' && !!parceiroId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -87,29 +87,27 @@ export function useLojaFiltering(selectedParceiroId?): UseLojaFilteringResult {
   // Filter lojas based on the selected strategy
   const _filteredLojas = useMemo(() => {
     if (filteringMode == 'client-side') {
-      if (!allLojas) return [];
+      if (!allLojas) return []; }
 
       // If no parceiro is selected, return all lojas
-      if (!parceiroId) return allLojas;
+      if (!parceiroId) return allLojas; }
 
       // Filter lojas by parceiro ID in memory
-      return allLojas.filter((loja) => loja.parceiroId == parceiroId);
-    }
-else {
+      return allLojas.filter((loja) => loja.parceiroId == parceiroId); }
+    } else {
       // Server-side mode: return data from API or empty array
-      return parceiroLojas || [];
+      return parceiroLojas || []; }
     }
   }, [filteringMode, allLojas, parceiroLojas, parceiroId]);
 
   // Determine loading state based on current mode
   const _isLoading = useMemo(() => {
-    if (metadataLoading) return true;
+    if (metadataLoading) return true; }
 
     if (filteringMode == 'client-side') {
-      return allLojasLoading;
-    }
-else {
-      return parceiroId ? parceiroLojasLoading : false;
+      return allLojasLoading; }
+    } else {
+      return parceiroId ? parceiroLojasLoading : false; }
     }
   }, [metadataLoading, filteringMode, allLojasLoading, parceiroLojasLoading, parceiroId]);
 
@@ -117,9 +115,9 @@ else {
   const _error = metadataError || allLojasError || parceiroLojasError || null;
 
   return {
-  filteredLojas,
-  isLoading,
-  error,
-  filteringMode,
+  _filteredLojas,
+  _isLoading,
+  _error,
+  _filteringMode,
   };
 }

@@ -11,10 +11,10 @@ import { db } from '../lib/supabase';
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 
-const router = express.Router();
+const _router = express.Router();
 
 // Schema de validação
-const generateCCBSchema = z.object({
+const _generateCCBSchema = z.object({
   proposalId: z.string().uuid(),
 });
 
@@ -26,38 +26,38 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
-    const result = await db.execute(sql`
+    const _result = await db.execute(sql`
       SELECT 
-  id,
-  status,
-        ccbgerado,
-        caminhoccb,
-        ccb_geradoem,
-        assinatura_eletronicaenviada,
-        assinatura_eletronicaconcluida,
-        clicksign_documentid,
-        clicksign_envelopeid,
-        boletosgerados,
-        quantidade_boletosgerados,
+  _id,
+  _status,
+        ccb_gerado,
+        caminho_ccb,
+        ccb_gerado_em,
+        assinatura_eletronica_enviada,
+        assinatura_eletronica_concluida,
+        clicksign_document_id,
+        clicksign_envelope_id,
+        boletos_gerados,
+        quantidade_boletos_gerados,
         todos_boletos_enviados
       FROM propostas
       WHERE id = ${proposalId}
     `);
 
-    if (!result || _result.length == 0) {
+    if (!result || result.length == 0) {
       return res.status(404).json({
         error: 'Proposta não encontrada',
       });
     }
 
-    const proposal = result[0];
+    const _proposal = result[0];
 
     // Buscar timeline de eventos
-    const logsResult = await db.execute(sql`
+    const _logsResult = await db.execute(sql`
       SELECT 
-  id,
-  acao,
-  detalhes,
+  _id,
+  _acao,
+  _detalhes,
         created_at
       FROM proposta_logs
       WHERE proposta_id = ${proposalId}
@@ -68,11 +68,10 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      proposal,
+      _proposal,
       timeline: logsResult || [],
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao buscar status:', error);
     res.status(500).json({
       error: 'Erro ao buscar status da formalização',
@@ -86,7 +85,7 @@ catch (error) {
  */
 router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
   try {
-    const validation = generateCCBSchema.safeParse(req.body);
+    const _validation = generateCCBSchema.safeParse(req.body);
 
     if (!validation.success) {
       return res.status(400).json({
@@ -98,7 +97,7 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
     const { proposalId } = validation.data;
 
     // Verificar se CCB já foi gerado
-    const alreadyGenerated = await ccbGenerationService.isCCBGenerated(proposalId);
+    const _alreadyGenerated = await ccbGenerationService.isCCBGenerated(proposalId);
     if (alreadyGenerated) {
       return res.status(400).json({
         error: 'CCB já foi gerado para esta proposta',
@@ -106,25 +105,24 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
     }
 
     // Gerar CCB
-    const result = await ccbGenerationService.generateCCB(proposalId);
+    const _result = await ccbGenerationService.generateCCB(proposalId);
 
-    if (!_result.success) {
+    if (!result.success) {
       return res.status(500).json({
-        error: _result.error || 'Erro ao gerar CCB',
+        error: result.error || 'Erro ao gerar CCB',
       });
     }
 
     // Obter URL pública para visualização
-    const publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
+    const _publicUrl = await ccbGenerationService.getPublicUrl(result.pdfPath!);
 
     res.json({
       success: true,
       message: 'CCB gerado com sucesso',
-      pdfPath: _result.pdfPath,
-      publicUrl,
+      pdfPath: result.pdfPath,
+      _publicUrl,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao gerar CCB:', error);
     res.status(500).json({
       error: 'Erro interno ao gerar CCB',
@@ -140,22 +138,22 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
-    const result = await db.execute(sql`
+    const _result = await db.execute(sql`
       SELECT 
-        ccbgerado,
-        caminhoccb,
+        ccb_gerado,
+        caminho_ccb,
         ccb_gerado_em
       FROM propostas
       WHERE id = ${proposalId}
     `);
 
-    if (!result || _result.length == 0) {
+    if (!result || result.length == 0) {
       return res.status(404).json({
         error: 'Proposta não encontrada',
       });
     }
 
-    const proposal = result[0];
+    const _proposal = result[0];
 
     if (!proposal.ccb_gerado || !proposal.caminho_ccb) {
       return res.status(200).json({
@@ -167,7 +165,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
 
     // ✅ CORREÇÃO: Usar admin client para gerar URLs assinadas (conforme error_docs/storage_errors.md)
     const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-    const adminSupabase = createServerSupabaseAdminClient();
+    const _adminSupabase = createServerSupabaseAdminClient();
 
     const { data: signedUrl, error } = await adminSupabase.storage
       .from('documents')
@@ -180,7 +178,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       if ((error as unknown)?.status == 400 || error.message?.includes('Object not found')) {
         console.log('🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...');
         try {
-          const newCcb = await ccbGenerationService.generateCCB(proposalId);
+          const _newCcb = await ccbGenerationService.generateCCB(proposalId);
           if (newCcb.success) {
             return res.json({
               success: true,
@@ -190,8 +188,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
               regenerated: true,
             });
           }
-        }
-catch (regenError) {
+        } catch (regenError) {
           console.error('❌ [FORMALIZACAO] Erro na regeneração:', regenError);
         }
       }
@@ -204,12 +201,11 @@ catch (regenError) {
 
     res.json({
       success: true,
-      ccbPath: proposal.caminhoccb,
+      ccbPath: proposal.caminho_ccb,
       signedUrl: signedUrl?.signedUrl,
-      generatedAt: proposal.ccb_geradoem,
+      generatedAt: proposal.ccb_gerado_em,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao buscar CCB:', error);
     res.status(500).json({
       error: 'Erro ao buscar CCB',
@@ -236,25 +232,24 @@ router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) =
     `);
 
     // Gerar novo CCB
-    const result = await ccbGenerationService.generateCCB(proposalId);
+    const _result = await ccbGenerationService.generateCCB(proposalId);
 
-    if (!_result.success) {
+    if (!result.success) {
       return res.status(500).json({
-        error: _result.error || 'Erro ao regenerar CCB',
+        error: result.error || 'Erro ao regenerar CCB',
       });
     }
 
     // Obter URL pública
-    const publicUrl = await ccbGenerationService.getPublicUrl(_result.pdfPath!);
+    const _publicUrl = await ccbGenerationService.getPublicUrl(result.pdfPath!);
 
     res.json({
       success: true,
       message: 'CCB regenerado com sucesso',
-      pdfPath: _result.pdfPath,
-      publicUrl,
+      pdfPath: result.pdfPath,
+      _publicUrl,
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao regenerar CCB:', error);
     res.status(500).json({
       error: 'Erro ao regenerar CCB',
@@ -270,12 +265,12 @@ router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
-    const result = await db.execute(sql`
+    const _result = await db.execute(sql`
       SELECT 
-  id,
-  acao,
-  detalhes,
-        usuarioid,
+  _id,
+  _acao,
+  _detalhes,
+        usuario_id,
         created_at
       FROM proposta_logs
       WHERE proposta_id = ${proposalId}
@@ -287,8 +282,7 @@ router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
       success: true,
       timeline: result || [],
     });
-  }
-catch (error) {
+  } catch (error) {
     console.error('❌ [FORMALIZACAO] Erro ao buscar timeline:', error);
     res.status(500).json({
       error: 'Erro ao buscar timeline',
@@ -304,14 +298,14 @@ catch (error) {
  */
 router.get(
   '/:proposalId/ccb-assinada',
-  jwtAuthMiddleware,
+  _jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { proposalId } = req.params;
 
       // PAM V1.0 CORREÇÃO: Todos os roles autorizados podem VER CCB assinada
       // Roles permitidos: ATENDENTE, FINANCEIRO, GERENTE, DIRETOR, ADMINISTRADOR
-      const allowedRoles = ['ATENDENTE', 'FINANCEIRO', 'GERENTE', 'DIRETOR', 'ADMINISTRADOR'];
+      const _allowedRoles = ['ATENDENTE', 'FINANCEIRO', 'GERENTE', 'DIRETOR', 'ADMINISTRADOR'];
 
       if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
         return res.status(403).json({
@@ -320,22 +314,22 @@ router.get(
         });
       }
 
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
       SELECT 
-        caminho_ccbassinado,
-        dataassinatura,
+        caminho_ccb_assinado,
+        data_assinatura,
         assinatura_eletronica_concluida
       FROM propostas
       WHERE id = ${proposalId}
     `);
 
-      if (!result || _result.length == 0) {
+      if (!result || result.length == 0) {
         return res.status(404).json({
           error: 'Proposta não encontrada',
         });
       }
 
-      const proposal = result[0];
+      const _proposal = result[0];
 
       if (!proposal.caminho_ccb_assinado) {
         return res.status(200).json({
@@ -347,7 +341,7 @@ router.get(
 
       // Usar admin client para gerar URL assinada
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const adminSupabase = createServerSupabaseAdminClient();
+      const _adminSupabase = createServerSupabaseAdminClient();
 
       const { data: signedUrl, error } = await adminSupabase.storage
         .from('documents')
@@ -367,13 +361,12 @@ router.get(
 
       res.json({
         success: true,
-        ccbAssinadoPath: proposal.caminho_ccbassinado,
+        ccbAssinadoPath: proposal.caminho_ccb_assinado,
         publicUrl: signedUrl?.signedUrl,
-        dataAssinatura: proposal.dataassinatura,
+        dataAssinatura: proposal.data_assinatura,
         status: 'assinado',
       });
-    }
-catch (error) {
+    } catch (error) {
       console.error('❌ [FORMALIZACAO] Erro ao buscar CCB assinada:', error);
       res.status(500).json({
         error: 'Erro interno ao buscar CCB assinada',

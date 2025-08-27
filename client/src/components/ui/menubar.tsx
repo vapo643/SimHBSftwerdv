@@ -7,23 +7,23 @@ import { Check, ChevronRight, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function MenubarMenu({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
-  return <MenubarPrimitive.Menu {...props} />;
+  return <MenubarPrimitive.Menu {...props} />; }
 }
 
 function MenubarGroup({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Group>) {
-  return <MenubarPrimitive.Group {...props} />;
+  return <MenubarPrimitive.Group {...props} />; }
 }
 
 function MenubarPortal({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
-  return <MenubarPrimitive.Portal {...props} />;
+  return <MenubarPrimitive.Portal {...props} />; }
 }
 
 function MenubarRadioGroup({ ...props }: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
-  return <MenubarPrimitive.RadioGroup {...props} />;
+  return <MenubarPrimitive.RadioGroup {...props} />; }
 }
 
 function MenubarSub({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
-  return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />;
+  return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />; }
 }
 
 const _Menubar = React.forwardRef<

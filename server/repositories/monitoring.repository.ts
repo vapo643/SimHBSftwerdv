@@ -4,7 +4,7 @@
  * PAM V1.0 - Repository pattern implementation
  */
 
-import { db } from '../lib/supabase.js';
+import { db } from '../lib/_supabase.js';
 import { sql } from 'drizzle-orm';
 
 export class MonitoringRepository {
@@ -13,16 +13,15 @@ export class MonitoringRepository {
    */
   async getDatabaseStats(): Promise<unknown> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
-          pg_database_size(current_database()) as databasesize,
-          (SELECT count(*) FROM pg_stat_activity) as activeconnections,
-          (SELECT count(*) FROM pg_stat_user_tables) as tablecount,
+          pg_database_size(current_database()) as database_size,
+          (SELECT count(*) FROM pg_stat_activity) as active_connections,
+          (SELECT count(*) FROM pg_stat_user_tables) as table_count,
           (SELECT sum(n_live_tup) FROM pg_stat_user_tables) as total_rows
       `);
-      return _result[0];
-    }
-catch (error) {
+      return result[0]; }
+    } catch (error) {
       console.error('[MONITORING_REPO] Error fetching database stats:', error);
       throw error;
     }
@@ -33,21 +32,20 @@ catch (error) {
    */
   async getTableStats(): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
-  schemaname,
-  tablename,
-          n_live_tup as rowcount,
-          n_dead_tup as deadrows,
-          lastvacuum,
-          lastautovacuum,
+  _schemaname,
+  _tablename,
+          n_live_tup as row_count,
+          n_dead_tup as dead_rows,
+          last_vacuum,
+          last_autovacuum,
           pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as total_size
         FROM pg_stat_user_tables
         ORDER BY n_live_tup DESC
       `);
-      return _result;
-    }
-catch (error) {
+      return result; }
+    } catch (error) {
       console.error('[MONITORING_REPO] Error fetching table stats:', error);
       throw error;
     }
@@ -58,21 +56,20 @@ catch (error) {
    */
   async getIndexUsage(): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
-  schemaname,
-  tablename,
-  indexname,
-          idx_scan as indexscans,
-          idx_tup_read as tuplesread,
-          idx_tup_fetch as tuplesfetched,
+  _schemaname,
+  _tablename,
+  _indexname,
+          idx_scan as index_scans,
+          idx_tup_read as tuples_read,
+          idx_tup_fetch as tuples_fetched,
           pg_size_pretty(pg_relation_size(indexrelid)) as index_size
         FROM pg_stat_user_indexes
         ORDER BY idx_scan DESC
       `);
-      return _result;
-    }
-catch (error) {
+      return result; }
+    } catch (error) {
       console.error('[MONITORING_REPO] Error fetching index usage:', error);
       throw error;
     }
@@ -83,23 +80,22 @@ catch (error) {
    */
   async getActiveConnections(): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
+      const _result = await db.execute(sql`
         SELECT 
-  pid,
-  usename,
-          applicationname,
-          clientaddr,
-          backendstart,
-  state,
-          statechange,
+  _pid,
+  _usename,
+          application_name,
+          client_addr,
+          backend_start,
+  _state,
+          state_change,
           query
         FROM pg_stat_activity
         WHERE state != 'idle'
         ORDER BY backend_start DESC
       `);
-      return _result;
-    }
-catch (error) {
+      return result; }
+    } catch (error) {
       console.error('[MONITORING_REPO] Error fetching connections:', error);
       throw error;
     }
@@ -130,17 +126,16 @@ catch (error) {
       // Check write permission (rollback transaction)
       await db.execute(sql`
         BEGIN;
-        INSERT INTO propostaLogs (propostaid, acao, descricao) 
+        INSERT INTO propostaLogs (proposta_id, acao, descricao) 
         VALUES (0, 'health_check', 'test');
         ROLLBACK;
       `);
       checks.writePermission = true;
 
-      const isHealthy = Object.values(checks).every((check) => check == true);
+      const _isHealthy = Object.values(checks).every((check) => check == true);
 
-      return { isHealthy, checks };
-    }
-catch (error) {
+      return { isHealthy, checks }; }
+    } catch (error) {
       console.error('[MONITORING_REPO] Database health check failed:', error);
       return {
         isHealthy: false,
@@ -168,14 +163,13 @@ catch (error) {
         tables: tables.slice(0, 10), // Top 10 tables
         indexes: indexes.slice(0, 10), // Top 10 indexes
         activeConnections: connections.length,
-        health,
+  _health,
       };
-    }
-catch (error) {
+    } catch (error) {
       console.error('[MONITORING_REPO] Error generating report:', error);
       throw error;
     }
   }
 }
 
-export const monitoringRepository = new MonitoringRepository();
+export const _monitoringRepository = new MonitoringRepository();
