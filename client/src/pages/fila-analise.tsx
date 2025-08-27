@@ -104,7 +104,6 @@ export default function FilaAnalise() {
       // Filtro por prioridade
       let matchesPrioridade = true;
       if (prioridadeFilter) {
-        const valorNum = parseFloat(proposta.valor);
         const prioridade = getPriorityBadge(proposta.valor).label;
         matchesPrioridade = prioridade === prioridadeFilter;
       }
@@ -121,7 +120,7 @@ export default function FilaAnalise() {
           return parseFloat(b.valor) - parseFloat(a.valor);
         case 'valor_asc':
           return parseFloat(a.valor) - parseFloat(b.valor);
-        case 'prioridade':
+        case 'prioridade': {
           const getPriorityValue = (valor: string) => {
             const num = parseFloat(valor);
             if (num > 100000) return 3;
@@ -129,6 +128,7 @@ export default function FilaAnalise() {
             return 1;
           };
           return getPriorityValue(b.valor) - getPriorityValue(a.valor);
+        }
         default:
           return 0;
       }
@@ -410,7 +410,6 @@ export default function FilaAnalise() {
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   {filteredPropostas && filteredPropostas.length > 0 ? (
                     filteredPropostas.map((proposta) => {
-                      const statusInfo = getStatusBadge(proposta.status);
                       const priorityInfo = getPriorityBadge(proposta.valor);
 
                       return (

@@ -275,7 +275,7 @@ const AnaliseManualPage: React.FC = () => {
                 proposta.valor_solicitado ||
                 proposta.valorSolicitado ||
                 proposta.condicoesData?.valor
-                  ? `R$ ${(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor).toLocaleString('pt-BR')}`
+                  ? `R$ ${(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor || 0).toLocaleString('pt-BR')}`
                   : 'N/A'}
               </p>
               <p>

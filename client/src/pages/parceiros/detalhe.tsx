@@ -16,10 +16,7 @@ import {
   ArrowLeft,
   Plus,
   MapPin,
-  Phone,
-  Mail,
   Activity,
-  Settings,
   BarChart3,
 } from 'lucide-react';
 
@@ -41,7 +38,7 @@ interface Store {
 }
 
 const PartnerDetailPage: React.FC = () => {
-  const [match, params] = useRoute('/parceiros/detalhe/:id');
+  const [, params] = useRoute('/parceiros/detalhe/:id');
   const partnerId = params ? parseInt(params.id) : null;
 
   const [isLojaModalOpen, setIsLojaModalOpen] = useState(false);

@@ -172,25 +172,10 @@ const EditarPropostaPendenciada: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  console.log('🔍 COMPONENTE INICIADO com ID:', id);
-
-  // Validação early return para IDs inválidos - DEVE estar antes de qualquer hook
-  if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
-    console.log('🔍 ID INVÁLIDO DETECTADO:', id, ' - redirecionando para dashboard');
-    return (
-      <DashboardLayout title="Erro">
-        <Alert variant="destructive">
-          <AlertDescription>
-            ID de proposta inválido. Redirecionando para o dashboard...
-          </AlertDescription>
-        </Alert>
-      </DashboardLayout>
-    );
-  }
-
+  // TODOS OS HOOKS DEVEM ESTAR NO TOPO - ANTES DE QUALQUER RETURN CONDICIONAL
   const [activeTab, setActiveTab] = useState('dados-cliente');
 
-  // Estado inicial para os formulários - DEVE estar antes de qualquer retorno condicional
+  // Estado inicial para os formulários
   const [formData, setFormData] = useState({
     clienteData: {},
     condicoesData: {},
@@ -221,7 +206,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
   });
 
-  // Atualizar formData quando proposta carrega - TODOS OS HOOKS DEVEM ESTAR AQUI NO TOPO
+  // Atualizar formData quando proposta carrega
   useEffect(() => {
     if (proposta) {
       console.log('🔍 DADOS DA PROPOSTA CARREGADA:', {
@@ -320,6 +305,22 @@ const EditarPropostaPendenciada: React.FC = () => {
       });
     },
   });
+
+  console.log('🔍 COMPONENTE INICIADO com ID:', id);
+
+  // Validação early return para IDs inválidos - AGORA DEPOIS DOS HOOKS
+  if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
+    console.log('🔍 ID INVÁLIDO DETECTADO:', id, ' - redirecionando para dashboard');
+    return (
+      <DashboardLayout title="Erro">
+        <Alert variant="destructive">
+          <AlertDescription>
+            ID de proposta inválido. Redirecionando para o dashboard...
+          </AlertDescription>
+        </Alert>
+      </DashboardLayout>
+    );
+  }
 
   if (isLoading) {
     return (

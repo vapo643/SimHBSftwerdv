@@ -33,7 +33,7 @@ function deepTransformDualCase(obj: any): any {
     const result: any = {};
 
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const value = deepTransformDualCase(obj[key]);
 
         // Always preserve the original key
