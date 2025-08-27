@@ -72,7 +72,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         throw new Error(`Failed to create observacao: No data returned`);
       }
 
-      return data as Observacao;
+      return data as unknown as Observacao;
     } catch (error) {
       throw new Error(`Failed to create observacao: ${error}`);
     }
@@ -87,7 +87,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
     const result = await db
       .select()
       .from(observacoesCobranca)
-      .where(eq(observacoesCobranca.isActive, true))
+      .where(isNull(observacoesCobranca.dataPromessaPagamento))
       .limit(limit)
       .offset(offset)
       .orderBy(desc(observacoesCobranca.createdAt));
@@ -96,7 +96,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
     // TODO: Implementar filtros usando Drizzle syntax se necessário
 
     return {
-      data: result as Observacao[],
+      data: result as unknown as Observacao[],
       total: result.length,
       page,
       limit,
@@ -111,8 +111,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
     await db
       .update(observacoesCobranca)
       .set({
-        deletedAt: new Date(),
-        updatedAt: new Date(),
+        statusPromessa: 'CANCELADO',
       })
       .where(eq(observacoesCobranca.id, id));
 

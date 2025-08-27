@@ -22,7 +22,7 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
       });
     }
 
-    const result = await documentsService.getProposalDocuments(parseInt(propostaId));
+    const result = await documentsService.getProposalDocuments(String(propostaId));
     res.json(result);
   } catch (error: any) {
     console.error('[DOCUMENTS_CONTROLLER] Error fetching proposal documents:', error);
@@ -55,7 +55,7 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
       });
     }
 
-    const result = await documentsService.uploadDocument(parseInt(propostaId), file);
+    const result = await documentsService.uploadDocument(String(propostaId), file);
 
     if (result.success) {
       res.json({

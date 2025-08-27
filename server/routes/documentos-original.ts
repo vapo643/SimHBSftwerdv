@@ -82,7 +82,7 @@ router.get(
         });
       }
 
-      const result = await documentsService.getProposalDocuments(parseInt(propostaId));
+      const result = await documentsService.getProposalDocuments(String(propostaId));
       res.json(result);
     } catch (error: any) {
       console.error('[DOCUMENTOS_CONTROLLER] Error listing documents:', error);

@@ -21,7 +21,7 @@ router.get('/health', async (req: Request, res: Response) => {
     const health = await healthService.performHealthCheck();
     const duration = Date.now() - startTime;
 
-    logMetric('health_check_duration', duration);
+    logMetric('health_check_duration', duration, 'ms');
     logInfo(`Health check completed: ${health.status}`, { health });
 
     const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 503 : 500;

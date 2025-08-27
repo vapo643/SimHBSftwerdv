@@ -446,8 +446,33 @@ router.get('/:propostaId/ficha', async (req, res) => {
     // Buscar dados da proposta com status contextual
     const result = await db
       .select({
-        // Todos os campos da proposta
-        ...propostas,
+        // Seleção específica de campos (não spread)
+        id: propostas.id,
+        numero: propostas.numero,
+        status: propostas.status,
+        clienteNome: propostas.clienteNome,
+        clienteCpf: propostas.clienteCpf,
+        clienteEmail: propostas.clienteEmail,
+        clienteTelefone: propostas.clienteTelefone,
+        clienteDataNascimento: propostas.clienteDataNascimento,
+        clienteEndereco: propostas.clienteEndereco,
+        clienteCep: propostas.clienteCep,
+        clienteOcupacao: propostas.clienteOcupacao,
+        dadosPagamentoBanco: propostas.dadosPagamentoBanco,
+        dadosPagamentoAgencia: propostas.dadosPagamentoAgencia,
+        dadosPagamentoConta: propostas.dadosPagamentoConta,
+        dadosPagamentoTipo: propostas.dadosPagamentoTipo,
+        dadosPagamentoPix: propostas.dadosPagamentoPix,
+        dadosPagamentoTipoPix: propostas.dadosPagamentoTipoPix,
+        dadosPagamentoNomeTitular: propostas.dadosPagamentoNomeTitular,
+        valor: propostas.valor,
+        valorTotalFinanciado: propostas.valorTotalFinanciado,
+        prazo: propostas.prazo,
+        taxaJuros: propostas.taxaJuros,
+        ccbGerado: propostas.ccbGerado,
+        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+        dataAprovacao: propostas.dataAprovacao,
+        createdAt: propostas.createdAt,
         // PAM V1.0 - Campo de status contextual
         statusContextual: statusContextuais.status,
       })

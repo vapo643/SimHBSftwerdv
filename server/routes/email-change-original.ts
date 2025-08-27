@@ -57,7 +57,7 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     const currentEmail = req.user!.email;
 
     // Check if new email is same as current
-    if (newEmail.toLowerCase() === currentEmail.toLowerCase()) {
+    if (newEmail.toLowerCase() === (currentEmail || '').toLowerCase()) {
       return res.status(400).json({
         error: 'O novo email deve ser diferente do atual',
       });
@@ -66,7 +66,7 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     // Verify user's password
     const supabase = createServerSupabaseClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: currentEmail,
+      email: currentEmail || '',
       password,
     });
 
@@ -75,7 +75,7 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
         type: SecurityEventType.INVALID_CREDENTIALS,
         severity: 'MEDIUM',
         userId,
-        userEmail: currentEmail,
+        userEmail: currentEmail || '',
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
@@ -110,7 +110,7 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
     // Store token
     emailChangeTokens.set(token, {
       userId,
-      oldEmail: currentEmail,
+      oldEmail: currentEmail || '',
       newEmail,
       createdAt: new Date(),
       expiresAt,

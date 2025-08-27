@@ -235,7 +235,9 @@ router.post(
       const result = await cobrancasService.processBatchPaymentUpdate(updates);
       res.json({
         success: true,
-        ...result,
+        processed: result.success || 0,
+        failed: result.failed || 0,
+        errors: result.errors || [],
       });
     } catch (error: any) {
       console.error('[COBRANCAS_CONTROLLER] Error in batch update:', error);
