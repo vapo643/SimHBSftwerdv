@@ -11,7 +11,7 @@ import { eq, desc, sql } from 'drizzle-orm';
 
 export class ClienteRepository extends BaseRepository<typeof propostas> {
   constructor() {
-    super(propostas);
+    super('propostas');
   }
 
   /**
@@ -22,8 +22,8 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
       const [proposta] = await db
         .select()
         .from(propostas)
-        .where(eq(propostas.cpf, cpf))
-        .orderBy(desc(propostas.created_at))
+        .where(eq(propostas.clienteCpf, cpf))
+        .orderBy(desc(propostas.createdAt))
         .limit(1);
 
       return proposta || null;
@@ -41,8 +41,8 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(propostas)
-        .where(eq(propostas.cpf, cpf))
-        .orderBy(desc(propostas.created_at));
+        .where(eq(propostas.clienteCpf, cpf))
+        .orderBy(desc(propostas.createdAt));
     } catch (error) {
       console.error('[CLIENTE_REPO] Error getting proposals by CPF:', error);
       return [];
@@ -57,7 +57,7 @@ export class ClienteRepository extends BaseRepository<typeof propostas> {
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(propostas)
-        .where(eq(propostas.cpf, cpf));
+        .where(eq(propostas.clienteCpf, cpf));
 
       return (result[0]?.count || 0) > 0;
     } catch (error) {

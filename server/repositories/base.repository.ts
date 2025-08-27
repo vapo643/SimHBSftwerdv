@@ -4,7 +4,7 @@
  * Controllers should never access database directly - they must go through services/repositories
  */
 
-import { db, supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export abstract class BaseRepository<T> {
@@ -18,7 +18,7 @@ export abstract class BaseRepository<T> {
    * Find all records with optional filters
    */
   async findAll(filters?: Record<string, any>): Promise<T[]> {
-    let query = db.from(this.tableName).select('*');
+    let query = supabase.from(this.tableName).select('*');
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -41,7 +41,7 @@ export abstract class BaseRepository<T> {
    * Find one record by ID
    */
   async findById(id: string | number): Promise<T | null> {
-    const { data, error } = await db.from(this.tableName).select('*').eq('id', id).single();
+    const { data, error } = await supabase.from(this.tableName).select('*').eq('id', id).single();
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = not found
@@ -55,7 +55,7 @@ export abstract class BaseRepository<T> {
    * Create a new record
    */
   async create(data: Partial<T>): Promise<T> {
-    const { data: created, error } = await db.from(this.tableName).insert(data).select().single();
+    const { data: created, error } = await supabase.from(this.tableName).insert(data).select().single();
 
     if (error) {
       throw new Error(`Failed to create ${this.tableName}: ${error.message}`);
@@ -68,7 +68,7 @@ export abstract class BaseRepository<T> {
    * Update a record by ID
    */
   async update(id: string | number, data: Partial<T>): Promise<T> {
-    const { data: updated, error } = await db
+    const { data: updated, error } = await supabase
       .from(this.tableName)
       .update(data)
       .eq('id', id)
@@ -86,7 +86,7 @@ export abstract class BaseRepository<T> {
    * Delete a record by ID (soft delete if applicable)
    */
   async delete(id: string | number): Promise<void> {
-    const { error } = await db
+    const { error } = await supabase
       .from(this.tableName)
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', id);
@@ -100,7 +100,7 @@ export abstract class BaseRepository<T> {
    * Execute raw query with Supabase client
    * For complex queries that need direct access
    */
-  protected async executeRawQuery(query: PostgrestFilterBuilder<any, any, any>) {
+  protected async executeRawQuery(query: PostgrestFilterBuilder<any, any, any, any, any>) {
     const { data, error } = await query;
 
     if (error) {

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../lib/supabase';
-import { users } from '@shared/schema';
+import { users, gerenteLojas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -26,16 +26,17 @@ export async function multiTenantMiddleware(
       return res.status(401).json({ message: 'User context not found' });
     }
 
-    // Get user's loja_id from database
+    // Get user's loja_id from database via gerente_lojas junction table
     const userRecord = await db
       .select({
         id: users.id,
         email: users.email,
         name: users.name,
-        lojaId: users.lojaId,
         role: users.role,
+        lojaId: gerenteLojas.lojaId,
       })
       .from(users)
+      .leftJoin(gerenteLojas, eq(users.id, gerenteLojas.gerenteId))
       .where(eq(users.email, req.user.email))
       .limit(1);
 
@@ -45,19 +46,22 @@ export async function multiTenantMiddleware(
 
     const userData = userRecord[0];
 
-    // Set database session context for RLS
-    await db.execute(`SET LOCAL app.current_user_loja_id = '${userData.lojaId}';`);
+    // Handle case where user might not have a loja assigned
+    const lojaId = userData.lojaId || 1; // Default to loja 1 if no assignment
 
-    await db.execute(`SET LOCAL app.current_user_email = '${req.user.email}';`);
+    // Set database session context for RLS
+    await db.execute(`SET LOCAL app.current_user_loja_id = '${lojaId}';`);
+
+    await db.execute(`SET LOCAL app.current_user_email = '${req.user!.email}';`);
 
     // Enhance request with complete user context
     req.user = {
-      ...req.user,
-      lojaId: userData.lojaId,
+      ...req.user!,
+      lojaId: lojaId,
     };
 
     console.log(
-      `Multi-tenant context set: userId=${req.user.id}, lojaId=${userData.lojaId}, email=${req.user.email}`
+      `Multi-tenant context set: userId=${req.user!.id}, lojaId=${lojaId}, email=${req.user!.email}`
     );
 
     next();

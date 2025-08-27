@@ -10,9 +10,9 @@ import { profiles, userSessions } from '@shared/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import type { Session } from '@shared/schema';
 
-export class AuthRepository extends BaseRepository<typeof userSessions> {
+export class AuthRepository extends BaseRepository<Session> {
   constructor() {
-    super(userSessions);
+    super('user_sessions');
   }
 
   /**
@@ -35,10 +35,9 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
           token: sessionData.token,
           ipAddress: sessionData.ipAddress,
           userAgent: sessionData.userAgent,
-          expiresAt: sessionData.expiresAt.toISOString(),
+          expiresAt: sessionData.expiresAt,
           isActive: true,
-          createdAt: new Date().toISOString(),
-          lastActivityAt: new Date().toISOString(),
+          lastActivityAt: new Date(),
         })
         .returning();
 
@@ -130,7 +129,6 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
         .update(userSessions)
         .set({
           isActive: false,
-          updatedAt: new Date().toISOString(),
         })
         .where(eq(userSessions.id, sessionId))
         .returning();
@@ -150,8 +148,7 @@ export class AuthRepository extends BaseRepository<typeof userSessions> {
       const result = await db
         .update(userSessions)
         .set({
-          lastActivityAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          lastActivityAt: new Date(),
         })
         .where(eq(userSessions.id, sessionId))
         .returning();

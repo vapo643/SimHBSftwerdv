@@ -75,6 +75,9 @@ export const userSessions = pgTable('user_sessions', {
   isActive: boolean('is_active').default(true).notNull(),
 });
 
+// Export types for userSessions
+export type Session = typeof userSessions.$inferSelect;
+
 // Tabela de junção para relacionamento muitos-para-muitos Gerentes x Lojas
 export const gerenteLojas = pgTable(
   'gerente_lojas',
