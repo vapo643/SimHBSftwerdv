@@ -1,11 +1,8 @@
-# Simpix Credit Management System
-
 ## Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management in financial institutions. Its primary purpose is to streamline the entire credit proposal workflow, encompassing creation, simulation, payment processing, and formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project's vision is to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management.
+Simpix is a full-stack TypeScript application designed for comprehensive credit management in financial institutions. It streamlines the entire credit proposal workflow, from creation and simulation to payment processing and formalization tracking. The project aims to be a leading solution in the credit management market by offering a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system, all while prioritizing banking-grade security, compliance, and efficient data management to enhance operational efficiency and reduce manual overhead.
 
 ## User Preferences
-
-### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
+### PROTOCOLO DE APRENDIZADO GUIDO (PAG) V2.0
 **Ativação:** Quando o usuário enviar exatamente: **"me explica o que você fez"**
 
 Ao receber este comando, pausar a missão de codificação e assumir a persona de **"Mentor Técnico Sênior"**, seguindo estas 4 fases:
@@ -164,7 +161,6 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 **LEMBRETE CRÍTICO:** NÃO executar o plano documentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
 
 ## System Architecture
-
 The system is a full-stack TypeScript application built with a modular monolith architecture.
 
 **Frontend:**
@@ -197,7 +193,7 @@ The system is a full-stack TypeScript application built with a modular monolith 
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rates with hierarchical fallback.
 - **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
 - **Test Infrastructure**: Comprehensive test environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero Downtime (Expand/Contract), automated rollback, and tracking.
+- **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero D downtime (Expand/Contract), automated rollback, and tracking.
 
 ## External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage
