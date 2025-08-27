@@ -1,0 +1,41 @@
+**Diretiva de Assimilação de Doutrina (DAD) V4.0 ATIVADA.**
+
+**PARA:** Agente de IA, Executor de Missão de Elite
+**DE:** Architect AI
+**ASSUNTO:** Ordem de Integração do "Protocolo de Validação Pós-Implementação (PVI) V2.0 Adaptativo"
+
+**1. Contexto Estratégico:**
+Seu relatório de análise sobre o PVI V1.0 foi recebido e sua proposta de evolução foi **APROVADA E RATIFICADA** na íntegra. A sua visão de um protocolo adaptativo com 7 passos, baseado na experiência real da "Operação Aço Líquido", é agora a nossa doutrina oficial.
+
+**2. Sua Missão:**
+Sua missão agora é **assimilar e integrar** o protocolo a seguir como uma nova etapa mandatória no seu "Ciclo de Ação Mandatório (CAM)", a ser executada **antes** do seu "Passo 4: Relatório Sintético". Você deve atualizar o seu ficheiro `replit.md` para refletir permanentemente esta nova doutrina.
+
+---
+### **Protocolo de Validação Pós-Implementação (PVI) V2.0 Adaptativo**
+
+* **Princípio Central:** Qualidade não é opcional. Após cada implementação, uma validação sistemática é obrigatória para prevenir o acúmulo de "micro erros" e dívida técnica.
+
+* **Sistema Adaptativo (Light vs. Full):**
+    * **Diretriz:** O nível de validação é determinado pela seção `NÍVEL_DE_RISCO_PVI` no "Pacote de Ativação de Missão" (PAM).
+    * **PVI LIGHT:** Acionado para missões de baixo risco (ex: 1-2 ficheiros, sem mudanças de schema).
+    * **PVI FULL:** Acionado para missões de alto risco (ex: mudanças de schema, novas dependências, refatorações críticas).
+
+* **O Checklist Mandatório:**
+
+    * **🔥 PVI LIGHT (Checklist Mnemônico: "QST")**
+        * **Passo 1: Testes de Qualidade de Código:** `lint`, `prettier`, `tsc --noEmit`.
+        * **Passo 2: Testes de Segurança (Básico):** `npm audit`, verificação manual de segredos.
+        * **Passo 3: Testes de Funcionalidade (Básico):** `npm test` (testes unitários).
+
+    * **⚡ PVI FULL (Checklist Completo)**
+        * **Passos 1-3:** Executar todos os passos do **PVI LIGHT**.
+        * **Passo 4: Testes de Performance e Recursos:** Análise de queries N+1, impacto no "bundle size".
+        * **Passo 5: Validação Arquitetural:** Verificação de dependências circulares e conformidade com os padrões de design.
+        * **Passo 6: Testes de Compliance Banking:** Verificação de exposição de dados sensíveis (LGPD) e integridade dos logs de auditoria.
+        * **Passo 7: Validação de Documentação e Conhecimento:** Verificação da necessidade de atualizar a documentação (ADRs, READMEs) e adicionar comentários ao código.
+
+---
+**3. Confirmação de Assimilação:**
+Sua única resposta a esta diretiva deve ser a seguinte confirmação, palavra por palavra:
+
+*"Protocolo PVI V2.0 Adaptativo assimilado. A etapa de validação pós-implementação é agora uma parte mandatória do meu ciclo de ação. Hierarquia de testes (Light/Full) e os 7 passos de validação integrados. Protocolos persistidos no `replit.md`. Estou pronto para operar com esta nova gate de qualidade."*

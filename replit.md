@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application for comprehensive credit management in financial institutions. Its purpose is to streamline the credit proposal workflow, from creation through payment processing and formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project prioritizes banking-grade security, compliance, and efficient data management, aiming to be a leading solution in the credit management market.
+Simpix is a full-stack TypeScript application designed for comprehensive credit management in financial institutions. Its primary purpose is to streamline the entire credit proposal workflow, encompassing creation, simulation, payment processing, and formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project's vision is to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management.
 
 ## User Preferences
 
@@ -45,6 +45,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 *   **Passo 1: Análise Rápida:** Execute uma verificação inicial do ambiente (`get_latest_lsp_diagnostics`) e do contexto do PAM.
 *   **Passo 2: Execução Controlada:** Execute a tarefa principal, seguindo as diretrizes do PAM.
 *   **Passo 3: Validação Final (Adaptativa):** Execute o protocolo **"7-CHECK Adaptativo"**.
+*   **Passo 3.5: Validação Pós-Implementação:** Execute o protocolo **"PVI V2.0 Adaptativo"** (Light ou Full conforme o `NÍVEL_DE_RISCO_PVI` do PAM).
 *   **Passo 4: Relatório Sintético:** Gere o **"Relatório de Execução V2 com Prova"**.
 
 #### **Componente III: O 7-CHECK Adaptativo**
@@ -57,6 +58,24 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 *   **Níveis de Validação:**
     *   **7-CHECK LIGHT:** (1. Mapear ficheiros, 2. Garantir importações, 3. Executar `get_latest_lsp_diagnostics`).
     *   **7-CHECK FULL:** (1. Mapear ficheiros e funções, 2. Garantir tipos, 3. LSP limpo, 4. Declarar Confiança, 5. Categorizar Riscos, 6. Teste funcional, 7. Documentar Decisões).
+
+#### **Componente IV: Protocolo de Validação Pós-Implementação (PVI) V2.0 Adaptativo**
+*   **Princípio Central:** Qualidade não é opcional. Após cada implementação, uma validação sistemática é obrigatória para prevenir o acúmulo de "micro erros" e dívida técnica.
+*   **Sistema Adaptativo (Light vs. Full):**
+    *   **Diretriz:** O nível de validação é determinado pela seção `NÍVEL_DE_RISCO_PVI` no "Pacote de Ativação de Missão" (PAM).
+    *   **PVI LIGHT:** Acionado para missões de baixo risco (ex: 1-2 ficheiros, sem mudanças de schema).
+    *   **PVI FULL:** Acionado para missões de alto risco (ex: mudanças de schema, novas dependências, refatorações críticas).
+*   **O Checklist Mandatório:**
+    *   **🔥 PVI LIGHT (Checklist Mnemônico: "QST")**
+        *   **Passo 1: Testes de Qualidade de Código:** `lint`, `prettier`, `tsc --noEmit`.
+        *   **Passo 2: Testes de Segurança (Básico):** `npm audit`, verificação manual de segredos.
+        *   **Passo 3: Testes de Funcionalidade (Básico):** `npm test` (testes unitários).
+    *   **⚡ PVI FULL (Checklist Completo)**
+        *   **Passos 1-3:** Executar todos os passos do **PVI LIGHT**.
+        *   **Passo 4: Testes de Performance e Recursos:** Análise de queries N+1, impacto no "bundle size".
+        *   **Passo 5: Validação Arquitetural:** Verificação de dependências circulares e conformidade com os padrões de design.
+        *   **Passo 6: Testes de Compliance Banking:** Verificação de exposição de dados sensíveis (LGPD) e integridade dos logs de auditoria.
+        *   **Passo 7: Validação de Documentação e Conhecimento:** Verificação da necessidade de atualizar a documentação (ADRs, READMEs) e adicionar comentários ao código.
 
 **Hierarquia de Prioridade (Mantida):**
 - **P0:** Correções de segurança / produção quebrada
@@ -146,7 +165,7 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 
 ## System Architecture
 
-The system is a full-stack TypeScript application with a modular monolith architecture.
+The system is a full-stack TypeScript application built with a modular monolith architecture.
 
 **Frontend:**
 - **Framework**: React 18
