@@ -175,6 +175,8 @@ export async function cleanTestDatabase(): Promise<void> {
  */
 export async function setupTestEnvironment(): Promise<{
   testUserId: string;
+  testEmail: string;
+  testPassword: string;
   testPartnerId: number;
   testStoreId: number;
   testProductId: number;

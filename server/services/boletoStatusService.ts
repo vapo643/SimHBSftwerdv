@@ -16,8 +16,8 @@ import { eq, and } from 'drizzle-orm';
 import { transitionTo, InvalidTransitionError } from './statusFsmService';
 // Usando import dinâmico para evitar ciclo de dependência
 const getInterService = async () => {
-  const { InterBankService } = await import('./interBankService');
-  return new InterBankService();
+  const { interBankService } = await import('./interBankService');
+  return interBankService;
 };
 
 // Mapeamento de status do Inter para nosso sistema
@@ -191,7 +191,7 @@ export class BoletoStatusService {
               .set({
                 situacao: novoStatus,
                 dataSituacao: detalhes.cobranca.dataSituacao,
-                valorPago: detalhes.cobranca.valorTotalRecebido?.toString(),
+                valorTotalRecebido: detalhes.cobranca.valorTotalRecebido?.toString(),
                 updatedAt: new Date(),
               })
               .where(eq(interCollections.codigoSolicitacao, cobranca.codigoSolicitacao));
@@ -309,7 +309,7 @@ export class BoletoStatusService {
         .set({
           situacao: detalhes.cobranca.situacao,
           dataSituacao: detalhes.cobranca.dataSituacao,
-          valorPago: detalhes.cobranca.valorTotalRecebido?.toString(),
+          valorTotalRecebido: detalhes.cobranca.valorTotalRecebido?.toString(),
           updatedAt: new Date(),
         })
         .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
