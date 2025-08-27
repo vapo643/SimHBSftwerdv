@@ -642,14 +642,14 @@ export class DatabaseStorage implements IStorage {
   ): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
     try {
       // Check if there are proposals associated with this store (excluding soft-deleted)
-      const _propostasCount = await db
+      const propostasCount = await db
         .select({ id: propostas.id })
         .from(propostas)
         .where(and(eq(propostas.lojaId, id), isNull(propostas.deletedAt)))
         .limit(1);
 
       // Check if there are manager-store relationships
-      const _gerentesCount = await db
+      const gerentesCount = await db
         .select({ id: gerenteLojas.gerenteId })
         .from(gerenteLojas)
         .where(eq(gerenteLojas.lojaId, id))
@@ -672,28 +672,28 @@ export class DatabaseStorage implements IStorage {
 
   // Gerente-Lojas Relationships
   async getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]> {
-    return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId)); }
+    return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId));
   }
 
   async getLojasForGerente(gerenteId: number): Promise<number[]> {
-    const _result = await db
+    const result = await db
       .select({ lojaId: gerenteLojas.lojaId })
       .from(gerenteLojas)
       .where(eq(gerenteLojas.gerenteId, gerenteId));
-    return result.map((r) => r.lojaId); }
+    return result.map((r) => r.lojaId);
   }
 
   async getGerentesForLoja(lojaId: number): Promise<number[]> {
-    const _result = await db
+    const result = await db
       .select({ gerenteId: gerenteLojas.gerenteId })
       .from(gerenteLojas)
       .where(eq(gerenteLojas.lojaId, lojaId));
-    return result.map((r) => r.gerenteId); }
+    return result.map((r) => r.gerenteId);
   }
 
   async addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas> {
-    const _result = await db.insert(gerenteLojas).values(relationship).returning();
-    return result[0]; }
+    const result = await db.insert(gerenteLojas).values(relationship).returning();
+    return result[0];
   }
 
   async removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void> {
@@ -712,47 +712,50 @@ export class DatabaseStorage implements IStorage {
     switch (keyType) {
       case 'document': {
         whereCondition = eq(propostas.clicksignDocumentKey, key);
-        break; }
+        break;
+      }
       case 'list': {
         whereCondition = eq(propostas.clicksignListKey, key);
-        break; }
+        break;
+      }
       case 'signer': {
         whereCondition = eq(propostas.clicksignSignerKey, key);
-        break; }
+        break;
+      }
       default:
         throw new Error(`Invalid keyType: ${keyType}`);
     }
 
-    const _result = await db.select().from(propostas).where(whereCondition).limit(1);
-    return result[0]; }
+    const result = await db.select().from(propostas).where(whereCondition).limit(1);
+    return result[0];
   }
 
   async getCcbUrl(propostaId: string): Promise<string | null> {
     try {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const _supabase = createServerSupabaseAdminClient();
+      const supabase = createServerSupabaseAdminClient();
 
       // Get proposal to find CCB file path
-      const _proposta = await this.getPropostaById(propostaId);
+      const proposta = await this.getPropostaById(propostaId);
       if (!proposta || !proposta.caminhoCcbAssinado) {
         console.log(`[CLICKSIGN] No CCB path found for proposal: ${propostaId}`);
-        return null; }
+        return null;
       }
 
       // Generate signed URL for CCB document
-      const { data: signedUrlData, error: signedUrlError } = await _supabase.storage
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from('documents')
         .createSignedUrl(proposta.caminhoCcbAssinado, 3600); // 1 hour expiry
 
       if (signedUrlError) {
         console.error(`[CLICKSIGN] Error generating signed URL for CCB:`, signedUrlError);
-        return null; }
+        return null;
       }
 
-      return signedUrlData.signedUrl; }
+      return signedUrlData.signedUrl;
     } catch (error) {
       console.error(`[CLICKSIGN] Error getting CCB URL:`, error);
-      return null; }
+      return null;
     }
   }
 

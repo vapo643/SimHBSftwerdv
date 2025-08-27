@@ -179,8 +179,8 @@ export const _logSecurity = (
   metadata?: unknown
 ) => {
   logger.warn(`🔒 Security Event: ${event}`, {
-  _severity,
-  _event,
+    _severity,
+    _event,
     timestamp: new Date().toISOString(),
     ...metadata,
   });
@@ -194,9 +194,9 @@ export const _logAudit = (
   metadata?: unknown
 ) => {
   logger.info('📝 Audit Log', {
-  _action,
-  _userId,
-  _resource,
+    _action,
+    _userId,
+    _resource,
     timestamp: new Date().toISOString(),
     ...metadata,
   });

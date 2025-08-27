@@ -29,12 +29,12 @@ interface OriginationContext {
       };
     };
   };
-  produtos: Record<string, unknown>[]>{
+  produtos: Array<{
     id: number;
     nome: string;
     tacValor: string;
     tacTipo: string;
-    tabelasDisponiveis: Record<string, unknown>[]>{
+    tabelasDisponiveis: Array<{
       id: number;
       nomeTabela: string;
       taxaJuros: string;
@@ -56,9 +56,9 @@ interface OriginationContext {
 router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     // 1. Get authenticated user with their store and partner data
-    const _userId = req.user?.id;
+    const userId = req.user?.id;
     if (!userId) {
-      return res.*);
+      return res.status(401).json({ error: 'User not authenticated' });
     }
 
     // Fetch user profile with store and partner information using Supabase client

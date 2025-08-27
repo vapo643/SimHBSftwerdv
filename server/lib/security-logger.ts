@@ -154,9 +154,8 @@ class SecurityLogger {
       totalEvents: recentEvents.length,
       failedLogins: recentEvents.filter((e) => e.type == SecurityEventType.LOGIN_FAILURE).length,
       accessDenied: recentEvents.filter((e) => e.type == SecurityEventType.ACCESS_DENIED).length,
-      rateLimitExceeded: recentEvents.filter(
-        (e) => e.type == SecurityEventType.RATE_LIMIT_EXCEEDED
-      ).length,
+      rateLimitExceeded: recentEvents.filter((e) => e.type == SecurityEventType.RATE_LIMIT_EXCEEDED)
+        .length,
       criticalEvents: recentEvents.filter((e) => e.severity == 'CRITICAL').length,
       suspiciousIPs: this.getSuspiciousIPs(recentEvents),
     };
