@@ -247,4 +247,24 @@ router.post(
   }
 );
 
+/**
+ * GET /api/cobrancas/kpis
+ * Get billing KPIs and analytics
+ */
+router.get('/kpis', jwtAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const kpis = await cobrancasService.getKPIs();
+    res.json({
+      success: true,
+      ...kpis,
+    });
+  } catch (error: any) {
+    console.error('[COBRANCAS_CONTROLLER] Error fetching KPIs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Erro ao buscar KPIs de cobrança',
+    });
+  }
+});
+
 export default router;

@@ -571,7 +571,7 @@ export default function CobrancasPage() {
   };
 
   // Filtrar propostas localmente pela busca (lógica robusta para campos vazios)
-  const propostasFiltradas =
+  const propostasFiltradas = Array.isArray(propostas) ? 
     propostas?.filter((proposta: PropostaCobranca) => {
       if (!searchTerm) return true; // Sem busca = mostrar todas
 
@@ -588,7 +588,7 @@ export default function CobrancasPage() {
 
       // Verifica se algum dos campos válidos contém o termo de busca
       return searchableFields.some((field) => String(field).toLowerCase().includes(search));
-    }) || [];
+    }) : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

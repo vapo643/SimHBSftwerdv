@@ -316,6 +316,74 @@ export class CobrancasService {
       throw error;
     }
   }
+  /**
+   * Get KPIs for billing dashboard
+   */
+  async getKPIs(): Promise<any> {
+    try {
+      console.log('[COBRANCAS_SERVICE] Calculating KPIs...');
+
+      // Get basic proposal counts
+      const propostas = await cobrancasRepository.getPropostasCobranca({});
+      
+      // Calculate basic metrics
+      let valorTotalEmAtraso = 0;
+      let quantidadeContratosEmAtraso = 0;
+      let valorTotalCarteira = 0;
+      let quantidadeTotalContratos = propostas.length;
+
+      const hoje = new Date();
+
+      // Process each proposal to calculate detailed metrics
+      for (const proposta of propostas) {
+        const { propostas: prop } = proposta;
+        valorTotalCarteira += Number(prop.valorTotalFinanciado) || 0;
+
+        // Get installments to check for overdue payments
+        const parcelas = await cobrancasRepository.getParcelasProposta(prop.id);
+        
+        let temParcelaVencida = false;
+        for (const parcela of parcelas) {
+          const dataVencimento = parseISO(parcela.dataVencimento);
+          const vencida = isAfter(hoje, dataVencimento) && parcela.status !== 'pago';
+
+          if (vencida) {
+            valorTotalEmAtraso += Number(parcela.valorParcela);
+            temParcelaVencida = true;
+          }
+        }
+
+        if (temParcelaVencida) {
+          quantidadeContratosEmAtraso++;
+        }
+      }
+
+      // Calculate rates
+      const taxaInadimplencia = quantidadeTotalContratos > 0 
+        ? (quantidadeContratosEmAtraso / quantidadeTotalContratos) * 100 
+        : 0;
+
+      const percentualValorEmAtraso = valorTotalCarteira > 0 
+        ? (valorTotalEmAtraso / valorTotalCarteira) * 100 
+        : 0;
+
+      const kpis = {
+        valorTotalEmAtraso,
+        quantidadeContratosEmAtraso,
+        valorTotalCarteira,
+        quantidadeTotalContratos,
+        taxaInadimplencia: Number(taxaInadimplencia.toFixed(2)),
+        percentualValorEmAtraso: Number(percentualValorEmAtraso.toFixed(2)),
+        dataAtualizacao: format(hoje, 'yyyy-MM-dd HH:mm:ss'),
+      };
+
+      console.log('[COBRANCAS_SERVICE] KPIs calculated:', kpis);
+      return kpis;
+    } catch (error: any) {
+      console.error('[COBRANCAS_SERVICE] Error calculating KPIs:', error);
+      throw new Error('Erro ao calcular KPIs de cobrança');
+    }
+  }
 }
 
 export const cobrancasService = new CobrancasService();
