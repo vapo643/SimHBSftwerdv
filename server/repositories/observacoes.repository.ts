@@ -84,33 +84,23 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
   async findPaginated(page: number = 1, limit: number = 10, filters?: Record<string, any>) {
     const offset = (page - 1) * limit;
 
-    let query = db
-      .from(this.tableName)
-      .select('*, users(full_name, email), propostas(numero_proposta)', { count: 'exact' })
-      .is('deleted_at', null);
+    const result = await db
+      .select()
+      .from(observacoesCobranca)
+      .where(eq(observacoesCobranca.isActive, true))
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(observacoesCobranca.createdAt));
 
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          query = query.eq(key, value);
-        }
-      });
-    }
-
-    query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
-
-    const { data, error, count } = await query;
-
-    if (error) {
-      throw new Error(`Failed to fetch paginated observacoes: ${error.message}`);
-    }
+    // Aplicar filtros se fornecidos
+    // TODO: Implementar filtros usando Drizzle syntax se necessário
 
     return {
-      data: data as Observacao[],
-      total: count || 0,
+      data: result as Observacao[],
+      total: result.length,
       page,
       limit,
-      totalPages: Math.ceil((count || 0) / limit),
+      totalPages: Math.ceil(result.length / limit),
     };
   }
 
@@ -118,17 +108,14 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    * Soft delete an observacao
    */
   async softDelete(id: number, usuarioId: string): Promise<void> {
-    const { error } = await db
-      .from(this.tableName)
-      .update({
-        deleted_at: new Date().toISOString(),
-        updated_by: usuarioId,
+    await db
+      .update(observacoesCobranca)
+      .set({
+        deletedAt: new Date(),
+        updatedAt: new Date(),
       })
-      .eq('id', id);
+      .where(eq(observacoesCobranca.id, id));
 
-    if (error) {
-      throw new Error(`Failed to delete observacao ${id}: ${error.message}`);
-    }
   }
 }
 

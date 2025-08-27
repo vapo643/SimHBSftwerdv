@@ -195,7 +195,7 @@ router.put(
       const result = await userService.deactivateUser(
         userId,
         req.user!.id,
-        req.user!.email,
+        req.user!.email!,
         clientIp,
         userAgent
       );
@@ -254,7 +254,7 @@ router.put(
       const result = await userService.reactivateUser(
         userId,
         req.user!.id,
-        req.user!.email,
+        req.user!.email!,
         clientIp,
         userAgent
       );

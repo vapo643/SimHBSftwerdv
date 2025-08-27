@@ -104,11 +104,10 @@ export class InterService {
     // Create observation history
     await interRepository.createObservationHistory({
       propostaId: validated.proposalId,
-      // tipoObservacao: 'COBRANÇA_GERADA',
       mensagem: `Cobrança gerada com sucesso. Código: ${interResult.codigoSolicitacao}`,
       criadoPor: 'Sistema',
-      usuarioId: userId,
-      metadata: { codigoSolicitacao: interResult.codigoSolicitacao },
+      tipoAcao: 'COBRANÇA_GERADA',
+      dadosAcao: { codigoSolicitacao: interResult.codigoSolicitacao, usuarioId: userId },
     });
 
     return collection;
@@ -199,11 +198,10 @@ export class InterService {
     // Create observation history
     await interRepository.createObservationHistory({
       propostaId: collection.propostaId,
-      tipoObservacao: 'COBRANÇA_CANCELADA',
       mensagem: `Cobrança cancelada. Motivo: ${motivo}`,
       criadoPor: 'Sistema',
-      usuarioId: userId,
-      metadata: { motivo },
+      tipoAcao: 'COBRANÇA_CANCELADA',
+      dadosAcao: { motivo, usuarioId: userId },
     });
 
     return updated!;
@@ -250,11 +248,10 @@ export class InterService {
         // Create observation history
         await interRepository.createObservationHistory({
           propostaId: collection.propostaId,
-          // tipoObservacao: 'VENCIMENTO_PRORROGADO',
           mensagem: `Vencimento prorrogado para ${novaDataVencimento}`,
           criadoPor: 'Sistema',
-          usuarioId: userId,
-          metadata: { novaDataVencimento },
+          tipoAcao: 'VENCIMENTO_PRORROGADO',
+          dadosAcao: { novaDataVencimento, usuarioId: userId },
         });
 
         results.push({
@@ -320,10 +317,10 @@ export class InterService {
       // Create observation
       await interRepository.createObservationHistory({
         propostaId: collection.propostaId,
-        // tipoObservacao: 'PAGAMENTO_CONFIRMADO',
         mensagem: 'Pagamento confirmado via webhook Banco Inter',
         criadoPor: 'Sistema',
-        metadata: webhookData,
+        tipoAcao: 'PAGAMENTO_CONFIRMADO',
+        dadosAcao: webhookData,
       });
 
       // Queue for further processing

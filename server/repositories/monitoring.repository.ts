@@ -139,7 +139,7 @@ export class MonitoringRepository {
       console.error('[MONITORING_REPO] Database health check failed:', error);
       return {
         isHealthy: false,
-        checks: { error: error.message },
+        checks: { error: (error as Error).message },
       };
     }
   }

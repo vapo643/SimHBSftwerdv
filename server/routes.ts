@@ -2397,7 +2397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         res
           .status(500)
-          .json({ message: 'Erro ao buscar dados de formalização', error: error.message });
+          .json({ message: 'Erro ao buscar dados de formalização', error: (error as Error).message });
       }
     }
   );
@@ -3920,7 +3920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(debugInfo);
     } catch (error) {
       console.error('❌ Erro no teste de endereço:', error);
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: (error as Error).message });
     }
   });
 
