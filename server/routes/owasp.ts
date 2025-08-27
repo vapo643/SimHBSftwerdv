@@ -333,7 +333,7 @@ router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) 
 // GET /api/owasp/cheatsheets/recommendations - Get All Security Recommendations
 router.get('/cheatsheets/recommendations', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const cheatsheets = await OwaspCheatSheetService.processCheatSheets();
+    const cheatsheets = await OwaspCheatSheetService.processAllCheatSheets();
     const allRecommendations = cheatsheets.flatMap((cs: CheatSheet) => cs.recommendations || []);
 
     // Group by category and priority

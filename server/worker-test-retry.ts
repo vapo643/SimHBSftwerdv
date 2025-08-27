@@ -28,10 +28,9 @@ const testWorkerOptions: WorkerOptions = {
   concurrency: 1,
   // CONFIGURAÇÃO DE RETRY - PONTO CRÍTICO DA AUDITORIA
   autorun: true,
-  settings: {
-    stalledInterval: 30000,
-    maxStalledCount: 1,
-  },
+  // settings: {
+  //   maxStalledCount: 1,
+  // },
 };
 
 // Test Retry Worker
@@ -71,7 +70,7 @@ testRetryWorker.on('failed', (job, err) => {
   if (attemptNumber < maxAttempts) {
     // Calcular delay do backoff exponencial
     const backoffDelay = job?.opts.backoff
-      ? Math.pow(2, attemptNumber - 1) * (job.opts.backoff.delay || 1000)
+      ? Math.pow(2, attemptNumber - 1) * (typeof job.opts.backoff === 'number' ? job.opts.backoff : (job.opts.backoff as any)?.delay || 1000)
       : 0;
 
     console.log(`[TEST RETRY WORKER] 🔄 Retry será tentado em ${backoffDelay}ms`);

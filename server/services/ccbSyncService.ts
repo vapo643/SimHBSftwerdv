@@ -76,7 +76,7 @@ class CCBSyncService {
       console.log(`[CCB SYNC] 📋 Found ${pendingProposals.length} CCBs to sync`);
 
       for (const proposal of pendingProposals) {
-        await this.syncSingleCCB(proposal.id, proposal.clicksignDocumentKey, proposal.clienteNome);
+        await this.syncSingleCCB(proposal.id as string, proposal.clicksignDocumentKey as string, proposal.clienteNome as string);
       }
 
       console.log('[CCB SYNC] ✅ Synchronization complete');
@@ -104,7 +104,7 @@ class CCBSyncService {
 
       if (!pdfBuffer || pdfBuffer.length === 0) {
         console.log(`[CCB SYNC] ⚠️ Empty PDF received for ${proposalId}`);
-        return false;
+        return false as boolean;
       }
 
       // Create a clean filename
@@ -184,9 +184,9 @@ class CCBSyncService {
       }
 
       return await this.syncSingleCCB(
-        proposal.id,
-        proposal.clicksignDocumentKey,
-        proposal.clienteNome
+        proposal.id as string,
+        proposal.clicksignDocumentKey as string,
+        proposal.clienteNome as string
       );
     } catch (error) {
       console.error(`[CCB SYNC] ❌ Error force syncing ${proposalId}:`, error);

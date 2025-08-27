@@ -16,7 +16,7 @@ const router = Router();
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await healthService.executeOperation('health_check', {});
+    const result = await healthService.getHealthStatus();
     res.json(result);
   } catch (error: any) {
     res.status(500).json({

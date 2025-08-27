@@ -23,11 +23,9 @@ router.post(
       console.log(`[INTER FIX] 🔧 INICIANDO REGENERAÇÃO DE BOLETOS PARA: ${propostaId}`);
 
       // 1. Buscar proposta usando queryClient
-      const queryResult = await db.execute(`SELECT * FROM propostas WHERE id = $1 LIMIT 1`, [
-        propostaId,
-      ]);
+      const queryResult = await db.execute(`SELECT * FROM propostas WHERE id = $1 LIMIT 1`);
 
-      const proposta = queryResult.rows[0];
+      const proposta = queryResult[0];
 
       if (!proposta) {
         return res.status(404).json({ error: 'Proposta não encontrada' });
