@@ -766,7 +766,7 @@ export class DatabaseStorage implements IStorage {
     statusNovo: string;
     observacao?: string;
   }): Promise<unknown> {
-    const _result = await db
+    const result = await db
       .insert(propostaLogs)
       .values({
         propostaId: log.propostaId,
@@ -777,24 +777,24 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
 
-    return result[0]; }
+    return result[0];
   }
 
   // ==== INTER BANK METHODS ====
 
   // Inter Bank Collections
   async createInterCollection(collection: InsertInterCollection): Promise<InterCollection> {
-    const _result = await db.insert(interCollections).values(collection).returning();
-    return result[0]; }
+    const result = await db.insert(interCollections).values(collection).returning();
+    return result[0];
   }
 
   async getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(interCollections)
       .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]> {
@@ -808,24 +808,24 @@ export class DatabaseStorage implements IStorage {
   async getInterCollectionByCodigoSolicitacao(
     codigoSolicitacao: string
   ): Promise<InterCollection | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async updateInterCollection(
     codigoSolicitacao: string,
     updates: UpdateInterCollection
   ): Promise<InterCollection> {
-    const _result = await db
+    const result = await db
       .update(interCollections)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
-    return result[0]; }
+    return result[0];
   }
 
   async getInterCollections(): Promise<InterCollection[]> {
@@ -841,17 +841,17 @@ export class DatabaseStorage implements IStorage {
     // Deactivate existing webhooks first
     await db.update(interWebhooks).set({ isActive: false });
 
-    const _result = await db.insert(interWebhooks).values(webhook).returning();
-    return result[0]; }
+    const result = await db.insert(interWebhooks).values(webhook).returning();
+    return result[0];
   }
 
   async getActiveInterWebhook(): Promise<InterWebhook | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(interWebhooks)
       .where(eq(interWebhooks.isActive, true))
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async updateInterWebhook(
