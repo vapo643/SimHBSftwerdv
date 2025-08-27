@@ -19,16 +19,16 @@ export interface AuthenticatedRequest extends Request {
 // Interface já definida acima
 
 // Token blacklist para segurança aprimorada (SAMM Optimization)
-const _tokenBlacklist = new Set<string>();
+const tokenBlacklist = new Set<string>();
 const TOKEN_BLACKLIST_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hora
 
 // Rate limiting por usuário (SAMM Optimization)
-const _userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
+const userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
 const MAX_AUTH_ATTEMPTS = 10;
 const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 
 // User token tracking for invalidation on account deactivation
-const _userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
+const userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
 
 // Limpar blacklist periodicamente
 setInterval(() => {
@@ -54,14 +54,14 @@ export function addToBlacklist(token: string): void {
  * Também usado para ASVS 8.3.7 - Account Deactivation
  */
 export function invalidateAllUserTokens(userId: string): void {
-  const _tokens = userTokens.get(userId);
+  const tokens = userTokens.get(userId);
   if (tokens && tokens.size > 0) {
     tokens.forEach((token) => tokenBlacklist.add(token));
     userTokens.delete(userId);
     securityLogger.logEvent({
       type: SecurityEventType.TOKEN_BLACKLISTED,
       severity: 'HIGH',
-  _userId,
+      userId,
       success: true,
       details: {
         reason: 'All user tokens invalidated - token rotation',
@@ -100,7 +100,7 @@ export async function jwtAuthMiddleware(
     console.log('[JWT DEBUG] Referer:', req.headers.referer);
 
     // Step a: Validate JWT token
-    const _authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization;
     console.log('[JWT DEBUG] Header Auth presente:', !!authHeader);
     console.log('[JWT DEBUG] Header começa com Bearer:', authHeader?.startsWith('Bearer '));
 
@@ -127,10 +127,10 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: 'Missing or invalid authorization header' },
       });
-      return res.*);
+      return res.status(401).json({ error: 'Missing or invalid authorization header' });
     }
 
-    const _token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Debug logging para PDF downloads - token info
     if (req.path.includes('/pdf')) {
@@ -152,7 +152,7 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: 'Token is blacklisted' },
       });
-      return res.*);
+      return res.status(401).json({ error: 'Token is blacklisted' });
     }
 
     let userId: string | undefined;
@@ -163,9 +163,9 @@ export async function jwtAuthMiddleware(
     // Auto-detect token type by checking JWT header
     let tokenType: 'supabase' | 'local' = 'local';
     try {
-      const _tokenParts = token.split('.');
+      const tokenParts = token.split('.');
       if (tokenParts.length == 3) {
-        const _header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
+        const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
         // Supabase tokens have 'kid' (Key ID) in header
         if (header.kid) {
           tokenType = 'supabase';
@@ -183,8 +183,8 @@ export async function jwtAuthMiddleware(
       try {
         console.log('[JWT DEBUG] Using Supabase token validation');
         const { createServerSupabaseAdminClient } = await import('./supabase');
-        const _supabase = createServerSupabaseAdminClient();
-        const _supabaseResult = await _supabase.auth.getUser(token);
+        const supabase = createServerSupabaseAdminClient();
+        const supabaseResult = await supabase.auth.getUser(token);
 
         data = supabaseResult.data;
         error = supabaseResult.error;
@@ -259,7 +259,7 @@ export async function jwtAuthMiddleware(
         success: false,
         details: { reason: error?.message || 'Invalid token' },
       });
-      return res.*);
+      return res.status(401).json({ error: error?.message || 'Invalid token' });
     }
 
     // Step c: Query profiles table using direct DB connection (bypasses RLS)
@@ -267,7 +267,7 @@ export async function jwtAuthMiddleware(
     const { profiles } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
 
-    const _profileResult = await db
+    const profileResult = await db
       .select({
         id: profiles.id,
         fullName: profiles.fullName,
@@ -284,8 +284,8 @@ export async function jwtAuthMiddleware(
       securityLogger.logEvent({
         type: SecurityEventType.ACCESS_DENIED,
         severity: 'HIGH',
-  _userId,
-  _userEmail,
+        userId,
+        userEmail,
         ipAddress: getClientIP(req),
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
@@ -326,14 +326,14 @@ export async function jwtAuthMiddleware(
 export async function extractRoleFromToken(authToken: string): Promise<string | null> {
   try {
     const { createServerSupabaseAdminClient } = await import('./supabase');
-    const _supabase = createServerSupabaseAdminClient();
-    const { data, error } = await _supabase.auth.getUser(authToken);
+    const supabase = createServerSupabaseAdminClient();
+    const { data, error } = await supabase.auth.getUser(authToken);
 
     if (error || !data.user) {
-      return null; }
+      return null;
     }
 
-    const _supabaseAdmin = createServerSupabaseAdminClient();
+    const supabaseAdmin = createServerSupabaseAdminClient();
 
     const { data: profile } = await supabaseAdmin
       .from('profiles')
@@ -341,9 +341,9 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
       .eq('id', data.user.id)
       .single();
 
-    return profile?.role || null; }
+    return profile?.role || null;
   } catch (error) {
     console.error('Error extracting role from token:', error);
-    return null; }
+    return null;
   }
 }

@@ -114,8 +114,7 @@ export interface IStorage {
     userAgent?: string;
     expiresAt: Date;
   }): Promise<void>;
-  getUserSessions(userId: string): Promise<
-    Record<string, unknown>[]>{
+  getUserSessions(userId: string): Promise<Array<{
       id: string;
       userId: string;
       ipAddress: string | null;
@@ -124,8 +123,7 @@ export interface IStorage {
       expiresAt: Date;
       lastActivityAt: Date;
       isActive: boolean;
-    }>
-  >;
+    }>>;
   deleteSession(sessionId: string): Promise<void>;
   deleteAllUserSessions(userId: string, exceptSessionId?: string): Promise<void>;
   updateSessionActivity(sessionId: string): Promise<void>;
@@ -133,33 +131,33 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    const _result = await db.select().from(users).where(eq(users.id, id)).limit(1);
-    return result[0]; }
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const _result = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    return result[0]; }
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const _result = await db.insert(users).values(user).returning();
-    return result[0]; }
+    const result = await db.insert(users).values(user).returning();
+    return result[0];
   }
 
   async getUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(users.name); }
+    return await db.select().from(users).orderBy(users.name);
   }
 
   async getUsersWithDetails(): Promise<any[]> {
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const _supabase = createServerSupabaseAdminClient();
+    const supabase = createServerSupabaseAdminClient();
 
     try {
-      const { data: users, error } = await _supabase.from('profiles').select(`
-  _id,
+      const { data: users, error } = await supabase.from('profiles').select(`
+        id,
           full_name,
-  _role,
+          role,
           loja_id,
           auth_user:auth.users!inner(email),
           loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)),
@@ -171,7 +169,7 @@ export class DatabaseStorage implements IStorage {
         throw new Error(`Erro ao buscar usuários: ${error.message}`);
       }
 
-      return users || []; }
+      return users || [];
     } catch (error) {
       console.error('Critical error in getUsersWithDetails:', error);
       throw error;
@@ -281,21 +279,21 @@ export class DatabaseStorage implements IStorage {
   _id,
           nome_loja,
           parceiros (
-  _id,
+            id,
             razao_social
           )
         ),
         produtos (
-  _id,
+          id,
           nome_produto,
           tac_valor,
           tac_tipo
         ),
         tabelas_comerciais (
-  _id,
+          id,
           nome_tabela,
           taxa_juros,
-  _prazos,
+          prazos,
           comissao
         )
       `
@@ -306,7 +304,7 @@ export class DatabaseStorage implements IStorage {
 
     if (error || !data) {
       console.error('Error fetching proposta by id:', error);
-      return undefined; }
+      return undefined;
     }
 
     // Buscar documentos associados à proposta
@@ -317,14 +315,14 @@ export class DatabaseStorage implements IStorage {
       .order('created_at', { ascending: false });
 
     // Formatear documentos para o frontend com URLs assinadas
-    const _documentosAnexados = [];
+    const documentosAnexados = [];
     if (documentos && documentos.length > 0) {
       for (const doc of documentos) {
         try {
           // Construir o caminho do arquivo no storage: proposta-{id}/{timestamp}-{fileName}
           // A URL salva contém o caminho completo: https://xxx._supabase.co/storage/v1/object/public/documents/proposta-{id}/{fileName}
           // Extrair o caminho após '/documents/'
-          const _documentsIndex = doc.url.indexOf('/documents/');
+          const documentsIndex = doc.url.indexOf('/documents/');
           let filePath;
 
           if (documentsIndex !== -1) {
@@ -519,7 +517,7 @@ export class DatabaseStorage implements IStorage {
 
     // Documents will be uploaded and associated separately via /api/propostas/:id/documentos endpoint
 
-    return data; }
+    return data;
   }
 
   async updateProposta(id, proposta: UpdateProposta): Promise<Proposta> {
@@ -556,35 +554,35 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Atualizar outros campos se necessário
-      const _otherFields = { ...proposta };
+      const otherFields = { ...proposta };
       delete otherFields.status;
 
       if (Object.keys(otherFields).length > 0) {
-        const _updateResult = await db
+        const updateResult = await db
           .update(propostas)
           .set(otherFields)
           .where(eq(propostas.id, propostaId))
           .returning();
-        return updateResult[0]; }
+        return updateResult[0];
       }
 
       // Retornar proposta atualizada
       const [updated] = await db.select().from(propostas).where(eq(propostas.id, propostaId));
-      return updated; }
+      return updated;
     }
 
     // Se não houver mudança de status, fazer update normal
-    const _result = await db
+    const result = await db
       .update(propostas)
       .set(proposta)
       .where(eq(propostas.id, propostaId))
       .returning();
-    return result[0]; }
+    return result[0];
   }
 
   async deleteProposta(id, deletedBy?: string): Promise<void> {
     // propostas.id is text field (UUID), not numeric
-    const _propostaId = typeof id == 'number' ? id.toString() : id;
+    const propostaId = typeof id == 'number' ? id.toString() : id;
     // Soft delete - set deleted_at timestamp
     await db.update(propostas).set({ deletedAt: new Date() }).where(eq(propostas.id, propostaId));
   }
@@ -604,7 +602,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLojaById(id: number): Promise<Loja | undefined> {
-    const _result = await db
+    const result = await db
       .select()
       .from(lojas)
       .where(
@@ -615,17 +613,17 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .limit(1);
-    return result[0]; }
+    return result[0];
   }
 
   async createLoja(loja: InsertLoja): Promise<Loja> {
-    const _result = await db.insert(lojas).values(loja).returning();
-    return result[0]; }
+    const result = await db.insert(lojas).values(loja).returning();
+    return result[0];
   }
 
   async updateLoja(id: number, loja: UpdateLoja): Promise<Loja> {
-    const _result = await db.update(lojas).set(loja).where(eq(lojas.id, id)).returning();
-    return result[0]; }
+    const result = await db.update(lojas).set(loja).where(eq(lojas.id, id)).returning();
+    return result[0];
   }
 
   async deleteLoja(id: number, deletedBy?: string): Promise<void> {

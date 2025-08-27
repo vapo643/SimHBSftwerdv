@@ -77,13 +77,13 @@ declare global {
 // Middleware para logging de requisições
 export function requestLoggingMiddleware(req: Request, res: Response, next: NextFunction) {
   // Adicionar correlation ID
-  const _correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
+  const correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
   req.correlationId = correlationId;
   req.startTime = Date.now();
 
   // Log inicial da requisição
   logger.info('📥 Request received', {
-  _correlationId,
+    correlationId,
     method: req.method,
     url: req.url,
     path: req.path,
@@ -94,26 +94,26 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
   });
 
   // Interceptar o response para log final
-  const _originalSend = res.send;
-  res.send = function (_data) {
-    const _duration = Date.now() - (req.startTime || Date.now());
+  const originalSend = res.send;
+  res.send = function (data) {
+    const duration = Date.now() - (req.startTime || Date.now());
 
     // Log do response
     logger.info('📤 Request completed', {
-  _correlationId,
+      correlationId,
       method: req.method,
       url: req.url,
       statusCode: res.statusCode,
-  _duration,
-      responseSize: Buffer.byteLength(JSON.stringify(_data)),
+      duration,
+      responseSize: Buffer.byteLength(JSON.stringify(data)),
     });
 
     // Alertar para requisições lentas
     if (duration > 1000) {
       logger.warn('⚠️ Slow request detected', {
-  _correlationId,
+        correlationId,
         url: req.url,
-  _duration,
+        duration,
         threshold: 1000,
       });
     }
@@ -121,27 +121,27 @@ export function requestLoggingMiddleware(req: Request, res: Response, next: Next
     // Alertar para erros
     if (res.statusCode >= 400) {
       logger.error('❌ Request error', {
-  _correlationId,
+        correlationId,
         method: req.method,
         url: req.url,
         statusCode: res.statusCode,
-  _duration,
+        duration,
         error: data,
       });
     }
 
-    return originalSend.call(this,_data); }
+    return originalSend.call(this, data);
   };
 
   next();
 }
 
 // Helper functions para logging estruturado
-export const _logInfo = (message: string, metadata?) => {
+export const logInfo = (message: string, metadata?: any) => {
   logger.info(message, metadata);
 };
 
-export const _logError = (message: string, error: Error | any, metadata?) => {
+export const logError = (message: string, error: Error | any, metadata?: any) => {
   logger.error(message, {
     ...metadata,
     error: {
@@ -153,20 +153,20 @@ export const _logError = (message: string, error: Error | any, metadata?) => {
   });
 };
 
-export const _logWarn = (message: string, metadata?) => {
+export const logWarn = (message: string, metadata?: any) => {
   logger.warn(message, metadata);
 };
 
-export const _logDebug = (message: string, metadata?) => {
+export const logDebug = (message: string, metadata?: any) => {
   logger.debug(message, metadata);
 };
 
 // Métricas básicas de logging
-export const _logMetric = (metricName: string, value: number, unit: string, metadata?) => {
+export const logMetric = (metricName: string, value: number, unit: string, metadata?: any) => {
   logger.info('📊 Metric', {
     metric: metricName,
-  _value,
-  _unit,
+    value,
+    unit,
     timestamp: new Date().toISOString(),
     ...metadata,
   });

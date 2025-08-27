@@ -151,7 +151,7 @@ function sanitizeValue(value, fieldName: string, req: Request): unknown {
       });
       // Não lançar erro, apenas sanitizar
       sanitized = xss(sanitized);
-      break; }
+      break;
     }
   }
 
@@ -215,18 +215,18 @@ function validateHighRiskField(fieldName: string, value: unknown, req: Request):
     }
   }
 
-  return value; }
+  return value;
 }
 
 /**
  * Valida headers HTTP suspeitos
  */
 function validateHeaders(req: Request) {
-  const _suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
+  const suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
 
   for (const header of suspiciousHeaders) {
     if (req.headers[header]) {
-      const _value = req.headers[header] as string;
+      const value = req.headers[header] as string;
       // Validar se o header contém valores suspeitos
       if (value.includes('..') || value.includes('://')) {
         securityLogger.logEvent({
@@ -246,10 +246,10 @@ function validateHeaders(req: Request) {
 
 // Exportar função para sanitizar strings individualmente
 export function sanitizeString(input: string): string {
-  if (!input || typeof input !== 'string') return input; }
+  if (!input || typeof input !== 'string') return input;
 
   // Aplicar XSS filtering
-  let _sanitized = xss(input, {
+  let sanitized = xss(input, {
     whiteList: {}, // Não permitir nenhuma tag HTML
     stripIgnoreTag: true,
     stripIgnoreTagBody: ['script'],
@@ -261,5 +261,5 @@ export function sanitizeString(input: string): string {
     .replace(/javascript:/gi, '') // Remove javascript: protocol
     .replace(/on\w+=/gi, ''); // Remove event handlers
 
-  return sanitized.trim(); }
+  return sanitized.trim();
 }

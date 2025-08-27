@@ -24,13 +24,13 @@ declare global {
 
 // Função principal de inicialização do Sentry (conforme PAM V1.0)
 export function initializeSentry() {
-  if (!_config.observability.sentryDsn) {
+  if (!config.observability.sentryDsn) {
     logInfo('⚠️ Sentry DSN not configured - error tracking disabled');
     return;
   }
 
   Sentry.init({
-    dsn: _config.observability.sentryDsn,
+    dsn: config.observability.sentryDsn,
     integrations: [nodeProfilingIntegration()],
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
@@ -44,7 +44,7 @@ export function initializeSentry() {
 
 // Configuração do Sentry (função legada, mantida para compatibilidade)
 export function initSentry(app: Express) {
-  const _sentryDsn = _config.observability.sentryDsn;
+  const sentryDsn = config.observability.sentryDsn;
 
   try {
     Sentry.init({
@@ -92,7 +92,7 @@ export function initSentry(app: Express) {
           eventId: event.event_id,
         });
 
-        return event; }
+        return event;
       },
 
       // Ignorar alguns erros comuns
@@ -138,7 +138,7 @@ export function sentryUserContext(req: Request, res: Response, next: NextFunctio
 
 // Middleware para capturar transações
 export function sentryTransactionMiddleware(req: Request, res: Response, next: NextFunction) {
-  const _transaction = Sentry.startInactiveSpan({
+  const transaction = Sentry.startInactiveSpan({
     op: 'http.server',
     name: `${req.method} ${req.route?.path || req.path}`,
   });

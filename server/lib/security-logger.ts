@@ -98,17 +98,17 @@ class SecurityLogger {
     }
 
     // Log formatado
-    const _logMessage = this.formatLogMessage(securityEvent);
+    const logMessage = this.formatLogMessage(securityEvent);
 
     // Diferentes níveis de log baseado na severidade
     switch (event.severity) {
-      case 'CRITICAL': {
-      case 'HIGH': {
+      case 'CRITICAL':
+      case 'HIGH':
         console.error(`🚨 [SECURITY] ${logMessage}`);
-        break; }
-      case 'MEDIUM': {
+        break;
+      case 'MEDIUM':
         console.warn(`⚠️ [SECURITY] ${logMessage}`);
-        break; }
+        break;
       default:
         log(`🔒 [SECURITY] ${logMessage}`);
     }
@@ -118,20 +118,20 @@ class SecurityLogger {
   }
 
   private formatLogMessage(event: SecurityEvent): string {
-    const _parts = [event.type, `severity=${event.severity}`, event.success ? 'SUCCESS' : 'FAILURE'];
+    const parts = [event.type, `severity=${event.severity}`, event.success ? 'SUCCESS' : 'FAILURE'];
 
     if (event.userEmail) parts.push(`user=${event.userEmail}`);
     if (event.ipAddress) parts.push(`ip=${event.ipAddress}`);
     if (event.endpoint) parts.push(`endpoint=${event.endpoint}`);
 
-    return parts.join(' | '); }
+    return parts.join(' | ');
   }
 
   private sanitizeDetails(details?: Record<string, any>): Record<string, any> | undefined {
-    if (!details) return undefined; }
+    if (!details) return undefined;
 
-    const _sanitized = { ...details };
-    const _sensitiveKeys = ['password', 'senha', 'token', 'secret', 'key', 'cpf', 'rg', 'card'];
+    const sanitized = { ...details };
+    const sensitiveKeys = ['password', 'senha', 'token', 'secret', 'key', 'cpf', 'rg', 'card'];
 
     Object.keys(sanitized).forEach((key) => {
       if (sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))) {
@@ -139,16 +139,16 @@ class SecurityLogger {
       }
     });
 
-    return sanitized; }
+    return sanitized;
   }
 
   // Análise de segurança
   getSecurityMetrics(hours: number = 24) {
-    const _cutoff = new Date();
+    const cutoff = new Date();
     cutoff.setHours(cutoff.getHours() - hours);
-    const _cutoffTimestamp = cutoff.toISOString();
+    const cutoffTimestamp = cutoff.toISOString();
 
-    const _recentEvents = this.events.filter((e) => e.timestamp > cutoffTimestamp);
+    const recentEvents = this.events.filter((e) => e.timestamp > cutoffTimestamp);
 
     return {
       totalEvents: recentEvents.length,
@@ -163,12 +163,12 @@ class SecurityLogger {
   }
 
   private getSuspiciousIPs(events: SecurityEvent[]): string[] {
-    const _ipCounts = new Map<string, number>();
+    const ipCounts = new Map<string, number>();
 
     events
       .filter((e) => !e.success && e.ipAddress)
       .forEach((e) => {
-        const _count = ipCounts.get(e.ipAddress!) || 0;
+        const count = ipCounts.get(e.ipAddress!) || 0;
         ipCounts.set(e.ipAddress!, count + 1);
       });
 
@@ -181,7 +181,7 @@ class SecurityLogger {
   // Detecção de anomalias
   detectAnomalies(): string[] {
     const anomalies: string[] = [];
-    const _metrics = this.getSecurityMetrics(1); // Última hora
+    const metrics = this.getSecurityMetrics(1); // Última hora
 
     if (metrics.failedLogins > 50) {
       anomalies.push('Alto número de tentativas de login falhadas');
@@ -195,15 +195,15 @@ class SecurityLogger {
       anomalies.push(`IPs suspeitos detectados: ${metrics.suspiciousIPs.join(', ')}`);
     }
 
-    return anomalies; }
+    return anomalies;
   }
 }
 
 // Singleton
-export const _securityLogger = new SecurityLogger();
+export const securityLogger = new SecurityLogger();
 
 // Helper para extrair IP do request
-export function getClientIP(req): string {
+export function getClientIP(req: any): string {
   return (
     req.headers['x-forwarded-for']?.split(',')[0] ||
     req.headers['x-real-ip'] ||
