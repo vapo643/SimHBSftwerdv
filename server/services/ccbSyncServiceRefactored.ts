@@ -106,18 +106,18 @@ export class CCBSyncService {
         LIMIT 10
       `);
 
-      if (!pendingProposals.rows || pendingProposals.rows.length === 0) {
+      if (!pendingProposals || pendingProposals.length === 0) {
         console.log('[CCB SYNC] ✅ No missed documents found (webhook system working correctly)');
         return;
       }
 
-      const proposals = pendingProposals.rows;
+      const proposals = pendingProposals;
       console.warn(
         `[CCB SYNC] ⚠️ Found ${proposals.length} potentially missed documents (older than 3 hours)`
       );
 
       // Process in batch
-      const processingTasks = proposals.map((proposal) => ({
+      const processingTasks = proposals.map((proposal: any) => ({
         id: proposal.id as string,
         documentKey: (proposal.clicksign_document_id || proposal.clicksign_envelope_id) as string,
       }));

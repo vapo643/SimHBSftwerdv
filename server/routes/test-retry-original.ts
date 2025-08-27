@@ -24,14 +24,14 @@ router.post('/retry', async (req: Request, res: Response) => {
       const { queues } = await import('../lib/mock-queue');
 
       // Criar uma fila de teste se não existir
-      if (!queues.testRetry) {
+      if (!(queues as any).testRetry) {
         console.log('[TEST RETRY] 📦 Criando fila test-retry');
-        const { MockQueue } = await import('../lib/mock-queue');
+        const mockQueue = await import('../lib/mock-queue');
         // @ts-ignore
-        queues.testRetry = new MockQueue('test-retry');
+        (queues as any).testRetry = new (mockQueue as any).MockQueue('test-retry');
       }
 
-      const queue = queues.testRetry;
+      const queue = (queues as any).testRetry;
 
       const testData = {
         type: 'TEST_RETRY_FAILURE',

@@ -134,12 +134,7 @@ export class PagamentoService {
 
     // Try to transition proposal status
     try {
-      await transitionTo(
-        validated.propostaId,
-        'processando_pagamento',
-        userId,
-        'Pagamento criado e enviado para processamento'
-      );
+      await transitionTo(validated.propostaId);
     } catch (error) {
       if (error instanceof InvalidTransitionError) {
         console.warn(
@@ -211,12 +206,7 @@ export class PagamentoService {
     // Handle status transitions
     if (status === 'pago') {
       try {
-        await transitionTo(
-          proposalId,
-          'pago',
-          userId,
-          'Pagamento confirmado e processado com sucesso'
-        );
+        await transitionTo(proposalId);
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);
@@ -226,12 +216,7 @@ export class PagamentoService {
       }
     } else if (status === 'rejeitado') {
       try {
-        await transitionTo(
-          proposalId,
-          'pagamento_rejeitado',
-          userId,
-          observacoes || 'Pagamento rejeitado'
-        );
+        await transitionTo(proposalId);
       } catch (error) {
         if (error instanceof InvalidTransitionError) {
           console.warn(`[PAGAMENTO] Status transition warning for ${proposalId}:`, error.message);

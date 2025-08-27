@@ -162,8 +162,8 @@ export class SecurityService {
       // In a real implementation, this would call the actual scanner methods
       const findings = null;
 
-      if (findings && Array.isArray(findings) && findings.length > 0) {
-        return findings.map((finding: any) => ({
+      if (findings && Array.isArray(findings) && (findings as any[]).length > 0) {
+        return (findings as any[]).map((finding: any) => ({
           id: finding.id || `semgrep-${Math.random().toString(36).substr(2, 9)}`,
           rule: finding.rule_id,
           severity: finding.extra?.severity?.toUpperCase() || 'MEDIUM',
@@ -546,7 +546,7 @@ export class SecurityService {
 
   private calculateConfidence(log: any): number {
     // Simple heuristic based on severity and metadata
-    const severityScore = { CRITICAL: 0.9, HIGH: 0.8, MEDIUM: 0.6, LOW: 0.4 }[log.severity] || 0.5;
+    const severityScore = ({ CRITICAL: 0.9, HIGH: 0.8, MEDIUM: 0.6, LOW: 0.4 } as any)[log.severity] || 0.5;
     return severityScore + Math.random() * 0.1;
   }
 

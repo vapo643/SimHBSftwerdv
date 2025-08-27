@@ -49,12 +49,16 @@ export class ObservacoesService {
       );
 
       // Log security event
-      securityLogger.log(SecurityEventType.DATA_ACCESS, {
+      securityLogger.logEvent({
+        type: SecurityEventType.DATA_ACCESS,
+        severity: 'LOW',
         userId: usuarioId,
-        resource: 'observacoes',
-        action: 'CREATE',
-        details: { propostaId },
-        ip: userIp,
+        userEmail: '',
+        ipAddress: userIp || '',
+        userAgent: '',
+        endpoint: '/observacoes',
+        success: true,
+        details: { propostaId, action: 'CREATE' },
       });
 
       return created;
@@ -105,12 +109,16 @@ export class ObservacoesService {
       await observacoesRepository.softDelete(observacaoId, usuarioId);
 
       // Log security event
-      securityLogger.log(SecurityEventType.DATA_ACCESS, {
+      securityLogger.logEvent({
+        type: SecurityEventType.DATA_ACCESS,
+        severity: 'MEDIUM',
         userId: usuarioId,
-        resource: 'observacoes',
-        action: 'DELETE',
-        details: { observacaoId },
-        ip: userIp,
+        userEmail: '',
+        ipAddress: userIp || '',
+        userAgent: '',
+        endpoint: '/observacoes',
+        success: true,
+        details: { observacaoId, action: 'DELETE' },
       });
     } catch (error) {
       console.error(`[ObservacoesService] Error deleting observacao ${observacaoId}:`, error);
@@ -153,12 +161,16 @@ export class ObservacoesService {
       });
 
       // Log security event
-      securityLogger.log(SecurityEventType.DATA_ACCESS, {
+      securityLogger.logEvent({
+        type: SecurityEventType.DATA_ACCESS,
+        severity: 'LOW',
         userId: usuarioId,
-        resource: 'observacoes',
-        action: 'UPDATE',
-        details: { observacaoId },
-        ip: userIp,
+        userEmail: '',
+        ipAddress: userIp || '',
+        userAgent: '',
+        endpoint: '/observacoes',
+        success: true,
+        details: { observacaoId, action: 'UPDATE' },
       });
 
       return updated;
