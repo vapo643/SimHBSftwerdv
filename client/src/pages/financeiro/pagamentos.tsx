@@ -275,8 +275,8 @@ export default function Pagamentos() {
     },
   });
 
-  // Filtrar pagamentos
-  const pagamentosFiltrados = pagamentos?.filter((pagamento) => {
+  // Filtrar pagamentos - Verificar se é array válido
+  const pagamentosFiltrados = Array.isArray(pagamentos) ? pagamentos.filter((pagamento) => {
     // Se não há termo de busca, retorna todos
     if (!searchTerm || searchTerm.trim() === '') {
       return true;
@@ -289,34 +289,34 @@ export default function Pagamentos() {
       pagamento.propostaId.includes(searchTerm);
 
     return matchesSearch;
-  });
+  }) : [];
 
   // Debug para ver o que está acontecendo
-  console.log('[PAGAMENTOS FRONTEND] Dados recebidos:', pagamentos?.length);
+  console.log('[PAGAMENTOS FRONTEND] Dados recebidos:', Array.isArray(pagamentos) ? pagamentos?.length : 'NOT_ARRAY', pagamentos);
   console.log('[PAGAMENTOS FRONTEND] Termo de busca:', searchTerm);
   console.log('[PAGAMENTOS FRONTEND] Dados filtrados:', pagamentosFiltrados?.length);
-  if (pagamentos?.length > 0) {
+  if (Array.isArray(pagamentos) && pagamentos?.length > 0) {
     console.log('[PAGAMENTOS FRONTEND] Primeiro pagamento:', pagamentos[0]);
   }
 
   // Estatísticas
   const stats = {
-    aguardandoAprovacao: pagamentos?.filter((p) => p.status === 'aguardando_aprovacao').length || 0,
-    aprovados: pagamentos?.filter((p) => p.status === 'aprovado').length || 0,
-    emProcessamento: pagamentos?.filter((p) => p.status === 'em_processamento').length || 0,
-    pagos: pagamentos?.filter((p) => p.status === 'pago').length || 0,
-    rejeitados: pagamentos?.filter((p) => p.status === 'rejeitado').length || 0,
-    valorTotalAguardando:
+    aguardandoAprovacao: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'aguardando_aprovacao').length || 0 : 0,
+    aprovados: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'aprovado').length || 0 : 0,
+    emProcessamento: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'em_processamento').length || 0 : 0,
+    pagos: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'pago').length || 0 : 0,
+    rejeitados: Array.isArray(pagamentos) ? pagamentos?.filter((p) => p.status === 'rejeitado').length || 0 : 0,
+    valorTotalAguardando: Array.isArray(pagamentos) ? 
       pagamentos
         ?.filter((p) => p.status === 'aguardando_aprovacao')
-        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
-    valorTotalPago:
+        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0 : 0,
+    valorTotalPago: Array.isArray(pagamentos) ?
       pagamentos?.filter((p) => p.status === 'pago').reduce((acc, p) => acc + p.valorLiquido, 0) ||
-      0,
-    valorTotalProcessando:
+      0 : 0,
+    valorTotalProcessando: Array.isArray(pagamentos) ?
       pagamentos
         ?.filter((p) => p.status === 'em_processamento' || p.status === 'aprovado')
-        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
+        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0 : 0,
   };
 
   const getStatusColor = (status: string) => {
