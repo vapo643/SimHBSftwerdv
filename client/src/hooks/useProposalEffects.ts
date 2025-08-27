@@ -143,6 +143,10 @@ export function useProposalEffects() {
     state.loanData.dataCarencia,
     state.context,
     toast,
+    clearErrors,
+    clearSimulation,
+    setError,
+    setSimulationResult,
   ]);
 
   // Validation effect for limits
@@ -163,7 +167,7 @@ export function useProposalEffects() {
     } else {
       setError('valorSolicitado', '');
     }
-  }, [state.loanData.valorSolicitado, state.context]);
+  }, [state.loanData.valorSolicitado, state.context, setError]);
 
   // Validation effect for term limits
   useEffect(() => {
@@ -180,5 +184,5 @@ export function useProposalEffects() {
     } else {
       setError('prazo', '');
     }
-  }, [state.loanData.prazo, state.context]);
+  }, [state.loanData.prazo, state.context, setError]);
 }

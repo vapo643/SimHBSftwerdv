@@ -643,14 +643,14 @@ export default function Formalizacao() {
     if (propostaId && collectionsData && collectionsData.length > 0) {
       checkStorageStatus();
     }
-  }, [propostaId, collectionsData]);
+  }, [propostaId, collectionsData, checkStorageStatus]);
 
   // Auto-verificar status do carnê quando proposta carrega
   useEffect(() => {
     if (proposta && propostaId && collectionsData && collectionsData.length > 0) {
       checkCarneStatus();
     }
-  }, [proposta, propostaId, collectionsData]);
+  }, [proposta, propostaId, collectionsData, checkCarneStatus]);
 
   const form = useForm<UpdateFormalizacaoForm>({
     resolver: zodResolver(updateFormalizacaoSchema),
@@ -846,7 +846,7 @@ export default function Formalizacao() {
       // 🛡️ PROTEÇÃO: Só reseta se não tem link local
       setClickSignData(null);
     }
-  }, [initialClickSignData]);
+  }, [initialClickSignData, clickSignData?.signUrl]);
 
   // 🔄 REALTIME: Escutar mudanças na tabela propostas
   useEffect(() => {
