@@ -68,14 +68,61 @@ export class CcbRepository implements ICcbRepository {
     return result.length > 0 ? result[0] : null;
   }
 
-  async findByPropostaId(propostaId: string): Promise<Ccb[]> {
-    const results = await db
-      .select()
-      .from(ccbs)
-      .where(and(eq(ccbs.propostaId, propostaId), isNull(ccbs.deletedAt)))
-      .orderBy(desc(ccbs.createdAt));
+  async findByPropostaId(propostaId: string, userId?: string): Promise<Ccb[]> {
+    // RBAC: Se userId fornecido, verificar se o usuário tem acesso à proposta
+    if (userId) {
+      const results = await db
+        .select({
+          // Incluir todos os campos obrigatórios do tipo Ccb
+          id: ccbs.id,
+          propostaId: ccbs.propostaId,
+          numeroCCB: ccbs.numeroCCB,
+          valorCCB: ccbs.valorCCB,
+          status: ccbs.status,
+          caminhoDocumentoOriginal: ccbs.caminhoDocumentoOriginal,
+          urlDocumentoOriginal: ccbs.urlDocumentoOriginal,
+          caminhoDocumentoAssinado: ccbs.caminhoDocumentoAssinado,
+          urlDocumentoAssinado: ccbs.urlDocumentoAssinado,
+          clicksignDocumentKey: ccbs.clicksignDocumentKey,
+          clicksignSignerKey: ccbs.clicksignSignerKey,
+          clicksignListKey: ccbs.clicksignListKey,
+          clicksignSignUrl: ccbs.clicksignSignUrl,
+          clicksignStatus: ccbs.clicksignStatus,
+          dataEnvioAssinatura: ccbs.dataEnvioAssinatura,
+          dataAssinaturaConcluida: ccbs.dataAssinaturaConcluida,
+          prazoAssinatura: ccbs.prazoAssinatura,
+          tamanhoArquivo: ccbs.tamanhoArquivo,
+          hashDocumento: ccbs.hashDocumento,
+          versaoTemplate: ccbs.versaoTemplate,
+          criadoPor: ccbs.criadoPor,
+          observacoes: ccbs.observacoes,
+          createdAt: ccbs.createdAt,
+          updatedAt: ccbs.updatedAt,
+          deletedAt: ccbs.deletedAt
+        })
+        .from(ccbs)
+        .innerJoin(propostas, eq(ccbs.propostaId, propostas.id))
+        .where(
+          and(
+            eq(ccbs.propostaId, propostaId),
+            eq(propostas.userId, userId), // RBAC: Filtrar por proprietário
+            isNull(ccbs.deletedAt),
+            isNull(propostas.deletedAt)
+          )
+        )
+        .orderBy(desc(ccbs.createdAt));
 
-    return results;
+      return results;
+    } else {
+      // Sem RBAC - para uso interno do sistema
+      const results = await db
+        .select()
+        .from(ccbs)
+        .where(and(eq(ccbs.propostaId, propostaId), isNull(ccbs.deletedAt)))
+        .orderBy(desc(ccbs.createdAt));
+
+      return results;
+    }
   }
 
   async findReadyForSignature(): Promise<Ccb[]> {

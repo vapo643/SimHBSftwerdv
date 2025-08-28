@@ -71,6 +71,32 @@ export function requireAnyRole(req: AuthenticatedRequest, res: Response, next: N
 }
 
 /**
+ * Guard que requer permissões de FINANCEIRO ou ADMINISTRADOR
+ */
+export function requireFinanceiro(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void {
+  if (!req.user) {
+    res.status(401).json({ message: 'Usuário não autenticado' });
+    return;
+  }
+
+  const allowedRoles = ['FINANCEIRO', 'ADMINISTRADOR'];
+  if (!req.user.role || !allowedRoles.includes(req.user.role)) {
+    res.status(403).json({
+      message: 'Acesso negado. Permissões financeiras ou de administrador requeridas.',
+      requiredRoles: allowedRoles,
+      userRole: req.user.role,
+    });
+    return;
+  }
+
+  next();
+}
+
+/**
  * Guard customizável que aceita uma lista de roles
  */
 export function requireRoles(roles: string[]) {

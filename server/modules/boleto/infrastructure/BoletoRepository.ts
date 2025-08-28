@@ -73,14 +73,68 @@ export class BoletoRepository implements IBoletoRepository {
     return result.length > 0 ? result[0] : null;
   }
 
-  async findByPropostaId(propostaId: string): Promise<Boleto[]> {
-    const results = await db
-      .select()
-      .from(boletos)
-      .where(and(eq(boletos.propostaId, propostaId), isNull(boletos.deletedAt)))
-      .orderBy(asc(boletos.numeroParcela));
+  async findByPropostaId(propostaId: string, userId?: string): Promise<Boleto[]> {
+    // RBAC: Se userId fornecido, verificar se o usuário tem acesso à proposta
+    if (userId) {
+      const results = await db
+        .select({
+          // Incluir todos os campos obrigatórios do tipo Boleto
+          id: boletos.id,
+          propostaId: boletos.propostaId,
+          ccbId: boletos.ccbId,
+          numeroBoleto: boletos.numeroBoleto,
+          numeroParcela: boletos.numeroParcela,
+          totalParcelas: boletos.totalParcelas,
+          valorPrincipal: boletos.valorPrincipal,
+          valorJuros: boletos.valorJuros,
+          valorMulta: boletos.valorMulta,
+          valorTotal: boletos.valorTotal,
+          dataVencimento: boletos.dataVencimento,
+          dataEmissao: boletos.dataEmissao,
+          dataPagamento: boletos.dataPagamento,
+          status: boletos.status,
+          formaPagamento: boletos.formaPagamento,
+          bancoOrigemId: boletos.bancoOrigemId,
+          codigoBarras: boletos.codigoBarras,
+          linhaDigitavel: boletos.linhaDigitavel,
+          nossoNumero: boletos.nossoNumero,
+          pixTxid: boletos.pixTxid,
+          pixCopiaECola: boletos.pixCopiaECola,
+          qrCodePix: boletos.qrCodePix,
+          urlBoleto: boletos.urlBoleto,
+          urlComprovantePagamento: boletos.urlComprovantePagamento,
+          tentativasEnvio: boletos.tentativasEnvio,
+          ultimoEnvio: boletos.ultimoEnvio,
+          motivoCancelamento: boletos.motivoCancelamento,
+          geradoPor: boletos.geradoPor,
+          observacoes: boletos.observacoes,
+          createdAt: boletos.createdAt,
+          updatedAt: boletos.updatedAt,
+          deletedAt: boletos.deletedAt
+        })
+        .from(boletos)
+        .innerJoin(propostas, eq(boletos.propostaId, propostas.id))
+        .where(
+          and(
+            eq(boletos.propostaId, propostaId),
+            eq(propostas.userId, userId), // RBAC: Filtrar por proprietário
+            isNull(boletos.deletedAt),
+            isNull(propostas.deletedAt)
+          )
+        )
+        .orderBy(asc(boletos.numeroParcela));
 
-    return results;
+      return results;
+    } else {
+      // Sem RBAC - para uso interno do sistema
+      const results = await db
+        .select()
+        .from(boletos)
+        .where(and(eq(boletos.propostaId, propostaId), isNull(boletos.deletedAt)))
+        .orderBy(asc(boletos.numeroParcela));
+
+      return results;
+    }
   }
 
   async findByCcbId(ccbId: string): Promise<Boleto[]> {

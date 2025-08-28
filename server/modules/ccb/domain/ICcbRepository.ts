@@ -43,8 +43,9 @@ export interface CcbRepository {
   /**
    * Busca CCBs por proposta ID
    * Utilizada para verificar histórico de documentos de uma proposta
+   * RBAC: Filtra por acesso do usuário
    */
-  findByPropostaId(propostaId: string): Promise<Ccb[]>;
+  findByPropostaId(propostaId: string, userId?: string): Promise<Ccb[]>;
 
   /**
    * Busca CCBs prontas para envio para assinatura

@@ -50,8 +50,9 @@ export interface BoletoRepository {
   /**
    * Busca boletos por proposta ID
    * Para visualizar cronograma completo de pagamentos
+   * RBAC: Filtra por acesso do usuário
    */
-  findByPropostaId(propostaId: string): Promise<Boleto[]>;
+  findByPropostaId(propostaId: string, userId?: string): Promise<Boleto[]>;
 
   /**
    * Busca boletos por CCB ID
