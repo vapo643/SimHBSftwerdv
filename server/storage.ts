@@ -42,8 +42,9 @@ import {
 import { db } from './lib/supabase';
 import { eq, desc, and, or, not, isNull } from 'drizzle-orm';
 import { transitionTo, InvalidTransitionError } from './services/statusFsmService';
+import { unitOfWork, Transaction, IUnitOfWork } from './lib/unit-of-work';
 
-export interface IStorage {
+export interface IStorage extends IUnitOfWork {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
@@ -199,6 +200,16 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Unit of Work Pattern implementation
+  async withTransaction<T>(operation: (tx: Transaction) => Promise<T>): Promise<T> {
+    return await unitOfWork.withTransaction(operation);
+  }
+
+  async withParallelTransaction<T>(
+    operations: Array<(tx: Transaction) => Promise<any>>
+  ): Promise<T[]> {
+    return await unitOfWork.withParallelTransaction(operations);
+  }
   async getUser(id: number): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return result[0];
