@@ -2,6 +2,7 @@ import { Queue } from 'bullmq';
 import { DomainEvent } from '../../modules/shared/domain/events/DomainEvent';
 import logger from '../../lib/logger';
 import { getRedisConnectionConfig } from '../../lib/redis-config';
+import { dlqManager } from '../../lib/dead-letter-queue';
 
 export class EventDispatcher {
   private static instance: EventDispatcher;
@@ -34,6 +35,10 @@ export class EventDispatcher {
           removeOnFail: false,
         },
       });
+      
+      // Note: DLQ handlers are set up on Workers, not Queues
+      // Workers will register their own DLQ handlers
+      
       this.queues.set(queueName, queue);
     }
     return this.queues.get(queueName)!;

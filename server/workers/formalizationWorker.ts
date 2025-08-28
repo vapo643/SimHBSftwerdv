@@ -3,6 +3,7 @@ import logger from '../lib/logger';
 import { GenerateCcbUseCase } from '../modules/ccb/application/GenerateCcbUseCase';
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
 import { getRedisConnectionConfig } from '../lib/redis-config';
+import { dlqManager } from '../lib/dead-letter-queue';
 // ClickSign service will be imported when needed
 
 interface ProposalApprovedPayload {
@@ -32,6 +33,10 @@ export class FormalizationWorker {
       {
         connection: this.redisConnection,
         concurrency: 5, // Processar até 5 propostas simultaneamente
+        // Job retry configuration - must match queue defaults
+        settings: {
+          retryProcessDelay: 2000, // 2 seconds between retries
+        },
       }
     );
 
@@ -113,6 +118,9 @@ export class FormalizationWorker {
   }
 
   private setupEventHandlers(): void {
+    // Set up DLQ handler for this worker
+    dlqManager.setupFailedJobHandler(this.worker, 'formalization-queue');
+    
     this.worker.on('completed', (job) => {
       logger.info('Formalization job completed', {
         jobId: job.id,
@@ -120,8 +128,10 @@ export class FormalizationWorker {
       });
     });
 
+    // Note: 'failed' event is now handled by DLQ manager
+    // Keeping this for additional worker-specific logging if needed
     this.worker.on('failed', (job, error) => {
-      logger.error('Formalization job failed', {
+      logger.error('Formalization job failed (worker-level logging)', {
         jobId: job?.id,
         proposalId: job?.data.aggregateId,
         error: error.message,

@@ -1,0 +1,53 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Rede de Segurança" / Missão 2: Padrão Dead-Letter Queue
+
+* **Sumário da Missão (O Quê):** Implementar o padrão Dead-Letter Queue (DLQ) para todas as filas críticas do BullMQ, especialmente a `formalization-queue`. Jobs que falharem após todas as tentativas de reprocessamento devem ser movidos para uma DLQ dedicada para análise manual e prevenção de perda de dados.
+* **Intenção Estratégica (O Porquê):** Garantir a resiliência e a rastreabilidade do nosso sistema assíncrono. A DLQ é uma rede de segurança não negociável que captura transações financeiras falhadas (ex: falha na geração de CCB ou envio para ClickSign), prevenindo a perda silenciosa de operações de negócio críticas e garantindo a conformidade de auditoria.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de SRE (Site Reliability Engineering) a blindar um sistema contra falhas. Sua tarefa é configurar o BullMQ para lidar com falhas de forma graciosa, isolando os *jobs* problemáticos para que não impactem a saúde geral da fila e possam ser investigados posteriormente.
+
+---
+
+**IMPLEMENTAR (Plano de Implementação):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+Os *workers* BullMQ (ex: `formalizationWorker.ts`) estão implementados com uma política de *retry* básica. Não existe um mecanismo de DLQ para capturar *jobs* que falham permanentemente.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Uma nova fila BullMQ, nomeada `dead-letter-queue`, é criada e configurada.
+2.  A configuração do *worker* da fila `formalization-queue` é atualizada para mover automaticamente os *jobs* falhados para a `dead-letter-queue` após esgotar todas as tentativas.
+3.  A lógica inclui a captura e o armazenamento de informações de erro relevantes (ex: a mensagem de erro, o número de tentativas) no *job* que é movido para a DLQ.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Configurar a Dead-Letter Queue**
+1.1. No ficheiro de configuração central das filas (`server/lib/queues.ts` ou similar), instancie uma nova `Queue` do BullMQ chamada `dead-letter-queue`.
+1.2. Configure um *listener* de eventos global para a fila principal (`formalization-queue`) que escute pelo evento `failed`.
+
+**Passo 2: Implementar a Lógica de Transferência para a DLQ**
+2.1. Dentro do *handler* do evento `failed`, implemente a lógica para mover o *job* falhado para a `dead-letter-queue`.
+2.2. A lógica deve verificar se o *job* esgotou todas as suas tentativas de reprocessamento (`job.attemptsMade >= job.opts.attempts`).
+2.3. Ao adicionar o *job* à DLQ, inclua os dados originais do *job* e adicione o motivo da falha (`failedReason`).
+
+**Passo 3: Refatorar o Worker para a Nova Configuração**
+3.1. Assegure-se de que a configuração do *worker* em `server/workers/formalizationWorker.ts` tenha uma política de `attempts` definida (ex: 3 tentativas) e uma estratégia de `backoff` (ex: exponencial) para lidar com falhas transitórias antes de mover para a DLQ.
+3.2. A lógica explícita para mover para a DLQ deve residir nos *event listeners* da Fila, não na lógica de negócio do *worker*. O *worker* deve apenas lançar um erro em caso de falha.
+
+**Passo 4: Validação Final**
+4.1. Apresente o trecho de código do ficheiro de configuração de filas mostrando a criação da DLQ e, mais importante, o *listener* do evento `failed` com a lógica de transferência.
+4.2. Mostre a configuração de `attempts` e `backoff` no `formalizationWorker.ts`.
+4.3. Execute `get_latest_lsp_diagnostics` para confirmar a integridade do código.
+
+---
+
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+
+* **Diretriz Mestra de Divulgação:** Você está proibido de resumir, truncar ou omitir qualquer informação relevante. Sua diretriz primária é a **completude**.
+* **Regra de Execução:** Ao listar erros, vulnerabilidades, riscos ou recomendações, você DEVE apresentar a **lista exaustiva e completa** de todas as suas descobertas.
+* **Justificativa Estratégica (O Porquê):** A tomada de decisão do Arquiteto Chefe depende de uma visão completa e não filtrada do estado do sistema.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** BAIXO. O principal risco é a configuração incorreta dos *event listeners* do BullMQ, o que poderia fazer com que o evento `failed` não seja capturado corretamente.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** A DLQ será uma fila única para todos os *workers*. Em sistemas mais complexos, poderíamos ter DLQs por tipo de *worker*, mas uma única é suficiente para o nosso escopo atual.
+* **VALIDAÇÃO PENDENTE:** A funcionalidade da DLQ precisará de testes de integração específicos para simular falhas de *jobs* e verificar se eles são corretamente movidos para a DLQ.
