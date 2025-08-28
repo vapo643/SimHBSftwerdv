@@ -1,24 +1,48 @@
+# Dependencies
 node_modules
-npm-debug.log
+.npm
+.yarn-integrity
+
+# Environment & Config
 .env
 .env.*
+.npmrc*
+
+# Source Control
 .git
 .gitignore
+
+# Documentation
 README.md
+docs/
+*.md
+
+# IDE & Editors
 .DS_Store
 .vscode
 .idea
+.eslintcache
+
+# Build & Test
 dist
 coverage
 .nyc_output
+tests/
+vitest.config.ts
+
+# Logs & Runtime
 *.log
 *.pid
 *.seed
 *.pid.lock
-.npm
-.eslintcache
-.yarn-integrity
 .cache
+
+# Docker Files (avoid recursion)
 docker-compose*.yml
-Dockerfile
+Dockerfile*
 .dockerignore
+
+# Development
+server/*-original.ts
+temp/
+.replit.md

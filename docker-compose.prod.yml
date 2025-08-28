@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simpix-app-prod
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}  # Supabase PostgreSQL
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      CSRF_SECRET: ${CSRF_SECRET}
+      CLICKSIGN_API_KEY: ${CLICKSIGN_API_KEY}
+      INTER_CLIENT_ID: ${INTER_CLIENT_ID}
+      INTER_CLIENT_SECRET: ${INTER_CLIENT_SECRET}
+      INTER_CERT_PATH: ${INTER_CERT_PATH}
+      INTER_KEY_PATH: ${INTER_KEY_PATH}
+    depends_on:
+      - redis
+    networks:
+      - simpix-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: simpix-redis-prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    networks:
+      - simpix-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+networks:
+  simpix-network:
+    driver: bridge
+
+volumes:
+  redis-data:
