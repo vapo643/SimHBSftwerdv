@@ -20,17 +20,11 @@ export interface AuthenticatedRequest extends Request {
 
 // Interface já definida acima
 
-// Token blacklist para segurança aprimorada (SAMM Optimization)
-const tokenBlacklist = new Set<string>();
-const TOKEN_BLACKLIST_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hora
-
-// Rate limiting por usuário (SAMM Optimization)
-const userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
+// Constants for Redis-based security features
+const TOKEN_BLACKLIST_TTL = 60 * 60; // 1 hour in seconds
 const MAX_AUTH_ATTEMPTS = 10;
-const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
-
-// User token tracking for invalidation on account deactivation
-const userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
+const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
 
 // Redis client for distributed token validation cache
 const redisClient = createRedisClient('jwt-token-cache');
@@ -44,55 +38,105 @@ interface TokenCacheEntry {
   timestamp: number;
 }
 
-// Limpar blacklist periodicamente
-setInterval(() => {
-  tokenBlacklist.clear();
-  userTokens.clear();
-}, TOKEN_BLACKLIST_CLEANUP_INTERVAL);
+// Redis TTL handles automatic cleanup - no manual intervals needed
 
 /**
- * Adiciona um token ao blacklist (ASVS 7.1.3 - Token Rotation)
+ * Distributed rate limiting for authentication attempts using Redis
  */
-export function addToBlacklist(token: string): void {
-  tokenBlacklist.add(token);
-  securityLogger.logEvent({
-    type: SecurityEventType.TOKEN_BLACKLISTED,
-    severity: 'LOW',
-    success: true,
-    details: { reason: 'Token added to blacklist' },
-  });
+async function checkAuthRateLimit(identifier: string): Promise<boolean> {
+  try {
+    const key = `auth_attempts:${identifier}`;
+    const attempts = await redisClient.get(key);
+    
+    if (!attempts) {
+      // First attempt - set counter with TTL
+      await redisClient.setex(key, AUTH_ATTEMPTS_TTL, '1');
+      return true; // Allow
+    }
+    
+    const attemptCount = parseInt(attempts, 10);
+    if (attemptCount >= MAX_AUTH_ATTEMPTS) {
+      return false; // Rate limited
+    }
+    
+    // Increment counter and refresh TTL
+    await redisClient.incr(key);
+    await redisClient.expire(key, AUTH_ATTEMPTS_TTL);
+    return true; // Allow
+  } catch (error) {
+    console.error('[JWT AUTH] Rate limit check failed:', error);
+    return true; // Allow on Redis error - don't block auth flow
+  }
 }
 
 /**
- * Invalida todos os tokens de um usuário (ASVS 7.2.4 - Token Rotation on Login)
- * Também usado para ASVS 8.3.7 - Account Deactivation
+ * Adiciona um token ao blacklist distribuído via Redis (ASVS 7.1.3 - Token Rotation)
  */
-export function invalidateAllUserTokens(userId: string): void {
-  const tokens = userTokens.get(userId);
-  if (tokens && tokens.size > 0) {
-    tokens.forEach((token) => tokenBlacklist.add(token));
-    userTokens.delete(userId);
+export async function addToBlacklist(token: string): Promise<void> {
+  try {
+    await redisClient.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1');
     securityLogger.logEvent({
       type: SecurityEventType.TOKEN_BLACKLISTED,
-      severity: 'HIGH',
-      userId,
+      severity: 'LOW',
       success: true,
-      details: {
-        reason: 'All user tokens invalidated - token rotation',
-        tokenCount: tokens.size,
-      },
+      details: { reason: 'Token added to distributed blacklist' },
     });
+  } catch (error) {
+    console.error('[JWT AUTH] Failed to add token to blacklist:', error);
+    // Log error but don't throw to prevent blocking auth flow
   }
 }
 
 /**
- * Rastreia um token para um usuário
+ * Invalida todos os tokens de um usuário via Redis distribuído (ASVS 7.2.4 - Token Rotation on Login)
+ * Também usado para ASVS 8.3.7 - Account Deactivation
  */
-export function trackUserToken(userId: string, token: string): void {
-  if (!userTokens.has(userId)) {
-    userTokens.set(userId, new Set());
+export async function invalidateAllUserTokens(userId: string): Promise<void> {
+  try {
+    // Get all tokens for user from Redis set
+    const tokens = await redisClient.smembers(`user_tokens:${userId}`);
+    
+    if (tokens.length > 0) {
+      // Add each token to blacklist
+      const blacklistPromises = tokens.map(token => 
+        redisClient.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1')
+      );
+      
+      // Remove the user tokens set
+      await Promise.all([
+        ...blacklistPromises,
+        redisClient.del(`user_tokens:${userId}`)
+      ]);
+      
+      securityLogger.logEvent({
+        type: SecurityEventType.TOKEN_BLACKLISTED,
+        severity: 'HIGH',
+        userId,
+        success: true,
+        details: {
+          reason: 'All user tokens invalidated via distributed cache',
+          tokenCount: tokens.length,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('[JWT AUTH] Failed to invalidate user tokens:', error);
+    // Log error but don't throw to prevent blocking auth flow
   }
-  userTokens.get(userId)!.add(token);
+}
+
+/**
+ * Rastreia um token para um usuário via Redis distribuído
+ */
+export async function trackUserToken(userId: string, token: string): Promise<void> {
+  try {
+    // Add token to user's Redis set with TTL matching token cache
+    await redisClient.sadd(`user_tokens:${userId}`, token);
+    await redisClient.expire(`user_tokens:${userId}`, CACHE_TTL_SECONDS);
+  } catch (error) {
+    console.error('[JWT AUTH] Failed to track user token:', error);
+    // Log error but don't throw to prevent blocking auth flow
+  }
 }
 
 /**
@@ -155,18 +199,40 @@ export async function jwtAuthMiddleware(
       );
     }
 
-    // SAMM Optimization: Check token blacklist
-    if (tokenBlacklist.has(token)) {
+    // Distributed rate limiting check (SAMM Optimization)
+    const clientIP = getClientIP(req);
+    const isAllowed = await checkAuthRateLimit(clientIP);
+    if (!isAllowed) {
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_INVALID,
         severity: 'HIGH',
-        ipAddress: getClientIP(req),
+        ipAddress: clientIP,
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: 'Token is blacklisted' },
+        details: { reason: 'Too many authentication attempts - rate limited' },
       });
-      return res.status(401).json({ message: 'Token inválido' });
+      return res.status(429).json({ message: 'Muitas tentativas de autenticação. Tente novamente mais tarde.' });
+    }
+
+    // SAMM Optimization: Check distributed token blacklist via Redis
+    try {
+      const isBlacklisted = await redisClient.get(`blacklist:${token}`);
+      if (isBlacklisted) {
+        securityLogger.logEvent({
+          type: SecurityEventType.TOKEN_INVALID,
+          severity: 'HIGH',
+          ipAddress: getClientIP(req),
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          success: false,
+          details: { reason: 'Token is blacklisted via distributed cache' },
+        });
+        return res.status(401).json({ message: 'Token inválido' });
+      }
+    } catch (redisError) {
+      console.warn('[JWT AUTH] Blacklist check failed, proceeding without check:', redisError);
+      // Continue without blacklist check - Redis failure shouldn't block auth
     }
 
     let userId: string | undefined;
@@ -379,8 +445,8 @@ export async function jwtAuthMiddleware(
 
     const profile = profileResult[0];
 
-    // Track the current token for this user (for token rotation)
-    trackUserToken(userId, token);
+    // Track the current token for this user via distributed cache (for token rotation)
+    await trackUserToken(userId, token);
 
     // Step e: Attach complete and valid profile to req.user
     req.user = {
