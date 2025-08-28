@@ -87,7 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     throttle: 1000, // Reduz a frequência de eventos para performance
   });
 
-  const fetchUserProfile = async (currentSession: Session | null) => {
+  const fetchUserProfile = useCallback(async (currentSession: Session | null) => {
     try {
       if (currentSession?.user) {
         try {
@@ -123,10 +123,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Conservative refetch strategy: maintain old data while fetching new
-  const refetchUser = async () => {
+  const refetchUser = useCallback(async () => {
     // Don't set loading to true to maintain current user data
     try {
       const supabase = getSupabase();
@@ -154,7 +154,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setError(err as Error);
       // Keep existing user data on error (conservative strategy)
     }
-  };
+  }, []);
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -192,7 +192,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       subscription?.unsubscribe();
     };
-  }, []);
+  }, [fetchUserProfile]);
 
   const value = {
     user,

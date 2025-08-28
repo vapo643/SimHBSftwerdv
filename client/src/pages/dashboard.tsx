@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link, useLocation } from 'wouter';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -352,12 +352,12 @@ const Dashboard: React.FC = () => {
     };
   }, [propostasData]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     if (user?.role === 'ATENDENTE') {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
     }
-  };
+  }, [queryClient, user?.role]);
 
   // Agora sim os returns condicionais - DEPOIS de todos os hooks
   if (isLoading) {
