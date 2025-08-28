@@ -1,0 +1,60 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Sprint 2 / US S2-005: Abstração de File Storage
+
+* **Sumário da Missão (O Quê):** Implementar o Padrão de Projeto "Adapter" para a funcionalidade de armazenamento de ficheiros, criando uma abstração (`IStorageProvider`) que desacopla a lógica de negócio da implementação concreta do Supabase Storage.
+* **Intenção Estratégica (O Porquê):** Aumentar a manutenibilidade e a portabilidade do sistema. Ao depender de uma interface, facilitamos a substituição futura do provedor de armazenamento (ex: de Supabase para Azure Blob Storage) sem a necessidade de reescrever a lógica de negócio que consome este serviço.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de software aplicando o princípio da Inversão de Dependência (o "D" de SOLID). Você definirá um contrato (interface) para o que o armazenamento de ficheiros deve fazer, e depois criará uma implementação (adapter) que cumpre esse contrato usando a tecnologia atual (Supabase).
+
+---
+
+**IMPLEMENTAR (Plano de Implementação):**
+Execute a seguinte sequência de ações para implementar a abstração de armazenamento de ficheiros.
+
+**CURRENT STATE:**
+Os serviços que precisam armazenar ficheiros (ex: `ccbGenerationService`, `boletoStorageService`) provavelmente interagem diretamente com o cliente Supabase.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Uma interface genérica `IStorageProvider` existe na camada de domínio partilhada.
+2.  Uma classe `SupabaseStorageAdapter` que implementa `IStorageProvider` existe na camada de infraestrutura.
+3.  Os serviços que realizam upload ou download de ficheiros foram refatorados para usar a abstração `IStorageProvider` através de injeção de dependência, em vez de dependerem diretamente do cliente Supabase.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Definir a Interface de Abstração (Contrato)**
+1.1. Crie um novo ficheiro em `server/modules/shared/domain/IStorageProvider.ts`.
+1.2. Defina a interface `IStorageProvider` com os métodos essenciais para o armazenamento de ficheiros, como:
+    ```typescript
+    // Em server/modules/shared/domain/IStorageProvider.ts
+    export interface UploadResult {
+      filePath: string;
+      publicUrl: string;
+    }
+
+    export interface IStorageProvider {
+      upload(fileBuffer: Buffer, destinationPath: string, bucketName: string): Promise<UploadResult>;
+      getDownloadUrl(filePath: string, bucketName: string): Promise<string>;
+      delete(filePath: string, bucketName: string): Promise<void>;
+    }
+    ```
+
+**Passo 2: Implementar o Adaptador Concreto para Supabase**
+2.1. Crie um novo ficheiro em `server/modules/shared/infrastructure/SupabaseStorageAdapter.ts`.
+2.2. Crie a classe `SupabaseStorageAdapter` que implementa a interface `IStorageProvider`.
+2.3. No construtor da classe, injete o cliente Supabase.
+2.4. Implemente os métodos `upload`, `getDownloadUrl` e `delete` usando as funções correspondentes do SDK do Supabase Storage (ex: `supabase.storage.from(bucketName).upload(...)`).
+
+**Passo 3: Refatorar um Serviço Consumidor**
+3.1. Identifique um serviço que realiza o upload de ficheiros, como o serviço responsável pela geração de CCBs.
+3.2. Refatore este serviço para receber uma instância de `IStorageProvider` no seu construtor (Injeção de Dependência).
+3.3. Substitua as chamadas diretas ao SDK do Supabase pelas chamadas aos métodos do `IStorageProvider` (ex: `this.storageProvider.upload(...)`).
+
+**Passo 4: Validação Final**
+4.1. Apresente o conteúdo dos ficheiros `IStorageProvider.ts` e `SupabaseStorageAdapter.ts`.
+4.2. Mostre o *snippet* de código do serviço que foi refatorado, destacando como a injeção de dependência foi aplicada e como o `IStorageProvider` é utilizado.
+4.3. Execute `get_latest_lsp_diagnostics` para garantir que a refatoração não introduziu erros de compilação.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 98%
+* **RISCOS IDENTIFICADOS:** BAIXO. O principal risco é a gestão correta dos `buckets` de armazenamento do Supabase, que devem ser passados como parâmetros para garantir a flexibilidade do adaptador.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** A implementação seguirá o Padrão Adapter e o Princípio de Inversão de Dependência para máximo desacoplamento.
+* **VALIDAÇÃO PENDENTE:** Os serviços refatorados precisarão de testes de integração para validar que o fluxo de upload e download de ficheiros continua a funcionar através da nova camada de abstração.

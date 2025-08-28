@@ -2,14 +2,27 @@
  * Documents Service
  * Business logic for document operations
  * PAM V1.0 - Service layer implementation
+ * Refatorado para usar abstração IStorageProvider (Padrão Adapter + Injeção de Dependência)
  */
 
-import { documentsRepository } from '../repositories/documents.repository.js';
+import { DocumentsRepository } from '../repositories/documents.repository.js';
+import { IStorageProvider } from '../modules/shared/domain/IStorageProvider';
+import { SupabaseStorageAdapter } from '../modules/shared/infrastructure/SupabaseStorageAdapter';
+import { createServerSupabaseAdminClient } from '../lib/supabase';
 
 export class DocumentsService {
+  private documentsRepository: DocumentsRepository;
+
+  constructor(storageProvider?: IStorageProvider) {
+    // Usar provider injetado ou criar instância padrão do Supabase
+    const provider = storageProvider || new SupabaseStorageAdapter(createServerSupabaseAdminClient());
+    this.documentsRepository = new DocumentsRepository(provider);
+  }
+
   /**
    * Get documents for a proposal
    */
+
   async getProposalDocuments(propostaId: string): Promise<{
     propostaId: string;
     totalDocuments: number;
@@ -17,7 +30,7 @@ export class DocumentsService {
   }> {
     try {
       // Get proposal to check CCB document
-      const proposta = await documentsRepository.getProposalById(propostaId);
+      const proposta = await this.documentsRepository.getProposalById(propostaId);
 
       if (!proposta) {
         throw new Error('Proposta não encontrada');
@@ -38,7 +51,7 @@ export class DocumentsService {
       }
 
       // Get other documents
-      const propostaDocuments = await documentsRepository.getProposalDocuments(propostaId);
+      const propostaDocuments = await this.documentsRepository.getProposalDocuments(propostaId);
 
       for (const doc of propostaDocuments) {
         try {
@@ -57,7 +70,7 @@ export class DocumentsService {
           console.log(`[DOCUMENTS_SERVICE] Generating signed URL for: ${filePath}`);
 
           // Generate signed URL
-          const signedUrl = await documentsRepository.generateSignedUrl(filePath, 3600);
+          const signedUrl = await this.documentsRepository.generateSignedUrl(filePath, 3600);
 
           documents.push({
             name: doc.nomeArquivo,
@@ -108,7 +121,7 @@ export class DocumentsService {
   }> {
     try {
       // Verify proposal exists
-      const proposta = await documentsRepository.getProposalById(propostaId);
+      const proposta = await this.documentsRepository.getProposalById(propostaId);
 
       if (!proposta) {
         return {
@@ -122,8 +135,8 @@ export class DocumentsService {
       const fileName = `${timestamp}-${file.originalname}`;
       const filePath = `proposta-${propostaId}/${fileName}`;
 
-      // Upload to storage
-      const uploadResult = await documentsRepository.uploadToStorage(
+      // Upload to storage (usando abstração IStorageProvider)
+      const uploadResult = await this.documentsRepository.uploadToStorage(
         filePath,
         file.buffer,
         file.mimetype
@@ -137,7 +150,7 @@ export class DocumentsService {
       }
 
       // Save document record
-      const document = await documentsRepository.createDocument({
+      const document = await this.documentsRepository.createDocument({
         proposta_id: propostaId,
         nome_arquivo: file.originalname,
         url: uploadResult.publicUrl,
@@ -179,7 +192,7 @@ export class DocumentsService {
     try {
       console.log(`[DOCUMENTS_SERVICE] Downloading document: ${path}`);
 
-      const signedUrl = await documentsRepository.generateSignedUrl(path, 3600);
+      const signedUrl = await this.documentsRepository.generateSignedUrl(path, 3600);
 
       if (!signedUrl) {
         const isNotFound = path.includes('not-found');
@@ -207,4 +220,8 @@ export class DocumentsService {
   }
 }
 
+// Instância padrão com Supabase Storage Adapter
 export const documentsService = new DocumentsService();
+
+// Para testes ou outros provedores de storage, usar:
+// const customDocumentsService = new DocumentsService(customStorageProvider);

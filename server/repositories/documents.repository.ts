@@ -2,16 +2,20 @@
  * Documents Repository
  * Handles all database operations for document-related data
  * PAM V1.0 - Repository pattern implementation
+ * Refatorado para usar abstração IStorageProvider (Padrão Adapter)
  */
 
 import { BaseRepository } from './base.repository.js';
-import { db, createServerSupabaseAdminClient } from '../lib/supabase.js';
+import { db } from '../lib/supabase.js';
 import { propostaDocumentos, propostas } from '@shared/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import type { PropostaDocumento } from '@shared/schema';
+import { IStorageProvider } from '../modules/shared/domain/IStorageProvider';
 
 export class DocumentsRepository extends BaseRepository<typeof propostaDocumentos> {
-  constructor() {
+  private readonly BUCKET_NAME = 'documents';
+
+  constructor(private storageProvider: IStorageProvider) {
     super('proposta_documentos');
   }
 
@@ -115,7 +119,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
   }
 
   /**
-   * Upload file to storage
+   * Upload file to storage (usando abstração IStorageProvider)
    */
   async uploadToStorage(
     filePath: string,
@@ -123,23 +127,16 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
     contentType: string
   ): Promise<{ publicUrl: string } | null> {
     try {
-      const supabase = createServerSupabaseAdminClient();
+      console.log(`[DOCUMENTS_REPO] Uploading file '${filePath}' using storage abstraction`);
+      
+      const uploadResult = await this.storageProvider.upload(
+        fileBuffer,
+        filePath,
+        this.BUCKET_NAME
+      );
 
-      const { data, error } = await supabase.storage
-        .from('documents')
-        .upload(filePath, fileBuffer, {
-          contentType,
-          upsert: false,
-        });
-
-      if (error) {
-        console.error('[DOCUMENTS_REPO] Upload error:', error);
-        return null;
-      }
-
-      const { data: publicUrl } = supabase.storage.from('documents').getPublicUrl(filePath);
-
-      return publicUrl;
+      console.log(`[DOCUMENTS_REPO] Upload successful: ${uploadResult.publicUrl}`);
+      return { publicUrl: uploadResult.publicUrl };
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error uploading to storage:', error);
       return null;
@@ -147,27 +144,55 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
   }
 
   /**
-   * Generate signed URL for a document
+   * Generate signed URL for a document (usando abstração IStorageProvider)
    */
   async generateSignedUrl(path: string, expiresIn: number = 3600): Promise<string | null> {
     try {
-      const supabase = createServerSupabaseAdminClient();
+      console.log(`[DOCUMENTS_REPO] Generating signed URL for '${path}' using storage abstraction`);
+      
+      const signedUrl = await this.storageProvider.getDownloadUrl(
+        path,
+        this.BUCKET_NAME,
+        expiresIn
+      );
 
-      const { data, error } = await supabase.storage
-        .from('documents')
-        .createSignedUrl(path, expiresIn);
-
-      if (error) {
-        console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
-        return null;
-      }
-
-      return data.signedUrl;
+      console.log(`[DOCUMENTS_REPO] Signed URL generated successfully`);
+      return signedUrl;
     } catch (error) {
       console.error('[DOCUMENTS_REPO] Error generating signed URL:', error);
       return null;
     }
   }
+
+  /**
+   * Verifica se um documento existe no storage
+   */
+  async documentExists(path: string): Promise<boolean> {
+    try {
+      return await this.storageProvider.exists(path, this.BUCKET_NAME);
+    } catch (error) {
+      console.error('[DOCUMENTS_REPO] Error checking document existence:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Remove um documento do storage
+   */
+  async deleteFromStorage(path: string): Promise<boolean> {
+    try {
+      console.log(`[DOCUMENTS_REPO] Deleting file '${path}' using storage abstraction`);
+      
+      await this.storageProvider.delete(path, this.BUCKET_NAME);
+      
+      console.log(`[DOCUMENTS_REPO] File deleted successfully`);
+      return true;
+    } catch (error) {
+      console.error('[DOCUMENTS_REPO] Error deleting from storage:', error);
+      return false;
+    }
+  }
 }
 
-export const documentsRepository = new DocumentsRepository();
+// NOTE: A instância é criada com injeção de dependência no service
+// export const documentsRepository = new DocumentsRepository();
