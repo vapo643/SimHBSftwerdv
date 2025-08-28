@@ -1,0 +1,60 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Sprint 2 / US S2-002: Padrão Repository
+
+* **Sumário da Missão (O Quê):** Implementar o Padrão Repository para as entidades de negócio, criando uma camada de abstração de persistência que separa a lógica de domínio do acesso direto aos dados via Drizzle ORM.
+* **Intenção Estratégica (O Porquê):** Garantir o baixo acoplamento entre a lógica de negócio e a camada de dados, facilitar a testabilidade dos *services* com *mocks*, e centralizar toda a lógica de construção de queries, incluindo consultas de negócio complexas e paginação por cursor.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de backend sênior aplicando os princípios de Domain-Driven Design (DDD). Sua tarefa é criar as interfaces (contratos) no nível do domínio e as implementações concretas na camada de infraestrutura.
+
+---
+
+**IMPLEMENTAR (Plano de Implementação):**
+Execute a seguinte sequência de ações para implementar o Padrão Repository.
+
+**CURRENT STATE:**
+O schema Drizzle está definido em `shared/schema.ts`. Os serviços de negócio atualmente podem ou não interagir diretamente com o Drizzle.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Interfaces de repositório (ex: `IProposalRepository`) estão definidas na camada de domínio (`server/modules/*/domain/`).
+2.  Implementações concretas (ex: `ProposalRepository`) existem na camada de infraestrutura (`server/modules/*/infrastructure/`), utilizando Drizzle para interagir com a base de dados.
+3.  A paginação baseada em cursor está implementada nos métodos de listagem principais.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Criar as Interfaces (Contratos) do Repositório**
+1.1. No diretório de domínio de cada módulo principal (ex: `server/modules/proposal/domain/`), crie um ficheiro de interface para o repositório (ex: `IProposalRepository.ts`).
+1.2. Defina a interface com os métodos de CRUD básicos e as queries de negócio específicas, conforme o blueprint estratégico. Para o `ProposalRepository`, a interface deve ser:
+    ```typescript
+    // Em server/modules/proposal/domain/IProposalRepository.ts
+    import { Proposal, ProposalStatus } from './Proposal';
+    import { PaginatedResult } from 'src/shared/types'; // (Crie este tipo se não existir)
+
+    export interface IProposalRepository {
+      // CRUD Básico
+      save(proposal: Proposal): Promise<void>;
+      findById(id: string): Promise<Proposal | null>;
+
+      // Queries de Negócio Específicas
+      findByClienteCpfAndStatus(cpf: string, status: ProposalStatus[]): Promise<Proposal[]>;
+      findPendingForAnalysis(limit: number, cursor?: string): Promise<PaginatedResult<Proposal>>;
+      findByComprometimentoRenda(threshold: number): Promise<Proposal[]>;
+      findPendingByAnalyst(analistaId: string): Promise<Proposal[]>;
+      findReadyForCCBGeneration(): Promise<Proposal[]>;
+      findAwaitingBoletoGeneration(): Promise<Proposal[]>;
+    }
+    ```
+1.3. Repita o processo para outras entidades principais como `Pagamentos`, `CCBs` e `Boletos`, criando as interfaces correspondentes.
+
+**Passo 2: Implementar os Repositórios Concretos**
+2.1. Na camada de infraestrutura de cada módulo (ex: `server/modules/proposal/infrastructure/`), crie a classe de implementação concreta (ex: `ProposalRepository.ts`).
+2.2. A classe deve implementar a interface definida no Passo 1 e usar o cliente Drizzle para executar as queries na base de dados.
+2.3. Implemente a lógica de **Paginação Baseada em Cursor** para o método `findPendingForAnalysis`. A lógica deve filtrar os resultados com base no cursor (que pode ser um `id` ou `timestamp`) e sempre retornar o próximo cursor.
+
+**Passo 3: Validação Final**
+3.1. Apresente o conteúdo dos ficheiros de interface e implementação para o `ProposalRepository`.
+3.2. Execute `get_latest_lsp_diagnostics` para garantir que a implementação não introduziu erros de tipo.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** BAIXO. A complexidade principal reside na implementação correta da lógica de paginação por cursor. O Agente deve garantir que a ordenação e a filtragem (`WHERE`) da query estejam corretas para evitar a perda de registos entre as páginas.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** O cursor para a paginação será baseado no campo `created_at` (ou um campo sequencial como `id`) da tabela `propostas`.
+* **VALIDAÇÃO PENDENTE:** A lógica do Padrão Repository será validada através de testes de integração no Sprint 3, quando os *use cases* forem implementados.

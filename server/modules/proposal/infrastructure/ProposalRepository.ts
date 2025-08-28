@@ -5,11 +5,12 @@
  * Parte da camada de infraestrutura.
  */
 
-import { eq, and, gte, lte, or, isNull, sql } from 'drizzle-orm';
+import { eq, and, gte, lte, or, isNull, sql, inArray, desc, asc, gt, lt } from 'drizzle-orm';
 import { db } from '../../../lib/supabase';
-import { propostas } from '@shared/schema';
-import { Proposal } from '../domain/Proposal';
+import { propostas, ccbs, boletos } from '@shared/schema';
+import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposalRepository';
+import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
 
 export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
@@ -213,6 +214,194 @@ export class ProposalRepository implements IProposalRepository {
       .from(propostas);
 
     return result[0].maxNumero + 1;
+  }
+
+  // ========================================================================
+  // NOVOS MÉTODOS - PAM V1.0 QUERIES DE NEGÓCIO ESPECÍFICAS
+  // ========================================================================
+
+  async findByClienteCpfAndStatus(cpf: string, status: ProposalStatus[]): Promise<Proposal[]> {
+    const cleanCPF = cpf.replace(/\D/g, '');
+    
+    const results = await db
+      .select()
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.clienteCpf, cleanCPF),
+          inArray(propostas.status, status),
+          isNull(propostas.deletedAt)
+        )
+      )
+      .orderBy(desc(propostas.createdAt));
+
+    return results.map((row) => this.mapToDomain(row));
+  }
+
+  async findPendingForAnalysis(
+    options: CursorPaginationOptions,
+    filters?: RepositoryFilters
+  ): Promise<PaginatedResult<Proposal>> {
+    const {
+      limit = 50,
+      cursor,
+      cursorField = 'created_at',
+      direction = 'desc'
+    } = options;
+
+    // Validar limite
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    
+    // Construir condições base
+    const conditions = [
+      eq(propostas.status, ProposalStatus.EM_ANALISE),
+      isNull(propostas.deletedAt)
+    ];
+
+    // Adicionar filtros opcionais
+    if (filters?.createdAfter) {
+      conditions.push(gte(propostas.createdAt, filters.createdAfter));
+    }
+    if (filters?.createdBefore) {
+      conditions.push(lte(propostas.createdAt, filters.createdBefore));
+    }
+
+    // Adicionar condição do cursor
+    if (cursor && CursorUtils.isValid(cursor)) {
+      const cursorValue = CursorUtils.decode(cursor);
+      
+      if (cursorField === 'created_at') {
+        const cursorDate = new Date(cursorValue);
+        const cursorCondition = direction === 'desc' 
+          ? lt(propostas.createdAt, cursorDate)
+          : gt(propostas.createdAt, cursorDate);
+        conditions.push(cursorCondition);
+      }
+    }
+
+    // Executar query
+    const query = db
+      .select()
+      .from(propostas)
+      .where(and(...conditions))
+      .limit(safeLimit + 1); // +1 para verificar hasNextPage
+
+    // Aplicar ordenação
+    if (direction === 'desc') {
+      query.orderBy(desc(propostas.createdAt));
+    } else {
+      query.orderBy(asc(propostas.createdAt));
+    }
+
+    const results = await query;
+    
+    // Verificar se há próxima página
+    const hasNextPage = results.length > safeLimit;
+    const data = hasNextPage ? results.slice(0, safeLimit) : results;
+    
+    // Gerar cursors
+    let nextCursor: string | null = null;
+    let prevCursor: string | null = null;
+    
+    if (hasNextPage && data.length > 0) {
+      const lastItem = data[data.length - 1];
+      nextCursor = CursorUtils.createFromItem(lastItem, cursorField);
+    }
+    
+    if (cursor && data.length > 0) {
+      const firstItem = data[0];
+      prevCursor = CursorUtils.createFromItem(firstItem, cursorField);
+    }
+
+    return {
+      data: data.map((row) => this.mapToDomain(row)),
+      pagination: {
+        nextCursor,
+        prevCursor,
+        pageSize: data.length,
+        hasNextPage,
+        hasPrevPage: !!cursor
+      }
+    };
+  }
+
+  async findByComprometimentoRenda(threshold: number): Promise<Proposal[]> {
+    // Query complexa que calcula comprometimento de renda
+    // Utilizando campos de renda mensal e valor da proposta
+    const results = await db
+      .select()
+      .from(propostas)
+      .where(
+        and(
+          isNull(propostas.deletedAt),
+          sql`
+            CASE 
+              WHEN ${propostas.clienteRenda} IS NOT NULL AND ${propostas.clienteRenda} > 0 
+              THEN ((${propostas.valor}::numeric / ${propostas.prazo}) / ${propostas.clienteRenda}::numeric) * 100 
+              ELSE 0 
+            END >= ${threshold}
+          `
+        )
+      )
+      .orderBy(desc(propostas.createdAt));
+
+    return results.map((row) => this.mapToDomain(row));
+  }
+
+  async findPendingByAnalyst(analistaId: string): Promise<Proposal[]> {
+    const results = await db
+      .select()
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.analistaId, analistaId),
+          eq(propostas.status, ProposalStatus.EM_ANALISE),
+          isNull(propostas.deletedAt)
+        )
+      )
+      .orderBy(asc(propostas.createdAt)); // FIFO para workload management
+
+    return results.map((row) => this.mapToDomain(row));
+  }
+
+  async findReadyForCCBGeneration(): Promise<Proposal[]> {
+    // Busca propostas aprovadas que ainda não têm CCB gerada
+    const results = await db
+      .select({
+        proposta: propostas,
+      })
+      .from(propostas)
+      .leftJoin(ccbs, eq(propostas.id, ccbs.propostaId))
+      .where(
+        and(
+          eq(propostas.status, ProposalStatus.APROVADO),
+          isNull(propostas.deletedAt),
+          isNull(ccbs.id) // Não tem CCB ainda
+        )
+      )
+      .orderBy(asc(propostas.createdAt));
+
+    return results.map((row) => this.mapToDomain(row.proposta));
+  }
+
+  async findAwaitingBoletoGeneration(): Promise<Proposal[]> {
+    // Busca propostas com assinatura concluída que ainda não têm boletos
+    const results = await db
+      .select({
+        proposta: propostas,
+      })
+      .from(propostas)
+      .leftJoin(boletos, eq(propostas.id, boletos.propostaId))
+      .where(
+        and(
+          eq(propostas.status, ProposalStatus.ASSINATURA_CONCLUIDA),
+          isNull(propostas.deletedAt),
+          isNull(boletos.id) // Não tem boletos ainda
+        )
+      )
+      .orderBy(asc(propostas.createdAt));
+
+    return results.map((row) => this.mapToDomain(row.proposta));
   }
 
   /**
