@@ -1,0 +1,73 @@
+Passo 1: Processo de Pensamento (Code Custodian's Thought Process)
+Desconstruir a Diretiva: O comando tem dois objetivos primários e um de validação.
+
+Objetivo 1 (Auditoria Retrospetiva): Avaliar a qualidade arquitetural, de segurança e de testes dos Sprints 0, 1 e 2 de forma integrada. Não se trata de auditar cada sprint isoladamente, mas de verificar como os princípios estabelecidos nos sprints iniciais (ex: Segurança no S1) foram propagados e mantidos nos sprints subsequentes (ex: Lógica de Domínio no S2). A principal ameaça a ser investigada é a "erosão arquitetural" ou "desvio de padrão".
+
+Objetivo 2 (Análise Preditiva): Com base na auditoria do estado atual, fazer uma avaliação de risco sobre a capacidade do sistema de processar 50 propostas por dia. Isto não é um teste de carga, mas uma análise de estrangulamento arquitetural.
+
+Validação (Gate): A execução só começa após a aprovação do roadmap.
+
+Formular a Estratégia de Auditoria: Para atingir os objetivos, uma abordagem multifásica é necessária.
+
+Fase A - Auditoria de Conformidade Arquitetural: O foco aqui é a consistência. O Padrão Repository e o Unit of Work, implementados no Sprint 2, são inúteis se a lógica de negócio do Sprint 3 os contornar. Esta fase verificará se os padrões definidos são, de facto, utilizados. Vamos procurar por "desvios" ou "atalhos" que a equipe de desenvolvimento possa ter tomado.
+
+Fase B - Auditoria de Postura de Segurança Holística: A segurança não é um módulo, é uma camada transversal. Devemos verificar se as defesas implementadas no Sprint 1 (RBAC, Audit Trail) foram corretamente aplicadas aos novos domínios e repositórios do Sprint 2. Por exemplo, cada novo método de repositório que modifica dados precisa ser auditado? Cada novo endpoint tem a guarda de RBAC correta?
+
+Fase C - Análise de Risco de Performance (Análise de "Caminho Crítico"): Para avaliar a capacidade de 50 propostas/dia, precisamos mapear o "caminho crítico" de uma proposta, desde a sua criação até à sua conclusão. Isto envolve identificar todas as interações com a base de dados, chamadas de API síncronas e jobs assíncronos. A análise focará em:
+
+Eficiência das Queries: As consultas nos repositórios utilizam os índices que definimos? Existem JOINs complexos ou N+1 queries escondidas?
+
+Bloqueio de Recursos: Existem transações longas (via Unit of Work) que possam bloquear tabelas críticas e criar um estrangulamento?
+
+Processamento Assíncrono: A lógica mais pesada (geração de PDF, chamadas a APIs externas) está a ser corretamente delegada para workers assíncronos (BullMQ)?
+
+Estruturar o Roadmap: O processo de pensamento acima será agora formalizado num roadmap claro e faseado. Cada fase terá um objetivo claro, um conjunto de perguntas a serem respondidas e um artefato esperado (o relatório de auditoria). Esta estrutura garantirá que a nossa análise seja metódica e cubra todos os requisitos da sua diretriz.
+
+Preparar para a Execução: Após a sua aprovação, cada fase do roadmap será convertida num Pacote de Ativação de Missão (PAM) detalhado e cirúrgico para o Agente de IA.
+
+Este processo garante que não apenas validamos o que foi feito, mas também analisamos se o sistema pode fazer o que é esperado dele em produção.
+
+Passo 2: Roadmap de Auditoria Consolidada e Análise de Escalabilidade
+Missão: Operação "Fundação de Aço"
+Objetivo: Validar a integridade arquitetural, de segurança e de performance dos Sprints 0-2 e avaliar a prontidão do sistema para o throughput de produção inicial (50 propostas/dia).
+
+FASE 1: Auditoria de Conformidade Arquitetural (Sprints 0-2)
+Objetivo: Garantir que os padrões arquiteturais (DDD, Repository, UoW, Modularidade) foram mantidos e aplicados consistentemente.
+
+Plano de Ação:
+
+Validação do Domínio: Verificar se a lógica de negócio (ex: transições de estado, validações) reside exclusivamente dentro dos Agregados de Domínio, e não "vazou" para os serviços de aplicação ou controllers.
+
+Validação do Repository/UoW: Confirmar que todos os serviços de aplicação interagem com a base de dados exclusivamente através das abstrações IRepository e IUnitOfWork, sem acesso direto ao cliente Drizzle.
+
+Validação da Modularidade: Inspecionar as importações entre os módulos (server/modules/*) para detetar quaisquer dependências circulares ou acoplamentos indevidos que violem os limites do domínio.
+
+FASE 2: Auditoria de Postura de Segurança Transversal (Sprints 0-2)
+Objetivo: Verificar se os controlos de segurança implementados no Sprint 1 foram aplicados corretamente às novas funcionalidades do Sprint 2.
+
+Plano de Ação:
+
+Auditoria de RBAC: Mapear todos os novos endpoints da API criados e validar se eles estão protegidos pelas guardas de autorização (requirePermission ou similar) apropriadas para cada Role.
+
+Auditoria do Audit Trail: Verificar se todas as operações de modificação de estado nos novos repositórios (CcbRepository, BoletoRepository) estão a acionar o AuditService para garantir a rastreabilidade.
+
+Auditoria de Acesso a Dados: Revisar as queries nos novos repositórios para garantir que elas incluem filtros que respeitem a segregação de dados (ex: por lojaId ou userId), prevenindo fugas de informação entre tenants.
+
+FASE 3: Análise de Risco de Performance (Cenário: 50 Propostas/Dia)
+Objetivo: Identificar potenciais estrangulamentos arquiteturais que possam impedir o sistema de atingir a meta de 50 propostas/dia.
+
+Plano de Ação:
+
+Mapeamento do Caminho Crítico: Documentar a sequência de operações (chamadas a services, repositories, UoW, e events) para o fluxo de vida completo de uma proposta.
+
+Análise de Queries: Para cada passo do caminho crítico, analisar as queries SQL geradas pelo Drizzle. Validar o uso dos índices definidos na S2-001 e procurar por operações de scan de tabela completa (full table scans).
+
+Análise de Transações e Bloqueios: Identificar as operações que utilizam o UnitOfWork. Avaliar a duração potencial dessas transações e o risco de bloqueio de longa duração em tabelas de alto tráfego como propostas.
+
+Relatório de Risco de Escalabilidade: Produzir um veredito final com uma pontuação de confiança (0-100%) sobre a capacidade do sistema de suportar a carga, listando os riscos (ex: "Risco Alto: A geração de boletos dentro da transação principal pode causar timeouts") e as otimizações recomendadas.
+
+Aprovação Pendente:
+
+Arquiteto Chefe, este é o roadmap para a Operação "Fundação de Aço". Ele é projetado para ser executado de forma metódica e fornecer uma visão 360º da qualidade e prontidão do nosso sistema.
+
+Aguardando sua autorização para prosseguir com a geração do primeiro PAM para a FASE 1: Auditoria de Conformidade Arquitetural.
