@@ -1,0 +1,40 @@
+Protocolo de Re-Sincronização de Contexto Estratégico (PRCE) V1.0
+Diretriz para o Executor Humano: Apresente os seguintes prompts ao Agente, um de cada vez.
+
+Fase 1: Alinhamento de Missão e Estado Atual
+
+"Resuma o objetivo principal do projeto Simpix em uma única frase. Com base nas interações mais recentes, qual você entende ser o status atual do projeto (ex: desenvolvimento, pré-deploy, correção de bugs críticos) e qual é o nosso foco imediato?"
+
+Fase 2: Reconhecimento da Arquitetura Macro
+
+"Descreva a arquitetura do Simpix em seus três componentes principais: Frontend, Backend e provedores de BaaS (Backend as a Service). Liste as tecnologias primárias para cada componente, conforme definido na documentação."
+
+"Consulte o architecture/EXECUTION_MATRIX.md. Explique o propósito deste documento e como ele se relaciona com a nossa doutrina de CONTEXT ENGINEERING PROTOCOL V2.0."
+
+"Liste os três ADRs (Architectural Decision Records) mais importantes localizados em architecture/07-decisions/ e explique o impacto de cada um na estrutura do sistema."
+
+Fase 3: Validação do Domínio e Lógica de Negócio Crítica
+
+"Qual é o fluxo de negócio mais crítico do Simpix? Descreva as principais etapas do ciclo de vida de uma proposta de crédito, desde a criação até a formalização final."
+
+"Identifique os dois serviços externos mais críticos para a operação do Simpix (excluindo Supabase) e descreva sua função no sistema."
+
+"Explique o propósito da Máquina de Estados Finitos (FSM) para o gerenciamento de status das propostas e por que ela é fundamental para a integridade do sistema."
+
+Fase 4: Internalização dos Protocolos Operacionais
+
+"Descreva a sua função sob o Padrão de Excelência Operacional (PEO) V2.0. Quais são os dois modos operacionais que você pode assumir e o que dispara a mudança entre eles?"
+
+"O que é a ESTRATEGIA_ZERO_MICRO_ERROS.md e qual comando você deve executar obrigatoriamente antes de declarar qualquer tarefa como 'concluída'?"
+
+"Qual é o procedimento mandatório, conforme a MANDATORY BUG DOCUMENTATION POLICY, após a resolução de qualquer bug?"
+
+Fase 5: Sincronização de Atividades Recentes e Próximos Passos
+
+"Com base no histórico de interações (se disponível), quais foram as últimas 3 funcionalidades ou correções implementadas? Quais foram os maiores desafios encontrados?"
+
+"Qual é a nossa prioridade P0 atual? Há algum débito técnico P1 que precise ser resolvido antes de avançarmos para novas funcionalidades P2?"
+
+"Finalmente, com base em todo este contexto, qual é o próximo passo lógico e tático para aproximar o projeto Simpix do deploy em produção?"
+
+Execute esta sequência rigorosamente. Ao final, o Agente Executor deverá ter um contexto robusto e alinhado para prosseguirmos com a missão.
