@@ -1,0 +1,40 @@
+dashboard:1 Refused to execute script from 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/scripts/custom-elements-protection.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.Understand this error
+client:733 [vite] connecting...
+client:745 WebSocket connection to 'wss://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/?token=uihkzgQFkHk6' failed: 
+createConnection @ client:745
+connect @ client:412
+connect @ client:751
+connect @ client:290
+connect @ client:374
+(anonymous) @ client:823Understand this error
+chunk-YQ5BCTVV.js?v=ba977359:21609 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+client:755 WebSocket connection to 'wss://localhost:5173/?token=uihkzgQFkHk6' failed: 
+createConnection @ client:755
+connect @ client:412
+connect @ client:759Understand this error
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765
+await in connect
+connect @ client:290
+connect @ client:374
+(anonymous) @ client:823Understand this error
+dashboard.tsx:308 DEBUG - First 3 proposals values: []
+dashboard.tsx:308 DEBUG - First 3 proposals values: []
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+dashboard.tsx:308 DEBUG - First 3 proposals values: []
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.2JQoPxh3qSTbP_atX4HodMmp7xYqr8vomda3-fB33K0', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.2JQoPxh3qSTbP_atX4HodMmp7xYqr8vomda3-fB33K0', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.2JQoPxh3qSTbP_atX4HodMmp7xYqr8vomda3-fB33K0', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}

@@ -8,14 +8,14 @@
 import { Router } from 'express';
 import { ProposalController } from '../../modules/proposal/presentation/proposalController.js';
 
-// Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
+// Middleware auth TEMPORÁRIO - usando JWT padrão (RLS causando timeout)
 const auth = async (req: any, res: any, next: any) => {
   try {
-    // Import dinâmico do middleware RLS - RETURN Promise não await
-    const { rlsAuthMiddleware } = await import('../../lib/rls-setup.js');
-    return rlsAuthMiddleware(req, res, next); // ← RETURN não AWAIT
+    // EMERGÊNCIA: Import JWT padrão para corrigir timeout
+    const { jwtAuthMiddleware } = await import('../../lib/jwt-auth-middleware.js');
+    return jwtAuthMiddleware(req, res, next);
   } catch (error) {
-    console.error('[RLS WRAPPER] Error in auth middleware:', error);
+    console.error('[JWT WRAPPER] Error in auth middleware:', error);
     next(error);
   }
 };
