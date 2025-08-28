@@ -171,8 +171,8 @@ export class FormalizationWorker {
         jobId: job?.id,
         proposalId: job?.data.aggregateId,
         error: error.message,
-        attempts: job?.attemptsMade,
-        isPermanentFailure: job?.attemptsMade >= (job?.opts.attempts || 3),
+        attempts: job?.attemptsMade || 0,
+        isPermanentFailure: (job?.attemptsMade || 0) >= (job?.opts.attempts || 3),
       });
     });
 

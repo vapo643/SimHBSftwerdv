@@ -130,8 +130,8 @@ router.get('/queues/metrics', async (req: Request, res: Response) => {
       success: true,
       data: {
         metricsService: {
-          status: serviceHealth.status,
-          isInitialized: serviceHealth.isInitialized,
+          healthy: serviceHealth.healthy,
+          sentryEnabled: serviceHealth.sentryEnabled,
           totalQueuesMonitored: queueMetrics.length,
           lastUpdated: new Date().toISOString(),
         },

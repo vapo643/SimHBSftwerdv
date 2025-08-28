@@ -1,0 +1,37 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Restauração de Doutrina"
+
+* **Sumário da Missão (O Quê):** Reverter completamente a implementação não autorizada de um sistema de filas customizado baseado em Supabase e, em seguida, implementar a solução correta para a falha de `ECONNREFUSED`, garantindo que o serviço Redis seja iniciado nativamente no ambiente Replit.
+* **Intenção Estratégica (O Porquê):** Restaurar a integridade, estabilidade e manutenibilidade da arquitetura original baseada em BullMQ/Redis. A solução correta para um serviço que não está a correr é iniciá-lo, não reescrever o sistema para não precisar dele.
+* **Modelo Mental (Como se Encaixa):** Você está a executar um *rollback* de uma implementação falhada e, em seguida, a aplicar o *patch* de infraestrutura correto. A primeira fase é de reversão, a segunda é de correção.
+
+---
+
+**IMPLEMENTAR (Plano de Remediação):**
+Execute a seguinte sequência de ações.
+
+**FASE 1: REVERSÃO DA ARQUITETURA NÃO AUTORIZADA**
+
+**Passo 1.1: Eliminar Artefatos Customizados**
+* Delete o ficheiro `server/lib/supabase-queue.ts`.
+* Delete o ficheiro `server/lib/supabase-queues.ts`.
+* Abra o ficheiro `shared/schema.ts` e remova as tabelas `supabase_jobs` e `dead_letter_jobs` que foram adicionadas.
+
+**Passo 1.2: Restaurar Dependências Originais**
+* Refatore os ficheiros `server/workers/formalizationWorker.ts`, `server/infrastructure/events/EventDispatcher.ts`, `server/routes/monitoring.ts` e `server/lib/dead-letter-queue.ts` para voltarem a usar a configuração original do BullMQ e do cliente `ioredis`, revertendo as alterações da última execução.
+
+**FASE 2: IMPLEMENTAÇÃO DA SOLUÇÃO CORRETA**
+
+**Passo 2.1: Instalar e Iniciar o Redis Nativamente**
+* Modifique o ficheiro de configuração do ambiente Replit, `replit.nix`, para incluir o pacote do Redis. Adicione `pkgs.redis` à lista de dependências.
+* Modifique o script `"dev"` no ficheiro `package.json` para iniciar o servidor Redis em segundo plano (`--daemonize yes`) antes de iniciar o servidor Node.js. A nova linha deve ser:
+    `"dev": "redis-server --daemonize yes && NODE_ENV=development tsx server/index.ts"`
+
+**Passo 3: Validação Final**
+3.1. Confirme que todos os ficheiros da FASE 1 foram revertidos ao seu estado anterior.
+3.2. Apresente o conteúdo modificado dos ficheiros `replit.nix` e `package.json`.
+3.3. Reinicie o servidor. **Validação Crítica:** Confirme nos logs que os erros de `ECONNREFUSED` para o Redis desapareceram e que a conexão com o Redis foi estabelecida com sucesso.
+3.4. Abra a aplicação no *browser* e confirme que o frontend carrega corretamente, sem os erros relacionados à falha de serviços.
+
+---
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+Apresente a lista exaustiva de TODAS as suas descobertas, riscos e recomendações.
