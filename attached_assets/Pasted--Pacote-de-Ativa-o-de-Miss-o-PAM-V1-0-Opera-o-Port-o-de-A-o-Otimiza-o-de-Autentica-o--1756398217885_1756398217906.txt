@@ -1,0 +1,55 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Portão de Aço": Otimização de Autenticação
+
+* **Sumário da Missão (O Quê):** Auditar e refatorar a configuração de segurança da API, especificamente o *rate limiting* e o tempo de vida (TTL) dos tokens JWT, para suportar um ambiente de produção com múltiplos utilizadores simultâneos.
+* **Intenção Estratégica (O Porquê):** Eliminar o estrangulamento de performance identificado no sistema de autenticação durante o teste de carga. O objetivo é aumentar o *throughput* de autenticações concorrentes sem comprometer a segurança contra ataques de força bruta, garantindo uma experiência de utilizador fluida em produção.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de segurança (AppSec) a realizar um *hardening* de performance. A sua tarefa é encontrar o equilíbrio ideal entre a disponibilidade do serviço e a proteção, ajustando os parâmetros de segurança para um cenário de uso real.
+
+---
+
+**IMPLEMENTAR (Plano de Otimização):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+O sistema possui uma configuração de `express-rate-limit` que é demasiado conservadora para múltiplos utilizadores. O TTL dos tokens JWT pode ser muito curto, forçando re-autenticações frequentes sob alta carga.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A configuração do `express-rate-limit`, especialmente para os endpoints de autenticação, é ajustada para valores de produção mais realistas.
+2.  O tempo de vida (TTL) do token de acesso JWT é ajustado para um valor que equilibre segurança e usabilidade.
+3.  O sistema é capaz de suportar um número maior de pedidos de autenticação concorrentes.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Auditar e Refatorar o Rate Limiting**
+1.1. Localize o ficheiro que configura o `express-rate-limit` (provavelmente `server/app.ts` ou `server/lib/security-config.ts`).
+1.2. Identifique o *limiter* específico para as rotas de autenticação (ex: `authLimiter`).
+1.3. Ajuste os seus parâmetros para valores mais adequados para produção, que permitam um maior número de tentativas antes de bloquear, mas que ainda previnam ataques de força bruta. (Sugestão: `max: 100` em 15 minutos, mas `skipSuccessfulRequests: false` para contar todas as tentativas).
+1.4. Apresente o código da nova configuração do `authLimiter`.
+
+**Passo 2: Auditar e Refatorar o TTL do JWT**
+2.1. Localize o serviço ou a função responsável por gerar os tokens JWT (provavelmente em `server/services/authService.ts` ou `server/lib/auth.ts`).
+2.2. Encontre a opção `expiresIn` na chamada `jwt.sign()`.
+2.3. Ajuste o tempo de expiração para um valor de produção padrão (ex: de '15m' para '1h' para o *access token*). Considere também a estratégia para o *refresh token*, se aplicável.
+2.4. Apresente o código com o novo valor de `expiresIn`.
+
+**Passo 3: Validação Final**
+3.1. Execute `get_latest_lsp_diagnostics` para garantir que as alterações não introduziram erros de compilação.
+3.2. Gere um relatório final documentando as alterações de configuração e justificando como os novos valores otimizam o sistema para alta concorrência, mantendo a segurança.
+
+---
+
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+
+* **Diretriz Mestra:** Completude exaustiva. Você DEVE listar a totalidade dos seus achados, riscos e recomendações.
+* **Regra de Execução:** Apresente todas as configurações de *rate limit* e TTL, não apenas as que foram alteradas.
+* **Justificativa Estratégica:** A ocultação de riscos de configuração é uma falha de missão.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 98%
+* **RISCOS IDENTIFICADOS (LISTA COMPLETA):**
+    * **Risco 1 (Baixo):** Aumentar excessivamente os limites do *rate limit* pode reduzir a proteção contra ataques de força bruta. O equilíbrio é chave.
+    * **Risco 2 (Baixo):** Aumentar o TTL do token de acesso aumenta a janela de oportunidade para um atacante em caso de roubo de token.
+* **DECISÕES TÉCNICAS ASSUMIDAS (LISTA COMPLETA):**
+    * Os novos valores de configuração serão baseados nas melhores práticas da indústria para APIs RESTful.
+* **VALIDAÇÃO PENDENTE (LISTA COMPLETA):**
+    * Um novo teste de carga focado nos endpoints de autenticação será necessário para validar empiricamente o aumento do *throughput*.

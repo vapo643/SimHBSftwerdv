@@ -66,12 +66,13 @@ export const generalApiLimiter = rateLimit({
   },
 });
 
-// Rate Limit Restritivo para Rotas de Autenticação: 5 requisições por 15 minutos
+// Rate Limit Otimizado para Rotas de Autenticação: 100 requisições por 15 minutos
+// PAM V1.0 - Operação Portão de Aço: Otimizado para múltiplos usuários concorrentes
 export const authApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // Máximo 5 tentativas de login por janela de tempo
+  max: 100, // Máximo 100 tentativas de login por janela de tempo (otimizado para produção)
   message: {
-    error: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
+    error: 'Limite de tentativas de login atingido. Tente novamente em 15 minutos.',
     retryAfter: '15 minutos',
   },
   standardHeaders: true,
@@ -84,9 +85,9 @@ export const authApiLimiter = rateLimit({
   },
   handler: (req, res) => {
     const email = req.body?.email;
-    log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''}`);
+    log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''} (100 req/15min limit)`);
     res.status(429).json({
-      error: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
+      error: 'Limite de tentativas de login atingido. Tente novamente em 15 minutos.',
       retryAfter: '15 minutos',
     });
   },

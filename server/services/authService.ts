@@ -95,9 +95,9 @@ export class AuthService {
         // Track the new token
         trackUserToken(data.user.id, data.session.access_token);
 
-        // Create session record
+        // Create session record - PAM V1.0 Operação Portão de Aço: TTL otimizado para produção
         const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 1);
+        expiresAt.setHours(expiresAt.getHours() + 4); // 4 horas para equilibrar segurança e usabilidade
 
         await authRepository.createSession({
           id: data.session.access_token,
