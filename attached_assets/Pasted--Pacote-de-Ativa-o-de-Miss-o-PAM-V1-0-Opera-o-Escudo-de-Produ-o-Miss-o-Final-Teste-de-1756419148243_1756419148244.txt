@@ -1,0 +1,42 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Escudo de Produção" / Missão Final: Teste de Carga End-to-End
+
+* **Sumário da Missão (O Quê):** Executar um teste de carga que simule o fluxo de vida completo de 50 propostas, desde a criação até à aprovação, para validar empiricamente a funcionalidade e a performance da nossa infraestrutura assíncrona baseada em Redis (BullMQ).
+* **Intenção Estratégica (O Porquê):** Obter provas irrefutáveis de que a conexão com o Redis Cloud está a funcionar corretamente e que o nosso sistema de *workers* assíncronos processa os *jobs* de forma fiável sob carga. Este é o *quality gate* final que certifica a prontidão do sistema para produção.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de QA a realizar um teste de integração e performance de ponta-a-ponta. A sua tarefa é simular o comportamento real do utilizador em escala e analisar os resultados em múltiplas camadas (API e infraestrutura de filas).
+
+---
+
+**IMPLEMENTAR (Plano de Teste de Carga):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+O sistema foi otimizado com um cache Redis distribuído e a infraestrutura do Redis Cloud está configurada e conectada. A funcionalidade do fluxo assíncrono sob carga nunca foi validada empiricamente.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um teste de carga executa com sucesso 50 iterações do fluxo completo (login, criar proposta, aprovar proposta).
+2.  A monitorização do endpoint das filas (`/api/monitoring/queues/metrics`) durante o teste mostra os *jobs* a serem adicionados e processados na `formalization-queue`.
+3.  O relatório de execução do teste demonstra que os SLAs de performance (`p(95) < 500ms`) e fiabilidade (`0% de erros`) foram atingidos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Preparação e Execução do Teste**
+1.1. Garanta que o utilizador de teste (`loadtest@simpix.com` ou `adminsimpix@simpix.com.br`) está disponível e funcional.
+1.2. Execute o script de teste de carga `scripts/load-test/proposal-flow.js` com uma configuração para **50 iterações** e **3 utilizadores virtuais (`vus: 3`)**.
+
+**Passo 2: Monitorização em Tempo Real**
+2.1. **Durante** a execução do teste de carga, execute repetidamente um comando `curl` no endpoint de monitoramento para observar o estado das filas.
+    `curl http://localhost:5000/api/monitoring/queues/metrics`
+2.2. Guarde o *output* de pelo menos duas destas chamadas de monitorização (uma a meio do teste e outra no final) como prova.
+
+**Passo 3: Gerar o Relatório de Validação Final (Protocolo de Divulgação Total Mandatório)**
+3.1. Apresente o resumo final completo gerado pelo script de teste de carga. O relatório deve incluir **TODAS** as métricas, com foco em:
+    * **`http_req_duration`** para todos os endpoints (`login`, `propostas`, `approve`): `avg` e `p(95)`.
+    * **`http_req_failed`**: A taxa de erros.
+    * **`iterations`**: A contagem total de iterações.
+3.2. Apresente os *outputs* do endpoint de monitoramento das filas como prova de que os *jobs* foram processados.
+3.3. Com base em **todas as evidências**, forneça um veredito final e inequívoco sobre se o sistema está **APROVADO** para produção.
+
+---
+
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+Apresente a lista exaustiva de TODAS as suas descobertas, riscos, recomendações e métricas. A omissão é uma falha de missão.
