@@ -79,6 +79,11 @@ formalizationQueue.on('waiting', (job) => {
   console.log(`[QUEUE:FORMALIZATION] 📋 Job ${job.id} waiting in queue`);
 });
 
+// Note: DLQ (Dead-Letter Queue) integration for failed jobs is implemented at the Worker level
+// Workers have access to the 'failed' event, Queues do not
+// The FormalizationWorker already implements DLQ handling via dlqManager.setupFailedJobHandler()
+// This pattern ensures proper job failure handling with retry policies and DLQ transfer
+
 // Note: Comprehensive metrics integration is handled at the Worker level
 // This provides better precision and access to processing context
 // See FormalizationWorker.ts for metrics integration pattern
