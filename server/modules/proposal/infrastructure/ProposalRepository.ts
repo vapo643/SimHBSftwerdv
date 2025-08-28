@@ -133,7 +133,7 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     if (criteria.atendenteId) {
-      conditions.push(eq(propostas.analistaId, criteria.atendenteId));
+      conditions.push(eq(propostas.userId, criteria.atendenteId));
     }
 
     if (criteria.cpf) {
