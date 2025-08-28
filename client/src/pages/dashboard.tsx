@@ -224,13 +224,16 @@ const Dashboard: React.FC = () => {
   const propostasFiltradas = useMemo(() => {
     return Array.isArray(propostasData)
       ? propostasData.filter((proposta) => {
+          // Proteção extra para garantir que a proposta existe
+          if (!proposta || !proposta.id) return false;
+
           const matchesSearch =
             proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             proposta.id.includes(searchTerm) ||
             proposta.cpfCliente?.includes(searchTerm);
 
           // PAM V1.0 - Usar status contextual com fallback
-          const statusFinal = proposta.statusContextual || proposta.status;
+          const statusFinal = proposta.statusContextual || proposta.status || 'rascunho';
           const matchesStatus = statusFilter === 'todos' || statusFinal === statusFilter;
 
           const matchesParceiro =
@@ -499,8 +502,8 @@ const Dashboard: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos os Parceiros</SelectItem>
-                    {estatisticas.parceiros.map((parceiro) => (
-                      <SelectItem key={parceiro} value={parceiro}>
+                    {estatisticas.parceiros.map((parceiro, index) => (
+                      <SelectItem key={`parceiro-${index}-${parceiro}`} value={parceiro}>
                         {parceiro}
                       </SelectItem>
                     ))}
@@ -533,25 +536,25 @@ const Dashboard: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            propostasFiltradas.map((proposta: any) => (
-              <Card key={proposta.id} className="overflow-hidden transition-shadow hover:shadow-md">
+            propostasFiltradas.map((proposta: any, index: number) => (
+              <Card key={`proposta-${proposta?.id || index}`} className="overflow-hidden transition-shadow hover:shadow-md">
                 <CardContent className="p-0">
                   <div className="flex items-center justify-between p-6">
                     <div className="flex items-center gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        {getStatusIcon(proposta.status)}
+                        {getStatusIcon(proposta?.status || 'rascunho')}
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-4">
                           <h3 className="text-lg font-semibold">
-                            {proposta.nomeCliente || 'Cliente não informado'}
+                            {proposta?.nomeCliente || 'Cliente não informado'}
                           </h3>
                           <Badge
-                            className={`${getStatusColor(proposta.statusContextual || proposta.status)} border`}
+                            className={`${getStatusColor(proposta?.statusContextual || proposta?.status || 'rascunho')} border`}
                           >
-                            {getStatusText(proposta.statusContextual || proposta.status)}
+                            {getStatusText(proposta?.statusContextual || proposta?.status || 'rascunho')}
                           </Badge>
-                          {proposta.status === 'pendenciado' && (
+                          {proposta?.status === 'pendenciado' && (
                             <Badge
                               variant="outline"
                               className="gap-1 border-orange-200 text-orange-700"
@@ -562,21 +565,21 @@ const Dashboard: React.FC = () => {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Proposta: #{proposta.numeroProposta || proposta.id} | CPF:{' '}
-                          {proposta.cpfCliente || 'Não informado'}
+                          Proposta: #{proposta?.numeroProposta || proposta?.id || 'N/A'} | CPF:{' '}
+                          {proposta?.cpfCliente || 'Não informado'}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Criado em:{' '}
-                          {format(new Date(proposta.createdAt), 'dd/MM/yyyy HH:mm', {
+                          {proposta?.createdAt ? format(new Date(proposta.createdAt), 'dd/MM/yyyy HH:mm', {
                             locale: ptBR,
-                          })}
-                          {proposta.parceiro?.razaoSocial && (
+                          }) : 'Data não disponível'}
+                          {proposta?.parceiro?.razaoSocial && (
                             <span className="ml-2">
                               | Parceiro: {proposta.parceiro.razaoSocial}
                             </span>
                           )}
                         </div>
-                        {proposta.status === 'pendenciado' && proposta.motivo_pendencia && (
+                        {proposta?.status === 'pendenciado' && proposta?.motivo_pendencia && (
                           <div className="mt-2 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-2">
                             <AlertCircle className="h-4 w-4 text-orange-600" />
                             <span className="text-sm text-orange-700">
@@ -589,18 +592,18 @@ const Dashboard: React.FC = () => {
 
                     <div className="space-y-1 text-right">
                       <div className="text-2xl font-bold text-green-600">
-                        {formatCurrency(proposta.valorSolicitado || 0)}
+                        {formatCurrency(proposta?.valorSolicitado || 0)}
                       </div>
                       <div className="flex justify-end gap-2">
-                        {proposta.status === 'pendenciado' ? (
-                          <Link to={`/propostas/editar/${proposta.id}`}>
+                        {proposta?.status === 'pendenciado' ? (
+                          <Link to={`/propostas/editar/${proposta?.id || 'new'}`}>
                             <Button size="sm" variant="outline" className="flex items-center gap-1">
                               <Edit className="h-4 w-4" />
                               Corrigir
                             </Button>
                           </Link>
                         ) : (
-                          <Link to={`/credito/analise/${proposta.id}`}>
+                          <Link to={`/credito/analise/${proposta?.id || 'new'}`}>
                             <Button size="sm" variant="outline">
                               <Eye className="mr-1 h-4 w-4" />
                               Visualizar
