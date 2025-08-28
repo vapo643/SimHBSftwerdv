@@ -232,16 +232,6 @@ const Dashboard: React.FC = () => {
     enabled: user?.role === 'ATENDENTE',
   });
 
-  // Early Return para Loading State
-  if (isLoading) {
-    return <DashboardSkeleton />;
-  }
-
-  // Early Return para Error State  
-  if (isError) {
-    return <ErrorDisplay message={error?.message || 'Erro desconhecido'} />;
-  }
-
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   const propostas = Array.isArray(propostasResponse?.data)
     ? propostasResponse.data.map((p: any) => ({
@@ -264,7 +254,7 @@ const Dashboard: React.FC = () => {
 
   const propostasData = propostas || [];
 
-  // Filtrar propostas - HOOK SEMPRE EXECUTADO
+  // Filtrar propostas - HOOK SEMPRE EXECUTADO ANTES DE QUALQUER EARLY RETURN
   const propostasFiltradas = useMemo(() => {
     return Array.isArray(propostasData)
       ? propostasData.filter((proposta) => {
@@ -358,6 +348,17 @@ const Dashboard: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
     }
   }, [queryClient, user?.role]);
+
+  // AGORA podemos fazer early returns - TODOS OS HOOKS JÁ FORAM EXECUTADOS
+  // Early Return para Loading State
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  // Early Return para Error State  
+  if (isError) {
+    return <ErrorDisplay message={error?.message || 'Erro desconhecido'} />;
+  }
 
   return (
     <DashboardLayout

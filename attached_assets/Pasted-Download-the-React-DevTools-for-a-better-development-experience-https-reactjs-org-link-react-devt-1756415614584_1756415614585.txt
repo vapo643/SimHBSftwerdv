@@ -1,0 +1,197 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+client:755 WebSocket connection to 'wss://localhost:5173/?token=VvRnEmgMwy44' failed: 
+createConnection @ client:755Understand this error
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765Understand this error
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+dashboard.tsx:308 DEBUG - First 3 proposals values: []
+dashboard.tsx:308 DEBUG - First 3 proposals values: []
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+dashboard.tsx:308 DEBUG - First 3 proposals values: []
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.f4nRqXQtMPhqqXOv2Csvm90PeA4yDfs9cjOZCNmQhAg', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.f4nRqXQtMPhqqXOv2Csvm90PeA4yDfs9cjOZCNmQhAg', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.f4nRqXQtMPhqqXOv2Csvm90PeA4yDfs9cjOZCNmQhAg', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-28T18:13:22.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-28T18:13:22.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+chunk-YQ5BCTVV.js?v=ba977359:11643 Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    at renderWithHooks (chunk-YQ5BCTVV.js?v=ba977359:11643:19)
+    at updateFunctionComponent (chunk-YQ5BCTVV.js?v=ba977359:14630:28)
+    at beginWork (chunk-YQ5BCTVV.js?v=ba977359:15972:22)
+    at HTMLUnknownElement.callCallback2 (chunk-YQ5BCTVV.js?v=ba977359:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-YQ5BCTVV.js?v=ba977359:3705:24)
+    at invokeGuardedCallback (chunk-YQ5BCTVV.js?v=ba977359:3739:39)
+    at beginWork$1 (chunk-YQ5BCTVV.js?v=ba977359:19818:15)
+    at performUnitOfWork (chunk-YQ5BCTVV.js?v=ba977359:19251:20)
+    at workLoopSync (chunk-YQ5BCTVV.js?v=ba977359:19190:13)
+    at renderRootSync (chunk-YQ5BCTVV.js?v=ba977359:19169:15)
+renderWithHooks @ chunk-YQ5BCTVV.js?v=ba977359:11643
+updateFunctionComponent @ chunk-YQ5BCTVV.js?v=ba977359:14630
+beginWork @ chunk-YQ5BCTVV.js?v=ba977359:15972
+callCallback2 @ chunk-YQ5BCTVV.js?v=ba977359:3680
+invokeGuardedCallbackDev @ chunk-YQ5BCTVV.js?v=ba977359:3705
+invokeGuardedCallback @ chunk-YQ5BCTVV.js?v=ba977359:3739
+beginWork$1 @ chunk-YQ5BCTVV.js?v=ba977359:19818
+performUnitOfWork @ chunk-YQ5BCTVV.js?v=ba977359:19251
+workLoopSync @ chunk-YQ5BCTVV.js?v=ba977359:19190
+renderRootSync @ chunk-YQ5BCTVV.js?v=ba977359:19169
+performConcurrentWorkOnRoot @ chunk-YQ5BCTVV.js?v=ba977359:18728
+workLoop @ chunk-YQ5BCTVV.js?v=ba977359:197
+flushWork @ chunk-YQ5BCTVV.js?v=ba977359:176
+performWorkUntilDeadline @ chunk-YQ5BCTVV.js?v=ba977359:384Understand this error
+chunk-YQ5BCTVV.js?v=ba977359:11643 Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    at renderWithHooks (chunk-YQ5BCTVV.js?v=ba977359:11643:19)
+    at updateFunctionComponent (chunk-YQ5BCTVV.js?v=ba977359:14630:28)
+    at beginWork (chunk-YQ5BCTVV.js?v=ba977359:15972:22)
+    at HTMLUnknownElement.callCallback2 (chunk-YQ5BCTVV.js?v=ba977359:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-YQ5BCTVV.js?v=ba977359:3705:24)
+    at invokeGuardedCallback (chunk-YQ5BCTVV.js?v=ba977359:3739:39)
+    at beginWork$1 (chunk-YQ5BCTVV.js?v=ba977359:19818:15)
+    at performUnitOfWork (chunk-YQ5BCTVV.js?v=ba977359:19251:20)
+    at workLoopSync (chunk-YQ5BCTVV.js?v=ba977359:19190:13)
+    at renderRootSync (chunk-YQ5BCTVV.js?v=ba977359:19169:15)
+renderWithHooks @ chunk-YQ5BCTVV.js?v=ba977359:11643
+updateFunctionComponent @ chunk-YQ5BCTVV.js?v=ba977359:14630
+beginWork @ chunk-YQ5BCTVV.js?v=ba977359:15972
+callCallback2 @ chunk-YQ5BCTVV.js?v=ba977359:3680
+invokeGuardedCallbackDev @ chunk-YQ5BCTVV.js?v=ba977359:3705
+invokeGuardedCallback @ chunk-YQ5BCTVV.js?v=ba977359:3739
+beginWork$1 @ chunk-YQ5BCTVV.js?v=ba977359:19818
+performUnitOfWork @ chunk-YQ5BCTVV.js?v=ba977359:19251
+workLoopSync @ chunk-YQ5BCTVV.js?v=ba977359:19190
+renderRootSync @ chunk-YQ5BCTVV.js?v=ba977359:19169
+recoverFromConcurrentError @ chunk-YQ5BCTVV.js?v=ba977359:18786
+performConcurrentWorkOnRoot @ chunk-YQ5BCTVV.js?v=ba977359:18734
+workLoop @ chunk-YQ5BCTVV.js?v=ba977359:197
+flushWork @ chunk-YQ5BCTVV.js?v=ba977359:176
+performWorkUntilDeadline @ chunk-YQ5BCTVV.js?v=ba977359:384Understand this error
+chunk-YQ5BCTVV.js?v=ba977359:14080 The above error occurred in the <Dashboard> component:
+
+    at Dashboard (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx:273:20)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ba977359:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ba977359:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-36WGJFHK.js?v=ba977359:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ba977359:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=ba977359:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+logCapturedError @ chunk-YQ5BCTVV.js?v=ba977359:14080
+callback @ chunk-YQ5BCTVV.js?v=ba977359:14126
+callCallback @ chunk-YQ5BCTVV.js?v=ba977359:11296
+commitUpdateQueue @ chunk-YQ5BCTVV.js?v=ba977359:11313
+commitLayoutEffectOnFiber @ chunk-YQ5BCTVV.js?v=ba977359:17123
+commitLayoutMountEffects_complete @ chunk-YQ5BCTVV.js?v=ba977359:18030
+commitLayoutEffects_begin @ chunk-YQ5BCTVV.js?v=ba977359:18019
+commitLayoutEffects @ chunk-YQ5BCTVV.js?v=ba977359:17970
+commitRootImpl @ chunk-YQ5BCTVV.js?v=ba977359:19406
+commitRoot @ chunk-YQ5BCTVV.js?v=ba977359:19330
+finishConcurrentRender @ chunk-YQ5BCTVV.js?v=ba977359:18813
+performConcurrentWorkOnRoot @ chunk-YQ5BCTVV.js?v=ba977359:18768
+workLoop @ chunk-YQ5BCTVV.js?v=ba977359:197
+flushWork @ chunk-YQ5BCTVV.js?v=ba977359:176
+performWorkUntilDeadline @ chunk-YQ5BCTVV.js?v=ba977359:384Understand this error
+ErrorBoundary.tsx:40 ErrorBoundary caught an error: Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    at renderWithHooks (chunk-YQ5BCTVV.js?v=ba977359:11643:19)
+    at updateFunctionComponent (chunk-YQ5BCTVV.js?v=ba977359:14630:28)
+    at beginWork (chunk-YQ5BCTVV.js?v=ba977359:15972:22)
+    at beginWork$1 (chunk-YQ5BCTVV.js?v=ba977359:19806:22)
+    at performUnitOfWork (chunk-YQ5BCTVV.js?v=ba977359:19251:20)
+    at workLoopSync (chunk-YQ5BCTVV.js?v=ba977359:19190:13)
+    at renderRootSync (chunk-YQ5BCTVV.js?v=ba977359:19169:15)
+    at recoverFromConcurrentError (chunk-YQ5BCTVV.js?v=ba977359:18786:28)
+    at performConcurrentWorkOnRoot (chunk-YQ5BCTVV.js?v=ba977359:18734:30)
+    at workLoop (chunk-YQ5BCTVV.js?v=ba977359:197:42) {componentStack: '\n    at Dashboard (https://874e2dce-5057-49ae-8fb5….replit.dev/src/components/ErrorBoundary.tsx:7:5)'}
+componentDidCatch @ ErrorBoundary.tsx:40
+callback @ chunk-YQ5BCTVV.js?v=ba977359:14132
+callCallback @ chunk-YQ5BCTVV.js?v=ba977359:11296
+commitUpdateQueue @ chunk-YQ5BCTVV.js?v=ba977359:11313
+commitLayoutEffectOnFiber @ chunk-YQ5BCTVV.js?v=ba977359:17123
+commitLayoutMountEffects_complete @ chunk-YQ5BCTVV.js?v=ba977359:18030
+commitLayoutEffects_begin @ chunk-YQ5BCTVV.js?v=ba977359:18019
+commitLayoutEffects @ chunk-YQ5BCTVV.js?v=ba977359:17970
+commitRootImpl @ chunk-YQ5BCTVV.js?v=ba977359:19406
+commitRoot @ chunk-YQ5BCTVV.js?v=ba977359:19330
+finishConcurrentRender @ chunk-YQ5BCTVV.js?v=ba977359:18813
+performConcurrentWorkOnRoot @ chunk-YQ5BCTVV.js?v=ba977359:18768
+workLoop @ chunk-YQ5BCTVV.js?v=ba977359:197
+flushWork @ chunk-YQ5BCTVV.js?v=ba977359:176
+performWorkUntilDeadline @ chunk-YQ5BCTVV.js?v=ba977359:384Understand this error
+client:809 [vite] TypeError: Cannot read properties of undefined (reading 'send')
+    at Object.send (client:450:7)
+    at Object.send (client:780:16)
+    at Object.send (client:319:23)
+    at Object.send (client:397:30)
+    at HMRClient.send (client:157:18)
+    at HMRContext.send (client:119:18)
+    at sendError (dashboard:16:7)
+    at dashboard:20:3
+    at Object.invokeGuardedCallbackDev (chunk-YQ5BCTVV.js?v=ba977359:3705:24)
+    at invokeGuardedCallback (chunk-YQ5BCTVV.js?v=ba977359:3739:39)
+error @ client:809
+(anonymous) @ client:158
+Promise.catch
+send @ client:157
+send @ client:119
+sendError @ dashboard:16
+(anonymous) @ dashboard:20
+invokeGuardedCallbackDev @ chunk-YQ5BCTVV.js?v=ba977359:3705
+invokeGuardedCallback @ chunk-YQ5BCTVV.js?v=ba977359:3739
+beginWork$1 @ chunk-YQ5BCTVV.js?v=ba977359:19818
+performUnitOfWork @ chunk-YQ5BCTVV.js?v=ba977359:19251
+workLoopSync @ chunk-YQ5BCTVV.js?v=ba977359:19190
+renderRootSync @ chunk-YQ5BCTVV.js?v=ba977359:19169
+performConcurrentWorkOnRoot @ chunk-YQ5BCTVV.js?v=ba977359:18728
+workLoop @ chunk-YQ5BCTVV.js?v=ba977359:197
+flushWork @ chunk-YQ5BCTVV.js?v=ba977359:176
+performWorkUntilDeadline @ chunk-YQ5BCTVV.js?v=ba977359:384Understand this error
+client:809 [vite] TypeError: Cannot read properties of undefined (reading 'send')
+    at Object.send (client:450:7)
+    at Object.send (client:780:16)
+    at Object.send (client:319:23)
+    at Object.send (client:397:30)
+    at HMRClient.send (client:157:18)
+    at HMRContext.send (client:119:18)
+    at sendError (dashboard:16:7)
+    at dashboard:20:3
+    at Object.invokeGuardedCallbackDev (chunk-YQ5BCTVV.js?v=ba977359:3705:24)
+    at invokeGuardedCallback (chunk-YQ5BCTVV.js?v=ba977359:3739:39)
+error @ client:809
+(anonymous) @ client:158
+Promise.catch
+send @ client:157
+send @ client:119
+sendError @ dashboard:16
+(anonymous) @ dashboard:20
+invokeGuardedCallbackDev @ chunk-YQ5BCTVV.js?v=ba977359:3705
+invokeGuardedCallback @ chunk-YQ5BCTVV.js?v=ba977359:3739
+beginWork$1 @ chunk-YQ5BCTVV.js?v=ba977359:19818
+performUnitOfWork @ chunk-YQ5BCTVV.js?v=ba977359:19251
+workLoopSync @ chunk-YQ5BCTVV.js?v=ba977359:19190
+renderRootSync @ chunk-YQ5BCTVV.js?v=ba977359:19169
+recoverFromConcurrentError @ chunk-YQ5BCTVV.js?v=ba977359:18786
+performConcurrentWorkOnRoot @ chunk-YQ5BCTVV.js?v=ba977359:18734
+workLoop @ chunk-YQ5BCTVV.js?v=ba977359:197
+flushWork @ chunk-YQ5BCTVV.js?v=ba977359:176
+performWorkUntilDeadline @ chunk-YQ5BCTVV.js?v=ba977359:384Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-28T18:13:23.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-28T18:13:23.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
