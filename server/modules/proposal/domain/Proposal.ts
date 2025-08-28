@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { DomainException } from '../../shared/domain/DomainException';
 
 // Value Objects
 export interface ClienteData {
@@ -70,12 +71,58 @@ export class ProposalRejectedEvent implements ProposalDomainEvent {
   ) {}
 }
 
+export class ProposalSubmittedEvent implements ProposalDomainEvent {
+  constructor(
+    public aggregateId: string,
+    public eventType: string = 'ProposalSubmitted',
+    public payload: any,
+    public occurredAt: Date = new Date()
+  ) {}
+}
+
+export class ProposalPendingEvent implements ProposalDomainEvent {
+  constructor(
+    public aggregateId: string,
+    public eventType: string = 'ProposalPending',
+    public payload: any,
+    public occurredAt: Date = new Date()
+  ) {}
+}
+
+export class ProposalUpdatedAfterPendingEvent implements ProposalDomainEvent {
+  constructor(
+    public aggregateId: string,
+    public eventType: string = 'ProposalUpdatedAfterPending',
+    public payload: any,
+    public occurredAt: Date = new Date()
+  ) {}
+}
+
+export class ProposalCcbGeneratedEvent implements ProposalDomainEvent {
+  constructor(
+    public aggregateId: string,
+    public eventType: string = 'ProposalCcbGenerated',
+    public payload: any,
+    public occurredAt: Date = new Date()
+  ) {}
+}
+
+export class ProposalSignatureCompletedEvent implements ProposalDomainEvent {
+  constructor(
+    public aggregateId: string,
+    public eventType: string = 'ProposalSignatureCompleted',
+    public payload: any,
+    public occurredAt: Date = new Date()
+  ) {}
+}
+
 // Status Enum (domínio)
 export enum ProposalStatus {
   RASCUNHO = 'rascunho',
   EM_ANALISE = 'em_analise',
   APROVADO = 'aprovado',
   REJEITADO = 'rejeitado',
+  PENDENCIADO = 'pendenciado', // Novo estado para proposta com pendências
   CCB_GERADA = 'CCB_GERADA',
   AGUARDANDO_ASSINATURA = 'AGUARDANDO_ASSINATURA',
   ASSINATURA_CONCLUIDA = 'ASSINATURA_CONCLUIDA',
@@ -211,26 +258,26 @@ export class Proposal {
   private validateInvariants(): void {
     // Invariante 1: Valor deve estar dentro dos limites
     if (this._valor < VALOR_MINIMO_EMPRESTIMO || this._valor > VALOR_MAXIMO_EMPRESTIMO) {
-      throw new Error(
+      throw new DomainException(
         `Valor do empréstimo deve estar entre R$ ${VALOR_MINIMO_EMPRESTIMO} e R$ ${VALOR_MAXIMO_EMPRESTIMO}`
       );
     }
 
     // Invariante 2: Prazo deve estar dentro dos limites
     if (this._prazo < PRAZO_MINIMO_MESES || this._prazo > PRAZO_MAXIMO_MESES) {
-      throw new Error(`Prazo deve estar entre ${PRAZO_MINIMO_MESES} e ${PRAZO_MAXIMO_MESES} meses`);
+      throw new DomainException(`Prazo deve estar entre ${PRAZO_MINIMO_MESES} e ${PRAZO_MAXIMO_MESES} meses`);
     }
 
     // Invariante 3: Taxa de juros deve estar dentro dos limites
     if (this._taxaJuros < TAXA_JUROS_MINIMA || this._taxaJuros > TAXA_JUROS_MAXIMA) {
-      throw new Error(
+      throw new DomainException(
         `Taxa de juros deve estar entre ${TAXA_JUROS_MINIMA}% e ${TAXA_JUROS_MAXIMA}%`
       );
     }
 
     // Invariante 4: CPF deve ser válido
     if (!this.isValidCPF(this._clienteData.cpf)) {
-      throw new Error('CPF inválido');
+      throw new DomainException('CPF inválido');
     }
   }
 
@@ -276,19 +323,25 @@ export class Proposal {
    */
   submitForAnalysis(): void {
     if (this._status !== ProposalStatus.RASCUNHO) {
-      throw new Error('Apenas propostas em rascunho podem ser submetidas para análise');
+      throw new DomainException('Apenas propostas em rascunho podem ser submetidas para análise');
     }
 
     this._status = ProposalStatus.EM_ANALISE;
     this._updatedAt = new Date();
+
+    this.addEvent(
+      new ProposalSubmittedEvent(this._id, 'ProposalSubmitted', {
+        submittedAt: this._updatedAt,
+      })
+    );
   }
 
   /**
    * Aprova a proposta
    */
   approve(analistaId: string, observacoes?: string): void {
-    if (this._status !== ProposalStatus.EM_ANALISE) {
-      throw new Error('Apenas propostas em análise podem ser aprovadas');
+    if (this._status !== ProposalStatus.EM_ANALISE && this._status !== ProposalStatus.PENDENCIADO) {
+      throw new DomainException('Apenas propostas em análise ou pendenciadas podem ser aprovadas');
     }
 
     // Verificar comprometimento de renda antes de aprovar
@@ -299,7 +352,7 @@ export class Proposal {
         (comprometimentoTotal / this._clienteData.renda_mensal) * 100;
 
       if (percentualComprometimento > LIMITE_COMPROMETIMENTO_RENDA) {
-        throw new Error(
+        throw new DomainException(
           `Comprometimento de renda (${percentualComprometimento.toFixed(1)}%) excede o limite de ${LIMITE_COMPROMETIMENTO_RENDA}%`
         );
       }
@@ -321,12 +374,12 @@ export class Proposal {
    * Rejeita a proposta
    */
   reject(analistaId: string, motivo: string): void {
-    if (this._status !== ProposalStatus.EM_ANALISE) {
-      throw new Error('Apenas propostas em análise podem ser rejeitadas');
+    if (this._status !== ProposalStatus.EM_ANALISE && this._status !== ProposalStatus.PENDENCIADO) {
+      throw new DomainException('Apenas propostas em análise ou pendenciadas podem ser rejeitadas');
     }
 
     if (!motivo || motivo.trim().length === 0) {
-      throw new Error('Motivo da rejeição é obrigatório');
+      throw new DomainException('Motivo da rejeição é obrigatório');
     }
 
     this._status = ProposalStatus.REJEITADO;
@@ -342,16 +395,108 @@ export class Proposal {
   }
 
   /**
+   * Pendencia a proposta
+   */
+  pend(analistaId: string, reason: string): void {
+    if (this._status !== ProposalStatus.EM_ANALISE) {
+      throw new DomainException('Apenas propostas em análise podem ser pendenciadas');
+    }
+
+    if (!reason || reason.trim().length === 0) {
+      throw new DomainException('Motivo da pendência é obrigatório');
+    }
+
+    this._status = ProposalStatus.PENDENCIADO;
+    this._observacoes = reason;
+    this._updatedAt = new Date();
+
+    this.addEvent(
+      new ProposalPendingEvent(this._id, 'ProposalPending', {
+        analistaId,
+        reason,
+      })
+    );
+  }
+
+  /**
+   * Atualiza dados após pendência
+   */
+  updateAfterPending(newData: Partial<{
+    clienteData: ClienteData;
+    valor: number;
+    prazo: number;
+    taxaJuros: number;
+    dadosPagamento: DadosPagamento;
+    observacoes: string;
+  }>): void {
+    if (this._status !== ProposalStatus.PENDENCIADO) {
+      throw new DomainException('Apenas propostas pendenciadas podem ter dados atualizados');
+    }
+
+    const previousData = {
+      clienteData: this._clienteData,
+      valor: this._valor,
+      prazo: this._prazo,
+      taxaJuros: this._taxaJuros,
+      dadosPagamento: this._dadosPagamento,
+      observacoes: this._observacoes
+    };
+
+    // Atualizar dados fornecidos
+    if (newData.clienteData) {
+      this._clienteData = { ...this._clienteData, ...newData.clienteData };
+    }
+    if (newData.valor !== undefined) {
+      this._valor = newData.valor;
+    }
+    if (newData.prazo !== undefined) {
+      this._prazo = newData.prazo;
+    }
+    if (newData.taxaJuros !== undefined) {
+      this._taxaJuros = newData.taxaJuros;
+    }
+    if (newData.dadosPagamento) {
+      this._dadosPagamento = newData.dadosPagamento;
+    }
+    if (newData.observacoes) {
+      this._observacoes = newData.observacoes;
+    }
+
+    this._updatedAt = new Date();
+
+    // Revalidar invariantes após atualização
+    this.validateInvariants();
+
+    // Retornar automaticamente para análise após atualização
+    this._status = ProposalStatus.EM_ANALISE;
+
+    this.addEvent(
+      new ProposalUpdatedAfterPendingEvent(this._id, 'ProposalUpdatedAfterPending', {
+        previousData,
+        newData,
+        updatedAt: this._updatedAt
+      })
+    );
+  }
+
+  /**
    * Gera a CCB (Cédula de Crédito Bancário)
    */
   generateCCB(ccbUrl: string): void {
     if (this._status !== ProposalStatus.APROVADO) {
-      throw new Error('CCB só pode ser gerada para propostas aprovadas');
+      throw new DomainException('CCB só pode ser gerada para propostas aprovadas');
     }
 
     this._ccbUrl = ccbUrl;
     this._status = ProposalStatus.CCB_GERADA;
     this._updatedAt = new Date();
+
+    this.addEvent(
+      new ProposalCcbGeneratedEvent(this._id, 'ProposalCcbGenerated', {
+        ccbUrl,
+        generatedAt: this._updatedAt
+      })
+    );
   }
 
   /**
@@ -359,7 +504,7 @@ export class Proposal {
    */
   markAwaitingSignature(): void {
     if (this._status !== ProposalStatus.CCB_GERADA) {
-      throw new Error('Proposta deve ter CCB gerada antes de aguardar assinatura');
+      throw new DomainException('Proposta deve ter CCB gerada antes de aguardar assinatura');
     }
 
     this._status = ProposalStatus.AGUARDANDO_ASSINATURA;
@@ -371,11 +516,17 @@ export class Proposal {
    */
   confirmSignature(): void {
     if (this._status !== ProposalStatus.AGUARDANDO_ASSINATURA) {
-      throw new Error('Proposta deve estar aguardando assinatura');
+      throw new DomainException('Proposta deve estar aguardando assinatura');
     }
 
     this._status = ProposalStatus.ASSINATURA_CONCLUIDA;
     this._updatedAt = new Date();
+
+    this.addEvent(
+      new ProposalSignatureCompletedEvent(this._id, 'ProposalSignatureCompleted', {
+        completedAt: this._updatedAt
+      })
+    );
   }
 
   /**
@@ -383,7 +534,7 @@ export class Proposal {
    */
   updatePaymentData(dadosPagamento: DadosPagamento): void {
     if (this._status === ProposalStatus.REJEITADO || this._status === ProposalStatus.CANCELADO) {
-      throw new Error(
+      throw new DomainException(
         'Não é possível atualizar dados de pagamento em propostas rejeitadas ou canceladas'
       );
     }
@@ -401,7 +552,7 @@ export class Proposal {
       this._status === ProposalStatus.CANCELADO ||
       this._status === ProposalStatus.PAGAMENTO_AUTORIZADO
     ) {
-      throw new Error('Proposta não pode ser cancelada neste status');
+      throw new DomainException('Proposta não pode ser cancelada neste status');
     }
 
     this._status = ProposalStatus.CANCELADO;
@@ -414,7 +565,7 @@ export class Proposal {
    */
   suspend(motivo: string): void {
     if (this._status === ProposalStatus.REJEITADO || this._status === ProposalStatus.CANCELADO) {
-      throw new Error('Proposta não pode ser suspensa neste status');
+      throw new DomainException('Proposta não pode ser suspensa neste status');
     }
 
     this._status = ProposalStatus.SUSPENSA;
@@ -427,7 +578,7 @@ export class Proposal {
    */
   reactivate(): void {
     if (this._status !== ProposalStatus.SUSPENSA) {
-      throw new Error('Apenas propostas suspensas podem ser reativadas');
+      throw new DomainException('Apenas propostas suspensas podem ser reativadas');
     }
 
     // Volta ao status anterior (simplificado - idealmente manteria histórico)
