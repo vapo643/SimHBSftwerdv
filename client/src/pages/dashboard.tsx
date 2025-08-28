@@ -146,59 +146,76 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
+// Dashboard Skeleton Component
+const DashboardSkeleton: React.FC = () => (
+  <DashboardLayout title="Dashboard">
+    <div className="space-y-6">
+      {/* Header Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {/* Content Skeleton */}
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-24 bg-gray-200 rounded animate-pulse"></div>
+        ))}
+      </div>
+    </div>
+  </DashboardLayout>
+);
+
+// Error Display Component
+const ErrorDisplay: React.FC<{ message: string }> = ({ message }) => (
+  <DashboardLayout title="Dashboard">
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription>
+        Erro ao carregar dashboard: {message}
+      </AlertDescription>
+    </Alert>
+  </DashboardLayout>
+);
+
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  
+  // TODOS os hooks useState devem estar no início - regra fundamental do React
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [parceiroFilter, setParceiroFilter] = useState<string>('todos');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+
+  // CRÍTICO: Early redirect check ANTES de qualquer hook condicional
+  useEffect(() => {
+    if (user?.role === 'ANALISTA') {
+      setLocation('/credito/fila');
+      return; // Exit early to prevent further execution
+    }
+  }, [user?.role, setLocation]);
 
   // Fetch real proposals data - only when authenticated
   const {
     data: propostasResponse,
     isLoading,
     error,
+    isError,
     refetch,
   } = useQuery<{ success: boolean; data: any[]; total: number }>({
     queryKey: ['/api/propostas'],
-    enabled: !!user, // Only fetch when user is authenticated
+    enabled: !!user && user?.role !== 'ANALISTA', // Only fetch when user is authenticated and not ANALISTA
   });
-
-  // Log the query state for debugging
-  console.log('[Dashboard] Query state:', {
-    user: !!user,
-    userRole: user?.role,
-    isLoading,
-    error,
-    data: propostasResponse,
-  });
-
-  // Extract propostas - dual-key transformation in apiClient ensures both formats work
-  // The apiClient automatically adds camelCase aliases for all snake_case keys
-  const propostas = Array.isArray(propostasResponse?.data)
-    ? propostasResponse.data.map((p: any) => {
-        console.log('[Dashboard] Processing proposal:', p);
-        return {
-          id: p.id,
-          status: p.status,
-          // Use camelCase properties directly (added by dual-key transformation)
-          nomeCliente: p.nomeCliente || p.clienteNome || p.cliente_nome, // Try all variations
-          cpfCliente: p.cpfCliente || p.clienteCpf || p.cliente_cpf, // Try all variations
-          valorSolicitado: p.valorSolicitado || p.valor,
-          prazo: p.prazo,
-          taxaJuros: p.taxaJuros || p.taxaJuros || p.taxa_juros,
-          produtoId: p.produtoId || p.produto_id,
-          lojaId: p.lojaId || p.loja_id,
-          createdAt: p.createdAt || p.created_at,
-          valorParcela: p.valorParcela || p.valor_parcela,
-          // Add contextual status for compatibility
-          statusContextual: p.status,
-          parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' },
-        };
-      })
-    : [];
 
   // Fetch user metrics if user is ATENDENTE
   const { data: metricas } = useQuery<{
@@ -210,14 +227,41 @@ const Dashboard: React.FC = () => {
     enabled: user?.role === 'ATENDENTE',
   });
 
-  // Redirect ANALISTA to analysis queue
-  useEffect(() => {
-    if (user?.role === 'ANALISTA') {
-      setLocation('/credito/fila');
-    }
-  }, [user?.role, setLocation]);
+  // PASSO 1.3: Early Return para Loading State
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
-  // IMPORTANTE: Sempre definir dados e hooks ANTES dos returns condicionais
+  // PASSO 1.4: Early Return para Error State  
+  if (isError) {
+    return <ErrorDisplay message={error?.message || 'Erro desconhecido'} />;
+  }
+
+  // PASSO 1.4: Early Return se usuário é ANALISTA (após redirect)
+  if (user?.role === 'ANALISTA') {
+    return <DashboardSkeleton />; // Show loading while redirecting
+  }
+
+  // Extract propostas - dual-key transformation in apiClient ensures both formats work
+  const propostas = Array.isArray(propostasResponse?.data)
+    ? propostasResponse.data.map((p: any) => ({
+        id: p.id,
+        status: p.status,
+        // Use camelCase properties directly (added by dual-key transformation)
+        nomeCliente: p.nomeCliente || p.clienteNome || p.cliente_nome,
+        cpfCliente: p.cpfCliente || p.clienteCpf || p.cliente_cpf,
+        valorSolicitado: p.valorSolicitado || p.valor,
+        prazo: p.prazo,
+        taxaJuros: p.taxaJuros || p.taxa_juros,
+        produtoId: p.produtoId || p.produto_id,
+        lojaId: p.lojaId || p.loja_id,
+        createdAt: p.createdAt || p.created_at,
+        valorParcela: p.valorParcela || p.valor_parcela,
+        statusContextual: p.status,
+        parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' },
+      }))
+    : [];
+
   const propostasData = propostas || [];
 
   // Filtrar propostas - HOOK SEMPRE EXECUTADO
