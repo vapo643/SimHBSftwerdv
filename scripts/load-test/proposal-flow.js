@@ -166,6 +166,7 @@ async function runProposalFlow(userIndex, metricsCollector) {
     }
     
     console.log(`✅ [User ${userIndex}] Authenticated successfully`);
+    console.log(`🔍 [DEBUG] Token length: ${token.length}, Token prefix: ${token.substring(0, 50)}...`);
     
     // Step 2: Create proposal
     const proposalData = {
@@ -183,7 +184,7 @@ async function runProposalFlow(userIndex, metricsCollector) {
     }, metricsCollector);
     
     if (!createResponse.success) {
-      console.error(`❌ [User ${userIndex}] Proposal creation failed`);
+      console.error(`❌ [User ${userIndex}] Proposal creation failed - Status: ${createResponse.status}`);
       return false;
     }
     

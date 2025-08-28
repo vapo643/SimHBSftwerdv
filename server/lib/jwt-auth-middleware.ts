@@ -30,6 +30,33 @@ const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 // User token tracking for invalidation on account deactivation
 const userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
 
+// HOTFIX: Token validation cache to prevent race conditions in concurrent requests
+interface TokenCacheEntry {
+  userId: string;
+  userEmail: string;
+  timestamp: number;
+  ttl: number; // 5 minutes
+}
+
+const tokenValidationCache = new Map<string, TokenCacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const validationSemaphore = new Map<string, Promise<any>>(); // Prevent concurrent validation of same token
+
+// Helper function to check cache validity
+function isTokenCacheValid(entry: TokenCacheEntry): boolean {
+  return Date.now() - entry.timestamp < CACHE_TTL;
+}
+
+// Cache cleanup every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, entry] of tokenValidationCache.entries()) {
+    if (now - entry.timestamp > CACHE_TTL) {
+      tokenValidationCache.delete(token);
+    }
+  }
+}, 10 * 60 * 1000);
+
 // Limpar blacklist periodicamente
 setInterval(() => {
   tokenBlacklist.clear();
@@ -178,26 +205,76 @@ export async function jwtAuthMiddleware(
 
     console.log('[JWT DEBUG] Auto-detected token type:', tokenType);
 
-    if (tokenType === 'supabase') {
-      // Use Supabase validation for Supabase tokens
+    // HOTFIX: Check cache first to prevent race conditions
+    const cachedEntry = tokenValidationCache.get(token);
+    if (cachedEntry && isTokenCacheValid(cachedEntry)) {
+      console.log('[JWT DEBUG] Using cached token validation - avoiding race condition');
+      userId = cachedEntry.userId;
+      userEmail = cachedEntry.userEmail;
+      data = { user: { id: userId, email: userEmail } };
+      error = null;
+    } else if (validationSemaphore.has(token)) {
+      // Wait for ongoing validation of the same token
+      console.log('[JWT DEBUG] Token validation in progress - waiting...');
       try {
-        console.log('[JWT DEBUG] Using Supabase token validation');
-        const { createServerSupabaseAdminClient } = await import('./supabase');
-        const supabase = createServerSupabaseAdminClient();
-        const supabaseResult = await supabase.auth.getUser(token);
-
-        data = supabaseResult.data;
-        error = supabaseResult.error;
-
-        if (data?.user) {
-          userId = data.user.id;
-          userEmail = data.user.email || '';
-        }
-      } catch (supabaseError: any) {
-        console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
-        error = { message: supabaseError.message };
+        const result = await validationSemaphore.get(token)!;
+        userId = result.userId;
+        userEmail = result.userEmail;
+        data = result.data;
+        error = result.error;
+      } catch (semaphoreError: any) {
+        console.error('[JWT DEBUG] Semaphore wait failed:', semaphoreError.message);
+        error = { message: semaphoreError.message };
         data = null;
       }
+    } else if (tokenType === 'supabase') {
+      // Create semaphore entry for this token validation
+      const validationPromise = (async () => {
+        try {
+          console.log('[JWT DEBUG] Using Supabase token validation');
+          const { createServerSupabaseAdminClient } = await import('./supabase');
+          const supabase = createServerSupabaseAdminClient();
+          const supabaseResult = await supabase.auth.getUser(token);
+
+          const result = {
+            userId: supabaseResult.data?.user?.id,
+            userEmail: supabaseResult.data?.user?.email || '',
+            data: supabaseResult.data,
+            error: supabaseResult.error
+          };
+
+          // Cache successful validation
+          if (!supabaseResult.error && supabaseResult.data?.user) {
+            tokenValidationCache.set(token, {
+              userId: result.userId!,
+              userEmail: result.userEmail,
+              timestamp: Date.now(),
+              ttl: CACHE_TTL
+            });
+          }
+
+          return result;
+        } catch (supabaseError: any) {
+          console.error('[JWT DEBUG] Supabase validation failed:', supabaseError.message);
+          return {
+            userId: undefined,
+            userEmail: '',
+            data: null,
+            error: { message: supabaseError.message }
+          };
+        } finally {
+          validationSemaphore.delete(token);
+        }
+      })();
+
+      validationSemaphore.set(token, validationPromise);
+      const result = await validationPromise;
+      
+      userId = result.userId;
+      userEmail = result.userEmail;
+      data = result.data;
+      error = result.error;
+
     } else {
       // Use local JWT validation for local tokens
       try {

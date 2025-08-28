@@ -1,8 +1,7 @@
-## Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management within financial institutions. Its primary purpose is to streamline the entire credit proposal workflow, encompassing creation, payment processing, and formalization tracking. Key features include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project prioritizes banking-grade security, compliance, and efficient data management, aiming to establish itself as a leading solution in the credit management market with significant business potential.
+# Overview
+Simpix is a full-stack TypeScript application for comprehensive credit management within financial institutions. Its core purpose is to streamline the credit proposal workflow, from creation and payment processing to formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project aims to be a leading solution in the credit management market, prioritizing banking-grade security, compliance, and efficient data management.
 
-## User Preferences
-
+# User Preferences
 ### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
 **Ativação:** Quando o usuário enviar exatamente: **"me explica o que você fez"**
 
@@ -142,41 +141,37 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 
 **LEMBRETE CRÍTICO:** NÃO executar o planodocumentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
 
-## System Architecture
-
-The system is a full-stack TypeScript application built on a modular monolith architecture.
+# System Architecture
+Simpix is a full-stack TypeScript application built on a modular monolith architecture.
 
 **Frontend:**
-- **Framework**: React 18, utilizing Wouter for routing.
-- **Language**: TypeScript.
-- **Styling**: Tailwind CSS with shadcn/ui components.
-- **State Management**: TanStack Query for server-side state, and `useReducer` for complex local state.
-- **Form Handling**: React Hook Form with Zod for validation.
+- **Technology Stack**: React 18, Wouter (routing), TypeScript, Tailwind CSS with shadcn/ui.
+- **State Management**: TanStack Query (server-side), `useReducer` (local).
+- **Form Handling**: React Hook Form with Zod validation.
 - **Build Tool**: Vite.
 
 **Backend:**
-- **Framework**: Express.js, implementing a RESTful API pattern.
-- **Language**: TypeScript.
-- **Database**: PostgreSQL, managed with Drizzle ORM, featuring soft deletes, sequential numeric IDs, and audit trails.
-- **Authentication**: Supabase Auth, using JWTs with custom Role-Based Access Control (RBAC) and extended 4-hour JWT session TTLs.
-- **File Storage**: Supabase Storage for secure private buckets.
-- **Job Queue**: BullMQ, backed by Redis for asynchronous worker processing.
-- **Cache Layer**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
-- **Architecture**: Modular monolith design with clear domain-based decomposition (e.g., Auth, Users, Proposals, Payments, Integrations).
-- **Security**: Comprehensive security measures including Helmet, two-tier rate limiting (100 requests/15min for auth and general endpoints), input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), anti-fragile RBAC, and extended JWT sessions.
-- **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.
-- **Observability**: Winston for structured logging, Sentry for error tracking, health checks, and automated backups.
+- **Technology Stack**: Express.js (RESTful API), TypeScript.
+- **Database & ORM**: PostgreSQL, Drizzle ORM (soft deletes, sequential IDs, audit trails).
+- **Authentication**: Supabase Auth (JWTs, custom RBAC, extended session TTLs).
+- **File Storage**: Supabase Storage (secure private buckets).
+- **Asynchronous Processing**: BullMQ backed by Redis (job queues).
+- **Caching**: Redis-based cache (commercial data tables, 1-hour TTL, cache-aside).
+- **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
+- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), anti-fragile RBAC.
+- **CI/CD**: GitHub Actions for CI, Staging Deployment, and Security workflows.
+- **Observability**: Winston (structured logging), Sentry (error tracking), health checks, automated backups.
 - **Configuration**: Centralized configuration management.
 - **Feature Flags**: Unleash-client integration with fallback mechanisms.
-- **Credit Simulation**: A production-ready API capable of dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
+- **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, audit logging.
 - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
-- **Payment Workflow**: A complete payment queue system supporting batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.
+- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, dual-storage strategy.
 - **Commercial Tables**: Supports N:N relationships between products and commercial tables, enabling personalized and general rates with hierarchical fallback.
-- **Status Management**: Utilizes a centralized Finite State Machine (FSM) for robust transition validation and audit logging.
-- **Test Infrastructure**: A comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Production-ready migration system using Drizzle-Kit, designed for Zero Downtime (Expand/Contract pattern), automated rollback, and tracking.
+- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
+- **Test Infrastructure**: Comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, full integration test coverage.
+- **Schema Migration**: Production-ready migration system using Drizzle-Kit (Zero Dissent Time, Expand/Contract pattern, automated rollback, tracking).
 
-## External Dependencies
+# External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
 - **Drizzle ORM**: Type-safe ORM for PostgreSQL.
 - **TanStack Query**: Server state management.
