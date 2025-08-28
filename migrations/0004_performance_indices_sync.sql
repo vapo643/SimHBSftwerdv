@@ -1,0 +1,2 @@
+CREATE INDEX "idx_propostas_status_performance" ON "propostas" USING btree ("status","created_at" DESC NULLS LAST,"deleted_at") WHERE deleted_at IS NULL;--> statement-breakpoint
+CREATE INDEX "idx_propostas_cpf_status" ON "propostas" USING btree ("cliente_cpf","status") WHERE deleted_at IS NULL;
