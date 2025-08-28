@@ -1,0 +1,55 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Estabilização de Frontend" / Fase 3 (P2)
+
+* **Sumário da Missão (O Quê):** Auditar e corrigir a configuração do Vite (`vite.config.ts`) para resolver a falha de conexão do WebSocket do HMR (Hot Module Replacement) no ambiente Replit.
+* **Intenção Estratégica (O Porquê):** Restaurar uma funcionalidade crítica da experiência do desenvolvedor (DX). Um HMR funcional acelera drasticamente o ciclo de desenvolvimento e depuração, permitindo que as alterações no código do frontend sejam refletidas instantaneamente no *browser* sem a necessidade de recarregar a página.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de frontend especialista em *build tools* e ambientes de desenvolvimento. A sua tarefa é diagnosticar um problema de configuração de rede entre o servidor Vite e o cliente no *browser*, específico do ambiente de *proxy* do Replit.
+
+---
+
+**IMPLEMENTAR (Plano de Remediação):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+O HMR do Vite está a falhar a conexão, como indicado pelos erros de WebSocket no console do *browser*. Isto força os desenvolvedores a recarregarem a página manualmente a cada alteração no código.
+
+**EXPECTED (Estado Final de Sucesso):**
+1. O ficheiro `vite.config.ts` é atualizado com a configuração de HMR correta para o ambiente Replit.
+2. Os erros de conexão de WebSocket no console do *browser* são eliminados.
+3. As alterações feitas nos componentes React (ex: mudar um texto) são refletidas instantaneamente na aplicação em execução, sem a necessidade de um *reload* manual.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Auditar e Refatorar `vite.config.ts`**
+1.1. Abra o ficheiro `vite.config.ts`.
+1.2. Localize o objeto de configuração `server`.
+1.3. Adicione ou modifique a propriedade `hmr` para configurar explicitamente o cliente WebSocket a conectar-se corretamente através do *proxy* do Replit. A configuração necessária é a seguinte:
+    ```typescript
+    // Dentro de defineConfig({ ... })
+    server: {
+      hmr: {
+        clientPort: 443, // Porta padrão para conexões seguras (https/wss)
+        host: new URL(process.env.REPL_EXTERNAL_URL).hostname, // Usa o hostname dinâmico do Replit
+      }
+    }
+    ```
+    *Atenção: `process.env.REPL_EXTERNAL_URL` é uma variável de ambiente fornecida pelo Replit.*
+
+**Passo 2: Validação Final**
+2.1. Apresente o código refatorado do ficheiro `vite.config.ts`.
+2.2. Após o servidor reiniciar, faça uma pequena alteração visual num componente React (ex: mude o título no `dashboard.tsx`) e confirme nos logs do *browser* que a mensagem `[vite] hmr update` aparece e que a alteração é refletida na UI sem um *reload* da página.
+2.3. Execute `get_latest_lsp_diagnostics` para confirmar a integridade do código.
+
+---
+
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+Liste a totalidade das suas descobertas, riscos e recomendações de forma exaustiva.
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS (LISTA COMPLETA):**
+    * **Risco 1 (Baixo):** A variável de ambiente `REPL_EXTERNAL_URL` pode não estar disponível em todos os contextos de execução, exigindo um *fallback*.
+* **DECISÕES TÉCNICAS ASSUMIDAS (LISTA COMPLETA):**
+    * A correção foca-se exclusivamente na configuração do HMR, que é a causa raiz mais provável para este tipo de erro no ambiente Replit.
+* **VALIDAÇÃO PENDENTE (LISTA COMPLETA):**
+    * O teste funcional de fazer uma alteração no código e observar a atualização instantânea na UI é a validação mandatória para o sucesso desta missão.
