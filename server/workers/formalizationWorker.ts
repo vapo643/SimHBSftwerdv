@@ -2,6 +2,7 @@ import { Worker, Job } from 'bullmq';
 import logger from '../lib/logger';
 import { GenerateCcbUseCase } from '../modules/ccb/application/GenerateCcbUseCase';
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
+import { getRedisConnectionConfig } from '../lib/redis-config';
 // ClickSign service will be imported when needed
 
 interface ProposalApprovedPayload {
@@ -20,11 +21,8 @@ export class FormalizationWorker {
   private redisConnection: any;
 
   constructor() {
-    this.redisConnection = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      maxRetriesPerRequest: 3,
-    };
+    // Use centralized Redis configuration
+    this.redisConnection = getRedisConnectionConfig();
 
     this.worker = new Worker(
       'formalization-queue',

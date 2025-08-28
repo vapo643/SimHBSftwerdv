@@ -1,6 +1,7 @@
 import { Queue } from 'bullmq';
 import { DomainEvent } from '../../modules/shared/domain/events/DomainEvent';
 import logger from '../../lib/logger';
+import { getRedisConnectionConfig } from '../../lib/redis-config';
 
 export class EventDispatcher {
   private static instance: EventDispatcher;
@@ -8,12 +9,8 @@ export class EventDispatcher {
   private redisConnection: any;
 
   private constructor() {
-    // Configuração Redis para BullMQ
-    this.redisConnection = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      maxRetriesPerRequest: 3,
-    };
+    // Use centralized Redis configuration
+    this.redisConnection = getRedisConnectionConfig();
   }
 
   public static getInstance(): EventDispatcher {

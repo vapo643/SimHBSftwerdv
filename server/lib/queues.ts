@@ -10,25 +10,10 @@
  */
 
 import { Queue, QueueOptions } from 'bullmq';
-import { Redis } from 'ioredis';
+import { getRedisConnectionConfig } from './redis-config';
 
-// Redis connection configuration
-const redisConnection = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: null, // Required for BullMQ
-  enableReadyCheck: false,
-});
-
-// Test Redis connection
-redisConnection.on('connect', () => {
-  console.log('[QUEUE] ✅ Redis connected successfully');
-});
-
-redisConnection.on('error', (err) => {
-  console.error('[QUEUE] ❌ Redis connection error:', err);
-});
+// Use centralized Redis configuration
+const redisConnection = getRedisConnectionConfig();
 
 // Default queue options with retry configuration
 const defaultQueueOptions: QueueOptions = {
