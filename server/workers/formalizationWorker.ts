@@ -19,27 +19,38 @@ interface ProposalApprovedPayload {
 }
 
 export class FormalizationWorker {
-  private worker: Worker;
+  private worker: Worker | null = null;
   private redisConnection: any;
+  private isRedisAvailable: boolean = false;
 
   constructor() {
-    // Use centralized Redis configuration
-    this.redisConnection = getRedisConnectionConfig();
+    try {
+      // Use centralized Redis configuration
+      this.redisConnection = getRedisConnectionConfig();
 
-    this.worker = new Worker(
-      'formalization-queue',
-      async (job: Job<ProposalApprovedPayload>) => {
-        return this.processFormalization(job);
-      },
-      {
-        connection: this.redisConnection,
-        concurrency: 5, // Processar até 5 propostas simultaneamente
-        // Note: Retry configuration is handled by queue options
-        // Job retry delays are controlled by the 'backoff' configuration in queue defaultJobOptions
-      }
-    );
+      this.worker = new Worker(
+        'formalization-queue',
+        async (job: Job<ProposalApprovedPayload>) => {
+          return this.processFormalization(job);
+        },
+        {
+          connection: this.redisConnection,
+          concurrency: 5, // Processar até 5 propostas simultaneamente
+          // Note: Retry configuration is handled by queue options
+          // Job retry delays are controlled by the 'backoff' configuration in queue defaultJobOptions
+        }
+      );
 
-    this.setupEventHandlers();
+      this.isRedisAvailable = true;
+      this.setupEventHandlers();
+      logger.info('📊 [FormalizationWorker] Redis connection established - async processing enabled');
+    } catch (error) {
+      this.isRedisAvailable = false;
+      logger.warn('⚠️ [FormalizationWorker] Redis unavailable - async processing disabled', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      logger.warn('💡 [FormalizationWorker] Events will be processed synchronously (development mode)');
+    }
   }
 
   private async processFormalization(job: Job<ProposalApprovedPayload>): Promise<void> {
@@ -117,6 +128,11 @@ export class FormalizationWorker {
   }
 
   private setupEventHandlers(): void {
+    if (!this.worker) {
+      logger.warn('⚠️ [FormalizationWorker] Cannot setup event handlers - worker not initialized');
+      return;
+    }
+
     // Set up DLQ handler for this worker
     dlqManager.setupFailedJobHandler(this.worker, 'formalization-queue');
     
@@ -179,12 +195,20 @@ export class FormalizationWorker {
   }
 
   public async start(): Promise<void> {
+    if (!this.isRedisAvailable) {
+      logger.warn('⚠️ [FormalizationWorker] Start called but Redis unavailable - no async processing');
+      return;
+    }
     // Worker já está rodando quando criado no constructor
-    logger.info('Formalization worker started');
+    logger.info('📊 [FormalizationWorker] Started successfully');
   }
 
   public async stop(): Promise<void> {
+    if (!this.worker) {
+      logger.warn('⚠️ [FormalizationWorker] Stop called but worker not initialized');
+      return;
+    }
     await this.worker.close();
-    logger.info('Formalization worker stopped');
+    logger.info('📊 [FormalizationWorker] Stopped successfully');
   }
 }

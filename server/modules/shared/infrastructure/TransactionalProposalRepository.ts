@@ -13,6 +13,7 @@ import * as schema from '@shared/schema';
 import { Proposal, ProposalStatus } from '../../proposal/domain/Proposal';
 import { IProposalRepository, ProposalSearchCriteria } from '../../proposal/domain/IProposalRepository';
 import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import { EventDispatcher } from '../../../infrastructure/events/EventDispatcher';
 
 // Type para transação Drizzle
 type DrizzleTransaction = PostgresJsTransaction<
@@ -84,6 +85,17 @@ export class TransactionalProposalRepository implements IProposalRepository {
         },
       ]);
     }
+
+    // Processar eventos de domínio (REMEDIAÇÃO CRÍTICA - Operação Aço Líquido)
+    const events = proposal.getUncommittedEvents();
+    const eventDispatcher = EventDispatcher.getInstance();
+    
+    for (const event of events) {
+      // Despachar evento para a fila assíncrona
+      await eventDispatcher.dispatch(event);
+      console.log(`[TRANSACTIONAL DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`);
+    }
+    proposal.markEventsAsCommitted();
   }
 
   async findById(id: string): Promise<Proposal | null> {
