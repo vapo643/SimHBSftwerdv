@@ -11,6 +11,7 @@ import {
   varchar,
   uuid,
   jsonb,
+  index,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -1030,7 +1031,152 @@ export const historicoExecucoesAlertas = pgTable('historico_execucoes_alertas', 
   dadosContexto: jsonb('dados_contexto'),
 });
 
-// Schemas de inserção para Alertas Proativos
+// ========================================================================
+// SPRINT 2: DOMAIN ENTITIES - CCBs e Boletos (Banking-Grade Performance)
+// ========================================================================
+
+// Tabela de CCBs (Cédulas de Crédito Bancário) - Documentos formalizados
+export const ccbs = pgTable('ccbs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  propostaId: text('proposta_id')
+    .references(() => propostas.id, { onDelete: 'cascade' })
+    .notNull(),
+  
+  // Identificação do documento
+  numeroCCB: text('numero_ccb').notNull().unique(), // Número único da CCB
+  valorCCB: decimal('valor_ccb', { precision: 15, scale: 2 }).notNull(),
+  
+  // Estados do ciclo de vida da CCB
+  status: text('status').notNull().default('gerada'), // gerada, enviada_assinatura, assinada, cancelada
+  
+  // Dados do documento original
+  caminhoDocumentoOriginal: text('caminho_documento_original'), // CCB gerada (PDF)
+  urlDocumentoOriginal: text('url_documento_original'), // URL do storage
+  
+  // Dados do documento assinado
+  caminhoDocumentoAssinado: text('caminho_documento_assinado'), // CCB assinada (PDF)
+  urlDocumentoAssinado: text('url_documento_assinado'), // URL do storage
+  
+  // Integração ClickSign
+  clicksignDocumentKey: text('clicksign_document_key'), // Chave do documento no ClickSign
+  clicksignSignerKey: text('clicksign_signer_key'), // Chave do signatário
+  clicksignListKey: text('clicksign_list_key'), // Chave da lista
+  clicksignSignUrl: text('clicksign_sign_url'), // URL de assinatura
+  clicksignStatus: text('clicksign_status'), // Status no ClickSign
+  
+  // Controle de tempo
+  dataEnvioAssinatura: timestamp('data_envio_assinatura'),
+  dataAssinaturaConcluida: timestamp('data_assinatura_concluida'),
+  prazoAssinatura: timestamp('prazo_assinatura'), // Prazo limite para assinatura
+  
+  // Metadados
+  tamanhoArquivo: integer('tamanho_arquivo'), // Tamanho em bytes
+  hashDocumento: text('hash_documento'), // Hash SHA-256 para integridade
+  versaoTemplate: text('versao_template').default('1.0'), // Controle de versão do template
+  
+  // Auditoria e soft delete
+  criadoPor: uuid('criado_por').references(() => profiles.id),
+  observacoes: text('observacoes'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'), // Soft delete
+});
+
+// Tabela de Boletos - Documentos de cobrança independentes do Inter
+export const boletos = pgTable('boletos', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  propostaId: text('proposta_id')
+    .references(() => propostas.id, { onDelete: 'cascade' })
+    .notNull(),
+  ccbId: uuid('ccb_id')
+    .references(() => ccbs.id, { onDelete: 'cascade' }),
+  
+  // Identificação do boleto
+  numeroBoleto: text('numero_boleto').notNull(), // Número sequencial único
+  numeroParcela: integer('numero_parcela').notNull(), // 1, 2, 3...
+  totalParcelas: integer('total_parcelas').notNull(),
+  
+  // Dados financeiros
+  valorPrincipal: decimal('valor_principal', { precision: 12, scale: 2 }).notNull(),
+  valorJuros: decimal('valor_juros', { precision: 10, scale: 2 }).default('0.00'),
+  valorMulta: decimal('valor_multa', { precision: 10, scale: 2 }).default('0.00'),
+  valorTotal: decimal('valor_total', { precision: 12, scale: 2 }).notNull(),
+  
+  // Datas importantes
+  dataVencimento: text('data_vencimento').notNull(), // YYYY-MM-DD
+  dataEmissao: text('data_emissao').notNull(), // YYYY-MM-DD
+  dataPagamento: text('data_pagamento'), // YYYY-MM-DD quando pago
+  
+  // Status e controle
+  status: text('status').notNull().default('emitido'), // emitido, vencido, pago, cancelado
+  formaPagamento: text('forma_pagamento'), // boleto, pix, transferencia
+  
+  // Integração bancária (Inter ou outros)
+  bancoOrigemId: text('banco_origem_id'), // Identificador no banco
+  codigoBarras: text('codigo_barras'),
+  linhaDigitavel: text('linha_digitavel'),
+  nossoNumero: text('nosso_numero'), // Número de controle do banco
+  
+  // PIX (se disponível)
+  pixTxid: text('pix_txid'),
+  pixCopiaECola: text('pix_copia_e_cola'),
+  qrCodePix: text('qr_code_pix'), // Base64 ou URL
+  
+  // Documentos e comprovantes
+  urlBoleto: text('url_boleto'), // URL do boleto em PDF
+  urlComprovantePagamento: text('url_comprovante_pagamento'),
+  
+  // Histórico de tentativas
+  tentativasEnvio: integer('tentativas_envio').default(0),
+  ultimoEnvio: timestamp('ultimo_envio'),
+  motivoCancelamento: text('motivo_cancelamento'),
+  
+  // Auditoria e soft delete
+  geradoPor: uuid('gerado_por').references(() => profiles.id),
+  observacoes: text('observacoes'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'), // Soft delete
+});
+
+// ========================================================================
+// SCHEMAS ZOD PARA VALIDAÇÃO DAS NOVAS ENTIDADES
+// ========================================================================
+
+// CCBs - Schemas de validação
+export const insertCcbSchema = createInsertSchema(ccbs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+});
+
+export const updateCcbSchema = createInsertSchema(ccbs).partial().omit({
+  id: true,
+  propostaId: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+});
+
+// Boletos - Schemas de validação
+export const insertBoletoSchema = createInsertSchema(boletos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+});
+
+export const updateBoletoSchema = createInsertSchema(boletos).partial().omit({
+  id: true,
+  propostaId: true,
+  ccbId: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+});
+
+// Schemas de inserção existentes
 export const insertNotificacaoSchema = createInsertSchema(notificacoes).omit({
   id: true,
   createdAt: true,
@@ -1051,6 +1197,20 @@ export const insertHistoricoExecucaoAlertaSchema = createInsertSchema(
   id: true,
   dataExecucao: true,
 });
+
+// ========================================================================
+// TYPES PARA NOVAS ENTIDADES (SPRINT 2)
+// ========================================================================
+
+// CCBs Types
+export type InsertCcb = z.infer<typeof insertCcbSchema>;
+export type UpdateCcb = z.infer<typeof updateCcbSchema>;
+export type Ccb = typeof ccbs.$inferSelect;
+
+// Boletos Types
+export type InsertBoleto = z.infer<typeof insertBoletoSchema>;
+export type UpdateBoleto = z.infer<typeof updateBoletoSchema>;
+export type Boleto = typeof boletos.$inferSelect;
 
 // Types para Alertas Proativos
 export type InsertNotificacao = z.infer<typeof insertNotificacaoSchema>;

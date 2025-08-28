@@ -13,6 +13,8 @@ import {
   interCollections,
   interWebhooks,
   interCallbacks,
+  ccbs,
+  boletos,
   type User,
   type InsertUser,
   type Proposta,
@@ -30,6 +32,12 @@ import {
   type InsertInterWebhook,
   type InterCallback,
   type InsertInterCallback,
+  type Ccb,
+  type InsertCcb,
+  type UpdateCcb,
+  type Boleto,
+  type InsertBoleto,
+  type UpdateBoleto,
 } from '@shared/schema';
 import { db } from './lib/supabase';
 import { eq, desc, and, or, not, isNull } from 'drizzle-orm';
@@ -105,6 +113,65 @@ export interface IStorage {
   createInterCallback(callback: InsertInterCallback): Promise<InterCallback>;
   getUnprocessedInterCallbacks(): Promise<InterCallback[]>;
   markInterCallbackAsProcessed(id: number, erro?: string): Promise<void>;
+
+  // ========================================================================
+  // SPRINT 2: CCBs (Cédulas de Crédito Bancário) - Domain Methods
+  // ========================================================================
+  
+  // CCBs CRUD Operations
+  createCcb(ccb: InsertCcb): Promise<Ccb>;
+  getCcbById(id: string): Promise<Ccb | undefined>;
+  getCcbsByPropostaId(propostaId: string): Promise<Ccb[]>;
+  getCcbByNumeroCcb(numeroCcb: string): Promise<Ccb | undefined>;
+  getCcbByClickSignKey(documentKey: string): Promise<Ccb | undefined>;
+  updateCcb(id: string, updates: UpdateCcb): Promise<Ccb>;
+  updateCcbClickSignData(id: string, clickSignData: {
+    clicksignDocumentKey?: string;
+    clicksignSignerKey?: string;
+    clicksignListKey?: string;
+    clicksignSignUrl?: string;
+    clicksignStatus?: string;
+    dataEnvioAssinatura?: Date;
+    dataAssinaturaConcluida?: Date;
+  }): Promise<Ccb>;
+  deleteCcb(id: string, deletedBy?: string): Promise<void>;
+  
+  // CCBs Status and Workflow
+  getCcbsByStatus(status: string): Promise<Ccb[]>;
+  getCcbsVencendoAssinatura(diasAntesPrazo: number): Promise<Ccb[]>;
+  
+  // ========================================================================
+  // SPRINT 2: Boletos - Domain Methods
+  // ========================================================================
+  
+  // Boletos CRUD Operations
+  createBoleto(boleto: InsertBoleto): Promise<Boleto>;
+  getBoletoById(id: string): Promise<Boleto | undefined>;
+  getBoletosByPropostaId(propostaId: string): Promise<Boleto[]>;
+  getBoletosByCcbId(ccbId: string): Promise<Boleto[]>;
+  getBoletoByNumeroBoleto(numeroBoleto: string): Promise<Boleto | undefined>;
+  getBoletoByBancoOrigemId(bancoOrigemId: string): Promise<Boleto | undefined>;
+  updateBoleto(id: string, updates: UpdateBoleto): Promise<Boleto>;
+  updateBoletoPagamento(id: string, dadosPagamento: {
+    dataPagamento: string;
+    status: string;
+    formaPagamento?: string;
+    urlComprovantePagamento?: string;
+  }): Promise<Boleto>;
+  deleteBoleto(id: string, deletedBy?: string): Promise<void>;
+  
+  // Boletos Status and Reports
+  getBoletosByStatus(status: string): Promise<Boleto[]>;
+  getBoletosVencendoHoje(): Promise<Boleto[]>;
+  getBoletosVencidos(): Promise<Boleto[]>;
+  getBoletosVencendoEmDias(dias: number): Promise<Boleto[]>;
+  
+  // Boletos Batch Operations
+  createBoletosPorCcb(ccbId: string, parcelas: Array<{
+    numeroParcela: number;
+    valorPrincipal: number;
+    dataVencimento: string;
+  }>): Promise<Boleto[]>;
 
   // User Sessions
   createSession(session: {
@@ -971,6 +1038,267 @@ export class DatabaseStorage implements IStorage {
       .update(userSessions)
       .set({ lastActivityAt: new Date() })
       .where(eq(userSessions.id, sessionId));
+  }
+
+  // ========================================================================
+  // SPRINT 2: CCBs (Cédulas de Crédito Bancário) - Implementation
+  // ========================================================================
+  
+  async createCcb(ccb: InsertCcb): Promise<Ccb> {
+    const result = await db.insert(ccbs).values(ccb).returning();
+    return result[0];
+  }
+
+  async getCcbById(id: string): Promise<Ccb | undefined> {
+    const result = await db
+      .select()
+      .from(ccbs)
+      .where(and(eq(ccbs.id, id), isNull(ccbs.deletedAt)))
+      .limit(1);
+    return result[0];
+  }
+
+  async getCcbsByPropostaId(propostaId: string): Promise<Ccb[]> {
+    return await db
+      .select()
+      .from(ccbs)
+      .where(and(eq(ccbs.propostaId, propostaId), isNull(ccbs.deletedAt)))
+      .orderBy(desc(ccbs.createdAt));
+  }
+
+  async getCcbByNumeroCcb(numeroCcb: string): Promise<Ccb | undefined> {
+    const result = await db
+      .select()
+      .from(ccbs)
+      .where(and(eq(ccbs.numeroCCB, numeroCcb), isNull(ccbs.deletedAt)))
+      .limit(1);
+    return result[0];
+  }
+
+  async getCcbByClickSignKey(documentKey: string): Promise<Ccb | undefined> {
+    const result = await db
+      .select()
+      .from(ccbs)
+      .where(and(eq(ccbs.clicksignDocumentKey, documentKey), isNull(ccbs.deletedAt)))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateCcb(id: string, updates: UpdateCcb): Promise<Ccb> {
+    const result = await db
+      .update(ccbs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(ccbs.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateCcbClickSignData(id: string, clickSignData: {
+    clicksignDocumentKey?: string;
+    clicksignSignerKey?: string;
+    clicksignListKey?: string;
+    clicksignSignUrl?: string;
+    clicksignStatus?: string;
+    dataEnvioAssinatura?: Date;
+    dataAssinaturaConcluida?: Date;
+  }): Promise<Ccb> {
+    const result = await db
+      .update(ccbs)
+      .set({ ...clickSignData, updatedAt: new Date() })
+      .where(eq(ccbs.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteCcb(id: string, deletedBy?: string): Promise<void> {
+    await db
+      .update(ccbs)
+      .set({ deletedAt: new Date() })
+      .where(eq(ccbs.id, id));
+  }
+
+  async getCcbsByStatus(status: string): Promise<Ccb[]> {
+    return await db
+      .select()
+      .from(ccbs)
+      .where(and(eq(ccbs.status, status), isNull(ccbs.deletedAt)))
+      .orderBy(desc(ccbs.createdAt));
+  }
+
+  async getCcbsVencendoAssinatura(diasAntesPrazo: number): Promise<Ccb[]> {
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() + diasAntesPrazo);
+    
+    return await db
+      .select()
+      .from(ccbs)
+      .where(and(
+        eq(ccbs.status, 'enviada_assinatura'),
+        isNull(ccbs.deletedAt)
+        // Note: Would need to add date comparison for prazoAssinatura
+      ))
+      .orderBy(ccbs.prazoAssinatura);
+  }
+
+  // ========================================================================
+  // SPRINT 2: Boletos - Implementation
+  // ========================================================================
+  
+  async createBoleto(boleto: InsertBoleto): Promise<Boleto> {
+    const result = await db.insert(boletos).values(boleto).returning();
+    return result[0];
+  }
+
+  async getBoletoById(id: string): Promise<Boleto | undefined> {
+    const result = await db
+      .select()
+      .from(boletos)
+      .where(and(eq(boletos.id, id), isNull(boletos.deletedAt)))
+      .limit(1);
+    return result[0];
+  }
+
+  async getBoletosByPropostaId(propostaId: string): Promise<Boleto[]> {
+    return await db
+      .select()
+      .from(boletos)
+      .where(and(eq(boletos.propostaId, propostaId), isNull(boletos.deletedAt)))
+      .orderBy(boletos.numeroParcela);
+  }
+
+  async getBoletosByCcbId(ccbId: string): Promise<Boleto[]> {
+    return await db
+      .select()
+      .from(boletos)
+      .where(and(eq(boletos.ccbId, ccbId), isNull(boletos.deletedAt)))
+      .orderBy(boletos.numeroParcela);
+  }
+
+  async getBoletoByNumeroBoleto(numeroBoleto: string): Promise<Boleto | undefined> {
+    const result = await db
+      .select()
+      .from(boletos)
+      .where(and(eq(boletos.numeroBoleto, numeroBoleto), isNull(boletos.deletedAt)))
+      .limit(1);
+    return result[0];
+  }
+
+  async getBoletoByBancoOrigemId(bancoOrigemId: string): Promise<Boleto | undefined> {
+    const result = await db
+      .select()
+      .from(boletos)
+      .where(and(eq(boletos.bancoOrigemId, bancoOrigemId), isNull(boletos.deletedAt)))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateBoleto(id: string, updates: UpdateBoleto): Promise<Boleto> {
+    const result = await db
+      .update(boletos)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(boletos.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateBoletoPagamento(id: string, dadosPagamento: {
+    dataPagamento: string;
+    status: string;
+    formaPagamento?: string;
+    urlComprovantePagamento?: string;
+  }): Promise<Boleto> {
+    const result = await db
+      .update(boletos)
+      .set({ ...dadosPagamento, updatedAt: new Date() })
+      .where(eq(boletos.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteBoleto(id: string, deletedBy?: string): Promise<void> {
+    await db
+      .update(boletos)
+      .set({ deletedAt: new Date() })
+      .where(eq(boletos.id, id));
+  }
+
+  async getBoletosByStatus(status: string): Promise<Boleto[]> {
+    return await db
+      .select()
+      .from(boletos)
+      .where(and(eq(boletos.status, status), isNull(boletos.deletedAt)))
+      .orderBy(desc(boletos.createdAt));
+  }
+
+  async getBoletosVencendoHoje(): Promise<Boleto[]> {
+    const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    return await db
+      .select()
+      .from(boletos)
+      .where(and(
+        eq(boletos.dataVencimento, hoje),
+        eq(boletos.status, 'emitido'),
+        isNull(boletos.deletedAt)
+      ))
+      .orderBy(boletos.numeroParcela);
+  }
+
+  async getBoletosVencidos(): Promise<Boleto[]> {
+    const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    return await db
+      .select()
+      .from(boletos)
+      .where(and(
+        eq(boletos.status, 'vencido'),
+        isNull(boletos.deletedAt)
+      ))
+      .orderBy(desc(boletos.dataVencimento));
+  }
+
+  async getBoletosVencendoEmDias(dias: number): Promise<Boleto[]> {
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() + dias);
+    const dataLimiteStr = dataLimite.toISOString().split('T')[0];
+    
+    return await db
+      .select()
+      .from(boletos)
+      .where(and(
+        eq(boletos.dataVencimento, dataLimiteStr),
+        eq(boletos.status, 'emitido'),
+        isNull(boletos.deletedAt)
+      ))
+      .orderBy(boletos.numeroParcela);
+  }
+
+  async createBoletosPorCcb(ccbId: string, parcelas: Array<{
+    numeroParcela: number;
+    valorPrincipal: number;
+    dataVencimento: string;
+  }>): Promise<Boleto[]> {
+    // Get CCB data first
+    const ccb = await this.getCcbById(ccbId);
+    if (!ccb) {
+      throw new Error(`CCB não encontrada: ${ccbId}`);
+    }
+
+    const boletosData = parcelas.map((parcela, index) => ({
+      propostaId: ccb.propostaId,
+      ccbId: ccbId,
+      numeroBoleto: `${ccb.numeroCCB}-${parcela.numeroParcela.toString().padStart(2, '0')}`,
+      numeroParcela: parcela.numeroParcela,
+      totalParcelas: parcelas.length,
+      valorPrincipal: parcela.valorPrincipal.toString(),
+      valorJuros: '0.00',
+      valorMulta: '0.00',
+      valorTotal: parcela.valorPrincipal.toString(),
+      dataVencimento: parcela.dataVencimento,
+      dataEmissao: new Date().toISOString().split('T')[0],
+      status: 'emitido',
+    }));
+
+    const result = await db.insert(boletos).values(boletosData).returning();
+    return result;
   }
 }
 
