@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { monitoringService } from '../services/monitoringService.js';
 import { metricsService } from '../lib/metricsService';
-import { checkQueuesHealth } from '../lib/supabase-queues';
+import { checkQueuesHealth } from '../lib/queues';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
 const router = Router();

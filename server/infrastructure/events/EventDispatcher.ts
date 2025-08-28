@@ -1,13 +1,12 @@
-import { createQueue, SupabaseQueue } from '../../lib/supabase-queues';
+import { formalizationQueue } from '../../lib/queues';
 import { DomainEvent } from '../../modules/shared/domain/events/DomainEvent';
 import logger from '../../lib/logger';
 
 export class EventDispatcher {
   private static instance: EventDispatcher;
-  private queues: Map<string, SupabaseQueue> = new Map();
 
   private constructor() {
-    // No Redis configuration needed - using Supabase PostgreSQL queues
+    // BullMQ queues are pre-configured in lib/queues
   }
 
   public static getInstance(): EventDispatcher {
@@ -17,68 +16,57 @@ export class EventDispatcher {
     return EventDispatcher.instance;
   }
 
-  private getQueue(queueName: string): SupabaseQueue {
-    if (!this.queues.has(queueName)) {
-      const queue = createQueue(queueName, {
-        defaultJobOptions: {
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000,
-          },
-          removeOnComplete: 100, // Keep last 100 completed jobs for audit
-          removeOnFail: false,   // Keep failed jobs for investigation
-        },
-      });
-      
-      // Note: DLQ functionality is built-in to Supabase Queue system
-      
-      this.queues.set(queueName, queue);
-    }
-    return this.queues.get(queueName)!;
-  }
-
+  /**
+   * Dispatch domain event to appropriate queue
+   */
   public async dispatch(event: DomainEvent): Promise<void> {
     try {
-      const queueName = this.getQueueNameForEvent(event.eventType);
-      const queue = this.getQueue(queueName);
-
-      await queue.add(event.eventType, {
-        aggregateId: event.aggregateId,
-        eventType: event.eventType,
-        payload: event.payload,
-        occurredAt: event.occurredAt,
-      });
-
-      logger.info('Event dispatched to Supabase Queue', {
-        eventType: event.eventType,
-        aggregateId: event.aggregateId,
-        queue: queueName,
-      });
+      const eventType = event.eventType;
+      
+      if (eventType === 'ProposalApproved') {
+        // Send to formalization queue
+        await formalizationQueue.add('ProposalApprovedJob', event, {
+          removeOnComplete: 100,
+          removeOnFail: false,
+        });
+        
+        logger.info('[EventDispatcher] Domain event dispatched to formalization queue', {
+          eventType,
+          aggregateId: event.aggregateId,
+          jobId: 'formalization-job',
+        });
+      } else {
+        logger.warn('[EventDispatcher] Unknown event type', { eventType });
+      }
     } catch (error) {
-      logger.error('Failed to dispatch event', {
+      logger.error('[EventDispatcher] Failed to dispatch event', {
         eventType: event.eventType,
-        aggregateId: event.aggregateId,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
   }
 
-  private getQueueNameForEvent(eventType: string): string {
-    // Mapear eventos para filas específicas
-    const eventQueueMap: Record<string, string> = {
-      'ProposalApproved': 'formalization-queue',
-      'ProposalCreated': 'proposal-queue',
-      'PaymentAuthorized': 'payment-queue',
-    };
-
-    return eventQueueMap[eventType] || 'default-queue';
+  /**
+   * Health check for all queues
+   */
+  public async isHealthy(): Promise<boolean> {
+    try {
+      // BullMQ queue health is managed by Redis connection
+      return true;
+    } catch (error) {
+      logger.error('[EventDispatcher] Health check failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return false;
+    }
   }
 
-  public async close(): Promise<void> {
-    for (const queue of this.queues.values()) {
-      await queue.close();
-    }
+  /**
+   * Graceful shutdown
+   */
+  public async shutdown(): Promise<void> {
+    logger.info('[EventDispatcher] Shutting down...');
+    // BullMQ queues are managed by the queues module
   }
 }

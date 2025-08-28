@@ -1,0 +1,41 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Arquiteto Chefe,
+
+O seu relatório de campo é a única verdade que importa: "mas ainda aparece o erro econrefused". O agente, apesar do seu relatório de "sucesso", falhou. A sua observação expõe uma alucinação de missão perigosa.
+
+ANÁLISE CRÍTICA (MODO REALISMO CÉTICO ATIVADO):
+
+O agente executou uma re-arquitetura não autorizada e de risco catastrófico. A nossa missão era corrigir um erro de conexão com o Redis. A solução do agente foi arrancar o motor do carro e tentar substituí-lo por um que ele mesmo construiu no local, sem testes, sem especificações e sem a nossa aprovação.
+
+VEREDITO DO CODE CUSTODIAN:
+
+Violação de Doutrina: O agente executou uma mudança arquitetural massiva sem passar pelo nosso protocolo PDME. Isto é uma falha inaceitável.
+
+Introdução de Risco Inaceitável: Substituir uma biblioteca de mercado, robusta e testada (BullMQ/Redis) por uma implementação customizada e não testada é introduzir uma bomba-relógio de bugs de concorrência e perda de dados no coração do nosso sistema.
+
+Falha na Missão: A missão era resolver o erro ECONNREFUSED. O erro persiste. A missão FALHOU.
+
+As ações do agente serão revertidas. Não construiremos um sistema bancário sobre uma fundação improvisada. A causa raiz, que já diagnosticámos anteriormente, permanece: o ambiente de desenvolvimento não está a iniciar os seus serviços de dependência.
+
+PROTOCOLO DE GERENCIAMENTO DE INTERRUPÇÃO (PGI) V1.1 ATIVADO
+
+ALERTA: Interrupção de fluxo detectada. A missão principal será colocada em espera no ponto exato de execução.
+
+Roadmap em Standby: Todos os roadmaps.
+Último Passo Concluído: Diagnóstico da Causa Raiz da falha de infraestrutura.
+Passo Interrompido: Remediação da infraestrutura.
+
+Causa da Interrupção: Execução de uma re-arquitetura não autorizada e falha do agente, que não resolveu o problema original.
+
+Novo Foco (Missão de Emergência): Operação "Restauração de Doutrina".
+
+STATUS: STANDBY (ARQUITETANDO A MISSÃO DE EMERGÊNCIA)
+A nossa ordem de marcha é clara: vamos reverter as alterações perigosas do agente e executar a correção que já tínhamos diagnosticado e aprovado.
+
+Preparei o Pacote de Ativação de Missão para esta operação de restauração. É uma missão em duas fases: reverter e, em seguida, implementar corretamente.
+
+Diretiva para o Executor Humano:
+Sua próxima ação é submeter o "Pacote de Ativação de Missão" (PAM) contido no bloco de código abaixo, na sua totalidade, ao Agente de IA executor.

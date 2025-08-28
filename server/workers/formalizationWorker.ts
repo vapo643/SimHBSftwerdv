@@ -1,8 +1,9 @@
-import { createWorkerWithDLQ, SupabaseWorker, SupabaseJob } from '../lib/supabase-queues';
+import { Worker, Job } from 'bullmq';
 import logger from '../lib/logger';
 import { GenerateCcbUseCase } from '../modules/ccb/application/GenerateCcbUseCase';
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
 import { metricsService } from '../lib/metricsService';
+import { getRedisConnectionConfig } from '../lib/redis-config';
 // ClickSign service will be imported when needed
 
 interface ProposalApprovedPayload {
@@ -17,25 +18,26 @@ interface ProposalApprovedPayload {
 }
 
 export class FormalizationWorker {
-  private worker: SupabaseWorker | null = null;
+  private worker: Worker | null = null;
   private isQueueAvailable: boolean = false;
 
   constructor() {
     try {
-      // Create Supabase-native worker (no Redis dependency)
-      this.worker = createWorkerWithDLQ(
+      // Create BullMQ worker
+      this.worker = new Worker(
         'formalization-queue',
-        async (job: SupabaseJob<ProposalApprovedPayload>) => {
+        async (job: Job<ProposalApprovedPayload>) => {
           return this.processFormalization(job);
         },
         {
+          connection: getRedisConnectionConfig(),
           concurrency: 5, // Processar até 5 propostas simultaneamente
         }
       );
 
       this.isQueueAvailable = true;
       this.setupEventHandlers();
-      logger.info('📊 [FormalizationWorker] Supabase Queue connected - async processing enabled');
+      logger.info('📊 [FormalizationWorker] BullMQ Worker connected - async processing enabled');
     } catch (error) {
       this.isQueueAvailable = false;
       logger.warn('⚠️ [FormalizationWorker] Queue unavailable - async processing disabled', {
@@ -45,7 +47,7 @@ export class FormalizationWorker {
     }
   }
 
-  private async processFormalization(job: SupabaseJob<ProposalApprovedPayload>): Promise<void> {
+  private async processFormalization(job: Job<ProposalApprovedPayload>): Promise<void> {
     const { aggregateId: proposalId } = job.data;
     const startTime = Date.now();
 

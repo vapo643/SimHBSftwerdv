@@ -11,8 +11,7 @@
 
 import { Job, Queue } from 'bullmq';
 import logger from './logger';
-// Note: DLQ functionality is now built-in to Supabase Queue system
-// This file is kept for compatibility but new systems use built-in DLQ
+import { deadLetterQueue } from './queues';
 
 /**
  * Interface for DLQ job data structure
