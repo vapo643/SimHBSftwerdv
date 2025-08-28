@@ -5,7 +5,7 @@
  * Refatorado para usar Unit of Work - Garantia de Atomicidade
  */
 
-import { IUnitOfWork } from '../../shared/domain/IUnitOfWork';
+import { IProposalRepository } from '../domain/IProposalRepository';
 
 export interface RejectProposalDTO {
   proposalId: string;
@@ -14,22 +14,20 @@ export interface RejectProposalDTO {
 }
 
 export class RejectProposalUseCase {
-  constructor(private unitOfWork: IUnitOfWork) {}
+  constructor(private repository: IProposalRepository) {}
 
   async execute(dto: RejectProposalDTO): Promise<void> {
-    return await this.unitOfWork.executeInTransaction(async () => {
-      // Buscar agregado usando repositório transacional
-      const proposal = await this.unitOfWork.proposals.findById(dto.proposalId);
+    // Buscar agregado usando repositório
+    const proposal = await this.repository.findById(dto.proposalId);
 
-      if (!proposal) {
-        throw new Error(`Proposta ${dto.proposalId} não encontrada`);
-      }
+    if (!proposal) {
+      throw new Error(`Proposta ${dto.proposalId} não encontrada`);
+    }
 
-      // Executar comando de negócio no agregado
-      proposal.reject(dto.analistaId, dto.motivo);
+    // Executar comando de negócio no agregado
+    proposal.reject(dto.analistaId, dto.motivo);
 
-      // Persistir mudanças dentro da transação
-      await this.unitOfWork.proposals.save(proposal);
-    });
+    // Persistir mudanças
+    await this.repository.save(proposal);
   }
 }

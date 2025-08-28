@@ -45,9 +45,18 @@ export class ProposalRepository implements IProposalRepository {
         })
         .where(eq(propostas.id, data.id));
     } else {
-      // Create - gerar IDs sequenciais
-      const sequentialId = await this.getNextSequentialId();
+      // Create - gerar número da proposta sequencial
       const numeroProposta = await this.getNextNumeroProposta();
+
+      console.log('[REPOSITORY DEBUG] About to insert with values:', {
+        id: proposal.id,
+        numeroProposta,
+        status: data.status,
+        produtoId: data.produto_id,
+        tabelaComercialId: data.tabela_comercial_id,
+        lojaId: data.loja_id,
+        userId: data.user_id
+      });
 
       await db.insert(propostas).values([
         {
@@ -72,22 +81,30 @@ export class ProposalRepository implements IProposalRepository {
           motivoPendencia: data.motivo_rejeicao,
           observacoes: data.observacoes,
           ccbDocumentoUrl: data.ccb_url,
+          userId: data.user_id, // Campo adicionado para corrigir o erro
           createdAt: data.created_at,
           // updatedAt campo removido - será atualizado automaticamente pelo schema
         },
       ]);
     }
 
-    // Processar eventos de domínio
+    // Processar eventos de domínio (comentado temporariamente para load test)
     const events = proposal.getUncommittedEvents();
-    const eventDispatcher = EventDispatcher.getInstance();
     
-    for (const event of events) {
-      // Despachar evento para a fila assíncrona
-      await eventDispatcher.dispatch(event);
-      console.log(`[DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`);
+    // Em desenvolvimento, apenas log dos eventos sem despachar para Redis
+    if (process.env.NODE_ENV === 'development') {
+      for (const event of events) {
+        console.log(`[DOMAIN EVENT LOGGED] ${event.eventType} for aggregate ${event.aggregateId} (Redis disabled in dev)`);
+      }
+      proposal.markEventsAsCommitted();
+    } else {
+      const eventDispatcher = EventDispatcher.getInstance();
+      for (const event of events) {
+        await eventDispatcher.dispatch(event);
+        console.log(`[DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`);
+      }
+      proposal.markEventsAsCommitted();
     }
-    proposal.markEventsAsCommitted();
   }
 
   async findById(id: string): Promise<Proposal | null> {

@@ -38,13 +38,19 @@ export class ProposalController {
       );
       console.log('[ProposalController.create] User context:', (req as any).user);
 
+      // DEBUG: Test individual field parsing
+      console.log('[DEBUG] valorSolicitado raw:', req.body.valorSolicitado, typeof req.body.valorSolicitado);
+      console.log('[DEBUG] parseFloat test:', parseFloat(req.body.valorSolicitado));
+      console.log('[DEBUG] CPF raw:', req.body.cpf, typeof req.body.cpf);
+      console.log('[DEBUG] nomeCompleto raw:', req.body.nomeCompleto, typeof req.body.nomeCompleto);
+
       // Mapear body da requisição para DTO do caso de uso
       const dto = {
-        clienteNome: req.body.clienteNome,
-        clienteCpf: req.body.clienteCpf,
+        clienteNome: req.body.nomeCompleto || req.body.clienteNome,
+        clienteCpf: req.body.cpf || req.body.clienteCpf,
         clienteRg: req.body.clienteRg,
-        clienteEmail: req.body.clienteEmail,
-        clienteTelefone: req.body.clienteTelefone,
+        clienteEmail: req.body.email || req.body.clienteEmail,
+        clienteTelefone: req.body.telefone || req.body.clienteTelefone,
         clienteEndereco: req.body.clienteEndereco,
         clienteCidade: req.body.clienteCidade,
         clienteEstado: req.body.clienteEstado || req.body.clienteUf,
@@ -56,15 +62,28 @@ export class ProposalController {
         clienteDividasExistentes: req.body.clienteDividasExistentes
           ? parseFloat(req.body.clienteDividasExistentes)
           : undefined,
-        valor: parseFloat(req.body.valor),
+        valor: parseFloat(req.body.valorSolicitado || req.body.valor),
         prazo: parseInt(req.body.prazo),
-        taxaJuros: parseFloat(req.body.taxaJuros),
-        produtoId: req.body.produtoId,
-        lojaId: req.body.lojaId,
+        taxaJuros: parseFloat(req.body.taxaJuros || '2.5'),
+        produtoId: req.body.produto_id || req.body.produtoId || 1,
+        lojaId: (req as any).user?.lojaId || 1,
         atendenteId: req.body.atendenteId || (req as any).user?.id,
       };
 
       console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));
+      
+      // Validar campos obrigatórios
+      if (!dto.clienteNome || !dto.clienteCpf || !dto.valor) {
+        console.error('[ProposalController.create] Missing required fields:', {
+          clienteNome: !!dto.clienteNome,
+          clienteCpf: !!dto.clienteCpf,
+          valor: !!dto.valor
+        });
+        return res.status(400).json({
+          success: false,
+          error: 'Campos obrigatórios ausentes: nome, CPF e valor'
+        });
+      }
 
       const result = await useCase.execute(dto);
 

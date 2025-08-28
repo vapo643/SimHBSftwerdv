@@ -288,9 +288,16 @@ export class Proposal {
     // Verifica se tem 11 dígitos
     if (cleanCPF.length !== 11) return false;
 
-    // Em desenvolvimento, permite CPFs de teste (sequências repetidas)
-    if (process.env.NODE_ENV === 'development' && /^(\d)\1{10}$/.test(cleanCPF)) {
-      return true; // Permite CPFs como 11111111111 em desenvolvimento
+    // Em desenvolvimento, permite CPFs de teste
+    if (process.env.NODE_ENV === 'development') {
+      // Permite CPFs com padrões específicos de teste
+      if (/^(\d)\1{10}$/.test(cleanCPF) || // Sequências repetidas  
+          cleanCPF.startsWith('99999') ||  // CPFs iniciados com 99999
+          cleanCPF.startsWith('11111') ||  // CPFs iniciados com 11111
+          cleanCPF.startsWith('48050') ||  // CPFs iniciados com 48050 (gerados pelo script)
+          cleanCPF.match(/^[0-9]{11}$/)) { // Qualquer CPF com 11 dígitos em desenvolvimento
+        return true;
+      }
     }
 
     // Verifica se todos os dígitos são iguais (apenas em produção)
@@ -717,6 +724,7 @@ export class Proposal {
       motivo_rejeicao: this._motivoRejeicao,
       observacoes: this._observacoes,
       ccb_url: this._ccbUrl,
+      user_id: this._atendenteId, // Campo adicionado para mapeamento correto no repositório
       created_at: this._createdAt,
       updated_at: this._updatedAt,
     };

@@ -6,7 +6,7 @@
  */
 
 import { Proposal } from '../domain/Proposal';
-import { IUnitOfWork } from '../../shared/domain/IUnitOfWork';
+import { IProposalRepository } from '../domain/IProposalRepository';
 
 export interface CreateProposalDTO {
   clienteNome: string;
@@ -32,44 +32,42 @@ export interface CreateProposalDTO {
 }
 
 export class CreateProposalUseCase {
-  constructor(private unitOfWork: IUnitOfWork) {}
+  constructor(private repository: IProposalRepository) {}
 
   async execute(dto: CreateProposalDTO): Promise<{ id: string }> {
-    return await this.unitOfWork.executeInTransaction(async () => {
-      // Mapear DTO para domínio
-      const clienteData = {
-        nome: dto.clienteNome,
-        cpf: dto.clienteCpf,
-        rg: dto.clienteRg,
-        email: dto.clienteEmail,
-        telefone: dto.clienteTelefone,
-        endereco: dto.clienteEndereco,
-        cidade: dto.clienteCidade,
-        estado: dto.clienteEstado,
-        cep: dto.clienteCep,
-        data_nascimento: dto.clienteDataNascimento,
-        renda_mensal: dto.clienteRendaMensal,
-        empregador: dto.clienteEmpregador,
-        tempo_emprego: dto.clienteTempoEmprego,
-        dividas_existentes: dto.clienteDividasExistentes,
-      };
+    // Mapear DTO para domínio
+    const clienteData = {
+      nome: dto.clienteNome,
+      cpf: dto.clienteCpf,
+      rg: dto.clienteRg,
+      email: dto.clienteEmail,
+      telefone: dto.clienteTelefone,
+      endereco: dto.clienteEndereco,
+      cidade: dto.clienteCidade,
+      estado: dto.clienteEstado,
+      cep: dto.clienteCep,
+      data_nascimento: dto.clienteDataNascimento,
+      renda_mensal: dto.clienteRendaMensal,
+      empregador: dto.clienteEmpregador,
+      tempo_emprego: dto.clienteTempoEmprego,
+      dividas_existentes: dto.clienteDividasExistentes,
+    };
 
-      // Criar agregado usando factory method
-      const proposal = Proposal.create(
-        clienteData,
-        dto.valor,
-        dto.prazo,
-        dto.taxaJuros,
-        dto.produtoId,
-        dto.lojaId,
-        dto.atendenteId
-      );
+    // Criar agregado usando factory method
+    const proposal = Proposal.create(
+      clienteData,
+      dto.valor,
+      dto.prazo,
+      dto.taxaJuros,
+      dto.produtoId,
+      dto.lojaId,
+      dto.atendenteId
+    );
 
-      // Persistir dentro da transação
-      await this.unitOfWork.proposals.save(proposal);
+    // Persistir usando repositório
+    await this.repository.save(proposal);
 
-      // Retornar ID da proposta criada
-      return { id: proposal.id };
-    });
+    // Retornar ID da proposta criada
+    return { id: proposal.id };
   }
 }
