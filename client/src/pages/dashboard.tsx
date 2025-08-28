@@ -197,7 +197,7 @@ const Dashboard: React.FC = () => {
   const [parceiroFilter, setParceiroFilter] = useState<string>('todos');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
-  // CRÍTICO: Early redirect check ANTES de qualquer hook condicional
+  // 🚨 CORREÇÃO P0: Early redirect check ANTES dos useQuery hooks
   useEffect(() => {
     if (user?.role === 'ANALISTA') {
       setLocation('/credito/fila');
@@ -205,7 +205,12 @@ const Dashboard: React.FC = () => {
     }
   }, [user?.role, setLocation]);
 
-  // Fetch real proposals data - only when authenticated
+  // Early return se usuário é ANALISTA (antes de qualquer query)
+  if (user?.role === 'ANALISTA') {
+    return <DashboardSkeleton />; // Show loading while redirecting
+  }
+
+  // Fetch real proposals data - only when authenticated and NOT ANALISTA
   const {
     data: propostasResponse,
     isLoading,
@@ -227,19 +232,14 @@ const Dashboard: React.FC = () => {
     enabled: user?.role === 'ATENDENTE',
   });
 
-  // PASSO 1.3: Early Return para Loading State
+  // Early Return para Loading State
   if (isLoading) {
     return <DashboardSkeleton />;
   }
 
-  // PASSO 1.4: Early Return para Error State  
+  // Early Return para Error State  
   if (isError) {
     return <ErrorDisplay message={error?.message || 'Erro desconhecido'} />;
-  }
-
-  // PASSO 1.4: Early Return se usuário é ANALISTA (após redirect)
-  if (user?.role === 'ANALISTA') {
-    return <DashboardSkeleton />; // Show loading while redirecting
   }
 
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
@@ -358,29 +358,6 @@ const Dashboard: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
     }
   }, [queryClient, user?.role]);
-
-  // Agora sim os returns condicionais - DEPOIS de todos os hooks
-  if (isLoading) {
-    return (
-      <DashboardLayout title="Dashboard de Propostas">
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout title="Dashboard de Propostas">
-        <Alert variant="destructive">
-          <AlertDescription>
-            Erro ao carregar propostas. Por favor, tente novamente.
-          </AlertDescription>
-        </Alert>
-      </DashboardLayout>
-    );
-  }
 
   return (
     <DashboardLayout
