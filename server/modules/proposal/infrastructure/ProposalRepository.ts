@@ -196,7 +196,7 @@ export class ProposalRepository implements IProposalRepository {
     const results = await db
       .select()
       .from(propostas)
-      .where(and(eq(propostas.analistaId, atendenteId), isNull(propostas.deletedAt)));
+      .where(and(eq(propostas.userId, atendenteId), isNull(propostas.deletedAt)));
 
     return results.map((row) => this.mapToDomain(row));
   }
@@ -374,7 +374,7 @@ export class ProposalRepository implements IProposalRepository {
       .from(propostas)
       .where(
         and(
-          eq(propostas.analistaId, analistaId),
+          eq(propostas.userId, analistaId),
           eq(propostas.status, ProposalStatus.EM_ANALISE),
           isNull(propostas.deletedAt)
         )
