@@ -1,0 +1,39 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Ponte Externa"
+
+* **Sumário da Missão (O Quê):** Configurar a aplicação para se conectar à nova instância do Redis Cloud que foi provisionada, utilizando as variáveis de ambiente (Secrets) do Replit para armazenar as credenciais de forma segura.
+* **Intenção Estratégica (O Porquê):** Resolver de forma definitiva a falha de `ECONNREFUSED`, habilitando completamente o nosso sistema de processamento de tarefas assíncronas (BullMQ) no ambiente de desenvolvimento e alinhando-o com uma arquitetura de produção realista.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de DevOps a configurar a conectividade de um serviço. A sua tarefa é gerir segredos e garantir que a aplicação utilize as credenciais corretas para se conectar a um serviço externo.
+
+---
+
+**IMPLEMENTAR (Plano de Configuração):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+A aplicação está configurada para se conectar a um Redis em `localhost:6379`, que não funciona no ambiente Replit. Uma nova base de dados no Redis Cloud foi criada, mas a aplicação ainda não sabe como se conectar a ela.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  As credenciais de conexão do Redis Cloud (Host, Porta, Senha) são armazenadas de forma segura nos "Secrets" do Replit.
+2.  O nosso módulo de configuração central do Redis (`server/lib/redis-config.ts`) é capaz de ler e utilizar estas novas variáveis de ambiente.
+3.  A aplicação inicia sem erros de `ECONNREFUSED` e os logs demonstram uma conexão bem-sucedida com o Redis Cloud.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Configurar os Segredos de Conexão**
+1.1. Utilize a ferramenta "Secrets" do Replit para adicionar as seguintes variáveis de ambiente. Utilize as credenciais da sua nova base de dados Redis Cloud:
+    * **Chave:** `REDIS_HOST` | **Valor:** (O seu host do Redis Cloud, ex: `redis-12345.c1.us-east-1-2.ec2.cloud.redislabs.com`)
+    * **Chave:** `REDIS_PORT` | **Valor:** (A sua porta do Redis Cloud, ex: `12345`)
+    * **Chave:** `REDIS_PASSWORD` | **Valor:** (A sua senha do Redis Cloud)
+    * **Chave:** `REDIS_TLS_ENABLED` | **Valor:** `true` (Serviços na nuvem geralmente usam TLS)
+
+**Passo 2: Validar a Lógica de Conexão**
+2.1. Inspecione o ficheiro `server/lib/redis-config.ts`. Confirme que a lógica existente já lê estas variáveis de ambiente (`process.env.REDIS_HOST`, etc.) e que o modo de desenvolvimento (`isDevelopment`) não irá sobrepor-se se as variáveis de produção estiverem definidas.
+
+**Passo 3: Validação Final**
+3.1. Reinicie o ambiente Replit para que as novas variáveis de ambiente sejam carregadas.
+3.2. **Validação Crítica:** Apresente os logs de inicialização do servidor. Confirme que os erros de `ECONNREFUSED` desapareceram e que aparecem mensagens de conexão bem-sucedida do BullMQ ou do cliente Redis.
+3.3. Abra a aplicação no *browser* e confirme que o frontend carrega completamente e está funcional.
+
+---
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+Apresente a lista exaustiva de TODAS as suas descobertas, riscos e recomendações.
