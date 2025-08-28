@@ -1,0 +1,62 @@
+Arquiteto Chefe,
+
+Sua sugestão é excelente e demonstra uma visão estratégica perfeitamente alinhada com os princípios de operabilidade e SRE (Site Reliability Engineering). Sim, é não apenas bom, mas essencial ter um frontend para acompanhar a saúde do nosso sistema assíncrono.
+
+Um sistema resiliente sem visibilidade é apenas metade da solução. A capacidade de observar e interagir com as filas, especialmente a Dead-Letter Queue (DLQ), transforma a nossa "Rede de Segurança" de uma infraestrutura passiva para uma ferramenta de controlo operacional ativa.
+
+Esta iniciativa alinha-se perfeitamente com o que o agente executor identificou como "Mission 4 - Dashboard Visualization" no seu último relatório. Vamos formalizar e priorizar esta necessidade.
+
+Proposta de Nova Missão: Operação "Torre de Vigia"
+Objetivo: Desenvolver um dashboard de monitoramento de sistema interno para fornecer visibilidade em tempo real sobre a saúde e a performance da nossa infraestrutura de processamento assíncrono (BullMQ/Redis).
+
+Justificativa de Negócio:
+
+Redução do MTTR (Mean Time to Resolution): Permite a identificação e resolução rápida de falhas em jobs sem a necessidade de inspecionar logs ou a base de dados diretamente.
+
+Gestão Proativa de Riscos: Dá visibilidade imediata sobre o acúmulo de falhas na DLQ, prevenindo a perda de transações críticas.
+
+Eficiência Operacional: Fornece à equipe de operações uma ferramenta para gerir o fluxo de trabalho assíncrono (reprocessar falhas, pausar filas, etc.).
+
+Blueprint Funcional Proposto para o Dashboard:
+
+Para que eu possa arquitetar o PAM de implementação, proponho o seguinte escopo para o nosso dashboard:
+
+1. Visualização de Filas em Tempo Real:
+
+Um painel que consome o endpoint GET /api/monitoring/queues que criámos.
+
+Exibir a contagem de jobs (waiting, active, completed, failed) para cada fila principal (formalization-queue, dead-letter-queue, etc.).
+
+Atualização automática dos dados a cada 10 segundos.
+
+2. Interface de Gestão da Dead-Letter Queue (DLQ):
+
+Uma vista detalhada para a dead-letter-queue.
+
+Listar todos os jobs falhados, exibindo o ID, o nome, os dados do payload e, mais importante, a razão da falha (failedReason).
+
+Para cada job na DLQ, devem existir ações para:
+
+Reprocessar: Reenviar o job para a sua fila original para uma nova tentativa.
+
+Descartar: Remover permanentemente o job da DLQ após análise (ação protegida e auditada).
+
+3. Visualização de Métricas de Performance:
+
+Exibir as métricas chave que estamos a coletar via Sentry:
+
+Taxa de Falhas (%) por fila.
+
+Tempo Médio de Processamento (ms) por job.
+
+4. Controlos Administrativos (Acesso Restrito):
+
+Botões para pausar e retomar o processamento de cada fila.
+
+Endpoint para limpar jobs concluídos de uma fila.
+
+Próximos Passos:
+
+Arquiteto Chefe, você aprova este escopo para a Operação "Torre de Vigia"?
+
+Após a sua aprovação, arquitetarei o Pacote de Ativação de Missão (PAM) detalhado para que o agente executor possa construir este dashboard de frontend.
