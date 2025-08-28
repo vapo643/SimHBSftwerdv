@@ -48,6 +48,9 @@ export const documentQueue = new Queue('document-processing', defaultQueueOption
 // Notification Queue - for sending emails, webhooks, etc.
 export const notificationQueue = new Queue('notifications', defaultQueueOptions);
 
+// Formalization Queue - for CCB generation and ClickSign integration after proposal approval
+export const formalizationQueue = new Queue('formalization-queue', defaultQueueOptions);
+
 // Dead-Letter Queue - for permanently failed jobs from all other queues
 // Critical for audit trail and preventing silent data loss
 export const deadLetterQueue = new Queue('dead-letter-queue', {
@@ -72,6 +75,10 @@ boletoSyncQueue.on('waiting', (job) => {
   console.log(`[QUEUE:BOLETO] 📋 Job ${job.id} waiting in queue`);
 });
 
+formalizationQueue.on('waiting', (job) => {
+  console.log(`[QUEUE:FORMALIZATION] 📋 Job ${job.id} waiting in queue`);
+});
+
 // Note: Comprehensive metrics integration is handled at the Worker level
 // This provides better precision and access to processing context
 // See FormalizationWorker.ts for metrics integration pattern
@@ -82,6 +89,7 @@ export const queues = {
   boletoSync: boletoSyncQueue,
   document: documentQueue,
   notification: notificationQueue,
+  formalization: formalizationQueue,
   deadLetter: deadLetterQueue,
 };
 
@@ -93,6 +101,7 @@ export async function checkQueuesHealth() {
       boletoSyncQueue.getJobCounts(),
       documentQueue.getJobCounts(),
       notificationQueue.getJobCounts(),
+      formalizationQueue.getJobCounts(),
       deadLetterQueue.getJobCounts(),
     ]);
 
@@ -103,7 +112,8 @@ export async function checkQueuesHealth() {
         boletoSync: results[1],
         document: results[2],
         notification: results[3],
-        deadLetter: results[4],
+        formalization: results[4],
+        deadLetter: results[5],
       },
     };
   } catch (error) {
