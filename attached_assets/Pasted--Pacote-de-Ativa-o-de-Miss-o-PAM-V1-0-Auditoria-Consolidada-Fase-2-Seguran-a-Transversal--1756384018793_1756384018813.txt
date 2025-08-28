@@ -1,0 +1,36 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Auditoria Consolidada - Fase 2: Segurança Transversal
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense focada em segurança para verificar se os controlos de Role-Based Access Control (RBAC) e Audit Trail, definidos no Sprint 1, foram corretamente aplicados às novas entidades e casos de uso desenvolvidos no Sprint 2.
+* **Intenção Estratégica (O Porquê):** Garantir que a expansão funcional do sistema não introduziu lacunas de segurança. É mandatório confirmar que cada nova funcionalidade que manipula dados sensíveis está protegida pelos mesmos controlos rigorosos da fundação do sistema, mantendo uma postura de segurança consistente e de nível bancário.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de segurança de aplicação (AppSec). Seu objetivo é "pensar como um atacante", procurando por endpoints desprotegidos e operações de modificação de dados que não estejam a ser devidamente rastreadas.
+
+---
+
+**IMPLEMENTAR (Plano de Auditoria):**
+Execute a seguinte sequência de verificações e reporte suas descobertas com evidências de código.
+
+**CURRENT STATE:**
+A base de código contém as funcionalidades dos Sprints 0, 1 e 2, incluindo novos repositórios e endpoints para CCBs e Boletos. Os controlos de segurança (RBAC, Auditoria) foram implementados no Sprint 1.
+
+**EXPECTED (Estado Final de Sucesso da Auditoria):**
+Um relatório detalhado que responde a cada verificação abaixo com "CONFORME" e o snippet de código como prova, ou "DESVIO IDENTIFICADO" com a evidência da não conformidade.
+
+**CONSTRAINTS (Roadmap de Auditoria - Fase 2):**
+
+**1. Auditoria de RBAC (Controlo de Acesso):**
+* **Verificação 1.1:** Mapeie todos os endpoints da API relacionados com `ccbs` e `boletos`. Para cada endpoint (GET, POST, PUT, DELETE), verifique se existe um middleware de autorização (ex: `requireFinanceiro`, `requireAnalyst`, `jwtAuthMiddleware`) a ser aplicado. Apresente o código da definição da rota como prova.
+* **Verificação 1.2:** Investigue as queries de listagem nos repositórios `CcbRepository.ts` e `BoletoRepository.ts`. Confirme se estas queries incluem cláusulas `WHERE` que filtram os resultados com base na afiliação do usuário autenticado (ex: por `proposta_id` que pertence ao usuário ou à sua loja), para prevenir fugas de dados entre tenants.
+
+**2. Auditoria do Audit Trail (Rastreabilidade):**
+* **Verificação 2.1:** Inspecione os *Use Cases* que modificam o estado de `CCB` e `Boleto` (ex: `GenerateCcbUseCase`, `MarkBoletoAsPaidUseCase`). Valide se, após cada operação de escrita bem-sucedida, há uma chamada ao `AuditService` para registar o evento. Apresente um exemplo de chamada ao serviço de auditoria.
+
+**3. Auditoria de Segurança de Webhooks:**
+* **Verificação 3.1:** Localize o endpoint que recebe os webhooks do Banco Inter e da ClickSign (provavelmente em `server/routes/webhooks.ts`).
+* **Verificação 3.2:** Confirme que este endpoint está protegido por um mecanismo de verificação de assinatura (ex: validação de HMAC signature para o ClickSign ou mTLS para o Inter) para garantir que apenas requisições autênticas são processadas. Apresente o código do middleware ou da função de validação.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** N/A (Missão de Auditoria)
+* **RISCOS IDENTIFICADOS:** N/A (Missão de Auditoria)
+* **DECISÕES TÉCNICAS ASSUMIDAS:** N/A (Missão de Auditoria)
+* **VALIDAÇÃO PENDENTE:** O resultado completo desta auditoria de segurança.
