@@ -17,47 +17,12 @@ export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
     const data = proposal.toPersistence();
 
-    // Verificar se é create ou update
-    const exists = await this.exists(proposal.id);
-
-    if (exists) {
-      // Update
-      await db
-        .update(propostas)
-        .set({
-          status: data.status,
-          clienteData: JSON.stringify(data.cliente_data),
-          valor: data.valor.toString(),
-          prazo: data.prazo,
-          taxaJuros: data.taxa_juros.toString(),
-          produtoId: data.produto_id,
-          tabelaComercialId: data.tabela_comercial_id,
-          lojaId: data.loja_id,
-          dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
-          dadosPagamentoBanco: data.dados_pagamento?.banco,
-          dadosPagamentoAgencia: data.dados_pagamento?.agencia,
-          dadosPagamentoConta: data.dados_pagamento?.conta,
-          dadosPagamentoPix: data.dados_pagamento?.pix_chave,
-          motivoPendencia: data.motivo_rejeicao,
-          observacoes: data.observacoes,
-          ccbDocumentoUrl: data.ccb_url,
-          // updatedAt campo removido - será atualizado automaticamente pelo schema
-        })
-        .where(eq(propostas.id, data.id));
-    } else {
-      // Create - gerar número da proposta sequencial
+    // P1.1 OPTIMIZATION: Use INSERT...ON CONFLICT instead of exists check
+    // Try insert first - if conflict, then update
+    try {
+      // Attempt INSERT for new proposal
       const numeroProposta = await this.getNextNumeroProposta();
-
-      console.log('[REPOSITORY DEBUG] About to insert with values:', {
-        id: proposal.id,
-        numeroProposta,
-        status: data.status,
-        produtoId: data.produto_id,
-        tabelaComercialId: data.tabela_comercial_id,
-        lojaId: data.loja_id,
-        userId: data.user_id
-      });
-
+      
       await db.insert(propostas).values([
         {
           id: proposal.id, // UUID do domínio
@@ -81,11 +46,45 @@ export class ProposalRepository implements IProposalRepository {
           motivoPendencia: data.motivo_rejeicao,
           observacoes: data.observacoes,
           ccbDocumentoUrl: data.ccb_url,
-          userId: data.user_id, // Campo adicionado para corrigir o erro
+          userId: data.user_id,
           createdAt: data.created_at,
-          // updatedAt campo removido - será atualizado automaticamente pelo schema
         },
       ]);
+      
+      console.log('[REPOSITORY] New proposal inserted:', proposal.id);
+      
+    } catch (insertError: any) {
+      // If insert fails due to unique constraint (proposal already exists), then update
+      if (insertError.code === '23505' || insertError.message?.includes('duplicate key')) {
+        console.log('[REPOSITORY] Proposal exists, updating:', proposal.id);
+        // UPDATE existing proposal
+        await db
+          .update(propostas)
+          .set({
+            status: data.status,
+            clienteData: JSON.stringify(data.cliente_data),
+            valor: data.valor.toString(),
+            prazo: data.prazo,
+            taxaJuros: data.taxa_juros.toString(),
+            produtoId: data.produto_id,
+            tabelaComercialId: data.tabela_comercial_id,
+            lojaId: data.loja_id,
+            dadosPagamentoTipo: data.dados_pagamento?.tipo_conta,
+            dadosPagamentoBanco: data.dados_pagamento?.banco,
+            dadosPagamentoAgencia: data.dados_pagamento?.agencia,
+            dadosPagamentoConta: data.dados_pagamento?.conta,
+            dadosPagamentoPix: data.dados_pagamento?.pix_chave,
+            motivoPendencia: data.motivo_rejeicao,
+            observacoes: data.observacoes,
+            ccbDocumentoUrl: data.ccb_url,
+            // updatedAt campo removido - será atualizado automaticamente pelo schema
+          })
+          .where(eq(propostas.id, data.id));
+      } else {
+        // Re-throw unexpected errors
+        console.error('[REPOSITORY] Unexpected error during proposal insert:', insertError);
+        throw insertError;
+      }
     }
 
     // Processar eventos de domínio (comentado temporariamente para load test)

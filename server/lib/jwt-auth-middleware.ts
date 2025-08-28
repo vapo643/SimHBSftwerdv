@@ -28,13 +28,18 @@ const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to second
 
 // Redis client for distributed token validation cache
 const redisClient = createRedisClient('jwt-token-cache');
-const CACHE_TTL_SECONDS = 300; // 5 minutes in seconds for Redis TTL
+const CACHE_TTL_SECONDS = 600; // 10 minutes in seconds for Redis TTL (P0.1 optimization)
 const validationSemaphore = new Map<string, Promise<any>>(); // Prevent concurrent validation of same token
 
-// Token cache entry interface for serialization
+// Enhanced token cache entry interface with profile data (P0.1 optimization)
 interface TokenCacheEntry {
   userId: string;
   userEmail: string;
+  profile?: {
+    role?: string | null;
+    fullName?: string | null;
+    lojaId?: number | null;
+  };
   timestamp: number;
 }
 
@@ -215,30 +220,55 @@ export async function jwtAuthMiddleware(
       return res.status(429).json({ message: 'Muitas tentativas de autenticação. Tente novamente mais tarde.' });
     }
 
-    // SAMM Optimization: Check distributed token blacklist via Redis
+    // P0.3 OPTIMIZATION: Redis Pipeline for batch operations
+    let isBlacklisted = false;
+    let cachedEntry: TokenCacheEntry | null = null;
+    
     try {
-      const isBlacklisted = await redisClient.get(`blacklist:${token}`);
-      if (isBlacklisted) {
-        securityLogger.logEvent({
-          type: SecurityEventType.TOKEN_INVALID,
-          severity: 'HIGH',
-          ipAddress: getClientIP(req),
-          userAgent: req.headers['user-agent'],
-          endpoint: req.originalUrl,
-          success: false,
-          details: { reason: 'Token is blacklisted via distributed cache' },
-        });
-        return res.status(401).json({ message: 'Token inválido' });
+      const pipeline = redisClient.pipeline();
+      pipeline.get(`blacklist:${token}`);
+      pipeline.get(`token:${token}`);
+      const results = await pipeline.exec();
+      
+      // Process results from pipeline
+      if (results) {
+        const [blacklistResult, cacheResult] = results;
+        isBlacklisted = !!(blacklistResult[1]); // blacklistResult[0] is error, [1] is value
+        
+        if (cacheResult[1]) {
+          cachedEntry = JSON.parse(cacheResult[1] as string);
+          console.log('[JWT DEBUG] Using Redis cached token validation (pipelined)');
+        }
       }
     } catch (redisError) {
-      console.warn('[JWT AUTH] Blacklist check failed, proceeding without check:', redisError);
-      // Continue without blacklist check - Redis failure shouldn't block auth
+      console.warn('[JWT AUTH] Redis pipeline failed, proceeding with fallback:', redisError);
+      // Fallback to individual operations if pipeline fails
+      try {
+        isBlacklisted = !!(await redisClient.get(`blacklist:${token}`));
+      } catch (e) {
+        console.warn('[JWT AUTH] Blacklist check failed:', e);
+      }
+    }
+    
+    // Check blacklist result
+    if (isBlacklisted) {
+      securityLogger.logEvent({
+        type: SecurityEventType.TOKEN_INVALID,
+        severity: 'HIGH',
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: false,
+        details: { reason: 'Token is blacklisted via distributed cache' },
+      });
+      return res.status(401).json({ message: 'Token inválido' });
     }
 
     let userId: string | undefined;
     let userEmail: string | undefined;
     let data: any = null;
     let error: any = null;
+    let profileFromCache: any = null;
 
     // Auto-detect token type by checking JWT header
     let tokenType: 'supabase' | 'local' = 'local';
@@ -258,19 +288,13 @@ export async function jwtAuthMiddleware(
 
     console.log('[JWT DEBUG] Auto-detected token type:', tokenType);
 
-    // Redis-based cache check to prevent race conditions
-    try {
-      const cachedEntryJson = await redisClient.get(`token:${token}`);
-      if (cachedEntryJson) {
-        const cachedEntry: TokenCacheEntry = JSON.parse(cachedEntryJson);
-        console.log('[JWT DEBUG] Using Redis cached token validation - avoiding race condition');
-        userId = cachedEntry.userId;
-        userEmail = cachedEntry.userEmail;
-        data = { user: { id: userId, email: userEmail } };
-        error = null;
-      }
-    } catch (redisError) {
-      console.warn('[JWT DEBUG] Redis cache check failed, proceeding without cache:', redisError);
+    // P0.1 OPTIMIZATION: Use cached entry with profile data
+    if (cachedEntry) {
+      userId = cachedEntry.userId;
+      userEmail = cachedEntry.userEmail;
+      profileFromCache = cachedEntry.profile;
+      data = { user: { id: userId, email: userEmail } };
+      error = null;
     }
 
     if (userId && userEmail) {
@@ -305,16 +329,34 @@ export async function jwtAuthMiddleware(
             error: supabaseResult.error
           };
 
-          // Cache successful validation in Redis
+          // P0.1 OPTIMIZATION: Cache with profile data to eliminate DB query
           if (!supabaseResult.error && supabaseResult.data?.user) {
             try {
+              // Fetch profile data once for cache
+              const { db } = await import('./supabase');
+              const { profiles } = await import('@shared/schema');
+              const { eq } = await import('drizzle-orm');
+              
+              const profileResult = await db
+                .select({
+                  role: profiles.role,
+                  fullName: profiles.fullName,
+                  lojaId: profiles.lojaId,
+                })
+                .from(profiles)
+                .where(eq(profiles.id, result.userId!))
+                .limit(1);
+              
+              const profileData = profileResult.length ? profileResult[0] : null;
+              
               const cacheEntry: TokenCacheEntry = {
                 userId: result.userId!,
                 userEmail: result.userEmail,
+                profile: profileData || undefined,
                 timestamp: Date.now()
               };
               await redisClient.setex(`token:${token}`, CACHE_TTL_SECONDS, JSON.stringify(cacheEntry));
-              console.log('[JWT DEBUG] Token cached in Redis successfully');
+              console.log('[JWT DEBUG] Token cached in Redis with profile data');
             } catch (redisError) {
               console.warn('[JWT DEBUG] Failed to cache token in Redis:', redisError);
               // Continue without cache - not critical
@@ -407,25 +449,53 @@ export async function jwtAuthMiddleware(
       return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
-    // Step c: Query profiles table using direct DB connection (bypasses RLS)
-    const { db } = await import('./supabase');
-    const { profiles } = await import('@shared/schema');
-    const { eq } = await import('drizzle-orm');
+    // P0.1 OPTIMIZATION: Use cached profile data or query as fallback
+    let profile: any;
+    
+    if (profileFromCache) {
+      console.log('[JWT DEBUG] Using cached profile data - no DB query needed');
+      profile = profileFromCache;
+    } else {
+      console.log('[JWT DEBUG] Profile not in cache, querying database');
+      const { db } = await import('./supabase');
+      const { profiles } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
 
-    const profileResult = await db
-      .select({
-        id: profiles.id,
-        fullName: profiles.fullName,
-        role: profiles.role,
-        lojaId: profiles.lojaId,
-      })
-      .from(profiles)
-      .where(eq(profiles.id, userId))
-      .limit(1);
+      const profileResult = await db
+        .select({
+          role: profiles.role,
+          fullName: profiles.fullName,
+          lojaId: profiles.lojaId,
+        })
+        .from(profiles)
+        .where(eq(profiles.id, userId))
+        .limit(1);
 
-    // Step d: Security fallback - Block orphaned users (no profile)
-    if (!profileResult.length) {
-      console.error('Profile query failed: No profile found for user', userId);
+      if (!profileResult.length) {
+        console.error('Profile query failed: No profile found for user', userId);
+        securityLogger.logEvent({
+          type: SecurityEventType.ACCESS_DENIED,
+          severity: 'HIGH',
+          userId,
+          userEmail,
+          ipAddress: getClientIP(req),
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          success: false,
+          details: { reason: 'Orphaned user - no profile found' },
+        });
+        return res.status(403).json({
+          message: 'Acesso negado. Perfil de usuário não encontrado.',
+          code: 'ORPHANED_USER',
+        });
+      }
+      
+      profile = profileResult[0];
+    }
+    
+    // Security fallback - Block users without profile
+    if (!profile) {
+      console.error('Profile validation failed: No profile data for user', userId);
       securityLogger.logEvent({
         type: SecurityEventType.ACCESS_DENIED,
         severity: 'HIGH',
@@ -435,15 +505,13 @@ export async function jwtAuthMiddleware(
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: 'Orphaned user - no profile found' },
+        details: { reason: 'No profile data available' },
       });
       return res.status(403).json({
         message: 'Acesso negado. Perfil de usuário não encontrado.',
-        code: 'ORPHANED_USER',
+        code: 'NO_PROFILE_DATA',
       });
     }
-
-    const profile = profileResult[0];
 
     // Track the current token for this user via distributed cache (for token rotation)
     await trackUserToken(userId, token);
