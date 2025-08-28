@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Sprint 2 / US S2-006: Resolução de Dívida Técnica TypeScript
+
+* **Sumário da Missão (O Quê):** Realizar uma varredura completa na base de código e corrigir todos os erros de compilação de TypeScript remanescentes, garantindo 100% de conformidade com a flag `"strict": true` no `tsconfig.json`.
+* **Intenção Estratégica (O Porquê):** Eliminar a dívida técnica (DT-002) para garantir a máxima segurança de tipos, reduzir a probabilidade de erros em tempo de execução, e melhorar a manutenibilidade e a experiência do desenvolvedor (DX) a longo prazo. Um código estritamente tipado é um requisito não negociável para um sistema de nível bancário.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de software sênior especializado em TypeScript, realizando uma missão de "limpeza de código". Sua tarefa é identificar e resolver erros de tipo de forma sistemática, sem introduzir regressões funcionais.
+
+---
+
+**IMPLEMENTAR (Plano de Implementação):**
+Execute a seguinte sequência de ações para eliminar os erros de TypeScript.
+
+**CURRENT STATE:**
+A base de código está funcional, mas o roadmap indica a existência de 47 erros de compilação de TypeScript que precisam ser resolvidos.
+
+**EXPECTED (Estado Final de Sucesso):**
+1. O comando `npm run typecheck` é executado e termina com sucesso, reportando 0 erros.
+2. A aplicação continua a compilar e a funcionar como esperado após as correções.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Diagnóstico Completo**
+1.1. Execute o comando de verificação de tipos para obter a lista completa e atual de todos os erros de TypeScript no projeto:
+    `npm run typecheck`
+1.2. Apresente um resumo dos erros encontrados, agrupando-os por tipo (ex: `Object is possibly 'null'`, `Type 'X' is not assignable to type 'Y'`, etc.) e pelos ficheiros mais afetados.
+
+**Passo 2: Execução da Remediação**
+2.1. Com base na lista de erros, comece a corrigi-los de forma metódica.
+2.2. Priorize os erros em ficheiros de *core* (serviços, domínio, repositórios) antes de passar para os componentes de UI ou ficheiros de teste.
+2.3. Aplique as melhores práticas para a correção, como adicionar verificações de nulidade, ajustar tipos de interface, ou refatorar a lógica para garantir a segurança de tipos.
+
+**Passo 3: Validação Final**
+3.1. Re-execute o comando `npm run typecheck` e confirme que a saída agora reporta 0 erros encontrados.
+3.2. Execute `get_latest_lsp_diagnostics` como uma verificação final para garantir que não há outros problemas pendentes.
+3.3. Apresente um breve relatório confirmando a resolução de todos os erros de tipo.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 90%
+* **RISCOS IDENTIFICADOS:** MÉDIO. A correção de erros de tipo, especialmente em um código complexo, pode inadvertidamente alterar a lógica de negócio se não for feita com cuidado. O agente deve focar-se em satisfazer o compilador de tipos sem mudar o comportamento funcional.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Será dada preferência a correções que aumentem a segurança de tipos (ex: adicionar `if (value)` para tratar nulidade) em vez de soluções que a contornem (ex: usar o operador `!`).
+* **VALIDAÇÃO PENDENTE:** Uma suíte de testes de regressão (a ser implementada no Sprint 3) será necessária para validar que as correções de tipo não introduziram bugs funcionais.

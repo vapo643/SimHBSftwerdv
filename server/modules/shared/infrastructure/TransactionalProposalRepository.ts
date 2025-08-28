@@ -224,7 +224,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
       )
       .orderBy(desc(propostas.createdAt));
 
-    return result.map(r => Proposal.fromPersistence(r.propostas));
+    return result.map(r => Proposal.fromDatabase(r.propostas));
   }
 
   async findAwaitingBoletoGeneration(): Promise<Proposal[]> {
@@ -241,7 +241,7 @@ export class TransactionalProposalRepository implements IProposalRepository {
       )
       .orderBy(desc(propostas.createdAt));
 
-    return result.map(r => Proposal.fromPersistence(r.propostas));
+    return result.map(r => Proposal.fromDatabase(r.propostas));
   }
 
   // ========================================================================
@@ -249,21 +249,27 @@ export class TransactionalProposalRepository implements IProposalRepository {
   // ========================================================================
 
   async findByCriteria(criteria: ProposalSearchCriteria): Promise<Proposal[]> {
-    let query = this.tx.select().from(propostas).where(isNull(propostas.deletedAt));
+    // Construir condições usando and() para combinar múltiplas condições
+    const conditions = [isNull(propostas.deletedAt)];
 
     if (criteria.status) {
-      query = query.where(eq(propostas.status, criteria.status as any));
+      conditions.push(eq(propostas.status, criteria.status as any));
     }
 
     if (criteria.lojaId) {
-      query = query.where(eq(propostas.lojaId, criteria.lojaId));
+      conditions.push(eq(propostas.lojaId, criteria.lojaId));
     }
 
     if (criteria.cpf) {
-      query = query.where(eq(propostas.clienteCpf, criteria.cpf));
+      conditions.push(eq(propostas.clienteCpf, criteria.cpf));
     }
 
-    const result = await query.orderBy(desc(propostas.createdAt));
+    const result = await this.tx
+      .select()
+      .from(propostas)
+      .where(and(...conditions))
+      .orderBy(desc(propostas.createdAt));
+
     return result.map((r: any) => Proposal.fromDatabase(r));
   }
 
