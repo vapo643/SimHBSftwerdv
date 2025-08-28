@@ -14,10 +14,10 @@ const TARGET_ITERATIONS = parseInt(process.env.ITERATIONS) || 50;
 const CONCURRENT_USERS = parseInt(process.env.VUS) || 2;
 const TEST_DURATION_MS = parseInt(process.env.DURATION_MS) || 60000; // 1 minute for accelerated test
 
-// Test credentials for load testing - using created test user
+// Test credentials for load testing - real admin credentials
 const TEST_USER = {
-  email: 'loadtest@simpix.com',
-  password: 'plaintext123'
+  email: 'adminsimpix@simpix.com.br',
+  password: 'agentsimpixpass'
 };
 
 // Sample proposal data for creation
@@ -158,9 +158,10 @@ async function runProposalFlow(userIndex, metricsCollector) {
       return false;
     }
     
-    const token = authResponse.data?.token;
+    const token = authResponse.data?.session?.access_token;
     if (!token) {
       console.error(`❌ [User ${userIndex}] No token received`);
+      console.log(`🔍 [DEBUG] Auth response:`, authResponse.data);
       return false;
     }
     
