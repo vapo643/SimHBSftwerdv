@@ -69,29 +69,52 @@ if (databaseUrl.includes('supabase.com')) {
     correctedUrl = correctedUrl.replace(':5432', ':6543');
   }
 
-  // Create connection with proper configuration
+  // MISSION 3 OPTIMIZATION: Robust connection pool for high concurrency
   dbClient = postgres(correctedUrl, {
     ssl: 'require',
-    max: 5,
-    idle_timeout: 30,
-    connect_timeout: 10,
+    max: 20,                    // Increased from 5 to 20 for better concurrency handling
+    idle_timeout: 30,          // Keep connections alive for 30s when idle
+    connect_timeout: 10,       // 10s timeout for new connections
+    prepare: false,            // Disable prepared statements for better Supabase compatibility
+    onnotice: () => {},        // Suppress PostgreSQL notices in logs
+    debug: process.env.NODE_ENV === 'development', // Enable debug in dev only
+    transform: {
+      undefined: null,         // Transform undefined to null for PostgreSQL
+    },
   });
-  console.log('✅ Database: Connection configured (lazy)');
+  console.log('✅ Database: Connection pool configured with 20 max connections (Mission 3 optimization)');
+  console.log('📊 Pool Config: idle_timeout=30s, connect_timeout=10s, prepared_statements=disabled');
 } else {
-  dbClient = postgres(databaseUrl);
+  // MISSION 3: Local/non-Supabase PostgreSQL with optimized pooling
+  dbClient = postgres(databaseUrl, {
+    max: 20,                    // Consistent pool size across environments
+    idle_timeout: 30,          // 30s idle timeout
+    connect_timeout: 10,       // 10s connection timeout
+    prepare: false,            // Disable prepared statements for consistency
+    onnotice: () => {},        // Suppress notices
+    debug: process.env.NODE_ENV === 'development',
+    transform: {
+      undefined: null,
+    },
+  });
 }
 
 const client = dbClient;
 export const db = drizzle(client, { schema });
 
-// Test database connection asynchronously
+// MISSION 3: Enhanced connection pool monitoring and testing
 setTimeout(async () => {
   try {
-    await client`SELECT 1`;
-    console.log('✅ Database: Connection test successful');
+    const startTime = Date.now();
+    await client`SELECT 1, current_setting('max_connections') as max_conn`;
+    const duration = Date.now() - startTime;
+    
+    console.log('✅ Database: Connection pool test successful');
+    console.log(`📊 Connection latency: ${duration}ms`);
+    console.log('🔧 Connection pool ready for high concurrency workload');
   } catch (error) {
-    console.warn('⚠️  Database: Connection test failed -', (error as Error).message);
-    console.warn('⚠️  Database: Check DATABASE_URL credentials in Secrets');
-    console.warn('⚠️  Database: App will continue using Supabase REST API only');
+    console.error('❌ Database: Connection pool test failed -', (error as Error).message);
+    console.warn('⚠️  Database: Check DATABASE_URL credentials and network connectivity');
+    console.warn('⚠️  Database: Pool optimization may not be effective - using fallback REST API');
   }
 }, 2000);
