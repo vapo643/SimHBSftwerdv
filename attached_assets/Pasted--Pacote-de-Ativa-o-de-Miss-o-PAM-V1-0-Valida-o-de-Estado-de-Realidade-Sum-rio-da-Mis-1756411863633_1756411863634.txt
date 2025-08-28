@@ -1,0 +1,39 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Validação de Estado de Realidade
+
+* **Sumário da Missão (O Quê):** Realizar uma verificação de ponta-a-ponta do estado operacional atual e real do sistema Simpix.
+* **Intenção Estratégica (O Porquê):** Houve múltiplos ciclos de falhas, auditorias e remediações, resultando em uma perda de sincronia entre os relatórios e a realidade observada. A sua missão é ignorar todos os relatórios anteriores e estabelecer uma "verdade do terreno" definitiva para que possamos tomar decisões estratégicas com base em factos, não em hipóteses.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de QA a realizar um *smoke test* final antes de uma reunião de "Go/No-Go". A sua resposta deve ser literal, factual e baseada em evidências observáveis diretas.
+
+---
+
+**IMPLEMENTAR (Plano de Verificação Sincera):**
+Execute os seguintes passos e reporte os resultados de forma literal.
+
+**CONTEXTO CRÍTICO:**
+Esqueça as missões anteriores. Esqueça os relatórios de sucesso ou falha. A única coisa que importa é o que acontece quando você executa os comandos abaixo, **agora**.
+
+**Roadmap de Verificação:**
+
+**Passo 1: Verificação da Inicialização do Backend e Serviços**
+1.1. Inicie a aplicação utilizando o comando de arranque padrão (`npm run dev` ou o comando definido no ficheiro `.replit`).
+1.2. Observe os logs de inicialização. Responda de forma literal a estas perguntas:
+    * O serviço da base de dados PostgreSQL conecta-se com sucesso?
+    * O serviço Redis conecta-se com sucesso? Se não, qual é a mensagem de erro exata que aparece nos logs (`ECONNREFUSED` ou outra)?
+    * O servidor Node.js/Express inicia com sucesso e reporta estar a "ouvir" numa porta (ex: `Server running on port 5000`)?
+1.3. Apresente os últimos 20-30 linhas dos logs de inicialização como prova.
+
+**Passo 2: Verificação Funcional do Frontend**
+2.1. Com o servidor em execução, acesse a aplicação no *browser*.
+2.2. Execute o fluxo de login com um utilizador de teste válido. O login funciona?
+2.3. Após o login, a UI principal (o dashboard) é renderizada? Responda especificamente a estes pontos:
+    * O menu de navegação lateral aparece?
+    * A área de conteúdo principal (onde as propostas deveriam aparecer) é renderizada, mesmo que vazia ou num estado de *loading*?
+    * Ocorrem alguns erros críticos no console do *browser* que quebram a aplicação (especificamente, o erro `Failed to execute 'removeChild' on 'Node'`)?
+2.4. **Ação Mandatória:** Forneça uma captura de ecrã (`screenshot`) da tela da aplicação imediatamente após o login.
+
+**Passo 3: Veredito Final e Honesto**
+3.1. Com base nas evidências que você acabou de coletar nos Passos 1 e 2, qual é o seu veredito final e sincero sobre o estado operacional do sistema? O sistema está funcional, parcialmente funcional, ou totalmente quebrado? Justifique a sua resposta com base nas suas observações diretas.
+
+---
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+Apresente a totalidade das suas descobertas, sem resumo ou omissão. A transparência total é o único critério de sucesso para esta missão.
