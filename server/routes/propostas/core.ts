@@ -6,7 +6,7 @@
  */
 
 import { Router } from 'express';
-import { ProposalController } from '../../contexts/proposal/presentation/proposalController.js';
+import { ProposalController } from '../../modules/proposal/presentation/proposalController.js';
 
 // Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
 const auth = async (req: any, res: any, next: any) => {

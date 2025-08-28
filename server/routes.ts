@@ -128,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/propostas', propostasCoreRouter);
 
   // DDD Credit Context Routes - Phase 1 Implementation
-  const { createCreditRoutes } = await import('./contexts/credit/presentation/routes.js');
+  const { createCreditRoutes } = await import('./modules/credit/presentation/routes.js');
   app.use('/api/ddd', createCreditRoutes());
 
   // Import and mount integration test routes

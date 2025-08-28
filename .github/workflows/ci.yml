@@ -143,7 +143,7 @@ jobs:
   docker-build:
     name: Docker Build Check
     runs-on: ubuntu-latest
-    if: false # Disabled until Dockerfiles are created
+    if: true # Docker build enabled after foundation completion
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
