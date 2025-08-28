@@ -151,17 +151,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Feature Flags endpoint - retorna flags para o usuário atual
-  app.get('/api/features', jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
+  // Feature Flags endpoint - PÚBLICO (não precisa de autenticação)
+  app.get('/api/features', async (req: Request, res: Response) => {
     try {
       // Inicializa o serviço se necessário
       await featureFlagService.init();
 
-      // Contexto do usuário para avaliação de flags
+      // Contexto público para avaliação de flags (sem dados de usuário)
       const context = {
-        userId: req.user?.id,
-        userRole: req.user?.role,
-        sessionId: req.sessionID,
+        userId: undefined, // Não disponível em endpoints públicos
+        userRole: undefined, // Não disponível em endpoints públicos
+        sessionId: (req as any).sessionID || 'anonymous',
         environment: process.env.NODE_ENV || 'development',
         remoteAddress: getClientIP(req),
       };

@@ -41,9 +41,14 @@ const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(und
 export function FeatureFlagProvider({ children }: { children: ReactNode }) {
   const [flags, setFlags] = useState<FeatureFlags>(defaultFlags);
 
-  // Buscar flags do backend
+  // Buscar flags do backend (SEM AUTENTICAÇÃO - feature flags são públicas)
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/features'],
+    queryFn: async () => {
+      const { api } = await import('@/lib/apiClient');
+      const response = await api.get('/api/features', { requireAuth: false });
+      return response.data;
+    },
     refetchInterval: 60000, // Atualiza a cada minuto
     staleTime: 30000, // Considera fresh por 30 segundos
     retry: 3,

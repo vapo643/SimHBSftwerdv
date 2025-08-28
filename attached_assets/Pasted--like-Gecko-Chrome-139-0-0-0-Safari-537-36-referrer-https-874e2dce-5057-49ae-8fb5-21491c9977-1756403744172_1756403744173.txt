@@ -1,0 +1,285 @@
+, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/features
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: false
+[JWT DEBUG] Header começa com Bearer: undefined
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/features
+2025-08-28 17:55:13 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"67be6a7b-0fe5-445b-8e0f-0867adc73d05","method":"GET","url":"/api/features","statusCode":401,"duration":2,"responseSize":45}
+2025-08-28 17:55:13 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"67be6a7b-0fe5-445b-8e0f-0867adc73d05","method":"GET","url":"/api/features","statusCode":401,"duration":2,"error":"{\"message\":\"Token de acesso requerido\"}"}
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+2025-08-28 17:55:14 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"187cd9df-111c-47ea-8655-b1cbe8eab8cc","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.93.130","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/features
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: false
+[JWT DEBUG] Header começa com Bearer: undefined
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/features
+2025-08-28 17:55:14 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"187cd9df-111c-47ea-8655-b1cbe8eab8cc","method":"GET","url":"/api/features","statusCode":401,"duration":1,"responseSize":45}
+2025-08-28 17:55:14 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"187cd9df-111c-47ea-8655-b1cbe8eab8cc","method":"GET","url":"/api/features","statusCode":401,"duration":1,"error":"{\"message\":\"Token de acesso requerido\"}"}
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+2025-08-28 17:55:16 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"0478dedc-9df7-44cf-aad6-d7f0d59da786","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.93.130","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/features
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: false
+[JWT DEBUG] Header começa com Bearer: undefined
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/features
+2025-08-28 17:55:16 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"0478dedc-9df7-44cf-aad6-d7f0d59da786","method":"GET","url":"/api/features","statusCode":401,"duration":1,"responseSize":45}
+2025-08-28 17:55:16 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"0478dedc-9df7-44cf-aad6-d7f0d59da786","method":"GET","url":"/api/features","statusCode":401,"duration":1,"error":"{\"message\":\"Token de acesso requerido\"}"}
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+2025-08-28 17:55:20 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"386b1c91-3632-4021-8ed5-67633ad4c6b1","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.93.130","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/features
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: false
+[JWT DEBUG] Header começa com Bearer: undefined
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/features
+2025-08-28 17:55:20 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"386b1c91-3632-4021-8ed5-67633ad4c6b1","method":"GET","url":"/api/features","statusCode":401,"duration":1,"responseSize":45}
+2025-08-28 17:55:20 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"386b1c91-3632-4021-8ed5-67633ad4c6b1","method":"GET","url":"/api/features","statusCode":401,"duration":1,"error":"{\"message\":\"Token de acesso requerido\"}"}
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+2025-08-28 17:55:25 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e91736ae-7785-4a0b-b8a8-c8877dd3ba24","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.93.130","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/dashboard"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/dashboard
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Auto-detected token type: supabase
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+2025-08-28 17:55:27 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"debaa0fb-5cc7-4100-b9d8-4e7dd10cb9f3","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.93.130","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/dashboard"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/dashboard
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Auto-detected token type: supabase
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+2025-08-28 17:55:30 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a2bad368-1efd-4005-8510-0e1e9052371b","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.93.130","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/dashboard"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/features
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/dashboard
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Auto-detected token type: supabase
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
+[REDIS:jwt-token-cache] ❌ Connection error: connect ECONNREFUSED 127.0.0.1:6379
+Full error: Error: connect ECONNREFUSED 127.0.0.1:6379
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379
+}
+[REDIS:jwt-token-cache] 🔌 Connection closed
+[REDIS:jwt-token-cache] 🔄 Attempting to reconnect...
