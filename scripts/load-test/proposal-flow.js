@@ -188,9 +188,10 @@ async function runProposalFlow(userIndex, metricsCollector) {
       return false;
     }
     
-    const proposalId = createResponse.data?.id;
+    const proposalId = createResponse.data?.data?.id;
     if (!proposalId) {
       console.error(`❌ [User ${userIndex}] No proposal ID received`);
+      console.log(`🔍 [DEBUG] Full create response:`, JSON.stringify(createResponse.data, null, 2));
       return false;
     }
     

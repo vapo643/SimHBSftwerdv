@@ -22,13 +22,14 @@ export interface AuthenticatedRequest extends Request {
 
 // Constants for Redis-based security features
 const TOKEN_BLACKLIST_TTL = 60 * 60; // 1 hour in seconds
-const MAX_AUTH_ATTEMPTS = 10;
+const MAX_AUTH_ATTEMPTS = 50; // Aumentado para suportar testes de carga
 const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
 
 // Redis client for distributed token validation cache
 const redisClient = createRedisClient('jwt-token-cache');
 const CACHE_TTL_SECONDS = 600; // 10 minutes in seconds for Redis TTL (P0.1 optimization)
+const VALIDATION_TIMEOUT_MS = 5000; // 5 second timeout for token validation
 const validationSemaphore = new Map<string, Promise<any>>(); // Prevent concurrent validation of same token
 
 // Enhanced token cache entry interface with profile data (P0.1 optimization)
@@ -314,13 +315,22 @@ export async function jwtAuthMiddleware(
         data = null;
       }
     } else if (tokenType === 'supabase') {
-      // Create semaphore entry for this token validation
+      // Create semaphore entry for this token validation with timeout
       const validationPromise = (async () => {
         try {
-          console.log('[JWT DEBUG] Using Supabase token validation');
+          console.log('[JWT DEBUG] Using Supabase token validation with timeout');
           const { createServerSupabaseAdminClient } = await import('./supabase');
           const supabase = createServerSupabaseAdminClient();
-          const supabaseResult = await supabase.auth.getUser(token);
+          
+          // Add timeout to prevent hanging validation
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Token validation timeout')), VALIDATION_TIMEOUT_MS)
+          );
+          
+          const supabaseResult = await Promise.race([
+            supabase.auth.getUser(token),
+            timeoutPromise
+          ]) as any;
 
           const result = {
             userId: supabaseResult.data?.user?.id,

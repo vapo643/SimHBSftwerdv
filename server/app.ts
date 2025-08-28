@@ -121,7 +121,7 @@ export async function createApp() {
 
     const authLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
-      max: isDevelopment ? 1000 : 20, // 1000 dev, 20 prod (muito mais permissivo)
+      max: isDevelopment ? 1000 : 100, // 1000 dev, 100 prod (ajustado para múltiplos usuários)
       skipSuccessfulRequests: true,
       message: {
         error: isDevelopment
