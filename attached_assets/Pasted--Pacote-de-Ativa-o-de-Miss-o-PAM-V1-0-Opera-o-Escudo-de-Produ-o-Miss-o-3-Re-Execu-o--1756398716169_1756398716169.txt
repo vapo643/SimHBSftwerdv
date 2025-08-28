@@ -1,0 +1,50 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Escudo de Produção" / Missão 3 (Re-Execução): Validação de Carga Completa
+
+* **Sumário da Missão (O Quê):** Executar o script de teste de carga `proposal-flow.js` para simular o *throughput* de 50 propostas/dia, validando o fluxo completo de autenticação, criação e aprovação de propostas sob carga.
+* **Intenção Estratégica (O Porquê):** Validar empiricamente que as otimizações de *rate limiting* e TTL de token da "Operação Portão de Aço" resolveram o estrangulamento de performance. Este teste é o *quality gate* final que certifica a prontidão do sistema para um ambiente de produção multi-utilizador.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de performance (SRE) a executar o teste de certificação final. A sua tarefa é provar, com dados, que o sistema agora suporta a carga de negócio projetada sem falhas de autenticação.
+
+---
+
+**IMPLEMENTAR (Plano de Teste):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+O sistema foi otimizado para alta concorrência na autenticação. Um script de teste de carga (`scripts/load-test/proposal-flow.js`) e um script de setup de utilizador de teste (`scripts/load-test/setup-test-user.js`) existem e estão prontos para serem utilizados.
+
+**EXPECTED (Estado Final de Sucesso):**
+1. O script `setup-test-user.js` é executado com sucesso, garantindo a existência de um utilizador de teste válido.
+2. O teste de carga `proposal-flow.js` é executado, completando com sucesso 50 iterações do fluxo completo (login, criar, aprovar).
+3. O relatório de execução do `k6` demonstra que os SLAs de performance (`p(95) < 500ms`) e fiabilidade (`0% de erros`) foram atingidos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Preparação do Ambiente de Teste**
+1.1. Execute o script de setup para garantir que o utilizador de teste (`loadtest@simpix.com`) está disponível no sistema de autenticação Supabase:
+    `node scripts/load-test/setup-test-user.js`
+
+**Passo 2: Execução do Teste de Carga**
+2.1. Execute o script de teste de carga principal com uma configuração que simule múltiplos utilizadores e o volume total de 50 propostas.
+    `k6 run --vus 3 --iterations 50 scripts/load-test/proposal-flow.js`
+
+**Passo 3: Gerar o Relatório de Validação (Protocolo de Divulgação Total Mandatório)**
+3.1. Apresente o resumo final completo gerado pelo `k6`. O relatório deve incluir, de forma exaustiva, **TODAS** as métricas, com foco em:
+    * **`http_req_duration`** para todos os endpoints (`login`, `propostas`, `approve`): `avg`, `min`, `med`, `max`, `p(90)`, `p(95)`.
+    * **`http_req_failed`**: A taxa de erros.
+    * **`iterations`**: A contagem total de iterações.
+3.2. Com base nas métricas, forneça um veredito final, claro e inequívoco, sobre se o sistema está **APROVADO** ou **REPROVADO** para a carga de 50 propostas/dia.
+
+---
+
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+* **Diretriz Mestra:** Completude exaustiva. A omissão de qualquer métrica ou erro é uma falha de missão.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS (LISTA COMPLETA):**
+    * **Risco 1 (Baixo):** O ambiente Replit pode apresentar uma performance ligeiramente diferente da produção, mas os resultados serão direcionais e válidos para a certificação.
+* **DECISÕES TÉCNICAS ASSUMIDAS (LISTA COMPLETA):**
+    * O teste foca-se no "caminho feliz".
+* **VALIDAÇÃO PENDENTE (LISTA COMPLETA):**
+    * O resultado deste teste de carga é o *quality gate* final antes do início do desenvolvimento de novas *features* como a "Operação Torre de Vigia".
