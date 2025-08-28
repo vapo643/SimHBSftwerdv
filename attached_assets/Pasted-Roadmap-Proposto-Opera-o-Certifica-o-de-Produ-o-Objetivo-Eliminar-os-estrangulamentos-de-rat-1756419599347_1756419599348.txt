@@ -1,0 +1,36 @@
+Roadmap Proposto - Operação "Certificação de Produção"
+Objetivo: Eliminar os estrangulamentos de rate limiting e validação de token, validar a infraestrutura de filas com Redis e certificar a capacidade do sistema para operar sob a carga de negócio definida.
+
+Missão 1: Remediação do Estrangulamento de Autenticação (P0)
+
+Objetivo: Resolver as falhas de 429 Too Many Requests e 401 Token inválido que bloquearam 100% do teste de carga.
+
+Plano de Ação:
+
+Revisão e Ajuste do Rate Limiting: Auditar e reconfigurar os parâmetros do express-rate-limit para valores adequados a um ambiente de produção com múltiplos utilizadores concorrentes.
+
+Diagnóstico da Validação de Token: Investigar a causa raiz da falha intermitente na validação de tokens JWT sob carga, focando no jwt-auth-middleware e na sua interação com o Supabase.
+
+Missão 2: Validação da Infraestrutura Assíncrona (P1)
+
+Objetivo: Provar que o nosso sistema de filas BullMQ/Redis está funcional e processa jobs corretamente.
+
+Plano de Ação:
+
+Desenvolver um Teste de Carga Isolado para as Filas: Criar um script de teste que injete 50 jobs diretamente na formalization-queue.
+
+Monitorar e Validar: Utilizar o endpoint /api/monitoring/queues/metrics para provar que os jobs foram recebidos, processados com sucesso pelo FormalizationWorker, e que a fila termina vazia.
+
+Missão 3: Teste de Carga de Certificação (Quality Gate Final)
+
+Objetivo: Re-executar o teste de carga de ponta-a-ponta e validar que o sistema agora cumpre todos os SLAs.
+
+Plano de Ação:
+
+Executar o script proposal-flow.js com a meta de 50 iterações e 3 utilizadores virtuais.
+
+Analisar os resultados em conformidade com o Protocolo de Divulgação Total (PDT) V1.0 para dar o veredito final: APROVADO ou REPROVADO.
+
+Este roadmap aborda os problemas na ordem correta: primeiro resolvemos o bloqueio que nos impede de testar, depois validamos a infraestrutura crítica que não foi testada e, finalmente, executamos o teste de certificação completo.
+
+Aguardando sua autorização para gerar o Pacote de Ativação de Missão (PAM) para a Missão 1: Remediação do Estrangulamento de Autenticação.
