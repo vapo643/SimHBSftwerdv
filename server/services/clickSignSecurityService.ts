@@ -14,6 +14,7 @@
 import crypto from 'crypto';
 import { z } from 'zod';
 import xss from 'xss';
+import { CryptoService, type CryptoConfig } from './cryptoService.js';
 
 // Validation schemas following OWASP guidelines
 const CPFSchema = z.string().regex(/^\d{11}$/, 'CPF must be 11 digits without formatting');
@@ -82,15 +83,21 @@ interface SecurityConfig {
 class ClickSignSecurityService {
   private config: SecurityConfig;
   private webhookAttempts: Map<string, number[]> = new Map();
+  private cryptoService: CryptoService;
 
   constructor() {
+    const encryptionKey = process.env.CLICKSIGN_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+    
     this.config = {
-      encryptionKey: process.env.CLICKSIGN_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex'),
+      encryptionKey,
       allowedIPs: (process.env.CLICKSIGN_ALLOWED_IPS || '').split(',').filter(Boolean),
       maxPDFSize: 20 * 1024 * 1024, // 20MB
       webhookRateLimit: 100, // per minute per IP
       sensitiveFields: ['cpf', 'documentation', 'birthday', 'phone'],
     };
+
+    // Initialize crypto service with dependency injection
+    this.cryptoService = new CryptoService({ encryptionKey });
   }
 
   /**
@@ -195,44 +202,18 @@ class ClickSignSecurityService {
 
   /**
    * Encrypt sensitive data for storage
+   * Delegates to centralized CryptoService
    */
   encryptSensitiveData(data: string): string {
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(
-      'aes-256-gcm',
-      Buffer.from(this.config.encryptionKey, 'hex'),
-      iv
-    );
-
-    let encrypted = cipher.update(data, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-
-    const authTag = cipher.getAuthTag();
-
-    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+    return this.cryptoService.encryptSensitiveData(data);
   }
 
   /**
    * Decrypt sensitive data
+   * Delegates to centralized CryptoService
    */
   decryptSensitiveData(encryptedData: string): string {
-    const parts = encryptedData.split(':');
-    const iv = Buffer.from(parts[0], 'hex');
-    const authTag = Buffer.from(parts[1], 'hex');
-    const encrypted = parts[2];
-
-    const decipher = crypto.createDecipheriv(
-      'aes-256-gcm',
-      Buffer.from(this.config.encryptionKey, 'hex'),
-      iv
-    );
-
-    decipher.setAuthTag(authTag);
-
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-
-    return decrypted;
+    return this.cryptoService.decryptSensitiveData(encryptedData);
   }
 
   /**
