@@ -1,0 +1,74 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - REMEDIAÇÃO DE PERFORMANCE: Sincronia de Índices
+
+* **Sumário da Missão (O Quê):** Reverter os índices criados manualmente na base de dados e re-implementá-los corretamente através da sua definição no schema Drizzle (`shared/schema.ts`), gerando um ficheiro de migração versionado.
+* **Intenção Estratégica (O Porquê):** Corrigir a violação do processo de Infrastructure as Code. O schema Drizzle é a única fonte da verdade. Todos os índices devem ser declarados no código para garantir a reprodutibilidade, o versionamento e a integridade da nossa arquitetura de dados. Atalhos que dessincronizam o código da infraestrutura são proibidos.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de dados a corrigir um desvio de processo. A sua tarefa não é apenas alcançar o estado final (índices existem), mas fazê-lo através do processo correto e auditável.
+
+---
+
+**IMPLEMENTAR (Plano de Remediação):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+Os índices `idx_propostas_status_performance` e `idx_propostas_cpf_status` existem na base de dados, mas não estão declarados dentro do ficheiro `shared/schema.ts`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Os índices manuais foram removidos da base de dados.
+2.  O ficheiro `shared/schema.ts` foi atualizado para incluir a definição dos índices compostos na tabela `propostas` usando a sintaxe do Drizzle.
+3.  Um novo ficheiro de migração foi gerado em `/migrations` contendo as instruções `CREATE INDEX`.
+4.  A nova migração foi aplicada, recriando os índices de forma correta e auditável.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Reverter Alterações Manuais (Rollback)**
+1.1. Execute os seguintes comandos SQL para remover os índices criados manualmente:
+    ```sql
+    DROP INDEX IF EXISTS public.idx_propostas_status_performance;
+    DROP INDEX IF EXISTS public.idx_propostas_cpf_status;
+    ```
+
+**Passo 2: Definir Índices como Código (Fonte da Verdade)**
+2.1. Abra o ficheiro `shared/schema.ts`.
+2.2. Localize a definição da tabela `propostas`.
+2.3. Dentro do *callback* de configuração da tabela (o segundo argumento de `pgTable`), adicione a definição dos índices utilizando a sintaxe do Drizzle ORM:
+    ```typescript
+    // Exemplo de adição dentro do pgTable
+    (table) => {
+      return {
+        statusPerformanceIdx: index('idx_propostas_status_performance')
+          .on(table.status, table.createdAt) // Adicione .desc() se necessário
+          .where(sql`"deletedAt" IS NULL`),
+        cpfStatusIdx: index('idx_propostas_cpf_status')
+          .on(table.clienteCpf, table.status)
+          .where(sql`"deletedAt" IS NULL`),
+      };
+    }
+    ```
+    *Atenção: Valide a sintaxe exata para colunas e a cláusula `WHERE` para soft delete.*
+
+**Passo 3: Gerar e Aplicar a Migração Versionada**
+3.1. Execute o comando `drizzle-kit` para gerar o ficheiro de migração:
+    `npm run db:generate`
+3.2. Execute o comando para aplicar a migração à base de dados:
+    `npm run db:push`
+
+**Passo 4: Validação Final**
+4.1. Apresente o trecho de código do ficheiro `shared/schema.ts` com os novos índices declarados.
+4.2. Apresente o nome e o conteúdo do novo ficheiro de migração SQL.
+4.3. Execute uma query SQL (`SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'propostas';`) para provar que os índices existem e foram criados a partir da nova migração.
+4.4. Execute `get_latest_lsp_diagnostics`.
+
+---
+
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+
+* **Diretriz Mestra:** Completude exaustiva em todos os relatórios.
+* **Regra de Execução:** Listar 100% dos erros, riscos e recomendações.
+* **Justificativa Estratégica:** A ocultação de riscos é uma falha de missão.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** BAIXO. O principal risco é a sintaxe do Drizzle para índices compostos com ordenação específica (`DESC`) e cláusulas `WHERE`. O agente deve consultar a documentação se necessário.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que não há dados de produção, permitindo operações `DROP INDEX` sem impacto.
+* **VALIDAÇÃO PENDENTE:** A performance real das queries utilizando os novos índices.
