@@ -25,6 +25,7 @@ import EditarPropostaPendenciada from '@/pages/propostas/editar';
 import OWASPAssessment from '@/pages/admin/security/owasp-assessment';
 import { WstgPage } from '@/pages/admin/security/wstg';
 import MonitoramentoAvancadoPage from '@/pages/admin/security/dashboard';
+import MonitoringDashboard from '@/pages/admin/monitoring/dashboard';
 import SessoesAtivas from '@/pages/configuracoes/sessoes';
 import AlterarEmail from '@/pages/configuracoes/alterar-email';
 import Configuracoes from '@/pages/configuracoes';
@@ -154,6 +155,11 @@ function Router() {
       <Route path="/admin/security/dashboard">
         <ProtectedRoute>
           <MonitoramentoAvancadoPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/monitoring/dashboard">
+        <ProtectedRoute>
+          <MonitoringDashboard />
         </ProtectedRoute>
       </Route>
 
