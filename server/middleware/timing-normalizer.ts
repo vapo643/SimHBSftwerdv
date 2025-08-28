@@ -210,4 +210,5 @@ export const timingNormalizerMiddleware = timingNormalizer.middleware();
 console.log('🚀 [TIMING MIDDLEWARE] Middleware instance created and exported');
 
 // Export para debugging/monitoring
-export { TimingNormalizer, TimingConfig, TimingMetrics };
+export type { TimingConfig, TimingMetrics };
+export { TimingNormalizer };

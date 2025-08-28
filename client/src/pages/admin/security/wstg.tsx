@@ -35,7 +35,7 @@ interface WstgCategory {
   secureTests: number;
 }
 
-interface WstgStatus {
+interface _WstgStatus {
   totalTests: number;
   completedTests: number;
   secureTests: number;

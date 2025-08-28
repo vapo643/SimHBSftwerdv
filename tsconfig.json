@@ -1,14 +1,14 @@
 {
   "include": ["client/src/**/*", "shared/**/*", "server/**/*", "tests/**/*"],
-  "exclude": ["node_modules", "build", "dist"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.*", "**/*.spec.*", ".cache", "coverage", "**/*-original.ts", "**/*-original.js"],
   "compilerOptions": {
     "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo",
     "noEmit": true,
     "module": "ESNext",
-    "target": "ES2015",
+    "target": "ES2020",
     "strict": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
+    "lib": ["ES2020", "dom", "dom.iterable"],
     "jsx": "preserve",
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -16,6 +16,9 @@
     "moduleResolution": "bundler",
     "downlevelIteration": true,
     "baseUrl": ".",
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+    "forceConsistentCasingInFileNames": true,
     "types": ["node", "vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "paths": {
       "@/*": ["./client/src/*"],

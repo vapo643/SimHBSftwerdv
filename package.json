@@ -63,6 +63,7 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "@unleash/proxy-client-react": "^5.0.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "axios": "^1.11.0",
     "bullmq": "^5.57.0",

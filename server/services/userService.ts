@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { UserDataSchema, UserData } from '../../shared/types/user';
 
 // Re-export UserData for tests
-export { UserData };
+export type { UserData };
 
 export async function createUser(userData: UserData) {
   const supabase = createServerSupabaseAdminClient();
