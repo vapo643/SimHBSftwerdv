@@ -2,9 +2,10 @@
  * Use Case: Aprovar Proposta
  *
  * Orquestra a aprovação de uma proposta por um analista
+ * Refatorado para usar Unit of Work - Garantia de Atomicidade
  */
 
-import { IProposalRepository } from '../domain/IProposalRepository';
+import { IUnitOfWork } from '../../shared/domain/IUnitOfWork';
 
 export interface ApproveProposalDTO {
   proposalId: string;
@@ -13,20 +14,22 @@ export interface ApproveProposalDTO {
 }
 
 export class ApproveProposalUseCase {
-  constructor(private proposalRepository: IProposalRepository) {}
+  constructor(private unitOfWork: IUnitOfWork) {}
 
   async execute(dto: ApproveProposalDTO): Promise<void> {
-    // Buscar agregado
-    const proposal = await this.proposalRepository.findById(dto.proposalId);
+    return await this.unitOfWork.executeInTransaction(async () => {
+      // Buscar agregado usando repositório transacional
+      const proposal = await this.unitOfWork.proposals.findById(dto.proposalId);
 
-    if (!proposal) {
-      throw new Error(`Proposta ${dto.proposalId} não encontrada`);
-    }
+      if (!proposal) {
+        throw new Error(`Proposta ${dto.proposalId} não encontrada`);
+      }
 
-    // Executar comando de negócio no agregado
-    proposal.approve(dto.analistaId, dto.observacoes);
+      // Executar comando de negócio no agregado
+      proposal.approve(dto.analistaId, dto.observacoes);
 
-    // Persistir mudanças
-    await this.proposalRepository.save(proposal);
+      // Persistir mudanças dentro da transação
+      await this.unitOfWork.proposals.save(proposal);
+    });
   }
 }
