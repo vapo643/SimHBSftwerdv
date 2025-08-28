@@ -4,6 +4,7 @@ import { GenerateCcbUseCase } from '../modules/ccb/application/GenerateCcbUseCas
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
 import { getRedisConnectionConfig } from '../lib/redis-config';
 import { dlqManager } from '../lib/dead-letter-queue';
+import { metricsService } from '../lib/metricsService';
 // ClickSign service will be imported when needed
 
 interface ProposalApprovedPayload {
@@ -33,10 +34,8 @@ export class FormalizationWorker {
       {
         connection: this.redisConnection,
         concurrency: 5, // Processar até 5 propostas simultaneamente
-        // Job retry configuration - must match queue defaults
-        settings: {
-          retryProcessDelay: 2000, // 2 seconds between retries
-        },
+        // Note: Retry configuration is handled by queue options
+        // Job retry delays are controlled by the 'backoff' configuration in queue defaultJobOptions
       }
     );
 
@@ -121,25 +120,60 @@ export class FormalizationWorker {
     // Set up DLQ handler for this worker
     dlqManager.setupFailedJobHandler(this.worker, 'formalization-queue');
     
-    this.worker.on('completed', (job) => {
-      logger.info('Formalization job completed', {
+    // METRICS INTEGRATION - Track job lifecycle events
+    this.worker.on('active', (job) => {
+      // Record active job metric
+      metricsService.incrementJobCounter('formalization-queue', 'active', job.id);
+      
+      logger.info('Formalization job started', {
         jobId: job.id,
         proposalId: job.data.aggregateId,
       });
     });
+    
+    this.worker.on('completed', (job) => {
+      // Calculate processing duration
+      const processingTime = job.processedOn && job.timestamp 
+        ? job.processedOn - job.timestamp 
+        : undefined;
+      
+      // Record completion metrics
+      metricsService.incrementJobCounter('formalization-queue', 'completed', job.id);
+      if (processingTime) {
+        metricsService.recordJobDuration('formalization-queue', processingTime, job.id);
+      }
+      
+      logger.info('Formalization job completed', {
+        jobId: job.id,
+        proposalId: job.data.aggregateId,
+        durationMs: processingTime,
+      });
+    });
 
-    // Note: 'failed' event is now handled by DLQ manager
-    // Keeping this for additional worker-specific logging if needed
+    // Note: 'failed' event is handled by DLQ manager for permanent failures
+    // This handler captures all failures (including retryable ones)
     this.worker.on('failed', (job, error) => {
+      // Record failure metric (includes retryable failures)
+      metricsService.incrementJobCounter('formalization-queue', 'failed', job?.id);
+      
+      // Check if this is a permanent failure that will go to DLQ
+      if (dlqManager.shouldMoveToDeadLetter(job)) {
+        metricsService.recordDeadLetterJob('formalization-queue', error.message, job?.id);
+      }
+      
       logger.error('Formalization job failed (worker-level logging)', {
         jobId: job?.id,
         proposalId: job?.data.aggregateId,
         error: error.message,
         attempts: job?.attemptsMade,
+        isPermanentFailure: dlqManager.shouldMoveToDeadLetter(job),
       });
     });
 
     this.worker.on('stalled', (jobId) => {
+      // Record stalled job metric
+      metricsService.incrementJobCounter('formalization-queue', 'stalled', jobId);
+      
       logger.warn('Formalization job stalled', { jobId });
     });
   }

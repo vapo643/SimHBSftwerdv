@@ -6,6 +6,8 @@
 
 import { Router, Request, Response } from 'express';
 import { monitoringService } from '../services/monitoringService.js';
+import { metricsService } from '../lib/metricsService';
+import { checkQueuesHealth } from '../lib/queues';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
 const router = Router();
@@ -109,6 +111,150 @@ router.get('/report', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Error generating monitoring report',
+    });
+  }
+});
+
+/**
+ * GET /api/monitoring/queues/metrics
+ * Get comprehensive BullMQ queue metrics with job counters, duration tracking, and DLQ status
+ * BANKING-GRADE observability endpoint for "Operação Rede de Segurança"
+ */
+router.get('/queues/metrics', async (req: Request, res: Response) => {
+  try {
+    const queueMetrics = metricsService.getAllMetrics();
+    const serviceHealth = metricsService.getServiceHealth();
+    const queuesHealth = await checkQueuesHealth();
+    
+    const response = {
+      success: true,
+      data: {
+        metricsService: {
+          status: serviceHealth.status,
+          isInitialized: serviceHealth.isInitialized,
+          totalQueuesMonitored: queueMetrics.length,
+          lastUpdated: new Date().toISOString(),
+        },
+        queues: queueMetrics.map(metrics => ({
+          queueName: metrics.queueName,
+          counters: {
+            totalJobs: metrics.totalJobs,
+            activeJobs: metrics.activeJobs,
+            completedJobs: metrics.completedJobs,
+            failedJobs: metrics.failedJobs,
+          },
+          performance: {
+            avgProcessingTime: Math.round(metrics.avgProcessingTime),
+            failureRate: parseFloat(metrics.failureRate.toFixed(2)),
+          },
+          reliability: {
+            dlqSize: metrics.dlqSize,
+            lastUpdated: metrics.lastUpdated,
+          },
+          alerts: {
+            highFailureRate: metrics.failureRate > 5, // 5% threshold
+            slowProcessing: metrics.avgProcessingTime > 30000, // 30s threshold
+            highDLQSize: metrics.dlqSize >= 10, // 10 jobs threshold
+          }
+        })),
+        systemHealth: queuesHealth,
+        timestamp: new Date().toISOString(),
+      }
+    };
+    
+    res.json(response);
+  } catch (error: any) {
+    console.error('[MONITORING] Error fetching queue metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Error fetching queue metrics',
+    });
+  }
+});
+
+/**
+ * GET /api/monitoring/queues/:queueName/metrics
+ * Get detailed metrics for a specific queue
+ */
+router.get('/queues/:queueName/metrics', async (req: Request, res: Response) => {
+  try {
+    const { queueName } = req.params;
+    const queueMetrics = metricsService.getQueueMetrics(queueName);
+    
+    if (!queueMetrics) {
+      return res.status(404).json({
+        success: false,
+        error: `Queue '${queueName}' not found or not being monitored`,
+      });
+    }
+    
+    const response = {
+      success: true,
+      data: {
+        queueName: queueMetrics.queueName,
+        counters: {
+          totalJobs: queueMetrics.totalJobs,
+          activeJobs: queueMetrics.activeJobs,
+          completedJobs: queueMetrics.completedJobs,
+          failedJobs: queueMetrics.failedJobs,
+        },
+        performance: {
+          avgProcessingTime: Math.round(queueMetrics.avgProcessingTime),
+          failureRate: parseFloat(queueMetrics.failureRate.toFixed(2)),
+        },
+        reliability: {
+          dlqSize: queueMetrics.dlqSize,
+          lastUpdated: queueMetrics.lastUpdated,
+        },
+        health: {
+          status: queueMetrics.failureRate > 5 ? 'warning' : 'healthy',
+          alerts: {
+            highFailureRate: queueMetrics.failureRate > 5,
+            slowProcessing: queueMetrics.avgProcessingTime > 30000,
+            highDLQSize: queueMetrics.dlqSize >= 10,
+          }
+        },
+        timestamp: new Date().toISOString(),
+      }
+    };
+    
+    res.json(response);
+  } catch (error: any) {
+    console.error('[MONITORING] Error fetching queue metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Error fetching queue metrics',
+    });
+  }
+});
+
+/**
+ * POST /api/monitoring/queues/reset-metrics
+ * Reset metrics for a specific queue (admin only)
+ */
+router.post('/queues/reset-metrics', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { queueName } = req.body;
+    
+    if (!queueName) {
+      return res.status(400).json({
+        success: false,
+        error: 'queueName is required',
+      });
+    }
+    
+    metricsService.resetMetrics(queueName);
+    
+    res.json({
+      success: true,
+      message: `Metrics reset for queue '${queueName}'`,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('[MONITORING] Error resetting metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Error resetting queue metrics',
     });
   }
 });

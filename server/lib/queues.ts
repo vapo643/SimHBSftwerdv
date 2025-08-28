@@ -12,6 +12,7 @@
 import { Queue, QueueOptions, Worker } from 'bullmq';
 import { getRedisConnectionConfig } from './redis-config';
 import { dlqManager } from './dead-letter-queue';
+import { metricsService } from './metricsService';
 
 // Use centralized Redis configuration
 const redisConnection = getRedisConnectionConfig();
@@ -62,7 +63,7 @@ export const deadLetterQueue = new Queue('dead-letter-queue', {
   },
 });
 
-// Queue event logging
+// Queue event logging (keeping existing events, metrics handled by workers)
 pdfProcessingQueue.on('waiting', (job) => {
   console.log(`[QUEUE:PDF] 📋 Job ${job.id} waiting in queue`);
 });
@@ -70,6 +71,10 @@ pdfProcessingQueue.on('waiting', (job) => {
 boletoSyncQueue.on('waiting', (job) => {
   console.log(`[QUEUE:BOLETO] 📋 Job ${job.id} waiting in queue`);
 });
+
+// Note: Comprehensive metrics integration is handled at the Worker level
+// This provides better precision and access to processing context
+// See FormalizationWorker.ts for metrics integration pattern
 
 // Export all queues
 export const queues = {
@@ -118,7 +123,7 @@ export function setupStaticQueueDLQHandlers() {
   console.log('[QUEUE] Static queue DLQ handlers setup helper available');
 }
 
-// Helper function to create a worker with DLQ support
+// Helper function to create a worker with DLQ support and metrics integration
 export function createWorkerWithDLQ(
   queueName: string,
   processor: (job: any) => Promise<any>,
