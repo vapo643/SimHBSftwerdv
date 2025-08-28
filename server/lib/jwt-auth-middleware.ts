@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 // Import dinâmico para usar função correta com Service Role Key
 import { securityLogger, SecurityEventType, getClientIP } from './security-logger';
+// Redis client for distributed token cache
+import { createRedisClient } from './redis-config';
 // Importação direta da interface personalizada
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -30,32 +32,17 @@ const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 // User token tracking for invalidation on account deactivation
 const userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
 
-// HOTFIX: Token validation cache to prevent race conditions in concurrent requests
+// Redis client for distributed token validation cache
+const redisClient = createRedisClient('jwt-token-cache');
+const CACHE_TTL_SECONDS = 300; // 5 minutes in seconds for Redis TTL
+const validationSemaphore = new Map<string, Promise<any>>(); // Prevent concurrent validation of same token
+
+// Token cache entry interface for serialization
 interface TokenCacheEntry {
   userId: string;
   userEmail: string;
   timestamp: number;
-  ttl: number; // 5 minutes
 }
-
-const tokenValidationCache = new Map<string, TokenCacheEntry>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const validationSemaphore = new Map<string, Promise<any>>(); // Prevent concurrent validation of same token
-
-// Helper function to check cache validity
-function isTokenCacheValid(entry: TokenCacheEntry): boolean {
-  return Date.now() - entry.timestamp < CACHE_TTL;
-}
-
-// Cache cleanup every 10 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [token, entry] of tokenValidationCache.entries()) {
-    if (now - entry.timestamp > CACHE_TTL) {
-      tokenValidationCache.delete(token);
-    }
-  }
-}, 10 * 60 * 1000);
 
 // Limpar blacklist periodicamente
 setInterval(() => {
@@ -205,14 +192,23 @@ export async function jwtAuthMiddleware(
 
     console.log('[JWT DEBUG] Auto-detected token type:', tokenType);
 
-    // HOTFIX: Check cache first to prevent race conditions
-    const cachedEntry = tokenValidationCache.get(token);
-    if (cachedEntry && isTokenCacheValid(cachedEntry)) {
-      console.log('[JWT DEBUG] Using cached token validation - avoiding race condition');
-      userId = cachedEntry.userId;
-      userEmail = cachedEntry.userEmail;
-      data = { user: { id: userId, email: userEmail } };
-      error = null;
+    // Redis-based cache check to prevent race conditions
+    try {
+      const cachedEntryJson = await redisClient.get(`token:${token}`);
+      if (cachedEntryJson) {
+        const cachedEntry: TokenCacheEntry = JSON.parse(cachedEntryJson);
+        console.log('[JWT DEBUG] Using Redis cached token validation - avoiding race condition');
+        userId = cachedEntry.userId;
+        userEmail = cachedEntry.userEmail;
+        data = { user: { id: userId, email: userEmail } };
+        error = null;
+      }
+    } catch (redisError) {
+      console.warn('[JWT DEBUG] Redis cache check failed, proceeding without cache:', redisError);
+    }
+
+    if (userId && userEmail) {
+      // Token found in cache, skip validation
     } else if (validationSemaphore.has(token)) {
       // Wait for ongoing validation of the same token
       console.log('[JWT DEBUG] Token validation in progress - waiting...');
@@ -243,14 +239,20 @@ export async function jwtAuthMiddleware(
             error: supabaseResult.error
           };
 
-          // Cache successful validation
+          // Cache successful validation in Redis
           if (!supabaseResult.error && supabaseResult.data?.user) {
-            tokenValidationCache.set(token, {
-              userId: result.userId!,
-              userEmail: result.userEmail,
-              timestamp: Date.now(),
-              ttl: CACHE_TTL
-            });
+            try {
+              const cacheEntry: TokenCacheEntry = {
+                userId: result.userId!,
+                userEmail: result.userEmail,
+                timestamp: Date.now()
+              };
+              await redisClient.setex(`token:${token}`, CACHE_TTL_SECONDS, JSON.stringify(cacheEntry));
+              console.log('[JWT DEBUG] Token cached in Redis successfully');
+            } catch (redisError) {
+              console.warn('[JWT DEBUG] Failed to cache token in Redis:', redisError);
+              // Continue without cache - not critical
+            }
           }
 
           return result;

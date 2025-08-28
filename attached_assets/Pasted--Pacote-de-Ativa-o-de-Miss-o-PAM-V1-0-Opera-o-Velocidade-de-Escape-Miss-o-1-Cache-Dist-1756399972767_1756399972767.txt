@@ -1,0 +1,47 @@
+### Pacote de Ativação de Missão (PAM) V1.0 - Operação "Velocidade de Escape" / Missão 1: Cache Distribuído
+
+* **Sumário da Missão (O Quê):** Refatorar o *hotfix* de cache de token local implementado no *middleware* JWT (`jwt-auth-middleware.ts`) para utilizar uma instância de Redis centralizada e distribuída.
+* **Intenção Estratégica (O Porquê):** Eliminar o risco P0 de instabilidade causado pelo cache em memória local. Um cache distribuído (Redis) garante a consistência do estado dos tokens através de múltiplos processos ou reinicializações do servidor, resolvendo a causa raiz da *race condition* de forma robusta e escalável.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de backend a substituir uma solução tática de curto prazo por uma solução arquitetural estratégica e de longo prazo.
+
+---
+
+**IMPLEMENTAR (Plano de Implementação):**
+Execute a seguinte sequência de ações.
+
+**CURRENT STATE:**
+O ficheiro `server/lib/jwt-auth-middleware.ts` contém uma implementação de cache de token em memória (`tokenCache`) para mitigar *race conditions*.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A implementação do cache em memória local é completamente removida.
+2.  O *middleware* é refatorado para interagir com o nosso serviço de Redis centralizado (`server/lib/redis-config.ts`).
+3.  A lógica de `get`, `set` e `delete` para o cache de tokens é agora executada contra a instância do Redis.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**Passo 1: Integrar o Cliente Redis no Middleware**
+1.1. Abra o ficheiro `server/lib/jwt-auth-middleware.ts`.
+1.2. Importe o cliente Redis configurado a partir do nosso módulo centralizado.
+1.3. Remova a declaração da variável `tokenCache` em memória.
+
+**Passo 2: Refatorar a Lógica de Cache para Usar Redis**
+2.1. Substitua as operações de `tokenCache.get(token)` por chamadas assíncronas ao Redis, como `await redisClient.get(token)`.
+2.2. Substitua as operações de `tokenCache.set(token, user, ...)` por chamadas assíncronas ao Redis, como `await redisClient.set(token, JSON.stringify(user), 'EX', 300)` (definindo um tempo de expiração de 5 minutos, por exemplo).
+2.3. Assegure-se de que os dados do utilizador sejam serializados (com `JSON.stringify`) antes de serem guardados e desserializados (com `JSON.parse`) após serem recuperados do Redis.
+
+**Passo 3: Validação Final**
+3.1. Apresente o código refatorado do `jwt-auth-middleware.ts` mostrando a nova lógica de cache baseada em Redis.
+3.2. Execute `get_latest_lsp_diagnostics` para confirmar que não há erros de compilação.
+
+---
+### **PROTOCOLO DE DIVULGAÇÃO TOTAL (PDT) V1.0 (MANDATÓRIO)**
+Liste a totalidade das suas descobertas, riscos e recomendações.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS (LISTA COMPLETA):**
+    * **Risco 1 (Baixo):** A gestão de serialização/desserialização de objetos JSON no Redis deve ser tratada corretamente para evitar erros de *parsing*.
+* **DECISÕES TÉCNICAS ASSUMIDAS (LISTA COMPLETA):**
+    * A conexão com o Redis utilizará o módulo de configuração central já existente, que foi validado na "Operação Escudo de Produção".
+* **VALIDAÇÃO PENDENTE (LISTA COMPLETA):**
+    * Um novo teste de carga será necessário após esta missão para validar a eliminação da *race condition* e a melhoria na latência P95.
