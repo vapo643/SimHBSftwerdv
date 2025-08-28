@@ -10,15 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStoresByPartner } from '@/hooks/queries/useUserFormData';
 import { api } from '@/lib/apiClient';
-import {
-  Building2,
-  Store,
-  ArrowLeft,
-  Plus,
-  MapPin,
-  Activity,
-  BarChart3,
-} from 'lucide-react';
+import { Building2, Store, ArrowLeft, Plus, MapPin, Activity, BarChart3 } from 'lucide-react';
 
 interface Partner {
   id: number;
