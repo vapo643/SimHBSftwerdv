@@ -19,6 +19,12 @@ import { registerRoutes } from './routes';
   ccbSyncService.startAutoSync(6); // Poll every 6 hours as safety net
   log('🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours');
 
+  // Initialize Formalization Worker for async event processing
+  const { FormalizationWorker } = await import('./workers/formalizationWorker');
+  const formalizationWorker = new FormalizationWorker();
+  await formalizationWorker.start();
+  log('⚡ Formalization Worker initialized - Processing async events');
+
   // Initialize Sistema de Alertas Proativos (PAM V1.0)
   const { alertasProativosService } = await import('./services/alertasProativosService');
 

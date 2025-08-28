@@ -13,6 +13,7 @@ import {
   jsonb,
   index,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
@@ -298,6 +299,16 @@ export const propostas = pgTable('propostas', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
   deletedAt: timestamp('deleted_at'), // Soft delete column
+}, (table) => {
+  return {
+    // Índices de performance crítica para queries de listagem
+    statusPerformanceIdx: index('idx_propostas_status_performance')
+      .on(table.status, table.createdAt.desc(), table.deletedAt)
+      .where(sql`deleted_at IS NULL`),
+    cpfStatusIdx: index('idx_propostas_cpf_status')
+      .on(table.clienteCpf, table.status)
+      .where(sql`deleted_at IS NULL`),
+  };
 });
 
 // Tabelas Comerciais (estrutura N:N)

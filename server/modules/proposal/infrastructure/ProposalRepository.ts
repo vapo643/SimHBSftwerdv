@@ -11,6 +11,7 @@ import { propostas, ccbs, boletos } from '@shared/schema';
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposalRepository';
 import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
+import { EventDispatcher } from '../../../infrastructure/events/EventDispatcher';
 
 export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
@@ -79,10 +80,12 @@ export class ProposalRepository implements IProposalRepository {
 
     // Processar eventos de domínio
     const events = proposal.getUncommittedEvents();
+    const eventDispatcher = EventDispatcher.getInstance();
+    
     for (const event of events) {
-      // Aqui poderíamos publicar os eventos para um event bus
-      // Por enquanto, apenas logamos
-      console.log(`[DOMAIN EVENT] ${event.eventType} for aggregate ${event.aggregateId}`);
+      // Despachar evento para a fila assíncrona
+      await eventDispatcher.dispatch(event);
+      console.log(`[DOMAIN EVENT DISPATCHED] ${event.eventType} for aggregate ${event.aggregateId}`);
     }
     proposal.markEventsAsCommitted();
   }
