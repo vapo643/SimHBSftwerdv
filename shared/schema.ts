@@ -1151,6 +1151,119 @@ export const boletos = pgTable('boletos', {
 });
 
 // ========================================================================
+// SUPABASE NATIVE QUEUE SYSTEM - REPLACEMENT FOR REDIS/BULLMQ
+// ========================================================================
+
+// Enums para o sistema de filas
+export const jobStatusEnum = pgEnum('job_status', [
+  'waiting',    // Job aguardando processamento
+  'active',     // Job sendo processado
+  'completed',  // Job concluído com sucesso
+  'failed',     // Job falhado (pode ser reprocessado)
+  'delayed',    // Job agendado para o futuro
+  'stalled',    // Job travado (timeout)
+]);
+
+export const queueNameEnum = pgEnum('queue_name', [
+  'pdf-processing',
+  'boleto-sync', 
+  'document-processing',
+  'notifications',
+  'formalization-queue',
+  'dead-letter-queue',
+]);
+
+// Tabela principal de jobs (substitui Redis/BullMQ)
+export const supabaseJobs = pgTable('supabase_jobs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  
+  // Identificação da fila e job
+  queueName: text('queue_name').notNull(), // Nome da fila
+  jobName: text('job_name').notNull(),     // Nome do tipo de job
+  
+  // Dados do job
+  data: jsonb('data').notNull(),           // Payload do job
+  options: jsonb('options'),               // Opções de configuração
+  
+  // Status e controle
+  status: text('status').notNull().default('waiting'),
+  progress: integer('progress').default(0).notNull(),
+  
+  // Controle de tentativas
+  attempts: integer('attempts').default(0).notNull(),
+  maxAttempts: integer('max_attempts').default(3).notNull(),
+  
+  // Resultado e erro
+  result: jsonb('result'),                 // Resultado do processamento
+  error: text('error'),                    // Mensagem de erro
+  errorStack: text('error_stack'),         // Stack trace completo
+  
+  // Timestamps para controle
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  processedAt: timestamp('processed_at'),  // Quando começou a processar
+  completedAt: timestamp('completed_at'),  // Quando terminou
+  scheduledFor: timestamp('scheduled_for'), // Para jobs agendados
+  
+  // Metadados para auditoria
+  correlationId: text('correlation_id'),   // Para rastreamento
+  priority: integer('priority').default(0).notNull(), // Prioridade (maior = mais prioritário)
+  
+  // Informações do processador
+  processedBy: text('processed_by'),       // Identificação do worker
+  
+  // Índices para performance
+}, (table) => ({
+  // Índice composto para busca eficiente de jobs aguardando
+  queueStatusIdx: index('queue_status_idx').on(table.queueName, table.status, table.scheduledFor),
+  // Índice para busca por correlation ID
+  correlationIdx: index('correlation_idx').on(table.correlationId),
+  // Índice para limpeza por data
+  createdAtIdx: index('created_at_idx').on(table.createdAt),
+}));
+
+// Tabela Dead Letter Queue - Jobs que falharam permanentemente
+export const deadLetterJobs = pgTable('dead_letter_jobs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  
+  // Informações do job original
+  originalJobId: uuid('original_job_id'),
+  originalQueueName: text('original_queue_name').notNull(),
+  originalJobName: text('original_job_name').notNull(),
+  originalData: jsonb('original_data').notNull(),
+  
+  // Contexto da falha
+  failureReason: text('failure_reason').notNull(),
+  failureStack: text('failure_stack'),
+  attemptsMade: integer('attempts_made').notNull(),
+  maxAttempts: integer('max_attempts').notNull(),
+  
+  // Timeline da falha
+  originalCreatedAt: timestamp('original_created_at').notNull(),
+  failedAt: timestamp('failed_at').defaultNow().notNull(),
+  processingDuration: integer('processing_duration'), // Em milissegundos
+  
+  // Metadados para investigação
+  environment: text('environment').default('development'),
+  serverInstance: text('server_instance'),
+  correlationId: text('correlation_id'),
+  metadata: jsonb('metadata'), // Dados adicionais para debug
+  
+  // Status da investigação
+  investigated: boolean('investigated').default(false),
+  resolution: text('resolution'), // Como foi resolvido
+  resolvedBy: text('resolved_by'),
+  resolvedAt: timestamp('resolved_at'),
+  
+}, (table) => ({
+  // Índice para busca por fila original
+  originalQueueIdx: index('original_queue_idx').on(table.originalQueueName),
+  // Índice para jobs não investigados
+  investigatedIdx: index('investigated_idx').on(table.investigated),
+  // Índice temporal para cleanup
+  failedAtIdx: index('failed_at_idx').on(table.failedAt),
+}));
+
+// ========================================================================
 // SCHEMAS ZOD PARA VALIDAÇÃO DAS NOVAS ENTIDADES
 // ========================================================================
 
@@ -1230,3 +1343,33 @@ export type InsertRegraAlerta = z.infer<typeof insertRegraAlertaSchema>;
 export type RegraAlerta = typeof regrasAlertas.$inferSelect;
 export type InsertHistoricoExecucaoAlerta = z.infer<typeof insertHistoricoExecucaoAlertaSchema>;
 export type HistoricoExecucaoAlerta = typeof historicoExecucoesAlertas.$inferSelect;
+
+// ========================================================================
+// SUPABASE QUEUE SYSTEM TYPES
+// ========================================================================
+
+// Schemas de validação para sistema de filas
+export const insertSupabaseJobSchema = createInsertSchema(supabaseJobs).omit({
+  id: true,
+  createdAt: true,
+  processedAt: true,
+  completedAt: true,
+});
+
+export const updateSupabaseJobSchema = createInsertSchema(supabaseJobs).partial().omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDeadLetterJobSchema = createInsertSchema(deadLetterJobs).omit({
+  id: true,
+  failedAt: true,
+});
+
+// Types para sistema de filas
+export type SupabaseJob = typeof supabaseJobs.$inferSelect;
+export type InsertSupabaseJob = z.infer<typeof insertSupabaseJobSchema>;
+export type UpdateSupabaseJob = z.infer<typeof updateSupabaseJobSchema>;
+
+export type DeadLetterJob = typeof deadLetterJobs.$inferSelect;
+export type InsertDeadLetterJob = z.infer<typeof insertDeadLetterJobSchema>;

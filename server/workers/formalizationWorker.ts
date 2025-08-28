@@ -1,9 +1,7 @@
-import { Worker, Job } from 'bullmq';
+import { createWorkerWithDLQ, SupabaseWorker, SupabaseJob } from '../lib/supabase-queues';
 import logger from '../lib/logger';
 import { GenerateCcbUseCase } from '../modules/ccb/application/GenerateCcbUseCase';
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
-import { getRedisConnectionConfig } from '../lib/redis-config';
-import { dlqManager } from '../lib/dead-letter-queue';
 import { metricsService } from '../lib/metricsService';
 // ClickSign service will be imported when needed
 
@@ -19,41 +17,35 @@ interface ProposalApprovedPayload {
 }
 
 export class FormalizationWorker {
-  private worker: Worker | null = null;
-  private redisConnection: any;
-  private isRedisAvailable: boolean = false;
+  private worker: SupabaseWorker | null = null;
+  private isQueueAvailable: boolean = false;
 
   constructor() {
     try {
-      // Use centralized Redis configuration
-      this.redisConnection = getRedisConnectionConfig();
-
-      this.worker = new Worker(
+      // Create Supabase-native worker (no Redis dependency)
+      this.worker = createWorkerWithDLQ(
         'formalization-queue',
-        async (job: Job<ProposalApprovedPayload>) => {
+        async (job: SupabaseJob<ProposalApprovedPayload>) => {
           return this.processFormalization(job);
         },
         {
-          connection: this.redisConnection,
           concurrency: 5, // Processar até 5 propostas simultaneamente
-          // Note: Retry configuration is handled by queue options
-          // Job retry delays are controlled by the 'backoff' configuration in queue defaultJobOptions
         }
       );
 
-      this.isRedisAvailable = true;
+      this.isQueueAvailable = true;
       this.setupEventHandlers();
-      logger.info('📊 [FormalizationWorker] Redis connection established - async processing enabled');
+      logger.info('📊 [FormalizationWorker] Supabase Queue connected - async processing enabled');
     } catch (error) {
-      this.isRedisAvailable = false;
-      logger.warn('⚠️ [FormalizationWorker] Redis unavailable - async processing disabled', {
+      this.isQueueAvailable = false;
+      logger.warn('⚠️ [FormalizationWorker] Queue unavailable - async processing disabled', {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
       logger.warn('💡 [FormalizationWorker] Events will be processed synchronously (development mode)');
     }
   }
 
-  private async processFormalization(job: Job<ProposalApprovedPayload>): Promise<void> {
+  private async processFormalization(job: SupabaseJob<ProposalApprovedPayload>): Promise<void> {
     const { aggregateId: proposalId } = job.data;
     const startTime = Date.now();
 
@@ -133,8 +125,7 @@ export class FormalizationWorker {
       return;
     }
 
-    // Set up DLQ handler for this worker
-    dlqManager.setupFailedJobHandler(this.worker, 'formalization-queue');
+    // DLQ functionality is built-in to SupabaseWorker
     
     // METRICS INTEGRATION - Track job lifecycle events
     this.worker.on('active', (job) => {
@@ -172,17 +163,14 @@ export class FormalizationWorker {
       // Record failure metric (includes retryable failures)
       metricsService.incrementJobCounter('formalization-queue', 'failed', job?.id);
       
-      // Check if this is a permanent failure that will go to DLQ
-      if (dlqManager.shouldMoveToDeadLetter(job)) {
-        metricsService.recordDeadLetterJob('formalization-queue', error.message, job?.id);
-      }
+      // Note: Dead Letter Queue functionality is built-in to SupabaseWorker
       
       logger.error('Formalization job failed (worker-level logging)', {
         jobId: job?.id,
         proposalId: job?.data.aggregateId,
         error: error.message,
         attempts: job?.attemptsMade,
-        isPermanentFailure: dlqManager.shouldMoveToDeadLetter(job),
+        isPermanentFailure: job?.attemptsMade >= (job?.opts.attempts || 3),
       });
     });
 
@@ -195,8 +183,8 @@ export class FormalizationWorker {
   }
 
   public async start(): Promise<void> {
-    if (!this.isRedisAvailable) {
-      logger.warn('⚠️ [FormalizationWorker] Start called but Redis unavailable - no async processing');
+    if (!this.isQueueAvailable) {
+      logger.warn('⚠️ [FormalizationWorker] Start called but Queue unavailable - no async processing');
       return;
     }
     // Worker já está rodando quando criado no constructor

@@ -1,17 +1,13 @@
-import { Queue } from 'bullmq';
+import { createQueue, SupabaseQueue } from '../../lib/supabase-queues';
 import { DomainEvent } from '../../modules/shared/domain/events/DomainEvent';
 import logger from '../../lib/logger';
-import { getRedisConnectionConfig } from '../../lib/redis-config';
-import { dlqManager } from '../../lib/dead-letter-queue';
 
 export class EventDispatcher {
   private static instance: EventDispatcher;
-  private queues: Map<string, Queue> = new Map();
-  private redisConnection: any;
+  private queues: Map<string, SupabaseQueue> = new Map();
 
   private constructor() {
-    // Use centralized Redis configuration
-    this.redisConnection = getRedisConnectionConfig();
+    // No Redis configuration needed - using Supabase PostgreSQL queues
   }
 
   public static getInstance(): EventDispatcher {
@@ -21,23 +17,21 @@ export class EventDispatcher {
     return EventDispatcher.instance;
   }
 
-  private getQueue(queueName: string): Queue {
+  private getQueue(queueName: string): SupabaseQueue {
     if (!this.queues.has(queueName)) {
-      const queue = new Queue(queueName, {
-        connection: this.redisConnection,
+      const queue = createQueue(queueName, {
         defaultJobOptions: {
           attempts: 3,
           backoff: {
             type: 'exponential',
             delay: 2000,
           },
-          removeOnComplete: true,
-          removeOnFail: false,
+          removeOnComplete: 100, // Keep last 100 completed jobs for audit
+          removeOnFail: false,   // Keep failed jobs for investigation
         },
       });
       
-      // Note: DLQ handlers are set up on Workers, not Queues
-      // Workers will register their own DLQ handlers
+      // Note: DLQ functionality is built-in to Supabase Queue system
       
       this.queues.set(queueName, queue);
     }
@@ -56,7 +50,7 @@ export class EventDispatcher {
         occurredAt: event.occurredAt,
       });
 
-      logger.info('Event dispatched', {
+      logger.info('Event dispatched to Supabase Queue', {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
         queue: queueName,
