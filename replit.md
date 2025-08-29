@@ -112,35 +112,6 @@ Error handling: Create structured documentation for automatic consultation durin
   - For explicitamente instruído a pesquisar "melhores práticas", "alternativas de arquitetura" ou a realizar uma "análise comparativa".
   - Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
 
-### 🚨 PROTOCOLO DE DOCUMENTAÇÃO ARQUITETURAL MANDATÓRIO - FASE DE PLANEJAMENTO 🚨
-
-**[DIRETRIZ CRÍTICA - INEGOCIÁVEL]**  
-**Status:** ESTAMOS NA FASE DE MAPEAMENTO E PLANEJAMENTO ARQUITETURAL  
-**Próxima Fase:** EXECUÇÃO (somente após completar todo planejamento)  
-
-**[PERSONA E FUNÇÃO]**  
-Nesta fase, sou um **Arquiteto Documentador**:
-- **SOU:** Planejador que desenha a planta arquitetural
-- **NÃO SOU:** Executor que constrói ou implementa código
-
-**[DEFINIÇÃO DE ENTREGÁVEIS]**  
-- **Documentação Arquitetural de Planejamento:** Descreve o que **SERÁ FEITO** (estratégias, planos, ADRs)
-- **NÃO Relatórios de Execução:** Que descrevem o que **FOI FEITO**
-
-**[PROTOCOLO MANDATÓRIO DE TRABALHO]**  
-1. **Analisar o PAM:** Processar o Pacote de Ativação de Missão tático
-2. **Localizar/Criar Artefato:** Navegar para `/architecture` e criar arquivo apropriado (`-strategy.md`, `-plan.md`, `ADR-XXX.md`)
-3. **Produzir Documentação:** Preencher com plano, estratégia, diagramas ou design solicitado
-4. **Validar Conclusão:** Confirmar que documento de planejamento foi criado conforme protocolos
-
-**[CRITÉRIO DE SUCESSO]  
-Missão concluída quando artefato de **documentação de planejamento arquitetural** estiver:
-- ✅ Criado e salvo no diretório correto
-- ✅ Em conformidade com requisitos do PAM
-- ✅ Documentando o que SERÁ implementado (não executando)
-
-**LEMBRETE CRÍTICO:** NÃO executar o plano documentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
-
 ### System Architecture
 Simpix is a full-stack TypeScript application built on a modular monolith architecture, emphasizing domain-driven design and banking-grade security.
 

@@ -75,6 +75,8 @@ import { timingNormalizerMiddleware } from './middleware/timing-normalizer';
 import timingSecurityRoutes from './routes/timing-security';
 import documentosRoutes from './routes/documentos';
 import featureFlagService from './services/featureFlagService';
+import { performanceMonitor } from './middleware/performance-monitor';
+import { performance } from 'perf_hooks';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -117,6 +119,9 @@ function parseUserAgent(userAgent: string): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Performance monitoring middleware - PAM V4.0 (applied to all routes)
+  app.use(performanceMonitor);
+
   // Import and mount authentication routes
   const authRouter = (await import('./routes/auth/index.js')).default;
   app.use('/api/auth', authRouter);
@@ -2416,6 +2421,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const queuesAdminRouter = (await import('./routes/admin/queues.js')).default;
   app.use('/', queuesAdminRouter);
 
+  // Performance Monitoring Admin Dashboard - PAM V4.0
+  const performanceAdminRouter = (await import('./routes/admin/performance.js')).default;
+  app.use('/', performanceAdminRouter);
+
   // API endpoint for partners - GET all (public for dropdowns)
   app.get('/api/parceiros', async (req, res) => {
     try {
@@ -3244,21 +3253,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Dashboard stats
+  // Dashboard stats - OPTIMIZED FOR PERFORMANCE (PAM V4.0)
   app.get('/api/dashboard/stats', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    const startTime = performance.now();
     try {
-      const allPropostas = await storage.getPropostas();
-
-      const stats = {
-        totalPropostas: allPropostas.length,
-        aguardandoAnalise: allPropostas.filter((p) => p.status === 'aguardando_analise').length,
-        aprovadas: allPropostas.filter((p) => p.status === 'aprovado').length,
-        valorTotal: allPropostas.reduce((sum, p) => sum + parseFloat(p.valor), 0),
-      };
+      // Import optimizer
+      const { getDashboardStatsOptimized } = await import('./utils/database-optimizer.js');
+      
+      // Use optimized query instead of loading all data
+      const stats = await getDashboardStatsOptimized();
+      
+      const duration = performance.now() - startTime;
+      console.log(`[PERFORMANCE] Dashboard stats completed in ${Math.round(duration)}ms`);
 
       res.json(stats);
     } catch (error) {
-      console.error('Get stats error:', error);
+      const duration = performance.now() - startTime;
+      console.error(`[PERFORMANCE] Dashboard stats failed in ${Math.round(duration)}ms:`, error);
       res.status(500).json({ message: 'Failed to fetch stats' });
     }
   });

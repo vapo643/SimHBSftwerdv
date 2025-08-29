@@ -1,0 +1,30 @@
+Questionário de Alinhamento Estratégico (QAE) - Missão 4: Performance Optimization
+Eixo I: Negócio (O "Valor")
+
+O SLA de P95 < 500ms se aplica a todas as interações de API ou a um conjunto específico de endpoints críticos? Por favor, liste os 3 a 5 endpoints mais importantes cujo tempo de resposta é vital para a experiência do usuário e a operação do negócio (ex: POST /propostas, GET /dashboard, POST /simulacao).
+
+Qual é o impacto de negócio se falharmos em atingir este SLA? (ex: abandono de usuário, perda de conversão, ineficiência operacional).
+
+Eixo II: Usuário (A "Experiência")
+
+Do ponto de vista do usuário, qual é a percepção de "lentidão"? Existem operações específicas que, se demorarem mais de 1 segundo, frustram o usuário e quebram o fluxo de trabalho?
+
+Devemos otimizar para o tempo de resposta do backend (Time to First Byte) ou para o tempo de renderização completa no frontend (Largest Contentful Paint)? Ou ambos são igualmente importantes?
+
+Eixo III: Técnico (O "Como")
+
+Quais ferramentas temos à nossa disposição para realizar o profiling e a análise de performance? (ex: Sentry Performance Monitoring, logs estruturados com duration_ms, EXPLAIN ANALYZE do PostgreSQL, Chrome DevTools).
+
+Onde suspeitamos que estão os maiores gargalos de performance? Nas queries do banco de dados (ex: joins complexos, falta de índices), na lógica de negócio do Node.js (ex: loops síncronos pesados), ou no frontend (ex: renderização de grandes listas, bundles pesados)?
+
+Eixo IV: Risco (As "Armadilhas")
+
+Qual o maior risco durante a otimização de performance? Introduzir um bug ao refatorar uma query complexa, ou implementar um caching excessivamente agressivo que sirva dados obsoletos (stale data) aos usuários?
+
+Qual é a "Definição de Feito"? É simplesmente atingir a meta de P95 < 500ms nos endpoints definidos, ou também inclui a criação de um "Plano de Monitoramento de Performance Contínuo" para o futuro?
+
+Eixo V: Sustentabilidade e Operações (A "Vida Longa")
+
+Como saberemos proativamente se a performance degradar em produção? Devemos configurar alertas automáticos (ex: no Sentry ou outro sistema de APM) se a latência P95 de um endpoint crítico exceder 500ms por mais de 5 minutos?
+
+Precisamos de uma estratégia de caching mais agressiva? Onde no sistema (ex: tabelas comerciais, dados de produtos, perfis de usuário) poderíamos aplicar um cache Redis para aliviar a carga no banco de dados?
