@@ -1,5 +1,5 @@
 # Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management within financial institutions. Its primary goal is to streamline the credit proposal workflow, from creation and payment processing to formalization tracking. Key features include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management.
+Simpix is a full-stack TypeScript application designed to streamline credit management for financial institutions. It provides a comprehensive solution for the credit proposal workflow, encompassing creation, payment processing, and formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to be a leading solution in the credit management market, prioritizing banking-grade security, compliance, and efficient data handling. Its business vision includes automating credit operations, reducing manual errors, enhancing regulatory compliance, and providing a scalable platform for future financial products, targeting significant market penetration in the fintech sector.
 
 # User Preferences
 ### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -152,36 +152,36 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 
 **Backend:**
 - **Technology Stack**: Express.js (RESTful API), TypeScript.
-- **Database & ORM**: PostgreSQL, Drizzle ORM (soft deletes, sequential IDs, audit trails).
+- **Database & ORM**: PostgreSQL, Drizzle ORM (supporting soft deletes, sequential IDs, and audit trails).
 - **Authentication**: Supabase Auth (JWTs, custom RBAC, extended session TTLs).
 - **File Storage**: Supabase Storage (secure private buckets).
-- **Asynchronous Processing**: BullMQ backed by Redis (job queues).
-- **Caching**: Redis-based cache (commercial data tables, 1-hour TTL, cache-aside).
+- **Asynchronous Processing**: BullMQ backed by Redis for job queues.
+- **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
 - **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
-- **Domain-Driven Design**: Full DDD implementation with Value Objects (CPF, Money, Email, PhoneNumber), aggregate roots, and proper domain boundaries.
-- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), anti-fragile RBAC.
-- **CI/CD**: GitHub Actions for CI, Staging Deployment, and Security workflows.
-- **Observability**: Winston (structured logging), Sentry (error tracking), health checks, automated backups.
+- **Domain-Driven Design**: Full DDD implementation with Value Objects (CPF, Money, Email, PhoneNumber), aggregate roots, and defined domain boundaries.
+- **Security**: Implements Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+- **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.
+- **Observability**: Winston (structured logging), Sentry (error tracking), health checks, and automated backups.
 - **Configuration**: Centralized configuration management.
 - **Feature Flags**: Unleash-client integration with fallback mechanisms.
-- **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, audit logging.
+- **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
 - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
-- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, dual-storage strategy.
+- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.
 - **Commercial Tables**: Supports N:N relationships between products and commercial tables, enabling personalized and general rates with hierarchical fallback.
 - **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
-- **Test Infrastructure**: Comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, full integration test coverage.
+- **Test Infrastructure**: Comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
 - **Schema Migration**: Production-ready migration system using Drizzle-Kit (Zero Dissent Time, Expand/Contract pattern, automated rollback, tracking).
 
 # External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
 - **Drizzle ORM**: Type-safe ORM for PostgreSQL.
-- **TanStack Query**: Server state management.
-- **React Hook Form**: Form management.
+- **TanStack Query**: Server state management for frontend.
+- **React Hook Form**: Form management for frontend.
 - **Zod**: Schema validation.
 - **Tailwind CSS**: Styling framework.
 - **shadcn/ui**: React components library.
 - **Wouter**: React router.
-- **Vite**: Build tool.
+- **Vite**: Build tool for frontend.
 - **Express.js**: Backend web framework.
 - **BullMQ**: Job queue management.
 - **Redis**: Caching and job queue backend.

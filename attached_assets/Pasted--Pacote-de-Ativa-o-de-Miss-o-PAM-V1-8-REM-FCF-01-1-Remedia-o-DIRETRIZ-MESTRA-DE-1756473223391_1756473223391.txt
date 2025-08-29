@@ -1,0 +1,37 @@
+### **Pacote de Ativação de Missão (PAM) V1.8 - REM-FCF-01.1 (Remediação)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de código forense nos arquivos `client/src/contexts/ProposalContext.tsx` e `client/src/hooks/useProposalEffects.ts` para identificar a causa exata do loop de renderização infinito ("Maximum update depth exceeded").
+* **Intenção Estratégica (O Porquê):** Antes de corrigir o problema, precisamos entender precisamente onde ele ocorre. Esta análise nos permitirá aplicar uma correção cirúrgica sem introduzir novos efeitos colaterais. O objetivo é dissecar a lógica de estado e efeitos para encontrar a chamada `setState` (ou `dispatch`) que está sendo acionada repetidamente.
+* **Histórico Relevante (Consulta Obrigatória):** O log de erro do navegador aponta diretamente para estes dois arquivos como o epicentro da falha. A sua análise deve focar nos hooks `useEffect` e nas suas interações com o estado do contexto.
+* **Modelo Mental (Como se Encaixa):** Você é um depurador de frontend sênior. Sua tarefa é ler o código, seguir o fluxo de dados e identificar o padrão de anti-design do React que está causando o loop. Você não está corrigindo o código ainda, está apenas diagnosticando com precisão absoluta.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **MÉDIO** - A lógica pode ser complexa, envolvendo múltiplas dependências de `useEffect`. Uma análise superficial pode identificar o `useEffect` errado.
+    * **Contramedida:** A sua resposta deve incluir não apenas o trecho de código problemático, mas uma explicação passo a passo de *por que* ele causa um loop (ex: "O estado X é atualizado, o que muda a dependência Y, o que aciona o efeito novamente").
+
+---
+
+**IMPLEMENTAR:**
+User Story REM-FCF-01.1: Análise Forense do Loop de Renderização no Frontend
+
+**CONTEXT:**
+O frontend da aplicação está inutilizável devido a um erro de "Maximum update depth exceeded" que se origina no `ProposalContext`. Suspeitamos que uma chamada de API falhando (resultando em 403) está acionando um `useEffect` que tenta repetidamente refazer a chamada, criando um loop infinito.
+
+**CURRENT STATE:**
+A aplicação está quebrada. O log de erro do navegador nos deu dois pontos de partida claros: `client/src/contexts/ProposalContext.tsx` (linha 445) e `client/src/hooks/useProposalEffects.ts` (linha 28).
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um **Relatório de Diagnóstico** contendo:
+1.  **Identificação do Código-Fonte:** O(s) trecho(s) de código exato(s) do(s) arquivo(s) `ProposalContext.tsx` e/ou `useProposalEffects.ts` que contêm o `useEffect` e a chamada de `setState` (ou `dispatch`) responsáveis pelo loop.
+2.  **Análise da Causa Raiz:** Uma explicação clara e detalhada, passo a passo, de como o ciclo vicioso ocorre. (Ex: "1. O componente monta e o `useEffect` é acionado. 2. A função `fetchData` é chamada. 3. `fetchData` falha e o estado `error` é atualizado. 4. A atualização do estado `error` causa uma nova renderização. 5. Como `error` está no array de dependências do `useEffect`, o efeito é acionado novamente, voltando ao passo 2.").
+3.  **Plano de Correção Sugerido:** Com base na sua análise, sugira uma ou mais estratégias para quebrar o loop (ex: "Remover a dependência do estado de erro", "Adicionar uma condição para só buscar dados se eles ainda não foram carregados", etc.).
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M3: Core Business Logic
+- **Missão de Emergência Atual:** "Roadmap de Remediação de Falha Crítica de Frontend (REM-FCF-01)"
+---
