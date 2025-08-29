@@ -191,26 +191,14 @@ const Dashboard: React.FC = () => {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   
-  // TODOS os hooks useState devem estar no início - regra fundamental do React
+  // UX-002: TODOS os hooks devem estar no início - regra fundamental do React
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [parceiroFilter, setParceiroFilter] = useState<string>('todos');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
-  // 🚨 CORREÇÃO P0: Early redirect check ANTES dos useQuery hooks
-  useEffect(() => {
-    if (user?.role === 'ANALISTA') {
-      setLocation('/credito/fila');
-      return; // Exit early to prevent further execution
-    }
-  }, [user?.role, setLocation]);
-
-  // Early return se usuário é ANALISTA (antes de qualquer query)
-  if (user?.role === 'ANALISTA') {
-    return <DashboardSkeleton />; // Show loading while redirecting
-  }
-
-  // Fetch real proposals data - only when authenticated and NOT ANALISTA
+  // UX-002: Mover TODOS os useQuery hooks para o topo, antes de qualquer early return
+  // Fetch real proposals data - conditional enabled based on user role
   const {
     data: propostasResponse,
     isLoading,
@@ -232,7 +220,7 @@ const Dashboard: React.FC = () => {
     enabled: user?.role === 'ATENDENTE',
   });
 
-  // Extract propostas - dual-key transformation in apiClient ensures both formats work
+  // UX-002: Extract propostas - cálculo baseado nos dados da query
   const propostas = Array.isArray(propostasResponse?.data)
     ? propostasResponse.data.map((p: any) => ({
         id: p.id,
@@ -254,7 +242,7 @@ const Dashboard: React.FC = () => {
 
   const propostasData = propostas || [];
 
-  // Filtrar propostas - HOOK SEMPRE EXECUTADO ANTES DE QUALQUER EARLY RETURN
+  // UX-002: Mover useMemo para o topo - HOOK SEMPRE EXECUTADO
   const propostasFiltradas = useMemo(() => {
     return Array.isArray(propostasData)
       ? propostasData.filter((proposta) => {
@@ -278,7 +266,7 @@ const Dashboard: React.FC = () => {
       : [];
   }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
 
-  // Estatísticas computadas - HOOK SEMPRE EXECUTADO
+  // UX-002: Mover useMemo para o topo - Estatísticas computadas
   const estatisticas = useMemo(() => {
     const total = propostasData.length;
     const aprovadas = Array.isArray(propostasData)
@@ -342,6 +330,7 @@ const Dashboard: React.FC = () => {
     };
   }, [propostasData]);
 
+  // UX-002: Mover useCallback para o topo
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     if (user?.role === 'ATENDENTE') {
@@ -349,7 +338,19 @@ const Dashboard: React.FC = () => {
     }
   }, [queryClient, user?.role]);
 
-  // AGORA podemos fazer early returns - TODOS OS HOOKS JÁ FORAM EXECUTADOS
+  // UX-002: useEffect também deve estar no início
+  useEffect(() => {
+    if (user?.role === 'ANALISTA') {
+      setLocation('/credito/fila');
+      return; // Exit early to prevent further execution
+    }
+  }, [user?.role, setLocation]);
+
+  // UX-002: AGORA todos os hooks foram executados - Early returns são seguros
+  if (user?.role === 'ANALISTA') {
+    return <DashboardSkeleton />; // Show loading while redirecting
+  }
+
   // Early Return para Loading State
   if (isLoading) {
     return <DashboardSkeleton />;

@@ -1,0 +1,35 @@
+### **Pacote de Ativação de Missão (PAM) V5.5 - UX-002 (Correção de Hooks Condicionais)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Refatorar o componente `dashboard.tsx` para garantir que todas as chamadas de Hooks do React (ex: `useQuery`, `useState`) sejam feitas no nível superior do componente, antes de qualquer lógica condicional ou retorno antecipado (`early return`).
+* **Intenção Estratégica (O Porquê):** Assegurar a estabilidade e a previsibilidade do componente de Dashboard. As "Regras do React" exigem que os Hooks sejam chamados na mesma ordem a cada renderização. A chamada condicional de Hooks é um anti-padrão que leva a bugs intermitentes e difíceis de depurar. Esta correção é uma medida de higiene de código preventiva e crítica.
+* **Histórico Relevante (Consulta Obrigatória):** A sua análise heurística (`GL-002`) identificou este problema como de severidade **CRÍTICA**, pois viola uma regra fundamental da biblioteca React e pode causar falhas inesperadas na aplicação.
+
+---
+
+**IMPLEMENTAR:**
+User Story UX-002: Corrigir Violação das Regras de Hooks no Dashboard
+
+**CONTEXT:**
+Nossa auditoria de UX/UI revelou um problema técnico grave na página de Dashboard: o código está chamando Hooks do React dentro de blocos condicionais (`if`). Isso viola uma das regras mais importantes do React e pode causar comportamentos imprevisíveis, como estados inconsistentes e falhas de renderização. Precisamos refatorar este componente para seguir as melhores práticas e garantir sua estabilidade.
+
+**CURRENT STATE:**
+O arquivo `client/src/pages/dashboard.tsx`, entre as linhas 201 e 223, contém chamadas para `useQuery` e outros Hooks que são executadas após uma verificação condicional (ex: `if (isLoading || isError)`). Isso faz com que o número e a ordem das chamadas de Hooks possam mudar entre as renderizações, o que é proibido pelo React.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Código Refatorado:** O componente `Dashboard` no arquivo `client/src/pages/dashboard.tsx` deve ser reestruturado. Todas as chamadas para `useQuery`, `useState`, `useEffect`, etc., devem ser movidas para o topo do corpo da função, antes de qualquer `if`, `else`, `while`, ou `return`.
+2.  **Funcionalidade Preservada:** O comportamento visual e funcional do Dashboard deve permanecer idêntico. A lógica de exibir estados de `loading` ou `error` deve ser mantida, mas implementada após as chamadas dos Hooks.
+3.  **Compilação Limpa:** O projeto deve compilar sem erros, e o comando `get_latest_lsp_diagnostics` deve retornar sucesso.
+4.  **Prova de Sucesso:** Você deve fornecer o `diff` do arquivo `dashboard.tsx` mostrando claramente que as chamadas de Hooks foram movidas para o topo do componente.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Localizar Componente:** O alvo é o arquivo `client/src/pages/dashboard.tsx`.
+2.  **Identificar Hooks Condicionais:** Analise o componente e identifique todas as chamadas de Hooks que ocorrem dentro de ou após uma declaração condicional.
+3.  **Refatorar o Código:** Mova todas as chamadas de Hooks para o início do componente, garantindo que sejam executadas incondicionalmente em todas as renderizações. Mantenha a lógica condicional para a parte de renderização (o JSX retornado).
+4.  **Validar Compilação:** Execute o comando `get_latest_lsp_diagnostics` para garantir que a refatoração não introduziu erros de tipo ou sintaxe.
+5.  **Validar Funcionalidade:** Descreva como você testaria manualmente a página do Dashboard para garantir que os estados de carregamento, erro e sucesso ainda são exibidos corretamente.
+6.  **Apresentar Evidência:** Forneça o `diff` das alterações feitas no arquivo `dashboard.tsx`.
+
+---
