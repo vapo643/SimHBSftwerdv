@@ -42,13 +42,17 @@ export const helmetConfig = {
 // RATE LIMITING CONFIGURATIONS
 // ====================================
 
-// Rate Limit Geral para toda a API: 100 requisições por 15 minutos
+// Rate Limit Geral para toda a API: Configuração dinâmica por ambiente
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 export const generalApiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Máximo 100 requisições por janela de tempo
+  windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
+  max: isDevelopment ? 10000 : 100, // 10k dev, 100 prod
   message: {
-    error: 'Muitas requisições da API. Tente novamente em 15 minutos.',
-    retryAfter: '15 minutos',
+    error: isDevelopment 
+      ? 'Rate limit atingido (modo desenvolvimento - limites altos)'
+      : 'Muitas requisições da API. Tente novamente em 15 minutos.',
+    retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
   },
   standardHeaders: true, // Retorna rate limit info nos headers `RateLimit-*`
   legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
@@ -58,22 +62,26 @@ export const generalApiLimiter = rateLimit({
   },
   // Handler customizado para quando o limite é excedido
   handler: (req, res) => {
-    log(`⚠️ Rate limit exceeded for IP: ${req.ip} on ${req.path}`);
+    log(`⚠️ Rate limit exceeded for IP: ${req.ip} on ${req.path} (ENV: ${process.env.NODE_ENV})`);
     res.status(429).json({
-      error: 'Muitas requisições da API. Tente novamente em 15 minutos.',
-      retryAfter: '15 minutos',
+      error: isDevelopment 
+        ? 'Rate limit atingido (modo desenvolvimento - limites altos)'
+        : 'Muitas requisições da API. Tente novamente em 15 minutos.',
+      retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
     });
   },
 });
 
-// Rate Limit Otimizado para Rotas de Autenticação: 100 requisições por 15 minutos
+// Rate Limit Otimizado para Rotas de Autenticação: Configuração dinâmica por ambiente
 // PAM V1.0 - Operação Portão de Aço: Otimizado para múltiplos usuários concorrentes
 export const authApiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Máximo 100 tentativas de login por janela de tempo (otimizado para produção)
+  windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
+  max: isDevelopment ? 1000 : 100, // 1000 dev, 100 prod
   message: {
-    error: 'Limite de tentativas de login atingido. Tente novamente em 15 minutos.',
-    retryAfter: '15 minutos',
+    error: isDevelopment
+      ? 'Rate limit auth atingido (modo desenvolvimento)'
+      : 'Limite de tentativas de login atingido. Tente novamente em 15 minutos.',
+    retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -85,10 +93,13 @@ export const authApiLimiter = rateLimit({
   },
   handler: (req, res) => {
     const email = req.body?.email;
-    log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''} (100 req/15min limit)`);
+    const limit = isDevelopment ? 1000 : 100;
+    log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''} (${limit} req limit) ENV: ${process.env.NODE_ENV}`);
     res.status(429).json({
-      error: 'Limite de tentativas de login atingido. Tente novamente em 15 minutos.',
-      retryAfter: '15 minutos',
+      error: isDevelopment
+        ? 'Rate limit auth atingido (modo desenvolvimento)'
+        : 'Limite de tentativas de login atingido. Tente novamente em 15 minutos.',
+      retryAfter: isDevelopment ? '1 minuto' : '15 minutos',
     });
   },
   // Skip para rotas que não são de autenticação crítica
