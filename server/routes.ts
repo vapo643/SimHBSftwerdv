@@ -199,43 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // FASE 0 - Sentry test endpoint (conforme PAM V3.0 - captura manual com flush)
-  app.get('/api/debug-sentry', async (req, res) => {
-    try {
-      throw new Error(`Sentry Manual Flush Test - OK: ${new Date().toISOString()}`);
-    } catch (error) {
-      console.error("ERRO CAPTURADO, ENVIANDO MANUALMENTE PARA O SENTRY...");
-      const eventId = Sentry.captureException(error);
-      console.log(`Evento capturado com ID: ${eventId}`);
 
-      // Força o envio de todos os eventos pendentes. Aguarda até 2 segundos.
-      await Sentry.flush(2000);
-      console.log("Sentry flush concluído.");
-
-      res.status(500).json({
-        message: 'Erro de teste enviado para o Sentry com sucesso.',
-        sentryEventId: eventId,
-      });
-    }
-  });
-
-  // Debug do status do Sentry  
-  app.get('/api/debug-sentry-status', async (req, res) => {
-    try {
-      const { config } = await import('./lib/config');
-      const Sentry = await import('@sentry/node');
-      
-      res.json({
-        sentryDsnConfigured: !!config.observability.sentryDsn,
-        sentryDsnLength: config.observability.sentryDsn?.length || 0,
-        sentryEnvVar: !!process.env.SENTRY_DSN,
-        sentryEnvLength: process.env.SENTRY_DSN?.length || 0,
-        sentryClientActive: !!Sentry.getCurrentScope(),
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to check Sentry status' });
-    }
-  });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
   app.get(
