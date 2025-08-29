@@ -1,0 +1,42 @@
+### **Pacote de Ativação de Missão (PAM) V6.9 - GL-003 (Checklist de Prontidão para Produção)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Executar um checklist de auditoria de prontidão para produção, verificando a configuração de variáveis de ambiente, a segurança das conexões com o banco de dados e a existência de procedimentos de emergência.
+* **Intenção Estratégica (O Porquê):** Garantir que a transição do ambiente de desenvolvimento para o de produção seja segura e sem surpresas. Esta auditoria verifica as configurações que são específicas do ambiente, mitigando os riscos associados ao deploy, como vazamento de dados, configurações de segurança incorretas ou a falta de um plano de recuperação de desastres.
+* **Histórico Relevante (Consulta Obrigatória):** Esta missão é a culminação de todo o nosso trabalho de endurecimento, desde a blindagem do banco de dados (`REM-DDD-01.3`) até as otimizações de performance.
+
+---
+
+**AUDITAR E VALIDAR:**
+Checklist Final de Endurecimento para Produção
+
+**CONTEXT:**
+O sistema está funcional, estável e com uma UX polida. O último passo antes de criar a documentação operacional e aprovar o Go-Live é uma verificação rigorosa das configurações de ambiente e dos planos de contingência. Precisamos garantir que não há `secrets` hard-coded, que as permissões do banco de dados seguem o princípio do menor privilégio e que temos um plano para o pior cenário.
+
+**CURRENT STATE:**
+A aplicação está pronta em termos de código, mas ainda não passou por uma auditoria formal de configuração para produção.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um **Relatório de Auditoria de Prontidão para Produção** que responda, com evidências de código ou de arquivos de configuração, a cada um dos seguintes pontos do checklist:
+
+1.  **Gestão de Segredos (`.env.example`):**
+    * **Verificação:** O arquivo `.env.example` está completo e não contém nenhum valor real de `secret`? Todos os segredos (senhas, chaves de API, DSNs) são representados por placeholders?
+    * **Evidência:** Confirme o estado do arquivo `.env.example`.
+
+2.  **Segurança da Conexão com o Banco (`server/lib/supabase.ts`):**
+    * **Verificação:** A conexão com o PostgreSQL utiliza SSL/TLS? A configuração do Drizzle força o uso de SSL?
+    * **Evidência:** Apresente o trecho de código onde o cliente do banco de dados é instanciado e a configuração de SSL é definida.
+
+3.  **Princípio do Menor Privilégio (SQL):**
+    * **Verificação:** Existe algum script de migração (`.sql`) ou de configuração que defina `roles` específicos no PostgreSQL com permissões limitadas (ex: uma role `app_user` com apenas `SELECT`, `INSERT`, `UPDATE`, `DELETE` em tabelas específicas, em vez de usar a role `postgres` de superusuário)?
+    * **Evidência:** Apresente o código SQL que cria e define as permissões para a role da aplicação.
+
+4.  **Plano de Backup e Restore (`scripts/backup.sh`):**
+    * **Verificação:** Existe um script de backup (`backup.sh`)? Ele utiliza `pg_dump` com as flags apropriadas para criar um backup consistente? Existe um procedimento documentado ou um script para o processo de restauração (`pg_restore`)?
+    * **Evidência:** Apresente o conteúdo do script `backup.sh` e confirme a existência (ou ausência) de um plano de restore.
+
+5.  **Veredito Final:** O sistema está em conformidade com o checklist de prontidão para produção? Liste quaisquer lacunas ou riscos identificados.
+
+---
