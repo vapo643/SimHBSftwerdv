@@ -22,8 +22,10 @@ export interface AuthenticatedRequest extends Request {
 
 // Constants for Redis-based security features
 const TOKEN_BLACKLIST_TTL = 60 * 60; // 1 hour in seconds
-const MAX_AUTH_ATTEMPTS = 50; // Aumentado para suportar testes de carga
-const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+// Configuração dinâmica por ambiente
+const isDevelopment = process.env.NODE_ENV === 'development';
+const MAX_AUTH_ATTEMPTS = isDevelopment ? 10000 : 50; // 10k dev, 50 prod
+const AUTH_WINDOW_MS = isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000; // 1min dev, 15min prod  
 const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
 
 // Redis client for distributed token validation cache
@@ -54,20 +56,27 @@ async function checkAuthRateLimit(identifier: string): Promise<boolean> {
     const key = `auth_attempts:${identifier}`;
     const attempts = await redisClient.get(key);
     
+    if (isDevelopment) {
+      console.log(`[JWT DEBUG] Rate limit check for ${identifier}: attempts=${attempts}, max=${MAX_AUTH_ATTEMPTS}, window=${AUTH_WINDOW_MS}ms`);
+    }
+    
     if (!attempts) {
       // First attempt - set counter with TTL
       await redisClient.setex(key, AUTH_ATTEMPTS_TTL, '1');
+      if (isDevelopment) console.log(`[JWT DEBUG] First attempt for ${identifier}, allowing`);
       return true; // Allow
     }
     
     const attemptCount = parseInt(attempts, 10);
     if (attemptCount >= MAX_AUTH_ATTEMPTS) {
+      if (isDevelopment) console.log(`[JWT DEBUG] Rate limit exceeded for ${identifier}: ${attemptCount}/${MAX_AUTH_ATTEMPTS}`);
       return false; // Rate limited
     }
     
     // Increment counter and refresh TTL
     await redisClient.incr(key);
     await redisClient.expire(key, AUTH_ATTEMPTS_TTL);
+    if (isDevelopment) console.log(`[JWT DEBUG] Incremented attempts for ${identifier}: ${attemptCount + 1}/${MAX_AUTH_ATTEMPTS}`);
     return true; // Allow
   } catch (error) {
     console.error('[JWT AUTH] Rate limit check failed:', error);
@@ -207,6 +216,9 @@ export async function jwtAuthMiddleware(
 
     // Distributed rate limiting check (SAMM Optimization)
     const clientIP = getClientIP(req);
+    if (isDevelopment) {
+      console.log(`[JWT DEBUG] Checking auth rate limit for IP: ${clientIP}, environment: ${process.env.NODE_ENV}`);
+    }
     const isAllowed = await checkAuthRateLimit(clientIP);
     if (!isAllowed) {
       securityLogger.logEvent({
