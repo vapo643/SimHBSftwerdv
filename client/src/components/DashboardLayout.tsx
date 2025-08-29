@@ -125,7 +125,11 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
       >
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center justify-between border-b px-6">
-            <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
+            <Link 
+              to="/dashboard" 
+              onClick={handleNavClick}
+              className="flex items-center gap-2 font-semibold"
+            >
               <img
                 src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png"
                 alt="Simpix Logo"
@@ -531,13 +535,21 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/configuracoes" className="flex items-center">
+                <Link 
+                  href="/configuracoes" 
+                  onClick={handleNavClick}
+                  className="flex items-center"
+                >
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Configurações</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/configuracoes/sessoes" className="flex items-center">
+                <Link 
+                  href="/configuracoes/sessoes" 
+                  onClick={handleNavClick}
+                  className="flex items-center"
+                >
                   <Shield className="mr-2 h-4 w-4" />
                   <span>Sessões Ativas</span>
                 </Link>
