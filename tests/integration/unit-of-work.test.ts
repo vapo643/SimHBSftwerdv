@@ -14,25 +14,36 @@ import { v4 as uuidv4 } from 'uuid';
 
 describe('Unit of Work - Auditoria Forense', () => {
   const testPropostaId = uuidv4();
+  const testUserId = '3fff3936-3cee-4e02-ab27-4e4b452e3efe'; // Usuário real do Supabase Auth
   
   beforeEach(async () => {
-    // Criar dados de teste válidos
+    // Criar dados de teste válidos - executar separadamente devido à limitação do PostgreSQL
     await db.execute(sql`
-      INSERT INTO parceiros (id, nome, codigo, is_active) 
-      VALUES (999, 'Parceiro Teste', 'TEST999', true)
-      ON CONFLICT (id) DO NOTHING;
-      
+      INSERT INTO parceiros (id, razao_social, cnpj, comissao_padrao) 
+      VALUES (999, 'Parceiro Teste LTDA', '12345678000199', 5.00)
+      ON CONFLICT (id) DO NOTHING
+    `);
+    
+    await db.execute(sql`
       INSERT INTO lojas (id, parceiro_id, nome_loja, endereco, is_active)
       VALUES (999, 999, 'Loja Teste Integração', 'Rua Teste, 123', true)
-      ON CONFLICT (id) DO NOTHING;
-      
-      INSERT INTO produtos (id, nome, descricao, is_active)
-      VALUES (999, 'Produto Teste', 'Produto para testes de integração', true)
-      ON CONFLICT (id) DO NOTHING;
-      
-      INSERT INTO profiles (id, nome_completo, role, permissions)
-      VALUES ('test-user-id', 'Usuário Teste', 'admin', '["all"]'::jsonb)
-      ON CONFLICT (id) DO NOTHING;
+      ON CONFLICT (id) DO NOTHING
+    `);
+    
+    await db.execute(sql`
+      INSERT INTO produtos (id, nome_produto)
+      VALUES (999, 'Produto Teste Integração')
+      ON CONFLICT (id) DO NOTHING
+    `);
+    
+    // Criar profile para usuário real do Supabase - ESSENTIAL para business rule validation
+    await db.execute(sql`
+      INSERT INTO profiles (id, full_name, role, loja_id)
+      VALUES (${testUserId}, 'Usuário Teste Integração', 'ADMINISTRADOR', 999)
+      ON CONFLICT (id) DO UPDATE SET 
+        full_name = EXCLUDED.full_name,
+        role = EXCLUDED.role,
+        loja_id = EXCLUDED.loja_id
     `);
     
     // Limpar dados de teste existentes
@@ -59,7 +70,7 @@ describe('Unit of Work - Auditoria Forense', () => {
 
     const mockLog = {
       propostaId: testPropostaId,
-      autorId: 'test-user',
+      autorId: testUserId,
       statusNovo: 'RASCUNHO',
       observacao: 'Proposta criada via teste de integração',
     };
@@ -142,7 +153,7 @@ describe('Unit of Work - Auditoria Forense', () => {
       };
 
       const mockLog = {
-        autorId: 'business-user',
+        autorId: testUserId,
         statusNovo: 'RASCUNHO',
         observacao: 'Operação de negócio complexa',
       };
