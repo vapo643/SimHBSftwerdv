@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertCircle, Save, Send } from 'lucide-react';
+import { Loader2, AlertCircle, Save, Send, FileImage, FileText, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/apiClient';
@@ -14,6 +14,139 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import HistoricoCompartilhado from '@/components/HistoricoCompartilhado';
+import * as pdfjs from 'pdfjs-dist';
+
+// Configurar worker path para pdfjs
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+// Componente para preview de PDF
+const PDFPreview: React.FC<{ url: string; className?: string }> = ({ url, className = '' }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPDF = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const loadingTask = pdfjs.getDocument(url);
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1); // Primeira página
+        
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        
+        const context = canvas.getContext('2d');
+        if (!context) return;
+        
+        // Calcular escala para fit no container
+        const viewport = page.getViewport({ scale: 1 });
+        const scale = Math.min(120 / viewport.width, 160 / viewport.height);
+        const scaledViewport = page.getViewport({ scale });
+        
+        canvas.height = scaledViewport.height;
+        canvas.width = scaledViewport.width;
+        
+        const renderContext = {
+          canvasContext: context,
+          viewport: scaledViewport,
+          canvas: canvas,
+        };
+        
+        await page.render(renderContext).promise;
+        setLoading(false);
+      } catch (err) {
+        console.error('Erro ao carregar PDF:', err);
+        setError('Erro ao carregar preview do PDF');
+        setLoading(false);
+      }
+    };
+
+    loadPDF();
+  }, [url]);
+
+  if (loading) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-700 ${className}`}>
+        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-700 ${className}`}>
+        <FileText className="h-8 w-8 text-gray-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex items-center justify-center bg-white ${className}`}>
+      <canvas ref={canvasRef} className="max-w-full max-h-full" />
+    </div>
+  );
+};
+
+// Componente para preview de documentos
+const DocumentPreview: React.FC<{ 
+  document: any; 
+  className?: string;
+  onClick?: () => void;
+}> = ({ document, className = '', onClick }) => {
+  const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(document.name || '');
+  const isPDF = /\.pdf$/i.test(document.name || '');
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (document.url) {
+      window.open(document.url, '_blank');
+    }
+  };
+
+  if (isImage) {
+    return (
+      <div 
+        className={`cursor-pointer overflow-hidden rounded-lg bg-gray-700 ${className}`}
+        onClick={handleClick}
+        data-testid="document-image-preview"
+      >
+        <img
+          src={document.url}
+          alt={document.name}
+          className="h-full w-full object-cover transition-transform hover:scale-110"
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  if (isPDF) {
+    return (
+      <div 
+        className={`cursor-pointer overflow-hidden rounded-lg ${className}`}
+        onClick={handleClick}
+        data-testid="document-pdf-preview"
+      >
+        <PDFPreview url={document.url} className="h-full w-full" />
+      </div>
+    );
+  }
+
+  // Arquivo genérico
+  return (
+    <div 
+      className={`flex cursor-pointer items-center justify-center rounded-lg bg-gray-700 ${className}`}
+      onClick={handleClick}
+      data-testid="document-generic-preview"
+    >
+      <FileText className="h-8 w-8 text-gray-400" />
+    </div>
+  );
+};
 
 // Componente separado para documentos
 const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
@@ -75,41 +208,64 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
       <h3 className="mb-4 text-lg font-semibold text-blue-400">Documentos da Proposta</h3>
 
       {documentos?.documents && documentos.documents.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {documentos.documents.map((doc: any, index: number) => (
             <div
               key={index}
-              className="flex items-center justify-between rounded-lg bg-gray-800 p-3"
+              className="group overflow-hidden rounded-lg border border-gray-700 bg-gray-800 transition-all hover:border-blue-500 hover:shadow-lg"
+              data-testid={`document-card-${index}`}
             >
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                <div>
-                  <p className="text-sm font-medium">
+              {/* Preview da miniatura */}
+              <div className="aspect-[4/3] w-full">
+                <DocumentPreview 
+                  document={doc} 
+                  className="h-full w-full"
+                  onClick={() => doc.url && window.open(doc.url, '_blank')}
+                />
+              </div>
+              
+              {/* Informações do documento */}
+              <div className="p-3">
+                <div className="mb-2">
+                  <p className="truncate text-sm font-medium text-white" title={doc.name || doc.nome || `Documento ${index + 1}`}>
                     {doc.name || doc.nome || `Documento ${index + 1}`}
                   </p>
                   <p className="text-xs text-gray-400">
                     {doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Tamanho não especificado'}
                   </p>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => doc.url && window.open(doc.url, '_blank')}
-                >
-                  Visualizar
-                </Button>
-                <Button variant="destructive" size="sm" disabled>
-                  Remover
-                </Button>
+                
+                {/* Botões de ação */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-xs"
+                    onClick={() => doc.url && window.open(doc.url, '_blank')}
+                    data-testid="button-view-document"
+                  >
+                    <Eye className="mr-1 h-3 w-3" />
+                    Ver
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    className="text-xs" 
+                    disabled
+                    data-testid="button-remove-document"
+                  >
+                    Remover
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="py-8 text-center text-gray-400">
-          <p>Nenhum documento encontrado para esta proposta</p>
+        <div className="py-12 text-center text-gray-400">
+          <FileText className="mx-auto mb-4 h-12 w-12" />
+          <p className="text-lg font-medium">Nenhum documento encontrado</p>
+          <p className="text-sm">Adicione documentos usando a área de upload abaixo</p>
         </div>
       )}
 

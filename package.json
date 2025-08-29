@@ -110,6 +110,7 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.4.54",
     "pdfkit": "^0.17.1",
     "postgres": "^3.4.7",
     "prettier": "^3.6.2",
