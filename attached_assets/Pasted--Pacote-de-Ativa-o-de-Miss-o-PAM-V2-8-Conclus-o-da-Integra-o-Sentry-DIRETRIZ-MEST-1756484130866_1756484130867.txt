@@ -1,0 +1,60 @@
+### **Pacote de Ativação de Missão (PAM) V2.8 - Conclusão da Integração Sentry**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Com a DSN de produção agora disponível, implementar a integração do Sentry no frontend, criar rotas de teste para validar a captura de erros de ponta-a-ponta (frontend e backend) e, em seguida, remover o código de teste.
+* **Intenção Estratégica (O Porquê):** Garantir que a nossa infraestrutura de observabilidade esteja 100% funcional antes do deploy. A captura de erros tanto do cliente quanto do servidor em um único dashboard é fundamental para a rápida detecção e resolução de problemas em produção.
+* **Histórico Relevante (Consulta Obrigatória):** Sua análise anterior (`PAM V2.7`) confirmou que a DSN de produção foi fornecida e que a implementação do Sentry no frontend era inexistente. Esta missão corrige essa lacuna.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **MÉDIO** - A inicialização do Sentry no frontend pode impactar a performance de carregamento inicial (TBT, LCP).
+    * **Contramedida:** A implementação deve seguir as melhores práticas, inicializando apenas o essencial para a captura de erros e garantindo que não bloqueie a renderização principal.
+
+---
+
+**IMPLEMENTAR:**
+User Story INFRA-001 (Fases 2-6): Implementar e Validar Integração Sentry de Produção
+
+**CONTEXT:**
+A DSN de produção foi fornecida e adicionada aos secrets do ambiente. Sua análise revelou que, enquanto o backend estava pronto, o frontend não tinha a instrumentação do Sentry. Agora, você deve implementar a instrumentação faltante no cliente e depois conduzir um teste de ponta-a-ponta para validar que tanto os erros do servidor quanto os do navegador estão sendo corretamente reportados ao nosso novo dashboard de produção.
+
+**CURRENT STATE:**
+A variável de ambiente `SENTRY_DSN` foi populada com a credencial de produção. O backend já utiliza esta variável. O frontend, no arquivo `client/src/main.tsx`, não possui código de inicialização do Sentry.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Frontend Instrumentado:** O arquivo `client/src/main.tsx` deve ser modificado para inicializar o Sentry SDK do React, utilizando a variável de ambiente `VITE_SENTRY_DSN`.
+2.  **Validação E2E Realizada:**
+    * Uma rota de teste temporária (`/api/debug/test-sentry`) deve ser criada no backend.
+    * Um botão de teste temporário deve ser criado no frontend.
+    * A ativação de ambos deve gerar erros que são confirmados (pelo Executor Humano) como visíveis no dashboard de produção do Sentry.
+3.  **Código Limpo:** Após a validação, a rota e o botão de teste devem ser completamente removidos, deixando a implementação de produção limpa.
+4.  **Prova de Sucesso:** Você deve fornecer o `diff` das alterações nos arquivos `client/src/main.tsx` e `server/routes.ts` (ou equivalente) mostrando a adição e posterior remoção do código de teste.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Implementar Sentry no Frontend:**
+    * Edite `client/src/main.tsx`.
+    * Importe as dependências necessárias do Sentry (`@sentry/react`).
+    * Adicione a lógica de `Sentry.init`, configurando a `dsn` para ler de `import.meta.env.VITE_SENTRY_DSN`.
+    * Envolva o componente `App` com o `Sentry.ErrorBoundary`.
+2.  **Criar Rota de Teste (Backend):**
+    * Adicione uma nova rota `GET /api/debug/test-sentry` em um arquivo de rotas apropriado.
+    * A lógica da rota deve simplesmente ser `throw new Error('Sentry Backend Test: OK');`.
+3.  **Criar Botão de Teste (Frontend):**
+    * Adicione um botão em qualquer página visível (ex: Dashboard).
+    * O `onClick` do botão deve executar uma função que deliberadamente lança um erro (ex: `throw new Error('Sentry Frontend Test: OK');`).
+4.  **Validação (com Executor Humano):**
+    * Peça ao Executor Humano para acessar a rota `/api/debug/test-sentry` e clicar no botão de teste.
+    * Peça ao Executor Humano para confirmar verbalmente que ambos os erros apareceram no dashboard do Sentry.
+5.  **Limpeza do Código:**
+    * Remova completamente a rota `/api/debug/test-sentry` do backend.
+    * Remova completamente o botão de teste do frontend.
+6.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+---
