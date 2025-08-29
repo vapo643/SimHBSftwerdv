@@ -1,6 +1,6 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { ProposalProvider, useProposal, useProposalActions } from '@/contexts/ProposalContext';
+import { ProposalProvider, useProposal, useProposalActions, useStepValidation } from '@/contexts/ProposalContext';
 import { useProposalEffects } from '@/hooks/useProposalEffects';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { PersonalReferencesStep } from '@/components/propostas/PersonalReference
 function ProposalForm() {
   const { state } = useProposal();
   const { setContext, setStep, setLoading } = useProposalActions();
+  const { isStepValid } = useStepValidation();
   const { toast } = useToast();
 
   // Apply proposal effects (auto-simulation, validation, etc.)
@@ -323,12 +324,19 @@ function ProposalForm() {
           variant="outline"
           onClick={() => setStep(Math.max(0, state.currentStep - 1))}
           disabled={state.currentStep === 0}
+          data-testid="button-voltar"
         >
           Voltar
         </Button>
 
         {state.currentStep < 3 ? (
-          <Button type="button" onClick={() => setStep(state.currentStep + 1)}>
+          <Button 
+            type="button" 
+            onClick={() => setStep(state.currentStep + 1)}
+            disabled={!isStepValid(state.currentStep)}
+            data-testid="button-proximo"
+            className={!isStepValid(state.currentStep) ? 'opacity-50' : ''}
+          >
             Próximo
           </Button>
         ) : (

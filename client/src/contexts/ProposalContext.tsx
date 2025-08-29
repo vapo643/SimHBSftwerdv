@@ -539,3 +539,88 @@ export function useProposalActions() {
     reset,
   };
 }
+
+// Custom hook for step validation
+export function useStepValidation() {
+  const { state } = useProposal();
+
+  // UX-001: Função de validação por step para botão "Próximo"
+  const isStepValid = useCallback((step: number): boolean => {
+    switch (step) {
+      case 0: // Dados do Cliente
+        const clientData = state.clientData;
+        const requiredClientFields = [
+          clientData.nome,
+          clientData.tipoPessoa === 'PF' ? clientData.cpf : clientData.cnpj,
+          clientData.email,
+          clientData.telefone,
+          clientData.dataNascimento,
+          clientData.cep,
+          clientData.logradouro,
+          clientData.numero,
+          clientData.cidade,
+          clientData.estado,
+          clientData.ocupacao,
+          clientData.rendaMensal,
+        ];
+        
+        // Verificar se todos os campos obrigatórios estão preenchidos
+        const allFieldsFilled = requiredClientFields.every(
+          (field) => field && field.toString().trim() !== ''
+        );
+        
+        // Verificar se não há erros de validação
+        const hasValidationErrors = Object.keys(state.errors).some(key => 
+          key.includes('cpf') || key.includes('email') || key.includes('telefone') || key.includes('cep')
+        );
+        
+        return allFieldsFilled && !hasValidationErrors;
+
+      case 1: // Referências Pessoais
+        const references = state.personalReferences;
+        
+        // Deve ter exatamente 2 referências
+        if (references.length !== 2) return false;
+        
+        // Cada referência deve ter todos os campos obrigatórios preenchidos
+        const allReferencesValid = references.every(ref => 
+          ref.nomeCompleto && ref.nomeCompleto.trim() !== '' &&
+          ref.grauParentesco && ref.grauParentesco.trim() !== '' &&
+          ref.telefone && ref.telefone.trim() !== ''
+        );
+        
+        // Verificar se não há erros de validação de referências
+        const hasReferenceErrors = Object.keys(state.errors).some(key => 
+          key.includes('reference_')
+        );
+        
+        return allReferencesValid && !hasReferenceErrors;
+
+      case 2: // Condições do Empréstimo
+        const loanData = state.loanData;
+        
+        // Verificar se todos os campos obrigatórios estão preenchidos
+        const loanFieldsValid = 
+          loanData.produtoId !== null &&
+          loanData.tabelaComercialId !== null &&
+          loanData.valorSolicitado && loanData.valorSolicitado.trim() !== '' &&
+          loanData.prazo !== null;
+        
+        // Verificar se não há erros de validação de empréstimo
+        const hasLoanErrors = Object.keys(state.errors).some(key => 
+          key.includes('produto') || key.includes('tabela') || key.includes('valor') || key.includes('prazo')
+        );
+        
+        return Boolean(loanFieldsValid && !hasLoanErrors);
+
+      case 3: // Documentos
+        // Step de documentos é opcional - sempre válido
+        return true;
+
+      default:
+        return false;
+    }
+  }, [state.clientData, state.personalReferences, state.loanData, state.errors]);
+
+  return { isStepValid };
+}
