@@ -1,0 +1,39 @@
+### **Pacote de Ativação de Missão (PAM) V2.6 - REM-S2-FINAL (Correção Final)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Corrigir o erro de tipo (`TypeError`) na linha 602 do arquivo `server/modules/proposal/domain/Proposal.ts`, garantindo que o projeto compile sem erros.
+* **Intenção Estratégica (O Porquê):** Eliminar o último bloqueador conhecido para a conformidade total do Sprint 2. Esta correção cirúrgica é o passo final para garantir que nossa camada de domínio não só está bem arquitetada, mas também funcionalmente correta, permitindo-nos avançar para o Sprint 3 com uma base 100% estável.
+* **Histórico Relevante (Consulta Obrigatória):** Sua última auditoria (`AUD-S2-001`) identificou este erro como o único desvio remanescente para a conformidade total do Sprint 2.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de software realizando um hotfix. A falha já foi diagnosticada. Sua missão é aplicar a correção precisa, validar que o problema foi resolvido e não introduzir novos efeitos colaterais.
+
+---
+
+**IMPLEMENTAR:**
+User Story REM-S2-FINAL: Correção de TypeError no Agregado `Proposal`
+
+**CONTEXT:**
+Nossa auditoria completa do Sprint 2 foi um sucesso, exceto por um único erro de compilação que impede o cálculo do Custo Efetivo Total (CET). O erro ocorre porque estamos tentando usar um objeto `Money` em uma operação matemática que espera um número.
+
+**CURRENT STATE:**
+O arquivo `server/modules/proposal/domain/Proposal.ts` contém um erro de tipo na linha 602. O código `(custoTotal / this._valor - 1) * 100` falha porque `this._valor` é uma instância do Value Object `Money`, não um `number`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Código Corrigido:** A linha 602 do arquivo `server/modules/proposal/domain/Proposal.ts` deve ser modificada para usar o valor numérico do Value Object `Money`. A correção provável é `(custoTotal / this._valor.getReais() - 1) * 100`.
+2.  **Compilação Limpa:** A execução do comando `get_latest_lsp_diagnostics` deve retornar sucesso, provando que não há mais erros de compilação em todo o projeto.
+3.  **Sem Regressões:** A suíte de testes de integração (`npx vitest run tests/integration`) deve ser executada novamente e todos os testes devem continuar passando.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Aplicar Correção:** Edite o arquivo `server/modules/proposal/domain/Proposal.ts` na linha 602 e aplique a correção para usar o método `.getReais()` (ou método equivalente para obter o valor numérico) do Value Object `Money`.
+2.  **Validar Compilação:** Execute o comando `get_latest_lsp_diagnostics` e cole o output, que deve ser `Success: No LSP diagnostics found.`.
+3.  **Validar Funcionalidade:** Execute o comando `npx vitest run tests/integration` para garantir que a correção não introduziu nenhuma regressão. Cole o output completo da execução dos testes.
+4.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M3: Core Business Logic
+- **Missão de Emergência Atual:** "Operação Validação Mestra"
+---

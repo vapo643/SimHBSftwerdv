@@ -153,8 +153,8 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 **Backend:**
 - **Technology Stack**: Express.js (RESTful API), TypeScript.
 - **Database & ORM**: PostgreSQL, Drizzle ORM (supporting soft deletes, sequential IDs, and audit trails).
-- **Authentication**: Supabase Auth (JWTs, custom RBAC, extended session TTLs).
-- **File Storage**: Supabase Storage (secure private buckets).
+- **Authentication**: JWTs, custom RBAC, extended session TTLs.
+- **File Storage**: Secure private buckets.
 - **Asynchronous Processing**: BullMQ backed by Redis for job queues.
 - **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
 - **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).

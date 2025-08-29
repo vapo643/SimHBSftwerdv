@@ -599,7 +599,7 @@ export class Proposal {
     // Em produção, usar cálculo completo segundo regulação BACEN
     const valorTotal = this.calculateTotalAmount();
     const custoTotal = valorTotal + (tac || 0);
-    const cet = (custoTotal / this._valor - 1) * 100;
+    const cet = (custoTotal / this._valor.getReais() - 1) * 100;
 
     return Math.round(cet * 100) / 100;
   }
