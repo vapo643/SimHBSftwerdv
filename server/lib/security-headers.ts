@@ -27,6 +27,7 @@ export function setupSecurityHeaders() {
       'https://*.supabase.co', // Supabase
       'https://cdn.inter.co', // Banco Inter
       'https://api.clicksign.com', // ClickSign
+      'https://*.sentry.io', // Sentry error tracking
       'wss://*.supabase.co', // WebSocket Supabase
       process.env.NODE_ENV === 'development' ? 'ws://localhost:*' : '',
     ].filter(Boolean),
