@@ -105,14 +105,6 @@ export function ClientDataStep() {
 
   const [progress, setProgress] = useState(0);
   
-  // UX-006: Busca automática de CEP com debounce
-  useEffect(() => {
-    const cleanCep = debouncedCep.replace(/\D/g, '');
-    if (cleanCep.length === 8 && CEP.isValid(cleanCep)) {
-      fetchAddressByCep(debouncedCep);
-    }
-  }, [debouncedCep, fetchAddressByCep]);
-
   // Função para buscar CEP usando nosso backend
   const fetchAddressByCep = useCallback(
     async (cep: string) => {
@@ -223,6 +215,14 @@ export function ClientDataStep() {
     },
     [updateClient, toast]
   );
+
+  // UX-006: Busca automática de CEP com debounce
+  useEffect(() => {
+    const cleanCep = debouncedCep.replace(/\D/g, '');
+    if (cleanCep.length === 8 && CEP.isValid(cleanCep)) {
+      fetchAddressByCep(debouncedCep);
+    }
+  }, [debouncedCep, fetchAddressByCep]);
 
   // Handlers
   const handleTipoPessoaChange = (checked: boolean) => {
