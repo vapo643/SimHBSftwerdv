@@ -1,0 +1,36 @@
+### **Pacote de Ativação de Missão (PAM) V6.8 - UX-014 (Varredura Final de Consistência)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Realizar uma varredura sistemática em toda a aplicação para identificar e corrigir pequenas inconsistências de UI e UX, como espaçamentos, uso de componentes, cores e ícones, conforme os problemas de baixo impacto catalogados na análise heurística.
+* **Intenção Estratégica (O Porquê):** Alcançar a excelência através da atenção aos detalhes. Uma interface consistente não apenas parece mais profissional, mas também é mais fácil de usar, pois o comportamento dos componentes é previsível. Esta "limpeza" final é o que separa uma aplicação funcional de uma aplicação de alta qualidade.
+* **Histórico Relevante (Consulta Obrigatória):** A análise heurística (`GL-002`) identificou 5 problemas de baixa severidade e 3 recomendações gerais de polimento que servem como o backlog inicial para esta missão.
+
+---
+
+**IMPLEMENTAR:**
+User Story UX-014: Realizar Varredura Geral de Consistência de UI
+
+**CONTEXT:**
+Concluímos todas as correções de usabilidade críticas e de alto impacto. A aplicação está robusta e funcional. Agora, na fase final de polimento, vamos nos concentrar nos detalhes que compõem uma experiência de usuário profissional e coesa, corrigindo as pequenas inconsistências visuais que foram identificadas em nossa auditoria.
+
+**CURRENT STATE:**
+A aplicação é funcional, mas apresenta pequenas inconsistências visuais em diferentes telas, como o uso de componentes de loading diferentes, ícones repetidos e espaçamentos não padronizados.
+
+**EXPECTED (Estado Final de Sucesso):**
+As seguintes inconsistências, identificadas na auditoria, devem ser corrigidas:
+1.  **Login (`login.tsx`):** O tamanho do logo deve ser reduzido para `h-24` para melhor proporção visual.
+2.  **Navegação (`DashboardLayout.tsx`):** O componente `ThemeSelector` duplicado na sidebar deve ser removido, mantendo-se apenas o do cabeçalho.
+3.  **Nova Proposta (`nova.tsx`):** O ícone para a aba "Referências" deve ser alterado para `Users` (ou similar), para se diferenciar do ícone da aba "Dados do Cliente".
+4.  **Dashboard (`dashboard.tsx`):** O emoji "✓" no card "Valor Total ✓" deve ser removido para manter a consistência visual com os outros cards de estatísticas.
+5.  **Consistência de Componentes:** Realizar uma revisão e padronizar o uso de componentes de `loading` (utilizar preferencialmente o `Loader2` do `lucide-react`) e garantir que os espaçamentos e o uso de gradientes em botões sejam consistentes em toda a aplicação.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Corrigir Logo do Login:** Edite `client/src/pages/login.tsx` e ajuste a classe do componente `img` do logo.
+2.  **Remover `ThemeSelector` Duplicado:** Edite `client/src/components/DashboardLayout.tsx` e remova a chamada ao componente `ThemeSelector` de dentro da sidebar.
+3.  **Corrigir Ícone da Aba:** Edite `client/src/pages/propostas/nova.tsx` e altere o ícone na `TabsTrigger` correspondente à aba de referências.
+4.  **Remover Emoji do Dashboard:** Edite `client/src/pages/dashboard.tsx` e remova o emoji do `CardTitle` do card de estatísticas.
+5.  **Auditoria de Consistência Geral:** Realize uma busca por outros componentes (ex: `Spinner`, `Loading...`) e padronize para o `Loader2`. Revise visualmente os principais botões e cards para unificar os estilos.
+6.  **Validar e Apresentar Evidência:** Após as correções, capture screenshots que demonstrem as mudanças (ex: a tela de login com o logo menor, a sidebar sem o `ThemeSelector`, etc.).
+7.  **Verificação Final:** Execute o protocolo `7-CHECK FULL`.

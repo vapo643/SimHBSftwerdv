@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { DollarSign, FileText, AlertCircle, Loader2, CheckCircle2, User } from 'lucide-react';
+import { DollarSign, FileText, AlertCircle, Loader2, CheckCircle2, User, Users } from 'lucide-react';
 import { ClientDataStep } from '@/components/propostas/ClientDataStep';
 import { LoanConditionsStep } from '@/components/propostas/LoanConditionsStep';
 import { DocumentsStep } from '@/components/propostas/DocumentsStep';
@@ -296,7 +296,7 @@ function ProposalForm() {
             Dados do Cliente
           </TabsTrigger>
           <TabsTrigger value="referencias-pessoais">
-            <User className="mr-2 h-4 w-4" />
+            <Users className="mr-2 h-4 w-4" />
             Referências
           </TabsTrigger>
           <TabsTrigger value="condicoes-emprestimo">

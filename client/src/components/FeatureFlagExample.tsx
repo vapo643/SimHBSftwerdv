@@ -4,7 +4,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, XCircle, TrendingUp, DollarSign, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, TrendingUp, DollarSign, FileText, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 /**
@@ -47,7 +47,7 @@ export function FeatureFlagExample() {
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
             <span>Carregando feature flags...</span>
           </div>
         </CardContent>

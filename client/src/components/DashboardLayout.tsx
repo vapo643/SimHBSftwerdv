@@ -136,7 +136,6 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                 className="h-32 w-auto"
               />
             </Link>
-            <ThemeSelector />
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="px-4">

@@ -473,7 +473,7 @@ const Dashboard: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Valor Total ✓</CardTitle>
+              <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
