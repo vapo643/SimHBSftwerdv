@@ -8,7 +8,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { unitOfWork } from '../../server/lib/unit-of-work';
 import { db } from '../../server/lib/supabase';
-import { propostas, propostaLogs } from '../../shared/schema';
+import { propostas, propostaLogs, users, gerenteLojas } from '../../shared/schema';
 import { eq, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -46,6 +46,14 @@ describe('Unit of Work - Auditoria Forense', () => {
         loja_id = EXCLUDED.loja_id
     `);
     
+    // CRITICAL: Criar associação gerente-loja para satisfazer validate_proposta_integrity()
+    // gerente_id é UUID que referencia profiles.id, não users.id
+    await db.execute(sql`
+      INSERT INTO gerente_lojas (gerente_id, loja_id)
+      VALUES (${testUserId}, 999)
+      ON CONFLICT (gerente_id, loja_id) DO NOTHING
+    `);
+    
     // Limpar dados de teste existentes
     await db.delete(propostaLogs).where(eq(propostaLogs.propostaId, testPropostaId));
     await db.delete(propostas).where(eq(propostas.id, testPropostaId));
@@ -66,6 +74,7 @@ describe('Unit of Work - Auditoria Forense', () => {
       clienteCpf: '12345678901',
       produtoId: 999,
       lojaId: 999,
+      userId: testUserId, // CRITICAL: Field required by enforce_proposta_integrity trigger
     };
 
     const mockLog = {
@@ -107,6 +116,7 @@ describe('Unit of Work - Auditoria Forense', () => {
       clienteCpf: '12345678901',
       produtoId: 999,
       lojaId: 999,
+      userId: testUserId, // CRITICAL: Field required by enforce_proposta_integrity trigger
     };
 
     // CENÁRIO DE FALHA: Tentar inserir log com autorId null
@@ -150,6 +160,7 @@ describe('Unit of Work - Auditoria Forense', () => {
         clienteCpf: '98765432100',
         produtoId: 999,
         lojaId: 999,
+        userId: testUserId, // CRITICAL: Field required by enforce_proposta_integrity trigger
       };
 
       const mockLog = {
