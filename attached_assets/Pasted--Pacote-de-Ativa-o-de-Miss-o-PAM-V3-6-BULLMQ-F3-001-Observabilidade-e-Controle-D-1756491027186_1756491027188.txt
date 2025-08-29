@@ -1,0 +1,53 @@
+### **Pacote de Ativação de Missão (PAM) V3.6 - BULLMQ-F3-001 (Observabilidade e Controle)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Integrar a UI do `bull-board` para criar um dashboard de monitoramento das filas e implementar um sistema básico de feature flags para controlar a ativação e a concorrência dos workers.
+* **Intenção Estratégica (O Porquê):** Dar à equipe de operações (e a nós) a visibilidade necessária para monitorar a saúde do sistema assíncrono e a capacidade de reagir a incidentes (ex: instabilidade em um serviço externo) de forma controlada, pausando filas ou ajustando a concorrência dinamicamente. Isso transforma nosso sistema de filas de uma "caixa-preta" para um centro de comando operacional.
+* **Histórico Relevante (Consulta Obrigatória):** O alinhamento estratégico (QAE) definiu a necessidade de um dashboard e de feature flags como parte da "Definição de Feito" da infraestrutura de filas.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **MÉDIO** - O dashboard, se exposto publicamente, pode vazar informações operacionais sensíveis. A lógica das feature flags, se implementada incorretamente, pode desativar permanentemente os workers.
+    * **Contramedida:** O endpoint do dashboard deve ser protegido pela nossa mais alta camada de autorização (ex: `requireAdmin`). As feature flags devem ter valores padrão seguros (ex: `enabled: true`) e a lógica deve ser envolvida em blocos `try...catch` para prevenir que uma falha na obtenção da flag quebre o worker.
+
+---
+
+**IMPLEMENTAR:**
+User Story S4-001.2: Implementar Dashboard de Monitoramento e Controle Operacional de Filas
+
+**CONTEXT:**
+Nossas filas BullMQ são robustas e idempotentes, mas atualmente operam como uma "caixa-preta". Para prepará-las para produção, precisamos de um dashboard para visualizar o estado dos jobs (em espera, ativos, falhos, completos) e de um mecanismo para controlar o comportamento dos workers em tempo real, sem a necessidade de reiniciar o servidor.
+
+**CURRENT STATE:**
+A aplicação possui as filas BullMQ, mas não há uma interface de usuário para monitorá-las. O controle dos workers (ex: número de processos concorrentes) está fixo no código.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Dashboard de Filas Integrado:**
+    * A biblioteca `@bull-board/express` deve ser instalada e configurada.
+    * Um novo endpoint de servidor (ex: `/admin/queues`) deve ser criado para servir a UI do Bull Board.
+    * Este endpoint deve ser protegido e acessível apenas para usuários com a role `ADMINISTRADOR`.
+    * O dashboard deve exibir o status das nossas três filas: `payments`, `webhooks`, e `reports`.
+2.  **Sistema de Feature Flags para Workers:**
+    * A lógica de inicialização dos workers em `server/worker.ts` deve ser refatorada.
+    * Antes de iniciar cada worker, o código deve consultar um serviço de feature flags (como `unleash-client`, que já está no nosso stack) para obter duas configurações:
+        * `queue.[queueName].enabled` (boolean): O worker só deve ser iniciado se esta flag for `true`.
+        * `worker.[queueName].concurrency` (number): O número de jobs concorrentes que o worker pode processar deve ser definido por esta flag.
+    * O sistema deve ter um fallback seguro caso o serviço de feature flags não esteja disponível.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Instalar e Configurar Bull Board:** Adicione as dependências `@bull-board/api` e `@bull-board/express`. Crie um novo arquivo de rota (ex: `server/routes/admin/queues.ts`) para configurar o `ExpressAdapter` e adicionar as filas ao `createBullBoard`.
+2.  **Proteger o Endpoint do Dashboard:** Aplique o middleware de autorização (`requireAdmin` ou `roleGuard(['ADMINISTRADOR'])`) à nova rota do dashboard.
+3.  **Refatorar Inicialização dos Workers:** Edite o arquivo `server/worker.ts`. Envolva a lógica de `new Worker(...)` em uma função `async` chamada `initializeWorkers`.
+4.  **Integrar Feature Flags:** Dentro de `initializeWorkers`, antes de instanciar cada worker, faça a chamada ao nosso `featureFlagService` para obter as flags `enabled` e `concurrency`.
+5.  **Aplicar Lógica Condicional:** Use as flags para decidir se o worker deve ser instanciado e com qual nível de concorrência. Implemente um fallback para valores padrão caso a consulta às flags falhe.
+6.  **Validação:** Descreva o plano de teste para validar tanto o acesso seguro ao dashboard quanto a funcionalidade das feature flags (como você confirmaria que alterar uma flag para `false` de fato impede o worker de iniciar?).
+7.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+---

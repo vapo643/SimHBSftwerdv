@@ -12,6 +12,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@bull-board/api": "^6.12.7",
+    "@bull-board/express": "^6.12.7",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@hookform/resolvers": "^3.10.0",

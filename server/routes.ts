@@ -1,4 +1,4 @@
-import type { Express, NextFunction, Response } from 'express';
+import type { Express, NextFunction, Response, Request } from 'express';
 import { createServer, type Server } from 'http';
 import { storage } from './storage';
 import { createServerSupabaseClient } from '../client/src/lib/supabase';
@@ -2411,6 +2411,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Users management endpoints - REFATORADO com padrão Service/Repository
   const usersAdminRouter = (await import('./routes/admin-users.js')).default;
   app.use('/api/admin', usersAdminRouter);
+
+  // Bull-Board Admin Dashboard - Queue Monitoring
+  const queuesAdminRouter = (await import('./routes/admin/queues.js')).default;
+  app.use('/', queuesAdminRouter);
 
   // API endpoint for partners - GET all (public for dropdowns)
   app.get('/api/parceiros', async (req, res) => {
