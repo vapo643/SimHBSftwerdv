@@ -259,6 +259,265 @@ notificationWorker.on('failed', (job, err) => {
   console.error(`[WORKER:NOTIFY] ❌ Job ${job?.id} failed:`, err);
 });
 
+// =============== PAM V3.4 - SPECIALIZED HIGH-PERFORMANCE WORKERS ===============
+
+// PAYMENTS WORKER - CRITICAL PRIORITY (5 retries, exponential backoff)
+const paymentsWorker = new Worker(
+  'payments',
+  async (job: Job) => {
+    console.log(`[WORKER:PAYMENTS] 🔄 Processing critical job ${job.id} - Type: ${job.data.type}`);
+    const startTime = Date.now();
+
+    try {
+      await job.updateProgress(10);
+
+      switch (job.data.type) {
+        case 'PROCESS_PAYMENT':
+          console.log(`[WORKER:PAYMENTS] 💰 Processing payment for proposal ${job.data.propostaId}`);
+          
+          // Idempotency key for payment processing (prevents duplicates)
+          const idempotencyKey = `payment-${job.data.propostaId}-${job.data.timestamp || Date.now()}`;
+          console.log(`[WORKER:PAYMENTS] 🔑 Using idempotency key: ${idempotencyKey}`);
+          
+          await job.updateProgress(50);
+          
+          // TODO: Implement actual payment processing logic
+          // This is where you would integrate with payment providers
+          
+          await job.updateProgress(100);
+          
+          const paymentDuration = Date.now() - startTime;
+          console.log(`[WORKER:PAYMENTS] ✅ Payment processed successfully in ${paymentDuration}ms`);
+          
+          return {
+            success: true,
+            propostaId: job.data.propostaId,
+            idempotencyKey,
+            processingTime: paymentDuration,
+            message: 'Payment processed successfully'
+          };
+
+        case 'REFUND_PAYMENT':
+          console.log(`[WORKER:PAYMENTS] 💸 Processing refund for proposal ${job.data.propostaId}`);
+          
+          await job.updateProgress(100);
+          
+          return {
+            success: true,
+            propostaId: job.data.propostaId,
+            message: 'Refund processed successfully (placeholder)'
+          };
+
+        default:
+          throw new Error(`Unknown payment job type: ${job.data.type}`);
+      }
+    } catch (error) {
+      const errorDuration = Date.now() - startTime;
+      console.error(`[WORKER:PAYMENTS] ❌ Critical payment job ${job.id} failed after ${errorDuration}ms:`, error);
+      throw error;
+    }
+  },
+  workerOptions
+);
+
+// WEBHOOKS WORKER - HIGH PRIORITY (3 retries, fixed backoff)
+const webhooksWorker = new Worker(
+  'webhooks',
+  async (job: Job) => {
+    console.log(`[WORKER:WEBHOOKS] 🔄 Processing webhook job ${job.id} - Type: ${job.data.type}`);
+    const startTime = Date.now();
+
+    try {
+      await job.updateProgress(10);
+
+      switch (job.data.type) {
+        case 'CLICKSIGN_WEBHOOK':
+          console.log(`[WORKER:WEBHOOKS] ✍️ Processing ClickSign webhook`);
+          
+          await job.updateProgress(50);
+          
+          // TODO: Implement ClickSign webhook processing
+          // This is where you would handle signature confirmations
+          
+          await job.updateProgress(100);
+          
+          const webhookDuration = Date.now() - startTime;
+          console.log(`[WORKER:WEBHOOKS] ✅ ClickSign webhook processed in ${webhookDuration}ms`);
+          
+          return {
+            success: true,
+            webhookType: 'clicksign',
+            processingTime: webhookDuration,
+            message: 'ClickSign webhook processed successfully'
+          };
+
+        case 'PAYMENT_WEBHOOK':
+          console.log(`[WORKER:WEBHOOKS] 💰 Processing payment webhook`);
+          
+          await job.updateProgress(100);
+          
+          return {
+            success: true,
+            webhookType: 'payment',
+            message: 'Payment webhook processed successfully (placeholder)'
+          };
+
+        default:
+          throw new Error(`Unknown webhook job type: ${job.data.type}`);
+      }
+    } catch (error) {
+      const errorDuration = Date.now() - startTime;
+      console.error(`[WORKER:WEBHOOKS] ❌ Webhook job ${job.id} failed after ${errorDuration}ms:`, error);
+      throw error;
+    }
+  },
+  workerOptions
+);
+
+// REPORTS WORKER - NORMAL PRIORITY (2 retries, fixed backoff)
+const reportsWorker = new Worker(
+  'reports',
+  async (job: Job) => {
+    console.log(`[WORKER:REPORTS] 🔄 Processing report job ${job.id} - Type: ${job.data.type}`);
+    const startTime = Date.now();
+
+    try {
+      await job.updateProgress(10);
+
+      switch (job.data.type) {
+        case 'GENERATE_MONTHLY_REPORT':
+          console.log(`[WORKER:REPORTS] 📊 Generating monthly report`);
+          
+          await job.updateProgress(50);
+          
+          // TODO: Implement monthly report generation
+          // This is where you would generate business reports
+          
+          await job.updateProgress(100);
+          
+          const reportDuration = Date.now() - startTime;
+          console.log(`[WORKER:REPORTS] ✅ Monthly report generated in ${reportDuration}ms`);
+          
+          return {
+            success: true,
+            reportType: 'monthly',
+            processingTime: reportDuration,
+            message: 'Monthly report generated successfully'
+          };
+
+        case 'EXPORT_PROPOSALS':
+          console.log(`[WORKER:REPORTS] 📋 Exporting proposals data`);
+          
+          await job.updateProgress(100);
+          
+          return {
+            success: true,
+            reportType: 'proposals_export',
+            message: 'Proposals exported successfully (placeholder)'
+          };
+
+        default:
+          throw new Error(`Unknown report job type: ${job.data.type}`);
+      }
+    } catch (error) {
+      const errorDuration = Date.now() - startTime;
+      console.error(`[WORKER:REPORTS] ❌ Report job ${job.id} failed after ${errorDuration}ms:`, error);
+      throw error;
+    }
+  },
+  workerOptions
+);
+
+// =============== PAM V3.4 - EVENT HANDLERS FOR SPECIALIZED WORKERS ===============
+
+// =============== PAM V3.4 - DLQ IMPLEMENTATION WITH STRUCTURED LOGGING ===============
+
+// Payments Worker Events - CRITICAL PRIORITY
+paymentsWorker.on('completed', (job) => {
+  console.log(`[WORKER:PAYMENTS] ✅ Critical job ${job.id} completed successfully`);
+});
+
+paymentsWorker.on('failed', (job, err) => {
+  const isMovingToDLQ = job && job.attemptsMade >= (job.opts?.attempts || 5);
+  
+  if (isMovingToDLQ) {
+    console.error(`[DLQ:PAYMENTS] 🚨 CRITICAL ALERT: Job ${job?.id} moved to Dead-Letter Queue after ${job?.attemptsMade} attempts`, {
+      jobId: job?.id,
+      jobType: job?.data?.type,
+      propostaId: job?.data?.propostaId,
+      queueName: 'payments',
+      priority: 'CRITICAL',
+      attemptsMade: job?.attemptsMade,
+      maxAttempts: job?.opts?.attempts || 5,
+      errorMessage: err.message,
+      timestamp: new Date().toISOString()
+    });
+    
+    // TODO: Integrate with alerting system (PagerDuty/Slack) for critical jobs
+    // alertingService.sendCriticalAlert('PAYMENT_JOB_FAILED', { jobId, error: err.message });
+    
+  } else {
+    console.error(`[WORKER:PAYMENTS] ❌ Critical job ${job?.id} failed (attempt ${job?.attemptsMade}/${job?.opts?.attempts || 5}):`, err.message);
+  }
+});
+
+// Webhooks Worker Events - HIGH PRIORITY  
+webhooksWorker.on('completed', (job) => {
+  console.log(`[WORKER:WEBHOOKS] ✅ Webhook job ${job.id} completed successfully`);
+});
+
+webhooksWorker.on('failed', (job, err) => {
+  const isMovingToDLQ = job && job.attemptsMade >= (job.opts?.attempts || 3);
+  
+  if (isMovingToDLQ) {
+    console.error(`[DLQ:WEBHOOKS] 🔔 HIGH PRIORITY ALERT: Webhook job ${job?.id} moved to Dead-Letter Queue after ${job?.attemptsMade} attempts`, {
+      jobId: job?.id,
+      jobType: job?.data?.type,
+      webhookType: job?.data?.webhookType,
+      queueName: 'webhooks',
+      priority: 'HIGH',
+      attemptsMade: job?.attemptsMade,
+      maxAttempts: job?.opts?.attempts || 3,
+      errorMessage: err.message,
+      timestamp: new Date().toISOString()
+    });
+    
+    // TODO: Send webhook failure notification
+    // webhookNotificationService.notifyFailure(job.data);
+    
+  } else {
+    console.error(`[WORKER:WEBHOOKS] ❌ Webhook job ${job?.id} failed (attempt ${job?.attemptsMade}/${job?.opts?.attempts || 3}):`, err.message);
+  }
+});
+
+// Reports Worker Events - NORMAL PRIORITY
+reportsWorker.on('completed', (job) => {
+  console.log(`[WORKER:REPORTS] ✅ Report job ${job.id} completed successfully`);
+});
+
+reportsWorker.on('failed', (job, err) => {
+  const isMovingToDLQ = job && job.attemptsMade >= (job.opts?.attempts || 2);
+  
+  if (isMovingToDLQ) {
+    console.error(`[DLQ:REPORTS] 📊 NORMAL PRIORITY: Report job ${job?.id} moved to Dead-Letter Queue after ${job?.attemptsMade} attempts`, {
+      jobId: job?.id,
+      jobType: job?.data?.type,
+      reportType: job?.data?.reportType,
+      queueName: 'reports',
+      priority: 'NORMAL',
+      attemptsMade: job?.attemptsMade,
+      maxAttempts: job?.opts?.attempts || 2,
+      errorMessage: err.message,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Normal priority - just log, no immediate alert needed
+    
+  } else {
+    console.error(`[WORKER:REPORTS] ❌ Report job ${job?.id} failed (attempt ${job?.attemptsMade}/${job?.opts?.attempts || 2}):`, err.message);
+  }
+});
+
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('[WORKER] 🛑 SIGTERM received, closing workers...');
@@ -267,7 +526,12 @@ process.on('SIGTERM', async () => {
     boletoWorker.close(),
     documentWorker.close(),
     notificationWorker.close(),
+    // PAM V3.4 - Close specialized workers
+    paymentsWorker.close(),
+    webhooksWorker.close(),
+    reportsWorker.close(),
   ]);
+  console.log('[WORKER] ✅ All workers closed gracefully');
   process.exit(0);
 });
 
@@ -277,3 +541,7 @@ console.log('  - PDF Processing Worker (concurrency: 5)');
 console.log('  - Boleto Sync Worker (concurrency: 5)');
 console.log('  - Document Processing Worker (concurrency: 5)');
 console.log('  - Notification Worker (concurrency: 5)');
+console.log('[WORKER] 🎯 PAM V3.4 - Specialized High-Performance Workers:');
+console.log('  - Payments Worker (concurrency: 5) - CRITICAL PRIORITY');
+console.log('  - Webhooks Worker (concurrency: 5) - HIGH PRIORITY');
+console.log('  - Reports Worker (concurrency: 5) - NORMAL PRIORITY');

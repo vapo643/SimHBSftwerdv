@@ -88,6 +88,66 @@ formalizationQueue.on('waiting', (job) => {
 // This provides better precision and access to processing context
 // See FormalizationWorker.ts for metrics integration pattern
 
+// =============== PAM V3.4 - SPECIALIZED QUEUES ===============
+// High-Performance Queues with differentiated retry policies
+
+// PAYMENTS QUEUE - CRITICAL (5 attempts, exponential backoff)
+export const paymentsQueue = new Queue('payments', {
+  connection: redisConnection,
+  defaultJobOptions: {
+    attempts: 5,
+    backoff: {
+      type: 'exponential',
+      delay: 2000, // Start with 2 seconds
+    },
+    removeOnComplete: {
+      age: 3600, // Keep completed jobs for 1 hour
+      count: 100, // Keep max 100 completed jobs
+    },
+    removeOnFail: {
+      age: 86400, // Keep failed jobs for 24 hours
+    },
+  },
+});
+
+// WEBHOOKS QUEUE - HIGH PRIORITY (3 attempts, fixed backoff)
+export const webhooksQueue = new Queue('webhooks', {
+  connection: redisConnection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: {
+      type: 'fixed',
+      delay: 5000, // Fixed 5 seconds delay
+    },
+    removeOnComplete: {
+      age: 3600,
+      count: 50,
+    },
+    removeOnFail: {
+      age: 86400,
+    },
+  },
+});
+
+// REPORTS QUEUE - NORMAL PRIORITY (2 attempts, fixed backoff)
+export const reportsQueue = new Queue('reports', {
+  connection: redisConnection,
+  defaultJobOptions: {
+    attempts: 2,
+    backoff: {
+      type: 'fixed',
+      delay: 10000, // Fixed 10 seconds delay
+    },
+    removeOnComplete: {
+      age: 1800, // 30 minutes
+      count: 25,
+    },
+    removeOnFail: {
+      age: 43200, // 12 hours
+    },
+  },
+});
+
 // Export all queues
 export const queues = {
   pdfProcessing: pdfProcessingQueue,
@@ -96,6 +156,10 @@ export const queues = {
   notification: notificationQueue,
   formalization: formalizationQueue,
   deadLetter: deadLetterQueue,
+  // PAM V3.4 - Specialized High-Performance Queues
+  payments: paymentsQueue,
+  webhooks: webhooksQueue,
+  reports: reportsQueue,
 };
 
 // Health check function
@@ -108,6 +172,10 @@ export async function checkQueuesHealth() {
       notificationQueue.getJobCounts(),
       formalizationQueue.getJobCounts(),
       deadLetterQueue.getJobCounts(),
+      // PAM V3.4 - New specialized queues health check
+      paymentsQueue.getJobCounts(),
+      webhooksQueue.getJobCounts(),
+      reportsQueue.getJobCounts(),
     ]);
 
     return {
@@ -119,6 +187,10 @@ export async function checkQueuesHealth() {
         notification: results[3],
         formalization: results[4],
         deadLetter: results[5],
+        // PAM V3.4 - Specialized queues
+        payments: results[6],
+        webhooks: results[7],
+        reports: results[8],
       },
     };
   } catch (error) {

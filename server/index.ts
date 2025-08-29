@@ -25,6 +25,32 @@ import { registerRoutes } from './routes';
   await formalizationWorker.start();
   log('⚡ Formalization Worker initialized - Processing async events');
 
+  // =============== PAM V3.4 - INITIALIZE SPECIALIZED HIGH-PERFORMANCE WORKERS ===============
+  // Initialize the specialized workers for payments, webhooks, and reports
+  let paymentsWorker: any, webhooksWorker: any, reportsWorker: any;
+  
+  try {
+    const { Worker } = await import('bullmq');
+    const { getRedisConnectionConfig } = await import('./lib/redis-config');
+    
+    const redisConnection = getRedisConnectionConfig();
+    const workerOptions = { connection: redisConnection, concurrency: 5 };
+
+    // Note: Worker processors are defined in server/worker.ts
+    // These are placeholder workers for graceful shutdown management in the main process
+    paymentsWorker = new Worker('payments', async () => {}, workerOptions);
+    webhooksWorker = new Worker('webhooks', async () => {}, workerOptions);  
+    reportsWorker = new Worker('reports', async () => {}, workerOptions);
+
+    log('🎯 PAM V3.4 - Specialized queue workers initialized in main process');
+    log('   - Payments Worker (CRITICAL PRIORITY)');
+    log('   - Webhooks Worker (HIGH PRIORITY)'); 
+    log('   - Reports Worker (NORMAL PRIORITY)');
+    
+  } catch (error) {
+    log('⚠️ Warning: Could not initialize specialized workers in main process:', error instanceof Error ? error.message : String(error));
+  }
+
   // Initialize Sistema de Alertas Proativos (PAM V1.0)
   const { alertasProativosService } = await import('./services/alertasProativosService');
 
@@ -180,6 +206,38 @@ import { registerRoutes } from './routes';
       );
     }
   }
+
+  // =============== PAM V3.4 - GRACEFUL SHUTDOWN FOR SPECIALIZED WORKERS ===============
+  // Graceful shutdown handler for main process workers
+  process.on('SIGTERM', async () => {
+    console.log('[SERVER] 🛑 SIGTERM received, closing specialized workers...');
+    
+    try {
+      const workers = [paymentsWorker, webhooksWorker, reportsWorker];
+      const activeWorkers = workers.filter(Boolean);
+      
+      if (activeWorkers.length > 0) {
+        console.log(`[SERVER] 📡 Closing ${activeWorkers.length} specialized workers...`);
+        await Promise.all(activeWorkers.map(worker => worker.close()));
+        console.log('[SERVER] ✅ All specialized workers closed gracefully');
+      } else {
+        console.log('[SERVER] ℹ️  No active specialized workers to close');
+      }
+      
+      // Close formalization worker if it exists
+      if (formalizationWorker) {
+        console.log('[SERVER] 📡 Closing formalization worker...');
+        await formalizationWorker.stop();
+        console.log('[SERVER] ✅ Formalization worker closed gracefully');
+      }
+      
+    } catch (error) {
+      console.error('[SERVER] ❌ Error during graceful shutdown:', error instanceof Error ? error.message : String(error));
+    }
+    
+    console.log('[SERVER] 🏁 Graceful shutdown complete');
+    process.exit(0);
+  });
 
   // Start server on configured port
   server.listen(
