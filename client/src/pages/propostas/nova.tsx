@@ -13,6 +13,7 @@ import { ClientDataStep } from '@/components/propostas/ClientDataStep';
 import { LoanConditionsStep } from '@/components/propostas/LoanConditionsStep';
 import { DocumentsStep } from '@/components/propostas/DocumentsStep';
 import { PersonalReferencesStep } from '@/components/propostas/PersonalReferencesStep';
+import { ProposalProgressIndicator } from '@/components/ProposalProgressIndicator';
 
 // Component that uses the ProposalContext
 function ProposalForm() {
@@ -280,25 +281,33 @@ function ProposalForm() {
   ][state.currentStep];
 
   return (
-    <Tabs value={currentTabValue} onValueChange={handleStepChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="dados-cliente">
-          <User className="mr-2 h-4 w-4" />
-          Dados do Cliente
-        </TabsTrigger>
-        <TabsTrigger value="referencias-pessoais">
-          <User className="mr-2 h-4 w-4" />
-          Referências
-        </TabsTrigger>
-        <TabsTrigger value="condicoes-emprestimo">
-          <DollarSign className="mr-2 h-4 w-4" />
-          Empréstimo
-        </TabsTrigger>
-        <TabsTrigger value="anexo-documentos">
-          <FileText className="mr-2 h-4 w-4" />
-          Documentos
-        </TabsTrigger>
-      </TabsList>
+    <div className="w-full">
+      {/* UX-005: Indicador de progresso visual */}
+      <ProposalProgressIndicator 
+        currentStep={state.currentStep} 
+        totalSteps={4}
+      />
+      
+      <Tabs value={currentTabValue} onValueChange={handleStepChange} className="w-full">
+        {/* TabsList mantida para funcionalidade, mas visualmente oculta */}
+        <TabsList className="hidden">
+          <TabsTrigger value="dados-cliente">
+            <User className="mr-2 h-4 w-4" />
+            Dados do Cliente
+          </TabsTrigger>
+          <TabsTrigger value="referencias-pessoais">
+            <User className="mr-2 h-4 w-4" />
+            Referências
+          </TabsTrigger>
+          <TabsTrigger value="condicoes-emprestimo">
+            <DollarSign className="mr-2 h-4 w-4" />
+            Empréstimo
+          </TabsTrigger>
+          <TabsTrigger value="anexo-documentos">
+            <FileText className="mr-2 h-4 w-4" />
+            Documentos
+          </TabsTrigger>
+        </TabsList>
 
       <div className="mt-6">
         <TabsContent value="dados-cliente">
@@ -368,6 +377,7 @@ function ProposalForm() {
         )}
       </div>
     </Tabs>
+    </div>
   );
 }
 
