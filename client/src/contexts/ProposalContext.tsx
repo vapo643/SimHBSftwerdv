@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 
 // Types from our orchestrator endpoint
 interface Atendente {
@@ -426,48 +426,116 @@ export function useProposal() {
 export function useProposalActions() {
   const { dispatch } = useProposal();
 
-  return {
-    setContext: (context: OriginationContext) =>
-      dispatch({ type: 'SET_CONTEXT', payload: context }),
+  // REM-FCF-01.3: Memoizar todas as funções action para evitar loop infinito
+  const setContext = useCallback(
+    (context: OriginationContext) => dispatch({ type: 'SET_CONTEXT', payload: context }),
+    [dispatch]
+  );
 
-    updateClient: (data: Partial<ClientData>) => dispatch({ type: 'UPDATE_CLIENT', payload: data }),
+  const updateClient = useCallback(
+    (data: Partial<ClientData>) => dispatch({ type: 'UPDATE_CLIENT', payload: data }),
+    [dispatch]
+  );
 
-    selectProduct: (productId: number) => dispatch({ type: 'SELECT_PRODUCT', payload: productId }),
+  const selectProduct = useCallback(
+    (productId: number) => dispatch({ type: 'SELECT_PRODUCT', payload: productId }),
+    [dispatch]
+  );
 
-    selectTable: (tableId: number) => dispatch({ type: 'SELECT_TABLE', payload: tableId }),
+  const selectTable = useCallback(
+    (tableId: number) => dispatch({ type: 'SELECT_TABLE', payload: tableId }),
+    [dispatch]
+  );
 
-    updateLoanConditions: (data: Partial<LoanData>) =>
-      dispatch({ type: 'UPDATE_LOAN_CONDITIONS', payload: data }),
+  const updateLoanConditions = useCallback(
+    (data: Partial<LoanData>) => dispatch({ type: 'UPDATE_LOAN_CONDITIONS', payload: data }),
+    [dispatch]
+  );
 
-    setSimulationResult: (result: SimulationResult) =>
-      dispatch({ type: 'SET_SIMULATION_RESULT', payload: result }),
+  const setSimulationResult = useCallback(
+    (result: SimulationResult) => dispatch({ type: 'SET_SIMULATION_RESULT', payload: result }),
+    [dispatch]
+  );
 
-    clearSimulation: () => dispatch({ type: 'CLEAR_SIMULATION' }),
+  const clearSimulation = useCallback(
+    () => dispatch({ type: 'CLEAR_SIMULATION' }),
+    [dispatch]
+  );
 
-    addDocument: (document: Document) => dispatch({ type: 'ADD_DOCUMENT', payload: document }),
+  const addDocument = useCallback(
+    (document: Document) => dispatch({ type: 'ADD_DOCUMENT', payload: document }),
+    [dispatch]
+  );
 
-    removeDocument: (documentId: string) =>
-      dispatch({ type: 'REMOVE_DOCUMENT', payload: documentId }),
+  const removeDocument = useCallback(
+    (documentId: string) => dispatch({ type: 'REMOVE_DOCUMENT', payload: documentId }),
+    [dispatch]
+  );
 
-    addReference: (reference: PersonalReference) =>
-      dispatch({ type: 'ADD_REFERENCE', payload: reference }),
+  const addReference = useCallback(
+    (reference: PersonalReference) => dispatch({ type: 'ADD_REFERENCE', payload: reference }),
+    [dispatch]
+  );
 
-    updateReference: (index: number, reference: PersonalReference) =>
+  const updateReference = useCallback(
+    (index: number, reference: PersonalReference) =>
       dispatch({ type: 'UPDATE_REFERENCE', payload: { index, reference } }),
+    [dispatch]
+  );
 
-    removeReference: (index: number) => dispatch({ type: 'REMOVE_REFERENCE', payload: index }),
+  const removeReference = useCallback(
+    (index: number) => dispatch({ type: 'REMOVE_REFERENCE', payload: index }),
+    [dispatch]
+  );
 
-    setStep: (step: number) => dispatch({ type: 'SET_STEP', payload: step }),
+  const setStep = useCallback(
+    (step: number) => dispatch({ type: 'SET_STEP', payload: step }),
+    [dispatch]
+  );
 
-    setError: (field: string, message: string) =>
-      dispatch({ type: 'SET_ERROR', payload: { field, message } }),
+  const setError = useCallback(
+    (field: string, message: string) => dispatch({ type: 'SET_ERROR', payload: { field, message } }),
+    [dispatch]
+  );
 
-    clearError: (field: string) => dispatch({ type: 'SET_ERROR', payload: { field, message: '' } }),
+  const clearError = useCallback(
+    (field: string) => dispatch({ type: 'SET_ERROR', payload: { field, message: '' } }),
+    [dispatch]
+  );
 
-    clearErrors: () => dispatch({ type: 'CLEAR_ERRORS' }),
+  const clearErrors = useCallback(
+    () => dispatch({ type: 'CLEAR_ERRORS' }),
+    [dispatch]
+  );
 
-    setLoading: (loading: boolean) => dispatch({ type: 'SET_LOADING', payload: loading }),
+  const setLoading = useCallback(
+    (loading: boolean) => dispatch({ type: 'SET_LOADING', payload: loading }),
+    [dispatch]
+  );
 
-    reset: () => dispatch({ type: 'RESET' }),
+  const reset = useCallback(
+    () => dispatch({ type: 'RESET' }),
+    [dispatch]
+  );
+
+  return {
+    setContext,
+    updateClient,
+    selectProduct,
+    selectTable,
+    updateLoanConditions,
+    setSimulationResult,
+    clearSimulation,
+    addDocument,
+    removeDocument,
+    addReference,
+    updateReference,
+    removeReference,
+    setStep,
+    setError,
+    clearError,
+    clearErrors,
+    setLoading,
+    reset,
   };
 }
