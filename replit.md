@@ -1,5 +1,5 @@
 # Overview
-Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. It covers credit creation, payment processing, and formalization tracking. The project aims to be a leading fintech solution, providing a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system.
+Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to provide a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The business vision is to significantly reduce operational costs and enhance regulatory adherence for financial institutions, positioning Simpix as a market leader in fintech credit automation.
 
 # User Preferences
 ### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -95,7 +95,7 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **2. Proibição de Fontes Duvidosas:** A utilização de fontes de baixa qualidade é **terminantemente proibida**. Isto inclui, mas não se limita a:
 - Blogs de opinião pessoal sem fundamentação técnica.
-- Fóruns de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
+- Fórum de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
 - Qualquer fonte que não possa ser claramente atribuída a uma organização ou a um especialista de reputação reconhecida.
 
 **3. Justificativa Estratégica (O "Porquê"):** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
