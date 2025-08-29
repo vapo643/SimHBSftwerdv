@@ -1,5 +1,5 @@
 # Overview
-Simpix is a full-stack TypeScript application designed to automate and streamline the entire credit proposal workflow for financial institutions. It covers credit proposal creation, payment processing, and formalization tracking. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to be a leading fintech solution providing a scalable platform with banking-grade security, compliance, and efficient data handling, ultimately reducing errors and enhancing regulatory adherence.
+Simpix is a full-stack TypeScript application designed to automate and streamline the entire credit proposal workflow for financial institutions. It covers credit creation, payment processing, and formalization tracking. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to be a leading fintech solution, providing a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence.
 
 # User Preferences
 ### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -158,7 +158,7 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 - **Asynchronous Processing**: BullMQ backed by Redis for job queues.
 - **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
 - **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
-- **Domain-Driven Design**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
+- **Domain-Driven Design (DDD)**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
 - **Security**: Implements Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
 - **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.
 - **Observability**: Winston (structured logging), Sentry (error tracking), health checks, and automated backups.

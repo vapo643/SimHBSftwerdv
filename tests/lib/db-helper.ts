@@ -19,7 +19,8 @@ import { v4 as uuidv4 } from 'uuid';
  * SAFETY: This function should ONLY be used in test environments
  */
 export async function cleanTestDatabase(): Promise<void> {
-  // TRIPLA PROTEÇÃO CONTRA EXECUÇÃO EM PRODUÇÃO - PAM V1.0 FORENSE
+  // 🚨 SISTEMA DE SALVAGUARDAS ANTI-DESTRUIÇÃO V2.0 - REM-DDD-01.3 🚨
+  // MÚLTIPLAS CAMADAS DE PROTEÇÃO CONTRA EXECUÇÃO ACIDENTAL
 
   // Proteção 1: NODE_ENV DEVE ser explicitamente 'test' (não apenas "não-production")
   if (process.env.NODE_ENV !== 'test') {
@@ -31,17 +32,72 @@ export async function cleanTestDatabase(): Promise<void> {
     );
   }
 
-  // Proteção 2: TEST_DATABASE_URL deve estar configurado
-  if (!process.env.TEST_DATABASE_URL) {
-    console.error('🔴 CRITICAL SECURITY ALERT: TEST_DATABASE_URL não está configurado');
+  // Proteção 2: DATABASE_URL deve estar configurado
+  const databaseUrl = process.env.DATABASE_URL || process.env.TEST_DATABASE_URL;
+  if (!databaseUrl) {
+    console.error('🔴 CRITICAL SECURITY ALERT: DATABASE_URL não está configurado');
     throw new Error(
-      'FATAL: TEST_DATABASE_URL não configurado. Use um banco de dados de teste dedicado. Operação abortada.'
+      'FATAL: DATABASE_URL não configurado. Use um banco de dados de teste dedicado. Operação abortada.'
     );
   }
 
-  // Proteção 3: Rejeitar URLs de produção conhecidas (defesa em profundidade)
+  // Proteção 3: VERIFICAÇÃO MANDATÓRIA DO NOME DO BANCO (NOVO - REM-DDD-01.3)
+  try {
+    const url = new URL(databaseUrl);
+    const dbName = url.pathname.substring(1); // Remove leading '/'
+    
+    if (!dbName.endsWith('-test')) {
+      console.error(
+        `🔴 CRITICAL SECURITY ALERT: Nome do banco '${dbName}' NÃO termina com '-test'`
+      );
+      throw new Error(
+        `FATAL: Nome do banco '${dbName}' deve terminar com '-test' para execução de limpeza. Operação abortada para proteger dados.`
+      );
+    }
+    
+    console.log(`✅ [SEGURANÇA] Nome do banco validado: '${dbName}' (termina com '-test')`);
+  } catch (urlError) {
+    console.error(`🔴 CRITICAL SECURITY ALERT: Erro ao analisar DATABASE_URL: ${urlError}`);
+    throw new Error(
+      'FATAL: Não foi possível validar o nome do banco de dados. Operação abortada para proteger dados.'
+    );
+  }
+
+  // Proteção 4: VERIFICAÇÃO DE HOSTNAME PROIBIDO (NOVO - REM-DDD-01.3)
+  try {
+    const url = new URL(databaseUrl);
+    const hostname = url.hostname.toLowerCase();
+    
+    // Lista de hostnames de produção conhecidos (expandir conforme necessário)
+    const forbiddenHosts = [
+      'prod-db.simpix.com',
+      'production-database.simpix.com',
+      'simpix-prod.database.azure.com',
+      'live-db.simpix.com'
+    ];
+    
+    const detectedForbiddenHost = forbiddenHosts.find(host => hostname.includes(host));
+    
+    if (detectedForbiddenHost) {
+      console.error(
+        `🔴 CRITICAL SECURITY ALERT: Hostname '${hostname}' está na lista de hosts proibidos: '${detectedForbiddenHost}'`
+      );
+      throw new Error(
+        `FATAL: Hostname '${hostname}' é um servidor de produção conhecido. Operação abortada para proteger dados.`
+      );
+    }
+    
+    console.log(`✅ [SEGURANÇA] Hostname validado: '${hostname}' (não está na lista proibida)`);
+  } catch (urlError) {
+    console.error(`🔴 CRITICAL SECURITY ALERT: Erro ao analisar hostname: ${urlError}`);
+    throw new Error(
+      'FATAL: Não foi possível validar o hostname do banco de dados. Operação abortada para proteger dados.'
+    );
+  }
+
+  // Proteção 5: Rejeitar URLs de produção conhecidas por padrões (mantida da V1.0)
   const prodPatterns = ['prod', 'production', 'azure', 'live', 'main'];
-  const dbUrl = process.env.DATABASE_URL?.toLowerCase() || '';
+  const dbUrl = databaseUrl.toLowerCase();
   const detectedProdPattern = prodPatterns.find((pattern) => dbUrl.includes(pattern));
 
   if (detectedProdPattern) {
@@ -54,6 +110,18 @@ export async function cleanTestDatabase(): Promise<void> {
   }
 
   const startTime = Date.now();
+  
+  // 🚨 LOGS DE ALERTA DE ALTA VISIBILIDADE (NOVO - REM-DDD-01.3) 🚨
+  console.warn('');
+  console.warn('⚠️ ========================================= ⚠️');
+  console.warn('⚠️  ALERTA: EXECUTANDO LIMPEZA DE BANCO DE DADOS DE TESTE  ⚠️');
+  console.warn('⚠️ ========================================= ⚠️');
+  console.warn(`⚠️  BANCO: ${process.env.DATABASE_URL || 'N/A'}`);
+  console.warn(`⚠️  NODE_ENV: ${process.env.NODE_ENV}`);
+  console.warn('⚠️  TODAS AS TABELAS SERÃO TRUNCADAS COM CASCADE!');
+  console.warn('⚠️ ========================================= ⚠️');
+  console.warn('');
+  
   console.log('[TEST DB] 🧹 Starting comprehensive database cleanup...');
 
   try {

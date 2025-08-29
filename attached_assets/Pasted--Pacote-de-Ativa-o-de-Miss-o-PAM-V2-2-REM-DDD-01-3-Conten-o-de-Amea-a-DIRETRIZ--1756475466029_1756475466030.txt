@@ -1,0 +1,47 @@
+### **Pacote de Ativação de Missão (PAM) V2.2 - REM-DDD-01.3 (Contenção de Ameaça)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Implementar um "kill switch" de segurança multicamada na função `cleanTestDatabase` em `tests/lib/db-helper.ts` para prevenir a execução acidental contra bancos de dados de não-teste.
+* **Intenção Estratégica (O Porquê):** Proteger nossos ativos de dados contra destruição acidental. A salvaguarda atual (`NODE_ENV`) é fraca e já falhou. Precisamos de uma defesa em profundidade que torne impossível, por design, que um script de teste apague um banco de dados de produção ou desenvolvimento.
+* **Histórico Relevante (Consulta Obrigatória):** Sua análise forense (`REM-DDD-01.1`) identificou a função `cleanTestDatabase` como a causa raiz da exclusão de dados. Esta missão é a resposta direta a essa descoberta.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de segurança reforçando uma porta blindada. Você não vai apenas consertar a fechadura quebrada (`NODE_ENV`), mas vai adicionar múltiplas travas novas e um alarme, garantindo que a porta nunca mais possa ser aberta acidentalmente.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **ALTO** - Uma implementação incorreta das novas salvaguardas pode bloquear indevidamente a execução de testes em ambientes de CI/CD legítimos, quebrando o pipeline.
+    * **Contramedida:** A lógica deve ser explícita e rigorosa. As verificações devem permitir a execução apenas se MÚLTIPLAS condições forem atendidas (ex: `NODE_ENV` é 'test' E o nome do banco de dados contém '-test').
+
+---
+
+**IMPLEMENTAR:**
+User Story REM-DDD-01.3: Implementar Salvaguardas Anti-Destruição no Ambiente de Teste
+
+**CONTEXT:**
+Nossa investigação forense identificou uma função de limpeza de banco de dados (`cleanTestDatabase`) em nosso helper de teste que é perigosamente destrutiva. A sua única proteção (`NODE_ENV === 'test'`) é insuficiente e já permitiu a limpeza acidental do banco de dados de desenvolvimento. Precisamos blindar esta função para que ela nunca mais possa ser executada contra um banco de dados que não seja especificamente dedicado a testes.
+
+**CURRENT STATE:**
+O arquivo `tests/lib/db-helper.ts` contém a função `cleanTestDatabase`. A primeira linha da função é um `if (process.env.NODE_ENV !== 'test')` que tenta prevenir a execução. Esta proteção se mostrou ineficaz.
+
+**EXPECTED (Estado Final de Sucesso):**
+A função `cleanTestDatabase` em `tests/lib/db-helper.ts` deve ser refatorada para incluir as seguintes salvaguardas **adicionais** e **mandatórias**:
+1.  **Verificação do Nome do Banco de Dados:** A função deve extrair o nome do banco de dados da string de conexão (`process.env.DATABASE_URL`). A execução só pode prosseguir se o nome do banco de dados terminar explicitamente com `-test` (ex: `simpix-db-test`). Se não terminar, a função deve lançar um erro fatal imediatamente.
+2.  **Verificação de Hostname Proibido:** A função deve verificar se o hostname do banco de dados na `DATABASE_URL` corresponde a qualquer endereço de produção conhecido (esta lista pode estar vazia por agora, mas a estrutura da verificação deve ser implementada). Se for um host de produção, a função deve lançar um erro fatal.
+3.  **Logs de Alerta:** Antes de executar o comando `TRUNCATE`, a função deve registrar um log de alerta explícito e de alta visibilidade no console (ex: `console.warn('--- ALERTA: EXECUTANDO LIMPEZA DE BANCO DE DADOS DE TESTE ---')`).
+4.  **Remoção do CI/CD (Contenção Imediata):** O arquivo `.github/workflows/ci.yml` deve ser modificado. A etapa `Run integration tests` que executa `npm run test:integration --if-present` deve ser **comentada ou removida** para desativar o gatilho automático até que a infraestrutura de teste seja considerada 100% segura.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Modificar `db-helper.ts`:** Edite o arquivo `tests/lib/db-helper.ts` e a função `cleanTestDatabase`.
+2.  **Implementar Verificação de Nome:** Adicione a lógica para analisar a `DATABASE_URL` e impor a regra do sufixo `-test`.
+3.  **Implementar Verificação de Hostname:** Adicione a estrutura de verificação de hostname proibido.
+4.  **Adicionar Logs de Alerta:** Insira o `console.warn` antes do comando `db.execute`.
+5.  **Modificar `ci.yml`:** Edite o arquivo `.github/workflows/ci.yml` e comente a etapa de execução dos testes de integração.
+6.  **Validação:** Descreva como você validaria que as novas proteções funcionam (não é necessário executar os testes, apenas descrever o plano de teste mental).
+7.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M3: Core Business Logic
+- **Missão de Emergência Atual:** "Análise forense de destruição de dados (REM-DDD-01)"
+---

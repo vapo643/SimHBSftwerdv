@@ -128,9 +128,11 @@ jobs:
         run: npm test --if-present
         continue-on-error: true # Non-blocking initially
         
-      - name: Run integration tests
-        run: npm run test:integration --if-present
-        continue-on-error: true # Non-blocking initially
+      # 🚨 DESABILITADO TEMPORARIAMENTE - REM-DDD-01.3 CONTENÇÃO DE AMEAÇA 🚨
+      # Testes de integração desabilitados até implementação de salvaguardas 100% seguras
+      # - name: Run integration tests
+      #   run: npm run test:integration --if-present
+      #   continue-on-error: true # Non-blocking initially
         
       - name: Upload test coverage
         uses: actions/upload-artifact@v4
