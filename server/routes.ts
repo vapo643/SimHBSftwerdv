@@ -48,7 +48,7 @@ import cobrancasRoutes from './routes/cobrancas';
 import monitoringRoutes from './routes/monitoring';
 import ccbIntelligentTestRoutes from './routes/ccb-intelligent-test';
 import ccbCorrectedRoutes from './routes/ccb-test-corrected';
-import clienteRoutes from './routes/cliente-routes';
+import clienteRoutes from './routes/cliente-routes-original';
 import gestaoContratosRoutes from './routes/gestao-contratos';
 import testCcbCoordinatesRoutes from './routes/test-ccb-coordinates';
 import propostasCarneRoutes from './routes/propostas-carne';
