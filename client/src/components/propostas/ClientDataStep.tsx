@@ -3,6 +3,8 @@ import { useProposal, useProposalActions } from '@/contexts/ProposalContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useDebounce } from '@/hooks/use-debounce';
+import { CPF, CEP } from '@shared/value-objects';
 import {
   Select,
   SelectContent,
@@ -91,8 +93,25 @@ export function ClientDataStep() {
   // Estados de loading para APIs
   const [loadingCep, setLoadingCep] = useState(false);
   const [loadingCpfData, setLoadingCpfData] = useState(false);
+  
+  // UX-006: Estados para validação em tempo real
+  const [cpfValidation, setCpfValidation] = useState<{
+    isValid: boolean;
+    isValidating: boolean;
+  }>({ isValid: false, isValidating: false });
+  
+  // UX-006: Debounce para CEP (500ms)
+  const debouncedCep = useDebounce(clientData.cep, 500);
 
   const [progress, setProgress] = useState(0);
+  
+  // UX-006: Busca automática de CEP com debounce
+  useEffect(() => {
+    const cleanCep = debouncedCep.replace(/\D/g, '');
+    if (cleanCep.length === 8 && CEP.isValid(cleanCep)) {
+      fetchAddressByCep(debouncedCep);
+    }
+  }, [debouncedCep, fetchAddressByCep]);
 
   // Função para buscar CEP usando nosso backend
   const fetchAddressByCep = useCallback(
@@ -214,15 +233,24 @@ export function ClientDataStep() {
     });
   };
 
-  // Handlers simplificados - SEM VALIDAÇÃO
+  // UX-006: Handler com validação em tempo real de CPF
   const handleCPFChange = (value: string) => {
     updateClient({ cpf: value });
     clearError('cpf');
-    // Buscar dados quando tiver 11 dígitos
+    
+    // UX-006: Validação em tempo real
     const cleanCPF = value.replace(/\D/g, '');
-    if (cleanCPF.length === 11) {
-      fetchClientDataByCpf(value);
-    }
+    setCpfValidation({ isValidating: true, isValid: false });
+    
+    setTimeout(() => {
+      const isValid = CPF.isValid(cleanCPF);
+      setCpfValidation({ isValidating: false, isValid });
+      
+      // Buscar dados quando CPF for válido (11 dígitos)
+      if (cleanCPF.length === 11 && isValid) {
+        fetchClientDataByCpf(value);
+      }
+    }, 100); // Micro delay para UX suave
   };
 
   const handleCNPJChange = (value: string) => {
@@ -240,14 +268,11 @@ export function ClientDataStep() {
     clearError('telefone');
   };
 
+  // UX-006: Handler simplificado - busca via debounce em useEffect
   const handleCEPChange = (value: string) => {
     updateClient({ cep: value });
     clearError('cep');
-    // Auto-buscar endereço quando CEP tiver 8 dígitos
-    const cleanCep = value.replace(/\D/g, '');
-    if (cleanCep.length === 8) {
-      fetchAddressByCep(value);
-    }
+    // Busca automática via debouncedCep no useEffect
   };
 
   const handleNameChange = (value: string) => {
@@ -399,13 +424,36 @@ export function ClientDataStep() {
                     onChange={(value) => handleCPFChange(value)}
                     id="cpf"
                     placeholder="000.000.000-00"
-                    className={errors.cpf ? 'border-destructive focus:border-destructive' : ''}
+                    className={`pr-10 ${
+                      errors.cpf
+                        ? 'border-destructive focus:border-destructive'
+                        : cpfValidation.isValid
+                        ? 'border-green-500 focus:border-green-600'
+                        : ''
+                    }`}
                     data-testid="input-cpf"
                   />
-                  {/* Ícone de validação removido */}
+                  {/* UX-006: Ícone de validação em tempo real */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {cpfValidation.isValidating ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" data-testid="icon-cpf-loading" />
+                    ) : clientData.cpf && clientData.cpf.replace(/\D/g, '').length >= 3 ? (
+                      cpfValidation.isValid ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" data-testid="icon-cpf-valid" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" data-testid="icon-cpf-invalid" />
+                      )
+                    ) : null}
+                  </div>
                 </div>
                 {errors.cpf && <p className="mt-1 text-sm text-destructive">{errors.cpf}</p>}
-                {/* Mensagem de CPF válido removida */}
+                {/* UX-006: Mensagem de feedback em tempo real */}
+                {clientData.cpf && cpfValidation.isValid && (
+                  <p className="mt-1 text-sm text-green-600 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" />
+                    CPF válido
+                  </p>
+                )}
               </div>
 
               <div>
@@ -646,6 +694,14 @@ export function ClientDataStep() {
                 } pr-10`}
                 data-testid="input-cep"
               />
+              {/* UX-006: Indicador de carregamento CEP em tempo real */}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {loadingCep ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" data-testid="icon-cep-loading" />
+                ) : clientData.logradouro ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-600" data-testid="icon-cep-success" />
+                ) : null}
+              </div>
               {loadingCep && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                   <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
