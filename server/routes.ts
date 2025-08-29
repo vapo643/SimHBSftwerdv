@@ -1913,39 +1913,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Simple GET endpoint for all commercial tables (for dropdowns)
+  // PAM V4.2 PERF-F3-001: GET endpoint for commercial tables with cache-aside pattern  
   app.get(
     '/api/tabelas-comerciais',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
-        // Import database connection
-        const { db } = await import('../server/lib/supabase');
-        const { desc, eq } = await import('drizzle-orm');
-        const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
+        console.log('🔍 [PAM V4.2] Buscando tabelas comerciais com cache-aside pattern...');
+        
+        // Import cache manager
+        const { CachedQueries } = await import('./lib/cache-manager');
+        
+        const tabelasWithProducts = await CachedQueries.getCommercialTables(async () => {
+          console.log('🔍 [PAM V4.2] CACHE MISS - Buscando tabelas comerciais no banco de dados...');
+          
+          // Import database connection
+          const { db } = await import('../server/lib/supabase');
+          const { desc, eq } = await import('drizzle-orm');
+          const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
 
-        // Get all commercial tables ordered by creation date (excluding soft-deleted)
-        const { isNull } = await import('drizzle-orm');
-        const tabelas = await db
-          .select()
-          .from(tabelasComerciais)
-          .where(isNull(tabelasComerciais.deletedAt))
-          .orderBy(desc(tabelasComerciais.createdAt));
+          // Get all commercial tables ordered by creation date (excluding soft-deleted)
+          const { isNull } = await import('drizzle-orm');
+          const tabelas = await db
+            .select()
+            .from(tabelasComerciais)
+            .where(isNull(tabelasComerciais.deletedAt))
+            .orderBy(desc(tabelasComerciais.createdAt));
 
-        // For each table, get associated products
-        const tabelasWithProducts = await Promise.all(
-          tabelas.map(async (tabela) => {
-            const associations = await db
-              .select({ produtoId: produtoTabelaComercial.produtoId })
-              .from(produtoTabelaComercial)
-              .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
+          // For each table, get associated products
+          const result = await Promise.all(
+            tabelas.map(async (tabela) => {
+              const associations = await db
+                .select({ produtoId: produtoTabelaComercial.produtoId })
+                .from(produtoTabelaComercial)
+                .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
 
-            return {
-              ...tabela,
-              produtoIds: associations.map((a) => a.produtoId),
-            };
-          })
-        );
+              return {
+                ...tabela,
+                produtoIds: associations.map((a) => a.produtoId),
+              };
+            })
+          );
+          
+          console.log(`🔍 [PAM V4.2] Tabelas comerciais carregadas do banco: ${result.length} registros`);
+          return result;
+        });
 
         console.log(
           `[${getBrasiliaTimestamp()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`
@@ -2009,6 +2021,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           return newTabela;
         });
+
+        // PAM V4.2 PERF-F3-001: Cache invalidation após criação
+        const cacheManager = await import('./lib/cache-manager');
+        await cacheManager.default.invalidate('commercial:tables', 'commercial');
+        console.log('🔥 [PAM V4.2] CACHE INVALIDATED: commercial tables após criação');
 
         console.log(
           `[${getBrasiliaTimestamp()}] Nova tabela comercial criada com ${validatedData.produtoIds.length} produtos: ${result.id}`
@@ -2090,6 +2107,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return updatedTabela;
         });
 
+        // PAM V4.2 PERF-F3-001: Cache invalidation após atualização
+        const cacheManager = await import('./lib/cache-manager');
+        await cacheManager.default.invalidate('commercial:tables', 'commercial');
+        console.log('🔥 [PAM V4.2] CACHE INVALIDATED: commercial tables após atualização');
+
         console.log(
           `[${getBrasiliaTimestamp()}] Tabela comercial atualizada com ${validatedData.produtoIds.length} produtos: ${result.id}`
         );
@@ -2141,6 +2163,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error('Tabela comercial não encontrada');
           }
         });
+
+        // PAM V4.2 PERF-F3-001: Cache invalidation após exclusão
+        const cacheManager = await import('./lib/cache-manager');
+        await cacheManager.default.invalidate('commercial:tables', 'commercial');
+        console.log('🔥 [PAM V4.2] CACHE INVALIDATED: commercial tables após exclusão');
 
         console.log(`[${getBrasiliaTimestamp()}] Tabela comercial deletada: ${tabelaId}`);
         res.status(204).send();
