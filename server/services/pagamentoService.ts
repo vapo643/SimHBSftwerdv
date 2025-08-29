@@ -89,7 +89,7 @@ export class PagamentoService {
   }
 
   /**
-   * Create new payment - PAM V3.5 IDEMPOTENT PROCESSING
+   * Create new payment - CONF-001 IDEMPOTENT PROCESSING FIX
    */
   async createPayment(paymentData: any, userId: string): Promise<any> {
     // Validate payment data
@@ -103,16 +103,41 @@ export class PagamentoService {
       throw new Error('Esta proposta já possui pagamento confirmado');
     }
 
-    // PAM V3.5 - Generate UNIQUE and DETERMINISTIC jobId for idempotency
-    // Format: payment-{propostaId}-{timestamp}-{hash} ensures uniqueness while preventing duplicates
-    const timestamp = Date.now();
-    const baseData = `${validated.propostaId}-${validated.numeroContrato}-${validated.valorLiquido}`;
-    const jobId = `payment-${validated.propostaId}-${timestamp}`;
+    // CONF-001 CRITICAL FIX: Check database for existing payment before creating job
+    // This prevents duplicate jobs at the application level
+    const existingCollection = await pagamentoRepository.checkExistingPayment(validated.propostaId);
+    
+    if (existingCollection) {
+      console.log(`[PAYMENT IDEMPOTENCY] 🛡️ Payment already exists for proposal ${validated.propostaId}:`, {
+        codigoSolicitacao: existingCollection.codigoSolicitacao,
+        seuNumero: existingCollection.seuNumero,
+        situacao: existingCollection.situacao,
+        createdAt: existingCollection.createdAt
+      });
+      
+      return {
+        message: 'Pagamento já foi processado anteriormente (idempotência database-level)',
+        propostaId: validated.propostaId,
+        existingPayment: {
+          codigoSolicitacao: existingCollection.codigoSolicitacao,
+          seuNumero: existingCollection.seuNumero,
+          situacao: existingCollection.situacao,
+          valorNominal: existingCollection.valorNominal
+        },
+        status: 'ja_processado',
+        duplicate: true,
+        timestamp: new Date().toISOString(),
+      };
+    }
 
-    console.log(`[PAYMENT IDEMPOTENCY] 🔑 Generated jobId: ${jobId} for proposal ${validated.propostaId}`);
+    // CONF-001 FIX: Generate DETERMINISTIC jobId without timestamp 
+    // This ensures the same proposal always gets the same jobId
+    const jobId = `payment-${validated.propostaId}`;
+
+    console.log(`[PAYMENT IDEMPOTENCY] 🔑 Generated deterministic jobId: ${jobId} for proposal ${validated.propostaId}`);
 
     try {
-      // PAM V3.5 - Add job to paymentsQueue with idempotent jobId 
+      // CONF-001 - Add job to paymentsQueue with deterministic jobId 
       const job = await paymentsQueue.add(
         'PROCESS_PAYMENT', 
         {
@@ -120,14 +145,14 @@ export class PagamentoService {
           propostaId: validated.propostaId,
           paymentData: validated,
           userId,
-          timestamp,
+          timestamp: Date.now(),
           // Include all necessary data for processing
           numeroContrato: validated.numeroContrato,
           valorLiquido: validated.valorLiquido,
           formaPagamento: validated.formaPagamento,
         },
         {
-          // PAM V3.5 - CRITICAL: jobId ensures idempotency
+          // CONF-001 - CRITICAL: Deterministic jobId ensures true idempotency
           jobId: jobId,
           // Additional job options
           attempts: 5, // Will be overridden by queue defaults
@@ -145,7 +170,7 @@ export class PagamentoService {
         internalJobId: job.id,
         propostaId: validated.propostaId,
         status: 'em_fila',
-        timestamp: new Date(timestamp).toISOString(),
+        timestamp: new Date().toISOString(),
       };
 
     } catch (error: any) {
@@ -154,12 +179,12 @@ export class PagamentoService {
         console.log(`[PAYMENT IDEMPOTENCY] 🛡️ Duplicate job prevented: ${jobId} already exists in queue`);
         
         return {
-          message: 'Pagamento já foi enfileirado anteriormente (idempotência ativa)',
+          message: 'Pagamento já foi enfileirado anteriormente (idempotência BullMQ-level)',
           jobId: jobId,
           propostaId: validated.propostaId,
           status: 'ja_enfileirado',
           duplicate: true,
-          timestamp: new Date(timestamp).toISOString(),
+          timestamp: new Date().toISOString(),
         };
       }
       

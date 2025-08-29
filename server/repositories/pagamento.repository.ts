@@ -343,6 +343,19 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
   }
 
   /**
+   * Check if payment already exists for a proposal - CONF-001 FIX
+   */
+  async checkExistingPayment(propostaId: string): Promise<any | null> {
+    const result = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, propostaId))
+      .limit(1);
+
+    return result[0] || null;
+  }
+
+  /**
    * Audit payment action
    */
   async auditPaymentAction(
