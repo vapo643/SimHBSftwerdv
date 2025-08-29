@@ -1,6 +1,13 @@
 ### Overview
 Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to provide a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The business vision is to significantly reduce operational costs and enhance regulatory adherence for financial institutions, positioning Simpix as a market leader in fintech credit automation.
 
+### Recent Changes
+**2025-08-29 - Fase 2: Melhorias de Alto Impacto**
+- **UX-007 CONCLUÍDO**: Contador de resultados dinâmico implementado no dashboard ("Exibindo X de Y propostas") com atualização em tempo real conforme filtros aplicados
+- **UX-008 CONCLUÍDO**: Sistema de breadcrumbs implementado com componente reutilizável, mapeamento dinâmico de rotas, links funcionais e integração completa ao DashboardLayout
+- **Robustez do Sistema**: Validadas as proteções contra falhas de APIs externas (CEP e CPF), garantindo que validações são apenas visuais e não bloqueiam o fluxo de negócio
+- **Arquitetura**: Adicionado componente `Breadcrumbs.tsx` com lógica de mapeamento de rotas e suporte completo à navegação estrutural
+
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
 **Ativação:** Quando o usuário enviar exatamente: **"me explica o que você fez"**
