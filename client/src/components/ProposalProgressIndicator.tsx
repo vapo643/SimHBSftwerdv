@@ -57,7 +57,7 @@ export function ProposalProgressIndicator({ currentStep, totalSteps }: ProposalP
           const IconComponent = step.icon;
           
           return (
-            <React.Fragment key={step.id}>
+            <div key={step.id} className="flex items-center">
               <div className="flex flex-col items-center space-y-2">
                 {/* Círculo do passo */}
                 <div 
@@ -116,7 +116,7 @@ export function ProposalProgressIndicator({ currentStep, totalSteps }: ProposalP
                   data-testid={`connector-${index}`}
                 />
               )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
