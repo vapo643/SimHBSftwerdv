@@ -158,6 +158,8 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 - **File Storage**: Secure private buckets.
 - **Asynchronous Processing**: BullMQ backed by Redis for job queues.
 - **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
+
+**Common to Frontend and Backend:**
 - **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
 - **Domain-Driven Design (DDD)**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
 - **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.

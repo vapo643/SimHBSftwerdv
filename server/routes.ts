@@ -200,7 +200,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
   app.get('/api/debug-sentry', function mainHandler(req, res) {
-    throw new Error("My first Sentry error!");
+    const Sentry = require('@sentry/node');
+    const error = new Error("My first Sentry error!");
+    
+    // Captura explícita no Sentry
+    Sentry.captureException(error);
+    console.log('🚀 Erro capturado e enviado para Sentry:', error.message);
+    
+    // Também lança o erro para manter compatibilidade
+    throw error;
+  });
+
+  // Debug do status do Sentry
+  app.get('/api/debug-sentry-status', (req, res) => {
+    const { config } = require('./lib/config');
+    const Sentry = require('@sentry/node');
+    
+    res.json({
+      sentryDsnConfigured: !!config.observability.sentryDsn,
+      sentryDsnLength: config.observability.sentryDsn?.length || 0,
+      sentryEnvVar: !!process.env.SENTRY_DSN,
+      sentryEnvLength: process.env.SENTRY_DSN?.length || 0,
+      sentryClientActive: !!Sentry.getCurrentScope(),
+    });
   });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
