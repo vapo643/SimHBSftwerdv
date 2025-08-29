@@ -1,0 +1,53 @@
+### **Pacote de Ativação de Missão (PAM) V1.6 - REM-S2-003 (Remediação)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Corrigir os bugs identificados nos testes unitários dos Value Objects (VOs) `Money` e `Email` no arquivo `tests/unit/value-objects.test.ts` e garantir que 100% dos testes passem.
+* **Intenção Estratégica (O Porquê):** Value Objects são a primeira linha de defesa da integridade do nosso domínio. Se eles contêm bugs, dados inválidos podem poluir o sistema na sua origem. A correção destes testes é fundamental para garantir que nossas regras de negócio mais básicas são robustas e confiáveis.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria (`PAM V1.2`) revelou falhas específicas:
+    * **`Money`:** Falha no parsing de valores no formato brasileiro (ex: `1234.56`).
+    * **`Email`:** Falha na validação, aceitando formatos inválidos (ex: `user..user@domain.com`) e rejeitando formatos válidos.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de software focado em lógica de domínio pura. Sua tarefa é refinar e fortalecer os "tipos" do nosso negócio, garantindo que eles sejam à prova de erros, com base nas falhas de teste já identificadas.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **MÉDIO** - As correções nas expressões regulares ou na lógica de parsing podem ser muito permissivas ou muito restritivas, introduzindo novos bugs.
+    * **Contramedida:** A correção deve ser guiada estritamente pelos testes. Modifique a lógica nos VOs em `shared/value-objects.ts` e execute `npx vitest run tests/unit/value-objects.test.ts` repetidamente até que todos os 14 testes passem. Não declare sucesso antes de ver o output "14 passed".
+
+---
+
+**IMPLEMENTAR:**
+User Story REM-S2-003: Corrigir Testes Unitários dos Value Objects
+
+**CONTEXT:**
+Nossa auditoria revelou que, embora a maioria dos nossos Value Objects esteja funcional, os VOs para `Money` e `Email` contêm bugs que fazem seus testes unitários falharem. Um VO não confiável é um risco de corrupção de dados. Precisamos corrigir a lógica de validação desses objetos para garantir 100% de precisão e robustez.
+
+**CURRENT STATE:**
+O arquivo de teste `tests/unit/value-objects.test.ts` tem 11 testes passando e 3 falhando. As falhas estão concentradas na validação de `Money` (parsing de valores brasileiros) e `Email`. O código fonte dos VOs está em `shared/value-objects.ts`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Lógica Corrigida:** O código em `shared/value-objects.ts` para as classes ou funções `MoneyValueObject` e `EmailValueObject` deve ser modificado para corrigir os bugs de validação e parsing.
+2.  **Todos os Testes Passando:** A execução do comando `npx vitest run tests/unit/value-objects.test.ts` deve resultar em **14 testes passando** (`14 passed`).
+3.  **Evidência de Sucesso:** O output completo e não resumido da execução bem-sucedida do teste deve ser fornecido como prova final da conclusão da missão.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Analisar Falhas:** Execute `npx vitest run tests/unit/value-objects.test.ts` e analise em detalhe as mensagens de erro para os 3 testes que falham.
+2.  **Corrigir Lógica do VO `Money`:** Edite o arquivo `shared/value-objects.ts`. Localize a lógica de parsing no `MoneyValueObject` e ajuste-a para interpretar corretamente os formatos numéricos brasileiros.
+3.  **Corrigir Lógica do VO `Email`:** No mesmo arquivo, refine a expressão regular ou a lógica de validação do `EmailValueObject` para ser mais precisa, cobrindo os casos de falha reportados.
+4.  **Executar e Iterar:** Após cada modificação, execute novamente o comando `npx vitest run tests/unit/value-objects.test.ts` até que o resultado seja "14 passed".
+5.  **Fornecer Prova:** Cole o output completo do terminal que mostra claramente o sucesso de todos os 14 testes.
+6.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M2: Data & Domain
+- **Missão de Emergência Atual:** "Roadmap de Remediação do Sprint 2"
+---
