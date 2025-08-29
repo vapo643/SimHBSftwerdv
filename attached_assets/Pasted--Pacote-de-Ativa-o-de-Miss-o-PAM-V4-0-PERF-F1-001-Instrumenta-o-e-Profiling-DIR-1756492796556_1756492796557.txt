@@ -1,0 +1,43 @@
+### **Pacote de Ativação de Missão (PAM) V4.0 - PERF-F1-001 (Instrumentação e Profiling)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Finalizar, estabilizar e validar a implementação do middleware de monitoramento de performance (`server/middleware/performance-monitor.ts`) e do `DatabaseOptimizer`, garantindo que temos um sistema de profiling robusto para coletar as métricas necessárias para as próximas fases de otimização.
+* **Intenção Estratégica (O Porquê):** Não podemos otimizar o que não podemos medir. Esta fase de instrumentação é a mais crítica, pois nos fornecerá os dados empíricos para tomar decisões de otimização baseadas em fatos, não em suposições, atacando os gargalos reais do sistema.
+* **Histórico Relevante (Consulta Obrigatória):** A execução anterior do Agente já criou os arquivos `performance-monitor.ts`, `database-optimizer.ts` e `cache-manager.ts`. Esta missão foca em refinar e validar formalmente este trabalho.
+
+---
+
+**IMPLEMENTAR:**
+User Story PERF-001: Finalizar e Validar a Camada de Profiling de Performance
+
+**CONTEXT:**
+Para combater a lentidão do sistema, precisamos primeiro de um diagnóstico preciso. A análise preliminar já identificou os endpoints críticos e potenciais gargalos. Agora, vamos finalizar a implementação das ferramentas de medição que nos permitirão quantificar a latência e identificar as causas raiz.
+
+**CURRENT STATE:**
+O Agente já criou `server/middleware/performance-monitor.ts` para interceptar e logar a duração das requisições, e `server/utils/database-optimizer.ts` e `server/lib/cache-manager.ts` para otimizações de DB e cache. No entanto, a integração e validação final não foram formalmente concluídas.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Middleware de Performance Consolidado:** O `performance-monitor.ts` deve estar devidamente registrado como um middleware global no `server/app.ts`, capturando e logando a duração (`duration_ms`), o `correlationId` e o `memoryDelta` de todas as requisições API.
+2.  **Otimização do Dashboard Validada:** A rota `/api/dashboard/stats` deve utilizar o `DatabaseOptimizer` para executar as agregações de dados diretamente no PostgreSQL, eliminando a carga de processamento do Node.js.
+3.  **Cache Manager Funcional:** O `CacheManager` (`server/lib/cache-manager.ts`) deve ser utilizado para aplicar um cache com TTL de 5 minutos no resultado do endpoint `/api/dashboard/stats`.
+4.  **Prova de Funcionamento:**
+    * Você deve fornecer logs do `performance-monitor` mostrando a captura de métricas de pelo menos um endpoint lento.
+    * Você deve fornecer o código SQL gerado pelo `DatabaseOptimizer` para o endpoint do dashboard.
+    * Você deve fornecer logs que provem o funcionamento do cache (um `CACHE HIT` após a primeira chamada ao endpoint do dashboard).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Auditar e Refinar Middlewares:** Verifique a implementação em `performance-monitor.ts`. Garanta que ele esteja corretamente registrado em `server/app.ts` para monitorar todas as rotas `/api/*`.
+2.  **Auditar e Refinar Otimizador de DB:** Verifique a rota `/api/dashboard/stats`. Confirme que ela não está mais carregando todas as propostas em memória (`storage.getPropostas()`) e, em vez disso, está usando uma função do `DatabaseOptimizer` que executa uma query `COUNT` e `GROUP BY` no banco. Apresente a nova query.
+3.  **Implementar Cache:** No controller da rota `/api/dashboard/stats`, implemente a lógica de caching "cache-aside":
+    * Tente buscar o resultado do `cacheManager.get('dashboard_stats')`.
+    * Se houver um `CACHE HIT`, retorne os dados do cache.
+    * Se for um `CACHE MISS`, execute a query otimizada, salve o resultado no cache com um TTL de 300 segundos (`cacheManager.set('dashboard_stats', result, 300)`), e retorne o resultado.
+4.  **Executar e Coletar Evidências:**
+    * Reinicie o servidor.
+    * Acesse um endpoint lento (como `/api/features` ou o antigo `/api/dashboard/stats` se ainda existir) e capture o log do `performance-monitor`.
+    * Acesse o endpoint `/api/dashboard/stats` duas vezes seguidas. Capture os logs que mostrem a execução da query na primeira vez e o `CACHE HIT` na segunda.
+5.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
