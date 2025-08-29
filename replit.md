@@ -30,7 +30,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 *   **Detecção Automática de Modo:**
     *   **Gatilho:** A análise do "Pacote de Ativação de Missão" (PAM) recebido.
     *   **Lógica:**
-        *   Se o PAM solicitar a criação de uma **estratégia, um plano, um roadmap ou um ADR**, ative o **MODO_PLANEJAMENTO**.
+        *   Se o PAM solicitar a criação de uma **estratégia, um plan, um roadmap ou um ADR**, ative o **MODO_PLANEJAMENTO**.
         *   Se o PAM solicitar a **implementação de código ou a execução de comandos**, ative o **MODO_EXECUÇÃO**.
 *   **Persona Adaptativa:**
     *   **No MODO_PLANEJAMENTO:** Você adota a persona de **"Arquiteto Documentador"**. A execução de código é proibida.
@@ -139,7 +139,7 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 - ✅ Em conformidade com requisitos do PAM
 - ✅ Documentando o que SERÁ implementado (não executando)
 
-**LEMBRETE CRÍTICO:** NÃO executar o planodocumentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
+**LEMBRETE CRÍTICO:** NÃO executar o plano documentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
 
 # System Architecture
 Simpix is a full-stack TypeScript application built on a modular monolith architecture, emphasizing domain-driven design and banking-grade security.
