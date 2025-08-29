@@ -94,6 +94,9 @@ export function ClientDataStep() {
   const [loadingCep, setLoadingCep] = useState(false);
   const [loadingCpfData, setLoadingCpfData] = useState(false);
   
+  // UX-012: Estado para controlar feedback visual de auto-preenchimento
+  const [addressFieldsJustFilled, setAddressFieldsJustFilled] = useState(false);
+  
   // UX-006: Estados para validação em tempo real
   const [cpfValidation, setCpfValidation] = useState<{
     isValid: boolean;
@@ -125,6 +128,12 @@ export function ClientDataStep() {
             cidade: data.cidade || '',
             estado: data.estado || '',
           });
+
+          // UX-012: Ativar efeito visual de flash nos campos preenchidos
+          setAddressFieldsJustFilled(true);
+          
+          // Remover o efeito após a animação (1.8s)
+          setTimeout(() => setAddressFieldsJustFilled(false), 1800);
 
           clearError('cep');
           toast({
@@ -736,7 +745,7 @@ export function ClientDataStep() {
               placeholder="Ex: Rua das Flores, Avenida Brasil"
               value={clientData.logradouro}
               onChange={(e) => updateClient({ logradouro: e.target.value })}
-              className={errors.logradouro ? 'border-destructive' : ''}
+              className={`${errors.logradouro ? 'border-destructive' : ''} ${addressFieldsJustFilled ? 'address-flash' : ''}`}
               data-testid="input-logradouro"
             />
             {errors.logradouro && (
@@ -774,6 +783,7 @@ export function ClientDataStep() {
               type="text"
               value={clientData.bairro}
               onChange={(e) => updateClient({ bairro: e.target.value })}
+              className={addressFieldsJustFilled ? 'address-flash' : ''}
               data-testid="input-bairro"
             />
           </div>
@@ -785,6 +795,7 @@ export function ClientDataStep() {
               type="text"
               value={clientData.cidade}
               onChange={(e) => updateClient({ cidade: e.target.value })}
+              className={addressFieldsJustFilled ? 'address-flash' : ''}
               data-testid="input-cidade"
             />
           </div>
@@ -795,7 +806,10 @@ export function ClientDataStep() {
               value={clientData.estado}
               onValueChange={(value) => updateClient({ estado: value })}
             >
-              <SelectTrigger data-testid="select-estado">
+              <SelectTrigger 
+                className={addressFieldsJustFilled ? 'address-flash' : ''}
+                data-testid="select-estado"
+              >
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
