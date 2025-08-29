@@ -1,0 +1,65 @@
+### **Pacote de Ativação de Missão (PAM) V1.2 - AUDITORIA E VALIDAÇÃO M2**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Sua função é reportar a realidade técnica, por mais dura que ela seja. Não resuma ou omita qualquer descoberta. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa e fornecer provas concretas da implementação das User Stories S2-002 (Unit of Work) e S2-004 (Value Objects), validando que a missão M2 foi concluída não apenas em código, mas em funcionalidade testada e comprovada.
+* **Intenção Estratégica (O Porquê):** Verificar a veracidade do auto-relato de sucesso do Agente. A camada de dados é a fundação do sistema; uma implementação falha ou não validada aqui comprometeria todos os Sprints futuros e a integridade da "Operação Aço Líquido". A confiança deve ser verificada.
+* **Histórico Relevante (Consulta Obrigatória):** A sua última mensagem declarou "MILESTONE M2 - DATA & DOMAIN CONCLUÍDO COM SUCESSO!". Esta auditoria tem como objetivo validar essa afirmação com evidências irrefutáveis.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor cético. Seu trabalho não é confiar, mas verificar. Você deve dissecar o trabalho que acabou de realizar para provar sua qualidade e correção, conforme os nossos rigorosos padrões de nível bancário.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **CRÍTICO** - A implementação do Unit of Work (UoW) pode ser superficial ou incorreta, não garantindo a atomicidade e levando a uma falsa sensação de segurança, resultando em corrupção de dados em produção.
+    * **Contramedida:** A auditoria exigirá a execução de testes de integração que forcem cenários de falha para provar que o rollback do UoW funciona como esperado. A mera existência do código é insuficiente.
+
+---
+
+**AUDITAR E VALIDAR:**
+Implementação do Milestone M2: Data Layer & Domain Model
+
+**CONTEXT:**
+Um agente de IA reportou a conclusão bem-sucedida da implementação do Unit of Work e dos Value Objects. No entanto, de acordo com nosso protocolo de "Realismo Cético", essa declaração não tem valor sem provas. Precisamos de uma auditoria completa para validar que a implementação não é apenas superficial, mas funcional, robusta e devidamente testada, garantindo a integridade dos dados antes de prosseguirmos.
+
+**CURRENT STATE:**
+O Agente Executor modificou arquivos como `server/lib/unit-of-work.ts`, `shared/value-objects.ts` e `server/storage.ts`, e declarou a missão como completa. Não há, no entanto, um relatório formal que apresente as provas da conclusão, como resultados de testes ou logs de execução.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve gerar um **Relatório de Auditoria Forense** detalhado que contenha as seguintes seções, preenchidas com as evidências brutas:
+
+1.  **Prova do Unit of Work (UoW):**
+    * Apresente o código-fonte do teste de integração que você criou ou modificou para validar o UoW.
+    * Este teste DEVE simular um cenário de falha (ex: a criação do `propostaLog` falha após a criação da `proposta`).
+    * Forneça os logs de execução do teste que PROVAM que, no cenário de falha, a transação sofreu `ROLLBACK` e nenhum dado foi persistido no banco de dados.
+2.  **Prova dos Value Objects (VOs):**
+    * Apresente o código-fonte dos testes unitários para o `CPFValueObject` e o `MoneyValueObject`.
+    * Os testes devem cobrir casos de sucesso (CPF válido) e de falha (CPF inválido).
+    * Mostre o resultado da execução desses testes, provando que um CPF inválido lança uma exceção e impede a criação do objeto.
+3.  **Prova de Integração no Domínio:**
+    * Mostre o trecho de código (diff) do Agregado `Proposal` (`server/contexts/credit/domain/aggregates/Proposal.ts`) que foi alterado para usar os novos Value Objects em vez de tipos primitivos.
+4.  **Prova de Zero Regressão:**
+    * Execute a suíte de testes de integração completa (`npm run test:integration`).
+    * Cole o output COMPLETO e não resumido do resultado dos testes, provando que todas as funcionalidades existentes continuam operando corretamente.
+5.  **Relatório de Sanidade do Código:**
+    * Execute `get_latest_lsp_diagnostics`.
+    * Cole o resultado, que deve ser `Success: No LSP diagnostics found.`
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+*Execute este protocolo como parte da sua auditoria e inclua os resultados na sua Declaração de Incerteza.*
+
+1.  Mapear ficheiros e funções exatas afetadas pela implementação do M2.
+2.  Garantir importações e tipos corretos em todos os arquivos modificados.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação auditada.
+5.  **Categorizar Riscos Descobertos** durante a auditoria (BAIXO/MÉDIO/ALTO/CRÍTICO).
+6.  Realizar teste funcional completo (provado pela suíte de integração).
+7.  **Documentar Decisões Técnicas** assumidas durante a implementação original.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% APÓS a auditoria]
+* **RISCOS IDENTIFICADOS:** [Listar riscos ou dívidas técnicas descobertas durante a auditoria]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Descrever as decisões tomadas pelo Agente na implementação, ex: "O UoW foi implementado como uma classe separada para desacoplamento."]
+* **VALIDAÇÃO PENDENTE:** [Listar ações de validação que ainda são necessárias]
+---

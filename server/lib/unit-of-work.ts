@@ -246,6 +246,5 @@ export class StatusContextualTransactionRepository extends TransactionRepository
 // Export singleton instance
 export const unitOfWork = new UnitOfWork();
 
-// Import shortcuts for common patterns
+// Import shortcuts for common patterns  
 export { db as database };
-export type { Transaction };
