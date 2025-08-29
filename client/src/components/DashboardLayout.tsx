@@ -32,6 +32,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -44,6 +50,18 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   const { toast } = useToast();
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // UX-003: Função para determinar qual seção do accordion deve estar aberta
+  const getDefaultOpenSection = (currentPath: string): string => {
+    if (currentPath.startsWith('/dashboard')) return 'principal';
+    if (currentPath.startsWith('/propostas') || currentPath.startsWith('/credito') || currentPath.startsWith('/formalizacao')) return 'principal';
+    if (currentPath.startsWith('/financeiro')) return 'financeiro';
+    if (currentPath.startsWith('/admin/usuarios')) return 'gestao-acesso';
+    if (currentPath.startsWith('/configuracoes')) return 'configuracoes';
+    if (currentPath.startsWith('/parceiros') || currentPath.startsWith('/admin/lojas') || currentPath.startsWith('/gestao/contratos')) return 'gestao-comercial';
+    if (currentPath.startsWith('/admin/security')) return 'seguranca';
+    return 'principal'; // Padrão
+  };
 
   // Fechar menu com Escape e ao navegar
   useEffect(() => {
@@ -116,320 +134,362 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
             <ThemeSelector />
           </div>
           <div className="flex-1 overflow-auto py-2">
-            <nav className="space-y-6 px-4">
-              {/* Workflow Principal */}
-              <div className="space-y-2">
-                <div className="px-3 pb-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Workflow Principal
-                  </h3>
-                </div>
-                {[
-                  {
-                    name: '📊 Dashboard',
-                    href: '/dashboard',
-                    icon: LayoutDashboard,
-                    gradient: 'from-blue-500 to-purple-600',
-                  },
-                  {
-                    name: '➕ Nova Proposta',
-                    href: '/propostas/nova',
-                    icon: PlusCircle,
-                    gradient: 'from-green-500 to-emerald-600',
-                  },
-                  {
-                    name: '📋 Fila de Análise',
-                    href: '/credito/fila',
-                    icon: List,
-                    gradient: 'from-orange-500 to-red-600',
-                  },
-                  {
-                    name: '📄 Formalização',
-                    href: '/formalizacao',
-                    icon: FileText,
-                    gradient: 'from-indigo-500 to-blue-600',
-                  },
-                ]
-                  .filter((item) => {
-                    // 🔒 FILTRO RÍGIDO POR ROLE
-                    switch (user?.role) {
-                      case 'ATENDENTE':
-                        // ATENDENTE: Dashboard, Nova Proposta e Formalização
-                        return ['📊 Dashboard', '➕ Nova Proposta', '📄 Formalização'].includes(
-                          item.name
-                        );
-
-                      case 'ANALISTA':
-                        // ANALISTA: APENAS Fila de Análise
-                        return ['📋 Fila de Análise'].includes(item.name);
-
-                      case 'FINANCEIRO':
-                        // FINANCEIRO: Sem acesso ao workflow principal
-                        return false;
-
-                      case 'GERENTE':
-                      case 'ADMINISTRADOR':
-                      case 'DIRETOR':
-                        // Gestores: Acesso completo
-                        return true;
-
-                      default:
-                        return false;
-                    }
-                  })
-                  .map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location === item.href;
-                    return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={handleNavClick}
-                        className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                          isActive
-                            ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                            : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <div
-                          className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
-                        >
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
-                          {item.name}
-                        </span>
-                      </Link>
-                    );
-                  })}
-              </div>
-
-              {/* Área Financeira */}
-              {(user?.role === 'FINANCEIRO' ||
-                user?.role === 'ADMINISTRADOR' ||
-                user?.role === 'DIRETOR') && (
-                <div className="space-y-2">
-                  <div className="px-3 pb-2">
+            <nav className="px-4">
+              {/* UX-003: Accordion Navigation */}
+              <Accordion type="single" defaultValue={getDefaultOpenSection(location)} collapsible className="space-y-2">
+                
+                {/* Workflow Principal */}
+                <AccordionItem value="principal" className="border-none">
+                  <AccordionTrigger className="hover:no-underline py-2 px-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Área Financeira
+                      📊 Workflow Principal
                     </h3>
-                  </div>
-                  <Link
-                    href="/financeiro/pagamentos"
-                    onClick={handleNavClick}
-                    className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                      location === '/financeiro/pagamentos'
-                        ? 'scale-105 transform bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                        : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <div
-                      className={`rounded-lg p-2 ${location === '/financeiro/pagamentos' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
-                    >
-                      <CreditCard className="h-4 w-4" />
-                    </div>
-                    <span
-                      className={`font-medium ${location === '/financeiro/pagamentos' ? 'text-white' : ''}`}
-                    >
-                      💳 Pagamentos
-                    </span>
-                  </Link>
-                  <Link
-                    href="/financeiro/cobrancas"
-                    onClick={handleNavClick}
-                    className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                      location === '/financeiro/cobrancas'
-                        ? 'scale-105 transform bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
-                        : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <div
-                      className={`rounded-lg p-2 ${location === '/financeiro/cobrancas' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
-                    >
-                      <Receipt className="h-4 w-4" />
-                    </div>
-                    <span
-                      className={`font-medium ${location === '/financeiro/cobrancas' ? 'text-white' : ''}`}
-                    >
-                      📑 Cobranças
-                    </span>
-                  </Link>
-                </div>
-              )}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-2">
+                    <div className="space-y-1">
+                      {[
+                        {
+                          name: '📊 Dashboard',
+                          href: '/dashboard',
+                          icon: LayoutDashboard,
+                          gradient: 'from-blue-500 to-purple-600',
+                        },
+                        {
+                          name: '➕ Nova Proposta',
+                          href: '/propostas/nova',
+                          icon: PlusCircle,
+                          gradient: 'from-green-500 to-emerald-600',
+                        },
+                        {
+                          name: '📋 Fila de Análise',
+                          href: '/credito/fila',
+                          icon: List,
+                          gradient: 'from-orange-500 to-red-600',
+                        },
+                        {
+                          name: '📄 Formalização',
+                          href: '/formalizacao',
+                          icon: FileText,
+                          gradient: 'from-indigo-500 to-blue-600',
+                        },
+                      ]
+                        .filter((item) => {
+                          // 🔒 FILTRO RÍGIDO POR ROLE
+                          switch (user?.role) {
+                            case 'ATENDENTE':
+                              // ATENDENTE: Dashboard, Nova Proposta e Formalização
+                              return ['📊 Dashboard', '➕ Nova Proposta', '📄 Formalização'].includes(
+                                item.name
+                              );
 
-              {/* Gestão Administrativa */}
-              {(user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR') && (
-                <>
-                  <div className="space-y-2">
-                    <div className="px-3 pb-2">
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Gestão de Acesso
-                      </h3>
+                            case 'ANALISTA':
+                              // ANALISTA: APENAS Fila de Análise
+                              return ['📋 Fila de Análise'].includes(item.name);
+
+                            case 'FINANCEIRO':
+                              // FINANCEIRO: Sem acesso ao workflow principal
+                              return false;
+
+                            case 'GERENTE':
+                            case 'ADMINISTRADOR':
+                            case 'DIRETOR':
+                              // Gestores: Acesso completo
+                              return true;
+
+                            default:
+                              return false;
+                          }
+                        })
+                        .map((item) => {
+                          const Icon = item.icon;
+                          const isActive = location === item.href;
+                          return (
+                            <Link
+                              key={item.name}
+                              href={item.href}
+                              onClick={handleNavClick}
+                              className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                                isActive
+                                  ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
+                                  : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
+                              }`}
+                              data-testid={`nav-${item.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                            >
+                              <div
+                                className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                              >
+                                <Icon className="h-4 w-4" />
+                              </div>
+                              <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
+                                {item.name}
+                              </span>
+                            </Link>
+                          );
+                        })}
                     </div>
-                    <Link
-                      href="/admin/usuarios"
-                      onClick={handleNavClick}
-                      className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                        location === '/admin/usuarios'
-                          ? 'scale-105 transform bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
-                          : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      <div
-                        className={`rounded-lg p-2 ${location === '/admin/usuarios' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
-                      >
-                        <Users className="h-4 w-4" />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Área Financeira */}
+                {(user?.role === 'FINANCEIRO' ||
+                  user?.role === 'ADMINISTRADOR' ||
+                  user?.role === 'DIRETOR') && (
+                  <AccordionItem value="financeiro" className="border-none">
+                    <AccordionTrigger className="hover:no-underline py-2 px-3">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        💳 Área Financeira
+                      </h3>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-2">
+                      <div className="space-y-1">
+                        <Link
+                          href="/financeiro/pagamentos"
+                          onClick={handleNavClick}
+                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                            location === '/financeiro/pagamentos'
+                              ? 'scale-105 transform bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
+                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
+                          }`}
+                          data-testid="nav-pagamentos"
+                        >
+                          <div
+                            className={`rounded-lg p-2 ${location === '/financeiro/pagamentos' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                          >
+                            <CreditCard className="h-4 w-4" />
+                          </div>
+                          <span
+                            className={`font-medium ${location === '/financeiro/pagamentos' ? 'text-white' : ''}`}
+                          >
+                            💳 Pagamentos
+                          </span>
+                        </Link>
+                        <Link
+                          href="/financeiro/cobrancas"
+                          onClick={handleNavClick}
+                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                            location === '/financeiro/cobrancas'
+                              ? 'scale-105 transform bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
+                          }`}
+                          data-testid="nav-cobrancas"
+                        >
+                          <div
+                            className={`rounded-lg p-2 ${location === '/financeiro/cobrancas' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                          >
+                            <Receipt className="h-4 w-4" />
+                          </div>
+                          <span
+                            className={`font-medium ${location === '/financeiro/cobrancas' ? 'text-white' : ''}`}
+                          >
+                            📑 Cobranças
+                          </span>
+                        </Link>
                       </div>
-                      <span
-                        className={`font-medium ${location === '/admin/usuarios' ? 'text-white' : ''}`}
-                      >
-                        👤 Usuários & Perfis
-                      </span>
-                    </Link>
-                  </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
 
-                  <div className="space-y-2">
-                    <div className="px-3 pb-2">
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Configurações
-                      </h3>
-                    </div>
-                    {[
-                      {
-                        name: '🔧 Tabelas Comerciais',
-                        href: '/configuracoes/tabelas',
-                        icon: Settings,
-                        gradient: 'from-slate-500 to-gray-600',
-                      },
-                      {
-                        name: '📦 Produtos de Crédito',
-                        href: '/configuracoes/produtos',
-                        icon: Package,
-                        gradient: 'from-cyan-500 to-blue-600',
-                      },
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      const isActive = location === item.href;
-                      return (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                            isActive
-                              ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          <div
-                            className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                {/* Gestão Administrativa */}
+                {(user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR') && (
+                  <>
+                    {/* Gestão de Acesso */}
+                    <AccordionItem value="gestao-acesso" className="border-none">
+                      <AccordionTrigger className="hover:no-underline py-2 px-3">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          👤 Gestão de Acesso
+                        </h3>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-2">
+                        <div className="space-y-1">
+                          <Link
+                            href="/admin/usuarios"
+                            onClick={handleNavClick}
+                            className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                              location === '/admin/usuarios'
+                                ? 'scale-105 transform bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
+                                : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
+                            }`}
+                            data-testid="nav-usuarios"
                           >
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
-                            {item.name}
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                            <div
+                              className={`rounded-lg p-2 ${location === '/admin/usuarios' ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                            >
+                              <Users className="h-4 w-4" />
+                            </div>
+                            <span
+                              className={`font-medium ${location === '/admin/usuarios' ? 'text-white' : ''}`}
+                            >
+                              👤 Usuários & Perfis
+                            </span>
+                          </Link>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
 
-                  <div className="space-y-2">
-                    <div className="px-3 pb-2">
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Gestão Comercial
-                      </h3>
-                    </div>
-                    {[
-                      {
-                        name: '🏢 Parceiros',
-                        href: '/parceiros',
-                        icon: Building2,
-                        gradient: 'from-amber-500 to-orange-600',
-                      },
-                      {
-                        name: '🏪 Lojas & Filiais',
-                        href: '/admin/lojas',
-                        icon: Store,
-                        gradient: 'from-pink-500 to-rose-600',
-                      },
-                      {
-                        name: '📑 Gestão de Contratos',
-                        href: '/gestao/contratos',
-                        icon: FileText,
-                        gradient: 'from-teal-500 to-cyan-600',
-                      },
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      const isActive = location === item.href;
-                      return (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                            isActive
-                              ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          <div
-                            className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
-                          >
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
-                            {item.name}
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                    {/* Configurações */}
+                    <AccordionItem value="configuracoes" className="border-none">
+                      <AccordionTrigger className="hover:no-underline py-2 px-3">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          ⚙️ Configurações
+                        </h3>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-2">
+                        <div className="space-y-1">
+                          {[
+                            {
+                              name: '🔧 Tabelas Comerciais',
+                              href: '/configuracoes/tabelas',
+                              icon: Settings,
+                              gradient: 'from-slate-500 to-gray-600',
+                            },
+                            {
+                              name: '📦 Produtos de Crédito',
+                              href: '/configuracoes/produtos',
+                              icon: Package,
+                              gradient: 'from-cyan-500 to-blue-600',
+                            },
+                          ].map((item) => {
+                            const Icon = item.icon;
+                            const isActive = location === item.href;
+                            return (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                onClick={handleNavClick}
+                                className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                                  isActive
+                                    ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
+                                    : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
+                                }`}
+                                data-testid={`nav-${item.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                              >
+                                <div
+                                  className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
+                                  {item.name}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
 
-                  <div className="space-y-2">
-                    <div className="px-3 pb-2">
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Segurança & Compliance
-                      </h3>
-                    </div>
-                    {[
-                      {
-                        name: '🔐 Dashboard OWASP',
-                        href: '/admin/security/owasp',
-                        icon: Shield,
-                        gradient: 'from-red-500 to-pink-600',
-                      },
-                      {
-                        name: '🔒 Monitoramento Avançado',
-                        href: '/admin/security/dashboard',
-                        icon: Shield,
-                        gradient: 'from-purple-500 to-indigo-600',
-                      },
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      const isActive = location === item.href;
-                      return (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                            isActive
-                              ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
-                              : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          <div
-                            className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
-                          >
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
-                            {item.name}
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+                    {/* Gestão Comercial */}
+                    <AccordionItem value="gestao-comercial" className="border-none">
+                      <AccordionTrigger className="hover:no-underline py-2 px-3">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          🏢 Gestão Comercial
+                        </h3>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-2">
+                        <div className="space-y-1">
+                          {[
+                            {
+                              name: '🏢 Parceiros',
+                              href: '/parceiros',
+                              icon: Building2,
+                              gradient: 'from-amber-500 to-orange-600',
+                            },
+                            {
+                              name: '🏪 Lojas & Filiais',
+                              href: '/admin/lojas',
+                              icon: Store,
+                              gradient: 'from-pink-500 to-rose-600',
+                            },
+                            {
+                              name: '📑 Gestão de Contratos',
+                              href: '/gestao/contratos',
+                              icon: FileText,
+                              gradient: 'from-teal-500 to-cyan-600',
+                            },
+                          ].map((item) => {
+                            const Icon = item.icon;
+                            const isActive = location === item.href;
+                            return (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                onClick={handleNavClick}
+                                className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                                  isActive
+                                    ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
+                                    : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
+                                }`}
+                                data-testid={`nav-${item.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                              >
+                                <div
+                                  className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
+                                  {item.name}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    {/* Segurança & Compliance */}
+                    <AccordionItem value="seguranca" className="border-none">
+                      <AccordionTrigger className="hover:no-underline py-2 px-3">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          🛡️ Segurança & Compliance
+                        </h3>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-2">
+                        <div className="space-y-1">
+                          {[
+                            {
+                              name: '🔐 Dashboard OWASP',
+                              href: '/admin/security/owasp',
+                              icon: Shield,
+                              gradient: 'from-red-500 to-pink-600',
+                            },
+                            {
+                              name: '🔒 Monitoramento Avançado',
+                              href: '/admin/security/dashboard',
+                              icon: Shield,
+                              gradient: 'from-purple-500 to-indigo-600',
+                            },
+                          ].map((item) => {
+                            const Icon = item.icon;
+                            const isActive = location === item.href;
+                            return (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                onClick={handleNavClick}
+                                className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                                  isActive
+                                    ? `bg-gradient-to-r ${item.gradient} scale-105 transform text-white shadow-lg`
+                                    : 'hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground'
+                                }`}
+                                data-testid={`nav-${item.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                              >
+                                <div
+                                  className={`rounded-lg p-2 ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <span className={`font-medium ${isActive ? 'text-white' : ''}`}>
+                                  {item.name}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </>
+                )}
+              </Accordion>
             </nav>
           </div>
         </div>

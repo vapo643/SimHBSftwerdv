@@ -1,0 +1,40 @@
+### **Pacote de Ativação de Missão (PAM) V5.6 - UX-003 (Refatoração da Sidebar)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Refatorar o componente da barra de navegação lateral (`sidebar.tsx`) para agrupar itens de menu relacionados em seções recolhíveis (padrão "accordion"), reduzindo a complexidade visual inicial.
+* **Intenção Estratégica (O Porquê):** Reduzir a sobrecarga cognitiva do usuário. Uma sidebar com dezenas de links visíveis de uma só vez é intimidadora e ineficiente. Ao agrupar itens logicamente (ex: "Gestão", "Configurações"), criamos uma interface mais limpa, organizada e fácil de navegar, melhorando a eficiência do usuário.
+* **Histórico Relevante (Consulta Obrigatória):** A análise heurística (`GL-002`) identificou a complexidade da sidebar como um problema de usabilidade de severidade **CRÍTICA**.
+
+---
+
+**IMPLEMENTAR:**
+User Story UX-003: Implementar Navegação Recolhível (Accordion) na Sidebar
+
+**CONTEXT:**
+Nossa auditoria de UX revelou que a barra de navegação lateral da aplicação cresceu a ponto de se tornar visualmente poluída e difícil de usar. Com muitas opções visíveis simultaneamente, os usuários podem ter dificuldade em encontrar o que precisam. Para resolver isso, vamos agrupar os links em seções lógicas que podem ser expandidas e recolhidas.
+
+**CURRENT STATE:**
+O componente `client/src/components/ui/sidebar.tsx` renderiza uma longa lista de links de navegação sem qualquer agrupamento hierárquico. Todos os itens são exibidos no mesmo nível.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Estrutura de Accordion:** A sidebar deve ser refatorada para usar o componente `Accordion` do `shadcn/ui`.
+2.  **Agrupamento Lógico:** Os links existentes devem ser agrupados em seções lógicas e recolhíveis, como por exemplo:
+    * **Principal:** (Dashboard)
+    * **Operações:** (Nova Proposta, Fila de Análise, etc.)
+    * **Gestão:** (Parceiros, Lojas, Usuários, etc.)
+    * **Configurações:** (Tabelas Comerciais, Produtos, etc.)
+3.  **Comportamento Funcional:**
+    * Apenas uma seção do accordion deve poder estar aberta por vez.
+    * A seção que contém o link da página atualmente ativa deve ser expandida por padrão ao carregar a página.
+4.  **Prova de Sucesso:** Você deve fornecer um screenshot da nova sidebar, mostrando as seções recolhidas e uma seção expandida.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Localizar Componente Alvo:** O alvo é o arquivo `client/src/components/ui/sidebar.tsx`.
+2.  **Importar Componente `Accordion`:** Importe os componentes `Accordion`, `AccordionItem`, `AccordionTrigger`, e `AccordionContent` de `@/components/ui/accordion`.
+3.  **Analisar e Agrupar Links:** Analise a lista atual de links de navegação e defina os agrupamentos lógicos mais adequados (ex: "Operações", "Gestão", "Configurações").
+4.  **Refatorar JSX:** Reestruture o JSX da sidebar. Envolva toda a lista de grupos em um componente `<Accordion>`. Cada grupo de links deve ser um `<AccordionItem>` com um `<AccordionTrigger>` (o título da seção) e um `<AccordionContent>` (que contém os links daquela seção).
+5.  **Implementar Abertura Padrão:** Utilize a propriedade `defaultValue` do componente `Accordion` para definir qual seção deve estar aberta com base na rota atual. Você precisará de uma lógica que mapeie o `pathname` atual para o `value` do `AccordionItem` correspondente.
+6.  **Validar e Apresentar Evidência:** Teste a nova sidebar, navegando entre páginas para garantir que a seção correta se expande. Capture e apresente o screenshot do resultado final.
+7.  **Verificação Final:** Execute o protocolo `7-CHECK FULL`.
