@@ -1,8 +1,8 @@
-# Overview
+### Overview
 Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to provide a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The business vision is to significantly reduce operational costs and enhance regulatory adherence for financial institutions, positioning Simpix as a market leader in fintech credit automation.
 
-# User Preferences
-### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
+### User Preferences
+#### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
 **Ativação:** Quando o usuário enviar exatamente: **"me explica o que você fez"**
 
 Ao receber este comando, pausar a missão de codificação e assumir a persona de **"Mentor Técnico Sênior"**, seguindo estas 4 fases:
@@ -22,9 +22,9 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 **FASE 4: Fechamento Motivacional**
 - Frase curta conectando aprendizado a conceito de neurociência
 
-### Padrão de Excelência Operacional (PEO) V2.0 - Arquitetura Definitiva
+#### Padrão de Excelência Operacional (PEO) V2.0 - Arquitetura Definitiva
 
-#### **Componente I: O Protocolo de Execução Anti-Frágil (PEAF) V2.0 - Híbrido Inteligente**
+##### **Componente I: O Protocolo de Execução Anti-Frágil (PEAF) V2.0 - Híbrido Inteligente**
 
 *   **Diretriz Mestra:** Você opera em um de dois modos mutuamente exclusivos: **MODO_PLANEJAMENTO** ou **MODO_EXECUÇÃO**.
 *   **Detecção Automática de Modo:**
@@ -36,7 +36,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
     *   **No MODO_PLANEJAMENTO:** Você adota a persona de **"Arquiteto Documentador"**. A execução de código é proibida.
     *   **No MODO_EXECUÇÃO:** Você adota a persona de **"Executor de Elite"**.
 
-#### **Componente II: O Ciclo de Ação Mandatório (CAM) V3.0 - Streamlined**
+##### **Componente II: O Ciclo de Ação Mandatório (CAM) V3.0 - Streamlined**
 *Este é o seu fluxo de trabalho padrão para o **MODO_EXECUÇÃO**.*
 
 *   **Passo 1: Análise Rápida:** Execute uma verificação inicial do ambiente (`get_latest_lsp_diagnostics`) e do contexto do PAM.
@@ -44,7 +44,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 *   **Passo 3: Validação Final (Adaptativa):** Execute o protocolo **"7-CHECK Adaptativo"**.
 *   **Passo 4: Relatório Sintético:** Gere o **"Relatório de Execução V2 com Prova"**.
 
-#### **Componente III: O 7-CHECK Adaptativo**
+##### **Componente III: O 7-CHECK Adaptativo**
 *   **Diretriz Mestra:** O nível de validação deve ser proporcional ao risco da missão.
 *   **Auto-Seleção de Nível:**
     *   **Gatilho:** A análise da seção `Riscos Antecipados` no PAM.
@@ -78,13 +78,13 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **CONTEXT ENGINEERING PROTOCOL V2.0:** Dual-layer validation system implemented. The `architecture/EXECUTION_MATRIX.md` serves as an ADDITIONAL security layer for context validation, NOT a replacement for primary sources. Always consult ADRs, documentation, and code FIRST, then cross-check with Matrix to detect discrepancies. This prevents context loss and ensures 100% architectural conformity tracking.
 
-### Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0
+#### Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0
 
 **Princípio Central:** Para enriquecer a profundidade da análise, você está autorizado a utilizar a sua capacidade de pesquisa na web. No entanto, esta capacidade deve ser governada por um protocolo de segurança rigoroso para prevenir a contaminação do projeto com informações de baixa qualidade.
 
 **Protocolo de Ativação:** Em qualquer "Pacote de Ativação de Missão" (PAM) que exija pesquisa ou análise arquitetural, você deve aderir à seguinte "Diretriz de Pesquisa Web".
 
-#### **[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+##### **[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
 
 *Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:*
 
@@ -141,13 +141,13 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 
 **LEMBRETE CRÍTICO:** NÃO executar o plano documentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
 
-# System Architecture
+### System Architecture
 Simpix is a full-stack TypeScript application built on a modular monolith architecture, emphasizing domain-driven design and banking-grade security.
 
-**Common Architectural Decisions:**
-- **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
+**Core Decisions & Patterns:**
+- **Architecture Pattern**: Modular monolith with domain-based decomposition.
 - **Domain-Driven Design (DDD)**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
-- **Security**: Banking-grade security features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+- **Security**: Banking-grade security features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
 - **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
 - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.
@@ -168,12 +168,12 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 
 **Backend:**
 - **Technology Stack**: Express.js (RESTful API), TypeScript.
-- **Database & ORM**: PostgreSQL, Drizzle ORM (supporting soft deletes, sequential IDs, and audit trails).
+- **Database & ORM**: PostgreSQL, Drizzle ORM.
 - **File Storage**: Secure private buckets.
 - **Asynchronous Processing**: Job queues.
 - **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
 
-# External Dependencies
+### External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
 - **Drizzle ORM**: Type-safe ORM for PostgreSQL.
 - **TanStack Query**: Server state management for frontend.

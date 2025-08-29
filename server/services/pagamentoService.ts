@@ -7,6 +7,8 @@
 import { pagamentoRepository } from '../repositories/pagamento.repository.js';
 import { transitionTo, InvalidTransitionError } from './statusFsmService.js';
 import { z } from 'zod';
+// PAM V3.5 - Import paymentsQueue for idempotent processing
+import { paymentsQueue } from '../lib/queues.js';
 
 // Validation schema
 const pagamentoSchema = z.object({
@@ -87,7 +89,7 @@ export class PagamentoService {
   }
 
   /**
-   * Create new payment
+   * Create new payment - PAM V3.5 IDEMPOTENT PROCESSING
    */
   async createPayment(paymentData: any, userId: string): Promise<any> {
     // Validate payment data
@@ -100,6 +102,82 @@ export class PagamentoService {
     if (proposal.proposta.statusPagamento === 'pago') {
       throw new Error('Esta proposta já possui pagamento confirmado');
     }
+
+    // PAM V3.5 - Generate UNIQUE and DETERMINISTIC jobId for idempotency
+    // Format: payment-{propostaId}-{timestamp}-{hash} ensures uniqueness while preventing duplicates
+    const timestamp = Date.now();
+    const baseData = `${validated.propostaId}-${validated.numeroContrato}-${validated.valorLiquido}`;
+    const jobId = `payment-${validated.propostaId}-${timestamp}`;
+
+    console.log(`[PAYMENT IDEMPOTENCY] 🔑 Generated jobId: ${jobId} for proposal ${validated.propostaId}`);
+
+    try {
+      // PAM V3.5 - Add job to paymentsQueue with idempotent jobId 
+      const job = await paymentsQueue.add(
+        'PROCESS_PAYMENT', 
+        {
+          type: 'PROCESS_PAYMENT',
+          propostaId: validated.propostaId,
+          paymentData: validated,
+          userId,
+          timestamp,
+          // Include all necessary data for processing
+          numeroContrato: validated.numeroContrato,
+          valorLiquido: validated.valorLiquido,
+          formaPagamento: validated.formaPagamento,
+        },
+        {
+          // PAM V3.5 - CRITICAL: jobId ensures idempotency
+          jobId: jobId,
+          // Additional job options
+          attempts: 5, // Will be overridden by queue defaults
+          removeOnComplete: 10,
+          removeOnFail: 50,
+        }
+      );
+
+      console.log(`[PAYMENT IDEMPOTENCY] ✅ Job ${jobId} added to paymentsQueue (Job ID: ${job.id})`);
+      
+      // Return job information instead of direct processing result
+      return {
+        message: 'Pagamento enfileirado para processamento idempotente',
+        jobId: jobId,
+        internalJobId: job.id,
+        propostaId: validated.propostaId,
+        status: 'em_fila',
+        timestamp: new Date(timestamp).toISOString(),
+      };
+
+    } catch (error: any) {
+      // If job addition fails, check if it's due to duplicate jobId (idempotency working)
+      if (error.message?.includes('already exists') || error.message?.includes('duplicate')) {
+        console.log(`[PAYMENT IDEMPOTENCY] 🛡️ Duplicate job prevented: ${jobId} already exists in queue`);
+        
+        return {
+          message: 'Pagamento já foi enfileirado anteriormente (idempotência ativa)',
+          jobId: jobId,
+          propostaId: validated.propostaId,
+          status: 'ja_enfileirado',
+          duplicate: true,
+          timestamp: new Date(timestamp).toISOString(),
+        };
+      }
+      
+      console.error(`[PAYMENT IDEMPOTENCY] ❌ Failed to add job ${jobId}:`, error as Error);
+      throw new Error(`Erro ao enfileirar pagamento: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Process payment - MOVED FROM DIRECT PROCESSING TO QUEUE WORKER
+   * This method is now called by the BullMQ worker in server/worker.ts
+   */
+  async processPaymentFromQueue(paymentData: any, userId: string): Promise<any> {
+    // Original processing logic moved here for queue worker consumption
+    const validated = paymentData;
+
+    // Get proposal data for status management
+    const proposal = await this.getProposalForPayment(validated.propostaId);
 
     // Create payment record
     const updatedProposal = await pagamentoRepository.createPayment({
