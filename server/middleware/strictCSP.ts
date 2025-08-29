@@ -70,10 +70,10 @@ export class StrictCSP {
         // Media source - self only
         "media-src 'self'",
 
-        // Connect source - API calls and WebSocket connections
+        // Connect source - API calls and WebSocket connections (includes Sentry)
         isDevelopment
-          ? "connect-src 'self' ws: wss: localhost:* 127.0.0.1:* https:"
-          : "connect-src 'self' ws: wss:",
+          ? "connect-src 'self' ws: wss: localhost:* 127.0.0.1:* https: *.ingest.us.sentry.io"
+          : "connect-src 'self' ws: wss: *.ingest.us.sentry.io",
 
         // Worker source - web workers and service workers
         "worker-src 'self' blob:",

@@ -198,17 +198,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
+  // FASE 0 - Sentry test endpoint (conforme PAM V2.9.1 - caminho correto)
   app.get('/api/debug-sentry', function mainHandler(req, res) {
-    const Sentry = require('@sentry/node');
-    const error = new Error("My first Sentry error!");
-    
-    // Captura explícita no Sentry
-    Sentry.captureException(error);
-    console.log('🚀 Erro capturado e enviado para Sentry:', error.message);
-    
-    // Também lança o erro para manter compatibilidade
-    throw error;
+    throw new Error("My first Sentry error!");
   });
 
   // Debug do status do Sentry

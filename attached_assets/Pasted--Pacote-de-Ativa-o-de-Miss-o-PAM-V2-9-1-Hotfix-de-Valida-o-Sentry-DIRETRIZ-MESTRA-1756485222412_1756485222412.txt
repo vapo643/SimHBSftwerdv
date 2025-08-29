@@ -1,0 +1,39 @@
+### **Pacote de Ativação de Missão (PAM) V2.9.1 - Hotfix de Validação Sentry**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Localizar a rota de teste de debug do Sentry existente no backend e modificá-la para corresponder exatamente à especificação exigida pela UI de validação do Sentry.
+* **Intenção Estratégica (O Porquê):** Desbloquear a validação da plataforma Sentry. Ao enviar o erro exato que o sistema deles está esperando, completaremos a configuração e garantiremos que o pipeline de observabilidade está ativo.
+* **Histórico Relevante (Consulta Obrigatória):** O Arquiteto Chefe forneceu o trecho de código exato que o Sentry está aguardando. Sua missão é implementar esta especificação com 100% de fidelidade.
+
+---
+
+**IMPLEMENTAR:**
+User Story INFRA-001 (Hotfix): Alinhar Rota de Teste com Especificação do Sentry
+
+**CONTEXT:**
+A configuração da nossa integração com o Sentry está pendente de uma validação final. A plataforma Sentry requer que um erro específico seja gerado e enviado para confirmar que a conexão está funcionando. Nossa implementação anterior criou um erro genérico, que não foi reconhecido. Precisamos enviar o erro exato que eles estão esperando.
+
+**CURRENT STATE:**
+O backend possui uma rota de teste para o Sentry (provavelmente em `/api/debug-sentry` ou `/api/debug/test-sentry`) que lança um erro com uma mensagem genérica como "Sentry Backend Test: OK".
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Rota Corrigida:** Uma rota `GET` no caminho exato `/debug-sentry` deve ser implementada no servidor.
+2.  **Erro Específico:** Ao ser acessada, esta rota deve lançar um erro com a mensagem exata: `"My first Sentry error!"`.
+3.  **Validação pelo Usuário:** Após a implementação, o Executor Humano (Arquiteto Chefe) acessará a rota, e a validação no Sentry será concluída.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Localizar Rota:** Encontre o arquivo de rotas (provavelmente `server/routes.ts` ou um arquivo de rotas de debug) onde a rota de teste Sentry foi adicionada.
+2.  **Modificar Rota:** Altere o código para corresponder **exatamente** à especificação abaixo:
+    ```typescript
+    app.get("/debug-sentry", function mainHandler(req, res) {
+      throw new Error("My first Sentry error!");
+    });
+    ```
+3.  **Confirmar Implementação:** Informe ao Executor Humano que a rota foi corrigida e que ele pode agora acessar `[URL_DA_APLICACAO]/debug-sentry` para finalizar a validação no site do Sentry.
+4.  **Aguardar Ordem de Limpeza:** Permaneça em espera após a confirmação. Não remova a rota até receber a ordem explícita para fazê-lo (na próxima missão do PAM).
+
+---
+
+**Executor Humano:** Entregue este PAM ao Agente. Após a confirmação de que o código foi alterado, acesse a rota `/debug-sentry` para completar a validação no Sentry.
