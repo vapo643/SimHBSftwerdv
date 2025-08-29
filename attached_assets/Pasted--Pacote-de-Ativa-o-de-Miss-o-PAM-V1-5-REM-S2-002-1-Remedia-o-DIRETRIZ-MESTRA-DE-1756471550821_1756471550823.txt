@@ -1,0 +1,50 @@
+### **Pacote de Ativação de Missão (PAM) V1.5 - REM-S2-002.1 (Remediação)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Refatorar o setup dos testes em `tests/integration/unit-of-work.test.ts` para satisfazer a função de validação `validate_proposta_integrity()`, garantindo que todos os testes no arquivo passem com sucesso.
+* **Intenção Estratégica (O Porquê):** Finalizar a validação do Unit of Work e eliminar a dívida técnica de um arquivo de teste quebrado. Um arquivo de teste 100% funcional é a única "Definição de Feito" aceitável e nos dá a confiança necessária para usar o UoW em futuras implementações.
+* **Histórico Relevante (Consulta Obrigatória):** Sua última execução provou que o `ROLLBACK` funciona, mas os testes de `COMMIT` falham devido a uma regra de negócio que valida a relação entre o usuário criador da proposta e a loja (`lojaId`) da proposta.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de QA finalizando um cenário de teste. O trabalho pesado de provar o rollback foi feito. Agora, você precisa fornecer os dados de setup corretos para que os testes de "caminho feliz" também passem, garantindo que a implementação não quebrou as regras de negócio existentes.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **MÉDIO** - A lógica para associar um gerente a uma loja no setup do teste pode ser implementada incorretamente, levando a mais ciclos de depuração.
+    * **Contramedida:** A implementação deve ser explícita e direta: antes de cada teste, garanta que existe um registro na tabela `gerente_lojas` que conecta o `gerenteId` ao `lojaId` que serão usados na criação da `mockProposta`.
+
+---
+
+**IMPLEMENTAR:**
+User Story REM-S2-002.1: Estabilizar Teste de Integração do Unit of Work
+
+**CONTEXT:**
+Nós validamos com sucesso que o Unit of Work (UoW) executa o `ROLLBACK` corretamente. No entanto, os testes de `COMMIT` (caminho feliz) estão falhando porque nosso banco de dados possui uma regra de negócio (`validate_proposta_integrity`) que impede um usuário de criar uma proposta para uma loja à qual ele não está associado. Para finalizar a validação do UoW, precisamos corrigir o setup dos nossos testes para que ele respeite essa regra.
+
+**CURRENT STATE:**
+O arquivo `tests/integration/unit-of-work.test.ts` tem 1 teste passando (rollback) e 2 falhando. As falhas ocorrem com a mensagem de erro `"User does not belong to the specified store"`, indicando que a constraint de integridade do banco de dados foi violada. O setup do teste cria um usuário e uma loja, mas não cria o registro de associação entre eles na tabela `gerente_lojas`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Setup de Teste Corrigido:** O bloco `beforeEach` (ou um setup similar) no arquivo `tests/integration/unit-of-work.test.ts` deve ser modificado. Além de criar o parceiro, a loja e o perfil de usuário, ele DEVE inserir um registro na tabela `gerente_lojas` para associar o usuário (gerente) à loja criada.
+2.  **Todos os Testes Passando:** A execução do comando `npx vitest run tests/integration/unit-of-work.test.ts` deve resultar em **3 testes passando** (`3 passed`).
+3.  **Evidência de Sucesso:** O output completo e não resumido da execução bem-sucedida do teste deve ser fornecido como prova final da conclusão da missão.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Analisar Tabela de Junção:** Investigue o schema da tabela `gerente_lojas` em `shared/schema.ts` para entender as colunas necessárias (`gerenteId`, `lojaId`).
+2.  **Modificar Setup do Teste:** No arquivo `tests/integration/unit-of-work.test.ts`, localize o bloco `beforeEach`. Adicione uma nova inserção de dados (`db.insert(gerenteLojas).values(...)`) que conecte o `gerenteId` e o `lojaId` criados no setup.
+3.  **Execução e Validação Final:** Execute o comando `npx vitest run tests/integration/unit-of-work.test.ts`.
+4.  **Fornecer Prova:** Cole o output completo do terminal, que deve mostrar claramente que os 3 testes passaram.
+5.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
+
+**DECLARAção DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M2: Data & Domain
+- **Missão de Emergência Atual:** "Roadmap de Remediação do Sprint 2"
+---
