@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { FeatureFlagProvider } from '@/contexts/FeatureFlagContext';
+import SentryTestButton from '@/components/SentryTestButton';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
@@ -182,6 +183,8 @@ function App() {
             <TooltipProvider>
               <Router />
               <Toaster />
+              {/* Temporary Sentry test button - only in development */}
+              {import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'development' && <SentryTestButton />}
             </TooltipProvider>
           </FeatureFlagProvider>
         </AuthProvider>
