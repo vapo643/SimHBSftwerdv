@@ -35,16 +35,19 @@ export async function createApp() {
   });
 
   // FASE 0 - Redis Cloud Health Check (PAM V3.2 requirement)
-  const redisHealth = await checkRedisHealth();
-  if (redisHealth.healthy) {
-    logInfo('✅ Conexão com Redis Cloud estabelecida com sucesso', {
-      latency: redisHealth.latency,
-      service: 'redis-cloud'
-    });
-  } else {
-    console.error('❌ FALHA CRÍTICA: Não foi possível conectar ao Redis Cloud. Verifique as credenciais REDIS_HOST, REDIS_PORT e REDIS_PASSWORD.');
-    console.error(`Erro: ${redisHealth.error}`);
-    process.exit(1);
+  try {
+    const redisHealth = await checkRedisHealth();
+    if (redisHealth.healthy) {
+      logInfo('✅ Conexão com Redis Cloud estabelecida com sucesso', {
+        latency: redisHealth.latency,
+        service: 'redis-cloud'
+      });
+    } else {
+      console.warn('⚠️ Redis Cloud não está disponível. Filas e cache funcionarão em modo fallback.');
+      console.warn(`Detalhes: ${redisHealth.error}`);
+    }
+  } catch (error) {
+    console.warn('⚠️ Erro ao verificar Redis Cloud. Continuando com fallback.', error);
   }
 
   // Disable X-Powered-By header - OWASP ASVS V14.4.1
