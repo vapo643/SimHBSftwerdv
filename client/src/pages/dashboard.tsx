@@ -43,38 +43,102 @@ import { ptBR } from 'date-fns/locale';
 import { FeatureFlagExample } from '@/components/FeatureFlagExample';
 import { useFeatureFlag } from '@/contexts/FeatureFlagContext';
 
+// UX-011: Sistema semântico de cores fortes e proeminentes
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
-    // Status V2.0
-    case 'CCB_GERADA':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'AGUARDANDO_ASSINATURA':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'ASSINATURA_CONCLUIDA':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'BOLETOS_EMITIDOS':
-      return 'bg-purple-100 text-purple-800 border-purple-200';
-    // Status antigos mantidos para compatibilidade
+    // 🟢 VERDE: Status de Sucesso
     case 'APROVADO':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'EM_ANALISE':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'AGUARDANDO_ANALISE':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'PENDENCIADO':
-      return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'REJEITADO':
-      return 'bg-red-100 text-red-800 border-red-200';
+    case 'ASSINATURA_CONCLUIDA':
     case 'PAGO':
-      return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    case 'PRONTO_PAGAMENTO':
-      return 'bg-purple-100 text-purple-800 border-purple-200';
-    case 'RASCUNHO':
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-green-600 text-white border-green-600 font-semibold shadow-lg';
+    
+    // 🔴 VERMELHO: Status de Falha/Bloqueio
+    case 'REJEITADO':
     case 'CANCELADO':
-      return 'bg-slate-100 text-slate-800 border-slate-200';
+      return 'bg-red-600 text-white border-red-600 font-semibold shadow-lg';
+    
+    // 🟡 AMARELO/LARANJA: Status de Pendência/Atenção
+    case 'PENDENCIADO':
+    case 'AGUARDANDO_ASSINATURA':
+    case 'AGUARDANDO_ANALISE':
+    case 'EM_ANALISE':
+      return 'bg-amber-500 text-white border-amber-500 font-semibold shadow-lg';
+    
+    // 🔵 AZUL/CINZA: Status Informativos/Iniciais
+    case 'CCB_GERADA':
+    case 'BOLETOS_EMITIDOS':
+    case 'PRONTO_PAGAMENTO':
+      return 'bg-blue-600 text-white border-blue-600 font-semibold shadow-lg';
+    
+    case 'RASCUNHO':
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-gray-500 text-white border-gray-500 font-semibold shadow-lg';
+  }
+};
+
+// UX-011: Função para bordas coloridas dos cards
+const getStatusBorderColor = (status: string) => {
+  switch (status.toUpperCase()) {
+    // 🟢 VERDE: Status de Sucesso
+    case 'APROVADO':
+    case 'ASSINATURA_CONCLUIDA':
+    case 'PAGO':
+      return 'border-l-4 border-l-green-500';
+    
+    // 🔴 VERMELHO: Status de Falha/Bloqueio
+    case 'REJEITADO':
+    case 'CANCELADO':
+      return 'border-l-4 border-l-red-500';
+    
+    // 🟡 AMARELO/LARANJA: Status de Pendência/Atenção
+    case 'PENDENCIADO':
+    case 'AGUARDANDO_ASSINATURA':
+    case 'AGUARDANDO_ANALISE':
+    case 'EM_ANALISE':
+      return 'border-l-4 border-l-amber-500';
+    
+    // 🔵 AZUL/CINZA: Status Informativos/Iniciais
+    case 'CCB_GERADA':
+    case 'BOLETOS_EMITIDOS':
+    case 'PRONTO_PAGAMENTO':
+      return 'border-l-4 border-l-blue-500';
+    
+    case 'RASCUNHO':
+    default:
+      return 'border-l-4 border-l-gray-400';
+  }
+};
+
+// UX-011: Função para cor do background do ícone
+const getStatusIconBackground = (status: string) => {
+  switch (status.toUpperCase()) {
+    // 🟢 VERDE: Status de Sucesso
+    case 'APROVADO':
+    case 'ASSINATURA_CONCLUIDA':
+    case 'PAGO':
+      return 'bg-green-100 text-green-600';
+    
+    // 🔴 VERMELHO: Status de Falha/Bloqueio
+    case 'REJEITADO':
+    case 'CANCELADO':
+      return 'bg-red-100 text-red-600';
+    
+    // 🟡 AMARELO/LARANJA: Status de Pendência/Atenção
+    case 'PENDENCIADO':
+    case 'AGUARDANDO_ASSINATURA':
+    case 'AGUARDANDO_ANALISE':
+    case 'EM_ANALISE':
+      return 'bg-amber-100 text-amber-600';
+    
+    // 🔵 AZUL/CINZA: Status Informativos/Iniciais
+    case 'CCB_GERADA':
+    case 'BOLETOS_EMITIDOS':
+    case 'PRONTO_PAGAMENTO':
+      return 'bg-blue-100 text-blue-600';
+    
+    case 'RASCUNHO':
+    default:
+      return 'bg-gray-100 text-gray-600';
   }
 };
 
@@ -111,31 +175,41 @@ const getStatusText = (status: string) => {
   }
 };
 
+// UX-011: Ícones mais explícitos e maiores para melhor diferenciação visual
 const getStatusIcon = (status: string) => {
   switch (status.toUpperCase()) {
-    // Status V2.0
-    case 'CCB_GERADA':
-      return <FileText className="h-4 w-4" />;
-    case 'AGUARDANDO_ASSINATURA':
-      return <Clock className="h-4 w-4" />;
-    case 'ASSINATURA_CONCLUIDA':
-      return <CheckCircle2 className="h-4 w-4" />;
-    case 'BOLETOS_EMITIDOS':
-      return <Banknote className="h-4 w-4" />;
-    // Status antigos mantidos para compatibilidade
+    // 🟢 VERDE: Status de Sucesso - Ícones de confirmação
     case 'APROVADO':
-      return <CheckCircle2 className="h-4 w-4" />;
-    case 'REJEITADO':
-      return <XCircle className="h-4 w-4" />;
-    case 'EM_ANALISE':
-    case 'AGUARDANDO_ANALISE':
-      return <Clock className="h-4 w-4" />;
-    case 'PENDENCIADO':
-      return <AlertCircle className="h-4 w-4" />;
+    case 'ASSINATURA_CONCLUIDA':
+      return <CheckCircle2 className="h-6 w-6" />;
     case 'PAGO':
-      return <Banknote className="h-4 w-4" />;
+      return <Banknote className="h-6 w-6" />;
+    
+    // 🔴 VERMELHO: Status de Falha - Ícones de erro/bloqueio
+    case 'REJEITADO':
+      return <XCircle className="h-6 w-6" />;
+    case 'CANCELADO':
+      return <XCircle className="h-6 w-6" />;
+    
+    // 🟡 AMARELO/LARANJA: Status de Pendência - Ícones de atenção/tempo
+    case 'PENDENCIADO':
+      return <AlertCircle className="h-6 w-6" />;
+    case 'AGUARDANDO_ASSINATURA':
+    case 'AGUARDANDO_ANALISE':
+      return <Clock className="h-6 w-6" />;
+    case 'EM_ANALISE':
+      return <Clock className="h-6 w-6" />;
+    
+    // 🔵 AZUL/CINZA: Status Informativos - Ícones de documentos/processos
+    case 'CCB_GERADA':
+      return <FileText className="h-6 w-6" />;
+    case 'BOLETOS_EMITIDOS':
+    case 'PRONTO_PAGAMENTO':
+      return <Banknote className="h-6 w-6" />;
+    
+    case 'RASCUNHO':
     default:
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-6 w-6" />;
   }
 };
 
@@ -577,11 +651,15 @@ const Dashboard: React.FC = () => {
             </Card>
           ) : (
             propostasFiltradas.map((proposta: any, index: number) => (
-              <Card key={`proposta-${proposta?.id || index}`} className="overflow-hidden transition-shadow hover:shadow-md">
+              <Card 
+                key={`proposta-${proposta?.id || index}`} 
+                className={`overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02] ${getStatusBorderColor(proposta?.statusContextual || proposta?.status || 'rascunho')}`}
+                data-testid={`proposal-card-${proposta?.id || index}`}
+              >
                 <CardContent className="p-0">
                   <div className="flex items-center justify-between p-6">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+                      <div className={`flex h-16 w-16 items-center justify-center rounded-xl ${getStatusIconBackground(proposta?.status || 'rascunho')} shadow-lg`}>
                         {getStatusIcon(proposta?.status || 'rascunho')}
                       </div>
                       <div className="space-y-1">
@@ -590,7 +668,8 @@ const Dashboard: React.FC = () => {
                             {proposta?.nomeCliente || 'Cliente não informado'}
                           </h3>
                           <Badge
-                            className={`${getStatusColor(proposta?.statusContextual || proposta?.status || 'rascunho')} border`}
+                            className={`${getStatusColor(proposta?.statusContextual || proposta?.status || 'rascunho')} border px-3 py-1 text-sm`}
+                            data-testid={`status-badge-${proposta?.status || 'rascunho'}`}
                           >
                             {getStatusText(proposta?.statusContextual || proposta?.status || 'rascunho')}
                           </Badge>

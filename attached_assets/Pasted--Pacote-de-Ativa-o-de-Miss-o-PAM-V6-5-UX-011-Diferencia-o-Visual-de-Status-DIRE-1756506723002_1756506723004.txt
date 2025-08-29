@@ -1,0 +1,37 @@
+### **Pacote de Ativação de Missão (PAM) V6.5 - UX-011 (Diferenciação Visual de Status)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Refatorar o componente de card de proposta, utilizado na página de Dashboard, para incluir indicadores visuais proeminentes (cores e ícones) que comuniquem claramente o status de cada proposta.
+* **Intenção Estratégica (O Porquê):** Aumentar a "escaneabilidade" da interface. Em um ambiente de alta demanda, os operadores de crédito precisam identificar o estado das propostas com um único olhar. O uso de um sistema de cores semântico e ícones claros permite o reconhecimento instantâneo do status, aumentando a eficiência e reduzindo a carga cognitiva.
+* **Histórico Relevante (Consulta Obrigatória):** A análise heurística (`GL-002`) identificou a falta de diferenciação visual nos cards de proposta como uma melhoria de usabilidade de severidade **MÉDIA**.
+
+---
+
+**IMPLEMENTAR:**
+User Story UX-011: Melhorar Diferenciação Visual de Status nos Cards de Proposta
+
+**CONTEXT:**
+Nossa auditoria de UX revelou que, na listagem de propostas do dashboard, todos os cards são muito similares visualmente, tornando difícil para o usuário distinguir rapidamente o status de cada uma (ex: Aprovado, Pendente, Rejeitado). Precisamos adicionar indicadores visuais fortes para resolver isso.
+
+**CURRENT STATE:**
+O componente que renderiza cada card de proposta no `dashboard.tsx` provavelmente usa apenas texto ou um `Badge` com cores sutis para indicar o status. A diferenciação visual é fraca.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Indicadores Visuais Proeminentes:** Cada card de proposta deve exibir um indicador visual claro do seu status. Isso pode ser uma borda colorida, um ícone grande, ou uma combinação de ambos.
+2.  **Sistema de Cores Semântico:** As cores utilizadas devem ter um significado claro e consistente:
+    * **Verde:** Para status de sucesso (ex: `APROVADO`, `PAGO_TOTAL`).
+    * **Vermelho:** Para status de falha ou atenção (ex: `REJEITADO`, `CANCELADO`, `INADIMPLENTE`).
+    * **Amarelo/Laranja:** Para status de pendência ou em andamento (ex: `PENDENTE`, `EM_ANALISE`, `AGUARDANDO_ASSINATURA`).
+    * **Azul/Cinza:** Para status informativos ou iniciais (ex: `RASCUNHO`, `CCB_GERADA`).
+3.  **Ícones Explícitos:** Ícones da biblioteca `lucide-react` devem ser usados para reforçar o significado do status (ex: `CheckCircle2` para Aprovado, `XCircle` para Rejeitado, `Hourglass` para Pendente).
+4.  **Prova de Sucesso:** Você deve fornecer um screenshot do dashboard mostrando vários cards de proposta com diferentes status, cada um exibindo claramente seu novo indicador visual (cor e ícone).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Localizar Componente Alvo:** Identifique o componente React responsável por renderizar um único card de proposta na lista do `dashboard.tsx`.
+2.  **Criar Mapeamento de Status:** Crie uma função helper ou um objeto de mapeamento que receba um `status` de proposta (string) e retorne a cor (`className` do Tailwind CSS, ex: `border-green-500`) e o nome do ícone `lucide-react` correspondente.
+3.  **Refatorar JSX do Card:** Modifique o JSX do componente do card. Adicione os novos elementos visuais (ex: a borda colorida no `Card` principal e o `Icon` ao lado do texto de status).
+4.  **Aplicar Lógica Condicional:** Use o mapeamento de status criado no passo 2 para aplicar dinamicamente as classes de cor e selecionar o ícone correto com base no `props.proposal.status`.
+5.  **Validar e Apresentar Evidência:** Teste a interface para garantir que os diferentes status são renderizados com as cores e ícones corretos. Capture e apresente o screenshot do resultado final.
+6.  **Verificação Final:** Execute o protocolo `7-CHECK FULL`.
