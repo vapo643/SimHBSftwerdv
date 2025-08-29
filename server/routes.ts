@@ -43,6 +43,7 @@ import interWebhookRouter from './routes/webhooks/inter';
 import interRealtimeRouter from './routes/inter-realtime';
 import securityRoutes from './routes/security.js';
 import emailChangeRoutes from './routes/email-change';
+import * as Sentry from '@sentry/node';
 import cobrancasRoutes from './routes/cobrancas';
 import monitoringRoutes from './routes/monitoring';
 import ccbIntelligentTestRoutes from './routes/ccb-intelligent-test';
@@ -198,9 +199,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // FASE 0 - Sentry test endpoint (conforme PAM V2.9.1 - caminho correto)
-  app.get('/api/debug-sentry', function mainHandler(req, res) {
-    throw new Error("My first Sentry error!");
+  // FASE 0 - Sentry test endpoint (conforme PAM V3.0 - captura manual com flush)
+  app.get('/api/debug-sentry', async (req, res) => {
+    try {
+      throw new Error(`Sentry Manual Flush Test - OK: ${new Date().toISOString()}`);
+    } catch (error) {
+      console.error("ERRO CAPTURADO, ENVIANDO MANUALMENTE PARA O SENTRY...");
+      const eventId = Sentry.captureException(error);
+      console.log(`Evento capturado com ID: ${eventId}`);
+
+      // Força o envio de todos os eventos pendentes. Aguarda até 2 segundos.
+      await Sentry.flush(2000);
+      console.log("Sentry flush concluído.");
+
+      res.status(500).json({
+        message: 'Erro de teste enviado para o Sentry com sucesso.',
+        sentryEventId: eventId,
+      });
+    }
   });
 
   // Debug do status do Sentry  

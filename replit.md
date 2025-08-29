@@ -144,6 +144,22 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 # System Architecture
 Simpix is a full-stack TypeScript application built on a modular monolith architecture, emphasizing domain-driven design and banking-grade security.
 
+**Common Architectural Decisions:**
+- **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
+- **Domain-Driven Design (DDD)**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
+- **Security**: Banking-grade security features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+- **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
+- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation.
+- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.
+- **Commercial Tables**: Supports N:N relationships between products and commercial tables, enabling personalized and general rates with hierarchical fallback.
+- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
+- **Test Infrastructure**: Comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
+- **Schema Migration**: Production-ready migration system (Zero Dissent Time, Expand/Contract pattern, automated rollback, tracking).
+- **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.
+- **Observability**: Structured logging, error tracking, health checks, and automated backups.
+- **Configuration**: Centralized configuration management.
+- **Feature Flags**: Integration with fallback mechanisms.
+
 **Frontend:**
 - **Technology Stack**: React 18, Wouter, TypeScript, Tailwind CSS with shadcn/ui.
 - **State Management**: TanStack Query (server-side), `useReducer` (local).
@@ -153,26 +169,9 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 **Backend:**
 - **Technology Stack**: Express.js (RESTful API), TypeScript.
 - **Database & ORM**: PostgreSQL, Drizzle ORM (supporting soft deletes, sequential IDs, and audit trails).
-- **Authentication**: JWTs, custom RBAC, extended session TTLs.
-- **Security**: Implements Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
 - **File Storage**: Secure private buckets.
-- **Asynchronous Processing**: BullMQ backed by Redis for job queues.
+- **Asynchronous Processing**: Job queues.
 - **Caching**: Redis-based cache for commercial data tables (1-hour TTL, cache-aside strategy).
-
-**Common to Frontend and Backend:**
-- **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
-- **Domain-Driven Design (DDD)**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
-- **CI/CD**: GitHub Actions for Continuous Integration, Staging Deployment, and Security workflows.
-- **Observability**: Winston (structured logging), Sentry (error tracking), health checks, and automated backups.
-- **Configuration**: Centralized configuration management.
-- **Feature Flags**: Unleash-client integration with fallback mechanisms.
-- **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
-- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
-- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.
-- **Commercial Tables**: Supports N:N relationships between products and commercial tables, enabling personalized and general rates with hierarchical fallback.
-- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
-- **Test Infrastructure**: Comprehensive testing environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
-- **Schema Migration**: Production-ready migration system using Drizzle-Kit (Zero Dissent Time, Expand/Contract pattern, automated rollback, tracking).
 
 # External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
