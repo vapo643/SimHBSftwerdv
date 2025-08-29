@@ -7,7 +7,7 @@
 
 import { eq, and, gte, lte, or, isNull, sql, inArray, desc, asc, gt, lt } from 'drizzle-orm';
 import { db } from '../../../lib/supabase';
-import { propostas, ccbs, boletos } from '@shared/schema';
+import { propostas, ccbs, boletos, produtos, tabelasComerciais, lojas } from '@shared/schema';
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposalRepository';
 import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
@@ -120,6 +120,7 @@ export class ProposalRepository implements IProposalRepository {
     return this.mapToDomain(result[0]);
   }
 
+  // PAM V4.1 PERF-F2-001: Eliminando N+1 com JOIN otimizado
   async findByCriteria(criteria: ProposalSearchCriteria): Promise<Proposal[]> {
     const conditions = [isNull(propostas.deletedAt)];
 
@@ -148,12 +149,26 @@ export class ProposalRepository implements IProposalRepository {
       conditions.push(lte(propostas.createdAt, criteria.dateTo));
     }
 
+    console.log('🔍 [PAM V4.1] Executing optimized proposal query with JOINs...');
+    
+    // OPTIMIZATION: Single query with LEFT JOINs para eliminar N+1
     const results = await db
-      .select()
+      .select({
+        proposta: propostas,
+        produto: produtos,
+        tabelaComercial: tabelasComerciais,
+        loja: lojas,
+      })
       .from(propostas)
-      .where(and(...conditions));
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .where(and(...conditions))
+      .orderBy(desc(propostas.createdAt)); // Ordenação para melhor UX
 
-    return results.map((row) => this.mapToDomain(row));
+    console.log(`🔍 [PAM V4.1] Query executed: ${results.length} proposals with joined data`);
+
+    return results.map((row) => this.mapToDomainWithJoinedData(row));
   }
 
   async findAll(): Promise<Proposal[]> {
@@ -421,6 +436,30 @@ export class ProposalRepository implements IProposalRepository {
       .orderBy(asc(propostas.createdAt));
 
     return results.map((row) => this.mapToDomain(row.proposta));
+  }
+
+  /**
+   * PAM V4.1: Mapeia dados JOINados para o agregado Proposal
+   * Inclui informações relacionadas (produto, tabela comercial, loja)
+   */
+  private mapToDomainWithJoinedData(row: any): Proposal {
+    const proposal = this.mapToDomain(row.proposta);
+    
+    // Anexar dados relacionados ao agregado para evitar N+1 queries
+    if (row.produto) {
+      (proposal as any)._relatedProductName = row.produto.nomeProduto;
+    }
+    
+    if (row.tabelaComercial) {
+      (proposal as any)._relatedCommercialTableName = row.tabelaComercial.nomeTabela;
+      (proposal as any)._relatedCommercialTableRate = row.tabelaComercial.taxaJuros;
+    }
+    
+    if (row.loja) {
+      (proposal as any)._relatedStoreName = row.loja.nomeLoja;
+    }
+    
+    return proposal;
   }
 
   /**

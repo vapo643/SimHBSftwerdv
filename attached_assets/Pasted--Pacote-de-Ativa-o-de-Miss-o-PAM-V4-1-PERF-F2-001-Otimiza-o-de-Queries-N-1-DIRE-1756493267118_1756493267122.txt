@@ -1,0 +1,46 @@
+### **Pacote de Ativação de Missão (PAM) V4.1 - PERF-F2-001 (Otimização de Queries N+1)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Realizar uma análise forense na query do endpoint `GET /api/propostas`, identificar e provar a existência de um padrão de query N+1, e refatorar o código de acesso a dados usando Drizzle ORM para executar uma única query eficiente.
+* **Intenção Estratégica (O Porquê):** Erradicar a causa raiz mais comum e destrutiva de lentidão em aplicações orientadas a dados. A eliminação do padrão N+1 resultará em uma redução drástica no número de chamadas ao banco de dados, melhorando exponencialmente o tempo de resposta do endpoint de listagem de propostas, que é crítico para a operação.
+* **Histórico Relevante (Consulta Obrigatória):** A Fase 1 (`PERF-F1-001`) nos deu as ferramentas para medir. Agora, usamos essas medições para justificar esta refatoração cirúrgica. O principal suspeito é o `proposalController.ts` e o `proposta.repository.ts`.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **ALTO** - A refatoração da query para incluir `joins` ou relações pode se tornar complexa e, se feita incorretamente, pode quebrar o contrato de dados da API ou até mesmo piorar a performance.
+    * **Contramedida:** A refatoração deve ser guiada por testes. Um teste de integração existente para o endpoint `GET /api/propostas` deve ser usado para validar que a estrutura do JSON de resposta permanece **idêntica** antes e depois da otimização. A prova da otimização virá da análise do log de queries.
+
+---
+
+**IMPLEMENTAR:**
+User Story PERF-002: Eliminar Padrão de Query N+1 na Listagem de Propostas
+
+**CONTEXT:**
+Nossa instrumentação de performance indica que o endpoint de listagem de propostas (`GET /api/propostas`) está entre os mais lentos. A principal suspeita, comum em sistemas que usam ORM, é o padrão N+1: uma query inicial busca a lista de propostas (1 query) e, em seguida, dentro de um loop, o código executa queries adicionais para buscar dados relacionados a cada proposta (N queries), resultando em N+1 chamadas ao banco para uma única requisição.
+
+**CURRENT STATE:**
+O código em `server/modules/proposal/presentation/proposalController.ts` chama um método do repositório (`proposta.repository.ts`) para buscar as propostas. Suspeitamos que este método busca apenas a tabela principal, e os dados relacionados (como nome do parceiro, nome da loja) são buscados posteriormente em um loop.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Prova do Problema (Análise N+1):**
+    * Você deve adicionar logging temporário ao Drizzle para exibir todas as queries SQL executadas.
+    * Execute uma requisição ao endpoint `GET /api/propostas`.
+    * Forneça os logs que **provam** o padrão N+1, mostrando a query principal seguida por múltiplas queries secundárias idênticas dentro de um loop.
+2.  **Código Refatorado:**
+    * O método de busca no repositório (`proposta.repository.ts`) deve ser refatorado. Utilizando os recursos relacionais do Drizzle ORM, a nova implementação deve buscar todas as propostas e seus dados relacionados (parceiros, lojas, etc.) em **uma única query SQL**.
+3.  **Prova da Solução:**
+    * Execute novamente a requisição ao endpoint `GET /api/propostas`.
+    * Forneça os novos logs de query que mostram apenas **uma única e eficiente query** sendo executada.
+4.  **Validação de Regressão:**
+    * A estrutura do JSON retornado pela API deve permanecer exatamente a mesma. Um teste de integração deve validar isso.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Instrumentar Drizzle para Logging:** No arquivo onde o Drizzle é instanciado (provavelmente `server/lib/supabase.ts` ou um arquivo de DB), configure o logger para exibir todas as queries. Ex: `const db = drizzle(client, { schema, logger: true });`.
+2.  **Executar e Capturar Evidência (Antes):** Inicie a aplicação, acesse `GET /api/propostas` e cole os logs SQL que demonstram o problema N+1.
+3.  **Localizar e Refatorar Query:** Audite `proposta.repository.ts` e a função que busca a lista de propostas. Modifique a query do Drizzle para carregar as relações necessárias de forma "eager". Consulte a documentação do Drizzle para "relational queries" ou "joins".
+4.  **Executar e Capturar Evidência (Depois):** Reinicie a aplicação, acesse `GET /api/propostas` novamente e cole os novos logs SQL, provando que agora apenas uma query é executada.
+5.  **Validar Resposta da API:** Execute um teste de integração existente para `GET /api/propostas` e confirme que ele continua passando, garantindo que o formato da resposta não foi alterado.
+6.  **Limpeza:** Remova o `logger: true` da configuração do Drizzle.
+7.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---

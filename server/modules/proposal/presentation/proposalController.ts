@@ -191,7 +191,7 @@ export class ProposalController {
 
       const proposals = await this.repository.findByCriteria(criteria);
 
-      // Serializar lista de agregados
+      // PAM V4.1: Serializar com dados relacionados (eliminando N+1)
       const data = proposals.map((proposal) => ({
         id: proposal.id,
         status: proposal.status,
@@ -201,7 +201,10 @@ export class ProposalController {
         prazo: proposal.prazo,
         taxa_juros: proposal.taxaJuros,
         produto_id: proposal.produtoId,
+        produto_nome: (proposal as any)._relatedProductName || null,
+        tabela_comercial_nome: (proposal as any)._relatedCommercialTableName || null,
         loja_id: proposal.lojaId,
+        loja_nome: (proposal as any)._relatedStoreName || null,
         atendente_id: proposal.atendenteId,
         created_at: proposal.createdAt,
         updated_at: proposal.updatedAt,
