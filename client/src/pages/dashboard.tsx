@@ -537,6 +537,23 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* UX-007: Contador de Resultados Dinâmico */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="h-4 w-4" />
+            <span>
+              Exibindo <span className="font-medium text-foreground">{propostasFiltradas.length}</span> de{' '}
+              <span className="font-medium text-foreground">{propostasData.length}</span> propostas
+            </span>
+          </div>
+          {propostasFiltradas.length !== propostasData.length && (
+            <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-200">
+              <Filter className="inline h-3 w-3 mr-1" />
+              Filtros ativos
+            </div>
+          )}
+        </div>
+
         {/* Lista de Propostas */}
         <div className="space-y-4">
           {isLoading ? (
