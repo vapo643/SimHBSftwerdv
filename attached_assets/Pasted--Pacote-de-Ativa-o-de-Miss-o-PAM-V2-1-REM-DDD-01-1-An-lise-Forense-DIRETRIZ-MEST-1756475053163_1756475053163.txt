@@ -1,0 +1,44 @@
+### **Pacote de Ativação de Missão (PAM) V2.1 - REM-DDD-01.1 (Análise Forense)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória. Liste todos os trechos de código suspeitos, mesmo que a sua confiança seja baixa.*
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de código forense nos arquivos de configuração e nos helpers do ambiente de teste para localizar qualquer código responsável por executar operações de exclusão de dados em massa (ex: `TRUNCATE`, `DROP`, `DELETE FROM ... WHERE 1=1`).
+* **Intenção Estratégica (O Porquê):** Identificar a arma do crime. Precisamos encontrar a função ou script exato que está causando a limpeza do banco de dados para entender a causa raiz do comportamento destrutivo do Agente e, posteriormente, neutralizá-lo.
+* **Histórico Relevante (Consulta Obrigatória):** A última grande interação do Agente com o código foi na estabilização dos testes de integração em `tests/integration/unit-of-work.test.ts`. A nossa investigação deve começar nos arquivos que dão suporte a esses testes.
+* **Modelo Mental (Como se Encaixa):** Você é um investigador forense digital (DFIR). Seu trabalho é procurar por "armas fumegantes" no código - funções perigosas, comandos SQL destrutivos, ou configurações de ambiente de teste excessivamente permissivas. Documente todas as pistas.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **ALTO** - O código destrutivo pode não estar em um local óbvio, mas sim ser acionado indiretamente por uma cadeia de chamadas.
+    * **Contramedida:** A busca não deve se limitar a strings óbvias como "TRUNCATE". Procure por padrões mais genéricos, como laços que iteram sobre todos os nomes de tabelas (`pg_tables`) e executam uma ação de exclusão dinâmica.
+
+---
+
+**IMPLEMENTAR:**
+User Story REM-DDD-01.1: Auditoria Forense de Scripts de Teste
+
+**CONTEXT:**
+Estamos enfrentando um incidente crítico de segurança onde o banco de dados de desenvolvimento está sendo completamente apagado. A suspeita principal é que um script de setup ou teardown no nosso ambiente de testes (Vitest) está configurado de forma incorreta e agressiva, causando a destruição dos dados.
+
+**CURRENT STATE:**
+O banco de dados está sendo esvaziado. A causa é desconhecida. Os arquivos de configuração de teste como `vitest.config.ts`, `tests/setup.ts`, e o helper `tests/lib/db-helper.ts` são os principais suspeitos.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um **Relatório de Análise Forense** contendo:
+1.  **Código Suspeito Identificado:** O trecho de código exato, junto com o nome do arquivo e o número da linha, que contém a lógica de exclusão de dados em massa.
+2.  **Análise da Lógica:** Uma explicação detalhada de como e por que esse código é acionado. Ele é chamado antes de cada teste (`beforeEach`)? Após todos os testes (`afterAll`)?
+3.  **Lista de Palavras-Chave de Busca:** Para fins de auditoria, liste todas as palavras-chave e padrões de busca que você utilizou para encontrar o código suspeito (ex: "TRUNCATE", "DROP TABLE", "DELETE FROM", "pg_tables").
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Busca por Comandos Destrutivos:** Execute uma busca (`rg` ou `grep`) em todo o diretório `tests/` e `scripts/` pelas seguintes palavras-chave: `TRUNCATE`, `DROP`, `DELETE FROM`. Analise cada resultado.
+2.  **Análise do Setup Global:** Abra e analise o conteúdo do arquivo `tests/setup.ts`. Procure por qualquer função global `beforeAll` ou `afterAll` que interaja com o banco de dados.
+3.  **Análise do DB Helper:** Abra e analise o conteúdo do arquivo `tests/lib/db-helper.ts`. Procure por funções de "limpeza" ou "reset" do banco de dados, como `cleanDb()`, `resetDatabase()`, etc.
+4.  **Análise da Configuração do Vitest:** Abra e analise `vitest.config.ts` para ver se ele aponta para algum script de setup global que possa conter a lógica destrutiva.
+5.  **Compilar Relatório:** Organize suas descobertas nas três seções solicitadas no "Estado Final de Sucesso".
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M3: Core Business Logic
+- **Missão de Emergência Atual:** "Análise forense de destruição de dados (REM-DDD-01)"
+---

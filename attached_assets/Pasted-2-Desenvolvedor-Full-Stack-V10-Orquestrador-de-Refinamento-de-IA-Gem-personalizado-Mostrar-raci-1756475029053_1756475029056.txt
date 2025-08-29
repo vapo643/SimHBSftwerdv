@@ -1,0 +1,36 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Arquiteto Chefe, compreendido. ALERTA MÁXIMO. DESTRUIÇÃO DE DADOS É UMA FALHA DE MISSÃO CATASTRÓFICA.
+
+Toda a operação está suspensa. A prioridade P0 absoluta é a contenção e análise desta anomalia. Um agente que destrói seu próprio ambiente de dados é um "rogue agent" e representa o maior risco possível à integridade do projeto.
+
+Invoco o Protocolo de Gerenciamento de Interrupção (PGI) V1.1 com a mais alta prioridade.
+
+`
+--- PROTOCOLO DE GERENCIAMENTO DE INTERRUPÇÃO (PGI) ATIVADO ---
+
+ALERTA: INCIDENTE DE SEGURANÇA CRÍTICO (DESTRUIÇÃO DE DADOS). A missão principal está suspensa.
+
+Roadmap em Standby: "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+Último Passo Concluído: Estabilização do sistema após falha de frontend.
+Passo Interrompido: Planejamento do Milestone M3: Core Business Logic.
+
+Causa da Interrupção: Comportamento anômalo e destrutivo do Agente Executor, resultando na exclusão de dados da base de desenvolvimento.
+
+Novo Foco (Missão de Emergência): Análise forense para identificar a causa raiz do comportamento de exclusão de dados.
+
+STATUS: STANDBY (AGUARDANDO EXECUÇÃO DO PLANO DE ANÁLISE FORENSE)
+`
+
+Análise Forense de Causa Raiz (RCA) - Hipótese Inicial
+A minha hipótese primária é que o comportamento destrutivo não é malicioso, mas sim um efeito colateral não intencional de um script de automação, muito provavelmente relacionado ao ambiente de testes. Durante a recente remediação (REM-S2-002.1), o Agente interagiu intensamente com os scripts de setup e teardown dos testes de integração. É altamente provável que um hook de "limpeza" (beforeEach, afterAll) no ambiente de teste esteja configurado de forma excessivamente agressiva, executando um TRUNCATE ou DROP em todas as tabelas, em vez de apenas nas tabelas de teste ou reverter transações.
+
+Para validar esta hipótese, precisamos de uma auditoria forense no código do ambiente de teste.
+
+Roadmap de Análise Forense de Destruição de Dados (REM-DDD-01)
+Prioridade	ID da Missão	Descrição	Status
+P0 (Crítico)	REM-DDD-01.1	Auditoria de Scripts de Teste: Realizar uma auditoria forense em todos os arquivos de configuração e helpers de teste (vitest.config.ts, tests/setup.ts, tests/lib/db-helper.ts) para localizar qualquer código que execute operações de exclusão em massa no banco de dados.	[🎯 EM EXECUÇÃO]
+P1 (Crítico)	REM-DDD-01.2	Análise de Hooks de Teste: Investigar os hooks beforeEach, afterEach, beforeAll, afterAll em todos os arquivos de teste de integração para identificar lógicas de limpeza de dados.	[PENDENTE]
+P2 (Alto)	REM-DDD-01.3	Identificação e Contenção: Uma vez identificado o código, determinar por que ele foi executado e propor uma estratégia de contenção imediata.
