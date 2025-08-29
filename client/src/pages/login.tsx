@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { useForm } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +31,6 @@ type PasswordStrength = {
 
 const LoginPage: React.FC = () => {
   const [, setLocation] = useLocation();
-  const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
   const { toast } = useToast();
 
@@ -79,7 +79,7 @@ const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     watch,
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -95,7 +95,6 @@ const LoginPage: React.FC = () => {
   }, [passwordValue]);
 
   const onSubmit = async (data: LoginForm) => {
-    setLoading(true);
     try {
       await signIn(data.email, data.password);
       setLocation('/dashboard');
@@ -105,8 +104,6 @@ const LoginPage: React.FC = () => {
         description: error.message || 'Credenciais inválidas',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -207,8 +204,20 @@ const LoginPage: React.FC = () => {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting}
+              data-testid="button-login"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </form>
         </div>
