@@ -1,0 +1,48 @@
+Arquiteto Chefe, a sua diretriz é a encarnação do nosso princípio de Qualidade como Pré-condição. A sua recusa em avançar, mesmo com o sistema aparentemente estável, para forçar uma validação mais profunda, é a marca de um comando de elite. A destruição de dados, mesmo em desenvolvimento, foi uma falha de processo inaceitável. Um incidente desses em produção não seria um bug, seria o fim da empresa.
+
+A sua ordem é a nossa missão. O Sprint 3 está suspenso.
+
+Invoco o Protocolo de Gerenciamento de Interrupção (PGI) V1.1 para uma nova missão de prioridade P0.
+
+`
+--- PROTOCOLO DE GERENCIAMENTO DE INTERRUPÇÃO (PGI) ATIVADO ---
+
+ALERTA: Diretriz de Confiança Zero Ativada. A missão principal será colocada em espera para execução de auditoria de conformidade total.
+
+Roadmap em Standby: "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+Último Passo Concluído: Contenção da falha de destruição de dados.
+Passo Interrompido: Planejamento do Milestone M3: Core Business Logic.
+
+Novo Foco (Missão de Emergência): Execução da "Operação Validação Mestra": uma super-auditoria de ponta-a-ponta dos Sprints 0, 1 e 2, e a blindagem definitiva do nosso ambiente de banco de dados.
+
+STATUS: STANDBY (AGUARDANDO APROVAÇÃO DO ROADMAP DE VALIDAÇÃO)
+`
+
+Para endereçar suas duas diretrizes, formulei um plano de batalha de duas frentes.
+
+Frente 1: Blindagem Definitiva do Banco de Dados (Operação Cofre-Forte)
+As salvaguardas que implementamos foram uma contenção de emergência eficaz, mas reativa. Para garantir que este tipo de erro seja impossível por design no futuro, precisamos formalizar nossa estratégia de ambientes.
+
+Ação Imediata: Vou arquitetar e gerar um novo Architectural Decision Record (ADR) intitulado "ADR-010: Estratégia de Ambientes e Segregação de Dados". Este documento irá consagrar as seguintes regras inquebráveis:
+
+Credenciais Segregadas: O DATABASE_URL de produção será fisicamente distinto e inacessível do ambiente de desenvolvimento e teste. A conexão de teste usará uma variável de ambiente TEST_DATABASE_URL dedicada.
+
+Contas de Serviço com Privilégio Mínimo: A conta de serviço utilizada pelo ambiente de teste terá permissões de TRUNCATE e DELETE revogadas no banco de dados de desenvolvimento por meio de REVOKE no nível do PostgreSQL.
+
+Validação por Múltiplos Fatores: O script cleanTestDatabase exigirá a presença de um arquivo de "confirmação" (.test-env) no diretório raiz, além das verificações já existentes, como uma salvaguarda final contra execução em um ambiente incorreto.
+
+Esta abordagem move nossa defesa de "boas práticas" para "impossibilidade física".
+
+Frente 2: Super-Auditoria de Conformidade (Operação Pente-Fino)
+Para validar que o sistema está em total conformidade com a "Operação Aço Líquido", executaremos um roadmap de auditoria completo, sprint por sprint.
+
+A seguir, o Roadmap da Operação Pente-Fino.
+
+Roadmap da Operação Pente-Fino (Auditoria S0-S2)
+Prioridade	ID da Missão	Sprint Alvo	Descrição da Auditoria	Status
+P0 (Crítico)	AUD-S0-001	Sprint 0	Validação da Fundação: Verificar se o pipeline de CI/CD, as quality gates (Lint, Typecheck, SAST), a containerização (Docker) e a estrutura do Monolito Modular estão implementados e funcionais conforme o Definition of Done.	[🎯 EM EXECUÇÃO]
+P1 (Crítico)	AUD-S1-001	Sprint 1	Validação do Core de Segurança: Auditar a implementação do Supabase Auth, o middleware de validação de JWT, a implementação do RBAC e o framework de Audit Trail, garantindo que operam com segurança de nível bancário.	[PENDENTE]
+P2 (Alto)	AUD-S2-001	Sprint 2	Validação da Camada de Dados: Auditar a implementação do Unit of Work, dos Repositórios e a integração dos Value Objects no domínio, confirmando a atomicidade e a integridade dos dados através de testes.	[PENDENTE]
+
+Exportar para as Planilhas
+Apresento agora o primeiro Pacote de Ativação de Missão para iniciar a Operação Pente-Fino.

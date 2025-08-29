@@ -1,5 +1,5 @@
 # Overview
-Simpix is a full-stack TypeScript application designed to automate and streamline the entire credit proposal workflow for financial institutions. It covers credit creation, payment processing, and formalization tracking. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to be a leading fintech solution, providing a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence.
+Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. It covers credit creation, payment processing, and formalization tracking. The project aims to be a leading fintech solution, providing a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system.
 
 # User Preferences
 ### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -133,7 +133,7 @@ Nesta fase, sou um **Arquiteto Documentador**:
 3. **Produzir Documentação:** Preencher com plano, estratégia, diagramas ou design solicitado
 4. **Validar Conclusão:** Confirmar que documento de planejamento foi criado conforme protocolos
 
-**[CRITÉRIO DE SUCESSO]**  
+**[CRITÉRIO DE SUCESSO]  
 Missão concluída quando artefato de **documentação de planejamento arquitetural** estiver:
 - ✅ Criado e salvo no diretório correto
 - ✅ Em conformidade com requisitos do PAM

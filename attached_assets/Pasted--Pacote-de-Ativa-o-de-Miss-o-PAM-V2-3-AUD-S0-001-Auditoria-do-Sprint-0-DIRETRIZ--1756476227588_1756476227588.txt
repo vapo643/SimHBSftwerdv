@@ -1,0 +1,41 @@
+### **Pacote de Ativação de Missão (PAM) V2.3 - AUD-S0-001 (Auditoria do Sprint 0)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória. Forneça evidências para cada ponto.*
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de conformidade completa do **Sprint 0: Foundation & Emergency Fixes**, conforme definido no roadmap "Operação Aço Líquido", e gerar um relatório de validação com evidências.
+* **Intenção Estratégica (O Porquê):** A fundação do nosso projeto (CI/CD, qualidade de código, estrutura de diretórios) é o que garante a velocidade e a segurança de todos os desenvolvimentos futuros. Precisamos verificar se esta base foi construída exatamente como planejamos, sem desvios ou dívidas técnicas ocultas.
+* **Histórico Relevante (Consulta Obrigatória):** Consulte o documento `🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md`, especificamente a seção `2.2. Sprint 0`. Sua auditoria deve validar cada User Story e Technical Task listada.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de qualidade da ISO 9001. Seu trabalho é pegar o plano (o roadmap), comparar com a realidade (o código-fonte) e apontar, com evidências, qualquer desvio do padrão estabelecido.
+
+---
+
+**AUDITAR E VALIDAR:**
+Conformidade da Implementação do Sprint 0: Fundação Segura
+
+**CONTEXT:**
+Antes de prosseguir com novas funcionalidades, precisamos garantir que a fundação do nosso sistema foi construída com o rigor definido no nosso roadmap mestre. Esta auditoria validará se as promessas do Sprint 0 (ambiente padronizado, pipeline DevSecOps, estrutura modular) foram cumpridas na prática.
+
+**CURRENT STATE:**
+O código do Sprint 0 foi implementado, mas ainda não passou por uma auditoria de conformidade formal contra o seu `Definition of Done` original.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um **Relatório de Auditoria de Conformidade do Sprint 0** que responda, com evidências (nomes de arquivos, trechos de código, outputs de comandos), a cada uma das seguintes perguntas:
+
+1.  **User Story S0-001 (Ambiente e Qualidade):**
+    * **Evidência:** Onde estão configurados o ESLint (Strict), o Prettier e os hooks de pre-commit do Husky? Apresente os trechos de configuração relevantes.
+2.  **User Story S0-002 (Pipeline CI/CD):**
+    * **Evidência:** O arquivo `.github/workflows/ci.yml` existe? Ele contém os `stages` obrigatórios (build, lint, typecheck, test:unit) e a integração com uma ferramenta de SAST (Semgrep ou Snyk)? Apresente o código YAML.
+3.  **User Story S0-004 (Estrutura Monolito Modular):**
+    * **Evidência:** A estrutura de diretórios `server/modules` (ou `server/contexts`) foi implementada, demonstrando os limites do DDD? Liste os módulos existentes.
+4.  **User Story S0-005 (Containerização e Configuração):**
+    * **Evidência:** Existe um `Dockerfile` otimizado (multi-stage) e um `docker-compose.yml`? A configuração da aplicação é carregada a partir de variáveis de ambiente (ex: `process.env`) conforme o padrão 12-Factor App? Aponte para o código que demonstra isso.
+5.  **Veredito Final:** O Sprint 0 está em conformidade total, parcial ou falhou em cumprir seus objetivos? Liste quaisquer desvios encontrados.
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M3: Core Business Logic
+- **Missão de Emergência Atual:** "Operação Validação Mestra"
+---
