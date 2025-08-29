@@ -64,13 +64,17 @@ export function createRedisConfig(): RedisOptions {
     db: parseInt(process.env.REDIS_DB || '0'),
   };
 
-  // TLS Configuration for production security
+  // TLS Configuration (only when explicitly enabled)
+  // DIAGNOSTIC RESULT: This Redis Cloud instance does NOT use TLS
+  // Only enable TLS if explicitly requested via REDIS_TLS_ENABLED=true
   if (process.env.REDIS_TLS_ENABLED === 'true') {
     config.tls = {
       // Accept self-signed certificates in staging
       rejectUnauthorized: isProduction ? true : false,
     };
     console.log('[REDIS CONFIG] 🔐 TLS enabled for secure connection');
+  } else {
+    console.log('[REDIS CONFIG] 📡 Using plain text connection (no TLS)');
   }
 
   // Connection URL override (for cloud providers like Redis Cloud, AWS ElastiCache)
@@ -86,6 +90,7 @@ export function createRedisConfig(): RedisOptions {
       config.tls = {
         rejectUnauthorized: isProduction ? true : false,
       };
+      console.log('[REDIS CONFIG] 🔐 TLS detected from rediss:// URL scheme');
     }
     console.log('[REDIS CONFIG] 🌐 Using connection URL configuration');
   }
