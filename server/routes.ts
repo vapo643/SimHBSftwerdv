@@ -200,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
   app.get('/api/debug-sentry', function mainHandler(req, res) {
-    throw new Error('Meu primeiro erro Sentry do Simpix!');
+    throw new Error("My first Sentry error!");
   });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
