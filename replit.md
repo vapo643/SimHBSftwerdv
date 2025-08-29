@@ -145,7 +145,7 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 Simpix is a full-stack TypeScript application built on a modular monolith architecture.
 
 **Frontend:**
-- **Technology Stack**: React 18, Wouter (routing), TypeScript, Tailwind CSS with shadcn/ui.
+- **Technology Stack**: React 18, Wouter, TypeScript, Tailwind CSS with shadcn/ui.
 - **State Management**: TanStack Query (server-side), `useReducer` (local).
 - **Form Handling**: React Hook Form with Zod validation.
 - **Build Tool**: Vite.
