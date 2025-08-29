@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis';
+import { createRedisClient, getRedisConnectionConfig } from '../lib/redis-config';
 
 // Reutilizando a conexão Redis existente do BullMQ
 let redisClient: Redis | null = null;
@@ -8,25 +9,11 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const inMemoryCache = new Map<string, { value: any; expires: number }>();
 
 /**
- * Inicializa o cliente Redis reutilizando a conexão existente
+ * Inicializa o cliente Redis reutilizando a configuração centralizada
  */
 export function initializeRedisClient(): Redis {
   if (!redisClient) {
-    redisClient = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      maxRetriesPerRequest: null,
-      enableReadyCheck: false,
-    });
-
-    redisClient.on('connect', () => {
-      console.log('[CACHE] ✅ Redis cache service connected');
-    });
-
-    redisClient.on('error', (err) => {
-      console.error('[CACHE] ❌ Redis cache service error:', err);
-    });
+    redisClient = createRedisClient('cache-service');
   }
 
   return redisClient;

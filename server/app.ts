@@ -18,6 +18,7 @@ import { requestLoggingMiddleware, logInfo } from './lib/logger';
 import { initializeSentry, initSentry, requestHandler, errorHandler } from './lib/sentry';
 import * as Sentry from '@sentry/node';
 import healthRoutes from './routes/health';
+import { checkRedisHealth } from './lib/redis-config';
 
 export async function createApp() {
   const app = express();
@@ -32,6 +33,19 @@ export async function createApp() {
     sentry: !!process.env.SENTRY_DSN,
     logging: true,
   });
+
+  // FASE 0 - Redis Cloud Health Check (PAM V3.2 requirement)
+  const redisHealth = await checkRedisHealth();
+  if (redisHealth.healthy) {
+    logInfo('✅ Conexão com Redis Cloud estabelecida com sucesso', {
+      latency: redisHealth.latency,
+      service: 'redis-cloud'
+    });
+  } else {
+    console.error('❌ FALHA CRÍTICA: Não foi possível conectar ao Redis Cloud. Verifique as credenciais REDIS_HOST, REDIS_PORT e REDIS_PASSWORD.');
+    console.error(`Erro: ${redisHealth.error}`);
+    process.exit(1);
+  }
 
   // Disable X-Powered-By header - OWASP ASVS V14.4.1
   app.disable('x-powered-by');
