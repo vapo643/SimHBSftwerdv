@@ -1,0 +1,44 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Arquiteto Chefe, o relatório de auditoria forense foi recebido.
+
+Veredito da Análise de Auditoria (PAPM): CATASTRÓFICO.
+
+O auto-relato de sucesso do Agente foi uma alucinação grave. A auditoria revela uma implementação que não é apenas "parcialmente completa", mas fundamentalmente instável e não validada. A confiança de 72% é injustificada; a realidade é que a funcionalidade mais crítica — a atomicidade das transações — não tem qualquer prova de funcionamento.
+
+Esta é a definição exata do padrão 80/20 que a nossa ESTRATÉGIA_ZERO_MICRO_ERROS.md foi projetada para aniquilar. O Agente escreveu código, mas não entregou valor. Ele entregou risco.
+
+O Milestone M2 não está "parcialmente concluído". Ele está em estado de FALHA CRÍTICA. Não haverá avanço para o Sprint 3, nem mesmo para otimizações de performance, até que a fundação do M2 seja reconstruída e provada como sólida.
+
+Invoco o Protocolo de Gerenciamento de Interrupção (PGI) V1.1.
+
+`
+--- PROTOCOLO DE GERENCIAMENTO DE INTERRUPÇÃO (PGI) ATIVADO ---
+
+ALERTA: Interrupção de fluxo detectada. A missão principal será colocada em espera no ponto exato de execução.
+
+Roadmap em Standby: "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+Último Passo Concluído: Milestone M1: Core Security
+Passo Interrompido: Milestone M2: Data & Domain
+
+Causa da Interrupção: Bug Crítico - Falha na implementação e validação da camada de dados (UoW e VOs).
+
+Novo Foco (Missão de Emergência): Execução do "Roadmap de Remediação do Sprint 2" para restaurar a integridade do sistema.
+
+STATUS: STANDBY (AGUARDANDO EXECUÇÃO DO PLANO DE REMEDIAÇÃO)
+`
+
+A seguir, o plano de batalha para a correção.
+
+Roadmap de Remediação do Sprint 2 (Missão de Emergência)
+Objetivo: Transformar a implementação falha do M2 em um artefato de software de nível empresarial, estável e validado.
+
+Diretriz: Cada passo deve ser concluído e validado antes de iniciar o próximo.
+
+Prioridade	ID da Missão	Descrição	Status
+P0 (Crítico)	REM-S2-001	Reparar a Suíte de Testes: Corrigir a infraestrutura de testes para que o comando npm run test:integration seja executável e todos os testes existentes passem.	[🎯 EM EXECUÇÃO]
+P1 (Crítico)	REM-S2-002	Provar a Atomicidade do UoW: Corrigir o teste de integração do Unit of Work para validar inequivocamente o cenário de ROLLBACK.	[PENDENTE]
+P2 (Alto)	REM-S2-003	Corrigir Value Objects: Sanar os bugs nos testes unitários dos VOs (Money e Email).	[PENDENTE]
+P3 (Médio)	REM-S2-004	Integrar Domínio: Localizar o agregado Proposal e refatorá-lo para utilizar os VOs validados.	[PENDENTE]

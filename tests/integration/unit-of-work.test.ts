@@ -9,13 +9,32 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { unitOfWork } from '../../server/lib/unit-of-work';
 import { db } from '../../server/lib/supabase';
 import { propostas, propostaLogs } from '../../shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 
 describe('Unit of Work - Auditoria Forense', () => {
   const testPropostaId = uuidv4();
   
   beforeEach(async () => {
+    // Criar dados de teste válidos
+    await db.execute(sql`
+      INSERT INTO parceiros (id, nome, codigo, is_active) 
+      VALUES (999, 'Parceiro Teste', 'TEST999', true)
+      ON CONFLICT (id) DO NOTHING;
+      
+      INSERT INTO lojas (id, parceiro_id, nome_loja, endereco, is_active)
+      VALUES (999, 999, 'Loja Teste Integração', 'Rua Teste, 123', true)
+      ON CONFLICT (id) DO NOTHING;
+      
+      INSERT INTO produtos (id, nome, descricao, is_active)
+      VALUES (999, 'Produto Teste', 'Produto para testes de integração', true)
+      ON CONFLICT (id) DO NOTHING;
+      
+      INSERT INTO profiles (id, nome_completo, role, permissions)
+      VALUES ('test-user-id', 'Usuário Teste', 'admin', '["all"]'::jsonb)
+      ON CONFLICT (id) DO NOTHING;
+    `);
+    
     // Limpar dados de teste existentes
     await db.delete(propostaLogs).where(eq(propostaLogs.propostaId, testPropostaId));
     await db.delete(propostas).where(eq(propostas.id, testPropostaId));
@@ -32,12 +51,10 @@ describe('Unit of Work - Auditoria Forense', () => {
       id: testPropostaId,
       numeroProposta: 123456,
       status: 'RASCUNHO',
-      clienteData: { nome: 'Cliente Teste', cpf: '12345678901' },
-      condicoesData: { valor: 10000, prazo: 12 },
-      produtoId: 1,
-      lojaId: 1,
-      parceiroId: 1,
-      gerenteId: 1,
+      clienteNome: 'Cliente Teste',
+      clienteCpf: '12345678901',
+      produtoId: 999,
+      lojaId: 999,
     };
 
     const mockLog = {
@@ -71,32 +88,21 @@ describe('Unit of Work - Auditoria Forense', () => {
   });
 
   test('PROVA UoW #2: Deve fazer ROLLBACK quando operação falha', async () => {
-    const mockProposta = {
-      id: testPropostaId,
-      status: 'RASCUNHO',
-      clienteData: { nome: 'Cliente Teste', cpf: '12345678901' },
-      condicoesData: { valor: 10000, prazo: 12 },
-      produtoId: 1,
-      lojaId: 1,
-    };
-
-    const mockProposta = {
+    const mockPropostaFalha = {
       id: testPropostaId,
       numeroProposta: 123457,
       status: 'RASCUNHO',
-      clienteData: { nome: 'Cliente Teste', cpf: '12345678901' },
-      condicoesData: { valor: 10000, prazo: 12 },
-      produtoId: 1,
-      lojaId: 1,
-      parceiroId: 1,
-      gerenteId: 1,
+      clienteNome: 'Cliente Teste 2',
+      clienteCpf: '12345678901',
+      produtoId: 999,
+      lojaId: 999,
     };
 
     // CENÁRIO DE FALHA: Tentar inserir log com autorId null
     try {
       await unitOfWork.withTransaction(async (tx) => {
         // 1. Criar proposta (sucesso)
-        await tx.insert(propostas).values(mockProposta);
+        await tx.insert(propostas).values(mockPropostaFalha);
         
         // 2. Forçar erro: tentar criar log com autorId null (violação NOT NULL)
         await tx.insert(propostaLogs).values({
@@ -129,12 +135,10 @@ describe('Unit of Work - Auditoria Forense', () => {
         id: testPropostaId,
         numeroProposta: 123458,
         status: 'RASCUNHO',
-        clienteData: { nome: 'Cliente Business', cpf: '98765432100' },
-        condicoesData: { valor: 15000, prazo: 24 },
-        produtoId: 1,
-        lojaId: 1,
-        parceiroId: 1,
-        gerenteId: 1,
+        clienteNome: 'Cliente Business',
+        clienteCpf: '98765432100',
+        produtoId: 999,
+        lojaId: 999,
       };
 
       const mockLog = {

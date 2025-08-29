@@ -168,11 +168,24 @@ export class Money {
   static fromString(value: string): Money | null {
     // Handle Brazilian format: "1.234,56" or "R$ 1.234,56"
     const cleaned = value
-      .replace(/[R$\s]/g, '')
-      .replace(/\./g, '')  // Remove thousands separator
-      .replace(',', '.');  // Convert decimal separator
+      .replace(/[R$\s]/g, '') // Remove R$ and spaces
+      .trim();
     
-    const parsed = parseFloat(cleaned);
+    let normalizedValue: string;
+    
+    // Check if it has both . and , (Brazilian format with thousands)
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+      // Format: 1.234,56 -> remove dots, replace comma with dot
+      normalizedValue = cleaned.replace(/\./g, '').replace(',', '.');
+    } else if (cleaned.includes(',')) {
+      // Format: 1234,56 -> replace comma with dot
+      normalizedValue = cleaned.replace(',', '.');
+    } else {
+      // Format: 1234.56 or 1234 -> use as is
+      normalizedValue = cleaned;
+    }
+    
+    const parsed = parseFloat(normalizedValue);
     if (isNaN(parsed) || parsed < 0) {
       return null;
     }
@@ -268,15 +281,26 @@ export class Email {
   private constructor(private readonly value: string) {}
 
   static create(email: string): Email | null {
-    if (!Email.isValid(email)) {
+    const normalized = email.toLowerCase().trim();
+    if (!Email.isValid(normalized)) {
       return null;
     }
-    return new Email(email.toLowerCase().trim());
+    return new Email(normalized);
   }
 
   static isValid(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) && email.length <= 254;
+    // More comprehensive email validation
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    
+    if (!emailRegex.test(email) || email.length > 254) {
+      return false;
+    }
+    
+    // Additional checks for edge cases
+    if (email.includes('..')) return false; // Consecutive dots
+    if (email.startsWith('.') || email.endsWith('.')) return false; // Starts or ends with dot
+    
+    return true;
   }
 
   getValue(): string {
