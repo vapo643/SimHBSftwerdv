@@ -203,18 +203,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     throw new Error("My first Sentry error!");
   });
 
-  // Debug do status do Sentry
-  app.get('/api/debug-sentry-status', (req, res) => {
-    const { config } = require('./lib/config');
-    const Sentry = require('@sentry/node');
-    
-    res.json({
-      sentryDsnConfigured: !!config.observability.sentryDsn,
-      sentryDsnLength: config.observability.sentryDsn?.length || 0,
-      sentryEnvVar: !!process.env.SENTRY_DSN,
-      sentryEnvLength: process.env.SENTRY_DSN?.length || 0,
-      sentryClientActive: !!Sentry.getCurrentScope(),
-    });
+  // Debug do status do Sentry  
+  app.get('/api/debug-sentry-status', async (req, res) => {
+    try {
+      const { config } = await import('./lib/config');
+      const Sentry = await import('@sentry/node');
+      
+      res.json({
+        sentryDsnConfigured: !!config.observability.sentryDsn,
+        sentryDsnLength: config.observability.sentryDsn?.length || 0,
+        sentryEnvVar: !!process.env.SENTRY_DSN,
+        sentryEnvLength: process.env.SENTRY_DSN?.length || 0,
+        sentryClientActive: !!Sentry.getCurrentScope(),
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to check Sentry status' });
+    }
   });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
