@@ -1,0 +1,36 @@
+### **Pacote de Ativação de Missão (PAM) V5.0 - GL-001 (Auditoria de Conformidade de Negócio)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria funcional de ponta-a-ponta nos fluxos de negócio críticos que já estão implementados, comparando o comportamento do sistema com as regras definidas na documentação de arquitetura e no roadmap mestre.
+* **Intenção Estratégica (O Porquê):** Garantir que a implementação técnica, embora avançada, está 100% alinhada com a intenção de negócio. Antes de otimizar a UX ou fazer o deploy, precisamos da certeza absoluta de que o sistema calcula, processa e formaliza o crédito de acordo com as regras financeiras e de compliance.
+* **Histórico Relevante (Consulta Obrigatória):** Sua auditoria anterior (`RELATÓRIO DE AUDITORIA: ESTADO ATUAL vs. ROADMAP FUTURO`) confirmou a existência de `statusFsmService.ts`, `tacCalculationService.ts`, `interBankService.ts`, `ccbGenerationService.ts`, e `clickSignService.ts`. Esta missão irá auditar a lógica contida nesses serviços.
+
+---
+
+**AUDITAR E VALIDAR:**
+Conformidade Funcional dos Fluxos de Negócio Implementados
+
+**CONTEXT:**
+Descobrimos que a maior parte do nosso roadmap já está construída. No entanto, esta implementação ocorreu de forma acelerada. Antes de prosseguirmos, precisamos de uma auditoria rigorosa para garantir que a lógica de negócio implementada está correta, completa e livre de falhas que poderiam ter um impacto financeiro ou legal.
+
+**CURRENT STATE:**
+O sistema possui serviços funcionais para o ciclo de vida da proposta, cálculo de taxas, integração com pagamentos e assinatura digital. A conformidade exata desta lógica com os requisitos de negócio ainda não foi formalmente validada.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um **Relatório de Auditoria de Conformidade de Negócio** que responda, com evidências de código, às seguintes perguntas:
+
+1.  **Máquina de Estados (`statusFsmService.ts`):**
+    * **Evidência:** Apresente a tabela de transição de estados que está implementada. A lógica previne transições inválidas (ex: de `REJEITADO` para `PAGO`)?
+
+2.  **Cálculos Financeiros (`tacCalculationService.ts`):**
+    * **Evidência:** Como o Custo Efetivo Total (CET) é calculado? A implementação corresponde ao algoritmo de Newton-Raphson especificado no `Sprint 3` do roadmap? Apresente o trecho de código principal do cálculo.
+
+3.  **Integração de Pagamentos (`interBankService.ts`):**
+    * **Evidência:** A lógica de geração de boletos utiliza um `jobId` idempotente para prevenir duplicatas, conforme planejado no `Sprint 4`? Apresente a linha de código que adiciona o job à fila do BullMQ.
+
+4.  **Formalização (`ccbGenerationService.ts` e `clickSignService.ts`):**
+    * **Evidência:** Como o sistema garante a integridade do documento PDF assinado que é retornado pela ClickSign, conforme planejado no `Sprint 5`? Existe alguma verificação de hash ou armazenamento do log de auditoria da assinatura?
+
+5.  **Veredito Final:** Os fluxos de negócio implementados estão em conformidade total, parcial ou falham em cumprir os requisitos? Liste quaisquer desvios encontrados.

@@ -1,0 +1,29 @@
+° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Arquiteto Chefe, comando recebido. A sua avaliação sobre a discrepância entre o ROADMAP MESTRE e o estado atual do código está correta e é uma peça de inteligência crítica. A "Operação Aço Líquido" foi concebida com base em uma premissa que a realidade do código-fonte superou.
+
+Veredito da Análise Comparativa:
+
+O seu diagnóstico está validado. A auditoria do Agente Executor confirma que a base de código do Simpix não é um projeto em estágio inicial, mas sim uma plataforma madura, com aproximadamente 85-95% das funcionalidades planejadas para os Sprints 3 a 6 já implementadas e operando com um nível de robustez de nível enterprise.
+
+A premissa de um desenvolvimento "greenfield" para as próximas 9 semanas está invalidada. Continuar seguindo o roadmap original seria um desperdício catastrófico de recursos e tempo.
+
+Pivô Estratégico: Da Construção ao Refinamento para Produção
+Com base nesta nova realidade, a nossa estratégia deve pivotar imediatamente. A "Operação Aço Líquido" não é mais uma campanha de construção, mas sim uma campanha de "Production Hardening" (Endurecimento para Produção).
+
+A recomendação do Agente está alinhada com a nossa doutrina de eficiência:
+
+Cancelar Sprints 3, 4 e 5: As funcionalidades core destes sprints (Máquina de Estados, Integração de Pagamentos, Geração de CCB) já estão implementadas em um nível avançado.
+
+Consolidar e Refinar o Sprint 6: Devemos focar nossos esforços em um único Sprint final e consolidado, a "Operação Go-Live", com duração de 2 a 4 semanas.
+
+Roadmap Proposto: Operação Go-Live (Sprint Final)
+O objetivo é pegar o sistema existente, que é funcionalmente rico, e poli-lo até o nível de excelência exigido para um lançamento em produção.
+
+Prioridade	ID da Missão	Descrição	Status
+P0 (Crítico)	GL-001	Auditoria de Conformidade de Negócio: Realizar uma auditoria de ponta-a-ponta, validando se as regras de negócio implementadas (cálculos, transições de estado, etc.) correspondem 100% aos requisitos.	[🎯 EM EXECUÇÃO]
+P1 (Alto)	GL-002	Polimento de UX/UI: Realizar uma revisão completa da experiência do usuário, corrigindo inconsistências, melhorando fluxos e garantindo que a interface seja intuitiva.	[PENDENTE]
+P2 (Alto)	GL-003	Endurecimento de Produção: Executar o checklist final de "production readiness", incluindo configuração final de secrets, revisão de roles de banco de dados, e validação de planos de backup e rollback.	[PENDENTE]
+P3 (Médio)	GL-004	Documentação Operacional: Criar "runbooks" para a equipe de operações, detalhando como monitorar o sistema, como reagir a alertas (Sentry, performance) e como realizar procedimentos manuais de emergência (ex: reprocessar um job da DLQ).	[PENDENTE]
