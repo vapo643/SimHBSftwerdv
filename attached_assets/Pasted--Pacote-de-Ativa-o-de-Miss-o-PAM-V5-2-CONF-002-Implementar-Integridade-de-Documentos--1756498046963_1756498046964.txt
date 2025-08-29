@@ -1,0 +1,34 @@
+### **Pacote de Ativação de Missão (PAM) V5.2 - CONF-002 (Implementar Integridade de Documentos)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissão. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Refatorar o `clickSignService.ts` para, após o download de um documento assinado, (1) calcular o hash SHA-256 do arquivo para verificar sua integridade e (2) armazenar o log de auditoria completo fornecido pela ClickSign junto aos metadados da proposta.
+* **Intenção Estratégica (O Porquê):** Garantir a não-repudiação e a validade jurídica dos contratos eletrônicos. A verificação de hash prova que o documento não foi corrompido ou alterado durante o trânsito. O armazenamento do log de auditoria da ClickSign nos fornece uma trilha de evidências forenses (IPs, timestamps, ações dos signatários) que é crucial em qualquer disputa legal.
+* **Histórico Relevante (Consulta Obrigatória):** Sua auditoria de negócio (`GL-001`) identificou a ausência de qualquer verificação de integridade de documentos como uma lacuna de risco crítico (ALTO), violando os requisitos planejados para o Sprint 5.
+
+---
+
+**IMPLEMENTAR:**
+User Story GL-001.2: Garantir a Integridade de Documentos Assinados
+
+**CONTEXT:**
+Nossa auditoria revelou uma falha grave em nosso fluxo de formalização: quando baixamos um contrato assinado da ClickSign, nós o armazenamos sem verificar sua integridade ou guardar as provas forenses da assinatura. Para um sistema de nível bancário, isso é inaceitável. Precisamos blindar este processo para garantir que cada contrato seja verificável e juridicamente sólido.
+
+**CURRENT STATE:**
+O método `downloadSignedDocument` em `server/services/clickSignService.ts` baixa os bytes do documento da API da ClickSign e os salva, mas não realiza nenhuma verificação de integridade sobre o arquivo recebido nem armazena a trilha de auditoria da assinatura.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Verificação de Hash Implementada:** A lógica de download de documentos no `clickSignService.ts` deve ser expandida. Após receber os bytes do documento, o serviço deve calcular o seu hash SHA-256 e compará-lo com o hash fornecido pela API da ClickSign (se disponível) ou, no mínimo, armazenar o hash calculado.
+2.  **Armazenamento do Log de Auditoria:** O serviço deve fazer uma chamada adicional à API da ClickSign para obter o "Log de Auditoria" ("Audit Trail") do documento. Este log (geralmente um JSON ou XML) deve ser salvo em uma tabela de logs ou nos metadados da proposta no nosso banco de dados.
+3.  **Fluxo Transacional:** As operações de download, verificação de hash e salvamento do log de auditoria devem ser atômicas. Se a verificação de hash falhar, o processo deve ser interrompido e um erro, lançado, impedindo que um documento inválido seja salvo.
+4.  **Prova de Funcionamento:** Logs claros devem ser adicionados para indicar cada etapa do processo: "Calculando hash do documento...", "Hash verificado com sucesso.", "Salvando log de auditoria da ClickSign...". Você deve fornecer estes logs como evidência.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Localizar Serviço Alvo:** O foco principal é o arquivo `server/services/clickSignService.ts`.
+2.  **Implementar Cálculo de Hash:** Utilize a biblioteca `crypto` nativa do Node.js para criar uma função que calcula o hash SHA-256 de um buffer de dados.
+3.  **Refatorar Lógica de Download:** Modifique a função que baixa os documentos para incluir a chamada à função de hash e a lógica de comparação.
+4.  **Implementar Coleta de Log de Auditoria:** Adicione uma nova função ao serviço para buscar o log de auditoria da ClickSign (consulte a documentação da API deles para o endpoint correto).
+5.  **Integrar e Logar:** Integre a coleta do log de auditoria ao fluxo principal de formalização e adicione os `console.log` para evidenciar a execução de cada etapa.
+6.  **Validar com Evidências:** Execute o fluxo (mesmo que de forma mockada em um teste ou script) e cole os logs que provam que o hash foi calculado e o log de auditoria foi salvo.
+7.  **Verificação Final:** Execute o protocolo `7-CHECK FULL`.

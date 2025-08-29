@@ -103,13 +103,23 @@ class CCBSyncService {
       // Import ClickSign service
       const { clickSignService } = await import('./clickSignService.js');
 
-      // Download the signed document from ClickSign
-      const pdfBuffer = await clickSignService.downloadSignedDocument(clicksignKey);
+      // Download the signed document from ClickSign - CONF-002: With integrity verification
+      const documentData = await clickSignService.downloadSignedDocument(clicksignKey);
 
-      if (!pdfBuffer || pdfBuffer.length === 0) {
+      if (!documentData || !documentData.documentBuffer || documentData.documentBuffer.length === 0) {
         console.log(`[CCB SYNC] ⚠️ Empty PDF received for ${proposalId}`);
         return false as boolean;
       }
+
+      // CONF-002: Log document integrity verification
+      console.log(`[CCB SYNC] 🔐 CONF-002: Document integrity verified for ${proposalId}:`, {
+        hash: documentData.documentHash,
+        auditTrailEvents: documentData.auditTrail.events.length,
+        auditTrailSignatures: documentData.auditTrail.signatures.length,
+        verifiedAt: documentData.verifiedAt
+      });
+
+      const pdfBuffer = documentData.documentBuffer;
 
       // Create a clean filename
       const timestamp = Date.now();
@@ -121,12 +131,22 @@ class CCBSyncService {
 
       console.log(`[CCB SYNC] 💾 Saving to Storage: ${storagePath}`);
 
-      // Upload to Supabase Storage
+      // CONF-002: Store document metadata with hash and audit trail
+      const documentMetadata = {
+        hash_sha256: documentData.documentHash,
+        audit_trail: JSON.stringify(documentData.auditTrail),
+        integrity_verified_at: documentData.verifiedAt.toISOString(),
+        clicksign_document_key: clicksignKey,
+        original_size_bytes: pdfBuffer.length
+      };
+
+      // Upload to Supabase Storage with metadata
       const { error: uploadError } = await supabase.storage
         .from('documents')
         .upload(storagePath, pdfBuffer, {
           contentType: 'application/pdf',
           upsert: true,
+          metadata: documentMetadata,
         });
 
       if (uploadError) {

@@ -91,26 +91,47 @@ export class DocumentProcessingService {
         }
       }
 
-      // 3. Baixar documento do ClickSign
+      // 3. Baixar documento do ClickSign - CONF-002: With integrity verification
       console.log(`📥 [DOCUMENT PROCESSING] Downloading document ${clickSignDocId} from ClickSign`);
-      const pdfBuffer = await this.clickSignService.downloadSignedDocument(
+      const documentData = await this.clickSignService.downloadSignedDocument(
         clickSignDocId as string
       );
 
-      if (!pdfBuffer) {
+      if (!documentData || !documentData.documentBuffer) {
         throw new Error('Failed to download document from ClickSign');
       }
+
+      // CONF-002: Log document integrity verification
+      console.log(`🔐 [DOCUMENT PROCESSING] CONF-002: Document integrity verified for ${proposalId}:`, {
+        hash: documentData.documentHash,
+        auditTrailEvents: documentData.auditTrail.events.length,
+        auditTrailSignatures: documentData.auditTrail.signatures.length,
+        verifiedAt: documentData.verifiedAt
+      });
+
+      const pdfBuffer = documentData.documentBuffer;
 
       // 4. Salvar no Supabase Storage - PAM V1.0: Organizar CCBs assinadas em pasta dedicada
       const fileName = `ccb_assinada_${proposalId}_${Date.now()}.pdf`;
       const storagePath = `ccb/assinadas/${fileName}`;
 
-      console.log(`💾 [DOCUMENT PROCESSING] Saving to Storage: ${storagePath}`);
+      // CONF-002: Prepare document metadata with integrity data
+      const documentMetadata = {
+        hash_sha256: documentData.documentHash,
+        audit_trail: JSON.stringify(documentData.auditTrail),
+        integrity_verified_at: documentData.verifiedAt.toISOString(),
+        clicksign_document_key: clickSignDocId as string,
+        original_size_bytes: pdfBuffer.length,
+        processing_timestamp: new Date().toISOString()
+      };
+
+      console.log(`💾 [DOCUMENT PROCESSING] Saving to Storage with integrity metadata: ${storagePath}`);
       const { error: uploadError } = await supabase.storage
         .from('documents')
         .upload(storagePath, pdfBuffer, {
           contentType: 'application/pdf',
           upsert: true,
+          metadata: documentMetadata,
         });
 
       if (uploadError) {
