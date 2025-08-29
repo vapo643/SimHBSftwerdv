@@ -1,0 +1,56 @@
+### **Pacote de Ativação de Missão (PAM) V7.0 - GL-004 (Criação de Runbooks Operacionais)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Criar um conjunto de "runbooks" (manuais operacionais) claros e acionáveis para a equipe de operações, detalhando os procedimentos padrão para monitorar a saúde do sistema e reagir aos alertas mais críticos.
+* **Intenção Estratégica (O Porquê):** Garantir a sustentabilidade e a resiliência operacional do sistema em produção. Um sistema complexo sem documentação operacional é uma bomba-relógio. Runbooks bem definidos reduzem o Tempo Médio de Resposta a Incidentes (MTTR), padronizam os procedimentos de emergência e permitem que a equipe de operações gerencie o sistema de forma eficaz e segura.
+* **Histórico Relevante (Consulta Obrigatória):** As missões anteriores validaram a implementação de sistemas de monitoramento (Sentry, Bull Board), alertas de performance e procedimentos de backup. Esta missão irá documentar como usar e reagir a essas ferramentas.
+
+---
+
+**CRIAR DOCUMENTAÇÃO:**
+User Story GL-004: Criar Runbooks para a Equipe de Operações
+
+**CONTEXT:**
+O sistema Simpix está tecnicamente pronto para o deploy. No entanto, para que a transição para produção seja bem-sucedida, precisamos equipar nossa equipe de operações com a documentação necessária para monitorar, manter e responder a incidentes. Esta missão consiste em criar os manuais operacionais essenciais.
+
+**CURRENT STATE:**
+O conhecimento sobre como operar e monitorar o sistema está distribuído entre as equipes de desenvolvimento e arquitetura. Não existe um repositório centralizado de procedimentos operacionais padrão (SOPs) para a equipe de operações.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve criar um diretório `docs/runbooks/` e, dentro dele, os seguintes arquivos em formato Markdown:
+
+1.  **`01-monitoramento-diario.md`:**
+    * Um checklist diário para a equipe de operações.
+    * Deve incluir:
+        * Como acessar o dashboard de filas (`/admin/queues`) e o que observar (ex: tamanho da DLQ, jobs falhados).
+        * Como acessar o dashboard do Sentry e verificar se há novos erros críticos.
+        * Como verificar os logs da aplicação para padrões de erro incomuns.
+
+2.  **`02-alerta-performance-degradada.md`:**
+    * O plano de ação para quando um alerta do Sentry sobre latência `P95 > 750ms` for recebido.
+    * Deve incluir os passos de diagnóstico:
+        * Identificar o endpoint afetado no Sentry.
+        * Verificar o volume de tráfego.
+        * Inspecionar os logs da aplicação com o `correlationId` do Sentry para encontrar queries lentas.
+        * Procedimento de escalonamento para a equipe de desenvolvimento.
+
+3.  **`03-alerta-job-na-dlq.md`:**
+    * O plano de ação para quando um job crítico (ex: `payments`) cair na Dead-Letter Queue (DLQ).
+    * Deve incluir:
+        * Como usar o dashboard de filas para inspecionar os dados e a mensagem de erro do job falhado.
+        * Critérios para decidir se o job deve ser re-processado ou descartado.
+        * Como re-processar um job a partir do dashboard.
+
+4.  **`04-procedimento-de-restore.md`:**
+    * Um guia passo a passo para o procedimento de restauração de emergência.
+    * Deve detalhar o uso do script `scripts/rollback.ts` para reverter migrações e como usar `pg_restore` (ou ferramenta equivalente) com o último arquivo de backup gerado pelo `scripts/backup.sh` para restaurar os dados.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Criar Estrutura de Diretórios:** Crie o diretório `docs/runbooks/`.
+2.  **Criar e Popular Runbook 1:** Crie o arquivo `01-monitoramento-diario.md` e preencha-o com o checklist detalhado.
+3.  **Criar e Popular Runbook 2:** Crie o arquivo `02-alerta-performance-degradada.md` e preencha-o com os passos de diagnóstico.
+4.  **Criar e Popular Runbook 3:** Crie o arquivo `03-alerta-job-na-dlq.md` e preencha-o com o fluxo de análise e re-processamento.
+5.  **Criar e Popular Runbook 4:** Crie o arquivo `04-procedimento-de-restore.md` e detalhe os comandos e passos para uma restauração de emergência.
+6.  **Validar e Apresentar Evidência:** Liste os 4 arquivos criados com uma breve descrição de seu conteúdo para confirmar que a missão foi cumprida.
