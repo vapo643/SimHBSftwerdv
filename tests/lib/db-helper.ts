@@ -347,12 +347,12 @@ export async function setupTestEnvironment(): Promise<{
     console.log(`[TEST DB] 🔍 Profile verification query result:`, verifyProfile[0]);
     console.log(`[TEST DB] ✅ Profile created with ATENDENTE role for RBAC permissions`);
 
-    // 7. Create gerente_lojas association for RLS
+    // 7. Create gerente_lojas association for RLS (using UUID for gerente_id)
     console.log('[TEST DB] 🔗 Creating store manager association...');
     await directDb`
       INSERT INTO gerente_lojas (gerente_id, loja_id)
       VALUES (
-        ${dbUserId},
+        ${testUserId}::uuid,
         ${testStoreId}
       )
       ON CONFLICT (gerente_id, loja_id) DO NOTHING

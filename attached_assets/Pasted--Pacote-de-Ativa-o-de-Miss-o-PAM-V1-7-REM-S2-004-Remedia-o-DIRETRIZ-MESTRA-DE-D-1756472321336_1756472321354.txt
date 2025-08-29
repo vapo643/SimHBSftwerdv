@@ -1,0 +1,52 @@
+### **Pacote de Ativação de Missão (PAM) V1.7 - REM-S2-004 (Remediação)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Localizar e refatorar o agregado de domínio `Proposal` para utilizar os `Value Objects` (`CPF`, `Money`, `Email`, etc.) em vez de tipos primitivos, garantindo que as regras de negócio sejam impostas na raiz do domínio.
+* **Intenção Estratégica (O Porquê):** Concluir a implementação do padrão DDD no nosso domínio mais crítico. Ao forçar o uso de tipos ricos e autovalidáveis no agregado, eliminamos a possibilidade de dados inválidos existirem dentro do nosso core de negócio, aumentando drasticamente a robustez e a segurança do sistema.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria (`PAM V1.2`) não conseguiu localizar o agregado `Proposal` em `server/contexts/credit/domain/aggregates/Proposal.ts`. A primeira etapa desta missão é uma investigação para encontrar a localização correta do arquivo que define a entidade de negócio `Proposal`.
+* **Modelo Mental (Como se Encaixa):** Você é um arquiteto de software aplicando os princípios de pureza do Domain-Driven Design. Sua tarefa é conectar os "tijolos" (Value Objects) à fundação principal da casa (o Agregado `Proposal`), garantindo que a estrutura seja conceitualmente sólida e tecnicamente íntegra.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** **ALTO** - A refatoração do agregado `Proposal` pode causar um efeito cascata de erros de tipo em todos os serviços e casos de uso que o consomem (`ProposalApplicationService`, `CreateProposalUseCase`, etc.).
+    * **Contramedida:** A refatoração deve ser feita de forma metódica. Primeiro, modifique a definição do agregado. Em segundo lugar, use as ferramentas do LSP (TypeScript) para identificar todos os locais onde a mudança quebrou o código. Em terceiro, corrija cada um desses locais, ajustando a lógica para trabalhar com os novos VOs (ex: `proposal.cpf.getValue()` em vez de `proposal.cpf`).
+
+---
+
+**IMPLEMENTAR:**
+User Story REM-S2-004: Integrar Value Objects no Agregado de Domínio `Proposal`
+
+**CONTEXT:**
+Nós construímos e validamos um `Unit of Work` para transações atômicas e um conjunto de `Value Objects` robustos. Agora, precisamos dar o passo final para concluir o Milestone M2: integrar esses VOs no coração do nosso negócio, o agregado `Proposal`. Isso garante que uma proposta, em seu estado de domínio, nunca possa conter um CPF inválido ou um valor monetário mal formatado.
+
+**CURRENT STATE:**
+A auditoria não localizou o agregado `Proposal`. A definição da entidade de negócio `Proposal` provavelmente existe, mas em um local inesperado. Atualmente, os serviços de aplicação (`Application Services`) e casos de uso (`Use Cases`) que manipulam propostas o fazem utilizando tipos primitivos (string, number).
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Localização do Agregado:** O arquivo que contém a definição principal da entidade/agregado `Proposal` deve ser localizado e seu caminho, reportado.
+2.  **Agregado Refatorado:** A classe ou interface `Proposal` deve ser modificada. Campos como `clienteCpf`, `valor`, `clienteEmail`, etc., devem ser tipados com seus respectivos `Value Objects` (ex: `clienteCpf: CPF`, `valor: Money`) em vez de `string` e `number`.
+3.  **Código Compilando:** Após a refatoração do agregado e de todos os seus pontos de uso, o projeto inteiro deve compilar sem erros. O comando `get_latest_lsp_diagnostics` deve retornar sucesso.
+4.  **Testes de Integração Passando:** A suíte de testes de integração (`npx vitest run tests/integration`) deve continuar passando, provando que a refatoração não quebrou a lógica de negócio existente.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Investigação Forense:** Use ferramentas de busca (`rg`, `grep`) para encontrar o arquivo que define a entidade de domínio `Proposal`. Procure por `class Proposal`, `interface Proposal`, ou `type Proposal` nos diretórios `server/contexts/` e `server/domain/`.
+2.  **Refatoração do Agregado:** Edite o arquivo encontrado. Substitua os tipos primitivos pelos `Value Objects` correspondentes importados de `shared/value-objects.ts`.
+3.  **Remediação de Efeitos em Cascata:** Use o LSP para identificar todos os erros de compilação causados pela mudança. Navegue para cada erro e ajuste o código para interagir corretamente com a nova API dos VOs (ex: usando `Money.fromString(...)` para criar valores e `.getValue()` para obter o número primitivo).
+4.  **Validação de Compilação:** Execute `get_latest_lsp_diagnostics` e corrija quaisquer erros restantes até que o resultado seja limpo.
+5.  **Validação Funcional:** Execute o comando `npx vitest run tests/integration` e forneça o output completo, mostrando que todos os testes de integração continuam a passar.
+6.  **Verificação Final:** Execute o protocolo `7-CHECK FULL` e preencha a declaração de incerteza.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar decisões tomadas que podem ter implicações futuras]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** "🚀 ROADMAP MESTRE DE IMPLEMENTAÇÃO_ OPERAÇÃO AÇO LÍQUIDO.md"
+- **Próximo Passo a ser Retomado:** Milestone M2: Data & Domain
+- **Missão de Emergência Atual:** "Roadmap de Remediação do Sprint 2"
+---

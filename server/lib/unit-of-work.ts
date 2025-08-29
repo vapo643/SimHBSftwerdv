@@ -161,7 +161,10 @@ export interface BusinessRepositories {
  */
 export class PropostaTransactionRepository extends TransactionRepository {
   async createWithLogs(proposta: any, log: any): Promise<any> {
-    const createdProposta = await this.tx.insert(schema.propostas).values(proposta).returning();
+    // If proposta has toPersistence method (DDD aggregate), use it to serialize Value Objects
+    const propostaData = proposta.toPersistence ? proposta.toPersistence() : proposta;
+    
+    const createdProposta = await this.tx.insert(schema.propostas).values(propostaData).returning();
     await this.tx.insert(schema.propostaLogs).values({
       ...log,
       propostaId: createdProposta[0].id,

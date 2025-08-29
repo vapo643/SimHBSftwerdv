@@ -152,15 +152,21 @@ describe('Unit of Work - Auditoria Forense', () => {
 
   test('PROVA UoW #3: Business Operation Pattern', async () => {
     const result = await unitOfWork.withBusinessOperation(async (repositories) => {
+      // Create proper Domain Object with correct schema fields
       const mockProposta = {
         id: testPropostaId,
         numeroProposta: 123458,
         status: 'RASCUNHO',
         clienteNome: 'Cliente Business',
         clienteCpf: '98765432100',
+        clienteEmail: 'teste@example.com',
         produtoId: 999,
         lojaId: 999,
         userId: testUserId, // CRITICAL: Field required by enforce_proposta_integrity trigger
+        // Add missing required fields for schema compatibility
+        valor: 5000.00,
+        prazo: 12,
+        taxaJuros: 2.5,
       };
 
       const mockLog = {

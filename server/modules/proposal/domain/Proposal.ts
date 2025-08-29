@@ -7,23 +7,24 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { DomainException } from '../../shared/domain/DomainException';
+import { CPF, Money, Email, PhoneNumber, CEP } from '@shared/value-objects';
 
 // Value Objects
 export interface ClienteData {
   nome: string;
-  cpf: string;
+  cpf: CPF;
   rg?: string;
-  email?: string;
-  telefone?: string;
+  email?: Email;
+  telefone?: PhoneNumber;
   endereco?: string;
   cidade?: string;
   estado?: string;
-  cep?: string;
+  cep?: CEP;
   data_nascimento?: string;
-  renda_mensal?: number;
+  renda_mensal?: Money;
   empregador?: string;
   tempo_emprego?: string;
-  dividas_existentes?: number;
+  dividas_existentes?: Money;
 }
 
 export interface DadosPagamento {
@@ -152,7 +153,7 @@ export class Proposal {
   private _id: string;
   private _status: ProposalStatus;
   private _clienteData: ClienteData;
-  private _valor: number;
+  private _valor: Money;
   private _prazo: number;
   private _taxaJuros: number;
   private _produtoId?: number;
@@ -170,7 +171,7 @@ export class Proposal {
   constructor(
     id: string,
     clienteData: ClienteData,
-    valor: number,
+    valor: Money,
     prazo: number,
     taxaJuros: number,
     produtoId?: number,
@@ -196,7 +197,7 @@ export class Proposal {
   // Factory method para criar nova proposta
   static create(
     clienteData: ClienteData,
-    valor: number,
+    valor: Money,
     prazo: number,
     taxaJuros: number,
     produtoId?: number,
@@ -229,10 +230,21 @@ export class Proposal {
 
   // Factory method para reconstituir do banco
   static fromDatabase(data: any): Proposal {
+    // Reconstituir Value Objects dos dados persistidos
+    const clienteData: ClienteData = {
+      ...data.cliente_data,
+      cpf: CPF.create(data.cliente_data.cpf)!,
+      email: data.cliente_data.email ? Email.create(data.cliente_data.email) : undefined,
+      telefone: data.cliente_data.telefone ? PhoneNumber.create(data.cliente_data.telefone) : undefined,
+      cep: data.cliente_data.cep ? CEP.create(data.cliente_data.cep) : undefined,
+      renda_mensal: data.cliente_data.renda_mensal ? Money.fromReais(data.cliente_data.renda_mensal) : undefined,
+      dividas_existentes: data.cliente_data.dividas_existentes ? Money.fromReais(data.cliente_data.dividas_existentes) : undefined,
+    };
+
     const proposal = new Proposal(
       data.id,
-      data.cliente_data,
-      data.valor,
+      clienteData,
+      Money.fromReais(data.valor),
       data.prazo,
       data.taxa_juros,
       data.produto_id,
@@ -257,7 +269,8 @@ export class Proposal {
 
   private validateInvariants(): void {
     // Invariante 1: Valor deve estar dentro dos limites
-    if (this._valor < VALOR_MINIMO_EMPRESTIMO || this._valor > VALOR_MAXIMO_EMPRESTIMO) {
+    const valorReais = this._valor.getReais();
+    if (valorReais < VALOR_MINIMO_EMPRESTIMO || valorReais > VALOR_MAXIMO_EMPRESTIMO) {
       throw new DomainException(
         `Valor do empréstimo deve estar entre R$ ${VALOR_MINIMO_EMPRESTIMO} e R$ ${VALOR_MAXIMO_EMPRESTIMO}`
       );
@@ -275,53 +288,10 @@ export class Proposal {
       );
     }
 
-    // Invariante 4: CPF deve ser válido
-    if (!this.isValidCPF(this._clienteData.cpf)) {
-      throw new DomainException('CPF inválido');
-    }
+    // Invariante 4: CPF é sempre válido devido ao Value Object
+    // O CPF é validado na criação do Value Object
   }
 
-  private isValidCPF(cpf: string): boolean {
-    // Remove caracteres não numéricos
-    const cleanCPF = cpf.replace(/\D/g, '');
-
-    // Verifica se tem 11 dígitos
-    if (cleanCPF.length !== 11) return false;
-
-    // Em desenvolvimento, permite CPFs de teste
-    if (process.env.NODE_ENV === 'development') {
-      // Permite CPFs com padrões específicos de teste
-      if (/^(\d)\1{10}$/.test(cleanCPF) || // Sequências repetidas  
-          cleanCPF.startsWith('99999') ||  // CPFs iniciados com 99999
-          cleanCPF.startsWith('11111') ||  // CPFs iniciados com 11111
-          cleanCPF.startsWith('48050') ||  // CPFs iniciados com 48050 (gerados pelo script)
-          cleanCPF.match(/^[0-9]{11}$/)) { // Qualquer CPF com 11 dígitos em desenvolvimento
-        return true;
-      }
-    }
-
-    // Verifica se todos os dígitos são iguais (apenas em produção)
-    if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
-
-    // Validação dos dígitos verificadores
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
-    }
-    let digit = 11 - (sum % 11);
-    if (digit >= 10) digit = 0;
-    if (digit !== parseInt(cleanCPF.charAt(9))) return false;
-
-    sum = 0;
-    for (let i = 0; i < 10; i++) {
-      sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
-    }
-    digit = 11 - (sum % 11);
-    if (digit >= 10) digit = 0;
-    if (digit !== parseInt(cleanCPF.charAt(10))) return false;
-
-    return true;
-  }
 
   // ========== COMANDOS (MÉTODOS DE NEGÓCIO) ==========
 
@@ -354,9 +324,9 @@ export class Proposal {
     // Verificar comprometimento de renda antes de aprovar
     if (this._clienteData.renda_mensal && this._clienteData.dividas_existentes !== undefined) {
       const valorParcela = this.calculateMonthlyPayment();
-      const comprometimentoTotal = (this._clienteData.dividas_existentes || 0) + valorParcela;
+      const comprometimentoTotal = this._clienteData.dividas_existentes.add(Money.fromReais(valorParcela));
       const percentualComprometimento =
-        (comprometimentoTotal / this._clienteData.renda_mensal) * 100;
+        (comprometimentoTotal.getReais() / this._clienteData.renda_mensal.getReais()) * 100;
 
       if (percentualComprometimento > LIMITE_COMPROMETIMENTO_RENDA) {
         throw new DomainException(
@@ -430,7 +400,7 @@ export class Proposal {
    */
   updateAfterPending(newData: Partial<{
     clienteData: ClienteData;
-    valor: number;
+    valor: Money;
     prazo: number;
     taxaJuros: number;
     dadosPagamento: DadosPagamento;
@@ -599,7 +569,7 @@ export class Proposal {
    * Calcula o valor da parcela mensal
    */
   calculateMonthlyPayment(): number {
-    const principal = this._valor;
+    const principal = this._valor.getReais();
     const monthlyRate = this._taxaJuros / 100;
     const numberOfPayments = this._prazo;
 
@@ -645,7 +615,7 @@ export class Proposal {
   get clienteData(): ClienteData {
     return this._clienteData;
   }
-  get valor(): number {
+  get valor(): Money {
     return this._valor;
   }
   get prazo(): number {
@@ -708,11 +678,22 @@ export class Proposal {
    * Converte o agregado para formato de persistência
    */
   toPersistence(): any {
+    // Serializar Value Objects para formato primitivo para persistência
+    const clienteDataPersistence = {
+      ...this._clienteData,
+      cpf: this._clienteData.cpf.getValue(),
+      email: this._clienteData.email?.getValue(),
+      telefone: this._clienteData.telefone?.getValue(),
+      cep: this._clienteData.cep?.getValue(),
+      renda_mensal: this._clienteData.renda_mensal?.getReais(),
+      dividas_existentes: this._clienteData.dividas_existentes?.getReais(),
+    };
+
     return {
       id: this._id,
       status: this._status,
-      cliente_data: this._clienteData,
-      valor: this._valor,
+      cliente_data: clienteDataPersistence,
+      valor: this._valor.getReais(),
       prazo: this._prazo,
       taxa_juros: this._taxaJuros,
       produto_id: this._produtoId,

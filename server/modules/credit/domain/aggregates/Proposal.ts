@@ -3,6 +3,8 @@
  * Core business logic for credit proposals
  */
 
+import { CPF, Money, Email, PhoneNumber } from '@shared/value-objects';
+
 export enum ProposalStatus {
   DRAFT = 'rascunho',
   WAITING_ANALYSIS = 'aguardando_analise',
@@ -16,11 +18,11 @@ export enum ProposalStatus {
 
 export interface CustomerData {
   name: string;
-  cpf: string;
-  email?: string;
-  phone?: string;
+  cpf: CPF;
+  email?: Email;
+  phone?: PhoneNumber;
   birthDate?: Date;
-  monthlyIncome?: number;
+  monthlyIncome?: Money;
   rg?: string;
   issuingBody?: string;
   maritalStatus?: string;
@@ -31,14 +33,14 @@ export interface CustomerData {
 }
 
 export interface LoanConditions {
-  requestedAmount: number;
+  requestedAmount: Money;
   term: number; // in months
   purpose?: string;
   collateral?: string;
-  tacValue?: number;
-  iofValue?: number;
-  totalFinancedAmount?: number;
-  monthlyPayment?: number;
+  tacValue?: Money;
+  iofValue?: Money;
+  totalFinancedAmount?: Money;
+  monthlyPayment?: Money;
   interestRate?: number;
 }
 
@@ -145,11 +147,9 @@ export class Proposal {
 
   // Business Rules Validation
   private validateInvariants(): void {
-    if (!this.customerData.cpf || !this.isValidCPF(this.customerData.cpf)) {
-      throw new Error('Invalid CPF');
-    }
-
-    if (this.loanConditions.requestedAmount <= 0) {
+    // CPF validation is handled by the Value Object
+    
+    if (!this.loanConditions.requestedAmount.isPositive()) {
       throw new Error('Requested amount must be positive');
     }
 
@@ -172,34 +172,6 @@ export class Proposal {
     }
   }
 
-  private isValidCPF(cpf: string): boolean {
-    // Remove non-digits
-    cpf = cpf.replace(/\D/g, '');
-
-    if (cpf.length !== 11) return false;
-
-    // Check for known invalid patterns
-    if (/^(\d)\1{10}$/.test(cpf)) return false;
-
-    // Validate check digits
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      sum += parseInt(cpf.charAt(i)) * (10 - i);
-    }
-    let checkDigit = 11 - (sum % 11);
-    if (checkDigit === 10 || checkDigit === 11) checkDigit = 0;
-    if (checkDigit !== parseInt(cpf.charAt(9))) return false;
-
-    sum = 0;
-    for (let i = 0; i < 10; i++) {
-      sum += parseInt(cpf.charAt(i)) * (11 - i);
-    }
-    checkDigit = 11 - (sum % 11);
-    if (checkDigit === 10 || checkDigit === 11) checkDigit = 0;
-    if (checkDigit !== parseInt(cpf.charAt(10))) return false;
-
-    return true;
-  }
 
   // Financial Calculations
   public calculateMonthlyPayment(): number | null {
@@ -212,7 +184,8 @@ export class Proposal {
 
     // Cálculo de parcela usando fórmula de juros compostos
     const monthlyRate = interestRate / 100 / 12;
-    const numerator = requestedAmount * monthlyRate * Math.pow(1 + monthlyRate, term);
+    const requestedAmountValue = requestedAmount.getReais();
+    const numerator = requestedAmountValue * monthlyRate * Math.pow(1 + monthlyRate, term);
     const denominator = Math.pow(1 + monthlyRate, term) - 1;
 
     return numerator / denominator;
@@ -265,12 +238,30 @@ export class Proposal {
 
   // Factory method to reconstruct from persistence
   public static fromPersistence(data: any): Proposal {
+    // Reconstruct Value Objects from primitive data
+    const customerData: CustomerData = {
+      ...data.customerData,
+      cpf: CPF.create(data.customerData.cpf)!,
+      email: data.customerData.email ? Email.create(data.customerData.email) : undefined,
+      phone: data.customerData.phone ? PhoneNumber.create(data.customerData.phone) : undefined,
+      monthlyIncome: data.customerData.monthlyIncome ? Money.fromReais(data.customerData.monthlyIncome) : undefined,
+    };
+
+    const loanConditions: LoanConditions = {
+      ...data.loanConditions,
+      requestedAmount: Money.fromReais(data.loanConditions.requestedAmount),
+      tacValue: data.loanConditions.tacValue ? Money.fromReais(data.loanConditions.tacValue) : undefined,
+      iofValue: data.loanConditions.iofValue ? Money.fromReais(data.loanConditions.iofValue) : undefined,
+      totalFinancedAmount: data.loanConditions.totalFinancedAmount ? Money.fromReais(data.loanConditions.totalFinancedAmount) : undefined,
+      monthlyPayment: data.loanConditions.monthlyPayment ? Money.fromReais(data.loanConditions.monthlyPayment) : undefined,
+    };
+
     const proposal = Object.create(Proposal.prototype);
     Object.assign(proposal, {
       id: data.id,
       status: data.status,
-      customerData: data.customerData,
-      loanConditions: data.loanConditions,
+      customerData,
+      loanConditions,
       partnerId: data.partnerId,
       storeId: data.storeId,
       productId: data.productId,

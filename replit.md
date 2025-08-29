@@ -1,5 +1,5 @@
 # Overview
-Simpix is a full-stack TypeScript application for comprehensive credit management within financial institutions. Its core purpose is to streamline the credit proposal workflow, from creation and payment processing to formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project aims to be a leading solution in the credit management market, prioritizing banking-grade security, compliance, and efficient data management.
+Simpix is a full-stack TypeScript application designed for comprehensive credit management within financial institutions. Its primary goal is to streamline the credit proposal workflow, from creation and payment processing to formalization tracking. Key features include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management.
 
 # User Preferences
 ### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -158,6 +158,7 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 - **Asynchronous Processing**: BullMQ backed by Redis (job queues).
 - **Caching**: Redis-based cache (commercial data tables, 1-hour TTL, cache-aside).
 - **Architecture Pattern**: Modular monolith with domain-based decomposition (e.g., Auth, Users, Proposals, Payments).
+- **Domain-Driven Design**: Full DDD implementation with Value Objects (CPF, Money, Email, PhoneNumber), aggregate roots, and proper domain boundaries.
 - **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), anti-fragile RBAC.
 - **CI/CD**: GitHub Actions for CI, Staging Deployment, and Security workflows.
 - **Observability**: Winston (structured logging), Sentry (error tracking), health checks, automated backups.
