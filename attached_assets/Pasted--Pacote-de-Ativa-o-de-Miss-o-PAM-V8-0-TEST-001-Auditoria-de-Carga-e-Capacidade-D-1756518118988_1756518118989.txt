@@ -1,0 +1,36 @@
+### **Pacote de Ativação de Missão (PAM) V8.0 - TEST-001 (Auditoria de Carga e Capacidade)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Adaptar e executar o script de teste de carga existente (`scripts/load-test/critical-endpoints.yml`) para simular um cenário de uso realista: 10 usuários concorrentes executando ações críticas (simulação, criação e listagem de propostas) ao longo de um período que represente um dia de trabalho, com o objetivo de criar ~50 novas propostas.
+* **Intenção Estratégica (O Porquê):** Validar que a arquitetura do sistema e as otimizações de performance que implementamos são suficientes para suportar a carga de negócio inicial projetada, sem degradação de performance, esgotamento de recursos (conexões, memória) ou aumento da taxa de erros.
+* **Histórico Relevante (Consulta Obrigatória):** A missão `PERF-F4-001` já validou que o sistema atinge o SLA de P95 < 500ms com picos de 50 usuários virtuais. Esta missão focará na *resistência* do sistema a uma carga *sustentada* e mais realista.
+
+---
+
+**IMPLEMENTAR:**
+User Story TEST-001: Validar Capacidade de Carga (10 Usuários, 50 Propostas/Dia)
+
+**CONTEXT:**
+O sistema foi otimizado e parece performático em testes de curta duração. No entanto, antes do deploy, precisamos simular um dia de trabalho real para garantir que o sistema não apenas responde rápido, mas se mantém estável e eficiente ao longo do tempo com múltiplos usuários operando simultaneamente.
+
+**CURRENT STATE:**
+Existe um script de teste de carga em `scripts/load-test/critical-endpoints.yml` configurado para um teste de "ramp-up" genérico. As otimizações de performance e a infraestrutura de monitoramento estão ativas.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Script de Teste de Carga Refinado:** O arquivo `critical-endpoints.yml` deve ser copiado para um novo arquivo, `realistic-day-simulation.yml`, e sua configuração deve ser ajustada para simular 10 usuários virtuais (VUs) constantes por um período de 8 minutos (simulando 8 horas de trabalho), com um "ramp-up" inicial. O fluxo deve focar na criação de propostas.
+2.  **Execução do Teste Concluída:** O teste de carga deve ser executado com sucesso.
+3.  **Relatório de Análise de Resultados:** Um relatório detalhado deve ser produzido, contendo:
+    * O sumário final do `Artillery`, com destaque para a latência `p(95)` e a taxa de erro.
+    * Uma análise confirmando que o SLA `p(95) < 500ms` foi mantido durante todo o teste.
+    * A confirmação de que o número de propostas criadas foi próximo de 50.
+    * Uma análise dos logs do `performance-monitor` ou do Sentry para verificar se não houve degradação de performance ao longo do tempo.
+4.  **Veredito Final:** Uma declaração final sobre se o sistema está ou não apto a suportar a carga de produção inicial.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Criar e Adaptar Script de Teste:** Crie o novo arquivo `scripts/load-test/realistic-day-simulation.yml`. Modifique a seção `phases` para refletir um "ramp-up" para 10 VUs seguido por uma duração sustentada de 10 VUs. Ajuste o `flow` para que a ação predominante seja o `POST` para `/api/propostas`, garantindo que cada request envie dados únicos para evitar falhas de constraint.
+2.  **Executar o Teste de Carga:** Execute o novo script com o comando `artillery run realistic-day-simulation.yml --output simulation-report.json`.
+3.  **Analisar o Relatório do Artillery:** Cole o sumário do relatório gerado pelo Artillery. Analise a métrica `http.response_times.p95` e a `errors.codes`.
+4.  **Analisar Logs do Servidor:** Verifique os logs da aplicação durante o período do teste. Procure por mensagens de degradação de performance do `performance-monitor` ou quaisquer outros erros.
+5.  **Compilar Relatório Final:** Organize todas as suas descobertas no relatório final, concluindo com o veredito sobre a capacidade do sistema.
