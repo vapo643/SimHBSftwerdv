@@ -18,7 +18,6 @@ export interface Profile {
   loja_ids?: number[] | null;
   created_at?: string;
   updated_at?: string;
-  deleted_at?: string | null;
 }
 
 export interface AuthUser {
@@ -61,7 +60,6 @@ export class UserRepository extends BaseRepository<Profile> {
     const { data: profiles, error: profileError } = await this.supabaseAdmin
       .from(this.tableName)
       .select('*')
-      .is('deleted_at', null)
       .order('full_name');
 
     if (profileError) {
@@ -215,10 +213,7 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to deactivate user: ${error.message}`);
     }
 
-    // Also mark profile as deleted (soft delete)
-    await this.updateProfile(userId, {
-      deleted_at: new Date().toISOString(),
-    });
+    // Profile deactivated via auth ban
   }
 
   /**
@@ -235,10 +230,7 @@ export class UserRepository extends BaseRepository<Profile> {
       throw new Error(`Failed to reactivate user: ${error.message}`);
     }
 
-    // Remove soft delete from profile
-    await this.updateProfile(userId, {
-      deleted_at: null,
-    });
+    // Profile reactivated via auth unban
   }
 
   /**
@@ -262,7 +254,7 @@ export class UserRepository extends BaseRepository<Profile> {
       .from(this.tableName)
       .select('*')
       .eq('role', role)
-      .is('deleted_at', null)
+
       .order('full_name');
 
     if (error) {
@@ -280,7 +272,7 @@ export class UserRepository extends BaseRepository<Profile> {
       .from(this.tableName)
       .select('*')
       .or(`loja_id.eq.${lojaId},loja_ids.cs.{${lojaId}}`)
-      .is('deleted_at', null)
+
       .order('full_name');
 
     if (error) {

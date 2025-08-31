@@ -1,0 +1,67 @@
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756663293385-m91x1yzsw',
+  duration: 1455,
+  memoryDeltaMB: 1,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+2025-08-31 18:01:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4ef9fb3f-9ba0-4256-bcec-1669233754cd","method":"GET","url":"/api/admin/users","path":"/api/admin/users","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.59.230.62, environment: development
+[JWT DEBUG] Rate limit check for 187.59.230.62: attempts=23, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.59.230.62: 24/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-31T18:01:36.605Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+📋 [Controller/Users] Fetching all users
+[UserService] Error fetching users: Error: Failed to fetch profiles: column profiles.deleted_at does not exist
+    at UserRepository.getAllUsersWithAuth (/home/runner/workspace/server/repositories/user.repository.ts:68:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async UserService.getAllUsers (/home/runner/workspace/server/services/userService-refactored.ts:20:14)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:43:21)
+❌ [Controller/Users] Error fetching users: Error: Erro ao buscar usuários
+    at UserService.getAllUsers (/home/runner/workspace/server/services/userService-refactored.ts:23:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:43:21)
+2025-08-31 18:01:37 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4ef9fb3f-9ba0-4256-bcec-1669233754cd","method":"GET","url":"/","statusCode":500,"duration":1387,"responseSize":44}
+2025-08-31 18:01:37 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4ef9fb3f-9ba0-4256-bcec-1669233754cd","url":"/","duration":1387,"threshold":1000}
+2025-08-31 18:01:37 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4ef9fb3f-9ba0-4256-bcec-1669233754cd","method":"GET","url":"/","statusCode":500,"duration":1387,"error":"{\"message\":\"Erro ao buscar usuários\"}"}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756663296095-ozdyhfgge',
+  duration: 1387,
+  memoryDeltaMB: 1,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756663296095-7llmz8qmo',
+  duration: 1387,
+  memoryDeltaMB: 1,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+2025-08-31 18:01:39 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"17b03e55-7352-4ed1-8e03-1e9ebe53e535","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-08-31 18:01:39 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"17b03e55-7352-4ed1-8e03-1e9ebe53e535","method"
