@@ -1,0 +1,40 @@
+### **Pacote de Ativação de Missão (PAM) V9.1 - FIX-CRUD-001 (Remediação da Criação de Usuário)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Corrigir a importação de rotas no arquivo principal do servidor (`server/routes.ts`) para apontar para o arquivo de rotas de usuário correto e completo (`users-refactored.ts`), restaurando a funcionalidade de criação de usuário.
+* **Intenção Estratégica (O Porquê):** Restaurar a integridade de uma das funcionalidades mais críticas do sistema. A correção desta falha de configuração não apenas conserta o bug, mas valida que nosso processo de diagnóstico forense é eficaz em isolar problemas complexos de forma precisa.
+* **Histórico Relevante (Consulta Obrigatória):** Sua auditoria (`AUDIT-CRUD-001`) identificou que o arquivo `server/routes.ts` (linha 2444) estava importando um arquivo de rotas obsoleto e incompleto (`admin-users.js`), que é a causa raiz direta da falha.
+
+---
+
+**IMPLEMENTAR:**
+User Story FIX-CRUD-001: Corrigir Roteamento e Restaurar a Persistência de Usuários
+
+**CONTEXT:**
+Nossa auditoria forense descobriu a causa da falha silenciosa na criação de usuários: o servidor não possui a rota `POST /api/admin/users` registrada porque o arquivo de rotas principal está importando a versão errada do roteador de usuários. Precisamos corrigir esta única linha de código para restaurar a funcionalidade completa.
+
+**CURRENT STATE:**
+O arquivo `server/routes.ts`, na linha 2444, contém a seguinte importação incorreta:
+`const usersAdminRouter = (await import('./routes/admin-users.js')).default;`
+Isso carrega um arquivo sem a rota `POST`, fazendo com que todas as tentativas de criação de usuário falhem com um `404`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Importação Corrigida:** A linha de importação em `server/routes.ts` deve ser alterada para apontar para o arquivo correto e completo:
+    `const usersAdminRouter = (await import('./routes/admin/users-refactored.js')).default;`
+2.  **Limpeza de Código:** O arquivo obsoleto e incorreto (`server/routes/admin-users.ts`) deve ser excluído para prevenir futuras confusões.
+3.  **Validação Funcional:** O fluxo de criação de usuário deve ser testado de ponta-a-ponta.
+    * A submissão do formulário na UI deve resultar em uma resposta `201 Created` da API.
+    * O novo usuário deve aparecer na seção "Authentication" do Supabase.
+    * Um novo registro correspondente deve existir na tabela `profiles` do banco de dados.
+4.  **Prova de Sucesso:** Você deve fornecer screenshots que comprovem a criação do usuário tanto no Supabase Auth quanto na tabela `profiles`.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Corrigir a Importação:** Edite o arquivo `server/routes.ts` na linha 2444 para corrigir o caminho da importação.
+2.  **Excluir Arquivo Obsoleto:** Delete o arquivo `server/routes/admin-users.ts`.
+3.  **Reiniciar e Validar:** Reinicie o servidor. Execute o fluxo de criação de um novo usuário a partir da interface gráfica.
+4.  **Validar no Supabase Auth:** Peça ao Executor Humano para verificar o painel do Supabase e confirmar que o novo usuário foi criado na seção de autenticação.
+5.  **Validar no Banco de Dados:** Execute uma query `SELECT * FROM profiles WHERE email = '[email_do_novo_usuario]'` e mostre o resultado, provando que o perfil foi salvo.
+6.  **Apresentar Evidência:** Capture e apresente os screenshots da validação no Supabase e no banco de dados.
+7.  **Verificação Final:** Execute o protocolo `7-CHECK FULL`.

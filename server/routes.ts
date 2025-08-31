@@ -2441,7 +2441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   ];
 
   // Users management endpoints - REFATORADO com padrão Service/Repository
-  const usersAdminRouter = (await import('./routes/admin-users.js')).default;
+  const usersAdminRouter = (await import('./routes/admin/users-refactored.js')).default;
   app.use('/api/admin', usersAdminRouter);
 
   // Bull-Board Admin Dashboard - Queue Monitoring
