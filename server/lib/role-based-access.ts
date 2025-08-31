@@ -24,8 +24,9 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
   '/api/pagamentos': ['FINANCEIRO', 'ADMINISTRADOR'],
 
   // Configurações Admin - GERENTE, ADMIN
-  '/api/users': ['GERENTE', 'ADMINISTRADOR'],
+  '/api/admin/users': ['GERENTE', 'ADMINISTRADOR'],
   '/api/parceiros': ['GERENTE', 'ADMINISTRADOR'],
+  '/api/admin/parceiros': ['GERENTE', 'ADMINISTRADOR'],
   '/api/lojas': ['GERENTE', 'ADMINISTRADOR'],
   '/api/produtos': ['GERENTE', 'ADMINISTRADOR'],
   '/api/tabelas-comerciais': ['GERENTE', 'ADMINISTRADOR'],
