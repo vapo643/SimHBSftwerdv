@@ -1,0 +1,219 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+@sentry_react.js?v=1517ce23:34402 Refused to create a worker from 'blob:https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/cca3673a-5fbe-49d8-a348-bd071b23ce4f' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://replit.com". Note that 'worker-src' was not explicitly set, so 'script-src' is used as a fallback.
+
+_loadWorker @ @sentry_react.js?v=1517ce23:34402Understand this error
+@sentry_react.js?v=1517ce23:13663 🚩 Feature Flags carregadas: Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+@sentry_react.js?v=1517ce23:13663 🔐 [AUTH EVENT] SIGNED_IN Object
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+(anonymous) @ @sentry_react.js?v=1517ce23:13663Understand this error
+@sentry_react.js?v=1517ce23:13663 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+@sentry_react.js?v=1517ce23:13663 [API Client] After dual-key transformation: Object
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+(anonymous) @ @sentry_react.js?v=1517ce23:13663Understand this error
+@sentry_react.js?v=1517ce23:13663 🚩 Feature Flags carregadas: Object
+@sentry_react.js?v=1517ce23:13663 🔐 [AUTH EVENT] INITIAL_SESSION Object
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+(anonymous) @ @sentry_react.js?v=1517ce23:13663Understand this error
+@sentry_react.js?v=1517ce23:13663 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+@sentry_react.js?v=1517ce23:13663 🔐 [AUTH EVENT] SIGNED_IN Object
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+(anonymous) @ @sentry_react.js?v=1517ce23:13663Understand this error
+@sentry_react.js?v=1517ce23:13663 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+@sentry_react.js?v=1517ce23:13663 [API Client] After dual-key transformation: Object
+@sentry_react.js?v=1517ce23:13663 🔐 [AUTH RESTORED] User profile loaded with valid token
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+(anonymous) @ @sentry_react.js?v=1517ce23:13663Understand this error
+/api/admin/users:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+@sentry_react.js?v=1517ce23:13663 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users : Object
+@sentry_react.js?v=1517ce23:13663 [API Client] After dual-key transformation: Object
+@sentry_react.js?v=1517ce23:13663 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+@sentry_react.js?v=1517ce23:13663 [API Client] After dual-key transformation: Object
+@sentry_react.js?v=1517ce23:13663 🔐 [AUTH RESTORED] User profile loaded with valid token
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+(anonymous) @ @sentry_react.js?v=1517ce23:13663Understand this error
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+@sentry_react.js?v=1517ce23:13663 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+@sentry_react.js?v=1517ce23:13663 [API Client] After dual-key transformation: Object
+@sentry_react.js?v=1517ce23:13663 🔐 [AUTH RESTORED] User profile loaded with valid token
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+(anonymous) @ @sentry_react.js?v=1517ce23:13663Understand this error
+/api/admin/users:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+@sentry_react.js?v=1517ce23:13663 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users : Object
+@sentry_react.js?v=1517ce23:13663 [API Client] After dual-key transformation: Object
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+/api/admin/users:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+@sentry_react.js?v=1517ce23:13663 [PASSO 3 - ENVIO] Object
+/api/admin/users:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+@sentry_react.js?v=1517ce23:13663 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users : Object
+@sentry_react.js?v=1517ce23:13663 [API Client] After dual-key transformation: Object
+3@sentry_react.js?v=1517ce23:13663 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@sentry_react.js?v=1517ce23:49062:5)
+    at errorBoundary(App)
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
