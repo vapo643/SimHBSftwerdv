@@ -1,0 +1,221 @@
+JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.59.230.62, environment: development
+[JWT DEBUG] Rate limit check for 187.59.230.62: attempts=3, max=10000, window=60000ms
+[JWT DEBUG] Rate limit check for 187.59.230.62: attempts=3, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.59.230.62: 4/10000
+[JWT DEBUG] Incremented attempts for 187.59.230.62: 4/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-31T17:49:26.077Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-31T17:49:26.087Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-08-31 17:49:26 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ee119215-4d05-43d8-911a-54a287b56661","method":"GET","url":"/api/debug/me","statusCode":200,"duration":776,"responseSize":299}
+2025-08-31 17:49:26 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"41c42edc-17b7-4d63-8d8c-372e35b1578e","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.59.230.62, environment: development
+[JWT DEBUG] Rate limit check for 187.59.230.62: attempts=5, max=10000, window=60000ms
+[UserService] Error fetching user users: Error: Failed to fetch profile: invalid input syntax for type uuid: "users"
+    at UserRepository.getUserWithAuth (/home/runner/workspace/server/repositories/user.repository.ts:105:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async UserService.getUserById (/home/runner/workspace/server/services/userService-refactored.ts:32:14)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:81:20)
+❌ [Controller/Users] Error fetching user users: Error: Erro ao buscar usuário
+    at UserService.getUserById (/home/runner/workspace/server/services/userService-refactored.ts:35:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:81:20)
+2025-08-31 17:49:26 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"89decd0a-ba6a-4af7-b1ae-8a0b8089e59f","method":"GET","url":"/users","statusCode":500,"duration":1296,"responseSize":43}
+2025-08-31 17:49:26 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"89decd0a-ba6a-4af7-b1ae-8a0b8089e59f","url":"/users","duration":1296,"threshold":1000}
+2025-08-31 17:49:26 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"89decd0a-ba6a-4af7-b1ae-8a0b8089e59f","method":"GET","url":"/users","statusCode":500,"duration":1296,"error":"{\"message\":\"Erro ao buscar usuário\"}"}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756662565569-ka7ky3unx',
+  duration: 1296,
+  memoryDeltaMB: 5,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756662565569-wkwb9oz1h',
+  duration: 1296,
+  memoryDeltaMB: 5,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[JWT DEBUG] Incremented attempts for 187.59.230.62: 6/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-31T17:49:26.997Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-08-31 17:49:27 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"41c42edc-17b7-4d63-8d8c-372e35b1578e","method":"GET","url":"/api/debug/me","statusCode":200,"duration":775,"responseSize":299}
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n    at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n    at <anonymous> (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AbstractAsyncHooksContextManager.ts:75:49)\n    at AsyncLocalStorage.run (node:async_hooks:346:14)\n    at SentryContextManager.with (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AsyncLocalStorageContextManager.ts:40:36)\n    at SentryContextManager.with (/home/runner/workspace/node_modules/@sentry/opentelemetry/src/contextManager.ts:70:24)\n    at ClientRequest.contextWrapper (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AbstractAsyncHooksContextManager.ts:75:26)\n    at ClientRequest.emit (node:events:524:28)\n    at emitErrorEvent (node:_http_client:101:11)\n    at Socket.socketErrorListener (node:_http_client:504:5)\n    at Socket.emit (node:events:524:28)\n    at emitErrorNT (node:internal/streams/destroy:169:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n    at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n    at <anonymous> (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AbstractAsyncHooksContextManager.ts:75:49)\n    at AsyncLocalStorage.run (node:async_hooks:346:14)\n    at SentryContextManager.with (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AsyncLocalStorageContextManager.ts:40:36)\n    at SentryContextManager.with (/home/runner/workspace/node_modules/@sentry/opentelemetry/src/contextManager.ts:70:24)\n    at ClientRequest.contextWrapper (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AbstractAsyncHooksContextManager.ts:75:26)\n    at ClientRequest.emit (node:events:524:28)\n    at emitErrorEvent (node:_http_client:101:11)\n    at Socket.socketErrorListener (node:_http_client:504:5)\n    at Socket.emit (node:events:524:28)\n    at emitErrorNT (node:internal/streams/destroy:169:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+error: Unleash initialization error: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":"ECONNREFUSED","port":4242,"service":"feature-flags","stack":"FetchError: Unleash Repository error: request to http://localhost:4242/api/client/features failed, reason: connect ECONNREFUSED 127.0.0.1:4242\n    at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/minipass-fetch/lib/index.js:130:14)\n    at <anonymous> (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AbstractAsyncHooksContextManager.ts:75:49)\n    at AsyncLocalStorage.run (node:async_hooks:346:14)\n    at SentryContextManager.with (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AsyncLocalStorageContextManager.ts:40:36)\n    at SentryContextManager.with (/home/runner/workspace/node_modules/@sentry/opentelemetry/src/contextManager.ts:70:24)\n    at ClientRequest.contextWrapper (/home/runner/workspace/node_modules/@opentelemetry/context-async-hooks/src/AbstractAsyncHooksContextManager.ts:75:26)\n    at ClientRequest.emit (node:events:524:28)\n    at emitErrorEvent (node:_http_client:101:11)\n    at Socket.socketErrorListener (node:_http_client:504:5)\n    at Socket.emit (node:events:524:28)\n    at emitErrorNT (node:internal/streams/destroy:169:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:128:3)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","syscall":"connect","type":"system"}
+info: Switching to fallback mode due to Unleash connection error {"service":"feature-flags"}
+2025-08-31 17:50:18 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"44be24af-8de7-4702-8014-1ce16ef84345","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-08-31 17:50:18 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"44be24af-8de7-4702-8014-1ce16ef84345","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-08-31 17:50:19 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"88fdb810-1fd8-4905-8efb-ed033e5ff9f6","method":"GET","url":"/api/admin/users","path":"/api/admin/users","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /users
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.59.230.62, environment: development
+2025-08-31 17:50:19 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f1e40399-1e3a-4074-96de-7667c892dfcd","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.59.230.62, environment: development
+2025-08-31 17:50:19 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2949502b-da0a-4187-b873-af85eb593911","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-08-31 17:50:19 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2949502b-da0a-4187-b873-af85eb593911","method":"GET","url":"/api/features","statusCode":200,"duration":5,"responseSize":262}
+[JWT DEBUG] Rate limit check for 187.59.230.62: attempts=6, max=10000, window=60000ms
+[JWT DEBUG] Rate limit check for 187.59.230.62: attempts=6, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.59.230.62: 7/10000
+[JWT DEBUG] Incremented attempts for 187.59.230.62: 7/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-31T17:50:19.946Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-31T17:50:19.999Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-08-31 17:50:20 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f1e40399-1e3a-4074-96de-7667c892dfcd","method":"GET","url":"/api/debug/me","statusCode":200,"duration":774,"responseSize":299}
+[UserService] Error fetching user users: Error: Failed to fetch profile: invalid input syntax for type uuid: "users"
+    at UserRepository.getUserWithAuth (/home/runner/workspace/server/repositories/user.repository.ts:105:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async UserService.getUserById (/home/runner/workspace/server/services/userService-refactored.ts:32:14)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:81:20)
+❌ [Controller/Users] Error fetching user users: Error: Erro ao buscar usuário
+    at UserService.getUserById (/home/runner/workspace/server/services/userService-refactored.ts:35:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:81:20)
+2025-08-31 17:50:20 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"88fdb810-1fd8-4905-8efb-ed033e5ff9f6","method":"GET","url":"/users","statusCode":500,"duration":1304,"responseSize":43}
+2025-08-31 17:50:20 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"88fdb810-1fd8-4905-8efb-ed033e5ff9f6","url":"/users","duration":1304,"threshold":1000}
+2025-08-31 17:50:20 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"88fdb810-1fd8-4905-8efb-ed033e5ff9f6","method":"GET","url":"/users","statusCode":500,"duration":1304,"error":"{\"message\":\"Erro ao buscar usuário\"}"}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756662619431-u0svhag9x',
+  duration: 1304,
+  memoryDeltaMB: 3,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756662619431-fsf220bq9',
+  duration: 1304,
+  memoryDeltaMB: 3,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+2025-08-31 17:50:22 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1df1a81f-2e94-4d5d-b1e4-c3410cd13634","method":"GET","url":"/api/admin/users","path":"/api/admin/users","query":{},"ip":"172.31.118.34","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /users
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/admin/usuarios
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.59.230.62, environment: development
+[JWT DEBUG] Rate limit check for 187.59.230.62: attempts=8, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.59.230.62: 9/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-31T17:50:23.413Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+[UserService] Error fetching user users: Error: Failed to fetch profile: invalid input syntax for type uuid: "users"
+    at UserRepository.getUserWithAuth (/home/runner/workspace/server/repositories/user.repository.ts:105:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async UserService.getUserById (/home/runner/workspace/server/services/userService-refactored.ts:32:14)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:81:20)
+❌ [Controller/Users] Error fetching user users: Error: Erro ao buscar usuário
+    at UserService.getUserById (/home/runner/workspace/server/services/userService-refactored.ts:35:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/admin/users-refactored.ts:81:20)
+2025-08-31 17:50:24 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1df1a81f-2e94-4d5d-b1e4-c3410cd13634","method":"GET","url":"/users","statusCode":500,"duration":1228,"responseSize":43}
+2025-08-31 17:50:24 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1df1a81f-2e94-4d5d-b1e4-c3410cd13634","url":"/users","duration":1228,"threshold":1000}
+2025-08-31 17:50:24 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1df1a81f-2e94-4d5d-b1e4-c3410cd13634","method":"GET","url":"/users","statusCode":500,"duration":1228,"error":"{\"message\":\"Erro ao buscar usuário\"}"}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756662622898-b8swax6uw',
+  duration: 1228,
+  memoryDeltaMB: -11,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/admin/users {
+  correlationId: 'perf-1756662622898-o05sg4foa',
+  duration: 1229,
+  memoryDeltaMB: -11,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}

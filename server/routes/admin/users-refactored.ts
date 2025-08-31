@@ -58,10 +58,87 @@ router.get(
 );
 
 /**
+ * GET /api/admin/users/role/:role
+ * Buscar usuários por perfil
+ *
+ * PADRÃO ARQUITETURAL: Query params no Controller, busca no Service
+ * IMPORTANTE: Esta rota deve vir ANTES de /:id para evitar conflitos
+ */
+router.get(
+  '/role/:role',
+  jwtAuthMiddleware,
+  requireAdmin,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { role } = req.params;
+
+      if (!role) {
+        return res.status(400).json({
+          message: 'Perfil é obrigatório',
+        });
+      }
+
+      // PADRÃO CORRETO: Service busca usuários por perfil
+      const users = await userService.getUsersByRole(role);
+      const formattedUsers = userService.formatUsersForResponse(users as any);
+
+      res.json(formattedUsers);
+    } catch (error) {
+      console.error(
+        `❌ [Controller/Users] Error fetching users by role ${req.params.role}:`,
+        error
+      );
+      res.status(500).json({
+        message: error instanceof Error ? error.message : 'Erro ao buscar usuários por perfil',
+      });
+    }
+  }
+);
+
+/**
+ * GET /api/admin/users/loja/:lojaId
+ * Buscar usuários por loja
+ *
+ * PADRÃO ARQUITETURAL: Parâmetros no Controller, busca no Service
+ * IMPORTANTE: Esta rota deve vir ANTES de /:id para evitar conflitos
+ */
+router.get(
+  '/loja/:lojaId',
+  jwtAuthMiddleware,
+  requireAdmin,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const lojaId = parseInt(req.params.lojaId);
+
+      if (isNaN(lojaId)) {
+        return res.status(400).json({
+          message: 'ID da loja inválido',
+        });
+      }
+
+      // PADRÃO CORRETO: Service busca usuários por loja
+      const users = await userService.getUsersByLoja(lojaId);
+      const formattedUsers = userService.formatUsersForResponse(users as any);
+
+      res.json(formattedUsers);
+    } catch (error) {
+      console.error(
+        `❌ [Controller/Users] Error fetching users by loja ${req.params.lojaId}:`,
+        error
+      );
+      res.status(500).json({
+        message: error instanceof Error ? error.message : 'Erro ao buscar usuários por loja',
+      });
+    }
+  }
+);
+
+/**
  * GET /api/admin/users/:id
  * Buscar usuário específico
  *
  * PADRÃO ARQUITETURAL: Validação no Controller, lógica no Service
+ * IMPORTANTE: Esta rota deve vir DEPOIS das rotas específicas (/role/:role, /loja/:lojaId)
  */
 router.get(
   '/:id',
@@ -277,79 +354,6 @@ router.put(
   }
 );
 
-/**
- * GET /api/admin/users/role/:role
- * Buscar usuários por perfil
- *
- * PADRÃO ARQUITETURAL: Query params no Controller, busca no Service
- */
-router.get(
-  '/role/:role',
-  jwtAuthMiddleware,
-  requireAdmin,
-  async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { role } = req.params;
-
-      if (!role) {
-        return res.status(400).json({
-          message: 'Perfil é obrigatório',
-        });
-      }
-
-      // PADRÃO CORRETO: Service busca usuários por perfil
-      const users = await userService.getUsersByRole(role);
-      const formattedUsers = userService.formatUsersForResponse(users as any);
-
-      res.json(formattedUsers);
-    } catch (error) {
-      console.error(
-        `❌ [Controller/Users] Error fetching users by role ${req.params.role}:`,
-        error
-      );
-      res.status(500).json({
-        message: error instanceof Error ? error.message : 'Erro ao buscar usuários por perfil',
-      });
-    }
-  }
-);
-
-/**
- * GET /api/admin/users/loja/:lojaId
- * Buscar usuários por loja
- *
- * PADRÃO ARQUITETURAL: Parâmetros no Controller, busca no Service
- */
-router.get(
-  '/loja/:lojaId',
-  jwtAuthMiddleware,
-  requireAdmin,
-  async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const lojaId = parseInt(req.params.lojaId);
-
-      if (isNaN(lojaId)) {
-        return res.status(400).json({
-          message: 'ID da loja inválido',
-        });
-      }
-
-      // PADRÃO CORRETO: Service busca usuários por loja
-      const users = await userService.getUsersByLoja(lojaId);
-      const formattedUsers = userService.formatUsersForResponse(users as any);
-
-      res.json(formattedUsers);
-    } catch (error) {
-      console.error(
-        `❌ [Controller/Users] Error fetching users by loja ${req.params.lojaId}:`,
-        error
-      );
-      res.status(500).json({
-        message: error instanceof Error ? error.message : 'Erro ao buscar usuários por loja',
-      });
-    }
-  }
-);
 
 export default router;
 
