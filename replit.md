@@ -26,12 +26,17 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 
 **MISSÃO:** Acabar com auditorias superficiais transformando "auditoria de código" em "auditoria de comportamento".
 
+**⚠️ PROTOCOLO UNIVERSAL:** PACN V1.0 é aplicável a **QUALQUER** auditoria, validação, ou análise de código/sistema, independentemente do domínio, tecnologia, ou complexidade. **NÃO HÁ EXCEÇÕES.**
+
 ##### **Gatilhos de Ativação Mandatórios**
-O PACN V1.0 é **OBRIGATÓRIO** para:
-- **Auditoria de Lógica de Negócio**: Verificação de fluxos de negócio
-- **Auditoria de Segurança e Permissões**: RBAC, controle de acesso, vulnerabilidades
-- **Auditoria de Fluxo de Usuário (UX)**: Interações e transições de estado
-- **Análise de Causa Raiz (RCA)**: Bugs complexos não-triviais
+O PACN V1.0 é **OBRIGATÓRIO** para **TODA AUDITORIA**, incluindo mas não limitado a:
+- **TODAS as Auditorias de Código**: Backend, frontend, APIs, integrações
+- **TODAS as Validações de Negócio**: Cálculos, fluxos, regras de negócio
+- **TODAS as Verificações de Segurança**: RBAC, autenticação, autorização
+- **TODAS as Análises de Performance**: Otimizações, gargalos, SLA
+- **TODAS as Validações de UX**: Fluxos de usuário, interações, estados
+- **TODA Análise de Causa Raiz**: Bugs simples ou complexos
+- **INDEPENDENTE DO DOMÍNIO**: Aplicar amplitude completa SEMPRE
 
 ##### **Template PAM V2.0 (Orientado a Cenários)**
 ```markdown
