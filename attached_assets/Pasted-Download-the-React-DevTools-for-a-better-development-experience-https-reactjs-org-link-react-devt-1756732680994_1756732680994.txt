@@ -1,0 +1,274 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+client:1068 Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self' 'nonce-Au/7eL/XPaUY756e8yWkPg==' 'unsafe-inline'". Note that 'unsafe-inline' is ignored if either a hash or nonce value is present in the source list.
+
+updateStyle @ client:1068
+(anonymous) @ index.css:4Understand this error
+client:1068 [Report Only] Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self' 'nonce-Au/7eL/XPaUY756e8yWkPg==' 'unsafe-eval' 'unsafe-inline'". Note that 'unsafe-inline' is ignored if either a hash or nonce value is present in the source list.
+
+client:755 WebSocket connection to 'wss://localhost:5173/?token=9wcCc89DNnPv' failed: 
+createConnection @ client:755
+connect @ client:412
+connect @ client:759Understand this error
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765
+await in connect
+connect @ client:290
+connect @ client:374
+(anonymous) @ client:823Understand this error
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+3breadcrumbs.tsx:106 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+printWarning @ react_jsx-dev-runtime.js?v=1517ce23:64
+error @ react_jsx-dev-runtime.js?v=1517ce23:48
+validateFragmentProps @ react_jsx-dev-runtime.js?v=1517ce23:796
+jsxWithValidation @ react_jsx-dev-runtime.js?v=1517ce23:874
+(anonymous) @ breadcrumbs.tsx:106
+Breadcrumbs @ breadcrumbs.tsx:101
+renderWithHooks @ chunk-QYFCA5BS.js?v=1517ce23:11596
+mountIndeterminateComponent @ chunk-QYFCA5BS.js?v=1517ce23:14974
+beginWork @ chunk-QYFCA5BS.js?v=1517ce23:15962
+beginWork$1 @ chunk-QYFCA5BS.js?v=1517ce23:19806
+performUnitOfWork @ chunk-QYFCA5BS.js?v=1517ce23:19251
+workLoopSync @ chunk-QYFCA5BS.js?v=1517ce23:19190
+renderRootSync @ chunk-QYFCA5BS.js?v=1517ce23:19169
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=1517ce23:18728
+workLoop @ chunk-QYFCA5BS.js?v=1517ce23:197
+flushWork @ chunk-QYFCA5BS.js?v=1517ce23:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=1517ce23:384Understand this error
+usuarios:1 [Report Only] Refused to load the image 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png' because it violates the following Content Security Policy directive: "img-src 'self' data: blob:".
+
+usuarios:1 Refused to load the image 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png' because it violates the following Content Security Policy directive: "img-src 'self' data: blob:".
+Understand this error
+3breadcrumbs.tsx:106 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+printWarning @ react_jsx-dev-runtime.js?v=1517ce23:64
+error @ react_jsx-dev-runtime.js?v=1517ce23:48
+validateFragmentProps @ react_jsx-dev-runtime.js?v=1517ce23:796
+jsxWithValidation @ react_jsx-dev-runtime.js?v=1517ce23:874
+(anonymous) @ breadcrumbs.tsx:106
+Breadcrumbs @ breadcrumbs.tsx:101
+renderWithHooks @ chunk-QYFCA5BS.js?v=1517ce23:11596
+updateFunctionComponent @ chunk-QYFCA5BS.js?v=1517ce23:14630
+beginWork @ chunk-QYFCA5BS.js?v=1517ce23:15972
+beginWork$1 @ chunk-QYFCA5BS.js?v=1517ce23:19806
+performUnitOfWork @ chunk-QYFCA5BS.js?v=1517ce23:19251
+workLoopSync @ chunk-QYFCA5BS.js?v=1517ce23:19190
+renderRootSync @ chunk-QYFCA5BS.js?v=1517ce23:19169
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=1517ce23:18728
+workLoop @ chunk-QYFCA5BS.js?v=1517ce23:197
+flushWork @ chunk-QYFCA5BS.js?v=1517ce23:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=1517ce23:384Understand this error
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+3breadcrumbs.tsx:106 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+printWarning @ react_jsx-dev-runtime.js?v=1517ce23:64
+error @ react_jsx-dev-runtime.js?v=1517ce23:48
+validateFragmentProps @ react_jsx-dev-runtime.js?v=1517ce23:796
+jsxWithValidation @ react_jsx-dev-runtime.js?v=1517ce23:874
+(anonymous) @ breadcrumbs.tsx:106
+Breadcrumbs @ breadcrumbs.tsx:101
+renderWithHooks @ chunk-QYFCA5BS.js?v=1517ce23:11596
+updateFunctionComponent @ chunk-QYFCA5BS.js?v=1517ce23:14630
+beginWork @ chunk-QYFCA5BS.js?v=1517ce23:15972
+beginWork$1 @ chunk-QYFCA5BS.js?v=1517ce23:19806
+performUnitOfWork @ chunk-QYFCA5BS.js?v=1517ce23:19251
+workLoopSync @ chunk-QYFCA5BS.js?v=1517ce23:19190
+renderRootSync @ chunk-QYFCA5BS.js?v=1517ce23:19169
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=1517ce23:18728
+workLoop @ chunk-QYFCA5BS.js?v=1517ce23:197
+flushWork @ chunk-QYFCA5BS.js?v=1517ce23:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=1517ce23:384Understand this error
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.nwlaOHvAADHlXSi1oYGKb75K1cS2iWOLUJjSOV60nxU', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.nwlaOHvAADHlXSi1oYGKb75K1cS2iWOLUJjSOV60nxU', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.nwlaOHvAADHlXSi1oYGKb75K1cS2iWOLUJjSOV60nxU', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.nwlaOHvAADHlXSi1oYGKb75K1cS2iWOLUJjSOV60nxU', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users : (3) [{…}, {…}, {…}]
+apiClient.ts:437 [API Client] After dual-key transformation: (3) [{…}, {…}, {…}]
+3breadcrumbs.tsx:106 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+printWarning @ react_jsx-dev-runtime.js?v=1517ce23:64
+error @ react_jsx-dev-runtime.js?v=1517ce23:48
+validateFragmentProps @ react_jsx-dev-runtime.js?v=1517ce23:796
+jsxWithValidation @ react_jsx-dev-runtime.js?v=1517ce23:874
+(anonymous) @ breadcrumbs.tsx:106
+Breadcrumbs @ breadcrumbs.tsx:101
+renderWithHooks @ chunk-QYFCA5BS.js?v=1517ce23:11596
+updateFunctionComponent @ chunk-QYFCA5BS.js?v=1517ce23:14630
+beginWork @ chunk-QYFCA5BS.js?v=1517ce23:15972
+beginWork$1 @ chunk-QYFCA5BS.js?v=1517ce23:19806
+performUnitOfWork @ chunk-QYFCA5BS.js?v=1517ce23:19251
+workLoopSync @ chunk-QYFCA5BS.js?v=1517ce23:19190
+renderRootSync @ chunk-QYFCA5BS.js?v=1517ce23:19169
+performSyncWorkOnRoot @ chunk-QYFCA5BS.js?v=1517ce23:18927
+flushSyncCallbacks @ chunk-QYFCA5BS.js?v=1517ce23:9166
+(anonymous) @ chunk-QYFCA5BS.js?v=1517ce23:18677
+setTimeout
+defaultScheduler @ @tanstack_react-query.js?v=1517ce23:543
+flush @ @tanstack_react-query.js?v=1517ce23:567
+batch @ @tanstack_react-query.js?v=1517ce23:585
+#dispatch @ @tanstack_react-query.js?v=1517ce23:1008
+setData @ @tanstack_react-query.js?v=1517ce23:690
+fetch @ @tanstack_react-query.js?v=1517ce23:900
+await in fetch
+#executeFetch @ @tanstack_react-query.js?v=1517ce23:2047
+onSubscribe @ @tanstack_react-query.js?v=1517ce23:1923
+subscribe @ @tanstack_react-query.js?v=1517ce23:19
+(anonymous) @ @tanstack_react-query.js?v=1517ce23:3089
+subscribeToStore @ chunk-QYFCA5BS.js?v=1517ce23:12032
+commitHookEffectListMount @ chunk-QYFCA5BS.js?v=1517ce23:16963
+commitPassiveMountOnFiber @ chunk-QYFCA5BS.js?v=1517ce23:18206
+commitPassiveMountEffects_complete @ chunk-QYFCA5BS.js?v=1517ce23:18179
+commitPassiveMountEffects_begin @ chunk-QYFCA5BS.js?v=1517ce23:18169
+commitPassiveMountEffects @ chunk-QYFCA5BS.js?v=1517ce23:18159
+flushPassiveEffectsImpl @ chunk-QYFCA5BS.js?v=1517ce23:19543
+flushPassiveEffects @ chunk-QYFCA5BS.js?v=1517ce23:19500
+performSyncWorkOnRoot @ chunk-QYFCA5BS.js?v=1517ce23:18921
+flushSyncCallbacks @ chunk-QYFCA5BS.js?v=1517ce23:9166
+commitRootImpl @ chunk-QYFCA5BS.js?v=1517ce23:19485
+commitRoot @ chunk-QYFCA5BS.js?v=1517ce23:19330
+finishConcurrentRender @ chunk-QYFCA5BS.js?v=1517ce23:18858
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=1517ce23:18768
+workLoop @ chunk-QYFCA5BS.js?v=1517ce23:197
+flushWork @ chunk-QYFCA5BS.js?v=1517ce23:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=1517ce23:384Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-01T10:17:37.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-01T10:17:37.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+3breadcrumbs.tsx:106 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+printWarning @ react_jsx-dev-runtime.js?v=1517ce23:64
+error @ react_jsx-dev-runtime.js?v=1517ce23:48
+validateFragmentProps @ react_jsx-dev-runtime.js?v=1517ce23:796
+jsxWithValidation @ react_jsx-dev-runtime.js?v=1517ce23:874
+(anonymous) @ breadcrumbs.tsx:106
+Breadcrumbs @ breadcrumbs.tsx:101
+renderWithHooks @ chunk-QYFCA5BS.js?v=1517ce23:11596
+updateFunctionComponent @ chunk-QYFCA5BS.js?v=1517ce23:14630
+beginWork @ chunk-QYFCA5BS.js?v=1517ce23:15972
+beginWork$1 @ chunk-QYFCA5BS.js?v=1517ce23:19806
+performUnitOfWork @ chunk-QYFCA5BS.js?v=1517ce23:19251
+workLoopSync @ chunk-QYFCA5BS.js?v=1517ce23:19190
+renderRootSync @ chunk-QYFCA5BS.js?v=1517ce23:19169
+performConcurrentWorkOnRoot @ chunk-QYFCA5BS.js?v=1517ce23:18728
+workLoop @ chunk-QYFCA5BS.js?v=1517ce23:197
+flushWork @ chunk-QYFCA5BS.js?v=1517ce23:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=1517ce23:384Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-01T10:17:37.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-01T10:17:37.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+3breadcrumbs.tsx:106 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at Breadcrumbs (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/breadcrumbs.tsx:71:31)
+    at div
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:59:43)
+    at UsuariosPage (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx:54:41)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1517ce23:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=1517ce23:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=1517ce23:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1517ce23:2878:3)
+    at App
+    at ErrorBoundary (

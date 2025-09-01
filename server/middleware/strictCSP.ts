@@ -59,13 +59,15 @@ export class StrictCSP {
         "frame-ancestors 'none'",
 
         // Style source - allow inline styles but restrict external
-        `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
+        isDevelopment
+          ? "style-src 'self' 'unsafe-inline'"
+          : `style-src 'self' 'nonce-${nonce}'`,
 
         // Font source - self and data URIs
         "font-src 'self' data:",
 
-        // Image source - self, data URIs, and blob for dynamic content
-        "img-src 'self' data: blob:",
+        // Image source - self, data URIs, blob and Supabase storage
+        "img-src 'self' data: blob: https://*.supabase.co",
 
         // Media source - self only
         "media-src 'self'",

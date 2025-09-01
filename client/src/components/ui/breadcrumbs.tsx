@@ -103,7 +103,7 @@ export function Breadcrumbs({ className = '' }: BreadcrumbsProps) {
         const isFirst = index === 0;
         
         return (
-          <React.Fragment key={item.path}>
+          <div key={item.path} className="flex items-center">
             {/* Separador */}
             {!isFirst && (
               <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
@@ -130,7 +130,7 @@ export function Breadcrumbs({ className = '' }: BreadcrumbsProps) {
                 {item.name}
               </Link>
             )}
-          </React.Fragment>
+          </div>
         );
       })}
     </nav>
