@@ -45,7 +45,7 @@ export default function FilaAnalise() {
   const [ordenacao, setOrdenacao] = useState('data_desc');
 
   const { data: propostas, isLoading } = useQuery<Proposta[]>({
-    queryKey: ['/api/propostas'],
+    queryKey: ['/api/propostas/analise'],
   });
 
   const getStatusBadge = (status: string) => {

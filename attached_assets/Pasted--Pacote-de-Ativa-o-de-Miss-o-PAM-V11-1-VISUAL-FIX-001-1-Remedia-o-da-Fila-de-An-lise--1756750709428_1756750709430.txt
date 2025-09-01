@@ -1,0 +1,47 @@
+### **Pacote de Ativação de Missão (PAM) V11.1 - VISUAL-FIX-001.1 (Remediação da Fila de Análise)**
+
+**[DIRETRIZ MESTRA DE DIVULGAÇÃO - PDT V2.0 ATIVADA]**
+*Sua resposta deve ser exaustiva. Reporte a realidade técnica sem omissões. A transparência radical é mandatória.*
+
+* **Sumário da Missão (O Quê):** Criar um novo endpoint de backend dedicado (`GET /api/propostas/analise`) que retorna apenas propostas nos status relevantes para análise e refatorar o componente de frontend `fila-analise.tsx` para consumir este novo endpoint.
+* **Intenção Estratégica (O Porquê):** Restaurar a funcionalidade de uma das telas mais críticas para a operação do negócio. Ao criar um endpoint especializado, garantimos que a lógica de filtragem de dados seja executada de forma eficiente e segura no backend, alinhando a implementação técnica com a regra de negócio e seguindo o padrão de arquitetura já validado.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria `VISUAL-AUDIT-001` provou que a causa da falha na tela "Fila de Análise" é o consumo de um endpoint genérico e não filtrado.
+
+---
+
+**IMPLEMENTAR:**
+User Story VISUAL-FIX-001.1: Corrigir Fluxo de Dados da Fila de Análise
+
+**CONTEXT:**
+Nossa auditoria forense descobriu por que a "Fila de Análise" está sempre vazia: o frontend está pedindo "todas as propostas" ao backend, em vez de pedir "apenas as propostas que precisam de análise". Precisamos criar um "canal" de dados específico para esta tela, tanto no backend quanto no frontend, para que a informação correta seja solicitada e exibida.
+
+**CURRENT STATE:**
+1.  **Frontend (`client/src/pages/fila-analise.tsx`):** A chamada `useQuery` aponta para o endpoint genérico `'/api/propostas'`.
+2.  **Backend (`server/routes/`):** Não existe um endpoint dedicado para servir os dados da fila de análise.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Novo Endpoint no Backend:**
+    * Um novo endpoint `GET /api/propostas/analise` deve ser criado.
+    * Este endpoint deve ser protegido por middleware que exija, no mínimo, a role `ANALISTA`.
+    * A lógica do endpoint deve consultar o banco de dados e retornar **apenas** as propostas com status `EM_ANALISE` ou `AGUARDANDO_ANALISE`.
+2.  **Frontend Refatorado:**
+    * O componente `client/src/pages/fila-analise.tsx` deve ser modificado.
+    * A `queryKey` e a `queryFn` da chamada `useQuery` devem ser alteradas para consumir o novo endpoint `/api/propostas/analise`.
+3.  **Funcionalidade Restaurada:** Ao navegar para a página "Fila de Análise" como um usuário `ANALISTA`, a lista de propostas que estão em análise deve ser exibida corretamente.
+4.  **Prova de Sucesso:** Você deve fornecer um screenshot da tela "Fila de Análise" populada com dados de teste corretos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Criar Rota no Backend:** No diretório `server/routes/propostas/`, crie um novo arquivo ou modifique um existente para adicionar o endpoint `GET /api/propostas/analise`.
+2.  **Implementar Lógica de Filtragem:** Na lógica do novo endpoint, utilize o Drizzle para construir uma query que filtre a tabela `propostas` pelos status `EM_ANALISE` e `AGUARDANDO_ANALISE`. Use a query da rota de formalização como um modelo.
+3.  **Aplicar Segurança:** Proteja o novo endpoint com os middlewares `jwtAuthMiddleware` e `requireAnalyst` (ou um `roleGuard` apropriado).
+4.  **Refatorar Componente do Frontend:** Edite o arquivo `client/src/pages/fila-analise.tsx`. Altere a chamada `useQuery` para usar a nova `queryKey` (ex: `['/api/propostas/analise']`) e a `queryFn` para chamar o novo endpoint.
+5.  **Validar e Apresentar Evidência:** Crie dados de teste no banco, se necessário (propostas com status `EM_ANALISE`). Reinicie a aplicação, navegue para a "Fila de Análise" e capture um screenshot que prove que a lista está sendo exibida corretamente.
+6.  **Verificação Final:** Execute o protocolo `7-CHECK FULL`.
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** Deploy em Produção
+- **Próximo Passo a ser Retomado:** "Operação Visão Clara" - Fase 2 (`VISUAL-AUDIT-002`)
+- **Missão de Emergência Atual:** "Operação Visão Clara" (`VISUAL-FIX-001.1` em execução pelo Agente)
+---

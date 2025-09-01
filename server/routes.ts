@@ -783,6 +783,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // 🎯 VISUAL-FIX-001.1: New endpoint for analysis proposals (filtered by status)
+  app.get(
+    '/api/propostas/analise',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
+
+        // Analysis statuses - Apenas propostas que precisam de análise
+        const analysisStatuses = [
+          'EM_ANALISE',
+          'AGUARDANDO_ANALISE',
+          // Status legados para compatibilidade
+          'em_analise',
+          'aguardando_analise',
+        ];
+
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+        const userLojaId = req.user?.loja_id;
+
+        console.log(
+          `🔐 [ANALYSIS] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`
+        );
+
+        // Build query based on user role
+        let query = supabase.from('propostas').select('*').in('status', analysisStatuses);
+
+        // Apply role-based filtering
+        if (userRole === 'ATENDENTE') {
+          // ATENDENTE sees only proposals they created
+          query = query.eq('user_id', userId);
+          console.log(`🔐 [ANALYSIS] ATENDENTE filter: user_id = ${userId}`);
+        } else if (userRole === 'GERENTE') {
+          // GERENTE sees all proposals from their store
+          query = query.eq('loja_id', userLojaId);
+          console.log(`🔐 [ANALYSIS] GERENTE filter: loja_id = ${userLojaId}`);
+        }
+        // For ANALISTA and ADMINISTRADOR, no additional filtering (see all analysis proposals)
+
+        const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('🚨 [ANALYSIS] Supabase error:', error);
+          return res.status(500).json({ message: 'Erro ao consultar propostas de análise' });
+        }
+
+        if (!rawPropostas || rawPropostas.length === 0) {
+          console.log(
+            `🔐 [ANALYSIS] No analysis proposals found for user ${userId} with role ${userRole}`
+          );
+          return res.json([]);
+        }
+
+        console.log(`🔐 [ANALYSIS] Found ${rawPropostas.length} analysis proposals for user ${userId}`);
+        console.log(
+          '🔐 [ANALYSIS] First proposal:',
+          rawPropostas[0]?.id,
+          rawPropostas[0]?.status
+        );
+
+        // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
+        const analisePropostas = rawPropostas.map((proposta) => {
+          let clienteData = null;
+          let condicoesData = null;
+
+          // Parse cliente_data se for string
+          if (typeof proposta.cliente_data === 'string') {
+            try {
+              clienteData = JSON.parse(proposta.cliente_data);
+            } catch (e) {
+              console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
+              clienteData = {};
+            }
+          } else {
+            clienteData = proposta.cliente_data || {};
+          }
+
+          // Parse condicoes_data se for string
+          if (typeof proposta.condicoes_data === 'string') {
+            try {
+              condicoesData = JSON.parse(proposta.condicoes_data);
+            } catch (e) {
+              console.warn(
+                `Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`,
+                e
+              );
+              condicoesData = {};
+            }
+          } else {
+            condicoesData = proposta.condicoes_data || {};
+          }
+
+          return {
+            ...proposta,
+            cliente_data: clienteData,
+            condicoes_data: condicoesData,
+            // Map database fields to frontend format
+            documentos_adicionais: proposta.documentos_adicionais,
+            observacoes_analise: proposta.observacoes_analise,
+            data_analise: proposta.data_analise,
+            analista_id: proposta.analista_id,
+          };
+        });
+
+        console.log(
+          `[${getBrasiliaTimestamp()}] Retornando ${analisePropostas.length} propostas em análise via RLS`
+        );
+        res.json(analisePropostas);
+      } catch (error) {
+        console.error('Erro ao buscar propostas de análise:', error);
+        res.status(500).json({
+          message: 'Erro ao buscar propostas de análise',
+        });
+      }
+    }
+  );
+
   // Endpoint para gerar CCB automaticamente
   app.post(
     '/api/propostas/:id/gerar-ccb',
