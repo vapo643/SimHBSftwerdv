@@ -1,0 +1,50 @@
+### **Pacote de Ativação de Missão (PAM) V10.3 - DATA-AUDIT-003 (Auditoria de Integração com Geração de CCB)**
+
+**[PROTOCOLO DE AUDITORIA DE CENÁRIO DE NEGÓCIO (PACN) V1.0 ATIVADO]**
+*Sua resposta deve ser exaustiva. Para cada cenário, prove com evidências de código e SQL como a regra de negócio é garantida.*
+
+* **Sumário da Missão:** Validar com 100% de precisão que todos os dados de uma proposta complexa ("proposta de ouro") são corretamente mapeados e renderizados no documento final da Cédula de Crédito Bancário (CCB) em PDF.
+* **Intenção Estratégica:** Garantir a integridade do artefato legal mais crítico gerado pelo nosso sistema. Um erro no mapeamento de dados para a CCB pode invalidar o contrato, causar perdas financeiras e criar riscos legais catastróficos. Esta é a validação final da jornada do dado.
+
+---
+
+**AUDITAR E VALIDAR:**
+Integridade de Dados na Geração de CCB a partir de uma Proposta
+
+**Cenário de Negócio (O "Caso de Teste"):**
+Após uma proposta ser totalmente preenchida, aprovada e aceita, um operador de crédito aciona a funcionalidade "Gerar CCB". O sistema deve pegar os dados da "proposta de ouro" que foram auditados e validados nas Fases 1 e 2, e usá-los para preencher um template de PDF, gerando o contrato final. A regra de negócio é de tolerância zero: cada campo no PDF (nome do cliente, CPF, valor do empréstimo, taxas, número de parcelas) deve ser um espelho exato do dado que reside em nosso banco de dados.
+
+**Vetor de Ataque / Ponto de Falha (O "Risco"):**
+O risco é o **mapeamento incorreto ou incompleto de dados**. A lógica nos serviços `ccbGenerationService.ts` e `ccbFieldMapping.ts` pode conter bugs: um campo pode estar sendo puxado da fonte errada, um valor monetário pode ser formatado incorretamente, ou um campo novo (como os de pagamento PIX) pode ter sido esquecido no mapeamento para o PDF, resultando em um contrato legalmente inválido ou incorreto.
+
+**Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+Você deve produzir um **Relatório de Auditoria de Mapeamento da CCB** que execute e documente os seguintes passos:
+
+1.  **Análise do Código de Mapeamento:**
+    * Audite os arquivos `server/services/ccbGenerationService.ts`, `ccbFieldMapping.ts`, e `ccbCoordinateMapper.ts`.
+    * Apresente o trecho de código que define o mapeamento entre um campo do banco de dados (ex: `proposta.cliente_nome`) e sua coordenada no PDF.
+2.  **Criação do Script de Verificação:**
+    * Crie um script de teste (`scripts/audit/verify-ccb-mapping.ts`) que:
+        * Carregue os dados da "proposta de ouro" do banco de dados (ID: `83d8af2d-cfa8-42fb-9507-7ce6317c3025`).
+        * Invoque o `ccbGenerationService` para gerar o PDF em memória.
+        * **Não é necessário salvar ou ler o PDF.** A validação será feita no objeto de mapeamento *antes* da renderização.
+3.  **Auditoria Campo a Campo (Simulada):**
+    * Dentro do script, extraia o objeto de mapeamento final que seria passado para a biblioteca de PDF (um array de `{ text, x, y, font, size }`).
+    * Crie uma tabela comparativa no seu relatório para, no mínimo, 10 campos críticos, validando o **VALOR** que seria impresso no PDF contra o valor no banco.
+
+| Campo (DB) | Valor no Banco | Campo Mapeado (PDF) | Valor a ser Impresso | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `cliente_nome` | "João da Silva Santos" | `nome_completo_cliente` | "João da Silva Santos" | ✅ IDÊNTICO |
+| `valor` | 25000.00 | `valor_principal_extenso` | "VINTE E CINCO MIL REAIS" | ✅ CORRETO |
+| `prazo` | 24 | `numero_parcelas` | "24" | ✅ IDÊNTICO |
+| ... | ... | ... | ... | ... |
+
+4.  **Veredito Final de Integridade da CCB:** Com base na análise do mapeamento, os dados da proposta estão sendo refletidos corretamente na CCB? Liste todas as discrepâncias ou campos faltantes.
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** Deploy em Produção
+- **Próximo Passo a ser Retomado:** Autorização para o Go-Live
+- **Missão de Emergência Atual:** "Operação Lacre de Ouro" (`DATA-AUDIT-003` em execução pelo Agente)
+---

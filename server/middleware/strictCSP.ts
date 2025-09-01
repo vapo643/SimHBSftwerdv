@@ -122,12 +122,15 @@ export class StrictCSP {
         ].join(' ')
       );
 
-      console.log(`[CSP] ✅ ${isDevelopment ? 'Development' : 'Production'} CSP applied:`, {
-        nonce: nonce.substring(0, 8) + '...',
-        path: req.path,
-        mode: isDevelopment ? 'dev' : 'prod',
-        userAgent: req.headers['user-agent']?.substring(0, 50),
-      });
+      // CSP applied silently - enable CSP_DEBUG=true for verbose logging
+      if (process.env.CSP_DEBUG === 'true') {
+        console.log(`[CSP] ✅ ${isDevelopment ? 'Development' : 'Production'} CSP applied:`, {
+          nonce: nonce.substring(0, 8) + '...',
+          path: req.path,
+          mode: isDevelopment ? 'dev' : 'prod',
+          userAgent: req.headers['user-agent']?.substring(0, 50),
+        });
+      }
 
       next();
     };
