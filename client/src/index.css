@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  * {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 700; /* Bold */
+  }
+}
+
 /* Custom Modern Scrollbar Design - Adaptive Theme */
 ::-webkit-scrollbar {
   width: 8px;
