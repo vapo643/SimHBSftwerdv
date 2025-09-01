@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,8 +6,8 @@
 
 @layer base {
   * {
-    font-family: 'Nunito Sans', system-ui, sans-serif;
-    font-weight: 700; /* Bold weight */
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 800; /* Extra Bold weight */
   }
 }
 
