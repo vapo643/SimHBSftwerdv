@@ -652,6 +652,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     '/api/propostas/formalizacao',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
+      console.log('🔍 [DEBUG] SPECIFIC FORMALIZATION ROUTE HIT!');
+      console.log('🔍 [DEBUG] URL:', req.url);
+      console.log('🔍 [DEBUG] Path:', req.path);
+      console.log('🔍 [DEBUG] Params:', req.params);
       try {
         const { createServerSupabaseAdminClient } = await import('./lib/supabase');
         const supabase = createServerSupabaseAdminClient();
@@ -1183,6 +1187,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const idParam = req.params.id;
         const user = req.user;
 
+        console.log('🔍 [DEBUG] GENERIC :ID ROUTE HIT!');
+        console.log('🔍 [DEBUG] URL:', req.url);
+        console.log('🔍 [DEBUG] Path:', req.path);
+        console.log('🔍 [DEBUG] ID Param:', idParam);
         console.log(
           `🔐 [PROPOSTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
         );
