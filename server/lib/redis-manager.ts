@@ -50,7 +50,7 @@ class RedisManager {
       connectTimeout: 10000,
       commandTimeout: 5000,
       maxRetriesPerRequest: 3,
-      enableOfflineQueue: false,
+      enableOfflineQueue: true, // Permite queue de comandos quando Redis não está disponível
       keepAlive: 30000,
 
       // Estratégia de reconexão exponencial
