@@ -60,11 +60,11 @@ export class StrictCSP {
 
         // Style source - allow inline styles but restrict external
         isDevelopment
-          ? "style-src 'self' 'unsafe-inline'"
-          : `style-src 'self' 'nonce-${nonce}'`,
+          ? "style-src 'self' 'unsafe-inline' fonts.googleapis.com"
+          : `style-src 'self' 'nonce-${nonce}' fonts.googleapis.com`,
 
-        // Font source - self and data URIs
-        "font-src 'self' data:",
+        // Font source - self, data URIs and Google Fonts
+        "font-src 'self' data: fonts.gstatic.com",
 
         // Image source - self, data URIs, blob and Supabase storage
         "img-src 'self' data: blob: https://*.supabase.co",
