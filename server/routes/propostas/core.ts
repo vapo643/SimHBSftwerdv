@@ -31,6 +31,118 @@ router.get('/', auth, (req: any, res: any) => controller.list(req, res));
 // GET /api/propostas/buscar-por-cpf/:cpf - Buscar por CPF (antes do /:id para evitar conflito)
 router.get('/buscar-por-cpf/:cpf', auth, (req: any, res: any) => controller.getByCpf(req, res));
 
+// 🔧 CRÍTICO: Rota específica /formalizacao ANTES da genérica /:id
+router.get('/formalizacao', auth, async (req: any, res: any) => {
+  console.log('🔍 [DEBUG] FORMALIZATION ROUTE HIT IN CORE ROUTER!');
+  console.log('🔍 [DEBUG] URL:', req.url);
+  console.log('🔍 [DEBUG] Path:', req.path);
+  
+  try {
+    const { createServerSupabaseAdminClient } = await import('../../lib/supabase.js');
+    const supabase = createServerSupabaseAdminClient();
+
+    // Formalization statuses - TODOS exceto BOLETOS_EMITIDOS
+    const formalizationStatuses = [
+      'aprovado',
+      'aceito_atendente',
+      'documentos_enviados',
+      'CCB_GERADA',
+      'AGUARDANDO_ASSINATURA',
+      'ASSINATURA_PENDENTE',
+      'ASSINATURA_CONCLUIDA',
+      'PAGAMENTO_PENDENTE',
+      'PAGAMENTO_PARCIAL',
+      'contratos_preparados',
+      'contratos_assinados',
+    ];
+
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    const userLojaId = req.user?.loja_id;
+
+    console.log(`🔐 [FORMALIZATION] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`);
+
+    // Build query based on user role
+    let query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
+
+    // Apply role-based filtering
+    if (userRole === 'ATENDENTE') {
+      query = query.eq('user_id', userId);
+      console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
+    } else if (userRole === 'GERENTE') {
+      query = query.eq('loja_id', userLojaId);
+      console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
+    }
+
+    const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('🚨 [FORMALIZATION] Supabase error:', error);
+      return res.status(500).json({ message: 'Erro ao consultar propostas de formalização' });
+    }
+
+    if (!rawPropostas || rawPropostas.length === 0) {
+      console.log(`🔐 [FORMALIZATION] No proposals found for user ${userId} with role ${userRole}`);
+      return res.json([]);
+    }
+
+    // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
+    const formalizacaoPropostas = rawPropostas.map((proposta) => {
+      let clienteData = null;
+      let condicoesData = null;
+
+      try {
+        if (typeof proposta.cliente_data === 'string') {
+          clienteData = JSON.parse(proposta.cliente_data);
+        } else {
+          clienteData = proposta.cliente_data;
+        }
+      } catch (error) {
+        console.warn(`Failed to parse cliente_data for proposta ${proposta.id}:`, error);
+      }
+
+      try {
+        if (typeof proposta.condicoes_data === 'string') {
+          condicoesData = JSON.parse(proposta.condicoes_data);
+        } else {
+          condicoesData = proposta.condicoes_data;
+        }
+      } catch (error) {
+        console.warn(`Failed to parse condicoes_data for proposta ${proposta.id}:`, error);
+      }
+
+      return {
+        ...proposta,
+        clienteData,
+        condicoesData,
+        // Convert snake_case to camelCase for frontend compatibility
+        createdAt: proposta.created_at,
+        numeroProposta: proposta.numero_proposta,
+        lojaId: proposta.loja_id,
+        produtoId: proposta.produto_id,
+        tabelaComercialId: proposta.tabela_comercial_id,
+        userId: proposta.user_id,
+        analistaId: proposta.analista_id,
+        dataAnalise: proposta.data_analise,
+        motivoPendencia: proposta.motivo_pendencia,
+        dataAprovacao: proposta.data_aprovacao,
+        documentosAdicionais: proposta.documentos_adicionais,
+        contratoGerado: proposta.contrato_gerado,
+        contratoAssinado: proposta.contrato_assinado,
+        dataAssinatura: proposta.data_assinatura,
+        dataPagamento: proposta.data_pagamento,
+        observacoesFormalização: proposta.observacoes_formalizacao,
+      };
+    });
+
+    console.log(`✅ [FORMALIZATION] Found ${formalizacaoPropostas.length} propostas for formalization`);
+    res.json(formalizacaoPropostas);
+  } catch (error) {
+    console.error('❌ [FORMALIZATION] Error:', error);
+    res.status(500).json({ message: 'Erro interno ao buscar propostas de formalização' });
+  }
+});
+
 // GET /api/propostas/:id - Buscar proposta por ID
 router.get('/:id', auth, (req: any, res: any) => controller.getById(req, res));
 
