@@ -100,7 +100,10 @@ if (databaseUrl.includes('supabase.com')) {
 }
 
 const client = dbClient;
-export const db = drizzle(client, { schema });
+export const db = drizzle(client, { 
+  schema,
+  logger: true  // PERF-FIX-001: Ativar logging SQL para auditoria N+1
+});
 
 // MISSION 3: Enhanced connection pool monitoring and testing
 setTimeout(async () => {

@@ -1,0 +1,41 @@
+### **Pacote de Ativação de Missão (PAM) V10.2 - PERF-FIX-001 (Remediação de Performance N+1)**
+
+**[PROTOCOLO DE AUDITORIA DE CENÁRIO DE NEGÓCIO (PACN) V1.0 ATIVADO]**
+*Sua resposta deve ser exaustiva. Para cada cenário, prove com evidências de código e SQL como a regra de negócio é garantida.*
+
+* **Sumário da Missão:** Realizar uma refatoração cirúrgica no endpoint `GET /api/propostas` para erradicar o padrão de query N+1, que foi identificado como a causa raiz da latência de 900ms, e provar que a otimização reduz o tempo de resposta para dentro do SLA de `P95 < 500ms`.
+* **Intenção Estratégica:** Eliminar um gargalo de performance P0 que atualmente torna a experiência do usuário no dashboard inaceitável. Esta correção é um pré-requisito para a conclusão da "Operação Lacre de Ouro" e para a autorização do deploy.
+
+---
+
+**AUDITAR E REMEDIAR:**
+Gargalo de Performance na Listagem de Propostas
+
+**Cenário de Negócio (O "Caso de Teste"):**
+Um operador de crédito acessa o Dashboard, que dispara uma requisição `GET /api/propostas`. O sistema deve retornar a lista de propostas com seus dados relacionados (nome do produto, nome da loja, etc.) com uma latência P95 inferior a 500ms.
+
+**Vetor de Ataque / Ponto de Falha (O "Risco"):**
+A auditoria anterior (`DATA-AUDIT-002`) provou que o sistema está executando um padrão de query N+1: uma query busca a lista de propostas e, em seguida, N queries adicionais são executadas em um loop para buscar os dados relacionados de cada proposta. Isso resulta em uma "tempestade de queries" no banco de dados, causando a latência de 900ms.
+
+**Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+Você deve produzir um **Relatório de Remediação de Performance** que execute e documente os seguintes passos:
+
+1.  **Prova do Problema (Logs SQL):**
+    * Ative temporariamente o logging de queries do Drizzle (`logger: true`).
+    * Execute uma requisição ao endpoint `GET /api/propostas`.
+    * Forneça os logs SQL que **provam** o padrão N+1 (uma query `SELECT * FROM propostas` seguida de múltiplas queries `SELECT ... FROM produtos WHERE id = ?`, etc.).
+2.  **Código Refatorado:**
+    * O método de busca no repositório (`server/modules/proposal/infrastructure/ProposalRepository.ts`) deve ser refatorado. A nova implementação deve usar os recursos de "relational queries" do Drizzle ORM para buscar todas as propostas e seus dados relacionados em **uma única query SQL** com `JOINs`.
+3.  **Prova da Solução (Logs SQL e de Performance):**
+    * Execute novamente a requisição ao `GET /api/propostas`.
+    * Forneça os novos logs SQL, mostrando apenas **uma única query**.
+    * Forneça o log do nosso `performance-monitor`, mostrando que a `duration` da mesma requisição agora está **abaixo de 500ms**.
+4.  **Veredito Final de Remediação:** Com base nas evidências, declare se o gargalo de performance foi eliminado e se o SLA foi cumprido.
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** Deploy em Produção
+- **Próximo Passo a ser Retomado:** "Operação Lacre de Ouro" - Fase 3 (`DATA-AUDIT-003`)
+- **Missão de Emergência Atual:** "Operação Lacre de Ouro" (`PERF-FIX-001` em execução pelo Agente)
+---
