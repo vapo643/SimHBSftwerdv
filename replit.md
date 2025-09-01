@@ -1,5 +1,5 @@
 ### Overview
-Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. It provides a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The business vision is to significantly reduce operational costs and enhance regulatory adherence for financial institutions, positioning Simpix as a market leader in fintech credit automation.
+Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to reduce operational costs, enhance regulatory adherence, and provide a scalable platform with banking-grade security and efficient data handling. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to improve efficiency in credit proposal processing and management, thereby addressing critical business needs in financial technology.
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -50,7 +50,7 @@ O PACN V1.0 é **OBRIGATÓRIO** para **TODA AUDITORIA**, incluindo mas não limi
 **Vetor de Ataque / Ponto de Falha (Risco):**
 [Hipótese específica de como a implementação pode falhar]
 
-**Evidência de Conformidade Requerida (Prova Irrefutável):**
+**Evidência de Conformidade Requerida (Prova Irrefutável):
 1. [Localizar código específico]
 2. [Apresentar trecho exato]
 3. [EXPLICAR como código mitiga o vetor de ataque específico]
