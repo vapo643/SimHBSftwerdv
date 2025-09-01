@@ -310,7 +310,7 @@ const Dashboard: React.FC = () => {
         createdAt: p.createdAt || p.created_at,
         valorParcela: p.valorParcela || p.valor_parcela,
         statusContextual: p.status,
-        parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' },
+        parceiro: p.parceiro || { razaoSocial: p.loja_nome || 'Parceiro Padrão' },
       }))
     : [];
 
@@ -665,7 +665,7 @@ const Dashboard: React.FC = () => {
                       <div className="space-y-1">
                         <div className="flex items-center gap-4">
                           <h3 className="text-lg font-semibold">
-                            {proposta?.cliente_nome || 'Cliente não informado'}
+                            {proposta?.nomeCliente || 'Cliente não informado'}
                           </h3>
                           <Badge
                             className={`${getStatusColor(proposta?.statusContextual || proposta?.status || 'rascunho')} border px-3 py-1 text-sm`}
@@ -685,16 +685,16 @@ const Dashboard: React.FC = () => {
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Proposta: #{proposta?.numeroProposta || proposta?.id || 'N/A'} | CPF:{' '}
-                          {proposta?.cliente_cpf || 'Não informado'}
+                          {proposta?.cpfCliente || 'Não informado'}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Criado em:{' '}
                           {proposta?.created_at ? format(new Date(proposta.created_at), 'dd/MM/yyyy HH:mm', {
                             locale: ptBR,
                           }) : 'Data não disponível'}
-                          {proposta?.parceiro?.razaoSocial && (
+                          {proposta?.loja_nome && (
                             <span className="ml-2">
-                              | Parceiro: {String(proposta.parceiro.razaoSocial)}
+                              | Parceiro: {String(proposta.loja_nome)}
                             </span>
                           )}
                         </div>
@@ -711,7 +711,7 @@ const Dashboard: React.FC = () => {
 
                     <div className="space-y-1 text-right">
                       <div className="text-2xl font-bold text-green-600">
-                        {formatCurrency(proposta?.valor || 0)}
+                        {formatCurrency(proposta?.valorSolicitado || 0)}
                       </div>
                       <div className="flex justify-end gap-2">
                         {proposta?.status === 'pendenciado' ? (
