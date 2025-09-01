@@ -1,0 +1,59 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O objetivo deste pacote não é dar ordens, mas sim realizar uma **transferência de estado mental**. Você deve entender o problema, a sua importância estratégica e os riscos envolvidos com a mesma clareza que o seu comandante. A missão atual é de **diagnóstico forense**, não de implementação.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise, sob as seguintes regras de engajamento:*
+
+* ***Prioridade às Fontes Primárias:*** Sua busca deve priorizar **Documentação Oficial (P0)** (ex: Documentação do `ioredis`, Artigos do Redis Labs) e **Blogs de Engenharia de Elite (P1)**.
+* ***Proibição de Fontes Duvidosas:*** Fóruns de discussão (ex: Stack Overflow sem resposta aceite) e blogs de opinião pessoal são **terminantemente proibidos**.
+* ***Justificativa Estratégica (O "Porquê"):*** A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
+* ***Critério de Ativação de Pesquisa:*** Você **DEVE** considerar uma pesquisa se encontrar padrões de gestão de ciclo de vida de conexões em `vitest` ou configurações avançadas de `ioredis` que não são imediatamente óbvias, para comparar a nossa implementação com as "melhores práticas" da indústria.
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ESTABILIZAÇÃO CRÍTICA (FASE 1 - DIAGNÓSTICO)**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense no comportamento de gestão de conexões Redis para identificar a causa raiz do erro de esgotamento do pool (`ReplyError: ERR max number of clients reached`) que está a paralisar a suíte de testes.
+* **Intenção Estratégica (O Porquê):** A estabilidade da conexão com o Redis é um pilar para a operação do sistema. Esta falha representa um ponto único de falha (SPOF) que garante indisponibilidade em produção. Esta missão não visa corrigir o sintoma, mas sim fornecer um diagnóstico irrefutável para erradicar a classe do problema.
+* **Histórico Relevante (Consulta Obrigatória):** A "Operação Veredito Final" revelou uma falha massiva de 66% na suíte de testes. A sua primeira ação deve ser analisar o log de erro bruto dessa operação, que aponta o `ReplyError` como a causa raiz.
+* **Modelo Mental (Como se Encaixa):** O cliente Redis deve ser tratado como um recurso partilhado e de longa duração. A arquitetura ideal pressupõe uma única instância do cliente Redis (padrão Singleton) que é partilhada por toda a aplicação. As falhas atuais sugerem que este padrão foi violado.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** A investigação pode revelar que não existe um ponto centralizado de gestão de conexões, o que implicará uma refatoração de risco médio na fase seguinte.
+    * **Contramedida (Nesta Missão):** A missão atual é estritamente de diagnóstico. **NÃO implemente nenhuma correção.** A contramedida é a qualidade e precisão do seu relatório forense.
+
+---
+
+### **AUDITAR E VALIDAR:**
+Falha Sistémica de Gerenciamento de Conexões Redis
+
+**[PROTOCOLO DE AUDITORIA DE CENÁRIO DE NEGÓCIO (PACN) V1.0 ATIVADO]**
+*Sua resposta deve ser um relatório de diagnóstico exaustivo. Para cada ponto da evidência requerida, prove com trechos de código exatos, caminhos de arquivos completos e valores de configuração.*
+
+**Cenário de Negócio (O "Caso de Teste"):**
+Durante a execução da suíte de testes automatizados (`npx vitest run`), múltiplos casos de teste tentam estabelecer conexão com o servidor Redis de forma concorrente. A regra de negócio arquitetural dita que a aplicação deve gerir este pool de conexões de forma centralizada e eficiente, garantindo que as conexões sejam reutilizadas e/ou devidamente encerradas ao final de cada ciclo de teste, para que o limite de `maxclients` do servidor nunca seja atingido.
+
+**Vetor de Ataque / Ponto de Falha (A "Hipótese"):**
+A hipótese principal é um "vazamento de conexões" (connection leak). O código está a instanciar novos clientes Redis de forma descentralizada (`new Redis()`) para cada operação ou teste, sem garantir o seu fecho (`.quit()`) subsequente. Este antipadrão leva a um esgotamento rápido e inevitável do número máximo de clientes permitidos pelo servidor Redis, resultando numa falha em cascata que derruba a suíte de testes.
+
+**Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+Você deve produzir um **Relatório de Diagnóstico Forense do Redis** que responda inequivocamente às seguintes questões, fornecendo as provas de código para cada uma:
+
+1.  **Mapeamento de Pontos de Instanciação:**
+    * Onde e como as conexões com o Redis são criadas no código-fonte principal (`/server`)? Liste todos os arquivos e linhas onde `new Redis()` ou `createClient()` (ou métodos equivalentes) são invocados.
+
+2.  **Análise do Padrão de Conexão:**
+    * A aplicação utiliza um padrão de Singleton ou um módulo centralizado para gerir a instância do cliente Redis? Apresente o código que comprova a sua conclusão (ou a ausência de tal padrão).
+
+3.  **Análise do Ciclo de Vida em Testes:**
+    * Como as conexões Redis são geridas no ambiente de teste? Inspecione os arquivos de setup (`tests/setup.ts`, `vitest.config.ts`) e os hooks (`beforeAll`, `afterAll`, etc.) nos arquivos de teste que falharam. As conexões estão a ser corretamente fechadas (`.quit()` ou `.disconnect()`) após a conclusão dos testes?
+
+4.  **Auditoria de Configuração do Servidor:**
+    * Qual é o valor configurado para a diretiva `maxclients` no nosso servidor Redis? Descreva o método que usaria para obter esta informação se o acesso direto não for possível.
+
+5.  **Veredito da Hipótese:**
+    * Com base nas evidências coletadas, valide ou refute a hipótese do "vazamento de conexões". Explique detalhadamente como as suas descobertas suportam a sua conclusão.
+
+---
+*Crie o seu relatório final no arquivo `docs/diagnostics/REDIS_CONNECTION_LEAK_FORENSIC_REPORT.md`.*
