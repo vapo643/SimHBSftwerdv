@@ -1,4 +1,5 @@
-import { defineConfig } from 'vitest/config';
+/// <reference types="vitest" />
+import { defineConfig } from 'vite';
 import path from 'path';
 
 export default defineConfig({
@@ -10,6 +11,7 @@ export default defineConfig({
     },
   },
   test: {
+    globals: true,
     environment: 'node',
     setupFiles: ['./tests/setup.ts'],
     // ADICIONADO: Configuração específica para Redis Manager em testes
