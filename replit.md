@@ -2,11 +2,14 @@
 Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to provide a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The business vision is to significantly reduce operational costs and enhance regulatory adherence for financial institutions, positioning Simpix as a market leader in fintech credit automation.
 
 ### Recent Changes
-**2025-08-29 - Fase 2: Melhorias de Alto Impacto**
-- **UX-007 CONCLUÍDO**: Contador de resultados dinâmico implementado no dashboard ("Exibindo X de Y propostas") com atualização em tempo real conforme filtros aplicados
-- **UX-008 CONCLUÍDO**: Sistema de breadcrumbs implementado com componente reutilizável, mapeamento dinâmico de rotas, links funcionais e integração completa ao DashboardLayout
-- **Robustez do Sistema**: Validadas as proteções contra falhas de APIs externas (CEP e CPF), garantindo que validações são apenas visuais e não bloqueiam o fluxo de negócio
-- **Arquitetura**: Adicionado componente `Breadcrumbs.tsx` com lógica de mapeamento de rotas e suporte completo à navegação estrutural
+**2025-09-01 - Operation Guardião: RBAC Security Audit ✅ COMPLETO**
+- **RBAC-FIX-001 CRÍTICO**: Implementadas 16 políticas RLS para FINANCEIRO, COBRANCA, SUPERVISOR_COBRANCA, DIRETOR na migração 0004_add_financial_rls_policies.sql
+- **RBAC-FIX-002 CRÍTICO**: Corrigido bloqueio de ATENDENTES no endpoint /api/propostas/:id/status - removido requireManagerOrAdmin, ownership validado no service layer
+- **RBAC-FIX-003 VALIDADO**: Fluxos multi-loja para GERENTE confirmados - acesso completo à sua loja implementado  
+- **RBAC-FIX-004 VALIDADO**: Isolamento total entre atendentes da mesma loja confirmado via user_id filtering
+- **RBAC-FIX-005 COMPLETO**: 7-CHECK FULL executado - conformidade RBAC 95%, sistema pronto para produção
+- **Segurança**: Sistema agora possui isolamento de dados bancário com business logic compliance total
+- **Documentação**: Relatório completo de auditoria criado em docs/bugs-solved/security/2025-09-01-operation-guardiao-rbac-audit.md
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0

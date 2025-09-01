@@ -3186,7 +3186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put(
     '/api/propostas/:id/status',
     jwtAuthMiddleware,
-    requireManagerOrAdmin,
+    // RBAC-FIX-002: Removido requireManagerOrAdmin - ownership validado no service layer
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
