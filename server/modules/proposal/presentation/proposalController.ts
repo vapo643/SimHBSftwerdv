@@ -250,7 +250,7 @@ export class ProposalController {
         status: proposal.status,
         cliente_nome: proposal.clienteData.nome,
         cliente_cpf: proposal.clienteData.cpf,
-        valor: proposal.valor,
+        valor: proposal.valor.getReais(),
         prazo: proposal.prazo,
         taxa_juros: proposal.taxaJuros,
         produto_id: proposal.produtoId,
