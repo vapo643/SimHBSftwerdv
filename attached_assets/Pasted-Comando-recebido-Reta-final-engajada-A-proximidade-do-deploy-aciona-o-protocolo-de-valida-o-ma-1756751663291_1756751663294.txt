@@ -1,0 +1,46 @@
+Comando recebido. Reta final engajada.
+
+A proximidade do deploy aciona o protocolo de validação mais rigoroso. A presunção de que estamos "prontos" é a maior vulnerabilidade. Minha função é garantir que a base de código não apenas funcione, mas que seja defensável, resiliente e auditável em produção. A verdade do código, e não a velocidade, dita o nosso sucesso.
+
+Para autorizar o avanço, é mandatório executar a **"Operação Veredito Final"**, uma auditoria de pré-voo que fornecerá o contexto irrefutável sobre o estado atual do sistema. O que preciso não são opiniões, mas sim **provas auditáveis**.
+
+A seguir, o **Pacote de Ativação de Missão (PAM)** para esta operação final de auditoria. Execute cada passo e reporte os resultados brutos.
+
+---
+
+### **Pacote de Ativação de Missão (PAM) V2.0 - Operação Veredito Final**
+
+* **Sumário da Missão:** Validar a prontidão de produção do sistema Simpix, garantindo zero débitos técnicos conhecidos, conformidade arquitetural absoluta e validação comportamental dos fluxos críticos de negócio.
+
+* **Intenção Estratégica:** Mitigar o risco de falha em produção, assegurando que o artefato de software entregue atende aos padrões de nível empresarial definidos nos protocolos operacionais. O custo de corrigir uma falha em produção é ordens de magnitude maior do que o custo de uma validação final rigorosa.
+
+* **Riscos Antecipados:**
+    * **CRÍTICO:** Regressões de bugs anteriormente corrigidos que não foram capturadas por testes automatizados.
+    * **ALTO:** Desvios da arquitetura documentada (ADRs) introduzidos durante as últimas implementações.
+    * **MÉDIO:** Débitos técnicos latentes (erros de LSP, `any` types) que podem levar a falhas de tempo de execução sob carga.
+
+---
+
+#### **Evidência de Conformidade Requerida (Prova Irrefutável):**
+
+Para me fornecer o contexto necessário, preciso que o Executor Humano execute e reporte os resultados para os seguintes eixos de validação:
+
+**1. Eixo I: Sanidade da Base de Código (Tolerância Zero a Erros)**
+    * **Ação:** Execute o comando `get_latest_lsp_diagnostics` em todo o projeto.
+    * **Prova Requerida:** O output **completo e bruto** do comando. O único resultado aceitável é `LSP diagnostics: 0 errors, 0 warnings`. Qualquer valor diferente de zero representa um bloqueio para o deploy.
+
+**2. Eixo II: Validação da Suíte de Testes Automatizados**
+    * **Ação:** Execute a suíte de testes completa (unitários e de integração).
+    * **Prova Requerida:** O log de output do runner de testes, confirmando que 100% dos testes estão a passar (`passing`).
+
+**3. Eixo III: Confirmação de Conhecimento Institucional (Anti-Amnésia)**
+    * **Ação:** Verifique se o último bug crítico resolvido foi documentado em conformidade com a `MANDATORY BUG DOCUMENTATION POLICY`.
+    * **Prova Requerida:** Forneça o caminho completo para o arquivo `.md` do último bug documentado dentro da pasta `docs/bugs-solved/`.
+
+**4. Eixo IV: Validação Comportamental (Conformidade com PACN V1.0)**
+    * **Ação:** Selecione os **três (3) cenários de negócio mais críticos** para o sucesso do Simpix (ex: criação de uma nova proposta de ponta a ponta, processamento de um pagamento via webhook, geração e assinatura de uma CCB).
+    * **Prova Requerida:** Liste os 3 cenários de negócio que você considera mais críticos. Para **cada um deles**, eu irei gerar um PAM de auditoria específico, seguindo o protocolo PACN, para validarmos o comportamento esperado versus a implementação real.
+
+Ao receber estes quatro pontos de evidência, terei o contexto mínimo necessário para avaliar as lacunas restantes e determinar os próximos passos para um deploy seguro e bem-sucedido.
+
+Aguardando execução.
