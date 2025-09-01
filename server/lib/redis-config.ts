@@ -98,45 +98,62 @@ export function createRedisConfig(): RedisOptions {
   return config as RedisOptions;
 }
 
+// PERF-BOOST-002: Singleton Redis client to avoid multiple connections
+let sharedRedisClient: Redis | null = null;
+
 /**
  * Creates a Redis client instance with production-ready configuration
- * Includes connection event handling and error monitoring
+ * Uses singleton pattern to avoid multiple connections during startup
  */
 export function createRedisClient(instanceName = 'default'): Redis {
+  // Return existing client if available (singleton pattern)
+  if (sharedRedisClient && instanceName === 'default') {
+    return sharedRedisClient;
+  }
+
   const config = createRedisConfig();
   const client = new Redis(config);
 
-  // Connection event handlers
-  client.on('connect', () => {
-    console.log(`[REDIS:${instanceName}] ✅ Connected successfully`);
-  });
+  // Store as shared client if it's the default instance
+  if (instanceName === 'default') {
+    sharedRedisClient = client;
+  }
 
-  client.on('ready', () => {
-    console.log(`[REDIS:${instanceName}] 🚀 Ready to accept commands`);
-  });
+  // Reduced logging for non-default instances to avoid spam
+  if (instanceName === 'default') {
+    client.on('connect', () => {
+      console.log(`[REDIS:${instanceName}] ✅ Connected successfully`);
+    });
 
-  client.on('error', (error) => {
-    console.error(`[REDIS:${instanceName}] ❌ Connection error:`, error.message);
-    // Don't throw in production - let BullMQ handle reconnection
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Full error:', error);
-    }
-  });
+    client.on('ready', () => {
+      console.log(`[REDIS:${instanceName}] 🚀 Ready to accept commands`);
+    });
 
-  client.on('close', () => {
-    console.log(`[REDIS:${instanceName}] 🔌 Connection closed`);
-  });
+    client.on('error', (error) => {
+      console.error(`[REDIS:${instanceName}] ❌ Connection error:`, error.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Full error:', error);
+      }
+    });
 
-  client.on('reconnecting', () => {
-    console.log(`[REDIS:${instanceName}] 🔄 Attempting to reconnect...`);
-  });
+    client.on('close', () => {
+      console.log(`[REDIS:${instanceName}] 🔌 Connection closed`);
+      if (instanceName === 'default') {
+        sharedRedisClient = null;
+      }
+    });
+
+    client.on('reconnecting', () => {
+      console.log(`[REDIS:${instanceName}] 🔄 Attempting to reconnect...`);
+    });
+  }
 
   return client;
 }
 
 /**
  * Health check function for Redis connectivity
- * Used by monitoring and health check endpoints
+ * Uses existing client to avoid creating new connections
  */
 export async function checkRedisHealth(): Promise<{
   healthy: boolean;
@@ -144,13 +161,17 @@ export async function checkRedisHealth(): Promise<{
   error?: string;
 }> {
   try {
-    const client = createRedisClient('health-check');
+    // Use existing client instead of creating a new one
+    const client = sharedRedisClient || createRedisClient('health-check');
     const startTime = Date.now();
     
     await client.ping();
     const latency = Date.now() - startTime;
     
-    await client.quit();
+    // Don't quit the shared client
+    if (!sharedRedisClient) {
+      await client.quit();
+    }
     
     return {
       healthy: true,

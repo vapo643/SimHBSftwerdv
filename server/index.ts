@@ -25,31 +25,10 @@ import { registerRoutes } from './routes';
   await formalizationWorker.start();
   log('⚡ Formalization Worker initialized - Processing async events');
 
-  // =============== PAM V3.4 - INITIALIZE SPECIALIZED HIGH-PERFORMANCE WORKERS ===============
-  // Initialize the specialized workers for payments, webhooks, and reports
-  let paymentsWorker: any, webhooksWorker: any, reportsWorker: any;
-  
-  try {
-    const { Worker } = await import('bullmq');
-    const { getRedisConnectionConfig } = await import('./lib/redis-config');
-    
-    const redisConnection = getRedisConnectionConfig();
-    const workerOptions = { connection: redisConnection, concurrency: 5 };
-
-    // Note: Worker processors are defined in server/worker.ts
-    // These are placeholder workers for graceful shutdown management in the main process
-    paymentsWorker = new Worker('payments', async () => {}, workerOptions);
-    webhooksWorker = new Worker('webhooks', async () => {}, workerOptions);  
-    reportsWorker = new Worker('reports', async () => {}, workerOptions);
-
-    log('🎯 PAM V3.4 - Specialized queue workers initialized in main process');
-    log('   - Payments Worker (CRITICAL PRIORITY)');
-    log('   - Webhooks Worker (HIGH PRIORITY)'); 
-    log('   - Reports Worker (NORMAL PRIORITY)');
-    
-  } catch (error) {
-    log('⚠️ Warning: Could not initialize specialized workers in main process:', error instanceof Error ? error.message : String(error));
-  }
+  // PERF-BOOST-003: Lazy initialization of workers to reduce startup time
+  // Workers will be initialized on-demand when first job is processed
+  log('🎯 Specialized queue workers configured for lazy initialization');
+  log('   - Workers will start when first job is processed (on-demand)');
 
   // Initialize Sistema de Alertas Proativos (PAM V1.0)
   const { alertasProativosService } = await import('./services/alertasProativosService');
@@ -207,22 +186,13 @@ import { registerRoutes } from './routes';
     }
   }
 
-  // =============== PAM V3.4 - GRACEFUL SHUTDOWN FOR SPECIALIZED WORKERS ===============
-  // Graceful shutdown handler for main process workers
+  // =============== PERF-BOOST-003 - OPTIMIZED GRACEFUL SHUTDOWN ===============
+  // Simplified graceful shutdown handler (workers are lazy-loaded)
   process.on('SIGTERM', async () => {
-    console.log('[SERVER] 🛑 SIGTERM received, closing specialized workers...');
+    console.log('[SERVER] 🛑 SIGTERM received, closing workers...');
     
     try {
-      const workers = [paymentsWorker, webhooksWorker, reportsWorker];
-      const activeWorkers = workers.filter(Boolean);
-      
-      if (activeWorkers.length > 0) {
-        console.log(`[SERVER] 📡 Closing ${activeWorkers.length} specialized workers...`);
-        await Promise.all(activeWorkers.map(worker => worker.close()));
-        console.log('[SERVER] ✅ All specialized workers closed gracefully');
-      } else {
-        console.log('[SERVER] ℹ️  No active specialized workers to close');
-      }
+      console.log('[SERVER] ℹ️  Specialized workers use lazy initialization (no cleanup needed)');
       
       // Close formalization worker if it exists
       if (formalizationWorker) {

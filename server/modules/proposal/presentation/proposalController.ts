@@ -242,27 +242,8 @@ export class ProposalController {
         criteria.atendenteId = atendente_id as string;
       }
 
-      const proposals = await this.repository.findByCriteria(criteria);
-
-      // PAM V4.1: Serializar com dados relacionados (eliminando N+1)
-      const data = proposals.map((proposal) => ({
-        id: proposal.id,
-        status: proposal.status,
-        cliente_nome: proposal.clienteData.nome,
-        cliente_cpf: proposal.clienteData.cpf,
-        valor: proposal.valor.getReais(),
-        prazo: proposal.prazo,
-        taxa_juros: proposal.taxaJuros,
-        produto_id: proposal.produtoId,
-        produto_nome: (proposal as any)._relatedProductName || null,
-        tabela_comercial_nome: (proposal as any)._relatedCommercialTableName || null,
-        loja_id: proposal.lojaId,
-        loja_nome: (proposal as any)._relatedStoreName || null,
-        atendente_id: proposal.atendenteId,
-        created_at: proposal.createdAt,
-        updated_at: proposal.updatedAt,
-        valor_parcela: proposal.calculateMonthlyPayment(),
-      }));
+      // PERF-BOOST-001: Usar método lightweight para listagem
+      const data = await this.repository.findByCriteriaLightweight(criteria);
 
       return res.json({
         success: true,

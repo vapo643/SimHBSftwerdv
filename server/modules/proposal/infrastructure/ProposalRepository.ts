@@ -179,6 +179,88 @@ export class ProposalRepository implements IProposalRepository {
     return results.map((row) => this.mapToDomainWithJoinedData(row));
   }
 
+  // PERF-BOOST-001: Método otimizado para listagem sem Value Objects pesados
+  async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]> {
+    const conditions = [isNull(propostas.deletedAt)];
+
+    if (criteria.status) {
+      conditions.push(eq(propostas.status, criteria.status));
+    }
+
+    if (criteria.lojaId) {
+      conditions.push(eq(propostas.lojaId, criteria.lojaId));
+    }
+
+    if (criteria.atendenteId) {
+      conditions.push(eq(propostas.userId, criteria.atendenteId));
+    }
+
+    if (criteria.cpf) {
+      const cleanCPF = criteria.cpf.replace(/\D/g, '');
+      conditions.push(eq(propostas.clienteCpf, cleanCPF));
+    }
+
+    if (criteria.dateFrom) {
+      conditions.push(gte(propostas.createdAt, criteria.dateFrom));
+    }
+
+    if (criteria.dateTo) {
+      conditions.push(lte(propostas.createdAt, criteria.dateTo));
+    }
+
+    console.log('⚡ [PERF-BOOST-001] Executing lightweight query without Value Objects...');
+    
+    // OPTIMIZATION: Retornar dados diretos do banco sem conversão para domínio
+    const results = await db
+      .select({
+        id: propostas.id,
+        status: propostas.status,
+        cliente_nome: propostas.clienteNome,
+        cliente_cpf: propostas.clienteCpf,
+        valor: propostas.valor,
+        prazo: propostas.prazo,
+        taxa_juros: propostas.taxaJuros,
+        produto_id: propostas.produtoId,
+        produto_nome: produtos.nomeProduto,
+        tabela_comercial_nome: tabelasComerciais.nomeTabela,
+        loja_id: propostas.lojaId,
+        loja_nome: lojas.nomeLoja,
+        atendente_id: propostas.userId,
+        created_at: propostas.createdAt,
+        updated_at: propostas.updatedAt,
+      })
+      .from(propostas)
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .where(and(...conditions))
+      .orderBy(desc(propostas.createdAt));
+
+    console.log(`⚡ [PERF-BOOST-001] Query executed: ${results.length} proposals (lightweight)`);
+
+    // Retornar dados diretos sem conversão para domínio
+    return results.map((row) => ({
+      ...row,
+      valor_parcela: this.calculateMonthlyPaymentRaw(
+        parseFloat(row.valor || '0'),
+        parseFloat(row.taxa_juros || '0'),
+        row.prazo || 1
+      ),
+    }));
+  }
+
+  // Cálculo simples de parcela sem Value Objects
+  private calculateMonthlyPaymentRaw(principal: number, monthlyRate: number, numberOfPayments: number): number {
+    const rate = monthlyRate / 100;
+    
+    if (rate === 0) {
+      return principal / numberOfPayments;
+    }
+
+    return (principal * (rate * Math.pow(1 + rate, numberOfPayments))) /
+           (Math.pow(1 + rate, numberOfPayments) - 1);
+  }
+
   async findAll(): Promise<Proposal[]> {
     const results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
 
