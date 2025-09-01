@@ -18,7 +18,7 @@ import { requestLoggingMiddleware, logInfo } from './lib/logger';
 import { initializeSentry, initSentry, requestHandler, errorHandler } from './lib/sentry';
 import * as Sentry from '@sentry/node';
 import healthRoutes from './routes/health';
-import { checkRedisHealth } from './lib/redis-config';
+import { checkRedisHealth } from './lib/redis-manager';
 
 export async function createApp() {
   const app = express();
@@ -36,7 +36,7 @@ export async function createApp() {
 
   // FASE 0 - Redis Cloud Health Check (PAM V3.3 - PRIC requirement)
   const redisHealth = await checkRedisHealth();
-  if (redisHealth.healthy) {
+  if (redisHealth.status === 'healthy') {
     logInfo('✅ Conexão com Redis Cloud estabelecida com sucesso', {
       latency: redisHealth.latency,
       service: 'redis-cloud'

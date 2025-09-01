@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { createRedisClient, getRedisConnectionConfig } from '../lib/redis-config';
+import { getRedisClient } from '../lib/redis-manager';
 
 // Reutilizando a conexão Redis existente do BullMQ
 let redisClient: Redis | null = null;
@@ -11,9 +11,9 @@ const inMemoryCache = new Map<string, { value: any; expires: number }>();
 /**
  * Inicializa o cliente Redis reutilizando a configuração centralizada
  */
-export function initializeRedisClient(): Redis {
+export async function initializeRedisClient(): Promise<Redis> {
   if (!redisClient) {
-    redisClient = createRedisClient('cache-service');
+    redisClient = await getRedisClient();
   }
 
   return redisClient;
@@ -38,7 +38,7 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
     }
 
     // Em produção, usar Redis
-    const client = initializeRedisClient();
+    const client = await initializeRedisClient();
     const data = await client.get(key);
 
     if (data) {
@@ -77,7 +77,7 @@ export async function setToCache<T>(
     }
 
     // Em produção, usar Redis
-    const client = initializeRedisClient();
+    const client = await initializeRedisClient();
     const serialized = JSON.stringify(value);
 
     // Armazena com TTL (EX = expire in seconds)
@@ -95,7 +95,7 @@ export async function setToCache<T>(
  */
 export async function invalidateCache(key: string): Promise<void> {
   try {
-    const client = initializeRedisClient();
+    const client = await initializeRedisClient();
     await client.del(key);
     console.log(`[CACHE] 🗑️ Invalidated cache key: ${key}`);
   } catch (error) {
@@ -109,7 +109,7 @@ export async function invalidateCache(key: string): Promise<void> {
  */
 export async function invalidateCachePattern(pattern: string): Promise<void> {
   try {
-    const client = initializeRedisClient();
+    const client = await initializeRedisClient();
     const keys = await client.keys(pattern);
 
     if (keys.length > 0) {
@@ -126,7 +126,7 @@ export async function invalidateCachePattern(pattern: string): Promise<void> {
  */
 export async function isCacheAvailable(): Promise<boolean> {
   try {
-    const client = initializeRedisClient();
+    const client = await initializeRedisClient();
     await client.ping();
     return true;
   } catch (error) {

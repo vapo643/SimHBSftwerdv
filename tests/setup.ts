@@ -1,8 +1,20 @@
 import { beforeEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
+import { mockRedisClient, clearMockRedisData } from './mocks/ioredis.mock';
 
 // Mock fetch globally
 global.fetch = vi.fn();
+
+// Mock ioredis para isolamento de testes - PAM V1.0 DECD
+vi.mock('ioredis', () => ({
+  default: vi.fn(() => mockRedisClient),
+  Redis: vi.fn(() => mockRedisClient),
+}));
+
+// Limpar dados do Redis mock entre testes
+beforeEach(() => {
+  clearMockRedisData();
+});
 
 // ADICIONADO: Mock Redis Manager para testes
 vi.mock('../server/lib/redis-manager', () => ({

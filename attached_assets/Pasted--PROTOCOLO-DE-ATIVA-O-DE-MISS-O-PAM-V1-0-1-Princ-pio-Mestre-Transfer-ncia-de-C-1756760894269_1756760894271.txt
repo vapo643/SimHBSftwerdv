@@ -1,0 +1,51 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*A infraestrutura de testes está operacional, mas instável. A sua missão é aplicar um hotfix cirúrgico para eliminar os débitos técnicos remanescentes da refatoração do Redis e garantir que os testes executem num ambiente verdadeiramente isolado, sem tocar em serviços externos como uma instância real do Redis.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa está **autorizada** com um foco restrito: encontrar a biblioteca e o padrão de mock recomendados para `ioredis` dentro do ecossistema `vitest`. A sua busca deve priorizar a documentação oficial e exemplos canónicos.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ESTABILIZAÇÃO CRÍTICA (FASE 1.3.1 - HOTFIX)**
+
+* **Sumário da Missão (O Quê):** Refatorar os 3 arquivos remanescentes que ainda importam a configuração legada do Redis e implementar um sistema de mock para `ioredis`, prevenindo que a suíte de testes tente estabelecer conexões reais.
+* **Intenção Estratégica (O Porquê):** Testes de unidade e integração devem ser herméticos e rápidos. Conexões de rede a serviços externos (como um Redis real) introduzem lentidão, instabilidade e dependências externas, violando os princípios fundamentais de testes automatizados. Esta missão visa garantir o isolamento completo da nossa suíte de testes.
+* **Histórico Relevante (Consulta Obrigatória):** O relatório da "Operação Fênix" (`docs/bugs-solved/infrastructure/2025-09-01-test-suite-resurrection.md`) e o output do script `scripts/validate-redis-refactor.sh` são as suas fontes primárias. Eles identificam os 3 arquivos problemáticos e a necessidade de mocks.
+* **Modelo Mental (Como se Encaixa):** Você está a blindar a fronteira entre o ambiente de testes e o mundo exterior. Ao substituir as conexões reais por mocks, você garante que os testes validem apenas a lógica da nossa aplicação, de forma rápida e determinística.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** A biblioteca de mock pode ter uma configuração complexa ou pode não cobrir todos os métodos do `ioredis` que usamos, exigindo uma implementação mais detalhada.
+    * **Contramedida:** Comece com um mock simples que cubra os métodos básicos (`get`, `set`, `del`) e expanda conforme necessário, validando a cada passo com a execução dos testes relevantes.
+
+---
+
+### **IMPLEMENTAR:**
+Hotfix de Débitos Técnicos e Implementação de Mock para ioredis.
+
+**CURRENT STATE:**
+A "Operação Fênix" restaurou o framework de testes, mas a sua execução revelou dois problemas:
+1.  O script `scripts/validate-redis-refactor.sh` reporta que 3 arquivos (`app.ts`, `formalizationWorker.ts`, `cacheService.ts`) ainda importam a configuração legada `redis-config.ts`.
+2.  A suíte de testes (`npx vitest run`) tenta conectar-se a uma instância real do Redis em `localhost:6379`, resultando em timeouts e falhas.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Os 3 arquivos remanescentes são refatorados para usar o novo `redis-manager.ts`.
+2.  Um sistema de mock para o `ioredis` é implementado (provavelmente em `tests/setup.ts` ou num diretório `tests/mocks`), garantindo que nenhuma chamada de teste atinja uma instância real do Redis.
+3.  A execução do script `scripts/validate-redis-refactor.sh` termina com sucesso (código de saída 0), provando que não há mais importações legadas.
+4.  O comando `npx vitest run` executa com sucesso, sem erros de conexão ou timeouts relacionados ao Redis.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Refatoração Final:** Corrija as importações nos 3 arquivos identificados para usar `redis-manager.ts`.
+2.  **Pesquisa e Implementação de Mock:**
+    * Pesquise por `vitest mock ioredis` ou `ioredis-mock`.
+    * Escolha uma solução e implemente-a no ambiente de teste para interceptar e simular todas as chamadas ao `redis-manager`.
+3.  **Validação de Arquitetura:** Execute `sh scripts/validate-redis-refactor.sh` e confirme o sucesso.
+4.  **Validação Funcional:** Execute `npx vitest run --reporter=basic` e reporte o novo output.
+
+---
+### **DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+*Você deve preencher esta seção ao final da sua execução.*
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Reportar quaisquer dificuldades com a biblioteca de mock]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "A biblioteca X foi escolhida para mock devido à sua compatibilidade com vitest."]
+* **VALIDAÇÃO PENDENTE:** O output limpo de `validate-redis-refactor.sh` e o novo resultado do `vitest run` serão a prova de sucesso.

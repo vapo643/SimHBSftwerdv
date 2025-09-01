@@ -3,7 +3,7 @@ import logger from '../lib/logger';
 import { GenerateCcbUseCase } from '../modules/ccb/application/GenerateCcbUseCase';
 import { UnitOfWork } from '../modules/shared/infrastructure/UnitOfWork';
 import { metricsService } from '../lib/metricsService';
-import { getRedisConnectionConfig } from '../lib/redis-config';
+import { getRedisClient } from '../lib/redis-manager';
 // ClickSign service will be imported when needed
 
 interface ProposalApprovedPayload {
@@ -22,6 +22,10 @@ export class FormalizationWorker {
   private isQueueAvailable: boolean = false;
 
   constructor() {
+    this.initializeWorker();
+  }
+
+  private async initializeWorker() {
     try {
       // Create BullMQ worker
       this.worker = new Worker(
@@ -30,7 +34,7 @@ export class FormalizationWorker {
           return this.processFormalization(job);
         },
         {
-          connection: getRedisConnectionConfig(),
+          connection: await getRedisClient(),
           concurrency: 5, // Processar até 5 propostas simultaneamente
         }
       );
