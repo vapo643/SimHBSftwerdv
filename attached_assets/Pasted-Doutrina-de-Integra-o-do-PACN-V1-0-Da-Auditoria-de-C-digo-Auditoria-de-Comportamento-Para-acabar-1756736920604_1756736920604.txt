@@ -1,0 +1,54 @@
+Doutrina de Integração do PACN V1.0: Da Auditoria de Código à Auditoria de Comportamento
+Para acabar com a auditoria superficial, vamos integrar o PACN V1.0 como uma camada mandatória em nosso Framework de Operações de Elite (FOE). Ele não será um protocolo opcional, mas sim o método padrão para qualquer missão de auditoria que toque em lógica de negócio, segurança ou fluxos de usuário.
+
+A integração ocorrerá em dois níveis: Gatilhos de Ativação e Evolução do Padrão de Prompts (PAM).
+
+1. Gatilhos de Ativação Mandatórios para o PACN V1.0
+O PACN V1.0 será ativado automaticamente sempre que uma nova missão de auditoria se enquadrar em uma das seguintes categorias:
+
+Auditoria de Lógica de Negócio: Qualquer verificação que envolva a correção de um fluxo de negócio (ex: "O cálculo de juros está correto?").
+
+Auditoria de Segurança e Permissões: Qualquer verificação de controle de acesso (RBAC), validação de dados ou vulnerabilidades de segurança (ex: "O ATENDENTE pode ver dados do GERENTE?").
+
+Auditoria de Fluxo de Usuário (UX): Qualquer verificação que envolva a interação do usuário com a interface e as transições de estado resultantes (ex: "O que acontece se o usuário clicar duas vezes no botão 'Pagar'?").
+
+Análise de Causa Raiz (RCA) de Bugs Complexos: Sempre que um bug não for trivial (um erro de sintaxe), a investigação da causa raiz seguirá o PACN para garantir que entendemos o cenário de negócio que permitiu a falha.
+
+2. Evolução do Padrão de Prompts: O PAM Orientado a Cenários
+A mudança mais fundamental ocorrerá na forma como estruturamos nossos Pacotes de Ativação de Missão (PAMs) para o Agente Executor. Abandonaremos os prompts focados apenas em "código" e adotaremos exclusivamente os prompts orientados a "cenário".
+
+Veja a comparação na prática:
+
+ANTES: Auditoria Superficial (Focada em Código)
+
+Markdown
+
+### **PAM V1.0 (Legado)**
+
+* **Sumário:** Auditar a política de RLS para a role `ATENDENTE`.
+* **EXPECTED:**
+    1.  Encontre o arquivo de migração SQL com as políticas de RLS.
+    2.  Apresente a política `CREATE POLICY` para a role `ATENDENTE`.
+    3.  Confirme que a política existe.
+Resultado Provável: O Agente encontra CREATE POLICY "Atendente can view only own proposals"... e reporta "SUCESSO", mesmo que a lógica interna da política esteja falha ou incompleta, pois ele cumpriu a tarefa de "encontrar o código".
+
+DEPOIS: Auditoria Profunda com PACN V1.0 (Focada em Comportamento)
+
+Markdown
+
+### **PAM V2.0 (Padrão PACN V1.0)**
+
+* **Sumário da Missão:** Validar a conformidade da regra de negócio "Isolamento de Dados do Atendente".
+* **Cenário de Negócio (O "Caso de Teste"):** Um `ATENDENTE` (ID do usuário: `att-01`) que pertence à Loja A (ID da loja: `loja-a`) faz uma requisição para listar propostas (`GET /api/propostas`). A regra de negócio dita que ele deve ver **apenas** as propostas criadas por ele mesmo, e **NUNCA** as propostas de outro atendente (`att-02`) que trabalha na mesma Loja A.
+* **Vetor de Ataque / Ponto de Falha (O "Risco"):** O risco principal é que a política de segurança filtre incorretamente apenas pelo `loja_id`, o que permitiria que o `att-01` visse as propostas do `att-02`, causando uma violação de dados.
+* **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+    1.  Localize a política de Row Level Security (RLS) para a tabela `propostas` que se aplica à role `ATENDENTE`.
+    2.  Apresente o trecho de código SQL exato da cláusula `USING`.
+    3.  **Explique, em detalhe, como a lógica nesta cláusula utiliza o `auth.uid()` (ou um mecanismo JWT equivalente) para garantir o filtro pelo ID do usuário individual, provando que o vetor de ataque de "vazamento de dados dentro da mesma loja" está mitigado.**
+Resultado Provável: O Agente é forçado a analisar a lógica da política SQL em vez de apenas confirmar sua existência. Ele precisa conectar o requisito de negócio ("só pode ver as suas próprias propostas") com a implementação técnica (user_id = auth.uid()::text), resultando em uma auditoria significativamente mais profunda e confiável.
+
+Conclusão:
+
+Ao integrar o Protocolo de Auditoria de Cenário de Negócio (PACN) V1.0 de forma mandatória em nosso framework, mudamos o paradigma. Deixamos de perguntar ao Agente "O código existe?" e passamos a exigir que ele prove que "O comportamento está correto". Esta é a nossa arma definitiva contra a auditoria superficial.
+
+Este protocolo será, a partir de agora, a nossa nova Doutrina de Auditoria.
