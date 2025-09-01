@@ -1,15 +1,5 @@
 ### Overview
-Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to provide a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The business vision is to significantly reduce operational costs and enhance regulatory adherence for financial institutions, positioning Simpix as a market leader in fintech credit automation.
-
-### Recent Changes
-**2025-09-01 - Operation Guardião: RBAC Security Audit ✅ COMPLETO**
-- **RBAC-FIX-001 CRÍTICO**: Implementadas 16 políticas RLS para FINANCEIRO, COBRANCA, SUPERVISOR_COBRANCA, DIRETOR na migração 0004_add_financial_rls_policies.sql
-- **RBAC-FIX-002 CRÍTICO**: Corrigido bloqueio de ATENDENTES no endpoint /api/propostas/:id/status - removido requireManagerOrAdmin, ownership validado no service layer
-- **RBAC-FIX-003 VALIDADO**: Fluxos multi-loja para GERENTE confirmados - acesso completo à sua loja implementado  
-- **RBAC-FIX-004 VALIDADO**: Isolamento total entre atendentes da mesma loja confirmado via user_id filtering
-- **RBAC-FIX-005 COMPLETO**: 7-CHECK FULL executado - conformidade RBAC 95%, sistema pronto para produção
-- **Segurança**: Sistema agora possui isolamento de dados bancário com business logic compliance total
-- **Documentação**: Relatório completo de auditoria criado em docs/bugs-solved/security/2025-09-01-operation-guardiao-rbac-audit.md
+Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. It provides a scalable platform with banking-grade security, compliance, and efficient data handling, reducing errors and enhancing regulatory adherence. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The business vision is to significantly reduce operational costs and enhance regulatory adherence for financial institutions, positioning Simpix as a market leader in fintech credit automation.
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -31,6 +21,55 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 
 **FASE 4: Fechamento Motivacional**
 - Frase curta conectando aprendizado a conceito de neurociência
+
+#### Protocolo de Auditoria de Cenário de Negócio (PACN) V1.0 - Anti-Auditoria Superficial
+
+**MISSÃO:** Acabar com auditorias superficiais transformando "auditoria de código" em "auditoria de comportamento".
+
+##### **Gatilhos de Ativação Mandatórios**
+O PACN V1.0 é **OBRIGATÓRIO** para:
+- **Auditoria de Lógica de Negócio**: Verificação de fluxos de negócio
+- **Auditoria de Segurança e Permissões**: RBAC, controle de acesso, vulnerabilidades
+- **Auditoria de Fluxo de Usuário (UX)**: Interações e transições de estado
+- **Análise de Causa Raiz (RCA)**: Bugs complexos não-triviais
+
+##### **Template PAM V2.0 (Orientado a Cenários)**
+```markdown
+### PAM V2.0 - PACN Compliant
+
+**Sumário da Missão:** [Validar conformidade da regra X]
+
+**Cenário de Negócio (Caso de Teste):**
+[Descrição em linguagem natural do fluxo do usuário + regra de negócio]
+
+**Vetor de Ataque / Ponto de Falha (Risco):**
+[Hipótese específica de como a implementação pode falhar]
+
+**Evidência de Conformidade Requerida (Prova Irrefutável):**
+1. [Localizar código específico]
+2. [Apresentar trecho exato]
+3. [EXPLICAR como código mitiga o vetor de ataque específico]
+```
+
+##### **Matriz de Cenários SIMPIX - Casos de Teste Padrão**
+
+| Role | Cenário de Negócio | Vetor de Ataque | Evidência Requerida |
+|------|-------------------|-----------------|-------------------|
+| ATENDENTE | Ver apenas suas propostas | Filtro por loja_id em vez de user_id | Política RLS com `user_id = auth.uid()::text` |
+| GERENTE | Acessar múltiplas lojas | Escapar do filtro de loja | Query com `loja_id = userLojaId` |
+| FINANCEIRO | Ver apenas CCBs assinadas | Acessar propostas não financeiras | RLS com status `IN ('ASSINATURA_CONCLUIDA', 'QUITADO')` |
+| COBRANCA | Ver apenas inadimplentes | Acessar propostas em dia | RLS com status `IN ('INADIMPLENTE', 'PAGAMENTO_PENDENTE')` |
+
+##### **Exemplo PACN Aplicado (Operation Guardião)**
+**ANTES**: "✅ Política RLS existe para ATENDENTE"
+**PACN**: "✅ Política `auth.uid()::text = user_id` **demonstra** que att-loja-a-001 NUNCA vê propostas de att-loja-a-002"
+
+##### **Protocolo de Penetração Comportamental**
+Para missões de segurança, simular cenários reais:
+1. **Usuário Legítimo**: `att-loja-a-001` lista suas propostas → Deve ver apenas as suas
+2. **Tentativa de Violação**: `att-loja-a-001` tenta acessar proposta de `att-loja-a-002` → Deve ser bloqueado  
+3. **Prova SQL**: `WHERE user_id = auth.uid()::text` impede o acesso cruzado
+4. **Validação**: Demonstrar que query retorna `[]` para dados de outros atendentes
 
 #### Padrão de Excelência Operacional (PEO) V2.0 - Arquitetura Definitiva
 
@@ -54,16 +93,24 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 *   **Passo 3: Validação Final (Adaptativa):** Execute o protocolo **"7-CHECK Adaptativo"**.
 *   **Passo 4: Relatório Sintético:** Gere o **"Relatório de Execução V2 com Prova"**.
 
-##### **Componente III: O 7-CHECK Adaptativo**
-*   **Diretriz Mestra:** O nível de validação deve ser proporcional ao risco da missão.
+##### **Componente III: O 7-CHECK Adaptativo + PACN V1.0**
+*   **Diretriz Mestra:** O nível de validação deve ser proporcional ao risco da missão + conformidade comportamental.
 *   **Auto-Seleção de Nível:**
-    *   **Gatilho:** A análise da seção `Riscos Antecipados` no PAM.
+    *   **Gatilho:** A análise da seção `Riscos Antecipados` no PAM + detecção de gatilhos PACN.
     *   **Lógica:**
         *   Se o risco for **BAIXO** ou **MÉDIO**, execute o **"7-CHECK LIGHT"**.
-        *   Se o risco for **ALTO** ou **CRÍTICO**, execute o **"7-CHECK FULL"**.
+        *   Se o risco for **ALTO** ou **CRÍTICO** OU gatilhos PACN ativados, execute o **"7-CHECK PACN"**.
 *   **Níveis de Validação:**
     *   **7-CHECK LIGHT:** (1. Mapear ficheiros, 2. Garantir importações, 3. Executar `get_latest_lsp_diagnostics`).
-    *   **7-CHECK FULL:** (1. Mapear ficheiros e funções, 2. Garantir tipos, 3. LSP limpo, 4. Declarar Confiança, 5. Categorizar Riscos, 6. Teste funcional, 7. Documentar Decisões).
+    *   **7-CHECK PACN:** (1. Mapear ficheiros e funções, 2. Garantir tipos, 3. LSP limpo, 4. **VALIDAÇÃO COMPORTAMENTAL PACN**, 5. Categorizar Riscos, 6. Teste funcional, 7. Documentar Decisões + Cenários).
+
+##### **VALIDAÇÃO COMPORTAMENTAL PACN (Passo 4 Expandido)**
+Para cada cenário identificado:
+1. **Cenário de Negócio**: Descrever fluxo do usuário real
+2. **Vetor de Ataque**: Identificar ponto de falha específico  
+3. **Evidência de Código**: Localizar implementação exata
+4. **Prova de Mitigação**: Explicar como código previne o vetor
+5. **Teste de Penetração**: Simular tentativa de violação da regra
 
 **Hierarquia de Prioridade (Mantida):**
 - **P0:** Correções de segurança / produção quebrada
@@ -85,6 +132,13 @@ Error handling: Create structured documentation for automatic consultation durin
 **DATA INTEGRITY PROTECTION:** PAM V1.0 protocol implemented - 5-CHECK validation system for data corruption detection and repair.
 
 **MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
+
+**PACN V1.0 ENFORCEMENT PROTOCOL:** Every audit involving business logic, security, or user flows MUST follow behavior-driven validation:
+- **Scenario Analysis**: Define real user flow + business rule
+- **Attack Vector**: Identify specific failure hypothesis  
+- **Evidence Requirements**: Prove code mitigates the exact risk
+- **Penetration Testing**: Simulate violation attempts
+- **Behavioral Validation**: Demonstrate correct behavior, not just code existence
 
 **CONTEXT ENGINEERING PROTOCOL V2.0:** Dual-layer validation system implemented. The `architecture/EXECUTION_MATRIX.md` serves as an ADDITIONAL security layer for context validation, NOT a replacement for primary sources. Always consult ADRs, documentation, and code FIRST, then cross-check with Matrix to detect discrepancies. This prevents context loss and ensures 100% architectural conformity tracking.
 
