@@ -70,11 +70,11 @@ export async function createApp() {
     app.use(setupSecurityHeaders());
     app.use(additionalSecurityHeaders);
     // Apply appropriate CSP based on environment
+    app.use(strictCSP);
     if (process.env.NODE_ENV !== 'development') {
-      app.use(strictCSP);
       log('🔒 [SECURITY] Enhanced security headers and strict CSP activated');
     } else {
-      log('🔧 [DEV] CSP temporarily disabled for React debugging');
+      log('🔧 [DEV] CSP configured for development with React+Vite compatibility');
     }
   }
 

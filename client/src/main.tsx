@@ -5,7 +5,7 @@ import './index.css';
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Initialize Sentry for frontend error tracking
-if (import.meta.env.VITE_SENTRY_DSN) {
+if (import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production') {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: import.meta.env.MODE || 'development',
@@ -65,7 +65,7 @@ window.addEventListener('error', (event) => {
 });
 
 // Wrap App with Sentry Error Boundary
-const SentryApp = import.meta.env.VITE_SENTRY_DSN 
+const SentryApp = (import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production')
   ? Sentry.withErrorBoundary(App, {
       fallback: ({ error, resetError }) => (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">

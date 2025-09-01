@@ -76,7 +76,9 @@ export class StrictCSP {
           : "connect-src 'self' ws: wss: *.ingest.us.sentry.io",
 
         // Worker source - web workers and service workers (including Sentry)
-        "worker-src 'self' blob: data:",
+        isDevelopment
+          ? "worker-src 'self' blob: data: 'unsafe-inline'"
+          : "worker-src 'self' blob: data:",
 
         // Child source - frames and workers
         "child-src 'self' blob:",
