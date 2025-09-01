@@ -30,6 +30,14 @@ const safeRender = (value: any): string => {
   if (value === null || value === undefined) return 'N/A';
   if (typeof value === 'string' || typeof value === 'number') return String(value);
   if (typeof value === 'object') {
+    // If it has a 'cents' property, convert to currency
+    if (value.cents !== undefined) {
+      const reais = value.cents / 100;
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(reais);
+    }
     // If it has a 'value' property, use that
     if (value.value !== undefined) return String(value.value);
     // If it's an array, join with commas
@@ -38,6 +46,20 @@ const safeRender = (value: any): string => {
     return JSON.stringify(value);
   }
   return String(value);
+};
+
+// Helper to safely parse cliente_data JSON
+const getClienteData = (proposta: any) => {
+  if (proposta.cliente_data) {
+    try {
+      return typeof proposta.cliente_data === 'string' 
+        ? JSON.parse(proposta.cliente_data) 
+        : proposta.cliente_data;
+    } catch {
+      return {};
+    }
+  }
+  return {};
 };
 
 const fetchProposta = async (id: string | undefined) => {
@@ -202,69 +224,69 @@ const AnaliseManualPage: React.FC = () => {
               </p>
               <p>
                 <strong>CPF:</strong>{' '}
-                {safeRender(proposta.cliente_cpf || proposta.clienteCpf || proposta.clienteData?.cpf)}
+                {safeRender(proposta.cliente_cpf || proposta.clienteCpf || getClienteData(proposta)?.cpf)}
               </p>
               <p>
                 <strong>Email:</strong>{' '}
                 {safeRender(proposta.cliente_email ||
                   proposta.clienteEmail ||
-                  proposta.clienteData?.email)}
+                  getClienteData(proposta)?.email)}
               </p>
               <p>
                 <strong>Telefone:</strong>{' '}
                 {safeRender(proposta.cliente_telefone ||
                   proposta.clienteTelefone ||
-                  proposta.clienteData?.telefone)}
+                  getClienteData(proposta)?.telefone)}
               </p>
               <p>
                 <strong>Data de Nascimento:</strong>{' '}
                 {safeRender(proposta.cliente_data_nascimento ||
                   proposta.clienteDataNascimento ||
-                  proposta.clienteData?.dataNascimento)}
+                  getClienteData(proposta)?.dataNascimento)}
               </p>
               <p>
                 <strong>Renda Mensal:</strong>{' '}
-                {proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData?.renda
-                  ? `R$ ${safeRender(proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData.renda)}`
+                {proposta.cliente_renda || proposta.clienteRenda || getClienteData(proposta)?.renda
+                  ? `R$ ${safeRender(proposta.cliente_renda || proposta.clienteRenda || getClienteData(proposta).renda)}`
                   : 'N/A'}
               </p>
               <p>
                 <strong>RG:</strong>{' '}
-                {safeRender(proposta.cliente_rg || proposta.clienteRg || proposta.clienteData?.rg)}
+                {safeRender(proposta.cliente_rg || proposta.clienteRg || getClienteData(proposta)?.rg)}
               </p>
               <p>
                 <strong>Órgão Emissor:</strong>{' '}
                 {safeRender(proposta.cliente_orgao_emissor ||
                   proposta.clienteOrgaoEmissor ||
-                  proposta.clienteData?.orgaoEmissor)}
+                  getClienteData(proposta)?.orgaoEmissor)}
               </p>
               <p>
                 <strong>Estado Civil:</strong>{' '}
                 {safeRender(proposta.cliente_estado_civil ||
                   proposta.clienteEstadoCivil ||
-                  proposta.clienteData?.estadoCivil)}
+                  getClienteData(proposta)?.estadoCivil)}
               </p>
               <p>
                 <strong>Nacionalidade:</strong>{' '}
                 {safeRender(proposta.cliente_nacionalidade ||
                   proposta.clienteNacionalidade ||
-                  proposta.clienteData?.nacionalidade)}
+                  getClienteData(proposta)?.nacionalidade)}
               </p>
               <p>
                 <strong>CEP:</strong>{' '}
-                {safeRender(proposta.cliente_cep || proposta.clienteCep || proposta.clienteData?.cep)}
+                {safeRender(proposta.cliente_cep || proposta.clienteCep || getClienteData(proposta)?.cep)}
               </p>
               <p>
                 <strong>Endereço:</strong>{' '}
                 {safeRender(proposta.cliente_endereco ||
                   proposta.clienteEndereco ||
-                  proposta.clienteData?.endereco)}
+                  getClienteData(proposta)?.endereco)}
               </p>
               <p>
                 <strong>Ocupação:</strong>{' '}
                 {safeRender(proposta.cliente_ocupacao ||
                   proposta.clienteOcupacao ||
-                  proposta.clienteData?.ocupacao)}
+                  getClienteData(proposta)?.ocupacao)}
               </p>
             </CardContent>
           </Card>
@@ -277,12 +299,7 @@ const AnaliseManualPage: React.FC = () => {
             <CardContent className="space-y-2">
               <p>
                 <strong>Valor Solicitado:</strong>{' '}
-                {proposta.valor ||
-                proposta.valor_solicitado ||
-                proposta.valorSolicitado ||
-                proposta.condicoesData?.valor
-                  ? `R$ ${safeRender(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor || 0)}`
-                  : 'N/A'}
+                {safeRender(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor)}
               </p>
               <p>
                 <strong>Prazo:</strong>{' '}
@@ -300,23 +317,15 @@ const AnaliseManualPage: React.FC = () => {
               </p>
               <p>
                 <strong>TAC:</strong>{' '}
-                {proposta.valor_tac || proposta.valorTac || proposta.condicoesData?.valorTac
-                  ? `R$ ${safeRender(proposta.valor_tac || proposta.valorTac || proposta.condicoesData.valorTac)}`
-                  : 'N/A'}
+                {safeRender(proposta.valor_tac || proposta.valorTac || proposta.condicoesData?.valorTac)}
               </p>
               <p>
                 <strong>IOF:</strong>{' '}
-                {proposta.valor_iof || proposta.valorIof || proposta.condicoesData?.valorIof
-                  ? `R$ ${safeRender(proposta.valor_iof || proposta.valorIof || proposta.condicoesData.valorIof)}`
-                  : 'N/A'}
+                {safeRender(proposta.valor_iof || proposta.valorIof || proposta.condicoesData?.valorIof)}
               </p>
               <p>
                 <strong>Valor Total Financiado:</strong>{' '}
-                {proposta.valor_total_financiado ||
-                proposta.valorTotalFinanciado ||
-                proposta.condicoesData?.valorTotalFinanciado
-                  ? `R$ ${safeRender(proposta.valor_total_financiado || proposta.valorTotalFinanciado || proposta.condicoesData.valorTotalFinanciado)}`
-                  : 'N/A'}
+                {safeRender(proposta.valor_total_financiado || proposta.valorTotalFinanciado || proposta.condicoesData?.valorTotalFinanciado)}
               </p>
             </CardContent>
           </Card>
@@ -331,10 +340,10 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Status Atual:</strong> {safeRender(proposta.status)}
               </p>
               <p>
-                <strong>Parceiro:</strong> {safeRender(proposta.parceiro?.razaoSocial)}
+                <strong>Parceiro:</strong> {safeRender(proposta.parceiro?.razaoSocial || proposta.loja_nome || 'Parceiro Padrão')}
               </p>
               <p>
-                <strong>Loja:</strong> {safeRender(proposta.loja?.nomeLoja)}
+                <strong>Loja:</strong> {safeRender(proposta.loja?.nomeLoja || proposta.loja_nome || 'N/A')}
               </p>
               <p>
                 <strong>Data de Criação:</strong>{' '}
