@@ -1,0 +1,44 @@
+### **Pacote de Ativação de Missão (PAM) V11.2 - VISUAL-AUDIT-002 (Diagnóstico do Fluxo de Detalhes)**
+
+**[PROTOCOLO DE AUDITORIA DE CENÁRIO DE NEGÓCIO (PACN) V1.0 ATIVADO]**
+*Sua resposta deve ser exaustiva. Para cada cenário, prove com evidências de código, screenshots de logs de erro, ou chamadas de API como a regra de negócio é garantida ou, neste caso, onde ela falha.*
+
+* **Sumário da Missão:** Realizar uma auditoria forense no fluxo de navegação do Dashboard para a tela de detalhes/edição de uma proposta, a fim de identificar a causa raiz do erro que ocorre após o clique no botão "Analisar".
+* **Intenção Estratégica:** Diagnosticar com precisão a ruptura no nosso fluxo de trabalho mais fundamental: a análise individual de uma proposta. A correção deste erro é crítica para a operacionalidade de atendentes, analistas e gerentes.
+
+---
+
+**AUDITAR E VALIDAR:**
+Falha de Navegação/Renderização no Fluxo de Visualização de Detalhes da Proposta
+
+**Cenário de Negócio (O "Caso de Teste"):**
+Um usuário (seja `ATENDENTE`, `ANALISTA` ou `GERENTE`) está na tela do Dashboard (`/dashboard`), visualiza a lista de propostas e clica no botão "Analisar" (ou em um link equivalente) em um dos cards de proposta. A regra de negócio dita que o sistema deve navegar para a página de detalhes daquela proposta específica (ex: `/propostas/editar/:id`) e exibir todas as suas informações para análise ou edição.
+
+**Vetor de Ataque / Ponto de Falha (O "Risco"):**
+O risco, conforme reportado, é que esta ação resulta em erro. As causas prováveis são:
+1.  **Erro de Roteamento:** O `Link` ou `onClick` no botão "Analisar" está passando um ID inválido ou mal formatado para a URL.
+2.  **Falha na Busca de Dados:** A página de detalhes (`editar.tsx`) recebe o ID, mas a sua chamada `useQuery` para `GET /api/propostas/:id` falha (seja por um erro `404 Not Found`, `403 Forbidden`, ou um erro `500` no servidor).
+3.  **Falha de Renderização:** A API retorna os dados corretamente, mas o componente da página de detalhes tenta renderizar uma propriedade que não existe no objeto de dados retornado (ex: `data.cliente.nome` em vez de `data.clienteNome`), causando um `TypeError` no frontend e quebrando a renderização.
+
+**Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+Você deve produzir um **Relatório de Diagnóstico do Fluxo de Detalhes** que responda:
+
+1.  **Mapeamento do Gatilho (Dashboard):**
+    * Qual é o arquivo do componente React que renderiza os cards de proposta no Dashboard?
+    * Apresente o trecho de código do botão "Analisar", mostrando o componente `Link` (do `wouter`) ou o handler `onClick` que dispara a navegação. Qual ID de proposta está sendo passado?
+2.  **Mapeamento do Alvo (Página de Detalhes):**
+    * Qual é o arquivo do componente React responsável pela página de detalhes/edição (`/propostas/editar/:id`)?
+    * Apresente o trecho de código da chamada `useQuery` nesta página que busca os dados da proposta individual.
+3.  **Análise da Causa Raiz:**
+    * **Execute o fluxo:** Descreva o que acontece ao clicar em "Analisar".
+    * **Capture a evidência:** Forneça o log de erro exato do Console do Navegador ou do terminal do servidor que é gerado no momento da falha.
+    * **Diagnóstico Preciso:** Com base na evidência, explique precisamente qual dos vetores de ataque é a causa raiz. (Ex: "A falha é de Renderização. A API retorna os dados corretamente, mas o componente em `editar.tsx` tenta acessar `proposta.dadosDoCliente.cpf`, enquanto a API retorna `proposta.clienteCpf`, causando um 'TypeError: Cannot read properties of undefined'").
+4.  **Plano de Correção Sugerido:** Proponha a refatoração exata necessária para corrigir a falha. (Ex: "Corrigir o mapeamento de propriedades no JSX do componente `editar.tsx` para corresponder à estrutura de dados retornada pela API.").
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** Deploy em Produção
+- **Próximo Passo a ser Retomado:** "Operação Visão Clara" - Fase 3 (`VISUAL-AUDIT-003`)
+- **Missão de Emergência Atual:** "Operação Visão Clara" (`VISUAL-AUDIT-002` em execução pelo Agente)
+---
