@@ -74,7 +74,7 @@ export async function createApp() {
     if (process.env.NODE_ENV !== 'development') {
       log('🔒 [SECURITY] Enhanced security headers and strict CSP activated');
     } else {
-      log('🔧 [DEV] CSP configured for development with React+Vite compatibility');
+      log('🔧 [DEV] CSP ultra-permissivo para desenvolvimento - Vite/React compatível');
     }
   }
 

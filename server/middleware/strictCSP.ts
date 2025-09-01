@@ -43,7 +43,7 @@ export class StrictCSP {
 
         // Script source - different policies for dev vs prod
         isDevelopment
-          ? `script-src 'self' 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline' localhost:* 127.0.0.1:* ws: wss: https: data: blob:`
+          ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
           : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
 
         // Object source - block all objects (Flash, Java, etc.)
@@ -111,13 +111,12 @@ export class StrictCSP {
       res.setHeader('X-XSS-Protection', '1; mode=block');
       res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-      // Permissions Policy (Feature Policy successor)
+      // Permissions Policy (Feature Policy successor) - only valid features
       res.setHeader(
         'Permissions-Policy',
         [
           'camera=(), microphone=(), geolocation=(), payment=(), usb=(),',
-          'accelerometer=(), gyroscope=(), magnetometer=(), speaker=(),',
-          'notifications=(), push=(), vibrate=()',
+          'accelerometer=(), gyroscope=(), magnetometer=()',
         ].join(' ')
       );
 
