@@ -1,0 +1,51 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O objetivo deste pacote é projetar uma solução arquitetural. Com base no relatório forense, você deve agora atuar como um arquiteto júnior e propor um plano de implementação detalhado e à prova de falhas para erradicar o vazamento de conexões Redis.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para encontrar as **melhores práticas** (best practices) para a implementação de um gerenciador de conexões Singleton com `ioredis` e a sua integração com o ciclo de vida de testes do `vitest`.*
+
+* ***Prioridade às Fontes Primárias:*** Documentação oficial do `ioredis`, do `vitest` e blogs de engenharia de elite.
+* ***Proibição de Fontes Duvidosas:*** Respostas de fóruns não validadas são proibidas.
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ESTABILIZAÇÃO CRÍTICA (FASE 1.2 - ARQUITETURA DA SOLUÇÃO)**
+
+* **Sumário da Missão (O Quê):** Arquitetar um plano de refatoração detalhado para implementar um gerenciador de conexão Redis centralizado (padrão Singleton), com base nas descobertas do relatório forense `REDIS_CONNECTION_LEAK_FORENSIC_REPORT.md`.
+* **Intenção Estratégica (O Porquê):** O objetivo não é apenas "consertar o bug", mas sim "elevar o padrão arquitetural". O plano deve garantir que a solução seja robusta, de fácil manutenção e que impeça a reintrodução de vazamentos de conexão no futuro. Este plano será a "planta" para a execução cirúrggica na Fase 1.3.
+* **Histórico Relevante (Consulta Obrigatória):** A sua única fonte da verdade para esta missão é o relatório `docs/diagnostics/REDIS_CONNECTION_LEAK_FORENSIC_REPORT.md`. Todas as suas decisões devem ser justificadas com base nas evidências contidas neste documento.
+* **Modelo Mental (Como se Encaixa):** Você está a projetar o novo "guardião" central da conexão Redis. O seu plano deve detalhar a criação deste guardião (`server/lib/redis-manager.ts`) e, crucialmente, o processo de refatoração para garantir que todos os 22 arquivos que atualmente usam Redis passem a consumir exclusivamente desta fonte centralizada.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** Um plano de refatoração incompleto pode deixar para trás uma instância "órfã" de `new Redis()`, que manteria o vazamento de conexões ativo.
+    * **Contramedida:** O seu plano deve incluir um passo de validação explícito, como um script de busca (`grep` ou `rg`) que, ao ser executado após a refatoração, não deve encontrar nenhuma ocorrência de `new Redis()` fora do novo arquivo `redis-manager.ts`.
+
+---
+
+### **PLANEJAR E ARQUITETAR:**
+Roadmap de Implementação para a Centralização de Conexão Redis.
+
+**CURRENT STATE:**
+O diagnóstico forense confirmou um vazamento massivo de conexões Redis devido a 6+ pontos de instanciação descentralizados e à ausência de um ciclo de vida de limpeza nos testes. A arquitetura atual é frágil e inoperante sob carga.
+
+**EXPECTED (Estado Final de Sucesso):**
+A geração de um novo documento Markdown em `docs/missions/ROADMAP_REDIS_SINGLETON_REFACTOR.md`. Este documento deve conter um roadmap de implementação passo a passo, detalhado e técnico, que um desenvolvedor possa seguir para executar a correção. O roadmap deve incluir:
+
+1.  **Estrutura do Módulo `redis-manager.ts`:**
+    * Definição da classe ou objeto Singleton.
+    * O código exato para exportar uma única instância do cliente `ioredis`.
+    * A inclusão de um método `getInstance()` para acesso e um método `disconnect()` para ser usado no encerramento dos testes.
+
+2.  **Plano de Refatoração Detalhado:**
+    * Uma lista (checklist) de **todos os arquivos** que precisam ser modificados.
+    * Para cada arquivo, um exemplo de `diff` mostrando como a importação e o uso do Redis devem ser alterados (antes e depois).
+
+3.  **Estratégia de Adaptação dos Testes:**
+    * O código exato a ser adicionado ao arquivo `tests/setup.ts`, incluindo o hook `afterAll()` para chamar `redis-manager.disconnect()`.
+
+4.  **Comando de Validação Pós-Refatoração:**
+    * Um comando `rg` (ripgrep) ou `grep` que o executor pode rodar para provar que nenhuma instanciação legada de `new Redis()` permanece no código.
+
+5.  **Plano de Documentação:**
+    * Instrução para criar o arquivo de documentação do bug resolvido em `docs/bugs-solved/infrastructure/`, conforme o protocolo `7-CHECK`.
