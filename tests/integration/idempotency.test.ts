@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach, beforeAll, afterEach } from 'vitest';
-import { paymentsQueue } from '../../server/lib/queues';
+import { getPaymentsQueue } from '../../server/lib/queues';
 
 describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
   beforeAll(() => {
@@ -22,6 +22,7 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
     console.log('[IDEMPOTENCY TEST] 🧹 Cleaning and pausing payments queue...');
     
     // Clean any existing jobs in the paymentsQueue to start fresh
+    const paymentsQueue = await getPaymentsQueue();
     await paymentsQueue.obliterate({ force: true });
     
     // CRITICAL: Pause queue to prevent automatic job processing during test
@@ -32,6 +33,7 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
 
   afterEach(async () => {
     // Resume queue and clean up after each test
+    const paymentsQueue = await getPaymentsQueue();
     await paymentsQueue.resume();
     await paymentsQueue.obliterate({ force: true });
     console.log('[IDEMPOTENCY TEST] 🧹 Queue resumed and cleaned up');
@@ -63,6 +65,7 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
       console.log(`[IDEMPOTENCY TEST] 📞 First job addition with jobId: ${jobId}`);
 
       // First job addition
+      const paymentsQueue = await getPaymentsQueue();
       const job1 = await paymentsQueue.add('PROCESS_PAYMENT', paymentData, {
         jobId: jobId,
         attempts: 5,

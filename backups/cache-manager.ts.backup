@@ -9,7 +9,7 @@
  * - Fallback to database when Redis unavailable
  */
 
-import { getRedisClient } from './redis-manager';
+import Redis from 'ioredis';
 
 interface CacheOptions {
   ttl?: number; // Time to live in seconds
@@ -24,7 +24,7 @@ interface CacheStats {
 }
 
 class CacheManager {
-  private redis: any = null;
+  private redis: Redis | null = null;
   private stats: CacheStats = { hits: 0, misses: 0, errors: 0, hitRate: 0 };
   private isRedisAvailable = false;
 
@@ -34,18 +34,39 @@ class CacheManager {
 
   private async initializeRedis() {
     try {
-      // REFATORADO: Usar Redis Manager centralizado
-      this.redis = await getRedisClient();
-      this.isRedisAvailable = true;
-      console.log('[CACHE] ✅ Redis conectado via Redis Manager centralizado');
+      // Use Redis URL from environment or default to local
+      const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
       
+      this.redis = new Redis(redisUrl, {
+        enableReadyCheck: true,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+        connectTimeout: 2000,
+        commandTimeout: 1000,
+      });
+
+      this.redis.on('connect', () => {
+        this.isRedisAvailable = true;
+        console.log('[CACHE] Redis connected successfully');
+      });
+
+      this.redis.on('error', (error) => {
+        this.isRedisAvailable = false;
+        this.stats.errors++;
+        console.warn('[CACHE] Redis connection error, falling back to database:', error.message);
+      });
+
+      this.redis.on('close', () => {
+        this.isRedisAvailable = false;
+        console.warn('[CACHE] Redis connection closed');
+      });
+
       // Test connection
       await this.redis.ping();
       
     } catch (error) {
       this.isRedisAvailable = false;
-      this.stats.errors++;
-      console.warn('[CACHE] ⚠️ Redis Manager connection failed, running without cache:', error);
+      console.warn('[CACHE] Redis initialization failed, running without cache:', error);
     }
   }
 
@@ -186,13 +207,12 @@ class CacheManager {
 
   /**
    * Close Redis connection
-   * REFATORADO: Não gerencia mais o ciclo de vida da conexão diretamente
    */
   async close(): Promise<void> {
-    // Conexão gerenciada pelo Redis Manager - não fechamos aqui
-    this.redis = null;
-    this.isRedisAvailable = false;
-    console.log('[CACHE] 🔌 Cache Manager desconectado do Redis Manager');
+    if (this.redis) {
+      await this.redis.quit();
+      this.isRedisAvailable = false;
+    }
   }
 }
 

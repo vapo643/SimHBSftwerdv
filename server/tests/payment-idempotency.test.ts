@@ -6,7 +6,7 @@
 import request from 'supertest';
 import { expect } from '@jest/globals';
 import { createTestApp } from '../test-setup';
-import { paymentsQueue } from '../lib/queues';
+import { getPaymentsQueue } from '../lib/queues';
 import { pagamentoRepository } from '../repositories/pagamento.repository';
 import { db } from '../lib/supabase';
 import { propostas, lojas, produtos, interCollections } from '../../shared/schema';
@@ -23,6 +23,7 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
 
   beforeEach(async () => {
     // Clean up any existing jobs in the queue
+    const paymentsQueue = await getPaymentsQueue();
     await paymentsQueue.obliterate({ force: true });
     
     // Create test data
@@ -68,6 +69,7 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
     // Clean up test data
     await db.delete(interCollections).where(eq(interCollections.propostaId, testPropostaId));
     await db.delete(propostas).where(eq(propostas.id, testPropostaId));
+    const paymentsQueue = await getPaymentsQueue();
     await paymentsQueue.obliterate({ force: true });
   });
 
@@ -105,6 +107,7 @@ describe('CONF-001 - Payment Idempotency Integration Tests', () => {
     expect(response.body.data.status).toBe('em_fila');
 
     // Check queue has exactly one job
+    const paymentsQueue = await getPaymentsQueue();
     const activeJobs = await paymentsQueue.getActive();
     const waitingJobs = await paymentsQueue.getWaiting();
     const totalJobs = activeJobs.length + waitingJobs.length;

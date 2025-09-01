@@ -8,7 +8,7 @@ import { pagamentoRepository } from '../repositories/pagamento.repository.js';
 import { transitionTo, InvalidTransitionError } from './statusFsmService.js';
 import { z } from 'zod';
 // PAM V3.5 - Import paymentsQueue for idempotent processing
-import { paymentsQueue } from '../lib/queues.js';
+import { getPaymentsQueue } from '../lib/queues.js';
 
 // Validation schema
 const pagamentoSchema = z.object({
@@ -138,6 +138,7 @@ export class PagamentoService {
 
     try {
       // CONF-001 - Add job to paymentsQueue with deterministic jobId 
+      const paymentsQueue = await getPaymentsQueue();
       const job = await paymentsQueue.add(
         'PROCESS_PAYMENT', 
         {

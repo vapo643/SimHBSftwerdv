@@ -1,4 +1,4 @@
-import { formalizationQueue } from '../../lib/queues';
+import { getFormalizationQueue } from '../../lib/queues';
 import { DomainEvent } from '../../modules/shared/domain/events/DomainEvent';
 import logger from '../../lib/logger';
 
@@ -25,6 +25,7 @@ export class EventDispatcher {
       
       if (eventType === 'ProposalApproved') {
         // Send to formalization queue
+        const formalizationQueue = await getFormalizationQueue();
         await formalizationQueue.add('ProposalApprovedJob', event, {
           removeOnComplete: 100,
           removeOnFail: false,

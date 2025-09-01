@@ -54,11 +54,17 @@ router.post('/retry', async (req: Request, res: Response) => {
         hint: 'Observe os logs do worker para ver as tentativas de retry',
       });
     } else {
-      // Usar queue real em produção - REFATORADO para usar Redis Manager centralizado
+      // Usar queue real em produção
       const { Queue } = await import('bullmq');
-      const { getRedisClient } = await import('../lib/redis-manager');
+      const { Redis } = await import('ioredis');
 
-      const connection = await getRedisClient();
+      const connection = new Redis({
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        maxRetriesPerRequest: null,
+        enableReadyCheck: false,
+      });
 
       const testRetryQueue = new Queue('test-retry', {
         connection,

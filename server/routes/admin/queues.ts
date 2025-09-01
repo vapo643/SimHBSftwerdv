@@ -11,29 +11,51 @@ import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { requireAdmin } from '../../lib/role-guards';
-import { paymentsQueue, webhooksQueue, reportsQueue } from '../../lib/queues';
+import { getPaymentsQueue, getWebhooksQueue, getReportsQueue } from '../../lib/queues';
 
 const router = express.Router();
 
-// Create Bull-Board dashboard
+// Create Bull-Board dashboard with async queue initialization
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
 
-const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-  queues: [
-    new BullMQAdapter(paymentsQueue),
-    new BullMQAdapter(webhooksQueue), 
-    new BullMQAdapter(reportsQueue),
-  ],
-  serverAdapter: serverAdapter,
-});
+// Initialize queues lazily
+const initializeQueues = async () => {
+  const [paymentsQueue, webhooksQueue, reportsQueue] = await Promise.all([
+    getPaymentsQueue(),
+    getWebhooksQueue(),
+    getReportsQueue(),
+  ]);
+  
+  return createBullBoard({
+    queues: [
+      new BullMQAdapter(paymentsQueue),
+      new BullMQAdapter(webhooksQueue), 
+      new BullMQAdapter(reportsQueue),
+    ],
+    serverAdapter: serverAdapter,
+  });
+};
 
-// Mount the Bull-Board UI with authentication
-router.use('/admin/queues', requireAdmin, serverAdapter.getRouter());
+let bullBoardInstance: any = null;
+
+// Mount the Bull-Board UI with authentication (lazy initialization)
+router.use('/admin/queues', requireAdmin, async (req, res, next) => {
+  if (!bullBoardInstance) {
+    bullBoardInstance = await initializeQueues();
+  }
+  serverAdapter.getRouter()(req, res, next);
+});
 
 // Health endpoint for queue monitoring
 router.get('/admin/queues/health', requireAdmin, async (req, res) => {
   try {
+    const [paymentsQueue, webhooksQueue, reportsQueue] = await Promise.all([
+      getPaymentsQueue(),
+      getWebhooksQueue(),
+      getReportsQueue(),
+    ]);
+    
     const queueHealths = await Promise.all([
       {
         name: 'payments',

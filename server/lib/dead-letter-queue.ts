@@ -11,7 +11,7 @@
 
 import { Job, Queue } from 'bullmq';
 import logger from './logger';
-import { deadLetterQueue } from './queues';
+import { getDeadLetterQueue } from './queues';
 
 /**
  * Interface for DLQ job data structure

@@ -10,51 +10,93 @@
  */
 
 import { Queue, QueueOptions, Worker } from 'bullmq';
-import { getRedisConnectionConfig } from './redis-config';
 import { dlqManager } from './dead-letter-queue';
 import { metricsService } from './metricsService';
+import { getRedisClient } from './redis-manager';
 
-// Use centralized Redis configuration
-const redisConnection = getRedisConnectionConfig();
+// REFATORADO: Use Redis Manager centralizado com lazy loading
+async function getRedisConnection() {
+  return await getRedisClient();
+}
 
-// Default queue options with retry configuration
-const defaultQueueOptions: QueueOptions = {
-  connection: redisConnection,
-  defaultJobOptions: {
-    attempts: 3, // Retry 3 times
-    backoff: {
-      type: 'exponential',
-      delay: 2000, // Start with 2 seconds
+// Default queue options factory function with Redis connection
+async function createQueueOptions(): Promise<QueueOptions> {
+  const connection = await getRedisConnection();
+  return {
+    connection,
+    defaultJobOptions: {
+      attempts: 3, // Retry 3 times
+      backoff: {
+        type: 'exponential',
+        delay: 2000, // Start with 2 seconds
+      },
+      removeOnComplete: {
+        age: 3600, // Keep completed jobs for 1 hour
+        count: 100, // Keep max 100 completed jobs
+      },
+      removeOnFail: {
+        age: 86400, // Keep failed jobs for 24 hours
+      },
     },
-    removeOnComplete: {
-      age: 3600, // Keep completed jobs for 1 hour
-      count: 100, // Keep max 100 completed jobs
-    },
-    removeOnFail: {
-      age: 86400, // Keep failed jobs for 24 hours
-    },
-  },
-};
+  };
+}
 
-// PDF Processing Queue - for carnê generation and PDF merging
-export const pdfProcessingQueue = new Queue('pdf-processing', defaultQueueOptions);
+// REFATORADO: Lazy loading para queues com Redis Manager
+let pdfProcessingQueue: Queue | null = null;
+let boletoSyncQueue: Queue | null = null;
+let documentQueue: Queue | null = null;
+let notificationQueue: Queue | null = null;
+let formalizationQueue: Queue | null = null;
 
-// Boleto Sync Queue - for synchronizing boletos from Banco Inter
-export const boletoSyncQueue = new Queue('boleto-sync', defaultQueueOptions);
+export async function getPdfProcessingQueue(): Promise<Queue> {
+  if (!pdfProcessingQueue) {
+    const options = await createQueueOptions();
+    pdfProcessingQueue = new Queue('pdf-processing', options);
+  }
+  return pdfProcessingQueue;
+}
 
-// Document Processing Queue - for ClickSign and other document operations
-export const documentQueue = new Queue('document-processing', defaultQueueOptions);
+export async function getBoletoSyncQueue(): Promise<Queue> {
+  if (!boletoSyncQueue) {
+    const options = await createQueueOptions();
+    boletoSyncQueue = new Queue('boleto-sync', options);
+  }
+  return boletoSyncQueue;
+}
 
-// Notification Queue - for sending emails, webhooks, etc.
-export const notificationQueue = new Queue('notifications', defaultQueueOptions);
+export async function getDocumentQueue(): Promise<Queue> {
+  if (!documentQueue) {
+    const options = await createQueueOptions();
+    documentQueue = new Queue('document-processing', options);
+  }
+  return documentQueue;
+}
 
-// Formalization Queue - for CCB generation and ClickSign integration after proposal approval
-export const formalizationQueue = new Queue('formalization-queue', defaultQueueOptions);
+export async function getNotificationQueue(): Promise<Queue> {
+  if (!notificationQueue) {
+    const options = await createQueueOptions();
+    notificationQueue = new Queue('notifications', options);
+  }
+  return notificationQueue;
+}
+
+export async function getFormalizationQueue(): Promise<Queue> {
+  if (!formalizationQueue) {
+    const options = await createQueueOptions();
+    formalizationQueue = new Queue('formalization-queue', options);
+  }
+  return formalizationQueue;
+}
 
 // Dead-Letter Queue - for permanently failed jobs from all other queues
-// Critical for audit trail and preventing silent data loss
-export const deadLetterQueue = new Queue('dead-letter-queue', {
-  connection: redisConnection,
+// Critical for audit trail and preventing silent data loss  
+let deadLetterQueue: Queue | null = null;
+
+export async function getDeadLetterQueue(): Promise<Queue> {
+  if (!deadLetterQueue) {
+    const connection = await getRedisConnection();
+    deadLetterQueue = new Queue('dead-letter-queue', {
+      connection,
   defaultJobOptions: {
     removeOnComplete: {
       age: 86400 * 7, // Keep completed DLQ jobs for 7 days
@@ -64,20 +106,29 @@ export const deadLetterQueue = new Queue('dead-letter-queue', {
       age: 86400 * 30, // Keep failed DLQ jobs for 30 days (compliance)
     },
   },
-});
+    });
+  }
+  return deadLetterQueue;
+}
 
-// Queue event logging (keeping existing events, metrics handled by workers)
-pdfProcessingQueue.on('waiting', (job) => {
-  console.log(`[QUEUE:PDF] 📋 Job ${job.id} waiting in queue`);
-});
+// REFATORADO: Queue event logging agora feito via getters lazily
+export async function initializeQueueEvents() {
+  const pdf = await getPdfProcessingQueue();
+  const boleto = await getBoletoSyncQueue();
+  const formalization = await getFormalizationQueue();
 
-boletoSyncQueue.on('waiting', (job) => {
-  console.log(`[QUEUE:BOLETO] 📋 Job ${job.id} waiting in queue`);
-});
+  pdf.on('waiting', (job) => {
+    console.log(`[QUEUE:PDF] 📋 Job ${job.id} waiting in queue`);
+  });
 
-formalizationQueue.on('waiting', (job) => {
-  console.log(`[QUEUE:FORMALIZATION] 📋 Job ${job.id} waiting in queue`);
-});
+  boleto.on('waiting', (job) => {
+    console.log(`[QUEUE:BOLETO] 📋 Job ${job.id} waiting in queue`);
+  });
+
+  formalization.on('waiting', (job) => {
+    console.log(`[QUEUE:FORMALIZATION] 📋 Job ${job.id} waiting in queue`);
+  });
+}
 
 // Note: DLQ (Dead-Letter Queue) integration for failed jobs is implemented at the Worker level
 // Workers have access to the 'failed' event, Queues do not
@@ -91,9 +142,16 @@ formalizationQueue.on('waiting', (job) => {
 // =============== PAM V3.4 - SPECIALIZED QUEUES ===============
 // High-Performance Queues with differentiated retry policies
 
-// PAYMENTS QUEUE - CRITICAL (5 attempts, exponential backoff)
-export const paymentsQueue = new Queue('payments', {
-  connection: redisConnection,
+// REFATORADO: Specialized queues com lazy loading
+let paymentsQueue: Queue | null = null;
+let webhooksQueue: Queue | null = null;
+let reportsQueue: Queue | null = null;
+
+export async function getPaymentsQueue(): Promise<Queue> {
+  if (!paymentsQueue) {
+    const connection = await getRedisConnection();
+    paymentsQueue = new Queue('payments', {
+      connection,
   defaultJobOptions: {
     attempts: 5,
     backoff: {
@@ -108,11 +166,16 @@ export const paymentsQueue = new Queue('payments', {
       age: 86400, // Keep failed jobs for 24 hours
     },
   },
-});
+    });
+  }
+  return paymentsQueue;
+}
 
-// WEBHOOKS QUEUE - HIGH PRIORITY (3 attempts, fixed backoff)
-export const webhooksQueue = new Queue('webhooks', {
-  connection: redisConnection,
+export async function getWebhooksQueue(): Promise<Queue> {
+  if (!webhooksQueue) {
+    const connection = await getRedisConnection();
+    webhooksQueue = new Queue('webhooks', {
+      connection,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -127,11 +190,16 @@ export const webhooksQueue = new Queue('webhooks', {
       age: 86400,
     },
   },
-});
+    });
+  }
+  return webhooksQueue;
+}
 
-// REPORTS QUEUE - NORMAL PRIORITY (2 attempts, fixed backoff)
-export const reportsQueue = new Queue('reports', {
-  connection: redisConnection,
+export async function getReportsQueue(): Promise<Queue> {
+  if (!reportsQueue) {
+    const connection = await getRedisConnection();
+    reportsQueue = new Queue('reports', {
+      connection,
   defaultJobOptions: {
     attempts: 2,
     backoff: {
@@ -146,36 +214,61 @@ export const reportsQueue = new Queue('reports', {
       age: 43200, // 12 hours
     },
   },
+    });
+  }
+  return reportsQueue;
+}
+
+// REFATORADO: Export all queue getters (lazy loading)
+export const getQueues = async () => ({
+  pdfProcessing: await getPdfProcessingQueue(),
+  boletoSync: await getBoletoSyncQueue(),
+  document: await getDocumentQueue(),
+  notification: await getNotificationQueue(),
+  formalization: await getFormalizationQueue(),
+  deadLetter: await getDeadLetterQueue(),
+  // PAM V3.4 - Specialized High-Performance Queues
+  payments: await getPaymentsQueue(),
+  webhooks: await getWebhooksQueue(),
+  reports: await getReportsQueue(),
 });
 
-// Export all queues
-export const queues = {
-  pdfProcessing: pdfProcessingQueue,
-  boletoSync: boletoSyncQueue,
-  document: documentQueue,
-  notification: notificationQueue,
-  formalization: formalizationQueue,
-  deadLetter: deadLetterQueue,
-  // PAM V3.4 - Specialized High-Performance Queues
-  payments: paymentsQueue,
-  webhooks: webhooksQueue,
-  reports: reportsQueue,
-};
-
-// Health check function
+// REFATORADO: Health check function com lazy loading
 export async function checkQueuesHealth() {
   try {
+    const [
+      pdfQueue,
+      boletoQueue, 
+      docQueue,
+      notifQueue,
+      formalQueue,
+      dlqQueue,
+      payQueue,
+      webhookQueue,
+      reportQueue
+    ] = await Promise.all([
+      getPdfProcessingQueue(),
+      getBoletoSyncQueue(),
+      getDocumentQueue(),
+      getNotificationQueue(),
+      getFormalizationQueue(),
+      getDeadLetterQueue(),
+      getPaymentsQueue(),
+      getWebhooksQueue(),
+      getReportsQueue(),
+    ]);
+
     const results = await Promise.all([
-      pdfProcessingQueue.getJobCounts(),
-      boletoSyncQueue.getJobCounts(),
-      documentQueue.getJobCounts(),
-      notificationQueue.getJobCounts(),
-      formalizationQueue.getJobCounts(),
-      deadLetterQueue.getJobCounts(),
+      pdfQueue.getJobCounts(),
+      boletoQueue.getJobCounts(),
+      docQueue.getJobCounts(),
+      notifQueue.getJobCounts(),
+      formalQueue.getJobCounts(),
+      dlqQueue.getJobCounts(),
       // PAM V3.4 - New specialized queues health check
-      paymentsQueue.getJobCounts(),
-      webhooksQueue.getJobCounts(),
-      reportsQueue.getJobCounts(),
+      payQueue.getJobCounts(),
+      webhookQueue.getJobCounts(),
+      reportQueue.getJobCounts(),
     ]);
 
     return {
@@ -211,13 +304,14 @@ export function setupStaticQueueDLQHandlers() {
 }
 
 // Helper function to create a worker with DLQ support and metrics integration
-export function createWorkerWithDLQ(
+export async function createWorkerWithDLQ(
   queueName: string,
   processor: (job: any) => Promise<any>,
   options: any = {}
-): Worker {
+): Promise<Worker> {
+  const connection = await getRedisClient();
   const worker = new Worker(queueName, processor, {
-    connection: redisConnection,
+    connection,
     concurrency: options.concurrency || 1,
     ...options,
   });

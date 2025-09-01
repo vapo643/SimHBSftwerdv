@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 // Import dinâmico para usar função correta com Service Role Key
 import { securityLogger, SecurityEventType, getClientIP } from './security-logger';
-// REFATORADO: Redis client via Redis Manager centralizado
-import { getRedisClient } from './redis-manager';
+// Redis client for distributed token cache
+import { createRedisClient } from './redis-config';
 // Importação direta da interface personalizada
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -28,15 +28,8 @@ const MAX_AUTH_ATTEMPTS = isDevelopment ? 10000 : 50; // 10k dev, 50 prod
 const AUTH_WINDOW_MS = isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000; // 1min dev, 15min prod  
 const AUTH_ATTEMPTS_TTL = Math.ceil(AUTH_WINDOW_MS / 1000); // Convert to seconds
 
-// REFATORADO: Redis client via Redis Manager centralizado (lazy loading)
-let redisClient: any = null;
-
-async function getRedisClientLazy() {
-  if (!redisClient) {
-    redisClient = await getRedisClient();
-  }
-  return redisClient;
-}
+// Redis client for distributed token validation cache
+const redisClient = createRedisClient('jwt-token-cache');
 const CACHE_TTL_SECONDS = 600; // 10 minutes in seconds for Redis TTL (P0.1 optimization)
 const VALIDATION_TIMEOUT_MS = 5000; // 5 second timeout for token validation
 const validationSemaphore = new Map<string, Promise<any>>(); // Prevent concurrent validation of same token
@@ -60,9 +53,8 @@ interface TokenCacheEntry {
  */
 async function checkAuthRateLimit(identifier: string): Promise<boolean> {
   try {
-    const redis = await getRedisClientLazy();
     const key = `auth_attempts:${identifier}`;
-    const attempts = await redis.get(key);
+    const attempts = await redisClient.get(key);
     
     if (isDevelopment) {
       console.log(`[JWT DEBUG] Rate limit check for ${identifier}: attempts=${attempts}, max=${MAX_AUTH_ATTEMPTS}, window=${AUTH_WINDOW_MS}ms`);
@@ -70,7 +62,7 @@ async function checkAuthRateLimit(identifier: string): Promise<boolean> {
     
     if (!attempts) {
       // First attempt - set counter with TTL
-      await redis.setex(key, AUTH_ATTEMPTS_TTL, '1');
+      await redisClient.setex(key, AUTH_ATTEMPTS_TTL, '1');
       if (isDevelopment) console.log(`[JWT DEBUG] First attempt for ${identifier}, allowing`);
       return true; // Allow
     }
@@ -82,8 +74,8 @@ async function checkAuthRateLimit(identifier: string): Promise<boolean> {
     }
     
     // Increment counter and refresh TTL
-    await redis.incr(key);
-    await redis.expire(key, AUTH_ATTEMPTS_TTL);
+    await redisClient.incr(key);
+    await redisClient.expire(key, AUTH_ATTEMPTS_TTL);
     if (isDevelopment) console.log(`[JWT DEBUG] Incremented attempts for ${identifier}: ${attemptCount + 1}/${MAX_AUTH_ATTEMPTS}`);
     return true; // Allow
   } catch (error) {
@@ -97,8 +89,7 @@ async function checkAuthRateLimit(identifier: string): Promise<boolean> {
  */
 export async function addToBlacklist(token: string): Promise<void> {
   try {
-    const redis = await getRedisClientLazy();
-    await redis.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1');
+    await redisClient.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1');
     securityLogger.logEvent({
       type: SecurityEventType.TOKEN_BLACKLISTED,
       severity: 'LOW',

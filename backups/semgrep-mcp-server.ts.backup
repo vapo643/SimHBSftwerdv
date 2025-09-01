@@ -6,9 +6,9 @@
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import { join, relative } from 'path';
+import Redis from 'ioredis';
 import * as chokidar from 'chokidar';
 import crypto from 'crypto';
-import { getRedisClient } from '../lib/redis-manager';
 
 interface SecurityFinding {
   rule_id: string;
@@ -77,7 +77,7 @@ interface SecurityRisk {
 }
 
 export class SemgrepMCPServer {
-  private redis: any = null;
+  private redis: Redis | null = null;
   private memoryCache: Map<string, { data: any; expires: number }> = new Map();
   private isScanning: boolean = false;
   private watchers: Map<string, chokidar.FSWatcher> = new Map();
@@ -85,28 +85,51 @@ export class SemgrepMCPServer {
   private useMemoryCache: boolean = false;
 
   constructor() {
-    // REFATORADO: Usar Redis Manager centralizado
-    this.initializeRedis();
+    // Tentar conectar ao Redis
+    if (process.env.NODE_ENV === 'production' || process.env.REDIS_HOST) {
+      try {
+        this.redis = new Redis({
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+          password: process.env.REDIS_PASSWORD,
+          retryStrategy: (times) => {
+            // Em desenvolvimento, desistir após 3 tentativas
+            if (process.env.NODE_ENV !== 'production' && times > 3) {
+              console.log('[SEMGREP MCP] Redis not available, using in-memory cache');
+              this.useMemoryCache = true;
+              return null;
+            }
+            // Retry com backoff exponencial
+            const delay = Math.min(times * 50, 2000);
+            return delay;
+          },
+        });
+
+        this.redis.on('error', (err) => {
+          if (!this.useMemoryCache) {
+            console.error('[SEMGREP MCP] Redis connection error:', err);
+            this.useMemoryCache = true;
+          }
+        });
+
+        this.redis.on('connect', () => {
+          console.log('[SEMGREP MCP] Connected to Redis cache');
+          this.useMemoryCache = false;
+        });
+      } catch (error) {
+        console.log('[SEMGREP MCP] Redis initialization failed, using in-memory cache');
+        this.useMemoryCache = true;
+      }
+    } else {
+      console.log('[SEMGREP MCP] Development mode - using in-memory cache');
+      this.useMemoryCache = true;
+    }
 
     // Inicializar file watching
     this.initializeRealTimeWatching();
 
     // Limpar cache expirado periodicamente
     setInterval(() => this.cleanupMemoryCache(), 60000); // A cada 1 minuto
-  }
-
-  /**
-   * Inicializa conexão Redis usando Redis Manager centralizado
-   */
-  private async initializeRedis() {
-    try {
-      this.redis = await getRedisClient();
-      this.useMemoryCache = false;
-      console.log('[SEMGREP MCP] Connected to Redis via Redis Manager');
-    } catch (error) {
-      console.log('[SEMGREP MCP] Redis Manager not available, using in-memory cache');
-      this.useMemoryCache = true;
-    }
   }
 
   /**
