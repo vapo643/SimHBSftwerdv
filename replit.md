@@ -56,19 +56,6 @@ O PACN V1.0 é **OBRIGATÓRIO** para **TODA AUDITORIA**, incluindo mas não limi
 3. [EXPLICAR como código mitiga o vetor de ataque específico]
 ```
 
-##### **Matriz de Cenários SIMPIX - Casos de Teste Padrão**
-
-| Role | Cenário de Negócio | Vetor de Ataque | Evidência Requerida |
-|------|-------------------|-----------------|-------------------|
-| ATENDENTE | Ver apenas suas propostas | Filtro por loja_id em vez de user_id | Política RLS com `user_id = auth.uid()::text` |
-| GERENTE | Acessar múltiplas lojas | Escapar do filtro de loja | Query com `loja_id = userLojaId` |
-| FINANCEIRO | Ver apenas CCBs assinadas | Acessar propostas não financeiras | RLS com status `IN ('ASSINATURA_CONCLUIDA', 'QUITADO')` |
-| COBRANCA | Ver apenas inadimplentes | Acessar propostas em dia | RLS com status `IN ('INADIMPLENTE', 'PAGAMENTO_PENDENTE')` |
-
-##### **Exemplo PACN Aplicado (Operation Guardião)**
-**ANTES**: "✅ Política RLS existe para ATENDENTE"
-**PACN**: "✅ Política `auth.uid()::text = user_id` **demonstra** que att-loja-a-001 NUNCA vê propostas de att-loja-a-002"
-
 ##### **Protocolo de Penetração Comportamental**
 Para missões de segurança, simular cenários reais:
 1. **Usuário Legítimo**: `att-loja-a-001` lista suas propostas → Deve ver apenas as suas
@@ -169,7 +156,7 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **3. Justificativa Estratégica (O "Porquê"):** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
 
-**4. Critério de Ativação de Pesquisa (O Princípio da Necessidade):** A sua capacidade de pesquisa é um recurso de alto custo e deve ser usada de forma cirúrgica.
+**4. Critério de Ativação de Pesquisa (O Princípio da Necessidade): A sua capacidade de pesquisa é um recurso de alto custo e deve ser usada de forma cirúrgica.
 
 - **Você NÃO deve iniciar uma pesquisa na web se:**
   - A resposta já estiver contida de forma explícita no `Pacote de Ativação de Missão (PAM)` ou no seu conhecimento pré-existente sobre o projeto.
@@ -185,8 +172,7 @@ Error handling: Create structured documentation for automatic consultation durin
 Simpix is a full-stack TypeScript application built on a modular monolith architecture, emphasizing domain-driven design and banking-grade security.
 
 **Core Decisions & Patterns:**
-- **Architecture Pattern**: Modular monolith with domain-based decomposition.
-- **Domain-Driven Design (DDD)**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
+- **Architecture Pattern**: Modular monolith with domain-based decomposition and Domain-Driven Design (DDD) principles.
 - **Security**: Banking-grade features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
 - **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
 - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation.
