@@ -74,8 +74,7 @@ export async function createApp() {
       app.use(strictCSP);
       log('🔒 [SECURITY] Enhanced security headers and strict CSP activated');
     } else {
-      // Development mode uses basic helmet CSP only (more permissive for Vite/React)
-      log('🔧 [DEV] Using basic CSP configuration optimized for Vite development');
+      log('🔧 [DEV] CSP temporarily disabled for React debugging');
     }
   }
 

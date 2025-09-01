@@ -43,7 +43,7 @@ export class StrictCSP {
 
         // Script source - different policies for dev vs prod
         isDevelopment
-          ? `script-src 'self' 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline' localhost:* 127.0.0.1:* ws: wss:`
+          ? `script-src 'self' 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline' localhost:* 127.0.0.1:* ws: wss: https: data: blob:`
           : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
 
         // Object source - block all objects (Flash, Java, etc.)
@@ -72,11 +72,11 @@ export class StrictCSP {
 
         // Connect source - API calls and WebSocket connections (includes Sentry)
         isDevelopment
-          ? "connect-src 'self' ws: wss: localhost:* 127.0.0.1:* https: *.ingest.us.sentry.io"
+          ? "connect-src 'self' ws: wss: localhost:* 127.0.0.1:* https: *.ingest.us.sentry.io data: blob:"
           : "connect-src 'self' ws: wss: *.ingest.us.sentry.io",
 
-        // Worker source - web workers and service workers
-        "worker-src 'self' blob:",
+        // Worker source - web workers and service workers (including Sentry)
+        "worker-src 'self' blob: data:",
 
         // Child source - frames and workers
         "child-src 'self' blob:",
