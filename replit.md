@@ -187,7 +187,7 @@ Simpix is a full-stack TypeScript application built on a modular monolith archit
 **Core Decisions & Patterns:**
 - **Architecture Pattern**: Modular monolith with domain-based decomposition.
 - **Domain-Driven Design (DDD)**: Full DDD implementation with Value Objects, aggregate roots, and defined domain boundaries.
-- **Security**: Banking-grade security features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+- **Security**: Banking-grade features including JWTs, custom RBAC, two-tier rate limiting, input sanitization, timing attack protection, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
 - **Credit Simulation**: API for dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
 - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and a dual-storage strategy.

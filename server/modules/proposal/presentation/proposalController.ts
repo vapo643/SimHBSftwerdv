@@ -44,30 +44,83 @@ export class ProposalController {
       console.log('[DEBUG] CPF raw:', req.body.cpf, typeof req.body.cpf);
       console.log('[DEBUG] nomeCompleto raw:', req.body.nomeCompleto, typeof req.body.nomeCompleto);
 
-      // Mapear body da requisição para DTO do caso de uso
+      // LACRE DE OURO: Mapeamento COMPLETO de todos os campos enviados pelo frontend
       const dto = {
-        clienteNome: req.body.nomeCompleto || req.body.clienteNome,
-        clienteCpf: req.body.cpf || req.body.clienteCpf,
+        // ===== DADOS BÁSICOS DO CLIENTE =====
+        clienteNome: req.body.clienteNome,
+        clienteCpf: req.body.clienteCpf,
+        tipoPessoa: req.body.tipoPessoa,
+        clienteRazaoSocial: req.body.clienteRazaoSocial,
+        clienteCnpj: req.body.clienteCnpj,
+        
+        // ===== DOCUMENTAÇÃO COMPLETA (RG) =====
         clienteRg: req.body.clienteRg,
-        clienteEmail: req.body.email || req.body.clienteEmail,
-        clienteTelefone: req.body.telefone || req.body.clienteTelefone,
-        clienteEndereco: req.body.clienteEndereco,
-        clienteCidade: req.body.clienteCidade,
-        clienteEstado: req.body.clienteEstado || req.body.clienteUf,
-        clienteCep: req.body.clienteCep,
+        clienteOrgaoEmissor: req.body.clienteOrgaoEmissor,
+        clienteRgUf: req.body.clienteRgUf,
+        clienteRgDataEmissao: req.body.clienteRgDataEmissao,
+        
+        // ===== DADOS PESSOAIS =====
+        clienteEmail: req.body.clienteEmail,
+        clienteTelefone: req.body.clienteTelefone,
         clienteDataNascimento: req.body.clienteDataNascimento,
-        clienteRendaMensal: req.body.clienteRenda ? parseFloat(req.body.clienteRenda) : undefined,
-        clienteEmpregador: req.body.clienteEmpregador || req.body.clienteEmpresaNome,
-        clienteTempoEmprego: req.body.clienteTempoEmprego,
-        clienteDividasExistentes: req.body.clienteDividasExistentes
-          ? parseFloat(req.body.clienteDividasExistentes)
-          : undefined,
-        valor: parseFloat(req.body.valorSolicitado || req.body.valor),
+        clienteLocalNascimento: req.body.clienteLocalNascimento,
+        clienteEstadoCivil: req.body.clienteEstadoCivil,
+        clienteNacionalidade: req.body.clienteNacionalidade,
+        
+        // ===== ENDEREÇO DETALHADO =====
+        clienteCep: req.body.clienteCep,
+        clienteLogradouro: req.body.clienteLogradouro,
+        clienteNumero: req.body.clienteNumero,
+        clienteComplemento: req.body.clienteComplemento,
+        clienteBairro: req.body.clienteBairro,
+        clienteCidade: req.body.clienteCidade,
+        clienteUf: req.body.clienteUf,
+        clienteEndereco: req.body.clienteEndereco, // Campo concatenado
+        
+        // ===== DADOS PROFISSIONAIS =====
+        clienteOcupacao: req.body.clienteOcupacao,
+        clienteRenda: req.body.clienteRenda ? parseFloat(req.body.clienteRenda) : undefined,
+        clienteTelefoneEmpresa: req.body.clienteTelefoneEmpresa,
+        
+        // ===== DADOS DE PAGAMENTO =====
+        metodoPagamento: req.body.metodoPagamento,
+        dadosPagamentoBanco: req.body.dadosPagamentoBanco,
+        dadosPagamentoAgencia: req.body.dadosPagamentoAgencia,
+        dadosPagamentoConta: req.body.dadosPagamentoConta,
+        dadosPagamentoDigito: req.body.dadosPagamentoDigito,
+        dadosPagamentoPix: req.body.dadosPagamentoPix,
+        dadosPagamentoTipoPix: req.body.dadosPagamentoTipoPix,
+        dadosPagamentoPixBanco: req.body.dadosPagamentoPixBanco,
+        dadosPagamentoPixNomeTitular: req.body.dadosPagamentoPixNomeTitular,
+        dadosPagamentoPixCpfTitular: req.body.dadosPagamentoPixCpfTitular,
+        
+        // ===== DADOS DO EMPRÉSTIMO =====
+        valor: parseFloat(req.body.valor),
         prazo: parseInt(req.body.prazo),
-        taxaJuros: parseFloat(req.body.taxaJuros || '2.5'),
-        produtoId: req.body.produto_id || req.body.produtoId || 1,
-        lojaId: (req as any).user?.lojaId || 1,
+        taxaJuros: req.body.taxaJuros ? parseFloat(req.body.taxaJuros) : 2.5,
+        produtoId: req.body.produtoId,
+        tabelaComercialId: req.body.tabelaComercialId,
+        
+        // ===== VALORES CALCULADOS =====
+        valorTac: req.body.valorTac ? parseFloat(req.body.valorTac) : undefined,
+        valorIof: req.body.valorIof ? parseFloat(req.body.valorIof) : undefined,
+        valorTotalFinanciado: req.body.valorTotalFinanciado ? parseFloat(req.body.valorTotalFinanciado) : undefined,
+        
+        // ===== CONDIÇÕES ESPECIAIS =====
+        dataCarencia: req.body.dataCarencia,
+        incluirTac: req.body.incluirTac,
+        
+        // ===== ADMINISTRATIVO =====
+        lojaId: req.body.lojaId || (req as any).user?.lojaId || 1,
         atendenteId: req.body.atendenteId || (req as any).user?.id,
+        finalidade: req.body.finalidade,
+        garantia: req.body.garantia,
+        formaLiberacao: req.body.formaLiberacao,
+        formaPagamento: req.body.formaPagamento,
+        pracaPagamento: req.body.pracaPagamento,
+        
+        // ===== REFERÊNCIAS PESSOAIS =====
+        referenciaPessoal: req.body.referenciaPessoal,
       };
 
       console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));

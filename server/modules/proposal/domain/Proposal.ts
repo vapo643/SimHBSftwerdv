@@ -9,32 +9,73 @@ import { v4 as uuidv4 } from 'uuid';
 import { DomainException } from '../../shared/domain/DomainException';
 import { CPF, Money, Email, PhoneNumber, CEP } from '@shared/value-objects';
 
-// Value Objects
+// Value Objects - LACRE DE OURO: Interface expandida para todos os campos
 export interface ClienteData {
+  // Dados básicos
   nome: string;
   cpf: CPF;
+  tipoPessoa?: string;
+  razaoSocial?: string;
+  cnpj?: string;
+  
+  // Documentação RG completa
   rg?: string;
+  orgaoEmissor?: string;
+  rgUf?: string;
+  rgDataEmissao?: string;
+  
+  // Dados pessoais
   email?: Email;
   telefone?: PhoneNumber;
-  endereco?: string;
-  cidade?: string;
-  estado?: string;
+  dataNascimento?: string;
+  localNascimento?: string;
+  estadoCivil?: string;
+  nacionalidade?: string;
+  
+  // Endereço detalhado
   cep?: CEP;
-  data_nascimento?: string;
-  renda_mensal?: Money;
-  empregador?: string;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
+  endereco?: string; // Campo concatenado para compatibilidade
+  
+  // Dados profissionais
+  ocupacao?: string;
+  rendaMensal?: Money;
+  telefoneEmpresa?: string;
+  
+  // Compatibilidade com campos antigos
+  data_nascimento?: string; // Alias para dataNascimento
+  estado?: string; // Alias para uf
+  renda_mensal?: Money; // Alias para rendaMensal
+  empregador?: string; // Campo empresaNome
   tempo_emprego?: string;
   dividas_existentes?: Money;
 }
 
 export interface DadosPagamento {
-  metodo: 'boleto' | 'pix' | 'transferencia';
+  metodo: 'boleto' | 'pix' | 'transferencia' | 'conta_bancaria';
+  
+  // Dados bancários
   banco?: string;
   agencia?: string;
   conta?: string;
+  digito?: string;
   tipo_conta?: string;
-  pix_chave?: string;
-  pix_tipo?: string;
+  
+  // Dados PIX
+  pixChave?: string;
+  pixTipo?: string;
+  pixBanco?: string;
+  pixNomeTitular?: string;
+  pixCpfTitular?: string;
+  
+  // Compatibilidade com campos antigos
+  pix_chave?: string; // Alias para pixChave
+  pix_tipo?: string; // Alias para pixTipo
 }
 
 // Domain Events
