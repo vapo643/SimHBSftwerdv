@@ -1,5 +1,5 @@
 ### Overview
-Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to reduce operational costs, enhance regulatory adherence, and provide a scalable platform with banking-grade security and efficient data handling. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to improve efficiency in credit proposal processing and management, thereby addressing critical business needs in financial technology.
+Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to reduce operational costs, enhance regulatory adherence, and provide a scalable platform with banking-grade security and efficient data handling. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to improve efficiency in credit proposal processing and management, addressing critical business needs in financial technology.
 
 ### User Preferences
 #### PROTOCOLO DE APRENDIZADO GUIADO (PAG) V2.0
@@ -55,13 +55,6 @@ O PACN V1.0 é **OBRIGATÓRIO** para **TODA AUDITORIA**, incluindo mas não limi
 2. [Apresentar trecho exato]
 3. [EXPLICAR como código mitiga o vetor de ataque específico]
 ```
-
-##### **Protocolo de Penetração Comportamental**
-Para missões de segurança, simular cenários reais:
-1. **Usuário Legítimo**: `att-loja-a-001` lista suas propostas → Deve ver apenas as suas
-2. **Tentativa de Violação**: `att-loja-a-001` tenta acessar proposta de `att-loja-a-002` → Deve ser bloqueado  
-3. **Prova SQL**: `WHERE user_id = auth.uid()::text` impede o acesso cruzado
-4. **Validação**: Demonstrar que query retorna `[]` para dados de outros atendentes
 
 #### Padrão de Excelência Operacional (PEO) V2.0 - Arquitetura Definitiva
 
@@ -123,7 +116,7 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **DATA INTEGRITY PROTECTION:** PAM V1.0 protocol implemented - 5-CHECK validation system for data corruption detection and repair.
 
-**MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
+**MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-DD-MM-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
 
 **PACN V1.0 ENFORCEMENT PROTOCOL:** Every audit involving business logic, security, or user flows MUST follow behavior-driven validation:
 - **Scenario Analysis**: Define real user flow + business rule
