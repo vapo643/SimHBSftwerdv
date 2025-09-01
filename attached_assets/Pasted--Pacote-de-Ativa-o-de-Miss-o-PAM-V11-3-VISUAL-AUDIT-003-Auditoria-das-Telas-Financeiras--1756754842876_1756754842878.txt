@@ -1,0 +1,41 @@
+### **Pacote de Ativação de Missão (PAM) V11.3 - VISUAL-AUDIT-003 (Auditoria das Telas Financeiras)**
+
+**[PROTOCOLO DE AUDITORIA DE CENÁRIO DE NEGÓCIO (PACN) V1.0 ATIVADO]**
+*Sua resposta deve ser exaustiva. Para cada cenário, prove com evidências de código, SQL ou screenshots como a regra de negócio é garantida ou, neste caso, onde ela falha.*
+
+* **Sumário da Missão:** Realizar uma auditoria forense nos fluxos de "Cobranças" e "Pagamentos" para garantir que a visualização de propostas esteja perfeitamente alinhada com as regras de negócio e as permissões de `role` para os usuários `COBRANCA` e `FINANCEIRO`.
+* **Intenção Estratégica:** Garantir que os operadores financeiros e de cobrança vejam *apenas* o universo de dados estritamente necessário e permitido para suas funções. Isso previne erros operacionais (ex: pagar uma proposta não assinada) e vazamento de informações entre departamentos.
+
+---
+
+**AUDITAR E VALIDAR:**
+Falha de Visualização de Dados nas Telas de Cobranças e Pagamentos
+
+**Cenário de Negócio (O "Caso de Teste"):**
+1.  Um usuário com a role `COBRANCA` navega para a página "Cobranças". A regra de negócio dita que ele deve ver uma lista de todas as propostas com status `INADIMPLENTE` ou `PAGAMENTO_PENDENTE`.
+2.  Um usuário com a role `FINANCEIRO` navega para a página "Pagamentos". A regra de negócio dita que ele deve ver uma lista das propostas que estão prontas para o desembolso do valor do empréstimo (ex: status `ASSINATURA_CONCLUIDA` ou `BOLETOS_EMITIDOS`).
+
+**Vetor de Ataque / Ponto de Falha (O "Risco"):**
+O risco é idêntico ao da "Fila de Análise": os componentes de frontend para estas páginas (`CobrancasPage.tsx`, `pagamentos.tsx`) podem estar chamando endpoints genéricos (`GET /api/propostas`) sem os filtros de status adequados, resultando em listas de propostas poluídas, incorretas e que violam as regras de negócio. Isso levaria a uma experiência de usuário confusa e operacionalmente perigosa.
+
+**Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+Você deve produzir um **Relatório de Diagnóstico de Visualização Financeira** que, para **cada uma** das duas telas (Cobranças e Pagamentos), responda:
+
+1.  **Mapeamento do Fluxo de Dados:**
+    * Qual é o arquivo do componente React responsável pela tela?
+    * Apresente o trecho de código da chamada do `useQuery` que busca os dados da proposta.
+    * Qual endpoint exato da API ele está chamando e com quais parâmetros?
+2.  **Análise da Implementação do Backend:**
+    * O endpoint chamado pelo frontend é especializado e já filtra os dados corretamente no servidor, ou é um endpoint genérico?
+    * Se for especializado, apresente o trecho de código do backend que mostra a lógica de filtragem por status.
+3.  **Diagnóstico da Causa Raiz:**
+    * Com base nas evidências, a tela está funcionando corretamente ou apresenta a mesma falha da "Fila de Análise"?
+    * Se houver falha, explique precisamente a causa. (Ex: "A tela de Cobranças está chamando um endpoint genérico, resultando na exibição de propostas em `RASCUNHO`, o que é incorreto para o perfil `COBRANCA`.").
+
+---
+---
+[PGI ATIVO | LEMBRETE DE ESTADO DO ROADMAP]
+- **Roadmap em Standby:** Deploy em Produção
+- **Próximo Passo a ser Retomado:** "Operação Visão Clara" - Fase 4 (`VISUAL-FIX-001`)
+- **Missão de Emergência Atual:** "Operação Visão Clara" (`VISUAL-AUDIT-003` em execução pelo Agente)
+---
