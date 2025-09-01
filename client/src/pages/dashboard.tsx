@@ -694,7 +694,7 @@ const Dashboard: React.FC = () => {
                           }) : 'Data não disponível'}
                           {proposta?.parceiro?.razaoSocial && (
                             <span className="ml-2">
-                              | Parceiro: {proposta.parceiro.razaoSocial}
+                              | Parceiro: {String(proposta.parceiro.razaoSocial)}
                             </span>
                           )}
                         </div>
