@@ -1,0 +1,53 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O diagnóstico está completo. A sua missão agora é traduzir as descobertas forenses num plano de batalha tático. Atuando como arquiteto de correção, você deve projetar um roadmap de implementação que seja eficiente, de baixo risco e que resolva as causas raiz dos problemas identificados.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa na web está **autorizada** para encontrar as implementações canónicas de mocks para o Drizzle ORM (especificamente para `innerJoin`) e as melhores práticas para o tratamento de erros assíncronos em testes `vitest`.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ESTABILIZAÇÃO CRÍTICA (FASE 2.2 - ARQUITETURA DA CORREÇÃO)**
+
+* **Sumário da Missão (O Quê):** Arquitetar um plano de implementação detalhado e priorizado para corrigir as três falhas críticas da suíte de testes, com base no relatório de diagnóstico `FASE_2_TEST_FAILURES_ROOT_CAUSE_ANALYSIS.md`.
+* **Intenção Estratégica (O Porquê):** O objetivo é criar uma "ordem de operações" que maximize o impacto e minimize o risco. Ao corrigir os problemas na sequência correta, evitamos trabalho duplicado e garantimos que cada correção seja construída sobre uma base estável. Este plano garantirá uma fase de implementação rápida e eficaz.
+* **Histórico Relevante (Consulta Obrigatória):** A sua única fonte da verdade para esta missão é o relatório `docs/diagnostics/FASE_2_TEST_FAILURES_ROOT_CAUSE_ANALYSIS.md`. O seu plano deve alavancar a descoberta estratégica de que a correção do Vetor 2 impacta diretamente o Vetor 3.
+* **Modelo Mental (Como se Encaixa):** Você é o líder técnico a preparar os tickets para a sprint de correção. Cada item no seu plano de implementação deve ser claro, conciso e conter um "Definition of Done" (Definição de Pronto) verificável.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** O mock do Drizzle ORM pode ser complexo, exigindo um conhecimento profundo da biblioteca para simular `innerJoin` corretamente.
+    * **Contramedida:** O plano deve incluir um passo para criar um teste de unidade isolado apenas para o mock do banco de dados, garantindo que ele funcione como esperado antes de ser integrado nos testes de API existentes.
+
+---
+
+### **PLANEJAR E ARQUITETAR:**
+Roadmap de Implementação para a Remediação da Suíte de Testes.
+
+**CURRENT STATE:**
+O relatório de diagnóstico confirmou três falhas críticas: um mock incompleto do Drizzle (`innerJoin`), um `req.body` indefinido devido a um teste mal configurado, e uma rejeição de promessa não tratada como consequência do segundo erro.
+
+**EXPECTED (Estado Final de Sucesso):**
+A geração de um novo documento Markdown em `docs/missions/ROADMAP_FASE_2_TEST_FIXES.md`. Este documento deve conter um roadmap de implementação priorizado, com 3 missões claras. Para cada missão, o plano deve incluir:
+1.  **Prioridade:** (P0, P1, P2)
+2.  **Arquivo(s) Alvo:** Os arquivos exatos a serem modificados.
+3.  **Plano de Ação Técnico:** As etapas detalhadas da correção.
+4.  **Prova de Sucesso:** O comando de validação específico (ex: um único teste a ser executado) para provar que a correção foi bem-sucedida.
+
+**CONSTRAINTS (Roadmap de Planeamento):**
+
+1.  **Priorização Estratégica:** O seu roadmap deve seguir a ordem de prioridade ditada pela análise de interdependência:
+    * **P0 (Bloqueador Principal):** Correção do `Destructuring Error` (Vetor de Ataque 2).
+    * **P1 (Dependente):** Correção do `Unhandled Rejection` (Vetor de Ataque 3).
+    * **P2 (Isolado):** Correção do `Erro 500 em Tabelas Comerciais` (Vetor de Ataque 1).
+
+2.  **Detalhe da Missão P0 (Vetor 2):**
+    * **Plano de Ação:** Deve instruir a modificar o teste em `timing-attack-mitigation.test.ts` para enviar um `body` válido na requisição `PUT` para `/api/propostas/:id/status`, satisfazendo a expectativa do endpoint.
+    * **Prova de Sucesso:** A execução do teste específico deve agora passar, ou falhar por outra razão que não `req.body is undefined`.
+
+3.  **Detalhe da Missão P1 (Vetor 3):**
+    * **Plano de Ação:** Deve instruir a refatorar o teste em `timing-attack-mitigation.test.ts` para usar `async/await` dentro de um bloco `try/catch`, permitindo asserções corretas sobre o comportamento esperado (seja sucesso ou uma falha controlada).
+    * **Prova de Sucesso:** A execução de `npx vitest run tests/timing-attack-mitigation.test.ts` deve passar sem `unhandled rejections`.
+
+4.  **Detalhe da Missão P2 (Vetor 1):**
+    * **Plano de Ação:** Deve instruir a pesquisar e implementar uma solução de mock para o Drizzle ORM que suporte `innerJoin`. O plano deve sugerir a modificação do helper de banco de dados de teste (`tests/lib/db-helper.ts`) para incluir este mock.
+    * **Prova de Sucesso:** A execução de `npx vitest run tests/routes/tabelasComerciais.test.ts` deve resultar num status `200 OK`.
