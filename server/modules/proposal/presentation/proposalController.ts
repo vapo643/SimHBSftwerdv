@@ -121,6 +121,9 @@ export class ProposalController {
         
         // ===== REFERÊNCIAS PESSOAIS =====
         referenciaPessoal: req.body.referenciaPessoal,
+        
+        // ===== CONTROLE DE FLUXO =====
+        submitForAnalysis: req.body.submitForAnalysis || false, // Padrão: false (criar como rascunho)
       };
 
       console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));

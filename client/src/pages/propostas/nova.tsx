@@ -152,6 +152,9 @@ function ProposalForm() {
         lojaId: state.context?.atendente?.loja?.id,
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
+        
+        // 🎯 CORREÇÃO: Enviar direto para análise em vez de rascunho
+        submitForAnalysis: true,
 
         // ===== CAMPOS OPCIONAIS PARA CCB =====
         // Estes podem ser preenchidos posteriormente ou com valores padrão

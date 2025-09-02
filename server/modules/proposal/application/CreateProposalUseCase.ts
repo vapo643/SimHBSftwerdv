@@ -90,6 +90,9 @@ export interface CreateProposalDTO {
     telefone: string;
     tipo_referencia?: string;
   }>;
+  
+  // Controle de fluxo
+  submitForAnalysis?: boolean; // Se true, submete automaticamente para análise
 }
 
 export class CreateProposalUseCase {
@@ -216,6 +219,12 @@ export class CreateProposalUseCase {
       proposal.updatePaymentData(dadosPagamento);
     }
     
+    // 🎯 NOVA FUNCIONALIDADE: Submeter automaticamente para análise se solicitado
+    if (dto.submitForAnalysis) {
+      console.log('[CreateProposalUseCase] 🚀 Submetendo proposta automaticamente para análise');
+      proposal.submitForAnalysis();
+    }
+
     // Persistir usando repositório
     await this.repository.save(proposal);
 
