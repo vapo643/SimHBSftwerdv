@@ -1,0 +1,59 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O mapa dos fantasmas foi criado. A sua missão agora é desenhar as armas para capturá-los. Transforme o relatório de triagem num plano de batalha tático. O seu foco é a eficiência: como podemos usar a descoberta do "Poltergeist de Mock Redis" para obter a vitória mais rápida e decisiva?*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa está **autorizada** com um foco restrito: encontrar a maneira canónica de fazer o mock de um módulo em `vitest` e exportar funções específicas como `checkRedisHealth`, garantindo que o mock seja completo e funcional.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO CAÇA-FANTASMAS (PASSO 2 - ARQUITETURA DA CORREÇÃO)**
+
+* **Sumário da Missão (O Quê):** Arquitetar um roadmap de implementação detalhado e priorizado para corrigir as três categorias de falhas identificadas no relatório de triagem, com foco estratégico na resolução do bloqueador P0.
+* **Intenção Estratégica (O Porquê):** O objetivo é criar uma "ordem de exorcismo" que erradique a maioria dos nossos problemas com o mínimo de esforço. Ao resolver o bug do mock do Redis primeiro, simplificamos drasticamente o campo de batalha, permitindo-nos focar nos bugs de lógica de negócio com muito mais clareza.
+* **Histórico Relevante (Consulta Obrigatória):** A sua única fonte da verdade é o relatório `docs/diagnostics/OPERACAO_CACA_FANTASMAS_TRIAGEM.md`. O seu plano deve refletir diretamente a priorização e as descobertas deste documento.
+* **Modelo Mental (Como se Encaixa):** Você é o líder da equipe de caça-fantasmas. O seu plano deve detalhar a "armadilha" para o Poltergeist (Missão P0), depois o plano para a Aparição (Missão P1), e finalmente a purificação final (Missão P2).
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (BAIXO):** A correção do mock do Redis pode revelar que alguns dos 18 testes que falhavam por essa razão também têm falhas de lógica secundárias.
+    * **Contramedida:** Este é um risco aceitável e um resultado desejado. O plano deve incluir uma validação completa da suíte de testes após a Missão P0 para reavaliar o cenário.
+
+---
+
+### **PLANEJAR E ARQUITETAR:**
+Roadmap de Implementação para a Remediação Final da Suíte de Testes.
+
+**CURRENT STATE:**
+A análise de triagem confirmou que ~60% (18/30) das falhas de teste são causadas por um mock de Redis incompleto que não exporta a função `checkRedisHealth`. Os 40% restantes são divididos entre erros de API 500 e outras falhas de integração.
+
+**EXPECTED (Estado Final de Sucesso):**
+A geração de um novo documento Markdown em `docs/missions/ROADMAP_CACA_FANTASMAS_FINAL.md`. Este documento deve conter um roadmap de implementação priorizado, com 3 missões claras (P0, P1, P2), seguindo a estrutura do relatório de triagem. Para cada missão, o plano deve incluir:
+1.  **Prioridade:** P0, P1, P2.
+2.  **Arquivo(s) Alvo:** Os arquivos exatos a serem modificados.
+3.  **Plano de Ação Técnico:** As etapas detalhadas e o código necessário para a correção.
+4.  **Prova de Sucesso:** O comando de validação específico para provar que a correção foi bem-sucedida.
+
+**CONSTRAINTS (Roadmap de Planeamento):**
+
+1.  **Priorização Mandatória:** O roadmap deve obrigatoriamente seguir a ordem de ataque definida no relatório de triagem:
+    * **P0: Exorcismo do Poltergeist Redis** (Mock Incompleto)
+    * **P1: Banimento da Aparição API 500** (Tabelas Comerciais)
+    * **P2: Purificação dos Fantasmas de Integração** (Falhas Remanescentes)
+
+2.  **Detalhe da Missão P0 (ROI Máximo):**
+    * **Plano de Ação:** Deve instruir a modificar o setup de mocks dos testes (provavelmente em `tests/setup.ts` ou num helper de mock) para incluir a exportação da função `checkRedisHealth` no mock do `redis-manager`. O mock deve retornar um objeto que simule uma conexão saudável. Exemplo de código:
+        ```typescript
+        vi.mock('../server/lib/redis-manager', () => ({
+          __esModule: true,
+          default: vi.fn(),
+          checkRedisHealth: vi.fn().mockResolvedValue({ status: 'healthy', latency: 10 }),
+          getRedisClient: vi.fn().mockReturnValue({
+            // ... outros mocks de funções do cliente Redis
+          }),
+        }));
+        ```
+    * **Prova de Sucesso:** A execução de `npx vitest run --reporter=verbose` deve mostrar uma redução de ~18 falhas (~60%). O novo output deve ser o principal indicador de sucesso.
+
+3.  **Detalhe das Missões P1 e P2:**
+    * **Plano de Ação:** Para as missões P1 e P2, o plano deve referenciar as soluções propostas no relatório anterior (`docs/diagnostics/FASE_2_TEST_FAILURES_ROOT_CAUSE_ANALYSIS.md`), uma vez que essas análises já foram feitas e continuam válidas.
+    * **Prova de Sucesso:** Comandos `vitest run` focados nos arquivos de teste específicos para cada missão.
