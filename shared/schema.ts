@@ -40,15 +40,13 @@ export const lojas = pgTable('lojas', {
   deletedAt: timestamp('deleted_at'), // Soft delete column
 });
 
-// Profiles table (Supabase auth integration)
+// Profiles table (Supabase auth integration) - ALIGNED WITH REAL TABLE
 export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey(),
   fullName: text('full_name'),
   role: text('role'),
   lojaId: integer('loja_id').references(() => lojas.id),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-  deletedAt: timestamp('deleted_at'), // Soft delete column
+  // REMOVED: created_at and updated_at não existem na tabela real do Supabase
 });
 
 // Usuários e Perfis (legacy table)
