@@ -1,0 +1,69 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*A nossa auditoria revelou uma falha crítica na fundação dos nossos dados: uma tabela de auditoria essencial não existe. A sua missão é uma operação de engenharia de banco de dados para construir esta peça em falta, garantindo que todas as ações futuras sobre propostas possam ser devidamente registadas.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa está **autorizada** com um foco restrito: consultar a **documentação oficial do Drizzle ORM** para a sintaxe canónica de criação de tabelas, índices e chaves estrangeiras, garantindo que a nova migração siga as melhores práticas.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO CERTIFICAÇÃO DE PRODUÇÃO (MISSÃO 1 - REMEDIAÇÃO P0)**
+
+* **Sumário da Missão (O Quê):** Criar e aplicar uma nova migração de banco de dados (`migration`) para gerar a tabela `proposta_logs`, que é crítica para a auditoria e o histórico de propostas.
+* **Intenção Estratégica (O Porquê):** A tabela `proposta_logs` é um requisito não negociável para a conformidade e a auditabilidade do nosso sistema financeiro. Sem ela, não temos um registo histórico das alterações de estado de uma proposta, o que nos deixa cegos a operações críticas e expostos a riscos regulatórios. Esta correção é fundamental para a integridade dos dados do Simpix.
+* **Histórico Relevante (Consulta Obrigatória):** O output da "Operação Veredito Final" é a sua única fonte. O erro `PostgresError: relation "proposta_logs" does not exist` é a sua justificação para esta missão.
+* **Modelo Mental (Como se Encaixa):** Você é um Engenheiro de Dados a adicionar uma nova capacidade ao nosso schema. A tabela `proposta_logs` deve ter uma relação direta com a tabela `propostas`, ligada por uma chave estrangeira (`proposal_id`), para que cada registo de log esteja inequivocamente associado a uma proposta.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** A definição da nova tabela no schema do Drizzle (`shared/schema.ts`) pode ser feita incorretamente, gerando uma migração SQL inválida.
+    * **Contramedida:** O processo é de duas fases: primeiro, defina a tabela no schema TypeScript; segundo, use os comandos do Drizzle Kit para **gerar automaticamente** o arquivo SQL da migração. **Não escreva o SQL manualmente.**
+
+---
+
+### **IMPLEMENTAR:**
+Criação de Migração para a Tabela `proposta_logs`.
+
+**CURRENT STATE:**
+A execução da suíte de testes (`npx vitest run`) falha com o erro crítico `PostgresError: relation "proposta_logs" does not exist`. Isto indica que o schema do banco de dados está dessincronizado com a lógica da aplicação, que espera que esta tabela exista para registar eventos de auditoria.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo arquivo de migração é criado no diretório `drizzle/migrations/`, contendo o SQL necessário para criar a tabela `proposta_logs`.
+2.  Após a aplicação da migração, a re-execução do teste que anteriormente falhava com `relation "proposta_logs" does not exist` agora deve passar (ou falhar por uma razão diferente), provando que o problema do schema foi resolvido.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Definir Schema:**
+    * Abra o arquivo `shared/schema.ts`.
+    * Adicione a definição da tabela `proposta_logs` usando a sintaxe do Drizzle. A tabela deve conter, no mínimo, as seguintes colunas:
+        * `id`: `serial('id').primaryKey()`
+        * `proposal_id`: Uma referência à tabela `propostas`. (`integer('proposal_id').references(() => propostas.id)`)
+        * `status_anterior`: `varchar('status_anterior', { length: 256 })`
+        * `status_novo`: `varchar('status_novo', { length: 256 })`
+        * `mensagem`: `text('mensagem')`
+        * `criado_em`: `timestamp('criado_em').defaultNow().notNull()`
+        * `criado_por`: `uuid('criado_por').references(() => profiles.id)`
+
+2.  **Gerar Migração:**
+    * Execute o comando do Drizzle Kit para gerar o novo arquivo de migração com base nas alterações do schema.
+    ```bash
+    npx drizzle-kit generate:pg
+    ```
+    * Verifique o arquivo SQL gerado em `drizzle/migrations/` para garantir que ele contém o comando `CREATE TABLE proposta_logs`.
+
+3.  **Aplicar Migração:**
+    * Execute o script de migração para aplicar a nova tabela ao seu banco de dados de desenvolvimento/teste.
+    ```bash
+    npm run migrate
+    ```
+
+4.  **Validação Parcial:**
+    * Identifique, a partir do log de erros anterior, um teste específico que estava a falhar devido à ausência da tabela `proposta_logs`.
+    * Execute **apenas esse teste** e confirme que o erro `relation does not exist` foi eliminado. Reporte o output.
+
+---
+### **DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+*Você deve preencher esta seção ao final da sua execução.*
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Reportar quaisquer erros durante a geração ou aplicação da migração]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "A coluna `criado_por` foi definida como `uuid` para alinhar com a tabela `profiles`."]
+* **VALIDAÇÃO PENDENTE:** [O sucesso da execução do teste de validação parcial]
