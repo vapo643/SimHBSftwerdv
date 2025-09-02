@@ -1,0 +1,49 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*Todas as missões de remediação foram concluídas com sucesso. A sua missão final é conduzir a auditoria de certificação que nos dará o veredito definitivo: **GO ou NO-GO** para o deploy. Você é o auditor final. A sua lealdade é para com a verdade irrefutável dos dados.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - DESATIVADA**
+*A pesquisa está **proibida**. A execução dos comandos de validação é a sua única função.*
+
+---
+### **Pacote de Ativação de Missão: VEREDITO FINAL DE DEPLOY (QUARTA EXECUÇÃO)**
+
+* **Sumário da Missão (O Quê):** Executar a auditoria de certificação final e definitiva do sistema Simpix para gerar o relatório de prontidão para produção.
+* **Intenção Estratégica (O Porquê):** O objetivo é obter a "fotografia" final e inalterada do estado de saúde do sistema. Este relatório consolidará todas as provas de qualidade (ou a falta dela) e será a única base para a decisão de deploy.
+* **Histórico Relevante (Consulta Obrigatória):** A "Operação Caça-Fantasmas" erradicou com sucesso os bloqueadores P0, P1 e P2. A expectativa é de um resultado drasticamente melhorado, com a maioria dos testes agora a passar.
+* **Modelo Mental (Como se Encaixa):** Você é o auditor a realizar a inspeção final. A sua tarefa é executar os testes e apresentar os factos brutos.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** A suíte de testes ainda pode conter falhas.
+    * **Contramedida:** Este é o propósito da auditoria. O seu relatório detalhado sobre as falhas restantes será o nosso backlog inicial de débito técnico pós-deploy, se a decisão for "GO".
+
+---
+
+### **EXECUTAR E VALIDAR:**
+Auditoria de Certificação de Produção Definitiva.
+
+**CURRENT STATE:**
+O sistema foi estabilizado através de múltiplas operações de remediação. A infraestrutura (Redis, DB Schema, Test Framework) está sólida, e os bugs mais críticos da aplicação foram corrigidos e validados. O sistema está no seu estado mais robusto até à data.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório consolidado contendo o output **completo e bruto** dos seguintes eixos de validação, que servirá como o documento final para a decisão de deploy.
+
+**CONSTRAINTS (Roadmap de Execução da Validação):**
+
+1.  **Eixo I: Sanidade da Base de Código**
+    * **Comando:** `get_latest_lsp_diagnostics`
+
+2.  **Eixo II: Conformidade da Arquitetura**
+    * **Comando:** `sh scripts/validate-redis-refactor.sh`
+
+3.  **Eixo III: Validação da Lógica de Negócio (Suíte de Testes)**
+    * **Comando:** `npx vitest run --reporter=verbose`
+
+---
+### **DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+*Você deve preencher esta seção ao final da sua execução, incluindo a sua recomendação final de GO ou NO-GO.*
+* **CONFIANÇA NA VALIDAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Listar as categorias de falhas de teste remanescentes e a sua severidade (Crítica, Alta, Média, Baixa)]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [N/A]
+* **VEREDITO FINAL (GO / NO-GO):** [Com base nos dados, forneça a sua recomendação final]
