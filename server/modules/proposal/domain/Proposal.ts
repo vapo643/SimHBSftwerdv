@@ -9,6 +9,39 @@ import { v4 as uuidv4 } from 'uuid';
 import { DomainException } from '../../shared/domain/DomainException';
 import { CPF, Money, Email, PhoneNumber, CEP } from '@shared/value-objects';
 
+// DTO para criação da Proposta - Todos os 14 campos críticos obrigatórios
+export interface ProposalCreationProps {
+  // Relacionamentos críticos
+  produtoId: number;
+  tabelaComercialId: number;
+  lojaId: number;
+  analistaId: string;
+  
+  // Dados do cliente (obrigatórios)
+  clienteNome: string;
+  clienteCpf: string;
+  
+  // Valores financeiros calculados
+  valor: number;
+  prazo: number;
+  valorTac: number;
+  valorIof: number;
+  valorTotalFinanciado: number;
+  taxaJuros: number;
+  taxaJurosAnual: number;
+  
+  // Dados de pagamento e documentos
+  dadosPagamentoBanco: string;
+  ccbDocumentoUrl: string;
+  clienteComprometimentoRenda: number;
+  
+  // Dados adicionais do cliente (opcionais)
+  clienteData?: ClienteData;
+  dadosPagamento?: DadosPagamento;
+  atendenteId?: string;
+  observacoes?: string;
+}
+
 // Value Objects - LACRE DE OURO: Interface expandida para todos os campos
 export interface ClienteData {
   // Dados básicos
@@ -197,26 +230,46 @@ export class Proposal {
   private _valor: Money;
   private _prazo: number;
   private _taxaJuros: number;
-  private _produtoId?: number;
-  private _tabelaComercialId?: number;
-  private _lojaId?: number;
+  
+  // Campos críticos obrigatórios (blindados)
+  private _produtoId: number;
+  private _tabelaComercialId: number;
+  private _lojaId: number;
+  private _analistaId: string;
+  private _valorTac: number;
+  private _valorIof: number;
+  private _valorTotalFinanciado: number;
+  private _taxaJurosAnual: number;
+  private _ccbUrl: string;
+  private _dadosPagamentoBanco: string;
+  private _clienteComprometimentoRenda: number;
+  
+  // Campos opcionais mantidos
   private _parceiroId?: number;
   private _atendenteId?: string;
   private _dadosPagamento?: DadosPagamento;
   private _motivoRejeicao?: string;
   private _observacoes?: string;
-  private _ccbUrl?: string;
   private _createdAt: Date;
   private _updatedAt: Date;
 
-  constructor(
+  private constructor(
     id: string,
     clienteData: ClienteData,
     valor: Money,
     prazo: number,
     taxaJuros: number,
-    produtoId?: number,
-    lojaId?: number,
+    produtoId: number,
+    tabelaComercialId: number,
+    lojaId: number,
+    analistaId: string,
+    valorTac: number,
+    valorIof: number,
+    valorTotalFinanciado: number,
+    taxaJurosAnual: number,
+    ccbDocumentoUrl: string,
+    dadosPagamentoBanco: string,
+    clienteComprometimentoRenda: number,
     atendenteId?: string
   ) {
     this._id = id;
@@ -225,48 +278,125 @@ export class Proposal {
     this._prazo = prazo;
     this._taxaJuros = taxaJuros;
     this._produtoId = produtoId;
+    this._tabelaComercialId = tabelaComercialId;
     this._lojaId = lojaId;
     this._atendenteId = atendenteId;
     this._status = ProposalStatus.RASCUNHO;
     this._createdAt = new Date();
     this._updatedAt = new Date();
+    
+    // Novos campos obrigatórios armazenados como propriedades privadas
+    this._analistaId = analistaId;
+    this._valorTac = valorTac;
+    this._valorIof = valorIof;
+    this._valorTotalFinanciado = valorTotalFinanciado;
+    this._taxaJurosAnual = taxaJurosAnual;
+    this._ccbUrl = ccbDocumentoUrl;
+    this._dadosPagamentoBanco = dadosPagamentoBanco;
+    this._clienteComprometimentoRenda = clienteComprometimentoRenda;
 
     // Validar invariantes na criação
     this.validateInvariants();
   }
 
-  // Factory method para criar nova proposta
-  static create(
-    clienteData: ClienteData,
-    valor: Money,
-    prazo: number,
-    taxaJuros: number,
-    produtoId?: number,
-    lojaId?: number,
-    atendenteId?: string
-  ): Proposal {
+  // Factory method para criar nova proposta - REFATORADO CONFORME PAM V1.0
+  static create(props: ProposalCreationProps): Proposal {
+    // VALIDAÇÃO CENTRALIZADA - Todos os 14 campos críticos obrigatórios
+    this.validateCreationProps(props);
+    
     const id = uuidv4();
+    
+    // Criando ClienteData básico baseado nos campos obrigatórios
+    const clienteData: ClienteData = {
+      nome: props.clienteNome,
+      cpf: CPF.create(props.clienteCpf)!,
+      ...(props.clienteData || {})
+    };
+    
     const proposal = new Proposal(
       id,
       clienteData,
-      valor,
-      prazo,
-      taxaJuros,
-      produtoId,
-      lojaId,
-      atendenteId
+      Money.fromReais(props.valor),
+      props.prazo,
+      props.taxaJuros,
+      props.produtoId,
+      props.tabelaComercialId,
+      props.lojaId,
+      props.analistaId,
+      props.valorTac,
+      props.valorIof,
+      props.valorTotalFinanciado,
+      props.taxaJurosAnual,
+      props.ccbDocumentoUrl,
+      props.dadosPagamentoBanco,
+      props.clienteComprometimentoRenda,
+      props.atendenteId
     );
 
     proposal.addEvent(
       new ProposalCreatedEvent(id, 'ProposalCreated', {
         clienteData,
-        valor,
-        prazo,
-        taxaJuros,
+        valor: props.valor,
+        prazo: props.prazo,
+        taxaJuros: props.taxaJuros,
+        produtoId: props.produtoId,
+        tabelaComercialId: props.tabelaComercialId,
       })
     );
 
     return proposal;
+  }
+  
+  // VALIDAÇÃO CENTRALIZADA - Implementação das regras de negócio críticas
+  private static validateCreationProps(props: ProposalCreationProps): void {
+    const errors: string[] = [];
+    
+    // Validação de campos obrigatórios (14 campos críticos)
+    const requiredFields = [
+      { field: 'produtoId', value: props.produtoId },
+      { field: 'tabelaComercialId', value: props.tabelaComercialId },
+      { field: 'lojaId', value: props.lojaId },
+      { field: 'analistaId', value: props.analistaId },
+      { field: 'clienteNome', value: props.clienteNome },
+      { field: 'clienteCpf', value: props.clienteCpf },
+      { field: 'valor', value: props.valor },
+      { field: 'prazo', value: props.prazo },
+      { field: 'valorTac', value: props.valorTac },
+      { field: 'valorIof', value: props.valorIof },
+      { field: 'valorTotalFinanciado', value: props.valorTotalFinanciado },
+      { field: 'taxaJuros', value: props.taxaJuros },
+      { field: 'taxaJurosAnual', value: props.taxaJurosAnual },
+      { field: 'ccbDocumentoUrl', value: props.ccbDocumentoUrl },
+      { field: 'dadosPagamentoBanco', value: props.dadosPagamentoBanco },
+      { field: 'clienteComprometimentoRenda', value: props.clienteComprometimentoRenda },
+    ];
+    
+    requiredFields.forEach(({ field, value }) => {
+      if (value === undefined || value === null || value === '') {
+        errors.push(`Campo crítico '${field}' é obrigatório`);
+      }
+    });
+    
+    // Validação de regras de negócio
+    if (props.valor && (props.valor < VALOR_MINIMO_EMPRESTIMO || props.valor > VALOR_MAXIMO_EMPRESTIMO)) {
+      errors.push(`Valor deve estar entre R$ ${VALOR_MINIMO_EMPRESTIMO} e R$ ${VALOR_MAXIMO_EMPRESTIMO}`);
+    }
+    
+    if (props.prazo && (props.prazo < PRAZO_MINIMO_MESES || props.prazo > PRAZO_MAXIMO_MESES)) {
+      errors.push(`Prazo deve estar entre ${PRAZO_MINIMO_MESES} e ${PRAZO_MAXIMO_MESES} meses`);
+    }
+    
+    if (props.taxaJuros && (props.taxaJuros < TAXA_JUROS_MINIMA || props.taxaJuros > TAXA_JUROS_MAXIMA)) {
+      errors.push(`Taxa de juros deve estar entre ${TAXA_JUROS_MINIMA}% e ${TAXA_JUROS_MAXIMA}%`);
+    }
+    
+    if (props.clienteComprometimentoRenda && props.clienteComprometimentoRenda > 40) {
+      errors.push('Comprometimento de renda não pode exceder 40%');
+    }
+    
+    if (errors.length > 0) {
+      throw new DomainException(`Falha na validação da proposta: ${errors.join('; ')}`);
+    }
   }
 
   // Factory method para reconstituir do banco
@@ -288,8 +418,17 @@ export class Proposal {
       Money.fromReais(data.valor),
       data.prazo,
       data.taxa_juros,
-      data.produto_id,
-      data.loja_id,
+      data.produto_id || 0,  // Valores padrão para compatibilidade
+      data.tabela_comercial_id || 0,
+      data.loja_id || 0,
+      data.analista_id || 'sistema',
+      data.valor_tac || 0,
+      data.valor_iof || 0,
+      data.valor_total_financiado || data.valor,
+      data.taxa_juros_anual || 0,
+      data.ccb_documento_url || '',
+      data.dados_pagamento_banco || '001',
+      data.cliente_comprometimento_renda || 30,
       data.atendente_id
     );
 
@@ -297,10 +436,8 @@ export class Proposal {
     proposal._dadosPagamento = data.dados_pagamento;
     proposal._motivoRejeicao = data.motivo_rejeicao;
     proposal._observacoes = data.observacoes;
-    proposal._ccbUrl = data.ccb_url;
     proposal._createdAt = data.created_at;
     proposal._updatedAt = data.updated_at;
-    proposal._tabelaComercialId = data.tabela_comercial_id;
     proposal._parceiroId = data.parceiro_id;
 
     return proposal;
@@ -665,14 +802,35 @@ export class Proposal {
   get taxaJuros(): number {
     return this._taxaJuros;
   }
-  get produtoId(): number | undefined {
+  get produtoId(): number {
     return this._produtoId;
   }
-  get tabelaComercialId(): number | undefined {
+  get tabelaComercialId(): number {
     return this._tabelaComercialId;
   }
-  get lojaId(): number | undefined {
+  get lojaId(): number {
     return this._lojaId;
+  }
+  get analistaId(): string {
+    return this._analistaId;
+  }
+  get valorTac(): number {
+    return this._valorTac;
+  }
+  get valorIof(): number {
+    return this._valorIof;
+  }
+  get valorTotalFinanciado(): number {
+    return this._valorTotalFinanciado;
+  }
+  get taxaJurosAnual(): number {
+    return this._taxaJurosAnual;
+  }
+  get dadosPagamentoBanco(): string {
+    return this._dadosPagamentoBanco;
+  }
+  get clienteComprometimentoRenda(): number {
+    return this._clienteComprometimentoRenda;
   }
   get parceiroId(): number | undefined {
     return this._parceiroId;
@@ -737,15 +895,26 @@ export class Proposal {
       valor: this._valor.getReais(),
       prazo: this._prazo,
       taxa_juros: this._taxaJuros,
+      
+      // Campos críticos obrigatórios
       produto_id: this._produtoId,
       tabela_comercial_id: this._tabelaComercialId,
       loja_id: this._lojaId,
+      analista_id: this._analistaId,
+      valor_tac: this._valorTac,
+      valor_iof: this._valorIof,
+      valor_total_financiado: this._valorTotalFinanciado,
+      taxa_juros_anual: this._taxaJurosAnual,
+      ccb_documento_url: this._ccbUrl,
+      dados_pagamento_banco: this._dadosPagamentoBanco,
+      cliente_comprometimento_renda: this._clienteComprometimentoRenda,
+      
+      // Campos opcionais mantidos
       parceiro_id: this._parceiroId,
       atendente_id: this._atendenteId,
       dados_pagamento: this._dadosPagamento,
       motivo_rejeicao: this._motivoRejeicao,
       observacoes: this._observacoes,
-      ccb_url: this._ccbUrl,
       user_id: this._atendenteId, // Campo adicionado para mapeamento correto no repositório
       created_at: this._createdAt,
       updated_at: this._updatedAt,

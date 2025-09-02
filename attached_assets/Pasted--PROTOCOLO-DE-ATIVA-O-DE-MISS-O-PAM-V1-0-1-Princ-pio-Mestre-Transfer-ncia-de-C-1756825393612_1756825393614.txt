@@ -1,0 +1,49 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*Blindámos o chão (o banco de dados). Agora, a sua missão é consertar as torneiras que pingam (a lógica de negócio). Você irá refatorar o coração da nossa entidade `Proposal`, o seu `factory method`, para garantir que uma proposta só possa nascer num estado de integridade absoluta, com todos os dados essenciais presentes desde o início.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa está **autorizada** com um foco restrito: consultar a **documentação ou exemplos de Domain-Driven Design (DDD) em TypeScript** para validar as melhores práticas na implementação de `factory methods` e na validação de `invariants` (regras de consistência) do agregado.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO RAIO-X (FASE 3.2 - REFORÇO DE DOMÍNIO)**
+
+* **Sumário da Missão (O Quê):** Refatorar o `factory method` `Proposal.create()` no arquivo `server/modules/proposal/domain/Proposal.ts` para que ele aceite, valide e atribua todos os 14 campos que foram recentemente tornados `NOT NULL` no banco de dados.
+* **Intenção Estratégica (O Porquê):** A causa raiz da corrupção de dados é que a nossa lógica permite a criação de objetos `Proposal` inválidos. Ao forçar a validação na fonte (a criação da entidade), erradicamos a classe do problema. Um objeto `Proposal` em memória nunca mais poderá existir num estado inconsistente, garantindo que o que é salvo no banco de dados é sempre válido.
+* **Histórico Relevante (Consulta Obrigatória):** Os relatórios `ANALISE_SCHEMA_PROPOSTAS.md` e `FASE_2_RASTREAMENTO_FLUXO_DADOS.md` são as suas fontes primárias. Eles provam que campos críticos como `tabelaComercialId` não eram sequer passados para o método `create`.
+* **Modelo Mental (Como se Encaixa):** Você está a reescrever a "certidão de nascimento" de uma proposta. A partir de agora, para uma proposta "nascer", ela precisa de ter todos os seus "documentos" (campos críticos) em ordem. Se faltar um, a certidão é negada (uma exceção é lançada).
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** Esta alteração na assinatura do método `Proposal.create()` irá causar uma cascata de erros de compilação em todos os `Use Cases` que o invocam (como o `CreateProposalUseCase`).
+    * **Contramedida:** Este é o resultado **desejado**. Os erros de compilação são o nosso guia. Eles irão apontar exatamente todos os locais no código que precisam ser atualizados para passar o novo conjunto completo de dados, o que constitui a próxima etapa da nossa missão (sincronização dos `Use Cases`).
+
+---
+
+### **IMPLEMENTAR:**
+Refatoração do Factory Method `Proposal.create()`.
+
+**CURRENT STATE:**
+O método `Proposal.create()` atualmente aceita um número limitado de parâmetros, ignorando campos críticos que agora são `NOT NULL` no banco de dados. Esta falha de design força os `Use Cases` a recorrer a "workarounds" frágeis para atribuir dados, resultando em inconsistências, como documentado em `FASE_2_RASTREAMENTO_FLUXO_DADOS.md`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `server/modules/proposal/domain/Proposal.ts` é modificado.
+2.  A assinatura do método estático `Proposal.create()` agora inclui os 14 campos críticos tornados `NOT NULL` na Fase 3.1.
+3.  A lógica interna do método `create()` atribui corretamente cada um destes 14 parâmetros às propriedades da nova instância da `Proposal`.
+4.  O código compila com sucesso, **mas espera-se que a aplicação inteira não compile**, devido aos erros de compilação nos `Use Cases` que chamam este método com a assinatura antiga. O seu relatório deve listar os arquivos que agora apresentam erros de compilação.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Refatorar a Assinatura:**
+    * Abra o arquivo `server/modules/proposal/domain/Proposal.ts`.
+    * Modifique a assinatura do método `public static create(...)` para aceitar um único objeto de propriedades (DTO) contendo todos os 14 campos `NOT NULL`.
+        * **Exemplo de Assinatura:** `public static create(props: ProposalCreationProps): Proposal`
+
+2.  **Atualizar a Lógica Interna:**
+    * Dentro do método `create()`, substitua a lógica de atribuição existente para usar os novos `props` recebidos.
+    * Garanta que cada um dos 14 campos obrigatórios seja atribuído à nova instância da `Proposal`.
+
+3.  **Validação e Relatório:**
+    * Execute `get_latest_lsp_diagnostics`.
+    * Confirme que o arquivo `Proposal.ts` está livre de erros.
+    * Apresente, no seu relatório final, a lista de **outros arquivos** que agora reportam erros de compilação devido a esta mudança. Este será o nosso "checklist" para a próxima missão.
