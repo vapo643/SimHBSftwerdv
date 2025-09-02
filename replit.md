@@ -25,6 +25,15 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **CONTEXT ENGINEERING PROTOCOL V2.0:** Dual-layer validation system implemented. The `architecture/EXECUTION_MATRIX.md` serves as an ADDITIONAL security layer for context validation, NOT a replacement for primary sources. Always consult ADRs, documentation, and code FIRST, then cross-check with Matrix to detect discrepancies. This prevents context loss and ensures 100% architectural conformity tracking.
 
+**🚨 CRITICAL DATABASE SAFETY PROTOCOL 🚨**
+**NEON DATABASE PROHIBITION:** The use of Replit's Neon Database service is **PERMANENTLY FORBIDDEN** for this project. This prohibition is absolute and non-negotiable. Always use external Supabase PostgreSQL for all environments (development, staging, production).
+
+**DATABASE ENVIRONMENT ISOLATION PROTOCOL:**
+- **PRODUCTION DATABASE**: Must be completely isolated from test and development environments
+- **TEST DATABASE**: Must use separate database instance with `_test` suffix or separate credentials
+- **MANDATORY**: All test configurations must validate database isolation before executing destructive operations
+- **ZERO TOLERANCE**: Any system that can accidentally delete production data is unacceptable and must be immediately fixed
+
 #### Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0
 
 **Princípio Central:** Para enriquecer a profundidade da análise, você está autorizado a utilizar a sua capacidade de pesquisa na web. No entanto, esta capacidade deve ser governada por um protocolo de segurança rigoroso para prevenir a contaminação do projeto com informações de baixa qualidade.

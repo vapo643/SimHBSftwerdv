@@ -32,12 +32,13 @@ export async function cleanTestDatabase(): Promise<void> {
     );
   }
 
-  // Proteção 2: DATABASE_URL deve estar configurado
-  const databaseUrl = process.env.DATABASE_URL || process.env.TEST_DATABASE_URL;
+  // Proteção 2: SEMPRE usar TEST_DATABASE_URL em testes (NUNCA DATABASE_URL de produção)
+  const databaseUrl = process.env.TEST_DATABASE_URL;
   if (!databaseUrl) {
-    console.error('🔴 CRITICAL SECURITY ALERT: DATABASE_URL não está configurado');
+    console.error('🔴 CRITICAL SECURITY ALERT: TEST_DATABASE_URL não está configurado');
+    console.error('🔴 DATABASE_URL de produção detectado, mas NEGADO para testes');
     throw new Error(
-      'FATAL: DATABASE_URL não configurado. Use um banco de dados de teste dedicado. Operação abortada.'
+      'FATAL: TEST_DATABASE_URL obrigatório para testes. NUNCA usar DATABASE_URL de produção.'
     );
   }
 
@@ -266,17 +267,32 @@ export async function setupTestEnvironment(): Promise<{
 
   try {
     // Create direct postgres connection - bypasses ALL application layer restrictions
-    // CRITICAL: Uses TEST_DATABASE_URL from .env.test when available (mapped to DATABASE_URL in setup.ts)
-    const databaseUrl = process.env.DATABASE_URL;
+    // CRITICAL: SEMPRE usar TEST_DATABASE_URL (NUNCA DATABASE_URL de produção)
+    const databaseUrl = process.env.TEST_DATABASE_URL;
     if (!databaseUrl) {
-      throw new Error('DATABASE_URL not found in environment variables');
+      console.error('🔴 CRITICAL: TEST_DATABASE_URL não configurado');
+      console.error('🔴 Detectado DATABASE_URL de produção, mas NEGADO');
+      throw new Error('FATAL: TEST_DATABASE_URL obrigatório. NUNCA usar DATABASE_URL de produção.');
     }
 
-    // Safety check: Warn if database doesn't appear to be a test database
-    if (!databaseUrl.includes('test')) {
-      console.warn(
-        "[TEST DB] ⚠️ WARNING: Database URL doesn't contain 'test' - ensure you're using a test database!"
-      );
+    // Safety check: Validação por hostname para diferenciar produção de teste
+    const url = new URL(databaseUrl);
+    const hostname = url.hostname;
+    
+    // VALIDAÇÃO CRÍTICA: Diferentes servidores Supabase para produção vs teste
+    const isTestDatabase = hostname.includes('fkfmirnnredvhocnhost') || hostname.includes('test');
+    const isProductionDatabase = hostname.includes('dvglgxrvhmtsixaabxha') || hostname.includes('prod');
+    
+    if (isProductionDatabase) {
+      console.error('🔴 CRITICAL SECURITY ALERT: Hostname de produção detectado em testes!');
+      console.error(`🔴 Hostname: ${hostname}`);
+      throw new Error('FATAL: Tentativa de usar banco de PRODUÇÃO em testes. Operação NEGADA.');
+    }
+    
+    if (!isTestDatabase) {
+      console.warn(`[TEST DB] ⚠️ WARNING: Hostname '${hostname}' não reconhecido como teste`);
+    } else {
+      console.log(`✅ [SEGURANÇA] Hostname de teste validado: ${hostname}`);
     }
 
     // Connect with the same configuration as server/lib/supabase.ts
