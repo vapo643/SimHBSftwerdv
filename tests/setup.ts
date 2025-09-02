@@ -16,8 +16,19 @@ beforeEach(() => {
   clearMockRedisData();
 });
 
-// ADICIONADO: Mock Redis Manager para testes
+// ADICIONADO: Mock Redis Manager para testes - PAM V1.0 P0 CORRIGIDO
 vi.mock('../server/lib/redis-manager', () => ({
+  __esModule: true,
+  default: vi.fn(),
+  
+  // Export principal que estava causando falha (CORRIGIDO P0)
+  checkRedisHealth: vi.fn().mockResolvedValue({ 
+    status: 'healthy', 
+    latency: 10,
+    timestamp: new Date().toISOString() 
+  }),
+  
+  // Exports existentes (mantidos)
   getRedisClient: vi.fn().mockResolvedValue({
     get: vi.fn(),
     set: vi.fn(),
@@ -30,7 +41,6 @@ vi.mock('../server/lib/redis-manager', () => ({
     }),
     quit: vi.fn(),
     disconnect: vi.fn(),
-    // Mock métodos específicos do JWT auth
     incr: vi.fn(),
     expire: vi.fn(),
     smembers: vi.fn().mockResolvedValue([]),
@@ -39,8 +49,15 @@ vi.mock('../server/lib/redis-manager', () => ({
     lpush: vi.fn(),
     ltrim: vi.fn(),
   }),
+  
+  // Outros exports do módulo real
   disconnectRedis: vi.fn(),
-  getRedisHealth: vi.fn().mockResolvedValue({ status: 'ok', connections: 1 })
+  resetRedisForTesting: vi.fn(),
+  redisManager: {
+    healthCheck: vi.fn().mockResolvedValue({ status: 'healthy' }),
+    getClient: vi.fn(),
+    disconnect: vi.fn()
+  }
 }));
 
 // Reset mocks before each test

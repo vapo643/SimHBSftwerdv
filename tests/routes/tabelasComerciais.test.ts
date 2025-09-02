@@ -256,6 +256,7 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
       // the API doesn't also return general tables
       const mockChainPersonalized = {
         from: vi.fn().mockReturnThis(),
+        innerJoin: vi.fn().mockReturnThis(),  // P2 CORRECTION: Missing innerJoin method
         where: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockResolvedValue(mockTabelasPersonalizadas),
       };
@@ -263,6 +264,7 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
       // The second call should not happen
       const mockChainGeral = {
         from: vi.fn().mockReturnThis(),
+        innerJoin: vi.fn().mockReturnThis(),  // P2 CORRECTION: Missing innerJoin method
         where: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockResolvedValue(mockTabelasGerais),
       };

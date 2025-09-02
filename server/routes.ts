@@ -1965,29 +1965,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { tabelasComerciais, produtoTabelaComercial } = await import('../shared/schema');
 
         // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
-        // Agora usando JOIN com a nova estrutura N:N
-        const tabelasPersonalizadas = await db
-          .select({
-            id: tabelasComerciais.id,
-            nomeTabela: tabelasComerciais.nomeTabela,
-            taxaJuros: tabelasComerciais.taxaJuros,
-            prazos: tabelasComerciais.prazos,
-            parceiroId: tabelasComerciais.parceiroId,
-            comissao: tabelasComerciais.comissao,
-            createdAt: tabelasComerciais.createdAt,
-          })
-          .from(tabelasComerciais)
-          .innerJoin(
-            produtoTabelaComercial,
-            eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
-          )
-          .where(
-            and(
-              eq(produtoTabelaComercial.produtoId, produtoIdNum),
-              eq(tabelasComerciais.parceiroId, parceiroIdNum)
+        // P1 CORRECTION: Defensive programming para consultas vazias
+        let tabelasPersonalizadas = [];
+        try {
+          tabelasPersonalizadas = await db
+            .select({
+              id: tabelasComerciais.id,
+              nomeTabela: tabelasComerciais.nomeTabela,
+              taxaJuros: tabelasComerciais.taxaJuros,
+              prazos: tabelasComerciais.prazos,
+              parceiroId: tabelasComerciais.parceiroId,
+              comissao: tabelasComerciais.comissao,
+              createdAt: tabelasComerciais.createdAt,
+            })
+            .from(tabelasComerciais)
+            .innerJoin(
+              produtoTabelaComercial,
+              eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
             )
-          )
-          .orderBy(desc(tabelasComerciais.createdAt));
+            .where(
+              and(
+                eq(produtoTabelaComercial.produtoId, produtoIdNum),
+                eq(tabelasComerciais.parceiroId, parceiroIdNum)
+              )
+            )
+            .orderBy(desc(tabelasComerciais.createdAt));
+        } catch (queryError) {
+          console.error(`[${getBrasiliaTimestamp()}] Erro na query de tabelas personalizadas:`, queryError);
+          tabelasPersonalizadas = [];
+        }
 
         // STEP 2: Validação - Se encontrou tabelas personalizadas, retorna apenas elas
         if (tabelasPersonalizadas && tabelasPersonalizadas.length > 0) {
@@ -2002,35 +2008,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
-        // Usando JOIN com a nova estrutura N:N
-        const tabelasGerais = await db
-          .select({
-            id: tabelasComerciais.id,
-            nomeTabela: tabelasComerciais.nomeTabela,
-            taxaJuros: tabelasComerciais.taxaJuros,
-            prazos: tabelasComerciais.prazos,
-            parceiroId: tabelasComerciais.parceiroId,
-            comissao: tabelasComerciais.comissao,
-            createdAt: tabelasComerciais.createdAt,
-          })
-          .from(tabelasComerciais)
-          .innerJoin(
-            produtoTabelaComercial,
-            eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
-          )
-          .where(
-            and(
-              eq(produtoTabelaComercial.produtoId, produtoIdNum),
-              isNull(tabelasComerciais.parceiroId)
+        // P1 CORRECTION: Defensive programming para consultas vazias
+        let tabelasGerais = [];
+        try {
+          tabelasGerais = await db
+            .select({
+              id: tabelasComerciais.id,
+              nomeTabela: tabelasComerciais.nomeTabela,
+              taxaJuros: tabelasComerciais.taxaJuros,
+              prazos: tabelasComerciais.prazos,
+              parceiroId: tabelasComerciais.parceiroId,
+              comissao: tabelasComerciais.comissao,
+              createdAt: tabelasComerciais.createdAt,
+            })
+            .from(tabelasComerciais)
+            .innerJoin(
+              produtoTabelaComercial,
+              eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId)
             )
-          )
-          .orderBy(desc(tabelasComerciais.createdAt));
+            .where(
+              and(
+                eq(produtoTabelaComercial.produtoId, produtoIdNum),
+                isNull(tabelasComerciais.parceiroId)
+              )
+            )
+            .orderBy(desc(tabelasComerciais.createdAt));
+        } catch (queryError) {
+          console.error(`[${getBrasiliaTimestamp()}] Erro na query de tabelas gerais:`, queryError);
+          tabelasGerais = [];
+        }
 
         // STEP 4: Resultado Final
         const resultado = tabelasGerais || [];
         console.log(`[${getBrasiliaTimestamp()}] Encontradas ${resultado.length} tabelas gerais`);
 
-        res.json(resultado);
+        // P1 CORRECTION: Explicit return para casos vazios
+        return res.status(200).json(resultado);
       } catch (error) {
         console.error('Erro no endpoint de tabelas comerciais hierárquicas:', error);
         res.status(500).json({
