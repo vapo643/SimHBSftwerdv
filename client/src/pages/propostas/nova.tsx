@@ -341,12 +341,17 @@ function ProposalForm() {
         {state.currentStep < 3 ? (
           <Button 
             type="button" 
-            onClick={() => setStep(state.currentStep + 1)}
+            onClick={() => {
+              console.log('🐛 [DEBUG] State atual:', state.currentStep);
+              console.log('🐛 [DEBUG] Validação step:', isStepValid(state.currentStep));
+              console.log('🐛 [DEBUG] Estado completo:', state);
+              setStep(state.currentStep + 1);
+            }}
             disabled={!isStepValid(state.currentStep)}
             data-testid="button-proximo"
             className={!isStepValid(state.currentStep) ? 'opacity-50' : ''}
           >
-            Próximo
+            Próximo {!isStepValid(state.currentStep) && '(Desabilitado)'}
           </Button>
         ) : (
           <Button
