@@ -130,6 +130,7 @@ describe('Payment Idempotency Tests - PAM V3.5 (Simplified)', () => {
       };
 
       // Add two different jobs with unique jobIds
+      const paymentsQueue = await getPaymentsQueue();
       const job1 = await paymentsQueue.add('PROCESS_PAYMENT', paymentData1, { jobId: jobId1 });
       const job2 = await paymentsQueue.add('PROCESS_PAYMENT', paymentData2, { jobId: jobId2 });
 
