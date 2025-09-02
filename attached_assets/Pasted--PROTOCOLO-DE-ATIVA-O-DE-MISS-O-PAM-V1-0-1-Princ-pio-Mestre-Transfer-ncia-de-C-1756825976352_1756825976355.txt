@@ -1,0 +1,41 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O coração do nosso domínio foi blindado. A sua missão agora é reparar a artéria principal que o alimenta. O `CreateProposalUseCase` está quebrado porque ainda tenta criar uma `Proposal` da maneira antiga e insegura. Você deve refatorá-lo para se adequar à nova realidade de integridade de dados absoluta.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - DESATIVADA**
+*A pesquisa está **proibida**. Toda a informação necessária está contida nos erros de compilação e nos relatórios de auditoria anteriores. O foco é na implementação cirúrgica.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO RAIO-X (FASE 3.3 - SINCRONIZAÇÃO DE USE CASE)**
+
+* **Sumário da Missão (O Quê):** Refatorar o `CreateProposalUseCase.ts` para que ele se alinhe com a nova assinatura do método `Proposal.create()`, resolvendo os erros de compilação e garantindo que o fluxo de criação de propostas passe o conjunto de dados completo e válido para a entidade de domínio.
+* **Intenção Estratégica (O Porquê):** Este passo propaga a nossa nova política de integridade de dados para a camada de aplicação. Ao forçar o `Use Case` a montar um objeto de dados completo, garantimos que a lógica de negócio opera sobre um estado consistente, prevenindo bugs e garantindo que os dados corretos cheguem à camada de persistência.
+* **Histórico Relevante (Consulta Obrigatória):** O seu "mapa de erros" é o relatório da Fase 3.2, que identificou 3 erros de compilação em `CreateProposalUseCase.ts`, incluindo `Expected 1 arguments, but got 7`. Os relatórios das Fases 1 e 2 (`ANALISE_SCHEMA_PROPOSTAS.md` e `FASE_2_RASTREAMENTO_FLUXO_DADOS.md`) detalham de onde estes dados devem vir.
+* **Modelo Mental (Como se Encaixa):** Você está a atualizar um formulário antigo (`Use Case`) para preencher uma nova ficha de registo muito mais rigorosa (a entidade `Proposal`). Você deve encontrar os dados necessários, preencher a nova ficha (`ProposalCreationProps` DTO) corretamente e submetê-la.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** O `payload` que chega ao `Use Case` a partir do controlador pode não conter todos os 14 campos necessários, exigindo que a refatoração se estenda para a camada de apresentação (`proposalController.ts`).
+    * **Contramedida:** Este é um resultado provável. A sua análise deve seguir os erros. Se o `Use Case` não recebe os dados, rastreie a sua origem e adicione os campos em falta ao DTO da camada de API e à chamada no controlador.
+
+---
+
+### **IMPLEMENTAR:**
+Sincronização do `CreateProposalUseCase` com a Entidade `Proposal` Refatorada.
+
+**CURRENT STATE:**
+O arquivo `server/modules/proposal/application/CreateProposalUseCase.ts` está com 3 erros de compilação críticos. A sua chamada ao método `Proposal.create()` está a usar uma assinatura obsoleta (7 parâmetros individuais) em vez da nova assinatura que espera um único objeto `ProposalCreationProps` com 14 campos obrigatórios.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `CreateProposalUseCase.ts` é refatorado.
+2.  A lógica dentro do método `execute()` agora constrói um objeto `ProposalCreationProps` completo, preenchendo todos os 14 campos `NOT NULL` a partir do `payload` da requisição e de dados de contexto (como `lojaId`, `analistaId`, etc.).
+3.  A chamada a `Proposal.create()` é atualizada para passar este único objeto.
+4.  Todos os erros de compilação em `CreateProposalUseCase.ts` são resolvidos. O arquivo está livre de erros de LSP.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Resolver Imports:** Corrija os erros de `Cannot find name 'ClienteData'` e `DadosPagamento`, garantindo que os tipos corretos sejam importados.
+2.  **Construir o DTO:** Dentro do método `execute()`, antes da chamada a `Proposal.create()`, instancie um objeto `props` do tipo `ProposalCreationProps`.
+3.  **Mapear os Dados:** Preencha este objeto `props` com os dados provenientes do `input` do `Use Case`. Rastreie a origem de cada um dos 14 campos necessários. Se algum campo não estiver disponível no `input`, a sua missão é encontrá-lo ou, se for o caso, usar um valor padrão apropriado (embora a maioria deva vir do `input`).
+4.  **Atualizar a Chamada:** Substitua a chamada `Proposal.create(clienteData, ...)` pela nova chamada `Proposal.create(props)`.
+5.  **Validação:** Execute `get_latest_lsp_diagnostics` e confirme que não há mais erros de compilação em `CreateProposalUseCase.ts`. Reporte quaisquer novos erros que possam ter surgido em outros arquivos (como `proposalController.ts`) como resultado das suas alterações.

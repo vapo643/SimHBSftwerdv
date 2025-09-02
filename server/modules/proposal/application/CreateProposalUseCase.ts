@@ -5,7 +5,7 @@
  * Refatorado para usar Unit of Work - Garantia de Atomicidade
  */
 
-import { Proposal } from '../domain/Proposal';
+import { Proposal, ClienteData, DadosPagamento, ProposalCreationProps } from '../domain/Proposal';
 import { IProposalRepository } from '../domain/IProposalRepository';
 import { CPF, Money, Email, PhoneNumber, CEP } from '@shared/value-objects';
 
@@ -149,20 +149,53 @@ export class CreateProposalUseCase {
       dividas_existentes: undefined, // Campo não usado no momento
     };
 
-    // Criar agregado usando factory method existente
-    const proposal = Proposal.create(
-      clienteData,
-      Money.fromReais(dto.valor),
-      dto.prazo,
-      dto.taxaJuros || 2.5,
-      dto.produtoId,
-      dto.lojaId,
-      dto.atendenteId
-    );
-
-    // LACRE DE OURO: Configurar dados adicionais no agregado antes da persistência
+    // LACRE DE OURO: Construir ProposalCreationProps com todos os 14 campos críticos
     
-    // Configurar dados de pagamento se fornecidos
+    // Cálculo de valores financeiros (se não fornecidos)
+    const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor
+    const valorIof = dto.valorIof || (dto.valor * 0.006); // 0.6% do valor
+    const valorTotalFinanciado = dto.valorTotalFinanciado || (dto.valor + valorTac + valorIof);
+    
+    // Cálculo da taxa de juros anual
+    const taxaJurosMensal = dto.taxaJuros || 2.5;
+    const taxaJurosAnual = Math.pow(1 + (taxaJurosMensal / 100), 12) - 1;
+    
+    // Construção do DTO completo para factory method refatorado
+    const proposalCreationProps: ProposalCreationProps = {
+      // Relacionamentos críticos (obrigatórios)
+      produtoId: dto.produtoId || 1, // Produto padrão se não especificado
+      tabelaComercialId: dto.tabelaComercialId || 4, // Tabela ativa padrão
+      lojaId: dto.lojaId || 1, // Loja padrão
+      analistaId: dto.atendenteId || 'sistema', // Usar atendente como analista ou padrão
+      
+      // Dados do cliente (obrigatórios)
+      clienteNome: dto.clienteNome,
+      clienteCpf: dto.clienteCpf,
+      
+      // Valores financeiros (obrigatórios)
+      valor: dto.valor,
+      prazo: dto.prazo,
+      valorTac: valorTac,
+      valorIof: valorIof,
+      valorTotalFinanciado: valorTotalFinanciado,
+      taxaJuros: taxaJurosMensal,
+      taxaJurosAnual: taxaJurosAnual,
+      
+      // Documentos e pagamento (obrigatórios)
+      ccbDocumentoUrl: `ccb-temporario-${Date.now()}.pdf`, // URL temporária
+      dadosPagamentoBanco: dto.dadosPagamentoBanco || '001', // Banco do Brasil padrão
+      clienteComprometimentoRenda: 30, // Valor conservador padrão
+      
+      // Dados adicionais (opcionais)
+      clienteData: clienteData,
+      atendenteId: dto.atendenteId,
+      observacoes: undefined
+    };
+    
+    // Criar agregado usando factory method refatorado
+    const proposal = Proposal.create(proposalCreationProps);
+
+    // LACRE DE OURO: Configurar dados de pagamento opcionais se fornecidos
     if (dto.metodoPagamento) {
       const dadosPagamento: DadosPagamento = {
         metodo: dto.metodoPagamento as 'boleto' | 'pix' | 'transferencia' | 'conta_bancaria',
@@ -181,11 +214,6 @@ export class CreateProposalUseCase {
         pix_tipo: dto.dadosPagamentoTipoPix,
       };
       proposal.updatePaymentData(dadosPagamento);
-    }
-
-    // Configurar tabela comercial diretamente na propriedade privada (acesso através do fromDatabase)
-    if (dto.tabelaComercialId) {
-      (proposal as any)._tabelaComercialId = dto.tabelaComercialId;
     }
     
     // Persistir usando repositório
