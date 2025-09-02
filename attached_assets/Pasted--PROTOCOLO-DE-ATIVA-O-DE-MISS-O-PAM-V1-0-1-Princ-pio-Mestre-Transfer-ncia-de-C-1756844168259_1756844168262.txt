@@ -1,0 +1,54 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O seu modo operacional muda de "Arquiteto de Segurança" para "Executor de Elite". O plano de batalha está definido. A sua missão é executar o `PROTOCOLO_BLINDAGEM_AMBIENTE.md` com precisão cirúrgica, camada por camada, para construir as defesas que protegerão nosso ativo mais crítico: os dados.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - DESATIVADA**
+*A pesquisa está **proibida**. O plano arquitetural é a sua única fonte da verdade. O seu foco é na implementação exata do que foi projetado.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO GUARDIÃO DO COFRE (FASE 4 - IMPLEMENTAÇÃO)**
+
+* **Sumário da Missão (O Quê):** Implementar as quatro camadas de defesa detalhadas no documento `docs/missions/PROTOCOLO_BLINDAGEM_AMBIENTE.md` para erradicar a vulnerabilidade de deleção de banco de dados.
+* **Intenção Estratégica (O Porquê):** Esta implementação visa restaurar a confiança na nossa infraestrutura e nos nossos processos de CI/CD. Ao concluir esta missão, teremos a garantia de que uma falha de configuração ou um erro de execução não poderá mais resultar numa catástrofe de perda de dados.
+* **Histórico Relevante (Consulta Obrigatória):** A sua **única fonte da verdade** para esta missão é o documento `docs/missions/PROTOCOLO_BLINDAGEM_AMBIENTE.md`. Execute as implementações na ordem exata das camadas (1 a 4).
+* **Modelo Mental (Como se Encaixa):** Você é o engenheiro a construir o cofre. Instale a fechadura mais forte na porta (`drizzle.config.ts`), implemente os procedimentos de acesso de dupla verificação (`package.json`), reforce as paredes internas (`db-helper.ts`) e, finalmente, limite o que pode ser feito dentro do cofre (permissões do PostgreSQL).
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** A alteração de `roles` e permissões no banco de dados (Camada 4) é uma operação de alto risco. Se feita incorretamente, pode bloquear o acesso da própria aplicação ao banco.
+    * **Contramedida:** A execução deve ser faseada. Primeiro, gere o script SQL para a Camada 4, mas **não o execute**. Apresente o script para a minha revisão. Apenas após a minha aprovação explícita você aplicará as alterações de `role` no banco de dados.
+
+---
+
+### **IMPLEMENTAR:**
+Protocolo de Blindagem de Ambiente.
+
+**CURRENT STATE:**
+O sistema é vulnerável a deleções acidentais de banco de dados devido a uma falha sistémica no isolamento de ambientes, conforme documentado em `docs/diagnostics/CAUSA_RAIZ_DELECAO_DB.md`.
+
+**EXPECTED (Estado Final de Sucesso):**
+As quatro camadas de defesa do `PROTOCOLO_BLINDAGEM_AMBIENTE.md` são implementadas com sucesso. A prova irrefutável será a execução bem-sucedida de um "Teste de Penetração Controlado":
+1.  A suíte de testes (`npx vitest run`) deve continuar a passar (ou falhar pelos motivos de lógica de negócio já conhecidos), provando que as novas defesas não quebraram a aplicação.
+2.  Uma tentativa de executar `npm run db:push` sem as devidas confirmações ou com o `NODE_ENV` incorreto deve falhar com uma mensagem de erro explícita, provando que as novas guardas estão a funcionar.
+3.  Uma tentativa de executar `cleanTestDatabase()` num contexto não-teste deve falhar.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Implementar Camada 1 (Blindagem da Configuração):**
+    * Refatore o `drizzle.config.ts` exatamente como especificado no seu plano de arquitetura.
+
+2.  **Implementar Camada 2 (Blindagem dos Scripts):**
+    * Refatore o `package.json` para criar os scripts específicos por ambiente.
+    * Crie o script `shell` de confirmação interativa.
+
+3.  **Implementar Camada 3 (Blindagem dos Helpers de Teste):**
+    * Refatore a função `cleanTestDatabase()` em `tests/lib/db-helper.ts` para incluir as novas verificações de segurança.
+
+4.  **Gerar Script da Camada 4 (Blindagem do Banco de Dados):**
+    * Crie um novo arquivo de migração SQL (`drizzle/migrations/0006_security_roles.sql`) contendo os comandos `CREATE ROLE`, `GRANT` e `REVOKE` que você projetou.
+    * **PARE E AGUARDE APROVAÇÃO.** Apresente este script SQL para a minha revisão antes de prosseguir.
+
+5.  **Validação (Após Aprovação da Camada 4):**
+    * Aplique a migração da Camada 4.
+    * Execute a suíte de testes completa para verificar se não há regressões.
+    * Tente executar `npm run db:push` de forma "incorreta" para provar que a guarda de segurança o bloqueia.

@@ -178,6 +178,7 @@ export async function cleanTestDatabase(): Promise<void> {
   } finally {
     await directDb.end();
   }
+
 }
 
 /**
@@ -200,6 +201,59 @@ export function validateTestEnvironmentSafety(): boolean {
     
   } catch {
     return false;
+  }
+}
+
+/**
+ * Creates a clean test environment with all necessary reference data
+ * Uses direct postgres connection to bypass ALL Supabase restrictions
+ *
+ * @returns Object containing all created test entities
+ */
+export async function setupTestEnvironment(): Promise<{
+  testUserId: string;
+  testEmail: string;
+  testPassword: string;
+  testPartnerId: number;
+  testStoreId: number;
+  testProductId: number;
+  testCommercialTableId: number;
+}> {
+        }
+      }
+
+      // Then clean core tables
+      await db.execute(sql.raw(`DELETE FROM "propostas"`));
+      console.log('[TEST DB] ✓ Cleaned table: propostas');
+
+      // Clean other reference tables if needed
+      const referenceTables = [
+        'produto_tabela_comercial',
+        'tabelas_comerciais',
+        'produtos',
+        'gerente_lojas',
+        'lojas',
+        'parceiros',
+        'users',
+        'security_logs',
+      ];
+
+      for (const table of referenceTables) {
+        try {
+          await db.execute(sql.raw(`DELETE FROM "${table}"`));
+          console.log(`[TEST DB] ✓ Cleaned table: ${table}`);
+        } catch (e) {
+          // These might fail if they have data referenced by other tables
+          // We continue anyway as they're less critical for tests
+          console.debug(`[TEST DB] Skipped table ${table}`);
+        }
+      }
+
+      console.log('[TEST DB] ✅ Fallback cleanup completed');
+    } catch (fallbackError) {
+      console.error('[TEST DB] ❌ Fallback cleanup also failed:', fallbackError);
+      throw fallbackError;
+    }
   }
 }
 
