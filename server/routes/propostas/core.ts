@@ -220,6 +220,14 @@ router.get('/:id/observacoes', auth, async (req: any, res: any) => {
 
 // PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
 router.put('/:id/status', auth, async (req: any, res: any) => {
+  // ADICIONAR: Validação defensiva do req.body
+  if (!req.body || typeof req.body !== 'object') {
+    return res.status(400).json({
+      success: false,
+      error: 'Request body is required'
+    });
+  }
+  
   const { status } = req.body;
 
   // Mapear para os novos endpoints baseado no status

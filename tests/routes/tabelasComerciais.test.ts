@@ -63,7 +63,15 @@ const mockTabelasGerais = [
 // Mock the database module
 vi.mock('../../server/lib/supabase', () => ({
   db: {
-    select: vi.fn(),
+    select: vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({  // ← ADICIONAR MÉTODO innerJoin
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue([])  // Retornar arrays vazios ou com dados mock
+          })
+        })
+      })
+    })
   },
   createServerSupabaseClient: vi.fn(),
   createServerSupabaseAdminClient: vi.fn(),
@@ -81,6 +89,15 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
   let app: Express;
   let dbMock: any;
 
+  // Expandir mock para suportar diferentes cenários de teste
+  const createMockQueryBuilder = (mockData: any[] = []) => ({
+    select: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    innerJoin: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockResolvedValue(mockData),
+  });
+
   beforeEach(async () => {
     // Clear all mocks before each test
     vi.clearAllMocks();
@@ -97,20 +114,17 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
 
   describe('Scenario 1: Return personalized table when it exists', () => {
     it('should return only personalized tables for a partner with custom tables', async () => {
-      // Setup mock to return personalized tables
-      const mockChain = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockResolvedValue(mockTabelasPersonalizadas),
-      };
-
-      dbMock.select.mockReturnValue(mockChain);
+      // Setup: Mock retorna tabelas personalizadas na primeira consulta
+      const personalizedBuilder = createMockQueryBuilder(mockTabelasPersonalizadas);
+      dbMock.select.mockReturnValue(personalizedBuilder);
 
       const response = await request(app)
         .get('/api/tabelas-comerciais-disponiveis')
         .query({ produtoId: 1, parceiroId: 10 })
         .expect(200);
 
+      // Validar que innerJoin foi chamado
+      expect(personalizedBuilder.innerJoin).toHaveBeenCalled();
       expect(response.body).toEqual(mockTabelasPersonalizadas);
       expect(response.body).toHaveLength(1);
       expect(response.body[0].nomeTabela).toBe('Tabela Personalizada Parceiro X');
@@ -120,21 +134,14 @@ describe('GET /api/tabelas-comerciais-disponiveis', () => {
 
   describe('Scenario 2: Return general tables when no personalized table exists', () => {
     it('should return general tables when partner has no custom tables', async () => {
-      // First call returns empty array (no personalized tables)
-      const mockChainPersonalized = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockResolvedValue([]),
-      };
-
-      // Second call returns general tables
-      const mockChainGeral = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockResolvedValue(mockTabelasGerais),
-      };
-
-      dbMock.select.mockReturnValueOnce(mockChainPersonalized).mockReturnValueOnce(mockChainGeral);
+      // Mock para tabelas personalizadas
+      const personalizedBuilder = createMockQueryBuilder([]);
+      // Mock para tabelas gerais  
+      const generalBuilder = createMockQueryBuilder(mockTabelasGerais);
+      
+      dbMock.select
+        .mockReturnValueOnce(personalizedBuilder)  // Primeira chamada
+        .mockReturnValueOnce(generalBuilder);      // Segunda chamada (fallback)
 
       const response = await request(app)
         .get('/api/tabelas-comerciais-disponiveis')

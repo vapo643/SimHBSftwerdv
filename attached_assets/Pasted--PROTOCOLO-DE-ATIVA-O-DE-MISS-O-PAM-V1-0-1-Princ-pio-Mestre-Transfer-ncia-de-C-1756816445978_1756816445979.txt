@@ -1,0 +1,53 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O seu modo operacional muda de "Arquiteto" para "Executor de Elite". O planeamento está concluído. A sua missão é executar o plano de batalha definido em `docs/missions/ROADMAP_FASE_2_TEST_FIXES.md` com precisão cirúrg-ica, seguindo a ordem de operações estabelecida.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - DESATIVADA**
+*A pesquisa está **proibida**. Todas as diretrizes necessárias estão contidas no roadmap. O seu foco é na execução, não na descoberta.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ESTABILIZAÇÃO CRÍTICA (FASE 2.3 - IMPLEMENTAÇÃO)**
+
+* **Sumário da Missão (O Quê):** Executar o plano de implementação detalhado em `docs/missions/ROADMAP_FASE_2_TEST_FIXES.md` para corrigir as 3 falhas críticas da suíte de testes, seguindo a ordem de prioridade P0, P1 e P2.
+* **Intenção Estratégica (O Porquê):** Esta missão visa erradicar os bugs conhecidos da camada de aplicação, aumentando progressivamente a taxa de sucesso da nossa suíte de testes e nos aproximando de um estado de "produção-pronto".
+* **Histórico Relevante (Consulta Obrigatória):** A sua **única fonte da verdade** para esta missão é o documento `docs/missions/ROADMAP_FASE_2_TEST_FIXES.md`. Você deve lê-lo na sua totalidade antes de iniciar.
+* **Modelo Mental (Como se Encaixa):** Você é um cirurgião a realizar três procedimentos distintos. Complete o primeiro (P0), valide o seu sucesso, depois passe para o segundo (P1), valide, e finalmente o terceiro (P2). A execução incremental e com validação a cada passo é crucial para evitar complicações.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** A correção de um bug pode, inadvertidamente, quebrar um teste que antes passava (regressão).
+    * **Contramedida:** A execução do comando de validação específico após cada missão (P0, P1, P2) e uma execução completa da suíte de testes no final são as contramedidas mandatórias para detectar regressões imediatamente.
+
+---
+
+### **IMPLEMENTAR:**
+Remediação Faseada da Suíte de Testes Conforme Roadmap.
+
+**CURRENT STATE:**
+A infraestrutura de base está estável, mas a suíte de testes reporta 33 falhas, com 3 bugs críticos diagnosticados como a causa raiz da maioria dos problemas: `Destructuring Error`, `Unhandled Rejection` e `Erro de Mock com innerJoin`.
+
+**EXPECTED (Estado Final de Sucesso):**
+Todas as três missões (P0, P1, P2) do roadmap são implementadas com sucesso. A prova irrefutável será o output dos seguintes comandos de validação:
+1.  O comando de validação específico para cada missão (P0, P1, P2) deve passar com sucesso.
+2.  A execução final de `npx vitest run --reporter=verbose` deve mostrar uma redução significativa no número de testes falhando (de 33 para < 27, conforme as métricas do roadmap).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Leia o Plano:** Inicie lendo o documento `docs/missions/ROADMAP_FASE_2_TEST_FIXES.md`.
+2.  **Execute a Missão P0:**
+    * Implemente o "Plano de Ação Técnico" para a **Missão P0**.
+    * Execute a "Prova de Sucesso" da **Missão P0** e reporte o output.
+3.  **Execute a Missão P1:**
+    * Implemente o "Plano de Ação Técnico" para a **Missão P1**.
+    * Execute a "Prova de Sucesso" da **Missão P1** e reporte o output.
+4.  **Execute a Missão P2:**
+    * Implemente o "Plano de Ação Técnico" para a **Missão P2**.
+    * Execute a "Prova de Sucesso" da **Missão P2** e reporte o output.
+5.  **Validação Final:** Execute o teste de regressão completo `npx vitest run --reporter=verbose` e reporte o output final.
+
+---
+### **DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+*Você deve preencher esta seção ao final da sua execução.*
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Reportar quaisquer regressões ou efeitos secundários inesperados]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [N/A]
+* **VALIDAÇÃO PENDENTE:** [O output final do `vitest run` será a validação]
