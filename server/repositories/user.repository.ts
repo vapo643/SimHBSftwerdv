@@ -15,7 +15,7 @@ export interface Profile {
   email?: string;
   role: string;
   loja_id?: number | null;
-  loja_ids?: number[] | null;
+  // REMOVED: loja_ids - using gerente_lojas junction table for GERENTE role
   // REMOVED: created_at and updated_at - don't exist in real table
 }
 
@@ -123,6 +123,28 @@ export class UserRepository extends BaseRepository<Profile> {
   }
 
   /**
+   * Create associations in gerente_lojas junction table
+   */
+  async createGerenteLojaAssociations(gerenteId: string, lojaIds: number[]): Promise<void> {
+    if (!lojaIds || lojaIds.length === 0) {
+      return;
+    }
+
+    const associations = lojaIds.map(lojaId => ({
+      gerente_id: gerenteId,
+      loja_id: lojaId,
+    }));
+
+    const { error } = await this.supabaseAdmin
+      .from('gerente_lojas')
+      .insert(associations);
+
+    if (error) {
+      throw new Error(`Failed to create gerente-loja associations: ${error.message}`);
+    }
+  }
+
+  /**
    * Create a new user (profile + auth)
    */
   async createUser(userData: z.infer<typeof UserDataSchema>): Promise<UserWithAuth> {
@@ -150,7 +172,7 @@ export class UserRepository extends BaseRepository<Profile> {
           full_name: userData.fullName,
           role: userData.role,
           loja_id: userData.lojaId || null,
-          loja_ids: userData.lojaIds || null,
+          // REMOVED: loja_ids - doesn't exist in schema, using gerente_lojas junction table
           // REMOVED: created_at - doesn't exist in real table
         })
         .select()
@@ -160,6 +182,17 @@ export class UserRepository extends BaseRepository<Profile> {
         // Rollback auth user creation if profile creation fails
         await this.supabaseAdmin.auth.admin.deleteUser(authData.user.id);
         throw new Error(`Failed to create profile: ${profileError.message}`);
+      }
+
+      // Step 3: Create gerente-loja associations if user is GERENTE
+      if (userData.role === 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
+        try {
+          await this.createGerenteLojaAssociations(authData.user.id, userData.lojaIds);
+        } catch (associationError) {
+          // Rollback profile and auth user if association creation fails
+          await this.supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+          throw associationError;
+        }
       }
 
       return {
@@ -264,21 +297,45 @@ export class UserRepository extends BaseRepository<Profile> {
   }
 
   /**
-   * Get users by loja
+   * Get users by loja (supports both ATENDENTE and GERENTE)
    */
   async getUsersByLoja(lojaId: number): Promise<Profile[]> {
-    const { data, error } = await this.supabaseAdmin
+    // Get ATENDENTEs directly via loja_id
+    const { data: atendentes, error: atendentesError } = await this.supabaseAdmin
       .from(this.tableName)
       .select('*')
-      .or(`loja_id.eq.${lojaId},loja_ids.cs.{${lojaId}}`)
-
+      .eq('loja_id', lojaId)
       .order('full_name');
 
-    if (error) {
-      throw new Error(`Failed to fetch users by loja: ${error.message}`);
+    if (atendentesError) {
+      throw new Error(`Failed to fetch atendentes by loja: ${atendentesError.message}`);
     }
 
-    return data as Profile[];
+    // Get GERENTEs via gerente_lojas junction table
+    const { data: gerentesData, error: gerentesError } = await this.supabaseAdmin
+      .from('gerente_lojas')
+      .select(`
+        gerente_id,
+        profiles!inner(
+          id, full_name, role, loja_id
+        )
+      `)
+      .eq('loja_id', lojaId);
+
+    if (gerentesError) {
+      throw new Error(`Failed to fetch gerentes by loja: ${gerentesError.message}`);
+    }
+
+    // Transform gerentes data to Profile format
+    const gerentes = gerentesData?.map((item: any) => item.profiles) || [];
+
+    // Combine both arrays and remove duplicates
+    const allUsers = [...(atendentes || []), ...gerentes];
+    const uniqueUsers = allUsers.filter((user, index, arr) => 
+      arr.findIndex(u => u.id === user.id) === index
+    );
+
+    return uniqueUsers as Profile[];
   }
 }
 

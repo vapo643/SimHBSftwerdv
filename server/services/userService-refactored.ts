@@ -288,12 +288,12 @@ export class UserService {
    * Validate role-specific requirements
    */
   private validateRoleRequirements(userData: z.infer<typeof UserDataSchema>): void {
-    // ATENDENTE must have lojaId
+    // ATENDENTE must have lojaId (single store via profiles.loja_id)
     if (userData.role === 'ATENDENTE' && !userData.lojaId) {
       throw new Error('Atendentes devem estar associados a uma loja');
     }
 
-    // GERENTE must have lojaIds
+    // GERENTE must have lojaIds (multiple stores via gerente_lojas junction table)
     if (userData.role === 'GERENTE' && (!userData.lojaIds || userData.lojaIds.length === 0)) {
       throw new Error('Gerentes devem estar associados a pelo menos uma loja');
     }
@@ -317,7 +317,7 @@ export class UserService {
       email: user.email,
       role: user.role,
       lojaId: user.loja_id,
-      lojaIds: user.loja_ids,
+      // REMOVED: lojaIds - not in profiles table, use gerente_lojas junction
       status: user.deleted_at ? 'inactive' : 'active',
       createdAt: user.created_at,
       updatedAt: user.updated_at,
