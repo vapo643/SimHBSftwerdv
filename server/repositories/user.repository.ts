@@ -16,8 +16,7 @@ export interface Profile {
   role: string;
   loja_id?: number | null;
   loja_ids?: number[] | null;
-  created_at?: string;
-  updated_at?: string;
+  // REMOVED: created_at and updated_at - don't exist in real table
 }
 
 export interface AuthUser {
@@ -143,7 +142,7 @@ export class UserRepository extends BaseRepository<Profile> {
     }
 
     try {
-      // Step 2: Create profile
+      // Step 2: Create profile (ALIGNED WITH REAL SCHEMA)
       const { data: profile, error: profileError } = await this.supabaseAdmin
         .from(this.tableName)
         .insert({
@@ -152,7 +151,7 @@ export class UserRepository extends BaseRepository<Profile> {
           role: userData.role,
           loja_id: userData.lojaId || null,
           loja_ids: userData.lojaIds || null,
-          created_at: new Date().toISOString(),
+          // REMOVED: created_at - doesn't exist in real table
         })
         .select()
         .single();
@@ -186,7 +185,7 @@ export class UserRepository extends BaseRepository<Profile> {
       .from(this.tableName)
       .update({
         ...data,
-        updated_at: new Date().toISOString(),
+        // REMOVED: updated_at - doesn't exist in real table
       })
       .eq('id', userId)
       .select()
