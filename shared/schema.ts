@@ -147,12 +147,12 @@ export const propostas = pgTable('propostas', {
   lojaId: integer('loja_id').notNull(), // Multi-tenant key
 
   // Relacionamentos de negócio
-  produtoId: integer('produto_id').references(() => produtos.id),
-  tabelaComercialId: integer('tabela_comercial_id').references(() => tabelasComerciais.id),
+  produtoId: integer('produto_id').references(() => produtos.id).notNull(),
+  tabelaComercialId: integer('tabela_comercial_id').references(() => tabelasComerciais.id).notNull(),
 
   // Cliente dados básicos (mantendo campos existentes para compatibilidade)
-  clienteNome: text('cliente_nome'),
-  clienteCpf: text('cliente_cpf'),
+  clienteNome: text('cliente_nome').notNull(),
+  clienteCpf: text('cliente_cpf').notNull(),
   clienteEmail: text('cliente_email'),
   clienteTelefone: text('cliente_telefone'),
   clienteDataNascimento: text('cliente_data_nascimento'),
@@ -184,21 +184,21 @@ export const propostas = pgTable('propostas', {
   clienteCnpj: text('cliente_cnpj'),
 
   // Empréstimo dados
-  valor: decimal('valor', { precision: 15, scale: 2 }),
-  prazo: integer('prazo'),
+  valor: decimal('valor', { precision: 15, scale: 2 }).notNull(),
+  prazo: integer('prazo').notNull(),
   finalidade: text('finalidade'),
   garantia: text('garantia'),
 
   // Valores calculados
-  valorTac: decimal('valor_tac', { precision: 10, scale: 2 }),
-  valorIof: decimal('valor_iof', { precision: 10, scale: 2 }),
-  valorTotalFinanciado: decimal('valor_total_financiado', { precision: 15, scale: 2 }),
+  valorTac: decimal('valor_tac', { precision: 10, scale: 2 }).notNull(),
+  valorIof: decimal('valor_iof', { precision: 10, scale: 2 }).notNull(),
+  valorTotalFinanciado: decimal('valor_total_financiado', { precision: 15, scale: 2 }).notNull(),
   valorLiquidoLiberado: decimal('valor_liquido_liberado', { precision: 15, scale: 2 }),
 
   // Dados financeiros detalhados
   jurosModalidade: text('juros_modalidade').default('pre_fixado'), // pre_fixado ou pos_fixado
   periodicidadeCapitalizacao: text('periodicidade_capitalizacao').default('mensal'),
-  taxaJurosAnual: decimal('taxa_juros_anual', { precision: 5, scale: 2 }),
+  taxaJurosAnual: decimal('taxa_juros_anual', { precision: 5, scale: 2 }).notNull(),
   pracaPagamento: text('praca_pagamento').default('São Paulo'),
   formaPagamento: text('forma_pagamento').default('boleto'), // boleto, pix, debito
   anoBase: integer('ano_base').default(365),
@@ -210,16 +210,16 @@ export const propostas = pgTable('propostas', {
 
   // Status e análise
   status: text('status').notNull(),
-  analistaId: text('analista_id'),
+  analistaId: text('analista_id').notNull(),
   dataAnalise: timestamp('data_analise'),
   motivoPendencia: text('motivo_pendencia'),
   valorAprovado: decimal('valor_aprovado', { precision: 15, scale: 2 }),
-  taxaJuros: decimal('taxa_juros', { precision: 5, scale: 2 }),
+  taxaJuros: decimal('taxa_juros', { precision: 5, scale: 2 }).notNull(),
   observacoes: text('observacoes'),
 
   // Documentos (mantendo campos legados)
   documentos: text('documentos').array(),
-  ccbDocumentoUrl: text('ccb_documento_url'),
+  ccbDocumentoUrl: text('ccb_documento_url').notNull(),
 
   // Formalização - Enhanced fields
   dataAprovacao: timestamp('data_aprovacao'),
@@ -251,7 +251,7 @@ export const propostas = pgTable('propostas', {
 
   // Dados de Pagamento (Destino do empréstimo) - Added August 5, 2025
   // Opção 1: Dados Bancários
-  dadosPagamentoBanco: text('dados_pagamento_banco'),
+  dadosPagamentoBanco: text('dados_pagamento_banco').notNull(),
   dadosPagamentoCodigoBanco: text('dados_pagamento_codigo_banco'), // Código do banco (001, 237, etc)
   dadosPagamentoAgencia: text('dados_pagamento_agencia'),
   dadosPagamentoConta: text('dados_pagamento_conta'),
@@ -290,7 +290,7 @@ export const propostas = pgTable('propostas', {
 
   // Novos campos Financeiros - Added August 20, 2025
   clienteDividasExistentes: decimal('cliente_dividas_existentes', { precision: 12, scale: 2 }), // NULLABLE
-  clienteComprometimentoRenda: decimal('cliente_comprometimento_renda', { precision: 6, scale: 2 }), // NULLABLE - Até 9999.99%
+  clienteComprometimentoRenda: decimal('cliente_comprometimento_renda', { precision: 6, scale: 2 }).notNull(), // NOT NULL - Até 9999.99%
   clienteScoreSerasa: integer('cliente_score_serasa'), // NULLABLE - Score de crédito
   clienteRestricoesCpf: boolean('cliente_restricoes_cpf').default(false), // NOT NULL com default
 
