@@ -28,6 +28,11 @@ Error handling: Create structured documentation for automatic consultation durin
 **🚨 CRITICAL DATABASE SAFETY PROTOCOL 🚨**
 **NEON DATABASE PROHIBITION:** The use of Replit's Neon Database service is **PERMANENTLY FORBIDDEN** for this project. This prohibition is absolute and non-negotiable. Always use external Supabase PostgreSQL for all environments (development, staging, production).
 
+**🚫 REPLIT AGENT AUTHORIZATION RESTRICTIONS - ABSOLUTE RULES:**
+- **DATABASE CREATION**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating any database (Neon, PostgreSQL, or any other). Only the user has authorization to create databases.
+- **AUTHENTICATION SETUP**: Replit Agent is **PERMANENTLY FORBIDDEN** from creating or configuring any authentication system (Replit Auth or any other). Only the user decides authentication architecture.
+- **INFRASTRUCTURE DECISIONS**: Database type, authentication provider, and infrastructure choices are **EXCLUSIVELY** user decisions. Agent must NEVER take initiative on these topics.
+
 **DATABASE ENVIRONMENT ISOLATION PROTOCOL:**
 - **PRODUCTION DATABASE**: Must be completely isolated from test and development environments
 - **TEST DATABASE**: Must use separate database instance with `_test` suffix or separate credentials

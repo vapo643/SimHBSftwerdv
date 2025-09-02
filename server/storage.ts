@@ -85,11 +85,11 @@ export interface IStorage extends IUnitOfWork {
   ): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }>;
 
   // Gerente-Lojas Relationships
-  getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]>;
-  getLojasForGerente(gerenteId: number): Promise<number[]>;
-  getGerentesForLoja(lojaId: number): Promise<number[]>;
+  getGerenteLojas(gerenteId: string): Promise<GerenteLojas[]>;
+  getLojasForGerente(gerenteId: string): Promise<number[]>;
+  getGerentesForLoja(lojaId: number): Promise<string[]>;
   addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas>;
-  removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void>;
+  removeGerenteFromLoja(gerenteId: string, lojaId: number): Promise<void>;
 
   // Inter Bank Collections
   createInterCollection(collection: InsertInterCollection): Promise<InterCollection>;
@@ -751,11 +751,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Gerente-Lojas Relationships
-  async getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]> {
+  async getGerenteLojas(gerenteId: string): Promise<GerenteLojas[]> {
     return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId));
   }
 
-  async getLojasForGerente(gerenteId: number): Promise<number[]> {
+  async getLojasForGerente(gerenteId: string): Promise<number[]> {
     const result = await db
       .select({ lojaId: gerenteLojas.lojaId })
       .from(gerenteLojas)
@@ -763,7 +763,7 @@ export class DatabaseStorage implements IStorage {
     return result.map((r) => r.lojaId);
   }
 
-  async getGerentesForLoja(lojaId: number): Promise<number[]> {
+  async getGerentesForLoja(lojaId: number): Promise<string[]> {
     const result = await db
       .select({ gerenteId: gerenteLojas.gerenteId })
       .from(gerenteLojas)
@@ -776,7 +776,7 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void> {
+  async removeGerenteFromLoja(gerenteId: string, lojaId: number): Promise<void> {
     await db
       .delete(gerenteLojas)
       .where(and(eq(gerenteLojas.gerenteId, gerenteId), eq(gerenteLojas.lojaId, lojaId)));
