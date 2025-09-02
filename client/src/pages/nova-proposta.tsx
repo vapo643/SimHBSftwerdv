@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Upload, Search } from 'lucide-react';
 import { MaskedInput } from '@/components/ui/MaskedInput';
+import { useStepValidation } from '@/contexts/ProposalContext';
 
 const clienteSchema = z.object({
   clienteNome: z
@@ -104,6 +105,7 @@ export default function NovaProposta() {
   const [currentStep, setCurrentStep] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { isStepValid } = useStepValidation();
   const queryClient = useQueryClient();
   const [isSearchingCpf, setIsSearchingCpf] = useState(false);
 
@@ -1065,7 +1067,12 @@ export default function NovaProposta() {
                     Salvar Rascunho
                   </Button>
                   {currentStep < 3 ? (
-                    <Button type="button" onClick={nextStep}>
+                    <Button 
+                      type="button" 
+                      onClick={nextStep}
+                      disabled={!isStepValid(currentStep - 1)}
+                      data-testid="button-next-step"
+                    >
                       Próximo
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
