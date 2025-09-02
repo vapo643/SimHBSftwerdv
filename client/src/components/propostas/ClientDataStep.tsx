@@ -285,10 +285,8 @@ export function ClientDataStep() {
   };
 
   const handleNameChange = (value: string) => {
-    console.log('🐛 [DEBUG] Nome alterado:', value);
     updateClient({ nome: value });
     clearError('nome');
-    console.log('🐛 [DEBUG] Estado após alteração nome:', state.clientData);
   };
 
   // Calcular progresso do formulário

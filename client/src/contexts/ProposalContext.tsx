@@ -546,36 +546,27 @@ export function useStepValidation() {
 
   // UX-001: Função de validação por step para botão "Próximo"
   const isStepValid = useCallback((step: number): boolean => {
-    console.log('🔍 [DEBUG] Validando step:', step);
-    console.log('🔍 [DEBUG] Estado completo:', state);
-    
     switch (step) {
       case 0: // Dados do Cliente
         const clientData = state.clientData;
-        console.log('🔍 [DEBUG] Client data:', clientData);
-        
         const requiredClientFields = [
-          { field: 'nome', value: clientData.nome },
-          { field: 'cpf/cnpj', value: clientData.tipoPessoa === 'PF' ? clientData.cpf : clientData.cnpj },
-          { field: 'email', value: clientData.email },
-          { field: 'telefone', value: clientData.telefone },
-          { field: 'dataNascimento', value: clientData.dataNascimento },
-          { field: 'cep', value: clientData.cep },
-          { field: 'logradouro', value: clientData.logradouro },
-          { field: 'numero', value: clientData.numero },
-          { field: 'cidade', value: clientData.cidade },
-          { field: 'estado', value: clientData.estado },
-          { field: 'ocupacao', value: clientData.ocupacao },
-          { field: 'rendaMensal', value: clientData.rendaMensal },
+          clientData.nome,
+          clientData.tipoPessoa === 'PF' ? clientData.cpf : clientData.cnpj,
+          clientData.email,
+          clientData.telefone,
+          clientData.dataNascimento,
+          clientData.cep,
+          clientData.logradouro,
+          clientData.numero,
+          clientData.cidade,
+          clientData.estado,
+          clientData.ocupacao,
+          clientData.rendaMensal,
         ];
-        
-        // Debug campos vazios
-        const emptyFields = requiredClientFields.filter(({ value }) => !value || value.toString().trim() === '');
-        console.log('🔍 [DEBUG] Campos vazios:', emptyFields.map(f => f.field));
         
         // Verificar se todos os campos obrigatórios estão preenchidos
         const allFieldsFilled = requiredClientFields.every(
-          ({ value }) => value && value.toString().trim() !== ''
+          (field) => field && field.toString().trim() !== ''
         );
         
         // Verificar se não há erros de validação
@@ -583,13 +574,7 @@ export function useStepValidation() {
           key.includes('cpf') || key.includes('email') || key.includes('telefone') || key.includes('cep')
         );
         
-        console.log('🔍 [DEBUG] Todos campos preenchidos:', allFieldsFilled);
-        console.log('🔍 [DEBUG] Tem erros:', hasValidationErrors);
-        console.log('🔍 [DEBUG] Erros atuais:', state.errors);
-        
-        const isValid = allFieldsFilled && !hasValidationErrors;
-        console.log('🔍 [DEBUG] Step 0 válido:', isValid);
-        return isValid;
+        return allFieldsFilled && !hasValidationErrors;
 
       case 1: // Referências Pessoais
         const references = state.personalReferences;
