@@ -81,11 +81,12 @@ export const userSessions = pgTable('user_sessions', {
 export type Session = typeof userSessions.$inferSelect;
 
 // Tabela de junção para relacionamento muitos-para-muitos Gerentes x Lojas
+// CORRIGIDO: Usar UUID para referenciar profiles.id conforme banco real (ADR-011)
 export const gerenteLojas = pgTable(
   'gerente_lojas',
   {
-    gerenteId: integer('gerente_id')
-      .references(() => users.id)
+    gerenteId: uuid('gerente_id')
+      .references(() => profiles.id)
       .notNull(),
     lojaId: integer('loja_id')
       .references(() => lojas.id)

@@ -915,7 +915,7 @@ export class Proposal {
       dados_pagamento: this._dadosPagamento,
       motivo_rejeicao: this._motivoRejeicao,
       observacoes: this._observacoes,
-      user_id: this._atendenteId, // Campo adicionado para mapeamento correto no repositório
+      user_id: this._analistaId, // Usar analistaId como userId para mapeamento correto
       created_at: this._createdAt,
       updated_at: this._updatedAt,
     };

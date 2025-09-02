@@ -34,12 +34,16 @@ export class ProposalRepository implements IProposalRepository {
           valor: data.valor.toString(),
           prazo: data.prazo,
           taxaJuros: data.taxa_juros.toString(),
+          taxaJurosAnual: data.taxa_juros_anual?.toString() || (data.taxa_juros * 12).toString(), // Campo obrigatório
+          valorTac: data.valor_tac?.toString() || '0', // Campo obrigatório  
+          valorIof: data.valor_iof?.toString() || '0', // Campo obrigatório
+          valorTotalFinanciado: data.valor_total_financiado?.toString() || data.valor.toString(), // Campo obrigatório
           produtoId: data.produto_id,
           tabelaComercialId: data.tabela_comercial_id,
           lojaId: data.loja_id,
           metodoPagamento: data.dados_pagamento?.metodo,
           dadosPagamentoTipo: data.dados_pagamento?.tipo_conta || data.dados_pagamento?.pixTipo || data.dados_pagamento?.pix_tipo,
-          dadosPagamentoBanco: data.dados_pagamento?.banco,
+          dadosPagamentoBanco: data.dados_pagamento_banco,
           dadosPagamentoAgencia: data.dados_pagamento?.agencia,
           dadosPagamentoConta: data.dados_pagamento?.conta,
           dadosPagamentoDigito: data.dados_pagamento?.digito,
@@ -49,9 +53,13 @@ export class ProposalRepository implements IProposalRepository {
           dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
           motivoPendencia: data.motivo_rejeicao,
           observacoes: data.observacoes,
-          ccbDocumentoUrl: data.ccb_url,
+          ccbDocumentoUrl: data.ccb_documento_url,
           userId: data.user_id,
+          analistaId: data.analista_id || data.user_id, // Campo obrigatório - usar user_id como fallback
           createdAt: data.created_at,
+          // Adicionar campos faltantes identificados pelo LSP
+          clienteComprometimentoRenda: data.cliente_comprometimento_renda || 30, // Valor padrão
+          clienteEndereco: data.cliente_data.endereco || '', // Extrair do clienteData
         },
       ]);
       
@@ -74,7 +82,7 @@ export class ProposalRepository implements IProposalRepository {
             tabelaComercialId: data.tabela_comercial_id,
             lojaId: data.loja_id,
             dadosPagamentoTipo: data.dados_pagamento?.tipo_conta || data.dados_pagamento?.pixTipo || data.dados_pagamento?.pix_tipo,
-            dadosPagamentoBanco: data.dados_pagamento?.banco,
+            dadosPagamentoBanco: data.dados_pagamento_banco,
             dadosPagamentoAgencia: data.dados_pagamento?.agencia,
             dadosPagamentoConta: data.dados_pagamento?.conta,
             dadosPagamentoDigito: data.dados_pagamento?.digito,
@@ -84,7 +92,7 @@ export class ProposalRepository implements IProposalRepository {
             dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
             motivoPendencia: data.motivo_rejeicao,
             observacoes: data.observacoes,
-            ccbDocumentoUrl: data.ccb_url,
+            ccbDocumentoUrl: data.ccb_documento_url,
             // updatedAt campo removido - será atualizado automaticamente pelo schema
           })
           .where(eq(propostas.id, data.id));
