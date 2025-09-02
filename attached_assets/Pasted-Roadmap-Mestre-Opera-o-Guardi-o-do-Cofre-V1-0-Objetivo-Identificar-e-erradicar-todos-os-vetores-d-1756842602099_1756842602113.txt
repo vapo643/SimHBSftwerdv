@@ -1,0 +1,37 @@
+Roadmap Mestre: Operação Guardião do Cofre V1.0
+Objetivo: Identificar e erradicar todos os vetores de ataque que permitem a deleção acidental ou autónoma do banco de dados, e implementar uma série de salvaguardas (código, infraestrutura, protocolo) para tornar esta classe de erro impossível no futuro.
+
+FASE 1: Mapeamento Forense de Vetores de Ataque (O "Mapa da Ameaça")
+
+[🎯 EM EXECUÇÃO] Passo 1.1: Auditoria de todos os Scripts com Potencial Destrutivo.
+
+Objetivo: Criar um inventário de cada linha de código, script ou comando no projeto que tenha a capacidade de executar uma operação destrutiva no banco de dados (DROP, DELETE, TRUNCATE, reset, push --force).
+
+[PENDENTE] FASE 2: Análise da Causa Raiz (A "Cena do Crime")
+
+Passo 2.1: Auditoria de Variáveis de Ambiente e Conexões.
+
+Objetivo: Mapear como as variáveis de ambiente do banco de dados (DATABASE_URL, etc.) são carregadas e utilizadas, especialmente a fronteira entre os ambientes de teste e produção.
+
+Passo 2.2: Auditoria do Protocolo de Segurança do Banco de Dados de Teste.
+
+Objetivo: Investigar a guarda de segurança em tests/lib/db-helper.ts que deveria prevenir a execução de testes contra o banco de produção, e entender como ela pode ter sido contornada ou desativada.
+
+[PENDENTE] FASE 3: Arquitetura da Solução de Blindagem (O "Sistema de Defesa")
+
+Passo 3.1: Desenho do Protocolo de Acesso "Menos Privilegiado".
+
+Objetivo: Arquitetar uma nova política de segurança onde o usuário do banco de dados utilizado pela aplicação e pelos testes tenha permissões estritamente limitadas, sendo incapaz de executar comandos de DROP TABLE.
+
+Passo 3.2: Desenho da Doutrina de "Imutabilidade da Infraestrutura de Teste".
+
+Objetivo: Definir um novo protocolo operacional que proíbe o Agente de modificar arquivos críticos de configuração de teste.
+
+[PENDENTE] FASE 4: Implementação e Certificação (A "Construção do Cofre")
+
+Passo 4.1: Implementação das salvaguardas de código e infraestrutura.
+
+Passo 4.2: Execução de um "Teste de Penetração Controlado" para validar as defesas.
+
+Passo 4.3: Execução final da "Operação Veredito Final" para recertificar o sistema.
+
