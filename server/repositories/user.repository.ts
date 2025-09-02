@@ -45,6 +45,13 @@ export class UserRepository extends BaseRepository<Profile> {
   }
 
   /**
+   * Force refresh Supabase client to clear schema cache
+   */
+  private refreshSupabaseClient() {
+    this.supabaseAdmin = createServerSupabaseAdminClient();
+  }
+
+  /**
    * Get all users with their auth status
    */
   async getAllUsersWithAuth(): Promise<UserWithAuth[]> {
@@ -148,6 +155,9 @@ export class UserRepository extends BaseRepository<Profile> {
    * Create a new user (profile + auth)
    */
   async createUser(userData: z.infer<typeof UserDataSchema>): Promise<UserWithAuth> {
+    // CACHE FIX: Force refresh Supabase client to clear schema cache
+    this.refreshSupabaseClient();
+    
     // Step 1: Create auth user
     const { data: authData, error: authError } = await this.supabaseAdmin.auth.admin.createUser({
       email: userData.email,
