@@ -350,7 +350,11 @@ const EditarPropostaPendenciada: React.FC = () => {
         const response = await api.get(`/api/propostas/${id}`);
         console.log('🔍 RESPOSTA DA API:', response);
         console.log('🔍 DADOS EXTRAÍDOS:', response.data);
-        return response.data as PropostaData;
+        // CORREÇÃO: Backend retorna { success: true, data: {...} }, precisamos acessar response.data.data
+        const propostaData = response.data.data || response.data;
+        console.log('🔍 DADOS FINAIS DA PROPOSTA:', propostaData);
+        console.log('🔍 STATUS ESPECÍFICO:', propostaData.status);
+        return propostaData as PropostaData;
       } catch (error) {
         console.error('🔍 ERRO NA QUERY:', error);
         throw error;
@@ -526,7 +530,7 @@ const EditarPropostaPendenciada: React.FC = () => {
 
   // Verificar se a proposta está pendenciada (tratamento universal de tipos)
   const statusString = String(proposta.status || '').trim();
-  if (statusString !== 'pendenciado') {
+  if (statusString !== 'pendenciado' && statusString !== 'pendente') {
     return (
       <DashboardLayout title="Editar Proposta">
         <div className="container mx-auto px-4 py-8">
@@ -537,7 +541,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                 <h2 className="mb-2 text-xl font-semibold">Proposta não editável</h2>
                 <p className="mb-4 text-gray-400">
                   Esta proposta está com status "{proposta.status}" e só pode ser editada quando
-                  estiver "pendenciado".
+                  estiver "pendenciado" ou "pendente".
                 </p>
                 <p className="mb-4 text-sm text-gray-500">
                   Status atual:{' '}
