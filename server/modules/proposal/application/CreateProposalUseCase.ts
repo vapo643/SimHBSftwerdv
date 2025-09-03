@@ -8,6 +8,7 @@
 import { Proposal, ClienteData, DadosPagamento, ProposalCreationProps } from '../domain/Proposal';
 import { IProposalRepository } from '../domain/IProposalRepository';
 import { CPF, Money, Email, PhoneNumber, CEP } from '@shared/value-objects';
+import { TacCalculationService } from '../../../services/tacCalculationService.js';
 
 export interface CreateProposalDTO {
   // Dados básicos do cliente
@@ -96,7 +97,10 @@ export interface CreateProposalDTO {
 }
 
 export class CreateProposalUseCase {
-  constructor(private repository: IProposalRepository) {}
+  constructor(
+    private repository: IProposalRepository,
+    private tacCalculationService: typeof TacCalculationService = TacCalculationService
+  ) {}
 
   async execute(dto: CreateProposalDTO): Promise<{ id: string; numeroSequencial: number }> {
     // Validar e criar Value Objects
@@ -154,8 +158,17 @@ export class CreateProposalUseCase {
 
     // LACRE DE OURO: Construir ProposalCreationProps com todos os 14 campos críticos
     
-    // Cálculo de valores financeiros (se não fornecidos)
-    const valorTac = dto.valorTac || (dto.valor * 0.02); // 2% do valor
+    // NOVA LÓGICA: Calcular TAC via serviço com novas regras (Strategy Pattern)
+    const tacResult = await this.tacCalculationService.calculateTacWithNewRules(
+      dto.produtoId || 1, // Produto padrão se não especificado
+      dto.valor,
+      dto.clienteCpf
+    );
+    
+    console.log(`[USE_CASE] TAC calculada: R$ ${tacResult.valorTac.toFixed(2)} via ${tacResult.estrategiaUsada}`);
+
+    // Usar resultado do serviço ou valor fornecido explicitamente
+    const valorTac = dto.valorTac || tacResult.valorTac;
     const valorIof = dto.valorIof || (dto.valor * 0.006); // 0.6% do valor
     const valorTotalFinanciado = dto.valorTotalFinanciado || (dto.valor + valorTac + valorIof);
     
