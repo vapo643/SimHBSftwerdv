@@ -1,0 +1,57 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**[ATIVAÇÃO DE PROTOCOLOS MANDATÓRIOS DO `replit.md`]**
+*Sua execução será governada pelos seguintes protocolos:*
+*- **CRITICAL WORKFLOW:** `get_latest_lsp_diagnostics` antes da conclusão.*
+*- **CONTEXT ENGINEERING PROTOCOL V2.0:** Consulte ADRs e a documentação existente.*
+*- **PACN V1.0 ENFORCEMENT:** O seu plano deve ser validável através de cenários de negócio claros.*
+*- **DECD V1.0:** Pesquisa na web autorizada para esta missão de planeamento.*
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O seu modo operacional muda de "Auditor" para "Arquiteto de Regras de Negócio". A auditoria revelou uma lógica de negócio invertida e uma integração quebrada. A sua missão é projetar o plano de batalha para refatorar o nosso motor de cálculo de taxas, alinhando-o com a nova diretriz estratégica e garantindo que ele seja, de facto, utilizado pela aplicação.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa está **autorizada** para consultar a **documentação sobre o `Strategy Pattern` em TypeScript** e as melhores práticas para a injeção de dependência (`Dependency Injection`) de serviços em `Use Cases`.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ACELERAÇÃO DE ORIGINAÇÃO (TRACK 2, FASE 2 - PLANEAMENTO)**
+
+* **Sumário da Missão (O Quê):** Arquitetar um plano de implementação detalhado para refatorar o `TacCalculationService` e o `CreateProposalUseCase`, implementando a nova regra de negócio de "10% de TAC para clientes novos" e eliminando a lógica "hardcoded" existente.
+* **Intenção Estratégica (O Porquê):** O objetivo é transformar a lógica de cálculo da TAC de um estado frágil e incorreto para um sistema robusto, flexível e alinhado com os objetivos de negócio. Este plano deve garantir que a implementação final seja auditável e de fácil manutenção.
+* **Histórico Relevante (Consulta Obrigatória):** A sua arquitetura deve ser baseada nas descobertas do relatório `docs/diagnostics/AUDITORIA_FLUXO_CALCULO_TAC.md`, que identificou a lógica invertida e a falta de integração do `TacCalculationService` como os problemas centrais.
+* **Modelo Mental (Como se Encaixa):** Você está a redesenhar uma peça central do motor financeiro. O plano deve detalhar a "recalibração" do `TacCalculationService` para a nova especificação e, crucialmente, a "religação" dos cabos para que o `CreateProposalUseCase` passe a receber e a usar a energia deste serviço.
+
+---
+
+### **PLANEJAR E ARQUITETAR:**
+Blueprint de Refatoração do Motor de Cálculo da TAC.
+
+**CURRENT STATE:**
+O sistema possui um `TacCalculationService` que implementa uma lógica de isenção de TAC para clientes existentes. No entanto, o `CreateProposalUseCase` ignora este serviço e aplica uma taxa de 2% "hardcoded" para todos os clientes, violando tanto a lógica antiga quanto a nova regra de negócio.
+
+**EXPECTED (Estado Final de Sucesso):**
+A geração de um novo documento Markdown em `docs/missions/BLUEPRINT_MOTOR_CALCULO_TAC.md`. Este documento deve conter um roadmap de implementação priorizado, com duas missões claras:
+
+1.  **Missão P0: Recalibração do `TacCalculationService`**
+    * **Arquivo Alvo:** `server/services/tacCalculationService.ts`
+    * **Plano de Ação Técnico:** Detalhar as alterações necessárias para inverter a lógica:
+        * O método `calculateTac` deve agora implementar a seguinte regra: `if (isClienteNovo) { return valorProposta * 0.10; } else { // manter a lógica existente de cálculo baseado no produto }`.
+        * Remover completamente a lógica de isenção (`return 0;`) para clientes existentes.
+
+2.  **Missão P1: Integração do Serviço no `CreateProposalUseCase`**
+    * **Arquivo Alvo:** `server/modules/proposal/application/CreateProposalUseCase.ts`
+    * **Plano de Ação Técnico:** Detalhar as alterações para a correta utilização do serviço:
+        * Implementar a injeção de dependência do `TacCalculationService` no construtor do `Use Case`.
+        * Remover a linha de cálculo "hardcoded": `const valorTac = dto.valorTac || (dto.valor * 0.02);`.
+        * Adicionar uma chamada ao serviço: `const valorTac = await this.tacCalculationService.calculateTac(dto.produtoId, dto.valor, dto.clienteCpf);`.
+        * Garantir que o `valorTac` retornado seja usado para construir o objeto `ProposalCreationProps`.
+
+3.  **Prova de Sucesso (para cada missão):**
+    * Definir os cenários de teste de unidade e de integração necessários para validar as alterações. Por exemplo:
+        * **Teste 1 (Cliente Novo):** "Deve calcular a TAC em 10% do valor da proposta para um CPF não existente."
+        * **Teste 2 (Cliente Existente):** "Deve calcular a TAC com base nas regras do produto para um CPF existente."
+
+**CONSTRAINTS (Roadmap de Planeamento):**
+1.  **Foco no Plano:** A sua missão é projetar e documentar este plano de forma clara e acionável. **Não implemente nenhuma correção.**
+2.  **Referência Cruzada:** Para cada missão, referencie explicitamente qual "Vetor de Falha" do relatório `AUDITORIA_FLUXO_CALCULO_TAC.md` ela mitiga.
