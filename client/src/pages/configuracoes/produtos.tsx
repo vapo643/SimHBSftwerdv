@@ -35,6 +35,7 @@ import { api } from '@/lib/apiClient';
 import { handleApiError, showSuccessMessage } from '@/lib/errorHandler';
 import { useLoadingStates } from '@/hooks/useLoadingStates';
 import DashboardLayout from '@/components/DashboardLayout';
+import ProdutoForm from '@/components/produtos/ProdutoForm';
 
 interface Produto {
   id: number;
@@ -45,24 +46,10 @@ interface Produto {
   tacAtivaParaClientesExistentes?: boolean;
 }
 
-interface ProdutoFormData {
-  nome: string;
-  status: 'Ativo' | 'Inativo';
-  tacValor: number;
-  tacTipo: 'fixo' | 'percentual';
-  tacAtivaParaClientesExistentes: boolean;
-}
 
 export default function GestãoProdutos() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Produto | null>(null);
-  const [formData, setFormData] = useState<ProdutoFormData>({
-    nome: '',
-    status: 'Ativo',
-    tacValor: 0,
-    tacTipo: 'fixo',
-    tacAtivaParaClientesExistentes: true,
-  });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -79,7 +66,13 @@ export default function GestãoProdutos() {
 
   // Mutation para criar produto
   const createMutation = useMutation({
-    mutationFn: async (data: ProdutoFormData) => {
+    mutationFn: async (data: {
+      nome: string;
+      status: 'Ativo' | 'Inativo';
+      tacValor: number;
+      tacTipo: 'fixo' | 'percentual';
+      tacAtivaParaClientesExistentes: boolean;
+    }) => {
       const response = await api.post<Produto>('/api/produtos', {
         nome: data.nome,
         status: data.status,
@@ -101,7 +94,16 @@ export default function GestãoProdutos() {
 
   // Mutation para atualizar produto
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: ProdutoFormData }) => {
+    mutationFn: async ({ id, data }: { 
+      id: number; 
+      data: {
+        nome: string;
+        status: 'Ativo' | 'Inativo';
+        tacValor: number;
+        tacTipo: 'fixo' | 'percentual';
+        tacAtivaParaClientesExistentes: boolean;
+      }
+    }) => {
       const response = await api.put<Produto>(`/api/produtos/${id}`, {
         nome: data.nome,
         status: data.status,
@@ -135,27 +137,9 @@ export default function GestãoProdutos() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingProduct) {
-      updateMutation.mutate({
-        id: editingProduct.id,
-        data: formData,
-      });
-    } else {
-      createMutation.mutate(formData);
-    }
-  };
 
   const handleEdit = (produto: Produto) => {
     setEditingProduct(produto);
-    setFormData({
-      nome: produto.nomeProduto,
-      status: produto.isActive ? 'Ativo' : 'Inativo',
-      tacValor: produto.tacValor || 0,
-      tacTipo: produto.tacTipo || 'fixo',
-      tacAtivaParaClientesExistentes: produto.tacAtivaParaClientesExistentes ?? true,
-    });
     setIsDialogOpen(true);
   };
 
@@ -168,12 +152,10 @@ export default function GestãoProdutos() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProduct(null);
-    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo', tacAtivaParaClientesExistentes: true });
   };
 
   const handleOpenDialog = () => {
     setEditingProduct(null);
-    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo', tacAtivaParaClientesExistentes: true });
     setIsDialogOpen(true);
   };
 
@@ -270,59 +252,26 @@ export default function GestãoProdutos() {
                     : 'Adicione um novo produto de crédito'}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nome" className="text-card-foreground">
-                    Nome do Produto
-                  </Label>
-                  <Input
-                    id="nome"
-                    value={formData.nome}
-                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                    placeholder="Ex: Crédito Pessoal"
-                    className="border-border bg-input text-foreground"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status" className="text-card-foreground">
-                    Status
-                  </Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value: 'Ativo' | 'Inativo') =>
-                      setFormData({ ...formData, status: value })
-                    }
-                  >
-                    <SelectTrigger className="border-border bg-input text-foreground">
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                    <SelectContent className="border-border bg-card">
-                      <SelectItem value="Ativo" className="text-card-foreground hover:bg-muted">
-                        Ativo
-                      </SelectItem>
-                      <SelectItem value="Inativo" className="text-card-foreground hover:bg-muted">
-                        Inativo
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                  >
-                    {createMutation.isPending || updateMutation.isPending
-                      ? loadingStates.saving
-                      : editingProduct
-                        ? 'Atualizar'
-                        : 'Criar'}
-                  </Button>
-                </div>
-              </form>
+              <ProdutoForm
+                onSubmit={(data) => {
+                  if (editingProduct) {
+                    updateMutation.mutate({
+                      id: editingProduct.id,
+                      data,
+                    });
+                  } else {
+                    createMutation.mutate(data);
+                  }
+                }}
+                onCancel={handleCloseDialog}
+                initialData={editingProduct ? {
+                  nome: editingProduct.nomeProduto,
+                  status: editingProduct.isActive ? 'Ativo' : 'Inativo',
+                  tacValor: editingProduct.tacValor ? parseFloat(editingProduct.tacValor.toString()) : 0,
+                  tacTipo: editingProduct.tacTipo || 'fixo',
+                  tacAtivaParaClientesExistentes: editingProduct.tacAtivaParaClientesExistentes ?? true,
+                } : undefined}
+              />
             </DialogContent>
           </Dialog>
         </div>
