@@ -280,4 +280,18 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
   });
 });
 
+// PUT /:id/resubmit - Endpoint específico para reenviar propostas pendentes
+router.put('/:id/resubmit', auth, async (req: any, res: any) => {
+  try {
+    const propostaController = new ProposalController(proposalRepository);
+    await propostaController.resubmitFromPending(req, res);
+  } catch (error) {
+    console.error('Error in resubmit route:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
 export default router;

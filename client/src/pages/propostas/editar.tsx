@@ -408,25 +408,19 @@ const EditarPropostaPendenciada: React.FC = () => {
   // Mutation para reenviar proposta (mudança de status)
   const resubmitMutation = useMutation({
     mutationFn: async () => {
-      console.log('🔍 REENVIANDO PROPOSTA para análise');
       // Primeiro salva as alterações se houver
       if (
         Object.keys(formData.clienteData).length > 0 ||
         Object.keys(formData.condicoesData).length > 0
       ) {
-        console.log('🔍 SALVANDO ALTERAÇÕES antes de reenviar');
         await api.put(`/api/propostas/${id}`, {
           cliente_data: formData.clienteData,
           condicoes_data: formData.condicoesData,
         });
       }
 
-      // Depois muda o status para aguardando_analise
-      console.log('🔍 MUDANDO STATUS para aguardando_analise');
-      const response = await api.put(`/api/propostas/${id}/status`, {
-        status: 'aguardando_analise',
-        observacao: 'Proposta corrigida e reenviada pelo atendente',
-      });
+      // Usar endpoint específico para reenviar propostas pendentes
+      const response = await api.put(`/api/propostas/${id}/resubmit`);
       return response.data;
     },
     onSuccess: () => {
@@ -443,11 +437,9 @@ const EditarPropostaPendenciada: React.FC = () => {
     },
     onError: (error: any) => {
       const errorMessage =
+        error?.response?.data?.error ||
         error?.message ||
-        error?.response?.data?.message ||
-        (typeof error === 'object' ? JSON.stringify(error) : String(error)) ||
-        'Erro desconhecido';
-      console.error('🔍 ERRO AO REENVIAR:', { error, errorMessage });
+        'Erro ao reenviar proposta';
       toast({
         variant: 'destructive',
         title: 'Erro ao reenviar',

@@ -473,6 +473,65 @@ export class ProposalController {
   }
 
   /**
+   * Reenviar proposta pendente para análise (após correções)
+   * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Endpoint específico para reenvio
+   */
+  async resubmitFromPending(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const analistaId = (req as any).user?.id;
+
+      if (!analistaId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Usuário não autenticado',
+        });
+      }
+
+      const proposal = await this.repository.findById(id);
+
+      if (!proposal) {
+        return res.status(404).json({
+          success: false,
+          error: 'Proposta não encontrada',
+        });
+      }
+
+      // Usar o novo método específico para reenvio de pendentes
+      proposal.resubmitFromPending();
+      await this.repository.save(proposal);
+
+      return res.json({
+        success: true,
+        message: 'Proposta reenviada para análise com sucesso',
+        propostaId: proposal.id,
+        novoStatus: proposal.status,
+      });
+    } catch (error: any) {
+      console.error('[ProposalController.resubmitFromPending] Error:', error);
+
+      if (error.message.includes('não encontrada')) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (error.message.includes('Apenas propostas pendentes')) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao reenviar proposta',
+      });
+    }
+  }
+
+  /**
    * Buscar proposta por CPF (última proposta do cliente)
    */
   async getByCpf(req: Request, res: Response): Promise<Response> {
