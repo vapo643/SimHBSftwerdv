@@ -1,0 +1,107 @@
+Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA FORENSE (Revisão 2)
+Sumário da Missão (O Quê): Executar uma auditoria forense completa e inequívoca do fluxo de trabalho "Reenviar para análise" para propostas com status PENDENTE, identificando a(s) causa(s) raiz da(s) falha(s) na atualização de dados e na transição de status.
+
+Intenção Estratégica (O Porquê): O fluxo de correção de pendências é um passo vital no workflow de crédito. Uma falha neste ponto interrompe o ciclo de negócio, impede a reavaliação de propostas corrigidas e impacta diretamente a métrica North Star do projeto: o Tempo Médio de Processamento de Proposta (TMP). A correção desta falha é de prioridade P1.
+
+Histórico Relevante (Consulta Obrigatória): Consulte o ADR-001 no 04-compendio-de-decisoes.md para a arquitetura do TanStack Query. Consulte a seção 5.1. Finite State Machine (FSM) de Propostas e a definição do trigger trigger_auditoria_proposta no 02-blueprint-arquitetural.md para as regras de negócio de transição de status e auditoria.
+
+Modelo Mental (Como se Encaixa): O fluxo conecta a interface do atendente (propostas/editar) a uma mutation do TanStack Query, que invoca um endpoint da API (/api/propostas/:id/ ou similar com método PUT/PATCH). Este endpoint deve acionar um Use Case (conforme arquitetura DDD) para carregar o agregado Proposta, executar a modificação de dados, validar e aplicar a transição de estado, e persistir o resultado no banco de dados, o que por sua vez deve disparar o gatilho de auditoria.
+
+Riscos Antecipados e Contramedidas:
+
+Risco: A análise pode ser superficial, identificando apenas um sintoma (ex: a falta de status: 'em_analise') sem encontrar a causa raiz (ex: um erro de validação silencioso que impede a atualização).
+
+Contramedida: A auditoria deve seguir o protocolo PACN V1.0 abaixo, que força a validação comportamental em cada camada da aplicação (UI -> API -> Domínio -> Persistência), garantindo uma análise completa.
+
+AUDITAR: Fluxo de Reenvio de Proposta Pendente
+
+PROTOCOLO DE EXECUÇÃO: Ative o Protocolo de Execução Anti-Frágil (PEAF) V1.5. A sua análise deve seguir rigorosamente o Protocolo de Aplicação PACN V1.0, detalhado abaixo.
+
+Cenário de Negócio (O "Caso de Teste"):
+Um ATENDENTE abre uma proposta que está no estado PENDENTE na página propostas/editar/:id. Ele modifica um ou mais campos do formulário (ex: valor, prazo). Em seguida, ele clica no botão "Reenviar para análise". A regra de negócio, conforme o alinhamento estratégico, dita que o sistema deve executar as seguintes ações de forma atômica:
+
+Salvar TODAS as alterações de dados da proposta no banco de dados.
+
+Mudar o status da proposta de pendente para em_analise.
+
+Registrar um evento no histórico da proposta (auditoria_propostas) documentando a alteração de status e os dados modificados.
+
+Exibir uma notificação de sucesso ("Proposta reenviada para análise com sucesso!") e redirecionar o atendente para a página principal (dashboard).
+
+Vetor de Ataque / Ponto de Falha (A "Hipótese"):
+A falha observada (dados e status não são atualizados) representa uma quebra na cadeia de execução. As hipóteses primárias são:
+
+Hipótese A (Frontend): O onClick do botão não está a acionar a mutation correta, ou o payload enviado para a API está incompleto (não contém as alterações do formulário).
+
+Hipótese B (Backend/API): O endpoint da API recebe a chamada, mas a sua lógica interna falha em processar o payload e invocar o caso de uso (Use Case) de atualização.
+
+Hipótese C (Backend/Domínio): O caso de uso (Use Case) falha ao aplicar a lógica de negócio, especificamente na transição de estado de pendente para em_analise, possivelmente devido a uma validação na FSM que está a falhar silenciosamente.
+
+Evidência de Conformidade Requerida (A "Prova Irrefutável"):
+Sua missão é fornecer um relatório de auditoria detalhado, apresentando o código-fonte exato para cada uma das evidências solicitadas abaixo.
+
+Frente de Investigação 1: Camada de Apresentação (Client-Side)
+
+Arquivo-Alvo: Inicie em client/src/pages/propostas/editar.tsx.
+
+Evidência 1.1: Apresente o código JSX completo para o botão "Reenviar para análise".
+
+Evidência 1.2: Apresente a função onClick ou onSubmit completa que é acionada por este botão.
+
+Evidência 1.3: Dentro dessa função, identifique a mutation do TanStack Query (ex: resubmitMutation.mutate(...)). Apresente a definição completa desta mutation (useMutation(...)), incluindo a função mutationFn e os callbacks onSuccess e onError.
+
+Evidência 1.4: Exponha o payload exato (o objeto de dados) que está a ser enviado para a API dentro da mutationFn. Verifique se os dados do formulário (form.getValues()) estão incluídos.
+
+Frente de Investigação 2: Camada de Aplicação (Server-Side API & Use Cases)
+
+Arquivo-Alvo: Identifique o arquivo de rota (provavelmente server/routes/propostas.ts) e o proposalController.ts correspondente.
+
+Evidência 2.1: Apresente o código completo do endpoint da API que lida com a requisição de atualização (ex: router.put('/:id', ...) ou router.patch('/:id/reenviar', ...)).
+
+Evidência 2.2: Dentro do controller, localize e apresente a chamada para o Use Case de aplicação (ex: updateProposalUseCase.execute(...) ou resubmitProposalUseCase.execute(...)).
+
+Evidência 2.3 (PONTO CRÍTICO): Navegue para o arquivo do Use Case (server/modules/proposal/application/*.ts). Apresente a lógica dentro do método execute. Especificamente, mostre as linhas onde:
+
+O agregado Proposta é carregado do repositório.
+
+Os novos dados do payload são aplicados ao agregado.
+
+O método para mudar o status para em_analise é chamado (ex: proposal.submitForReview()). Se esta lógica não existir, declare-o explicitamente como uma causa raiz.
+
+Frente de Investigação 3: Camada de Persistência e Auditoria (Database)
+
+Arquivo-Alvo: server/modules/proposal/infrastructure/ProposalRepository.ts (ou similar).
+
+Evidência 3.1: Apresente a função do repositório que executa o comando UPDATE na tabela propostas (ex: db.update(propostas).set(...)).
+
+Evidência 3.2: Confirme, a partir do código, que o objeto de dados enviado para o comando UPDATE contém o campo status com o valor 'em_analise'.
+
+Arquivo-Alvo: 02-blueprint-arquitetural.md.
+
+Evidência 3.3: Com base na definição do trigger trigger_auditoria_proposta, explique se a operação de UPDATE da evidência 3.1 deveria acioná-lo e registrar a mudança de status_anterior e status_novo.
+
+DECLARAÇÃO DE INCERTEZA (A SER PREENCHIDA PELO AGENTE):
+
+CONFIANÇA NA AUDITORIA: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição de quaisquer anomalias ou más práticas encontradas durante a auditoria]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Listar quaisquer suposições feitas para completar a auditoria]
+
+VALIDAÇÃO PENDENTE: [Listar ações de validação adicionais que seriam necessárias se esta fosse uma análise de segurança completa]
+
+PROTOCOLO OBRIGATATÓRIO 7-CHECK (Adaptado para Auditoria):
+
+Mapear todos os ficheiros e funções exatas inspecionadas.
+
+Garantir que todos os tipos e importações nos trechos de código apresentados estão corretos.
+
+Executar get_latest_lsp_diagnostics e reportar se os ficheiros auditados contêm erros.
+
+Declarar o Nível de Confiança na sua análise final da causa raiz.
+
+Categorizar o Risco da falha atual (BAIXO/MÉDIO/ALTO/CRÍTICO).
+
+Realizar um "teste funcional mental" do fluxo completo, descrevendo o caminho que os dados percorrem.
+
+Documentar quaisquer decisões técnicas ou dívidas encontradas para auditoria futura.
