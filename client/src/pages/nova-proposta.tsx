@@ -124,6 +124,9 @@ export default function NovaProposta() {
     defaultValues: {
       documentos: [],
       clienteNacionalidade: 'Brasileira',
+      // CORREÇÃO: Valores padrão para finalidade e garantia
+      finalidade: '',
+      garantia: '',
     },
   });
 
@@ -874,7 +877,13 @@ export default function NovaProposta() {
                       <Label htmlFor="finalidade">Finalidade</Label>
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden" value={watch('finalidade') || ''} />
-                      <Select onValueChange={(value) => setValue('finalidade', value)}>
+                      <Select 
+                        value={watch('finalidade') || ''}
+                        onValueChange={(value) => {
+                          setValue('finalidade', value);
+                          clearErrors('finalidade');
+                        }}
+                      >
                         <SelectTrigger
                           className={
                             errors.finalidade
@@ -901,7 +910,13 @@ export default function NovaProposta() {
                       <Label htmlFor="garantia">Tipo de Garantia</Label>
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden" value={watch('garantia') || ''} />
-                      <Select onValueChange={(value) => setValue('garantia', value)}>
+                      <Select 
+                        value={watch('garantia') || ''}
+                        onValueChange={(value) => {
+                          setValue('garantia', value);
+                          clearErrors('garantia');
+                        }}
+                      >
                         <SelectTrigger
                           className={
                             errors.garantia
