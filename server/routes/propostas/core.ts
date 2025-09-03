@@ -219,7 +219,15 @@ router.get('/:id/observacoes', auth, async (req: any, res: any) => {
 });
 
 // PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
-router.put('/:id/status', auth, async (req: any, res: any) => {
+router.put('/:id/status', (req: any, res: any, next: any) => {
+  // 🚨 LOG ABSOLUTO - ANTES DE QUALQUER MIDDLEWARE
+  console.log(`[🚨 ROTA DEBUG] ===== REQUEST CHEGOU NA ROTA PUT /:id/status =====`);
+  console.log(`[🚨 ROTA DEBUG] URL:`, req.url);
+  console.log(`[🚨 ROTA DEBUG] Method:`, req.method);
+  console.log(`[🚨 ROTA DEBUG] Params:`, req.params);
+  console.log(`[🚨 ROTA DEBUG] Body:`, JSON.stringify(req.body, null, 2));
+  next();
+}, auth, async (req: any, res: any) => {
   // INÍCIO DOS LOGS DE DEBUG - SEMPRE APARECE
   console.log(`[🚨 PENDENCIAR DEBUG] ===== INÍCIO DA ROTA =====`);
   console.log(`[🚨 PENDENCIAR DEBUG] URL:`, req.url);
