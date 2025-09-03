@@ -240,10 +240,19 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
   } else if (status === 'pendente' || status === 'pendenciado') {
     // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendente
     try {
+      // DEBUG: Log completo do request body
+      console.log(`[PENDENCIAR DEBUG] Full req.body:`, JSON.stringify(req.body, null, 2));
+      console.log(`[PENDENCIAR DEBUG] Status:`, status);
+      console.log(`[PENDENCIAR DEBUG] motivo_pendencia:`, req.body.motivo_pendencia);
+      console.log(`[PENDENCIAR DEBUG] motivoPendencia:`, req.body.motivoPendencia);
+      console.log(`[PENDENCIAR DEBUG] observacao:`, req.body.observacao);
+      
       // Aceitar tanto camelCase (frontend) quanto snake_case (backend)
       const motivo_pendencia = req.body.motivo_pendencia || req.body.motivoPendencia || req.body.observacao;
+      console.log(`[PENDENCIAR DEBUG] Final motivo_pendencia:`, motivo_pendencia);
       
       if (!motivo_pendencia) {
+        console.log(`[PENDENCIAR DEBUG] ❌ Motivo da pendência não encontrado!`);
         return res.status(400).json({
           success: false,
           error: 'Motivo da pendência é obrigatório',
@@ -252,6 +261,7 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
       
       // Garantir que o motivo seja passado corretamente para o controller
       req.body.motivo_pendencia = motivo_pendencia;
+      console.log(`[PENDENCIAR DEBUG] ✅ Motivo definido, passando para controller`);
       
       // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
       return controller.pendenciar(req, res);
