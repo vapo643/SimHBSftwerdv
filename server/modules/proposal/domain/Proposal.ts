@@ -423,7 +423,7 @@ export class Proposal {
       data.produto_id || 0,  // Valores padrão para compatibilidade
       data.tabela_comercial_id || 0,
       data.loja_id || 0,
-      data.analista_id || 'sistema',
+      data.analista_id || 'e647afc0-03fa-482d-8293-d824dcab0399', // UUID padrão do sistema
       data.valor_tac || 0,
       data.valor_iof || 0,
       data.valor_total_financiado || data.valor,

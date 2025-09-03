@@ -182,7 +182,7 @@ export class CreateProposalUseCase {
       produtoId: dto.produtoId || 1, // Produto padrão se não especificado
       tabelaComercialId: dto.tabelaComercialId || 4, // Tabela ativa padrão
       lojaId: dto.lojaId || 1, // Loja padrão
-      analistaId: String(dto.atendenteId) || 'sistema', // COMPATIBILIDADE: converter integer para string
+      analistaId: String(dto.atendenteId) || 'e647afc0-03fa-482d-8293-d824dcab0399', // COMPATIBILIDADE: UUID padrão
       
       // Dados do cliente (obrigatórios)
       clienteNome: dto.clienteNome,
