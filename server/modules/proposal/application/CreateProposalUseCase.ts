@@ -147,9 +147,9 @@ export class CreateProposalUseCase {
       data_nascimento: dto.clienteDataNascimento, // Alias
       estado: dto.clienteUf, // Alias
       renda_mensal: dto.clienteRenda ? Money.fromReais(dto.clienteRenda) : undefined, // Alias
-      empregador: dto.clienteOcupacao, // Empresas vs ocupação
-      tempo_emprego: undefined, // Campo não usado no momento
-      dividas_existentes: undefined, // Campo não usado no momento
+      empregador: dto.clienteEmpresaNome || dto.clienteOcupacao, // CORRIGIDO: usar empresa se disponível
+      tempo_emprego: dto.clienteTempoEmprego, // CORRIGIDO: usar valor real
+      dividas_existentes: dto.clienteDividasExistentes ? parseFloat(dto.clienteDividasExistentes.toString()) : undefined, // CORRIGIDO: usar valor real
     };
 
     // LACRE DE OURO: Construir ProposalCreationProps com todos os 14 campos críticos

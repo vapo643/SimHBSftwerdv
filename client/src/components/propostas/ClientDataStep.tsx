@@ -236,6 +236,11 @@ export function ClientDataStep() {
       // 🏭 Nome da empresa - usar campo REAL
       clienteEmpresaNome: clientData.empregador || apiData.clienteEmpresaNome || '',
       
+      // 💼 Dados profissionais adicionais - CAMPOS REAIS
+      clienteDividasExistentes: clientData.dividas_existentes || apiData.clienteDividasExistentes || '',
+      clienteTempoEmprego: clientData.tempo_emprego || apiData.clienteTempoEmprego || '',
+      clienteCargoFuncao: clientData.cargo_funcao || apiData.clienteCargoFuncao || '',
+      
       // Dados de pagamento - usar estrutura correta
       metodoPagamento: (apiData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
       dadosPagamentoBanco: apiData.dadosPagamentoBanco || '',
