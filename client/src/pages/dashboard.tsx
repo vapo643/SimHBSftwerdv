@@ -698,7 +698,7 @@ const Dashboard: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        {proposta?.status === 'pendenciado' && proposta?.motivo_pendencia && (
+                        {(proposta?.status === 'pendenciado' || proposta?.status === 'pendente') && proposta?.motivo_pendencia && (
                           <div className="mt-2 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-2">
                             <AlertCircle className="h-4 w-4 text-orange-600" />
                             <span className="text-sm text-orange-700">
@@ -714,7 +714,7 @@ const Dashboard: React.FC = () => {
                         {formatCurrency(proposta?.valorSolicitado || 0)}
                       </div>
                       <div className="flex justify-end gap-2">
-                        {proposta?.status === 'pendenciado' ? (
+                        {(proposta?.status === 'pendenciado' || proposta?.status === 'pendente') ? (
                           <Link to={`/propostas/editar/${proposta?.id || 'new'}`}>
                             <Button size="sm" variant="outline" className="flex items-center gap-1">
                               <Edit className="h-4 w-4" />
