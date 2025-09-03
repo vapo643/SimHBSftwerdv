@@ -236,6 +236,9 @@ export class ProposalController {
         valor_tac: proposal.valorTac,
         valor_iof: proposal.valorIof,
         valor_total_financiado: proposal.valorTotalFinanciado,
+        // CAMPOS AUSENTES - CORREÇÃO AUDITORIA
+        finalidade: proposal.finalidade,
+        garantia: proposal.garantia,
         // Cálculos do agregado
         valor_parcela: proposal.calculateMonthlyPayment(),
         valor_total: proposal.calculateTotalAmount(),

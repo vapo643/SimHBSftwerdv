@@ -250,6 +250,8 @@ export class Proposal {
   private _dadosPagamento?: DadosPagamento;
   private _motivoRejeicao?: string;
   private _observacoes?: string;
+  private _finalidade?: string;
+  private _garantia?: string;
   private _createdAt: Date;
   private _updatedAt: Date;
 
@@ -436,6 +438,8 @@ export class Proposal {
     proposal._dadosPagamento = data.dados_pagamento;
     proposal._motivoRejeicao = data.motivo_rejeicao;
     proposal._observacoes = data.observacoes;
+    proposal._finalidade = data.finalidade;
+    proposal._garantia = data.garantia;
     proposal._createdAt = data.created_at;
     proposal._updatedAt = data.updated_at;
     proposal._parceiroId = data.parceiro_id;
@@ -865,6 +869,14 @@ export class Proposal {
   get observacoes(): string | undefined {
     return this._observacoes;
   }
+
+  get finalidade(): string | undefined {
+    return this._finalidade;
+  }
+
+  get garantia(): string | undefined {
+    return this._garantia;
+  }
   get ccbUrl(): string | undefined {
     return this._ccbUrl;
   }
@@ -933,6 +945,8 @@ export class Proposal {
       dados_pagamento: this._dadosPagamento,
       motivo_rejeicao: this._motivoRejeicao,
       observacoes: this._observacoes,
+      finalidade: this._finalidade,
+      garantia: this._garantia,
       user_id: this._analistaId, // Usar analistaId como userId para mapeamento correto
       created_at: this._createdAt,
       updated_at: this._updatedAt,

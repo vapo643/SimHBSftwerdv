@@ -359,7 +359,7 @@ const EditarPropostaPendenciada: React.FC = () => {
   // Atualizar formData quando proposta carrega
   useEffect(() => {
     if (proposta) {
-      console.log('🔍 DADOS DA PROPOSTA CARREGADA - PROPOSTA COMPLETA:', proposta);
+      // console.log('🔍 DADOS DA PROPOSTA CARREGADA - PROPOSTA COMPLETA:', proposta);
       
       // Normalizar dados de cliente (suportar ambas estruturas clienteData e cliente_data)
       const clienteData = {
