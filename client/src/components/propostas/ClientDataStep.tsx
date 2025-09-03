@@ -208,10 +208,10 @@ export function ClientDataStep() {
       rgUf: apiData.clienteRgUf || clientData.uf || '',
       rgDataEmissao: apiData.clienteRgDataEmissao || clientData.rgDataEmissao || '',
       
-      // Dados adicionais - priorizar campos diretos
-      localNascimento: apiData.clienteLocalNascimento || clientData.localNascimento || '',
-      estadoCivil: apiData.clienteEstadoCivil || clientData.estadoCivil || '',
-      nacionalidade: apiData.clienteNacionalidade || clientData.nacionalidade || '',
+      // 🌍 Dados adicionais - APENAS CAMPOS REAIS
+      localNascimento: clientData.localNascimento || apiData.clienteLocalNascimento || '',
+      estadoCivil: clientData.estadoCivil || apiData.clienteEstadoCivil || '',
+      nacionalidade: clientData.nacionalidade || apiData.clienteNacionalidade || '',
       
       // Endereço - verificar tanto campo direto quanto clienteData
       cep: apiData.clienteCep || clientData.cep || '',
@@ -222,15 +222,19 @@ export function ClientDataStep() {
       cidade: apiData.clienteCidade || clientData.cidade || '',
       estado: apiData.clienteUf || clientData.estado || '',
       
-      // Dados profissionais - priorizar campos diretos
+      // 💼 Dados profissionais - APENAS CAMPOS REAIS
       ocupacao: apiData.clienteOcupacao || clientData.ocupacao || '',
-      rendaMensal: apiData.clienteRendaMensal || apiData.clienteRenda || clientData.rendaMensal || clientData.renda_mensal || '',
-      telefoneEmpresa: apiData.clienteTelefoneEmpresa || clientData.telefoneEmpresa || '',
+      rendaMensal: (
+        // Converter centavos para reais se vier no formato {cents: number}
+        clientData.rendaMensal?.cents ? (clientData.rendaMensal.cents / 100).toString() :
+        clientData.renda_mensal || 
+        apiData.clienteRenda || 
+        apiData.clienteRendaMensal || ''
+      ),
+      telefoneEmpresa: clientData.telefoneEmpresa || apiData.clienteTelefoneEmpresa || '',
       
-      // 🏭 NOVOS CAMPOS EMPRESARIAIS
-      clienteEmpresaNome: apiData.clienteEmpresaNome || clientData.empresaNome || clientData.empregador || '',
-      clienteDividasExistentes: apiData.clienteDividasExistentes || clientData.dividasExistentes || clientData.dividas_existentes || '',
-      dataAdmissao: apiData.clienteDataAdmissao || clientData.dataAdmissao || clientData.data_admissao || '',
+      // 🏭 Nome da empresa - usar campo REAL
+      clienteEmpresaNome: clientData.empregador || apiData.clienteEmpresaNome || '',
       
       // Dados de pagamento - usar estrutura correta
       metodoPagamento: (apiData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
