@@ -176,9 +176,9 @@ export class ProposalController {
   async getById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const useCase = new GetProposalByIdUseCase(this.repository);
-
-      const proposal = await useCase.execute(id);
+      
+      // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta com dados relacionados
+      const proposal = await this.repository.findById(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -187,7 +187,7 @@ export class ProposalController {
         });
       }
 
-      // Serializar agregado para resposta
+      // OPERAÇÃO VISÃO CLARA V1.0: Serializar agregado COMPLETO para resposta
       const data = {
         id: proposal.id,
         status: proposal.status,
@@ -204,6 +204,12 @@ export class ProposalController {
         ccb_url: proposal.ccbUrl,
         created_at: proposal.createdAt,
         updated_at: proposal.updatedAt,
+        // CORREÇÃO: Incluir campos que estavam ausentes
+        valor_tac: proposal.valorTac,
+        valor_iof: proposal.valorIof,
+        valor_total_financiado: proposal.valorTotalFinanciado,
+        // NOTA: finalidade e garantia não são propriedades do agregado Proposal
+        // Eles estão no banco mas não foram modelados no domínio
         // Cálculos do agregado
         valor_parcela: proposal.calculateMonthlyPayment(),
         valor_total: proposal.calculateTotalAmount(),

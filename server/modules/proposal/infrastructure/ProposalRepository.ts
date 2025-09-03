@@ -628,6 +628,7 @@ export class ProposalRepository implements IProposalRepository {
       };
     }
 
+    // OPERAÇÃO VISÃO CLARA V1.0: Incluir campos ausentes no mapeamento
     return Proposal.fromDatabase({
       id: aggregateId,
       status: row.status,
@@ -640,6 +641,12 @@ export class ProposalRepository implements IProposalRepository {
       loja_id: row.lojaId,
       parceiro_id: row.parceiroId,
       atendente_id: row.atendenteId,
+      // CORREÇÃO: Incluir campos que estavam ausentes
+      valor_tac: row.valorTac ? parseFloat(row.valorTac) : 0,
+      valor_iof: row.valorIof ? parseFloat(row.valorIof) : 0,
+      valor_total_financiado: row.valorTotalFinanciado ? parseFloat(row.valorTotalFinanciado) : parseFloat(row.valor),
+      finalidade: row.finalidade,
+      garantia: row.garantia,
       dados_pagamento: row.dadosPagamentoMetodo
         ? {
             metodo: row.dadosPagamentoMetodo || row.metodoPagamento,
