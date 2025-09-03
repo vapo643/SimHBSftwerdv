@@ -151,10 +151,19 @@ router.post('/', auth, (req: any, res: any) => controller.create(req, res));
 
 // PUT /api/propostas/:id - Atualizar dados da proposta
 router.put('/:id', auth, async (req: any, res: any) => {
+  console.log('🔍 [ROUTER DEBUG] PUT /:id route hit');
+  console.log('🔍 [ROUTER DEBUG] Request params:', req.params);
+  console.log('🔍 [ROUTER DEBUG] Request body keys:', Object.keys(req.body));
+  console.log('🔍 [ROUTER DEBUG] User from auth:', req.user?.id);
+  
   try {
-    return controller.update(req, res);
+    console.log('🔍 [ROUTER DEBUG] Calling controller.update...');
+    const result = await controller.update(req, res);
+    console.log('🔍 [ROUTER DEBUG] Controller.update completed');
+    return result;
   } catch (error) {
-    console.error('Error in update route:', error);
+    console.error('🚨 [ROUTER DEBUG] Error in PUT /:id:', error);
+    console.error('🚨 [ROUTER DEBUG] Error stack:', (error as any)?.stack);
     res.status(500).json({
       success: false,
       error: 'Erro interno do servidor'
