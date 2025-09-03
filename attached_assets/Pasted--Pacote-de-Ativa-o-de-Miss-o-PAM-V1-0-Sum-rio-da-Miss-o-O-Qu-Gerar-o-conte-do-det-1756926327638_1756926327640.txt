@@ -1,0 +1,90 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Gerar o conteúdo detalhado do "Compêndio de Decisões Críticas" em formato Markdown, com um mínimo de 1000 linhas, para registrar o histórico arquitetural do projeto Simpix.
+* **Intenção Estratégica (O Porquê):** Criar um registro cronológico, detalhado e imutável das decisões arquiteturais mais impactantes tomadas durante o desenvolvimento do Simpix. O objetivo é prevenir a "amnésia de projeto", facilitar o onboarding de novos membros, e justificar a estrutura atual do sistema para futuras auditorias ou evoluções.
+* **Histórico Relevante (Consulta Obrigatória):** As decisões a serem documentadas são aquelas que levaram diretamente à "Golden Stack" e aos padrões operacionais definidos nos documentos `02-blueprint-arquitetural.md` e `03-manual-de-operacoes.md`.
+* **Modelo Mental (Como se Encaixa):** Este documento é o "diário de bordo" do arquiteto. Ele não descreve o estado atual, mas sim *como chegamos* ao estado atual, capturando a lógica, os debates e os trade-offs de cada ponto de inflexão técnico.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** O Agente pode gerar justificativas superficiais ou genéricas para as decisões.
+    * **Contramedida:** O prompt abaixo fornece exemplos de decisões com um nível extremo de detalhe no contexto, nas opções consideradas e na justificativa, servindo como um "molde" de alta fidelidade para a IA emular e expandir.
+
+---
+
+**IMPLEMENTAR:**
+Criar o terceiro e último documento mestre do Dossiê do Projeto Simpix: o "Compêndio de Decisões Críticas".
+
+**CURRENT STATE:**
+A arquitetura e os padrões operacionais do projeto estão definidos, mas a justificativa histórica e o raciocínio por trás das decisões-chave que moldaram esses artefatos não estão formalmente registrados.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Na pasta `/docs` existente, um novo arquivo chamado `04-compendio-de-decisoes.md` deve ser criado.
+2.  Este arquivo deve ser um log detalhado, com no mínimo 1000 linhas, contendo um registro de várias decisões arquiteturais críticas, seguindo rigorosamente a estrutura e os exemplos fornecidos nas constraints abaixo.
+
+**CONSTRAINTS (Roadmap de Implementação do Documento):**
+
+Você deve escrever o conteúdo do arquivo `04-compendio-de-decisoes.md` em formato Markdown. O documento deve ser estruturado como uma lista de registros de decisão. Para cada registro, você deve seguir o template fornecido e expandir cada seção com o máximo de detalhes técnicos e de negócio. Gere pelo menos 3 registros de decisão detalhados com base nos exemplos de contexto fornecidos.
+
+**# Compêndio de Decisões Críticas do Projeto Simpix**
+
+## Registro de Decisão Arquitetural (ADR - Architectural Decision Record)
+
+---
+
+### **ADR-001: Adoção do Jotai para Gerenciamento de Estado no Frontend**
+
+* **Data da Decisão:** 2025-05-15
+* **Decisão:** Adotado Jotai como a biblioteca primária para gerenciamento de estado no frontend, em detrimento de Zustand, Redux Toolkit e da Context API nativa do React.
+* **Contexto e Problema:** O dashboard do prestador de serviço no Simpix é altamente interativo, com múltiplos componentes (calendário de agendamentos, lista de propostas, painel de métricas) que precisam refletir atualizações de estado em tempo real e de forma independente. Uma abordagem de estado global monolítica poderia levar a re-renderizações excessivas e degradação de performance, especialmente em telas com alta densidade de informação. Precisávamos de uma solução que garantisse reatividade granular e minimizasse o acoplamento entre os componentes.
+* **Opções Consideradas:**
+    1.  **Zustand:** Uma solução minimalista com uma store centralizada. Rápida e com pouco boilerplate.
+    2.  **Redux Toolkit:** Padrão da indústria, robusto, com excelentes ferramentas de depuração, mas com maior complexidade e boilerplate.
+    3.  **React Context API:** Solução nativa do React, mas conhecida por causar problemas de performance com re-renderizações em cascata quando o estado muda frequentemente.
+    4.  **Jotai:** Biblioteca de estado atômico, que permite criar "peças" de estado pequenas e independentes.
+* **Justificativa ("O Porquê"):** A decisão pendeu para o Jotai devido à sua filosofia atômica, que se alinha perfeitamente com a nossa necessidade de reatividade granular. Com Jotai, um componente que exibe o número de propostas pendentes se inscreve apenas no átomo `proposalsCountAtom`. Uma atualização no átomo do calendário (`calendarEventsAtom`) não provocará uma nova renderização desnecessária no contador de propostas. Isso é fundamental para a performance do nosso dashboard. Enquanto Zustand é excelente e simples, seu modelo de "slices" de uma store única ainda poderia levar a re-renderizações indesejadas se os seletores não fossem cuidadosamente otimizados com `useShallow`. Jotai, por sua natureza, previne este problema, tornando o código mais previsível e performático por padrão.
+* **Implicações:** A equipe precisa ser treinada no paradigma de estado atômico, que é ligeiramente diferente do modelo de store centralizada. Haverá uma proliferação maior de pequenos "átomos" em vez de um único "estado", o que exige uma organização de arquivos cuidadosa para manter a manutenibilidade.
+
+---
+
+### **ADR-002: Seleção do Supabase como Backend as a Service (BaaS)**
+
+* **Data da Decisão:** 2025-04-20
+* **Decisão:** Selecionado o Supabase como a plataforma de backend para o Simpix, gerenciando o banco de dados, autenticação e funções serverless.
+* **Contexto e Problema:** Para validar o Simpix rapidamente no mercado (Time-to-Market), precisávamos de uma solução de backend que abstraísse a complexidade de infraestrutura, mas sem nos prender a um ecossistema proprietário no futuro (vendor lock-in). A necessidade de um sistema de permissões robusto para separar os dados de múltiplos prestadores de serviço era um requisito de segurança não negociável desde o primeiro dia.
+* **Opções Consideradas:**
+    1.  **Backend Customizado:** Construir um backend do zero usando Node.js, Express/Fastify e um ORM como o Prisma sobre uma instância PostgreSQL na AWS/GCP. Oferece controle máximo, mas com um custo de desenvolvimento e manutenção muito elevado.
+    2.  **Firebase:** Solução BaaS líder de mercado, com excelente escalabilidade e ecossistema. No entanto, seu banco de dados (Firestore) é NoSQL e proprietário, representando um alto risco de vendor lock-in. A migração para outra plataforma seria extremamente complexa e custosa.
+    3.  **Supabase:** Alternativa open-source ao Firebase, construída sobre tecnologias padrão de mercado (PostgreSQL, GoTrue, Deno).
+* **Justificativa ("O Porquê"):** O Supabase ofereceu o equilíbrio perfeito entre velocidade de desenvolvimento e sustentabilidade a longo prazo. Ele nos fornece as funcionalidades prontas de um BaaS (Auth, DB, Storage) ao mesmo tempo que utiliza PostgreSQL, um SGBD relacional open-source extremamente robusto. Isso nos dá uma "porta de saída": se um dia precisarmos migrar, podemos exportar um dump SQL padrão e mover nossa base de dados para qualquer outro provedor. A funcionalidade de Row Level Security (RLS) nativa do PostgreSQL, exposta de forma acessível pelo Supabase, foi o fator decisivo, permitindo-nos construir uma arquitetura multi-tenant segura e isolada diretamente na camada de dados, o que é muito mais seguro do que lógicas de permissão na camada de aplicação.
+* **Implicações:** Estamos dependentes do ecossistema e das ferramentas do Supabase para a operação diária. Embora a base seja aberta, uma migração ainda exigiria a reconstrução da camada de API e autenticação. A performance em escala dependerá da otimização das nossas queries e do plano de serviço contratado.
+
+---
+
+### **ADR-003: Estratégia de Testes End-to-End (E2E) com Playwright**
+
+* **Data da Decisão:** 2025-05-25
+* **Decisão:** Adotado o Playwright como framework padrão para todos os testes End-to-End (E2E), em detrimento do Cypress.
+* **Contexto e Problema:** Os fluxos de usuário do Simpix, como o agendamento de um serviço e o pagamento de uma proposta, são críticos para o negócio. Precisávamos de uma ferramenta de teste E2E que fosse rápida, confiável (menos "flaky") e com excelentes capacidades de depuração para garantir que esses fluxos nunca quebrem em produção.
+* **Opções Consideradas:**
+    1.  **Cypress:** Uma ferramenta E2E muito popular, conhecida por sua excelente experiência de desenvolvedor e interface de depuração interativa.
+    2.  **Selenium:** A solução mais antiga e estabelecida, com suporte a múltiplas linguagens, mas com uma API mais verbosa e propensa a testes instáveis.
+    3.  **Playwright:** Um framework moderno desenvolvido pela Microsoft, com foco em velocidade, confiabilidade e testes cross-browser.
+* **Justificativa ("O Porquê"):** A escolha pelo Playwright foi baseada em três vantagens técnicas cruciais. Primeiro, seu mecanismo de "auto-waiting" é inerentemente mais robusto que o do Cypress, aguardando que os elementos se tornem "acionáveis" (visíveis, estáveis, habilitados) antes de interagir, o que reduz drasticamente a principal causa de testes "flaky". Segundo, a arquitetura do Playwright permite testes verdadeiramente paralelos e cross-browser (Chrome, Firefox, WebKit) a partir de uma única base de código, o que é mais eficiente. Terceiro, suas ferramentas de depuração, especialmente o **Trace Viewer**, são superiores, permitindo-nos capturar um "traço" completo da execução do teste (DOM snapshots, logs de console, requisições de rede) e analisá-lo post-mortem, o que acelera a identificação da causa raiz de falhas de forma sem precedentes.
+* **Implicações:** A sintaxe do Playwright, baseada em `async/await`, é ligeiramente diferente do encadeamento de comandos do Cypress, exigindo uma pequena curva de aprendizado. A gestão dos testes e a análise dos relatórios serão centralizadas nas ferramentas oferecidas pelo Playwright.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATTÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** BAIXO - O risco principal é a geração de justificativas que, embora plausíveis, não capturem a profundidade técnica total. Os exemplos detalhados servem como um guia forte para mitigar este risco.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** As decisões, contextos e justificativas apresentadas são exemplos hipotéticos, mas realistas, criados para servir de base para o documento.
+* **VALIDAÇÃO PENDENTE:** O documento gerado deve ser auditado por um arquiteto humano para validar a coerência e a precisão técnica das justificativas apresentadas.
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (`/docs/04-compendio-de-decisoes.md`).
+2.  Garantir importações e tipos corretos (Não aplicável para Markdown).
+3.  Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros (Não aplicável para Markdown).
+4.  **Declarar Nível de Confiança (0-100%)**: 95%.
+5.  **Categorizar Riscos Descobertos**: BAIXO.
+6.  Realizar teste funcional completo (Revisão humana do documento gerado).
+7.  **Documentar Decisões Técnicas** (As premissas para as decisões estão documentadas neste prompt).
