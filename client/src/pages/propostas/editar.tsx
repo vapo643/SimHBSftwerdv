@@ -389,10 +389,15 @@ const EditarPropostaPendenciada: React.FC = () => {
                   (proposta as any).cliente_data?.telefone || '',
       };
 
-      // Normalizar dados de condições
+      // Normalizar dados de condições - INCLUIR DADOS DIRETOS DA PROPOSTA
       const condicoesData = {
         ...(proposta.condicoesData || {}),
         ...((proposta as any).condicoes_data || {}),
+        // Fallbacks para campos principais vindos diretamente da proposta  
+        valor: (proposta as any).valor || (proposta.condicoesData as any)?.valor || ((proposta as any).condicoes_data as any)?.valor || '',
+        prazo: (proposta as any).prazo || (proposta.condicoesData as any)?.prazo || ((proposta as any).condicoes_data as any)?.prazo || '',
+        finalidade: (proposta as any).finalidade || (proposta.condicoesData as any)?.finalidade || ((proposta as any).condicoes_data as any)?.finalidade || '',
+        garantia: (proposta as any).garantia || (proposta.condicoesData as any)?.garantia || ((proposta as any).condicoes_data as any)?.garantia || '',
       };
       
       setFormData({
@@ -905,9 +910,13 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="valor">Valor Solicitado *</Label>
                       <CurrencyInput
                         id="valor"
-                        value={(formData.condicoesData as any)?.valor?.cents ? 
-                          ((formData.condicoesData as any)?.valor?.cents / 100).toString() :
-                          (formData.condicoesData as any)?.valor || ''}
+                        value={
+                          (formData.condicoesData as any)?.valor?.cents ? 
+                            ((formData.condicoesData as any)?.valor?.cents / 100).toString() :
+                          (formData.condicoesData as any)?.valor ||
+                          (proposta as any)?.valor ||
+                          ''
+                        }
                         onChange={(e) => handleCondicoesChange('valor', e.target.value)}
                       />
                     </div>
@@ -918,7 +927,9 @@ const EditarPropostaPendenciada: React.FC = () => {
                         type="number"
                         min="1"
                         max="120"
-                        value={(formData.condicoesData as any)?.prazo || ''}
+                        value={(formData.condicoesData as any)?.prazo || 
+                               (proposta as any)?.prazo || 
+                               ''}
                         onChange={(e) => handleCondicoesChange('prazo', e.target.value)}
                         placeholder="12"
                       />
@@ -1021,7 +1032,9 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="finalidade">Finalidade *</Label>
                       <Input
                         id="finalidade"
-                        value={(formData.condicoesData as any)?.finalidade || ''}
+                        value={(formData.condicoesData as any)?.finalidade || 
+                               (proposta as any)?.finalidade || 
+                               ''}
                         onChange={(e) => handleCondicoesChange('finalidade', e.target.value)}
                         placeholder="Capital de giro, aquisição de equipamentos, etc."
                       />
@@ -1030,7 +1043,9 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="garantia">Garantia</Label>
                       <Input
                         id="garantia"
-                        value={(formData.condicoesData as any)?.garantia || ''}
+                        value={(formData.condicoesData as any)?.garantia || 
+                               (proposta as any)?.garantia || 
+                               ''}
                         onChange={(e) => handleCondicoesChange('garantia', e.target.value)}
                         placeholder="Sem garantia, aval, etc."
                       />
