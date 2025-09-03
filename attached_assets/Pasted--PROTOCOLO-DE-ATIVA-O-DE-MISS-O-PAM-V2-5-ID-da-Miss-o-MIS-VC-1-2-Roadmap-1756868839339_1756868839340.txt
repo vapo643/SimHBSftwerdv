@@ -1,0 +1,57 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V2.5**
+* **ID da Missão:** MIS-VC-1.2
+* **Roadmap Associado:** RDM-VC-1.0
+
+**[ATIVAÇÃO DE PROTOCOLOS MANDATÓRIOS DO `replit.md`]**
+*Sua execução será governada pelos seguintes protocolos:*
+*- **CRITICAL WORKFLOW:** `get_latest_lsp_diagnostics` antes da conclusão.*
+*- **PACN V1.0 ENFORCEMENT:** O seu plano deve ser validável através de cenários de negócio claros.*
+*- **CONTEXT ENGINEERING PROTOCOL V2.0:** Consulte ADRs, o schema e a documentação existente.*
+*- **DECD V1.0:** Pesquisa na web autorizada para esta missão de planeamento.*
+
+**1. Princípio Mestre: Transferência de Consciência**
+*O seu modo operacional muda de "Detetive Forense" para "Arquiteto de Soluções". O diagnóstico da Fase 1 revelou as rachaduras na fundação do fluxo do Analista. A sua missão agora é projetar os reforços estruturais. Você deve criar um `blueprint` de remediação unificado que não apenas conserte os quatro problemas, mas que estabeleça um contrato de dados robusto e à prova de futuro entre o backend e o frontend do Analista.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO VISÃO CLARA (FASE 2 - PLANEAMENTO UNIFICADO)**
+
+* **Sumário da Missão (O Quê):** Arquitetar um `blueprint` de remediação completo em `docs/missions/BLUEPRINT_VISAO_CLARA.md` para resolver todas as quatro falhas identificadas no fluxo de Análise de Crédito. O plano deve formalizar as correções já aplicadas e detalhar as soluções para os problemas remanescentes.
+* **Intenção Estratégica (O Porquê):** O objetivo é criar um plano de implementação coeso que garanta consistência de dados em todo o fluxo do Analista. Ao projetar a solução de forma unificada, garantimos que as correções na Fila de Análise e na Tela de Detalhes usem a mesma fonte da verdade, eliminando a possibilidade de futuras divergências.
+
+---
+
+### **PLANEJAR E ARQUITETAR:**
+Blueprint de Remediação do Fluxo de Análise
+
+**CURRENT STATE:**
+A auditoria da Fase 1 confirmou quatro falhas: (1) A query da Fila de Análise não inclui `parceiros` e o controller ignora o parâmetro `queue`; (2) A tela de Detalhe da Análise não exibe campos financeiros e documentos críticos; (3) Há uma inconsistência de dados entre o que é capturado na originação e o que é exibido para o analista; (4) A funcionalidade "Pendenciar" falha com um `HTTP 400` porque o status "PENDENTE" não é reconhecido pelo backend.
+
+**EXPECTED (Estado Final de Sucesso):**
+A geração de um novo documento Markdown em `docs/missions/BLUEPRINT_VISAO_CLARA.md`. Este documento deve conter um plano de implementação detalhado e priorizado para as seguintes missões de remediação:
+
+1.  **Missão P0: Formalização do Contrato de Dados da Fila de Análise**
+    * **Arquivo Alvo:** `server/modules/proposal/infrastructure/ProposalRepository.ts` e `server/modules/proposal/presentation/proposalController.ts`.
+    * **Plano de Ação Técnico:**
+        * **Validar e Documentar:** Confirme que a sua correção anterior (adicionar `JOIN` com `parceiros` e processar `queue=analysis`) está completa.
+        * **Arquitetar Teste:** Projete um teste de integração que valide especificamente este cenário: a chamada a `GET /api/propostas?queue=analysis` deve retornar um `array` de propostas onde cada objeto contém os campos `cliente.nome`, `parceiro.razaoSocial` e `loja.nomeLoja`.
+
+2.  **Missão P1: Expansão do Contrato de Dados do Detalhe da Proposta**
+    * **Arquivo Alvo:** O repositório de propostas e o controlador relevante para `GET /api/propostas/:id`.
+    * **Plano de Ação Técnico:**
+        * **Análise de Query:** Investigue a query do backend para a busca de proposta individual.
+        * **Plano de Refatoração:** Detalhe as modificações necessárias na query para incluir todos os campos em falta: `Renda mensal`, `Finalidade`, `Garantia`, `Tac`, `Iof`, `Valor total financiado`, `loja` e a lista de `documentos`.
+        * **Arquitetar Teste:** Projete um teste de integração que valide que a chamada a `GET /api/propostas/:id` para uma proposta válida retorna um objeto JSON contendo todos estes campos.
+
+3.  **Missão P2: Criação do Manifesto de Dados do Analista**
+    * **Arquivo Alvo:** Um novo documento de governança de dados em `architecture/02-technical/data-contracts/analyst-proposal-view.md`.
+    * **Plano de Ação Técnico:**
+        * Execute a "Auditoria de Consistência de Dados" descrita no PAM anterior.
+        * Crie uma tabela Markdown neste novo arquivo que sirva como a **fonte única da verdade**, listando todos os campos que **devem** ser visíveis para o Analista (tanto na fila quanto nos detalhes) e mapeando-os para a sua origem na tabela `propostas`.
+
+4.  **Missão P3: Blindagem do Fluxo de "Pendenciar"**
+    * **Arquivos Alvo:** `server/routes/propostas/core.ts` e o serviço de máquina de estados (`statusFsmService.ts`).
+    * **Plano de Ação Técnico:**
+        * **Validação:** Detalhe a alteração necessária no `schema` de validação (provavelmente Zod) do endpoint `PUT /api/propostas/:id/status` para aceitar `'PENDENTE'` como um valor válido no `payload`.
+        * **Lógica de Negócio:** Detalhe a alteração necessária no `statusFsmService.ts` para adicionar a transição de estado permitida para `PENDENTE` (ex: de `AGUARDANDO_ANALISE` para `PENDENTE`).
+        * **Arquitetar Teste:** Projete um teste de integração que simule um Analista a pendenciar uma proposta, enviando o `payload` `{ "status": "PENDENTE", "motivoPendencia": "Documentação inválida" }`, e valide que a API retorna `200 OK` e o estado da proposta no banco de dados é atualizado corretamente.
