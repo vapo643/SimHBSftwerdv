@@ -16,60 +16,76 @@ import { EventDispatcher } from '../../../infrastructure/events/EventDispatcher'
 export class ProposalRepository implements IProposalRepository {
   async save(proposal: Proposal): Promise<void> {
     const data = proposal.toPersistence();
+    
+    console.log('🔍 [REPOSITORY DEBUG] Starting save for proposal:', proposal.id);
+    console.log('🔍 [REPOSITORY DEBUG] Persistence data keys:', Object.keys(data));
+    console.log('🔍 [REPOSITORY DEBUG] analista_id:', data.analista_id);
+    console.log('🔍 [REPOSITORY DEBUG] user_id:', data.user_id);
+    console.log('🔍 [REPOSITORY DEBUG] status:', data.status);
 
     // P1.1 OPTIMIZATION: Use INSERT...ON CONFLICT instead of exists check
     // Try insert first - if conflict, then update
     try {
       // Attempt INSERT for new proposal
       const numeroProposta = await this.getNextNumeroProposta();
+      console.log('🔍 [REPOSITORY DEBUG] Next numero proposta:', numeroProposta);
       
-      await db.insert(propostas).values([
-        {
-          id: proposal.id, // UUID do domínio
-          numeroProposta: numeroProposta, // ID sequencial começando em 300001
-          status: data.status,
-          clienteNome: data.cliente_data.nome,
-          clienteCpf: data.cliente_data.cpf,
-          clienteData: JSON.stringify(data.cliente_data),
-          valor: data.valor.toString(),
-          prazo: data.prazo,
-          taxaJuros: data.taxa_juros.toString(),
-          taxaJurosAnual: data.taxa_juros_anual?.toString() || (data.taxa_juros * 12).toString(), // Campo obrigatório
-          valorTac: data.valor_tac?.toString() || '0', // Campo obrigatório  
-          valorIof: data.valor_iof?.toString() || '0', // Campo obrigatório
-          valorTotalFinanciado: data.valor_total_financiado?.toString() || data.valor.toString(), // Campo obrigatório
-          produtoId: data.produto_id,
-          tabelaComercialId: data.tabela_comercial_id,
-          lojaId: data.loja_id,
-          metodoPagamento: data.dados_pagamento?.metodo,
-          dadosPagamentoTipo: data.dados_pagamento?.tipo_conta || data.dados_pagamento?.pixTipo || data.dados_pagamento?.pix_tipo,
-          dadosPagamentoBanco: data.dados_pagamento_banco,
-          dadosPagamentoAgencia: data.dados_pagamento?.agencia,
-          dadosPagamentoConta: data.dados_pagamento?.conta,
-          dadosPagamentoDigito: data.dados_pagamento?.digito,
-          dadosPagamentoPix: data.dados_pagamento?.pixChave || data.dados_pagamento?.pix_chave,
-          dadosPagamentoPixBanco: data.dados_pagamento?.pixBanco,
-          dadosPagamentoPixNomeTitular: data.dados_pagamento?.pixNomeTitular,
-          dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
-          motivoPendencia: data.motivo_rejeicao,
-          observacoes: data.observacoes,
-          ccbDocumentoUrl: data.ccb_documento_url,
-          userId: data.user_id || 'e647afc0-03fa-482d-8293-d824dcab0399', // Campo obrigatório UUID - usar real da proposta existente
-          analistaId: data.analista_id || 'e647afc0-03fa-482d-8293-d824dcab0399', // Campo obrigatório UUID
-          createdAt: data.created_at,
-          // Adicionar campos faltantes identificados pelo LSP
-          clienteComprometimentoRenda: data.cliente_comprometimento_renda || 30, // Valor padrão
-          clienteEndereco: data.cliente_data.endereco || '', // Extrair do clienteData
-          // Campos obrigatórios booleanos faltantes
-          ccbGerado: false, // Valor padrão para nova proposta
-          assinaturaEletronicaConcluida: false, // Valor padrão para nova proposta
-          biometriaConcluida: false, // Valor padrão para nova proposta
-        },
-      ]);
+      const insertValues = {
+        id: proposal.id, // UUID do domínio
+        numeroProposta: numeroProposta, // ID sequencial começando em 300001
+        status: data.status,
+        clienteNome: data.cliente_data.nome,
+        clienteCpf: data.cliente_data.cpf,
+        clienteData: JSON.stringify(data.cliente_data),
+        valor: data.valor.toString(),
+        prazo: data.prazo,
+        taxaJuros: data.taxa_juros.toString(),
+        taxaJurosAnual: data.taxa_juros_anual?.toString() || (data.taxa_juros * 12).toString(), // Campo obrigatório
+        valorTac: data.valor_tac?.toString() || '0', // Campo obrigatório  
+        valorIof: data.valor_iof?.toString() || '0', // Campo obrigatório
+        valorTotalFinanciado: data.valor_total_financiado?.toString() || data.valor.toString(), // Campo obrigatório
+        produtoId: data.produto_id,
+        tabelaComercialId: data.tabela_comercial_id,
+        lojaId: data.loja_id,
+        metodoPagamento: data.dados_pagamento?.metodo,
+        dadosPagamentoTipo: data.dados_pagamento?.tipo_conta || data.dados_pagamento?.pixTipo || data.dados_pagamento?.pix_tipo,
+        dadosPagamentoBanco: data.dados_pagamento_banco,
+        dadosPagamentoAgencia: data.dados_pagamento?.agencia,
+        dadosPagamentoConta: data.dados_pagamento?.conta,
+        dadosPagamentoDigito: data.dados_pagamento?.digito,
+        dadosPagamentoPix: data.dados_pagamento?.pixChave || data.dados_pagamento?.pix_chave,
+        dadosPagamentoPixBanco: data.dados_pagamento?.pixBanco,
+        dadosPagamentoPixNomeTitular: data.dados_pagamento?.pixNomeTitular,
+        dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
+        motivoPendencia: data.motivo_rejeicao,
+        observacoes: data.observacoes,
+        ccbDocumentoUrl: data.ccb_documento_url,
+        userId: data.user_id || 'e647afc0-03fa-482d-8293-d824dcab0399', // Campo obrigatório UUID - usar real da proposta existente
+        analistaId: data.analista_id || 'e647afc0-03fa-482d-8293-d824dcab0399', // Campo obrigatório UUID
+        createdAt: data.created_at,
+        // Adicionar campos faltantes identificados pelo LSP
+        clienteComprometimentoRenda: data.cliente_comprometimento_renda || 30, // Valor padrão
+        clienteEndereco: data.cliente_data.endereco || '', // Extrair do clienteData
+        // Campos obrigatórios booleanos faltantes
+        ccbGerado: false, // Valor padrão para nova proposta
+        assinaturaEletronicaConcluida: false, // Valor padrão para nova proposta
+        biometriaConcluida: false, // Valor padrão para nova proposta
+      };
+      
+      console.log('🔍 [REPOSITORY DEBUG] Insert values userId:', insertValues.userId);
+      console.log('🔍 [REPOSITORY DEBUG] Insert values analistaId:', insertValues.analistaId);
+      console.log('🔍 [REPOSITORY DEBUG] Insert values ccbGerado:', insertValues.ccbGerado);
+      
+      await db.insert(propostas).values([insertValues]);
       
       console.log('[REPOSITORY] New proposal inserted:', proposal.id);
       
     } catch (insertError: any) {
+      console.log('🚨 [REPOSITORY DEBUG] INSERT FAILED:', insertError.message);
+      console.log('🚨 [REPOSITORY DEBUG] Error code:', insertError.code);
+      console.log('🚨 [REPOSITORY DEBUG] Error detail:', insertError.detail);
+      console.log('🚨 [REPOSITORY DEBUG] Full error:', insertError);
+      
       // If insert fails due to unique constraint (proposal already exists), then update
       if (insertError.code === '23505' || insertError.message?.includes('duplicate key')) {
         console.log('[REPOSITORY] Proposal exists, updating:', proposal.id);
