@@ -1,0 +1,86 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Consolidação de Ação Atômica P2.1
+Sumário da Missão (O Quê): Auditar e, se necessário, refatorar a função handleResubmit para garantir que a lógica de salvar as alterações (updateMutation) e reenviar para análise (resubmitMutation) seja executada sequencialmente e de forma robusta.
+
+Intenção Estratégica (O Porquê): Embora os passos anteriores tenham corrigido a lógica de domínio e a UI, este passo garante a integridade da transação do usuário. A operação deve ser atômica: ou salva e reenvia com sucesso, ou falha de forma limpa, sem deixar o sistema em um estado inconsistente (ex: dados salvos mas a proposta não reenviada).
+
+Histórico Relevante (Consulta Obrigatória): A execução do Passo 2 confirmou que a função handleResubmit já continha a sequência de mutações. Esta missão serve como uma verificação e reforço dessa lógica.
+
+Modelo Mental (Como se Encaixa): Estamos a finalizar a lógica do lado do cliente (client-side). Esta função é o ponto de gatilho que inicia toda a cadeia de eventos que corrigimos, ligando a ação do usuário na UI (Passo 2) à lógica de negócio no backend (Passo 1). A sua robustez é fundamental.
+
+Riscos Antecipados e Contramedidas:
+
+Risco: A resubmitMutation pode ser chamada mesmo que a updateMutation falhe.
+
+Contramedida: A implementação deve usar async/await e um bloco try/catch para garantir que a segunda mutação só seja chamada após o sucesso da primeira.
+
+IMPLEMENTAR: Garantia de Atomicidade no Fluxo de Reenvio da Proposta
+
+CONTEXT: Após a simplificação da UI, a função handleResubmit é agora o único ponto de entrada para a ação de reenviar uma proposta pendente. É crítico que esta função orquestre corretamente as duas mutações (salvar e reenviar) para garantir uma operação atômica.
+
+CURRENT STATE: A auditoria indicou que a lógica sequencial já existe. No entanto, precisamos validá-la e garantir que o tratamento de erros seja explícito.
+
+Evidência Bruta (Lógica a ser validada):
+
+TypeScript
+
+// client/src/pages/propostas/editar.tsx
+const handleResubmit = async () => {
+  try {
+    if (
+      Object.keys(formData.clienteData).length > 0 ||
+      Object.keys(formData.condicoesData).length > 0
+    ) {
+      await updateMutation.mutateAsync({
+        cliente_data: formData.clienteData,
+        condicoes_data: formData.condicoesData,
+      });
+    }
+    
+    resubmitMutation.mutate();
+  } catch (error) {
+    toast({
+      variant: 'destructive',
+      title: 'Erro ao salvar',
+      description: 'Não foi possível salvar as alterações antes do reenvio.',
+    });
+  }
+};
+EXPECTED (Estado Final de Sucesso): A função handleResubmit deve ser confirmada como estando perfeitamente alinhada com os requisitos de atomicidade. A lógica deve ser clara, explícita e o tratamento de erro deve impedir o reenvio se o salvamento falhar. A implementação atual já parece correta, portanto, a principal tarefa é confirmar e validar.
+
+CONSTRAINTS (Roadmap de Implementação):
+
+Abra o arquivo client/src/pages/propostas/editar.tsx.
+
+Localize a função handleResubmit.
+
+Audite a lógica existente. Confirme que o uso de await updateMutation.mutateAsync() dentro do bloco try/catch efetivamente impede que resubmitMutation.mutate() seja chamado em caso de falha no salvamento.
+
+Não são necessárias alterações no código se a lógica atual for validada como correta. O objetivo desta missão é a garantia da qualidade da lógica existente após a refatoração da UI.
+
+Execute o protocolo 7-CHECK. O seu relatório deve focar na análise da robustez da função handleResubmit e confirmar que ela atende aos requisitos.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Listar decisões tomadas]
+
+VALIDAÇÃO PENDENTE: [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+
+PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:
+
+Mapear ficheiros e funções exatas afetadas (neste caso, auditadas).
+
+Garantir importações e tipos corretos.
+
+Executar get_latest_lsp_diagnostics e corrigir TODOS os erros.
+
+Declarar Nível de Confiança (0-100%) na implementação.
+
+Categorizar Riscos Descobertos (BAIXO/MÉDIO/ALTO/CRÍTICO).
+
+Realizar teste funcional completo (será feito no Passo 4 do roadmap).
+
+Documentar Decisões Técnicas assumidas para auditoria futura.
