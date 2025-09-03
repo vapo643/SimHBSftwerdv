@@ -345,20 +345,10 @@ const EditarPropostaPendenciada: React.FC = () => {
   } = useQuery({
     queryKey: [`/api/propostas/${id}`],
     queryFn: async () => {
-      try {
-        console.log('🔍 INICIANDO QUERY para:', `/api/propostas/${id}`);
-        const response = await api.get(`/api/propostas/${id}`);
-        console.log('🔍 RESPOSTA DA API:', response);
-        console.log('🔍 DADOS EXTRAÍDOS:', response.data);
-        // CORREÇÃO: Backend retorna { success: true, data: {...} }, precisamos acessar response.data.data
-        const propostaData = response.data.data || response.data;
-        console.log('🔍 DADOS FINAIS DA PROPOSTA:', propostaData);
-        console.log('🔍 STATUS ESPECÍFICO:', propostaData.status);
-        return propostaData as PropostaData;
-      } catch (error) {
-        console.error('🔍 ERRO NA QUERY:', error);
-        throw error;
-      }
+      const response = await api.get(`/api/propostas/${id}`);
+      // CORREÇÃO: Backend retorna { success: true, data: {...} }, precisamos acessar response.data.data
+      const propostaData = response.data.data || response.data;
+      return propostaData as PropostaData;
     },
     enabled: !!id && id.trim() !== '' && id !== 'undefined', // Validação mais robusta
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
@@ -637,11 +627,13 @@ const EditarPropostaPendenciada: React.FC = () => {
               </div>
               <div>
                 <span className="font-medium">CPF:</span>{' '}
-                {(formData.clienteData as any)?.cpf || 'N/A'}
+                {(formData.clienteData as any)?.cpf?.value || (formData.clienteData as any)?.cpf || 'N/A'}
               </div>
               <div>
                 <span className="font-medium">Valor Solicitado:</span> R${' '}
-                {(formData.condicoesData as any)?.valor || 0}
+                {(formData.condicoesData as any)?.valor?.cents ? 
+                  ((formData.condicoesData as any)?.valor?.cents / 100).toFixed(2) : 
+                  (formData.condicoesData as any)?.valor || 0}
               </div>
               <div>
                 <span className="font-medium">Prazo:</span>{' '}
@@ -678,7 +670,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="cpf">CPF *</Label>
                       <Input
                         id="cpf"
-                        value={(formData.clienteData as any)?.cpf || ''}
+                        value={(formData.clienteData as any)?.cpf?.value || (formData.clienteData as any)?.cpf || ''}
                         onChange={(e) => handleClientChange('cpf', e.target.value)}
                         placeholder="000.000.000-00"
                       />
@@ -739,7 +731,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Input
                         id="email"
                         type="email"
-                        value={(formData.clienteData as any)?.email || ''}
+                        value={(formData.clienteData as any)?.email?.value || (formData.clienteData as any)?.email || ''}
                         onChange={(e) => handleClientChange('email', e.target.value)}
                         placeholder="cliente@email.com"
                       />
@@ -748,7 +740,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="telefone">Telefone *</Label>
                       <Input
                         id="telefone"
-                        value={(formData.clienteData as any)?.telefone || ''}
+                        value={(formData.clienteData as any)?.telefone?.value || (formData.clienteData as any)?.telefone || ''}
                         onChange={(e) => handleClientChange('telefone', e.target.value)}
                         placeholder="(11) 99999-9999"
                       />
@@ -764,7 +756,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="cep">CEP</Label>
                       <Input
                         id="cep"
-                        value={(formData.clienteData as any)?.cep || ''}
+                        value={(formData.clienteData as any)?.cep?.value || (formData.clienteData as any)?.cep || ''}
                         onChange={(e) => handleClientChange('cep', e.target.value)}
                         placeholder="00000-000"
                       />
@@ -804,6 +796,10 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <CurrencyInput
                         id="renda"
                         value={
+                          (formData.clienteData as any)?.rendaMensal?.cents ? 
+                            ((formData.clienteData as any)?.rendaMensal?.cents / 100).toString() :
+                          (formData.clienteData as any)?.renda?.cents ? 
+                            ((formData.clienteData as any)?.renda?.cents / 100).toString() :
                           (formData.clienteData as any)?.renda ||
                           (formData.clienteData as any)?.rendaMensal ||
                           ''
@@ -826,7 +822,9 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="valor">Valor Solicitado *</Label>
                       <CurrencyInput
                         id="valor"
-                        value={(formData.condicoesData as any)?.valor || ''}
+                        value={(formData.condicoesData as any)?.valor?.cents ? 
+                          ((formData.condicoesData as any)?.valor?.cents / 100).toString() :
+                          (formData.condicoesData as any)?.valor || ''}
                         onChange={(e) => handleCondicoesChange('valor', e.target.value)}
                       />
                     </div>
