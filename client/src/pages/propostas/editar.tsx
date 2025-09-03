@@ -492,11 +492,15 @@ const EditarPropostaPendenciada: React.FC = () => {
     
     console.log('🔍 VALORES RAW:', { valorRaw, prazoRaw });
     
-    const valor = parseFloat(
-      typeof valorRaw === 'string' 
-        ? valorRaw.replace(/[^\d,]/g, '').replace(',', '.') 
-        : String(valorRaw || '0')
-    );
+    const valor = (() => {
+      if (typeof valorRaw === 'object' && valorRaw?.cents) {
+        return parseFloat(String(valorRaw.cents / 100));
+      }
+      if (typeof valorRaw === 'string') {
+        return parseFloat(valorRaw.replace(/[^\d,]/g, '').replace(',', '.'));
+      }
+      return parseFloat(String(valorRaw || '0'));
+    })();
     const prazo = parseInt(String(prazoRaw || '0'));
     
     // Usar taxa da tabela ou padrão de 2.5% ao mês
