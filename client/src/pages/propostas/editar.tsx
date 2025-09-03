@@ -364,6 +364,11 @@ const EditarPropostaPendenciada: React.FC = () => {
         cliente_data: (proposta as any).cliente_data,
         condicoesData: proposta.condicoesData,
         condicoes_data: (proposta as any).condicoes_data,
+        produto: proposta.produto,
+        tabelaComercial: proposta.tabelaComercial,
+        produtoId: proposta.produtoId || (proposta as any).produto_id,
+        taxaJuros: proposta.taxaJuros,
+        PROPOSTA_COMPLETA: proposta
       });
       
       // Normalizar dados de cliente (suportar ambas estruturas clienteData e cliente_data)
