@@ -42,6 +42,7 @@ interface Produto {
   isActive: boolean;
   tacValor?: number;
   tacTipo?: 'fixo' | 'percentual';
+  tacAtivaParaClientesExistentes?: boolean;
 }
 
 interface ProdutoFormData {
@@ -49,6 +50,7 @@ interface ProdutoFormData {
   status: 'Ativo' | 'Inativo';
   tacValor: number;
   tacTipo: 'fixo' | 'percentual';
+  tacAtivaParaClientesExistentes: boolean;
 }
 
 export default function GestãoProdutos() {
@@ -59,6 +61,7 @@ export default function GestãoProdutos() {
     status: 'Ativo',
     tacValor: 0,
     tacTipo: 'fixo',
+    tacAtivaParaClientesExistentes: true,
   });
 
   const { toast } = useToast();
@@ -82,6 +85,7 @@ export default function GestãoProdutos() {
         status: data.status,
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
+        tacAtivaParaClientesExistentes: data.tacAtivaParaClientesExistentes,
       });
       return (response as any).data || response;
     },
@@ -103,6 +107,7 @@ export default function GestãoProdutos() {
         status: data.status,
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
+        tacAtivaParaClientesExistentes: data.tacAtivaParaClientesExistentes,
       });
       return (response as any).data || response;
     },
@@ -149,6 +154,7 @@ export default function GestãoProdutos() {
       status: produto.isActive ? 'Ativo' : 'Inativo',
       tacValor: produto.tacValor || 0,
       tacTipo: produto.tacTipo || 'fixo',
+      tacAtivaParaClientesExistentes: produto.tacAtivaParaClientesExistentes ?? true,
     });
     setIsDialogOpen(true);
   };
@@ -162,12 +168,12 @@ export default function GestãoProdutos() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProduct(null);
-    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
+    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo', tacAtivaParaClientesExistentes: true });
   };
 
   const handleOpenDialog = () => {
     setEditingProduct(null);
-    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
+    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo', tacAtivaParaClientesExistentes: true });
     setIsDialogOpen(true);
   };
 

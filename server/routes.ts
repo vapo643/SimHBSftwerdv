@@ -2761,9 +2761,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/produtos', async (req, res) => {
     try {
-      const { nome, status, tacValor, tacTipo } = req.body;
+      const { nome, status, tacValor, tacTipo, tacAtivaParaClientesExistentes } = req.body;
 
-      console.log('[PRODUTOS API] Criando produto com dados:', { nome, status, tacValor, tacTipo });
+      console.log('[PRODUTOS API] Criando produto com dados:', { nome, status, tacValor, tacTipo, tacAtivaParaClientesExistentes });
 
       if (!nome || !status) {
         return res.status(400).json({ message: 'Nome e status são obrigatórios' });
@@ -2783,6 +2783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status,
         tacValor: tacValor ?? 0,
         tacTipo: tacTipo ?? 'fixo',
+        tacAtivaParaClientesExistentes: tacAtivaParaClientesExistentes ?? true,
       };
 
       console.log('[PRODUTOS API] Enviando para controller:', dadosProduto);
@@ -2801,7 +2802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/produtos/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const { nome, status, tacValor, tacTipo } = req.body;
+      const { nome, status, tacValor, tacTipo, tacAtivaParaClientesExistentes } = req.body;
 
       if (!nome || !status) {
         return res.status(400).json({ message: 'Nome e status são obrigatórios' });
@@ -2821,6 +2822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status,
         tacValor: tacValor ?? 0,
         tacTipo: tacTipo ?? 'fixo',
+        tacAtivaParaClientesExistentes: tacAtivaParaClientesExistentes ?? true,
       });
       res.json(produtoAtualizado);
     } catch (error) {

@@ -26,6 +26,7 @@ interface ITacCalculationStrategy {
 interface ProdutoTacConfig {
   tacValor: number;
   tacTipo: 'fixo' | 'percentual';
+  tacAtivaParaClientesExistentes: boolean;
 }
 
 /**
@@ -53,12 +54,20 @@ class ExistingClientTacStrategy implements ITacCalculationStrategy {
       return 0;
     }
     
-    const { tacValor, tacTipo } = produtoConfig;
+    const { tacValor, tacTipo, tacAtivaParaClientesExistentes } = produtoConfig;
+    
+    // NOVA REGRA: Se TAC desativada para clientes existentes, retorna 0 (isento)
+    if (!tacAtivaParaClientesExistentes) {
+      console.log('[TAC_EXISTING_CLIENT] TAC desativada para clientes existentes neste produto - isento');
+      return 0;
+    }
     
     if (tacTipo === 'fixo') {
+      console.log(`[TAC_EXISTING_CLIENT] TAC fixa aplicada: R$ ${tacValor}`);
       return tacValor;
     } else if (tacTipo === 'percentual') {
       const tacCalculada = (valorEmprestimo * tacValor) / 100;
+      console.log(`[TAC_EXISTING_CLIENT] TAC percentual ${tacValor}% aplicada: R$ ${tacCalculada.toFixed(2)}`);
       return Math.round(tacCalculada * 100) / 100;
     }
     
@@ -132,6 +141,7 @@ export class TacCalculationService {
         .select({
           tacValor: produtos.tacValor,
           tacTipo: produtos.tacTipo,
+          tacAtivaParaClientesExistentes: produtos.tacAtivaParaClientesExistentes,
         })
         .from(produtos)
         .where(and(eq(produtos.id, produtoId), isNull(produtos.deletedAt)))
@@ -144,7 +154,8 @@ export class TacCalculationService {
 
       return {
         tacValor: parseFloat(produto[0].tacValor || '0'),
-        tacTipo: produto[0].tacTipo as 'fixo' | 'percentual' || 'fixo'
+        tacTipo: produto[0].tacTipo as 'fixo' | 'percentual' || 'fixo',
+        tacAtivaParaClientesExistentes: produto[0].tacAtivaParaClientesExistentes ?? true
       };
     } catch (error) {
       console.error(`[TAC_SERVICE] Erro ao buscar config produto ${produtoId}:`, error);

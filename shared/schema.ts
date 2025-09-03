@@ -345,6 +345,7 @@ export const produtos = pgTable('produtos', {
   isActive: boolean('is_active').notNull().default(true),
   tacValor: decimal('tac_valor', { precision: 10, scale: 2 }).default('0'),
   tacTipo: text('tac_tipo').notNull().default('fixo'),
+  tacAtivaParaClientesExistentes: boolean('tac_ativa_para_clientes_existentes').notNull().default(true),
 
   // Novos campos para CCB
   modalidadeJuros: text('modalidade_juros').default('pre_fixado'), // pre_fixado ou pos_fixado

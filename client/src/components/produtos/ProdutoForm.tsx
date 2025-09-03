@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ const produtoSchema = z.object({
       errorMap: () => ({ message: 'Tipo de TAC é obrigatório.' }),
     })
     .default('fixo'),
+  tacAtivaParaClientesExistentes: z.boolean().default(true),
 });
 
 type ProdutoFormData = z.infer<typeof produtoSchema>;
@@ -46,6 +48,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
       status: 'Ativo',
       tacValor: 0,
       tacTipo: 'fixo',
+      tacAtivaParaClientesExistentes: true,
     },
   });
 
@@ -108,6 +111,39 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
           )}
         />
         {errors.tacTipo && <p className="mt-1 text-sm text-red-500">{errors.tacTipo.message}</p>}
+      </div>
+
+      <div className="space-y-3 p-4 border rounded-lg bg-blue-50">
+        <div className="text-sm font-medium text-blue-900">
+          📋 Configuração TAC para Clientes
+        </div>
+        <div className="text-xs text-blue-700 mb-3">
+          • <strong>Clientes NOVOS:</strong> Sempre pagam 10% TAC (automático) <br/>
+          • <strong>Clientes EXISTENTES:</strong> TAC configurável abaixo
+        </div>
+        <Controller
+          name="tacAtivaParaClientesExistentes"
+          control={control}
+          render={({ field }) => (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="tacAtivaParaClientesExistentes"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                data-testid="checkbox-tac-clientes-existentes"
+              />
+              <Label 
+                htmlFor="tacAtivaParaClientesExistentes" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Ativar TAC para clientes existentes
+              </Label>
+            </div>
+          )}
+        />
+        <div className="text-xs text-gray-600">
+          Se desmarcado, clientes existentes ficam isentos de TAC neste produto
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-4">

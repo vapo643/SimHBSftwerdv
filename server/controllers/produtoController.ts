@@ -25,6 +25,7 @@ export const criarProduto = async (data: {
   status: 'Ativo' | 'Inativo';
   tacValor?: number;
   tacTipo?: 'fixo' | 'percentual';
+  tacAtivaParaClientesExistentes?: boolean;
 }) => {
   const [novoProduto] = await db
     .insert(produtos)
@@ -33,6 +34,7 @@ export const criarProduto = async (data: {
       isActive: data.status === 'Ativo',
       tacValor: data.tacValor !== undefined ? data.tacValor.toString() : '0',
       tacTipo: data.tacTipo || 'fixo',
+      tacAtivaParaClientesExistentes: data.tacAtivaParaClientesExistentes ?? true,
     })
     .returning();
   
@@ -51,6 +53,7 @@ export const atualizarProduto = async (
     status: 'Ativo' | 'Inativo';
     tacValor?: number;
     tacTipo?: 'fixo' | 'percentual';
+    tacAtivaParaClientesExistentes?: boolean;
   }
 ) => {
   const [produtoAtualizado] = await db
@@ -60,6 +63,7 @@ export const atualizarProduto = async (
       isActive: data.status === 'Ativo',
       tacValor: data.tacValor !== undefined ? data.tacValor.toString() : '0',
       tacTipo: data.tacTipo || 'fixo',
+      tacAtivaParaClientesExistentes: data.tacAtivaParaClientesExistentes ?? true,
     })
     .where(eq(produtos.id, parseInt(id)))
     .returning();
