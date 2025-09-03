@@ -35,6 +35,7 @@ import { commonBanks, brazilianBanks } from '@/utils/brazilianBanks';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog';
 
 // Interfaces para tipagem das respostas da API
 interface CepApiResponse {
@@ -108,6 +109,10 @@ export function ClientDataStep() {
 
   const [progress, setProgress] = useState(0);
   
+  // Estados para modal de confirmação de cliente encontrado
+  const [clientFoundData, setClientFoundData] = useState<ClientDataApiResponse['data'] | null>(null);
+  const [showClientConfirmDialog, setShowClientConfirmDialog] = useState(false);
+  
   // Função para buscar CEP usando nosso backend
   const fetchAddressByCep = useCallback(
     async (cep: string) => {
@@ -166,55 +171,9 @@ export function ClientDataStep() {
         })) as ClientDataApiResponse;
 
         if (response && response.exists && response.data) {
-          const data = response.data;
-
-          // Mostrar diálogo confirmando que encontrou dados
-          const userConfirmed = window.confirm(
-            `Cliente já cadastrado!\n\nEncontramos dados de: ${data.nome}\n\nDeseja usar os dados existentes para esta nova proposta?`
-          );
-
-          if (userConfirmed) {
-            // Preencher todos os campos com dados existentes
-            updateClient({
-              nome: data.nome || '',
-              email: data.email || '',
-              telefone: data.telefone || '',
-              dataNascimento: data.dataNascimento || '',
-              rg: data.rg || '',
-              orgaoEmissor: data.orgaoEmissor || '',
-              rgUf: data.rgUf || '',
-              rgDataEmissao: data.rgDataEmissao || '',
-              localNascimento: data.localNascimento || '',
-              estadoCivil: data.estadoCivil || '',
-              nacionalidade: data.nacionalidade || '',
-              cep: data.cep || '',
-              logradouro: data.logradouro || '',
-              numero: data.numero || '',
-              complemento: data.complemento || '',
-              bairro: data.bairro || '',
-              cidade: data.cidade || '',
-              estado: data.estado || '',
-              ocupacao: data.ocupacao || '',
-              rendaMensal: data.rendaMensal || '',
-              telefoneEmpresa: data.telefoneEmpresa || '',
-              metodoPagamento:
-                (data.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
-              dadosPagamentoBanco: data.dadosPagamentoBanco || '',
-              dadosPagamentoAgencia: data.dadosPagamentoAgencia || '',
-              dadosPagamentoConta: data.dadosPagamentoConta || '',
-              dadosPagamentoDigito: data.dadosPagamentoDigito || '',
-              dadosPagamentoPix: data.dadosPagamentoPix || '',
-              dadosPagamentoTipoPix: data.dadosPagamentoTipoPix || '',
-              dadosPagamentoPixBanco: data.dadosPagamentoPixBanco || '',
-              dadosPagamentoPixNomeTitular: data.dadosPagamentoPixNomeTitular || '',
-              dadosPagamentoPixCpfTitular: data.dadosPagamentoPixCpfTitular || '',
-            });
-
-            toast({
-              title: 'Dados carregados!',
-              description: 'Dados do cliente preenchidos automaticamente.',
-            });
-          }
+          // ✅ NOVO: Armazenar dados e abrir modal
+          setClientFoundData(response.data);
+          setShowClientConfirmDialog(true);
         }
       } catch (error) {
         console.error('Erro ao buscar dados do cliente:', error);
@@ -222,8 +181,57 @@ export function ClientDataStep() {
         setLoadingCpfData(false);
       }
     },
-    [updateClient, toast]
+    [setClientFoundData, setShowClientConfirmDialog]
   );
+
+  // ✅ NOVO: Handler para confirmação do modal
+  const handleUseExistingClientData = useCallback(() => {
+    if (!clientFoundData) return;
+
+    // Preencher todos os campos com dados existentes - TODOS OS CAMPOS COMO SOLICITADO
+    updateClient({
+      nome: clientFoundData.nome || '',
+      email: clientFoundData.email || '',
+      telefone: clientFoundData.telefone || '',
+      dataNascimento: clientFoundData.dataNascimento || '',
+      rg: clientFoundData.rg || '',
+      orgaoEmissor: clientFoundData.orgaoEmissor || '',
+      rgUf: clientFoundData.rgUf || '',
+      rgDataEmissao: clientFoundData.rgDataEmissao || '',
+      localNascimento: clientFoundData.localNascimento || '',
+      estadoCivil: clientFoundData.estadoCivil || '',
+      nacionalidade: clientFoundData.nacionalidade || '',
+      cep: clientFoundData.cep || '',
+      logradouro: clientFoundData.logradouro || '',
+      numero: clientFoundData.numero || '',
+      complemento: clientFoundData.complemento || '',
+      bairro: clientFoundData.bairro || '',
+      cidade: clientFoundData.cidade || '',
+      estado: clientFoundData.estado || '',
+      ocupacao: clientFoundData.ocupacao || '',
+      rendaMensal: clientFoundData.rendaMensal || '',
+      telefoneEmpresa: clientFoundData.telefoneEmpresa || '',
+      metodoPagamento: (clientFoundData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
+      dadosPagamentoBanco: clientFoundData.dadosPagamentoBanco || '',
+      dadosPagamentoAgencia: clientFoundData.dadosPagamentoAgencia || '',
+      dadosPagamentoConta: clientFoundData.dadosPagamentoConta || '',
+      dadosPagamentoDigito: clientFoundData.dadosPagamentoDigito || '',
+      dadosPagamentoPix: clientFoundData.dadosPagamentoPix || '',
+      dadosPagamentoTipoPix: clientFoundData.dadosPagamentoTipoPix || '',
+      dadosPagamentoPixBanco: clientFoundData.dadosPagamentoPixBanco || '',
+      dadosPagamentoPixNomeTitular: clientFoundData.dadosPagamentoPixNomeTitular || '',
+      dadosPagamentoPixCpfTitular: clientFoundData.dadosPagamentoPixCpfTitular || '',
+    });
+
+    toast({
+      title: 'Dados carregados!',
+      description: 'Dados do cliente preenchidos automaticamente.',
+    });
+
+    // Fechar modal e limpar dados temporários
+    setShowClientConfirmDialog(false);
+    setClientFoundData(null);
+  }, [clientFoundData, updateClient, toast]);
 
   // UX-006: Busca automática de CEP com debounce
   useEffect(() => {
@@ -1157,6 +1165,22 @@ export function ClientDataStep() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Modal de Confirmação de Cliente Encontrado */}
+      <ConfirmationDialog
+        isOpen={showClientConfirmDialog}
+        onClose={() => {
+          setShowClientConfirmDialog(false);
+          setClientFoundData(null);
+        }}
+        onConfirm={handleUseExistingClientData}
+        title="Cliente Encontrado"
+        description={`Encontramos dados de: ${clientFoundData?.nome || 'Cliente'}\n\nDeseja preencher a proposta com os dados existentes?`}
+        confirmText="Usar Dados"
+        cancelText="Não Usar"
+        variant="default"
+        isLoading={loadingCpfData}
+      />
     </div>
   );
 }
