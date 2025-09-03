@@ -94,6 +94,9 @@ export function ClientDataStep() {
   // Estados de loading para APIs
   const [loadingCep, setLoadingCep] = useState(false);
   const [loadingCpfData, setLoadingCpfData] = useState(false);
+  // 🚫 FLAGS PARA EVITAR RE-VALIDAÇÕES DESNECESSÁRIAS
+  const [cepAlreadyFetched, setCepAlreadyFetched] = useState(false);
+  const [cpfAlreadyFetched, setCpfAlreadyFetched] = useState(false);
   
   // UX-012: Estado para controlar feedback visual de auto-preenchimento
   const [addressFieldsJustFilled, setAddressFieldsJustFilled] = useState(false);
@@ -268,13 +271,14 @@ export function ClientDataStep() {
     setClientFoundData(null);
   }, [clientFoundData, updateClient, toast]);
 
-  // UX-006: Busca automática de CEP com debounce
+  // UX-006: Busca automática de CEP com debounce - OTIMIZADO
   useEffect(() => {
     const cleanCep = debouncedCep.replace(/\D/g, '');
-    if (cleanCep.length === 8 && CEP.isValid(cleanCep)) {
+    if (cleanCep.length === 8 && CEP.isValid(cleanCep) && !cepAlreadyFetched) {
       fetchAddressByCep(debouncedCep);
+      setCepAlreadyFetched(true); // 🚫 Marcar como já buscado
     }
-  }, [debouncedCep, fetchAddressByCep]);
+  }, [debouncedCep, fetchAddressByCep, cepAlreadyFetched]);
 
   // Handlers
   const handleTipoPessoaChange = (checked: boolean) => {
@@ -290,6 +294,11 @@ export function ClientDataStep() {
     updateClient({ cpf: value });
     clearError('cpf');
     
+    // 🚫 Resetar flag se CPF mudou para permitir nova busca
+    if (value !== clientData.cpf) {
+      setCpfAlreadyFetched(false);
+    }
+    
     // UX-006: Validação em tempo real
     const cleanCPF = value.replace(/\D/g, '');
     setCpfValidation({ isValidating: true, isValid: false });
@@ -298,9 +307,10 @@ export function ClientDataStep() {
       const isValid = CPF.isValid(cleanCPF);
       setCpfValidation({ isValidating: false, isValid });
       
-      // Buscar dados quando CPF for válido (11 dígitos)
-      if (cleanCPF.length === 11 && isValid) {
+      // Buscar dados quando CPF for válido (11 dígitos) - OTIMIZADO
+      if (cleanCPF.length === 11 && isValid && !cpfAlreadyFetched) {
         fetchClientDataByCpf(value);
+        setCpfAlreadyFetched(true); // 🚫 Marcar como já buscado
       }
     }, 100); // Micro delay para UX suave
   };
@@ -324,6 +334,11 @@ export function ClientDataStep() {
   const handleCEPChange = (value: string) => {
     updateClient({ cep: value });
     clearError('cep');
+    
+    // 🚫 Resetar flag se CEP mudou para permitir nova busca
+    if (value !== clientData.cep) {
+      setCepAlreadyFetched(false);
+    }
     // Busca automática via debouncedCep no useEffect
   };
 
