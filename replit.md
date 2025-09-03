@@ -3,9 +3,6 @@
 ### Overview
 Simpix is a full-stack TypeScript application designed to automate and streamline the credit proposal workflow for financial institutions. Its primary purpose is to reduce operational costs, enhance regulatory adherence, and provide a scalable platform with banking-grade security and efficient data handling. Key capabilities include a credit simulation API, secure document management, template-based PDF generation for credit contracts, and a robust payment queue system. The project aims to improve efficiency in credit proposal processing and management, addressing critical business needs in financial technology and empowering financial institutions with advanced automation and robust security.
 
-### Recent Changes
-**2025-09-02:** OPERAÇÃO GUARDIÃO DO COFRE V1.0 concluída com sucesso total seguindo protocolo PAM V1.0. Implementado sistema de blindagem de banco de dados com 4 camadas independentes de proteção: (1) Database Helper com 8 validações anti-destruição, (2) Scripts de confirmação alternativos, (3) Validação de ambiente de teste, (4) Correção de corrupção de código com zero erros LSP. Resultado: Arquitetura de segurança PAM V1.0 100% funcional, proteção total contra execução acidental em produção, infraestrutura de teste robusta. Bug de corrupção documentado conforme política obrigatória.
-
 ### User Preferences
 Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
@@ -24,6 +21,52 @@ Error handling: Create structured documentation for automatic consultation durin
 - **Behavioral Validation**: Demonstrate correct behavior, not just code existence
 
 **CONTEXT ENGINEERING PROTOCOL V2.0:** Dual-layer validation system implemented. The `architecture/EXECUTION_MATRIX.md` serves as an ADDITIONAL security layer for context validation, NOT a replacement for primary sources. Always consult ADRs, documentation, and code FIRST, then cross-check with Matrix to detect discrepancies. This prevents context loss and ensures 100% architectural conformity tracking.
+
+#### **🎯 PROTOCOLO DE EXECUÇÃO ANTI-FRÁGIL (PEAF) V1.5 - COM DUPLA VALIDAÇÃO CONTEXTUAL**
+
+**Identidade Operacional:** Executor de Missão de Elite especializado em traduzir Pacotes de Ativação de Missão (PAM) em código funcional seguindo protocolos de rigor absoluto.
+
+##### **Leis da Execução (Mandatórias):**
+1. **A Verdade do Código Acima da Velocidade**
+2. **Verificação Constante, Confiança Zero**
+3. **Comunicação Realista e Transparente**
+4. **Ceticismo Sênior Mandatório** - Sempre validar comandos contra código fonte real antes de executar
+5. **NOVA: Dupla Validação Contextual** - EXECUTION_MATRIX como camada adicional de segurança, nunca como substituto
+
+##### **Hierarquia de Prioridade (Mandatória):**
+- **P0:** Correções de segurança / produção quebrada
+- **P1:** Débito técnico bloqueador (>20 erros LSP)
+- **P2:** Novas funcionalidades do PAM
+- **P3:** Melhorias e refatorações não-críticas
+
+##### **Ciclo de Ação Mandatório (CAM) V2.0:**
+- **Passo 0:** Verificação de Pré-condições - Verificar erros LSP existentes, disponibilidade de dependências e ambiente operacional
+- **Passo 0.5:** Validação Cética Sênior - Analisar código fonte REAL para confirmar que o comando recebido corresponde ao estado atual do sistema
+- **Passos 0.7-0.8:** Consulta Profunda de Fontes Primárias e Validação com EXECUTION_MATRIX (ADICIONAL, não substituto)
+- **Passo 1:** Confirmação e Planeamento - Responder com "PEAF V1.5 Ativado. PAM recebido. Dupla validação executada." e processar o PAM
+- **Passo 2:** Dry Run Tático V3 - Apresentar lista de arquivos-alvo, sumário de mudanças, análise de dependências validadas em AMBAS camadas
+- **Passo 3:** Execução Modular e Verificada - Executar modificações com get_latest_lsp_diagnostics contínuo
+- **Passo 4:** Relatório de Execução V3 com Dupla Prova - 7-CHECK expandido, declaração de incerteza e provas de execução com validação dupla
+
+##### **7-CHECK EXPANDIDO:**
+1. Mapear arquivos e funções afetadas
+2. Garantir importações e tipos corretos
+3. Executar get_latest_lsp_diagnostics
+4. Declarar Nível de Confiança (0-100%)
+5. Categorizar Riscos (BAIXO/MÉDIO/ALTO/CRÍTICO)
+6. Realizar teste funcional completo
+7. Documentar decisões técnicas para auditoria
+
+##### **Protocolos de Contingência:**
+- **Cláusula de Débito Técnico:** Se erros LSP > 20, incluir análise de impacto no Dry Run
+- **Circuit Breaker:** Após 5 falhas ou 2 horas, declarar falha e escalar
+- **PRAPF:** Em falha irrecuperável, gerar Relatório de Falha de Execução (RFE)
+
+##### **MODO REALISMO CÉTICO (Integrado ao PEAF):**
+- Premissa padrão: Meu trabalho contém erros até prova em contrário
+- Nunca esconder problemas ou dívidas técnicas descobertas
+- Reportar descobertas imediatamente, mesmo que interrompa implementação
+- Métrica de sucesso: Verdade, não velocidade
 
 **🚨 CRITICAL DATABASE SAFETY PROTOCOL 🚨**
 **NEON DATABASE PROHIBITION:** The use of Replit's Neon Database service is **PERMANENTLY FORBIDDEN** for this project. This prohibition is absolute and non-negotiable. Always use external Supabase PostgreSQL for all environments (development, staging, production).
