@@ -361,14 +361,43 @@ const EditarPropostaPendenciada: React.FC = () => {
     if (proposta) {
       console.log('🔍 DADOS DA PROPOSTA CARREGADA:', {
         clienteData: proposta.clienteData,
-        ocupacao_atual: proposta.clienteData?.ocupacao,
-        renda_atual: proposta.clienteData?.renda,
-        ocupacao_vazia: proposta.clienteData?.ocupacao === '',
-        renda_vazia: proposta.clienteData?.renda === '',
+        cliente_data: (proposta as any).cliente_data,
+        condicoesData: proposta.condicoesData,
+        condicoes_data: (proposta as any).condicoes_data,
       });
+      
+      // Normalizar dados de cliente (suportar ambas estruturas clienteData e cliente_data)
+      const clienteData = {
+        ...(proposta.clienteData || {}),
+        ...((proposta as any).cliente_data || {}),
+        // Garantir que campos obrigatórios tenham valores
+        nome: proposta.clienteData?.nome?.value || 
+              proposta.clienteData?.nome || 
+              (proposta as any).cliente_data?.nome?.value ||
+              (proposta as any).cliente_data?.nome || '',
+        cpf: proposta.clienteData?.cpf?.value || 
+             proposta.clienteData?.cpf || 
+             (proposta as any).cliente_data?.cpf?.value ||
+             (proposta as any).cliente_data?.cpf || '',
+        email: proposta.clienteData?.email?.value || 
+               proposta.clienteData?.email || 
+               (proposta as any).cliente_data?.email?.value ||
+               (proposta as any).cliente_data?.email || '',
+        telefone: proposta.clienteData?.telefone?.value || 
+                  proposta.clienteData?.telefone || 
+                  (proposta as any).cliente_data?.telefone?.value ||
+                  (proposta as any).cliente_data?.telefone || '',
+      };
+
+      // Normalizar dados de condições
+      const condicoesData = {
+        ...(proposta.condicoesData || {}),
+        ...((proposta as any).condicoes_data || {}),
+      };
+      
       setFormData({
-        clienteData: proposta.clienteData || {},
-        condicoesData: proposta.condicoesData || {},
+        clienteData,
+        condicoesData,
       });
     }
   }, [proposta]);
@@ -575,6 +604,49 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
+  // Cálculos automáticos baseados em valor, prazo e taxa
+  useEffect(() => {
+    const valor = parseFloat((formData.condicoesData as any)?.valor?.replace(/[^\d,]/g, '')?.replace(',', '.') || '0');
+    const prazo = parseInt((formData.condicoesData as any)?.prazo || '0');
+    const taxaJuros = parseFloat(proposta?.tabelaComercial?.taxaJuros || '0');
+
+    if (valor > 0 && prazo > 0 && taxaJuros > 0) {
+      // Calcular TAC (exemplo: 3% do valor)
+      const tacPercentual = 3; // 3% padrão
+      const valorTac = (valor * tacPercentual / 100);
+
+      // Calcular IOF (exemplo: 0.38% ao mês + 0.0082% ao dia)
+      const iofMensal = 0.38;
+      const iofDiario = 0.0082;
+      const diasPorMes = 30;
+      const iofTotal = (valor * (iofMensal + (iofDiario * prazo * diasPorMes)) / 100);
+
+      // Valor total financiado
+      const valorTotalFinanciado = valor + valorTac + iofTotal;
+
+      // Calcular parcela usando fórmula de juros compostos
+      const taxaMensal = taxaJuros / 100;
+      const fatorJuros = Math.pow(1 + taxaMensal, prazo);
+      const valorParcela = (valorTotalFinanciado * taxaMensal * fatorJuros) / (fatorJuros - 1);
+
+      // Atualizar os campos calculados
+      setFormData((prev) => ({
+        ...prev,
+        condicoesData: {
+          ...prev.condicoesData,
+          valorTac: valorTac.toFixed(2),
+          valorIof: iofTotal.toFixed(2),
+          valorTotalFinanciado: valorTotalFinanciado.toFixed(2),
+          valorParcela: valorParcela.toFixed(2),
+        },
+      }));
+    }
+  }, [
+    (formData.condicoesData as any)?.valor,
+    (formData.condicoesData as any)?.prazo,
+    proposta?.tabelaComercial?.taxaJuros
+  ]);
+
   const handleSave = () => {
     updateMutation.mutate({
       cliente_data: formData.clienteData,
@@ -582,12 +654,29 @@ const EditarPropostaPendenciada: React.FC = () => {
     });
   };
 
-  const handleResubmit = () => {
-    // Primeiro salvar, depois reenviar
-    handleSave();
-    setTimeout(() => {
+  const handleResubmit = async () => {
+    // Primeiro salvar se houver alterações, depois reenviar
+    try {
+      if (
+        Object.keys(formData.clienteData).length > 0 ||
+        Object.keys(formData.condicoesData).length > 0
+      ) {
+        // Aguardar salvamento completar antes de reenviar
+        await updateMutation.mutateAsync({
+          cliente_data: formData.clienteData,
+          condicoes_data: formData.condicoesData,
+        });
+      }
+      
+      // Agora reenviar para análise
       resubmitMutation.mutate();
-    }, 1000);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao salvar',
+        description: 'Não foi possível salvar as alterações antes do reenvio.',
+      });
+    }
   };
 
   return (
@@ -615,11 +704,22 @@ const EditarPropostaPendenciada: React.FC = () => {
             <div className="grid gap-2 text-sm">
               <div>
                 <span className="font-medium">Cliente:</span>{' '}
-                {(formData.clienteData as any)?.nome || 'N/A'}
+                {(formData.clienteData as any)?.nome || 
+                 proposta?.clienteData?.nome?.value || 
+                 proposta?.clienteData?.nome || 
+                 (proposta as any)?.cliente_data?.nome?.value ||
+                 (proposta as any)?.cliente_data?.nome ||
+                 'Nome não informado'}
               </div>
               <div>
                 <span className="font-medium">CPF:</span>{' '}
-                {(formData.clienteData as any)?.cpf?.value || (formData.clienteData as any)?.cpf || 'N/A'}
+                {(formData.clienteData as any)?.cpf?.value || 
+                 (formData.clienteData as any)?.cpf || 
+                 proposta?.clienteData?.cpf?.value ||
+                 proposta?.clienteData?.cpf ||
+                 (proposta as any)?.cliente_data?.cpf?.value ||
+                 (proposta as any)?.cliente_data?.cpf ||
+                 'CPF não informado'}
               </div>
               <div>
                 <span className="font-medium">Valor Solicitado:</span> R${' '}
@@ -838,7 +938,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         id="valorTac"
                         value={(formData.condicoesData as any)?.valorTac || ''}
                         onChange={(e) => handleCondicoesChange('valorTac', e.target.value)}
-                        disabled
+                        placeholder="Será calculado automaticamente"
                       />
                     </div>
                     <div>
@@ -847,7 +947,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         id="valorIof"
                         value={(formData.condicoesData as any)?.valorIof || ''}
                         onChange={(e) => handleCondicoesChange('valorIof', e.target.value)}
-                        disabled
+                        placeholder="Será calculado automaticamente"
                       />
                     </div>
                     <div>
@@ -858,7 +958,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         onChange={(e) =>
                           handleCondicoesChange('valorTotalFinanciado', e.target.value)
                         }
-                        disabled
+                        placeholder="Será calculado automaticamente"
                       />
                     </div>
                     <div>
@@ -867,7 +967,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         id="valorParcela"
                         value={(formData.condicoesData as any)?.valorParcela || ''}
                         onChange={(e) => handleCondicoesChange('valorParcela', e.target.value)}
-                        disabled
+                        placeholder="Será calculado automaticamente"
                       />
                     </div>
                   </div>
@@ -881,8 +981,10 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="produto">Produto</Label>
                       <Input
                         id="produto"
-                        value={proposta?.produto?.nomeProduto || 'N/A'}
-                        disabled
+                        value={proposta?.produto?.nomeProduto || 
+                               (proposta?.produto as any)?.nome ||
+                               'Produto não definido'}
+                        placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                       />
                     </div>
@@ -890,8 +992,10 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="tabelaComercial">Tabela Comercial</Label>
                       <Input
                         id="tabelaComercial"
-                        value={proposta?.tabelaComercial?.nomeTabela || 'N/A'}
-                        disabled
+                        value={proposta?.tabelaComercial?.nomeTabela ||
+                               (proposta?.tabelaComercial as any)?.nome ||
+                               'Tabela não definida'}
+                        placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                       />
                     </div>
@@ -900,7 +1004,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Input
                         id="taxaJuros"
                         value={proposta?.tabelaComercial?.taxaJuros || ''}
-                        disabled
+                        placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                       />
                     </div>
@@ -909,7 +1013,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Input
                         id="comissao"
                         value={proposta?.tabelaComercial?.comissao || ''}
-                        disabled
+                        placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                       />
                     </div>

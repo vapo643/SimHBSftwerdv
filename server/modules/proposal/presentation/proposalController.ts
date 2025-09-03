@@ -532,6 +532,77 @@ export class ProposalController {
   }
 
   /**
+   * Atualizar dados da proposta (para correções)
+   * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Endpoint para salvamento
+   */
+  async update(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const { cliente_data, condicoes_data } = req.body;
+
+      if (!cliente_data && !condicoes_data) {
+        return res.status(400).json({
+          success: false,
+          error: 'Nenhum dado fornecido para atualização',
+        });
+      }
+
+      const proposal = await this.repository.findById(id);
+
+      if (!proposal) {
+        return res.status(404).json({
+          success: false,
+          error: 'Proposta não encontrada',
+        });
+      }
+
+      // Verificar se a proposta pode ser editada (apenas pendenciadas)
+      const statusString = String(proposal.status || '').trim();
+      if (statusString !== 'pendenciado' && statusString !== 'pendente') {
+        return res.status(400).json({
+          success: false,
+          error: 'Apenas propostas pendenciadas podem ser editadas',
+        });
+      }
+
+      // Atualizar dados usando o método do agregado
+      proposal.updateAfterPending({
+        clienteData: cliente_data,
+        observacoes: condicoes_data?.observacoes || '',
+      });
+
+      await this.repository.save(proposal);
+
+      return res.json({
+        success: true,
+        message: 'Proposta atualizada com sucesso',
+        propostaId: proposal.id,
+      });
+    } catch (error: any) {
+      console.error('[ProposalController.update] Error:', error);
+
+      if (error.message.includes('não encontrada')) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (error.message.includes('Apenas propostas pendenciadas')) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao atualizar proposta',
+      });
+    }
+  }
+
+  /**
    * Buscar proposta por CPF (última proposta do cliente)
    */
   async getByCpf(req: Request, res: Response): Promise<Response> {

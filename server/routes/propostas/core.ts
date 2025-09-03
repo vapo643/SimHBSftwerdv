@@ -149,6 +149,19 @@ router.get('/:id', auth, (req: any, res: any) => controller.getById(req, res));
 // POST /api/propostas - Criar nova proposta
 router.post('/', auth, (req: any, res: any) => controller.create(req, res));
 
+// PUT /api/propostas/:id - Atualizar dados da proposta
+router.put('/:id', auth, async (req: any, res: any) => {
+  try {
+    return controller.update(req, res);
+  } catch (error) {
+    console.error('Error in update route:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
 // PUT /api/propostas/:id/submit - Submeter para análise
 router.put('/:id/submit', auth, (req: any, res: any) => controller.submitForAnalysis(req, res));
 
@@ -283,8 +296,7 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
 // PUT /:id/resubmit - Endpoint específico para reenviar propostas pendentes
 router.put('/:id/resubmit', auth, async (req: any, res: any) => {
   try {
-    const propostaController = new ProposalController(proposalRepository);
-    await propostaController.resubmitFromPending(req, res);
+    return controller.resubmitFromPending(req, res);
   } catch (error) {
     console.error('Error in resubmit route:', error);
     res.status(500).json({
