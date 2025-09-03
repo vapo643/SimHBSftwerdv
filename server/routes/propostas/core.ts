@@ -240,7 +240,8 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
   } else if (status === 'pendente' || status === 'pendenciado') {
     // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendente
     try {
-      const { motivo_pendencia } = req.body;
+      // Aceitar tanto camelCase (frontend) quanto snake_case (backend)
+      const motivo_pendencia = req.body.motivo_pendencia || req.body.motivoPendencia || req.body.observacao;
       
       if (!motivo_pendencia) {
         return res.status(400).json({
@@ -248,6 +249,9 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
           error: 'Motivo da pendência é obrigatório',
         });
       }
+      
+      // Garantir que o motivo seja passado corretamente para o controller
+      req.body.motivo_pendencia = motivo_pendencia;
       
       // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
       return controller.pendenciar(req, res);
