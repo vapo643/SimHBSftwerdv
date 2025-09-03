@@ -60,4 +60,3 @@ localPort = 45243
 externalPort = 3003
 
 [agent]
-integrations = ["javascript_database==1.0.0"]
