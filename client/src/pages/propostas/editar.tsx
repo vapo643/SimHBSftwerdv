@@ -482,15 +482,17 @@ const EditarPropostaPendenciada: React.FC = () => {
     },
   });
 
-  // CÁLCULOS AUTOMÁTICOS - POSICIONADO CORRETAMENTE ANTES DOS RETURNS
+  // CÁLCULOS AUTOMÁTICOS - FUNCIONAR MESMO SEM TABELA COMERCIAL
   useEffect(() => {
-    if (!proposta?.tabelaComercial?.taxaJuros) return;
-
     const valor = parseFloat((formData.condicoesData as any)?.valor?.replace(/[^\d,]/g, '')?.replace(',', '.') || '0');
     const prazo = parseInt((formData.condicoesData as any)?.prazo || '0');
-    const taxaJuros = parseFloat(proposta.tabelaComercial.taxaJuros);
+    
+    // Usar taxa da tabela ou padrão de 2.5% ao mês
+    const taxaJuros = parseFloat(proposta?.tabelaComercial?.taxaJuros || '2.5');
 
-    if (valor > 0 && prazo > 0 && taxaJuros > 0) {
+    if (valor > 0 && prazo > 0) {
+      console.log('🧮 CALCULANDO:', { valor, prazo, taxaJuros });
+      
       const tacPercentual = 3;
       const valorTac = (valor * tacPercentual / 100);
       const iofMensal = 0.38;
@@ -501,6 +503,8 @@ const EditarPropostaPendenciada: React.FC = () => {
       const taxaMensal = taxaJuros / 100;
       const fatorJuros = Math.pow(1 + taxaMensal, prazo);
       const valorParcela = (valorTotalFinanciado * taxaMensal * fatorJuros) / (fatorJuros - 1);
+
+      console.log('🧮 RESULTADOS:', { valorTac, iofTotal, valorTotalFinanciado, valorParcela });
 
       setFormData((prev) => ({
         ...prev,
@@ -513,7 +517,11 @@ const EditarPropostaPendenciada: React.FC = () => {
         },
       }));
     }
-  }, [formData.condicoesData, proposta?.tabelaComercial?.taxaJuros]);
+  }, [
+    (formData.condicoesData as any)?.valor,
+    (formData.condicoesData as any)?.prazo,
+    proposta?.tabelaComercial?.taxaJuros
+  ]);
 
   console.log('🔍 COMPONENTE INICIADO com ID:', id);
 
@@ -985,6 +993,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         id="produto"
                         value={proposta?.produto?.nomeProduto || 
                                (proposta?.produto as any)?.nome ||
+                               (proposta as any)?.nomeProduto ||
                                'Produto não definido'}
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
@@ -996,6 +1005,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         id="tabelaComercial"
                         value={proposta?.tabelaComercial?.nomeTabela ||
                                (proposta?.tabelaComercial as any)?.nome ||
+                               (proposta as any)?.nomeTabela ||
                                'Tabela não definida'}
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
