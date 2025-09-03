@@ -188,8 +188,18 @@ export function ClientDataStep() {
   const handleUseExistingClientData = useCallback(() => {
     if (!clientFoundData) return;
 
+    // DEBUG: Verificar que dados estão chegando
+    console.log('==== DEBUG: DADOS DO CLIENTE ENCONTRADO ====');
+    console.log('clientFoundData:', clientFoundData);
+    console.log('nome:', clientFoundData.nome);
+    console.log('email:', clientFoundData.email);
+    console.log('telefone:', clientFoundData.telefone);
+    console.log('dataNascimento:', clientFoundData.dataNascimento);
+    console.log('rg:', clientFoundData.rg);
+    console.log('==========================================');
+
     // Preencher todos os campos com dados existentes - TODOS OS CAMPOS COMO SOLICITADO
-    updateClient({
+    const clientUpdateData = {
       nome: clientFoundData.nome || '',
       email: clientFoundData.email || '',
       telefone: clientFoundData.telefone || '',
@@ -221,7 +231,13 @@ export function ClientDataStep() {
       dadosPagamentoPixBanco: clientFoundData.dadosPagamentoPixBanco || '',
       dadosPagamentoPixNomeTitular: clientFoundData.dadosPagamentoPixNomeTitular || '',
       dadosPagamentoPixCpfTitular: clientFoundData.dadosPagamentoPixCpfTitular || '',
-    });
+    };
+
+    console.log('==== DEBUG: DADOS ENVIADOS PARA updateClient ====');
+    console.log('clientUpdateData:', clientUpdateData);
+    console.log('================================================');
+
+    updateClient(clientUpdateData);
 
     toast({
       title: 'Dados carregados!',
