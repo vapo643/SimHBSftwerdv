@@ -313,11 +313,11 @@ const AnaliseManualPage: React.FC = () => {
               </p>
               <p>
                 <strong>Finalidade:</strong>{' '}
-                {safeRender(proposta.finalidade || proposta.condicoesData?.finalidade)}
+                {proposta.finalidade || proposta.condicoesData?.finalidade || 'Não informado'}
               </p>
               <p>
                 <strong>Garantia:</strong>{' '}
-                {safeRender(proposta.garantia || proposta.condicoesData?.garantia)}
+                {proposta.garantia || proposta.condicoesData?.garantia || 'Não informado'}
               </p>
               <p>
                 <strong>TAC:</strong>{' '}
