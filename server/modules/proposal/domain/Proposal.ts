@@ -908,14 +908,15 @@ export class Proposal {
    */
   toPersistence(): any {
     // Serializar Value Objects para formato primitivo para persistência
+    // Adicionar verificação defensiva para tipos mistos
     const clienteDataPersistence = {
       ...this._clienteData,
-      cpf: this._clienteData.cpf.getValue(),
-      email: this._clienteData.email?.getValue(),
-      telefone: this._clienteData.telefone?.getValue(),
-      cep: this._clienteData.cep?.getValue(),
-      renda_mensal: this._clienteData.renda_mensal?.getReais(),
-      dividas_existentes: this._clienteData.dividas_existentes?.getReais(),
+      cpf: this._clienteData.cpf?.getValue ? this._clienteData.cpf.getValue() : this._clienteData.cpf,
+      email: this._clienteData.email?.getValue ? this._clienteData.email.getValue() : this._clienteData.email,
+      telefone: this._clienteData.telefone?.getValue ? this._clienteData.telefone.getValue() : this._clienteData.telefone,
+      cep: this._clienteData.cep?.getValue ? this._clienteData.cep.getValue() : this._clienteData.cep,
+      renda_mensal: this._clienteData.renda_mensal?.getReais ? this._clienteData.renda_mensal.getReais() : this._clienteData.renda_mensal,
+      dividas_existentes: this._clienteData.dividas_existentes?.getReais ? this._clienteData.dividas_existentes.getReais() : this._clienteData.dividas_existentes,
     };
 
     return {
