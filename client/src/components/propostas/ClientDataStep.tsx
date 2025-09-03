@@ -193,12 +193,18 @@ export function ClientDataStep() {
     const apiData = clientFoundData as any; // Type assertion para acessar propriedades corretas
     const clientData = apiData.clienteData || {};
     
+    // 🔍 INVESTIGAR: Verificar quais campos realmente existem na API
+    console.log('==== CAMPOS DISPONÍVEIS NA API ====');
+    console.log('Campos cliente*:', Object.keys(apiData).filter(k => k.startsWith('cliente')));
+    console.log('clienteData keys:', Object.keys(clientData));
+    console.log('===================================');
+    
     const clientUpdateData = {
-      // Dados pessoais - usar campos corretos da API
-      nome: apiData.clienteNome || '',
-      email: apiData.clienteEmail || '',
-      telefone: apiData.clienteTelefone || '',
-      dataNascimento: apiData.clienteDataNascimento || '',
+      // Dados pessoais - tentar diferentes variações de nome
+      nome: apiData.clienteNome || apiData.nome || clientData.nome || '',
+      email: apiData.clienteEmail || apiData.email || clientData.email || '',
+      telefone: apiData.clienteTelefone || apiData.telefone || clientData.telefone || '',
+      dataNascimento: apiData.clienteDataNascimento || apiData.dataNascimento || clientData.dataNascimento || clientData.data_nascimento || '',
       
       // Documentos - verificar tanto campo direto quanto clienteData
       rg: apiData.clienteRg || clientData.rg || '',
@@ -206,10 +212,10 @@ export function ClientDataStep() {
       rgUf: apiData.clienteRgUf || clientData.uf || '',
       rgDataEmissao: apiData.clienteRgDataEmissao || clientData.rgDataEmissao || '',
       
-      // Dados adicionais
-      localNascimento: apiData.clienteLocalNascimento || '',
-      estadoCivil: apiData.clienteEstadoCivil || '',
-      nacionalidade: apiData.clienteNacionalidade || '',
+      // Dados adicionais - verificar diferentes variações
+      localNascimento: apiData.clienteLocalNascimento || apiData.localNascimento || clientData.localNascimento || clientData.local_nascimento || '',
+      estadoCivil: apiData.clienteEstadoCivil || apiData.estadoCivil || clientData.estadoCivil || clientData.estado_civil || '',
+      nacionalidade: apiData.clienteNacionalidade || apiData.nacionalidade || clientData.nacionalidade || '',
       
       // Endereço - verificar tanto campo direto quanto clienteData
       cep: apiData.clienteCep || clientData.cep || '',
@@ -220,10 +226,10 @@ export function ClientDataStep() {
       cidade: apiData.clienteCidade || clientData.cidade || '',
       estado: apiData.clienteUf || clientData.estado || '',
       
-      // Dados profissionais
-      ocupacao: apiData.clienteOcupacao || '',
-      rendaMensal: apiData.clienteRenda || '',
-      telefoneEmpresa: apiData.clienteTelefoneEmpresa || '',
+      // Dados profissionais - verificar diferentes variações
+      ocupacao: apiData.clienteOcupacao || apiData.ocupacao || clientData.ocupacao || '',
+      rendaMensal: apiData.clienteRenda || apiData.rendaMensal || clientData.rendaMensal || clientData.renda_mensal || '',
+      telefoneEmpresa: apiData.clienteTelefoneEmpresa || apiData.telefoneEmpresa || clientData.telefoneEmpresa || clientData.telefone_empresa || '',
       
       // Dados de pagamento - usar estrutura correta
       metodoPagamento: (apiData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
