@@ -1,0 +1,122 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Refinamento de UI P2
+Sumário da Missão (O Quê): Refatorar a interface de edição de propostas (propostas/editar) para remover o botão redundante "Salvar alterações", simplificando o fluxo de trabalho do usuário.
+
+Intenção Estratégica (O Porquê): Conforme definido no "Blueprint de Negócio" durante a Fase de Alinhamento, a ação de corrigir uma pendência é atômica. A existência de dois botões ("Salvar" e "Reenviar") cria ambiguidade e um passo desnecessário. A remoção do botão "Salvar" cria uma experiência de usuário mais clara, direta e menos propensa a erros.
+
+Histórico Relevante (Consulta Obrigatória): A auditoria forense anterior já mapeou o arquivo client/src/pages/propostas/editar.tsx e identificou o código JSX dos botões e suas funções de onClick (handleSave e handleResubmit).
+
+Modelo Mental (Como se Encaixa): Esta é uma otimização na camada de apresentação (Frontend). Ao remover o botão, estamos a reforçar a regra de negócio de que a única ação válida para uma proposta pendente editada é o seu reenvio para análise. A lógica de "salvar" será implicitamente garantida pela ação de "reenviar".
+
+Riscos Antecipados e Contramedidas:
+
+Risco: A lógica de atualização de dados (updateMutation), que era parte do handleResubmit, ser acidentalmente removida junto com o botão, impedindo que as alterações sejam salvas.
+
+Contramedida: O prompt especifica que a função handleResubmit, que já contém a chamada à updateMutation, deve ser preservada como a ação principal, garantindo a atomicidade da operação (salvar e reenviar).
+
+IMPLEMENTAR: Simplificação da Interface de Edição de Proposta Pendente
+
+CONTEXT: Na tela de edição de uma proposta com status PENDENTE, existem dois botões de ação: "Salvar alterações" e "Reenviar para Análise". A regra de negócio exige um fluxo atômico, tornando o botão "Salvar alterações" redundante e confuso para o usuário.
+
+CURRENT STATE: A UI apresenta dois botões que executam ações separadas, complicando o fluxo do atendente.
+
+Evidência Bruta (Código JSX Atual):
+
+TypeScript
+
+// client/src/pages/propostas/editar.tsx
+
+// ...
+<div className="flex justify-end gap-4 mt-8">
+  <Button
+    variant="outline"
+    onClick={handleSave}
+    disabled={updateMutation.isPending}
+  >
+    {updateMutation.isPending ? (
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+    ) : (
+      <Save className="mr-2 h-4 w-4" />
+    )}
+    Salvar alterações
+  </Button>
+  <Button
+    className="btn-simpix-accent"
+    onClick={handleResubmit}
+    disabled={resubmitMutation.isPending}
+  >
+    {resubmitMutation.isPending ? (
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+    ) : (
+      <Send className="mr-2 h-4 w-4" />
+    )}
+    Reenviar para Análise
+  </Button>
+</div>
+// ...
+EXPECTED (Estado Final de Sucesso): A UI deve conter apenas um único botão de ação principal: "Reenviar para Análise". Este botão será o único responsável por salvar as alterações e submeter a proposta para a nova análise. A função handleSave deve ser removida.
+
+Código Esperado:
+
+TypeScript
+
+// client/src/pages/propostas/editar.tsx
+
+// ...
+<div className="flex justify-end gap-4 mt-8">
+  <Button
+    className="btn-simpix-accent"
+    onClick={handleResubmit}
+    disabled={updateMutation.isPending || resubmitMutation.isPending} // Agora desabilita com qualquer uma das mutations
+  >
+    {(updateMutation.isPending || resubmitMutation.isPending) ? (
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+    ) : (
+      <Send className="mr-2 h-4 w-4" />
+    )}
+    Reenviar para Análise
+  </Button>
+</div>
+// ...
+CONSTRAINTS (Roadmap de Implementação):
+
+Abra o arquivo client/src/pages/propostas/editar.tsx.
+
+Localize o div que contém os dois botões de ação.
+
+Delete completamente o componente <Button> referente a "Salvar alterações".
+
+Delete a declaração da função handleSave, pois ela não será mais utilizada.
+
+Localize a função handleResubmit. A auditoria confirmou que ela já chama a updateMutation antes da resubmitMutation. Mantenha esta lógica intacta.
+
+No botão restante ("Reenviar para Análise"), atualize a condição disabled para desativar o botão se qualquer uma das mutações (updateMutation ou resubmitMutation) estiver em andamento. Ex: disabled={updateMutation.isPending || resubmitMutation.isPending}.
+
+Atualize a lógica de exibição do Loader2 para que ele apareça se qualquer uma das mutações estiver pendente.
+
+Execute o protocolo 7-CHECK. A verificação de get_latest_lsp_diagnostics é mandatória.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e uma breve descrição]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Listar decisões tomadas]
+
+VALIDAÇÃO PENDENTE: [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+
+PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:
+
+Mapear ficheiros e funções exatas afetadas.
+
+Garantir importações e tipos corretos.
+
+Executar get_latest_lsp_diagnostics e corrigir TODOS os erros.
+
+Declarar Nível de Confiança (0-100%) na implementação.
+
+Categorizar Riscos Descobertos (BAIXO/MÉDIO/ALTO/CRÍTICO).
+
+Realizar teste funcional completo (será feito no Passo 4 do roadmap).
+
+Documentar Decisões Técnicas assumidas para auditoria futura.

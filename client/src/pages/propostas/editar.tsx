@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertCircle, Save, Send, FileImage, FileText, Eye } from 'lucide-react';
+import { Loader2, AlertCircle, Send, FileImage, FileText, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/apiClient';
@@ -656,12 +656,6 @@ const EditarPropostaPendenciada: React.FC = () => {
   };
 
 
-  const handleSave = () => {
-    updateMutation.mutate({
-      cliente_data: formData.clienteData,
-      condicoes_data: formData.condicoesData,
-    });
-  };
 
   const handleResubmit = async () => {
     // Primeiro salvar se houver alterações, depois reenviar
@@ -1104,28 +1098,18 @@ const EditarPropostaPendenciada: React.FC = () => {
           <Button variant="outline" onClick={() => setLocation('/dashboard')}>
             Cancelar
           </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleSave} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              Salvar Alterações
-            </Button>
-            <Button
-              className="btn-simpix-accent"
-              onClick={handleResubmit}
-              disabled={resubmitMutation.isPending}
-            >
-              {resubmitMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Reenviar para Análise
-            </Button>
-          </div>
+          <Button
+            className="btn-simpix-accent"
+            onClick={handleResubmit}
+            disabled={updateMutation.isPending || resubmitMutation.isPending}
+          >
+            {(updateMutation.isPending || resubmitMutation.isPending) ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
+            Reenviar para Análise
+          </Button>
         </div>
       </div>
     </DashboardLayout>
