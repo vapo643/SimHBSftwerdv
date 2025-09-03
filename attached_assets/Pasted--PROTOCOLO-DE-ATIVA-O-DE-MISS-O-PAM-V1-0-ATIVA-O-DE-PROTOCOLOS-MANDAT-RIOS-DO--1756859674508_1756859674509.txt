@@ -1,0 +1,54 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**[ATIVAÇÃO DE PROTOCOLOS MANDATÓRIOS DO `replit.md`]**
+*Sua execução será governada pelos seguintes protocolos:*
+*- **CRITICAL WORKFLOW:** `get_latest_lsp_diagnostics` antes da conclusão.*
+*- **CONTEXT ENGINEERING PROTOCOL V2.0:** Consulte ADRs e a documentação existente.*
+*- **DECD V1.0:** Pesquisa na web autorizada para esta missão de planeamento.*
+
+**1. Princípio Mestre: Transferência de Consciência**
+*A sua missão agora é atuar como um Arquiteto de UI/UX. A funcionalidade de preenchimento automático é funcional, mas a sua apresentação é amadora. Você deve projetar uma solução elegante e intuitiva, substituindo o `window.confirm()` por um modal de confirmação que se alinhe com a nossa biblioteca de componentes (`shadcn/ui`) e que ofereça uma experiência de usuário superior.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa está **autorizada** para consultar a **documentação oficial da `shadcn/ui` e do `Radix UI`** para selecionar o componente de `AlertDialog` ou `Dialog` mais apropriado e para rever as melhores práticas de gestão de estado de modais em React com `TanStack Query` e `React Hook Form`.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ACELERAÇÃO DE ORIGINAÇÃO (TRACK 1, FASE 2 - PLANEAMENTO)**
+
+* **Sumário da Missão (O Quê):** Arquitetar um plano de implementação detalhado para substituir o `window.confirm()` existente na funcionalidade de "Preenchimento Automático por CPF" por um componente de modal customizado da biblioteca `shadcn/ui`.
+* **Intenção Estratégica (O Porquê):** O objetivo é refinar a experiência do usuário, tornando-a mais profissional, clara e consistente com o resto da aplicação. Um modal bem projetado aumenta a confiança do usuário e reduz a fricção no preenchimento de propostas.
+* **Histórico Relevante (Consulta Obrigatória):** A sua arquitetura deve ser baseada nas descobertas do relatório `docs/diagnostics/AUDITORIA_PREENCHIMENTO_AUTOMATICO_CPF.md`, que validou o fluxo de dados existente e identificou o `window.confirm()` como o ponto a ser melhorado.
+* **Modelo Mental (Como se Encaixa):** Você está a substituir uma janela pop-up genérica e intrusiva por um elemento de design que faz parte integrante do ecossistema visual da aplicação. O fluxo de dados permanece o mesmo; a sua tarefa é projetar uma "ponte" visualmente agradável para esse fluxo.
+
+---
+
+### **PLANEJAR E ARQUITETAR:**
+Blueprint de Melhoria de UX para o Modal de Preenchimento Automático.
+
+**CURRENT STATE:**
+No componente `ClientDataStep.tsx`, a detecção de um cliente existente aciona um `window.confirm()`. Embora funcional, esta abordagem é visualmente inconsistente, bloqueia o thread principal do navegador e oferece uma experiência de usuário pobre.
+
+**EXPECTED (Estado Final de Sucesso):**
+A geração de um novo documento Markdown em `docs/missions/BLUEPRINT_MODAL_PREENCHIMENTO_CPF.md`. Este documento deve conter um plano de implementação detalhado, incluindo:
+
+1.  **Seleção de Componente:**
+    * A recomendação de qual componente `shadcn/ui` deve ser usado (`AlertDialog` ou `Dialog`) e uma justificativa técnica para a escolha.
+
+2.  **Gestão de Estado:**
+    * A estratégia para controlar a visibilidade do modal. Isso deve incluir a definição de um novo estado (ex: `useState`) para armazenar os dados do cliente encontrado e para controlar a abertura/fecho do modal.
+
+3.  **Design do Componente (Props e Conteúdo):**
+    * A definição das `props` que o novo componente de modal irá receber (ex: `isOpen`, `onClose`, `onConfirm`, `clientName`).
+    * O texto exato a ser exibido no modal, incluindo título (ex: "Cliente Encontrado"), descrição (ex: "Deseja preencher a proposta com os dados de **[Nome do Cliente]**?") e os rótulos dos botões (ex: "Preencher Dados" e "Cancelar").
+
+4.  **Plano de Refatoração do `ClientDataStep.tsx`:**
+    * Um `diff` ou um guia passo a passo mostrando como o componente `ClientDataStep.tsx` deve ser modificado para:
+        * Remover a chamada `window.confirm()`.
+        * Implementar a nova lógica de gestão de estado.
+        * Renderizar o novo componente de modal.
+        * Chamar a função `updateClient()` existente apenas quando o botão de confirmação do modal for clicado.
+
+**CONSTRAINTS (Roadmap de Planeamento):**
+1.  **Análise de Componentes:** Inspecione a documentação da `shadcn/ui` para fazer a sua recomendação.
+2.  **Foco no Plano:** A sua missão é projetar e documentar este plano de forma clara e acionável. **Não implemente nenhuma correção.**
