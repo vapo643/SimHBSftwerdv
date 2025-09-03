@@ -123,17 +123,35 @@ export class ProposalRepository implements IProposalRepository {
   }
 
   async findById(id: string): Promise<Proposal | null> {
+    console.log('🔍 [findById] Executing query with JOINs for ID:', id);
+    
+    // CRITICAL FIX: Incluir JOINs para buscar dados de produto e tabela comercial
     const result = await db
-      .select()
+      .select({
+        proposta: propostas,
+        produto: produtos,
+        tabelaComercial: tabelasComerciais,
+        loja: lojas,
+      })
       .from(propostas)
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)))
       .limit(1);
 
     if (!result || result.length === 0) {
+      console.log('🔍 [findById] No proposal found for ID:', id);
       return null;
     }
 
-    return this.mapToDomain(result[0]);
+    console.log('🔍 [findById] Found proposal with joined data:', {
+      produtoNome: result[0].produto?.nomeProduto,
+      tabelaComercialNome: result[0].tabelaComercial?.nomeTabela,
+      lojaNome: result[0].loja?.nomeLoja
+    });
+
+    return this.mapToDomainWithJoinedData(result[0]);
   }
 
   // PAM V4.1 PERF-F2-001: Eliminando N+1 com JOIN otimizado
