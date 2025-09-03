@@ -1,0 +1,265 @@
+🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:532 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at EditarPropostaPendenciada (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/editar.tsx?t=1756921683783:483:18)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=9648f934:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=9648f934:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=9648f934:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9648f934:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=9648f934:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+printWarning @ chunk-QYFCA5BS.js?v=9648f934:521
+error @ chunk-QYFCA5BS.js?v=9648f934:505
+checkForNestedUpdates @ chunk-QYFCA5BS.js?v=9648f934:19718
+scheduleUpdateOnFiber @ chunk-QYFCA5BS.js?v=9648f934:18583
+dispatchSetState @ chunk-QYFCA5BS.js?v=9648f934:12451
+(anonymous) @ editar.tsx:532
+commitHookEffectListMount @ chunk-QYFCA5BS.js?v=9648f934:16963
+commitPassiveMountOnFiber @ chunk-QYFCA5BS.js?v=9648f934:18206
+commitPassiveMountEffects_complete @ chunk-QYFCA5BS.js?v=9648f934:18179
+commitPassiveMountEffects_begin @ chunk-QYFCA5BS.js?v=9648f934:18169
+commitPassiveMountEffects @ chunk-QYFCA5BS.js?v=9648f934:18159
+flushPassiveEffectsImpl @ chunk-QYFCA5BS.js?v=9648f934:19543
+flushPassiveEffects @ chunk-QYFCA5BS.js?v=9648f934:19500
+(anonymous) @ chunk-QYFCA5BS.js?v=9648f934:19381
+workLoop @ chunk-QYFCA5BS.js?v=9648f934:197
+flushWork @ chunk-QYFCA5BS.js?v=9648f934:176
+performWorkUntilDeadline @ chunk-QYFCA5BS.js?v=9648f934:384Understand this error
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendente', cliente_data: {…}, clienteData: {…}, valor: {…}, …}
+editar.tsx:498 🔍 VALORES RAW: {valorRaw: {…}, prazoRaw: 6}
+editar.tsx:514 🔍 VALORES PROCESSADOS: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:517 🧮 CALCULANDO: {valor: 1006, prazo: 6, taxaJuros: 2.5}
+editar.tsx:530 🧮 RESULTADOS: {valorTac: 30.18, iofTotal: 18.671360000000004, valorTotalFinanciado: 1054.85136, valorParcela: 191.50823388258067}
+editar.tsx:543 ✅ CÁLCULOS APLICADOS AO FORMDATA
+editar.tsx:552 🔍 COMPONENTE INICIADO com ID: 29e80705-89bb-43a5-bbc8-960b3139939c
+editar.tsx:604 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'pendente', statusType: 'string', statusLength: 8, expectedStatus: 'pendenciado', isEqual: false, …}
+editar.tsx:492 🔍 USEEFFECT EXECUTANDO - FormData: {clienteData: {…}, condicoesData: {…}}
+editar.tsx:493 🔍 USEEFFECT EXECUTANDO - Proposta: {id: '29e80705-89bb-43a5-bbc8-960

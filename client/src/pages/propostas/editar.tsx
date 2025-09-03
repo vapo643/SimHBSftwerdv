@@ -366,8 +366,8 @@ const EditarPropostaPendenciada: React.FC = () => {
         condicoes_data: (proposta as any).condicoes_data,
         produto: proposta.produto,
         tabelaComercial: proposta.tabelaComercial,
-        produtoId: proposta.produtoId || (proposta as any).produto_id,
-        taxaJuros: proposta.taxaJuros,
+        produtoId: (proposta as any).produto_id || (proposta as any).produtoId,
+        taxaJuros: (proposta as any).taxaJuros || proposta?.tabelaComercial?.taxaJuros,
         PROPOSTA_COMPLETA: proposta
       });
       
@@ -487,15 +487,10 @@ const EditarPropostaPendenciada: React.FC = () => {
     },
   });
 
-  // CÁLCULOS AUTOMÁTICOS - FORCANDO EXECUÇÃO
+  // CÁLCULOS AUTOMÁTICOS - PREVENINDO LOOP INFINITO
   useEffect(() => {
-    console.log('🔍 USEEFFECT EXECUTANDO - FormData:', formData);
-    console.log('🔍 USEEFFECT EXECUTANDO - Proposta:', proposta);
-    
     const valorRaw = (formData.condicoesData as any)?.valor;
     const prazoRaw = (formData.condicoesData as any)?.prazo;
-    
-    console.log('🔍 VALORES RAW:', { valorRaw, prazoRaw });
     
     const valor = (() => {
       if (typeof valorRaw === 'object' && valorRaw?.cents) {
@@ -511,11 +506,11 @@ const EditarPropostaPendenciada: React.FC = () => {
     // Usar taxa da tabela ou padrão de 2.5% ao mês
     const taxaJuros = parseFloat(proposta?.tabelaComercial?.taxaJuros || '2.5');
 
-    console.log('🔍 VALORES PROCESSADOS:', { valor, prazo, taxaJuros });
-
-    if (valor > 0 && prazo > 0) {
-      console.log('🧮 CALCULANDO:', { valor, prazo, taxaJuros });
-      
+    // EVITAR LOOP: Só calcular se ainda não temos os valores calculados
+    const valorTacExistente = (formData.condicoesData as any)?.valorTac;
+    const valorIofExistente = (formData.condicoesData as any)?.valorIof;
+    
+    if (valor > 0 && prazo > 0 && !valorTacExistente && !valorIofExistente) {
       const tacPercentual = 3;
       const valorTac = (valor * tacPercentual / 100);
       const iofMensal = 0.38;
@@ -527,8 +522,6 @@ const EditarPropostaPendenciada: React.FC = () => {
       const fatorJuros = Math.pow(1 + taxaMensal, prazo);
       const valorParcela = (valorTotalFinanciado * taxaMensal * fatorJuros) / (fatorJuros - 1);
 
-      console.log('🧮 RESULTADOS:', { valorTac, iofTotal, valorTotalFinanciado, valorParcela });
-
       setFormData((prev) => ({
         ...prev,
         condicoesData: {
@@ -539,17 +532,13 @@ const EditarPropostaPendenciada: React.FC = () => {
           valorParcela: valorParcela.toFixed(2),
         },
       }));
-      
-      console.log('✅ CÁLCULOS APLICADOS AO FORMDATA');
-    } else {
-      console.log('❌ CONDIÇÕES NÃO ATENDIDAS:', { valor, prazo, condicao: valor > 0 && prazo > 0 });
     }
   }, [
-    formData.condicoesData,
-    proposta
+    (formData.condicoesData as any)?.valor,
+    (formData.condicoesData as any)?.prazo,
+    proposta?.tabelaComercial?.taxaJuros
   ]);
 
-  console.log('🔍 COMPONENTE INICIADO com ID:', id);
 
   // Validação early return para IDs inválidos - AGORA DEPOIS DOS HOOKS
   if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
