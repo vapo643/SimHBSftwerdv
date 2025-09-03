@@ -285,7 +285,7 @@ export const propostas = pgTable('propostas', {
   clienteEmpresaCnpj: text('cliente_empresa_cnpj'), // NULLABLE
   clienteCargoFuncao: text('cliente_cargo_funcao'), // NULLABLE
   clienteTempoEmprego: text('cliente_tempo_emprego'), // NULLABLE - Ex: "2 anos", "6 meses"
-  clienteDataAdmissao: timestamp('cliente_data_admissao'), // NULLABLE - Data específica de admissão
+  // clienteDataAdmissao: timestamp('cliente_data_admissao'), // NULLABLE - Data específica de admissão - TEMPORARIAMENTE COMENTADO
   clienteRendaComprovada: boolean('cliente_renda_comprovada').default(false), // NOT NULL com default
 
   // Novos campos Financeiros - Added August 20, 2025
