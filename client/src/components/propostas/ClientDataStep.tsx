@@ -188,54 +188,63 @@ export function ClientDataStep() {
   const handleUseExistingClientData = useCallback(() => {
     if (!clientFoundData) return;
 
-    // DEBUG: Verificar que dados estão chegando
-    console.log('==== DEBUG: DADOS DO CLIENTE ENCONTRADO ====');
-    console.log('clientFoundData:', clientFoundData);
-    console.log('nome:', clientFoundData.nome);
-    console.log('email:', clientFoundData.email);
-    console.log('telefone:', clientFoundData.telefone);
-    console.log('dataNascimento:', clientFoundData.dataNascimento);
-    console.log('rg:', clientFoundData.rg);
-    console.log('==========================================');
-
-    // Preencher todos os campos com dados existentes - TODOS OS CAMPOS COMO SOLICITADO
+    // 🔍 MAPEAMENTO CORRETO DOS CAMPOS DA API
+    // A API retorna dados com estrutura: clienteNome, clienteCep, etc. + sub-objeto clienteData
+    const apiData = clientFoundData as any; // Type assertion para acessar propriedades corretas
+    const clientData = apiData.clienteData || {};
+    
     const clientUpdateData = {
-      nome: clientFoundData.nome || '',
-      email: clientFoundData.email || '',
-      telefone: clientFoundData.telefone || '',
-      dataNascimento: clientFoundData.dataNascimento || '',
-      rg: clientFoundData.rg || '',
-      orgaoEmissor: clientFoundData.orgaoEmissor || '',
-      rgUf: clientFoundData.rgUf || '',
-      rgDataEmissao: clientFoundData.rgDataEmissao || '',
-      localNascimento: clientFoundData.localNascimento || '',
-      estadoCivil: clientFoundData.estadoCivil || '',
-      nacionalidade: clientFoundData.nacionalidade || '',
-      cep: clientFoundData.cep || '',
-      logradouro: clientFoundData.logradouro || '',
-      numero: clientFoundData.numero || '',
-      complemento: clientFoundData.complemento || '',
-      bairro: clientFoundData.bairro || '',
-      cidade: clientFoundData.cidade || '',
-      estado: clientFoundData.estado || '',
-      ocupacao: clientFoundData.ocupacao || '',
-      rendaMensal: clientFoundData.rendaMensal || '',
-      telefoneEmpresa: clientFoundData.telefoneEmpresa || '',
-      metodoPagamento: (clientFoundData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
-      dadosPagamentoBanco: clientFoundData.dadosPagamentoBanco || '',
-      dadosPagamentoAgencia: clientFoundData.dadosPagamentoAgencia || '',
-      dadosPagamentoConta: clientFoundData.dadosPagamentoConta || '',
-      dadosPagamentoDigito: clientFoundData.dadosPagamentoDigito || '',
-      dadosPagamentoPix: clientFoundData.dadosPagamentoPix || '',
-      dadosPagamentoTipoPix: clientFoundData.dadosPagamentoTipoPix || '',
-      dadosPagamentoPixBanco: clientFoundData.dadosPagamentoPixBanco || '',
-      dadosPagamentoPixNomeTitular: clientFoundData.dadosPagamentoPixNomeTitular || '',
-      dadosPagamentoPixCpfTitular: clientFoundData.dadosPagamentoPixCpfTitular || '',
+      // Dados pessoais - usar campos corretos da API
+      nome: apiData.clienteNome || '',
+      email: apiData.clienteEmail || '',
+      telefone: apiData.clienteTelefone || '',
+      dataNascimento: apiData.clienteDataNascimento || '',
+      
+      // Documentos - verificar tanto campo direto quanto clienteData
+      rg: apiData.clienteRg || clientData.rg || '',
+      orgaoEmissor: apiData.clienteOrgaoEmissor || clientData.orgaoEmissor || '',
+      rgUf: apiData.clienteRgUf || clientData.uf || '',
+      rgDataEmissao: apiData.clienteRgDataEmissao || clientData.rgDataEmissao || '',
+      
+      // Dados adicionais
+      localNascimento: apiData.clienteLocalNascimento || '',
+      estadoCivil: apiData.clienteEstadoCivil || '',
+      nacionalidade: apiData.clienteNacionalidade || '',
+      
+      // Endereço - verificar tanto campo direto quanto clienteData
+      cep: apiData.clienteCep || clientData.cep || '',
+      logradouro: apiData.clienteLogradouro || clientData.logradouro || '',
+      numero: apiData.clienteNumero || clientData.numero || '',
+      complemento: apiData.clienteComplemento || clientData.complemento || '',
+      bairro: apiData.clienteBairro || clientData.bairro || '',
+      cidade: apiData.clienteCidade || clientData.cidade || '',
+      estado: apiData.clienteUf || clientData.estado || '',
+      
+      // Dados profissionais
+      ocupacao: apiData.clienteOcupacao || '',
+      rendaMensal: apiData.clienteRenda || '',
+      telefoneEmpresa: apiData.clienteTelefoneEmpresa || '',
+      
+      // Dados de pagamento - usar estrutura correta
+      metodoPagamento: (apiData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
+      dadosPagamentoBanco: apiData.dadosPagamentoBanco || '',
+      dadosPagamentoAgencia: apiData.dadosPagamentoAgencia || '',
+      dadosPagamentoConta: apiData.dadosPagamentoConta || '',
+      dadosPagamentoDigito: apiData.dadosPagamentoDigito || '',
+      dadosPagamentoPix: apiData.dadosPagamentoPix || '',
+      dadosPagamentoTipoPix: apiData.dadosPagamentoTipoPix || '',
+      dadosPagamentoPixBanco: apiData.dadosPagamentoPixBanco || '',
+      dadosPagamentoPixNomeTitular: apiData.dadosPagamentoPixNomeTitular || '',
+      dadosPagamentoPixCpfTitular: apiData.dadosPagamentoPixCpfTitular || '',
     };
 
-    console.log('==== DEBUG: DADOS ENVIADOS PARA updateClient ====');
+    console.log('==== DEBUG: DADOS CORRIGIDOS PARA updateClient ====');
     console.log('clientUpdateData:', clientUpdateData);
-    console.log('================================================');
+    console.log('nome preenchido:', clientUpdateData.nome);
+    console.log('email preenchido:', clientUpdateData.email);
+    console.log('telefone preenchido:', clientUpdateData.telefone);
+    console.log('cep preenchido:', clientUpdateData.cep);
+    console.log('====================================================');
 
     updateClient(clientUpdateData);
 
