@@ -220,8 +220,19 @@ router.get('/:id/observacoes', auth, async (req: any, res: any) => {
 
 // PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
 router.put('/:id/status', auth, async (req: any, res: any) => {
+  // INÍCIO DOS LOGS DE DEBUG - SEMPRE APARECE
+  console.log(`[🚨 PENDENCIAR DEBUG] ===== INÍCIO DA ROTA =====`);
+  console.log(`[🚨 PENDENCIAR DEBUG] URL:`, req.url);
+  console.log(`[🚨 PENDENCIAR DEBUG] Método:`, req.method);
+  console.log(`[🚨 PENDENCIAR DEBUG] Body completo:`, JSON.stringify(req.body, null, 2));
+  console.log(`[🚨 PENDENCIAR DEBUG] Headers relevantes:`, {
+    'content-type': req.headers['content-type'],
+    'authorization': req.headers.authorization ? 'PRESENTE' : 'AUSENTE'
+  });
+  
   // ADICIONAR: Validação defensiva do req.body
   if (!req.body || typeof req.body !== 'object') {
+    console.log(`[🚨 PENDENCIAR DEBUG] ❌ Req.body inválido!`);
     return res.status(400).json({
       success: false,
       error: 'Request body is required'

@@ -1,0 +1,127 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: 
+{maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN 
+{hasSession: true, tokenLength: 759}
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION 
+{hasSession: true, tokenLength: 759}
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 759
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : 
+{flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: 
+{flags: {…}, context: {…}}
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: 
+{maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : 
+{message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-03T00:33:16.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: 
+{message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-03T00:33:16.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : 
+{message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-03T00:33:17.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: 
+{message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-03T00:33:17.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : 
+{success: true, data: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: 
+{success: true, data: {…}}
+analise.tsx:69 [Análise] Proposta carregada: 
+{success: true, data: {…}}
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…alizacao/29e80705-89bb-43a5-bbc8-960b3139939c/ccb', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : 
+{success: true, data: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: 
+{success: true, data: {…}}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes : 
+{logs: Array(0), total: 0}
+apiClient.ts:437 [API Client] After dual-key transformation: 
+{logs: Array(0), total: 0}
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+{url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…ostas/29e80705-89bb-43a5-bbc8-960b3139939c/status', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.jz-VuDUrVXvtqed6d9VN4PoxPrmETbC5dhODnQiboYE', hasToken: true, isFormData: false}
+apiClient.ts:305 
+ PUT https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status 400 (Bad Request)
+fetchWithTimeout	@	apiClient.ts:305
+apiClient	@	apiClient.ts:413
+await in apiClient		
+put	@	apiClient.ts:605
+updatePropostaStatus	@	analise.tsx:92
+await in execute		
+onSubmit	@	analise.tsx:178
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status : 
+{success: false, error: 'Motivo da pendência é obrigatório'}
+error
+: 
+"Motivo da pendência é obrigatório"
+success
+: 
+false
+[[Prototype]]
+: 
+Object
+apiClient.ts:437 [API Client] After dual-key transformation: 
+{success: false, error: 'Motivo da pendência é obrigatório'}
+error
+: 
+"Motivo da pendência é obrigatório"
+success
+: 
+false
+[[Prototype]]
+: 
+Object
+constructor
+: 
+ƒ Object()
+hasOwnProperty
+: 
+ƒ hasOwnProperty()
+isPrototypeOf
+: 
+ƒ isPrototypeOf()
+propertyIsEnumerable
+: 
+ƒ propertyIsEnumerable()
+toLocaleString
+: 
+ƒ toLocaleString()
+toString
+: 
+ƒ toString()
+valueOf
+: 
+ƒ valueOf()
+__defineGetter__
+: 
+ƒ __defineGetter__()
+__defineSetter__
+: 
+ƒ __defineSetter__()
+__lookupGetter__
+: 
+ƒ __lookupGetter__()
+__lookupSetter__
+: 
+ƒ __lookupSetter__()
+__proto__
+: 
+(...)
+get __proto__
+: 
+ƒ __proto__()
+set __proto__
+: 
+ƒ __proto__()
