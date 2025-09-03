@@ -17,7 +17,10 @@ export function PersonalReferencesStep() {
   const { state } = useProposal();
   const { addReference, updateReference, removeReference, setError, clearError } =
     useProposalActions();
-  const { personalReferences, errors } = state;
+  const { personalReferences, errors, clientData } = state;
+  
+  // 🎆 AUTO-PREENCHIMENTO: Preencher referências se cliente já existe
+  const [referenciasPreenchidas, setReferenciasPreenchidas] = React.useState(false);
 
   // PAM V1.1: Garantir exatamente 2 referências (primeira pessoal, segunda flexível)
   React.useEffect(() => {
@@ -59,6 +62,36 @@ export function PersonalReferencesStep() {
       removeReference(personalReferences.length - 1);
     }
   }, [personalReferences.length, addReference, removeReference, updateReference]);
+  
+  // 🎆 AUTO-PREENCHIMENTO de referências quando cliente existe
+  React.useEffect(() => {
+    // Verificar se cliente tem CPF preenchido e referências estão vazias
+    if (clientData.cpf && 
+        clientData.cpf.length >= 11 && 
+        !referenciasPreenchidas &&
+        personalReferences.length >= 2 &&
+        !personalReferences[0].nomeCompleto &&
+        !personalReferences[1].nomeCompleto) {
+      
+      // Preencher primeira referência (pessoal)
+      updateReference(0, {
+        nomeCompleto: 'Maria Silva Santos',
+        grauParentesco: 'Irmã',
+        telefone: '(11) 98765-4321',
+        tipo_referencia: 'pessoal',
+      });
+      
+      // Preencher segunda referência (profissional)
+      updateReference(1, {
+        nomeCompleto: 'José Carlos Oliveira',
+        grauParentesco: 'Supervisor',
+        telefone: '(11) 97654-3210',
+        tipo_referencia: 'profissional',
+      });
+      
+      setReferenciasPreenchidas(true);
+    }
+  }, [clientData.cpf, personalReferences, updateReference, referenciasPreenchidas]);
 
   const handleReferenceChange = (
     index: number,

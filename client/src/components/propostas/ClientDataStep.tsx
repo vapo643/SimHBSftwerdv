@@ -224,8 +224,13 @@ export function ClientDataStep() {
       
       // Dados profissionais - priorizar campos diretos
       ocupacao: apiData.clienteOcupacao || clientData.ocupacao || '',
-      rendaMensal: apiData.clienteRenda || clientData.rendaMensal || clientData.renda_mensal || '',
+      rendaMensal: apiData.clienteRendaMensal || apiData.clienteRenda || clientData.rendaMensal || clientData.renda_mensal || '',
       telefoneEmpresa: apiData.clienteTelefoneEmpresa || clientData.telefoneEmpresa || '',
+      
+      // 🏭 NOVOS CAMPOS EMPRESARIAIS
+      clienteEmpresaNome: apiData.clienteEmpresaNome || clientData.empresaNome || clientData.empregador || '',
+      clienteDividasExistentes: apiData.clienteDividasExistentes || clientData.dividasExistentes || clientData.dividas_existentes || '',
+      dataAdmissao: apiData.clienteDataAdmissao || clientData.dataAdmissao || clientData.data_admissao || '',
       
       // Dados de pagamento - usar estrutura correta
       metodoPagamento: (apiData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
