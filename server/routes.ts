@@ -3960,18 +3960,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const formalizacaoRouter = (await import('./routes/formalizacao')).default;
   app.use('/api/formalizacao', formalizacaoRouter);
 
-  // Register Propostas Carnê routes
+  // 🔧 CRITICAL FIX: Mount DDD core router FIRST to avoid catch-all conflicts
+  console.log('🔍 [STARTUP] Registering propostasCoreRouter FIRST to avoid conflicts...');
+  const propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
+  app.use('/api/propostas', propostasCoreRouter);
+
+  // Register legacy Propostas Carnê routes (AFTER core router)
   app.use('/api/propostas', propostasCarneRoutes);
   app.use('/api', propostasCarneStatusRoutes);
   app.use(propostasCarneCheckRoutes);
   app.use('/api/propostas', propostasStorageStatusRoutes);
   app.use('/api/propostas', propostasCorrigirSincronizacaoRoutes);
   app.use('/api/propostas', propostasSincronizarBoletosRoutes);
-
-  // 🔧 CRITICAL FIX: Mount propostas core router AFTER other handlers to avoid conflicts
-  console.log('🔍 [STARTUP] Registering propostasCoreRouter AFTER other handlers...');
-  const propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
-  app.use('/api/propostas', propostasCoreRouter);
 
   // Job Status routes (para consultar status de jobs assíncronos)
   app.use('/api/jobs', jobStatusRoutes);

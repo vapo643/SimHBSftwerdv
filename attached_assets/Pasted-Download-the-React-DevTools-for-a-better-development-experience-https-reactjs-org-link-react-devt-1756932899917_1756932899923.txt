@@ -1,0 +1,80 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: 
+Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN 
+Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION 
+Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+Object
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+Object
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+Object
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : 
+Object
+apiClient.ts:437 [API Client] After dual-key transformation: 
+Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: 
+Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/parceiros : 
+Array(2)
+apiClient.ts:437 [API Client] After dual-key transformation: 
+Array(2)
+client:755 WebSocket connection to 'wss://localhost:5173/?token=eIwirx_xhS8R' failed: 
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : 
+Object
+apiClient.ts:437 [API Client] After dual-key transformation: 
+Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas?queue=analysis : 
+Object
+apiClient.ts:437 [API Client] After dual-key transformation: 
+Object
+2
+fila.tsx:187 Uncaught TypeError: propostas?.filter is not a function
+    at FilaAnalise (fila.tsx:187:36)
+chunk-QYFCA5BS.js?v=9648f934:14080 The above error occurred in the <FilaAnalise> component:
+
+    at FilaAnalise (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/credito/fila.tsx:61:43)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:22:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.repli…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=9648f934:205:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.repli…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=9648f934:261:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.repli…unner/workspace/node_modules/.vite/deps/chunk-LJ2X57HO.js?v=9648f934:37:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.repli…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9648f934:65:5)
+    at FeatureFlagProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/FeatureFlagContext.tsx:30:39)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.repli…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=9648f934:2878:3)
+    at App
+    at ErrorBoundary (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+ErrorBoundary.tsx:40 ErrorBoundary caught an error: TypeError: propostas?.filter is not a function
+    at FilaAnalise (fila.tsx:187:36)
+ 
+Object
+2
+client:809 [vite] TypeError: Cannot read properties of undefined (reading 'send')
+    at Object.send (client:450:7)
+    at Object.send (client:780:16)
+    at Object.send (client:319:23)
+    at Object.send (client:397:30)
+    at HMRClient.send (client:157:18)
+    at HMRContext.send (client:119:18)
+    at sendError (fila:16:7)
+    at fila:20:3
