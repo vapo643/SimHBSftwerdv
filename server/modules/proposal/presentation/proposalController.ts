@@ -188,31 +188,54 @@ export class ProposalController {
         });
       }
 
+      // CRITICAL FIX: Extrair nomes relacionados anexados pelo mapToDomainWithJoinedData
+      const produtoNome = (proposal as any)._relatedProductName || null;
+      const tabelaComercialNome = (proposal as any)._relatedCommercialTableName || null;
+      const tabelaComercialTaxa = (proposal as any)._relatedCommercialTableRate ?? null;
+      const lojaNome = (proposal as any)._relatedStoreName || null;
+      
+      console.log('🔍 [getById] Extracted related data:', {
+        produtoNome,
+        tabelaComercialNome,
+        tabelaComercialTaxa,
+        lojaNome,
+        produtoId: proposal.produtoId,
+        tabelaComercialId: proposal.tabelaComercialId
+      });
+
       // OPERAÇÃO VISÃO CLARA V1.0: Serializar agregado COMPLETO para resposta
       const data = {
         id: proposal.id,
         status: proposal.status,
         cliente_data: proposal.clienteData,
+        clienteData: proposal.clienteData, // Duplicado para compatibilidade
         valor: proposal.valor,
         prazo: proposal.prazo,
         taxa_juros: proposal.taxaJuros,
+        taxaJuros: proposal.taxaJuros, // Duplicado para compatibilidade
         produto_id: proposal.produtoId,
+        produtoId: proposal.produtoId, // Duplicado para compatibilidade
+        produto_nome: produtoNome, // NOVO: Nome do produto
+        tabela_comercial_id: proposal.tabelaComercialId, // CORREÇÃO: Campo que estava ausente
+        tabela_comercial_nome: tabelaComercialNome, // NOVO: Nome da tabela comercial
+        tabela_comercial_taxa: tabelaComercialTaxa, // NOVO: Taxa da tabela comercial
         loja_id: proposal.lojaId,
+        loja_nome: lojaNome, // Usar dados relacionados
         atendente_id: proposal.atendenteId,
         dados_pagamento: proposal.dadosPagamento,
         motivo_rejeicao: proposal.motivoRejeicao,
+        motivo_pendencia: proposal.motivoRejeicao, // Alias para compatibilidade
         observacoes: proposal.observacoes,
         ccb_url: proposal.ccbUrl,
+        ccbUrl: proposal.ccbUrl, // Duplicado para compatibilidade
         created_at: proposal.createdAt,
         updated_at: proposal.updatedAt,
+        createdAt: proposal.createdAt, // Duplicado para compatibilidade
+        updatedAt: proposal.updatedAt, // Duplicado para compatibilidade
         // CORREÇÃO: Incluir campos que estavam ausentes
         valor_tac: proposal.valorTac,
         valor_iof: proposal.valorIof,
         valor_total_financiado: proposal.valorTotalFinanciado,
-        // OPERAÇÃO VISÃO CLARA V1.0: Incluir dados relacionados da loja
-        loja_nome: (proposal as any)._relatedStoreName || null,
-        // NOTA: finalidade e garantia não são propriedades do agregado Proposal
-        // Eles estão no banco mas não foram modelados no domínio
         // Cálculos do agregado
         valor_parcela: proposal.calculateMonthlyPayment(),
         valor_total: proposal.calculateTotalAmount(),

@@ -996,7 +996,8 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="produto">Produto</Label>
                       <Input
                         id="produto"
-                        value={proposta?.produto?.nomeProduto || 
+                        value={(proposta as any)?.produto_nome || 
+                               proposta?.produto?.nomeProduto || 
                                (proposta?.produto as any)?.nome ||
                                (proposta as any)?.nomeProduto ||
                                'Produto não definido'}
@@ -1009,7 +1010,8 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="tabelaComercial">Tabela Comercial</Label>
                       <Input
                         id="tabelaComercial"
-                        value={proposta?.tabelaComercial?.nomeTabela ||
+                        value={(proposta as any)?.tabela_comercial_nome || 
+                               proposta?.tabelaComercial?.nomeTabela ||
                                (proposta?.tabelaComercial as any)?.nome ||
                                (proposta as any)?.nomeTabela ||
                                'Tabela não definida'}
@@ -1022,7 +1024,9 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="taxaJuros">Taxa de Juros (%)</Label>
                       <Input
                         id="taxaJuros"
-                        value={proposta?.tabelaComercial?.taxaJuros || ''}
+                        value={(proposta as any)?.tabela_comercial_taxa || 
+                               proposta?.tabelaComercial?.taxaJuros || 
+                               (proposta as any)?.taxa_juros || ''}
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                         readOnly
