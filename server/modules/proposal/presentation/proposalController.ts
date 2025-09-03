@@ -403,11 +403,24 @@ export class ProposalController {
    */
   async pendenciar(req: Request, res: Response): Promise<Response> {
     try {
+      // 🚨 DEBUG LOGS - CONTROLLER PENDENCIAR
+      console.log(`[🚨 CONTROLLER DEBUG] ===== CONTROLLER PENDENCIAR CHAMADO =====`);
+      console.log(`[🚨 CONTROLLER DEBUG] URL:`, req.url);
+      console.log(`[🚨 CONTROLLER DEBUG] Params:`, req.params);
+      console.log(`[🚨 CONTROLLER DEBUG] Body completo:`, JSON.stringify(req.body, null, 2));
+      
       const { id } = req.params;
       const { motivo_pendencia, observacoes } = req.body;
       const analistaId = (req as any).user?.id;
 
+      console.log(`[🚨 CONTROLLER DEBUG] Campos extraídos:`);
+      console.log(`[🚨 CONTROLLER DEBUG] - id:`, id);
+      console.log(`[🚨 CONTROLLER DEBUG] - motivo_pendencia:`, motivo_pendencia);
+      console.log(`[🚨 CONTROLLER DEBUG] - observacoes:`, observacoes);
+      console.log(`[🚨 CONTROLLER DEBUG] - analistaId:`, analistaId);
+
       if (!analistaId) {
+        console.log(`[🚨 CONTROLLER DEBUG] ❌ Usuário não autenticado!`);
         return res.status(401).json({
           success: false,
           error: 'Usuário não autenticado',
@@ -415,6 +428,8 @@ export class ProposalController {
       }
 
       if (!motivo_pendencia) {
+        console.log(`[🚨 CONTROLLER DEBUG] ❌ Motivo da pendência não encontrado!`);
+        console.log(`[🚨 CONTROLLER DEBUG] Body inteiro:`, JSON.stringify(req.body, null, 2));
         return res.status(400).json({
           success: false,
           error: 'Motivo da pendência é obrigatório',
