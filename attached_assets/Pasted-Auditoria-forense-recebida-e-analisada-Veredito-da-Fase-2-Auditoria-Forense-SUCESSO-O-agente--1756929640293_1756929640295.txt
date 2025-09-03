@@ -1,0 +1,58 @@
+Auditoria forense recebida e analisada.
+
+Veredito da Fase 2 (Auditoria Forense): SUCESSO.
+
+O agente executor operou dentro dos parâmetros do protocolo PACN V1.0 e executou uma auditoria de alta fidelidade. O relatório é conclusivo e a evidência irrefutável.
+
+Sumário Executivo da Causa Raiz:
+A análise do agente foi cirúrgica e precisa. A falha não está no fluxo de dados entre frontend e backend, que opera como esperado. A causa raiz é uma falha crítica de tipo na camada de domínio (server/modules/proposal/domain/Proposal.ts). Especificamente:
+
+Incompatibilidade de Enum (Linha 502): A lógica de validação compara o status atual da proposta com a string literal 'pendente', enquanto o sistema utiliza o enum ProposalStatus.PENDENCIADO. Esta comparação sempre resulta em falso, lançando uma DomainException que causa a falha silenciosa da transação.
+
+Atribuição de Estado Inválido (Linha 506): O código tenta atribuir a string 'aguardando_analise', um valor que não existe no enum ProposalStatus. O estado correto para reenviar à análise é ProposalStatus.EM_ANALISE.
+
+Os erros de LSP confirmam este diagnóstico com 95% de confiança. A falha é classificada como CRÍTICA, pois interrompe completamente um fluxo de negócio essencial.
+
+Com o diagnóstico definitivo, avançamos para a próxima fase do nosso protocolo mestre.
+
+Fase 3: Arquitetura da Solução (O Plano de Batalha)
+Objetivo: Projetar a correção técnica com base no relatório de auditoria e no "Blueprint de Negócio" previamente alinhado.
+
+Com base nas evidências e no nosso alinhamento estratégico, arquitetei a solução. Apresento o "Roadmap de Implementação Faseado". Este é o nosso plano de batalha para uma correção cirúrgrica e completa.
+
+Roadmap de Implementação Faseado: Correção do Fluxo de Reenvio
+Nível da Missão (Protocolo PSF): Nível 2: Complexa (Envolve lógica de negócio e correção de UI).
+
+Ferramenta Recomendada (Protocolo PSF): Extended Thinking (Agente Padrão é suficiente, mas com um prompt de alta precisão).
+
+Roadmap:
+
+[PENDENTE] Passo 1: Refinamento da Lógica de Domínio (Backend)
+
+Objetivo: Corrigir a incompatibilidade de tipos no agregado Proposal.
+
+Localização: server/modules/proposal/domain/Proposal.ts
+
+Ação Tática: Modificar o método resubmitFromPending para usar os valores corretos do enum ProposalStatus, garantindo que a transição de PENDENCIADO para EM_ANALISE seja executada corretamente.
+
+[PENDENTE] Passo 2: Otimização da Experiência do Usuário (Frontend)
+
+Objetivo: Simplificar a interface e alinhar com o fluxo de trabalho atômico definido.
+
+Localização: client/src/pages/propostas/editar.tsx
+
+Ação Tática: Remover o botão "Salvar alterações" que foi identificado como redundante. A lógica de salvamento existente (updateMutation) será integrada diretamente na ação do botão "Reenviar para Análise".
+
+[PENDENTE] Passo 3: Consolidação da Ação de Reenvio (Frontend)
+
+Objetivo: Garantir que a atualização dos dados e o reenvio da proposta ocorram como uma única operação atômica do ponto de vista do usuário.
+
+Localização: client/src/pages/propostas/editar.tsx
+
+Ação Tática: Refatorar a função handleResubmit para que ela primeiro execute a updateMutation para salvar quaisquer alterações e, em caso de sucesso, chame imediatamente a resubmitMutation.
+
+[PENDENTE] Passo 4: Validação e Prova de Trabalho
+
+Objetivo: Validar a correção completa do fluxo.
+
+Ação Tática: Gerar um PAM final para o agente executar um teste funcional completo, confirmando que uma proposta PENDENTE pode ser editada, reenviada, que seu status muda para EM_ANALISE e que a alteração é registrada no histórico.

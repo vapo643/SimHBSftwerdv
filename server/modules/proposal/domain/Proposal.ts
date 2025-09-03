@@ -499,11 +499,11 @@ export class Proposal {
    * Reenvia proposta pendente para análise (após correções)
    */
   resubmitFromPending(): void {
-    if (this._status !== 'pendente' && this._status !== 'pendenciado') {
-      throw new DomainException('Apenas propostas pendentes podem ser reenviadas para análise');
+    if (this._status !== ProposalStatus.PENDENCIADO) {
+      throw new DomainException('Apenas propostas com status PENDENCIADO podem ser reenviadas para análise');
     }
 
-    this._status = 'aguardando_analise';
+    this._status = ProposalStatus.EM_ANALISE;
     this._updatedAt = new Date();
 
     this.addEvent(
