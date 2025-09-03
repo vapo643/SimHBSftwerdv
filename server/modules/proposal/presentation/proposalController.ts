@@ -563,8 +563,13 @@ export class ProposalController {
    */
   async update(req: Request, res: Response): Promise<Response> {
     try {
+      console.log('🔍 [CONTROLLER DEBUG] Starting update for proposal ID:', req.params.id);
       const { id } = req.params;
       const { cliente_data, condicoes_data } = req.body;
+      
+      console.log('🔍 [CONTROLLER DEBUG] Request body keys:', Object.keys(req.body));
+      console.log('🔍 [CONTROLLER DEBUG] cliente_data provided:', !!cliente_data);
+      console.log('🔍 [CONTROLLER DEBUG] condicoes_data provided:', !!condicoes_data);
 
       if (!cliente_data && !condicoes_data) {
         return res.status(400).json({
@@ -573,39 +578,49 @@ export class ProposalController {
         });
       }
 
+      console.log('🔍 [CONTROLLER DEBUG] Finding proposal by ID...');
       const proposal = await this.repository.findById(id);
 
       if (!proposal) {
+        console.log('🚨 [CONTROLLER DEBUG] Proposal not found for ID:', id);
         return res.status(404).json({
           success: false,
           error: 'Proposta não encontrada',
         });
       }
+      
+      console.log('🔍 [CONTROLLER DEBUG] Proposal found, status:', proposal.status);
 
       // Verificar se a proposta pode ser editada (apenas pendenciadas)
       const statusString = String(proposal.status || '').trim();
+      console.log('🔍 [CONTROLLER DEBUG] Status string:', statusString);
       if (statusString !== 'pendenciado' && statusString !== 'pendente') {
+        console.log('🚨 [CONTROLLER DEBUG] Invalid status for editing:', statusString);
         return res.status(400).json({
           success: false,
           error: 'Apenas propostas pendenciadas podem ser editadas',
         });
       }
 
+      console.log('🔍 [CONTROLLER DEBUG] Calling updateAfterPending...');
       // Atualizar dados usando o método do agregado
       proposal.updateAfterPending({
         clienteData: cliente_data,
         observacoes: condicoes_data?.observacoes || '',
       });
 
+      console.log('🔍 [CONTROLLER DEBUG] Calling repository.save...');
       await this.repository.save(proposal);
 
+      console.log('✅ [CONTROLLER DEBUG] Save completed successfully');
       return res.json({
         success: true,
         message: 'Proposta atualizada com sucesso',
         propostaId: proposal.id,
       });
     } catch (error: any) {
-      console.error('[ProposalController.update] Error:', error);
+      console.error('🚨 [CONTROLLER DEBUG] ERROR in update:', error);
+      console.error('🚨 [CONTROLLER DEBUG] Error stack:', error.stack);
 
       if (error.message.includes('não encontrada')) {
         return res.status(404).json({
