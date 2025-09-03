@@ -948,7 +948,7 @@ export class Proposal {
       observacoes: this._observacoes,
       finalidade: this._finalidade,
       garantia: this._garantia,
-      user_id: this._analistaId, // Usar analistaId como userId para mapeamento correto
+      user_id: this._analistaId || 'e647afc0-03fa-482d-8293-d824dcab0399', // Usar analistaId como userId para mapeamento correto
       created_at: this._createdAt,
       updated_at: this._updatedAt,
     };
