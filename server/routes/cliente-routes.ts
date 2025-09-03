@@ -6,6 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { clientService } from '../services/genericService';
+import { clienteService as clientCpfService } from '../services/clienteService';
 import { AuthenticatedRequest } from '../../shared/types/express';
 
 const router = Router();
@@ -22,6 +23,24 @@ router.get('/', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to fetch clients',
+    });
+  }
+});
+
+/**
+ * GET /api/clientes/cpf/:cpf
+ * Get client data by CPF
+ */
+router.get('/cpf/:cpf', async (req: Request, res: Response) => {
+  try {
+    const { cpf } = req.params;
+    const result = await clientCpfService.getClientByCPF(cpf);
+    res.json(result);
+  } catch (error: any) {
+    console.error('[CLIENTE_ROUTES] Error getting client by CPF:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Erro ao buscar dados do cliente',
     });
   }
 });
