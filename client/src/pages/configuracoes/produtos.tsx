@@ -40,7 +40,6 @@ interface Produto {
   id: number;
   nomeProduto: string;
   isActive: boolean;
-  tacAtivo?: boolean;
   tacValor?: number;
   tacTipo?: 'fixo' | 'percentual';
 }
@@ -48,7 +47,6 @@ interface Produto {
 interface ProdutoFormData {
   nome: string;
   status: 'Ativo' | 'Inativo';
-  tacAtivo: boolean;
   tacValor: number;
   tacTipo: 'fixo' | 'percentual';
 }
@@ -59,7 +57,6 @@ export default function GestãoProdutos() {
   const [formData, setFormData] = useState<ProdutoFormData>({
     nome: '',
     status: 'Ativo',
-    tacAtivo: true,
     tacValor: 0,
     tacTipo: 'fixo',
   });
@@ -83,7 +80,6 @@ export default function GestãoProdutos() {
       const response = await api.post<Produto>('/api/produtos', {
         nome: data.nome,
         status: data.status,
-        tacAtivo: data.tacAtivo,
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
@@ -105,7 +101,6 @@ export default function GestãoProdutos() {
       const response = await api.put<Produto>(`/api/produtos/${id}`, {
         nome: data.nome,
         status: data.status,
-        tacAtivo: data.tacAtivo,
         tacValor: data.tacValor,
         tacTipo: data.tacTipo,
       });
@@ -152,7 +147,6 @@ export default function GestãoProdutos() {
     setFormData({
       nome: produto.nomeProduto,
       status: produto.isActive ? 'Ativo' : 'Inativo',
-      tacAtivo: produto.tacAtivo ?? true,
       tacValor: produto.tacValor || 0,
       tacTipo: produto.tacTipo || 'fixo',
     });
@@ -168,12 +162,12 @@ export default function GestãoProdutos() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProduct(null);
-    setFormData({ nome: '', status: 'Ativo', tacAtivo: true, tacValor: 0, tacTipo: 'fixo' });
+    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
   };
 
   const handleOpenDialog = () => {
     setEditingProduct(null);
-    setFormData({ nome: '', status: 'Ativo', tacAtivo: true, tacValor: 0, tacTipo: 'fixo' });
+    setFormData({ nome: '', status: 'Ativo', tacValor: 0, tacTipo: 'fixo' });
     setIsDialogOpen(true);
   };
 

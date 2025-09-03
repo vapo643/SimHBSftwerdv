@@ -343,7 +343,6 @@ export const produtos = pgTable('produtos', {
   id: serial('id').primaryKey(),
   nomeProduto: text('nome_produto').notNull(),
   isActive: boolean('is_active').notNull().default(true),
-  tacAtivo: boolean('tac_ativo').notNull().default(true), // Controla se TAC está ativo para este produto
   tacValor: decimal('tac_valor', { precision: 10, scale: 2 }).default('0'),
   tacTipo: text('tac_tipo').notNull().default('fixo'),
 
@@ -749,7 +748,6 @@ export const insertProdutoSchema = createInsertSchema(produtos)
     createdAt: true,
   })
   .extend({
-    tacAtivo: z.boolean().default(true),
     tacValor: z.number().min(0).default(0),
     tacTipo: z.enum(['fixo', 'percentual']).default('fixo'),
   });
