@@ -1,0 +1,59 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 766
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+client:755 WebSocket connection to 'wss://localhost:5173/?token=iN0Sc5FckYMz' failed: 
+createConnection @ client:755Understand this error
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/origination/context : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] ObjectauthorizationHeader: "Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJlNjQ3YWZjMC0wM2ZhLTQ4MmQtODI5My1kODI0ZGNhYjAzOTkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU2ODYxNzk4LCJpYXQiOjE3NTY4NTgxOTgsImVtYWlsIjoiYXRlbmRlbnRlZWxsZXZlbGFyQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFURU5ERU5URSJ9LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc1Njg1ODE5OH1dLCJzZXNzaW9uX2lkIjoiMDViYmQzYmMtMGM4YS00MDNmLThmMzktYTA3YzE4ZDJkOTUwIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.NItLoVt5qDSrL-fm_kCy6J0pgI5q_BB0c8WNw6PylbU"hasToken: trueisFormData: falseurl: "https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me"[[Prototype]]: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:385 [PASSO 3 - ENVIO] ObjectauthorizationHeader: "Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJlNjQ3YWZjMC0wM2ZhLTQ4MmQtODI5My1kODI0ZGNhYjAzOTkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU2ODYxNzk4LCJpYXQiOjE3NTY4NTgxOTgsImVtYWlsIjoiYXRlbmRlbnRlZWxsZXZlbGFyQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFURU5ERU5URSJ9LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc1Njg1ODE5OH1dLCJzZXNzaW9uX2lkIjoiMDViYmQzYmMtMGM4YS00MDNmLThmMzktYTA3YzE4ZDJkOTUwIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.NItLoVt5qDSrL-fm_kCy6J0pgI5q_BB0c8WNw6PylbU"hasToken: trueisFormData: falseurl: "https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/clientes/cpf/20528464760"[[Prototype]]: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/clientes/cpf/20528464760 : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+ClientDataStep.tsx:197 ==== CAMPOS DISPONÍVEIS NA API ====
+ClientDataStep.tsx:198 Campos cliente*: Array(34)0: "clienteNome"1: "clienteCpf"2: "clienteEmail"3: "clienteTelefone"4: "clienteDataNascimento"5: "clienteRenda"6: "clienteRg"7: "clienteOrgaoEmissor"8: "clienteRgUf"9: "clienteRgDataEmissao"10: "clienteEstadoCivil"11: "clienteNacionalidade"12: "clienteLocalNascimento"13: "clienteCep"14: "clienteEndereco"15: "clienteLogradouro"16: "clienteNumero"17: "clienteComplemento"18: "clienteBairro"19: "clienteCidade"20: "clienteUf"21: "clienteOcupacao"22: "clienteRazaoSocial"23: "clienteCnpj"24: "clienteData"25: "clienteEmpresaNome"26: "clienteEmpresaCnpj"27: "clienteCargoFuncao"28: "clienteTempoEmprego"29: "clienteRendaComprovada"30: "clienteDividasExistentes"31: "clienteComprometimentoRenda"32: "clienteScoreSerasa"33: "clienteRestricoesCpf"length: 34[[Prototype]]: Array(0)at: ƒ at()concat: ƒ concat()constructor: ƒ Array()copyWithin: ƒ copyWithin()entries: ƒ entries()every: ƒ every()fill: ƒ fill()filter: ƒ filter()find: ƒ find()findIndex: ƒ findIndex()findLast: ƒ findLast()findLastIndex: ƒ findLastIndex()flat: ƒ flat()flatMap: ƒ flatMap()forEach: ƒ forEach()includes: ƒ includes()indexOf: ƒ indexOf()join: ƒ join()keys: ƒ keys()lastIndexOf: ƒ lastIndexOf()length: 0map: ƒ map()pop: ƒ pop()push: ƒ push()reduce: ƒ reduce()reduceRight: ƒ reduceRight()reverse: ƒ reverse()shift: ƒ shift()slice: ƒ slice()some: ƒ some()sort: ƒ sort()splice: ƒ splice()toLocaleString: ƒ toLocaleString()toReversed: ƒ toReversed()toSorted: ƒ toSorted()toSpliced: ƒ toSpliced()toString: ƒ toString()unshift: ƒ unshift()values: ƒ values()with: ƒ with()Symbol(Symbol.iterator): ƒ values()Symbol(Symbol.unscopables): {at: true, copyWithin: true, entries: true, fill: true, find: true, …}[[Prototype]]: Object
+ClientDataStep.tsx:199 clienteData keys: Array(30)0: "rg"1: "uf"2: "cep"3: "cpf"4: "cnpj"5: "nome"6: "rgUf"7: "email"8: "bairro"9: "cidade"10: "estado"11: "numero"12: "endereco"13: "ocupacao"14: "telefone"15: "empregador"16: "logradouro"17: "tipoPessoa"18: "complemento"19: "estadoCivil"20: "razaoSocial"21: "rendaMensal"22: "orgaoEmissor"23: "renda_mensal"24: "nacionalidade"25: "rgDataEmissao"26: "dataNascimento"27: "data_nascimento"28: "localNascimento"29: "telefoneEmpresa"length: 30[[Prototype]]: Array(0)
+ClientDataStep.tsx:200 ===================================
+ClientDataStep.tsx:247 ==== DEBUG: DADOS CORRIGIDOS PARA updateClient ====
+ClientDataStep.tsx:248 clientUpdateData: Object
+ClientDataStep.tsx:249 nome preenchido: Gabriel Santana Jesus Santana
+ClientDataStep.tsx:250 email preenchido: gabrielserri238@gmail.com
+ClientDataStep.tsx:251 telefone preenchido: 27998538565
+ClientDataStep.tsx:252 cep preenchido: 29165460
+ClientDataStep.tsx:253 ====================================================
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/cep/29165460 : Objectbairro: "Parque Residencial Laranjeiras"cep: "29165-460"cidade: "Serra"estado: "ES"logradouro: "Rua Miguel Angelo"[[Prototype]]: Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.NItLoVt5qDSrL-fm_kCy6J0pgI5q_BB0c8WNw6PylbU', hasToken: true, isFormData: false}

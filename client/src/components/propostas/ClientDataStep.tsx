@@ -193,18 +193,14 @@ export function ClientDataStep() {
     const apiData = clientFoundData as any; // Type assertion para acessar propriedades corretas
     const clientData = apiData.clienteData || {};
     
-    // 🔍 INVESTIGAR: Verificar quais campos realmente existem na API
-    console.log('==== CAMPOS DISPONÍVEIS NA API ====');
-    console.log('Campos cliente*:', Object.keys(apiData).filter(k => k.startsWith('cliente')));
-    console.log('clienteData keys:', Object.keys(clientData));
-    console.log('===================================');
+    // Mapeamento otimizado baseado na estrutura real da API
     
     const clientUpdateData = {
-      // Dados pessoais - tentar diferentes variações de nome
-      nome: apiData.clienteNome || apiData.nome || clientData.nome || '',
-      email: apiData.clienteEmail || apiData.email || clientData.email || '',
-      telefone: apiData.clienteTelefone || apiData.telefone || clientData.telefone || '',
-      dataNascimento: apiData.clienteDataNascimento || apiData.dataNascimento || clientData.dataNascimento || clientData.data_nascimento || '',
+      // Dados pessoais - priorizar campos diretos
+      nome: apiData.clienteNome || clientData.nome || '',
+      email: apiData.clienteEmail || clientData.email || '',
+      telefone: apiData.clienteTelefone || clientData.telefone || '',
+      dataNascimento: apiData.clienteDataNascimento || clientData.dataNascimento || clientData.data_nascimento || '',
       
       // Documentos - verificar tanto campo direto quanto clienteData
       rg: apiData.clienteRg || clientData.rg || '',
@@ -212,10 +208,10 @@ export function ClientDataStep() {
       rgUf: apiData.clienteRgUf || clientData.uf || '',
       rgDataEmissao: apiData.clienteRgDataEmissao || clientData.rgDataEmissao || '',
       
-      // Dados adicionais - verificar diferentes variações
-      localNascimento: apiData.clienteLocalNascimento || apiData.localNascimento || clientData.localNascimento || clientData.local_nascimento || '',
-      estadoCivil: apiData.clienteEstadoCivil || apiData.estadoCivil || clientData.estadoCivil || clientData.estado_civil || '',
-      nacionalidade: apiData.clienteNacionalidade || apiData.nacionalidade || clientData.nacionalidade || '',
+      // Dados adicionais - priorizar campos diretos
+      localNascimento: apiData.clienteLocalNascimento || clientData.localNascimento || '',
+      estadoCivil: apiData.clienteEstadoCivil || clientData.estadoCivil || '',
+      nacionalidade: apiData.clienteNacionalidade || clientData.nacionalidade || '',
       
       // Endereço - verificar tanto campo direto quanto clienteData
       cep: apiData.clienteCep || clientData.cep || '',
@@ -226,10 +222,10 @@ export function ClientDataStep() {
       cidade: apiData.clienteCidade || clientData.cidade || '',
       estado: apiData.clienteUf || clientData.estado || '',
       
-      // Dados profissionais - verificar diferentes variações
-      ocupacao: apiData.clienteOcupacao || apiData.ocupacao || clientData.ocupacao || '',
-      rendaMensal: apiData.clienteRenda || apiData.rendaMensal || clientData.rendaMensal || clientData.renda_mensal || '',
-      telefoneEmpresa: apiData.clienteTelefoneEmpresa || apiData.telefoneEmpresa || clientData.telefoneEmpresa || clientData.telefone_empresa || '',
+      // Dados profissionais - priorizar campos diretos
+      ocupacao: apiData.clienteOcupacao || clientData.ocupacao || '',
+      rendaMensal: apiData.clienteRenda || clientData.rendaMensal || clientData.renda_mensal || '',
+      telefoneEmpresa: apiData.clienteTelefoneEmpresa || clientData.telefoneEmpresa || '',
       
       // Dados de pagamento - usar estrutura correta
       metodoPagamento: (apiData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
@@ -244,13 +240,7 @@ export function ClientDataStep() {
       dadosPagamentoPixCpfTitular: apiData.dadosPagamentoPixCpfTitular || '',
     };
 
-    console.log('==== DEBUG: DADOS CORRIGIDOS PARA updateClient ====');
-    console.log('clientUpdateData:', clientUpdateData);
-    console.log('nome preenchido:', clientUpdateData.nome);
-    console.log('email preenchido:', clientUpdateData.email);
-    console.log('telefone preenchido:', clientUpdateData.telefone);
-    console.log('cep preenchido:', clientUpdateData.cep);
-    console.log('====================================================');
+    // Aplicar dados ao formulário
 
     updateClient(clientUpdateData);
 
