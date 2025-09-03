@@ -1002,6 +1002,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                                'Produto não definido'}
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
+                        readOnly
                       />
                     </div>
                     <div>
@@ -1014,6 +1015,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                                'Tabela não definida'}
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
+                        readOnly
                       />
                     </div>
                     <div>
@@ -1023,6 +1025,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         value={proposta?.tabelaComercial?.taxaJuros || ''}
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
+                        readOnly
                       />
                     </div>
                     <div>
@@ -1032,6 +1035,7 @@ const EditarPropostaPendenciada: React.FC = () => {
                         value={proposta?.tabelaComercial?.comissao || ''}
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
+                        readOnly
                       />
                     </div>
                   </div>
