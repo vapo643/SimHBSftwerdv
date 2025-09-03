@@ -124,7 +124,7 @@ SELECT
   p.valor,
   p.status,
   l.nome_loja,
-  l.razao_social as parceiro_razao_social
+  l.nome_loja as parceiro_razao_social
 FROM propostas p
 LEFT JOIN lojas l ON p.loja_id = l.id
 WHERE p.status IN ('aguardando_analise', 'em_analise', 'pendente')

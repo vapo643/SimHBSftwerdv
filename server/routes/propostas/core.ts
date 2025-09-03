@@ -249,11 +249,8 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
         });
       }
       
-      // TODO: Implementar use case específico para pendenciar
-      return res.status(501).json({
-        success: false,
-        error: 'Funcionalidade de pendência em desenvolvimento',
-      });
+      // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
+      return controller.pendenciar(req, res);
     } catch (error) {
       return res.status(500).json({
         success: false,

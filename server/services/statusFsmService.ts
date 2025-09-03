@@ -20,6 +20,10 @@ import { eq } from 'drizzle-orm';
  */
 export enum ProposalStatus {
   RASCUNHO = 'rascunho',
+  AGUARDANDO_ANALISE = 'aguardando_analise',
+  EM_ANALISE = 'em_analise',
+  PENDENTE = 'pendente',
+  PENDENCIADO = 'pendenciado',
   APROVADO = 'aprovado',
   REJEITADO = 'rejeitado',
   CCB_GERADA = 'CCB_GERADA',
@@ -70,9 +74,46 @@ export class InvalidTransitionError extends Error {
 const transitionGraph: Record<string, string[]> = {
   // Status inicial - pode ser aprovado, rejeitado, cancelado ou suspenso
   [ProposalStatus.RASCUNHO]: [
+    ProposalStatus.AGUARDANDO_ANALISE,
+    ProposalStatus.EM_ANALISE,
     ProposalStatus.APROVADO,
     ProposalStatus.REJEITADO,
     ProposalStatus.CANCELADO,
+    ProposalStatus.SUSPENSA,
+  ],
+
+  // Status de análise - podem ser aprovados, rejeitados, pendenciados ou suspensos
+  [ProposalStatus.AGUARDANDO_ANALISE]: [
+    ProposalStatus.EM_ANALISE,
+    ProposalStatus.APROVADO,
+    ProposalStatus.REJEITADO,
+    ProposalStatus.PENDENTE,
+    ProposalStatus.PENDENCIADO,
+    ProposalStatus.SUSPENSA,
+  ],
+
+  [ProposalStatus.EM_ANALISE]: [
+    ProposalStatus.APROVADO,
+    ProposalStatus.REJEITADO,
+    ProposalStatus.PENDENTE,
+    ProposalStatus.PENDENCIADO,
+    ProposalStatus.SUSPENSA,
+  ],
+
+  // Estados pendentes podem voltar para análise ou serem aprovados/rejeitados
+  [ProposalStatus.PENDENTE]: [
+    ProposalStatus.AGUARDANDO_ANALISE,
+    ProposalStatus.EM_ANALISE,
+    ProposalStatus.APROVADO,
+    ProposalStatus.REJEITADO,
+    ProposalStatus.SUSPENSA,
+  ],
+
+  [ProposalStatus.PENDENCIADO]: [
+    ProposalStatus.AGUARDANDO_ANALISE,
+    ProposalStatus.EM_ANALISE,
+    ProposalStatus.APROVADO,
+    ProposalStatus.REJEITADO,
     ProposalStatus.SUSPENSA,
   ],
 

@@ -15,6 +15,7 @@ import { CreateProposalUseCase } from '../application/CreateProposalUseCase';
 import { GetProposalByIdUseCase } from '../application/GetProposalByIdUseCase';
 import { ApproveProposalUseCase } from '../application/ApproveProposalUseCase';
 import { RejectProposalUseCase } from '../application/RejectProposalUseCase';
+import { PendenciarPropostaUseCase } from '../application/PendenciarPropostaUseCase';
 
 export class ProposalController {
   private repository: ProposalRepository;
@@ -177,9 +178,8 @@ export class ProposalController {
     try {
       const { id } = req.params;
       
-      // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta com dados relacionados incluindo loja
-      const proposalWithJoin = await this.repository.findByCriteria({ id });
-      const proposal = proposalWithJoin.length > 0 ? proposalWithJoin[0] : null;
+      // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta por ID usando método específico
+      const proposal = await this.repository.findById(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -393,6 +393,81 @@ export class ProposalController {
       return res.status(500).json({
         success: false,
         error: 'Erro ao rejeitar proposta',
+      });
+    }
+  }
+
+  /**
+   * Pendenciar proposta
+   * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Missão P0
+   */
+  async pendenciar(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const { motivo_pendencia, observacoes } = req.body;
+      const analistaId = (req as any).user?.id;
+
+      if (!analistaId) {
+        return res.status(401).json({
+          success: false,
+          error: 'Usuário não autenticado',
+        });
+      }
+
+      if (!motivo_pendencia) {
+        return res.status(400).json({
+          success: false,
+          error: 'Motivo da pendência é obrigatório',
+        });
+      }
+
+      console.log(`[ProposalController.pendenciar] Pendenciando proposta ${id} por analista ${analistaId}`);
+
+      const useCase = new PendenciarPropostaUseCase(this.repository);
+
+      const result = await useCase.execute({
+        propostaId: id,
+        motivoPendencia: motivo_pendencia,
+        analistaId,
+        observacoes,
+      });
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: result.message,
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: result.message,
+        propostaId: result.propostaId,
+        novoStatus: result.novoStatus,
+      });
+    } catch (error: any) {
+      console.error('[ProposalController.pendenciar] Error:', error);
+
+      if (error.message.includes('não encontrada')) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (
+        error.message.includes('Apenas propostas') ||
+        error.message.includes('Motivo da pendência')
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao pendenciar proposta',
       });
     }
   }
