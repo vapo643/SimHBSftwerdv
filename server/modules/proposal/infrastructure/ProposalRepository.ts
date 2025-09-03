@@ -7,7 +7,7 @@
 
 import { eq, and, gte, lte, or, isNull, sql, inArray, desc, asc, gt, lt } from 'drizzle-orm';
 import { db } from '../../../lib/supabase';
-import { propostas, ccbs, boletos, produtos, tabelasComerciais, lojas } from '@shared/schema';
+import { propostas, ccbs, boletos, produtos, tabelasComerciais, lojas, parceiros } from '@shared/schema';
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { IProposalRepository, ProposalSearchCriteria } from '../domain/IProposalRepository';
 import { PaginatedResult, CursorPaginationOptions, RepositoryFilters, CursorUtils } from '@shared/types/pagination';
@@ -219,6 +219,7 @@ export class ProposalRepository implements IProposalRepository {
     console.log('⚡ [PERF-BOOST-001] Executing lightweight query without Value Objects...');
     
     // OPTIMIZATION: Retornar dados diretos do banco sem conversão para domínio
+    // OPERAÇÃO VISÃO CLARA V1.0: Adicionado JOIN com parceiros
     const results = await db
       .select({
         id: propostas.id,
@@ -233,6 +234,8 @@ export class ProposalRepository implements IProposalRepository {
         tabela_comercial_nome: tabelasComerciais.nomeTabela,
         loja_id: propostas.lojaId,
         loja_nome: lojas.nomeLoja,
+        parceiro_id: parceiros.id,
+        parceiro_nome: parceiros.razaoSocial,
         atendente_id: propostas.userId,
         created_at: propostas.createdAt,
         updated_at: propostas.updatedAt,
@@ -241,14 +244,25 @@ export class ProposalRepository implements IProposalRepository {
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
       .where(and(...conditions))
       .orderBy(desc(propostas.createdAt));
 
     console.log(`⚡ [PERF-BOOST-001] Query executed: ${results.length} proposals (lightweight)`);
 
-    // Retornar dados diretos sem conversão para domínio
+    // OPERAÇÃO VISÃO CLARA V1.0: Retornar dados estruturados para frontend
     return results.map((row) => ({
       ...row,
+      // Estruturar dados para compatibilidade com frontend
+      nomeCliente: row.cliente_nome,
+      parceiro: row.parceiro_id ? {
+        id: row.parceiro_id,
+        razaoSocial: row.parceiro_nome
+      } : null,
+      loja: row.loja_id ? {
+        id: row.loja_id,
+        nomeLoja: row.loja_nome
+      } : null,
       valor_parcela: this.calculateMonthlyPaymentRaw(
         parseFloat(row.valor || '0'),
         parseFloat(row.taxa_juros || '0'),

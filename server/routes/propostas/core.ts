@@ -237,6 +237,29 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
     return controller.reject(req, res);
   } else if (status === 'aguardando_analise') {
     return controller.submitForAnalysis(req, res);
+  } else if (status === 'pendente' || status === 'pendenciado') {
+    // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendente
+    try {
+      const { motivo_pendencia } = req.body;
+      
+      if (!motivo_pendencia) {
+        return res.status(400).json({
+          success: false,
+          error: 'Motivo da pendência é obrigatório',
+        });
+      }
+      
+      // TODO: Implementar use case específico para pendenciar
+      return res.status(501).json({
+        success: false,
+        error: 'Funcionalidade de pendência em desenvolvimento',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao processar pendência',
+      });
+    }
   }
 
   // Para outros status, retornar erro por enquanto

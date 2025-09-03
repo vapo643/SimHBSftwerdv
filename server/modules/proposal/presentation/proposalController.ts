@@ -228,7 +228,7 @@ export class ProposalController {
    */
   async list(req: Request, res: Response): Promise<Response> {
     try {
-      const { status, loja_id, atendente_id, cpf } = req.query;
+      const { status, loja_id, atendente_id, cpf, queue } = req.query;
 
       // Aplicar filtros baseados no role do usuário
       const user = (req as any).user;
@@ -237,6 +237,14 @@ export class ProposalController {
       if (status) criteria.status = status as string;
       if (loja_id) criteria.lojaId = parseInt(loja_id as string);
       if (cpf) criteria.cpf = cpf as string;
+
+      // OPERAÇÃO VISÃO CLARA V1.0: Processar parâmetro queue=analysis
+      if (queue === 'analysis') {
+        // Filtrar apenas status de análise
+        if (!status) {
+          criteria.status = 'aguardando_analise';
+        }
+      }
 
       // Se for ATENDENTE, filtrar apenas suas propostas
       if (user?.role === 'ATENDENTE') {
