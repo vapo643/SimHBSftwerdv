@@ -607,7 +607,7 @@ export class Proposal {
     observacoes: string;
   }>): void {
     if (this._status !== ProposalStatus.PENDENCIADO) {
-      throw new DomainException('Apenas propostas pendenciadas podem ter dados atualizados');
+      throw new DomainException('Apenas propostas com status PENDENCIADO podem ter dados atualizados');
     }
 
     const previousData = {
