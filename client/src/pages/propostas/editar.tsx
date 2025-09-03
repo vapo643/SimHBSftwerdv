@@ -482,18 +482,27 @@ const EditarPropostaPendenciada: React.FC = () => {
     },
   });
 
-  // CÁLCULOS AUTOMÁTICOS - FUNCIONAR MESMO SEM TABELA COMERCIAL
+  // CÁLCULOS AUTOMÁTICOS - FORCANDO EXECUÇÃO
   useEffect(() => {
+    console.log('🔍 USEEFFECT EXECUTANDO - FormData:', formData);
+    console.log('🔍 USEEFFECT EXECUTANDO - Proposta:', proposta);
+    
     const valorRaw = (formData.condicoesData as any)?.valor;
+    const prazoRaw = (formData.condicoesData as any)?.prazo;
+    
+    console.log('🔍 VALORES RAW:', { valorRaw, prazoRaw });
+    
     const valor = parseFloat(
       typeof valorRaw === 'string' 
         ? valorRaw.replace(/[^\d,]/g, '').replace(',', '.') 
         : String(valorRaw || '0')
     );
-    const prazo = parseInt(String((formData.condicoesData as any)?.prazo || '0'));
+    const prazo = parseInt(String(prazoRaw || '0'));
     
     // Usar taxa da tabela ou padrão de 2.5% ao mês
     const taxaJuros = parseFloat(proposta?.tabelaComercial?.taxaJuros || '2.5');
+
+    console.log('🔍 VALORES PROCESSADOS:', { valor, prazo, taxaJuros });
 
     if (valor > 0 && prazo > 0) {
       console.log('🧮 CALCULANDO:', { valor, prazo, taxaJuros });
@@ -521,11 +530,14 @@ const EditarPropostaPendenciada: React.FC = () => {
           valorParcela: valorParcela.toFixed(2),
         },
       }));
+      
+      console.log('✅ CÁLCULOS APLICADOS AO FORMDATA');
+    } else {
+      console.log('❌ CONDIÇÕES NÃO ATENDIDAS:', { valor, prazo, condicao: valor > 0 && prazo > 0 });
     }
   }, [
-    (formData.condicoesData as any)?.valor,
-    (formData.condicoesData as any)?.prazo,
-    proposta?.tabelaComercial?.taxaJuros
+    formData.condicoesData,
+    proposta
   ]);
 
   console.log('🔍 COMPONENTE INICIADO com ID:', id);
