@@ -54,12 +54,16 @@ export class ProposalRepository implements IProposalRepository {
           motivoPendencia: data.motivo_rejeicao,
           observacoes: data.observacoes,
           ccbDocumentoUrl: data.ccb_documento_url,
-          userId: data.user_id,
-          analistaId: data.analista_id || data.user_id, // Campo obrigatório - usar user_id como fallback
+          userId: data.analista_id || 'sistema', // Campo obrigatório
+          analistaId: data.analista_id || 'sistema', // Campo obrigatório - usar analista_id
           createdAt: data.created_at,
           // Adicionar campos faltantes identificados pelo LSP
           clienteComprometimentoRenda: data.cliente_comprometimento_renda || 30, // Valor padrão
           clienteEndereco: data.cliente_data.endereco || '', // Extrair do clienteData
+          // Campos obrigatórios booleanos faltantes
+          ccbGerado: false, // Valor padrão para nova proposta
+          assinaturaEletronicaConcluida: false, // Valor padrão para nova proposta
+          biometriaConcluida: false, // Valor padrão para nova proposta
         },
       ]);
       
