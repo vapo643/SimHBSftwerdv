@@ -477,6 +477,39 @@ const EditarPropostaPendenciada: React.FC = () => {
     },
   });
 
+  // CÁLCULOS AUTOMÁTICOS - POSICIONADO CORRETAMENTE ANTES DOS RETURNS
+  useEffect(() => {
+    if (!proposta?.tabelaComercial?.taxaJuros) return;
+
+    const valor = parseFloat((formData.condicoesData as any)?.valor?.replace(/[^\d,]/g, '')?.replace(',', '.') || '0');
+    const prazo = parseInt((formData.condicoesData as any)?.prazo || '0');
+    const taxaJuros = parseFloat(proposta.tabelaComercial.taxaJuros);
+
+    if (valor > 0 && prazo > 0 && taxaJuros > 0) {
+      const tacPercentual = 3;
+      const valorTac = (valor * tacPercentual / 100);
+      const iofMensal = 0.38;
+      const iofDiario = 0.0082;
+      const diasPorMes = 30;
+      const iofTotal = (valor * (iofMensal + (iofDiario * prazo * diasPorMes)) / 100);
+      const valorTotalFinanciado = valor + valorTac + iofTotal;
+      const taxaMensal = taxaJuros / 100;
+      const fatorJuros = Math.pow(1 + taxaMensal, prazo);
+      const valorParcela = (valorTotalFinanciado * taxaMensal * fatorJuros) / (fatorJuros - 1);
+
+      setFormData((prev) => ({
+        ...prev,
+        condicoesData: {
+          ...prev.condicoesData,
+          valorTac: valorTac.toFixed(2),
+          valorIof: iofTotal.toFixed(2),
+          valorTotalFinanciado: valorTotalFinanciado.toFixed(2),
+          valorParcela: valorParcela.toFixed(2),
+        },
+      }));
+    }
+  }, [formData.condicoesData, proposta?.tabelaComercial?.taxaJuros]);
+
   console.log('🔍 COMPONENTE INICIADO com ID:', id);
 
   // Validação early return para IDs inválidos - AGORA DEPOIS DOS HOOKS
@@ -604,48 +637,6 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
-  // Cálculos automáticos baseados em valor, prazo e taxa
-  useEffect(() => {
-    const valor = parseFloat((formData.condicoesData as any)?.valor?.replace(/[^\d,]/g, '')?.replace(',', '.') || '0');
-    const prazo = parseInt((formData.condicoesData as any)?.prazo || '0');
-    const taxaJuros = parseFloat(proposta?.tabelaComercial?.taxaJuros || '0');
-
-    if (valor > 0 && prazo > 0 && taxaJuros > 0) {
-      // Calcular TAC (exemplo: 3% do valor)
-      const tacPercentual = 3; // 3% padrão
-      const valorTac = (valor * tacPercentual / 100);
-
-      // Calcular IOF (exemplo: 0.38% ao mês + 0.0082% ao dia)
-      const iofMensal = 0.38;
-      const iofDiario = 0.0082;
-      const diasPorMes = 30;
-      const iofTotal = (valor * (iofMensal + (iofDiario * prazo * diasPorMes)) / 100);
-
-      // Valor total financiado
-      const valorTotalFinanciado = valor + valorTac + iofTotal;
-
-      // Calcular parcela usando fórmula de juros compostos
-      const taxaMensal = taxaJuros / 100;
-      const fatorJuros = Math.pow(1 + taxaMensal, prazo);
-      const valorParcela = (valorTotalFinanciado * taxaMensal * fatorJuros) / (fatorJuros - 1);
-
-      // Atualizar os campos calculados
-      setFormData((prev) => ({
-        ...prev,
-        condicoesData: {
-          ...prev.condicoesData,
-          valorTac: valorTac.toFixed(2),
-          valorIof: iofTotal.toFixed(2),
-          valorTotalFinanciado: valorTotalFinanciado.toFixed(2),
-          valorParcela: valorParcela.toFixed(2),
-        },
-      }));
-    }
-  }, [
-    (formData.condicoesData as any)?.valor,
-    (formData.condicoesData as any)?.prazo,
-    proposta?.tabelaComercial?.taxaJuros
-  ]);
 
   const handleSave = () => {
     updateMutation.mutate({
