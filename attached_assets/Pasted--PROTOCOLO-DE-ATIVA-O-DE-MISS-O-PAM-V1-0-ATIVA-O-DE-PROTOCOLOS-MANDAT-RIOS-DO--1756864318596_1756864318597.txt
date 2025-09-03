@@ -1,0 +1,57 @@
+---
+### **PROTOCOLO DE ATIVAÇÃO DE MISSÃO (PAM) V1.0**
+
+**[ATIVAÇÃO DE PROTOCOLOS MANDATÓRIOS DO `replit.md`]**
+*Sua execução será governada pelos seguintes protocolos:*
+*- **CRITICAL WORKFLOW:** `get_latest_lsp_diagnostics` antes da conclusão.*
+*- **PACN V1.0 ENFORCEMENT:** Auditoria guiada por comportamento.*
+*- **CONTEXT ENGINEERING PROTOCOL V2.0:** Consulte ADRs e a documentação existente.*
+*- **DECD V1.0:** Pesquisa na web autorizada para esta missão de diagnóstico.*
+
+**1. Princípio Mestre: Transferência de Consciência**
+*Vamos introduzir uma nova regra de negócio crítica que afeta a rentabilidade e o risco. A sua missão é uma auditoria forense para mapear o sistema de cálculo de taxas existente. Você deve dissecar a lógica atual para entender como, onde e quando a Taxa de Abertura de Crédito (TAC) é calculada e persistida. O seu diagnóstico será a fundação sobre a qual construiremos a nova funcionalidade.*
+
+**2. Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0 - ATIVADA**
+*A pesquisa está **autorizada** para consultar a **documentação do Drizzle ORM e padrões de design em TypeScript** para `Strategy Pattern` ou outros padrões que possam ser usados em motores de cálculo flexíveis.*
+
+---
+### **Pacote de Ativação de Missão: OPERAÇÃO ACELERAÇÃO DE ORIGINAÇÃO (TRACK 2, FASE 1 - AUDITORIA)**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa no sistema de cálculo e persistência da Taxa de Abertura de Crédito (TAC), identificando todos os pontos de código relevantes e avaliando a viabilidade de se introduzir a nova regra de negócio de "10% de TAC para clientes novos".
+* **Intenção Estratégica (O Porquê):** O objetivo é garantir que a nova regra de negócio seja implementada de forma segura e robusta, sem introduzir regressões na lógica de cálculo de taxas existente. Precisamos entender a arquitetura atual para projetar uma solução que seja flexível e de fácil manutenção.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro a fazer a engenharia reversa de um motor. Você precisa desmontá-lo peça por peça (identificar as funções de verificação de cliente, cálculo de taxa, persistência) para entender como ele funciona antes de propor a instalação de um "turbo" (a nova regra de 10%).
+
+---
+
+### **AUDITAR E VALIDAR:**
+Fluxo de Cálculo e Persistência da Taxa de Abertura de Crédito (TAC)
+
+**[PROTOCOLO DE AUDITORIA DE CENÁRIO DE NEGÓCIO (PACN) V1.0 ATIVADO]**
+*Sua resposta deve ser um relatório de diagnóstico exaustivo em `docs/diagnostics/AUDITORIA_FLUXO_CALCULO_TAC.md`. Para cada ponto, prove com evidências de código e, se necessário, logs de execução de testes.*
+
+**Cenário de Negócio (O "Caso de Teste"):**
+Durante a criação de uma nova proposta, o sistema deve determinar se o cliente (identificado pelo CPF) é novo ou existente. Se for novo, uma TAC de 10% sobre o valor da proposta deve ser calculada e associada à proposta. Se for existente, a lógica atual de cálculo de TAC (se houver) deve ser aplicada.
+
+**Vetor de Ataque / Ponto de Falha (A "Hipótese"):**
+A hipótese é que a implementação da nova regra pode ser complexa devido a:
+1.  **Lógica Descentralizada:** O cálculo da TAC pode estar espalhado por múltiplos locais (frontend, backend, diferentes serviços), sem um ponto único de verdade.
+2.  **Falta de Flexibilidade:** A lógica de cálculo atual pode ser rígida (hardcoded) e não suportar regras condicionais (ex: `if (cliente_novo) then ... else ...`).
+3.  **Timing Incorreto:** A verificação de "cliente novo" pode ocorrer num momento inadequado do fluxo, dificultando a aplicação da taxa correta antes da persistência final.
+
+**Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+Você deve produzir um **Relatório de Diagnóstico Forense da TAC** que responda:
+
+1.  **Ponto de Verificação (Cliente Novo vs. Existente):**
+    * Qual arquivo e função são responsáveis por verificar se um CPF já existe na base de dados durante a criação de uma proposta? (Dica: A auditoria anterior do Preenchimento Automático pode conter esta informação).
+
+2.  **Ponto de Cálculo (Lógica da TAC):**
+    * Localize e apresente o trecho de código onde o `valorTac` é atualmente calculado.
+    * A lógica atual é baseada em quê? (Ex: um valor fixo, uma percentagem de uma `tabelaComercial`, etc.). Existe um serviço central como `TacCalculationService`?
+
+3.  **Ponto de Persistência (Salvando a TAC):**
+    * Em que ponto do fluxo de criação da proposta o `valorTac` calculado é salvo no banco de dados?
+    * Apresente a linha de código no `Use Case` ou `Repository` que persiste este valor.
+
+4.  **Avaliação Arquitetural:**
+    * Com base nas suas descobertas, a arquitetura atual é flexível o suficiente para acomodar a nova regra de "10% para clientes novos"?
+    * Descreva as mudanças de alto nível que seriam necessárias. (Ex: "Será necessário refatorar o `TacCalculationService` para incluir uma nova estratégia de cálculo baseada no parâmetro `isNewClient`").
