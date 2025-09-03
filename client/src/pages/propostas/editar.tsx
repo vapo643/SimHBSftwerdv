@@ -484,8 +484,13 @@ const EditarPropostaPendenciada: React.FC = () => {
 
   // CÁLCULOS AUTOMÁTICOS - FUNCIONAR MESMO SEM TABELA COMERCIAL
   useEffect(() => {
-    const valor = parseFloat((formData.condicoesData as any)?.valor?.replace(/[^\d,]/g, '')?.replace(',', '.') || '0');
-    const prazo = parseInt((formData.condicoesData as any)?.prazo || '0');
+    const valorRaw = (formData.condicoesData as any)?.valor;
+    const valor = parseFloat(
+      typeof valorRaw === 'string' 
+        ? valorRaw.replace(/[^\d,]/g, '').replace(',', '.') 
+        : String(valorRaw || '0')
+    );
+    const prazo = parseInt(String((formData.condicoesData as any)?.prazo || '0'));
     
     // Usar taxa da tabela ou padrão de 2.5% ao mês
     const taxaJuros = parseFloat(proposta?.tabelaComercial?.taxaJuros || '2.5');
