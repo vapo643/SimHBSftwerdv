@@ -246,9 +246,13 @@ const AnaliseManualPage: React.FC = () => {
               </p>
               <p>
                 <strong>Renda Mensal:</strong>{' '}
-                {proposta.cliente_renda || proposta.clienteRenda || getClienteData(proposta)?.renda
-                  ? `R$ ${safeRender(proposta.cliente_renda || proposta.clienteRenda || getClienteData(proposta).renda)}`
-                  : 'N/A'}
+                {safeRender(
+                  proposta.cliente_renda || 
+                  proposta.clienteRenda || 
+                  getClienteData(proposta)?.rendaMensal || 
+                  getClienteData(proposta)?.renda_mensal ||
+                  getClienteData(proposta)?.renda
+                )}
               </p>
               <p>
                 <strong>RG:</strong>{' '}
@@ -343,7 +347,7 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Parceiro:</strong> {safeRender(proposta.parceiro?.razaoSocial || proposta.loja_nome || 'Parceiro Padrão')}
               </p>
               <p>
-                <strong>Loja:</strong> {safeRender(proposta.loja?.nomeLoja || proposta.loja_nome || 'N/A')}
+                <strong>Loja:</strong> {safeRender(proposta.loja_nome || proposta.loja?.nomeLoja || 'N/A')}
               </p>
               <p>
                 <strong>Data de Criação:</strong>{' '}

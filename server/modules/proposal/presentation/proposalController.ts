@@ -177,8 +177,9 @@ export class ProposalController {
     try {
       const { id } = req.params;
       
-      // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta com dados relacionados
-      const proposal = await this.repository.findById(id);
+      // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta com dados relacionados incluindo loja
+      const proposalWithJoin = await this.repository.findByCriteria({ id });
+      const proposal = proposalWithJoin.length > 0 ? proposalWithJoin[0] : null;
 
       if (!proposal) {
         return res.status(404).json({
@@ -208,6 +209,8 @@ export class ProposalController {
         valor_tac: proposal.valorTac,
         valor_iof: proposal.valorIof,
         valor_total_financiado: proposal.valorTotalFinanciado,
+        // OPERAÇÃO VISÃO CLARA V1.0: Incluir dados relacionados da loja
+        loja_nome: (proposal as any)._relatedStoreName || null,
         // NOTA: finalidade e garantia não são propriedades do agregado Proposal
         // Eles estão no banco mas não foram modelados no domínio
         // Cálculos do agregado
