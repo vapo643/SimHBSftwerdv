@@ -210,7 +210,7 @@ export class ProposalController {
         status: proposal.status,
         cliente_data: proposal.clienteData,
         clienteData: proposal.clienteData, // Duplicado para compatibilidade
-        valor: proposal.valor,
+        valor: proposal.valor.getReais(), // CORREÇÃO CRÍTICA: Converter Money Value Object para número
         prazo: proposal.prazo,
         taxa_juros: proposal.taxaJuros,
         taxaJuros: proposal.taxaJuros, // Duplicado para compatibilidade
@@ -240,9 +240,9 @@ export class ProposalController {
         // CAMPOS AUSENTES - CORREÇÃO AUDITORIA
         finalidade: proposal.finalidade,
         garantia: proposal.garantia,
-        // Cálculos do agregado
-        valor_parcela: proposal.calculateMonthlyPayment(),
-        valor_total: proposal.calculateTotalAmount(),
+        // Cálculos do agregado - CORREÇÃO CRÍTICA: Converter Money Value Objects para números
+        valor_parcela: proposal.calculateMonthlyPayment().getReais(),
+        valor_total: proposal.calculateTotalAmount().getReais(),
       };
 
       const response = {
