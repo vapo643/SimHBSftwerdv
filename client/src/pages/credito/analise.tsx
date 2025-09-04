@@ -24,8 +24,9 @@ import HistoricoCompartilhado from '@/components/HistoricoCompartilhado';
 import RefreshButton from '@/components/RefreshButton';
 
 import { api } from '@/lib/apiClient';
-import { PropostaAnaliseViewModel, PropostaApiResponse } from '@/types/proposta.types';
-import { PropostaMapper } from '@/mappers/proposta.mapper';
+// Removido temporariamente para resolver problema do Vite
+// import { PropostaAnaliseViewModel, PropostaApiResponse } from '@/types/proposta.types';
+// import { PropostaMapper } from '@/mappers/proposta.mapper';
 
 // 🔧 Helper function to safely render complex values
 const safeRender = (value: any): string => {
@@ -52,22 +53,16 @@ const safeRender = (value: any): string => {
 
 // Helper removido - agora usamos o PropostaMapper
 
-const fetchProposta = async (id: string | undefined): Promise<PropostaAnaliseViewModel> => {
+const fetchProposta = async (id: string | undefined): Promise<any> => {
   if (!id) throw new Error('ID da proposta não fornecido.');
   try {
     const response = await api.get(`/api/propostas/${id}`);
     console.log('[Análise] Resposta bruta da API:', response.data);
     
-    // Normalizar resposta - pode vir com ou sem wrapper
-    const apiResponse: PropostaApiResponse = response.data.success !== undefined
-      ? response.data
-      : { success: true, data: response.data };
+    // Usar dados diretamente sem mapper temporariamente
+    const data = response.data.success !== undefined ? response.data.data : response.data;
     
-    // Usa o mapper para transformar a resposta da API no ViewModel
-    const viewModel = PropostaMapper.toViewModel(apiResponse);
-    console.log('[Análise] ViewModel mapeado:', viewModel);
-    
-    return viewModel;
+    return data;
   } catch (error) {
     console.error('[Análise] Erro ao carregar proposta:', error);
     throw new Error('Proposta não encontrada');
