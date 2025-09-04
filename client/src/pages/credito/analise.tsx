@@ -190,6 +190,71 @@ const AnaliseManualPage: React.FC = () => {
       </DashboardLayout>
     );
 
+  // Mapper inline básico para compatibilidade temporária
+  const mapProposta = (rawData: any) => {
+    // Parse client data if it's a JSON string
+    let clienteData = rawData.cliente_data || rawData.clienteData || {};
+    if (typeof clienteData === 'string') {
+      try {
+        clienteData = JSON.parse(clienteData);
+      } catch (e) {
+        clienteData = {};
+      }
+    }
+
+    return {
+      id: rawData.id,
+      numeroProposta: rawData.numero_proposta || rawData.numeroProposta,
+      status: rawData.status || 'N/A',
+      cliente: {
+        nome: clienteData.nome || rawData.cliente_nome || rawData.clienteNome || 'N/A',
+        cpf: clienteData.cpf || rawData.cliente_cpf || rawData.clienteCpf || 'N/A',
+        email: clienteData.email || rawData.cliente_email || rawData.clienteEmail || 'N/A',
+        telefone: clienteData.telefone || rawData.cliente_telefone || rawData.clienteTelefone || 'N/A',
+        dataNascimento: clienteData.data_nascimento || clienteData.dataNascimento || rawData.cliente_data_nascimento || 'N/A',
+        rendaMensal: safeRender(clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda),
+        rg: clienteData.rg || rawData.cliente_rg || rawData.clienteRg || 'N/A',
+        orgaoEmissor: clienteData.orgao_emissor || clienteData.orgaoEmissor || rawData.cliente_orgao_emissor || 'N/A',
+        estadoCivil: clienteData.estado_civil || clienteData.estadoCivil || rawData.cliente_estado_civil || 'N/A',
+        nacionalidade: clienteData.nacionalidade || rawData.cliente_nacionalidade || 'N/A',
+        cep: clienteData.cep || rawData.cliente_cep || rawData.clienteCep || 'N/A',
+        endereco: clienteData.endereco || rawData.cliente_endereco || rawData.clienteEndereco || 'N/A',
+        ocupacao: clienteData.ocupacao || rawData.cliente_ocupacao || rawData.clienteOcupacao || 'N/A'
+      },
+      condicoes: {
+        valorSolicitado: safeRender(rawData.valor_solicitado || rawData.valorSolicitado || rawData.valor),
+        prazo: rawData.prazo || rawData.prazo_meses || 'N/A',
+        finalidade: rawData.finalidade || 'N/A',
+        garantia: rawData.garantia || 'N/A',
+        valorTac: safeRender(rawData.valor_tac || rawData.valorTac),
+        valorIof: safeRender(rawData.valor_iof || rawData.valorIof),
+        valorTotalFinanciado: safeRender(rawData.valor_total_financiado || rawData.valorTotalFinanciado),
+        taxaJuros: rawData.taxa_juros || rawData.taxaJuros
+      },
+      produto: {
+        id: rawData.produto_id,
+        nome: rawData.produto_nome || rawData.produtoNome || 'N/A'
+      },
+      loja: {
+        id: rawData.loja_id,
+        nome: rawData.loja_nome || rawData.lojaNome || 'N/A'
+      },
+      tabelaComercial: {
+        id: rawData.tabela_comercial_id,
+        nome: rawData.tabela_comercial_nome || 'N/A',
+        taxa: rawData.tabela_comercial_taxa
+      },
+      createdAt: rawData.created_at || rawData.createdAt,
+      updatedAt: rawData.updated_at || rawData.updatedAt,
+      motivoPendencia: rawData.motivo_pendencia || rawData.motivoPendencia,
+      motivoRejeicao: rawData.motivo_rejeicao || rawData.motivoRejeicao,
+      observacoes: rawData.observacoes,
+      documentos: rawData.documentos || []
+    };
+  };
+
+  const propostaMapeada = mapProposta(proposta);
+
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
     queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
@@ -199,7 +264,7 @@ const AnaliseManualPage: React.FC = () => {
 
   return (
     <DashboardLayout
-      title={`Análise Manual - Proposta #${proposta.id}`}
+      title={`Análise Manual - Proposta #${propostaMapeada.id}`}
       actions={<RefreshButton onRefresh={handleRefresh} isLoading={isLoading} variant="ghost" />}
     >
       <div className="grid gap-6 md:grid-cols-3">
@@ -211,43 +276,43 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Nome:</strong> {proposta.cliente.nome}
+                <strong>Nome:</strong> {propostaMapeada.cliente.nome}
               </p>
               <p>
-                <strong>CPF:</strong> {proposta.cliente.cpf}
+                <strong>CPF:</strong> {propostaMapeada.cliente.cpf}
               </p>
               <p>
-                <strong>Email:</strong> {proposta.cliente.email}
+                <strong>Email:</strong> {propostaMapeada.cliente.email}
               </p>
               <p>
-                <strong>Telefone:</strong> {proposta.cliente.telefone}
+                <strong>Telefone:</strong> {propostaMapeada.cliente.telefone}
               </p>
               <p>
-                <strong>Data de Nascimento:</strong> {proposta.cliente.dataNascimento}
+                <strong>Data de Nascimento:</strong> {propostaMapeada.cliente.dataNascimento}
               </p>
               <p>
-                <strong>Renda Mensal:</strong> {proposta.cliente.rendaMensal}
+                <strong>Renda Mensal:</strong> {propostaMapeada.cliente.rendaMensal}
               </p>
               <p>
-                <strong>RG:</strong> {proposta.cliente.rg}
+                <strong>RG:</strong> {propostaMapeada.cliente.rg}
               </p>
               <p>
-                <strong>Órgão Emissor:</strong> {proposta.cliente.orgaoEmissor}
+                <strong>Órgão Emissor:</strong> {propostaMapeada.cliente.orgaoEmissor}
               </p>
               <p>
-                <strong>Estado Civil:</strong> {proposta.cliente.estadoCivil}
+                <strong>Estado Civil:</strong> {propostaMapeada.cliente.estadoCivil}
               </p>
               <p>
-                <strong>Nacionalidade:</strong> {proposta.cliente.nacionalidade}
+                <strong>Nacionalidade:</strong> {propostaMapeada.cliente.nacionalidade}
               </p>
               <p>
-                <strong>CEP:</strong> {proposta.cliente.cep}
+                <strong>CEP:</strong> {propostaMapeada.cliente.cep}
               </p>
               <p>
-                <strong>Endereço:</strong> {proposta.cliente.endereco}
+                <strong>Endereço:</strong> {propostaMapeada.cliente.endereco}
               </p>
               <p>
-                <strong>Ocupação:</strong> {proposta.cliente.ocupacao}
+                <strong>Ocupação:</strong> {propostaMapeada.cliente.ocupacao}
               </p>
             </CardContent>
           </Card>
@@ -259,25 +324,25 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Valor Solicitado:</strong> {proposta.condicoes.valorSolicitado}
+                <strong>Valor Solicitado:</strong> {propostaMapeada.condicoes.valorSolicitado}
               </p>
               <p>
-                <strong>Prazo:</strong> {proposta.condicoes.prazo} meses
+                <strong>Prazo:</strong> {propostaMapeada.condicoes.prazo} meses
               </p>
               <p>
-                <strong>Finalidade:</strong> {proposta.condicoes.finalidade}
+                <strong>Finalidade:</strong> {propostaMapeada.condicoes.finalidade}
               </p>
               <p>
-                <strong>Garantia:</strong> {proposta.condicoes.garantia}
+                <strong>Garantia:</strong> {propostaMapeada.condicoes.garantia}
               </p>
               <p>
-                <strong>TAC:</strong> {proposta.condicoes.valorTac}
+                <strong>TAC:</strong> {propostaMapeada.condicoes.valorTac}
               </p>
               <p>
-                <strong>IOF:</strong> {proposta.condicoes.valorIof}
+                <strong>IOF:</strong> {propostaMapeada.condicoes.valorIof}
               </p>
               <p>
-                <strong>Valor Total Financiado:</strong> {proposta.condicoes.valorTotalFinanciado}
+                <strong>Valor Total Financiado:</strong> {propostaMapeada.condicoes.valorTotalFinanciado}
               </p>
             </CardContent>
           </Card>
@@ -289,38 +354,38 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Status Atual:</strong> {proposta.status}
+                <strong>Status Atual:</strong> {propostaMapeada.status}
               </p>
               <p>
-                <strong>Produto:</strong> {proposta.produto.nome}
+                <strong>Produto:</strong> {propostaMapeada.produto.nome}
               </p>
               <p>
-                <strong>Loja:</strong> {proposta.loja.nome}
+                <strong>Loja:</strong> {propostaMapeada.loja.nome}
               </p>
               <p>
                 <strong>Data de Criação:</strong>{' '}
-                {proposta.createdAt
-                  ? new Date(proposta.createdAt).toLocaleDateString('pt-BR')
+                {propostaMapeada.createdAt
+                  ? new Date(propostaMapeada.createdAt).toLocaleDateString('pt-BR')
                   : 'N/A'}
               </p>
-              {proposta.observacoes && (
+              {propostaMapeada.observacoes && (
                 <p>
-                  <strong>Observações:</strong> {proposta.observacoes}
+                  <strong>Observações:</strong> {propostaMapeada.observacoes}
                 </p>
               )}
-              {proposta.motivoPendencia && (
+              {propostaMapeada.motivoPendencia && (
                 <p>
-                  <strong>Motivo da Pendência:</strong> {proposta.motivoPendencia}
+                  <strong>Motivo da Pendência:</strong> {propostaMapeada.motivoPendencia}
                 </p>
               )}
             </CardContent>
           </Card>
 
           {/* Visualizador de Documentos */}
-          {proposta.documentos && proposta.documentos.length > 0 && (
+          {propostaMapeada.documentos && propostaMapeada.documentos.length > 0 && (
             <DocumentViewer
               propostaId={propostaId!}
-              documents={proposta.documentos?.map((doc: any) => ({
+              documents={propostaMapeada.documentos?.map((doc: any) => ({
                 ...doc,
                 name: doc.nome || doc.name || 'Documento'
               })) || []}
