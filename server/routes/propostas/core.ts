@@ -260,7 +260,7 @@ router.put('/:id/status', auth, async (req: any, res: any) => {
   } else if (status === 'aguardando_analise') {
     return controller.submitForAnalysis(req, res);
   } else if (status === 'pendente' || status === 'pendenciado') {
-    // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendente
+    // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendenciado
     try {
       // DEBUG: Log completo do request body
       console.log(`[PENDENCIAR DEBUG] Full req.body:`, JSON.stringify(req.body, null, 2));

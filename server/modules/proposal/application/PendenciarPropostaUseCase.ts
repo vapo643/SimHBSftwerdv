@@ -55,12 +55,12 @@ export class PendenciarPropostaUseCase {
         throw new Error('Motivo da pendência é obrigatório');
       }
 
-      // 4. Aplicar transição FSM para 'pendente'
-      console.log(`[PENDENCIAR USE CASE] 🔄 Aplicando transição FSM: ${statusAtual} → pendente`);
+      // 4. Aplicar transição FSM para 'pendenciado'
+      console.log(`[PENDENCIAR USE CASE] 🔄 Aplicando transição FSM: ${statusAtual} → pendenciado`);
       
       await transitionTo({
         propostaId,
-        novoStatus: 'pendente',
+        novoStatus: 'pendenciado',
         userId: analistaId,
         contexto: 'geral',
         observacoes: observacoes || `Pendenciado pelo analista. Motivo: ${motivoPendencia}`,
@@ -87,7 +87,7 @@ export class PendenciarPropostaUseCase {
         success: true,
         message: 'Proposta pendenciada com sucesso',
         propostaId,
-        novoStatus: 'pendente',
+        novoStatus: 'pendenciado',
       };
 
     } catch (error: any) {
