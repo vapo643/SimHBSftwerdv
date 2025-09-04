@@ -243,6 +243,7 @@ const AnaliseManualPage: React.FC = () => {
           produto.tacValor || condicoesData.valorTac || condicoesData.valor_tac ||
           rawData.valor_tac || rawData.valorTac || clienteData.valor_tac
         ),
+        tacTipo: produto.tacTipo || rawData.tac_tipo || 'valor',
         valorIof: safeRender(
           condicoesData.valorIof || condicoesData.valor_iof ||
           rawData.valor_iof || rawData.valorIof || clienteData.valor_iof
@@ -362,7 +363,11 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Garantia:</strong> {propostaMapeada.condicoes.garantia}
               </p>
               <p>
+                <strong>Taxa de Juros:</strong> {propostaMapeada.condicoes.taxaJuros}
+              </p>
+              <p>
                 <strong>TAC:</strong> {propostaMapeada.condicoes.valorTac}
+                {propostaMapeada.condicoes.tacTipo === 'percentual' && propostaMapeada.condicoes.valorTac !== 'N/A' ? '%' : ''}
               </p>
               <p>
                 <strong>IOF:</strong> {propostaMapeada.condicoes.valorIof}
