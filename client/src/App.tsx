@@ -11,7 +11,7 @@ import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
 import NovaProposta from '@/pages/propostas/nova';
 import FilaAnalise from '@/pages/credito/fila';
-import AnaliseManual from '@/pages/credito/analise';
+import AnaliseManualPage from '@/pages/credito/analise';
 import Pagamentos from '@/pages/financeiro/pagamentos';
 import CobrancasPage from '@/pages/financeiro/CobrancasPage';
 import Formalizacao from '@/pages/formalizacao';
@@ -64,7 +64,7 @@ function Router() {
       </Route>
       <Route path="/credito/analise/:id">
         <ProtectedRoute>
-          <AnaliseManual />
+          <AnaliseManualPage />
         </ProtectedRoute>
       </Route>
       <Route path="/financeiro/pagamentos">

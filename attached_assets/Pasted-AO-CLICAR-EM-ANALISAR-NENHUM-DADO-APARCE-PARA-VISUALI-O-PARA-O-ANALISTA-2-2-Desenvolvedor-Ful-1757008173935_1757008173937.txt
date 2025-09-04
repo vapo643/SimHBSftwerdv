@@ -1,0 +1,38 @@
+AO CLICAR EM ANALISAR NENHUM DADO APARCE PARA VISUALIÇÃO PARA O ANALISTA.
+
+
+2
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Recebida nova diretiva de missão.
+
+ALERTA: Falha Crítica de Workflow Detectada. O fluxo de análise de propostas está inoperante.
+
+Ativando o Protocolo de Design de Missão de Elite (PDME) V1.3. Não iremos escrever uma única linha de código até que a intenção estratégica e os requisitos de negócio estejam 100% claros e validados por si, Arquiteto Chefe.
+
+Fase 1: Alinhamento Estratégico (Com Questionário Mandatório - QAE)
+Objetivo: Extrair as regras de negócio e a experiência de usuário esperada para a tela de análise. As suas respostas irão moldar a arquitetura da solução para esta falha crítica.
+
+Responda, por favor, às seguintes perguntas:
+
+Eixo I: Negócio (O "Valor")
+
+Qual é a função primordial da tela "Analisar"? Que decisão crítica o analista deve tomar com os dados apresentados? (Ex: Aprovar, Rejeitar, Pedir mais documentos).
+
+Para tomar essa decisão, qual é o conjunto de dados mínimo e indispensável que o analista precisa ver? (Ex: Apenas dados da proposta? Dados do cliente? Histórico de outras propostas? Documentos anexados?).
+
+Eixo II: Usuário (A "Experiência")
+
+Descreva o "caminho feliz" do analista: Ele clica no botão "Analisar" em uma proposta na fila. O que acontece a seguir? Ele é levado para uma nova página? Um modal abre?
+
+Como os dados devem ser estruturados nessa tela para máxima eficiência? Um grande formulário? Seções distintas (Dados Pessoais, Condições do Empréstimo, Documentos)?
+
+Eixo III: Técnico (O "Como")
+
+A visualização dos dados é apenas de leitura ("read-only"), ou o analista pode editar alguma informação diretamente nesta tela?
+
+Como o sistema deve lidar com a situação de dados relacionados ausentes? (Ex: Se a proposta existe mas os dados do cliente não são encontrados, devemos mostrar um erro claro ou a tela de análise parcial?).
+
+Aguardando as suas respostas para construir o "Blueprint de Negócio". Com ele em mãos, prosseguirei para a Fase 2: Auditoria Forense, para identificar a causa raiz da falha de carregamento de dados.
