@@ -55,11 +55,16 @@ const safeRender = (value: any): string => {
 const fetchProposta = async (id: string | undefined): Promise<PropostaAnaliseViewModel> => {
   if (!id) throw new Error('ID da proposta não fornecido.');
   try {
-    const response = await api.get<PropostaApiResponse>(`/api/propostas/${id}`);
+    const response = await api.get(`/api/propostas/${id}`);
     console.log('[Análise] Resposta bruta da API:', response.data);
     
+    // Normalizar resposta - pode vir com ou sem wrapper
+    const apiResponse: PropostaApiResponse = response.data.success !== undefined
+      ? response.data
+      : { success: true, data: response.data };
+    
     // Usa o mapper para transformar a resposta da API no ViewModel
-    const viewModel = PropostaMapper.toViewModel(response.data);
+    const viewModel = PropostaMapper.toViewModel(apiResponse);
     console.log('[Análise] ViewModel mapeado:', viewModel);
     
     return viewModel;
@@ -310,15 +315,7 @@ const AnaliseManualPage: React.FC = () => {
               )}
               {proposta.motivoPendencia && (
                 <p>
-                  <strong>Documento CCB:</strong>
-                  <a
-                    href={proposta.ccbDocumentoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-2 text-blue-500 hover:underline"
-                  >
-                    Visualizar Documento
-                  </a>
+                  <strong>Motivo da Pendência:</strong> {proposta.motivoPendencia}
                 </p>
               )}
             </CardContent>
@@ -328,7 +325,10 @@ const AnaliseManualPage: React.FC = () => {
           {proposta.documentos && proposta.documentos.length > 0 && (
             <DocumentViewer
               propostaId={propostaId!}
-              documents={proposta.documentos}
+              documents={proposta.documentos?.map((doc: any) => ({
+                ...doc,
+                name: doc.nome || doc.name || 'Documento'
+              })) || []}
               ccbDocumentoUrl={undefined}
             />
           )}
