@@ -1187,10 +1187,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const idParam = req.params.id;
         const user = req.user;
 
-        console.log('🔍 [DEBUG] GENERIC :ID ROUTE HIT!');
-        console.log('🔍 [DEBUG] URL:', req.url);
-        console.log('🔍 [DEBUG] Path:', req.path);
-        console.log('🔍 [DEBUG] ID Param:', idParam);
+        console.log('⚠️ [LEGACY ROUTE] ROTA LEGACY EXECUTADA! (DEVERIA SER DDD)');
+        console.log('⚠️ [LEGACY ROUTE] URL:', req.url);
+        console.log('⚠️ [LEGACY ROUTE] Path:', req.path);
+        console.log('⚠️ [LEGACY ROUTE] ID Param:', idParam);
         console.log(
           `🔐 [PROPOSTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
         );
