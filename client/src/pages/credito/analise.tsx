@@ -25,8 +25,6 @@ import RefreshButton from '@/components/RefreshButton';
 
 import { api } from '@/lib/apiClient';
 // Removido temporariamente para resolver problema do Vite
-// import { PropostaAnaliseViewModel, PropostaApiResponse } from '@/types/proposta.types';
-// import { PropostaMapper } from '@/mappers/proposta.mapper';
 
 // 🔧 Helper function to safely render complex values
 const safeRender = (value: any): string => {
@@ -57,7 +55,6 @@ const fetchProposta = async (id: string | undefined): Promise<any> => {
   if (!id) throw new Error('ID da proposta não fornecido.');
   try {
     const response = await api.get(`/api/propostas/${id}`);
-    console.log('[Análise] Resposta bruta da API:', response.data);
     
     // Usar dados diretamente sem mapper temporariamente
     const data = response.data.success !== undefined ? response.data.data : response.data;
@@ -127,7 +124,7 @@ const AnaliseManualPage: React.FC = () => {
     data: proposta,
     isLoading,
     isError,
-  } = useQuery<PropostaAnaliseViewModel>({
+  } = useQuery<any>({
     queryKey: ['proposta', propostaId],
     queryFn: () => fetchProposta(propostaId),
     enabled: !!propostaId,
