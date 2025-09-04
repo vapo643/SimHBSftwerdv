@@ -190,11 +190,8 @@ const AnaliseManualPage: React.FC = () => {
       </DashboardLayout>
     );
 
-  // Mapper inline básico para compatibilidade temporária
+  // Mapper inline para dados da API com estrutura aninhada
   const mapProposta = (rawData: any) => {
-    // 🔍 DEBUG: Log dos dados para identificar campos financeiros
-    console.log('[MAPPER] Dados brutos da API:', JSON.stringify(rawData, null, 2));
-    
     // Parse client data if it's a JSON string
     let clienteData = rawData.cliente_data || rawData.clienteData || {};
     if (typeof clienteData === 'string') {
@@ -204,6 +201,11 @@ const AnaliseManualPage: React.FC = () => {
         clienteData = {};
       }
     }
+
+    // Extrair dados dos objetos aninhados
+    const produto = rawData.produto || {};
+    const tabelaComercial = rawData.tabelaComercial || {};
+    const condicoesData = rawData.condicoesData || {};
 
     return {
       id: rawData.id,
@@ -226,44 +228,47 @@ const AnaliseManualPage: React.FC = () => {
       },
       condicoes: {
         valorSolicitado: safeRender(
-          rawData.valor_solicitado || rawData.valorSolicitado || rawData.valor || 
-          rawData.amount || rawData.loan_amount || rawData.loanAmount ||
+          condicoesData.valorSolicitado || condicoesData.valor_solicitado ||
+          rawData.valor_solicitado || rawData.valorSolicitado || rawData.valor ||
           clienteData.valor_solicitado || clienteData.valorSolicitado
         ),
-        prazo: rawData.prazo || rawData.prazo_meses || rawData.term || rawData.months || 
-               rawData.duration || clienteData.prazo || 'N/A',
-        finalidade: rawData.finalidade || rawData.purpose || rawData.loan_purpose || 
+        prazo: condicoesData.prazo || condicoesData.prazo_meses ||
+               rawData.prazo || rawData.prazo_meses || 
+               clienteData.prazo || 'N/A',
+        finalidade: condicoesData.finalidade || rawData.finalidade || 
                    clienteData.finalidade || 'N/A',
-        garantia: rawData.garantia || rawData.guarantee || rawData.collateral || 
+        garantia: condicoesData.garantia || rawData.garantia || 
                  clienteData.garantia || 'N/A',
         valorTac: safeRender(
-          rawData.valor_tac || rawData.valorTac || rawData.tac || rawData.tac_amount ||
-          clienteData.valor_tac || clienteData.valorTac
+          produto.tacValor || condicoesData.valorTac || condicoesData.valor_tac ||
+          rawData.valor_tac || rawData.valorTac || clienteData.valor_tac
         ),
         valorIof: safeRender(
-          rawData.valor_iof || rawData.valorIof || rawData.iof || rawData.iof_amount ||
-          clienteData.valor_iof || clienteData.valorIof
+          condicoesData.valorIof || condicoesData.valor_iof ||
+          rawData.valor_iof || rawData.valorIof || clienteData.valor_iof
         ),
         valorTotalFinanciado: safeRender(
-          rawData.valor_total_financiado || rawData.valorTotalFinanciado || 
-          rawData.total_amount || rawData.totalAmount || rawData.financed_amount ||
-          clienteData.valor_total_financiado || clienteData.valorTotalFinanciado
+          condicoesData.valorTotalFinanciado || condicoesData.valor_total_financiado ||
+          rawData.valor_total_financiado || rawData.valorTotalFinanciado ||
+          clienteData.valor_total_financiado
         ),
-        taxaJuros: rawData.taxa_juros || rawData.taxaJuros || rawData.interest_rate || 
-                  rawData.interestRate || clienteData.taxa_juros || clienteData.taxaJuros
+        taxaJuros: safeRender(
+          tabelaComercial.taxaJuros || condicoesData.taxaJuros ||
+          rawData.taxa_juros || rawData.taxaJuros || clienteData.taxa_juros
+        )
       },
       produto: {
-        id: rawData.produto_id,
-        nome: rawData.produto_nome || rawData.produtoNome || 'N/A'
+        id: rawData.produtoId || rawData.produto_id,
+        nome: produto.nomeProduto || rawData.produto_nome || rawData.produtoNome || 'N/A'
       },
       loja: {
-        id: rawData.loja_id,
-        nome: rawData.loja_nome || rawData.lojaNome || 'N/A'
+        id: rawData.lojaId || rawData.loja_id,
+        nome: (rawData.loja && rawData.loja.nomeLoja) || rawData.loja_nome || rawData.lojaNome || 'N/A'
       },
       tabelaComercial: {
-        id: rawData.tabela_comercial_id,
-        nome: rawData.tabela_comercial_nome || 'N/A',
-        taxa: rawData.tabela_comercial_taxa
+        id: rawData.tabelaComercialId || rawData.tabela_comercial_id,
+        nome: tabelaComercial.nomeTabela || rawData.tabela_comercial_nome || 'N/A',
+        taxa: tabelaComercial.taxaJuros || rawData.tabela_comercial_taxa
       },
       createdAt: rawData.created_at || rawData.createdAt,
       updatedAt: rawData.updated_at || rawData.updatedAt,
