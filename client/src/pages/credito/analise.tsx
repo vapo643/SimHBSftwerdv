@@ -70,27 +70,37 @@ const fetchProposta = async (id: string | undefined) => {
     
     const proposta = response.data?.data || response.data;
     
-    // DEBUG TEMPORÁRIO - Ver estrutura dos dados
-    console.log('🔍 [DEBUG] Estrutura da proposta:', {
-      cliente_data: proposta.cliente_data,
-      clienteData: proposta.clienteData,
-      cliente_nome: proposta.cliente_nome,
-      clienteNome: proposta.clienteNome,
-      keys: Object.keys(proposta)
-    });
+    // DEBUG ROBUSTO - Ver estrutura completa dos dados
+    console.log('🔍 [DEBUG] === INÍCIO ANÁLISE ESTRUTURA ===');
+    console.log('🔍 [DEBUG] Todas as keys da proposta:', Object.keys(proposta));
+    console.log('🔍 [DEBUG] Valor:', proposta.valor);
+    console.log('🔍 [DEBUG] Status:', proposta.status);
+    console.log('🔍 [DEBUG] cliente_data raw:', proposta.cliente_data);
+    console.log('🔍 [DEBUG] clienteData:', proposta.clienteData);
     
-    // DEBUG TEMPORÁRIO - Parsear cliente_data
+    // DEBUG: Tentar parsear cliente_data se for string
+    let clienteDataParsed = null;
     if (proposta.cliente_data) {
       try {
-        const clienteDataParsed = typeof proposta.cliente_data === 'string' 
-          ? JSON.parse(proposta.cliente_data) 
-          : proposta.cliente_data;
-        console.log('🔍 [DEBUG] cliente_data parseado:', clienteDataParsed);
-        console.log('🔍 [DEBUG] Keys do cliente_data:', Object.keys(clienteDataParsed));
+        if (typeof proposta.cliente_data === 'string') {
+          clienteDataParsed = JSON.parse(proposta.cliente_data);
+          console.log('🔍 [DEBUG] cliente_data PARSEADO como JSON:', clienteDataParsed);
+        } else {
+          clienteDataParsed = proposta.cliente_data;
+          console.log('🔍 [DEBUG] cliente_data já é objeto:', clienteDataParsed);
+        }
+        
+        if (clienteDataParsed && typeof clienteDataParsed === 'object') {
+          console.log('🔍 [DEBUG] Keys dentro de cliente_data:', Object.keys(clienteDataParsed));
+          console.log('🔍 [DEBUG] Nome do cliente:', clienteDataParsed.nome || clienteDataParsed.nomeCompleto || clienteDataParsed.clienteNome);
+          console.log('🔍 [DEBUG] CPF do cliente:', clienteDataParsed.cpf || clienteDataParsed.clienteCpf);
+        }
       } catch (e) {
-        console.log('🔍 [DEBUG] Erro ao parsear cliente_data:', e);
+        console.error('🔍 [DEBUG] ERRO ao parsear cliente_data:', e);
       }
     }
+    
+    console.log('🔍 [DEBUG] === FIM ANÁLISE ESTRUTURA ===');
     
     return proposta;
   } catch (error) {
