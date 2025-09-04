@@ -24,6 +24,8 @@ import HistoricoCompartilhado from '@/components/HistoricoCompartilhado';
 import RefreshButton from '@/components/RefreshButton';
 
 import { api } from '@/lib/apiClient';
+import { PropostaAnaliseViewModel, PropostaApiResponse } from '@/types/proposta.types';
+import { PropostaMapper } from '@/mappers/proposta.mapper';
 
 // 🔧 Helper function to safely render complex values
 const safeRender = (value: any): string => {
@@ -48,61 +50,19 @@ const safeRender = (value: any): string => {
   return String(value);
 };
 
-// Helper to safely parse cliente_data JSON
-const getClienteData = (proposta: any) => {
-  if (proposta.cliente_data) {
-    try {
-      return typeof proposta.cliente_data === 'string' 
-        ? JSON.parse(proposta.cliente_data) 
-        : proposta.cliente_data;
-    } catch {
-      return {};
-    }
-  }
-  return {};
-};
+// Helper removido - agora usamos o PropostaMapper
 
-const fetchProposta = async (id: string | undefined) => {
+const fetchProposta = async (id: string | undefined): Promise<PropostaAnaliseViewModel> => {
   if (!id) throw new Error('ID da proposta não fornecido.');
   try {
-    const response = await api.get(`/api/propostas/${id}`);
-    console.log('[Análise] Proposta carregada:', response.data);
+    const response = await api.get<PropostaApiResponse>(`/api/propostas/${id}`);
+    console.log('[Análise] Resposta bruta da API:', response.data);
     
-    const proposta = response.data?.data || response.data;
+    // Usa o mapper para transformar a resposta da API no ViewModel
+    const viewModel = PropostaMapper.toViewModel(response.data);
+    console.log('[Análise] ViewModel mapeado:', viewModel);
     
-    // DEBUG ROBUSTO - Ver estrutura completa dos dados
-    console.log('🔍 [DEBUG] === INÍCIO ANÁLISE ESTRUTURA ===');
-    console.log('🔍 [DEBUG] Todas as keys da proposta:', Object.keys(proposta));
-    console.log('🔍 [DEBUG] Valor:', proposta.valor);
-    console.log('🔍 [DEBUG] Status:', proposta.status);
-    console.log('🔍 [DEBUG] cliente_data raw:', proposta.cliente_data);
-    console.log('🔍 [DEBUG] clienteData:', proposta.clienteData);
-    
-    // DEBUG: Tentar parsear cliente_data se for string
-    let clienteDataParsed = null;
-    if (proposta.cliente_data) {
-      try {
-        if (typeof proposta.cliente_data === 'string') {
-          clienteDataParsed = JSON.parse(proposta.cliente_data);
-          console.log('🔍 [DEBUG] cliente_data PARSEADO como JSON:', clienteDataParsed);
-        } else {
-          clienteDataParsed = proposta.cliente_data;
-          console.log('🔍 [DEBUG] cliente_data já é objeto:', clienteDataParsed);
-        }
-        
-        if (clienteDataParsed && typeof clienteDataParsed === 'object') {
-          console.log('🔍 [DEBUG] Keys dentro de cliente_data:', Object.keys(clienteDataParsed));
-          console.log('🔍 [DEBUG] Nome do cliente:', clienteDataParsed.nome || clienteDataParsed.nomeCompleto || clienteDataParsed.clienteNome);
-          console.log('🔍 [DEBUG] CPF do cliente:', clienteDataParsed.cpf || clienteDataParsed.clienteCpf);
-        }
-      } catch (e) {
-        console.error('🔍 [DEBUG] ERRO ao parsear cliente_data:', e);
-      }
-    }
-    
-    console.log('🔍 [DEBUG] === FIM ANÁLISE ESTRUTURA ===');
-    
-    return proposta;
+    return viewModel;
   } catch (error) {
     console.error('[Análise] Erro ao carregar proposta:', error);
     throw new Error('Proposta não encontrada');
@@ -167,7 +127,7 @@ const AnaliseManualPage: React.FC = () => {
     data: proposta,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<PropostaAnaliseViewModel>({
     queryKey: ['proposta', propostaId],
     queryFn: () => fetchProposta(propostaId),
     enabled: !!propostaId,
@@ -251,80 +211,43 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Nome:</strong>{' '}
-                {safeRender(proposta.cliente_nome ||
-                  proposta.clienteNome ||
-                  proposta.clienteData?.nome)}
+                <strong>Nome:</strong> {proposta.cliente.nome}
               </p>
               <p>
-                <strong>CPF:</strong>{' '}
-                {safeRender(proposta.cliente_cpf || proposta.clienteCpf || getClienteData(proposta)?.cpf)}
+                <strong>CPF:</strong> {proposta.cliente.cpf}
               </p>
               <p>
-                <strong>Email:</strong>{' '}
-                {safeRender(proposta.cliente_email ||
-                  proposta.clienteEmail ||
-                  getClienteData(proposta)?.email)}
+                <strong>Email:</strong> {proposta.cliente.email}
               </p>
               <p>
-                <strong>Telefone:</strong>{' '}
-                {safeRender(proposta.cliente_telefone ||
-                  proposta.clienteTelefone ||
-                  getClienteData(proposta)?.telefone)}
+                <strong>Telefone:</strong> {proposta.cliente.telefone}
               </p>
               <p>
-                <strong>Data de Nascimento:</strong>{' '}
-                {safeRender(proposta.cliente_data_nascimento ||
-                  proposta.clienteDataNascimento ||
-                  getClienteData(proposta)?.dataNascimento)}
+                <strong>Data de Nascimento:</strong> {proposta.cliente.dataNascimento}
               </p>
               <p>
-                <strong>Renda Mensal:</strong>{' '}
-                {safeRender(
-                  proposta.cliente_renda || 
-                  proposta.clienteRenda || 
-                  getClienteData(proposta)?.rendaMensal || 
-                  getClienteData(proposta)?.renda_mensal ||
-                  getClienteData(proposta)?.renda
-                )}
+                <strong>Renda Mensal:</strong> {proposta.cliente.rendaMensal}
               </p>
               <p>
-                <strong>RG:</strong>{' '}
-                {safeRender(proposta.cliente_rg || proposta.clienteRg || getClienteData(proposta)?.rg)}
+                <strong>RG:</strong> {proposta.cliente.rg}
               </p>
               <p>
-                <strong>Órgão Emissor:</strong>{' '}
-                {safeRender(proposta.cliente_orgao_emissor ||
-                  proposta.clienteOrgaoEmissor ||
-                  getClienteData(proposta)?.orgaoEmissor)}
+                <strong>Órgão Emissor:</strong> {proposta.cliente.orgaoEmissor}
               </p>
               <p>
-                <strong>Estado Civil:</strong>{' '}
-                {safeRender(proposta.cliente_estado_civil ||
-                  proposta.clienteEstadoCivil ||
-                  getClienteData(proposta)?.estadoCivil)}
+                <strong>Estado Civil:</strong> {proposta.cliente.estadoCivil}
               </p>
               <p>
-                <strong>Nacionalidade:</strong>{' '}
-                {safeRender(proposta.cliente_nacionalidade ||
-                  proposta.clienteNacionalidade ||
-                  getClienteData(proposta)?.nacionalidade)}
+                <strong>Nacionalidade:</strong> {proposta.cliente.nacionalidade}
               </p>
               <p>
-                <strong>CEP:</strong>{' '}
-                {safeRender(proposta.cliente_cep || proposta.clienteCep || getClienteData(proposta)?.cep)}
+                <strong>CEP:</strong> {proposta.cliente.cep}
               </p>
               <p>
-                <strong>Endereço:</strong>{' '}
-                {safeRender(proposta.cliente_endereco ||
-                  proposta.clienteEndereco ||
-                  getClienteData(proposta)?.endereco)}
+                <strong>Endereço:</strong> {proposta.cliente.endereco}
               </p>
               <p>
-                <strong>Ocupação:</strong>{' '}
-                {safeRender(proposta.cliente_ocupacao ||
-                  proposta.clienteOcupacao ||
-                  getClienteData(proposta)?.ocupacao)}
+                <strong>Ocupação:</strong> {proposta.cliente.ocupacao}
               </p>
             </CardContent>
           </Card>
@@ -336,34 +259,25 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Valor Solicitado:</strong>{' '}
-                {safeRender(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor)}
+                <strong>Valor Solicitado:</strong> {proposta.condicoes.valorSolicitado}
               </p>
               <p>
-                <strong>Prazo:</strong>{' '}
-                {proposta.prazo || proposta.condicoesData?.prazo
-                  ? `${safeRender(proposta.prazo || proposta.condicoesData.prazo)} meses`
-                  : 'N/A'}
+                <strong>Prazo:</strong> {proposta.condicoes.prazo} meses
               </p>
               <p>
-                <strong>Finalidade:</strong>{' '}
-                {proposta.finalidade || proposta.condicoesData?.finalidade || 'Não informado'}
+                <strong>Finalidade:</strong> {proposta.condicoes.finalidade}
               </p>
               <p>
-                <strong>Garantia:</strong>{' '}
-                {proposta.garantia || proposta.condicoesData?.garantia || 'Não informado'}
+                <strong>Garantia:</strong> {proposta.condicoes.garantia}
               </p>
               <p>
-                <strong>TAC:</strong>{' '}
-                {safeRender(proposta.valor_tac || proposta.valorTac || proposta.condicoesData?.valorTac)}
+                <strong>TAC:</strong> {proposta.condicoes.valorTac}
               </p>
               <p>
-                <strong>IOF:</strong>{' '}
-                {safeRender(proposta.valor_iof || proposta.valorIof || proposta.condicoesData?.valorIof)}
+                <strong>IOF:</strong> {proposta.condicoes.valorIof}
               </p>
               <p>
-                <strong>Valor Total Financiado:</strong>{' '}
-                {safeRender(proposta.valor_total_financiado || proposta.valorTotalFinanciado || proposta.condicoesData?.valorTotalFinanciado)}
+                <strong>Valor Total Financiado:</strong> {proposta.condicoes.valorTotalFinanciado}
               </p>
             </CardContent>
           </Card>
@@ -375,13 +289,13 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Status Atual:</strong> {safeRender(proposta.status)}
+                <strong>Status Atual:</strong> {proposta.status}
               </p>
               <p>
-                <strong>Parceiro:</strong> {safeRender(proposta.parceiro?.razaoSocial || proposta.loja_nome || 'Parceiro Padrão')}
+                <strong>Produto:</strong> {proposta.produto.nome}
               </p>
               <p>
-                <strong>Loja:</strong> {safeRender(proposta.loja_nome || proposta.loja?.nomeLoja || 'N/A')}
+                <strong>Loja:</strong> {proposta.loja.nome}
               </p>
               <p>
                 <strong>Data de Criação:</strong>{' '}
@@ -389,7 +303,12 @@ const AnaliseManualPage: React.FC = () => {
                   ? new Date(proposta.createdAt).toLocaleDateString('pt-BR')
                   : 'N/A'}
               </p>
-              {proposta.ccbDocumentoUrl && (
+              {proposta.observacoes && (
+                <p>
+                  <strong>Observações:</strong> {proposta.observacoes}
+                </p>
+              )}
+              {proposta.motivoPendencia && (
                 <p>
                   <strong>Documento CCB:</strong>
                   <a
@@ -406,11 +325,13 @@ const AnaliseManualPage: React.FC = () => {
           </Card>
 
           {/* Visualizador de Documentos */}
-          <DocumentViewer
-            propostaId={propostaId!}
-            documents={proposta.documentos || []}
-            ccbDocumentoUrl={proposta.ccbDocumentoUrl}
-          />
+          {proposta.documentos && proposta.documentos.length > 0 && (
+            <DocumentViewer
+              propostaId={propostaId!}
+              documents={proposta.documentos}
+              ccbDocumentoUrl={undefined}
+            />
+          )}
 
           {/* Renderização condicional - Painel de Decisão apenas para ANALISTA e ADMINISTRADOR */}
           {user && (user.role === 'ANALISTA' || user.role === 'ADMINISTRADOR') ? (

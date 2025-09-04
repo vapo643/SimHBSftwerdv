@@ -16,6 +16,7 @@ import { GetProposalByIdUseCase } from '../application/GetProposalByIdUseCase';
 import { ApproveProposalUseCase } from '../application/ApproveProposalUseCase';
 import { RejectProposalUseCase } from '../application/RejectProposalUseCase';
 import { PendenciarPropostaUseCase } from '../application/PendenciarPropostaUseCase';
+import { ProposalOutputSchema } from '../../../schemas/proposalOutput.schema';
 
 export class ProposalController {
   private repository: ProposalRepository;
@@ -244,10 +245,21 @@ export class ProposalController {
         valor_total: proposal.calculateTotalAmount(),
       };
 
-      return res.json({
+      const response = {
         success: true,
         data,
-      });
+      };
+      
+      // Validar a resposta antes de enviar
+      try {
+        const validated = ProposalOutputSchema.parse(response);
+        return res.json(validated);
+      } catch (validationError) {
+        console.error('[ProposalController.getById] Output validation failed:', validationError);
+        // Em desenvolvimento, log o erro mas envie a resposta mesmo assim
+        // Em produção, você pode querer tratar isso diferentemente
+        return res.json(response);
+      }
     } catch (error: any) {
       console.error('[ProposalController.getById] Error:', error);
 
