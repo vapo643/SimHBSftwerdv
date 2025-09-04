@@ -192,6 +192,9 @@ const AnaliseManualPage: React.FC = () => {
 
   // Mapper inline básico para compatibilidade temporária
   const mapProposta = (rawData: any) => {
+    // 🔍 DEBUG: Log dos dados para identificar campos financeiros
+    console.log('[MAPPER] Dados brutos da API:', JSON.stringify(rawData, null, 2));
+    
     // Parse client data if it's a JSON string
     let clienteData = rawData.cliente_data || rawData.clienteData || {};
     if (typeof clienteData === 'string') {
@@ -222,14 +225,32 @@ const AnaliseManualPage: React.FC = () => {
         ocupacao: clienteData.ocupacao || rawData.cliente_ocupacao || rawData.clienteOcupacao || 'N/A'
       },
       condicoes: {
-        valorSolicitado: safeRender(rawData.valor_solicitado || rawData.valorSolicitado || rawData.valor),
-        prazo: rawData.prazo || rawData.prazo_meses || 'N/A',
-        finalidade: rawData.finalidade || 'N/A',
-        garantia: rawData.garantia || 'N/A',
-        valorTac: safeRender(rawData.valor_tac || rawData.valorTac),
-        valorIof: safeRender(rawData.valor_iof || rawData.valorIof),
-        valorTotalFinanciado: safeRender(rawData.valor_total_financiado || rawData.valorTotalFinanciado),
-        taxaJuros: rawData.taxa_juros || rawData.taxaJuros
+        valorSolicitado: safeRender(
+          rawData.valor_solicitado || rawData.valorSolicitado || rawData.valor || 
+          rawData.amount || rawData.loan_amount || rawData.loanAmount ||
+          clienteData.valor_solicitado || clienteData.valorSolicitado
+        ),
+        prazo: rawData.prazo || rawData.prazo_meses || rawData.term || rawData.months || 
+               rawData.duration || clienteData.prazo || 'N/A',
+        finalidade: rawData.finalidade || rawData.purpose || rawData.loan_purpose || 
+                   clienteData.finalidade || 'N/A',
+        garantia: rawData.garantia || rawData.guarantee || rawData.collateral || 
+                 clienteData.garantia || 'N/A',
+        valorTac: safeRender(
+          rawData.valor_tac || rawData.valorTac || rawData.tac || rawData.tac_amount ||
+          clienteData.valor_tac || clienteData.valorTac
+        ),
+        valorIof: safeRender(
+          rawData.valor_iof || rawData.valorIof || rawData.iof || rawData.iof_amount ||
+          clienteData.valor_iof || clienteData.valorIof
+        ),
+        valorTotalFinanciado: safeRender(
+          rawData.valor_total_financiado || rawData.valorTotalFinanciado || 
+          rawData.total_amount || rawData.totalAmount || rawData.financed_amount ||
+          clienteData.valor_total_financiado || clienteData.valorTotalFinanciado
+        ),
+        taxaJuros: rawData.taxa_juros || rawData.taxaJuros || rawData.interest_rate || 
+                  rawData.interestRate || clienteData.taxa_juros || clienteData.taxaJuros
       },
       produto: {
         id: rawData.produto_id,
