@@ -1,0 +1,66 @@
+Pacote de Ativação de Missão (PAM) V1.0 - Prova de Trabalho P4
+Sumário da Missão (O Quê): Executar um teste funcional de ponta a ponta para validar inequivocamente que o fluxo de análise de propostas foi completamente restaurado e está a operar conforme o esperado.
+
+Intenção Estratégica (O Porquê): Este passo é a prova final da nossa engenharia. Ele confirma que a correção arquitetural não apenas resolveu o bug, mas também resultou numa experiência de usuário funcional e correta, validando o valor de negócio entregue ao analista.
+
+Histórico Relevante (Consulta Obrigatória): A correção envolveu o redirecionamento da rota /credito/analise/:id para o componente em client/src/pages/credito/analise.tsx. A validação deve confirmar que este componente agora é carregado e renderiza os dados corretamente.
+
+Modelo Mental (Como se Encaixa): Você irá simular o ANALISTA no "caminho feliz". A sua ação de clicar em "Analisar" agora deve ser corretamente encaminhada pelo App.tsx (Passo 1), renderizando o componente AnaliseManualPage que, por sua vez, deve buscar e exibir os dados da proposta de forma bem-sucedida.
+
+Riscos Antecipados e Contramedidas:
+
+Risco: O componente AnaliseManualPage pode ter suas próprias dependências ou lógicas de busca de dados que podem falhar.
+
+Contramedida: Este teste de ponta a ponta é a contramedida exata, pois ele não testa apenas o roteamento, mas a funcionalidade completa do componente-alvo em um cenário de uso real.
+
+IMPLEMENTAR: Validação Funcional Completa do Fluxo de Análise de Proposta
+
+CONTEXT: Após a auditoria identificar uma duplicação de componentes e um erro de roteamento, nós alterámos o App.tsx para usar o componente correto (AnaliseManualPage) e eliminámos o arquivo defeituoso. Agora, precisamos de uma prova de trabalho de que o fluxo está totalmente funcional.
+
+CURRENT STATE: O código foi refatorado, mas o comportamento final do ponto de vista do usuário ainda não foi validado.
+
+EXPECTED (Estado Final de Sucesso): Um usuário com o papel de ANALISTA, ao clicar no botão "Analisar" de qualquer proposta na fila, deve ser redirecionado para a página de análise (/credito/analise/:id), e a página deve carregar e exibir com sucesso os detalhes completos da proposta selecionada.
+
+CONSTRAINTS (Roadmap de Implementação):
+
+Preparação: Identifique qualquer proposta na fila de análise que esteja pronta para ser analisada (ex: status EM_ANALISE).
+
+Execução (Simulação de Usuário):
+
+Navegue até a fila de análise.
+
+Clique no botão "Analisar" de uma proposta.
+
+Validação (Prova de Trabalho):
+
+Confirme o Roteamento: Verifique se o URL no navegador muda para /credito/analise/<ID_DA_PROPOSTA>.
+
+Confirme o Carregamento de Dados: Verifique se a página de análise carrega e exibe os dados específicos da proposta que você selecionou (ex: nome do cliente, valor da proposta, etc.). Não deve haver uma tela em branco ou mensagens de erro.
+
+Relatório: Apresente seu relatório final de execução. Confirme explicitamente o sucesso ou falha dos pontos de validação (Roteamento e Carregamento de Dados). Siga o protocolo 7-CHECK.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Listar decisões tomadas]
+
+VALIDAÇÃO PENDENTE: [Listar ações que o Orquestrador (GEM 02) ou o QA (GEM 03) devem validar]
+
+PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:
+
+Mapear ficheiros e funções exatas afetadas/testadas.
+
+Garantir importações e tipos corretos.
+
+Executar get_latest_lsp_diagnostics e confirmar ZERO erros em todos os arquivos relacionados.
+
+Declarar Nível de Confiança (0-100%) na funcionalidade completa do fluxo de análise.
+
+Categorizar Riscos Descobertos (BAIXO/MÉDIO/ALTO/CRÍTICO).
+
+Realizar teste funcional completo.
+
+Documentar Decisões Técnicas assumidas para auditoria futura.
