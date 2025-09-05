@@ -11,6 +11,7 @@ import { PaginatedResult, CursorPaginationOptions, RepositoryFilters } from '@sh
 
 export interface ProposalSearchCriteria {
   status?: string;
+  statusArray?: string[]; // CORREÇÃO CRÍTICA: Suporte para múltiplos status na fila de análise
   lojaId?: number;
   atendenteId?: string;
   cpf?: string;

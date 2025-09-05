@@ -248,9 +248,9 @@ export class ProposalController {
         // CAMPOS AUSENTES - CORREÇÃO AUDITORIA
         finalidade: proposal.finalidade,
         garantia: proposal.garantia,
-        // Cálculos do agregado - CORREÇÃO CRÍTICA: Converter Money Value Objects para números
-        valor_parcela: proposal.calculateMonthlyPayment().getReais(),
-        valor_total: proposal.calculateTotalAmount().getReais(),
+        // Cálculos do agregado - valores já retornados como números pelos métodos
+        valor_parcela: proposal.calculateMonthlyPayment(),
+        valor_total: proposal.calculateTotalAmount(),
       };
 
       const response = {
@@ -295,9 +295,9 @@ export class ProposalController {
 
       // OPERAÇÃO VISÃO CLARA V1.0: Processar parâmetro queue=analysis
       if (queue === 'analysis') {
-        // Filtrar apenas status de análise
+        // Filtrar apenas status de análise - incluir ambos status possíveis
         if (!status) {
-          criteria.status = 'aguardando_analise';
+          criteria.statusArray = ['aguardando_analise', 'em_analise'];
         }
       }
 

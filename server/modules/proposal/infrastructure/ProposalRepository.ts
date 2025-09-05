@@ -232,6 +232,11 @@ export class ProposalRepository implements IProposalRepository {
     if (criteria.status) {
       conditions.push(eq(propostas.status, criteria.status));
     }
+    
+    // CORREÇÃO CRÍTICA: Suporte para múltiplos status na fila de análise
+    if (criteria.statusArray && Array.isArray(criteria.statusArray)) {
+      conditions.push(inArray(propostas.status, criteria.statusArray));
+    }
 
     if (criteria.lojaId) {
       conditions.push(eq(propostas.lojaId, criteria.lojaId));
