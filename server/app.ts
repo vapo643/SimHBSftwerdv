@@ -177,17 +177,8 @@ export async function createApp() {
   // JSON middleware
   app.use(express.json());
 
-  // Error handling
-  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
-
-    if (status === 500) {
-      console.error(`[express] Error:`, err);
-    }
-
-    res.status(status).json({ message });
-  });
+  // Error handling - PAM P2.4.1: Centralized error handling middleware
+  // Temporary placeholder - actual errorHandler will be registered after routes
 
   // FASE 0 - Register health check routes first (no auth needed)
   app.use('/api', healthRoutes);
@@ -202,8 +193,9 @@ export async function createApp() {
   // CRITICAL: Must be AFTER all routes, BEFORE other error handlers
   Sentry.setupExpressErrorHandler(app);
 
-  // Legacy error handler (for compatibility)
-  app.use(errorHandler());
+  // PAM P2.4.1 - Centralized error handling middleware (MUST BE LAST)
+  const { errorHandler } = await import('./middleware/errorHandler.js');
+  app.use(errorHandler);
 
   return app;
 }

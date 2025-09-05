@@ -9,7 +9,7 @@
  * Não contém lógica de negócio - apenas orquestração
  */
 
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { 
   proposalRepository,
   createProposalUseCase,
@@ -176,7 +176,7 @@ export class ProposalController {
   /**
    * Buscar proposta por ID
    */
-  async getById(req: Request, res: Response): Promise<Response> {
+  async getById(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
       
@@ -270,12 +270,8 @@ export class ProposalController {
         return res.json(response);
       }
     } catch (error: any) {
-      console.error('[ProposalController.getById] Error:', error);
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao buscar proposta',
-      });
+      // PAM P2.4.1: Delegate error handling to centralized middleware
+      next(error);
     }
   }
 
