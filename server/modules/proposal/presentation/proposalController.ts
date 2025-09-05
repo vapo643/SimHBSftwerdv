@@ -210,6 +210,14 @@ export class ProposalController {
         status: proposal.status,
         cliente_data: proposal.clienteData,
         clienteData: proposal.clienteData, // Duplicado para compatibilidade
+        // CORREÇÃO CRÍTICA: Adicionar condicoesData estruturado que o frontend espera
+        condicoesData: {
+          valor: proposal.valor.getReais(),
+          prazo: proposal.prazo,
+          taxaJuros: proposal.taxaJuros,
+          finalidade: proposal.finalidade,
+          garantia: proposal.garantia,
+        },
         valor: proposal.valor.getReais(), // CORREÇÃO CRÍTICA: Converter Money Value Object para número
         prazo: proposal.prazo,
         taxa_juros: proposal.taxaJuros,

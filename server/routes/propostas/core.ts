@@ -146,7 +146,6 @@ router.get('/formalizacao', auth, async (req: any, res: any) => {
 // GET /api/propostas/:id - Buscar proposta por ID
 router.get('/:id', auth, (req: any, res: any) => {
   console.log('🎯 [DDD CONTROLLER] Nova rota DDD executada para ID:', req.params.id);
-  console.log('🎯 [DDD CONTROLLER] User:', req.user?.id);
   return controller.getById(req, res);
 });
 

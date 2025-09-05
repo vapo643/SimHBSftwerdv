@@ -3960,7 +3960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const formalizacaoRouter = (await import('./routes/formalizacao')).default;
   app.use('/api/formalizacao', formalizacaoRouter);
 
-  // 🔧 CRITICAL FIX: Mount DDD core router FIRST to avoid catch-all conflicts
+  // 🔧 CRITICAL FIX: Mount DDD core router BEFORE legacy routes to ensure DDD precedence
   console.log('🔍 [STARTUP] Registering propostasCoreRouter FIRST to avoid conflicts...');
   const propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
   app.use('/api/propostas', propostasCoreRouter);

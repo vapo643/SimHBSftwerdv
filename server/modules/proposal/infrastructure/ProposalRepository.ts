@@ -666,10 +666,7 @@ export class ProposalRepository implements IProposalRepository {
       };
     }
 
-    // DEBUG: Verificar nomes reais das propriedades do row
-    console.log('🔍 [DEBUG REPOSITORY] Keys disponíveis no row:', Object.keys(row));
-    console.log('🔍 [DEBUG REPOSITORY] valorTac:', row.valorTac, typeof row.valorTac);
-    console.log('🔍 [DEBUG REPOSITORY] valor_tac:', row.valor_tac, typeof row.valor_tac);
+    // OPERAÇÃO VISÃO CLARA V1.0: Mapear dados do banco para domínio
 
     // OPERAÇÃO VISÃO CLARA V1.0: Incluir campos ausentes no mapeamento
     return Proposal.fromDatabase({
