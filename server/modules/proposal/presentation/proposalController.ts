@@ -809,6 +809,7 @@ export class ProposalController {
       });
     }
     
+    const { id } = req.params;
     const { status } = req.body;
 
     // Mapear para os novos endpoints baseado no status
