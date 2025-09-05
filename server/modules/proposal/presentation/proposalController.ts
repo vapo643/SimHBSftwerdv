@@ -289,6 +289,12 @@ export class ProposalController {
 
       // PERF-BOOST-001: Usar método lightweight para listagem
       const rawData = await proposalRepository.findByCriteriaLightweight(criteria);
+      
+      // 🐛 DEBUG: Log temporário para investigar problema N/A
+      if (queue === 'analysis') {
+        console.log('🔍 [ANÁLISE DEBUG] Critérios usados:', JSON.stringify(criteria, null, 2));
+        console.log('🔍 [ANÁLISE DEBUG] Dados brutos do repository:', JSON.stringify(rawData[0] || 'NENHUM RESULTADO', null, 2));
+      }
 
       // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
       // OPERAÇÃO AÇO LÍQUIDO P0.3: Adaptador de Contrato API para blindagem do frontend
@@ -315,6 +321,11 @@ export class ProposalController {
         updatedAt: row.updated_at,
       }));
 
+      // 🐛 DEBUG: Log temporário dos dados mapeados
+      if (queue === 'analysis' && data[0]) {
+        console.log('🔍 [ANÁLISE DEBUG] Dados após mapeamento:', JSON.stringify(data[0], null, 2));
+      }
+      
       return res.json({
         success: true,
         data,
