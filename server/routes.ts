@@ -3961,8 +3961,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/formalizacao', formalizacaoRouter);
 
   // ✅ PAM P2.3: Legacy core.ts ELIMINATED - DDD Architecture Migration Complete
+  
+  // 🔧 CRITICAL FIX: Register DDD Controller routes BEFORE legacy Carnê routes
+  const { ProposalController } = await import('./modules/proposal/presentation/proposalController.js');
+  const proposalController = new ProposalController();
+  
+  // Main proposal routes using DDD controller
+  app.get('/api/propostas', jwtAuthMiddleware as any, async (req: any, res: any, next: any) => {
+    try {
+      await proposalController.list(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.get('/api/propostas/:id', jwtAuthMiddleware as any, async (req: any, res: any, next: any) => {
+    try {
+      await proposalController.getById(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.post('/api/propostas', jwtAuthMiddleware as any, async (req: any, res: any, next: any) => {
+    try {
+      await proposalController.create(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  });
 
-  // Register legacy Propostas Carnê routes (AFTER core router)
+  // Register legacy Propostas Carnê routes (AFTER DDD routes)
   app.use('/api/propostas', propostasCarneRoutes);
   app.use('/api', propostasCarneStatusRoutes);
   app.use(propostasCarneCheckRoutes);
