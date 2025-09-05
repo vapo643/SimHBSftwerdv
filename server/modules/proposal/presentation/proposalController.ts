@@ -216,7 +216,7 @@ export class ProposalController {
         atendente_id: proposal.atendenteId,
         dados_pagamento: proposal.dadosPagamento,
         motivo_rejeicao: proposal.motivoRejeicao,
-        motivo_pendencia: proposal.motivoRejeicao, // Alias para compatibilidade
+        motivo_pendencia: proposal.motivoPendencia, // CORREÇÃO: Usar motivoPendencia, não motivoRejeicao
         observacoes: proposal.observacoes,
         ccb_url: proposal.ccbUrl,
         ccbUrl: proposal.ccbUrl, // Duplicado para compatibilidade
@@ -618,7 +618,7 @@ export class ProposalController {
   /**
    * Submeter proposta para análise
    */
-  async submitForAnalysis(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  async submitForAnalysis(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
 
@@ -653,7 +653,7 @@ export class ProposalController {
    * Buscar propostas para formalização (baseado em status específicos)
    * PAM P2.3: Migração de GET /formalizacao de core.ts
    */
-  async getFormalizacao(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  async getFormalizacao(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       SafeLogger.debug('[DEBUG] FORMALIZATION ROUTE HIT IN DDD CONTROLLER');
       SafeLogger.debug('[DEBUG] Route information', { url: req.url, path: req.path });
@@ -742,7 +742,7 @@ export class ProposalController {
    * Buscar logs de observação/auditoria de uma proposta
    * PAM P2.3: Migração de GET /:id/observacoes de core.ts
    */
-  async getObservacoes(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  async getObservacoes(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const propostaId = req.params.id;
       const { createServerSupabaseAdminClient } = await import('../../../lib/supabase.js');
@@ -800,7 +800,7 @@ export class ProposalController {
    * Atualizar status da proposta (legacy compatibility)
    * PAM P2.3: Migração de PUT /:id/status de core.ts
    */
-  async updateStatus(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  async updateStatus(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     // Validação defensiva do req.body
     if (!req.body || typeof req.body !== 'object') {
       return res.status(400).json({
@@ -814,11 +814,11 @@ export class ProposalController {
 
     // Mapear para os novos endpoints baseado no status
     if (status === 'aprovado') {
-      return this.approve(req, res);
+      return this.approve(req, res, next);
     } else if (status === 'rejeitado') {
-      return this.reject(req, res);
+      return this.reject(req, res, next);
     } else if (status === 'aguardando_analise') {
-      return this.submitForAnalysis(req, res);
+      return this.submitForAnalysis(req, res, next);
     } else if (status === 'pendente' || status === 'pendenciado') {
       // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendenciado
       try {
