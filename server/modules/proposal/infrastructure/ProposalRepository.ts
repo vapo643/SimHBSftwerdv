@@ -457,10 +457,20 @@ export class ProposalRepository implements IProposalRepository {
       }
     }
 
-    // Executar query
+    // Executar query OTIMIZADA com JOINs
     const query = db
-      .select()
+      .select({
+        proposta: propostas,
+        produto: produtos,
+        tabelaComercial: tabelasComerciais,
+        loja: lojas,
+        parceiro: parceiros
+      })
       .from(propostas)
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
       .where(and(...conditions))
       .limit(safeLimit + 1); // +1 para verificar hasNextPage
 
@@ -483,16 +493,18 @@ export class ProposalRepository implements IProposalRepository {
     
     if (hasNextPage && data.length > 0) {
       const lastItem = data[data.length - 1];
-      nextCursor = CursorUtils.createFromItem(lastItem, cursorField);
+      nextCursor = CursorUtils.createFromItem(lastItem.proposta, cursorField);
     }
     
     if (cursor && data.length > 0) {
       const firstItem = data[0];
-      prevCursor = CursorUtils.createFromItem(firstItem, cursorField);
+      prevCursor = CursorUtils.createFromItem(firstItem.proposta, cursorField);
     }
 
+    console.log('🚀 [PERF-OPT] findPendingForAnalysis optimized with JOINs:', data.length, 'proposals');
+    
     return {
-      data: data.map((row) => this.mapToDomain(row)),
+      data: data.map((row) => this.mapToDomainWithJoinedData(row)),
       pagination: {
         nextCursor,
         prevCursor,

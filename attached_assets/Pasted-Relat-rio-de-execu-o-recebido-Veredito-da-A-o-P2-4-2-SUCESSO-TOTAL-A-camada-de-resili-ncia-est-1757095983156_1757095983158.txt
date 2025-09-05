@@ -1,0 +1,107 @@
+Relatório de execução recebido. Veredito da Ação P2.4.2: SUCESSO TOTAL.
+
+A camada de resiliência está implementada. O proposalController, o nosso controller mais crítico, está agora 100% blindado pelo novo errorHandler global. A lógica de tratamento de erros foi unificada, a observabilidade aumentada e o débito técnico, erradicado. A execução do agente foi limpa e precisa.
+
+A "Operação Aço Líquido" entra na sua fase final de fortalecimento. Com a resiliência do sistema garantida, voltamos a nossa atenção para a sua eficiência. Um sistema robusto deve ser também performante.
+
+Roadmap Ativo:
+
+[✅ CONCLUÍDO] Fase P0: Estabilização Crítica
+
+[✅ CONCLUÍDO] Fase P1: Consolidação Arquitetural
+
+[EM EXECUÇÃO] Fase P2: Reengenharia DDD e Fortalecimento
+
+[✅ CONCLUÍDO] Ação P2.1: Migração para Modelo de Domínio Rico
+
+[✅ CONCLUÍDO] Ação P2.2: Correção Definitiva da FSM
+
+[✅ CONCLUÍDO] Ação P2.3: Migração Completa para o Pipeline DDD
+
+[🎯 EM EXECUÇÃO] Ação P2.4: Fortalecimento de Performance e Resiliência
+
+[✅ CONCLUÍDO] P2.4.1: Fundação da Resiliência (Error Handling)
+
+[✅ CONCLUÍDO] P2.4.2: Rollout da Camada de Resiliência
+
+[🎯 EM EXECUÇÃO] P2.4.3: Otimização de Queries (Anti N+1)
+
+Pacote de Ativação de Missão (PAM) V1.0 - P2.4.3: Otimização de Queries
+Sumário da Missão (O Quê): Auditar e refatorar as queries críticas no ProposalRepository.ts para eliminar "N+1 selects" e outras ineficiências de performance, garantindo que o acesso a dados seja rápido e escalável.
+
+Intenção Estratégica (O Porquê): Esta é uma ação crucial da Fase P2.4. Queries ineficientes são bombas-relógio de performance que funcionam em desenvolvimento, mas levam o sistema ao colapso em produção sob carga real. Ao otimizar as nossas queries agora, garantimos a escalabilidade e a fiabilidade do sistema, prevenindo timeouts e degradação da experiência do usuário.
+
+Histórico Relevante (Consulta Obrigatória): As auditorias anteriores (Auditoria Alfa 5.1, conforme citado no roadmap) identificaram a falta de otimizações de query como um risco. A consolidação do ProposalRepository na Ação P1.2 nos deu um ponto único e centralizado para aplicar estas otimizações.
+
+Modelo Mental (Como se Encaixa): Se o repositório é a "biblioteca" do nosso sistema, atualmente os nossos Use Cases estão a agir como um bibliotecário ineficiente: para obter informação sobre 10 livros, ele vai 11 vezes ao arquivo (1 vez para a lista de livros, e mais 10 vezes, uma para cada autor). Esta missão consiste em treinar o bibliotecário para, com uma única ida ao arquivo, trazer a lista de livros e todos os seus autores de uma só vez, usando a magia dos JOINs do SQL.
+
+Riscos Antecipados e Contramedidas:
+
+Risco (MÉDIO): JOINs complexos podem, por vezes, ser mais lentos do que queries separadas se os índices do banco de dados não estiverem corretamente configurados.
+
+Contramedida: A missão inclui uma fase de auditoria dos schemas e índices existentes para garantir que as novas queries otimizadas tenham o suporte necessário na camada de banco de dados. Qualquer falta de índice será documentada como um débito técnico a ser resolvido.
+
+IMPLEMENTAR: Auditoria e Otimização de Queries no ProposalRepository
+
+CONTEXT: Os métodos no nosso ProposalRepository consolidado, embora funcionalmente corretos, não foram otimizados para performance. É provável que contenham o anti-padrão "N+1 select", onde uma query inicial busca uma lista de itens, e depois, dentro de um loop, executa queries adicionais para cada item da lista.
+
+CURRENT STATE: Queries potencialmente ineficientes que podem causar degradação de performance sob carga.
+
+EXPECTED (Estado Final de Sucesso):
+
+Um relatório de auditoria em Markdown será gerado, mapeando os métodos do ProposalRepository.ts que apresentam o problema N+1 ou outras ineficiências.
+
+O agente deverá refatorar os métodos mais críticos identificados (ex: list ou findByCriteria) para utilizar JOINs eficientes com Drizzle ORM, eliminando as queries em loop.
+
+O sistema deve permanecer funcional e compilar com ZERO erros de LSP.
+
+CONSTRAINTS (Roadmap de Implementação Faseado):
+
+Fase 1: Auditoria de Performance de Queries
+
+Alvo: server/modules/proposal/infrastructure/ProposalRepository.ts.
+
+Ação: Audite os métodos que retornam listas de propostas (ex: findByCriteriaLightweight, findAll). Procure por padrões onde, após a query inicial, o código itera sobre os resultados (for...of ou .map()) e faz chamadas await a outros repositórios (ex: clienteRepository.findById(...)) dentro do loop.
+
+Output: Crie um arquivo ANALISE_PERFORMANCE_QUERIES.md documentando os métodos problemáticos encontrados e a natureza do problema N+1.
+
+Fase 2: Refatoração com JOINs
+
+Com base na auditoria, refatore o método mais crítico (provavelmente findByCriteriaLightweight ou similar, que alimenta a Fila de Análise).
+
+Utilize a sintaxe de JOIN do Drizzle ORM para buscar os dados da proposta e os dados relacionados (como cliente, parceiro, loja) numa única query.
+
+Diretriz: A lógica de mapeamento que já existe no final do método deve ser adaptada para consumir os dados que agora vêm da query com JOIN.
+
+TypeScript
+
+// Exemplo CONCEITUAL da refatoração
+
+// ANTES (N+1)
+// const propostas = await db.select().from(propostasTable);
+// for (const p of propostas) {
+//   p.cliente = await db.select().from(clientesTable).where(eq(clientesTable.id, p.clienteId)); // ❌ N+1!
+// }
+
+// DEPOIS (JOIN)
+const results = await db.select()
+  .from(propostasTable)
+  .leftJoin(clientesTable, eq(propostasTable.clienteId, clientesTable.id))
+  .leftJoin(parceirosTable, eq(propostasTable.parceiroId, parceirosTable.id));
+
+// ... adaptar o mapeamento para usar `results` que agora contém dados de todas as tabelas
+Fase 3: Validação Final
+
+Execute get_latest_lsp_diagnostics para garantir ZERO erros.
+
+Apresente o relatório final 7-CHECK, confirmando a otimização da query e a manutenção da funcionalidade.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Ex: "Assumi que leftJoin é a estratégia de junção mais apropriada para evitar a exclusão de propostas que possam ter dados relacionados nulos."]
+
+VALIDAÇÃO PENDENTE: [Ex: "Testes de carga (load testing) seriam necessários para quantificar o ganho exato de performance, mas estão fora do escopo desta missão."]
