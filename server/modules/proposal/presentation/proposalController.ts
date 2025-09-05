@@ -17,8 +17,11 @@ import type { GetProposalByIdUseCase } from '../application/GetProposalByIdUseCa
 import type { ApproveProposalUseCase } from '../application/ApproveProposalUseCase';
 import type { RejectProposalUseCase } from '../application/RejectProposalUseCase';
 import type { PendenciarPropostaUseCase } from '../application/PendenciarPropostaUseCase';
+import type { ListProposalsByCriteriaUseCase } from '../application/ListProposalsByCriteriaUseCase';
+import type { ResubmitPendingProposalUseCase } from '../application/ResubmitPendingProposalUseCase';
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { ProposalOutputSchema } from '../../../schemas/proposalOutput.schema';
+import { SafeLogger } from '../../shared/infrastructure/SanitizedLogger';
 
 export class ProposalController {
   private container: Container;
@@ -35,18 +38,13 @@ export class ProposalController {
     try {
       const useCase = this.container.resolve<CreateProposalUseCase>(TOKENS.CREATE_PROPOSAL_USE_CASE);
 
-      // DEBUG: Log request body for troubleshooting
-      console.log(
-        '[ProposalController.create] Raw request body:',
-        JSON.stringify(req.body, null, 2)
-      );
-      console.log('[ProposalController.create] User context:', (req as any).user);
+      // SAFE DEBUG: Log request body for troubleshooting without PII exposure
+      SafeLogger.debug('[ProposalController.create] Raw request body received');
+      SafeLogger.debug('[ProposalController.create] User context available', { userId: (req as any).user?.id });
 
-      // DEBUG: Test individual field parsing
-      console.log('[DEBUG] valorSolicitado raw:', req.body.valorSolicitado, typeof req.body.valorSolicitado);
-      console.log('[DEBUG] parseFloat test:', parseFloat(req.body.valorSolicitado));
-      console.log('[DEBUG] CPF raw:', req.body.cpf, typeof req.body.cpf);
-      console.log('[DEBUG] nomeCompleto raw:', req.body.nomeCompleto, typeof req.body.nomeCompleto);
+      // SAFE DEBUG: Test individual field parsing without exposing PII
+      SafeLogger.debug('[DEBUG] valorSolicitado received', { type: typeof req.body.valorSolicitado });
+      SafeLogger.debug('[DEBUG] parseFloat test successful', { isValid: !isNaN(parseFloat(req.body.valorSolicitado)) });
 
       // LACRE DE OURO: Mapeamento COMPLETO de todos os campos enviados pelo frontend
       const dto = {
@@ -130,11 +128,11 @@ export class ProposalController {
         submitForAnalysis: req.body.submitForAnalysis || false, // Padrão: false (criar como rascunho)
       };
 
-      console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));
+      SafeLogger.debug('[ProposalController.create] DTO mapping completed', { hasRequiredFields: !!(dto.clienteNome && dto.clienteCpf && dto.valor) });
       
       // Validar campos obrigatórios
       if (!dto.clienteNome || !dto.clienteCpf || !dto.valor) {
-        console.error('[ProposalController.create] Missing required fields:', {
+        SafeLogger.error('[ProposalController.create] Missing required fields', {
           clienteNome: !!dto.clienteNome,
           clienteCpf: !!dto.clienteCpf,
           valor: !!dto.valor
@@ -180,11 +178,11 @@ export class ProposalController {
       const tabelaComercialTaxa = (proposal as any)._relatedCommercialTableRate ?? null;
       const lojaNome = (proposal as any)._relatedStoreName || null;
       
-      console.log('🔍 [getById] Extracted related data:', {
-        produtoNome,
-        tabelaComercialNome,
-        tabelaComercialTaxa,
-        lojaNome,
+      SafeLogger.debug('[getById] Extracted related data', {
+        hasProductName: !!produtoNome,
+        hasTableName: !!tabelaComercialNome,
+        hasTableRate: tabelaComercialTaxa !== null,
+        hasStoreName: !!lojaNome,
         produtoId: proposal.produtoId,
         tabelaComercialId: proposal.tabelaComercialId
       });
@@ -253,7 +251,7 @@ export class ProposalController {
         const validated = ProposalOutputSchema.parse(response);
         return res.json(validated);
       } catch (validationError) {
-        console.error('[ProposalController.getById] Output validation failed:', validationError);
+        SafeLogger.error('[ProposalController.getById] Output validation failed', { errorType: validationError?.constructor?.name });
         // Em desenvolvimento, log o erro mas envie a resposta mesmo assim
         // Em produção, você pode querer tratar isso diferentemente
         return res.json(response);
@@ -295,10 +293,9 @@ export class ProposalController {
       }
 
       // PERF-BOOST-001: Usar método lightweight para listagem
-      // 🏡 P0.2 - DIP Compliant: Use case instead of direct repository access
-      // TODO: Create dedicated FindByCriteriaUseCase when available
-      const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
-      const rawData = await repository.findByCriteriaLightweight(criteria);
+      // 🏡 P0.2 GREEN - DIP Compliant: Use case elimina violação DIP
+      const listUseCase = this.container.resolve<ListProposalsByCriteriaUseCase>(TOKENS.LIST_PROPOSALS_BY_CRITERIA_USE_CASE);
+      const rawData = await listUseCase.execute(criteria);
 
       // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
       // OPERAÇÃO AÇO LÍQUIDO P0.3: Adaptador de Contrato API para blindagem do frontend
@@ -433,7 +430,7 @@ export class ProposalController {
         });
       }
 
-      console.log(`[ProposalController.pendenciar] Pendenciando proposta ${id} por analista ${analistaId}`);
+      SafeLogger.info('[ProposalController.pendenciar] Processing proposal request', { hasProposalId: !!id, hasAnalystId: !!analistaId });
 
       const useCase = this.container.resolve<PendenciarPropostaUseCase>(TOKENS.PENDENCIAR_PROPOSTA_USE_CASE);
 
@@ -511,13 +508,15 @@ export class ProposalController {
    */
   async update(req: Request, res: Response, next: NextFunction): Promise<Response> {
     try {
-      console.log('🔍 [CONTROLLER DEBUG] Starting update for proposal ID:', req.params.id);
+      SafeLogger.debug('[CONTROLLER DEBUG] Starting update request');
       const { id } = req.params;
       const { cliente_data, condicoes_data } = req.body;
       
-      console.log('🔍 [CONTROLLER DEBUG] Request body keys:', Object.keys(req.body));
-      console.log('🔍 [CONTROLLER DEBUG] cliente_data provided:', !!cliente_data);
-      console.log('🔍 [CONTROLLER DEBUG] condicoes_data provided:', !!condicoes_data);
+      SafeLogger.debug('[CONTROLLER DEBUG] Request analysis', {
+        bodyKeysCount: Object.keys(req.body).length,
+        hasClienteData: !!cliente_data,
+        hasCondicoesData: !!condicoes_data
+      });
 
       if (!cliente_data && !condicoes_data) {
         return res.status(400).json({
@@ -526,44 +525,44 @@ export class ProposalController {
         });
       }
 
-      console.log('🔍 [CONTROLLER DEBUG] Finding proposal by ID...');
+      SafeLogger.debug('[CONTROLLER DEBUG] Finding proposal by ID');
       const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
       const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
-        console.log('🚨 [CONTROLLER DEBUG] Proposal not found for ID:', id);
+        SafeLogger.warn('[CONTROLLER DEBUG] Proposal not found', { requestedId: !!id });
         return res.status(404).json({
           success: false,
           error: 'Proposta não encontrada',
         });
       }
       
-      console.log('🔍 [CONTROLLER DEBUG] Proposal found, status:', proposal.status);
+      SafeLogger.debug('[CONTROLLER DEBUG] Proposal found', { status: proposal.status });
 
       // Verificar se a proposta pode ser editada (apenas pendenciadas)
       const statusString = String(proposal.status || '').trim();
-      console.log('🔍 [CONTROLLER DEBUG] Status string:', statusString);
+      SafeLogger.debug('[CONTROLLER DEBUG] Status validation', { statusString });
       if (statusString !== 'pendenciado' && statusString !== 'pendente') {
-        console.log('🚨 [CONTROLLER DEBUG] Invalid status for editing:', statusString);
+        SafeLogger.warn('[CONTROLLER DEBUG] Invalid status for editing', { currentStatus: statusString });
         return res.status(400).json({
           success: false,
           error: 'Apenas propostas pendenciadas podem ser editadas',
         });
       }
 
-      console.log('🔍 [CONTROLLER DEBUG] Calling updateAfterPending...');
+      SafeLogger.debug('[CONTROLLER DEBUG] Updating proposal data');
       // Atualizar dados usando o método do agregado
       proposal.updateAfterPending({
         clienteData: cliente_data,
         observacoes: condicoes_data?.observacoes || '',
       });
 
-      console.log('🔍 [CONTROLLER DEBUG] Calling repository.save...');
+      SafeLogger.debug('[CONTROLLER DEBUG] Saving updated proposal');
       // 🏡 P0.2 - DIP Compliant: Use appropriate use case for persistence
       const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
       await repository.save(proposal);
 
-      console.log('✅ [CONTROLLER DEBUG] Save completed successfully');
+      SafeLogger.info('[CONTROLLER DEBUG] Proposal update completed successfully');
       return res.json({
         success: true,
         message: 'Proposta atualizada com sucesso',
@@ -656,9 +655,8 @@ export class ProposalController {
    */
   async getFormalizacao(req: Request, res: Response, next: NextFunction): Promise<Response> {
     try {
-      console.log('🔍 [DEBUG] FORMALIZATION ROUTE HIT IN DDD CONTROLLER!');
-      console.log('🔍 [DEBUG] URL:', req.url);
-      console.log('🔍 [DEBUG] Path:', req.path);
+      SafeLogger.debug('[DEBUG] FORMALIZATION ROUTE HIT IN DDD CONTROLLER');
+      SafeLogger.debug('[DEBUG] Route information', { url: req.url, path: req.path });
       
       const { createServerSupabaseAdminClient } = await import('../../../lib/supabase.js');
       const supabase = createServerSupabaseAdminClient();
@@ -682,7 +680,7 @@ export class ProposalController {
       const userRole = (req as any).user?.role;
       const userLojaId = (req as any).user?.loja_id;
 
-      console.log(`🔐 [FORMALIZATION] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`);
+      SafeLogger.info('[FORMALIZATION] Querying proposals with user context', { hasUserId: !!userId, userRole, userLojaId });
 
       // Build query based on user role
       let query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
@@ -690,16 +688,16 @@ export class ProposalController {
       // Apply role-based filtering
       if (userRole === 'ATENDENTE') {
         query = query.eq('user_id', userId);
-        console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
+        SafeLogger.debug('[FORMALIZATION] Applying ATENDENTE filter');
       } else if (userRole === 'GERENTE') {
         query = query.eq('loja_id', userLojaId);
-        console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
+        SafeLogger.debug('[FORMALIZATION] Applying GERENTE filter', { userLojaId });
       }
 
       const { data: formalizacaoPropostasRaw, error } = await query;
 
       if (error) {
-        console.error('❌ [FORMALIZATION] Error fetching proposals:', error);
+        SafeLogger.error('Formalization error fetching proposals', { errorType: error?.constructor?.name });
         throw error;
       }
 
@@ -733,7 +731,7 @@ export class ProposalController {
         };
       });
 
-      console.log(`✅ [FORMALIZATION] Found ${formalizacaoPropostas.length} propostas for formalization`);
+      SafeLogger.info('Formalization proposals found', { count: formalizacaoPropostas.length });
       return res.json(formalizacaoPropostas);
     } catch (error) {
       next(error);
@@ -768,7 +766,7 @@ export class ProposalController {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.warn('Erro ao buscar logs de auditoria:', error);
+        SafeLogger.warn('Erro ao buscar logs de auditoria', { errorType: error?.constructor?.name });
         return res.json({ logs: [] });
       }
 
@@ -824,18 +822,23 @@ export class ProposalController {
       // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendenciado
       try {
         // DEBUG: Log completo do request body
-        console.log(`[PENDENCIAR DEBUG] Full req.body:`, JSON.stringify(req.body, null, 2));
-        console.log(`[PENDENCIAR DEBUG] Status:`, status);
-        console.log(`[PENDENCIAR DEBUG] motivo_pendencia:`, req.body.motivo_pendencia);
-        console.log(`[PENDENCIAR DEBUG] motivoPendencia:`, req.body.motivoPendencia);
-        console.log(`[PENDENCIAR DEBUG] observacao:`, req.body.observacao);
+        SafeLogger.debug('Pendenciar request received', { 
+          userId: (req as any).user?.id,
+          proposalId: id,
+          fieldsCount: Object.keys(req.body).length
+        });
+        SafeLogger.debug('Pendenciar operation details', { 
+          status,
+          hasMotivo: !!req.body.motivo_pendencia || !!req.body.motivoPendencia,
+          hasObservacao: !!req.body.observacao
+        });
         
         // Aceitar tanto camelCase (frontend) quanto snake_case (backend)
         const motivo_pendencia = req.body.motivo_pendencia || req.body.motivoPendencia || req.body.observacao;
-        console.log(`[PENDENCIAR DEBUG] Final motivo_pendencia:`, motivo_pendencia);
+        SafeLogger.debug('Pendenciar final motivo processed', { hasFinalMotivo: !!motivo_pendencia });
         
         if (!motivo_pendencia) {
-          console.log(`[PENDENCIAR DEBUG] ❌ Motivo da pendência não encontrado!`);
+          SafeLogger.debug('Pendenciar validation failed', { reason: 'motivo_pendencia_missing' });
           return res.status(400).json({
             success: false,
             error: 'Motivo da pendência é obrigatório',
@@ -844,7 +847,7 @@ export class ProposalController {
         
         // Garantir que o motivo seja passado corretamente para o controller
         req.body.motivo_pendencia = motivo_pendencia;
-        console.log(`[PENDENCIAR DEBUG] ✅ Motivo definido, passando para controller`);
+        SafeLogger.debug('Pendenciar validation passed', { motivoPresent: true });
         
         // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
         return this.pendenciar(req, res);

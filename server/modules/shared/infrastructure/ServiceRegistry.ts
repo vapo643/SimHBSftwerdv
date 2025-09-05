@@ -17,6 +17,8 @@ import { ApproveProposalUseCase } from '../../proposal/application/ApprovePropos
 import { RejectProposalUseCase } from '../../proposal/application/RejectProposalUseCase';
 import { PendenciarPropostaUseCase } from '../../proposal/application/PendenciarPropostaUseCase';
 import { SubmitForAnalysisUseCase } from '../../proposal/application/SubmitForAnalysisUseCase';
+import { ListProposalsByCriteriaUseCase } from '../../proposal/application/ListProposalsByCriteriaUseCase';
+import { ResubmitPendingProposalUseCase } from '../../proposal/application/ResubmitPendingProposalUseCase';
 
 /**
  * Configura o container de dependências
@@ -59,6 +61,15 @@ export function configureContainer(): Container {
 
   container.registerFactory(TOKENS.SUBMIT_FOR_ANALYSIS_USE_CASE, () => 
     new SubmitForAnalysisUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  );
+
+  // 🏡 P0.2 GREEN - Registrar novos use cases para eliminar DIP leakage
+  container.registerFactory(TOKENS.LIST_PROPOSALS_BY_CRITERIA_USE_CASE, () => 
+    new ListProposalsByCriteriaUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
+  );
+
+  container.registerFactory(TOKENS.RESUBMIT_PENDING_PROPOSAL_USE_CASE, () => 
+    new ResubmitPendingProposalUseCase(container.resolve(TOKENS.PROPOSAL_REPOSITORY))
   );
 
   return container;

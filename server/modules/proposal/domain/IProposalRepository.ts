@@ -129,6 +129,12 @@ export interface ProposalRepository {
    * Gera o próximo ID sequencial (para compatibilidade com sistema legado)
    */
   getNextSequentialId(): Promise<number>;
+
+  /**
+   * Busca propostas por critérios com formato lightweight para listagem
+   * Retorna dados otimizados para a UI com JOINs mínimos necessários
+   */
+  findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]>;
 }
 
 /**
