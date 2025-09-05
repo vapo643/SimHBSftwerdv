@@ -263,6 +263,7 @@ export class ProposalRepository implements IProposalRepository {
     
     // OPTIMIZATION: Retornar dados diretos do banco sem conversão para domínio
     // OPERAÇÃO VISÃO CLARA V1.0: Adicionado JOIN com parceiros
+    // CORREÇÃO CRÍTICA P3: Adicionar campos ausentes que causavam N/A no frontend
     const results = await db
       .select({
         id: propostas.id,
@@ -272,6 +273,12 @@ export class ProposalRepository implements IProposalRepository {
         valor: propostas.valor,
         prazo: propostas.prazo,
         taxa_juros: propostas.taxaJuros,
+        // CAMPOS AUSENTES - CORREÇÃO P3
+        valor_tac: propostas.valorTac,
+        valor_iof: propostas.valorIof,
+        valor_total_financiado: propostas.valorTotalFinanciado,
+        finalidade: propostas.finalidade,
+        garantia: propostas.garantia,
         produto_id: propostas.produtoId,
         produto_nome: produtos.nomeProduto,
         tabela_comercial_nome: tabelasComerciais.nomeTabela,

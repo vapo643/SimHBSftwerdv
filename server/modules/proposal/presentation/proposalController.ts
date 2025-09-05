@@ -301,6 +301,13 @@ export class ProposalController {
         telefoneCliente: null, // ← Campo não retornado pelo repository (TODO P1.2)  
         valorSolicitado: row.valor,
         prazo: row.prazo,
+        taxaJuros: row.taxa_juros,
+        // CORREÇÃO CRÍTICA P3: Incluir campos que estavam ausentes
+        valorTac: row.valor_tac,
+        valorIof: row.valor_iof,
+        valorTotalFinanciado: row.valor_total_financiado,
+        finalidade: row.finalidade,
+        garantia: row.garantia,
         lojaId: row.loja_id,
         parceiro: row.parceiro, // ← Já estruturado pelo repository
         loja: row.loja, // ← Já estruturado pelo repository
