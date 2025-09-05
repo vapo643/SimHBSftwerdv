@@ -1,0 +1,62 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA DE ALINHAMENTO ARQUITETURAL (VISÃO VS. REALIDADE)**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense comparativa entre a arquitetura documentada e a arquitetura implementada, mapeando as discrepâncias, violações de boundaries e desvios de padrão. O output final deve ser um arquivo Markdown (`ARQUITETURA_VS_REALIDADE.md`).
+* **Intenção Estratégica (O Porquê):** O sistema está em um estado de falha sistémica porque a implementação se desviou da visão arquitetural. Para corrigir o sistema, primeiro precisamos de um mapa preciso e detalhado de *onde* e *como* esses desvios ocorreram. Este documento será a base para o plano de realinhamento.
+* **Histórico Relevante (Consulta Obrigatória):** A sua análise deve usar os seguintes documentos como a "visão arquitetural":
+    * `02-blueprint-arquitetural.md`
+    * `04-compendio-de-decisoes.md` (especialmente o ADR-003 sobre DDD)
+    * Todos os documentos dentro de `architecture/`
+
+---
+
+**AUDITAR:** Alinhamento Arquitetural Visão vs. Realidade
+
+**PROTOCOLO DE EXECUÇÃO:** Ative o **PEAF V1.5** e siga o protocolo **PACN V1.0**.
+
+#### **Cenário de Negócio (O "Caso de Teste"):**
+A arquitetura do Simpix foi projetada para ser um Monólito Modular com `Bounded Contexts` bem definidos (ex: `proposal`, `credit`, `payment`), `Aggregates` que protegem as regras de negócio e `Use Cases` que orquestram as operações. A auditoria deve validar se a implementação atual reflete esta estrutura.
+
+#### **Vetor de Ataque / Ponto de Falha (A "Hipótese"):**
+A hipótese primária é que a lógica de negócio "vazou" para fora da camada de domínio. As regras que deveriam estar protegidas dentro dos `Aggregates` (ex: `Proposal.ts`) foram implementadas incorretamente em `Controllers` (camada de apresentação) ou em `Repositories` (camada de infraestrutura), quebrando o isolamento e a integridade do sistema.
+
+#### **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+
+Gere um arquivo `ARQUITETURA_VS_REALIDADE.md` com a seguinte estrutura:
+
+# Relatório de Auditoria de Alinhamento Arquitetural
+
+## 1. Mapeamento de Bounded Contexts
+
+| Contexto Planeado (Documentação) | Mapeamento no Código (`/server/modules/*`) | Conformidade | Observações (Desvios) |
+| :--- | :--- | :---: | :--- |
+| `proposal` | [Liste os diretórios encontrados] | ✅/❌ | [Ex: Lógica de pagamento encontrada aqui] |
+| `credit` | [Liste os diretórios encontrados] | ✅/❌ | [Ex: Não encontrado, lógica misturada em `proposal`] |
+| `payment` | [Liste os diretórios encontrados] | ✅/❌ | [Ex: Conforme] |
+| `ccb` | [Liste os diretórios encontrados] | ✅/❌ | [Ex: Lógica de geração de PDF no controller] |
+
+## 2. Análise da Camada de Domínio (`/server/modules/*/domain`)
+
+Apresente o código-fonte e a sua análise para os seguintes pontos:
+
+### 2.1 Agregado `Proposal` (`server/modules/proposal/domain/Proposal.ts`)
+* **Análise:** O agregado contém e protege as regras de negócio centrais (ex: transições de status, validações de valor)? Ou ele é apenas uma estrutura de dados anémica (só getters e setters)?
+* **Evidência:** Apresente trechos de código do `Proposal.ts` que comprovem a sua análise.
+
+### 2.2 Vazamento de Lógica de Negócio
+* **Análise:** Inspecione os `Controllers` (ex: `proposalController.ts`) e `Repositories` (ex: `ProposalRepository.ts`). Existe lógica de negócio (ex: `if (proposal.status === ...)` ou cálculos financeiros) implementada nestas camadas?
+* **Evidência:** Apresente trechos de código dos controllers/repositórios que demonstrem vazamento de lógica.
+
+## 3. Análise dos Contratos de Dados (Frontend vs. Backend)
+
+### 3.1 Contrato de Dados da "Fila de Análise"
+* **Análise:** Compare a estrutura de dados esperada pelo componente do frontend que renderiza a "Fila de Análise" com os dados realmente retornados pelo endpoint da API correspondente.
+* **Evidência (Frontend):** Apresente o tipo/interface TypeScript ou o `ViewModel` que o componente da fila de análise espera.
+* **Evidência (Backend):** Apresente o objeto JSON retornado pelo endpoint que alimenta a fila de análise. Destaque as inconsistências.
+
+## 4. Veredito da Auditoria
+
+* **Nível de Conformidade Arquitetural:** [Preencher com: ALTO / MÉDIO / BAIXO / CRÍTICO]
+* **Principais Desvios Identificados:**
+    * [Ponto 1: Ex: Quebra do Bounded Context `credit`]
+    * [Ponto 2: Ex: Lógica de negócio implementada nos Controllers]
+    * [Ponto 3: Ex: Contrato de dados inconsistente na Fila de Análise]
