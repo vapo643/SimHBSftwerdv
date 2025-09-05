@@ -3,7 +3,7 @@
  * Contains complex business logic that doesn't belong to a single aggregate
  */
 
-import { Proposal } from '../aggregates/Proposal';
+import { Proposal } from '../../proposal/domain/Proposal';
 
 export interface CreditScore {
   score: number;

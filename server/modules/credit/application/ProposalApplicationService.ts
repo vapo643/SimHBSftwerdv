@@ -6,9 +6,9 @@
 import {
   Proposal,
   ProposalStatus,
-  CustomerData,
-  LoanConditions,
-} from '../domain/aggregates/Proposal';
+  ClienteData as CustomerData,
+  DadosPagamento as LoanConditions,
+} from '../../proposal/domain/Proposal';
 import { IProposalRepository } from '../domain/repositories/IProposalRepository';
 import { CreditAnalysisService } from '../domain/services/CreditAnalysisService';
 import { v4 as uuidv4 } from 'uuid';
@@ -55,15 +55,27 @@ export class ProposalApplicationService {
     // Generate unique ID
     const id = uuidv4();
 
-    // Create domain entity
-    const proposal = new Proposal(
-      id,
-      dto.customerData,
-      dto.loanConditions,
-      dto.partnerId,
-      dto.storeId,
-      dto.productId
-    );
+    // Create domain entity using factory method
+    const proposal = Proposal.create({
+      produtoId: parseInt(dto.productId || '1'),
+      tabelaComercialId: 1,
+      lojaId: parseInt(dto.storeId || '1'),
+      analistaId: 'e647afc0-03fa-482d-8293-d824dcab0399',
+      clienteNome: dto.customerData.nome,
+      clienteCpf: dto.customerData.cpf.getValue(),
+      valor: dto.loanConditions.valor_solicitado || 1000,
+      prazo: dto.loanConditions.prazo || 12,
+      valorTac: dto.loanConditions.valor_tac || 0,
+      valorIof: dto.loanConditions.valor_iof || 0,
+      valorTotalFinanciado: dto.loanConditions.valor_total_financiado || dto.loanConditions.valor_solicitado || 1000,
+      taxaJuros: 2.5,
+      taxaJurosAnual: 30.0,
+      dadosPagamentoBanco: '001',
+      ccbDocumentoUrl: '',
+      clienteComprometimentoRenda: 30,
+      clienteData: dto.customerData,
+      dadosPagamento: dto.loanConditions
+    });
 
     // Save to repository
     await this.proposalRepository.save(proposal);
@@ -136,9 +148,9 @@ export class ProposalApplicationService {
     }
 
     // Ensure proposal is in analysis
-    if (proposal.getStatus() !== ProposalStatus.IN_ANALYSIS) {
+    if (proposal.status !== ProposalStatus.EM_ANALISE) {
       // Start analysis if not already
-      proposal.startAnalysis();
+      proposal.submitForAnalysis();
     }
 
     proposal.approve();
@@ -157,8 +169,8 @@ export class ProposalApplicationService {
     }
 
     // Ensure proposal is in analysis
-    if (proposal.getStatus() !== ProposalStatus.IN_ANALYSIS) {
-      proposal.startAnalysis();
+    if (proposal.status !== ProposalStatus.EM_ANALISE) {
+      proposal.submitForAnalysis();
     }
 
     proposal.reject(reason);
@@ -177,8 +189,8 @@ export class ProposalApplicationService {
     }
 
     // Ensure proposal is in analysis
-    if (proposal.getStatus() !== ProposalStatus.IN_ANALYSIS) {
-      proposal.startAnalysis();
+    if (proposal.status !== ProposalStatus.EM_ANALISE) {
+      proposal.submitForAnalysis();
     }
 
     proposal.setPending(reason);
@@ -291,17 +303,23 @@ export class ProposalApplicationService {
    */
   private toDTO(proposal: Proposal): ProposalDTO {
     return {
-      id: proposal.getId(),
-      status: proposal.getStatus(),
-      customerData: proposal.getCustomerData(),
-      loanConditions: proposal.getLoanConditions(),
-      partnerId: proposal.getPartnerId(),
-      storeId: proposal.getStoreId(),
-      productId: proposal.getProductId(),
-      createdAt: proposal.getCreatedAt(),
-      updatedAt: proposal.getUpdatedAt(),
-      pendingReason: proposal.getPendingReason(),
-      observations: proposal.getObservations(),
+      id: proposal.id,
+      status: proposal.status,
+      customerData: proposal.clienteData,
+      loanConditions: {
+        valor_solicitado: proposal.valor.getReais(),
+        prazo: proposal.prazo,
+        valor_tac: proposal.valorTac,
+        valor_iof: proposal.valorIof,
+        valor_total_financiado: proposal.valorTotalFinanciado
+      },
+      partnerId: proposal.parceiroId?.toString(),
+      storeId: proposal.lojaId?.toString(),
+      productId: proposal.produtoId?.toString(),
+      createdAt: proposal.createdAt,
+      updatedAt: proposal.updatedAt,
+      pendingReason: proposal.motivoRejeicao,
+      observations: proposal.observacoes,
     };
   }
 }

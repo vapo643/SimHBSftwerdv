@@ -3,7 +3,7 @@
  * Abstraction for data persistence
  */
 
-import { Proposal } from '../aggregates/Proposal';
+import { Proposal } from '../../proposal/domain/Proposal';
 
 export interface IProposalRepository {
   // Query methods

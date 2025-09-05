@@ -6,7 +6,7 @@
 import { eq, and, between, sql } from 'drizzle-orm';
 import { db } from '../../../lib/supabase';
 import { propostas } from '../../../../shared/schema';
-import { Proposal } from '../domain/aggregates/Proposal';
+import { Proposal } from '../../proposal/domain/Proposal';
 import { IProposalRepository } from '../domain/repositories/IProposalRepository';
 
 export class ProposalRepositoryImpl implements IProposalRepository {
@@ -68,7 +68,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   async update(proposal: Proposal): Promise<void> {
     const data = this.toPersistence(proposal);
 
-    await db.update(propostas).set(data).where(eq(propostas.id, proposal.getId()));
+    await db.update(propostas).set(data).where(eq(propostas.id, proposal.id));
   }
 
   /**
@@ -162,18 +162,46 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       interestRate: record.taxaJuros,
     };
 
-    return Proposal.fromPersistence({
+    return Proposal.fromDatabase({
       id: record.id,
       status: record.status,
-      customerData,
-      loanConditions,
-      partnerId: record.parceiroId?.toString(),
-      storeId: record.lojaId?.toString(),
-      productId: record.produtoId?.toString(),
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-      pendingReason: record.motivoPendencia,
-      observations: record.observacoes,
+      cliente_data: {
+        nome: customerData.name,
+        cpf: customerData.cpf,
+        email: customerData.email,
+        telefone: customerData.phone,
+        data_nascimento: customerData.birthDate,
+        renda_mensal: customerData.monthlyIncome,
+        rg: customerData.rg,
+        orgao_emissor: customerData.issuingBody,
+        estado_civil: customerData.maritalStatus,
+        nacionalidade: customerData.nationality,
+        cep: customerData.zipCode,
+        endereco: customerData.address,
+        ocupacao: customerData.occupation,
+      },
+      valor: loanConditions.requestedAmount,
+      prazo: loanConditions.term,
+      taxa_juros: loanConditions.interestRate || 2.5,
+      produto_id: record.produtoId,
+      tabela_comercial_id: record.tabelaComercialId || 1,
+      loja_id: record.lojaId,
+      analista_id: record.analistaId || 'e647afc0-03fa-482d-8293-d824dcab0399',
+      valor_tac: loanConditions.tacValue || 0,
+      valor_iof: loanConditions.iofValue || 0,
+      valor_total_financiado: loanConditions.totalFinancedAmount || loanConditions.requestedAmount,
+      taxa_juros_anual: (loanConditions.interestRate || 2.5) * 12,
+      ccb_documento_url: '',
+      dados_pagamento_banco: '001',
+      cliente_comprometimento_renda: 30,
+      parceiro_id: record.parceiroId,
+      atendente_id: record.atendenteId,
+      finalidade: loanConditions.purpose,
+      garantia: loanConditions.collateral,
+      created_at: record.createdAt,
+      updated_at: record.updatedAt,
+      motivo_rejeicao: record.motivoPendencia,
+      observacoes: record.observacoes
     });
   }
 
@@ -181,12 +209,22 @@ export class ProposalRepositoryImpl implements IProposalRepository {
    * Convert domain entity to database record
    */
   private toPersistence(proposal: Proposal): any {
-    const customerData = proposal.getCustomerData();
-    const loanConditions = proposal.getLoanConditions();
+    const customerData = proposal.clienteData;
+    const loanConditions = {
+      requestedAmount: proposal.valor.getReais(),
+      term: proposal.prazo,
+      purpose: proposal.finalidade,
+      collateral: proposal.garantia,
+      tacValue: proposal.valorTac,
+      iofValue: proposal.valorIof,
+      totalFinancedAmount: proposal.valorTotalFinanciado,
+      monthlyPayment: proposal.calculateMonthlyPayment(),
+      interestRate: proposal.taxaJuros
+    };
 
     return {
-      id: proposal.getId(),
-      status: proposal.getStatus(),
+      id: proposal.id,
+      status: proposal.status,
       clienteNome: customerData.name,
       clienteCpf: customerData.cpf,
       clienteEmail: customerData.email,
@@ -209,12 +247,12 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       valorTotalFinanciado: loanConditions.totalFinancedAmount,
       valorParcela: loanConditions.monthlyPayment,
       taxaJuros: loanConditions.interestRate,
-      parceiroId: proposal.getPartnerId() ? parseInt(proposal.getPartnerId()!) : null,
-      lojaId: proposal.getStoreId() ? parseInt(proposal.getStoreId()!) : null,
-      produtoId: proposal.getProductId() ? parseInt(proposal.getProductId()!) : null,
-      motivoPendencia: proposal.getPendingReason(),
-      observacoes: proposal.getObservations(),
-      updatedAt: proposal.getUpdatedAt(),
+      parceiroId: proposal.parceiroId ? parseInt(proposal.parceiroId.toString()) : null,
+      lojaId: proposal.lojaId || null,
+      produtoId: proposal.produtoId || null,
+      motivoPendencia: proposal.motivoRejeicao,
+      observacoes: proposal.observacoes,
+      updatedAt: proposal.updatedAt,
     };
   }
 }
