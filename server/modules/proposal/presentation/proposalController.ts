@@ -30,7 +30,7 @@ export class ProposalController {
   /**
    * Criar nova proposta
    */
-  async create(req: Request, res: Response): Promise<Response> {
+  async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const useCase = createProposalUseCase();
 
@@ -151,25 +151,7 @@ export class ProposalController {
         data: result,
       });
     } catch (error: any) {
-      console.error('[ProposalController.create] Error:', error);
-
-      // Tratar erros de validação do domínio
-      if (
-        error.message.includes('CPF inválido') ||
-        error.message.includes('Valor do empréstimo') ||
-        error.message.includes('Prazo deve estar') ||
-        error.message.includes('Taxa de juros')
-      ) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao criar proposta',
-      });
+      next(error);
     }
   }
 
@@ -278,7 +260,7 @@ export class ProposalController {
   /**
    * Listar propostas com filtros
    */
-  async list(req: Request, res: Response): Promise<Response> {
+  async list(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { status, loja_id, atendente_id, cpf, queue } = req.query;
 
@@ -332,19 +314,14 @@ export class ProposalController {
         total: data.length,
       });
     } catch (error: any) {
-      console.error('[ProposalController.list] Error:', error);
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao listar propostas',
-      });
+      next(error);
     }
   }
 
   /**
    * Aprovar proposta
    */
-  async approve(req: Request, res: Response): Promise<Response> {
+  async approve(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
       const { observacoes } = req.body;
@@ -370,36 +347,14 @@ export class ProposalController {
         message: 'Proposta aprovada com sucesso',
       });
     } catch (error: any) {
-      console.error('[ProposalController.approve] Error:', error);
-
-      if (error.message.includes('não encontrada')) {
-        return res.status(404).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      if (
-        error.message.includes('Apenas propostas em análise') ||
-        error.message.includes('Comprometimento de renda')
-      ) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao aprovar proposta',
-      });
+      next(error);
     }
   }
 
   /**
    * Rejeitar proposta
    */
-  async reject(req: Request, res: Response): Promise<Response> {
+  async reject(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
       const { motivo } = req.body;
@@ -432,29 +387,7 @@ export class ProposalController {
         message: 'Proposta rejeitada',
       });
     } catch (error: any) {
-      console.error('[ProposalController.reject] Error:', error);
-
-      if (error.message.includes('não encontrada')) {
-        return res.status(404).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      if (
-        error.message.includes('Apenas propostas em análise') ||
-        error.message.includes('Motivo da rejeição')
-      ) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao rejeitar proposta',
-      });
+      next(error);
     }
   }
 
@@ -462,7 +395,7 @@ export class ProposalController {
    * Pendenciar proposta
    * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Missão P0
    */
-  async pendenciar(req: Request, res: Response): Promise<Response> {
+  async pendenciar(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
       const { motivo_pendencia, observacoes } = req.body;
@@ -507,29 +440,7 @@ export class ProposalController {
         novoStatus: result.novoStatus,
       });
     } catch (error: any) {
-      console.error('[ProposalController.pendenciar] Error:', error);
-
-      if (error.message.includes('não encontrada')) {
-        return res.status(404).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      if (
-        error.message.includes('Apenas propostas') ||
-        error.message.includes('Motivo da pendência')
-      ) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao pendenciar proposta',
-      });
+      next(error);
     }
   }
 
@@ -537,7 +448,7 @@ export class ProposalController {
    * Reenviar proposta pendente para análise (após correções)
    * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Endpoint específico para reenvio
    */
-  async resubmitFromPending(req: Request, res: Response): Promise<Response> {
+  async resubmitFromPending(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
       const analistaId = (req as any).user?.id;
@@ -569,26 +480,7 @@ export class ProposalController {
         novoStatus: proposal.status,
       });
     } catch (error: any) {
-      console.error('[ProposalController.resubmitFromPending] Error:', error);
-
-      if (error.message.includes('não encontrada')) {
-        return res.status(404).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      if (error.message.includes('Apenas propostas pendentes')) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao reenviar proposta',
-      });
+      next(error);
     }
   }
 
@@ -596,7 +488,7 @@ export class ProposalController {
    * Atualizar dados da proposta (para correções)
    * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Endpoint para salvamento
    */
-  async update(req: Request, res: Response): Promise<Response> {
+  async update(req: Request, res: Response, next: NextFunction): Promise<Response> {
     try {
       console.log('🔍 [CONTROLLER DEBUG] Starting update for proposal ID:', req.params.id);
       const { id } = req.params;
@@ -654,34 +546,14 @@ export class ProposalController {
         propostaId: proposal.id,
       });
     } catch (error: any) {
-      console.error('🚨 [CONTROLLER DEBUG] ERROR in update:', error);
-      console.error('🚨 [CONTROLLER DEBUG] Error stack:', error.stack);
-
-      if (error.message.includes('não encontrada')) {
-        return res.status(404).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      if (error.message.includes('Apenas propostas pendenciadas')) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao atualizar proposta',
-      });
+      next(error);
     }
   }
 
   /**
    * Buscar proposta por CPF (última proposta do cliente)
    */
-  async getByCpf(req: Request, res: Response): Promise<Response> {
+  async getByCpf(req: Request, res: Response, next: NextFunction): Promise<Response> {
     try {
       const { cpf } = req.params;
 
@@ -713,19 +585,14 @@ export class ProposalController {
         },
       });
     } catch (error: any) {
-      console.error('[ProposalController.getByCpf] Error:', error);
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao buscar dados por CPF',
-      });
+      next(error);
     }
   }
 
   /**
    * Submeter proposta para análise
    */
-  async submitForAnalysis(req: Request, res: Response): Promise<Response> {
+  async submitForAnalysis(req: Request, res: Response, next: NextFunction): Promise<Response> {
     try {
       const { id } = req.params;
 
@@ -749,19 +616,7 @@ export class ProposalController {
         message: 'Proposta submetida para análise',
       });
     } catch (error: any) {
-      console.error('[ProposalController.submitForAnalysis] Error:', error);
-
-      if (error.message.includes('Apenas propostas em rascunho')) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao submeter proposta',
-      });
+      next(error);
     }
   }
 
@@ -769,7 +624,7 @@ export class ProposalController {
    * Buscar propostas para formalização (baseado em status específicos)
    * PAM P2.3: Migração de GET /formalizacao de core.ts
    */
-  async getFormalizacao(req: Request, res: Response): Promise<Response> {
+  async getFormalizacao(req: Request, res: Response, next: NextFunction): Promise<Response> {
     try {
       console.log('🔍 [DEBUG] FORMALIZATION ROUTE HIT IN DDD CONTROLLER!');
       console.log('🔍 [DEBUG] URL:', req.url);
@@ -851,11 +706,7 @@ export class ProposalController {
       console.log(`✅ [FORMALIZATION] Found ${formalizacaoPropostas.length} propostas for formalization`);
       return res.json(formalizacaoPropostas);
     } catch (error) {
-      console.error('❌ [FORMALIZATION] Error:', error);
-      return res.status(500).json({ 
-        success: false,
-        message: 'Erro interno ao buscar propostas de formalização' 
-      });
+      next(error);
     }
   }
 
@@ -863,7 +714,7 @@ export class ProposalController {
    * Buscar logs de observação/auditoria de uma proposta
    * PAM P2.3: Migração de GET /:id/observacoes de core.ts
    */
-  async getObservacoes(req: Request, res: Response): Promise<Response> {
+  async getObservacoes(req: Request, res: Response, next: NextFunction): Promise<Response> {
     try {
       const propostaId = req.params.id;
       const { createServerSupabaseAdminClient } = await import('../../../lib/supabase.js');
@@ -913,8 +764,7 @@ export class ProposalController {
         total: transformedLogs.length,
       });
     } catch (error) {
-      console.error('Error fetching proposal audit logs:', error);
-      return res.json({ logs: [] });
+      next(error);
     }
   }
 
@@ -922,7 +772,7 @@ export class ProposalController {
    * Atualizar status da proposta (legacy compatibility)
    * PAM P2.3: Migração de PUT /:id/status de core.ts
    */
-  async updateStatus(req: Request, res: Response): Promise<Response> {
+  async updateStatus(req: Request, res: Response, next: NextFunction): Promise<Response> {
     // Validação defensiva do req.body
     if (!req.body || typeof req.body !== 'object') {
       return res.status(400).json({
@@ -969,10 +819,7 @@ export class ProposalController {
         // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
         return this.pendenciar(req, res);
       } catch (error) {
-        return res.status(500).json({
-          success: false,
-          error: 'Erro ao processar pendência',
-        });
+        next(error);
       }
     }
 
