@@ -768,4 +768,222 @@ export class ProposalController {
       });
     }
   }
+
+  /**
+   * Buscar propostas para formalização (baseado em status específicos)
+   * PAM P2.3: Migração de GET /formalizacao de core.ts
+   */
+  async getFormalizacao(req: Request, res: Response): Promise<Response> {
+    try {
+      console.log('🔍 [DEBUG] FORMALIZATION ROUTE HIT IN DDD CONTROLLER!');
+      console.log('🔍 [DEBUG] URL:', req.url);
+      console.log('🔍 [DEBUG] Path:', req.path);
+      
+      const { createServerSupabaseAdminClient } = await import('../../../lib/supabase.js');
+      const supabase = createServerSupabaseAdminClient();
+
+      // Formalization statuses - TODOS exceto BOLETOS_EMITIDOS
+      const formalizationStatuses = [
+        'aprovado',
+        'aceito_atendente',
+        'documentos_enviados',
+        'CCB_GERADA',
+        'AGUARDANDO_ASSINATURA',
+        'ASSINATURA_PENDENTE',
+        'ASSINATURA_CONCLUIDA',
+        'PAGAMENTO_PENDENTE',
+        'PAGAMENTO_PARCIAL',
+        'contratos_preparados',
+        'contratos_assinados',
+      ];
+
+      const userId = (req as any).user?.id;
+      const userRole = (req as any).user?.role;
+      const userLojaId = (req as any).user?.loja_id;
+
+      console.log(`🔐 [FORMALIZATION] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`);
+
+      // Build query based on user role
+      let query = supabase.from('propostas').select('*').in('status', formalizationStatuses);
+
+      // Apply role-based filtering
+      if (userRole === 'ATENDENTE') {
+        query = query.eq('user_id', userId);
+        console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
+      } else if (userRole === 'GERENTE') {
+        query = query.eq('loja_id', userLojaId);
+        console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
+      }
+
+      const { data: formalizacaoPropostasRaw, error } = await query;
+
+      if (error) {
+        console.error('❌ [FORMALIZATION] Error fetching proposals:', error);
+        throw error;
+      }
+
+      // Transform data for frontend compatibility
+      const formalizacaoPropostas = formalizacaoPropostasRaw.map((proposta: any) => {
+        // Parse client data
+        const clienteData = proposta.cliente_data ? JSON.parse(proposta.cliente_data) : {};
+        const condicoesData = proposta.condicoes_data ? JSON.parse(proposta.condicoes_data) : {};
+
+        return {
+          ...proposta,
+          clienteData,
+          condicoesData,
+          // Convert snake_case to camelCase for frontend compatibility
+          createdAt: proposta.created_at,
+          numeroProposta: proposta.numero_proposta,
+          lojaId: proposta.loja_id,
+          produtoId: proposta.produto_id,
+          tabelaComercialId: proposta.tabela_comercial_id,
+          userId: proposta.user_id,
+          analistaId: proposta.analista_id,
+          dataAnalise: proposta.data_analise,
+          motivoPendencia: proposta.motivo_pendencia,
+          dataAprovacao: proposta.data_aprovacao,
+          documentosAdicionais: proposta.documentos_adicionais,
+          contratoGerado: proposta.contrato_gerado,
+          contratoAssinado: proposta.contrato_assinado,
+          dataAssinatura: proposta.data_assinatura,
+          dataPagamento: proposta.data_pagamento,
+          observacoesFormalização: proposta.observacoes_formalizacao,
+        };
+      });
+
+      console.log(`✅ [FORMALIZATION] Found ${formalizacaoPropostas.length} propostas for formalization`);
+      return res.json(formalizacaoPropostas);
+    } catch (error) {
+      console.error('❌ [FORMALIZATION] Error:', error);
+      return res.status(500).json({ 
+        success: false,
+        message: 'Erro interno ao buscar propostas de formalização' 
+      });
+    }
+  }
+
+  /**
+   * Buscar logs de observação/auditoria de uma proposta
+   * PAM P2.3: Migração de GET /:id/observacoes de core.ts
+   */
+  async getObservacoes(req: Request, res: Response): Promise<Response> {
+    try {
+      const propostaId = req.params.id;
+      const { createServerSupabaseAdminClient } = await import('../../../lib/supabase.js');
+      const supabase = createServerSupabaseAdminClient();
+
+      const { data: logs, error } = await supabase
+        .from('proposta_logs')
+        .select(`
+          id,
+          observacao,
+          status_anterior,
+          status_novo,
+          created_at,
+          autor_id,
+          profiles!proposta_logs_autor_id_fkey (
+            full_name,
+            role
+          )
+        `)
+        .eq('proposta_id', propostaId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.warn('Erro ao buscar logs de auditoria:', error);
+        return res.json({ logs: [] });
+      }
+
+      const transformedLogs =
+        logs?.map((log: any) => ({
+          id: log.id,
+          acao:
+            log.status_novo === 'aguardando_analise'
+              ? 'reenvio_atendente'
+              : `mudanca_status_${log.status_novo}`,
+          detalhes: log.observacao,
+          status_anterior: log.status_anterior,
+          status_novo: log.status_novo,
+          data_acao: log.created_at,
+          autor_id: log.autor_id,
+          profiles: log.profiles,
+          observacao: log.observacao,
+          created_at: log.created_at,
+        })) || [];
+
+      return res.json({
+        logs: transformedLogs,
+        total: transformedLogs.length,
+      });
+    } catch (error) {
+      console.error('Error fetching proposal audit logs:', error);
+      return res.json({ logs: [] });
+    }
+  }
+
+  /**
+   * Atualizar status da proposta (legacy compatibility)
+   * PAM P2.3: Migração de PUT /:id/status de core.ts
+   */
+  async updateStatus(req: Request, res: Response): Promise<Response> {
+    // Validação defensiva do req.body
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({
+        success: false,
+        error: 'Request body is required'
+      });
+    }
+    
+    const { status } = req.body;
+
+    // Mapear para os novos endpoints baseado no status
+    if (status === 'aprovado') {
+      return this.approve(req, res);
+    } else if (status === 'rejeitado') {
+      return this.reject(req, res);
+    } else if (status === 'aguardando_analise') {
+      return this.submitForAnalysis(req, res);
+    } else if (status === 'pendente' || status === 'pendenciado') {
+      // OPERAÇÃO VISÃO CLARA V1.0: Implementar transição para pendenciado
+      try {
+        // DEBUG: Log completo do request body
+        console.log(`[PENDENCIAR DEBUG] Full req.body:`, JSON.stringify(req.body, null, 2));
+        console.log(`[PENDENCIAR DEBUG] Status:`, status);
+        console.log(`[PENDENCIAR DEBUG] motivo_pendencia:`, req.body.motivo_pendencia);
+        console.log(`[PENDENCIAR DEBUG] motivoPendencia:`, req.body.motivoPendencia);
+        console.log(`[PENDENCIAR DEBUG] observacao:`, req.body.observacao);
+        
+        // Aceitar tanto camelCase (frontend) quanto snake_case (backend)
+        const motivo_pendencia = req.body.motivo_pendencia || req.body.motivoPendencia || req.body.observacao;
+        console.log(`[PENDENCIAR DEBUG] Final motivo_pendencia:`, motivo_pendencia);
+        
+        if (!motivo_pendencia) {
+          console.log(`[PENDENCIAR DEBUG] ❌ Motivo da pendência não encontrado!`);
+          return res.status(400).json({
+            success: false,
+            error: 'Motivo da pendência é obrigatório',
+          });
+        }
+        
+        // Garantir que o motivo seja passado corretamente para o controller
+        req.body.motivo_pendencia = motivo_pendencia;
+        console.log(`[PENDENCIAR DEBUG] ✅ Motivo definido, passando para controller`);
+        
+        // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
+        return this.pendenciar(req, res);
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          error: 'Erro ao processar pendência',
+        });
+      }
+    }
+
+    // Para outros status, retornar erro por enquanto
+    return res.status(400).json({
+      success: false,
+      error: 'Status transition not yet implemented in DDD architecture',
+    });
+  }
 }

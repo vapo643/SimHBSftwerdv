@@ -1,0 +1,74 @@
+Pacote de Ativação de Missão (PAM) V1.0 - P2.3: Unificação de Pipeline Definitiva
+Sumário da Missão (O Quê): Concluir a unificação do fluxo de negócio ao migrar todas as operações de server/routes/propostas/core.ts para o proposalController.ts canónico (DDD), e em seguida, eliminar o arquivo de rotas legado core.ts.
+
+Intenção Estratégica (O Porquê): Esta é a Ação P2.3 da "Operação Aço Líquido". É o golpe final contra a "Esquizofrenia Arquitetural". Ao eliminar o último bastião de lógica legada, garantimos que 100% do fluxo de propostas opere sob a nova arquitetura DDD consolidada, eliminando a dívida técnica e prevenindo futuras regressões. O sistema passará a ter um único ponto de entrada para a lógica de propostas.
+
+Histórico Relevante (Consulta Obrigatória): As fases anteriores (P1.1 a P2.2) prepararam o terreno, consolidando o Domínio, o Repositório, a Injeção de Dependência e a FSM. O proposalController.ts e os Use Cases associados estão agora prontos para assumir a responsabilidade total pelo fluxo.
+
+Modelo Mental (Como se Encaixa): Estamos a realizar uma demolição controlada. O arquivo server/routes/propostas/core.ts é um edifício antigo e instável. Antes de o demolir, vamos garantir que todas as suas "funções" (rotas de API) tenham sido recriadas de forma robusta no novo "arranha-céus" arquitetural (proposalController.ts). Uma vez que a migração de cada função esteja confirmada, o edifício antigo será removido do mapa do sistema (server/routes.ts) e implodido (eliminado do disco).
+
+Riscos Antecipados e Contramedidas:
+
+Risco (ALTO): A eliminação de core.ts sem a migração completa de todas as suas rotas para o novo controller quebrará funcionalidades essenciais da aplicação.
+
+Contramedida: A missão será executada em três fases rigorosas: Auditoria de Rotas, Migração Controlada e, finalmente, a Eliminação. A validação com get_latest_lsp_diagnostics e testes funcionais será o portão de qualidade para a conclusão.
+
+IMPLEMENTAR: Migração Final para Pipeline DDD e Remoção de Rotas Legadas
+
+CONTEXT: O sistema ainda opera com um arquivo de rotas legado (server/routes/propostas/core.ts) que gere o fluxo principal de propostas. Com a arquitetura DDD agora consolidada, precisamos migrar esta responsabilidade para o proposalController.ts canónico e eliminar o código legado.
+
+CURRENT STATE: O arquivo server/routes/propostas/core.ts está ativo e a ser utilizado, enquanto o proposalController.ts já contém parte da nova lógica, mas pode não cobrir todas as funcionalidades do arquivo legado.
+
+EXPECTED (Estado Final de Sucesso):
+
+O proposalController.ts deve conter toda a lógica de manipulação de rotas que anteriormente residia em core.ts.
+
+O arquivo server/routes/propostas/core.ts deve ser permanentemente eliminado.
+
+O arquivo principal de roteamento (server/routes.ts) deve ser atualizado para remover a importação e o uso de propostasCoreRouter.
+
+O sistema deve permanecer 100% funcional, com todas as rotas de propostas a serem servidas pela arquitetura DDD.
+
+CONSTRAINTS (Roadmap de Implementação Faseado):
+
+Fase 1: Auditoria Comparativa de Rotas
+
+Abra server/routes/propostas/core.ts e server/modules/proposal/presentation/proposalController.ts.
+
+Crie um mapa de rotas. Liste todas as rotas (GET /:id, POST /, PUT /:id/resubmit, etc.) definidas em core.ts.
+
+Para cada rota, verifique se já existe um método correspondente no proposalController.ts que utilize os Use Cases corretos do nosso dependencies.ts.
+
+Fase 2: Migração e Consolidação de Lógica
+
+Para qualquer rota existente em core.ts que não tenha um equivalente no proposalController.ts, implemente o método faltante.
+
+Diretriz de Implementação: Os novos métodos no Controller devem ser "magros". A sua única responsabilidade é extrair dados da req, invocar o Use Case apropriado (importado de dependencies.ts), e formatar a resposta. NÃO COLOQUE LÓGICA DE NEGÓCIO NO CONTROLLER.
+
+Fase 3: Transição do Roteamento e Eliminação
+
+Abra o arquivo de roteamento principal server/routes.ts.
+
+Localize a linha app.use('/api/propostas', propostasCoreRouter); e a sua importação correspondente.
+
+Comente estas linhas para desativar o roteador legado.
+
+Validação Intermediária: Reinicie o servidor. Teste manualmente se as rotas de propostas ainda funcionam (elas devem agora ser servidas pelo proposalController se a Fase 2 foi bem-sucedida).
+
+Ação Final: Uma vez validado, delete o arquivo server/routes/propostas/core.ts e remova permanentemente as linhas comentadas em server/routes.ts.
+
+Validação Final:
+
+Execute get_latest_lsp_diagnostics até que zero erros sejam reportados.
+
+Apresente um relatório final confirmando que o pipeline legado foi erradicado e que o sistema opera exclusivamente na arquitetura DDD.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Ex: "Assumi que todas as rotas em core.ts têm um Use Case correspondente já criado ou que podem ser implementadas de forma direta."]
+
+VALIDAÇÃO PENDENTE: [Ex: "Testes de regressão de ponta a ponta para todos os endpoints de propostas são mandatórios após esta alteração."]
