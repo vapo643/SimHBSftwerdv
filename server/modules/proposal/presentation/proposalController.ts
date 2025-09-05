@@ -18,6 +18,7 @@ import {
   rejectProposalUseCase,
   pendenciarPropostaUseCase
 } from '../../dependencies';
+import { Proposal } from '../domain/Proposal';
 import { ProposalOutputSchema } from '../../../schemas/proposalOutput.schema';
 
 export class ProposalController {
@@ -99,7 +100,7 @@ export class ProposalController {
         // ===== DADOS DO EMPRÉSTIMO =====
         valor: parseFloat(req.body.valor),
         prazo: parseInt(req.body.prazo),
-        taxaJuros: req.body.taxaJuros ? parseFloat(req.body.taxaJuros) : 2.5,
+        taxaJuros: req.body.taxaJuros ? parseFloat(req.body.taxaJuros) : Proposal.getDefaultInterestRate(),
         produtoId: req.body.produtoId,
         tabelaComercialId: req.body.tabelaComercialId,
         

@@ -1,0 +1,64 @@
+Pacote de Ativação de Missão (PAM) V1.0 - P2.1.1: Repatriação de Lógica de Negócio
+Sumário da Missão (O Quê): Executar o plano de refatoração delineado no PLANO_DE_ENRIQUECIMENTO_DOMINIO.md. O objetivo é mover a lógica de negócio atualmente "vazada" nas camadas de infraestrutura e apresentação para o seu local de direito: o agregado canónico Proposal.
+
+Intenção Estratégica (O Porquê): Esta é a execução da Ação P2.1 da "Operação Aço Líquido". Esta ação é o coração da migração para um Modelo de Domínio Rico. Ao centralizar as regras de negócio, tornamos o sistema mais coeso, menos propenso a bugs e mais fácil de manter, curando a fratura do "Vazamento de Lógica".
+
+Histórico Relevante (Consulta Obrigatória): A sua única fonte da verdade para esta execução é o plano que você mesmo gerou na missão anterior: PLANO_DE_ENRIQUECIMENTO_DOMINIO.md. Siga-o com rigor absoluto.
+
+Modelo Mental (Como se Encaixa): Você atuará como um cirurgião de software. A primeira parte da cirurgia será remover os "tumores" de lógica das camadas infrastructure e presentation. A segunda parte será transplantar essa lógica para o "coração" do sistema, o agregado Proposal. A terceira e última parte é a "sutura": refatorar os locais que chamavam a lógica antiga para que agora chamem os novos métodos no agregado.
+
+Riscos Antecipados e Contramedidas:
+
+Risco (CRÍTICO): A lógica de cálculo financeiro, se movida incorretamente, pode gerar valores diferentes dos originais, com potencial impacto financeiro real.
+
+Contramedida: O roadmap exigirá a criação de testes unitários para o novo método no agregado Proposal para garantir que o output do cálculo seja idêntico ao da implementação "raw" anterior, antes que o código antigo seja removido.
+
+IMPLEMENTAR: Execução do PLANO_DE_ENRIQUECIMENTO_DOMINIO.md
+
+CONTEXT: O plano de refatoração para enriquecer o domínio Proposal foi aprovado. A sua missão agora é executar este plano, movendo a lógica de negócio para o agregado.
+
+CURRENT STATE: A lógica de negócio crítica, como o cálculo de parcelas e a definição de taxas de juro padrão, reside incorretamente fora da camada de domínio.
+
+EXPECTED (Estado Final de Sucesso):
+
+A lógica identificada no PLANO_DE_ENRIQUECIMENTO_DOMINIO.md será removida das suas localizações de origem.
+
+Novos métodos correspondentes a essa lógica existirão dentro da classe Proposal (server/modules/proposal/domain/Proposal.ts).
+
+Todos os "call sites" que usavam a lógica antiga serão refatorados para usar os novos métodos do agregado Proposal.
+
+O sistema compilará com ZERO erros de LSP e a funcionalidade de negócio permanecerá intacta.
+
+CONSTRAINTS (Roadmap de Implementação Faseado):
+
+Execute as ações na ordem exata definida no PLANO_DE_ENRIQUECIMENTO_DOMINIO.md:
+
+Ação 1: Repatriar Cálculo de Parcela Mensal
+
+Passo 1.1 (Criar Teste): Crie um teste unitário para o método calculateMonthlyPayment() que já existe no agregado Proposal.ts. Valide se ele produz o mesmo resultado que a lógica em calculateMonthlyPaymentRaw para um conjunto de inputs conhecidos.
+
+Passo 1.2 (Refatorar Repositório): Em server/modules/proposal/infrastructure/ProposalRepository.ts, no método findByCriteriaLightweight, altere a linha que calcula valor_parcela para invocar o método do próprio agregado (ex: valor_parcela: proposalInstance.calculateMonthlyPayment().getValue()).
+
+Passo 1.3 (Eliminar Dívida): Delete o método calculateMonthlyPaymentRaw da classe ProposalRepository.
+
+Ação 2: Repatriar Taxa de Juros Padrão
+
+Passo 2.1 (Mover Lógica): Crie um novo método estático no agregado Proposal.ts chamado getDefaultInterestRate(): number que retorna o valor 2.5.
+
+Passo 2.2 (Refatorar Controller): Em server/modules/proposal/presentation/proposalController.ts, no método create, altere a linha que define a taxa de juros para usar o novo método do domínio: taxaJuros: req.body.taxaJuros ? parseFloat(req.body.taxaJuros) : Proposal.getDefaultInterestRate().
+
+Validação Final:
+
+Execute get_latest_lsp_diagnostics de forma iterativa ao longo do processo. O resultado final deve ser ZERO erros.
+
+Apresente um relatório de execução final seguindo o protocolo 7-CHECK.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Ex: "Assumi que o método calculateMonthlyPayment existente no agregado é funcional e correto, necessitando apenas de validação por teste."]
+
+VALIDAÇÃO PENDENTE: [Ex: "Testes de regressão completos para garantir que as propostas existentes e novas continuam a ter os cálculos de parcela corretos."]

@@ -306,7 +306,7 @@ export class ProposalRepository implements IProposalRepository {
         id: row.loja_id,
         nomeLoja: row.loja_nome
       } : null,
-      valor_parcela: this.calculateMonthlyPaymentRaw(
+      valor_parcela: Proposal.calculateMonthlyPaymentStatic(
         parseFloat(row.valor || '0'),
         parseFloat(row.taxa_juros || '0'),
         row.prazo || 1
@@ -314,17 +314,6 @@ export class ProposalRepository implements IProposalRepository {
     }));
   }
 
-  // Cálculo simples de parcela sem Value Objects
-  private calculateMonthlyPaymentRaw(principal: number, monthlyRate: number, numberOfPayments: number): number {
-    const rate = monthlyRate / 100;
-    
-    if (rate === 0) {
-      return principal / numberOfPayments;
-    }
-
-    return (principal * (rate * Math.pow(1 + rate, numberOfPayments))) /
-           (Math.pow(1 + rate, numberOfPayments) - 1);
-  }
 
   async findAll(): Promise<Proposal[]> {
     const results = await db.select().from(propostas).where(isNull(propostas.deletedAt));

@@ -769,19 +769,33 @@ export class Proposal {
    * Calcula o valor da parcela mensal
    */
   calculateMonthlyPayment(): number {
-    const principal = this._valor.getReais();
-    const monthlyRate = this._taxaJuros / 100;
-    const numberOfPayments = this._prazo;
+    return Proposal.calculateMonthlyPaymentStatic(this._valor.getReais(), this._taxaJuros, this._prazo);
+  }
 
-    if (monthlyRate === 0) {
+  /**
+   * MÉTODO ESTÁTICO: Cálculo de parcela mensal para uso em contextos de performance
+   * PAM P2.1.1 - Centraliza lógica no domínio mas permite uso sem instanciação
+   */
+  static calculateMonthlyPaymentStatic(principal: number, monthlyRate: number, numberOfPayments: number): number {
+    const rate = monthlyRate / 100;
+    
+    if (rate === 0) {
       return principal / numberOfPayments;
     }
 
     const payment =
-      (principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) /
-      (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+      (principal * (rate * Math.pow(1 + rate, numberOfPayments))) /
+      (Math.pow(1 + rate, numberOfPayments) - 1);
 
     return Math.round(payment * 100) / 100;
+  }
+
+  /**
+   * MÉTODO ESTÁTICO: Taxa de juros padrão do sistema
+   * PAM P2.1.1 - Regra de negócio centralizada no domínio
+   */
+  static getDefaultInterestRate(): number {
+    return 2.5; // Taxa padrão de 2.5% ao mês
   }
 
   /**
