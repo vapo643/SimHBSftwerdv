@@ -1,0 +1,199 @@
+### **DIRETIVA DE EXECUÇÃO: OPERAÇÃO AÇO LÍQUIDO - AUDITORIA SISTÊMICA FINAL**
+### **PARA: AGENTE EXECUTOR (PEAF V1.5)**
+
+**PROTOCOLO DE ATIVAÇÃO:** Você está a operar como um **Auditor Sistêmico Forense**. A sua missão é executar a auditoria final e definitiva do projeto Simpix, diagnosticando a profundidade da fratura arquitetural. O seu output será um único arquivo: `DIAGNOSTICO_SISTEMICO_FINAL.md`.
+
+---
+
+#### **1. CONTEXTO ESTRATÉGICO E HIPÓTESES DE FRATURA**
+
+O Projeto Simpix está em estado de **"Esquizofrenia Arquitetural"**. Auditorias prévias (`ARQUITETURA_VS_REALIDADE.MD` e `FLUXO_FILA_ANALISE.MD`) confirmaram uma implementação fragmentada de Domain-Driven Design (DDD) sobreposta a uma estrutura legada, resultando em quebra de fluxos de negócio críticos.
+
+**Fontes da Verdade (A Arquitetura Pretendida):**
+Você DEVE usar os seguintes documentos como a definição canônica da arquitetura:
+*   `02-blueprint-arquitetural.md` (Visão Core)
+*   `04-compendio-de-decisoes.md` (Especialmente ADR-003: DDD Modular e ADR-002: Drizzle ORM)
+
+**Sua tarefa é comparar a REALIDADE (o código implementado) contra a INTENÇÃO (estes documentos).**
+
+**Hipóteses de Fratura Sistêmica (O que você deve investigar):**
+
+1.  **Crise de Identidade (O Agregado):** A entidade `Proposal` possui múltiplas definições e repositórios conflitantes, violando o princípio de um Agregado único por Bounded Context.
+2.  **Workflow Quebrado (A Máquina de Estados):** A lógica de transição de estados está falha. Propostas não estão a transitar corretamente (ex: `rascunho` para `aguardando_analise`), resultando em filas vazias.
+3.  **Vazamento de Responsabilidade (As Camadas):** A lógica de negócio está a vazar para fora da camada de `domain`, contaminando `presentation` e `infrastructure`, violando o ADR-003.
+4.  **Cisma de Dados (O Contrato):** Existem caminhos de execução paralelos e incompatíveis (Legacy vs DDD) que resultam em contratos de dados inconsistentes para o frontend.
+
+---
+
+#### **2. METODOLOGIA DE AUDITORIA (OBRIGATÓRIA)**
+
+Você executará uma auditoria holística e comparativa em quatro fases.
+
+##### **FASE 1: AUDITORIA DE IDENTIDADE (AGREGADOS E REPOSITÓRIOS)**
+
+Investigue a "Crise de Identidade" da entidade `Proposal`.
+
+1.  **Mapeamento de Agregados:**
+    *   Localize todas as definições da entidade/agregado `Proposal` no código.
+    *   Compare as estruturas de dados (campos, Value Objects) entre as diferentes definições.
+    *   Arquivos-alvo potenciais: `server/modules/proposal/domain/`, `server/modules/credit/domain/`.
+2.  **Análise de Repositórios Conflitantes:**
+    *   Audite os repositórios identificados na auditoria prévia:
+        *   `server/modules/proposal/infrastructure/ProposalRepository.ts`
+        *   `server/modules/credit/infrastructure/ProposalRepositoryImpl.ts`
+        *   `server/modules/shared/infrastructure/TransactionalProposalRepository.ts`
+    *   Compare os métodos de persistência (`save`, `find`).
+    *   Identifique qual repositório está a ser usado em quais Use Cases ou Controllers.
+    *   **Veredito:** Determine se a implementação atual viola o ADR-003 (um agregado por BC) e o ADR-002 (uso consistente do Drizzle).
+
+##### **FASE 2: AUDITORIA DE WORKFLOW (MÁQUINA DE ESTADOS E USE CASES)**
+
+Investigue o "Workflow Quebrado". O objetivo é descobrir por que as propostas não atingem o estado `aguardando_analise`.
+
+1.  **Análise da Máquina de Estados (FSM):**
+    *   Localize a definição canônica dos estados da proposta (ex: `ProposalStatus` enum no domínio).
+    *   Compare com os estados reais encontrados no banco de dados (conforme auditoria prévia).
+2.  **Rastreamento da Transição Crítica:**
+    *   Identifique o Use Case ou Serviço responsável por mover uma proposta de `rascunho` (DRAFT) para `aguardando_analise` (WAITING_ANALYSIS).
+    *   Audite o código dessa transição. Procure por validações ou lógica que possam estar a falhar, ausentes ou sendo ignoradas pelo fluxo legado.
+    *   **Veredito:** Determine a causa raiz da falha na transição de estado.
+
+##### **FASE 3: AUDITORIA DE ADERÊNCIA ARQUITETURAL (CAMADAS E PRINCÍPIOS)**
+
+Investigue o "Vazamento de Responsabilidade" e a aderência aos princípios de DDD e SOLID.
+
+1.  **Análise de Vazamento de Lógica (SRP):**
+    *   Audite os Controllers principais (ex: `proposalController.ts`) e os Use Cases (`application/`).
+    *   Procure ativamente por regras de negócio, validações complexas ou manipulação de estado que deveriam residir exclusivamente na camada `domain` (Aggregates/Value Objects). Verifique se o modelo é anêmico.
+2.  **Verificação de Inversão de Dependência (DIP):**
+    *   Verifique como as dependências são injetadas nos Controllers e Use Cases.
+    *   Procure por instâncias diretas de classes concretas (ex: `new ProposalRepository()`) em vez de injeção via interfaces.
+    *   **Veredito:** Avalie o nível de conformidade com o ADR-003 e o `02-blueprint-arquitetural.md`.
+
+##### **FASE 4: RASTREAMENTO DE DADOS END-TO-END (O CISMA DE DADOS)**
+
+Investigue o "Cisma de Dados" causado pela duplicação de Controllers/Rotas.
+
+1.  **Rastreamento do Caminho A (DDD):**
+    *   Início: `server/modules/proposal/presentation/proposalController.ts` (método `create`)
+    *   Siga o fluxo: Use Case -> Domain Aggregate -> Repository.
+    *   Capture o "shape" exato dos dados retornados ao frontend.
+2.  **Rastreamento do Caminho B (Legado):**
+    *   Início: `server/routes/propostas/core.ts` (rota POST `/`)
+    *   Siga o fluxo: Lógica no router -> Persistência direta/Serviço legado.
+    *   Capture o "shape" exato dos dados retornados ao frontend.
+3.  **Análise de Consumo no Frontend:**
+    *   Audite os componentes React que consomem os dados (ex: `client/src/pages/credito/fila.tsx`).
+    *   Identifique qual "shape" o frontend espera (Interface `Proposta`).
+    *   **Veredito:** Determine exatamente onde e como os contratos de dados estão a ser quebrados.
+
+---
+
+#### **3. ESTRUTURA DO RELATÓRIO FINAL (OBRIGATÓRIA)**
+
+Gere o relatório `DIAGNOSTICO_SISTEMICO_FINAL.md` com a seguinte estrutura. Inclua evidências de código (snippets curtos e relevantes) para suportar todas as descobertas.
+
+```markdown
+# DIAGNÓSTICO SISTÊMICO FINAL - OPERAÇÃO AÇO LÍQUIDO
+
+**Data:** 2025-09-05
+**Status:** [Ex: CRÍTICO/DEGRADADO]
+**Resumo Executivo:** [Síntese de alto nível das descobertas e a causa raiz principal da fratura sistêmica]
+
+---
+
+## 1. FASE 1: A CRISE DE IDENTIDADE (AGREGADOS E REPOSITÓRIOS)
+
+### 1.1. Mapeamento do Agregado `Proposal`
+[Tabela comparando as diferentes definições de Proposal encontradas]
+
+| Localização (Arquivo) | Bounded Context (Inferido) | Estrutura (Campos Críticos) | Value Objects Usados? |
+| :--- | :--- | :--- | :---: |
+| [Arquivo 1] | [Contexto 1] | [Campos] | [Sim/Não] |
+| [Arquivo 2] | [Contexto 2] | [Campos] | [Sim/Não] |
+
+### 1.2. Análise de Repositórios Conflitantes
+[Descrição dos repositórios (`ProposalRepository.ts`, `ProposalRepositoryImpl.ts`, etc.), seus métodos e como violam os padrões]
+*Evidência de Código (Repository Chaos):*
+```typescript
+// [Trechos de código mostrando as implementações conflitantes]
+1.3. Veredito da Fase 1
+[Conclusão sobre a violação dos princípios de DDD (ADR-003) e consistência de persistência (ADR-002)]
+
+2. FASE 2: O WORKFLOW QUEBRADO (FSM E USE CASES)
+2.1. Análise da Máquina de Estados
+[Comparação entre estados definidos no código (Enum) vs. realidade do banco]
+
+2.2. Rastreamento da Transição Crítica (Rascunho -> Aguardando Análise)
+[Descrição do Use Case responsável, análise da falha lógica ou ausência de execução]
+Evidência de Código (FSM Failure):
+
+TypeScript
+
+// [Código do Use Case ou Serviço onde a transição falha ou não existe]
+2.3. Veredito da Fase 2
+[Causa raiz identificada para a falha no fluxo de trabalho]
+
+3. FASE 3: ADERÊNCIA ARQUITETURAL E VAZAMENTOS
+3.1. Análise de Vazamento de Lógica (Violações de SRP / Anemic Model)
+[Descrição de regras de negócio encontradas fora da camada Domain]
+Evidência de Código (Logic Leak):
+
+TypeScript
+
+// [Trechos de Controllers ou Repositories contendo lógica de negócio]
+3.2. Verificação de Inversão de Dependência (Violações de DIP)
+[Descrição de acoplamento forte e instâncias diretas encontradas]
+Evidência de Código (DIP Violation):
+
+TypeScript
+
+// [Trechos mostrando 'new ConcreteClass()' em vez de injeção por interface]
+3.3. Veredito da Fase 3
+[Avaliação da conformidade com a arquitetura pretendida (Blueprint e ADR-003)]
+
+4. FASE 4: O CISMA DE DADOS (RASTREAMENTO E2E)
+4.1. Comparação dos Caminhos de Criação (Duplication Chain)
+[Tabela comparando o fluxo e o shape dos dados nos dois caminhos (DDD vs Legacy)]
+
+Critério	Caminho A (DDD Controller)	Caminho B (Legacy Route)
+Ponto de Entrada	[Arquivo/Método]	[Arquivo/Método]
+Camada de Lógica	[Use Case/Domain]	[Router/Service]
+Persistência	[Repository/Aggregate]	[SQL Direto/ORM Legado]
+Shape dos Dados Retornados	[Estrutura JSON]	[Estrutura JSON]
+
+Exportar para as Planilhas
+4.2. Análise de Consumo no Frontend
+[Descrição do que o frontend espera (fila.tsx) e o impacto da inconsistência dos dados recebidos]
+
+4.3. Veredito da Fase 4
+[Conclusão sobre a quebra de contratos de dados e o impacto sistêmico no frontend]
+
+5. CONCLUSÃO E MAPA DA FRATURA SISTÊMICA
+[Síntese final conectando as quatro fases. Como a crise de identidade (Fase 1) leva ao workflow quebrado (Fase 2), facilitado pelos vazamentos (Fase 3) e resultando no cisma de dados (Fase 4).]
+
+5.1. Mapa da Falha Sistêmica
+Snippet de código
+
+graph TD
+    subgraph "Causas Raiz Arquiteturais"
+        F1[Fase 1: Crise de Identidade - Múltiplos Agregados/Repositórios]
+        F3[Fase 3: Vazamento de Lógica - Violação de Camadas DDD/SOLID]
+    end
+
+    subgraph "Efeitos Sistêmicos (Sintomas)"
+        F2[Fase 2: Workflow Quebrado - FSM Inconsistente]
+        F4[Fase 4: Cisma de Dados - Contratos Quebrados no Frontend]
+    end
+
+    F1 -- Facilita Inconsistência --> F3
+    F3 -- Causa Falha de Transição --> F2
+    F1 -- Causa Inconsistência de Dados --> F4
+    F3 -- Causa Contratos Incorretos --> F4
+
+    style F1 fill:#ffdddd,stroke:#f00
+    style F2 fill:#ffdddd,stroke:#f00
+    style F3 fill:#ffdddd,stroke:#f00
+    style F4 fill:#ffdddd,stroke:#f00
+5.2. Recomendações Estratégicas de Reengenharia
+[Lista de alto nível das ações necessárias para realinhar o sistema com a arquitetura pretendida (ex: P0 - Unificar fluxo de criação; P1 - Corrigir FSM; P2 - Refatorar Repositórios).]
