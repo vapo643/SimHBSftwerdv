@@ -1,0 +1,51 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - P1.2: Unificação de Repositório**
+
+* **Sumário da Missão (O Quê):** Eliminar o "Repository Chaos" ao consolidar as múltiplas e conflitantes implementações de `ProposalRepository` numa única e canónica implementação. Esta ação envolve definir uma interface clara (`IProposalRepository`) e refatorar todas as dependências para usar exclusivamente esta nova abstração.
+* **Intenção Estratégica (O Porquê):** Esta é a Ação P1.2 da "Operação Aço Líquido". Após unificar o agregado (Ação P1.1), é imperativo unificar a forma como interagimos com ele na camada de persistência. A existência de múltiplos repositórios viola o princípio de Single Source of Truth (SSOT), cria inconsistências de dados e torna a manutenção impossível. Esta consolidação garante um caminho de acesso a dados único, previsível e alinhado com o `ADR-002` (Adoção do Drizzle ORM).
+* **Histórico Relevante (Consulta Obrigatória):** A execução da Ação P1.1 já nos forçou a corrigir as importações nos repositórios redundantes (`ProposalRepositoryImpl.ts`). Agora, vamos eliminá-los de vez. A análise `DIAGNOSTICO_SISTEMICO_FINAL.md` identificou as três implementações a serem consolidadas.
+* **Modelo Mental (Como se Encaixa):** Se o agregado `Proposal` é o "cofre" que guarda as regras de negócio, o `IProposalRepository` será a "porta" blindada deste cofre. Definiremos as especificações desta porta (a interface) e depois construiremos a sua única implementação concreta (`ProposalRepository.ts`), garantindo que toda a aplicação passe por este ponto de controlo único para aceder aos dados da proposta.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** A nova interface pode não contemplar todos os métodos específicos que as implementações antigas possuíam, quebrando a lógica dos `Use Cases` que dependem deles.
+    * **Contramedida:** A primeira fase da implementação será uma análise cuidadosa de todos os métodos existentes nos repositórios a serem eliminados. Qualquer método de busca de dados que seja válido e necessário será adicionado à nova interface `IProposalRepository` antes da refatoração das dependências.
+
+---
+
+**IMPLEMENTAR:** Consolidação e Abstração do `ProposalRepository`
+
+**CONTEXT:** O sistema sofre de "Repository Chaos", com três implementações diferentes de repositórios para a mesma entidade `Proposal`. Precisamos de unificar isto numa única implementação concreta, precedida por uma interface clara para garantir a Inversão de Dependência (DIP).
+
+**CURRENT STATE:** Múltiplos arquivos (`ProposalRepository.ts`, `ProposalRepositoryImpl.ts`, `TransactionalProposalRepository.ts`) implementam lógicas de persistência para propostas de forma inconsistente e duplicada.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Deve existir uma nova interface `IProposalRepository.ts` no `bounded context` de domínio (`server/modules/proposal/domain/`).
+2.  A implementação `server/modules/proposal/infrastructure/ProposalRepository.ts` deve ser a única classe concreta que implementa esta interface.
+3.  Os repositórios redundantes (`ProposalRepositoryImpl.ts` em `credit/infrastructure` e `TransactionalProposalRepository.ts` em `shared/infrastructure`) devem ser eliminados.
+4.  Todos os `Use Cases` e `Services` que dependiam dos repositórios antigos devem ser refatorados para depender da **interface** `IProposalRepository` e recebê-la via injeção de dependência (próximo passo, mas preparamos o terreno aqui).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Fase 1: Definição da Abstração (Interface)**
+    * Crie um novo arquivo: `server/modules/proposal/domain/IProposalRepository.ts`.
+    * Dentro deste arquivo, defina a interface `IProposalRepository`. Comece com os métodos essenciais de um repositório (ex: `findById(id: string): Promise<Proposal | null>`, `save(proposal: Proposal): Promise<void>`, `findAll(): Promise<Proposal[]>`).
+    * **Audite** os repositórios a serem eliminados (`ProposalRepositoryImpl.ts`, `TransactionalProposalRepository.ts`) e o repositório canónico (`ProposalRepository.ts`). Identifique todos os métodos públicos de busca de dados (ex: `findByCriteriaLightweight`). Adicione as assinaturas destes métodos à interface `IProposalRepository`.
+
+2.  **Fase 2: Consolidação da Implementação Concreta**
+    * Abra `server/modules/proposal/infrastructure/ProposalRepository.ts`.
+    * Faça esta classe implementar a nova interface: `export class ProposalRepository implements IProposalRepository`.
+    * O TypeScript irá agora apontar todos os métodos que precisam ser implementados ou ajustados. Use isto como um guia para garantir que a implementação canónica seja completa.
+    * Mova qualquer lógica de query valiosa dos repositórios antigos para esta classe.
+
+3.  **Fase 3: Erradicação e Refatoração de Dependências**
+    * **Delete** os arquivos de repositório redundantes.
+    * Execute `get_latest_lsp_diagnostics`. Similar à Ação P1.1, isto irá revelar todos os pontos do sistema que dependiam das implementações antigas.
+    * Para cada erro, refatore a classe (ex: um `Use Case`) para importar e depender da **interface** `IProposalRepository`, não da classe concreta.
+
+4.  **Validação:**
+    * Continue o ciclo de `get_latest_lsp_diagnostics` e refatoração até que **zero erros** sejam reportados.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** \[Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** \[Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** \[Ex: "Assumi que todos os métodos nos repositórios antigos são para busca de dados e podem ser abstraídos na nova interface."]
+* **VALIDAÇÃO PENDENTE:** \[Ex: "A injeção de dependência será tratada na Ação P1.3. Por agora, a dependência da interface é suficiente."]
