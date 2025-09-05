@@ -224,36 +224,16 @@ const AnaliseManualPage: React.FC = () => {
         ocupacao: clienteData.ocupacao || rawData.cliente_ocupacao || rawData.clienteOcupacao || 'N/A'
       },
       condicoes: {
-        valorSolicitado: safeRender(
-          condicoesData.valorSolicitado || condicoesData.valor_solicitado ||
-          rawData.valor_solicitado || rawData.valorSolicitado || rawData.valor ||
-          clienteData.valor_solicitado || clienteData.valorSolicitado
-        ),
-        prazo: condicoesData.prazo || condicoesData.prazo_meses ||
-               rawData.prazo || rawData.prazo_meses || 
-               clienteData.prazo || 'N/A',
-        finalidade: condicoesData.finalidade || rawData.finalidade || 
-                   clienteData.finalidade || 'N/A',
-        garantia: condicoesData.garantia || rawData.garantia || 
-                 clienteData.garantia || 'N/A',
-        valorTac: safeRender(
-          produto.tacValor || condicoesData.valorTac || condicoesData.valor_tac ||
-          rawData.valor_tac || rawData.valorTac || clienteData.valor_tac
-        ),
-        tacTipo: produto.tacTipo || rawData.tac_tipo || 'valor',
-        valorIof: safeRender(
-          condicoesData.valorIof || condicoesData.valor_iof ||
-          rawData.valor_iof || rawData.valorIof || clienteData.valor_iof
-        ),
-        valorTotalFinanciado: safeRender(
-          condicoesData.valorTotalFinanciado || condicoesData.valor_total_financiado ||
-          rawData.valor_total_financiado || rawData.valorTotalFinanciado ||
-          clienteData.valor_total_financiado
-        ),
-        taxaJuros: safeRender(
-          tabelaComercial.taxaJuros || condicoesData.taxaJuros ||
-          rawData.taxa_juros || rawData.taxaJuros || clienteData.taxa_juros
-        )
+        // ✍️ CORREÇÃO: Usar dados diretos da API com fallbacks mínimos para compatibilidade
+        valorSolicitado: safeRender(rawData.valorSolicitado || rawData.valor || condicoesData.valorSolicitado),
+        prazo: rawData.prazo || condicoesData.prazo || 'N/A',
+        finalidade: rawData.finalidade || condicoesData.finalidade || 'N/A',
+        garantia: rawData.garantia || condicoesData.garantia || 'N/A',
+        valorTac: safeRender(rawData.valorTac || condicoesData.valorTac),
+        tacTipo: rawData.tacTipo || 'valor',
+        valorIof: safeRender(rawData.valorIof || condicoesData.valorIof),
+        valorTotalFinanciado: safeRender(rawData.valorTotalFinanciado || condicoesData.valorTotalFinanciado),
+        taxaJuros: safeRender(rawData.taxaJuros || tabelaComercial.taxaJuros)
       },
       produto: {
         id: rawData.produtoId || rawData.produto_id,
@@ -351,7 +331,7 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Valor Solicitado:</strong> {propostaMapeada.condicoes.valorSolicitado}
               </p>
               <p>
-                <strong>Prazo:</strong> {propostaMapeada.condicoes.prazo} meses
+                <strong>Prazo:</strong> {Number.isFinite(Number(propostaMapeada.condicoes.prazo)) ? `${propostaMapeada.condicoes.prazo} meses` : propostaMapeada.condicoes.prazo}
               </p>
               <p>
                 <strong>Finalidade:</strong> {propostaMapeada.condicoes.finalidade}
@@ -360,7 +340,7 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Garantia:</strong> {propostaMapeada.condicoes.garantia}
               </p>
               <p>
-                <strong>Taxa de Juros:</strong> {propostaMapeada.condicoes.taxaJuros}
+                <strong>Taxa de Juros:</strong> {propostaMapeada.condicoes.taxaJuros !== 'N/A' && !isNaN(Number(propostaMapeada.condicoes.taxaJuros)) ? `${Number(propostaMapeada.condicoes.taxaJuros).toFixed(2)}%` : propostaMapeada.condicoes.taxaJuros}
               </p>
               <p>
                 <strong>TAC:</strong> {propostaMapeada.condicoes.valorTac}
