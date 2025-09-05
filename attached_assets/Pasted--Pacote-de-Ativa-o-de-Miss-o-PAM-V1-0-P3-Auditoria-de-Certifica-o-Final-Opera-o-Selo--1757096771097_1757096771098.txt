@@ -1,0 +1,93 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - P3: Auditoria de Certificação Final ("Operação Selo de Qualidade")**
+
+* **Sumário da Missão (O Quê):** Executar uma auditoria de validação final e abrangente sobre a base de código do Simpix para certificar que todas as refatorações executadas durante a "Operação Aço Líquido" foram bem-sucedidas e que o sistema está agora em total conformidade com a visão arquitetural DDD. O output deve ser um único relatório de conformidade em Markdown: `CERTIFICADO_CONFORMIDADE_ACO_LIQUIDO.md`.
+* **Intenção Estratégica (O Porquê):** Após uma reengenharia massiva, é imperativo obter uma "prova de vida" e de saúde do sistema. Este relatório servirá como o artefato oficial que valida o sucesso da operação, atesta a qualidade da nova arquitetura e dá o "sinal verde" para a retomada do desenvolvimento de novas funcionalidades ou para o planeamento do deploy em produção. É a nossa "Definition of Done" para toda a campanha de refatoração.
+* **Histórico Relevante (Consulta Obrigatória):** A sua única fonte da verdade para esta missão é o `ROADMAP_MESTRE_ACO_LIQUIDO.md`. A sua tarefa é validar os resultados esperados de cada fase (P0, P1 e P2) que foram concluídas.
+* **Modelo Mental (Como se Encaixa):** Você atuará como um auditor de qualidade independente. A sua missão não é corrigir, mas sim verificar e reportar. Você irá percorrer a "fábrica" de software que acabamos de reconstruir, inspecionando cada estação de trabalho (Domínio, Persistência, Aplicação, Resiliência, Performance) para garantir que ela está a operar de acordo com as novas especificações e padrões de segurança.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (BAIXO):** A auditoria pode revelar pequenas inconsistências ou débitos técnicos residuais não cobertos pelo roadmap.
+    * **Contramedida:** O relatório final terá uma seção dedicada para documentar estes "Pontos de Melhoria Contínua", que servirão como backlog para futuras missões de refinamento, sem invalidar o sucesso global da operação.
+
+---
+
+**AUDITAR:** Conformidade Arquitetural Pós-"Operação Aço Líquido"
+
+**PROTOCOLO DE EXECUÇÃO:** Ative o **PEAF V1.5**. A sua análise deve seguir o formato de um checklist de conformidade, validando os resultados de cada ação chave do `ROADMAP_MESTRE_ACO_LIQUIDO.md`.
+
+#### **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+
+Gere um arquivo `CERTIFICADO_CONFORMIDADE_ACO_LIQUIDO.md` com a seguinte estrutura. Para cada item do checklist, forneça um veredito (`✅ SUCESSO` ou `❌ FALHA`) e a evidência em código que suporta a sua conclusão.
+
+# Certificado de Conformidade Arquitetural - Operação Aço Líquido
+
+**Data da Certificação:** 2025-09-05
+**Veredito Geral:** [Preencher no final: CONFORME / NÃO CONFORME]
+
+---
+
+## Checklist de Validação Pós-Refatoração
+
+### **Fase P1: Validação da Consolidação Arquitetural**
+
+#### **1.1. Unificação do Agregado `Proposal` (Resultado da Ação P1.1)**
+* **Critério de Sucesso:** Existe uma única `class Proposal` canónica no sistema.
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência:**
+    * Execute `find server/ -name "Proposal.ts"`. O resultado deve ser um único arquivo: `server/modules/proposal/domain/Proposal.ts`. Apresente o output do comando.
+
+#### **1.2. Unificação do Repositório (Resultado da Ação P1.2)**
+* **Critério de Sucesso:** Existe uma única interface `IProposalRepository` e uma única implementação concreta `ProposalRepository`.
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência:**
+    * Execute `find server/ -name "*ProposalRepository.ts*"`. O resultado deve ser apenas os dois arquivos canónicos (`IProposalRepository.ts` e `ProposalRepository.ts`). Apresente o output.
+    * Abra `server/modules/proposal/infrastructure/ProposalRepository.ts` e apresente a declaração da classe, confirmando que ela implementa a interface: `...implements IProposalRepository`.
+
+#### **1.3. Inversão de Dependência (Resultado da Ação P1.3)**
+* **Critério de Sucesso:** Os `Controllers` não instanciam mais os `Use Cases` ou `Repositories` diretamente (`new ...`).
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência:**
+    * Abra `server/modules/proposal/presentation/proposalController.ts`. Apresente o trecho de um método (ex: `create`) e confirme que ele invoca um `Use Case` importado do `dependencies.ts`, em vez de instanciá-lo.
+
+---
+
+### **Fase P2: Validação da Reengenharia DDD e Fortalecimento**
+
+#### **2.1. Modelo de Domínio Rico (Resultado da Ação P2.1)**
+* **Critério de Sucesso:** A lógica de negócio, como o cálculo de parcelas, reside no agregado `Proposal`, não no repositório.
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência:**
+    * Apresente o método estático `calculateMonthlyPaymentStatic` de dentro do arquivo `server/modules/proposal/domain/Proposal.ts`.
+    * Apresente o método `findByCriteriaLightweight` de `server/modules/proposal/infrastructure/ProposalRepository.ts` e mostre a linha onde ele agora invoca `Proposal.calculateMonthlyPaymentStatic(...)`, provando que o repositório delega a lógica para o domínio.
+
+#### **2.2. Sincronização da FSM (Resultado da Ação P2.2)**
+* **Critério de Sucesso:** Existe um único `enum ProposalStatus` canónico que é usado em todo o sistema.
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência:**
+    * Abra `server/services/statusFsmService.ts`. Apresente a linha de `import` no topo do arquivo, provando que ele agora importa o `ProposalStatus` de `server/modules/proposal/domain/Proposal`.
+
+#### **2.3. Unificação do Pipeline (Resultado da Ação P2.3)**
+* **Critério de Sucesso:** O arquivo de rotas legado `server/routes/propostas/core.ts` foi eliminado.
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência:**
+    * Execute `ls server/routes/propostas/core.ts`. O comando deve falhar com "No such file or directory". Apresente o output.
+
+#### **2.4. Resiliência e Performance (Resultado da Ação P2.4)**
+* **Critério de Sucesso (Resiliência):** O `proposalController` utiliza o `errorHandler` global.
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência (Resiliência):**
+    * Abra `server/modules/proposal/presentation/proposalController.ts`. Apresente o bloco `catch` de qualquer método e confirme que ele contém apenas `next(error);`.
+
+* **Critério de Sucesso (Performance):** A query da fila de análise utiliza `JOINs`.
+* **Veredito:** [✅ SUCESSO / ❌ FALHA]
+* **Evidência (Performance):**
+    * Abra `server/modules/proposal/infrastructure/ProposalRepository.ts`. Apresente o método `findPendingForAnalysis` e destaque a utilização de `.leftJoin(...)` na query do Drizzle.
+
+---
+
+## Sumário Final da Auditoria
+
+* **Conformidade Arquitetural:** [Preencher: Total / Parcial / Baixa]
+* **Pontos de Melhoria Contínua (Débitos Técnicos Residuais):**
+    * [Liste aqui quaisquer pequenas inconsistências ou oportunidades de refatoração encontradas durante a auditoria. Se nenhum, declare "Nenhum débito técnico crítico identificado."]
+* **Veredito Final do Arquiteto:**
+    * [Com base nas evidências, declare se a "Operação Aço Líquido" foi um sucesso e se o sistema está certificado como estável e em conformidade.]
