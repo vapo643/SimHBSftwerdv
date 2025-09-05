@@ -4,9 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { ProposalApplicationService } from '../application/ProposalApplicationService';
-import { ProposalRepositoryImpl } from '../infrastructure/ProposalRepositoryImpl';
-import { CreditAnalysisService } from '../domain/services/CreditAnalysisService';
+import { proposalApplicationService } from '../../dependencies';
 import { z } from 'zod';
 
 // Input validation schemas
@@ -43,13 +41,10 @@ const createProposalSchema = z.object({
 });
 
 export class ProposalController {
-  private applicationService: ProposalApplicationService;
+  private applicationService = proposalApplicationService; // DIP compliant injection
 
   constructor() {
-    // Initialize dependencies
-    const repository = new ProposalRepositoryImpl();
-    const creditAnalysisService = new CreditAnalysisService();
-    this.applicationService = new ProposalApplicationService(repository, creditAnalysisService);
+    // Dependencies now injected via IoC container
   }
 
   /**

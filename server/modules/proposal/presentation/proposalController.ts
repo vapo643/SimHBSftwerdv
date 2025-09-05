@@ -10,20 +10,20 @@
  */
 
 import { Request, Response } from 'express';
-import { ProposalRepository } from '../infrastructure/ProposalRepository';
-import { CreateProposalUseCase } from '../application/CreateProposalUseCase';
-import { GetProposalByIdUseCase } from '../application/GetProposalByIdUseCase';
-import { ApproveProposalUseCase } from '../application/ApproveProposalUseCase';
-import { RejectProposalUseCase } from '../application/RejectProposalUseCase';
-import { PendenciarPropostaUseCase } from '../application/PendenciarPropostaUseCase';
+import { 
+  proposalRepository,
+  createProposalUseCase,
+  getProposalByIdUseCase,
+  approveProposalUseCase,
+  rejectProposalUseCase,
+  pendenciarPropostaUseCase
+} from '../../dependencies';
 import { ProposalOutputSchema } from '../../../schemas/proposalOutput.schema';
 
 export class ProposalController {
-  private repository: ProposalRepository;
-
+  // Dependencies injected via IoC container - DIP compliant
   constructor() {
-    // Injeção de dependência simples - instanciação manual
-    this.repository = new ProposalRepository();
+    // All dependencies managed centrally via dependencies.ts
   }
 
   /**
@@ -31,7 +31,7 @@ export class ProposalController {
    */
   async create(req: Request, res: Response): Promise<Response> {
     try {
-      const useCase = new CreateProposalUseCase(this.repository);
+      const useCase = createProposalUseCase();
 
       // DEBUG: Log request body for troubleshooting
       console.log(
@@ -180,7 +180,7 @@ export class ProposalController {
       const { id } = req.params;
       
       // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta por ID usando método específico
-      const proposal = await this.repository.findById(id);
+      const proposal = await proposalRepository.findById(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -311,7 +311,7 @@ export class ProposalController {
       }
 
       // PERF-BOOST-001: Usar método lightweight para listagem
-      const rawData = await this.repository.findByCriteriaLightweight(criteria);
+      const rawData = await proposalRepository.findByCriteriaLightweight(criteria);
 
       // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
       // OPERAÇÃO AÇO LÍQUIDO P0.3: Adaptador de Contrato API para blindagem do frontend
@@ -362,7 +362,7 @@ export class ProposalController {
         });
       }
 
-      const useCase = new ApproveProposalUseCase(this.repository);
+      const useCase = approveProposalUseCase();
 
       await useCase.execute({
         proposalId: id,
@@ -424,7 +424,7 @@ export class ProposalController {
         });
       }
 
-      const useCase = new RejectProposalUseCase(this.repository);
+      const useCase = rejectProposalUseCase();
 
       await useCase.execute({
         proposalId: id,
@@ -489,7 +489,7 @@ export class ProposalController {
 
       console.log(`[ProposalController.pendenciar] Pendenciando proposta ${id} por analista ${analistaId}`);
 
-      const useCase = new PendenciarPropostaUseCase(this.repository);
+      const useCase = pendenciarPropostaUseCase();
 
       const result = await useCase.execute({
         propostaId: id,
@@ -554,7 +554,7 @@ export class ProposalController {
         });
       }
 
-      const proposal = await this.repository.findById(id);
+      const proposal = await proposalRepository.findById(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -565,7 +565,7 @@ export class ProposalController {
 
       // Usar o novo método específico para reenvio de pendentes
       proposal.resubmitFromPending();
-      await this.repository.save(proposal);
+      await proposalRepository.save(proposal);
 
       return res.json({
         success: true,
@@ -619,7 +619,7 @@ export class ProposalController {
       }
 
       console.log('🔍 [CONTROLLER DEBUG] Finding proposal by ID...');
-      const proposal = await this.repository.findById(id);
+      const proposal = await proposalRepository.findById(id);
 
       if (!proposal) {
         console.log('🚨 [CONTROLLER DEBUG] Proposal not found for ID:', id);
@@ -650,7 +650,7 @@ export class ProposalController {
       });
 
       console.log('🔍 [CONTROLLER DEBUG] Calling repository.save...');
-      await this.repository.save(proposal);
+      await proposalRepository.save(proposal);
 
       console.log('✅ [CONTROLLER DEBUG] Save completed successfully');
       return res.json({
@@ -697,7 +697,7 @@ export class ProposalController {
         });
       }
 
-      const proposals = await this.repository.findByCPF(cpf);
+      const proposals = await proposalRepository.findByCPF(cpf);
 
       if (!proposals || proposals.length === 0) {
         return res.json({
@@ -734,7 +734,7 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const proposal = await this.repository.findById(id);
+      const proposal = await proposalRepository.findById(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -747,7 +747,7 @@ export class ProposalController {
       proposal.submitForAnalysis();
 
       // Persistir mudança
-      await this.repository.save(proposal);
+      await proposalRepository.save(proposal);
 
       return res.json({
         success: true,
