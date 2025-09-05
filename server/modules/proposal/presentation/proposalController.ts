@@ -18,7 +18,7 @@ import {
   rejectProposalUseCase,
   pendenciarPropostaUseCase
 } from '../../dependencies';
-import { Proposal } from '../domain/Proposal';
+import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { ProposalOutputSchema } from '../../../schemas/proposalOutput.schema';
 
 export class ProposalController {
@@ -294,13 +294,11 @@ export class ProposalController {
       if (loja_id) criteria.lojaId = parseInt(loja_id as string);
       if (cpf) criteria.cpf = cpf as string;
 
-      // OPERAÇÃO AÇO LÍQUIDO P0.2: Processar parâmetro queue=analysis
-      // FIX CRÍTICO: Remover estado inexistente 'aguardando_analise'
+      // PAM P2.2: Processar parâmetro queue=analysis usando enum canônico
       if (queue === 'analysis') {
-        // Filtrar apenas status de análise - usar apenas status existentes no banco
+        // Filtrar propostas em análise usando enum canônico sincronizado
         if (!status) {
-          criteria.statusArray = ['em_analise']; // TEMPORÁRIO: Apenas estado existente
-          // TODO P2.2: Reintegrar 'aguardando_analise' após correção da FSM
+          criteria.statusArray = [ProposalStatus.EM_ANALISE];
         }
       }
 

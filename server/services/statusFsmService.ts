@@ -12,35 +12,7 @@ import { updateStatusWithContext, StatusContexto } from '../lib/status-context-h
 import { db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
-
-/**
- * Enum dos status ativos do sistema
- * Baseado na auditoria de status realizada em 19/08/2025
- * Valores expandidos para compatibilidade com testes
- */
-export enum ProposalStatus {
-  RASCUNHO = 'rascunho',
-  AGUARDANDO_ANALISE = 'aguardando_analise',
-  EM_ANALISE = 'em_analise',
-  PENDENTE = 'pendente',
-  PENDENCIADO = 'pendenciado',
-  APROVADO = 'aprovado',
-  REJEITADO = 'rejeitado',
-  CCB_GERADA = 'CCB_GERADA',
-  AGUARDANDO_ASSINATURA = 'AGUARDANDO_ASSINATURA',
-  ASSINATURA_CONCLUIDA = 'ASSINATURA_CONCLUIDA',
-  BOLETOS_EMITIDOS = 'BOLETOS_EMITIDOS',
-  PAGAMENTO_AUTORIZADO = 'pagamento_autorizado',
-  SUSPENSA = 'suspensa',
-
-  // Status adicionais para compatibilidade com testes
-  AGUARDANDO_DOCUMENTACAO = 'aguardando_documentacao',
-  DOCUMENTACAO_COMPLETA = 'documentacao_completa',
-  ASSINATURA_PENDENTE = 'assinatura_pendente',
-  CANCELADO = 'cancelado',
-  PAGO_TOTAL = 'pago',
-  AGUARDANDO_PAGAMENTO = 'aguardando_pagamento',
-}
+import { ProposalStatus } from '../modules/proposal/domain/Proposal';
 
 /**
  * Classe de erro customizada para transições inválidas
@@ -74,7 +46,6 @@ export class InvalidTransitionError extends Error {
 const transitionGraph: Record<string, string[]> = {
   // Status inicial - pode ser aprovado, rejeitado, cancelado ou suspenso
   [ProposalStatus.RASCUNHO]: [
-    ProposalStatus.AGUARDANDO_ANALISE,
     ProposalStatus.EM_ANALISE,
     ProposalStatus.APROVADO,
     ProposalStatus.REJEITADO,
@@ -83,34 +54,16 @@ const transitionGraph: Record<string, string[]> = {
   ],
 
   // Status de análise - podem ser aprovados, rejeitados, pendenciados ou suspensos
-  [ProposalStatus.AGUARDANDO_ANALISE]: [
-    ProposalStatus.EM_ANALISE,
-    ProposalStatus.APROVADO,
-    ProposalStatus.REJEITADO,
-    ProposalStatus.PENDENTE,
-    ProposalStatus.PENDENCIADO,
-    ProposalStatus.SUSPENSA,
-  ],
 
   [ProposalStatus.EM_ANALISE]: [
     ProposalStatus.APROVADO,
     ProposalStatus.REJEITADO,
-    ProposalStatus.PENDENTE,
     ProposalStatus.PENDENCIADO,
     ProposalStatus.SUSPENSA,
   ],
 
-  // Estados pendentes podem voltar para análise ou serem aprovados/rejeitados
-  [ProposalStatus.PENDENTE]: [
-    ProposalStatus.AGUARDANDO_ANALISE,
-    ProposalStatus.EM_ANALISE,
-    ProposalStatus.APROVADO,
-    ProposalStatus.REJEITADO,
-    ProposalStatus.SUSPENSA,
-  ],
-
+  // Estados pendenciados podem voltar para análise ou serem aprovados/rejeitados
   [ProposalStatus.PENDENCIADO]: [
-    ProposalStatus.AGUARDANDO_ANALISE,
     ProposalStatus.EM_ANALISE,
     ProposalStatus.APROVADO,
     ProposalStatus.REJEITADO,
@@ -121,7 +74,6 @@ const transitionGraph: Record<string, string[]> = {
   // NÃO pode voltar para REJEITADO após aprovação (regra de negócio)
   [ProposalStatus.APROVADO]: [
     ProposalStatus.CCB_GERADA,
-    ProposalStatus.AGUARDANDO_DOCUMENTACAO,
     ProposalStatus.CANCELADO,
     ProposalStatus.SUSPENSA,
   ],
@@ -141,29 +93,9 @@ const transitionGraph: Record<string, string[]> = {
   // Boletos emitidos - aguardando autorização de pagamento
   [ProposalStatus.BOLETOS_EMITIDOS]: [ProposalStatus.PAGAMENTO_AUTORIZADO, ProposalStatus.SUSPENSA],
 
-  // Status de documentação
-  [ProposalStatus.AGUARDANDO_DOCUMENTACAO]: [
-    ProposalStatus.DOCUMENTACAO_COMPLETA,
-    ProposalStatus.SUSPENSA,
-  ],
-
-  [ProposalStatus.DOCUMENTACAO_COMPLETA]: [
-    ProposalStatus.ASSINATURA_PENDENTE,
-    ProposalStatus.CCB_GERADA,
-    ProposalStatus.SUSPENSA,
-  ],
-
-  [ProposalStatus.ASSINATURA_PENDENTE]: [
-    ProposalStatus.ASSINATURA_CONCLUIDA,
-    ProposalStatus.SUSPENSA,
-  ],
-
-  // Status de pagamento
-  [ProposalStatus.AGUARDANDO_PAGAMENTO]: [ProposalStatus.PAGO_TOTAL, ProposalStatus.SUSPENSA],
 
   // Estados finais - não podem transicionar
   [ProposalStatus.PAGAMENTO_AUTORIZADO]: [], // Estado final de sucesso
-  [ProposalStatus.PAGO_TOTAL]: [], // Estado final de sucesso
   [ProposalStatus.REJEITADO]: [], // Estado final de rejeição
   [ProposalStatus.CANCELADO]: [], // Estado final de cancelamento
 
@@ -175,10 +107,7 @@ const transitionGraph: Record<string, string[]> = {
     ProposalStatus.AGUARDANDO_ASSINATURA,
     ProposalStatus.ASSINATURA_CONCLUIDA,
     ProposalStatus.BOLETOS_EMITIDOS,
-    ProposalStatus.AGUARDANDO_DOCUMENTACAO,
-    ProposalStatus.DOCUMENTACAO_COMPLETA,
-    ProposalStatus.ASSINATURA_PENDENTE,
-    ProposalStatus.AGUARDANDO_PAGAMENTO,
+    // Status canônicos apenas
   ],
 };
 

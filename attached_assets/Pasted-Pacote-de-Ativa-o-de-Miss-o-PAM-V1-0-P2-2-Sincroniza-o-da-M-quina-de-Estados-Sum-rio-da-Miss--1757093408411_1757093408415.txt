@@ -1,0 +1,70 @@
+Pacote de Ativação de Missão (PAM) V1.0 - P2.2: Sincronização da Máquina de Estados
+Sumário da Missão (O Quê): Realizar a correção definitiva da Máquina de Estados Finita (FSM), eliminando as definições de status conflitantes, estabelecendo um enum canónico como a única fonte da verdade, e garantindo que o código e o banco de dados estejam perfeitamente sincronizados.
+
+Intenção Estratégica (O Porquê): Esta é a Ação P2.2 da "Operação Aço Líquido". A inconsistência de estados (em_analise vs. aguardando_analise) foi a causa raiz da falha original da "Fila Vazia" e é um sintoma da fratura arquitetural. A correção temporária na Fase P0 foi um curativo. Esta missão é a cirurgia que remove a doença, garantindo que o workflow de propostas opere sobre uma base de estados única, previsível e livre de ambiguidades.
+
+Histórico Relevante (Consulta Obrigatória): A sua execução anterior já identificou as definições conflitantes dos enums de status em proposal/domain/Proposal.ts, credit/domain/aggregates/Proposal.ts (já eliminado), e server/services/statusFsmService.ts. O agregado canónico em proposal/domain será a fonte da verdade.
+
+Modelo Mental (Como se Encaixa): Estamos a padronizar o "idioma" que o sistema usa para descrever o estado de uma proposta. Atualmente, diferentes módulos falam "dialetos" diferentes, causando confusão. Vamos impor um único "idioma oficial" (o enum canónico) e garantir que todos os componentes do sistema (UI, Controllers, Use Cases, Banco de Dados) sejam fluentes nele, eliminando qualquer possibilidade de má interpretação.
+
+Riscos Antecipados e Contramedidas:
+
+Risco (MÉDIO): A refatoração dos enums pode causar erros de tipo em cascata se não for feita de forma sistemática.
+
+Contramedida: A missão seguirá um roteiro de 3 fases (Consolidar, Refatorar, Migrar) e utilizará get_latest_lsp_diagnostics como um radar contínuo para detetar e corrigir erros de tipo à medida que surgem.
+
+IMPLEMENTAR: Correção Definitiva e Sincronização da FSM de Status
+
+CONTEXT: O sistema sofre de múltiplas e conflitantes definições para os status de proposta, notavelmente a confusão entre em_analise e aguardando_analise. Isto levou a uma correção temporária na Fase P0. Agora, precisamos implementar a solução definitiva e permanente.
+
+CURRENT STATE: Múltiplos enums de status coexistem, e o proposalController contém uma correção temporária que contorna o problema, mas não o resolve na sua origem.
+
+EXPECTED (Estado Final de Sucesso):
+
+Deve existir apenas UMA definição canónica para o enum ProposalStatus, localizada em server/modules/proposal/domain/Proposal.ts.
+
+Todos os outros arquivos do sistema (statusFsmService.ts, etc.) devem importar e usar este enum canónico.
+
+Qualquer referência hardcoded a strings de status (como 'em_analise') deve ser substituída pelo membro do enum correspondente (ex: ProposalStatus.EM_ANALISE).
+
+A correção temporária no proposalController.ts (Ação P0.2) deve ser revertida, pois a causa raiz da inconsistência terá sido eliminada.
+
+O sistema deve compilar com ZERO erros de LSP.
+
+CONSTRAINTS (Roadmap de Implementação Faseado):
+
+Fase 1: Consolidação do Enum Canónico
+
+Auditoria: Abra server/services/statusFsmService.ts e server/modules/proposal/domain/Proposal.ts. Compare as definições do enum de status.
+
+Ação: No arquivo server/services/statusFsmService.ts, delete a sua definição local do enum ProposalStatus. Em vez disso, importe o enum canónico do agregado: import { ProposalStatus } from '../modules/proposal/domain/Proposal';.
+
+Fase 2: Refatoração de Dependências
+
+Execute get_latest_lsp_diagnostics. É provável que a alteração anterior cause erros de tipo em statusFsmService.ts se os nomes dos membros do enum forem diferentes. Corrija quaisquer discrepâncias para usar os nomes do enum canónico.
+
+Procure em todo o projeto por referências "hardcoded" aos status (ex: status === 'em_analise'). Substitua-as por comparações com o enum canónico (ex: status === ProposalStatus.EM_ANALISE).
+
+Fase 3: Reversão da Correção Temporária
+
+Abra server/modules/proposal/presentation/proposalController.ts.
+
+Localize a correção temporária da Ação P0.2, onde a criteria.statusArray foi fixada para ['em_analise'].
+
+Reverta esta lógica para a sua intenção original mais flexível (se aplicável) ou valide que a busca agora é robusta o suficiente sem o "hardcode". O ROADMAP_MESTRE_ACO_LIQUIDO.md indica que devemos reverter as alterações. A lógica original que buscava por ['aguardando_analise', 'em_analise'] deve ser restaurada para usar apenas os valores corretos do enum agora unificado.
+
+Validação Final:
+
+Execute get_latest_lsp_diagnostics até que zero erros sejam reportados.
+
+Apresente um relatório de execução final seguindo o protocolo 7-CHECK, confirmando que a FSM está agora sincronizada em toda a aplicação.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: [Preencher com a porcentagem de 0 a 100%]
+
+RISCOS IDENTIFICADOS: [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+
+DECISÕES TÉCNICAS ASSUMIDAS: [Ex: "Assumi que o enum em Proposal.ts é a fonte da verdade definitiva e que em_analise é o estado canónico, não aguardando_analise."]
+
+VALIDAÇÃO PENDENTE: [Ex: "Migração de dados no banco para converter quaisquer status legados para os novos valores canónicos, se necessário."]
