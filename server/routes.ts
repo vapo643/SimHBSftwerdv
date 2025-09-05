@@ -1965,7 +1965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
         // P1 CORRECTION: Defensive programming para consultas vazias
-        let tabelasPersonalizadas = [];
+        let tabelasPersonalizadas: any[] = [];
         try {
           tabelasPersonalizadas = await db
             .select({
@@ -2008,7 +2008,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
         // P1 CORRECTION: Defensive programming para consultas vazias
-        let tabelasGerais = [];
+        let tabelasGerais: any[] = [];
         try {
           tabelasGerais = await db
             .select({
@@ -3365,7 +3365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const gerenteId = parseInt(req.params.gerenteId);
-        const lojaIds = await storage.getLojasForGerente(gerenteId);
+        const lojaIds = await storage.getLojasForGerente(gerenteId.toString());
         res.json(lojaIds);
       } catch (error) {
         console.error('Get lojas for gerente error:', error);
@@ -3437,7 +3437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: AuthenticatedRequest, res) => {
       try {
         const gerenteId = parseInt(req.params.gerenteId);
-        const relationships = await storage.getGerenteLojas(gerenteId);
+        const relationships = await storage.getGerenteLojas(gerenteId.toString());
         res.json(relationships);
       } catch (error) {
         console.error('Get gerente relationships error:', error);
