@@ -52,6 +52,13 @@ interface Proposta {
   telefoneCliente?: string;
   valorSolicitado?: number;
   prazo?: number;
+  // ✍️ CORREÇÃO: Adicionar campos financeiros que estavam ausentes
+  taxaJuros?: number;
+  valorTac?: number;
+  valorIof?: number;
+  valorTotalFinanciado?: number;
+  finalidade?: string;
+  garantia?: string;
   lojaId?: number;
   parceiro?: {
     id: number;
@@ -337,6 +344,22 @@ const FilaAnalise: React.FC = () => {
                         Cliente
                       </div>
                     </TableHead>
+                    {/* ✍️ CORREÇÃO: Adicionar colunas para campos financeiros */}
+                    <TableHead className="min-w-[120px] text-right text-gray-900 dark:text-white">
+                      Valor Solicitado
+                    </TableHead>
+                    <TableHead className="min-w-[80px] text-right text-gray-900 dark:text-white">
+                      Prazo
+                    </TableHead>
+                    <TableHead className="min-w-[100px] text-right text-gray-900 dark:text-white">
+                      Taxa Juros
+                    </TableHead>
+                    <TableHead className="min-w-[100px] text-right text-gray-900 dark:text-white">
+                      TAC
+                    </TableHead>
+                    <TableHead className="min-w-[100px] text-right text-gray-900 dark:text-white">
+                      IOF
+                    </TableHead>
                     <TableHead className="min-w-[130px] text-gray-900 dark:text-white">
                       <div className="flex items-center gap-2">
                         <Building className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -361,7 +384,7 @@ const FilaAnalise: React.FC = () => {
                   {isLoading ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={12}
                         className="py-8 text-center text-gray-900 dark:text-white"
                       >
                         <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-gray-600 dark:text-gray-400" />
@@ -370,13 +393,13 @@ const FilaAnalise: React.FC = () => {
                     </TableRow>
                   ) : error ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-8 text-center text-red-500">
+                      <TableCell colSpan={12} className="py-8 text-center text-red-500">
                         Erro ao carregar propostas. Por favor, recarregue a página.
                       </TableCell>
                     </TableRow>
                   ) : filteredData.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-8 text-center text-gray-500">
+                      <TableCell colSpan={12} className="py-8 text-center text-gray-500">
                         Nenhuma proposta encontrada.
                       </TableCell>
                     </TableRow>
@@ -389,13 +412,29 @@ const FilaAnalise: React.FC = () => {
                         <TableCell className="text-gray-900 dark:text-white">
                           {format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })}
                         </TableCell>
-                        <TableCell className="text-gray-900 dark:text-white">
+                        <TableCell className="text-gray-900 dark:text-white" data-testid={`text-nomeCliente-${proposta.id}`}>
                           {proposta.nomeCliente || '-'}
                         </TableCell>
-                        <TableCell className="text-gray-900 dark:text-white">
+                        {/* ✍️ CORREÇÃO: Exibir campos financeiros com formatação aprimorada */}
+                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-valorSolicitado-${proposta.id}`}>
+                          {proposta.valorSolicitado != null ? `R$ ${proposta.valorSolicitado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                        </TableCell>
+                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-prazo-${proposta.id}`}>
+                          {proposta.prazo != null ? `${proposta.prazo} meses` : '-'}
+                        </TableCell>
+                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-taxaJuros-${proposta.id}`}>
+                          {proposta.taxaJuros != null ? `${proposta.taxaJuros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%` : '-'}
+                        </TableCell>
+                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-valorTac-${proposta.id}`}>
+                          {proposta.valorTac != null ? `R$ ${proposta.valorTac.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                        </TableCell>
+                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-valorIof-${proposta.id}`}>
+                          {proposta.valorIof != null ? `R$ ${proposta.valorIof.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                        </TableCell>
+                        <TableCell className="text-gray-900 dark:text-white" data-testid={`text-parceiro-${proposta.id}`}>
                           {proposta.parceiro?.razaoSocial || '-'}
                         </TableCell>
-                        <TableCell className="text-gray-900 dark:text-white">
+                        <TableCell className="text-gray-900 dark:text-white" data-testid={`text-loja-${proposta.id}`}>
                           {proposta.loja?.nomeLoja || '-'}
                         </TableCell>
                         <TableCell>
@@ -429,8 +468,10 @@ const FilaAnalise: React.FC = () => {
                               <Button
                                 className="bg-blue-500 text-white hover:bg-blue-600"
                                 size="sm"
+                                data-testid={`button-analisar-${proposta.id}`}
+                                aria-label={`Analisar proposta do cliente ${proposta.nomeCliente}`}
                               >
-                                <Eye className="mr-2 h-4 w-4" />
+                                <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                                 <span className="hidden sm:inline">Analisar</span>
                               </Button>
                             </Link>
@@ -451,13 +492,19 @@ const FilaAnalise: React.FC = () => {
                                   }
                                   size="sm"
                                   onClick={() => handleToggleStatus(proposta.id, proposta.status)}
+                                  data-testid={`button-toggle-status-${proposta.id}`}
+                                  aria-label={
+                                    proposta.status === 'suspensa'
+                                      ? `Reativar proposta do cliente ${proposta.nomeCliente}`
+                                      : `Suspender proposta do cliente ${proposta.nomeCliente}`
+                                  }
                                   title={
                                     proposta.status === 'suspensa'
                                       ? 'Reativar proposta'
                                       : 'Suspender proposta'
                                   }
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <Edit className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                               )}
                           </div>
