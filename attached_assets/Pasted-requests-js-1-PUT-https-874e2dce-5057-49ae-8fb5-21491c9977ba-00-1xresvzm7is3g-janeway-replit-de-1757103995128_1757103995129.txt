@@ -1,0 +1,48 @@
+requests.js:1 
+ PUT https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status 400 (Bad Request)
+s.fetch	@	requests.js:1
+(anonymous)	@	traffic.js:1
+fetch	@	traffic.js:1
+fetchWithTimeout	@	apiClient.ts:305
+apiClient	@	apiClient.ts:413
+await in apiClient		
+put	@	apiClient.ts:605
+updatePropostaStatus	@	analise.tsx:83
+await in execute		
+onSubmit	@	analise.tsx:169
+Explanation
+
+Understanding the problem
+The console error PUT https://.../status 400 (Bad Request) indicates that the server received your PUT request but could not process it because there was something wrong with the request itself. A 400 Bad Request error is a client-side error, meaning the issue is with how your browser or application sent the request, not necessarily a problem with the server itself [3, 4, 5]. Common causes include malformed request syntax, invalid data in the request body, or exceeding server-defined limitations [2, 5].
+
+How to verify
+Inspect the Request Payload: In the Network tab of DevTools, click on the failed PUT request. Go to the "Payload" tab to examine the data being sent to the server. Check for incorrect formatting (e.g., invalid JSON), missing required fields, or values that might exceed expected limits.
+Check Server Logs: If you have access to the server-side logs, review them to see if they provide more specific details about why the request was considered "bad."
+Suggested fix
+Review the data being sent in the body of your PUT request to https://.../api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status. Ensure the data is correctly formatted (likely JSON, based on the Content-Type header) and contains all necessary information in the expected structure.
+
+For example, if the API expects a JSON object with a status property:
+
+ts
+
+// In your apiClient or analise.tsx where the PUT request is made
+const response = await apiClient.put(
+  '/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status',
+  {
+    // Ensure the data being sent matches the expected format
+    status: 'approved', // Example: Make sure the status value is valid
+    // Add any other required fields here
+  }
+);
+Use code snippets with caution
+
+Verify the required format and valid values for the request payload by checking your server's API documentation or the server-side code handling this endpoint.
+
+Summary
+A 400 Bad Request error for a PUT request indicates that the data sent to the server was invalid or improperly formatted. To fix this, inspect the request payload in DevTools and ensure the data matches the server's expected structure and content.
+
+Sources and related content
+Data used to understand this message
+Use search instead
+AI tools may generate inaccurate info that doesn't represent Google's views. Data sent to Google may be seen by human reviewers to improve this feature. Open settings or learn more
+
