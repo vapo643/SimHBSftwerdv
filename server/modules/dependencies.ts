@@ -48,6 +48,7 @@ import { GetProposalByIdUseCase } from './proposal/application/GetProposalByIdUs
 import { ApproveProposalUseCase } from './proposal/application/ApproveProposalUseCase';
 import { RejectProposalUseCase } from './proposal/application/RejectProposalUseCase';
 import { PendenciarPropostaUseCase } from './proposal/application/PendenciarPropostaUseCase';
+import { SubmitForAnalysisUseCase } from './proposal/application/SubmitForAnalysisUseCase';
 
 /**
  * Factory functions for Use Cases with dependency injection
@@ -57,3 +58,4 @@ export const getProposalByIdUseCase = () => new GetProposalByIdUseCase(proposalR
 export const approveProposalUseCase = () => new ApproveProposalUseCase(proposalRepository);
 export const rejectProposalUseCase = () => new RejectProposalUseCase(proposalRepository);
 export const pendenciarPropostaUseCase = () => new PendenciarPropostaUseCase(proposalRepository);
+export const submitForAnalysisUseCase = () => new SubmitForAnalysisUseCase(proposalRepository);
