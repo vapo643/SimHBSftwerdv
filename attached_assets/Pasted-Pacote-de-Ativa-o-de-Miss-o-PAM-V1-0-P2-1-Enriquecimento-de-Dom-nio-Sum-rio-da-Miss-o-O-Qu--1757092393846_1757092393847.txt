@@ -1,0 +1,77 @@
+Pacote de Ativação de Missão (PAM) V1.0 - P2.1: Enriquecimento de Domínio
+Sumário da Missão (O Quê): Iniciar a migração do nosso agregado Proposal de um "Modelo de Domínio Anémico" para um "Modelo de Domínio Rico". Esta missão consiste em identificar lógica de negócio que "vazou" para outras camadas (controllers, services, repositories) e movê-la para dentro do agregado Proposal, onde ela pertence.
+
+Intenção Estratégica (O Porquê): Esta é a Ação P2.1 da "Operação Aço Líquido". Um Modelo Anémico, onde os objetos de domínio são meros sacos de dados, é um anti-padrão que leva a lógica de negócio a espalhar-se por todo o sistema, tornando-o frágil e difícil de manter. Ao enriquecer o nosso domínio, garantimos que o agregado Proposal seja o único e verdadeiro guardião das suas próprias regras e invariantes, cumprindo a promessa central do DDD.
+
+Histórico Relevante (Consulta Obrigatória): O DIAGNOSTICO_SISTEMICO_FINAL.md identificou explicitamente o "Vazamento de Lógica" como uma fratura sistémica. O ROADMAP_MESTRE_ACO_LIQUIDO.md aponta exemplos concretos, como cálculos e defaults de taxa no proposalController.ts e o método calculateMonthlyPaymentRaw no ProposalRepository.ts.
+
+Modelo Mental (Como se Encaixa): Estamos a "repatriar" a inteligência do sistema. A lógica que foi exilada para as fronteiras (outras camadas) será trazida de volta para o seu "país" de origem (o agregado de domínio). O agregado deixará de ser um mero "passaporte" (dados) para se tornar um "cidadão" completo (dados + comportamento).
+
+Riscos Antecipados e Contramedidas:
+
+Risco (ALTO): Mover a lógica de forma incorreta pode quebrar os pontos do sistema que a consumiam. A refatoração precisa ser completa, alterando não só a localização da lógica mas também a forma como ela é chamada.
+
+Contramedida: A missão será executada em duas fases: primeiro, uma auditoria para mapear toda a lógica vazada e criar um plano de refatoração claro. Apenas após a aprovação deste plano é que a execução da movimentação do código começará.
+
+IMPLEMENTAR: Auditoria e Plano de Refatoração para Enriquecimento do Agregado Proposal
+
+CONTEXT: A lógica de negócio crítica pertencente às Propostas está atualmente espalhada por Controllers e Repositories. Precisamos centralizá-la dentro da classe Proposal para aderir aos princípios de um Modelo de Domínio Rico.
+
+CURRENT STATE: O agregado Proposal é largamente anémico, com a sua lógica sendo gerida por classes externas, violando o princípio de encapsulamento.
+
+EXPECTED (Estado Final de Sucesso):
+O agente deve produzir um plano de refatoração em Markdown como output. Este plano deve detalhar:
+
+Uma lista de todos os métodos e lógicas de negócio encontrados fora da camada de domínio que deveriam pertencer ao agregado Proposal.
+
+Para cada item, o plano deve especificar o arquivo de origem e o método/lógica a ser movido.
+
+Para cada item, o plano deve propor o novo método a ser criado dentro da classe destino (Proposal.ts).
+
+O plano deve listar todos os "call sites" (locais de chamada) que precisarão ser atualizados para usar os novos métodos do agregado.
+
+CONSTRAINTS (Roadmap de Implementação):
+
+Fase 1: Auditoria de Lógica de Negócio Vazada
+
+Alvo 1 (Repository): Audite o arquivo server/modules/proposal/infrastructure/ProposalRepository.ts. Procure por métodos que façam mais do que apenas buscar ou salvar dados. Especificamente, investigue o método calculateMonthlyPaymentRaw. A lógica de cálculo financeiro pertence ao domínio, não à infraestrutura de persistência.
+
+Alvo 2 (Controller): Audite o arquivo server/modules/proposal/presentation/proposalController.ts. Procure por qualquer lógica que defina valores padrão, realize cálculos ou valide regras de negócio antes de chamar um Use Case.
+
+Alvo 3 (Legacy Services): Investigue o arquivo server/services/proposalService.ts (se ainda existir lógica relevante) por regras de negócio que ainda não foram migradas.
+
+Fase 2: Geração do Plano de Refatoração
+
+Com base nas descobertas da Fase 1, construa um relatório em Markdown chamado PLANO_DE_ENRIQUECIMENTO_DOMINIO.md.
+
+Use a seguinte estrutura para o relatório:
+
+Markdown
+
+# Plano de Refatoração: Migração para Modelo de Domínio Rico (P2.1)
+
+## 1. Lógicas de Negócio a Serem Repatriadas
+
+### 1.1. Cálculo de Parcela Mensal
+* **Lógica Identificada:** Método `calculateMonthlyPaymentRaw`.
+* **Localização Atual (Origem):** `server/modules/proposal/infrastructure/ProposalRepository.ts`
+* **Justificativa:** A forma como uma parcela é calculada é uma regra de negócio intrínseca da proposta, não um detalhe de persistência.
+* **Plano de Ação:**
+    1. Mover a lógica de cálculo para um novo método público dentro da classe `Proposal` em `server/modules/proposal/domain/Proposal.ts`, chamado `calculateMonthlyPayment(): Money`.
+    2. Refatorar o `call site` dentro de `ProposalRepository.ts` para invocar `proposal.calculateMonthlyPayment()` em vez de usar a lógica local.
+
+### 1.2. [Próxima Lógica Identificada]
+* **Lógica Identificada:** [Ex: Definição de taxa de juros padrão]
+* **Localização Atual (Origem):** [Ex: `server/modules/proposal/presentation/proposalController.ts`]
+* **Justificativa:** [Ex: A política de taxas padrão é uma regra de negócio do domínio.]
+* **Plano de Ação:**
+    1. [Ação 1]
+    2. [Ação 2]
+
+## 2. Lista de "Call Sites" a Serem Atualizados
+* `server/modules/proposal/infrastructure/ProposalRepository.ts`: (método `findByCriteriaLightweight`)
+* [Liste todos os outros arquivos que serão impactados]
+
+Validação:
+
+O seu único output para esta missão é o arquivo PLANO_DE_ENRIQUECIMENTO_DOMINIO.md. Não modifique nenhum código-fonte ainda. A execução da refatoração será uma missão subsequente, após a aprovação deste plano.
