@@ -224,7 +224,12 @@ export class ProposalController {
         updated_at: proposal.updatedAt,
         createdAt: proposal.createdAt, // Duplicado para compatibilidade
         updatedAt: proposal.updatedAt, // Duplicado para compatibilidade
-        // CORREÇÃO: Incluir campos que estavam ausentes
+        // ✍️ CORREÇÃO CRÍTICA: Incluir campos em camelCase (igual ao endpoint de listagem)
+        valorSolicitado: proposal.valor.getReais(),
+        valorTac: proposal.valorTac,
+        valorIof: proposal.valorIof,
+        valorTotalFinanciado: proposal.valorTotalFinanciado,
+        // Manter snake_case para compatibilidade com código legacy
         valor_tac: proposal.valorTac,
         valor_iof: proposal.valorIof,
         valor_total_financiado: proposal.valorTotalFinanciado,
