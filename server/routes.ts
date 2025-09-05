@@ -133,9 +133,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // const propostasCoreRouter = (await import('./routes/propostas/core.js')).default;
   // app.use('/api/propostas', propostasCoreRouter); // MOVED TO END TO AVOID CONFLICTS
 
-  // DDD Credit Context Routes - Phase 1 Implementation
-  const { createCreditRoutes } = await import('./modules/credit/presentation/routes.js');
-  app.use('/api/ddd', createCreditRoutes());
+  // 🗑️ DDD Credit Context Routes - REMOVIDO POR P0.1 AUDITORIA SOBERANIA
+  // Pipeline duplo eliminado - manter apenas /api/propostas canônico
 
   // Import and mount integration test routes
   const interIntegrationRouter = (await import('./routes/integracao/inter.js')).default;

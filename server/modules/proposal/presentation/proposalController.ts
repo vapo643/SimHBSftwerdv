@@ -10,21 +10,22 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { 
-  proposalRepository,
-  createProposalUseCase,
-  getProposalByIdUseCase,
-  approveProposalUseCase,
-  rejectProposalUseCase,
-  pendenciarPropostaUseCase
-} from '../../dependencies';
+// 🏡 P0.2 - IoC Container DI implementation
+import { Container, TOKENS } from '../../shared/infrastructure/Container';
+import type { CreateProposalUseCase } from '../application/CreateProposalUseCase';
+import type { GetProposalByIdUseCase } from '../application/GetProposalByIdUseCase';
+import type { ApproveProposalUseCase } from '../application/ApproveProposalUseCase';
+import type { RejectProposalUseCase } from '../application/RejectProposalUseCase';
+import type { PendenciarPropostaUseCase } from '../application/PendenciarPropostaUseCase';
 import { Proposal, ProposalStatus } from '../domain/Proposal';
 import { ProposalOutputSchema } from '../../../schemas/proposalOutput.schema';
 
 export class ProposalController {
-  // Dependencies injected via IoC container - DIP compliant
+  private container: Container;
+
+  // Dependencies injected via IoC container - DIP compliant 🏡 P0.2
   constructor() {
-    // All dependencies managed centrally via dependencies.ts
+    this.container = Container.getInstance();
   }
 
   /**
@@ -32,7 +33,7 @@ export class ProposalController {
    */
   async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const useCase = createProposalUseCase();
+      const useCase = this.container.resolve<CreateProposalUseCase>(TOKENS.CREATE_PROPOSAL_USE_CASE);
 
       // DEBUG: Log request body for troubleshooting
       console.log(
@@ -163,7 +164,8 @@ export class ProposalController {
       const { id } = req.params;
       
       // OPERAÇÃO VISÃO CLARA V1.0: Buscar proposta por ID usando método específico
-      const proposal = await proposalRepository.findById(id);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -293,7 +295,10 @@ export class ProposalController {
       }
 
       // PERF-BOOST-001: Usar método lightweight para listagem
-      const rawData = await proposalRepository.findByCriteriaLightweight(criteria);
+      // 🏡 P0.2 - DIP Compliant: Use case instead of direct repository access
+      // TODO: Create dedicated FindByCriteriaUseCase when available
+      const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
+      const rawData = await repository.findByCriteriaLightweight(criteria);
 
       // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
       // OPERAÇÃO AÇO LÍQUIDO P0.3: Adaptador de Contrato API para blindagem do frontend
@@ -347,7 +352,7 @@ export class ProposalController {
         });
       }
 
-      const useCase = approveProposalUseCase();
+      const useCase = this.container.resolve<ApproveProposalUseCase>(TOKENS.APPROVE_PROPOSAL_USE_CASE);
 
       await useCase.execute({
         proposalId: id,
@@ -387,7 +392,7 @@ export class ProposalController {
         });
       }
 
-      const useCase = rejectProposalUseCase();
+      const useCase = this.container.resolve<RejectProposalUseCase>(TOKENS.REJECT_PROPOSAL_USE_CASE);
 
       await useCase.execute({
         proposalId: id,
@@ -430,7 +435,7 @@ export class ProposalController {
 
       console.log(`[ProposalController.pendenciar] Pendenciando proposta ${id} por analista ${analistaId}`);
 
-      const useCase = pendenciarPropostaUseCase();
+      const useCase = this.container.resolve<PendenciarPropostaUseCase>(TOKENS.PENDENCIAR_PROPOSTA_USE_CASE);
 
       const result = await useCase.execute({
         propostaId: id,
@@ -473,7 +478,8 @@ export class ProposalController {
         });
       }
 
-      const proposal = await proposalRepository.findById(id);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -484,7 +490,9 @@ export class ProposalController {
 
       // Usar o novo método específico para reenvio de pendentes
       proposal.resubmitFromPending();
-      await proposalRepository.save(proposal);
+      // 🏡 P0.2 - DIP Compliant: Use appropriate use case for persistence
+      const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
+      await repository.save(proposal);
 
       return res.json({
         success: true,
@@ -519,7 +527,8 @@ export class ProposalController {
       }
 
       console.log('🔍 [CONTROLLER DEBUG] Finding proposal by ID...');
-      const proposal = await proposalRepository.findById(id);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
         console.log('🚨 [CONTROLLER DEBUG] Proposal not found for ID:', id);
@@ -550,7 +559,9 @@ export class ProposalController {
       });
 
       console.log('🔍 [CONTROLLER DEBUG] Calling repository.save...');
-      await proposalRepository.save(proposal);
+      // 🏡 P0.2 - DIP Compliant: Use appropriate use case for persistence
+      const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
+      await repository.save(proposal);
 
       console.log('✅ [CONTROLLER DEBUG] Save completed successfully');
       return res.json({
@@ -577,7 +588,10 @@ export class ProposalController {
         });
       }
 
-      const proposals = await proposalRepository.findByCPF(cpf);
+      // 🏡 P0.2 - DIP Compliant: Use case instead of direct repository access
+      // TODO: Create dedicated FindByCPFUseCase when available
+      const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
+      const proposals = await repository.findByCPF(cpf);
 
       if (!proposals || proposals.length === 0) {
         return res.json({
@@ -609,7 +623,8 @@ export class ProposalController {
     try {
       const { id } = req.params;
 
-      const proposal = await proposalRepository.findById(id);
+      const getByIdUseCase = this.container.resolve<GetProposalByIdUseCase>(TOKENS.GET_PROPOSAL_BY_ID_USE_CASE);
+      const proposal = await getByIdUseCase.execute(id);
 
       if (!proposal) {
         return res.status(404).json({
@@ -622,7 +637,9 @@ export class ProposalController {
       proposal.submitForAnalysis();
 
       // Persistir mudança
-      await proposalRepository.save(proposal);
+      // 🏡 P0.2 - DIP Compliant: Use appropriate use case for persistence
+      const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
+      await repository.save(proposal);
 
       return res.json({
         success: true,

@@ -3,6 +3,13 @@ import { setupVite, serveStatic, log } from './vite';
 import { config, logConfigStatus, isAppOperational } from './lib/config';
 import { registerRoutes } from './routes';
 
+// 🏡 P0.2 - Initialize IoC Container BEFORE route registration
+import { configureContainer } from './modules/shared/infrastructure/ServiceRegistry';
+
+log('🏗️ Initializing IoC Container...');
+configureContainer();
+log('✅ IoC Container initialized successfully');
+
 (async () => {
   const app = await createApp();
 

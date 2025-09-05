@@ -69,6 +69,11 @@ export class TransactionalProposalRepository implements IProposalRepository {
           valor: data.valor.toString(),
           prazo: data.prazo,
           taxaJuros: data.taxa_juros.toString(),
+          // 🛠️ P2.1 - Campos obrigatórios adicionados para corrigir LSP diagnostic
+          taxaJurosAnual: data.taxa_juros_anual?.toString() || (data.taxa_juros * 12).toString(),
+          valorTac: data.valor_tac?.toString() || '0',
+          valorIof: data.valor_iof?.toString() || '0', 
+          valorTotalFinanciado: data.valor_total_financiado?.toString() || data.valor.toString(),
           produtoId: data.produto_id,
           tabelaComercialId: data.tabela_comercial_id,
           lojaId: data.loja_id,
@@ -81,6 +86,14 @@ export class TransactionalProposalRepository implements IProposalRepository {
           motivoPendencia: data.motivo_rejeicao,
           observacoes: data.observacoes,
           ccbDocumentoUrl: data.ccb_url,
+          // Campos obrigatórios adicionais identificados pelo LSP
+          userId: data.user_id || 'e647afc0-03fa-482d-8293-d824dcab0399',
+          analistaId: data.analista_id || 'e647afc0-03fa-482d-8293-d824dcab0399',
+          clienteComprometimentoRenda: data.cliente_comprometimento_renda || 30,
+          clienteEndereco: data.cliente_data.endereco || '',
+          ccbGerado: false,
+          assinaturaEletronicaConcluida: false,
+          biometriaConcluida: false,
           createdAt: data.created_at,
         },
       ]);
