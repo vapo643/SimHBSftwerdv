@@ -81,9 +81,10 @@ const FilaAnalise: React.FC = () => {
 
       case 'ANALISTA':
         // ANALISTA vê fila de análise OU histórico completo
+        // OPERAÇÃO AÇO LÍQUIDO P0.2: Ajustado para estados válidos
         return showHistorico
           ? '/api/propostas' // Histórico completo
-          : '/api/propostas?queue=analysis'; // Apenas fila de análise
+          : '/api/propostas?queue=analysis'; // Apenas fila de análise (agora corrigida)
 
       case 'GERENTE':
       case 'ADMINISTRADOR':

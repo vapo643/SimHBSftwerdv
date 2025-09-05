@@ -293,11 +293,13 @@ export class ProposalController {
       if (loja_id) criteria.lojaId = parseInt(loja_id as string);
       if (cpf) criteria.cpf = cpf as string;
 
-      // OPERAÇÃO VISÃO CLARA V1.0: Processar parâmetro queue=analysis
+      // OPERAÇÃO AÇO LÍQUIDO P0.2: Processar parâmetro queue=analysis
+      // FIX CRÍTICO: Remover estado inexistente 'aguardando_analise'
       if (queue === 'analysis') {
-        // Filtrar apenas status de análise - incluir ambos status possíveis
+        // Filtrar apenas status de análise - usar apenas status existentes no banco
         if (!status) {
-          criteria.statusArray = ['aguardando_analise', 'em_analise'];
+          criteria.statusArray = ['em_analise']; // TEMPORÁRIO: Apenas estado existente
+          // TODO P2.2: Reintegrar 'aguardando_analise' após correção da FSM
         }
       }
 
