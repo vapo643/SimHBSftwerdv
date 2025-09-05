@@ -290,10 +290,13 @@ export class ProposalController {
       // PERF-BOOST-001: Usar método lightweight para listagem
       const rawData = await proposalRepository.findByCriteriaLightweight(criteria);
       
-      // 🐛 DEBUG: Log temporário para investigar problema N/A
+      // 🐛 DEBUG: AGUARDANDO ACESSO À FILA DE ANÁLISE
+      console.log('🔍 [CONTROLLER DEBUG] Endpoint acessado - queue param:', queue || 'NENHUM');
+      console.log('🔍 [CONTROLLER DEBUG] URL completa seria:', req.originalUrl);
+      
       if (queue === 'analysis') {
-        console.log('🔍 [ANÁLISE DEBUG] Critérios usados:', JSON.stringify(criteria, null, 2));
-        console.log('🔍 [ANÁLISE DEBUG] Dados brutos do repository:', JSON.stringify(rawData[0] || 'NENHUM RESULTADO', null, 2));
+        console.log('🔴 [FILA DE ANÁLISE DETECTADA!] Critérios:', JSON.stringify(criteria, null, 2));
+        console.log('🔴 [FILA DE ANÁLISE DETECTADA!] Dados brutos:', JSON.stringify(rawData[0] || 'SEM DADOS', null, 2));
       }
 
       // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
@@ -321,9 +324,9 @@ export class ProposalController {
         updatedAt: row.updated_at,
       }));
 
-      // 🐛 DEBUG: Log temporário dos dados mapeados
+      // 🐛 DEBUG: Log dados mapeados se for fila de análise
       if (queue === 'analysis' && data[0]) {
-        console.log('🔍 [ANÁLISE DEBUG] Dados após mapeamento:', JSON.stringify(data[0], null, 2));
+        console.log('🔴 [FILA DE ANÁLISE DETECTADA!] Dados mapeados:', JSON.stringify(data[0], null, 2));
       }
       
       return res.json({
