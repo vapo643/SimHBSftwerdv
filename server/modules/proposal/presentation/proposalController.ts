@@ -311,7 +311,25 @@ export class ProposalController {
       }
 
       // PERF-BOOST-001: Usar método lightweight para listagem
-      const data = await this.repository.findByCriteriaLightweight(criteria);
+      const rawData = await this.repository.findByCriteriaLightweight(criteria);
+
+      // TODO P1.2: Remover este adaptador quando o repositório for consolidado para retornar o DTO correto
+      // OPERAÇÃO AÇO LÍQUIDO P0.3: Adaptador de Contrato API para blindagem do frontend
+      const data = rawData.map(row => ({
+        id: row.id,
+        status: row.status,
+        nomeCliente: row.nomeCliente, // ← Já mapeado pelo repository
+        cpfCliente: row.cliente_cpf,
+        emailCliente: null, // ← Campo não retornado pelo repository (TODO P1.2)
+        telefoneCliente: null, // ← Campo não retornado pelo repository (TODO P1.2)  
+        valorSolicitado: row.valor,
+        prazo: row.prazo,
+        lojaId: row.loja_id,
+        parceiro: row.parceiro, // ← Já estruturado pelo repository
+        loja: row.loja, // ← Já estruturado pelo repository
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
 
       return res.json({
         success: true,
