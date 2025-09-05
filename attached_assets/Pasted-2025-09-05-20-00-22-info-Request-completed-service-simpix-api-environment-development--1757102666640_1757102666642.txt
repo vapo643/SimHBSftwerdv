@@ -1,0 +1,779 @@
+2025-09-05 20:00:22 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"79e42181-02b1-4aa3-97b8-2d1210f37313","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-05 20:00:22 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ae1073ea-44a6-4b57-9b88-2e1f38312949","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=9, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 10/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:00:22.902Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:00:23 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ae1073ea-44a6-4b57-9b88-2e1f38312949","method":"GET","url":"/api/debug/me","statusCode":200,"duration":778,"responseSize":296}
+2025-09-05 20:00:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"67bd0278-8bf0-4b83-9490-b30e589deffa","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:00:37 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"67bd0278-8bf0-4b83-9490-b30e589deffa","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-05 20:00:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"b25080f9-30bb-42da-bc48-1dc9cd3b1c86","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=10, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 11/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:00:37.886Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:00:38 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"b25080f9-30bb-42da-bc48-1dc9cd3b1c86","method":"GET","url":"/api/debug/me","statusCode":200,"duration":764,"responseSize":296}
+2025-09-05 20:00:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ed5b2e15-1eb6-4c90-b7c9-5fc190960eab","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=11, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 12/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:00:38.791Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:00:39 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ed5b2e15-1eb6-4c90-b7c9-5fc190960eab","method":"GET","url":"/api/debug/me","statusCode":200,"duration":763,"responseSize":296}
+2025-09-05 20:00:55 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"80938029-f4fa-4ffe-b16c-38687a49d6f4","method":"GET","url":"/api/alertas/notificacoes","path":"/api/alertas/notificacoes","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+2025-09-05 20:01:05 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c799c40c-69c6-4602-9be3-ca9ed8e5c40d","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+2025-09-05 20:01:05 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"8c8638cf-84b0-4736-b783-b78bc065ed76","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:01:05 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"8c8638cf-84b0-4736-b783-b78bc065ed76","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=12, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 13/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:01:06.224Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:01:06 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c799c40c-69c6-4602-9be3-ca9ed8e5c40d","method":"GET","url":"/api/debug/me","statusCode":200,"duration":766,"responseSize":296}
+2025-09-05 20:01:10 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ad9bf8c2-3893-4395-a4e9-93e2c734e7b4","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:01:10 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ad9bf8c2-3893-4395-a4e9-93e2c734e7b4","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-05 20:01:10 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a5699bda-d0e5-4eaf-9802-8f5d90ab06f0","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=13, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 14/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:01:10.898Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:01:11 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a5699bda-d0e5-4eaf-9802-8f5d90ab06f0","method":"GET","url":"/api/debug/me","statusCode":200,"duration":766,"responseSize":296}
+2025-09-05 20:01:11 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"00a94cf1-0a52-42f8-95ad-e0f4099ec7d9","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=14, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 15/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:01:11.808Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:01:12 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"00a94cf1-0a52-42f8-95ad-e0f4099ec7d9","method":"GET","url":"/api/debug/me","statusCode":200,"duration":767,"responseSize":296}
+2025-09-05 20:01:12 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3357bf74-aab9-4bd2-bec7-a017c872cd3a","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=15, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 16/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:01:13.403Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:01:13 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3357bf74-aab9-4bd2-bec7-a017c872cd3a","method":"GET","url":"/api/debug/me","statusCode":200,"duration":762,"responseSize":296}
+2025-09-05 20:01:18 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f3f0024d-696a-4045-845f-4142fb7392a6","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=16, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 17/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:01:19.127Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:01:19 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f3f0024d-696a-4045-845f-4142fb7392a6","method":"GET","url":"/api/debug/me","statusCode":200,"duration":763,"responseSize":296}
+2025-09-05 20:01:19 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d367ce46-db28-402e-bdeb-1c03ed9ea584","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=17, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 18/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:01:20.037Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:01:20 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d367ce46-db28-402e-bdeb-1c03ed9ea584","method":"GET","url":"/api/debug/me","statusCode":200,"duration":766,"responseSize":296}
+2025-09-05 20:01:55 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ab9e016b-2428-487b-a2fa-46523223aa0a","method":"GET","url":"/api/alertas/notificacoes","path":"/api/alertas/notificacoes","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+2025-09-05 20:02:01 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"393ce91e-6f15-4830-b2d3-0947bf305e6a","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:02:01 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"393ce91e-6f15-4830-b2d3-0947bf305e6a","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-05 20:02:01 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a2098b60-841c-418b-8d85-fe6411ad7885","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=18, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 19/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:02:02.127Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:02:02 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a2098b60-841c-418b-8d85-fe6411ad7885","method":"GET","url":"/api/debug/me","statusCode":200,"duration":764,"responseSize":296}
+2025-09-05 20:02:10 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e74deec7-e787-41df-a12c-2d76b0f91e7d","method":"PUT","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","path":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","query":{},"ip":"127.0.0.1","userAgent":"curl/8.14.1"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status
+[JWT DEBUG] Método: PUT
+[JWT DEBUG] User-Agent: curl/8.14.1
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: undefined
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 127.0.0.1, environment: development
+[JWT DEBUG] Rate limit check for 127.0.0.1: attempts=null, max=10000, window=60000ms
+[JWT DEBUG] First attempt for 127.0.0.1, allowing
+[JWT DEBUG] Auto-detected token type: local
+[JWT DEBUG] Using local JWT validation
+[JWT DEBUG] Local JWT verification failed: jwt malformed
+[JWT DEBUG] Falha na validação. Erro completo: {
+  message: 'jwt malformed',
+  mode: 'LOCAL',
+  fullError: '{\n  "message": "jwt malformed"\n}'
+}
+🔐 JWT VALIDATION: {
+  hasError: true,
+  errorType: 'jwt malformed',
+  hasUser: false,
+  userId: undefined,
+  timestamp: '2025-09-05T20:02:10.536Z',
+  mode: 'LOCAL'
+}
+[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=127.0.0.1 | endpoint=/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status
+2025-09-05 20:02:10 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e74deec7-e787-41df-a12c-2d76b0f91e7d","method":"PUT","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","statusCode":401,"duration":470,"responseSize":47}
+2025-09-05 20:02:10 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e74deec7-e787-41df-a12c-2d76b0f91e7d","method":"PUT","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","statusCode":401,"duration":470,"error":"{\"message\":\"Token inválido ou expirado\"}"}
+2025-09-05 20:03:01 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"883514cc-5472-459d-8a92-56c1d179c424","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:03:01 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"883514cc-5472-459d-8a92-56c1d179c424","method":"GET","url":"/api/features","statusCode":200,"duration":3,"responseSize":262}
+2025-09-05 20:03:33 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"87608a70-e1ca-4c5e-837e-dfbe9598fb03","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:03:33 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"87608a70-e1ca-4c5e-837e-dfbe9598fb03","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-05 20:03:33 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"bcc326a6-c200-460c-9974-b873a7f36eb0","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=null, max=10000, window=60000ms
+[JWT DEBUG] First attempt for 187.36.168.240, allowing
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:33.670Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:03:33 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"bcc326a6-c200-460c-9974-b873a7f36eb0","method":"GET","url":"/api/debug/me","statusCode":200,"duration":635,"responseSize":296}
+2025-09-05 20:03:34 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"055944a2-999d-422d-8214-8eb4cb47a2f0","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=1, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 2/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:34.590Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:03:34 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f75d86e1-8d8f-4b88-a6d8-bf6557d092d9","method":"GET","url":"/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c","path":"/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"}
+2025-09-05 20:03:34 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"055944a2-999d-422d-8214-8eb4cb47a2f0","method":"GET","url":"/api/debug/me","statusCode":200,"duration":763,"responseSize":296}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"59781f4a-78cc-4057-84e3-b5c5f4d84637","method":"GET","url":"/@vite/client","path":"/@vite/client","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3e86a6af-3da2-4b1c-a076-1c70476f8d4a","method":"GET","url":"/@react-refresh","path":"/@react-refresh","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c6044abe-ddef-4359-95b0-38d9e9e46c33","method":"GET","url":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@vite/client"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"afbba359-99ea-48e8-ae39-58ca2a06f32a","method":"GET","url":"/src/main.tsx?v=hzzNq0r-gGrPgEXJi114u","path":"/src/main.tsx","query":{"v":"hzzNq0r-gGrPgEXJi114u"},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"762476d1-e63b-4199-bdc3-1fd227368076","method":"GET","url":"/src/App.tsx","path":"/src/App.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/main.tsx?v=hzzNq0r-gGrPgEXJi114u"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a063ebf3-bc18-4988-85af-25be3b33d8cf","method":"GET","url":"/src/components/ErrorBoundary.tsx","path":"/src/components/ErrorBoundary.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/main.tsx?v=hzzNq0r-gGrPgEXJi114u"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"906f8430-eebf-4dff-ac76-1515452011a9","method":"GET","url":"/src/index.css","path":"/src/index.css","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/main.tsx?v=hzzNq0r-gGrPgEXJi114u"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"cc65eaeb-23d0-4e23-880e-483277765274","method":"GET","url":"/src/lib/queryClient.ts","path":"/src/lib/queryClient.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3d7abc6f-e10d-4c3d-955c-668d70c422e6","method":"GET","url":"/src/components/ui/toaster.tsx","path":"/src/components/ui/toaster.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9b1fd841-fc29-4cc3-9b60-0989cbfb0219","method":"GET","url":"/src/components/ui/tooltip.tsx","path":"/src/components/ui/tooltip.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"0cefe0bb-4fbb-4438-9898-db73cfa616b4","method":"GET","url":"/src/contexts/AuthContext.tsx","path":"/src/contexts/AuthContext.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ec967fe6-866a-4dab-a273-aa56aaa675d3","method":"GET","url":"/src/contexts/FeatureFlagContext.tsx","path":"/src/contexts/FeatureFlagContext.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d324e5d8-23d7-4879-ad91-5c2aa4796cd5","method":"GET","url":"/src/contexts/ThemeContext.tsx","path":"/src/contexts/ThemeContext.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"468a2fd0-3548-40bf-b392-d9e2873e1a39","method":"GET","url":"/src/components/ProtectedRoute.tsx","path":"/src/components/ProtectedRoute.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9fb71023-b707-4771-8580-51c6fccc439d","method":"GET","url":"/src/pages/login.tsx","path":"/src/pages/login.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"724bd0bb-5ff4-4b5d-ba49-be21e7c65613","method":"GET","url":"/src/pages/propostas/nova.tsx","path":"/src/pages/propostas/nova.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"fa79481f-40c4-4038-a1a3-1b69cde1e2bc","method":"GET","url":"/src/pages/dashboard.tsx","path":"/src/pages/dashboard.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"af13e29e-3ff2-4d63-82c0-189d8329f287","method":"GET","url":"/src/pages/credito/fila.tsx","path":"/src/pages/credito/fila.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"45e8e652-92ae-4273-b411-7fa9ba5d7169","method":"GET","url":"/src/pages/credito/analise.tsx","path":"/src/pages/credito/analise.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"843728f9-1598-4f4c-8958-9f4aed8375bf","method":"GET","url":"/src/pages/financeiro/pagamentos.tsx","path":"/src/pages/financeiro/pagamentos.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1d491a8a-2dd2-4cda-95e4-27a50259aa15","method":"GET","url":"/src/pages/financeiro/CobrancasPage.tsx","path":"/src/pages/financeiro/CobrancasPage.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"90a84a53-02d4-436f-82d2-b4dff97f6976","method":"GET","url":"/src/pages/formalizacao.tsx","path":"/src/pages/formalizacao.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a3aa1bd6-f1b0-46c4-a6b8-c2e29acd1427","method":"GET","url":"/src/pages/parceiros/index.tsx","path":"/src/pages/parceiros/index.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"49b6a732-11ac-4e26-996e-8bcaeb52e6db","method":"GET","url":"/src/pages/admin/usuarios.tsx","path":"/src/pages/admin/usuarios.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:35 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"8e7d1f48-6bd2-44d3-8446-5144c0616e21","method":"GET","url":"/src/pages/configuracoes/tabelas.tsx","path":"/src/pages/configuracoes/tabelas.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c1d2647c-4618-4edb-a3a9-d781e7612fc8","method":"GET","url":"/src/pages/parceiros/detalhe.tsx","path":"/src/pages/parceiros/detalhe.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"768669c6-4bdd-4064-90d0-9326fcd9cbef","method":"GET","url":"/src/pages/configuracoes/produtos.tsx","path":"/src/pages/configuracoes/produtos.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"08dd2559-9e7a-4bc5-bba3-e4f06f1396d3","method":"GET","url":"/src/pages/propostas/editar.tsx","path":"/src/pages/propostas/editar.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ccb557e6-667b-4326-9c0b-24ac9f7fc6a0","method":"GET","url":"/src/pages/admin/security/wstg.tsx","path":"/src/pages/admin/security/wstg.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"5200971c-475b-4164-a34e-5762ac196b37","method":"GET","url":"/src/pages/admin/lojas/index.tsx","path":"/src/pages/admin/lojas/index.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c18ffb51-780f-4efd-9485-f0b4ad3646df","method":"GET","url":"/src/pages/admin/security/owasp-assessment.tsx","path":"/src/pages/admin/security/owasp-assessment.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4ee1d0d4-43db-4a5a-bfeb-964a0fdd0cd1","method":"GET","url":"/src/pages/admin/security/dashboard.tsx","path":"/src/pages/admin/security/dashboard.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"bf5f24c8-ff9a-4500-b776-90d11b784a2e","method":"GET","url":"/src/pages/admin/monitoring/dashboard.tsx","path":"/src/pages/admin/monitoring/dashboard.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d622aada-0c42-4ef4-9685-2bfe7d7eb26b","method":"GET","url":"/src/pages/configuracoes/sessoes.tsx","path":"/src/pages/configuracoes/sessoes.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d49cab8b-9936-47cc-b012-1a09541fb941","method":"GET","url":"/src/pages/configuracoes/alterar-email.tsx","path":"/src/pages/configuracoes/alterar-email.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"55a2f894-e099-4531-8a0e-f3e609dbeefa","method":"GET","url":"/src/pages/configuracoes/index.tsx","path":"/src/pages/configuracoes/index.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"66d90f85-ae76-4115-8063-4d869bd702a4","method":"GET","url":"/src/pages/aceite-atendente.tsx","path":"/src/pages/aceite-atendente.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1e3db032-594a-440e-8040-b7e31e659689","method":"GET","url":"/src/pages/not-found.tsx","path":"/src/pages/not-found.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2642417c-d678-4049-87c3-1e74fb04e609","method":"GET","url":"/src/pages/GestaoContratos.tsx","path":"/src/pages/GestaoContratos.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/App.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c1384ca7-c7de-4970-8a76-b93ad32534e7","method":"GET","url":"/src/lib/apiClient.ts","path":"/src/lib/apiClient.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/lib/queryClient.ts"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"aeb682ca-46f9-48f9-8924-5f210513e079","method":"GET","url":"/src/hooks/use-toast.ts","path":"/src/hooks/use-toast.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/toaster.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"fbcdb5dd-5692-44e6-ac8f-1d3d64663938","method":"GET","url":"/src/components/ui/toast.tsx","path":"/src/components/ui/toast.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/toaster.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7e2336d8-33e5-47e9-bb38-0aa4350f000d","method":"GET","url":"/src/lib/utils.ts","path":"/src/lib/utils.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/tooltip.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"af536ad3-9585-4980-bd52-c8af11478652","method":"GET","url":"/src/lib/supabase.ts","path":"/src/lib/supabase.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"10e07beb-01b3-4ed1-b48e-810125c2e77d","method":"GET","url":"/src/hooks/useIdleTimer.ts","path":"/src/hooks/useIdleTimer.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"296c8734-146a-4b19-8e2c-894539aac945","method":"GET","url":"/src/components/IdleWarningModal.tsx","path":"/src/components/IdleWarningModal.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"135c2a75-9a53-4288-907b-d00ad3d93f78","method":"GET","url":"/src/lib/auth.ts","path":"/src/lib/auth.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9c84a831-009b-4811-a75d-92e14e9eb959","method":"GET","url":"/src/components/ui/button.tsx","path":"/src/components/ui/button.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/login.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"b1e33399-9bf0-45e2-9470-6c295c45a4c0","method":"GET","url":"/src/components/ui/label.tsx","path":"/src/components/ui/label.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/login.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"972fa457-bda6-44b1-9787-bb35c897f460","method":"GET","url":"/src/components/ui/input.tsx","path":"/src/components/ui/input.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/login.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"12c3186f-7e25-4071-98ae-3fd1ca9046e5","method":"GET","url":"/src/components/DashboardLayout.tsx","path":"/src/components/DashboardLayout.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c1dac6e2-07c9-45a9-8a29-6b18ec5269a8","method":"GET","url":"/src/contexts/ProposalContext.tsx","path":"/src/contexts/ProposalContext.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1d5258c1-43e5-41ce-a919-15d8371cb2e9","method":"GET","url":"/src/components/ui/tabs.tsx","path":"/src/components/ui/tabs.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"217f9967-b911-4b9b-8660-9b9a6ebdb266","method":"GET","url":"/src/hooks/useProposalEffects.ts","path":"/src/hooks/useProposalEffects.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e4bef2ba-74cd-4a65-af12-b4a586c3f751","method":"GET","url":"/src/components/ProposalProgressIndicator.tsx","path":"/src/components/ProposalProgressIndicator.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d142b59a-7704-4414-b84a-bc3ae612235b","method":"GET","url":"/src/components/ui/alert.tsx","path":"/src/components/ui/alert.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"76894d47-8e00-4d80-8815-4ad2d11d85cb","method":"GET","url":"/src/components/propostas/ClientDataStep.tsx","path":"/src/components/propostas/ClientDataStep.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"757a316a-a86a-4638-b656-afc78138b8d1","method":"GET","url":"/src/components/propostas/LoanConditionsStep.tsx","path":"/src/components/propostas/LoanConditionsStep.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1c2850a2-f7ae-4e30-ba21-54597b882012","method":"GET","url":"/src/components/propostas/DocumentsStep.tsx","path":"/src/components/propostas/DocumentsStep.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"86a93948-14a4-4741-aab3-c9ec3fc179d2","method":"GET","url":"/src/components/propostas/PersonalReferencesStep.tsx","path":"/src/components/propostas/PersonalReferencesStep.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"279580aa-4be4-4059-8286-72dc0720233f","method":"GET","url":"/src/components/ui/card.tsx","path":"/src/components/ui/card.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2b337b20-2e1e-4896-9cd4-2834219d5843","method":"GET","url":"/src/components/ui/badge.tsx","path":"/src/components/ui/badge.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"34e8403b-1cf1-42a9-871c-cd4d0da64e8a","method":"GET","url":"/src/components/ui/select.tsx","path":"/src/components/ui/select.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"57fd5d0c-841b-4ef9-a897-f8eefd49a939","method":"GET","url":"/src/components/RefreshButton.tsx","path":"/src/components/RefreshButton.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"df56d4ec-5eeb-41cc-9a9d-76f85ab082be","method":"GET","url":"/src/components/FeatureFlagExample.tsx","path":"/src/components/FeatureFlagExample.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3532c0d8-57b5-4220-abb0-b887d3d14c0e","method":"GET","url":"/src/components/ui/table.tsx","path":"/src/components/ui/table.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/credito/fila.tsx"}
+2025-09-05 20:03:36 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7b1f9652-927c-4611-a83f-da3a607d4997","method":"GET","url":"/src/components/ui/textarea.tsx","path":"/src/components/ui/textarea.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/credito/analise.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3e3ba836-dc61-4cdf-bebf-7f9155ab11f1","method":"GET","url":"/src/components/DocumentViewer.tsx","path":"/src/components/DocumentViewer.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/credito/analise.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"856faea9-ae6e-4b64-a999-74ae11739cf3","method":"GET","url":"/src/components/HistoricoCompartilhado.tsx","path":"/src/components/HistoricoCompartilhado.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/credito/analise.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4974369a-3ad7-4dd9-af3b-7e2191e38803","method":"GET","url":"/src/components/ui/dialog.tsx","path":"/src/components/ui/dialog.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/pagamentos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"be1477de-b6c5-4c71-b207-76abfe71b1e9","method":"GET","url":"/src/components/ui/progress.tsx","path":"/src/components/ui/progress.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/pagamentos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"26440c39-d270-4cee-89cf-3f6dde4ff804","method":"GET","url":"/src/components/ui/scroll-area.tsx","path":"/src/components/ui/scroll-area.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/pagamentos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7458c4a4-4f28-42d1-8591-5180ca58f9d7","method":"GET","url":"/src/pages/financeiro/marcar-pago-modal.tsx","path":"/src/pages/financeiro/marcar-pago-modal.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/pagamentos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"b34eb260-039f-43c4-922d-778e9006b9f1","method":"GET","url":"/src/components/ui/switch.tsx","path":"/src/components/ui/switch.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/pagamentos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ff0312aa-802a-4201-8210-4dd2032d7123","method":"GET","url":"/src/pages/financeiro/pagamentos-review.tsx","path":"/src/pages/financeiro/pagamentos-review.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/pagamentos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"71c1bd95-cc28-4b0c-b460-d7d3e5b74c03","method":"GET","url":"/src/components/ui/dropdown-menu.tsx","path":"/src/components/ui/dropdown-menu.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/CobrancasPage.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"117d7727-0fe2-45b9-9eab-7cbba078a9b5","method":"GET","url":"/src/components/propostas/EtapaFormalizacaoControl.tsx","path":"/src/components/propostas/EtapaFormalizacaoControl.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/formalizacao.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7880c387-bd72-46e9-90e7-a168e2a293d4","method":"GET","url":"/src/components/CCBViewer.tsx","path":"/src/components/CCBViewer.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/formalizacao.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7c4d532a-d734-468b-a2bc-267bfb0c6501","method":"GET","url":"/src/components/ui/alert-dialog.tsx","path":"/src/components/ui/alert-dialog.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/parceiros/index.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3a435ab8-3bf9-492a-a57b-4626fdef3fef","method":"GET","url":"/src/components/parceiros/PartnerForm.tsx","path":"/src/components/parceiros/PartnerForm.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/parceiros/index.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"1e687a97-e21f-40ed-8cb6-487db15e6f20","method":"GET","url":"/src/hooks/queries/queryKeys.ts","path":"/src/hooks/queries/queryKeys.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/parceiros/index.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d34e4488-1699-4c30-8db5-f129f5ee470f","method":"GET","url":"/src/components/ui/skeleton.tsx","path":"/src/components/ui/skeleton.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"3092f596-38ea-461a-9e22-fde153269639","method":"GET","url":"/src/components/ui/avatar.tsx","path":"/src/components/ui/avatar.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"6340ee89-73a4-4b96-9c33-b5883bb3cba5","method":"GET","url":"/src/components/usuarios/UserForm.tsx","path":"/src/components/usuarios/UserForm.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/usuarios.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"05dd2270-fd37-4bb5-b8ad-bfa92218f02e","method":"GET","url":"/src/components/tabelas-comerciais/TabelaComercialForm.tsx","path":"/src/components/tabelas-comerciais/TabelaComercialForm.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/configuracoes/tabelas.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"bed8c2ff-257f-4056-ab06-ebe7a8410fde","method":"GET","url":"/src/components/tabelas-comerciais/ConfirmDeleteModal.tsx","path":"/src/components/tabelas-comerciais/ConfirmDeleteModal.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/configuracoes/tabelas.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c2510016-1271-449c-b894-6ed61071eff9","method":"GET","url":"/src/components/parceiros/ConfiguracaoComercialForm.tsx","path":"/src/components/parceiros/ConfiguracaoComercialForm.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/parceiros/detalhe.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d2f4638b-2063-4501-963a-ebe9f70a80cd","method":"GET","url":"/src/components/parceiros/LojaForm.tsx","path":"/src/components/parceiros/LojaForm.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/parceiros/detalhe.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c8bec166-dc68-4aa4-9087-572b30e656b8","method":"GET","url":"/src/hooks/queries/useUserFormData.ts","path":"/src/hooks/queries/useUserFormData.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/parceiros/detalhe.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"9b8bd36c-8daf-4f10-8ba9-2b7de32cf9b1","method":"GET","url":"/src/lib/errorHandler.ts","path":"/src/lib/errorHandler.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/configuracoes/produtos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"60bbe758-54aa-4cad-87d6-9ded868ce08f","method":"GET","url":"/src/hooks/useLoadingStates.ts","path":"/src/hooks/useLoadingStates.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/configuracoes/produtos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"8f59f0f5-046b-4930-9d2a-eb754632fe83","method":"GET","url":"/src/components/produtos/ProdutoForm.tsx","path":"/src/components/produtos/ProdutoForm.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/configuracoes/produtos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"8445b51f-57f6-491f-8b0d-1105293f57f3","method":"GET","url":"/src/components/ui/CurrencyInput.tsx","path":"/src/components/ui/CurrencyInput.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/editar.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7bba0cec-2d01-4edf-8963-76e2264e843a","method":"GET","url":"/src/components/lojas/LojaForm.tsx","path":"/src/components/lojas/LojaForm.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/lojas/index.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"f6d856b5-687f-4582-a437-c4d640f61e92","method":"GET","url":"/src/pages/SecurityDashboard.tsx","path":"/src/pages/SecurityDashboard.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/admin/security/dashboard.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d45ced98-a838-42f5-a1a3-cf6839cc602d","method":"GET","url":"/src/components/ui/form.tsx","path":"/src/components/ui/form.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/configuracoes/alterar-email.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"226a7d68-8f6d-47e1-8bab-04b3a538cdb3","method":"GET","url":"/src/components/ui/pagination.tsx","path":"/src/components/ui/pagination.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/GestaoContratos.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e9add326-6071-48d9-b4dd-c628a8a9d4fc","method":"GET","url":"/src/lib/auth-config.ts","path":"/src/lib/auth-config.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/lib/auth.ts"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"441e7d40-7d27-4898-9548-7e6f82ab27d8","method":"GET","url":"/src/components/OfflineIndicator.tsx","path":"/src/components/OfflineIndicator.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"08ab4893-f0c3-4e4c-aa12-2199aeb933e5","method":"GET","url":"/src/components/ThemeSelector.tsx","path":"/src/components/ThemeSelector.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d4df6294-eee7-40a8-80f9-76a6ed08b211","method":"GET","url":"/src/components/notifications/NotificationBell.tsx","path":"/src/components/notifications/NotificationBell.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"68da7107-0444-46d7-ad44-6593a0ab88f0","method":"GET","url":"/src/components/ui/breadcrumbs.tsx","path":"/src/components/ui/breadcrumbs.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"ca6023d1-99b3-4517-b8fa-5dab896fe923","method":"GET","url":"/src/components/ui/accordion.tsx","path":"/src/components/ui/accordion.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e9f056cf-6b00-47bd-99f6-465ec857acb4","method":"GET","url":"/src/hooks/use-debounce.ts","path":"/src/hooks/use-debounce.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/hooks/useProposalEffects.ts"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d8645f42-9661-46bc-acbc-0c4ee7f6c6b4","method":"GET","url":"/@fs/home/runner/workspace/shared/value-objects.ts","path":"/@fs/home/runner/workspace/shared/value-objects.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/propostas/ClientDataStep.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"b930095b-f157-4a08-ab0d-757316ea9a9b","method":"GET","url":"/src/components/ui/MaskedInput.tsx","path":"/src/components/ui/MaskedInput.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/propostas/ClientDataStep.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c2ae712b-54f0-43b1-995c-f1cd051b6dc3","method":"GET","url":"/src/components/ui/ConfirmationDialog.tsx","path":"/src/components/ui/ConfirmationDialog.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/propostas/ClientDataStep.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"53e67bd0-b76e-4da4-849a-6dac541e0b10","method":"GET","url":"/src/utils/brazilianBanks.ts","path":"/src/utils/brazilianBanks.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/propostas/ClientDataStep.tsx"}
+2025-09-05 20:03:37 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"c553965f-ad1c-4327-8aab-4b216866da6b","method":"GET","url":"/src/components/ui/checkbox.tsx","path":"/src/components/ui/checkbox.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/propostas/LoanConditionsStep.tsx"}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2aed25de-1438-41a5-a47f-7e6535fae59f","method":"GET","url":"/src/components/ui/separator.tsx","path":"/src/components/ui/separator.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/financeiro/marcar-pago-modal.tsx"}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"4e8e1679-80b0-467b-8bd3-a4d81ff6ead4","method":"GET","url":"/src/components/tabelas-comerciais/MultiProductSelector.tsx","path":"/src/components/tabelas-comerciais/MultiProductSelector.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/tabelas-comerciais/TabelaComercialForm.tsx"}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"7c85af0d-a120-4a38-aa55-311a81c9ef58","method":"GET","url":"/src/lib/providers/supabase-auth-provider.ts","path":"/src/lib/providers/supabase-auth-provider.ts","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/lib/auth-config.ts"}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"8afd8561-3191-4f6b-bce5-348679173da2","method":"GET","url":"/src/components/notifications/NotificationDropdown.tsx","path":"/src/components/notifications/NotificationDropdown.tsx","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/notifications/NotificationBell.tsx"}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"6500c778-3ec7-4f9b-bba9-1bfc6279f4b3","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=2, max=10000, window=60000ms
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"61c3f3a3-a0f4-4f82-9f51-5859a7ef5710","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:03:38 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"61c3f3a3-a0f4-4f82-9f51-5859a7ef5710","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"83c7b63c-6036-4127-a275-e7adaf66d510","method":"GET","url":"/favicon.ico","path":"/favicon.ico","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"e1eaa275-917a-4148-9c20-a69bd4f24c83","method":"GET","url":"/api/alertas/notificacoes","path":"/api/alertas/notificacoes","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+2025-09-05 20:03:38 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2eaf24f0-269f-4ed6-86d5-7703fe5a900a","method":"GET","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","path":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=3, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 3/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:39.295Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 4/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:39.481Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:03:39 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"6500c778-3ec7-4f9b-bba9-1bfc6279f4b3","method":"GET","url":"/api/debug/me","statusCode":200,"duration":759,"responseSize":296}
+2025-09-05 20:03:39 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"297d8770-6280-4f9a-86e2-e8c27655f3de","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+🚀 [TIMING MIDDLEWARE] GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c - Config: baseline=25ms, jitter=±5ms, enabled=true
+⚠️ [LEGACY ROUTE] ROTA LEGACY EXECUTADA! (DEVERIA SER DDD)
+⚠️ [LEGACY ROUTE] URL: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c
+⚠️ [LEGACY ROUTE] Path: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c
+⚠️ [LEGACY ROUTE] ID Param: 29e80705-89bb-43a5-bbc8-960b3139939c
+🔐 [PROPOSTA ACCESS] User a65efc54-90cd-4b94-b971-c8a560104032 (ADMINISTRADOR) accessing proposta 29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=4, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 5/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:40.202Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+2025-09-05 20:03:40 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"297d8770-6280-4f9a-86e2-e8c27655f3de","method":"GET","url":"/api/debug/me","statusCode":200,"duration":762,"responseSize":296}
+2025-09-05 20:03:40 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"37df0aab-c683-4fa4-ba5c-3791112f94cc","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=5, max=10000, window=60000ms
+🔐 [ADMIN/GERENTE/ANALISTA ACCESS] User a65efc54-90cd-4b94-b971-c8a560104032 (ADMINISTRADOR) accessing proposta 29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 6/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:41.105Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+🔍 [ANÁLISE-OUTROS] Documentos encontrados para proposta 29e80705-89bb-43a5-bbc8-960b3139939c: 0
+🔍 [ANÁLISE-OUTROS] ✅ Retornando proposta 29e80705-89bb-43a5-bbc8-960b3139939c com 0 documentos formatados
+2025-09-05 20:03:41 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2eaf24f0-269f-4ed6-86d5-7703fe5a900a","method":"GET","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","statusCode":200,"duration":2254,"responseSize":1687}
+2025-09-05 20:03:41 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"2eaf24f0-269f-4ed6-86d5-7703fe5a900a","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","duration":2254,"threshold":1000}
+🕐 [TIMING] GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c: actual=1494.23ms, target=24.63ms, delay=0.00ms
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c {
+  correlationId: 'perf-1757102618974-rjwan5xzg',
+  duration: 2255,
+  memoryDeltaMB: 0,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c {
+  correlationId: 'perf-1757102618974-t9r4w6a20',
+  duration: 2256,
+  memoryDeltaMB: 0,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-05 20:03:41 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"37df0aab-c683-4fa4-ba5c-3791112f94cc","method":"GET","url":"/api/debug/me","statusCode":200,"duration":760,"responseSize":296}
+2025-09-05 20:03:41 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a3828de1-ecac-463c-99b2-8cccf97fdae5","method":"GET","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes","path":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+2025-09-05 20:03:41 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"fa1b7aa3-1267-4f52-8aef-643e81659786","method":"GET","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","path":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=6, max=10000, window=60000ms
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=6, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 7/10000
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 7/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:41.928Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:41.931Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+Query: select "observacoes_cobranca"."id", "observacoes_cobranca"."proposta_id", "observacoes_cobranca"."observacao", "observacoes_cobranca"."user_id", "observacoes_cobranca"."created_at" from "observacoes_cobranca" left join "profiles" on "profiles"."id" = "observacoes_cobranca"."user_id" where "observacoes_cobranca"."proposta_id" = $1 order by "observacoes_cobranca"."created_at" desc -- params: ["NaN"]
+🚀 [TIMING MIDDLEWARE] GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c - Config: baseline=25ms, jitter=±5ms, enabled=true
+⚠️ [LEGACY ROUTE] ROTA LEGACY EXECUTADA! (DEVERIA SER DDD)
+⚠️ [LEGACY ROUTE] URL: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c
+⚠️ [LEGACY ROUTE] Path: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c
+⚠️ [LEGACY ROUTE] ID Param: 29e80705-89bb-43a5-bbc8-960b3139939c
+🔐 [PROPOSTA ACCESS] User a65efc54-90cd-4b94-b971-c8a560104032 (ADMINISTRADOR) accessing proposta 29e80705-89bb-43a5-bbc8-960b3139939c
+🔐 [ADMIN/GERENTE/ANALISTA ACCESS] User a65efc54-90cd-4b94-b971-c8a560104032 (ADMINISTRADOR) accessing proposta 29e80705-89bb-43a5-bbc8-960b3139939c
+🔍 [ANÁLISE-OUTROS] Documentos encontrados para proposta 29e80705-89bb-43a5-bbc8-960b3139939c: 0
+🔍 [ANÁLISE-OUTROS] ✅ Retornando proposta 29e80705-89bb-43a5-bbc8-960b3139939c com 0 documentos formatados
+2025-09-05 20:03:43 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"fa1b7aa3-1267-4f52-8aef-643e81659786","method":"GET","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","statusCode":200,"duration":1873,"responseSize":1687}
+2025-09-05 20:03:43 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"fa1b7aa3-1267-4f52-8aef-643e81659786","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c","duration":1873,"threshold":1000}
+🕐 [TIMING] GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c: actual=1116.16ms, target=24.07ms, delay=0.00ms
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c {
+  correlationId: 'perf-1757102621426-iqkmrjsvc',
+  duration: 1875,
+  memoryDeltaMB: -22,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c {
+  correlationId: 'perf-1757102621426-hy6l7pq7v',
+  duration: 1875,
+  memoryDeltaMB: -22,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-05 20:03:43 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a3828de1-ecac-463c-99b2-8cccf97fdae5","method":"GET","url":"/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes","statusCode":200,"duration":2144,"responseSize":51}
+2025-09-05 20:03:43 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"a3828de1-ecac-463c-99b2-8cccf97fdae5","url":"/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes","duration":2144,"threshold":1000}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes {
+  correlationId: 'perf-1757102621421-bpwf8ly6e',
+  duration: 2143,
+  memoryDeltaMB: -21,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes {
+  correlationId: 'perf-1757102621421-q6zndbcz9',
+  duration: 2144,
+  memoryDeltaMB: -21,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-05 20:03:50 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d50f5bd3-4cda-4890-bb82-8aa323fe0484","method":"PUT","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","path":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status
+[JWT DEBUG] Método: PUT
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/credito/analise/29e80705-89bb-43a5-bbc8-960b3139939c
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=8, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 9/10000
+[JWT DEBUG] Using Redis cached token validation (pipelined)
+[JWT DEBUG] Auto-detected token type: supabase
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:03:50.580Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Using cached profile data - no DB query needed
+Query: select "status", "loja_id" from "propostas" where "propostas"."id" = $1 -- params: ["29e80705-89bb-43a5-bbc8-960b3139939c"]
+[FSM] 🚀 Iniciando transição para proposta 29e80705-89bb-43a5-bbc8-960b3139939c
+[FSM] 📊 Novo status desejado: pendenciado
+Query: select "id", "status" from "propostas" where "propostas"."id" = $1 limit $2 -- params: ["29e80705-89bb-43a5-bbc8-960b3139939c", 1]
+[FSM] 📍 Status atual: pendenciado
+[FSM] ℹ️ Status já está em pendenciado, nenhuma transição necessária
+Update status error: Error: No values to set
+    at mapUpdateSet (/home/runner/workspace/node_modules/src/utils.ts:125:9)
+    at PgUpdateBuilder.set (/home/runner/workspace/node_modules/src/pg-core/query-builders/update.ts:96:4)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:3391:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async scope (file:///home/runner/workspace/node_modules/postgres/src/index.js:260:18)
+    at async Function.begin (file:///home/runner/workspace/node_modules/postgres/src/index.js:243:14)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:3346:24)
+2025-09-05 20:03:52 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d50f5bd3-4cda-4890-bb82-8aa323fe0484","method":"PUT","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","statusCode":500,"duration":2666,"responseSize":44}
+2025-09-05 20:03:52 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d50f5bd3-4cda-4890-bb82-8aa323fe0484","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","duration":2666,"threshold":1000}
+2025-09-05 20:03:52 [error]: ❌ Request error {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"d50f5bd3-4cda-4890-bb82-8aa323fe0484","method":"PUT","url":"/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status","statusCode":500,"duration":2666,"error":"{\"message\":\"Erro ao atualizar status\"}"}
+[PERFORMANCE] ⚠️  SLOW PUT /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status {
+  correlationId: 'perf-1757102630072-gv901u8j3',
+  duration: 2660,
+  memoryDeltaMB: 1,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW PUT /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/status {
+  correlationId: 'perf-1757102630072-y8gc134ex',
+  duration: 2661,
+  memoryDeltaMB: 1,
+  statusCode: 500,
+  isCritical: false,
+  threshold: 1000
+}
+2025-09-05 20:04:07 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"fe8c7384-f12a-40b5-9887-978f41ad84b4","method":"GET","url":"/api/features","path":"/api/features","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+info: Feature flag service already initialized {"service":"feature-flags"}
+2025-09-05 20:04:07 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"fe8c7384-f12a-40b5-9887-978f41ad84b4","method":"GET","url":"/api/features","statusCode":200,"duration":2,"responseSize":262}
+2025-09-05 20:04:07 [info]: 📥 Request received {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"af0cc202-f487-4fe4-baef-275d76dc63e9","method":"GET","url":"/api/debug/me","path":"/api/debug/me","query":{},"ip":"172.31.72.98","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36","referrer":"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features"}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/client/features
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] Checking auth rate limit for IP: 187.36.168.240, environment: development
+[JWT DEBUG] Rate limit check for 187.36.168.240: attempts=9, max=10000, window=60000ms
+[JWT DEBUG] Incremented attempts for 187.36.168.240: 10/10000
+[JWT DEBUG] Auto-detected token type: supabase
+[JWT DEBUG] Using Supabase token validation with timeout
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["a65efc54-90cd-4b94-b971-c8a560104032", 1]
+[JWT DEBUG] Token cached in Redis with profile data
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-09-05T20:04:08.670Z',
+  mode: 'SUPABASE'
+}
+[JWT DEBUG] Profile not in cache, querying database
+Query: select "role", "full_name", "loja_id" from "profiles" where "profiles"."id" = $1 limit $2 -- params: ["a65efc54-90cd-4b94-b971-c8a560104032", 1]
+2025-09-05 20:04:09 [info]: 📤 Request completed {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"af0cc202-f487-4fe4-baef-275d76dc63e9","method":"GET","url":"/api/debug/me","statusCode":200,"duration":1935,"responseSize":296}
+2025-09-05 20:04:09 [warn]: ⚠️ Slow request detected {"service":"simpix-api","environment":"development","version":"1.0.0","correlationId":"af0cc202-f487-4fe4-baef-275d76dc63e9","url":"/api/debug/me","duration":1935,"threshold":1000}
+[PERFORMANCE] ⚠️  SLOW GET /api/debug/me {
+  correlationId: 'perf-1757102647256-udnt4rusy',
+  duration: 1935,
+  memoryDeltaMB: 1,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}
+[PERFORMANCE] ⚠️  SLOW GET /api/debug/me {
+  correlationId: 'perf-1757102647256-vx330ecxf',
+  duration: 1935,
+  memoryDeltaMB: 1,
+  statusCode: 200,
+  isCritical: false,
+  threshold: 1000
+}

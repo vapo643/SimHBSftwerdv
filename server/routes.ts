@@ -3323,101 +3323,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Update proposal status - REAL IMPLEMENTATION WITH AUDIT TRAIL
+  // Update proposal status - REDIRECTED TO DDD CONTROLLER
   app.put(
     '/api/propostas/:id/status',
     jwtAuthMiddleware,
-    // RBAC-FIX-002: Removido requireManagerOrAdmin - ownership validado no service layer
-    async (req: AuthenticatedRequest, res) => {
-      try {
-        const { id } = req.params;
-        const { status, observacao } = req.body;
-
-        if (!status) {
-          return res.status(400).json({ message: 'Status é obrigatório' });
-        }
-
-        // Import database and schema dependencies
-        const { db } = await import('../server/lib/supabase');
-        const { propostas, comunicacaoLogs } = await import('../shared/schema');
-        const { eq } = await import('drizzle-orm');
-
-        // Execute transaction for atomic updates
-        const result = await db.transaction(async (tx) => {
-          // Step 1: Get current proposal for audit trail
-          const [currentProposta] = await tx
-            .select({
-              status: propostas.status,
-              lojaId: propostas.lojaId,
-            })
-            .from(propostas)
-            .where(eq(propostas.id, id));
-
-          if (!currentProposta) {
-            throw new Error('Proposta não encontrada');
-          }
-
-          // PAM V1.0 - Usar FSM para validação de transição de status
-          // Determinar contexto baseado no status
-          let contexto: 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral' = 'geral';
-          if (['aprovado', 'reprovado', 'cancelado'].includes(status)) {
-            contexto = 'geral';
-          }
-
-          try {
-            await transitionTo({
-              propostaId: id,
-              novoStatus: status,
-              userId: req.user?.id || 'sistema',
-              contexto,
-              observacoes: observacao || `Status alterado para ${status}`,
-              metadata: {
-                tipoAcao: 'STATUS_UPDATE_MANUAL',
-                usuarioRole: req.user?.role || 'desconhecido',
-                statusAnterior: currentProposta.status,
-              },
-            });
-          } catch (error) {
-            if (error instanceof InvalidTransitionError) {
-              // Retornar 409 Conflict para transições inválidas
-              throw { statusCode: 409, message: error.message };
-            }
-            throw error;
-          }
-
-          // Atualizar campos adicionais se necessário
-          const [updatedProposta] = await tx
-            .update(propostas)
-            .set({
-              dataAprovacao: status === 'aprovado' ? getBrasiliaDate() : undefined,
-            })
-            .where(eq(propostas.id, id))
-            .returning();
-
-          // Skip comunicacaoLogs for now - focus on propostaLogs for audit
-          // This will be implemented later for client communication tracking
-
-          return updatedProposta;
-        });
-
-        console.log(
-          `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`
-        );
-        res.json(result);
-      } catch (error: any) {
-        console.error('Update status error:', error);
-        if (error instanceof Error && error.message === 'Proposta não encontrada') {
-          return res.status(404).json({ message: error.message });
-        }
-        // Tratar erro 409 de transição inválida
-        if (error?.statusCode === 409) {
-          return res.status(409).json({
-            message: error.message,
-            error: 'INVALID_TRANSITION',
-          });
-        }
-        res.status(500).json({ message: 'Erro ao atualizar status' });
-      }
+    async (req: Request, res: Response, next: NextFunction) => {
+      // PAM P2.3: Redirecionar para controller DDD
+      const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
+      const proposalController = new ProposalController();
+      return proposalController.updateStatus(req, res, next);
     }
   );
 
