@@ -47,17 +47,17 @@ class RedisManager {
 
       // Configurações de produção baseadas em melhores práticas
       lazyConnect: true,
-      connectTimeout: 10000,
-      commandTimeout: 5000,
+      connectTimeout: 3000, // Timeout mais rápido para deploy
+      commandTimeout: 2000, // Comando timeout mais rápido
       maxRetriesPerRequest: null, // CRÍTICO para BullMQ - evita timeouts
       enableOfflineQueue: true, // Permite queue de comandos quando Redis não está disponível
       keepAlive: 30000,
 
-      // Estratégia de reconexão exponencial
+      // Estratégia de reconexão mais agressiva para deploy
       retryStrategy: (times: number) => {
-        const delay = Math.min(times * 50, 2000);
-        if (times > 10) {
-          console.error('[REDIS MANAGER] Máximo de tentativas de reconexão atingido');
+        const delay = Math.min(times * 50, 1000);
+        if (times > 3) { // Máximo 3 tentativas para deploy mais rápido
+          console.error('[REDIS MANAGER] Máximo de tentativas de reconexão atingido (deploy mode)');
           return null;
         }
         return delay;
