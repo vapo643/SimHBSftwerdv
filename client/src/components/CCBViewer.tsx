@@ -300,11 +300,16 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   variant="outline"
                   size="sm"
                   onClick={handleView}
+                  disabled={fetchCcbUrlMutation.isPending}
                   className="flex items-center gap-2"
                   data-testid="button-view-ccb-original"
                 >
-                  <Eye className="h-4 w-4" />
-                  Ver CCB Original
+                  {fetchCcbUrlMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  {fetchCcbUrlMutation.isPending ? 'Buscando...' : 'Ver CCB Original'}
                 </Button>
 
                 {/* PAM V1.0 CORREÇÃO: Todos os roles autorizados podem VER CCB assinada */}
@@ -313,11 +318,16 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                     variant="outline"
                     size="sm"
                     onClick={handleViewCCBAssinada}
+                    disabled={fetchCcbAssinadaUrlMutation.isPending}
                     className="flex items-center gap-2 border-green-600 text-green-600 hover:bg-green-50"
                     data-testid="button-view-ccb-assinada"
                   >
-                    <Shield className="h-4 w-4" />
-                    Ver CCB Assinada
+                    {fetchCcbAssinadaUrlMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Shield className="h-4 w-4" />
+                    )}
+                    {fetchCcbAssinadaUrlMutation.isPending ? 'Buscando...' : 'Ver CCB Assinada'}
                   </Button>
                 )}
 
@@ -325,11 +335,16 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   variant="outline"
                   size="sm"
                   onClick={handleDownload}
+                  disabled={fetchCcbUrlMutation.isPending}
                   className="flex items-center gap-2"
                   data-testid="button-download-ccb"
                 >
-                  <Download className="h-4 w-4" />
-                  Baixar PDF Original
+                  {fetchCcbUrlMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {fetchCcbUrlMutation.isPending ? 'Buscando...' : 'Baixar PDF Original'}
                 </Button>
 
                 {/* PAM V1.0: Botão de download CCB assinada - EXCLUSIVO para ADMINISTRADOR */}
