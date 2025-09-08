@@ -491,7 +491,7 @@ export class ProposalController {
       const repository = this.container.resolve<any>(TOKENS.PROPOSAL_REPOSITORY);
       await repository.save(proposal);
 
-      return res.json({
+      return res.status(200).json({
         success: true,
         message: 'Proposta reenviada para análise com sucesso',
         propostaId: proposal.id,
