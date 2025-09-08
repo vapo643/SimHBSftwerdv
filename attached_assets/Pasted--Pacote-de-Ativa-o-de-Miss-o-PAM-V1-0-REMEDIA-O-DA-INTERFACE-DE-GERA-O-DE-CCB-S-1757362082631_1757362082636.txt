@@ -1,0 +1,75 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - REMEDIAÇÃO DA INTERFACE DE GERAÇÃO DE CCB**
+
+* **Sumário da Missão:** Implementar os elementos de interface do usuário (UI) necessários na tela de Formalização (`formalizacao.tsx`) para permitir que o `ATENDENTE` acione a geração da CCB e visualize o documento gerado.
+
+* **Intenção Estratégica:** Concluir o fluxo de negócio de formalização, tornando a funcionalidade de backend (que já está operacional) acessível ao usuário e permitindo a finalização das propostas de crédito.
+
+* **Contexto Técnico:** A sua auditoria provou que a função `generateCCB` em `client/src/pages/formalizacao.tsx` é funcional mas órfã. A missão é criar um `<Button>` que chame esta função e, em seguida, renderizar o resultado (o link para o PDF da CCB) na tela quando a chamada de API for bem-sucedida.
+
+---
+
+**IMPLEMENTAR:**
+Conexão da UI com a Lógica de Geração de CCB
+
+**CURRENT STATE:**
+A página `formalizacao.tsx` contém uma função `generateCCB` que não é chamada por nenhum elemento na UI, tornando a funcionalidade de geração de CCB inacessível.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um botão "Gerar CCB" é visível na tela de Formalização para propostas que estão no estado apropriado.
+2.  Clicar neste botão aciona a função `generateCCB`, que por sua vez chama o endpoint da API `POST /api/propostas/:id/gerar-ccb`.
+3.  Enquanto a CCB está a ser gerada, um indicador de carregamento (`loading state`) é exibido no botão.
+4.  Após a geração bem-sucedida, a resposta da API (contendo o caminho do ficheiro) é armazenada no estado do componente.
+5.  A UI é atualizada para exibir uma secção "CCB Gerada", mostrando um link para o documento e, potencialmente, um botão para "Gerar Novamente".
+6.  O fluxo de ponta-a-ponta é totalmente funcional a partir da perspectiva do usuário.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Adicione o Botão "Gerar CCB":**
+    * Navegue até `client/src/pages/formalizacao.tsx`.
+    * Localize a secção apropriada na renderização do JSX para adicionar as ações de formalização.
+    * Insira o seguinte componente de botão `shadcn/ui`:
+        ```jsx
+        <Button 
+          onClick={() => generateCCB(proposta.id)} 
+          disabled={isGeneratingCcb}
+        >
+          {isGeneratingCcb ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <FileText className="mr-2 h-4 w-4" />
+          )}
+          {isGeneratingCcb ? 'Gerando...' : 'Gerar CCB'}
+        </Button>
+        ```
+    * *Nota: `isGeneratingCcb` é o booleano de `isLoading` da sua mutação `useMutation`.*
+
+2.  **Gerencie e Exiba o Resultado:**
+    * Modifique o hook `useMutation` da função `generateCCB` para usar o callback `onSuccess`.
+    * No `onSuccess`, atualize um estado local (usando `useState`) com o caminho do ficheiro da CCB retornado pela API. Ex: `setCcbPath(data.caminho);`
+    * Crie um novo estado: `const [ccbPath, setCcbPath] = useState<string | null>(proposta.ccbPath || null);`
+    * Na secção do JSX, adicione uma renderização condicional para exibir o link da CCB se `ccbPath` existir:
+        ```jsx
+        {ccbPath && (
+          <div className="mt-4 p-4 border rounded-lg bg-green-50 dark:bg-green-900/20">
+            <h3 className="font-semibold text-green-700 dark:text-green-300">CCB Gerada com Sucesso</h3>
+            <p className="text-sm text-muted-foreground">O documento foi gerado e salvo com segurança.</p>
+            <div className="mt-2 flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => window.open(getSignedUrlFor(ccbPath), '_blank')}>
+                <Eye className="mr-2 h-4 w-4" />
+                Visualizar CCB
+              </Button>
+              {/* Adicione aqui o botão "Gerar Novamente" se necessário */}
+            </div>
+          </div>
+        )}
+        ```
+    * *Nota: Você precisará de uma função auxiliar `getSignedUrlFor(path)` que construa a URL completa para aceder ao documento no Supabase Storage. Se não existir, crie-a.*
+
+3.  **Validação Final:** Após as modificações, execute a aplicação e valide o fluxo completo: o botão deve aparecer, o clique deve acionar a geração, o estado de `loading` deve ser exibido, e o link para a CCB gerada deve aparecer na tela.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 98%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - O risco é mínimo e restringe-se a possíveis ajustes de estilo (CSS) ou à implementação da função `getSignedUrlFor`. A lógica principal já foi provada funcional.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que o componente `Button` e os ícones `Loader2`, `FileText`, `Eye` da biblioteca `lucide-react` já estão disponíveis no projeto.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve validar o fluxo de ponta-a-ponta, confirmando que um `ATENDENTE` pode gerar, visualizar e, se aplicável, re-gerar a CCB a partir da interface do usuário.
