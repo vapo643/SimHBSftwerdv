@@ -151,9 +151,9 @@ export class CreateProposalUseCase {
       data_nascimento: dto.clienteDataNascimento, // Alias
       estado: dto.clienteUf, // Alias
       renda_mensal: dto.clienteRenda ? Money.fromReais(dto.clienteRenda) : undefined, // Alias
-      empregador: dto.clienteEmpresaNome || dto.clienteOcupacao, // CORRIGIDO: usar empresa se disponível
-      tempo_emprego: dto.clienteTempoEmprego, // CORRIGIDO: usar valor real
-      dividas_existentes: dto.clienteDividasExistentes ? parseFloat(dto.clienteDividasExistentes.toString()) : undefined, // CORRIGIDO: usar valor real
+      empregador: dto.clienteOcupacao, // Usar ocupação como empregador padrão
+      tempo_emprego: undefined, // Campo não disponível no DTO
+      dividas_existentes: undefined // Campo não disponível no DTO
     };
 
     // LACRE DE OURO: Construir ProposalCreationProps com todos os 14 campos críticos
@@ -205,7 +205,11 @@ export class CreateProposalUseCase {
       // Dados adicionais (opcionais)
       clienteData: clienteData,
       atendenteId: dto.atendenteId,
-      observacoes: undefined
+      observacoes: undefined,
+      
+      // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia
+      finalidade: dto.finalidade,
+      garantia: dto.garantia
     };
     
     // Criar agregado usando factory method refatorado

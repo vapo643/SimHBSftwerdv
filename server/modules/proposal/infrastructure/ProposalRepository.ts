@@ -70,6 +70,9 @@ export class ProposalRepository implements IProposalRepository {
         ccbGerado: false, // Valor padrão para nova proposta
         assinaturaEletronicaConcluida: false, // Valor padrão para nova proposta
         biometriaConcluida: false, // Valor padrão para nova proposta
+        // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia
+        finalidade: data.finalidade,
+        garantia: data.garantia
       };
       
       console.log('🔍 [REPOSITORY DEBUG] Insert values userId:', insertValues.userId);
@@ -113,6 +116,9 @@ export class ProposalRepository implements IProposalRepository {
             motivoPendencia: data.motivo_rejeicao,
             observacoes: data.observacoes,
             ccbDocumentoUrl: data.ccb_documento_url,
+            // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia no UPDATE
+            finalidade: data.finalidade,
+            garantia: data.garantia,
             // updatedAt campo removido - será atualizado automaticamente pelo schema
           })
           .where(eq(propostas.id, data.id));

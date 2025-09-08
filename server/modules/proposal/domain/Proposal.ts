@@ -40,6 +40,10 @@ export interface ProposalCreationProps {
   dadosPagamento?: DadosPagamento;
   atendenteId?: string;
   observacoes?: string;
+  
+  // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia
+  finalidade?: string;
+  garantia?: string;
 }
 
 // Value Objects - LACRE DE OURO: Interface expandida para todos os campos
@@ -334,6 +338,14 @@ export class Proposal {
       props.clienteComprometimentoRenda,
       props.atendenteId
     );
+    
+    // CORREÇÃO MANDATÓRIA PAM V1.0: Definir finalidade e garantia
+    if (props.finalidade) {
+      proposal._finalidade = props.finalidade;
+    }
+    if (props.garantia) {
+      proposal._garantia = props.garantia;
+    }
 
     proposal.addEvent(
       new ProposalCreatedEvent(id, 'ProposalCreated', {
