@@ -32,24 +32,25 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const queryClient = useQueryClient();
   const { user } = useAuth(); // PAM V1.0: Obter informações do usuário para verificar role
 
-  // Query para buscar status do CCB
+  // Query para buscar status do CCB - PAM V1.0: Endpoint corrigido
   const {
-    data: ccbStatus,
+    data: proposalData,
     isLoading,
     error,
-  } = useQuery<CCBStatus>({
-    queryKey: [`/api/formalizacao/${proposalId}/ccb`],
+  } = useQuery({
+    queryKey: [`/api/propostas/${proposalId}`],
     refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
+    select: (data: any) => ({
+      ccbPath: data?.ccbPath || data?.caminhoCcb,
+      signedUrl: data?.signedUrl,
+      generatedAt: data?.ccbGeradoEm || data?.ccb_gerado_em,
+      status: data?.status
+    })
   });
 
-  // PAM V1.0: Query para buscar dados da proposta (verificar se tem CCB assinada)
-  const { data: proposalData } = useQuery({
-    queryKey: [`/api/propostas/${proposalId}`],
-    select: (data: any) => ({
-      caminhoCcbAssinado: data?.caminhoCcbAssinado || data?.caminho_ccb_assinado,
-      dataAssinatura: data?.dataAssinatura || data?.data_assinatura,
-    }),
-  });
+  // PAM V1.0: Dados de CCB assinada extraídos da query principal
+  const caminhoCcbAssinado = proposalData?.caminhoCcbAssinado;
+  const dataAssinatura = proposalData?.dataAssinatura;
 
   // Mutation para gerar CCB - PAM V1.0: Endpoint corrigido
   const generateCCBMutation = useMutation({
@@ -66,18 +67,16 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         variant: 'default',
       });
 
-      // Invalidar queries relacionadas - usar chaves corretas
-      queryClient.invalidateQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/ccb-url`] });
-      queryClient.invalidateQueries({ queryKey: ['proposta', proposalId] });
-      queryClient.invalidateQueries({ queryKey: ['formalizacao-status', proposalId] });
+      // Invalidar queries relacionadas - PAM V1.0: Chaves corretas
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
 
       setIsGenerating(false);
       onCCBGenerated?.();
 
       // Forçar refetch após 500ms
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
+        queryClient.refetchQueries({ queryKey: [`/api/propostas/${proposalId}`] });
       }, 500);
     },
     onError: (error: unknown) => {
@@ -107,17 +106,15 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         variant: 'default',
       });
 
-      // Invalidar queries - usar a chave correta
-      queryClient.invalidateQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/ccb-url`] });
-      queryClient.invalidateQueries({ queryKey: ['proposta', proposalId] });
-      queryClient.invalidateQueries({ queryKey: ['formalizacao-status', proposalId] });
+      // Invalidar queries - PAM V1.0: Chaves corretas
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
 
       setIsGenerating(false);
 
       // Forçar refetch após 500ms para garantir atualização
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
+        queryClient.refetchQueries({ queryKey: [`/api/propostas/${proposalId}`] });
       }, 500);
     },
     onError: (error: unknown) => {
