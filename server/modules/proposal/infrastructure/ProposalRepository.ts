@@ -299,6 +299,13 @@ export class ProposalRepository implements IProposalRepository {
       .orderBy(desc(propostas.createdAt));
 
     console.log(`⚡ [PERF-BOOST-001] Query executed: ${results.length} proposals (lightweight)`);
+    
+    // PAM V1.0 DEBUG: Log do primeiro resultado para análise
+    if (results.length > 0) {
+      console.log('🔍 [PAM DEBUG] First result keys:', Object.keys(results[0]));
+      console.log('🔍 [PAM DEBUG] loja_nome:', results[0].loja_nome);
+      console.log('🔍 [PAM DEBUG] parceiro_nome:', results[0].parceiro_nome);
+    }
 
     // PAM V1.0 - RECONSTRUÇÃO DO CONTRATO DE DADOS: Usar mapeador completo
     return results.map((row) => this.mapRowToProposalDTO(row));
@@ -310,6 +317,12 @@ export class ProposalRepository implements IProposalRepository {
    * Converte snake_case para camelCase e estrutura dados corretamente
    */
   private mapRowToProposalDTO(row: any): any {
+    // PAM V1.0 DEBUG: Log para análise do mapeamento
+    console.log('🔍 [MAPEADOR DEBUG] parceiro_id:', row.parceiro_id);
+    console.log('🔍 [MAPEADOR DEBUG] parceiro_nome:', row.parceiro_nome);
+    console.log('🔍 [MAPEADOR DEBUG] loja_id:', row.loja_id);
+    console.log('🔍 [MAPEADOR DEBUG] loja_nome:', row.loja_nome);
+    
     return {
       // Dados básicos da proposta
       id: row.id,
