@@ -1,0 +1,33 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA FORENSE DO HISTÓRICO DE COMUNICAÇÃO**
+
+* **Sumário da Missão:** Realizar uma auditoria forense de ponta-a-ponta no fluxo de dados que alimenta o componente "Histórico de Comunicação" na tela de Análise de Proposta para identificar a causa raiz da falha de visualização.
+
+* **Cenário de Negócio (O "Caso de Teste"):** Um `ANALISTA` acede à página `/credito/analise/:id` para analisar uma proposta. A secção que deveria exibir o histórico de interações (observações, mudanças de status, e-mails enviados) não aparece ou é exibida vazia.
+
+* **Vetor de Ataque / Ponto de Falha (Hipóteses):**
+    1.  **Componente Frontend:** O componente React (`HistoricoCompartilhado.tsx` ou similar) contém um erro de renderização ou está a receber adereços (props) incorretos.
+    2.  **Hook de Dados (TanStack Query):** A query que busca os dados do histórico está a falhar silenciosamente ou a retornar dados vazios/malformados.
+    3.  **Endpoint da API (Backend):** O endpoint (ex: `GET /api/propostas/:id/auditoria`) está com erro, retornando uma resposta vazia, ou não está a ser chamado de todo.
+    4.  **Camada de Repositório (Backend):** A query no repositório que busca os logs de auditoria da base de dados está incorreta ou não retorna nenhum dado.
+    5.  **Política de RLS (Banco de Dados):** Uma política de Row Level Security está a bloquear o acesso aos dados da tabela de auditoria para o `role` do analista.
+
+* **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+
+1.  **Análise do Frontend:**
+    * Localize o ficheiro da página de Análise de Proposta (provavelmente `client/src/pages/credito/analise.tsx`).
+    * Identifique o componente responsável por renderizar o histórico de comunicação (ex: `<HistoricoCompartilhado />` ou `<HistoricoComunicao />`).
+    * Apresente o código deste componente de histórico. Mostre o hook do TanStack Query (`useQuery`) que ele utiliza para buscar os dados.
+
+2.  **Análise da Chamada de Rede:**
+    * Dentro do hook `useQuery` identificado, aponte a função de busca (ex: `apiClient.get(...)`). Qual é o endpoint exato da API que está a ser chamado?
+
+3.  **Análise do Backend (Controller e Rota):**
+    * Navegue até `server/routes.ts` (ou ficheiro de rotas relevante). Localize a definição da rota para o endpoint identificado acima.
+    * Apresente o código da rota e identifique qual método do `proposalController` (ou outro controller) é acionado.
+    * Apresente o código completo do método correspondente no ficheiro do controller.
+
+4.  **Análise da Camada de Dados (Repositório):**
+    * Siga o fluxo a partir do controller até ao `UseCase` e, finalmente, ao método no `ProposalRepository` (ou `AuditRepository`) que executa a query no banco de dados.
+    * Apresente a query Drizzle ORM completa que busca os dados do histórico de comunicação/auditoria.
+
+5.  **Veredito Final:** Com base na análise completa, explique precisamente por que o Histórico de Comunicação não está a ser exibido. O problema é que o frontend não está a pedir os dados, a API não os está a devolver, ou a base de dados não os está a fornecer?
