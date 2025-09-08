@@ -506,7 +506,7 @@ export class ProposalController {
    * Atualizar dados da proposta (para correções)
    * PAM V2.5 - OPERAÇÃO VISÃO CLARA - Endpoint para salvamento
    */
-  async update(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       SafeLogger.debug('[CONTROLLER DEBUG] Starting update request');
       const { id } = req.params;
@@ -576,7 +576,7 @@ export class ProposalController {
   /**
    * Buscar proposta por CPF (última proposta do cliente)
    */
-  async getByCpf(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  async getByCpf(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { cpf } = req.params;
 
@@ -601,7 +601,7 @@ export class ProposalController {
 
       // Retornar a proposta mais recente
       const latestProposal = proposals.sort(
-        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+        (a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime()
       )[0];
 
       return res.json({
