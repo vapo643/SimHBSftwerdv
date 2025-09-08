@@ -1,0 +1,103 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 766
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+HistoricoCompartilhado.tsx:42 Erro ao buscar logs de auditoria: ApiError: Acesso negado. Permissão insuficiente.
+    at apiClient (apiClient.ts:528:13)
+    at async queryFn (HistoricoCompartilhado.tsx:39:26)
+queryFn @ HistoricoCompartilhado.tsx:42Understand this warning
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+editar.tsx:435 🔍 SALVANDO ALTERAÇÕES: Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+HistoricoCompartilhado.tsx:42 Erro ao buscar logs de auditoria: ApiError: Acesso negado. Permissão insuficiente.
+    at apiClient (apiClient.ts:528:13)
+    at async queryFn (HistoricoCompartilhado.tsx:39:26)
+queryFn @ HistoricoCompartilhado.tsx:42Understand this warning
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+editar.tsx:526 🔥 [PAM V1.0] Cache invalidation agressiva executada - todas as queries invalidadas
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+HistoricoCompartilhado.tsx:42 Erro ao buscar logs de auditoria: ApiError: Acesso negado. Permissão insuficiente.
+    at apiClient (apiClient.ts:528:13)
+    at async queryFn (HistoricoCompartilhado.tsx:39:26)
+queryFn @ HistoricoCompartilhado.tsx:42Understand this warning
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] ObjectauthorizationHeader: "Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJlNjQ3YWZjMC0wM2ZhLTQ4MmQtODI5My1kODI0ZGNhYjAzOTkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU3MzU4MjczLCJpYXQiOjE3NTczNTQ2NzMsImVtYWlsIjoiYXRlbmRlbnRlZWxsZXZlbGFyQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFURU5ERU5URSJ9LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc1NzM1NDY3M31dLCJzZXNzaW9uX2lkIjoiYWUzZTMxM2YtZWYwNy00MzFjLWJiYzYtMTlkZWVkOGZkYjc2IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.wLsXYpAHlr__DjGzBWyTTWms8q4vTO2Pb2dahDbYgAg"hasToken: trueisFormData: falseurl: "https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c"[[Prototype]]: Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: ObjectexpectedStatus: "pendenciado"isEqual: truepropostaCompleta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendenciado', cliente_data: {…}, clienteData: {…}, condicoesData: {…}, …}propostaStatus: "pendenciado"statusAsString: "pendenciado"statusLength: 11statusType: "string"[[Prototype]]: Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] ObjectauthorizationHeader: "Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJlNjQ3YWZjMC0wM2ZhLTQ4MmQtODI5My1kODI0ZGNhYjAzOTkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU3MzU4MjczLCJpYXQiOjE3NTczNTQ2NzMsImVtYWlsIjoiYXRlbmRlbnRlZWxsZXZlbGFyQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFURU5ERU5URSJ9LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc1NzM1NDY3M31dLCJzZXNzaW9uX2lkIjoiYWUzZTMxM2YtZWYwNy00MzFjLWJiYzYtMTlkZWVkOGZkYjc2IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.wLsXYpAHlr__DjGzBWyTTWms8q4vTO2Pb2dahDbYgAg"hasToken: trueisFormData: falseurl: "https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c"[[Prototype]]: Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] ObjectauthorizationHeader: "Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJlNjQ3YWZjMC0wM2ZhLTQ4MmQtODI5My1kODI0ZGNhYjAzOTkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU3MzU4MjczLCJpYXQiOjE3NTczNTQ2NzMsImVtYWlsIjoiYXRlbmRlbnRlZWxsZXZlbGFyQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFURU5ERU5URSJ9LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc1NzM1NDY3M31dLCJzZXNzaW9uX2lkIjoiYWUzZTMxM2YtZWYwNy00MzFjLWJiYzYtMTlkZWVkOGZkYjc2IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.wLsXYpAHlr__DjGzBWyTTWms8q4vTO2Pb2dahDbYgAg"hasToken: trueisFormData: falseurl: "https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c"[[Prototype]]: Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+editar.tsx:613 🔍 ERRO OU PROPOSTA VAZIA: Objecterror: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: cep.replace is not a function<br> &nbsp; &nbsp;at Function.create (/home/runner/workspace/shared/value-objects.ts:407:25)<br> &nbsp; &nbsp;at Function.fromDatabase (/home/runner/workspace/server/modules/proposal/domain/Proposal.ts:434:40)<br> &nbsp; &nbsp;at ProposalRepository.mapToDomain (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:929:21)<br> &nbsp; &nbsp;at ProposalRepository.findById (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:274:29)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)<br> &nbsp; &nbsp;at async GetProposalByIdUseCase.execute (/home/runner/workspace/server/modules/proposal/application/GetProposalByIdUseCase.ts:14:12)<br> &nbsp; &nbsp;at async ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:182:24)</pre>
+</body>
+</html>
+
+    at apiClient (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/lib/apiClient.ts:341:13)
+    at async queryFn (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/editar.tsx:512:24)errorMessage: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>TypeError: cep.replace is not a function<br> &nbsp; &nbsp;at Function.create (/home/runner/workspace/shared/value-objects.ts:407:25)<br> &nbsp; &nbsp;at Function.fromDatabase (/home/runner/workspace/server/modules/proposal/domain/Proposal.ts:434:40)<br> &nbsp; &nbsp;at ProposalRepository.mapToDomain (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:929:21)<br> &nbsp; &nbsp;at ProposalRepository.findById (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:274:29)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)<br> &nbsp; &nbsp;at async GetProposalByIdUseCase.execute (/home/runner/workspace/server/modules/proposal/application/GetProposalByIdUseCase.ts:14:12)<br> &nbsp; &nbsp;at async ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:182:24)</pre>\n</body>\n</html>\n"proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendenciado', cliente_data: {…}, clienteData: {…}, condicoesData: {…}, …}[[Prototype]]: Object
+editar.tsx:613 🔍 ERRO OU PROPOSTA VAZIA: Objecterror: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: cep.replace is not a function<br> &nbsp; &nbsp;at Function.create (/home/runner/workspace/shared/value-objects.ts:407:25)<br> &nbsp; &nbsp;at Function.fromDatabase (/home/runner/workspace/server/modules/proposal/domain/Proposal.ts:434:40)<br> &nbsp; &nbsp;at ProposalRepository.mapToDomain (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:929:21)<br> &nbsp; &nbsp;at ProposalRepository.findById (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:274:29)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)<br> &nbsp; &nbsp;at async GetProposalByIdUseCase.execute (/home/runner/workspace/server/modules/proposal/application/GetProposalByIdUseCase.ts:14:12)<br> &nbsp; &nbsp;at async ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:182:24)</pre>
+</body>
+</html>
+
+    at apiClient (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/lib/apiClient.ts:341:13)
+    at async queryFn (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/editar.tsx:512:24)errorMessage: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>TypeError: cep.replace is not a function<br> &nbsp; &nbsp;at Function.create (/home/runner/workspace/shared/value-objects.ts:407:25)<br> &nbsp; &nbsp;at Function.fromDatabase (/home/runner/workspace/server/modules/proposal/domain/Proposal.ts:434:40)<br> &nbsp; &nbsp;at ProposalRepository.mapToDomain (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:929:21)<br> &nbsp; &nbsp;at ProposalRepository.findById (/home/runner/workspace/server/modules/proposal/infrastructure/ProposalRepository.ts:274:29)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)<br> &nbsp; &nbsp;at async GetProposalByIdUseCase.execute (/home/runner/workspace/server/modules/proposal/application/GetProposalByIdUseCase.ts:14:12)<br> &nbsp; &nbsp;at async ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:182:24)</pre>\n</body>\n</html>\n"proposta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', status: 'pendenciado', cliente_data: {…}, clienteData: {…}, condicoesData: {…}, …}[[Prototype]]: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object

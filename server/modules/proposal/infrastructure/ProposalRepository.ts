@@ -47,24 +47,40 @@ export class ProposalRepository implements IProposalRepository {
       console.log('[REPOSITORY] Proposal exists, updating directly:', proposal.id);
       
       // RLS CORREÇÃO PAM V1.0: UPDATE otimizado que preserva relacionamentos críticos
+      // VALUE OBJECT FIX: Garantir que campos sejam strings, não objetos
+      const cleanClienteData = {
+        ...data.cliente_data,
+        // Garantir que CEP seja string
+        cep: typeof data.cliente_data.cep === 'object' && data.cliente_data.cep?.value 
+          ? data.cliente_data.cep.value 
+          : data.cliente_data.cep,
+        // Garantir que renda_mensal seja número
+        renda_mensal: typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
+          ? data.cliente_data.renda_mensal.cents / 100
+          : data.cliente_data.renda_mensal,
+        rendaMensal: typeof data.cliente_data.rendaMensal === 'object' && data.cliente_data.rendaMensal?.cents
+          ? data.cliente_data.rendaMensal.cents / 100
+          : data.cliente_data.rendaMensal,
+      };
+      
       // Campos que são seguros para atualizar (não afetam RLS policies)
       const updateFields: any = {
         status: data.status,
-        clienteData: JSON.stringify(data.cliente_data),
+        clienteData: JSON.stringify(cleanClienteData),
         // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente no UPDATE
-        clienteEmail: data.cliente_data.email,
-        clienteTelefone: data.cliente_data.telefone,
+        clienteEmail: cleanClienteData.email,
+        clienteTelefone: cleanClienteData.telefone,
         clienteDataNascimento:
-          data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
+          cleanClienteData.dataNascimento || cleanClienteData.data_nascimento,
         clienteRenda:
-          data.cliente_data.rendaMensal?.toString() ||
-          data.cliente_data.renda_mensal?.toString(),
-        clienteRg: data.cliente_data.rg,
-        clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
-        clienteEstadoCivil: data.cliente_data.estadoCivil,
-        clienteNacionalidade: data.cliente_data.nacionalidade,
-        clienteCep: data.cliente_data.cep,
-        clienteOcupacao: data.cliente_data.ocupacao,
+          cleanClienteData.rendaMensal?.toString() ||
+          cleanClienteData.renda_mensal?.toString(),
+        clienteRg: cleanClienteData.rg,
+        clienteOrgaoEmissor: cleanClienteData.orgaoEmissor,
+        clienteEstadoCivil: cleanClienteData.estadoCivil,
+        clienteNacionalidade: cleanClienteData.nacionalidade,
+        clienteCep: typeof cleanClienteData.cep === 'string' ? cleanClienteData.cep : null,
+        clienteOcupacao: cleanClienteData.ocupacao,
         valor: data.valor.toString(),
         prazo: data.prazo,
         taxaJuros: data.taxa_juros.toString(),
@@ -115,26 +131,42 @@ export class ProposalRepository implements IProposalRepository {
       const numeroProposta = await this.getNextNumeroProposta();
       console.log('🔍 [REPOSITORY DEBUG] Next numero proposta:', numeroProposta);
 
+      // VALUE OBJECT FIX: Reutilizar mesma lógica de limpeza do UPDATE
+      const cleanClienteDataForInsert = {
+        ...data.cliente_data,
+        // Garantir que CEP seja string
+        cep: typeof data.cliente_data.cep === 'object' && data.cliente_data.cep?.value 
+          ? data.cliente_data.cep.value 
+          : data.cliente_data.cep,
+        // Garantir que renda_mensal seja número
+        renda_mensal: typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
+          ? data.cliente_data.renda_mensal.cents / 100
+          : data.cliente_data.renda_mensal,
+        rendaMensal: typeof data.cliente_data.rendaMensal === 'object' && data.cliente_data.rendaMensal?.cents
+          ? data.cliente_data.rendaMensal.cents / 100
+          : data.cliente_data.rendaMensal,
+      };
+
       const insertValues = {
         id: proposal.id, // UUID do domínio
         numeroProposta: numeroProposta, // ID sequencial começando em 300001
         status: data.status,
-        clienteNome: data.cliente_data.nome,
-        clienteCpf: data.cliente_data.cpf,
-        clienteData: JSON.stringify(data.cliente_data),
+        clienteNome: cleanClienteDataForInsert.nome,
+        clienteCpf: cleanClienteDataForInsert.cpf,
+        clienteData: JSON.stringify(cleanClienteDataForInsert),
         // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente
-        clienteEmail: data.cliente_data.email,
-        clienteTelefone: data.cliente_data.telefone,
+        clienteEmail: cleanClienteDataForInsert.email,
+        clienteTelefone: cleanClienteDataForInsert.telefone,
         clienteDataNascimento:
-          data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
+          cleanClienteDataForInsert.dataNascimento || cleanClienteDataForInsert.data_nascimento,
         clienteRenda:
-          data.cliente_data.rendaMensal?.toString() || data.cliente_data.renda_mensal?.toString(),
-        clienteRg: data.cliente_data.rg,
-        clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
-        clienteEstadoCivil: data.cliente_data.estadoCivil,
-        clienteNacionalidade: data.cliente_data.nacionalidade,
-        clienteCep: data.cliente_data.cep,
-        clienteOcupacao: data.cliente_data.ocupacao,
+          cleanClienteDataForInsert.rendaMensal?.toString() || cleanClienteDataForInsert.renda_mensal?.toString(),
+        clienteRg: cleanClienteDataForInsert.rg,
+        clienteOrgaoEmissor: cleanClienteDataForInsert.orgaoEmissor,
+        clienteEstadoCivil: cleanClienteDataForInsert.estadoCivil,
+        clienteNacionalidade: cleanClienteDataForInsert.nacionalidade,
+        clienteCep: typeof cleanClienteDataForInsert.cep === 'string' ? cleanClienteDataForInsert.cep : null,
+        clienteOcupacao: cleanClienteDataForInsert.ocupacao,
         valor: data.valor.toString(),
         prazo: data.prazo,
         taxaJuros: data.taxa_juros.toString(),

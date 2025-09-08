@@ -423,6 +423,15 @@ export class Proposal {
 
   // Factory method para reconstituir do banco
   static fromDatabase(data: any): Proposal {
+    // VALUE OBJECT DEFENSIVE FIX: Lidar com dados que podem estar salvos incorretamente
+    const cepValue = typeof data.cliente_data.cep === 'object' && data.cliente_data.cep?.value
+      ? data.cliente_data.cep.value
+      : data.cliente_data.cep;
+    
+    const rendaMensalValue = typeof data.cliente_data.renda_mensal === 'object' && data.cliente_data.renda_mensal?.cents
+      ? data.cliente_data.renda_mensal.cents / 100
+      : data.cliente_data.renda_mensal;
+    
     // Reconstituir Value Objects dos dados persistidos
     const clienteData: ClienteData = {
       ...data.cliente_data,
@@ -431,9 +440,9 @@ export class Proposal {
       telefone: data.cliente_data.telefone
         ? PhoneNumber.create(data.cliente_data.telefone)
         : undefined,
-      cep: data.cliente_data.cep ? CEP.create(data.cliente_data.cep) : undefined,
-      renda_mensal: data.cliente_data.renda_mensal
-        ? Money.fromReais(data.cliente_data.renda_mensal)
+      cep: cepValue ? CEP.create(cepValue) : undefined,
+      renda_mensal: rendaMensalValue
+        ? Money.fromReais(rendaMensalValue)
         : undefined,
       dividas_existentes: data.cliente_data.dividas_existentes
         ? Money.fromReais(data.cliente_data.dividas_existentes)
