@@ -605,11 +605,32 @@ export class ProposalController {
       }
 
       SafeLogger.debug('[CONTROLLER DEBUG] Updating proposal data');
-      // Atualizar dados usando o método do agregado
-      proposal.updateAfterPending({
-        clienteData: cliente_data,
-        observacoes: condicoes_data?.observacoes || '',
+      
+      // DEBUG CRÍTICO: Verificar se proposal é uma instância de Proposal
+      SafeLogger.debug('[CONTROLLER DEBUG] Proposal object analysis', {
+        isProposal: proposal.constructor.name,
+        hasUpdateMethod: typeof proposal.updateAfterPending,
+        methods: Object.getOwnPropertyNames(Object.getPrototypeOf(proposal)),
+        proposalId: proposal.id,
+        proposalStatus: proposal.status
       });
+      
+      // Atualizar dados usando o método do agregado
+      // LINHA 622 - VERIFICA SE MÉTODO EXISTE ANTES DE CHAMAR
+      if (typeof proposal.updateAfterPending === 'function') {
+        proposal.updateAfterPending({
+          clienteData: cliente_data,
+          observacoes: condicoes_data?.observacoes || '',
+        });
+      } else {
+        SafeLogger.error('[CRITICAL ERROR] updateAfterPending method not found on proposal object', {
+          proposalType: typeof proposal,
+          constructorName: proposal.constructor.name,
+          proposalId: proposal.id,
+          availableMethods: Object.getOwnPropertyNames(Object.getPrototypeOf(proposal))
+        });
+        throw new Error('updateAfterPending method not available on proposal object');
+      }
 
       SafeLogger.debug('[CONTROLLER DEBUG] Saving updated proposal');
       // 🏡 P0.2 - DIP Compliant: Use appropriate use case for persistence

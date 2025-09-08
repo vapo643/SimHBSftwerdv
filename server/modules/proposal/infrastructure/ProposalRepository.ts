@@ -258,10 +258,11 @@ export class ProposalRepository implements IProposalRepository {
       produto: result[0].produto_nome,
     });
 
-    // PAM V1.0 CORREÇÃO CRÍTICA: Usar o mesmo mapeador que funciona no findByCriteriaLightweight
-    const mappedData = this.mapRowToProposalDTO(result[0]);
+    // CORREÇÃO CRÍTICA PAM V2.0: Retornar instância de domain, não DTO
+    // Outros métodos do repositório usam mapToDomain() - deve ser consistente
+    const mappedData = this.mapToDomain(result[0]);
 
-    // PAM V1.0 UNIFICAÇÃO: Retornar DTO diretamente com fallback JSON funcionando
+    // CORREÇÃO: Retornar instância de domain com métodos disponíveis
     return mappedData;
   }
 
