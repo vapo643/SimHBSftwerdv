@@ -4,7 +4,8 @@
  */
 
 import express from 'express';
-import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
+import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware.js';
+import { type AuthenticatedRequest } from '../../shared/types/express.js';
 import { clickSignServiceV3 } from '../services/clickSignServiceV3.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import fs from 'fs/promises';
