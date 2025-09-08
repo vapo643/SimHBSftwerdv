@@ -583,7 +583,7 @@ export async function extractRoleFromToken(token: string): Promise<string | null
   try {
     const { createServerSupabaseAdminClient } = await import('./supabase');
     const supabase = createServerSupabaseAdminClient();
-    const { data, error } = await supabase.auth.getUser(authToken);
+    const { data, error } = await supabase.auth.getUser(token);
 
     if (error || !data.user) {
       return null;
