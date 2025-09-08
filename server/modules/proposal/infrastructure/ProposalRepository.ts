@@ -305,10 +305,26 @@ export class ProposalRepository implements IProposalRepository {
       console.log('🔍 [PAM DEBUG] First result keys:', Object.keys(results[0]));
       console.log('🔍 [PAM DEBUG] loja_nome:', results[0].loja_nome);
       console.log('🔍 [PAM DEBUG] parceiro_nome:', results[0].parceiro_nome);
+      console.log('🔍 [PAM DEBUG] LINHA 310 - TESTE CRÍTICO');
+      console.log('🔍 [PAM DEBUG] DEBUG FINALIZADO - Próximo: MAPEADOR');
+    } else {
+      console.log('🔍 [PAM DEBUG] NENHUM RESULTADO ENCONTRADO!');
     }
 
     // PAM V1.0 - RECONSTRUÇÃO DO CONTRATO DE DADOS: Usar mapeador completo
-    return results.map((row) => this.mapRowToProposalDTO(row));
+    console.log('🔍 [PAM DEBUG] ANTES DO MAPEADOR - Total results:', results.length);
+    console.log('🔍 [PAM DEBUG] CHAMANDO MAPEADOR...');
+    
+    try {
+      const mappedResults = results.map((row) => this.mapRowToProposalDTO(row));
+      console.log('🔍 [PAM DEBUG] MAPEADOR CONCLUÍDO - Total mapped:', mappedResults.length);
+      return mappedResults;
+    } catch (error) {
+      console.error('🚨 [PAM DEBUG] ERRO NO MAPEADOR:', error);
+      console.error('🚨 [PAM DEBUG] Stack trace:', error.stack);
+      // FALLBACK: Retornar dados brutos se o mapeador falhar
+      return results;
+    }
   }
 
   /**
