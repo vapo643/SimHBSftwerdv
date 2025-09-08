@@ -115,6 +115,52 @@ function generateSecureSecret(name: string): string {
   return fallback;
 }
 
+// Funções específicas para cada tipo de secret com validação por ambiente
+function getJwtSecret(): string {
+  const env = process.env.NODE_ENV || 'development';
+  
+  switch (env) {
+    case 'production':
+      return process.env.PROD_JWT_SECRET || (() => {
+        throw new Error('PROD_JWT_SECRET is required in production environment!');
+      })();
+    case 'staging':
+      return process.env.STAGING_JWT_SECRET || generateSecureSecret('STAGING_JWT_SECRET');
+    default:
+      return process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
+  }
+}
+
+function getSessionSecret(): string {
+  const env = process.env.NODE_ENV || 'development';
+  
+  switch (env) {
+    case 'production':
+      return process.env.PROD_SESSION_SECRET || (() => {
+        throw new Error('PROD_SESSION_SECRET is required in production environment!');
+      })();
+    case 'staging':
+      return process.env.STAGING_SESSION_SECRET || generateSecureSecret('STAGING_SESSION_SECRET');
+    default:
+      return process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
+  }
+}
+
+function getCsrfSecret(): string {
+  const env = process.env.NODE_ENV || 'development';
+  
+  switch (env) {
+    case 'production':
+      return process.env.PROD_CSRF_SECRET || (() => {
+        throw new Error('PROD_CSRF_SECRET is required in production environment!');
+      })();
+    case 'staging':
+      return process.env.STAGING_CSRF_SECRET || generateSecureSecret('STAGING_CSRF_SECRET');
+    default:
+      return process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
+  }
+}
+
 // Helper functions para buscar secrets baseado no ambiente
 function getJwtSecret(): string {
   const env = process.env.NODE_ENV || 'development';

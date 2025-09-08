@@ -579,7 +579,7 @@ export async function jwtAuthMiddleware(
  * Legacy function - maintained for backward compatibility
  * @deprecated Use jwtAuthMiddleware directly
  */
-export async function extractRoleFromToken(authToken: string): Promise<string | null> {
+export async function extractRoleFromToken(token: string): Promise<string | null> {
   try {
     const { createServerSupabaseAdminClient } = await import('./supabase');
     const supabase = createServerSupabaseAdminClient();
