@@ -234,28 +234,8 @@ export class ProposalRepository implements IProposalRepository {
     // PAM V1.0 CORREÇÃO CRÍTICA: Usar o mesmo mapeador que funciona no findByCriteriaLightweight
     const mappedData = this.mapRowToProposalDTO(result[0]);
     
-    // Retornar como Domain Object para manter compatibilidade com interface IProposalRepository
-    return this.mapToDomain({
-      id: mappedData.id,
-      status: mappedData.status,
-      clienteNome: mappedData.nomeCliente,
-      clienteCpf: mappedData.cpfCliente,
-      valor: mappedData.valorSolicitado,
-      prazo: mappedData.prazo,
-      taxaJuros: mappedData.taxaJuros,
-      valorTac: mappedData.valorTac,
-      valorIof: mappedData.valorIof,
-      valorTotalFinanciado: mappedData.valorTotalFinanciado,
-      finalidade: mappedData.finalidade,
-      garantia: mappedData.garantia,
-      produtoId: mappedData.produto?.id || null,
-      tabelaComercialId: null, // TODO: adicionar se necessário
-      lojaId: mappedData.lojaId,
-      userId: mappedData.atendenteId,
-      createdAt: mappedData.createdAt,
-      updatedAt: mappedData.updatedAt,
-      deletedAt: null
-    });
+    // PAM V1.0 UNIFICAÇÃO: Retornar DTO diretamente com fallback JSON funcionando
+    return mappedData;
   }
 
   // PAM V4.1 PERF-F2-001: Eliminando N+1 com JOIN otimizado

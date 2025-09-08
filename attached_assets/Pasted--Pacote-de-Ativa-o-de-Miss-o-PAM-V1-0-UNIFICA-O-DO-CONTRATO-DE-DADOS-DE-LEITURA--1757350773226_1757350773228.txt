@@ -1,0 +1,40 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - UNIFICAÇÃO DO CONTRATO DE DADOS DE LEITURA**
+
+* **Sumário da Missão:** Refatorar o método `findById` dentro de `server/modules/proposal/infrastructure/ProposalRepository.ts` para que ele utilize o mesmo mapeador de dados com lógica de fallback JSON (`mapRowToProposalDTO`) que já está em uso e funcional no método `findByCriteriaLightweight`.
+
+* **Intenção Estratégica:** Garantir que a recuperação de dados de uma proposta individual seja 100% consistente com a recuperação de dados em listas, eliminando a perda de dados para propostas antigas e restaurando a funcionalidade completa da tela de Análise.
+
+* **Contexto Técnico:** A auditoria forense provou que o `ProposalRepository` contém duas lógicas de mapeamento de dados conflitantes. O `findById` usa `mapToDomain`, que não tem fallback para a coluna JSON `cliente_data`. O `findByCriteriaLightweight` usa `mapRowToProposalDTO`, que tem o fallback correto. A missão é fazer com que `findById` adote o método correto e comprovadamente funcional.
+
+---
+
+**IMPLEMENTAR:**
+Unificação da Lógica de Mapeamento de Dados no `ProposalRepository`
+
+**CURRENT STATE:**
+O método `findById` em `ProposalRepository.ts` ignora os dados mapeados pelo `mapRowToProposalDTO` e retorna o resultado de um `mapToDomain` incompleto, o que causa a perda dos dados de cliente que existem apenas na coluna JSON `cliente_data`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O método `findById` em `server/modules/proposal/infrastructure/ProposalRepository.ts` é refatorado para remover completamente a chamada ao `mapToDomain`.
+2.  O método `findById` deve, em vez disso, chamar o `mapRowToProposalDTO` e retornar diretamente o seu resultado (um DTO completo).
+3.  Como resultado, uma chamada de API para `GET /api/propostas/:id` retornará um objeto JSON com TODOS os campos de cliente e condições preenchidos, mesmo para propostas antigas que dependem do fallback do JSON.
+4.  A tela de Análise de Proposta (`/credito/analise/:id`) renderizará com sucesso todos os campos, sem nenhum "N/A".
+
+**CONSTRAINTS (Roadmap de Implementação Cirúrgica):**
+1.  **Navegue** até o ficheiro `server/modules/proposal/infrastructure/ProposalRepository.ts`.
+2.  **Localize** o método `findById`.
+3.  **Identifique a Linha Defeituosa:** Encontre a linha `return this.mapToDomain(...)` dentro do `findById` (próximo à linha 238, conforme a auditoria).
+4.  **Execute a Substituição:** **DELETE** a linha `return this.mapToDomain(...)` e a substitua pela seguinte linha, que retorna o DTO mapeado corretamente:
+    ```typescript
+    return mappedData;
+    ```
+    *Contexto:* A linha anterior `const mappedData = this.mapRowToProposalDTO(result[0]);` já faz o trabalho correto. O erro é que o seu resultado estava a ser ignorado.
+5.  **Ajuste de Tipos:** Altere a assinatura do método `findById` para que o tipo de retorno seja uma `Promise<ProposalDTO | null>` (ou o tipo DTO apropriado) em vez de `Promise<Proposal | null>`, para refletir a mudança.
+6.  **Validação Final:** Execute `get_latest_lsp_diagnostics` para garantir que a mudança de tipo de retorno não introduziu erros de compilação no `GetProposalByIdUseCase` ou no `proposalController`. Corrija quaisquer erros de tipo que surjam, garantindo que o DTO seja passado corretamente até a resposta da API.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 99%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - O único risco é um erro de tipo em cascata se o `UseCase` ou o `Controller` esperavam estritamente uma instância da classe `Proposal` em vez do DTO. No entanto, a correção deste erro de tipo é uma tarefa de baixa complexidade.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que a lógica de negócio crítica já foi executada e que o objeto retornado ao controller é puramente para fins de visualização de dados, tornando a substituição de um objeto de domínio por um DTO segura.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve executar o teste de validação final: aceder à tela de Análise para a proposta `29e80705-89bb-43a5-bbc8-960b3139939c` e confirmar que **TODOS** os campos, especialmente "Email", "Telefone", "Finalidade" e "Garantia", são agora exibidos com os dados corretos provenientes do JSON.
