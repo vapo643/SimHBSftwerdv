@@ -413,7 +413,10 @@ const FilaAnalise: React.FC = () => {
                           {proposta.id}
                         </TableCell>
                         <TableCell className="text-gray-900 dark:text-white">
-                          {format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })}
+                          {proposta.createdAt || proposta.created_at ? 
+                            format(new Date(proposta.createdAt || proposta.created_at), 'dd/MM/yyyy', { locale: ptBR }) : 
+                            '-'
+                          }
                         </TableCell>
                         <TableCell className="text-gray-900 dark:text-white" data-testid={`text-nomeCliente-${proposta.id}`}>
                           {proposta.nomeCliente || '-'}
