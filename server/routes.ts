@@ -1213,45 +1213,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Import document routes - REACTIVATED FOR DIAGNOSIS
   const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
-                  .from('documents')
-                  .createSignedUrl(filePath, 3600); // 1 hora
-
-                if (!urlError && signedUrlData) {
-                  documentosComUrls.push({
-                    ...doc,
-                    // Mapeamento para formato esperado pelo DocumentViewer
-                    name: doc.nome_arquivo,
-                    url: signedUrlData.signedUrl,
-                    type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
-                    uploadDate: doc.created_at,
-                    // Manter campos originais também
-                    url_visualizacao: signedUrlData.signedUrl,
-                  });
-                  console.log(`🔍 [ANÁLISE] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
-                } else {
-                  console.log(
-                    `🔍 [ANÁLISE] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`,
-                    urlError?.message
-                  );
-                  console.log(`🔍 [ANÁLISE] ❌ Caminho tentado: ${filePath}`);
-                  documentosComUrls.push({
-                    ...doc,
-                    // Mesmo sem URL, mapear para formato esperado
-                    name: doc.nome_arquivo,
-                    url: '',
-                    type: doc.tipo || 'application/octet-stream',
-                    uploadDate: doc.created_at,
-                  }); // Adiciona sem URL em caso de erro
-                }
-              } catch (error) {
-                console.log(
-                  `🔍 [ANÁLISE] ❌ Erro ao processar documento ${doc.nome_arquivo}:`,
-                  error
-                );
-                documentosComUrls.push(doc); // Adiciona sem URL em caso de erro
-              }
-            }
-          }
 
           // Transform to match expected format with proper camelCase conversion
           const formattedProposta = {
@@ -1288,47 +1249,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
 
           res.json(formattedProposta);
-        } else {
-          // Para outros roles (ADMIN, GERENTE, ANALISTA), usar método original sem RLS
-          const proposta = await storage.getPropostaById(idParam);
+        }
 
-          if (!proposta) {
-            return res.status(404).json({ message: 'Proposta not found' });
-          }
+  // Document routes for proposals - REACTIVATED FOR DIAGNOSIS  
+  app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
 
-          console.log(
-            `🔐 [ADMIN/GERENTE/ANALISTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
-          );
-
-          // 🔧 CORREÇÃO CRÍTICA: Aplicar mesma lógica de documentos do ATENDENTE
-          const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
-          const supabase = createServerSupabaseAdminClient();
-
-          // Buscar documentos da proposta (mesma lógica do ATENDENTE)
-          const { data: documentos, error: docError } = await supabase
-            .from('proposta_documentos')
-            .select('*')
-            .eq('proposta_id', idParam);
-
-          console.log(
-            `🔍 [ANÁLISE-OUTROS] Documentos encontrados para proposta ${idParam}:`,
-            documentos?.length || 0
-          );
-
-          // Gerar URLs assinadas para visualização dos documentos (mesma lógica do ATENDENTE)
-          let documentosComUrls = [];
-          if (documentos && documentos.length > 0) {
-            console.log(
-              `🔍 [ANÁLISE-OUTROS] Gerando URLs assinadas para ${documentos.length} documentos...`
-            );
-
-            for (const doc of documentos) {
-              try {
-                console.log(`🔍 [ANÁLISE-OUTROS] Tentando gerar URL para documento:`, {
-                  nome: doc.nome_arquivo,
-                  url: doc.url,
-                  tipo: doc.tipo,
-                  proposta_id: doc.proposta_id,
+  // Import propostas routes
+  const { togglePropostaStatus, getCcbAssinada } = await import('./routes/propostas');
                 });
 
                 // Extrair o caminho do arquivo a partir da URL salva
