@@ -1544,7 +1544,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // MOVED TO server/routes/propostas/core.ts - PUT /api/propostas/:id
+  // PUT /api/propostas/:id - Atualizar dados da proposta (para correções)
+  app.put(
+    '/api/propostas/:id',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res, next) => {
+      try {
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
+        const proposalController = new ProposalController();
+        return proposalController.update(req, res, next);
+      } catch (error) {
+        console.error('PUT /api/propostas/:id error:', error);
+        next(error);
+      }
+    }
+  );
+
+  // PUT /api/propostas/:id/resubmit - Reenviar proposta pendente para análise
+  app.put(
+    '/api/propostas/:id/resubmit',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res, next) => {
+      try {
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
+        const proposalController = new ProposalController();
+        return proposalController.resubmitFromPending(req, res, next);
+      } catch (error) {
+        console.error('PUT /api/propostas/:id/resubmit error:', error);
+        next(error);
+      }
+    }
+  );
 
   // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
 
