@@ -1,0 +1,39 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - CORREÇÃO DE SINCRONIZAÇÃO DE ESTADO**
+
+* **Sumário da Missão:** Corrigir a falha de sincronização de estado no frontend após a edição e reenvio de uma proposta, garantindo que a interface do usuário (UI) reflita de forma consistente e imediata as alterações persistidas no banco de dados.
+
+* **Intenção Estratégica:** Restaurar a confiança do usuário na plataforma, eliminando a inconsistência entre as ações realizadas e os dados exibidos. Esta correção é crítica para a usabilidade do fluxo de negócio principal.
+
+* **Contexto Técnico:** O backend está a funcionar corretamente – as rotas `PUT /api/propostas/:id` e `PUT /api/propostas/:id/resubmit` persistem os dados e alteram o status no banco de dados. No entanto, o frontend falha em atualizar sua visualização. A causa raiz provável é uma implementação incorreta dos callbacks (`onSuccess`, `onError`) nos hooks de mutação do TanStack Query em `client/src/pages/propostas/editar.tsx`, que impede a invalidação do cache de queries relevantes.
+
+---
+
+**IMPLEMENTAR:**
+Correção do Fluxo de Sincronização de Dados e Redirecionamento Pós-Edição de Proposta
+
+**CURRENT STATE:**
+1.  Ao submeter a correção de uma proposta em `editar.tsx`, uma chamada `api.put` é realizada.
+2.  A API retorna um erro `HTTP 400` (apesar de salvar os dados no DB), o que provavelmente aciona o callback `onError` da mutação.
+3.  As lógicas de invalidação de cache (`queryClient.invalidateQueries`) e de redirecionamento, que estão no callback `onSuccess`, nunca são executadas.
+4.  O usuário vê uma mensagem de erro, é redirecionado incorretamente (ou não é redirecionado), e o dashboard continua a exibir dados desatualizados do cache.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `client/src/pages/propostas/editar.tsx` deve ser refatorado.
+2.  As mutações `updateMutation` e `resubmitMutation` devem utilizar o callback `onSettled`.
+3.  Dentro do `onSettled`, a invalidação de todas as queries relevantes deve ser executada. Chaves de query a serem invalidadas incluem, mas não se limitam a: `['propostas']`, `['proposta', id]`, `['dashboard-kpis']`. Consulte `client/src/hooks/queries/queryKeys.ts` para a estratégia de chaves correta.
+4.  Após a invalidação, a lógica de redirecionamento deve ser acionada, enviando o usuário para a fila de análise (`/credito/fila`) ou para o dashboard principal (`/dashboard`).
+5.  O `toast` de sucesso ("Alterações salvas e proposta reenviada") deve ser exibido apenas se a mutação for bem-sucedida. O `toast` de erro deve ser exibido em caso de falha.
+6.  O erro `HTTP 400` que vem do backend deve ser investigado e corrigido no `proposalController.ts` para que ele retorne `HTTP 200` com um corpo JSON de sucesso quando a operação for bem-sucedida.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Refatorar Mutações:** Modifique `updateMutation` e `resubmitMutation` em `editar.tsx` para mover a lógica de `queryClient.invalidateQueries` para dentro de um callback `onSettled`.
+2.  **Corrigir Redirecionamento:** Implemente a lógica de redirecionamento (utilizando o router `wouter`) dentro do `onSettled` (mas condicional ao sucesso da operação) para garantir que o usuário saia da tela de edição.
+3.  **Corrigir Resposta da API:** Investigue o método `update` e `resubmitFromPending` no `proposalController.ts`. A causa provável do erro `400` é que, após o sucesso, o controller tenta retornar um objeto que falha na serialização ou em alguma outra etapa do middleware do Express. Garanta que, em caso de sucesso, a resposta seja um `res.status(200).json({ success: true, ... })`.
+4.  **Validação Final:** Teste o fluxo completo para garantir que, após o clique em "Reenviar para Análise", os dados são salvos, a UI é atualizada, os toasts corretos são exibidos e o redirecionamento ocorre como esperado.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 90%
+* **RISCOS IDENTIFICADOS:** **BAIXO** - O principal risco é invalidar as queries incorretas ou em uma ordem que cause re-fetches desnecessários. A lógica de redirecionamento deve ser cuidadosamente testada para evitar loops.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que a biblioteca `wouter` já está disponível para o redirecionamento. A estrutura dos hooks do TanStack Query permite o uso de `onSettled`.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve executar testes de regressão em outras funcionalidades que dependem do TanStack Query para garantir que a mudança no padrão de invalidação (de `onSuccess` para `onSettled`) não tenha introduzido efeitos colaterais.

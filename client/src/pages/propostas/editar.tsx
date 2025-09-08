@@ -414,10 +414,6 @@ const EditarPropostaPendenciada: React.FC = () => {
         title: 'Alterações salvas',
         description: 'As alterações foram salvas com sucesso.',
       });
-      // Invalidar múltiplas queries para atualização completa
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
     onError: (error: any) => {
       const errorMessage =
@@ -431,6 +427,14 @@ const EditarPropostaPendenciada: React.FC = () => {
         title: 'Erro ao salvar',
         description: errorMessage,
       });
+    },
+    onSettled: () => {
+      // Invalidar múltiplas queries para atualização completa - SEMPRE executa
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', 'queue=analysis'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
     },
   });
 
@@ -457,12 +461,8 @@ const EditarPropostaPendenciada: React.FC = () => {
         title: 'Proposta reenviada',
         description: 'A proposta foi reenviada para análise com sucesso.',
       });
-      // Invalidar todas as queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
-      queryClient.invalidateQueries({ queryKey: ['proposta'] });
-      setLocation('/dashboard');
+      // Redirecionamento apenas em caso de sucesso
+      setLocation('/credito/fila');
     },
     onError: (error: any) => {
       const errorMessage =
@@ -474,6 +474,15 @@ const EditarPropostaPendenciada: React.FC = () => {
         title: 'Erro ao reenviar',
         description: errorMessage,
       });
+    },
+    onSettled: () => {
+      // Invalidar todas as queries relacionadas - SEMPRE executa independente do status
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
+      queryClient.invalidateQueries({ queryKey: ['proposta'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', 'queue=analysis'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
     },
   });
 
