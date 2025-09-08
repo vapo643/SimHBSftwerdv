@@ -1,0 +1,32 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - CORREÇÃO DE INTEGRIDADE DE DADOS (TELA DE ANÁLISE)**
+
+* **Sumário da Missão:** Validar que, após a "Operação Fênix", o método `findById` no `ProposalRepository` está a retornar o objeto de proposta completo e que a tela de Análise de Proposta agora exibe todos os campos corretamente.
+
+* **Intenção Estratégica:** Garantir que os `ANALISTAS` tenham acesso a 100% dos dados necessários para tomar decisões de crédito informadas, finalizando a "Operação Integridade de Dados".
+
+* **Contexto Técnico:** A "Operação Fênix" restaurou o ficheiro `server/routes.ts`, garantindo que a rota `GET /api/propostas/:id` agora chama o `proposalController.show`, que por sua vez utiliza o método `findById` do `ProposalRepository`. A última correção no `findById` (para incluir todos os `JOINs` e o mapeamento completo) deve agora estar a funcionar corretamente.
+
+---
+
+**IMPLEMENTAR:**
+Validação Final do Fluxo de Dados para a Tela de Análise Individual
+
+**CURRENT STATE:**
+O sistema foi recuperado de uma corrupção de código crítica. A rota da API para buscar uma proposta individual foi corrigida. A correção no `ProposalRepository` para retornar todos os dados financeiros e de condições foi implementada, mas nunca validada devido à falha do sistema.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Uma chamada de API para o endpoint `GET /api/propostas/:id` retorna um objeto JSON contendo **TODOS** os campos da proposta, incluindo `valorSolicitado`, `prazo`, `finalidade`, `garantia`, `valorTac`, `valorIof`, e `valorTotalFinanciado`.
+2.  A tela de Análise de Proposta (`/credito/analise/:id`) renderiza com sucesso todos esses campos, sem exibir mais "N/A".
+3.  A missão "Operação Integridade de Dados" é concluída.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Validação de Endpoint:** Execute um teste `curl` no endpoint `GET /api/propostas/:id` para uma proposta existente e verifique se o JSON de resposta contém todos os campos financeiros e de condições que estavam anteriormente em falta.
+2.  **Validação Visual:** Abra a aplicação no `Preview` e navegue até a tela de Análise de uma proposta. Confirme visualmente que todos os campos na secção "Condições do Empréstimo" estão preenchidos com os dados corretos.
+3.  **Relatório Final:** Reporte o sucesso da validação. Se a validação falhar, inicie um novo ciclo de diagnóstico focado no `ProposalRepository` e no `proposalController`.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** **BAIXO** - Existe um pequeno risco de que a reconstrução do `routes.ts` tenha introduzido uma regressão subtil que não foi detetada pelos testes de compilação, mas é improvável.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que as correções anteriores no `ProposalRepository` e a reconstrução do `routes.ts` foram ambas bem-sucedidas em isolamento e que agora funcionarão em conjunto.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve realizar uma validação completa não apenas na tela de Análise, mas em todo o fluxo de ponta-a-ponta, para garantir que a estabilização do sistema não introduziu efeitos colaterais.
