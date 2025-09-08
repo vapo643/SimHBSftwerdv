@@ -877,7 +877,7 @@ export default function NovaProposta() {
                       <Label htmlFor="finalidade">Finalidade</Label>
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden" value={watch('finalidade') || ''} />
-                      <Select 
+                      <Select
                         value={watch('finalidade') || ''}
                         onValueChange={(value) => {
                           setValue('finalidade', value);
@@ -910,7 +910,7 @@ export default function NovaProposta() {
                       <Label htmlFor="garantia">Tipo de Garantia</Label>
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden" value={watch('garantia') || ''} />
-                      <Select 
+                      <Select
                         value={watch('garantia') || ''}
                         onValueChange={(value) => {
                           setValue('garantia', value);
@@ -1082,8 +1082,8 @@ export default function NovaProposta() {
                     Salvar Rascunho
                   </Button>
                   {currentStep < 3 ? (
-                    <Button 
-                      type="button" 
+                    <Button
+                      type="button"
                       onClick={nextStep}
                       disabled={!isStepValid(currentStep - 1)}
                       data-testid="button-next-step"

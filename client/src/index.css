@@ -247,18 +247,18 @@
 
 /* UX-012: Animação de flash para auto-preenchimento de endereço */
 @keyframes address-flash {
-  0% { 
-    background-color: rgb(251 191 36 / 0.2); 
+  0% {
+    background-color: rgb(251 191 36 / 0.2);
     border-color: rgb(251 191 36);
     box-shadow: 0 0 0 1px rgb(251 191 36 / 0.5);
   }
-  50% { 
-    background-color: rgb(251 191 36 / 0.4); 
+  50% {
+    background-color: rgb(251 191 36 / 0.4);
     border-color: rgb(251 191 36);
     box-shadow: 0 0 0 2px rgb(251 191 36 / 0.7);
   }
-  100% { 
-    background-color: transparent; 
+  100% {
+    background-color: transparent;
     border-color: hsl(var(--border));
     box-shadow: none;
   }
@@ -272,15 +272,15 @@
   .text-warning {
     color: hsl(var(--warning));
   }
-  
+
   .text-success {
     color: hsl(var(--success));
   }
-  
+
   .bg-warning {
     background-color: hsl(var(--warning));
   }
-  
+
   .bg-success {
     background-color: hsl(var(--success));
   }

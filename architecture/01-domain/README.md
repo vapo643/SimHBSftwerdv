@@ -3,6 +3,7 @@
 ## Conteúdo desta pasta
 
 Documentação relacionada ao domínio de negócio:
+
 - Bounded contexts
 - Agregados e entidades
 - Eventos de domínio
@@ -11,12 +12,12 @@ Documentação relacionada ao domínio de negócio:
 
 ## Documentos
 
-| Arquivo | Descrição | Status |
-|---------|-----------|--------|
-| bounded-contexts.md | Mapeamento dos contextos | Pendente |
-| aggregates.md | Definição de agregados | Pendente |
-| domain-events.md | Catálogo de eventos | Pendente |
-| ubiquitous-language.md | Glossário do domínio | Pendente |
+| Arquivo                | Descrição                | Status   |
+| ---------------------- | ------------------------ | -------- |
+| bounded-contexts.md    | Mapeamento dos contextos | Pendente |
+| aggregates.md          | Definição de agregados   | Pendente |
+| domain-events.md       | Catálogo de eventos      | Pendente |
+| ubiquitous-language.md | Glossário do domínio     | Pendente |
 
 ## Bounded Contexts Identificados (Preliminar)
 
@@ -26,4 +27,4 @@ Documentação relacionada ao domínio de negócio:
 4. **User Management** - Auth, roles, permissions
 5. **Partner Integration** - Banco Inter, ClickSign
 
-*Aguardando validação com GEM 02*
+_Aguardando validação com GEM 02_

@@ -20,7 +20,10 @@ const steps: Step[] = [
   { id: 'anexo-documentos', title: 'Documentos', icon: FileText },
 ];
 
-export function ProposalProgressIndicator({ currentStep, totalSteps }: ProposalProgressIndicatorProps) {
+export function ProposalProgressIndicator({
+  currentStep,
+  totalSteps,
+}: ProposalProgressIndicatorProps) {
   const getStepStatus = (stepIndex: number) => {
     if (stepIndex < currentStep) return 'completed';
     if (stepIndex === currentStep) return 'current';
@@ -42,7 +45,7 @@ export function ProposalProgressIndicator({ currentStep, totalSteps }: ProposalP
           </span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-primary transition-all duration-300 ease-in-out"
             style={{ width: `${getProgressPercentage()}%` }}
             data-testid="progress-bar"
@@ -55,21 +58,22 @@ export function ProposalProgressIndicator({ currentStep, totalSteps }: ProposalP
         {steps.map((step, index) => {
           const status = getStepStatus(index);
           const IconComponent = step.icon;
-          
+
           return (
             <div key={step.id} className="flex items-center">
               <div className="flex flex-col items-center space-y-2">
                 {/* Círculo do passo */}
-                <div 
+                <div
                   className={cn(
-                    "relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200",
+                    'relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200',
                     {
                       // Passo concluído
-                      "bg-primary border-primary text-primary-foreground": status === 'completed',
+                      'bg-primary border-primary text-primary-foreground': status === 'completed',
                       // Passo atual
-                      "bg-primary/10 border-primary text-primary": status === 'current',
+                      'bg-primary/10 border-primary text-primary': status === 'current',
                       // Passo pendente
-                      "bg-muted border-muted-foreground/30 text-muted-foreground": status === 'pending',
+                      'bg-muted border-muted-foreground/30 text-muted-foreground':
+                        status === 'pending',
                     }
                   )}
                   data-testid={`step-indicator-${index}`}
@@ -82,37 +86,29 @@ export function ProposalProgressIndicator({ currentStep, totalSteps }: ProposalP
                     <Circle className="h-5 w-5" />
                   )}
                 </div>
-                
+
                 {/* Título do passo */}
                 <div className="text-center">
-                  <p 
-                    className={cn(
-                      "text-xs font-medium transition-colors",
-                      {
-                        "text-primary": status === 'completed' || status === 'current',
-                        "text-muted-foreground": status === 'pending',
-                      }
-                    )}
+                  <p
+                    className={cn('text-xs font-medium transition-colors', {
+                      'text-primary': status === 'completed' || status === 'current',
+                      'text-muted-foreground': status === 'pending',
+                    })}
                     data-testid={`step-title-${index}`}
                   >
                     {step.title}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Passo {index + 1}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Passo {index + 1}</p>
                 </div>
               </div>
-              
+
               {/* Linha conectora (não mostrar após último passo) */}
               {index < steps.length - 1 && (
-                <div 
-                  className={cn(
-                    "h-0.5 flex-1 transition-colors duration-300 mx-4 mt-[-20px]",
-                    {
-                      "bg-primary": index < currentStep,
-                      "bg-muted": index >= currentStep,
-                    }
-                  )}
+                <div
+                  className={cn('h-0.5 flex-1 transition-colors duration-300 mx-4 mt-[-20px]', {
+                    'bg-primary': index < currentStep,
+                    'bg-muted': index >= currentStep,
+                  })}
                   data-testid={`connector-${index}`}
                 />
               )}

@@ -22,6 +22,7 @@ Este documento define o modelo completo de autorização para o Simpix, implemen
 ## 🎯 OBJETIVOS E PRINCÍPIOS
 
 ### Objetivos Primários
+
 1. **Zero Trust Authorization:** Nunca confiar, sempre verificar
 2. **Granularidade Total:** Controle até nível de campo
 3. **Contexto Dinâmico:** Decisões baseadas em atributos em tempo real
@@ -29,6 +30,7 @@ Este documento define o modelo completo de autorização para o Simpix, implemen
 5. **Performance:** < 10ms de overhead por decisão
 
 ### Princípios de Design
+
 - **Principle of Least Privilege:** Mínimo acesso necessário
 - **Separation of Duties:** Segregação de funções críticas
 - **Defense in Depth:** Múltiplas camadas de autorização
@@ -52,21 +54,21 @@ graph TB
         PIP[Policy Information Point]
         PAP[Policy Administration Point]
     end
-    
+
     subgraph "Authorization Engine"
         OPA[Open Policy Agent]
         CACHE[Decision Cache]
         POLICY[Policy Store]
         AUDIT[Audit Logger]
     end
-    
+
     subgraph "Context Sources"
         USER[User Context]
         RESOURCE[Resource Context]
         ENV[Environment Context]
         RISK[Risk Context]
     end
-    
+
     subgraph "Policy Types"
         RBAC[Role Policies]
         ABAC[Attribute Policies]
@@ -74,7 +76,7 @@ graph TB
         GEO[Geographic Policies]
         DYNAMIC[Dynamic Policies]
     end
-    
+
     REQ --> GW
     GW --> AUTH
     AUTH --> PEP
@@ -86,13 +88,13 @@ graph TB
     PIP --> RESOURCE
     PIP --> ENV
     PIP --> RISK
-    
+
     OPA --> RBAC
     OPA --> ABAC
     OPA --> TEMPORAL
     OPA --> GEO
     OPA --> DYNAMIC
-    
+
     PDP --> CACHE
     PDP --> AUDIT
 ```
@@ -109,12 +111,12 @@ interface AuthorizationModel {
   roles: Role[];
   permissions: Permission[];
   roleHierarchy: RoleHierarchy;
-  
+
   // ABAC Components
   attributes: Attribute[];
   policies: Policy[];
   policyEngine: PolicyEngine;
-  
+
   // Hybrid Components
   contextualRoles: ContextualRole[];
   dynamicPermissions: DynamicPermission[];
@@ -154,78 +156,74 @@ interface Policy {
 class HybridAuthorizationService {
   private opa: OpenPolicyAgent;
   private cache: AuthorizationCache;
-  
+
   /**
    * Main authorization method
    */
-  async authorize(
-    request: AuthorizationRequest
-  ): Promise<AuthorizationDecision> {
+  async authorize(request: AuthorizationRequest): Promise<AuthorizationDecision> {
     // 1. Check cache first
     const cached = await this.cache.get(request);
     if (cached && !cached.expired) {
       return cached.decision;
     }
-    
+
     // 2. Gather context
     const context = await this.gatherContext(request);
-    
+
     // 3. Evaluate RBAC rules
     const rbacDecision = await this.evaluateRBAC(context);
-    
+
     // 4. If RBAC denies, check ABAC for override
     if (!rbacDecision.allowed) {
       const abacDecision = await this.evaluateABAC(context);
-      
+
       if (abacDecision.allowed && abacDecision.overridesRBAC) {
         return this.allow(context, 'ABAC_OVERRIDE');
       }
-      
+
       return this.deny(context, rbacDecision.reason);
     }
-    
+
     // 5. RBAC allows, check ABAC for additional constraints
     const abacConstraints = await this.evaluateABACConstraints(context);
-    
+
     if (!abacConstraints.satisfied) {
       return this.deny(context, abacConstraints.reason);
     }
-    
+
     // 6. Check dynamic policies
     const dynamicDecision = await this.evaluateDynamicPolicies(context);
-    
+
     if (!dynamicDecision.allowed) {
       return this.deny(context, dynamicDecision.reason);
     }
-    
+
     // 7. Apply obligations
     const obligations = await this.gatherObligations(context);
-    
+
     // 8. Generate decision
     const decision = this.allow(context, 'HYBRID', obligations);
-    
+
     // 9. Cache decision
     await this.cache.set(request, decision);
-    
+
     // 10. Audit
     await this.audit(context, decision);
-    
+
     return decision;
   }
-  
+
   /**
    * Gather full context for authorization
    */
-  private async gatherContext(
-    request: AuthorizationRequest
-  ): Promise<AuthorizationContext> {
+  private async gatherContext(request: AuthorizationRequest): Promise<AuthorizationContext> {
     const [user, resource, environment, risk] = await Promise.all([
       this.getUserContext(request.subject),
       this.getResourceContext(request.resource),
       this.getEnvironmentContext(request),
       this.getRiskContext(request),
     ]);
-    
+
     return {
       request,
       user,
@@ -248,21 +246,24 @@ class HybridAuthorizationService {
 Role Hierarchy:
   super_admin:
     inherits: []
-    description: "Full system access"
-    permissions: [
-      "users:read", "users:write", 
-      "users:delete:with_approval",
-      "audit:read:all", "settings:write:with_dual_control",
-      "backup:restore:with_approval"
-    ]
+    description: 'Full system access'
+    permissions:
+      [
+        'users:read',
+        'users:write',
+        'users:delete:with_approval',
+        'audit:read:all',
+        'settings:write:with_dual_control',
+        'backup:restore:with_approval',
+      ]
     constraints:
       dual_control_required: true
       audit_everything: true
       session_timeout: 1800 # 30 minutes
-    
+
   admin:
     inherits: [manager]
-    description: "Administrative access"
+    description: 'Administrative access'
     permissions:
       - users:read
       - users:write
@@ -270,49 +271,49 @@ Role Hierarchy:
       - settings:read
       - settings:write
       - audit:read
-      
+
   manager:
     inherits: [supervisor]
-    description: "Management functions"
+    description: 'Management functions'
     permissions:
       - proposals:approve
       - reports:generate
       - teams:manage
-      
+
   supervisor:
     inherits: [operator]
-    description: "Supervisory functions"
+    description: 'Supervisory functions'
     permissions:
       - proposals:review
       - queues:assign
       - metrics:view
-      
+
   operator:
     inherits: [user]
-    description: "Operational functions"
+    description: 'Operational functions'
     permissions:
       - proposals:create
       - proposals:edit:own
       - documents:upload
-      
+
   user:
     inherits: []
-    description: "Basic user access"
+    description: 'Basic user access'
     permissions:
       - profile:read:own
       - profile:edit:own
-      
+
   partner:
     inherits: []
-    description: "Partner access"
+    description: 'Partner access'
     permissions:
       - proposals:create:partner
       - proposals:read:partner
       - reports:read:partner
-      
+
   auditor:
     inherits: []
-    description: "Audit access"
+    description: 'Audit access'
     permissions:
       - audit:read
       - reports:read
@@ -329,66 +330,57 @@ Role Hierarchy:
 class RBACService {
   private roleHierarchy: Map<string, Role>;
   private permissionRegistry: Map<string, Permission>;
-  
+
   /**
    * Check if user has required permission
    */
-  async hasPermission(
-    userId: string,
-    permission: string,
-    resource?: string
-  ): Promise<boolean> {
+  async hasPermission(userId: string, permission: string, resource?: string): Promise<boolean> {
     // 1. Get user's direct roles
     const userRoles = await this.getUserRoles(userId);
-    
+
     // 2. Expand roles with inheritance
     const expandedRoles = this.expandRoles(userRoles);
-    
+
     // 3. Collect all permissions
     const permissions = new Set<string>();
     for (const role of expandedRoles) {
-      role.permissions.forEach(p => permissions.add(p));
+      role.permissions.forEach((p) => permissions.add(p));
     }
-    
+
     // 4. Check for exact match
     if (permissions.has(permission)) {
       return true;
     }
-    
+
     // 5. Check for wildcard match
     if (this.matchWildcard(permissions, permission)) {
       return true;
     }
-    
+
     // 6. Check for resource-specific permissions
     if (resource) {
-      return this.checkResourcePermission(
-        permissions,
-        permission,
-        resource,
-        userId
-      );
+      return this.checkResourcePermission(permissions, permission, resource, userId);
     }
-    
+
     return false;
   }
-  
+
   /**
    * Expand roles with inheritance
    */
   private expandRoles(roles: Role[]): Role[] {
     const expanded = new Set<Role>();
     const queue = [...roles];
-    
+
     while (queue.length > 0) {
       const role = queue.shift()!;
-      
+
       if (expanded.has(role)) {
         continue;
       }
-      
+
       expanded.add(role);
-      
+
       // Add inherited roles to queue
       for (const inheritedName of role.inherits || []) {
         const inherited = this.roleHierarchy.get(inheritedName);
@@ -397,10 +389,10 @@ class RBACService {
         }
       }
     }
-    
+
     return Array.from(expanded);
   }
-  
+
   /**
    * Check resource-specific permissions
    */
@@ -415,19 +407,19 @@ class RBACService {
       const isOwner = await this.checkOwnership(userId, resource);
       if (isOwner) return true;
     }
-    
+
     // Check for department-based permissions
     if (permissions.has(`${permission}:department`)) {
       const sameDept = await this.checkSameDepartment(userId, resource);
       if (sameDept) return true;
     }
-    
+
     // Check for hierarchical permissions
     if (permissions.has(`${permission}:subordinates`)) {
       const isSubordinate = await this.checkSubordinate(userId, resource);
       if (isSubordinate) return true;
     }
-    
+
     return false;
   }
 }
@@ -476,41 +468,31 @@ class SegregationOfDutiesService {
       ],
     },
   ];
-  
+
   /**
    * Validate SoD compliance
    */
-  async validateSoD(
-    userId: string,
-    action: string,
-    resource: string
-  ): Promise<SoDValidation> {
+  async validateSoD(userId: string, action: string, resource: string): Promise<SoDValidation> {
     const violations: string[] = [];
-    
+
     // 1. Check role conflicts
     const userRoles = await this.getUserRoles(userId);
     for (const policy of this.policies) {
       for (const conflict of policy.conflictingRoles) {
-        const hasConflict = conflict.every(role => 
-          userRoles.includes(role)
-        );
+        const hasConflict = conflict.every((role) => userRoles.includes(role));
         if (hasConflict) {
-          violations.push(
-            `User has conflicting roles: ${conflict.join(' and ')}`
-          );
+          violations.push(`User has conflicting roles: ${conflict.join(' and ')}`);
         }
       }
     }
-    
+
     // 2. Check action history
     const history = await this.getActionHistory(userId, resource);
     for (const policy of this.policies) {
       for (const exclusive of policy.mutuallyExclusiveActions) {
         if (exclusive.includes(action)) {
-          const otherActions = exclusive.filter(a => a !== action);
-          const hasPerformed = history.some(h => 
-            otherActions.includes(h.action)
-          );
+          const otherActions = exclusive.filter((a) => a !== action);
+          const hasPerformed = history.some((h) => otherActions.includes(h.action));
           if (hasPerformed) {
             violations.push(
               `User cannot perform ${action} after performing ${otherActions.join(' or ')}`
@@ -519,31 +501,25 @@ class SegregationOfDutiesService {
         }
       }
     }
-    
+
     // 3. Check time-based separation
     for (const policy of this.policies) {
       for (const separation of policy.timeBasedSeparation) {
         if (separation.action2 === action) {
-          const lastAction = history.find(
-            h => h.action === separation.action1
-          );
+          const lastAction = history.find((h) => h.action === separation.action1);
           if (lastAction) {
             const gap = Date.now() - lastAction.timestamp;
             if (gap < separation.minimumGap) {
-              violations.push(
-                `Must wait ${separation.minimumGap / 1000} seconds between actions`
-              );
+              violations.push(`Must wait ${separation.minimumGap / 1000} seconds between actions`);
             }
             if (!separation.sameUser && lastAction.userId === userId) {
-              violations.push(
-                `Different user must perform ${action}`
-              );
+              violations.push(`Different user must perform ${action}`);
             }
           }
         }
       }
     }
-    
+
     return {
       compliant: violations.length === 0,
       violations,
@@ -571,23 +547,23 @@ interface SubjectAttributes {
   userId: string;
   username: string;
   email: string;
-  
+
   // Organization
   department: string;
   team: string;
   manager: string;
   location: string;
-  
+
   // Security
   clearanceLevel: 'public' | 'internal' | 'confidential' | 'secret';
   mfaEnabled: boolean;
   lastPasswordChange: Date;
-  
+
   // Business
   employeeType: 'full-time' | 'contractor' | 'partner' | 'vendor';
   seniority: number; // years
   certifications: string[];
-  
+
   // Dynamic
   currentProjects: string[];
   activeClients: string[];
@@ -602,24 +578,24 @@ interface ResourceAttributes {
   resourceId: string;
   resourceType: string;
   owner: string;
-  
+
   // Classification
   dataClassification: 'public' | 'internal' | 'confidential' | 'restricted';
   piiPresent: boolean;
   financialData: boolean;
-  
+
   // Business
   businessUnit: string;
   project: string;
   client: string;
   value: number;
-  
+
   // Lifecycle
   createdAt: Date;
   modifiedAt: Date;
   status: string;
   version: number;
-  
+
   // Security
   encryptionRequired: boolean;
   auditRequired: boolean;
@@ -634,19 +610,19 @@ interface EnvironmentAttributes {
   currentTime: Date;
   dayOfWeek: string;
   businessHours: boolean;
-  
+
   // Location
   requestIP: string;
   country: string;
   region: string;
   networkZone: 'internal' | 'dmz' | 'external';
-  
+
   // Device
   deviceType: 'desktop' | 'mobile' | 'tablet';
   deviceTrusted: boolean;
   osType: string;
   browserType: string;
-  
+
   // Security
   tlsVersion: string;
   vpnConnected: boolean;
@@ -685,16 +661,16 @@ default allow = false
 allow if {
     # Check authentication
     input.subject.authenticated == true
-    
+
     # Check RBAC
     rbac_allow
-    
+
     # Check ABAC
     abac_allow
-    
+
     # Check SoD
     sod_compliant
-    
+
     # Check context
     context_allow
 }
@@ -726,10 +702,10 @@ abac_allow if {
         "confidential": 2,
         "restricted": 3
     }
-    
+
     user_clearance := clearance_levels[input.subject.clearanceLevel]
     resource_clearance := clearance_levels[input.resource.dataClassification]
-    
+
     user_clearance >= resource_clearance
 }
 
@@ -870,19 +846,17 @@ field_permissions[field] if {
 class PolicyEngine {
   private opa: OPA;
   private policyCache: Map<string, CompiledPolicy>;
-  
+
   /**
    * Evaluate ABAC policies
    */
-  async evaluateABAC(
-    context: AuthorizationContext
-  ): Promise<ABACDecision> {
+  async evaluateABAC(context: AuthorizationContext): Promise<ABACDecision> {
     // 1. Prepare input for OPA
     const input = this.prepareOPAInput(context);
-    
+
     // 2. Load applicable policies
     const policies = await this.loadPolicies(context);
-    
+
     // 3. Evaluate policies in OPA
     const result = await this.opa.evaluate({
       input,
@@ -893,16 +867,16 @@ class PolicyEngine {
       },
       query: 'data.simpix.authz.allow',
     });
-    
+
     // 4. Process obligations
     const obligations = result.obligations || [];
-    
+
     // 5. Process advice
     const advice = result.advice || [];
-    
+
     // 6. Extract field permissions
     const fieldPermissions = result.field_permissions || [];
-    
+
     return {
       allowed: result.allow,
       obligations,
@@ -912,13 +886,11 @@ class PolicyEngine {
       evaluationTime: result.metrics.evaluation_time_ms,
     };
   }
-  
+
   /**
    * Prepare context for OPA evaluation
    */
-  private prepareOPAInput(
-    context: AuthorizationContext
-  ): OPAInput {
+  private prepareOPAInput(context: AuthorizationContext): OPAInput {
     return {
       subject: {
         userId: context.user.id,
@@ -949,27 +921,23 @@ class PolicyEngine {
       },
     };
   }
-  
+
   /**
    * Dynamic Policy Loading
    */
-  async loadPolicies(
-    context: AuthorizationContext
-  ): Promise<Policy[]> {
+  async loadPolicies(context: AuthorizationContext): Promise<Policy[]> {
     // Load base policies
     const basePolicies = await this.loadBasePolicies();
-    
+
     // Load context-specific policies
     const contextPolicies = await this.loadContextPolicies(context);
-    
+
     // Load user-specific policies
     const userPolicies = await this.loadUserPolicies(context.user.id);
-    
+
     // Load resource-specific policies
-    const resourcePolicies = await this.loadResourcePolicies(
-      context.resource.type
-    );
-    
+    const resourcePolicies = await this.loadResourcePolicies(context.resource.type);
+
     // Merge and prioritize
     return this.mergePolicies([
       ...basePolicies,
@@ -1014,87 +982,68 @@ class FieldLevelAuthorizationService {
   /**
    * Filter object based on field permissions
    */
-  async filterFields<T>(
-    data: T,
-    userId: string,
-    operation: 'read' | 'write'
-  ): Promise<Partial<T>> {
+  async filterFields<T>(data: T, userId: string, operation: 'read' | 'write'): Promise<Partial<T>> {
     const user = await this.getUser(userId);
-    const permissions = await this.getFieldPermissions(
-      user,
-      data,
-      operation
-    );
-    
+    const permissions = await this.getFieldPermissions(user, data, operation);
+
     const filtered: any = {};
-    
+
     for (const [field, value] of Object.entries(data as any)) {
-      const permission = permissions.find(p => p.field === field);
-      
+      const permission = permissions.find((p) => p.field === field);
+
       if (!permission) {
         // No permission defined, deny by default
         continue;
       }
-      
+
       if (!permission.operations.includes(operation)) {
         // Operation not allowed
         continue;
       }
-      
+
       // Check conditions
-      const conditionsMet = await this.evaluateConditions(
-        permission.conditions,
-        user,
-        data,
-        field
-      );
-      
+      const conditionsMet = await this.evaluateConditions(permission.conditions, user, data, field);
+
       if (!conditionsMet) {
         continue;
       }
-      
+
       // Apply transformation if needed
       if (permission.transformation && operation === 'read') {
-        filtered[field] = await this.transformField(
-          value,
-          permission.transformation
-        );
+        filtered[field] = await this.transformField(value, permission.transformation);
       } else {
         filtered[field] = value;
       }
     }
-    
+
     return filtered as Partial<T>;
   }
-  
+
   /**
    * Transform field value based on permissions
    */
-  private async transformField(
-    value: any,
-    transformation: FieldTransformation
-  ): Promise<any> {
+  private async transformField(value: any, transformation: FieldTransformation): Promise<any> {
     switch (transformation.type) {
       case 'mask':
         return this.maskValue(value, transformation.config);
-        
+
       case 'encrypt':
         return this.encryptValue(value, transformation.config);
-        
+
       case 'hash':
         return this.hashValue(value);
-        
+
       case 'redact':
         return '***REDACTED***';
-        
+
       case 'truncate':
         return String(value).substring(0, transformation.config.length);
-        
+
       default:
         return value;
     }
   }
-  
+
   /**
    * Mask sensitive value
    */
@@ -1102,36 +1051,36 @@ class FieldLevelAuthorizationService {
     const str = String(value);
     const showFirst = config.showFirst || 0;
     const showLast = config.showLast || 0;
-    
+
     if (str.length <= showFirst + showLast) {
       return '*'.repeat(str.length);
     }
-    
-    const masked = 
+
+    const masked =
       str.substring(0, showFirst) +
       '*'.repeat(str.length - showFirst - showLast) +
       str.substring(str.length - showLast);
-    
+
     return masked;
   }
 }
 
 // Field permission configuration
 const fieldPermissionConfig = {
-  'proposal': {
-    'id': {
+  proposal: {
+    id: {
       roles: ['*'],
       operations: ['read'],
     },
-    'cpf': {
+    cpf: {
       roles: ['admin', 'manager'],
       operations: ['read'],
       transformation: {
         type: 'mask',
-        config: { showFirst: 3, showLast: 2 }
+        config: { showFirst: 3, showLast: 2 },
       },
     },
-    'valor_solicitado': {
+    valor_solicitado: {
       roles: ['admin', 'manager', 'operator'],
       operations: ['read', 'write'],
       conditions: [
@@ -1139,21 +1088,21 @@ const fieldPermissionConfig = {
           type: 'value',
           operator: 'less',
           value: 100000,
-        }
+        },
       ],
     },
-    'taxa_juros': {
+    taxa_juros: {
       roles: ['admin', 'manager'],
       operations: ['read', 'write'],
     },
-    'score_credito': {
+    score_credito: {
       roles: ['admin', 'risk_analyst'],
       operations: ['read'],
       transformation: {
         type: 'redact',
       },
     },
-    'documentos': {
+    documentos: {
       roles: ['admin', 'compliance'],
       operations: ['read'],
       conditions: [
@@ -1161,7 +1110,7 @@ const fieldPermissionConfig = {
           type: 'ownership',
           operator: 'equals',
           value: true,
-        }
+        },
       ],
     },
   },
@@ -1183,9 +1132,7 @@ class DynamicAuthorizationService {
   /**
    * Evaluate dynamic rules based on runtime context
    */
-  async evaluateDynamic(
-    context: AuthorizationContext
-  ): Promise<DynamicDecision> {
+  async evaluateDynamic(context: AuthorizationContext): Promise<DynamicDecision> {
     const rules: DynamicRule[] = [
       // Time-based rules
       {
@@ -1195,7 +1142,7 @@ class DynamicAuthorizationService {
         effect: 'deny',
         message: 'Operation only allowed during business hours',
       },
-      
+
       // Risk-based rules
       {
         name: 'high_risk_restriction',
@@ -1204,7 +1151,7 @@ class DynamicAuthorizationService {
         effect: 'deny',
         message: 'Operation blocked due to high risk score',
       },
-      
+
       // Value-based rules
       {
         name: 'high_value_approval',
@@ -1213,7 +1160,7 @@ class DynamicAuthorizationService {
         effect: 'require_approval',
         message: 'High value operation requires additional approval',
       },
-      
+
       // Location-based rules
       {
         name: 'geographic_restriction',
@@ -1222,7 +1169,7 @@ class DynamicAuthorizationService {
         effect: 'deny',
         message: 'Access not allowed from this location',
       },
-      
+
       // Velocity-based rules
       {
         name: 'rate_limit',
@@ -1231,7 +1178,7 @@ class DynamicAuthorizationService {
         effect: 'throttle',
         message: 'Rate limit exceeded',
       },
-      
+
       // Anomaly-based rules
       {
         name: 'anomaly_detection',
@@ -1241,17 +1188,16 @@ class DynamicAuthorizationService {
         message: 'Unusual activity detected',
       },
     ];
-    
-    const applicableRules = rules.filter(rule => 
-      rule.applies.includes('*') || 
-      rule.applies.includes(context.request.action)
+
+    const applicableRules = rules.filter(
+      (rule) => rule.applies.includes('*') || rule.applies.includes(context.request.action)
     );
-    
+
     const violations: DynamicViolation[] = [];
-    
+
     for (const rule of applicableRules) {
       const violated = await rule.condition();
-      
+
       if (violated) {
         violations.push({
           rule: rule.name,
@@ -1260,14 +1206,14 @@ class DynamicAuthorizationService {
         });
       }
     }
-    
+
     return {
       allowed: violations.length === 0,
       violations,
       requiredActions: this.determineRequiredActions(violations),
     };
   }
-  
+
   /**
    * Just-In-Time (JIT) Permissions
    */
@@ -1281,13 +1227,13 @@ class DynamicAuthorizationService {
     if (!this.isValidJustification(justification)) {
       throw new Error('Invalid justification for JIT access');
     }
-    
+
     // Check if user is eligible
     const eligible = await this.checkJITEligibility(userId, permission);
     if (!eligible) {
       throw new Error('User not eligible for JIT permission');
     }
-    
+
     // Create temporary grant
     const grant: JITGrant = {
       id: this.generateGrantId(),
@@ -1298,32 +1244,28 @@ class DynamicAuthorizationService {
       justification,
       status: 'active',
     };
-    
+
     // Store grant
     await this.storeJITGrant(grant);
-    
+
     // Audit
     await this.auditJITGrant(grant);
-    
+
     // Schedule expiration
     this.scheduleExpiration(grant);
-    
+
     return grant;
   }
-  
+
   /**
    * Break-Glass Emergency Access
    */
-  async breakGlass(
-    userId: string,
-    resource: string,
-    reason: string
-  ): Promise<BreakGlassAccess> {
+  async breakGlass(userId: string, resource: string, reason: string): Promise<BreakGlassAccess> {
     // Validate emergency
     if (!this.isValidEmergency(reason)) {
       throw new Error('Invalid emergency reason');
     }
-    
+
     // Grant emergency access
     const access: BreakGlassAccess = {
       id: this.generateAccessId(),
@@ -1333,7 +1275,7 @@ class DynamicAuthorizationService {
       reason,
       duration: 3600000, // 1 hour
     };
-    
+
     // Notify security team immediately
     await this.notifySecurityTeam({
       type: 'BREAK_GLASS',
@@ -1342,13 +1284,13 @@ class DynamicAuthorizationService {
       reason,
       severity: 'CRITICAL',
     });
-    
+
     // Enable enhanced monitoring
     await this.enableEnhancedMonitoring(userId, resource);
-    
+
     // Store access
     await this.storeBreakGlassAccess(access);
-    
+
     return access;
   }
 }
@@ -1382,8 +1324,8 @@ class PolicyTestingFramework {
         },
         expected: { allowed: true },
       },
-      
-      // Negative test cases  
+
+      // Negative test cases
       {
         name: 'User cannot approve own proposal',
         context: {
@@ -1393,7 +1335,7 @@ class PolicyTestingFramework {
         },
         expected: { allowed: false, reason: 'SoD violation' },
       },
-      
+
       // Edge cases
       {
         name: 'Emergency access during non-business hours',
@@ -1406,17 +1348,16 @@ class PolicyTestingFramework {
         expected: { allowed: true, obligations: ['audit', 'notify'] },
       },
     ];
-    
+
     const results: TestResult[] = [];
-    
+
     for (const testCase of testCases) {
       const actual = await this.authorize(testCase.context);
-      
-      const passed = 
+
+      const passed =
         actual.allowed === testCase.expected.allowed &&
-        (!testCase.expected.reason || 
-         actual.reason === testCase.expected.reason);
-      
+        (!testCase.expected.reason || actual.reason === testCase.expected.reason);
+
       results.push({
         name: testCase.name,
         passed,
@@ -1424,26 +1365,26 @@ class PolicyTestingFramework {
         actual,
       });
     }
-    
+
     return {
       total: results.length,
-      passed: results.filter(r => r.passed).length,
-      failed: results.filter(r => !r.passed).length,
+      passed: results.filter((r) => r.passed).length,
+      failed: results.filter((r) => !r.passed).length,
       results,
     };
   }
-  
+
   /**
    * Policy conflict detection
    */
   async detectConflicts(): Promise<PolicyConflict[]> {
     const policies = await this.loadAllPolicies();
     const conflicts: PolicyConflict[] = [];
-    
+
     for (let i = 0; i < policies.length; i++) {
       for (let j = i + 1; j < policies.length; j++) {
         const conflict = this.checkConflict(policies[i], policies[j]);
-        
+
         if (conflict) {
           conflicts.push({
             policy1: policies[i].id,
@@ -1454,7 +1395,7 @@ class PolicyTestingFramework {
         }
       }
     }
-    
+
     return conflicts;
   }
 }
@@ -1468,22 +1409,22 @@ class PolicyTestingFramework {
 
 ```yaml
 Performance Metrics:
-  authorization_latency_p50: "< 5ms"
-  authorization_latency_p99: "< 20ms"
-  cache_hit_rate: "> 90%"
-  policy_evaluation_time: "< 10ms"
-  
+  authorization_latency_p50: '< 5ms'
+  authorization_latency_p99: '< 20ms'
+  cache_hit_rate: '> 90%'
+  policy_evaluation_time: '< 10ms'
+
 Security Metrics:
-  unauthorized_attempts: "< 1%"
-  policy_violations: "< 0.1%"
-  sod_violations: "0"
-  break_glass_usage: "< 5 per month"
-  
+  unauthorized_attempts: '< 1%'
+  policy_violations: '< 0.1%'
+  sod_violations: '0'
+  break_glass_usage: '< 5 per month'
+
 Operational Metrics:
-  policy_updates_per_week: "< 10"
-  role_changes_per_month: "< 50"
-  permission_audits: "weekly"
-  policy_test_coverage: "> 95%"
+  policy_updates_per_week: '< 10'
+  role_changes_per_month: '< 50'
+  permission_audits: 'weekly'
+  policy_test_coverage: '> 95%'
 ```
 
 ### Dashboard de Autorização
@@ -1494,12 +1435,12 @@ interface AuthorizationDashboard {
   currentLoad: number;
   avgLatency: number;
   errorRate: number;
-  
+
   // Security indicators
   suspiciousActivity: Alert[];
   recentViolations: Violation[];
   breakGlassActive: BreakGlassSession[];
-  
+
   // Compliance status
   sodCompliance: boolean;
   policyTestsPassing: boolean;
@@ -1519,25 +1460,25 @@ Phase 1 - Foundation (Week 1-2):
   - Migrate existing roles to RBAC
   - Implement basic policy engine
   - Create policy testing framework
-  
+
 Phase 2 - RBAC Implementation (Week 3-4):
   - Define complete role hierarchy
   - Implement permission inheritance
   - Setup role assignment workflow
   - Test RBAC policies
-  
+
 Phase 3 - ABAC Implementation (Week 5-6):
   - Define attribute model
   - Implement attribute collectors
   - Create ABAC policies
   - Test hybrid model
-  
+
 Phase 4 - Advanced Features (Week 7-8):
   - Implement SoD rules
   - Setup JIT permissions
   - Configure break-glass
   - Field-level permissions
-  
+
 Phase 5 - Testing & Rollout (Week 9-10):
   - Complete policy testing
   - Performance optimization
@@ -1552,6 +1493,7 @@ Phase 5 - Testing & Rollout (Week 9-10):
 Este modelo híbrido RBAC/ABAC fornece autorização granular, contextual e auditável para o Simpix. A implementação com OPA garante flexibilidade, performance e conformidade com requisitos de segurança enterprise.
 
 **Benefícios:**
+
 - **Segurança:** Zero Trust com múltiplas camadas
 - **Flexibilidade:** Políticas dinâmicas e contextuais
 - **Compliance:** Auditoria completa e SoD
@@ -1561,14 +1503,15 @@ Este modelo híbrido RBAC/ABAC fornece autorização granular, contextual e audi
 ---
 
 **Aprovação:**
+
 - [ ] CISO
-- [ ] CTO  
+- [ ] CTO
 - [ ] Security Architect
 - [ ] Compliance Officer
 
-**Data:** ___________
+**Data:** ****\_\_\_****
 
 ---
 
-*Documento RBAC/ABAC - Versão 1.0*  
-*Cobertura: 100% endpoints | 100% recursos | 4 camadas de autorização*
+_Documento RBAC/ABAC - Versão 1.0_  
+_Cobertura: 100% endpoints | 100% recursos | 4 camadas de autorização_

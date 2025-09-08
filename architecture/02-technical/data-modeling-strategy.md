@@ -4,7 +4,7 @@
 **Versão:** 1.0  
 **Data:** 22 de Agosto de 2025  
 **Status:** Oficial - Planta da Persistência  
-**Aprovação:** Pendente Ratificação do Arquiteto Chefe  
+**Aprovação:** Pendente Ratificação do Arquiteto Chefe
 
 ---
 
@@ -14,7 +14,7 @@ Este documento formaliza a estratégia de modelagem de dados do Sistema Simpix, 
 
 **Ponto de Conformidade:** Remediação do Ponto 39 - Modelagem de Dados  
 **Criticidade:** P0 (Crítica)  
-**Impacto:** Base para performance, escalabilidade e integridade sistêmica  
+**Impacto:** Base para performance, escalabilidade e integridade sistêmica
 
 ---
 
@@ -29,47 +29,47 @@ erDiagram
     %% ===========================================
     %% ENTIDADES CORE DO NEGÓCIO
     %% ===========================================
-    
+
     %% Fluxo Central de Crédito
     CLIENTE ||--o{ PROPOSTA : "solicita"
     PROPOSTA ||--|| PRODUTO : "utiliza"
     PROPOSTA ||--o{ PARCELA : "gera_cronograma"
     PARCELA ||--o{ PAGAMENTO : "recebe"
-    
+
     %% Estrutura Organizacional
     PARCEIRO ||--o{ LOJA : "possui"
     LOJA ||--o{ PROPOSTA : "origina"
     LOJA ||--o{ USUARIO : "emprega"
-    
+
     %% Configuração Comercial
     PRODUTO ||--o{ PRODUTO_TABELA : "usa_configuracao"
     TABELA_COMERCIAL ||--o{ PRODUTO_TABELA : "define_regras"
     PARCEIRO ||--o{ TABELA_COMERCIAL : "possui_configuracao"
-    
+
     %% Fluxo de Formalização
     PROPOSTA ||--o{ CONTRATO_CCB : "formaliza"
     CONTRATO_CCB ||--o{ ASSINATURA_LOG : "rastreia_assinatura"
     CONTRATO_CCB ||--o{ CLICKSIGN_EVENT : "integra_clicksign"
-    
+
     %% Fluxo de Pagamento
     PROPOSTA ||--o{ BOLETO_INTER : "gera_cobranca"
     BOLETO_INTER ||--o{ WEBHOOK_INTER : "notifica_pagamento"
     PARCELA ||--o{ OBSERVACAO_COBRANCA : "registra_contato"
-    
+
     %% Auditoria e Conformidade
     PROPOSTA ||--o{ STATUS_TRANSITION : "rastreia_mudancas"
     PROPOSTA ||--o{ PROPOSTA_LOG : "audita_acoes"
     PROPOSTA ||--o{ COMUNICACAO_LOG : "registra_comunicacao"
-    
+
     %% Dados Auxiliares
     PROPOSTA ||--o{ REFERENCIA_PESSOAL : "tem_referencias"
     PROPOSTA ||--o{ REFERENCIA_PROFISSIONAL : "tem_referencia_trabalho"
     PROPOSTA ||--o{ DOCUMENTO_ANEXO : "anexa_documentos"
-    
+
     %% ===========================================
     %% DEFINIÇÕES DAS ENTIDADES
     %% ===========================================
-    
+
     CLIENTE {
         string cpf PK
         string nome
@@ -77,7 +77,7 @@ erDiagram
         string endereco_completo
         integer score_credito
     }
-    
+
     PROPOSTA {
         uuid id PK
         integer numero_proposta UK "300001+"
@@ -89,7 +89,7 @@ erDiagram
         jsonb cliente_dados "Desnormalizado"
         timestamp created_at
     }
-    
+
     PRODUTO {
         integer id PK
         string nome_produto
@@ -97,7 +97,7 @@ erDiagram
         string modalidade_juros
         boolean is_active
     }
-    
+
     PARCELA {
         integer id PK
         uuid proposta_id FK
@@ -106,7 +106,7 @@ erDiagram
         date data_vencimento
         string status "pendente|pago|vencido"
     }
-    
+
     LOJA {
         integer id PK
         integer parceiro_id FK
@@ -114,7 +114,7 @@ erDiagram
         string endereco
         boolean is_active
     }
-    
+
     PARCEIRO {
         integer id PK
         string razao_social
@@ -125,16 +125,16 @@ erDiagram
 
 ### 1.2 Princípios Arquiteturais da Modelagem
 
-| **Princípio** | **Aplicação no Simpix** | **Benefício** |
-|---------------|--------------------------|---------------|
-| **Event Sourcing Pattern** | `command_events` como store imutável de mudanças de estado | Auditoria completa e reconstrução de estado |
-| **CQRS Separation** | `write_models` para comandos, `read_projections` para queries | Otimização independente de escrita/leitura |
-| **Single Source of Truth** | `event_store` como única fonte de verdade para mudanças | Consistência temporal e causal |
-| **Read Model Denormalization** | `read_projections` materializadas para performance | Queries otimizadas sem impacto em writes |
-| **Multi-Tenancy por Loja** | `loja_id` em todas as entidades críticas | Isolamento e segurança |
-| **Audit Trail Completo** | Logs de status, comunicação e mudanças | Compliance e rastreabilidade |
-| **Soft Delete Universal** | Campo `deleted_at` em todas as tabelas | Recuperação e auditoria |
-| **Finite State Machine** | Status controlado com transições válidas | Integridade de workflow |
+| **Princípio**                  | **Aplicação no Simpix**                                       | **Benefício**                               |
+| ------------------------------ | ------------------------------------------------------------- | ------------------------------------------- |
+| **Event Sourcing Pattern**     | `command_events` como store imutável de mudanças de estado    | Auditoria completa e reconstrução de estado |
+| **CQRS Separation**            | `write_models` para comandos, `read_projections` para queries | Otimização independente de escrita/leitura  |
+| **Single Source of Truth**     | `event_store` como única fonte de verdade para mudanças       | Consistência temporal e causal              |
+| **Read Model Denormalization** | `read_projections` materializadas para performance            | Queries otimizadas sem impacto em writes    |
+| **Multi-Tenancy por Loja**     | `loja_id` em todas as entidades críticas                      | Isolamento e segurança                      |
+| **Audit Trail Completo**       | Logs de status, comunicação e mudanças                        | Compliance e rastreabilidade                |
+| **Soft Delete Universal**      | Campo `deleted_at` em todas as tabelas                        | Recuperação e auditoria                     |
+| **Finite State Machine**       | Status controlado com transições válidas                      | Integridade de workflow                     |
 
 ---
 
@@ -153,14 +153,14 @@ CREATE TABLE propostas (
     -- Identificação
     id TEXT PRIMARY KEY,                    -- UUID format (Drizzle)
     numero_proposta INTEGER UNIQUE NOT NULL, -- Business ID (300001+)
-    
+
     -- Multi-tenancy
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
-    
+
     -- Relacionamentos de Negócio
     produto_id INTEGER REFERENCES produtos(id),
     tabela_comercial_id INTEGER REFERENCES tabelas_comerciais(id),
-    
+
     -- Dados do Cliente (DESNORMALIZADOS para performance)
     cliente_nome TEXT,
     cliente_cpf TEXT,
@@ -173,7 +173,7 @@ CREATE TABLE propostas (
     cliente_cep TEXT,
     cliente_cidade TEXT,
     cliente_uf TEXT,
-    
+
     -- Dados Financeiros
     valor DECIMAL(15,2),
     prazo INTEGER,
@@ -181,22 +181,22 @@ CREATE TABLE propostas (
     valor_tac DECIMAL(10,2),
     valor_iof DECIMAL(10,2),
     valor_total_financiado DECIMAL(15,2),
-    
+
     -- Workflow
     status TEXT NOT NULL DEFAULT 'rascunho',
     analista_id TEXT,
     data_analise TIMESTAMP,
-    
+
     -- Formalização
     ccb_gerado BOOLEAN DEFAULT FALSE,
     caminho_ccb TEXT,
     clicksign_document_key TEXT,
     clicksign_status TEXT,
-    
+
     -- Pagamento
     inter_boleto_gerado BOOLEAN DEFAULT FALSE,
     metodo_pagamento TEXT DEFAULT 'conta_bancaria',
-    
+
     -- Auditoria
     user_id TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -334,26 +334,26 @@ CREATE TABLE proposta_logs (
 Nossa implementação física utiliza o **Drizzle ORM** com PostgreSQL, proporcionando:
 
 - **Type Safety**: TypeScript end-to-end
-- **Performance**: SQL otimizado gerado automaticamente  
+- **Performance**: SQL otimizado gerado automaticamente
 - **Migrations**: Evolução de schema versionada
 - **Flexibilidade**: Raw SQL quando necessário
 
 ### 3.2 Decisões de Tipos PostgreSQL
 
-| **Tipo de Dado** | **Uso no Simpix** | **Justificativa** |
-|-------------------|-------------------|-------------------|
-| **TEXT** | IDs de proposta, dados de cliente | Flexibilidade para UUIDs e dados variáveis |
-| **DECIMAL(15,2)** | Valores monetários | Precisão financeira obrigatória |
-| **INTEGER[]** | Prazos em tabelas comerciais | Performance para queries de range |
-| **JSONB** | Metadata de transições | Flexibilidade para dados semiestruturados |
-| **TIMESTAMP** | Todos os campos de data | Timezone awareness nativo |
-| **BOOLEAN** | Flags e estados binários | Eficiência de armazenamento |
+| **Tipo de Dado**  | **Uso no Simpix**                 | **Justificativa**                          |
+| ----------------- | --------------------------------- | ------------------------------------------ |
+| **TEXT**          | IDs de proposta, dados de cliente | Flexibilidade para UUIDs e dados variáveis |
+| **DECIMAL(15,2)** | Valores monetários                | Precisão financeira obrigatória            |
+| **INTEGER[]**     | Prazos em tabelas comerciais      | Performance para queries de range          |
+| **JSONB**         | Metadata de transições            | Flexibilidade para dados semiestruturados  |
+| **TIMESTAMP**     | Todos os campos de data           | Timezone awareness nativo                  |
+| **BOOLEAN**       | Flags e estados binários          | Eficiência de armazenamento                |
 
 ### 3.3 Constraints e Integridade
 
 ```sql
 -- Constraints Críticas Implementadas
-ALTER TABLE propostas 
+ALTER TABLE propostas
 ADD CONSTRAINT ck_valor_positivo CHECK (valor > 0),
 ADD CONSTRAINT ck_prazo_valido CHECK (prazo BETWEEN 6 AND 60);
 
@@ -375,29 +375,29 @@ ALTER TABLE inter_collections ADD CONSTRAINT uk_codigo_solicitacao UNIQUE (codig
 
 Com base na análise do código e padrões identificados:
 
-| **Padrão de Acesso** | **Frequência** | **Exemplo de Query** | **Impacto Performance** |
-|----------------------|----------------|----------------------|-------------------------|
-| **Busca por Status** | 🔥 **MUITO ALTA** | `SELECT * FROM propostas WHERE status = 'aprovado'` | **CRÍTICO** |
-| **Busca por Loja (Multi-tenant)** | 🔥 **MUITO ALTA** | `SELECT * FROM propostas WHERE loja_id = 123` | **CRÍTICO** |
-| **Busca por ID** | 🔥 **ALTA** | `SELECT * FROM propostas WHERE id = 'uuid'` | **ALTO** |
-| **Busca por CPF** | 🟡 **MÉDIA** | `SELECT * FROM propostas WHERE cliente_cpf = '123.456.789-00'` | **MÉDIO** |
-| **Busca por Data** | 🟡 **MÉDIA** | `SELECT * FROM propostas WHERE created_at >= '2025-01-01'` | **MÉDIO** |
-| **Soft Delete Filter** | 🔥 **UNIVERSAL** | `WHERE deleted_at IS NULL` | **CRÍTICO** |
+| **Padrão de Acesso**              | **Frequência**    | **Exemplo de Query**                                           | **Impacto Performance** |
+| --------------------------------- | ----------------- | -------------------------------------------------------------- | ----------------------- |
+| **Busca por Status**              | 🔥 **MUITO ALTA** | `SELECT * FROM propostas WHERE status = 'aprovado'`            | **CRÍTICO**             |
+| **Busca por Loja (Multi-tenant)** | 🔥 **MUITO ALTA** | `SELECT * FROM propostas WHERE loja_id = 123`                  | **CRÍTICO**             |
+| **Busca por ID**                  | 🔥 **ALTA**       | `SELECT * FROM propostas WHERE id = 'uuid'`                    | **ALTO**                |
+| **Busca por CPF**                 | 🟡 **MÉDIA**      | `SELECT * FROM propostas WHERE cliente_cpf = '123.456.789-00'` | **MÉDIO**               |
+| **Busca por Data**                | 🟡 **MÉDIA**      | `SELECT * FROM propostas WHERE created_at >= '2025-01-01'`     | **MÉDIO**               |
+| **Soft Delete Filter**            | 🔥 **UNIVERSAL**  | `WHERE deleted_at IS NULL`                                     | **CRÍTICO**             |
 
 ### 4.2 Padrões de Escrita (Transaction Patterns)
 
-| **Operação** | **Frequência** | **Complexidade** | **Tabelas Envolvidas** |
-|--------------|----------------|------------------|------------------------|
-| **Criação de Proposta** | 🔥 **ALTA** | **SIMPLES** | `propostas` |
-| **Mudança de Status** | 🔥 **MUITO ALTA** | **MÉDIA** | `propostas`, `status_transitions`, `proposta_logs` |
-| **Geração de Parcelas** | 🟡 **MÉDIA** | **COMPLEXA** | `propostas`, `parcelas`, `inter_collections` |
-| **Sincronização Inter** | 🟡 **MÉDIA** | **COMPLEXA** | `inter_collections`, `inter_callbacks`, `parcelas` |
-| **Auditoria de Deleção** | 🟢 **BAIXA** | **SIMPLES** | `audit_delete_log` |
+| **Operação**             | **Frequência**    | **Complexidade** | **Tabelas Envolvidas**                             |
+| ------------------------ | ----------------- | ---------------- | -------------------------------------------------- |
+| **Criação de Proposta**  | 🔥 **ALTA**       | **SIMPLES**      | `propostas`                                        |
+| **Mudança de Status**    | 🔥 **MUITO ALTA** | **MÉDIA**        | `propostas`, `status_transitions`, `proposta_logs` |
+| **Geração de Parcelas**  | 🟡 **MÉDIA**      | **COMPLEXA**     | `propostas`, `parcelas`, `inter_collections`       |
+| **Sincronização Inter**  | 🟡 **MÉDIA**      | **COMPLEXA**     | `inter_collections`, `inter_callbacks`, `parcelas` |
+| **Auditoria de Deleção** | 🟢 **BAIXA**      | **SIMPLES**      | `audit_delete_log`                                 |
 
 ### 4.3 Análise de Volumetria Projetada
 
 **Meta Atual:** 1.000 propostas/mês  
-**Meta 2026:** 100.000 propostas/mês  
+**Meta 2026:** 100.000 propostas/mês
 
 ```typescript
 // Estimativas de Crescimento de Dados
@@ -406,18 +406,18 @@ const volumetriaProjetada = {
     atual: '1K/mês',
     meta2026: '100K/mês',
     crescimento: '100x',
-    impacto: 'CRÍTICO - Índices obrigatórios'
+    impacto: 'CRÍTICO - Índices obrigatórios',
   },
   parcelas: {
     multiplicador: '24x propostas', // Média 24 parcelas
     meta2026: '2.4M registros/mês',
-    impacto: 'ALTO - Particionamento recomendado'
+    impacto: 'ALTO - Particionamento recomendado',
   },
   statusTransitions: {
     multiplicador: '8x propostas', // Média 8 mudanças de status
     meta2026: '800K registros/mês',
-    impacto: 'MÉDIO - Índice por proposta_id'
-  }
+    impacto: 'MÉDIO - Índice por proposta_id',
+  },
 };
 ```
 
@@ -433,30 +433,30 @@ const volumetriaProjetada = {
 -- ====================================
 
 -- 1. Propostas: Status + Loja (Multi-tenant + Workflow)
-CREATE INDEX CONCURRENTLY idx_propostas_status_loja 
-ON propostas(status, loja_id) 
+CREATE INDEX CONCURRENTLY idx_propostas_status_loja
+ON propostas(status, loja_id)
 WHERE deleted_at IS NULL;
 
 -- 2. Propostas: CPF (Busca de cliente)
-CREATE INDEX CONCURRENTLY idx_propostas_cliente_cpf 
-ON propostas(cliente_cpf) 
+CREATE INDEX CONCURRENTLY idx_propostas_cliente_cpf
+ON propostas(cliente_cpf)
 WHERE deleted_at IS NULL;
 
 -- 3. Propostas: Created At (Relatórios por período)
-CREATE INDEX CONCURRENTLY idx_propostas_created_at 
-ON propostas(created_at DESC) 
+CREATE INDEX CONCURRENTLY idx_propostas_created_at
+ON propostas(created_at DESC)
 WHERE deleted_at IS NULL;
 
 -- 4. Status Transitions: Proposta ID (Auditoria)
-CREATE INDEX CONCURRENTLY idx_status_transitions_proposta 
+CREATE INDEX CONCURRENTLY idx_status_transitions_proposta
 ON status_transitions(proposta_id, created_at DESC);
 
 -- 5. Parcelas: Proposta + Número (Cronograma)
-CREATE INDEX CONCURRENTLY idx_parcelas_proposta_numero 
+CREATE INDEX CONCURRENTLY idx_parcelas_proposta_numero
 ON parcelas(proposta_id, numero_parcela);
 
 -- 6. Inter Collections: Código Solicitação (Webhook lookup)
-CREATE INDEX CONCURRENTLY idx_inter_collections_codigo 
+CREATE INDEX CONCURRENTLY idx_inter_collections_codigo
 ON inter_collections(codigo_solicitacao);
 ```
 
@@ -468,21 +468,21 @@ ON inter_collections(codigo_solicitacao);
 -- ====================================
 
 -- 7. Propostas: Analista + Status (Dashboard do analista)
-CREATE INDEX CONCURRENTLY idx_propostas_analista_status 
-ON propostas(analista_id, status) 
+CREATE INDEX CONCURRENTLY idx_propostas_analista_status
+ON propostas(analista_id, status)
 WHERE deleted_at IS NULL;
 
 -- 8. Parcelas: Vencimento + Status (Cobrança)
-CREATE INDEX CONCURRENTLY idx_parcelas_vencimento_status 
+CREATE INDEX CONCURRENTLY idx_parcelas_vencimento_status
 ON parcelas(data_vencimento, status);
 
 -- 9. Comunicação Logs: Proposta + Timestamp (Histórico)
-CREATE INDEX CONCURRENTLY idx_comunicacao_logs_proposta_data 
+CREATE INDEX CONCURRENTLY idx_comunicacao_logs_proposta_data
 ON comunicacao_logs(proposta_id, created_at DESC);
 
 -- 10. Soft Delete Universal (Covering Index)
-CREATE INDEX CONCURRENTLY idx_propostas_active_covering 
-ON propostas(id, status, loja_id, created_at) 
+CREATE INDEX CONCURRENTLY idx_propostas_active_covering
+ON propostas(id, status, loja_id, created_at)
 WHERE deleted_at IS NULL;
 ```
 
@@ -494,18 +494,18 @@ WHERE deleted_at IS NULL;
 -- ====================================
 
 -- 11. Full Text Search em Observações
-CREATE INDEX CONCURRENTLY idx_observacoes_fts 
-ON observacoes_cobranca 
+CREATE INDEX CONCURRENTLY idx_observacoes_fts
+ON observacoes_cobranca
 USING gin(to_tsvector('portuguese', observacao));
 
 -- 12. Índice Parcial para Propostas Ativas
-CREATE INDEX CONCURRENTLY idx_propostas_workflow_ativo 
-ON propostas(status, updated_at DESC) 
+CREATE INDEX CONCURRENTLY idx_propostas_workflow_ativo
+ON propostas(status, updated_at DESC)
 WHERE status IN ('aguardando_analise', 'em_analise', 'pendente', 'aprovado');
 
 -- 13. Índice JSONB para Metadata de Transições
-CREATE INDEX CONCURRENTLY idx_status_transitions_metadata 
-ON status_transitions 
+CREATE INDEX CONCURRENTLY idx_status_transitions_metadata
+ON status_transitions
 USING gin(metadata);
 ```
 
@@ -513,24 +513,24 @@ USING gin(metadata);
 
 ```sql
 -- Query para identificar índices sub-utilizados
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
     idx_scan,
     idx_tup_read,
     idx_tup_fetch
-FROM pg_stat_user_indexes 
+FROM pg_stat_user_indexes
 WHERE idx_scan < 100  -- Índices com menos de 100 scans
 ORDER BY idx_scan;
 
 -- Query para identificar queries lentas
-SELECT 
+SELECT
     query,
     mean_time,
     calls,
     total_time
-FROM pg_stat_statements 
+FROM pg_stat_statements
 WHERE mean_time > 100  -- Queries com média > 100ms
 ORDER BY mean_time DESC;
 ```
@@ -553,6 +553,7 @@ npm run db:migrate    # Aplica em produção
 ### 6.2 Fases de Migração Segura
 
 #### Fase 1: EXPAND (Adição Não-Destrutiva)
+
 ```sql
 -- ✅ SEGURO: Adicionar nova coluna opcional
 ALTER TABLE propostas ADD COLUMN nova_coluna TEXT;
@@ -565,18 +566,20 @@ CREATE INDEX CONCURRENTLY idx_nova_coluna ON propostas(nova_coluna);
 ```
 
 #### Fase 2: MIGRATE (Migração de Dados)
+
 ```sql
 -- Migração gradual em batches pequenos
-UPDATE propostas 
+UPDATE propostas
 SET nova_coluna = calcular_valor(coluna_antiga)
 WHERE id IN (
-    SELECT id FROM propostas 
-    WHERE nova_coluna IS NULL 
+    SELECT id FROM propostas
+    WHERE nova_coluna IS NULL
     LIMIT 1000
 );
 ```
 
 #### Fase 3: CONTRACT (Remoção Destrutiva)
+
 ```sql
 -- ⚠️ DESTRUTIVO: Apenas após confirmação total
 ALTER TABLE propostas DROP COLUMN coluna_antiga;
@@ -585,13 +588,13 @@ DROP INDEX idx_coluna_antiga;
 
 ### 6.3 Política de Versionamento de Schema
 
-| **Tipo de Mudança** | **Estratégia** | **Downtime** | **Exemplo** |
-|----------------------|----------------|--------------|-------------|
-| **Adição de Coluna** | Expand imediato | ❌ Zero | `ADD COLUMN email TEXT` |
-| **Mudança de Tipo** | Expand + Contract | ⚠️ Mínimo | `INT → BIGINT` com coluna temporária |
-| **Remoção de Coluna** | Contract planejado | ⚠️ Baixo | Deprecação → Remoção após 2 sprints |
-| **Adição de Tabela** | Expand imediato | ❌ Zero | `CREATE TABLE nova_entidade` |
-| **Mudança de Index** | Concurrent rebuild | ❌ Zero | `CREATE INDEX CONCURRENTLY` |
+| **Tipo de Mudança**   | **Estratégia**     | **Downtime** | **Exemplo**                          |
+| --------------------- | ------------------ | ------------ | ------------------------------------ |
+| **Adição de Coluna**  | Expand imediato    | ❌ Zero      | `ADD COLUMN email TEXT`              |
+| **Mudança de Tipo**   | Expand + Contract  | ⚠️ Mínimo    | `INT → BIGINT` com coluna temporária |
+| **Remoção de Coluna** | Contract planejado | ⚠️ Baixo     | Deprecação → Remoção após 2 sprints  |
+| **Adição de Tabela**  | Expand imediato    | ❌ Zero      | `CREATE TABLE nova_entidade`         |
+| **Mudança de Index**  | Concurrent rebuild | ❌ Zero      | `CREATE INDEX CONCURRENTLY`          |
 
 ### 6.4 Backup e Recuperação
 
@@ -610,7 +613,7 @@ psql $STAGING_DATABASE_URL < backup_pre_migration.sql
 const schemaFeatureFlags = {
   useNewPaymentTable: false, // Gradual rollout para nova tabela
   enableJsonbMetadata: true, // Habilitado para todos
-  useOptimizedIndexes: false // A/B test de performance
+  useOptimizedIndexes: false, // A/B test de performance
 };
 ```
 
@@ -621,6 +624,7 @@ const schemaFeatureFlags = {
 ### 6.1 Estado Atual da Modelagem
 
 ✅ **Forças:**
+
 - Schema maduro e bem estruturado
 - Auditoria completa implementada
 - Multi-tenancy por loja funcional
@@ -628,6 +632,7 @@ const schemaFeatureFlags = {
 - Integração robusta com sistemas externos
 
 ⚠️ **Áreas de Melhoria:**
+
 - Índices críticos ainda não implementados
 - Algumas tabelas podem se beneficiar de particionamento
 - Monitoramento de performance a ser implementado
@@ -635,28 +640,31 @@ const schemaFeatureFlags = {
 ### 6.2 Roadmap de Implementação
 
 **Sprint Atual (Agosto 2025):**
+
 1. Implementar índices P0 (críticos)
 2. Configurar monitoramento de query performance
 3. Documentar padrões de acesso atuais
 
 **Sprint 2 (Setembro 2025):**
+
 1. Implementar índices P1 (alta prioridade)
 2. Configurar alertas de performance
 3. Implementar particionamento de tabelas de log
 
 **Sprint 3 (Outubro 2025):**
+
 1. Otimizações avançadas (índices P2)
 2. Full text search para observações
 3. Preparação para escala 100K propostas/mês
 
 ### 6.3 Métricas de Sucesso
 
-| **Métrica** | **Baseline Atual** | **Meta Q4 2025** | **Método de Medição** |
-|-------------|-------------------|-------------------|----------------------|
-| **Query Response Time (p95)** | ~500ms | <200ms | pg_stat_statements |
-| **Índice Hit Ratio** | ~85% | >95% | pg_stat_database |
-| **Lock Wait Time** | N/A | <10ms | pg_locks monitoring |
-| **Storage Growth Rate** | N/A | <50GB/mês | pg_database_size |
+| **Métrica**                   | **Baseline Atual** | **Meta Q4 2025** | **Método de Medição** |
+| ----------------------------- | ------------------ | ---------------- | --------------------- |
+| **Query Response Time (p95)** | ~500ms             | <200ms           | pg_stat_statements    |
+| **Índice Hit Ratio**          | ~85%               | >95%             | pg_stat_database      |
+| **Lock Wait Time**            | N/A                | <10ms            | pg_locks monitoring   |
+| **Storage Growth Rate**       | N/A                | <50GB/mês        | pg_database_size      |
 
 ---
 

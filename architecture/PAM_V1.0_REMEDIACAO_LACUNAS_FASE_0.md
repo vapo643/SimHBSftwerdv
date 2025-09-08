@@ -1,4 +1,5 @@
 # 📋 Pacote de Ativação de Missão (PAM) V1.0
+
 ## Remediação de Lacunas Críticas - Fase 0
 
 **Missão:** Implementar Estratégia de Schema Migration com Zero Downtime  
@@ -12,6 +13,7 @@
 ## 🎯 OBJETIVO DA MISSÃO
 
 Implementar uma estratégia robusta de migração de schema que garanta:
+
 1. **Versionamento completo** de todas as mudanças de banco
 2. **Zero downtime** durante migrações em produção
 3. **Rollback automático** em caso de falha
@@ -22,6 +24,7 @@ Implementar uma estratégia robusta de migração de schema que garanta:
 ## 📊 CONTEXTO OPERACIONAL
 
 ### Situação Atual
+
 - **PostgreSQL** rodando no Supabase
 - **Drizzle ORM** como camada de abstração
 - **50+ tabelas** em produção
@@ -29,6 +32,7 @@ Implementar uma estratégia robusta de migração de schema que garanta:
 - **Risco alto** de downtime em mudanças de schema
 
 ### Requisitos Críticos
+
 - Suportar **migrações forward e backward**
 - Manter **auditoria completa** de mudanças
 - Implementar **padrão Expand/Contract**
@@ -41,6 +45,7 @@ Implementar uma estratégia robusta de migração de schema que garanta:
 ### Fase 1: Seleção e Setup (24h)
 
 #### 1.1 Implementar Drizzle-Kit Migration System
+
 ```bash
 # Drizzle já está instalado, precisamos configurar migrations
 npm install --save-dev drizzle-kit@latest
@@ -51,6 +56,7 @@ mkdir -p migrations/meta
 ```
 
 #### 1.2 Configurar drizzle.config.ts
+
 ```typescript
 // drizzle.config.ts - ATUALIZAR configuração existente
 import { defineConfig } from 'drizzle-kit';
@@ -74,6 +80,7 @@ export default defineConfig({
 ```
 
 #### 1.3 Scripts de Migração no package.json
+
 ```json
 {
   "scripts": {
@@ -92,6 +99,7 @@ export default defineConfig({
 ### Fase 2: Implementar Padrão Expand/Contract (24h)
 
 #### 2.1 Criar Script de Migração Segura
+
 ```typescript
 // scripts/migrate.ts
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -101,32 +109,31 @@ import * as schema from '../shared/schema';
 
 async function runMigration() {
   console.log('🔄 Iniciando migração segura...');
-  
-  const sql = postgres(process.env.DATABASE_URL!, { 
+
+  const sql = postgres(process.env.DATABASE_URL!, {
     max: 1,
-    onnotice: () => {} 
+    onnotice: () => {},
   });
-  
+
   const db = drizzle(sql, { schema });
-  
+
   try {
     // EXPAND phase - adicionar sem remover
-    await migrate(db, { 
+    await migrate(db, {
       migrationsFolder: './migrations',
       migrationsTable: '__drizzle_migrations',
     });
-    
+
     console.log('✅ Migração EXPAND concluída');
-    
+
     // Verificar integridade
     const result = await sql`
       SELECT COUNT(*) as count 
       FROM __drizzle_migrations 
       WHERE success = true
     `;
-    
+
     console.log(`📊 Total de migrações aplicadas: ${result[0].count}`);
-    
   } catch (error) {
     console.error('❌ Erro na migração:', error);
     process.exit(1);
@@ -139,6 +146,7 @@ runMigration();
 ```
 
 #### 2.2 Criar Script de Rollback
+
 ```typescript
 // scripts/rollback.ts
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -148,9 +156,9 @@ import * as path from 'path';
 
 async function rollbackMigration(steps: number = 1) {
   console.log(`🔙 Iniciando rollback de ${steps} migração(ões)...`);
-  
+
   const sql = postgres(process.env.DATABASE_URL!, { max: 1 });
-  
+
   try {
     // Buscar últimas migrações aplicadas
     const migrations = await sql`
@@ -158,31 +166,26 @@ async function rollbackMigration(steps: number = 1) {
       ORDER BY created_at DESC 
       LIMIT ${steps}
     `;
-    
+
     for (const migration of migrations) {
-      const downFile = path.join(
-        './migrations', 
-        migration.hash, 
-        'down.sql'
-      );
-      
+      const downFile = path.join('./migrations', migration.hash, 'down.sql');
+
       if (fs.existsSync(downFile)) {
         const downSQL = fs.readFileSync(downFile, 'utf-8');
         await sql.unsafe(downSQL);
-        
+
         // Marcar como revertida
         await sql`
           UPDATE __drizzle_migrations 
           SET success = false 
           WHERE hash = ${migration.hash}
         `;
-        
+
         console.log(`✅ Revertida: ${migration.hash}`);
       } else {
         console.warn(`⚠️ Arquivo down.sql não encontrado para ${migration.hash}`);
       }
     }
-    
   } catch (error) {
     console.error('❌ Erro no rollback:', error);
     process.exit(1);
@@ -199,7 +202,8 @@ rollbackMigration(steps);
 ### Fase 3: Documentar Zero Downtime Strategy (24h)
 
 #### 3.1 Criar Documento de Estratégia
-```markdown
+
+````markdown
 # architecture/03-infrastructure/zero-downtime-migration.md
 
 ## Estratégia de Zero Downtime
@@ -210,18 +214,17 @@ rollbackMigration(steps);
    - Adicionar nova coluna/tabela SEM remover a antiga
    - Deploy do código que suporta AMBAS versões
    - Migrar dados gradualmente
-   
 2. **MIGRATE Phase**
    - Backfill de dados para nova estrutura
    - Validar integridade
    - Monitorar por 24-48h
-   
 3. **CONTRACT Phase**
    - Remover código que usa estrutura antiga
    - Deploy da versão final
    - Dropar colunas/tabelas antigas
 
 ### Exemplo Prático
+
 ```sql
 -- EXPAND: Adicionar nova coluna
 ALTER TABLE users ADD COLUMN email_normalized VARCHAR(255);
@@ -233,7 +236,9 @@ UPDATE users SET email_normalized = LOWER(TRIM(email));
 ALTER TABLE users DROP COLUMN email;
 ALTER TABLE users RENAME COLUMN email_normalized TO email;
 ```
-```
+````
+
+````
 
 #### 3.2 Criar Checklist de Migração
 ```yaml
@@ -257,13 +262,14 @@ ALTER TABLE users RENAME COLUMN email_normalized TO email;
 - [ ] Performance benchmarks
 - [ ] Atualizar documentação
 - [ ] Comunicar sucesso
-```
+````
 
 ---
 
 ## 📋 CRITÉRIOS DE SUCESSO
 
 ### Entregáveis Obrigatórios
+
 1. ✅ **Drizzle-Kit configurado** com suporte a migrations
 2. ✅ **Scripts de migração e rollback** funcionais
 3. ✅ **Documentação Zero Downtime** completa
@@ -271,6 +277,7 @@ ALTER TABLE users RENAME COLUMN email_normalized TO email;
 5. ✅ **Checklist operacional** para produção
 
 ### Métricas de Validação
+
 - **0 erros** durante migração de teste
 - **< 100ms** de latência adicional durante migração
 - **100% rollback** funcional testado
@@ -280,18 +287,19 @@ ALTER TABLE users RENAME COLUMN email_normalized TO email;
 
 ## 🚨 RISCOS E MITIGAÇÕES
 
-| Risco | Probabilidade | Impacto | Mitigação |
-|-------|--------------|---------|-----------|
-| Corrupção de dados | Baixa | Crítico | Backup antes de cada migração |
-| Downtime inesperado | Média | Alto | Padrão Expand/Contract rigoroso |
-| Rollback falhar | Baixa | Crítico | Testes exaustivos em staging |
-| Performance degradada | Média | Médio | Índices e VACUUM após migração |
+| Risco                 | Probabilidade | Impacto | Mitigação                       |
+| --------------------- | ------------- | ------- | ------------------------------- |
+| Corrupção de dados    | Baixa         | Crítico | Backup antes de cada migração   |
+| Downtime inesperado   | Média         | Alto    | Padrão Expand/Contract rigoroso |
+| Rollback falhar       | Baixa         | Crítico | Testes exaustivos em staging    |
+| Performance degradada | Média         | Médio   | Índices e VACUUM após migração  |
 
 ---
 
 ## 🔄 SEQUÊNCIA DE EXECUÇÃO
 
 ### DIA 1 (Hoje)
+
 ```bash
 09:00 - Setup Drizzle-Kit migrations
 11:00 - Criar scripts migrate.ts e rollback.ts
@@ -300,6 +308,7 @@ ALTER TABLE users RENAME COLUMN email_normalized TO email;
 ```
 
 ### DIA 2 (Amanhã)
+
 ```bash
 09:00 - Implementar padrão Expand/Contract
 11:00 - Criar migration de exemplo
@@ -308,6 +317,7 @@ ALTER TABLE users RENAME COLUMN email_normalized TO email;
 ```
 
 ### DIA 3 (Validação)
+
 ```bash
 09:00 - Teste end-to-end em staging
 11:00 - Documentação final
@@ -320,6 +330,7 @@ ALTER TABLE users RENAME COLUMN email_normalized TO email;
 ## 📊 MONITORAMENTO
 
 ### Queries de Validação
+
 ```sql
 -- Status das migrations
 SELECT * FROM __drizzle_migrations ORDER BY created_at DESC;
@@ -328,9 +339,9 @@ SELECT * FROM __drizzle_migrations ORDER BY created_at DESC;
 SELECT * FROM pg_locks WHERE NOT granted;
 
 -- Monitor de performance
-SELECT query, calls, mean_exec_time 
-FROM pg_stat_statements 
-ORDER BY mean_exec_time DESC 
+SELECT query, calls, mean_exec_time
+FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
 LIMIT 10;
 ```
 

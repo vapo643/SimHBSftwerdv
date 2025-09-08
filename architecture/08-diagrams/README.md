@@ -3,6 +3,7 @@
 ## Conteúdo desta pasta
 
 Diagramas arquiteturais:
+
 - C4 Model
 - Entity Relationship
 - Sequence diagrams
@@ -11,16 +12,16 @@ Diagramas arquiteturais:
 
 ## Documentos
 
-| Arquivo | Descrição | Status |
-|---------|-----------|--------|
-| c4-level-1-context.puml | System Context | Pendente |
-| c4-level-2-container.puml | Container Diagram | Pendente |
-| c4-level-3-component.puml | Component Diagram | Pendente |
-| erd-current.sql | ERD atual | Pendente |
-| erd-target.sql | ERD target | Pendente |
-| sequence-auth.puml | Fluxo de autenticação | Pendente |
-| sequence-payment.puml | Fluxo de pagamento | Pendente |
-| user-journey.md | Jornada do usuário | Pendente |
+| Arquivo                   | Descrição             | Status   |
+| ------------------------- | --------------------- | -------- |
+| c4-level-1-context.puml   | System Context        | Pendente |
+| c4-level-2-container.puml | Container Diagram     | Pendente |
+| c4-level-3-component.puml | Component Diagram     | Pendente |
+| erd-current.sql           | ERD atual             | Pendente |
+| erd-target.sql            | ERD target            | Pendente |
+| sequence-auth.puml        | Fluxo de autenticação | Pendente |
+| sequence-payment.puml     | Fluxo de pagamento    | Pendente |
+| user-journey.md           | Jornada do usuário    | Pendente |
 
 ## Ferramentas Recomendadas
 

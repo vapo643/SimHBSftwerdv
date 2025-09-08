@@ -66,21 +66,25 @@ export default function MonitoringDashboard() {
   };
 
   const getStatusBadge = (queue: QueueMetrics) => {
-    const hasAlerts = Object.values(queue.alerts).some(alert => alert);
-    
+    const hasAlerts = Object.values(queue.alerts).some((alert) => alert);
+
     if (hasAlerts) {
       return <Badge variant="destructive">Alerta</Badge>;
     }
-    
+
     if (queue.activeJobs > 0) {
       return <Badge variant="secondary">Processando</Badge>;
     }
-    
-    return <Badge variant="default" className="bg-green-100 text-green-800">Saudável</Badge>;
+
+    return (
+      <Badge variant="default" className="bg-green-100 text-green-800">
+        Saudável
+      </Badge>
+    );
   };
 
   const getCardBorderClass = (queue: QueueMetrics) => {
-    const hasAlerts = Object.values(queue.alerts).some(alert => alert);
+    const hasAlerts = Object.values(queue.alerts).some((alert) => alert);
     return hasAlerts ? 'border-red-500 border-2' : '';
   };
 
@@ -136,7 +140,10 @@ export default function MonitoringDashboard() {
               <AlertTriangle className="h-5 w-5 text-red-500" />
             )}
             <span className="text-sm text-muted-foreground">
-              Última atualização: {metricsData?.timestamp ? new Date(metricsData.timestamp).toLocaleTimeString() : 'N/A'}
+              Última atualização:{' '}
+              {metricsData?.timestamp
+                ? new Date(metricsData.timestamp).toLocaleTimeString()
+                : 'N/A'}
             </span>
           </div>
         </div>
@@ -144,7 +151,11 @@ export default function MonitoringDashboard() {
         {/* Grid de Cards das Filas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {metricsData?.queues?.map((queue) => (
-            <Card key={queue.queueName} className={getCardBorderClass(queue)} data-testid={`card-queue-${queue.queueName}`}>
+            <Card
+              key={queue.queueName}
+              className={getCardBorderClass(queue)}
+              data-testid={`card-queue-${queue.queueName}`}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium flex items-center space-x-2">
                   {getQueueIcon(queue.queueName)}
@@ -158,19 +169,36 @@ export default function MonitoringDashboard() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total:</span>
-                      <span className="font-semibold" data-testid={`text-total-${queue.queueName}`}>{queue.totalJobs}</span>
+                      <span className="font-semibold" data-testid={`text-total-${queue.queueName}`}>
+                        {queue.totalJobs}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Ativos:</span>
-                      <span className="font-semibold text-blue-600" data-testid={`text-active-${queue.queueName}`}>{queue.activeJobs}</span>
+                      <span
+                        className="font-semibold text-blue-600"
+                        data-testid={`text-active-${queue.queueName}`}
+                      >
+                        {queue.activeJobs}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Completos:</span>
-                      <span className="font-semibold text-green-600" data-testid={`text-completed-${queue.queueName}`}>{queue.completedJobs}</span>
+                      <span
+                        className="font-semibold text-green-600"
+                        data-testid={`text-completed-${queue.queueName}`}
+                      >
+                        {queue.completedJobs}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Falhados:</span>
-                      <span className="font-semibold text-red-600" data-testid={`text-failed-${queue.queueName}`}>{queue.failedJobs}</span>
+                      <span
+                        className="font-semibold text-red-600"
+                        data-testid={`text-failed-${queue.queueName}`}
+                      >
+                        {queue.failedJobs}
+                      </span>
                     </div>
                   </div>
 
@@ -179,7 +207,10 @@ export default function MonitoringDashboard() {
                     <div className="border-t pt-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">DLQ Size:</span>
-                        <span className={`font-semibold ${queue.dlqSize > 0 ? 'text-red-600' : 'text-green-600'}`} data-testid="text-dlq-size">
+                        <span
+                          className={`font-semibold ${queue.dlqSize > 0 ? 'text-red-600' : 'text-green-600'}`}
+                          data-testid="text-dlq-size"
+                        >
                           {queue.dlqSize}
                         </span>
                       </div>
@@ -187,7 +218,7 @@ export default function MonitoringDashboard() {
                   )}
 
                   {/* Alertas ativos */}
-                  {Object.values(queue.alerts).some(alert => alert) && (
+                  {Object.values(queue.alerts).some((alert) => alert) && (
                     <div className="border-t pt-2">
                       <div className="flex items-center space-x-1 text-sm text-red-600">
                         <AlertTriangle className="h-3 w-3" />

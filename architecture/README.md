@@ -1,4 +1,5 @@
 # 📐 Arquitetura Simpix - Documentação Centralizada
+
 ## Sistema de Gestão de Crédito Enterprise-Grade
 
 ---
@@ -23,6 +24,7 @@ architecture/
 ## 📚 Conteúdo por Pasta
 
 ### 01-domain/
+
 - Bounded contexts
 - Agregados e entidades
 - Domain events
@@ -30,6 +32,7 @@ architecture/
 - Invariantes de negócio
 
 ### 02-technical/
+
 - Patterns arquiteturais
 - Escolhas de stack
 - APIs e contratos
@@ -37,6 +40,7 @@ architecture/
 - Testing strategy
 
 ### 03-infrastructure/
+
 - Configuração cloud (Azure)
 - CI/CD pipelines
 - IaC (Infrastructure as Code)
@@ -44,6 +48,7 @@ architecture/
 - Disaster recovery
 
 ### 04-security/
+
 - Threat modeling
 - OWASP compliance
 - LGPD compliance
@@ -51,6 +56,7 @@ architecture/
 - Security checklist
 
 ### 05-performance/
+
 - Load testing
 - Caching strategy
 - Query optimization
@@ -58,6 +64,7 @@ architecture/
 - Performance metrics
 
 ### 06-roadmap/
+
 - Fases de implementação
 - Cronogramas
 - Milestones
@@ -65,11 +72,13 @@ architecture/
 - Risk assessment
 
 ### 07-decisions/
+
 - ADRs numerados (001, 002, etc)
 - Formato: Context → Decision → Consequences
 - Registro histórico de decisões
 
 ### 08-diagrams/
+
 - C4 Model (Context, Container, Component, Code)
 - Entity Relationship Diagrams
 - Sequence diagrams
@@ -77,6 +86,7 @@ architecture/
 - User journey maps
 
 ### 99-collaboration/
+
 - Conversas GEM 01 ↔ GEM 02
 - Meeting notes
 - Brainstorming sessions
@@ -87,29 +97,32 @@ architecture/
 
 ## 🎯 Status do Planejamento
 
-| Fase | Status | Progresso | Data Início | Data Fim |
-|------|--------|-----------|-------------|----------|
-| Discovery | 🟡 Em Andamento | 10% | 20/08/2025 | - |
-| Domain Mapping | ⏸️ Aguardando | 0% | - | - |
-| Technical Design | ⏸️ Aguardando | 0% | - | - |
-| Security Review | ⏸️ Aguardando | 0% | - | - |
-| Implementation Plan | ⏸️ Aguardando | 0% | - | - |
+| Fase                | Status          | Progresso | Data Início | Data Fim |
+| ------------------- | --------------- | --------- | ----------- | -------- |
+| Discovery           | 🟡 Em Andamento | 10%       | 20/08/2025  | -        |
+| Domain Mapping      | ⏸️ Aguardando   | 0%        | -           | -        |
+| Technical Design    | ⏸️ Aguardando   | 0%        | -           | -        |
+| Security Review     | ⏸️ Aguardando   | 0%        | -           | -        |
+| Implementation Plan | ⏸️ Aguardando   | 0%        | -           | -        |
 
 ---
 
 ## 📋 Documentos Principais
 
 ### Criados
+
 - [x] ARQUITETURA_PLANEJAMENTO_V1.0.md
 - [x] Estrutura de pastas
 
 ### Em Desenvolvimento
+
 - [ ] Bounded Contexts Map
 - [ ] C4 Level 1 - System Context
 - [ ] Technology Radar
 - [ ] Risk Registry
 
 ### Planejados
+
 - [ ] API Contracts
 - [ ] Data Model v2.0
 - [ ] Migration Strategy
@@ -120,14 +133,17 @@ architecture/
 ## 🤝 Protocolo de Trabalho
 
 ### Para Adicionar Documentação:
+
 1. Escolha a pasta apropriada (01-08)
 2. Use nomenclatura: `YYYY-MM-DD-titulo-documento.md`
 3. Inclua header com metadata
 4. Atualize este README
 
 ### Template de Header:
+
 ```markdown
 # Título do Documento
+
 **Autor:** GEM 01/GEM 02
 **Data:** DD/MM/YYYY
 **Status:** Draft/Review/Approved
@@ -138,8 +154,8 @@ architecture/
 
 ## 🔄 Últimas Atualizações
 
-| Data | Documento | Autor | Descrição |
-|------|-----------|-------|-----------|
+| Data       | Documento         | Autor  | Descrição                            |
+| ---------- | ----------------- | ------ | ------------------------------------ |
 | 20/08/2025 | Estrutura inicial | GEM 01 | Criação da estrutura de documentação |
 
 ---
@@ -152,4 +168,4 @@ architecture/
 
 ---
 
-*Última atualização: 20/08/2025 22:20 UTC*
+_Última atualização: 20/08/2025 22:20 UTC_

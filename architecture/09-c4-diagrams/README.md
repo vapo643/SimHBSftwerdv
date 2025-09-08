@@ -24,12 +24,12 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
    - Tecnologias utilizadas
    - Comunicação entre containers
 
-3. **[Level 3 - Component Diagram](./c4-level3-proposal-context.md)** *(DDD Compliant)*
+3. **[Level 3 - Component Diagram](./c4-level3-proposal-context.md)** _(DDD Compliant)_
    - Componentes DDD (Presentation → Application → Domain ← Infrastructure)
    - Bounded Context internal structure
    - Repository Pattern e Domain Services
 
-4. **Level 4 - Code Diagram** *(Planejado)*
+4. **Level 4 - Code Diagram** _(Planejado)_
    - Classes e módulos principais
    - Padrões de design implementados
    - Estrutura de código
@@ -39,16 +39,19 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 ## 🔧 Como Usar Esta Documentação
 
 ### **Para Desenvolvedores:**
+
 - Comece pelo Level 2 para entender a estrutura técnica
 - Use Level 3 para navegar no código
 - Consulte durante refatorações
 
 ### **Para Arquitetos:**
+
 - Level 1 para visão estratégica
 - Level 2 para decisões de infraestrutura
 - Use para planejar migrações
 
 ### **Para Gestores:**
+
 - Level 1 para entender dependências externas
 - Identifique riscos e custos
 - Planeje roadmap com base nas evoluções TO-BE
@@ -58,11 +61,13 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 ## 🛠️ Ferramentas de Visualização
 
 ### **Mermaid (Atual)**
+
 - Integrado no Markdown
 - Renderização automática no GitHub/GitLab
 - Versionado com o código
 
 ### **Migração Futura:**
+
 - **Structurizr** - Diagrams as Code
 - **PlantUML** - Para diagramas complexos
 - **draw.io** - Para apresentações
@@ -72,12 +77,14 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 ## 📈 Estado Atual (AS-IS)
 
 ### **Resumo Arquitetural:**
+
 - **Padrão:** Monolito modular
 - **Deployment:** Single container (Replit)
 - **Database:** PostgreSQL (Supabase)
 - **Integrações:** 4 sistemas externos
 
 ### **Principais Características:**
+
 ✅ Autenticação centralizada (Supabase)  
 ✅ Background jobs com BullMQ  
 ✅ Cache L2 implementado  
@@ -85,13 +92,14 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 ⚠️ Acoplamento com Supabase  
 ⚠️ Single point of failure  
 ❌ Sem API Gateway  
-❌ Sem service mesh  
+❌ Sem service mesh
 
 ---
 
 ## 🚀 Evolução Planejada (TO-BE)
 
 ### **Fase 0 - Fundação (ATUAL)**
+
 - ✅ Documentação C4 Levels 1-2
 - ✅ Migração de secrets
 - ✅ Observabilidade básica
@@ -99,18 +107,21 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 - 🔄 Ambientes separados
 
 ### **Fase 1 - Desacoplamento**
+
 - Repository Pattern
 - API Gateway
 - Cache distribuído
 - Circuit breakers completos
 
 ### **Fase 2 - Containerização**
+
 - Docker images
 - Kubernetes deployment
 - Service mesh
 - Horizontal scaling
 
 ### **Fase Final - Azure Migration**
+
 - Azure Container Apps
 - Azure SQL Database
 - Azure Service Bus
@@ -120,13 +131,13 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 
 ## 📊 Métricas de Arquitetura
 
-| Métrica | Atual | Meta Fase 1 | Meta Final |
-|---------|--------|-------------|------------|
-| **Acoplamento** | Alto | Médio | Baixo |
-| **Disponibilidade** | 98% | 99% | 99.9% |
-| **Deployment Time** | Manual | 30min | 5min |
-| **Recovery Time** | 4h | 1h | 15min |
-| **Scaling** | Vertical | Manual | Auto |
+| Métrica             | Atual    | Meta Fase 1 | Meta Final |
+| ------------------- | -------- | ----------- | ---------- |
+| **Acoplamento**     | Alto     | Médio       | Baixo      |
+| **Disponibilidade** | 98%      | 99%         | 99.9%      |
+| **Deployment Time** | Manual   | 30min       | 5min       |
+| **Recovery Time**   | 4h       | 1h          | 15min      |
+| **Scaling**         | Vertical | Manual      | Auto       |
 
 ---
 
@@ -143,12 +154,14 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 ## 📝 Convenções de Documentação
 
 ### **Notação de Criticidade:**
+
 - 🔴 **Crítico** - Falha impacta todo sistema
 - 🟡 **Alto** - Degradação significativa
 - 🟢 **Médio** - Impacto localizado
 - ⚪ **Baixo** - Funcionalidade auxiliar
 
 ### **Status de Implementação:**
+
 - ✅ Implementado
 - 🔄 Em progresso
 - ❌ Não implementado
@@ -159,6 +172,7 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
 ## 🤝 Contribuindo
 
 Para atualizar os diagramas:
+
 1. Edite os arquivos `.md` correspondentes
 2. Mantenha a notação Mermaid válida
 3. Atualize a data de versão

@@ -4,7 +4,7 @@
 **Versão:** 1.0  
 **Data:** 22 de Agosto de 2025  
 **Status:** Oficial - Fonte da Verdade da Camada de APIs  
-**Aprovação:** Pendente Ratificação do Arquiteto Chefe  
+**Aprovação:** Pendente Ratificação do Arquiteto Chefe
 
 ---
 
@@ -14,7 +14,7 @@ Este documento estabelece a estratégia formal de arquitetura de APIs para o Sis
 
 **Ponto de Conformidade:** Remediação do Ponto 33 - Contrato da API (OpenAPI)  
 **Criticidade:** P0 (Crítica)  
-**Impacto:** Integração com parceiros, documentação de APIs e consistência arquitetural  
+**Impacto:** Integração com parceiros, documentação de APIs e consistência arquitetural
 
 ---
 
@@ -24,7 +24,7 @@ Este documento estabelece a estratégia formal de arquitetura de APIs para o Sis
 
 **Especificação:** OpenAPI 3.0.3  
 **Localização:** `architecture/02-technical/api-contracts/proposal-api.v1.yaml`  
-**Coverage:** 18 endpoints cobrindo workflow completo  
+**Coverage:** 18 endpoints cobrindo workflow completo
 
 #### Arquitetura de Endpoints Implementada
 
@@ -43,46 +43,46 @@ const apiDomains = {
     basePath: '/api/v1/proposals',
     endpoints: {
       core: [
-        'GET    /proposals',              // Listar propostas (paginado)
-        'POST   /proposals',              // Criar proposta
-        'GET    /proposals/{id}',         // Buscar por ID
-        'GET    /proposals/buscar-por-cpf/{cpf}' // Buscar por CPF
+        'GET    /proposals', // Listar propostas (paginado)
+        'POST   /proposals', // Criar proposta
+        'GET    /proposals/{id}', // Buscar por ID
+        'GET    /proposals/buscar-por-cpf/{cpf}', // Buscar por CPF
       ],
       workflow: [
-        'PUT    /proposals/{id}/submit',      // FSM: Submeter → Análise
-        'PUT    /proposals/{id}/approve',     // FSM: Aprovar proposta
-        'PUT    /proposals/{id}/reject',      // FSM: Rejeitar proposta
-        'PUT    /proposals/{id}/toggle-status' // FSM: Suspender/Reativar
-      ]
+        'PUT    /proposals/{id}/submit', // FSM: Submeter → Análise
+        'PUT    /proposals/{id}/approve', // FSM: Aprovar proposta
+        'PUT    /proposals/{id}/reject', // FSM: Rejeitar proposta
+        'PUT    /proposals/{id}/toggle-status', // FSM: Suspender/Reativar
+      ],
     },
     schemas: {
       core: ['ProposalData', 'ProposalResponse', 'ProposalListResponse'],
       validation: ['ValidationErrorResponse', 'TransitionErrorResponse'],
-      audit: ['AuditLogEntry']
-    }
+      audit: ['AuditLogEntry'],
+    },
   },
 
   // SUPPORTING DOMAIN - Documentos
   documents: {
     basePath: '/api/v1/proposals/{id}/documents',
     endpoints: [
-      'GET    /proposals/{id}/documents',   // Listar documentos
-      'POST   /proposals/{id}/documents',   // Upload documento
-      'GET    /proposals/{id}/ccb'          // Download CCB assinada
+      'GET    /proposals/{id}/documents', // Listar documentos
+      'POST   /proposals/{id}/documents', // Upload documento
+      'GET    /proposals/{id}/ccb', // Download CCB assinada
     ],
-    schemas: ['DocumentInfo', 'UploadResponse']
+    schemas: ['DocumentInfo', 'UploadResponse'],
   },
 
   // SUPPORTING DOMAIN - Formalização
   formalization: {
     basePath: '/api/v1/proposals/{id}/formalizacao',
     endpoints: [
-      'GET    /proposals/{id}/formalizacao',        // Status formalização
-      'POST   /proposals/{id}/gerar-ccb',           // Gerar CCB
-      'PATCH  /proposals/{id}/etapa-formalizacao'   // Atualizar etapa
+      'GET    /proposals/{id}/formalizacao', // Status formalização
+      'POST   /proposals/{id}/gerar-ccb', // Gerar CCB
+      'PATCH  /proposals/{id}/etapa-formalizacao', // Atualizar etapa
     ],
-    schemas: ['FormalizationStatus', 'FormalizationEvent']
-  }
+    schemas: ['FormalizationStatus', 'FormalizationEvent'],
+  },
 } as const;
 ```
 
@@ -100,13 +100,13 @@ const apiDomains = {
  * MANDATÓRIO para todos os responses de erro (4xx, 5xx)
  */
 interface ProblemDetails {
-  type: string;           // URI que identifica o tipo de problema
-  title: string;          // Resumo legível humano do tipo de problema
-  status: number;         // Status HTTP code
-  detail: string;         // Explicação específica da ocorrência
-  instance: string;       // URI identificando a ocorrência específica
-  timestamp: string;      // ISO 8601 timestamp
-  correlationId: string;  // Para rastreabilidade
+  type: string; // URI que identifica o tipo de problema
+  title: string; // Resumo legível humano do tipo de problema
+  status: number; // Status HTTP code
+  detail: string; // Explicação específica da ocorrência
+  instance: string; // URI identificando a ocorrência específica
+  timestamp: string; // ISO 8601 timestamp
+  correlationId: string; // Para rastreabilidade
   // Extensões específicas do domínio permitidas
   [key: string]: any;
 }
@@ -117,126 +117,126 @@ interface ProblemDetails {
 const problemTypes = {
   // VALIDATION ERRORS (400)
   validationError: {
-    type: "https://api.simpix.app/problems/validation-error",
-    title: "Request Validation Failed",
+    type: 'https://api.simpix.app/problems/validation-error',
+    title: 'Request Validation Failed',
     status: 400,
-    detail: "The request body contains invalid data",
+    detail: 'The request body contains invalid data',
     example: {
-      type: "https://api.simpix.app/problems/validation-error",
-      title: "Request Validation Failed",
+      type: 'https://api.simpix.app/problems/validation-error',
+      title: 'Request Validation Failed',
       status: 400,
       detail: "The 'amount' field must be a positive number greater than 0",
-      instance: "/api/v1/proposals",
-      timestamp: "2025-08-26T16:30:00Z",
-      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      instance: '/api/v1/proposals',
+      timestamp: '2025-08-26T16:30:00Z',
+      correlationId: '550e8400-e29b-41d4-a716-446655440000',
       errors: [
         {
-          field: "amount",
-          message: "Must be greater than 0",
-          code: "INVALID_AMOUNT",
-          value: -1000
-        }
-      ]
-    }
+          field: 'amount',
+          message: 'Must be greater than 0',
+          code: 'INVALID_AMOUNT',
+          value: -1000,
+        },
+      ],
+    },
   },
 
   // AUTHENTICATION ERRORS (401)
   authenticationError: {
-    type: "https://api.simpix.app/problems/authentication-required",
-    title: "Authentication Required",
+    type: 'https://api.simpix.app/problems/authentication-required',
+    title: 'Authentication Required',
     status: 401,
-    detail: "Valid authentication credentials are required",
+    detail: 'Valid authentication credentials are required',
     example: {
-      type: "https://api.simpix.app/problems/authentication-required",
-      title: "Authentication Required",
+      type: 'https://api.simpix.app/problems/authentication-required',
+      title: 'Authentication Required',
       status: 401,
-      detail: "JWT token is missing, expired, or invalid",
-      instance: "/api/v1/proposals",
-      timestamp: "2025-08-26T16:30:00Z",
-      correlationId: "550e8400-e29b-41d4-a716-446655440000",
-      hint: "Include 'Authorization: Bearer <token>' header"
-    }
+      detail: 'JWT token is missing, expired, or invalid',
+      instance: '/api/v1/proposals',
+      timestamp: '2025-08-26T16:30:00Z',
+      correlationId: '550e8400-e29b-41d4-a716-446655440000',
+      hint: "Include 'Authorization: Bearer <token>' header",
+    },
   },
 
   // AUTHORIZATION ERRORS (403)
   authorizationError: {
-    type: "https://api.simpix.app/problems/insufficient-privileges",
-    title: "Insufficient Privileges",
+    type: 'https://api.simpix.app/problems/insufficient-privileges',
+    title: 'Insufficient Privileges',
     status: 403,
-    detail: "The authenticated user lacks required permissions",
+    detail: 'The authenticated user lacks required permissions',
     example: {
-      type: "https://api.simpix.app/problems/insufficient-privileges",
-      title: "Insufficient Privileges", 
+      type: 'https://api.simpix.app/problems/insufficient-privileges',
+      title: 'Insufficient Privileges',
       status: 403,
       detail: "Role 'ATENDENTE' cannot approve proposals",
-      instance: "/api/v1/proposals/300123/approve",
-      timestamp: "2025-08-26T16:30:00Z",
-      correlationId: "550e8400-e29b-41d4-a716-446655440000",
-      requiredRole: "ANALISTA",
-      currentRole: "ATENDENTE"
-    }
+      instance: '/api/v1/proposals/300123/approve',
+      timestamp: '2025-08-26T16:30:00Z',
+      correlationId: '550e8400-e29b-41d4-a716-446655440000',
+      requiredRole: 'ANALISTA',
+      currentRole: 'ATENDENTE',
+    },
   },
 
   // BUSINESS LOGIC ERRORS (409, 422)
   businessLogicError: {
-    type: "https://api.simpix.app/problems/business-rule-violation",
-    title: "Business Rule Violation",
+    type: 'https://api.simpix.app/problems/business-rule-violation',
+    title: 'Business Rule Violation',
     status: 422,
-    detail: "The operation violates business constraints",
+    detail: 'The operation violates business constraints',
     example: {
-      type: "https://api.simpix.app/problems/business-rule-violation",
-      title: "Business Rule Violation",
+      type: 'https://api.simpix.app/problems/business-rule-violation',
+      title: 'Business Rule Violation',
       status: 422,
       detail: "Cannot transition from 'APROVADA' to 'RASCUNHO'",
-      instance: "/api/v1/proposals/300123/status",
-      timestamp: "2025-08-26T16:30:00Z",
-      correlationId: "550e8400-e29b-41d4-a716-446655440000",
-      currentStatus: "APROVADA",
-      attemptedStatus: "RASCUNHO",
-      allowedTransitions: ["AGUARDANDO_ASSINATURA", "SUSPENSA"]
-    }
+      instance: '/api/v1/proposals/300123/status',
+      timestamp: '2025-08-26T16:30:00Z',
+      correlationId: '550e8400-e29b-41d4-a716-446655440000',
+      currentStatus: 'APROVADA',
+      attemptedStatus: 'RASCUNHO',
+      allowedTransitions: ['AGUARDANDO_ASSINATURA', 'SUSPENSA'],
+    },
   },
 
   // RATE LIMITING (429)
   rateLimitError: {
-    type: "https://api.simpix.app/problems/rate-limit-exceeded",
-    title: "Rate Limit Exceeded",
+    type: 'https://api.simpix.app/problems/rate-limit-exceeded',
+    title: 'Rate Limit Exceeded',
     status: 429,
-    detail: "API rate limit exceeded for this endpoint",
+    detail: 'API rate limit exceeded for this endpoint',
     example: {
-      type: "https://api.simpix.app/problems/rate-limit-exceeded",
-      title: "Rate Limit Exceeded",
+      type: 'https://api.simpix.app/problems/rate-limit-exceeded',
+      title: 'Rate Limit Exceeded',
       status: 429,
-      detail: "You have exceeded 100 requests per hour for payment operations",
-      instance: "/api/v1/payments",
-      timestamp: "2025-08-26T16:30:00Z",
-      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      detail: 'You have exceeded 100 requests per hour for payment operations',
+      instance: '/api/v1/payments',
+      timestamp: '2025-08-26T16:30:00Z',
+      correlationId: '550e8400-e29b-41d4-a716-446655440000',
       limit: 100,
       remaining: 0,
-      resetTime: "2025-08-26T17:30:00Z"
-    }
+      resetTime: '2025-08-26T17:30:00Z',
+    },
   },
 
   // SERVER ERRORS (500)
   internalServerError: {
-    type: "https://api.simpix.app/problems/internal-error",
-    title: "Internal Server Error",
+    type: 'https://api.simpix.app/problems/internal-error',
+    title: 'Internal Server Error',
     status: 500,
-    detail: "An unexpected error occurred while processing the request",
+    detail: 'An unexpected error occurred while processing the request',
     example: {
-      type: "https://api.simpix.app/problems/internal-error",
-      title: "Internal Server Error",
+      type: 'https://api.simpix.app/problems/internal-error',
+      title: 'Internal Server Error',
       status: 500,
-      detail: "Database connection failed during proposal creation",
-      instance: "/api/v1/proposals",
-      timestamp: "2025-08-26T16:30:00Z",
-      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      detail: 'Database connection failed during proposal creation',
+      instance: '/api/v1/proposals',
+      timestamp: '2025-08-26T16:30:00Z',
+      correlationId: '550e8400-e29b-41d4-a716-446655440000',
       // NÃO expor detalhes internos em produção
       ...(process.env.NODE_ENV === 'development' && {
-        trace: "Error: Connection timeout at pg.connect..."
-      })
-    }
-  }
+        trace: 'Error: Connection timeout at pg.connect...',
+      }),
+    },
+  },
 } as const;
 
 /**
@@ -260,17 +260,12 @@ class ProblemDetailsHandler {
       instance,
       timestamp: new Date().toISOString(),
       correlationId,
-      ...extensions
+      ...extensions,
     };
   }
 
-  static sendProblemResponse(
-    res: Response,
-    problem: ProblemDetails
-  ): void {
-    res.status(problem.status)
-       .header('Content-Type', 'application/problem+json')
-       .json(problem);
+  static sendProblemResponse(res: Response, problem: ProblemDetails): void {
+    res.status(problem.status).header('Content-Type', 'application/problem+json').json(problem);
   }
 }
 ```
@@ -290,24 +285,24 @@ const securityLayers = {
   authentication: {
     type: 'Bearer Token',
     provider: 'Supabase Auth',
-    validation: 'JWT middleware com timing attack protection'
+    validation: 'JWT middleware com timing attack protection',
   },
-  
+
   authorization: {
     rbac: {
       roles: ['ATENDENTE', 'ANALISTA', 'GERENTE', 'ADMINISTRADOR'],
       permissions: {
         'ATENDENTE|GERENTE|ADMINISTRADOR': ['proposals:create', 'proposals:edit'],
         'ANALISTA|ADMINISTRADOR': ['proposals:approve', 'proposals:reject'],
-        'ALL_AUTHENTICATED': ['documents:manage_own', 'audit:view_own']
-      }
+        ALL_AUTHENTICATED: ['documents:manage_own', 'audit:view_own'],
+      },
     },
     rls: {
       enabled: true,
       policies: ['Users só veem dados próprios ou de lojas associadas'],
-      audit: 'Todas operações logadas em audit_logs'
-    }
-  }
+      audit: 'Todas operações logadas em audit_logs',
+    },
+  },
 } as const;
 ```
 
@@ -330,24 +325,24 @@ const securityLayers = {
  */
 interface ProposalDataContract {
   // Identificação
-  id: number;                    // Sequential numeric (300001+)
-  status: ProposalStatusEnum;    // FSM State
-  
+  id: number; // Sequential numeric (300001+)
+  status: ProposalStatusEnum; // FSM State
+
   // Dados do Cliente (PII Sensitive)
   cliente_nome: string;
-  cliente_cpf: string;           // Formato: XXX.XXX.XXX-XX
+  cliente_cpf: string; // Formato: XXX.XXX.XXX-XX
   cliente_email: string;
   cliente_telefone: string;
-  
+
   // Condições Financeiras
-  valor_solicitado: number;      // Decimal(10,2)
+  valor_solicitado: number; // Decimal(10,2)
   prazo_meses: number;
-  taxa_juros: number;           // Percentual mensal
-  
+  taxa_juros: number; // Percentual mensal
+
   // Metadados
-  created_at: string;           // ISO 8601
-  updated_at: string;           // ISO 8601
-  
+  created_at: string; // ISO 8601
+  updated_at: string; // ISO 8601
+
   // Relacionamentos
   parceiro_id: string;
   loja_id: string;
@@ -361,22 +356,22 @@ enum ProposalStatusEnum {
   // Estados Iniciais
   RASCUNHO = 'rascunho',
   PENDENTE_DOCUMENTOS = 'pendente_documentos',
-  
+
   // Estados de Análise
   EM_ANALISE = 'em_analise',
   PENDENTE_INFORMACOES = 'pendente_informacoes',
-  
+
   // Estados Finais
   APROVADA = 'aprovada',
   REPROVADA = 'reprovada',
-  
+
   // Estados de Formalização
   AGUARDANDO_ASSINATURA = 'aguardando_assinatura',
   FORMALIZADA = 'formalizada',
-  
+
   // Estados Especiais
   SUSPENSA = 'suspensa',
-  CANCELADA = 'cancelada'
+  CANCELADA = 'cancelada',
 }
 ```
 
@@ -398,20 +393,20 @@ const validationLayers = {
   schema: {
     tool: 'Zod (drizzle-zod integration)',
     coverage: 'Tipos, formatos, required fields',
-    errorResponse: 'ValidationErrorResponse (400)'
+    errorResponse: 'ValidationErrorResponse (400)',
   },
-  
+
   business: {
     tool: 'Domain services + FSM validation',
     coverage: 'Regras de negócio, transições válidas',
-    errorResponse: 'TransitionErrorResponse (409)'
+    errorResponse: 'TransitionErrorResponse (409)',
   },
-  
+
   database: {
     tool: 'PostgreSQL constraints + RLS',
     coverage: 'Integridade referencial, permissões',
-    errorResponse: 'DatabaseErrorResponse (500)'
-  }
+    errorResponse: 'DatabaseErrorResponse (500)',
+  },
 } as const;
 
 /**
@@ -420,7 +415,7 @@ const validationLayers = {
 const cpfValidation = {
   format: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
   algorithm: 'Dígitos verificadores + checksum',
-  masked: true // PII protection in responses
+  masked: true, // PII protection in responses
 };
 ```
 
@@ -445,32 +440,32 @@ const stateTransitions = {
   RASCUNHO: {
     allowedTransitions: ['PENDENTE_DOCUMENTOS', 'CANCELADA'],
     requiredPermissions: ['proposals:edit'],
-    validationRules: ['Dados obrigatórios preenchidos']
+    validationRules: ['Dados obrigatórios preenchidos'],
   },
-  
+
   PENDENTE_DOCUMENTOS: {
     allowedTransitions: ['EM_ANALISE', 'RASCUNHO'],
     requiredPermissions: ['proposals:submit'],
-    validationRules: ['Documentos mínimos anexados']
+    validationRules: ['Documentos mínimos anexados'],
   },
-  
+
   EM_ANALISE: {
     allowedTransitions: ['APROVADA', 'REPROVADA', 'PENDENTE_INFORMACOES'],
     requiredPermissions: ['proposals:analyze'],
-    validationRules: ['Análise de crédito completa']
+    validationRules: ['Análise de crédito completa'],
   },
-  
+
   APROVADA: {
     allowedTransitions: ['AGUARDANDO_ASSINATURA', 'SUSPENSA'],
     requiredPermissions: ['proposals:approve'],
-    validationRules: ['Score de crédito suficiente']
+    validationRules: ['Score de crédito suficiente'],
   },
-  
+
   AGUARDANDO_ASSINATURA: {
     allowedTransitions: ['FORMALIZADA', 'CANCELADA'],
     requiredPermissions: ['formalization:manage'],
-    validationRules: ['CCB gerada e válida']
-  }
+    validationRules: ['CCB gerada e válida'],
+  },
 } as const;
 
 /**
@@ -481,8 +476,8 @@ interface StateTransitionEvent {
   proposalId: number;
   fromState: ProposalStatusEnum;
   toState: ProposalStatusEnum;
-  triggeredBy: string;          // User ID
-  reason?: string;              // Motivo da transição
+  triggeredBy: string; // User ID
+  reason?: string; // Motivo da transição
   metadata?: Record<string, any>; // Dados adicionais
   timestamp: Date;
 }
@@ -500,25 +495,25 @@ interface StateTransitionEvent {
  * Tabela: status_transitions + audit_logs
  */
 interface AuditLogEntry {
-  id: string;                   // UUID
+  id: string; // UUID
   proposal_id: number;
   event_type: AuditEventType;
   old_status?: ProposalStatusEnum;
   new_status?: ProposalStatusEnum;
-  
+
   // Actor Information
   user_id: string;
   user_role: string;
   ip_address: string;
   user_agent: string;
-  
+
   // Change Details
-  changed_fields: string[];     // Campos modificados
+  changed_fields: string[]; // Campos modificados
   old_values: Record<string, any>;
   new_values: Record<string, any>;
-  
+
   // Metadata
-  correlation_id: string;       // Request correlation
+  correlation_id: string; // Request correlation
   timestamp: Date;
   session_id?: string;
 }
@@ -528,7 +523,7 @@ enum AuditEventType {
   DATA_UPDATE = 'data_update',
   DOCUMENT_UPLOAD = 'document_upload',
   ACCESS_GRANTED = 'access_granted',
-  SECURITY_VIOLATION = 'security_violation'
+  SECURITY_VIOLATION = 'security_violation',
 }
 ```
 
@@ -553,33 +548,33 @@ const dataClassification = {
   PUBLIC: {
     fields: ['id', 'status', 'created_at', 'produto_id'],
     access: 'Qualquer usuário autenticado',
-    masking: false
+    masking: false,
   },
-  
+
   INTERNAL: {
     fields: ['valor_solicitado', 'prazo_meses', 'taxa_juros'],
     access: 'Mesma loja ou role >= ANALISTA',
-    masking: false
+    masking: false,
   },
-  
+
   CONFIDENTIAL: {
     fields: ['cliente_nome', 'cliente_email', 'cliente_telefone'],
     access: 'Owner ou role >= GERENTE',
     masking: true,
     maskingRules: {
       cliente_nome: 'João ***',
-      cliente_email: 'j*****@***.com'
-    }
+      cliente_email: 'j*****@***.com',
+    },
   },
-  
+
   RESTRICTED: {
     fields: ['cliente_cpf'],
     access: 'Owner ou role == ADMINISTRADOR',
     masking: true,
     maskingRules: {
-      cliente_cpf: '***.***.***-**'
-    }
-  }
+      cliente_cpf: '***.***.***-**',
+    },
+  },
 } as const;
 
 /**
@@ -590,7 +585,7 @@ const responseSchemas = {
   ProposalPublicResponse: 'PUBLIC + INTERNAL fields',
   ProposalInternalResponse: 'PUBLIC + INTERNAL + CONFIDENTIAL fields (masked)',
   ProposalFullResponse: 'Todos os campos (admin only)',
-  ProposalAuditResponse: 'Full access para audit logs'
+  ProposalAuditResponse: 'Full access para audit logs',
 };
 ```
 
@@ -610,23 +605,23 @@ const rateLimiting = {
     limit: '1000 requests per hour per IP',
     burst: '100 requests per minute',
     status: 429,
-    headers: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'Retry-After']
+    headers: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'Retry-After'],
   },
-  
+
   authenticated: {
     limit: '10000 requests per hour per user',
     sensitiveEndpoints: {
       '/proposals': '100 requests per hour',
       '/documents': '50 uploads per hour',
-      '/gerar-ccb': '10 requests per hour'
-    }
+      '/gerar-ccb': '10 requests per hour',
+    },
   },
-  
+
   protection: {
     timingAttack: 'Constant-time operations para validação',
     inputSanitization: 'XSS protection em todos os inputs',
-    sqlInjection: 'Drizzle ORM + prepared statements'
-  }
+    sqlInjection: 'Drizzle ORM + prepared statements',
+  },
 };
 ```
 
@@ -655,23 +650,23 @@ const versioningRoadmap = {
       'Core proposal operations',
       'FSM workflow',
       'Document management',
-      'Basic formalization'
+      'Basic formalization',
     ],
-    deprecation: 'N/A - Foundation version'
+    deprecation: 'N/A - Foundation version',
   },
-  
+
   v1_1: {
     status: 'PLANNED - Q4 2025',
-    basePath: '/api/v1',  // Backward compatible
+    basePath: '/api/v1', // Backward compatible
     features: [
       'Bulk operations',
       'Advanced filtering',
       'Webhook subscriptions',
-      'Real-time notifications'
+      'Real-time notifications',
     ],
-    migration: 'Zero-downtime - additive changes only'
+    migration: 'Zero-downtime - additive changes only',
   },
-  
+
   v2: {
     status: 'PLANNED - Q1 2026',
     basePath: '/api/v2',
@@ -679,10 +674,10 @@ const versioningRoadmap = {
       'GraphQL support',
       'Microservices architecture',
       'Advanced analytics APIs',
-      'AI-powered recommendations'
+      'AI-powered recommendations',
     ],
-    migration: 'Parallel deployment - 6 months deprecation period for v1'
-  }
+    migration: 'Parallel deployment - 6 months deprecation period for v1',
+  },
 } as const;
 ```
 
@@ -701,28 +696,28 @@ const versioningRoadmap = {
  */
 const partnerIntegration = {
   current_readiness: '85%',
-  
+
   completed: [
     '✅ OpenAPI 3.0.3 specification',
     '✅ 18 endpoints documented',
     '✅ Authentication & authorization',
     '✅ Error handling patterns',
-    '✅ Rate limiting policies'
+    '✅ Rate limiting policies',
   ],
-  
+
   pending_p0: [
     '🔧 RFC 7807 error standardization',
     '🔧 API versioning via URL (/api/v1)',
     '🔧 PII masking in responses',
-    '🔧 Idempotency-Key support'
+    '🔧 Idempotency-Key support',
   ],
-  
+
   delivery_artifacts: {
     documentation: 'proposal-api.v1.yaml',
     sdks: 'Auto-generated (TypeScript, Java) - Q4 2025',
     postman_collection: 'Generated from OpenAPI - Q4 2025',
-    sandbox_environment: 'Mock server - Q4 2025'
-  }
+    sandbox_environment: 'Mock server - Q4 2025',
+  },
 } as const;
 ```
 
@@ -745,22 +740,22 @@ const apiMetrics = {
     p95_latency: 'Target: < 500ms',
     p99_latency: 'Target: < 1s',
     availability: 'Target: 99.9%',
-    error_rate: 'Target: < 1%'
+    error_rate: 'Target: < 1%',
   },
-  
+
   business: {
     proposals_created_per_day: 'Tracking via audit logs',
     approval_rate: 'FSM transition metrics',
     integration_usage: 'Per-partner API calls',
-    feature_adoption: 'Endpoint usage patterns'
+    feature_adoption: 'Endpoint usage patterns',
   },
-  
+
   security: {
     authentication_failures: 'JWT validation errors',
     authorization_violations: 'RBAC policy breaches',
     rate_limit_triggers: '429 response count',
-    suspicious_patterns: 'ML-based anomaly detection'
-  }
+    suspicious_patterns: 'ML-based anomaly detection',
+  },
 } as const;
 ```
 
@@ -769,26 +764,30 @@ const apiMetrics = {
 ## ✅ **CONCLUSÃO E PRÓXIMOS PASSOS**
 
 ### Estado Atual
+
 - **Point 33 (API Contracts):** ✅ CONCLUÍDO (100%)
 - **OpenAPI Specification:** Implementada e funcional
 - **Conformidade Fase 1:** 86.6% (aumento de 4.2%)
 
 ### Refinamentos P0 (Imediatos)
+
 1. **RFC 7807 Error Standardization** - Padronizar responses de erro
 2. **API Versioning** - Implementar /api/v1 base path
 3. **PII Masking** - Proteger dados sensíveis em responses
 4. **Idempotency Support** - Headers para operações críticas
 
 ### Roadmap Q4 2025
+
 1. **SDK Generation** - TypeScript e Java auto-gerados
 2. **Postman Collections** - Documentação interativa
 3. **Contract Testing** - Dredd/Prism na CI/CD
 4. **Partner Sandbox** - Ambiente de testes
 
 ### Meta Arquitetural
+
 **Objetivo:** Transformar Simpix em plataforma de integração líder no mercado de crédito, com APIs enterprise-grade que permitam integrações seguras e escaláveis com parceiros e fornecedores.
 
 ---
 
-*Documento gerado como parte da Fase 1 - Sprint 1 Point 33*  
-*Fonte da Verdade para Arquitetura de APIs | Sistema Simpix*
+_Documento gerado como parte da Fase 1 - Sprint 1 Point 33_  
+_Fonte da Verdade para Arquitetura de APIs | Sistema Simpix_

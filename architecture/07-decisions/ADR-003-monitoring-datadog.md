@@ -28,13 +28,13 @@ Fase 0 (Imediato):
   - Log aggregation
   - Basic dashboards
   - Error tracking
-  
+
 Fase 1 (1 mês):
   - Custom metrics
   - SLO tracking
   - Synthetic monitoring
   - Database monitoring
-  
+
 Fase 2 (3 meses):
   - Distributed tracing
   - RUM (Real User Monitoring)
@@ -44,12 +44,14 @@ Fase 2 (3 meses):
 ## Consequências
 
 ### Positivas
+
 - ✅ Visibilidade imediata do sistema
 - ✅ Reduced MTTR (Mean Time To Recovery)
 - ✅ Proactive alerting
 - ✅ Histórico para capacity planning
 
 ### Negativas
+
 - ❌ Custo alto ($70-150/mês inicial)
 - ❌ Vendor lock-in
 - ❌ Learning curve para features avançadas
@@ -71,4 +73,4 @@ ROI: Redução de 80% no MTTR
 
 ---
 
-*"You can't manage what you can't measure" - Decisão crítica para operação segura*
+_"You can't manage what you can't measure" - Decisão crítica para operação segura_

@@ -51,25 +51,25 @@ const getStatusColor = (status: string) => {
     case 'ASSINATURA_CONCLUIDA':
     case 'PAGO':
       return 'bg-green-600 text-white border-green-600 font-semibold shadow-lg';
-    
+
     // 🔴 VERMELHO: Status de Falha/Bloqueio
     case 'REJEITADO':
     case 'CANCELADO':
       return 'bg-red-600 text-white border-red-600 font-semibold shadow-lg';
-    
+
     // 🟡 AMARELO/LARANJA: Status de Pendência/Atenção
     case 'PENDENCIADO':
     case 'AGUARDANDO_ASSINATURA':
     case 'AGUARDANDO_ANALISE':
     case 'EM_ANALISE':
       return 'bg-amber-500 text-white border-amber-500 font-semibold shadow-lg';
-    
+
     // 🔵 AZUL/CINZA: Status Informativos/Iniciais
     case 'CCB_GERADA':
     case 'BOLETOS_EMITIDOS':
     case 'PRONTO_PAGAMENTO':
       return 'bg-blue-600 text-white border-blue-600 font-semibold shadow-lg';
-    
+
     case 'RASCUNHO':
     default:
       return 'bg-gray-500 text-white border-gray-500 font-semibold shadow-lg';
@@ -84,25 +84,25 @@ const getStatusBorderColor = (status: string) => {
     case 'ASSINATURA_CONCLUIDA':
     case 'PAGO':
       return 'border-l-4 border-l-green-500';
-    
+
     // 🔴 VERMELHO: Status de Falha/Bloqueio
     case 'REJEITADO':
     case 'CANCELADO':
       return 'border-l-4 border-l-red-500';
-    
+
     // 🟡 AMARELO/LARANJA: Status de Pendência/Atenção
     case 'PENDENCIADO':
     case 'AGUARDANDO_ASSINATURA':
     case 'AGUARDANDO_ANALISE':
     case 'EM_ANALISE':
       return 'border-l-4 border-l-amber-500';
-    
+
     // 🔵 AZUL/CINZA: Status Informativos/Iniciais
     case 'CCB_GERADA':
     case 'BOLETOS_EMITIDOS':
     case 'PRONTO_PAGAMENTO':
       return 'border-l-4 border-l-blue-500';
-    
+
     case 'RASCUNHO':
     default:
       return 'border-l-4 border-l-gray-400';
@@ -117,25 +117,25 @@ const getStatusIconBackground = (status: string) => {
     case 'ASSINATURA_CONCLUIDA':
     case 'PAGO':
       return 'bg-green-100 text-green-600';
-    
+
     // 🔴 VERMELHO: Status de Falha/Bloqueio
     case 'REJEITADO':
     case 'CANCELADO':
       return 'bg-red-100 text-red-600';
-    
+
     // 🟡 AMARELO/LARANJA: Status de Pendência/Atenção
     case 'PENDENCIADO':
     case 'AGUARDANDO_ASSINATURA':
     case 'AGUARDANDO_ANALISE':
     case 'EM_ANALISE':
       return 'bg-amber-100 text-amber-600';
-    
+
     // 🔵 AZUL/CINZA: Status Informativos/Iniciais
     case 'CCB_GERADA':
     case 'BOLETOS_EMITIDOS':
     case 'PRONTO_PAGAMENTO':
       return 'bg-blue-100 text-blue-600';
-    
+
     case 'RASCUNHO':
     default:
       return 'bg-gray-100 text-gray-600';
@@ -184,13 +184,13 @@ const getStatusIcon = (status: string) => {
       return <CheckCircle2 className="h-6 w-6" />;
     case 'PAGO':
       return <Banknote className="h-6 w-6" />;
-    
+
     // 🔴 VERMELHO: Status de Falha - Ícones de erro/bloqueio
     case 'REJEITADO':
       return <XCircle className="h-6 w-6" />;
     case 'CANCELADO':
       return <XCircle className="h-6 w-6" />;
-    
+
     // 🟡 AMARELO/LARANJA: Status de Pendência - Ícones de atenção/tempo
     case 'PENDENCIADO':
       return <AlertCircle className="h-6 w-6" />;
@@ -199,14 +199,14 @@ const getStatusIcon = (status: string) => {
       return <Clock className="h-6 w-6" />;
     case 'EM_ANALISE':
       return <Clock className="h-6 w-6" />;
-    
+
     // 🔵 AZUL/CINZA: Status Informativos - Ícones de documentos/processos
     case 'CCB_GERADA':
       return <FileText className="h-6 w-6" />;
     case 'BOLETOS_EMITIDOS':
     case 'PRONTO_PAGAMENTO':
       return <Banknote className="h-6 w-6" />;
-    
+
     case 'RASCUNHO':
     default:
       return <FileText className="h-6 w-6" />;
@@ -237,7 +237,7 @@ const DashboardSkeleton: React.FC = () => (
           </Card>
         ))}
       </div>
-      
+
       {/* Content Skeleton */}
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
@@ -253,9 +253,7 @@ const ErrorDisplay: React.FC<{ message: string }> = ({ message }) => (
   <DashboardLayout title="Dashboard">
     <Alert variant="destructive">
       <AlertCircle className="h-4 w-4" />
-      <AlertDescription>
-        Erro ao carregar dashboard: {message}
-      </AlertDescription>
+      <AlertDescription>Erro ao carregar dashboard: {message}</AlertDescription>
     </Alert>
   </DashboardLayout>
 );
@@ -264,7 +262,7 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  
+
   // UX-002: TODOS os hooks devem estar no início - regra fundamental do React
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
@@ -430,7 +428,7 @@ const Dashboard: React.FC = () => {
     return <DashboardSkeleton />;
   }
 
-  // Early Return para Error State  
+  // Early Return para Error State
   if (isError) {
     return <ErrorDisplay message={error?.message || 'Erro desconhecido'} />;
   }
@@ -616,7 +614,8 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="h-4 w-4" />
             <span>
-              Exibindo <span className="font-medium text-foreground">{propostasFiltradas.length}</span> de{' '}
+              Exibindo{' '}
+              <span className="font-medium text-foreground">{propostasFiltradas.length}</span> de{' '}
               <span className="font-medium text-foreground">{propostasData.length}</span> propostas
             </span>
           </div>
@@ -651,15 +650,17 @@ const Dashboard: React.FC = () => {
             </Card>
           ) : (
             propostasFiltradas.map((proposta: any, index: number) => (
-              <Card 
-                key={`proposta-${proposta?.id || index}`} 
+              <Card
+                key={`proposta-${proposta?.id || index}`}
                 className={`overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02] ${getStatusBorderColor(proposta?.statusContextual || proposta?.status || 'rascunho')}`}
                 data-testid={`proposal-card-${proposta?.id || index}`}
               >
                 <CardContent className="p-0">
                   <div className="flex items-center justify-between p-6">
                     <div className="flex items-center gap-4">
-                      <div className={`flex h-16 w-16 items-center justify-center rounded-xl ${getStatusIconBackground(proposta?.status || 'rascunho')} shadow-lg`}>
+                      <div
+                        className={`flex h-16 w-16 items-center justify-center rounded-xl ${getStatusIconBackground(proposta?.status || 'rascunho')} shadow-lg`}
+                      >
                         {getStatusIcon(proposta?.status || 'rascunho')}
                       </div>
                       <div className="space-y-1">
@@ -671,7 +672,9 @@ const Dashboard: React.FC = () => {
                             className={`${getStatusColor(proposta?.statusContextual || proposta?.status || 'rascunho')} border px-3 py-1 text-sm`}
                             data-testid={`status-badge-${proposta?.status || 'rascunho'}`}
                           >
-                            {getStatusText(proposta?.statusContextual || proposta?.status || 'rascunho')}
+                            {getStatusText(
+                              proposta?.statusContextual || proposta?.status || 'rascunho'
+                            )}
                           </Badge>
                           {proposta?.status === 'pendenciado' && (
                             <Badge
@@ -689,23 +692,24 @@ const Dashboard: React.FC = () => {
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Criado em:{' '}
-                          {proposta?.created_at ? format(new Date(proposta.created_at), 'dd/MM/yyyy HH:mm', {
-                            locale: ptBR,
-                          }) : 'Data não disponível'}
+                          {proposta?.created_at
+                            ? format(new Date(proposta.created_at), 'dd/MM/yyyy HH:mm', {
+                                locale: ptBR,
+                              })
+                            : 'Data não disponível'}
                           {proposta?.loja_nome && (
-                            <span className="ml-2">
-                              | Parceiro: {String(proposta.loja_nome)}
-                            </span>
+                            <span className="ml-2">| Parceiro: {String(proposta.loja_nome)}</span>
                           )}
                         </div>
-                        {(proposta?.status === 'pendenciado' || proposta?.status === 'pendente') && proposta?.motivo_pendencia && (
-                          <div className="mt-2 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-2">
-                            <AlertCircle className="h-4 w-4 text-orange-600" />
-                            <span className="text-sm text-orange-700">
-                              Pendência: {proposta.motivo_pendencia}
-                            </span>
-                          </div>
-                        )}
+                        {(proposta?.status === 'pendenciado' || proposta?.status === 'pendente') &&
+                          proposta?.motivo_pendencia && (
+                            <div className="mt-2 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-2">
+                              <AlertCircle className="h-4 w-4 text-orange-600" />
+                              <span className="text-sm text-orange-700">
+                                Pendência: {proposta.motivo_pendencia}
+                              </span>
+                            </div>
+                          )}
                       </div>
                     </div>
 
@@ -714,7 +718,7 @@ const Dashboard: React.FC = () => {
                         {formatCurrency(proposta?.valorSolicitado || 0)}
                       </div>
                       <div className="flex justify-end gap-2">
-                        {(proposta?.status === 'pendenciado' || proposta?.status === 'pendente') ? (
+                        {proposta?.status === 'pendenciado' || proposta?.status === 'pendente' ? (
                           <Link to={`/propostas/editar/${proposta?.id || 'new'}`}>
                             <Button size="sm" variant="outline" className="flex items-center gap-1">
                               <Edit className="h-4 w-4" />

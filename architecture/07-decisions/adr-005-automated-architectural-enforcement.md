@@ -4,7 +4,7 @@
 **Data:** 22/08/2025  
 **Autor:** GEM 02 (Dev Specialist)  
 **Revisores:** Arquiteto Chefe  
-**Criticidade:** P0 - Crítica para Conformidade Fase 1  
+**Criticidade:** P0 - Crítica para Conformidade Fase 1
 
 ---
 
@@ -19,8 +19,9 @@ Esta ADR estabelece a estratégia mandatória para enforcement automatizado dos 
 ### **Situação Atual (Análise Arquitetural)**
 
 Com a conclusão da Modelagem de Domínio (Ponto 9), identificamos **5 Bounded Contexts críticos**:
+
 - **Credit Proposal Context:** Gestão de propostas de crédito
-- **Credit Analysis Context:** Análise e aprovação de crédito  
+- **Credit Analysis Context:** Análise e aprovação de crédito
 - **Contract Management Context:** Gestão de contratos formalizados
 - **Payment Context:** Processamento de pagamentos e cobrança
 - **User Management Context:** Autenticação e autorização
@@ -40,6 +41,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 ```
 
 **Impactos Identificados:**
+
 1. **Bounded Context Erosion:** Contextos perdendo autonomia e responsabilidades claras
 2. **Dependency Inversion Violation:** Camadas de domínio acopladas à infraestrutura
 3. **Monolithic Drift:** Tendência ao código monolítico não-modular
@@ -60,12 +62,12 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 #### **1. Análise Comparativa de Ferramentas**
 
-| Ferramenta | TypeScript Native | Regras Customizáveis | CI Integration | Community |
-|------------|------------------|---------------------|----------------|-----------|
-| **dependency-cruiser** | ✅ Nativo | ✅ Regex avançado | ✅ Zero config | ✅ 5k+ stars |
-| madge | ❌ Limitado | ❌ Básico | ⚠️ Manual | ⚠️ 900 stars |
-| ArchUnit (Java) | ❌ N/A | ✅ Poderoso | ✅ Nativo | ⚠️ Java only |
-| ts-morph | ✅ Nativo | 🔧 Complexo | 🔧 Custom | ❌ Overhead |
+| Ferramenta             | TypeScript Native | Regras Customizáveis | CI Integration | Community    |
+| ---------------------- | ----------------- | -------------------- | -------------- | ------------ |
+| **dependency-cruiser** | ✅ Nativo         | ✅ Regex avançado    | ✅ Zero config | ✅ 5k+ stars |
+| madge                  | ❌ Limitado       | ❌ Básico            | ⚠️ Manual      | ⚠️ 900 stars |
+| ArchUnit (Java)        | ❌ N/A            | ✅ Poderoso          | ✅ Nativo      | ⚠️ Java only |
+| ts-morph               | ✅ Nativo         | 🔧 Complexo          | 🔧 Custom      | ❌ Overhead  |
 
 #### **2. Vantagens Estratégicas do dependency-cruiser:**
 
@@ -99,7 +101,7 @@ Nossa configuração atual (`.dependency-cruiser.cjs`) implementa **4 categorias
   severity: 'error',
   comment: 'Bounded Contexts não podem importar diretamente uns dos outros',
   from: { path: '^server/contexts/([^/]+)/' },
-  to: { 
+  to: {
     path: '^server/contexts/(?!$1)[^/]+/',
     pathNot: ['^server/contexts/shared/', '^server/contexts/contracts/']
   }
@@ -130,7 +132,7 @@ Nossa configuração atual (`.dependency-cruiser.cjs`) implementa **4 categorias
   severity: 'error',
   comment: 'Payment Context deve usar ACL para integrações externas',
   from: { path: '^server/contexts/payment/' },
-  to: { 
+  to: {
     path: '^server/lib/(inter-api|clicksign)/',
     pathNot: '^server/contexts/payment/adapters/'
   }
@@ -155,13 +157,13 @@ Nossa configuração atual (`.dependency-cruiser.cjs`) implementa **4 categorias
 
 ### **2. Mapeamento Context-to-Rules**
 
-| Bounded Context | Regras Aplicadas | Comunicação Permitida |
-|-----------------|------------------|----------------------|
-| **Credit Proposal** | Context Isolation + Domain Purity | → Shared Contracts apenas |
-| **Credit Analysis** | Context Isolation + Domain Purity | → Shared Contracts apenas |
+| Bounded Context         | Regras Aplicadas                  | Comunicação Permitida     |
+| ----------------------- | --------------------------------- | ------------------------- |
+| **Credit Proposal**     | Context Isolation + Domain Purity | → Shared Contracts apenas |
+| **Credit Analysis**     | Context Isolation + Domain Purity | → Shared Contracts apenas |
 | **Contract Management** | Context Isolation + Domain Purity | → Shared Contracts apenas |
-| **Payment** | ACL Required + Context Isolation | → External APIs via ACL |
-| **User Management** | Security + Context Isolation | → Auth providers via ACL |
+| **Payment**             | ACL Required + Context Isolation  | → External APIs via ACL   |
+| **User Management**     | Security + Context Isolation      | → Auth providers via ACL  |
 
 ### **3. Exceções Controladas**
 
@@ -169,19 +171,19 @@ Nossa configuração atual (`.dependency-cruiser.cjs`) implementa **4 categorias
 allowed: [
   // Comunicação via contratos compartilhados
   { from: {}, to: { path: '^shared/' } },
-  
+
   // Routes podem acessar Application Layer
-  { 
+  {
     from: { path: '^server/routes/' },
-    to: { path: '^server/contexts/.*/application/' }
+    to: { path: '^server/contexts/.*/application/' },
   },
-  
+
   // Application pode acessar Domain do mesmo contexto
   {
     from: { path: '^server/contexts/.*/application/' },
-    to: { path: '^server/contexts/$1/domain/' }
-  }
-]
+    to: { path: '^server/contexts/$1/domain/' },
+  },
+];
 ```
 
 ---
@@ -211,7 +213,7 @@ interface PaymentRepository {
 }
 
 // ✅ PERMITIDO: Infrastructure implementa
-class SupabasePaymentRepository implements PaymentRepository { }
+class SupabasePaymentRepository implements PaymentRepository {}
 
 // ❌ PROIBIDO: Domain importa infrastructure
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -257,29 +259,29 @@ on: [push, pull_request]
 
 jobs:
   architectural-validation:
-    name: "🏛️ Architecture Validation"
+    name: '🏛️ Architecture Validation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: 🔍 Validate Architecture
         run: npx depcruise --config .dependency-cruiser.cjs --output-type err-only server client shared
-        
+
       - name: 📊 Generate Dependency Report
         if: failure()
         run: |
           npx depcruise --config .dependency-cruiser.cjs --output-type html --output-to dependency-report.html server client shared
           npx depcruise --config .dependency-cruiser.cjs --output-type dot --output-to dependency-graph.dot server client shared
-          
+
       - name: 📤 Upload Architecture Violation Report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -335,14 +337,14 @@ interface ArchitecturalMetrics {
   dependencyInversionViolations: number;
   aclViolations: number;
   dataAccessViolations: number;
-  
+
   // Trends temporais
   violationTrend: 'improving' | 'degrading' | 'stable';
   complexityGrowth: number;
-  
+
   // Health scores
   contextIsolationScore: number; // 0-100
-  layerComplianceScore: number;  // 0-100
+  layerComplianceScore: number; // 0-100
   overallArchitecturalHealth: number; // 0-100
 }
 ```
@@ -371,11 +373,11 @@ interface ArchitecturalMetrics {
 - name: architecture_violation_spike
   condition: violations_count > 5 in 1 hour
   severity: P1
-  
+
 - name: context_boundary_breach
   condition: cross_context_imports > 0
   severity: P0
-  
+
 - name: domain_infrastructure_coupling
   condition: domain_infrastructure_violations > 0
   severity: P1
@@ -394,34 +396,36 @@ describe('Architectural Rules Enforcement', () => {
     expect(config.forbidden).toBeDefined();
     expect(config.forbidden.length).toBeGreaterThan(0);
   });
-  
+
   test('no cross-context dependencies exist', async () => {
     const result = await runDependencyCruiser([
-      '--config', '.dependency-cruiser.cjs',
-      '--output-type', 'json',
-      'server/contexts'
+      '--config',
+      '.dependency-cruiser.cjs',
+      '--output-type',
+      'json',
+      'server/contexts',
     ]);
-    
+
     const violations = JSON.parse(result).violations;
-    const crossContextViolations = violations.filter(v => 
-      v.rule.name === 'no-cross-context-imports'
+    const crossContextViolations = violations.filter(
+      (v) => v.rule.name === 'no-cross-context-imports'
     );
-    
+
     expect(crossContextViolations).toHaveLength(0);
   });
-  
+
   test('domain layer has no infrastructure dependencies', async () => {
     const result = await runDependencyCruiser([
-      '--config', '.dependency-cruiser.cjs',
-      '--output-type', 'json',
-      'server/contexts/*/domain'
+      '--config',
+      '.dependency-cruiser.cjs',
+      '--output-type',
+      'json',
+      'server/contexts/*/domain',
     ]);
-    
+
     const violations = JSON.parse(result).violations;
-    const domainViolations = violations.filter(v => 
-      v.rule.name === 'domain-no-infrastructure'
-    );
-    
+    const domainViolations = violations.filter((v) => v.rule.name === 'domain-no-infrastructure');
+
     expect(domainViolations).toHaveLength(0);
   });
 });
@@ -435,7 +439,7 @@ describe('CI Pipeline Integration', () => {
     const packageJson = require('../package.json');
     expect(packageJson.scripts['arch:validate']).toBeDefined();
   });
-  
+
   test('GitHub Actions workflow includes architecture step', async () => {
     const workflow = await fs.readFile('.github/workflows/ci.yml', 'utf8');
     expect(workflow).toContain('Validate Architecture');
@@ -452,7 +456,7 @@ describe('Performance Requirements', () => {
     const startTime = Date.now();
     await runDependencyCruiser(['--config', '.dependency-cruiser.cjs', 'server', 'client']);
     const duration = Date.now() - startTime;
-    
+
     // Should complete within 30 seconds even for large codebases
     expect(duration).toBeLessThan(30000);
   }, 60000);
@@ -464,24 +468,28 @@ describe('Performance Requirements', () => {
 ## 🛠️ Roadmap de Evolução
 
 ### **Fase 1: Foundational Rules (Atual)**
+
 - ✅ Bounded Context isolation
 - ✅ Hexagonal Architecture layers
 - ✅ Anti-Corruption Layer enforcement
 - ✅ Repository pattern compliance
 
 ### **Fase 2: Advanced Governance (Sprint 2-3)**
+
 - 🔄 **Complexity Metrics:** Limite de dependências por módulo
 - 🔄 **Circular Dependency Detection:** Zero tolerance para ciclos
 - 🔄 **API Surface Control:** Limitação de exports públicos
 - 🔄 **Module Size Limits:** Controle de crescimento de arquivos
 
 ### **Fase 3: Domain-Specific Rules (Sprint 4-5)**
+
 - 🔄 **Business Logic Purity:** Domain models sem side effects
 - 🔄 **Event Sourcing Compliance:** Aggregate consistency rules
 - 🔄 **CQRS Enforcement:** Command/Query segregation
 - 🔄 **Security Boundaries:** PII access control rules
 
 ### **Fase 4: Intelligent Validation (Sprint 6+)**
+
 - 🔄 **ML-Based Anomaly Detection:** Padrões suspeitos de dependência
 - 🔄 **Semantic Analysis:** Validação baseada em intenção de código
 - 🔄 **Refactoring Suggestions:** Auto-sugestões de melhorias
@@ -514,17 +522,18 @@ describe('Performance Requirements', () => {
 ### **2. Environment-Specific Rules**
 
 ```javascript
-const rules = process.env.NODE_ENV === 'production' 
-  ? [...baseRules, ...productionRules]
-  : [...baseRules, ...developmentRules];
+const rules =
+  process.env.NODE_ENV === 'production'
+    ? [...baseRules, ...productionRules]
+    : [...baseRules, ...developmentRules];
 
 const productionRules = [
   {
     name: 'no-debug-imports',
     severity: 'error',
     from: {},
-    to: { path: ['debug', 'console'] }
-  }
+    to: { path: ['debug', 'console'] },
+  },
 ];
 ```
 
@@ -546,31 +555,34 @@ const productionRules = [
 
 ### **Riscos Identificados:**
 
-| Risco | Impacto | Probabilidade | Mitigação |
-|-------|---------|--------------|-----------|
-| **False positives** | Médio | Alto | Exceções granulares + whitelist |
-| **Performance degradation** | Baixo | Médio | Cache incremental + exclude patterns |
-| **Developer friction** | Alto | Alto | Documentação clara + training |
-| **Rule complexity creep** | Médio | Médio | Revisões regulares + simplificação |
-| **Maintenance overhead** | Médio | Baixo | Automated updates + versioning |
+| Risco                       | Impacto | Probabilidade | Mitigação                            |
+| --------------------------- | ------- | ------------- | ------------------------------------ |
+| **False positives**         | Médio   | Alto          | Exceções granulares + whitelist      |
+| **Performance degradation** | Baixo   | Médio         | Cache incremental + exclude patterns |
+| **Developer friction**      | Alto    | Alto          | Documentação clara + training        |
+| **Rule complexity creep**   | Médio   | Médio         | Revisões regulares + simplificação   |
+| **Maintenance overhead**    | Médio   | Baixo         | Automated updates + versioning       |
 
 ### **Estratégias de Mitigação:**
 
 #### **1. Gradual Adoption**
+
 ```javascript
 // Start with warnings, evolve to errors
-severity: process.env.STRICT_ARCH ? 'error' : 'warn'
+severity: process.env.STRICT_ARCH ? 'error' : 'warn';
 ```
 
 #### **2. Escape Hatches**
+
 ```javascript
 // Emergency bypass for critical fixes
-from: { 
-  pathNot: process.env.EMERGENCY_MODE ? [] : normalRules 
+from: {
+  pathNot: process.env.EMERGENCY_MODE ? [] : normalRules;
 }
 ```
 
 #### **3. Performance Optimization**
+
 ```javascript
 options: {
   doNotFollow: {
@@ -586,12 +598,14 @@ options: {
 ## 📚 Documentação e Compliance
 
 ### **Documentação Obrigatória**
+
 - **Architecture Decision Records:** Esta ADR + evolução das regras
 - **Rule Catalog:** Documentação de todas as regras com exemplos
 - **Violation Playbook:** Como resolver cada tipo de violação
 - **Migration Guides:** Como refatorar código não-conforme
 
 ### **Compliance Standards**
+
 - **Domain-Driven Design:** Bounded Context integrity
 - **Hexagonal Architecture:** Layer dependency inversion
 - **SOLID Principles:** Dependency injection e inversão
@@ -602,12 +616,14 @@ options: {
 ## 📈 Benefícios Esperados
 
 ### **Quantitativos**
+
 - **100% enforcement** de regras arquiteturais via CI
 - **90% redução** em violações de bounded context
 - **75% redução** no tempo de code review arquitetural
 - **50% redução** em bugs relacionados a acoplamento
 
 ### **Qualitativos**
+
 - **Architectural Integrity:** Código auto-documenta a arquitetura
 - **Knowledge Transfer:** Regras explicitas facilitam onboarding
 - **Refactoring Confidence:** Mudanças seguras com validação automática
@@ -620,17 +636,19 @@ options: {
 Esta ADR estabelece as fundações para uma arquitetura **auto-vigiada e resiliente** através do enforcement automatizado de princípios Domain-Driven Design. A implementação atual já possui **25+ regras** operacionais que garantem:
 
 1. **Isolamento absoluto** entre Bounded Contexts
-2. **Inversão de dependência** respeitada em todas as camadas  
+2. **Inversão de dependência** respeitada em todas as camadas
 3. **Anti-Corruption Layers** obrigatórios para integrações
 4. **Repository Pattern** centralizado para acesso aos dados
 
 ### **Próximos Passos Imediatos:**
+
 1. ✅ **Aprovação desta ADR** (Sprint atual)
 2. 🔄 **Integração GitHub Actions** (Próximo sprint)
 3. 🔄 **Training da equipe** nas regras existentes
 4. 🔄 **Métricas e dashboards** de saúde arquitetural
 
 ### **Impacto na Conformidade:**
+
 - **Ponto 20 - Enforcement Automatizado:** ❌ PENDENTE → ✅ COMPLETO
 - **Conformidade Geral Fase 1:** 87% → **93%** (+6 pontos)
 - **Próxima lacuna P0:** Ponto 19 (Protocolos de Comunicação)
@@ -639,10 +657,10 @@ Esta ADR estabelece as fundações para uma arquitetura **auto-vigiada e resilie
 
 **Status:** ✅ **APROVADO** - Remedia lacuna crítica P0 do Ponto 20  
 **Implementação:** Infraestrutura já operacional + documentação estratégica completa  
-**Revisão:** 30 dias após integração completa no CI  
+**Revisão:** 30 dias após integração completa no CI
 
 ---
 
 **GEM 02 - Dev Specialist**  
-*22/08/2025 - ADR-005 Automated Architectural Enforcement Strategy*  
-*Conformidade Arquitetural Fase 1 - P0 Remediation*
+_22/08/2025 - ADR-005 Automated Architectural Enforcement Strategy_  
+_Conformidade Arquitetural Fase 1 - P0 Remediation_

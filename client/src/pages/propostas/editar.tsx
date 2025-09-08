@@ -30,31 +30,31 @@ const PDFPreview: React.FC<{ url: string; className?: string }> = ({ url, classN
       try {
         setLoading(true);
         setError(null);
-        
+
         const loadingTask = pdfjs.getDocument(url);
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1); // Primeira página
-        
+
         const canvas = canvasRef.current;
         if (!canvas) return;
-        
+
         const context = canvas.getContext('2d');
         if (!context) return;
-        
+
         // Calcular escala para fit no container
         const viewport = page.getViewport({ scale: 1 });
         const scale = Math.min(120 / viewport.width, 160 / viewport.height);
         const scaledViewport = page.getViewport({ scale });
-        
+
         canvas.height = scaledViewport.height;
         canvas.width = scaledViewport.width;
-        
+
         const renderContext = {
           canvasContext: context,
           viewport: scaledViewport,
           canvas: canvas,
         };
-        
+
         await page.render(renderContext).promise;
         setLoading(false);
       } catch (err) {
@@ -91,8 +91,8 @@ const PDFPreview: React.FC<{ url: string; className?: string }> = ({ url, classN
 };
 
 // Componente para preview de documentos
-const DocumentPreview: React.FC<{ 
-  document: any; 
+const DocumentPreview: React.FC<{
+  document: any;
   className?: string;
   onClick?: () => void;
 }> = ({ document, className = '', onClick }) => {
@@ -109,7 +109,7 @@ const DocumentPreview: React.FC<{
 
   if (isImage) {
     return (
-      <div 
+      <div
         className={`cursor-pointer overflow-hidden rounded-lg bg-gray-700 ${className}`}
         onClick={handleClick}
         data-testid="document-image-preview"
@@ -126,7 +126,7 @@ const DocumentPreview: React.FC<{
 
   if (isPDF) {
     return (
-      <div 
+      <div
         className={`cursor-pointer overflow-hidden rounded-lg ${className}`}
         onClick={handleClick}
         data-testid="document-pdf-preview"
@@ -138,7 +138,7 @@ const DocumentPreview: React.FC<{
 
   // Arquivo genérico
   return (
-    <div 
+    <div
       className={`flex cursor-pointer items-center justify-center rounded-lg bg-gray-700 ${className}`}
       onClick={handleClick}
       data-testid="document-generic-preview"
@@ -217,24 +217,27 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
             >
               {/* Preview da miniatura */}
               <div className="aspect-[4/3] w-full">
-                <DocumentPreview 
-                  document={doc} 
+                <DocumentPreview
+                  document={doc}
                   className="h-full w-full"
                   onClick={() => doc.url && window.open(doc.url, '_blank')}
                 />
               </div>
-              
+
               {/* Informações do documento */}
               <div className="p-3">
                 <div className="mb-2">
-                  <p className="truncate text-sm font-medium text-white" title={doc.name || doc.nome || `Documento ${index + 1}`}>
+                  <p
+                    className="truncate text-sm font-medium text-white"
+                    title={doc.name || doc.nome || `Documento ${index + 1}`}
+                  >
                     {doc.name || doc.nome || `Documento ${index + 1}`}
                   </p>
                   <p className="text-xs text-gray-400">
                     {doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Tamanho não especificado'}
                   </p>
                 </div>
-                
+
                 {/* Botões de ação */}
                 <div className="flex gap-2">
                   <Button
@@ -247,10 +250,10 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
                     <Eye className="mr-1 h-3 w-3" />
                     Ver
                   </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    className="text-xs" 
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="text-xs"
                     disabled
                     data-testid="button-remove-document"
                   >
@@ -360,41 +363,65 @@ const EditarPropostaPendenciada: React.FC = () => {
   useEffect(() => {
     if (proposta) {
       // console.log('🔍 DADOS DA PROPOSTA CARREGADA - PROPOSTA COMPLETA:', proposta);
-      
+
       // Normalizar dados de cliente (suportar ambas estruturas clienteData e cliente_data)
       const clienteData = {
         ...(proposta.clienteData || {}),
         ...((proposta as any).cliente_data || {}),
         // Garantir que campos obrigatórios tenham valores
-        nome: proposta.clienteData?.nome?.value || 
-              proposta.clienteData?.nome || 
-              (proposta as any).cliente_data?.nome?.value ||
-              (proposta as any).cliente_data?.nome || '',
-        cpf: proposta.clienteData?.cpf?.value || 
-             proposta.clienteData?.cpf || 
-             (proposta as any).cliente_data?.cpf?.value ||
-             (proposta as any).cliente_data?.cpf || '',
-        email: proposta.clienteData?.email?.value || 
-               proposta.clienteData?.email || 
-               (proposta as any).cliente_data?.email?.value ||
-               (proposta as any).cliente_data?.email || '',
-        telefone: proposta.clienteData?.telefone?.value || 
-                  proposta.clienteData?.telefone || 
-                  (proposta as any).cliente_data?.telefone?.value ||
-                  (proposta as any).cliente_data?.telefone || '',
+        nome:
+          proposta.clienteData?.nome?.value ||
+          proposta.clienteData?.nome ||
+          (proposta as any).cliente_data?.nome?.value ||
+          (proposta as any).cliente_data?.nome ||
+          '',
+        cpf:
+          proposta.clienteData?.cpf?.value ||
+          proposta.clienteData?.cpf ||
+          (proposta as any).cliente_data?.cpf?.value ||
+          (proposta as any).cliente_data?.cpf ||
+          '',
+        email:
+          proposta.clienteData?.email?.value ||
+          proposta.clienteData?.email ||
+          (proposta as any).cliente_data?.email?.value ||
+          (proposta as any).cliente_data?.email ||
+          '',
+        telefone:
+          proposta.clienteData?.telefone?.value ||
+          proposta.clienteData?.telefone ||
+          (proposta as any).cliente_data?.telefone?.value ||
+          (proposta as any).cliente_data?.telefone ||
+          '',
       };
 
       // Normalizar dados de condições - INCLUIR DADOS DIRETOS DA PROPOSTA
       const condicoesData = {
         ...(proposta.condicoesData || {}),
         ...((proposta as any).condicoes_data || {}),
-        // Fallbacks para campos principais vindos diretamente da proposta  
-        valor: (proposta as any).valor || (proposta.condicoesData as any)?.valor || ((proposta as any).condicoes_data as any)?.valor || '',
-        prazo: (proposta as any).prazo || (proposta.condicoesData as any)?.prazo || ((proposta as any).condicoes_data as any)?.prazo || '',
-        finalidade: (proposta as any).finalidade || (proposta.condicoesData as any)?.finalidade || ((proposta as any).condicoes_data as any)?.finalidade || '',
-        garantia: (proposta as any).garantia || (proposta.condicoesData as any)?.garantia || ((proposta as any).condicoes_data as any)?.garantia || '',
+        // Fallbacks para campos principais vindos diretamente da proposta
+        valor:
+          (proposta as any).valor ||
+          (proposta.condicoesData as any)?.valor ||
+          ((proposta as any).condicoes_data as any)?.valor ||
+          '',
+        prazo:
+          (proposta as any).prazo ||
+          (proposta.condicoesData as any)?.prazo ||
+          ((proposta as any).condicoes_data as any)?.prazo ||
+          '',
+        finalidade:
+          (proposta as any).finalidade ||
+          (proposta.condicoesData as any)?.finalidade ||
+          ((proposta as any).condicoes_data as any)?.finalidade ||
+          '',
+        garantia:
+          (proposta as any).garantia ||
+          (proposta.condicoesData as any)?.garantia ||
+          ((proposta as any).condicoes_data as any)?.garantia ||
+          '',
       };
-      
+
       setFormData({
         clienteData,
         condicoesData,
@@ -466,9 +493,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     },
     onError: (error: any) => {
       const errorMessage =
-        error?.response?.data?.error ||
-        error?.message ||
-        'Erro ao reenviar proposta';
+        error?.response?.data?.error || error?.message || 'Erro ao reenviar proposta';
       toast({
         variant: 'destructive',
         title: 'Erro ao reenviar',
@@ -477,7 +502,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     },
     onSettled: () => {
       // 🔥 PAM V1.0: Invalidação de cache AGRESSIVA para garantir sincronização total
-      
+
       // Invalidações básicas
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
@@ -485,7 +510,7 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['proposta'] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas', 'queue=analysis'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
-      
+
       // PAM V1.0: Invalidações adicionais para dashboard e métricas
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-kpis'] });
@@ -493,12 +518,14 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['metrics'] });
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       queryClient.invalidateQueries({ queryKey: ['proposals', 'list'] });
-      
+
       // Invalidar queries hierárquicas baseadas no padrão queryKeys.ts
       queryClient.invalidateQueries({ queryKey: ['proposals'] }); // queryKeys.proposals.all
       queryClient.invalidateQueries({ queryKey: ['proposals', 'list'] }); // queryKeys.proposals.lists()
-      
-      console.log('🔥 [PAM V1.0] Cache invalidation agressiva executada - todas as queries invalidadas');
+
+      console.log(
+        '🔥 [PAM V1.0] Cache invalidation agressiva executada - todas as queries invalidadas'
+      );
     },
   });
 
@@ -506,7 +533,7 @@ const EditarPropostaPendenciada: React.FC = () => {
   useEffect(() => {
     const valorRaw = (formData.condicoesData as any)?.valor;
     const prazoRaw = (formData.condicoesData as any)?.prazo;
-    
+
     const valor = (() => {
       if (typeof valorRaw === 'object' && valorRaw?.cents) {
         return parseFloat(String(valorRaw.cents / 100));
@@ -517,21 +544,21 @@ const EditarPropostaPendenciada: React.FC = () => {
       return parseFloat(String(valorRaw || '0'));
     })();
     const prazo = parseInt(String(prazoRaw || '0'));
-    
+
     // Usar taxa da tabela ou padrão de 2.5% ao mês
     const taxaJuros = parseFloat(proposta?.tabelaComercial?.taxaJuros || '2.5');
 
     // EVITAR LOOP: Só calcular se ainda não temos os valores calculados
     const valorTacExistente = (formData.condicoesData as any)?.valorTac;
     const valorIofExistente = (formData.condicoesData as any)?.valorIof;
-    
+
     if (valor > 0 && prazo > 0 && !valorTacExistente && !valorIofExistente) {
       const tacPercentual = 3;
-      const valorTac = (valor * tacPercentual / 100);
+      const valorTac = (valor * tacPercentual) / 100;
       const iofMensal = 0.38;
       const iofDiario = 0.0082;
       const diasPorMes = 30;
-      const iofTotal = (valor * (iofMensal + (iofDiario * prazo * diasPorMes)) / 100);
+      const iofTotal = (valor * (iofMensal + iofDiario * prazo * diasPorMes)) / 100;
       const valorTotalFinanciado = valor + valorTac + iofTotal;
       const taxaMensal = taxaJuros / 100;
       const fatorJuros = Math.pow(1 + taxaMensal, prazo);
@@ -551,9 +578,8 @@ const EditarPropostaPendenciada: React.FC = () => {
   }, [
     (formData.condicoesData as any)?.valor,
     (formData.condicoesData as any)?.prazo,
-    proposta?.tabelaComercial?.taxaJuros
+    proposta?.tabelaComercial?.taxaJuros,
   ]);
-
 
   // Validação early return para IDs inválidos - AGORA DEPOIS DOS HOOKS
   if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
@@ -680,8 +706,6 @@ const EditarPropostaPendenciada: React.FC = () => {
     }));
   };
 
-
-
   const handleResubmit = async () => {
     // Primeiro salvar se houver alterações, depois reenviar
     try {
@@ -695,7 +719,7 @@ const EditarPropostaPendenciada: React.FC = () => {
           condicoes_data: formData.condicoesData,
         });
       }
-      
+
       // Agora reenviar para análise
       resubmitMutation.mutate();
     } catch (error) {
@@ -732,28 +756,28 @@ const EditarPropostaPendenciada: React.FC = () => {
             <div className="grid gap-2 text-sm">
               <div>
                 <span className="font-medium">Cliente:</span>{' '}
-                {(formData.clienteData as any)?.nome || 
-                 proposta?.clienteData?.nome?.value || 
-                 proposta?.clienteData?.nome || 
-                 (proposta as any)?.cliente_data?.nome?.value ||
-                 (proposta as any)?.cliente_data?.nome ||
-                 'Nome não informado'}
+                {(formData.clienteData as any)?.nome ||
+                  proposta?.clienteData?.nome?.value ||
+                  proposta?.clienteData?.nome ||
+                  (proposta as any)?.cliente_data?.nome?.value ||
+                  (proposta as any)?.cliente_data?.nome ||
+                  'Nome não informado'}
               </div>
               <div>
                 <span className="font-medium">CPF:</span>{' '}
-                {(formData.clienteData as any)?.cpf?.value || 
-                 (formData.clienteData as any)?.cpf || 
-                 proposta?.clienteData?.cpf?.value ||
-                 proposta?.clienteData?.cpf ||
-                 (proposta as any)?.cliente_data?.cpf?.value ||
-                 (proposta as any)?.cliente_data?.cpf ||
-                 'CPF não informado'}
+                {(formData.clienteData as any)?.cpf?.value ||
+                  (formData.clienteData as any)?.cpf ||
+                  proposta?.clienteData?.cpf?.value ||
+                  proposta?.clienteData?.cpf ||
+                  (proposta as any)?.cliente_data?.cpf?.value ||
+                  (proposta as any)?.cliente_data?.cpf ||
+                  'CPF não informado'}
               </div>
               <div>
                 <span className="font-medium">Valor Solicitado:</span> R${' '}
-                {(formData.condicoesData as any)?.valor?.cents ? 
-                  ((formData.condicoesData as any)?.valor?.cents / 100).toFixed(2) : 
-                  (formData.condicoesData as any)?.valor || 0}
+                {(formData.condicoesData as any)?.valor?.cents
+                  ? ((formData.condicoesData as any)?.valor?.cents / 100).toFixed(2)
+                  : (formData.condicoesData as any)?.valor || 0}
               </div>
               <div>
                 <span className="font-medium">Prazo:</span>{' '}
@@ -790,7 +814,11 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="cpf">CPF *</Label>
                       <Input
                         id="cpf"
-                        value={(formData.clienteData as any)?.cpf?.value || (formData.clienteData as any)?.cpf || ''}
+                        value={
+                          (formData.clienteData as any)?.cpf?.value ||
+                          (formData.clienteData as any)?.cpf ||
+                          ''
+                        }
                         onChange={(e) => handleClientChange('cpf', e.target.value)}
                         placeholder="000.000.000-00"
                       />
@@ -851,7 +879,11 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Input
                         id="email"
                         type="email"
-                        value={(formData.clienteData as any)?.email?.value || (formData.clienteData as any)?.email || ''}
+                        value={
+                          (formData.clienteData as any)?.email?.value ||
+                          (formData.clienteData as any)?.email ||
+                          ''
+                        }
                         onChange={(e) => handleClientChange('email', e.target.value)}
                         placeholder="cliente@email.com"
                       />
@@ -860,7 +892,11 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="telefone">Telefone *</Label>
                       <Input
                         id="telefone"
-                        value={(formData.clienteData as any)?.telefone?.value || (formData.clienteData as any)?.telefone || ''}
+                        value={
+                          (formData.clienteData as any)?.telefone?.value ||
+                          (formData.clienteData as any)?.telefone ||
+                          ''
+                        }
                         onChange={(e) => handleClientChange('telefone', e.target.value)}
                         placeholder="(11) 99999-9999"
                       />
@@ -876,7 +912,11 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="cep">CEP</Label>
                       <Input
                         id="cep"
-                        value={(formData.clienteData as any)?.cep?.value || (formData.clienteData as any)?.cep || ''}
+                        value={
+                          (formData.clienteData as any)?.cep?.value ||
+                          (formData.clienteData as any)?.cep ||
+                          ''
+                        }
                         onChange={(e) => handleClientChange('cep', e.target.value)}
                         placeholder="00000-000"
                       />
@@ -916,13 +956,13 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <CurrencyInput
                         id="renda"
                         value={
-                          (formData.clienteData as any)?.rendaMensal?.cents ? 
-                            ((formData.clienteData as any)?.rendaMensal?.cents / 100).toString() :
-                          (formData.clienteData as any)?.renda?.cents ? 
-                            ((formData.clienteData as any)?.renda?.cents / 100).toString() :
-                          (formData.clienteData as any)?.renda ||
-                          (formData.clienteData as any)?.rendaMensal ||
-                          ''
+                          (formData.clienteData as any)?.rendaMensal?.cents
+                            ? ((formData.clienteData as any)?.rendaMensal?.cents / 100).toString()
+                            : (formData.clienteData as any)?.renda?.cents
+                              ? ((formData.clienteData as any)?.renda?.cents / 100).toString()
+                              : (formData.clienteData as any)?.renda ||
+                                (formData.clienteData as any)?.rendaMensal ||
+                                ''
                         }
                         onChange={(e) => handleClientChange('renda', e.target.value)}
                       />
@@ -943,11 +983,11 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <CurrencyInput
                         id="valor"
                         value={
-                          (formData.condicoesData as any)?.valor?.cents ? 
-                            ((formData.condicoesData as any)?.valor?.cents / 100).toString() :
-                          (formData.condicoesData as any)?.valor ||
-                          (proposta as any)?.valor ||
-                          ''
+                          (formData.condicoesData as any)?.valor?.cents
+                            ? ((formData.condicoesData as any)?.valor?.cents / 100).toString()
+                            : (formData.condicoesData as any)?.valor ||
+                              (proposta as any)?.valor ||
+                              ''
                         }
                         onChange={(e) => handleCondicoesChange('valor', e.target.value)}
                       />
@@ -959,9 +999,9 @@ const EditarPropostaPendenciada: React.FC = () => {
                         type="number"
                         min="1"
                         max="120"
-                        value={(formData.condicoesData as any)?.prazo || 
-                               (proposta as any)?.prazo || 
-                               ''}
+                        value={
+                          (formData.condicoesData as any)?.prazo || (proposta as any)?.prazo || ''
+                        }
                         onChange={(e) => handleCondicoesChange('prazo', e.target.value)}
                         placeholder="12"
                       />
@@ -1015,11 +1055,13 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="produto">Produto</Label>
                       <Input
                         id="produto"
-                        value={(proposta as any)?.produto_nome || 
-                               proposta?.produto?.nomeProduto || 
-                               (proposta?.produto as any)?.nome ||
-                               (proposta as any)?.nomeProduto ||
-                               'Produto não definido'}
+                        value={
+                          (proposta as any)?.produto_nome ||
+                          proposta?.produto?.nomeProduto ||
+                          (proposta?.produto as any)?.nome ||
+                          (proposta as any)?.nomeProduto ||
+                          'Produto não definido'
+                        }
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                         readOnly
@@ -1029,11 +1071,13 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="tabelaComercial">Tabela Comercial</Label>
                       <Input
                         id="tabelaComercial"
-                        value={(proposta as any)?.tabela_comercial_nome || 
-                               proposta?.tabelaComercial?.nomeTabela ||
-                               (proposta?.tabelaComercial as any)?.nome ||
-                               (proposta as any)?.nomeTabela ||
-                               'Tabela não definida'}
+                        value={
+                          (proposta as any)?.tabela_comercial_nome ||
+                          proposta?.tabelaComercial?.nomeTabela ||
+                          (proposta?.tabelaComercial as any)?.nome ||
+                          (proposta as any)?.nomeTabela ||
+                          'Tabela não definida'
+                        }
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                         readOnly
@@ -1043,9 +1087,12 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="taxaJuros">Taxa de Juros (%)</Label>
                       <Input
                         id="taxaJuros"
-                        value={(proposta as any)?.tabela_comercial_taxa || 
-                               proposta?.tabelaComercial?.taxaJuros || 
-                               (proposta as any)?.taxa_juros || ''}
+                        value={
+                          (proposta as any)?.tabela_comercial_taxa ||
+                          proposta?.tabelaComercial?.taxaJuros ||
+                          (proposta as any)?.taxa_juros ||
+                          ''
+                        }
                         placeholder="Será calculado automaticamente"
                         className="bg-gray-800"
                         readOnly
@@ -1074,9 +1121,11 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="finalidade">Finalidade *</Label>
                       <Input
                         id="finalidade"
-                        value={(formData.condicoesData as any)?.finalidade || 
-                               (proposta as any)?.finalidade || 
-                               ''}
+                        value={
+                          (formData.condicoesData as any)?.finalidade ||
+                          (proposta as any)?.finalidade ||
+                          ''
+                        }
                         onChange={(e) => handleCondicoesChange('finalidade', e.target.value)}
                         placeholder="Capital de giro, aquisição de equipamentos, etc."
                       />
@@ -1085,9 +1134,11 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="garantia">Garantia</Label>
                       <Input
                         id="garantia"
-                        value={(formData.condicoesData as any)?.garantia || 
-                               (proposta as any)?.garantia || 
-                               ''}
+                        value={
+                          (formData.condicoesData as any)?.garantia ||
+                          (proposta as any)?.garantia ||
+                          ''
+                        }
                         onChange={(e) => handleCondicoesChange('garantia', e.target.value)}
                         placeholder="Sem garantia, aval, etc."
                       />
@@ -1128,7 +1179,7 @@ const EditarPropostaPendenciada: React.FC = () => {
             onClick={handleResubmit}
             disabled={updateMutation.isPending || resubmitMutation.isPending}
           >
-            {(updateMutation.isPending || resubmitMutation.isPending) ? (
+            {updateMutation.isPending || resubmitMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Send className="mr-2 h-4 w-4" />

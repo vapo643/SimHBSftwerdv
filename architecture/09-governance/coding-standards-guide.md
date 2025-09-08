@@ -12,7 +12,7 @@
 
 Este documento estabelece a **Doutrina de Padrões de Codificação** do Sistema Simpix, transformando qualidade de código de "preferência" para "lei não negociável" através de automação completa no CI/CD. Nossa abordagem segue os padrões Airbnb e Google para TypeScript/React/Node.js, com enforcement automático via Quality Gates.
 
-**Princípio Central:** *"Se não passa nos Quality Gates, não entra em produção. Sem exceções."*
+**Princípio Central:** _"Se não passa nos Quality Gates, não entra em produção. Sem exceções."_
 
 ---
 
@@ -22,17 +22,18 @@ Este documento estabelece a **Doutrina de Padrões de Codificação** do Sistema
 
 Baseadas no **Google TypeScript Style Guide** e **Airbnb JavaScript Style Guide**:
 
-| **Tipo de Identificador** | **Convenção** | **Exemplos** | **Anti-pattern** |
-|---------------------------|---------------|--------------|------------------|
-| **Variáveis e Funções** | `camelCase` | `userName`, `getUserData()` | `user_name`, `GetUserData()` |
-| **Classes e Interfaces** | `PascalCase` | `UserProfile`, `ApiResponse` | `userProfile`, `IUserProfile` |
-| **Enums e Namespaces** | `PascalCase` | `HttpStatus`, `UserActions` | `HTTP_STATUS` |
-| **Type Parameters** | `T` + `PascalCase` | `TRequest`, `TUserData` | `T`, `Type` |
-| **Constantes** | `UPPER_SNAKE_CASE` | `API_BASE_URL`, `MAX_RETRY_COUNT` | `apiBaseUrl` |
-| **Arquivos** | `kebab-case` | `user-profile.ts`, `api-client.ts` | `userProfile.ts` |
-| **Componentes React** | `PascalCase` (arquivo e export) | `UserCard.tsx` | `userCard.tsx` |
+| **Tipo de Identificador** | **Convenção**                   | **Exemplos**                       | **Anti-pattern**              |
+| ------------------------- | ------------------------------- | ---------------------------------- | ----------------------------- |
+| **Variáveis e Funções**   | `camelCase`                     | `userName`, `getUserData()`        | `user_name`, `GetUserData()`  |
+| **Classes e Interfaces**  | `PascalCase`                    | `UserProfile`, `ApiResponse`       | `userProfile`, `IUserProfile` |
+| **Enums e Namespaces**    | `PascalCase`                    | `HttpStatus`, `UserActions`        | `HTTP_STATUS`                 |
+| **Type Parameters**       | `T` + `PascalCase`              | `TRequest`, `TUserData`            | `T`, `Type`                   |
+| **Constantes**            | `UPPER_SNAKE_CASE`              | `API_BASE_URL`, `MAX_RETRY_COUNT`  | `apiBaseUrl`                  |
+| **Arquivos**              | `kebab-case`                    | `user-profile.ts`, `api-client.ts` | `userProfile.ts`              |
+| **Componentes React**     | `PascalCase` (arquivo e export) | `UserCard.tsx`                     | `userCard.tsx`                |
 
 **Regras Críticas:**
+
 - ❌ **NUNCA** prefixar interfaces com `I` (evitar `IUserProfile`)
 - ❌ **NUNCA** usar underscores como prefixo/sufixo (`_privateVar`)
 - ❌ **NUNCA** incluir informação de tipo no nome (`userArray`, `stringName`)
@@ -49,23 +50,23 @@ interface UserCardProps {
   onSelect: (id: string) => void;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ 
-  name, 
-  age, 
+const UserCard: React.FC<UserCardProps> = ({
+  name,
+  age,
   isActive = true,
-  onSelect 
+  onSelect
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  
+
   // Hooks na ordem: useState, useEffect, useCallback, useMemo, custom hooks
   useEffect(() => {
     // Effect logic
   }, []);
-  
+
   const handleClick = useCallback(() => {
     onSelect(name);
   }, [name, onSelect]);
-  
+
   return (
     <div className={`user-card ${isActive ? 'active' : 'inactive'}`}>
       <h2>{name}</h2>
@@ -78,6 +79,7 @@ export default UserCard;
 ```
 
 **❌ INCORRETO:**
+
 ```typescript
 // Evitar class components
 class UserCard extends React.Component { }
@@ -97,14 +99,14 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
   try {
     const { id } = req.params;
     const user = await userService.findById(id);
-    
+
     if (!user) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: 'User not found',
-        code: 'USER_NOT_FOUND' 
+        code: 'USER_NOT_FOUND',
       });
     }
-    
+
     return res.json(user);
   } catch (error) {
     next(error); // Proper error propagation
@@ -173,39 +175,48 @@ module.exports = {
   rules: {
     // TypeScript
     '@typescript-eslint/explicit-function-return-type': 'warn',
-    '@typescript-eslint/no-unused-vars': ['error', { 
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_' 
-    }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/strict-boolean-expressions': 'error',
-    
+
     // React
     'react/react-in-jsx-scope': 'off', // React 18+
-    'react/function-component-definition': [2, {
-      namedComponents: 'arrow-function',
-      unnamedComponents: 'arrow-function'
-    }],
+    'react/function-component-definition': [
+      2,
+      {
+        namedComponents: 'arrow-function',
+        unnamedComponents: 'arrow-function',
+      },
+    ],
     'react/prop-types': 'off', // Using TypeScript
-    
+
     // Import ordering
-    'import/order': ['error', {
-      groups: [
-        'builtin',
-        'external',
-        'internal',
-        ['parent', 'sibling'],
-        'index',
-        'object',
-        'type'
-      ],
-      'newlines-between': 'always',
-      alphabetize: { order: 'asc', caseInsensitive: true }
-    }],
-    
+    'import/order': [
+      'error',
+      {
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          ['parent', 'sibling'],
+          'index',
+          'object',
+          'type',
+        ],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
+
     // Security (OWASP 2025 Compliance)
     'security/detect-object-injection': 'error',
-    'security/detect-non-literal-regexp': 'error', 
+    'security/detect-non-literal-regexp': 'error',
     'security/detect-unsafe-regex': 'error',
     'security/detect-buffer-noassert': 'error',
     'security/detect-child-process': 'warn',
@@ -216,12 +227,12 @@ module.exports = {
     'security/detect-non-literal-require': 'warn',
     'security/detect-possible-timing-attacks': 'warn',
     'security/detect-pseudoRandomBytes': 'error',
-    
+
     // General
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'prefer-const': 'error',
     'no-var': 'error',
-    'curly': ['error', 'all'],
+    curly: ['error', 'all'],
   },
   settings: {
     react: { version: 'detect' },
@@ -236,13 +247,13 @@ module.exports = {
 
 **Justificativa das Regras Principais:**
 
-| **Regra** | **Configuração** | **Porquê** |
-|-----------|------------------|------------|
-| `@typescript-eslint/no-explicit-any` | `error` | Previne perda de type safety |
-| `@typescript-eslint/strict-boolean-expressions` | `error` | Evita bugs com valores falsy |
-| `import/order` | `error` + groups | Consistência e legibilidade |
-| `curly` | `error, all` | Previne bugs de scope |
-| `no-console` | `warn` + exceptions | Logs controlados em produção |
+| **Regra**                                       | **Configuração**    | **Porquê**                   |
+| ----------------------------------------------- | ------------------- | ---------------------------- |
+| `@typescript-eslint/no-explicit-any`            | `error`             | Previne perda de type safety |
+| `@typescript-eslint/strict-boolean-expressions` | `error`             | Evita bugs com valores falsy |
+| `import/order`                                  | `error` + groups    | Consistência e legibilidade  |
+| `curly`                                         | `error, all`        | Previne bugs de scope        |
+| `no-console`                                    | `warn` + exceptions | Logs controlados em produção |
 
 ### **2.2 Prettier Configuration (`.prettierrc`)**
 
@@ -265,6 +276,7 @@ module.exports = {
 ```
 
 **Integração ESLint + Prettier + Security (OWASP 2025):**
+
 ```bash
 npm install -D eslint-config-prettier eslint-plugin-prettier
 npm install -D eslint-plugin-security@^2.0.0  # MANDATÓRIO: v2.0+ para OWASP 2025
@@ -275,6 +287,7 @@ npm install -D eslint-plugin-security@^2.0.0  # MANDATÓRIO: v2.0+ para OWASP 20
 ### **2.3 Pre-commit Hooks (Husky + lint-staged)**
 
 **`.husky/pre-commit`:**
+
 ```bash
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
@@ -283,16 +296,12 @@ npx lint-staged
 ```
 
 **`package.json`:**
+
 ```json
 {
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yml,yaml}": ["prettier --write"]
   }
 }
 ```
@@ -303,19 +312,20 @@ npx lint-staged
 
 ### **3.1 Métricas Monitoradas**
 
-| **Métrica** | **Threshold** | **Ferramenta** | **Descrição** |
-|-------------|---------------|----------------|---------------|
-| **Code Coverage** | ≥ 85% | Jest/Vitest | Cobertura de testes (statements, branches, functions) |
-| **Cyclomatic Complexity** | ≤ 10 | ESLint complexity rule | Número de caminhos independentes no código |
-| **Cognitive Complexity** | ≤ 15 | SonarQube | Dificuldade de entendimento humano |
-| **Maintainability Index** | ≥ 20 | SonarQube | Score composto de manutenibilidade |
-| **Technical Debt Ratio** | < 5% | SonarQube | Custo de correção vs. desenvolvimento |
-| **Duplicated Lines** | < 3% | SonarQube | Porcentagem de código duplicado |
-| **Security Hotspots** | 0 Critical/High | Snyk/CodeQL | Vulnerabilidades de segurança |
+| **Métrica**               | **Threshold**   | **Ferramenta**         | **Descrição**                                         |
+| ------------------------- | --------------- | ---------------------- | ----------------------------------------------------- |
+| **Code Coverage**         | ≥ 85%           | Jest/Vitest            | Cobertura de testes (statements, branches, functions) |
+| **Cyclomatic Complexity** | ≤ 10            | ESLint complexity rule | Número de caminhos independentes no código            |
+| **Cognitive Complexity**  | ≤ 15            | SonarQube              | Dificuldade de entendimento humano                    |
+| **Maintainability Index** | ≥ 20            | SonarQube              | Score composto de manutenibilidade                    |
+| **Technical Debt Ratio**  | < 5%            | SonarQube              | Custo de correção vs. desenvolvimento                 |
+| **Duplicated Lines**      | < 3%            | SonarQube              | Porcentagem de código duplicado                       |
+| **Security Hotspots**     | 0 Critical/High | Snyk/CodeQL            | Vulnerabilidades de segurança                         |
 
 ### **3.2 Configuração de Cobertura (Jest)**
 
 **`jest.config.js`:**
+
 ```javascript
 module.exports = {
   preset: 'ts-jest',
@@ -328,21 +338,21 @@ module.exports = {
       branches: 85,
       functions: 85,
       lines: 85,
-      statements: 85
+      statements: 85,
     },
     // Thresholds específicos por path
     './src/services/': {
       branches: 90,
       functions: 90,
       lines: 90,
-      statements: 90
+      statements: 90,
     },
     './src/utils/': {
       branches: 95,
       functions: 95,
       lines: 95,
-      statements: 95
-    }
+      statements: 95,
+    },
   },
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
@@ -350,8 +360,8 @@ module.exports = {
     '!src/**/*.spec.{js,jsx,ts,tsx}',
     '!src/**/index.{js,ts}',
     '!src/**/*.d.ts',
-    '!src/types/**'
-  ]
+    '!src/types/**',
+  ],
 };
 ```
 
@@ -360,6 +370,7 @@ module.exports = {
 **⚠️ COMPLIANCE CRITICAL:** Todo repositório Simpix **DEVE** incluir um arquivo `sonar-project.properties` configurado conforme os padrões SonarQube 2025 para compliance bancária e auditoria Red Team.
 
 **`sonar-project.properties` (OBRIGATÓRIO):**
+
 ```properties
 # === CONFIGURAÇÃO MANDATÓRIA SIMPIX 2025 ===
 sonar.projectKey=simpix-credit-management
@@ -407,14 +418,15 @@ sonar.issue.ignore.multicriteria.e3.resourceKey=**/*.test.*
 ```
 
 **CI/CD Integration (GitHub Actions):**
+
 ```yaml
 # .github/workflows/sonarqube-analysis.yml
 name: SonarQube Analysis
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   sonarqube:
@@ -423,20 +435,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones disabled for better analysis
-      
+          fetch-depth: 0 # Shallow clones disabled for better analysis
+
       - name: Setup Node.js 20
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run tests with coverage
         run: npm run test:coverage
-      
+
       - name: SonarQube Scan
         uses: sonarqube-quality-gate-action@master
         with:
@@ -445,7 +457,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      
+
       - name: Quality Gate Status Check
         run: |
           if [ "${{ steps.sonarqube.outputs.quality-gate-status }}" != "PASSED" ]; then
@@ -457,6 +469,7 @@ jobs:
 ```
 
 **Validação de Compliance:**
+
 ```bash
 # Script de verificação local (desenvolvimento)
 #!/bin/bash
@@ -491,17 +504,18 @@ echo "✅ SonarQube compliance validated"
 ### **3.4 Análise de Complexidade**
 
 **ESLint Complexity Rules:**
+
 ```javascript
 {
   rules: {
     'complexity': ['error', { max: 10 }],
     'max-depth': ['error', { max: 4 }],
-    'max-lines': ['error', { 
-      max: 300, 
-      skipBlankLines: true, 
-      skipComments: true 
+    'max-lines': ['error', {
+      max: 300,
+      skipBlankLines: true,
+      skipComments: true
     }],
-    'max-lines-per-function': ['error', { 
+    'max-lines-per-function': ['error', {
       max: 50,
       skipBlankLines: true,
       skipComments: true
@@ -539,33 +553,33 @@ jobs:
   quality-gate:
     name: Quality Gate Check
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-    
+
     steps:
       # 1. Checkout
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necessário para SonarQube
-      
+          fetch-depth: 0 # Necessário para SonarQube
+
       # 2. Setup Node.js
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      
+
       # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
-      
+
       # 4. Type checking
       - name: TypeScript type check
         run: npx tsc --noEmit
-        
+
       # 5. Linting com threshold
       - name: ESLint check (max 0 errors)
         run: |
@@ -577,35 +591,35 @@ jobs:
             exit 1
           fi
           echo "✅ ESLint passed with 0 errors"
-      
+
       # 6. Prettier formatting check
       - name: Prettier format check
         run: npx prettier --check "**/*.{js,jsx,ts,tsx,json,md}"
-      
+
       # 7. Security audit
       - name: Security audit (moderate+)
         run: npm audit --audit-level moderate
         continue-on-error: false
-      
+
       # 8. Run tests with coverage
       - name: Run tests with coverage
         run: npm test -- --coverage --watchAll=false
         env:
           CI: true
-      
+
       # 9. Coverage threshold check
       - name: Check coverage thresholds
         run: |
           COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
           echo "📊 Line Coverage: $COVERAGE%"
-          
+
           if (( $(echo "$COVERAGE < 85" | bc -l) )); then
             echo "❌ Coverage $COVERAGE% is below 85% threshold"
             exit 1
           fi
-          
+
           echo "✅ Coverage $COVERAGE% meets threshold"
-      
+
       # 10. Upload coverage to Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -615,7 +629,7 @@ jobs:
           flags: unittests
           name: codecov-${{ matrix.node-version }}
           fail_ci_if_error: true
-      
+
       # 11. SonarQube scan
       - name: SonarQube Scan
         uses: sonarsource/sonarcloud-github-action@v2.3.0
@@ -631,14 +645,14 @@ jobs:
             -Dsonar.test.inclusions=**/*.test.ts,**/*.spec.ts
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.coverage.exclusions=**/*.test.ts,**/*.spec.ts,**/index.ts
-      
+
       # 12. SonarQube Quality Gate
       - name: SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      
+
       # 13. Snyk security scan
       - name: Snyk Security Scan
         uses: snyk/actions/node@master
@@ -646,23 +660,23 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --fail-on=all
-      
+
       # 14. Build validation
       - name: Build check
         run: npm run build
-        
+
       # 15. Bundle size check
       - name: Check bundle size
         run: |
           npm run build
           MAX_SIZE=500000  # 500KB
           BUNDLE_SIZE=$(stat -c%s dist/main.js)
-          
+
           if [ "$BUNDLE_SIZE" -gt "$MAX_SIZE" ]; then
             echo "❌ Bundle size ($BUNDLE_SIZE bytes) exceeds limit ($MAX_SIZE bytes)"
             exit 1
           fi
-          
+
           echo "✅ Bundle size ($BUNDLE_SIZE bytes) within limit"
 ```
 
@@ -671,6 +685,7 @@ jobs:
 **Configuração obrigatória em Settings → Branches → main:**
 
 ✅ **Required status checks:**
+
 - `quality-gate / Quality Gate Check (18.x)`
 - `quality-gate / Quality Gate Check (20.x)`
 - `codecov/patch` (>75% coverage em código novo)
@@ -679,6 +694,7 @@ jobs:
 - `snyk` (No high/critical vulnerabilities)
 
 ✅ **Additional settings:**
+
 - Require branches to be up to date before merging
 - Require conversation resolution before merging
 - Require approved reviews: 2
@@ -689,19 +705,20 @@ jobs:
 
 **Critérios de Bloqueio (FAIL FAST):**
 
-| **Check** | **Threshold** | **Ação se Falhar** |
-|-----------|---------------|-------------------|
-| **ESLint Errors** | 0 | ❌ Block PR |
-| **TypeScript Errors** | 0 | ❌ Block PR |
-| **Prettier Issues** | 0 | ❌ Block PR |
-| **Test Coverage** | < 85% | ❌ Block PR |
-| **Security Vulnerabilities** | High/Critical | ❌ Block PR |
-| **Build Failure** | Any | ❌ Block PR |
-| **SonarQube Quality Gate** | Failed | ❌ Block PR |
+| **Check**                    | **Threshold** | **Ação se Falhar** |
+| ---------------------------- | ------------- | ------------------ |
+| **ESLint Errors**            | 0             | ❌ Block PR        |
+| **TypeScript Errors**        | 0             | ❌ Block PR        |
+| **Prettier Issues**          | 0             | ❌ Block PR        |
+| **Test Coverage**            | < 85%         | ❌ Block PR        |
+| **Security Vulnerabilities** | High/Critical | ❌ Block PR        |
+| **Build Failure**            | Any           | ❌ Block PR        |
+| **SonarQube Quality Gate**   | Failed        | ❌ Block PR        |
 
 ### **4.4 Scripts NPM para Desenvolvimento Local**
 
 **`package.json`:**
+
 ```json
 {
   "scripts": {
@@ -735,16 +752,16 @@ sonar.qualitygate.conditions:
     error: 3
   - metric: new_maintainability_rating
     op: GT
-    error: 1  # Must be A
+    error: 1 # Must be A
   - metric: new_reliability_rating
     op: GT
-    error: 1  # Must be A
+    error: 1 # Must be A
   - metric: new_security_rating
     op: GT
-    error: 1  # Must be A
+    error: 1 # Must be A
   - metric: new_security_hotspots_reviewed
     op: LT
-    error: 100  # All must be reviewed
+    error: 100 # All must be reviewed
 ```
 
 ---
@@ -752,16 +769,19 @@ sonar.qualitygate.conditions:
 ## 📋 Implementação e Rollout
 
 ### **Fase 1: Setup Inicial (Semana 1)**
+
 - [ ] Instalar e configurar ESLint + Prettier
 - [ ] Configurar pre-commit hooks
 - [ ] Setup inicial do GitHub Actions
 
 ### **Fase 2: Calibração (Semana 2-3)**
+
 - [ ] Ajustar thresholds baseados no código atual
 - [ ] Treinar equipe nas convenções
 - [ ] Documentar exceções aprovadas
 
 ### **Fase 3: Enforcement (Semana 4+)**
+
 - [ ] Ativar branch protection rules
 - [ ] Bloquear PRs não conformes
 - [ ] Monitorar métricas de qualidade
@@ -773,11 +793,13 @@ sonar.qualitygate.conditions:
 ### **CONFIANÇA NA IMPLEMENTAÇÃO: 95%**
 
 **Alta Confiança (98%):**
+
 - Configurações ESLint/Prettier baseadas em documentação oficial
 - GitHub Actions workflow testado em produção
 - Thresholds alinhados com industry standards
 
 **Incerteza Controlada (5%):**
+
 - Impacto inicial na velocidade de desenvolvimento
 - Necessidade de ajuste fino dos thresholds
 - Curva de aprendizado da equipe
@@ -785,11 +807,13 @@ sonar.qualitygate.conditions:
 ### **RISCOS IDENTIFICADOS: MÉDIO**
 
 **Riscos Técnicos:**
+
 - Quality Gates muito restritivos podem desacelerar entregas inicialmente
 - Possível aumento no tempo de CI/CD (mitigado com cache)
 - Falsos positivos em análise de segurança
 
 **Mitigações:**
+
 - Período de adaptação com thresholds progressivos
 - Documentação clara e treinamento
 - Processo de exceção para casos especiais
@@ -818,4 +842,4 @@ sonar.qualitygate.conditions:
 ---
 
 **Software Quality Engineer**  
-*25/08/2025 - Quality Gates como Lei Estabelecida*
+_25/08/2025 - Quality Gates como Lei Estabelecida_

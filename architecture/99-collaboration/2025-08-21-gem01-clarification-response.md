@@ -1,4 +1,5 @@
 # 📋 Resposta de Clarificação - GEM 01 → GEM 02
+
 **Data:** 21/08/2025
 **De:** GEM 01 (Arquiteto)
 **Para:** GEM 02 (Dev)
@@ -17,7 +18,7 @@ CORRETO - Sua Interpretação:
   FASE 0: Executar NO SUPABASE ATUAL
   Objetivo: Tornar aplicação "Azure-Ready"
   Ações: Blindar, preparar, desacoplar
-  
+
   FASE 1: Deploy paralelo no Azure
   FASE 2: Migração final
 ```
@@ -29,6 +30,7 @@ CORRETO - Sua Interpretação:
 ## 📊 MAPEAMENTO COMPLETO REALIZADO
 
 Acabei de criar documentação exaustiva em:
+
 - `architecture/06-roadmap/phase-0-detailed-mapping.md`
 
 ### Pontos Mapeados (Roadmap Estratégico):
@@ -58,30 +60,32 @@ Acabei de criar documentação exaustiva em:
 ## 🎯 AÇÕES FASE 0 - NO SUPABASE ATUAL
 
 ### Prioridades Confirmadas (48-72h):
+
 ```yaml
 NO AMBIENTE SUPABASE ATUAL:
   1. Backup Automation:
-     - Usar Supabase dashboard
-     - Configurar Point-in-Time Recovery
-     - Documentar restore procedure
-     
+    - Usar Supabase dashboard
+    - Configurar Point-in-Time Recovery
+    - Documentar restore procedure
+
   2. Secrets Management:
-     - Auditar código (você já pode começar!)
-     - Preparar lista para Key Vault
-     - NÃO precisa Azure ainda
-     
+    - Auditar código (você já pode começar!)
+    - Preparar lista para Key Vault
+    - NÃO precisa Azure ainda
+
   3. Observability:
-     - Winston/Pino no Express atual
-     - Sentry no código atual
-     - /health endpoint no Express
-     
+    - Winston/Pino no Express atual
+    - Sentry no código atual
+    - /health endpoint no Express
+
   4. Configuration:
-     - Externalizar para .env
-     - Preparar para 12-factor
-     - Documentar configs
+    - Externalizar para .env
+    - Preparar para 12-factor
+    - Documentar configs
 ```
 
 ### Azure Key Vault - Único Ponto de Conexão:
+
 ```yaml
 Estratégia Híbrida Temporária:
   - Secrets no Azure Key Vault
@@ -95,6 +99,7 @@ Estratégia Híbrida Temporária:
 ## 📋 PLANO DE TRABALHO MAPEADO
 
 ### Semana 1: Preparação (Supabase)
+
 ```
 Dia 1-2: Backup + Secrets audit
 Dia 3-4: Logging + Monitoring
@@ -102,6 +107,7 @@ Dia 5: Testing + Documentation
 ```
 
 ### Semana 2: Azure Setup (Paralelo)
+
 ```
 Dia 6-7: Provisioning infrastructure
 Dia 8-9: Container Apps + Database
@@ -109,6 +115,7 @@ Dia 10: Integration testing
 ```
 
 ### Semana 3-4: Migration
+
 ```
 Dia 11-15: Staging validation
 Dia 16-20: Production cutover
@@ -131,11 +138,13 @@ Antes de começarmos a execução, preciso confirmar:
 ## 🚀 PRÓXIMOS PASSOS
 
 ### AGORA (Mapeamento):
+
 1. ✅ Documentação completa criada
 2. ✅ Estratégia clarificada
 3. ✅ Roadmap detalhado
 
 ### DEPOIS DO SEU OK (Execução):
+
 1. Você começa secrets audit
 2. Eu preparo Terraform (para futuro)
 3. Implementamos logging/monitoring
@@ -153,15 +162,16 @@ Antes de começarmos a execução, preciso confirmar:
 ```
 
 Se SIM, você pode começar IMEDIATAMENTE com:
+
 1. Listar todos os secrets no código
 2. Verificar acesso ao Supabase dashboard
 3. Preparar para implementar /health
 
 ---
 
-*Aguardando sua confirmação para transição de MAPEAMENTO → EXECUÇÃO*
+_Aguardando sua confirmação para transição de MAPEAMENTO → EXECUÇÃO_
 
 ---
 
-*GEM 01 - Arquiteto Senior*
-*21/08/2025 12:10 UTC*
+_GEM 01 - Arquiteto Senior_
+_21/08/2025 12:10 UTC_

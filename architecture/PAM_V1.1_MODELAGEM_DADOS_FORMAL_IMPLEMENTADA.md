@@ -11,11 +11,13 @@
 ## 📋 **CONTEXTO DA MISSÃO**
 
 ### Lacuna Identificada na Auditoria
+
 - **Ponto 39 - Modelagem de Dados:** 0% de conformidade (6/6 subtópicos pendentes)
 - **Impacto:** Base de dados sem modelagem formal, inconsistências potenciais
 - **Risco:** Problemas de performance e integridade em escala
 
 ### Objetivos do PAM V1.1
+
 1. Criar modelo conceitual, lógico e físico completo
 2. Definir padrões de acesso e estratégia de indexação
 3. Estabelecer estratégia de evolução de schema
@@ -37,33 +39,33 @@ erDiagram
     PROPOSTA ||--o{ PARCELA : "gera"
     PROPOSTA ||--o{ DOCUMENTO : "anexa"
     PROPOSTA ||--o{ PROPOSTA_LOG : "registra"
-    
+
     %% Business Rules & Analysis
     PROPOSTA ||--|| ANALISE_CREDITO : "possui"
     ANALISE_CREDITO ||--o{ SCORE_HISTORICO : "calcula"
-    
+
     %% Partner & Store Management
     PARCEIRO ||--o{ LOJA : "possui"
     LOJA ||--o{ PROPOSTA : "origina"
     LOJA ||--o{ USUARIO : "emprega"
-    
+
     %% Product & Commercial Configuration
     PRODUTO ||--o{ PRODUTO_TABELA_COMERCIAL : "usa"
     TABELA_COMERCIAL ||--o{ PRODUTO_TABELA_COMERCIAL : "aplica"
-    
+
     %% Payment & Financial Operations
     PARCELA ||--o{ PAGAMENTO : "recebe"
     PAGAMENTO ||--|| BOLETO : "pode_ser"
     PAGAMENTO ||--|| PIX : "pode_ser"
-    
+
     %% Contract & Formalization
     PROPOSTA ||--o{ CONTRATO : "formaliza"
     CONTRATO ||--o{ ASSINATURA_LOG : "rastreia"
-    
+
     %% Audit & Communication
     PROPOSTA ||--o{ COMUNICACAO_LOG : "comunica"
     USUARIO ||--o{ NOTIFICACAO : "recebe"
-    
+
     %% External Integration Events
     PROPOSTA ||--o{ INTER_CALLBACK : "webhook_bancario"
     CONTRATO ||--o{ CLICKSIGN_CALLBACK : "webhook_assinatura"
@@ -71,13 +73,13 @@ erDiagram
 
 ### 1.2 Entidades Core e Atributos Essenciais
 
-| **Entidade** | **Propósito de Negócio** | **Atributos Chave** | **Relacionamentos Críticos** |
-|--------------|--------------------------|---------------------|-------------------------------|
-| **PROPOSTA** | Solicitação de crédito central ao negócio | id, status, valor, prazo, cliente_* | PRODUTO, LOJA, PARCELA, ANALISE |
-| **CLIENTE** | Pessoa física solicitante | cpf, nome, renda_mensal, score | PROPOSTA (1:N) |
-| **PARCELA** | Prestação mensal do empréstimo | numero, valor, vencimento, status | PROPOSTA (N:1), PAGAMENTO (1:N) |
-| **PRODUTO** | Tipo de crédito oferecido | nome, categoria, taxa_base | TABELA_COMERCIAL, PROPOSTA |
-| **LOJA** | Ponto de originação | cnpj, nome, parceiro_id | PARCEIRO (N:1), PROPOSTA (1:N) |
+| **Entidade** | **Propósito de Negócio**                  | **Atributos Chave**                   | **Relacionamentos Críticos**    |
+| ------------ | ----------------------------------------- | ------------------------------------- | ------------------------------- |
+| **PROPOSTA** | Solicitação de crédito central ao negócio | id, status, valor, prazo, cliente\_\* | PRODUTO, LOJA, PARCELA, ANALISE |
+| **CLIENTE**  | Pessoa física solicitante                 | cpf, nome, renda_mensal, score        | PROPOSTA (1:N)                  |
+| **PARCELA**  | Prestação mensal do empréstimo            | numero, valor, vencimento, status     | PROPOSTA (N:1), PAGAMENTO (1:N) |
+| **PRODUTO**  | Tipo de crédito oferecido                 | nome, categoria, taxa_base            | TABELA_COMERCIAL, PROPOSTA      |
+| **LOJA**     | Ponto de originação                       | cnpj, nome, parceiro_id               | PARCEIRO (N:1), PROPOSTA (1:N)  |
 
 ---
 
@@ -94,14 +96,14 @@ erDiagram
 CREATE TABLE propostas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     numero_sequencial BIGINT UNIQUE NOT NULL, -- Business ID
-    
+
     -- Cliente (desnormalizado para performance)
     cliente_nome VARCHAR(200) NOT NULL,
     cliente_cpf VARCHAR(11) UNIQUE NOT NULL,
     cliente_email VARCHAR(320) NOT NULL,
     cliente_telefone VARCHAR(20),
     cliente_renda_mensal DECIMAL(12,2),
-    
+
     -- Condições do Empréstimo
     valor_solicitado DECIMAL(12,2) NOT NULL,
     prazo_meses INTEGER NOT NULL,
@@ -110,17 +112,17 @@ CREATE TABLE propostas (
     valor_iof DECIMAL(12,2),
     valor_tac DECIMAL(12,2),
     cet DECIMAL(8,4),
-    
+
     -- Relacionamentos
     produto_id INTEGER NOT NULL REFERENCES produtos(id),
     loja_id INTEGER NOT NULL REFERENCES lojas(id),
-    
+
     -- Workflow e Audit
     status status_proposta NOT NULL DEFAULT 'aguardando_analise',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ NULL, -- Soft delete
-    
+
     -- Indexação estratégica
     CONSTRAINT ck_valor_positivo CHECK (valor_solicitado > 0),
     CONSTRAINT ck_prazo_valido CHECK (prazo_meses BETWEEN 6 AND 60)
@@ -151,14 +153,14 @@ CREATE TABLE parcelas (
     valor_total DECIMAL(12,2) NOT NULL,
     data_vencimento DATE NOT NULL,
     status status_parcela NOT NULL DEFAULT 'aguardando',
-    
+
     -- Tracking de pagamento
     valor_pago DECIMAL(12,2) DEFAULT 0,
     data_pagamento TIMESTAMPTZ NULL,
     forma_pagamento VARCHAR(50) NULL,
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     UNIQUE(proposta_id, numero),
     CONSTRAINT ck_numero_positivo CHECK (numero > 0),
     CONSTRAINT ck_valor_parcela_positivo CHECK (valor_total > 0)
@@ -206,7 +208,7 @@ CREATE TABLE produto_tabela_comercial (
     tabela_comercial_id INTEGER NOT NULL REFERENCES tabelas_comerciais(id),
     prioridade INTEGER NOT NULL DEFAULT 1,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     PRIMARY KEY (produto_id, tabela_comercial_id)
 );
 
@@ -224,7 +226,7 @@ CREATE TABLE status_transitions (
     usuario_id UUID,
     metadata JSONB,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     CONSTRAINT ck_transicao_valida CHECK (status_anterior != status_novo)
 );
 
@@ -341,24 +343,24 @@ CREATE TYPE tabela_tipo AS ENUM (
 -- ====================================
 
 -- Propostas: Queries mais frequentes
-CREATE INDEX CONCURRENTLY idx_propostas_status_created 
-ON propostas(status, created_at DESC) 
+CREATE INDEX CONCURRENTLY idx_propostas_status_created
+ON propostas(status, created_at DESC)
 WHERE deleted_at IS NULL;
 
-CREATE INDEX CONCURRENTLY idx_propostas_loja_status 
-ON propostas(loja_id, status) 
+CREATE INDEX CONCURRENTLY idx_propostas_loja_status
+ON propostas(loja_id, status)
 WHERE deleted_at IS NULL;
 
-CREATE INDEX CONCURRENTLY idx_propostas_cpf_ativo 
-ON propostas(cliente_cpf) 
+CREATE INDEX CONCURRENTLY idx_propostas_cpf_ativo
+ON propostas(cliente_cpf)
 WHERE deleted_at IS NULL;
 
 -- Parcelas: Controle de vencimento e pagamento
-CREATE INDEX CONCURRENTLY idx_parcelas_vencimento_status 
-ON parcelas(data_vencimento, status) 
+CREATE INDEX CONCURRENTLY idx_parcelas_vencimento_status
+ON parcelas(data_vencimento, status)
 WHERE status IN ('aguardando', 'vencida');
 
-CREATE INDEX CONCURRENTLY idx_parcelas_proposta_numero 
+CREATE INDEX CONCURRENTLY idx_parcelas_proposta_numero
 ON parcelas(proposta_id, numero);
 
 -- ====================================
@@ -366,13 +368,13 @@ ON parcelas(proposta_id, numero);
 -- ====================================
 
 -- Dashboard e Relatórios
-CREATE INDEX CONCURRENTLY idx_propostas_analytics 
-ON propostas(created_at, status, produto_id, loja_id) 
+CREATE INDEX CONCURRENTLY idx_propostas_analytics
+ON propostas(created_at, status, produto_id, loja_id)
 WHERE deleted_at IS NULL;
 
 -- Busca por cliente (múltiplos campos)
-CREATE INDEX CONCURRENTLY idx_propostas_cliente_search 
-ON propostas(cliente_nome, cliente_cpf, cliente_email) 
+CREATE INDEX CONCURRENTLY idx_propostas_cliente_search
+ON propostas(cliente_nome, cliente_cpf, cliente_email)
 WHERE deleted_at IS NULL;
 
 -- ====================================
@@ -380,11 +382,11 @@ WHERE deleted_at IS NULL;
 -- ====================================
 
 -- Configurações de tabelas comerciais
-CREATE INDEX CONCURRENTLY idx_tabelas_configuracao_gin 
+CREATE INDEX CONCURRENTLY idx_tabelas_configuracao_gin
 ON tabelas_comerciais USING GIN (configuracao);
 
 -- Metadata de transições
-CREATE INDEX CONCURRENTLY idx_transitions_metadata_gin 
+CREATE INDEX CONCURRENTLY idx_transitions_metadata_gin
 ON status_transitions USING GIN (metadata);
 
 -- ====================================
@@ -392,10 +394,10 @@ ON status_transitions USING GIN (metadata);
 -- ====================================
 
 -- Logs por período (particionamento futuro)
-CREATE INDEX CONCURRENTLY idx_comunicacao_logs_periodo 
+CREATE INDEX CONCURRENTLY idx_comunicacao_logs_periodo
 ON comunicacao_logs(created_at DESC, tipo);
 
-CREATE INDEX CONCURRENTLY idx_status_transitions_periodo 
+CREATE INDEX CONCURRENTLY idx_status_transitions_periodo
 ON status_transitions(created_at DESC, proposta_id);
 ```
 
@@ -423,13 +425,13 @@ FOR VALUES FROM ('2025-02-01') TO ('2025-03-01');
 -- ====================================
 
 -- Limitar crescimento de tabelas críticas
-ALTER TABLE status_transitions 
-ADD CONSTRAINT ck_retention_period 
+ALTER TABLE status_transitions
+ADD CONSTRAINT ck_retention_period
 CHECK (created_at > NOW() - INTERVAL '2 years');
 
 -- Constraint de volumetria para webhook callbacks
-ALTER TABLE inter_callbacks 
-ADD CONSTRAINT ck_callback_retention 
+ALTER TABLE inter_callbacks
+ADD CONSTRAINT ck_callback_retention
 CHECK (created_at > NOW() - INTERVAL '6 months');
 ```
 
@@ -439,13 +441,13 @@ CHECK (created_at > NOW() - INTERVAL '6 months');
 
 ### 4.1 Queries Críticas Identificadas
 
-| **Query Pattern** | **Frequência** | **Complexidade** | **Impacto Performance** | **Índice Requerido** |
-|-------------------|----------------|------------------|-------------------------|----------------------|
-| `SELECT * FROM propostas WHERE status = ? ORDER BY created_at DESC` | 1000/min | Baixa | Alto | `idx_propostas_status_created` |
-| `SELECT p.*, l.nome FROM propostas p JOIN lojas l WHERE l.id = ?` | 500/min | Média | Médio | `idx_propostas_loja_status` |
-| `SELECT * FROM parcelas WHERE data_vencimento <= NOW() AND status = 'aguardando'` | 100/min | Baixa | Alto | `idx_parcelas_vencimento_status` |
-| `SELECT p.* FROM propostas p WHERE cliente_cpf = ?` | 300/min | Baixa | Médio | `idx_propostas_cpf_ativo` |
-| Analytics dashboard (agregações por período) | 50/min | Alta | Alto | `idx_propostas_analytics` |
+| **Query Pattern**                                                                 | **Frequência** | **Complexidade** | **Impacto Performance** | **Índice Requerido**             |
+| --------------------------------------------------------------------------------- | -------------- | ---------------- | ----------------------- | -------------------------------- |
+| `SELECT * FROM propostas WHERE status = ? ORDER BY created_at DESC`               | 1000/min       | Baixa            | Alto                    | `idx_propostas_status_created`   |
+| `SELECT p.*, l.nome FROM propostas p JOIN lojas l WHERE l.id = ?`                 | 500/min        | Média            | Médio                   | `idx_propostas_loja_status`      |
+| `SELECT * FROM parcelas WHERE data_vencimento <= NOW() AND status = 'aguardando'` | 100/min        | Baixa            | Alto                    | `idx_parcelas_vencimento_status` |
+| `SELECT p.* FROM propostas p WHERE cliente_cpf = ?`                               | 300/min        | Baixa            | Médio                   | `idx_propostas_cpf_ativo`        |
+| Analytics dashboard (agregações por período)                                      | 50/min         | Alta             | Alto                    | `idx_propostas_analytics`        |
 
 ### 4.2 Estratégia de Caching
 
@@ -453,22 +455,22 @@ CHECK (created_at > NOW() - INTERVAL '6 months');
 // Cache Strategy para queries frequentes
 const CACHE_STRATEGIES = {
   // Query patterns com TTL otimizado
-  'propostas_by_status': {
+  propostas_by_status: {
     ttl: 300, // 5 minutos
-    invalidation: ['proposta_status_change']
+    invalidation: ['proposta_status_change'],
   },
-  'produtos_ativos': {
+  produtos_ativos: {
     ttl: 3600, // 1 hora
-    invalidation: ['produto_update']
+    invalidation: ['produto_update'],
   },
-  'tabelas_comerciais_vigentes': {
+  tabelas_comerciais_vigentes: {
     ttl: 1800, // 30 minutos
-    invalidation: ['tabela_comercial_update']
+    invalidation: ['tabela_comercial_update'],
   },
-  'loja_configuration': {
+  loja_configuration: {
     ttl: 7200, // 2 horas
-    invalidation: ['loja_update']
-  }
+    invalidation: ['loja_update'],
+  },
 };
 ```
 
@@ -478,34 +480,34 @@ const CACHE_STRATEGIES = {
 
 ### 5.1 Projeções de Crescimento (12 meses)
 
-| **Tabela** | **Volume Atual** | **Crescimento Mensal** | **Volume 12M** | **Storage Estimado** |
-|------------|------------------|------------------------|----------------|----------------------|
-| **propostas** | 500 | 2.000 | 24.500 | 50 MB |
-| **parcelas** | 8.000 | 48.000 | 584.000 | 120 MB |
-| **status_transitions** | 2.000 | 12.000 | 146.000 | 30 MB |
-| **comunicacao_logs** | 5.000 | 30.000 | 365.000 | 200 MB |
-| **inter_callbacks** | 1.000 | 8.000 | 97.000 | 50 MB |
-| **clicksign_callbacks** | 200 | 1.500 | 18.200 | 10 MB |
-| **TOTAL** | - | - | **1.234.700** | **460 MB** |
+| **Tabela**              | **Volume Atual** | **Crescimento Mensal** | **Volume 12M** | **Storage Estimado** |
+| ----------------------- | ---------------- | ---------------------- | -------------- | -------------------- |
+| **propostas**           | 500              | 2.000                  | 24.500         | 50 MB                |
+| **parcelas**            | 8.000            | 48.000                 | 584.000        | 120 MB               |
+| **status_transitions**  | 2.000            | 12.000                 | 146.000        | 30 MB                |
+| **comunicacao_logs**    | 5.000            | 30.000                 | 365.000        | 200 MB               |
+| **inter_callbacks**     | 1.000            | 8.000                  | 97.000         | 50 MB                |
+| **clicksign_callbacks** | 200              | 1.500                  | 18.200         | 10 MB                |
+| **TOTAL**               | -                | -                      | **1.234.700**  | **460 MB**           |
 
 ### 5.2 Thresholds de Performance
 
 ```sql
 -- Alertas de volumetria automatizados
-CREATE OR REPLACE FUNCTION check_table_growth() 
+CREATE OR REPLACE FUNCTION check_table_growth()
 RETURNS TABLE(table_name TEXT, current_count BIGINT, growth_rate NUMERIC) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 'propostas'::TEXT, COUNT(*)::BIGINT, 
+    SELECT 'propostas'::TEXT, COUNT(*)::BIGINT,
            (COUNT(*) * 100.0 / 24500)::NUMERIC as growth_pct
-    FROM propostas 
+    FROM propostas
     WHERE created_at >= NOW() - INTERVAL '1 month'
-    
+
     UNION ALL
-    
+
     SELECT 'comunicacao_logs'::TEXT, COUNT(*)::BIGINT,
            (COUNT(*) * 100.0 / 30000)::NUMERIC as growth_pct
-    FROM comunicacao_logs 
+    FROM comunicacao_logs
     WHERE created_at >= NOW() - INTERVAL '1 month';
 END;
 $$ LANGUAGE plpgsql;
@@ -523,14 +525,14 @@ $$ LANGUAGE plpgsql;
 -- ====================================
 
 -- Fase 1: EXPAND (Adicionar nova coluna)
-ALTER TABLE propostas 
+ALTER TABLE propostas
 ADD COLUMN nova_coluna_v2 TEXT NULL;
 
 -- Fase 2: DUAL WRITE (Aplicação escreve nos dois campos)
 -- [Deployment da aplicação que escreve em ambos]
 
 -- Fase 3: MIGRATE (Backfill de dados existentes)
-UPDATE propostas 
+UPDATE propostas
 SET nova_coluna_v2 = legacy_column_transformation(antiga_coluna)
 WHERE nova_coluna_v2 IS NULL;
 
@@ -543,17 +545,17 @@ ALTER TABLE propostas ALTER COLUMN nova_coluna_v2 SET NOT NULL;
 
 ```yaml
 # schema_migrations.yml
-version: "2025.08.22.001"
-description: "Adicionar campo score_credito em propostas"
-type: "additive" # additive | breaking | data_migration
-rollback_strategy: "drop_column"
-estimated_duration: "< 5 minutes"
+version: '2025.08.22.001'
+description: 'Adicionar campo score_credito em propostas'
+type: 'additive' # additive | breaking | data_migration
+rollback_strategy: 'drop_column'
+estimated_duration: '< 5 minutes'
 pre_conditions:
-  - table_exists: "propostas"
-  - index_exists: "idx_propostas_status_created"
+  - table_exists: 'propostas'
+  - index_exists: 'idx_propostas_status_created'
 post_conditions:
-  - column_exists: "propostas.score_credito"
-  - column_nullable: "propostas.score_credito"
+  - column_exists: 'propostas.score_credito'
+  - column_nullable: 'propostas.score_credito'
 ```
 
 ---
@@ -571,22 +573,22 @@ post_conditions:
 CREATE TABLE propostas_history (
     history_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     proposta_id UUID NOT NULL,
-    
+
     -- Todos os campos da tabela original
     cliente_nome VARCHAR(200),
     valor_solicitado DECIMAL(12,2),
     status status_proposta,
     -- ... outros campos
-    
+
     -- Temporal tracking
     valid_from TIMESTAMPTZ NOT NULL,
     valid_to TIMESTAMPTZ NOT NULL DEFAULT 'infinity',
     transaction_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     -- Audit metadata
     changed_by UUID,
     change_reason TEXT,
-    
+
     CONSTRAINT ck_valid_period CHECK (valid_from < valid_to)
 );
 
@@ -595,20 +597,20 @@ CREATE OR REPLACE FUNCTION track_proposta_changes()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Fechar período anterior
-    UPDATE propostas_history 
+    UPDATE propostas_history
     SET valid_to = NOW()
     WHERE proposta_id = NEW.id AND valid_to = 'infinity';
-    
+
     -- Inserir nova versão
     INSERT INTO propostas_history (
         proposta_id, cliente_nome, valor_solicitado, status,
         valid_from, changed_by, change_reason
     ) VALUES (
         NEW.id, NEW.cliente_nome, NEW.valor_solicitado, NEW.status,
-        NOW(), current_setting('app.user_id', true)::UUID, 
+        NOW(), current_setting('app.user_id', true)::UUID,
         current_setting('app.change_reason', true)
     );
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -637,7 +639,7 @@ $$ LANGUAGE sql;
 
 -- Auditoria de mudanças por período
 CREATE VIEW vw_proposta_changes AS
-SELECT 
+SELECT
     h.proposta_id,
     h.status as status_anterior,
     h2.status as status_novo,
@@ -656,14 +658,14 @@ WHERE h.valid_to = h2.valid_from
 
 ### 8.1 Checklist de Validação
 
-| **Subtópico Obrigatório** | **Status** | **Artefato Criado** |
-|---------------------------|------------|---------------------|
-| ✅ Modelo Conceitual, Lógico e Físico | **CONCLUÍDO** | Seções 1, 2, 3 |
-| ✅ Análise dos Padrões de Acesso a Dados | **CONCLUÍDO** | Seção 4 |
-| ✅ Estratégia de Indexação detalhada | **CONCLUÍDO** | Seção 3.1 |
-| ✅ Estimativas de Volumetria de Dados | **CONCLUÍDO** | Seção 5 |
-| ✅ Estratégia de Evolução do Schema | **CONCLUÍDO** | Seção 6 |
-| ✅ Modelagem de Dados Temporais | **CONCLUÍDO** | Seção 7 |
+| **Subtópico Obrigatório**                | **Status**    | **Artefato Criado** |
+| ---------------------------------------- | ------------- | ------------------- |
+| ✅ Modelo Conceitual, Lógico e Físico    | **CONCLUÍDO** | Seções 1, 2, 3      |
+| ✅ Análise dos Padrões de Acesso a Dados | **CONCLUÍDO** | Seção 4             |
+| ✅ Estratégia de Indexação detalhada     | **CONCLUÍDO** | Seção 3.1           |
+| ✅ Estimativas de Volumetria de Dados    | **CONCLUÍDO** | Seção 5             |
+| ✅ Estratégia de Evolução do Schema      | **CONCLUÍDO** | Seção 6             |
+| ✅ Modelagem de Dados Temporais          | **CONCLUÍDO** | Seção 7             |
 
 ### 8.2 Próximos Passos de Implementação
 
@@ -698,6 +700,6 @@ WHERE h.valid_to = h2.valid_from
 
 ---
 
-*Documento técnico criado por GEM-07 AI Specialist System*  
-*Timestamp: 2025-08-22T17:15:00Z*  
-*Sprint 1 - Sprint Fundação de Dados e Padrões*
+_Documento técnico criado por GEM-07 AI Specialist System_  
+_Timestamp: 2025-08-22T17:15:00Z_  
+_Sprint 1 - Sprint Fundação de Dados e Padrões_

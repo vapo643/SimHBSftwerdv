@@ -10,7 +10,7 @@ on:
     - cron: '0 2 * * *' # Daily at 2 AM UTC
   workflow_dispatch:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   # SAST - Static Application Security Testing
@@ -22,16 +22,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full history for better analysis
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
         with:
@@ -42,19 +42,19 @@ jobs:
             p/react
             p/nodejs
           generateSarif: true
-          
+
       - name: Upload Semgrep results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: semgrep.sarif
-          
+
       - name: Run ESLint security plugin
         run: |
           npm install --save-dev eslint-plugin-security
           npx eslint . --ext .ts,.tsx,.js,.jsx --format json > eslint-security.json
         continue-on-error: true
-        
+
       - name: Upload ESLint results
         uses: actions/upload-artifact@v4
         if: always()
@@ -69,20 +69,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Run npm audit
         run: |
           npm audit --json > npm-audit.json || true
           npm audit
         continue-on-error: true
-        
+
       - name: Upload npm audit results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: npm-audit-results
           path: npm-audit.json
-          
+
       - name: Run Snyk scan
         uses: snyk/actions/node@master
         continue-on-error: true
@@ -90,7 +90,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
-          
+
       - name: OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
@@ -101,7 +101,7 @@ jobs:
             --enableRetired
             --enableExperimental
             --nvdApiKey ${{ secrets.NVD_API_KEY }}
-            
+
       - name: Upload OWASP results
         uses: actions/upload-artifact@v4
         if: always()
@@ -118,7 +118,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - name: TruffleHog scan
         uses: trufflesecurity/trufflehog@main
         with:
@@ -126,12 +126,12 @@ jobs:
           base: ${{ github.event.repository.default_branch }}
           head: HEAD
           extra_args: --debug --only-verified
-          
+
       - name: Gitleaks scan
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Check .env files
         run: |
           echo "Checking for exposed .env files..."
@@ -152,7 +152,7 @@ jobs:
           image-ref: 'simpix:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          
+
       - name: Upload Trivy results
         uses: github/codeql-action/upload-sarif@v3
         with:
@@ -165,17 +165,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Check licenses
         run: |
           npm install -g license-checker
           license-checker --json > licenses.json
-          
+
           # Check for problematic licenses
           if grep -E '"licenses": ".*(GPL|AGPL|LGPL)"' licenses.json; then
             echo "⚠️ Warning: GPL-licensed dependencies found"
           fi
-          
+
       - name: Upload license report
         uses: actions/upload-artifact@v4
         with:
@@ -193,43 +193,43 @@ jobs:
         run: |
           cat > security-report.md << EOF
           # Security Scan Report
-          
+
           ## Scan Date
           $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          
+
           ## Results Summary
           - SAST Analysis: ${{ needs.sast.result }}
           - Dependency Scan: ${{ needs.dependency-scan.result }}
           - Secret Scan: ${{ needs.secret-scan.result }}
           - License Check: ${{ needs.license-check.result }}
-          
+
           ## Risk Assessment
           - **Critical Issues:** 0
           - **High Issues:** 0
           - **Medium Issues:** 0
           - **Low Issues:** 0
-          
+
           ## Compliance Status
           - OWASP Top 10: ✅ Compliant
           - PCI DSS: ⚠️ Review needed
           - LGPD/GDPR: ⚠️ Review needed
-          
+
           ## Recommendations
           1. Review and update dependencies regularly
           2. Enable Dependabot for automatic updates
           3. Implement security headers validation
           4. Add DAST scanning for staging environment
-          
+
           ## Next Security Review
           Scheduled for: $(date -d "+7 days" +"%Y-%m-%d")
           EOF
-          
+
       - name: Upload security report
         uses: actions/upload-artifact@v4
         with:
           name: security-report
           path: security-report.md
-          
+
       - name: Create issue if critical findings
         if: failure()
         uses: actions/github-script@v7

@@ -4,7 +4,7 @@
 **Versão:** 1.0  
 **Data:** 22 de Agosto de 2025  
 **Status:** Oficial - Doutrina de Gestão de Estado  
-**Aprovação:** Pendente Ratificação do Arquiteto Chefe  
+**Aprovação:** Pendente Ratificação do Arquiteto Chefe
 
 ---
 
@@ -14,7 +14,7 @@ Este documento estabelece a doutrina oficial para gestão de estado no frontend 
 
 **Ponto de Conformidade:** Remediação do Ponto 59 - Gestão de Estado no Cliente  
 **Criticidade:** P1 (Alta Prioridade)  
-**Impacto:** Consistência, performance e manutenibilidade do frontend  
+**Impacto:** Consistência, performance e manutenibilidade do frontend
 
 ---
 
@@ -35,7 +35,7 @@ Este documento estabelece a doutrina oficial para gestão de estado no frontend 
  * - Cached no frontend para performance
  * - Sincronização automática necessária
  * - Invalidação após mutações
- * 
+ *
  * FERRAMENTA: TanStack Query (obrigatório)
  */
 const serverStateExamples = {
@@ -43,7 +43,7 @@ const serverStateExamples = {
   proposals: 'Propostas e seu status',
   featureFlags: 'Feature flags do backend',
   commercialTables: 'Tabelas comerciais',
-  systemMetadata: 'Metadados do sistema'
+  systemMetadata: 'Metadados do sistema',
 } as const;
 
 /**
@@ -52,7 +52,7 @@ const serverStateExamples = {
  * - Vida apenas no navegador
  * - Descreve estado da interface
  * - Sem sincronização com backend
- * 
+ *
  * FERRAMENTAS: Context API + useReducer + useState
  */
 const clientStateExamples = {
@@ -60,7 +60,7 @@ const clientStateExamples = {
   theme: 'Tema da UI (light/dark)',
   modalStates: 'Estados de modais abertos/fechados',
   formProgress: 'Progresso de formulários multi-step',
-  uiFilters: 'Filtros ativos em tabelas'
+  uiFilters: 'Filtros ativos em tabelas',
 } as const;
 
 /**
@@ -126,20 +126,20 @@ const stateClassificationDecisionTree = (
  * queryClient.ts - Configuração Oficial
  * Esta configuração está baseada no código real implementado
  */
-import { QueryClient } from "@tanstack/react-query";
-import { apiRequest } from "./apiClient";
+import { QueryClient } from '@tanstack/react-query';
+import { apiRequest } from './apiClient';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,         // Evita polling desnecessário
-      refetchOnWindowFocus: false,    // Evita refetch em focus
-      staleTime: Infinity,            // Cache agressivo por padrão
-      retry: false,                   // Retry customizado por query
+      queryFn: getQueryFn({ on401: 'throw' }),
+      refetchInterval: false, // Evita polling desnecessário
+      refetchOnWindowFocus: false, // Evita refetch em focus
+      staleTime: Infinity, // Cache agressivo por padrão
+      retry: false, // Retry customizado por query
     },
     mutations: {
-      retry: false,                   // Mutations nunca retry automático
+      retry: false, // Mutations nunca retry automático
     },
   },
 });
@@ -150,17 +150,16 @@ export const queryClient = new QueryClient({
  */
 export const queryKeys = {
   users: {
-    all: ["users"] as const,
-    details: () => [...queryKeys.users.all, "detail"] as const,
+    all: ['users'] as const,
+    details: () => [...queryKeys.users.all, 'detail'] as const,
     detail: (id: string | number) => [...queryKeys.users.details(), id] as const,
   },
   proposals: {
-    all: ["proposals"] as const,
-    lists: () => [...queryKeys.proposals.all, "list"] as const,
-    list: (filters?: Record<string, unknown>) => 
+    all: ['proposals'] as const,
+    lists: () => [...queryKeys.proposals.all, 'list'] as const,
+    list: (filters?: Record<string, unknown>) =>
       [...queryKeys.proposals.lists(), { filters }] as const,
-    byStatus: (status: string) => 
-      [...queryKeys.proposals.all, "byStatus", status] as const,
+    byStatus: (status: string) => [...queryKeys.proposals.all, 'byStatus', status] as const,
   },
   // ... outros domains
 } as const;
@@ -186,13 +185,13 @@ const criticalDataQueries = {
     staleTime: 0,
     refetchInterval: 30000,
     retry: 3,
-    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000)
+    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
   },
   payments: {
     staleTime: 0,
     refetchInterval: 30000,
-    retry: 3
-  }
+    retry: 3,
+  },
 } as const;
 
 /**
@@ -203,15 +202,15 @@ const criticalDataQueries = {
  */
 const semiStaticDataQueries = {
   commercialTables: {
-    staleTime: 5 * 60 * 1000,      // 5 minutos
+    staleTime: 5 * 60 * 1000, // 5 minutos
     refetchInterval: false,
-    retry: 1
+    retry: 1,
   },
   products: {
     staleTime: 5 * 60 * 1000,
     refetchInterval: false,
-    retry: 1
-  }
+    retry: 1,
+  },
 } as const;
 
 /**
@@ -222,11 +221,11 @@ const semiStaticDataQueries = {
  */
 const dynamicDataQueries = {
   featureFlags: {
-    staleTime: 30000,             // 30 segundos
-    refetchInterval: 60000,       // 1 minuto
+    staleTime: 30000, // 30 segundos
+    refetchInterval: 60000, // 1 minuto
     retry: 3,
-    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000)
-  }
+    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  },
 } as const;
 ```
 
@@ -245,8 +244,8 @@ const dynamicDataQueries = {
  */
 const { data, isLoading, error, refetch } = useQuery({
   queryKey: ['/api/features'],
-  refetchInterval: 60000,         // Auto-refresh cada minuto
-  staleTime: 30000,              // Fresh por 30 segundos
+  refetchInterval: 60000, // Auto-refresh cada minuto
+  staleTime: 30000, // Fresh por 30 segundos
   retry: 3,
   retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 });
@@ -260,12 +259,12 @@ const useProposalsList = (filters?: ProposalFilters) => {
     queryKey: queryKeys.proposals.list(filters),
     refetchInterval: (data) => {
       // Polling mais frequente se há propostas em análise
-      const hasActiveProposals = data?.some(p => 
+      const hasActiveProposals = data?.some((p) =>
         ['EM_ANALISE', 'AGUARDANDO_ANALISE'].includes(p.status)
       );
       return hasActiveProposals ? 30000 : false; // 30s ou desabilitado
     },
-    refetchOnWindowFocus: true,   // Refresh ao retornar à página
+    refetchOnWindowFocus: true, // Refresh ao retornar à página
   });
 };
 
@@ -276,9 +275,9 @@ const useProposalsList = (filters?: ProposalFilters) => {
 const useUserProfile = (userId: string) => {
   return useQuery({
     queryKey: queryKeys.users.detail(userId),
-    staleTime: 10 * 60 * 1000,    // Fresh por 10 minutos
-    refetchInterval: false,        // Sem polling automático
-    refetchOnWindowFocus: false,   // Sem refresh em focus
+    staleTime: 10 * 60 * 1000, // Fresh por 10 minutos
+    refetchInterval: false, // Sem polling automático
+    refetchOnWindowFocus: false, // Sem refresh em focus
   });
 };
 ```
@@ -298,23 +297,16 @@ const useUserProfile = (userId: string) => {
  */
 export const invalidationPatterns = {
   // Quando user muda: invalida users, partners, stores
-  onUserChange: [
-    queryKeys.users.all,
-    queryKeys.partners.all,
-    queryKeys.stores.all,
-  ],
-  
+  onUserChange: [queryKeys.users.all, queryKeys.partners.all, queryKeys.stores.all],
+
   // Quando proposta muda: invalida propostas e dashboard
   onProposalChange: [
     queryKeys.proposals.all,
     queryKeys.system.metadata(), // Dashboard statistics
   ],
-  
+
   // Quando feature flag muda: invalida flags e UI state dependente
-  onFeatureFlagChange: [
-    ['/api/features'],
-    queryKeys.system.all,
-  ]
+  onFeatureFlagChange: [['/api/features'], queryKeys.system.all],
 } as const;
 
 /**
@@ -323,17 +315,17 @@ export const invalidationPatterns = {
  */
 const useCreateProposal = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (proposalData: ProposalCreateInput) => {
       return apiRequest('/api/propostas', {
         method: 'POST',
-        body: proposalData
+        body: proposalData,
       });
     },
     onSuccess: () => {
       // Invalidação hierárquica obrigatória
-      invalidationPatterns.onProposalChange.forEach(pattern => {
+      invalidationPatterns.onProposalChange.forEach((pattern) => {
         queryClient.invalidateQueries({ queryKey: pattern });
       });
     },
@@ -341,7 +333,7 @@ const useCreateProposal = () => {
       // Error handling padronizado
       console.error('Proposal creation failed:', error);
       // Toast notification ou error boundary
-    }
+    },
   });
 };
 
@@ -351,40 +343,36 @@ const useCreateProposal = () => {
  */
 const useUpdateProposalStatus = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       return apiRequest(`/api/propostas/${id}/status`, {
         method: 'PATCH',
-        body: { status }
+        body: { status },
       });
     },
     // Optimistic update para feedback imediato
     onMutate: async ({ id, status }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.proposals.detail(id) });
-      
+
       const previousData = queryClient.getQueryData(queryKeys.proposals.detail(id));
-      
-      queryClient.setQueryData(
-        queryKeys.proposals.detail(id),
-        (old: any) => old ? { ...old, status } : old
+
+      queryClient.setQueryData(queryKeys.proposals.detail(id), (old: any) =>
+        old ? { ...old, status } : old
       );
-      
+
       return { previousData, id };
     },
     // Rollback em caso de erro
     onError: (err, variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(
-          queryKeys.proposals.detail(context.id),
-          context.previousData
-        );
+        queryClient.setQueryData(queryKeys.proposals.detail(context.id), context.previousData);
       }
     },
     // Refetch para garantir consistência
     onSettled: (data, error, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.proposals.detail(id) });
-    }
+    },
   });
 };
 ```
@@ -425,9 +413,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Idle timeout management
   const [showIdleWarning, setShowIdleWarning] = useState(false);
-  
+
   // ... implementação da lógica de auth
-  
+
   return (
     <AuthContext.Provider value={{
       user, session, accessToken, isLoading, error,
@@ -439,7 +427,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 /**
- * ThemeContext - Exemplo Real Implementado  
+ * ThemeContext - Exemplo Real Implementado
  * Estado do tema da UI com persistência
  */
 interface ThemeContextType {
@@ -453,22 +441,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem("theme") as Theme;
     return stored || "light";
   });
-  
+
   const [actualTheme, setActualTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     const updateTheme = () => {
       let newActualTheme: "light" | "dark" = "light";
-      
+
       if (theme === "system") {
         newActualTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
           ? "dark" : "light";
       } else {
         newActualTheme = theme;
       }
-      
+
       setActualTheme(newActualTheme);
       root.classList.remove("light", "dark");
       root.classList.add(newActualTheme);
@@ -513,11 +501,11 @@ interface ExampleContextType {
   value: SomeType | null;
   isLoading: boolean;
   error: Error | null;
-  
-  // Actions  
+
+  // Actions
   setValue: (value: SomeType) => void;
   reset: () => void;
-  
+
   // Computed values (se necessário)
   isReady: boolean;
 }
@@ -658,21 +646,21 @@ const contextDependencyOrder = {
 interface ProposalState {
   // Context de originação
   originationContext: OriginationContext | null;
-  
+
   // Dados do cliente (multi-step)
   clientData: ClientData;
-  
+
   // Dados do empréstimo
   loanData: LoanData;
-  
+
   // Resultado da simulação
   simulationResult: SimulationResult | null;
-  
+
   // Estados de UI
   currentStep: ProposalStep;
   isSubmitting: boolean;
   errors: Record<string, string>;
-  
+
   // Flags de validação
   isClientDataValid: boolean;
   isLoanDataValid: boolean;
@@ -773,41 +761,41 @@ export function ProposalProvider({ children }: { children: ReactNode }) {
   const actions = useMemo(() => ({
     setOriginationContext: (context: OriginationContext) =>
       dispatch({ type: 'SET_ORIGINATION_CONTEXT', payload: context }),
-    
+
     updateClientData: (data: Partial<ClientData>) =>
       dispatch({ type: 'UPDATE_CLIENT_DATA', payload: data }),
-    
+
     updateLoanData: (data: Partial<LoanData>) =>
       dispatch({ type: 'UPDATE_LOAN_DATA', payload: data }),
-    
+
     setSimulationResult: (result: SimulationResult) =>
       dispatch({ type: 'SET_SIMULATION_RESULT', payload: result }),
-    
+
     nextStep: () => {
       const nextStepIndex = Math.min(currentStepIndex + 1, totalSteps - 1);
       const nextStep = ['client-data', 'loan-conditions', 'simulation', 'review'][nextStepIndex];
       dispatch({ type: 'SET_CURRENT_STEP', payload: nextStep as ProposalStep });
     },
-    
+
     previousStep: () => {
       const prevStepIndex = Math.max(currentStepIndex - 1, 0);
       const prevStep = ['client-data', 'loan-conditions', 'simulation', 'review'][prevStepIndex];
       dispatch({ type: 'SET_CURRENT_STEP', payload: prevStep as ProposalStep });
     },
-    
+
     resetProposal: () => dispatch({ type: 'RESET_PROPOSAL' })
   }), [currentStepIndex, totalSteps]);
 
   const contextValue = {
     // State
     ...state,
-    
+
     // Computed values
     canProceedToNextStep,
     progressPercentage,
     currentStepIndex,
     totalSteps,
-    
+
     // Actions
     ...actions
   };
@@ -840,7 +828,7 @@ const useStateExamples = {
   modalOpen: useState(false),
   filterText: useState(''),
   selectedTab: useState('overview'),
-  isLoading: useState(false)
+  isLoading: useState(false),
 };
 
 /**
@@ -856,7 +844,7 @@ const useReducerCriteria = {
   multipleActionTypes: 'UPDATE_CLIENT, VALIDATE, SUBMIT, RESET',
   interdependentValidation: 'clientData validity affects loanData options',
   workflowSteps: 'multi-step forms, wizards',
-  consistencyNeeds: 'atomic updates across related properties'
+  consistencyNeeds: 'atomic updates across related properties',
 } as const;
 
 /**
@@ -870,14 +858,14 @@ const shouldUseReducer = (stateProps: {
   needsValidation: boolean;
   isWorkflow: boolean;
 }): boolean => {
-  const { 
-    propertyCount, 
-    hasInterdependencies, 
+  const {
+    propertyCount,
+    hasInterdependencies,
     hasMultipleActionTypes,
     needsValidation,
-    isWorkflow 
+    isWorkflow,
   } = stateProps;
-  
+
   // If any of these is true, use useReducer
   return (
     propertyCount >= 4 ||
@@ -913,7 +901,7 @@ function useMultiStepForm<T extends Record<string, any>>({
   steps,
   initialData,
   validators,
-  onComplete
+  onComplete,
 }: UseMultiStepFormOptions<T>) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [formData, setFormData] = useState<T>(initialData);
@@ -929,12 +917,12 @@ function useMultiStepForm<T extends Record<string, any>>({
   }, [currentStep, formData, validators]);
 
   const updateData = useCallback((updates: Partial<T>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev) => ({ ...prev, ...updates }));
   }, []);
 
   const nextStep = useCallback(() => {
     if (canProceed && !isLastStep) {
-      setCurrentStepIndex(prev => prev + 1);
+      setCurrentStepIndex((prev) => prev + 1);
     } else if (canProceed && isLastStep) {
       onComplete?.(formData);
     }
@@ -942,7 +930,7 @@ function useMultiStepForm<T extends Record<string, any>>({
 
   const previousStep = useCallback(() => {
     if (!isFirstStep) {
-      setCurrentStepIndex(prev => prev - 1);
+      setCurrentStepIndex((prev) => prev - 1);
     }
   }, [isFirstStep]);
 
@@ -958,18 +946,18 @@ function useMultiStepForm<T extends Record<string, any>>({
     currentStepIndex,
     formData,
     errors,
-    
+
     // Computed
     isFirstStep,
     isLastStep,
     canProceed,
     progress: ((currentStepIndex + 1) / steps.length) * 100,
-    
+
     // Actions
     updateData,
     nextStep,
     previousStep,
-    reset
+    reset,
   };
 }
 
@@ -987,36 +975,35 @@ function useLoadingStates({ operations }: UseLoadingStatesOptions) {
   );
 
   const setLoading = useCallback((operation: string, isLoading: boolean) => {
-    setLoadingStates(prev => ({ ...prev, [operation]: isLoading }));
+    setLoadingStates((prev) => ({ ...prev, [operation]: isLoading }));
   }, []);
 
-  const isAnyLoading = useMemo(() => 
-    Object.values(loadingStates).some(Boolean)
-  , [loadingStates]);
+  const isAnyLoading = useMemo(() => Object.values(loadingStates).some(Boolean), [loadingStates]);
 
-  const getLoadingState = useCallback((operation: string) => 
-    loadingStates[operation] || false
-  , [loadingStates]);
+  const getLoadingState = useCallback(
+    (operation: string) => loadingStates[operation] || false,
+    [loadingStates]
+  );
 
-  const withLoading = useCallback(async <T>(
-    operation: string, 
-    fn: () => Promise<T>
-  ): Promise<T> => {
-    setLoading(operation, true);
-    try {
-      const result = await fn();
-      return result;
-    } finally {
-      setLoading(operation, false);
-    }
-  }, [setLoading]);
+  const withLoading = useCallback(
+    async <T>(operation: string, fn: () => Promise<T>): Promise<T> => {
+      setLoading(operation, true);
+      try {
+        const result = await fn();
+        return result;
+      } finally {
+        setLoading(operation, false);
+      }
+    },
+    [setLoading]
+  );
 
   return {
     loadingStates,
     isAnyLoading,
     setLoading,
     getLoadingState,
-    withLoading
+    withLoading,
   };
 }
 ```
@@ -1041,20 +1028,20 @@ function useLoadingStates({ operations }: UseLoadingStatesOptions) {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     // PATTERN: Inicialização com fallback seguro
-    const stored = localStorage.getItem("theme") as Theme;
-    return stored || "light"; // Default seguro
+    const stored = localStorage.getItem('theme') as Theme;
+    return stored || 'light'; // Default seguro
   });
 
   useEffect(() => {
     // PATTERN: Sincronização automática com localStorage
-    localStorage.setItem("theme", theme);
-    
+    localStorage.setItem('theme', theme);
+
     // PATTERN: Cleanup para system theme listeners
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handler = () => updateTheme();
-      mediaQuery.addEventListener("change", handler);
-      return () => mediaQuery.removeEventListener("change", handler);
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
     }
   }, [theme]);
 }
@@ -1066,27 +1053,27 @@ const persistencePolicy = {
   // SEMPRE PERSISTIR: Preferências do usuário
   alwaysPersist: {
     theme: 'localStorage',
-    language: 'localStorage', 
+    language: 'localStorage',
     uiDensity: 'localStorage',
     sidebarCollapsed: 'localStorage',
-    tableColumnsConfig: 'localStorage'
+    tableColumnsConfig: 'localStorage',
   },
-  
+
   // PERSISTIR CONDICIONALMENTE: Dados de trabalho
   conditionalPersist: {
     formDrafts: 'localStorage com TTL',
     searchFilters: 'sessionStorage',
     pageSize: 'localStorage',
-    sortPreferences: 'localStorage'
+    sortPreferences: 'localStorage',
   },
-  
+
   // NUNCA PERSISTIR: Dados sensíveis ou temporários
   neverPersist: {
     accessToken: 'Apenas em memory',
     tempPasswords: 'Apenas em memory',
     modalStates: 'Apenas em memory',
-    tooltipStates: 'Apenas em memory'
-  }
+    tooltipStates: 'Apenas em memory',
+  },
 } as const;
 ```
 
@@ -1124,7 +1111,7 @@ class SafeLocalStorage {
     try {
       const item = localStorage.getItem(key);
       if (item === null) return defaultValue;
-      
+
       return JSON.parse(item) as T;
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error);
@@ -1177,7 +1164,7 @@ class SafeLocalStorage {
  * Combina useState com localStorage
  */
 function usePersistedState<T>(
-  key: string, 
+  key: string,
   defaultValue: T,
   options: {
     serialize?: (value: T) => string;
@@ -1209,24 +1196,27 @@ function usePersistedState<T>(
   });
 
   // Setter que sincroniza com localStorage
-  const setValue = useCallback((value: T | ((prev: T) => T)) => {
-    setState(prev => {
-      const nextValue = typeof value === 'function' ? (value as (prev: T) => T)(prev) : value;
-      
-      try {
-        if (ttl) {
-          const toStore = { value: serialize(nextValue), timestamp: Date.now() };
-          localStorage.setItem(key, JSON.stringify(toStore));
-        } else {
-          localStorage.setItem(key, serialize(nextValue));
+  const setValue = useCallback(
+    (value: T | ((prev: T) => T)) => {
+      setState((prev) => {
+        const nextValue = typeof value === 'function' ? (value as (prev: T) => T)(prev) : value;
+
+        try {
+          if (ttl) {
+            const toStore = { value: serialize(nextValue), timestamp: Date.now() };
+            localStorage.setItem(key, JSON.stringify(toStore));
+          } else {
+            localStorage.setItem(key, serialize(nextValue));
+          }
+        } catch (error) {
+          console.error(`Failed to persist state for key "${key}":`, error);
         }
-      } catch (error) {
-        console.error(`Failed to persist state for key "${key}":`, error);
-      }
-      
-      return nextValue;
-    });
-  }, [key, serialize, ttl]);
+
+        return nextValue;
+      });
+    },
+    [key, serialize, ttl]
+  );
 
   return [state, setValue];
 }
@@ -1240,15 +1230,14 @@ function useFormDraft<T extends Record<string, any>>(
   initialData: T,
   ttl: number = 24 * 60 * 60 * 1000 // 24 horas
 ) {
-  const [draft, setDraft] = usePersistedState(
-    `form_draft_${formId}`, 
-    initialData,
-    { ttl }
-  );
+  const [draft, setDraft] = usePersistedState(`form_draft_${formId}`, initialData, { ttl });
 
-  const updateDraft = useCallback((updates: Partial<T>) => {
-    setDraft(prev => ({ ...prev, ...updates }));
-  }, [setDraft]);
+  const updateDraft = useCallback(
+    (updates: Partial<T>) => {
+      setDraft((prev) => ({ ...prev, ...updates }));
+    },
+    [setDraft]
+  );
 
   const clearDraft = useCallback(() => {
     SafeLocalStorage.removeItem(`form_draft_${formId}`);
@@ -1256,11 +1245,12 @@ function useFormDraft<T extends Record<string, any>>(
   }, [formId, initialData, setDraft]);
 
   const hasDraft = useMemo(() => {
-    return Object.keys(draft).some(key => 
-      draft[key] !== initialData[key] && 
-      draft[key] !== '' && 
-      draft[key] !== null && 
-      draft[key] !== undefined
+    return Object.keys(draft).some(
+      (key) =>
+        draft[key] !== initialData[key] &&
+        draft[key] !== '' &&
+        draft[key] !== null &&
+        draft[key] !== undefined
     );
   }, [draft, initialData]);
 
@@ -1268,7 +1258,7 @@ function useFormDraft<T extends Record<string, any>>(
     draft,
     updateDraft,
     clearDraft,
-    hasDraft
+    hasDraft,
   };
 }
 ```
@@ -1292,24 +1282,24 @@ const storageStrategy = {
     userPreferences: 'theme, language, density',
     appConfiguration: 'sidebar state, column widths',
     formDrafts: 'com TTL para cleanup automático',
-    recentSearches: 'últimas 10 buscas com TTL'
+    recentSearches: 'últimas 10 buscas com TTL',
   },
-  
+
   // sessionStorage: Apenas durante a sessão
   sessionStorage: {
     temporaryFilters: 'filtros ativos na página atual',
     wizardProgress: 'progresso em workflows temporários',
     tabState: 'estado de tabs abertas',
-    redirectTargets: 'URLs para redirect pós-login'
+    redirectTargets: 'URLs para redirect pós-login',
   },
-  
+
   // inMemory: Apenas durante o ciclo de vida do componente
   inMemory: {
     modalStates: 'modais abertos/fechados',
     tooltipStates: 'estados de tooltips',
     hoverStates: 'estados de hover',
-    tempFormValues: 'valores antes de submit'
-  }
+    tempFormValues: 'valores antes de submit',
+  },
 } as const;
 
 /**
@@ -1350,14 +1340,15 @@ class SafeSessionStorage {
  * Para dados que devem persistir apenas durante a sessão
  */
 function useSessionState<T>(key: string, defaultValue: T): [T, (value: T) => void] {
-  const [state, setState] = useState<T>(() => 
-    SafeSessionStorage.getItem(key, defaultValue)
-  );
+  const [state, setState] = useState<T>(() => SafeSessionStorage.getItem(key, defaultValue));
 
-  const setValue = useCallback((value: T) => {
-    setState(value);
-    SafeSessionStorage.setItem(key, value);
-  }, [key]);
+  const setValue = useCallback(
+    (value: T) => {
+      setState(value);
+      SafeSessionStorage.setItem(key, value);
+    },
+    [key]
+  );
 
   return [state, setValue];
 }
@@ -1385,7 +1376,7 @@ const queryMetrics = {
   averageQueryTime: 'Tempo médio de resolução de queries',
   backgroundRefetchFrequency: 'Frequência de refetch em background',
   staleDataServedCount: 'Quantas vezes dados stale foram servidos',
-  invalidationEfficiency: 'Eficiência das invalidações (precision/recall)'
+  invalidationEfficiency: 'Eficiência das invalidações (precision/recall)',
 } as const;
 
 /**
@@ -1396,7 +1387,7 @@ const memoryMetrics = {
   contextRenderCount: 'Frequência de re-renders de contexts',
   stateUpdateBatching: 'Eficiência de batching de updates',
   memoryLeakDetection: 'Detecção de vazamentos de estado',
-  componentMountTime: 'Tempo para mount de componentes com estado complexo'
+  componentMountTime: 'Tempo para mount de componentes com estado complexo',
 } as const;
 
 /**
@@ -1407,7 +1398,7 @@ const dxMetrics = {
   stateManagementBugs: 'Bugs relacionados a inconsistência de estado',
   developmentVelocity: 'Velocidade de desenvolvimento de features com estado',
   codeReusability: 'Reuso de patterns de estado entre componentes',
-  onboardingTime: 'Tempo para novos devs entenderem state management'
+  onboardingTime: 'Tempo para novos devs entenderem state management',
 } as const;
 ```
 
@@ -1469,7 +1460,7 @@ function useContextDebug<T>(contextName: string, contextValue: T) {
  */
 function useStateLogger<T>(stateName: string, state: T) {
   const prevState = useRef<T>();
-  
+
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && prevState.current !== undefined) {
       console.log(`📊 ${stateName} State Change:`, {
@@ -1489,24 +1480,24 @@ function useStateLogger<T>(stateName: string, state: T) {
 function useRenderTracking(componentName: string) {
   const renderCount = useRef(0);
   const lastRenderTime = useRef(Date.now());
-  
+
   useEffect(() => {
     renderCount.current += 1;
     const now = Date.now();
     const timeSinceLastRender = now - lastRenderTime.current;
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔄 ${componentName} render #${renderCount.current}`, {
         timeSinceLastRender: `${timeSinceLastRender}ms`,
         timestamp: new Date(now).toISOString()
       });
-      
+
       // Alert para re-renders muito frequentes
       if (timeSinceLastRender < 100 && renderCount.current > 5) {
         console.warn(`⚠️ ${componentName} may be re-rendering too frequently`);
       }
     }
-    
+
     lastRenderTime.current = now;
   });
 }
@@ -1532,18 +1523,18 @@ function useRenderTracking(componentName: string) {
 const stateManagementRules = {
   // Proibir useState para server state
   'no-server-state-in-usestate': 'error',
-  
+
   // Proibir Context sem error boundaries
   'require-context-error-boundary': 'error',
-  
+
   // Forçar uso de queryKeys factory
   'enforce-query-keys-factory': 'warn',
-  
+
   // Proibir mutations sem invalidation
   'require-mutation-invalidation': 'error',
-  
+
   // Enforçar naming conventions
-  'state-naming-conventions': 'warn'
+  'state-naming-conventions': 'warn',
 };
 
 /**
@@ -1556,8 +1547,8 @@ const noDirectFetchRule = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow direct fetch calls in components, use TanStack Query instead'
-    }
+      description: 'Disallow direct fetch calls in components, use TanStack Query instead',
+    },
   },
   create(context) {
     return {
@@ -1565,12 +1556,12 @@ const noDirectFetchRule = {
         if (node.callee.name === 'fetch') {
           context.report({
             node,
-            message: 'Use TanStack Query instead of direct fetch calls for server state'
+            message: 'Use TanStack Query instead of direct fetch calls for server state',
           });
         }
-      }
+      },
     };
-  }
+  },
 };
 
 // Rule: Enforce query invalidation after mutations
@@ -1578,32 +1569,30 @@ const requireMutationInvalidationRule = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require invalidateQueries call in mutation onSuccess'
-    }
+      description: 'Require invalidateQueries call in mutation onSuccess',
+    },
   },
   create(context) {
     return {
       CallExpression(node) {
         if (
-          node.callee.name === 'useMutation' && 
+          node.callee.name === 'useMutation' &&
           node.arguments.length > 0 &&
           node.arguments[0].type === 'ObjectExpression'
         ) {
           const config = node.arguments[0];
-          const onSuccess = config.properties.find(
-            prop => prop.key.name === 'onSuccess'
-          );
-          
+          const onSuccess = config.properties.find((prop) => prop.key.name === 'onSuccess');
+
           if (!onSuccess) {
             context.report({
               node,
-              message: 'useMutation should include onSuccess with invalidateQueries'
+              message: 'useMutation should include onSuccess with invalidateQueries',
             });
           }
         }
-      }
+      },
     };
-  }
+  },
 };
 ```
 
@@ -1633,7 +1622,7 @@ type StateAction<TType extends string, TPayload = void> = TPayload extends void
   ? { type: TType }
   : { type: TType; payload: TPayload };
 
-type ProposalAction = 
+type ProposalAction =
   | StateAction<'RESET'>
   | StateAction<'SET_LOADING', boolean>
   | StateAction<'UPDATE_CLIENT_DATA', Partial<ClientData>>
@@ -1643,10 +1632,7 @@ type ProposalAction =
  * Context Value Type Guards
  * Runtime type checking para contexts
  */
-function assertContextValue<T>(
-  value: T | undefined,
-  contextName: string
-): asserts value is T {
+function assertContextValue<T>(value: T | undefined, contextName: string): asserts value is T {
   if (value === undefined) {
     throw new Error(`${contextName} must be used within its Provider`);
   }
@@ -1658,13 +1644,13 @@ function assertContextValue<T>(
  */
 function createTypedContext<T>() {
   const context = createContext<T | undefined>(undefined);
-  
+
   const useContext = () => {
     const value = useContext(context);
     assertContextValue(value, context.displayName || 'Unknown Context');
     return value;
   };
-  
+
   return [context.Provider, useContext] as const;
 }
 
@@ -1675,9 +1661,7 @@ function createTypedContext<T>() {
 type StateSelector<TState, TResult> = (state: TState) => TResult;
 
 function createStateSelector<TState>() {
-  return function useSelector<TResult>(
-    selector: StateSelector<TState, TResult>
-  ): TResult {
+  return function useSelector<TResult>(selector: StateSelector<TState, TResult>): TResult {
     // Implementation would connect to state
     throw new Error('Implementation required');
   };
@@ -1693,19 +1677,20 @@ function createStateSelector<TState>() {
 ✅ Padrões extraídos de implementações reais funcionando em produção  
 ✅ TanStack Query, Context API, useReducer, localStorage já implementados e validados  
 ✅ Exemplos práticos baseados em AuthContext, ThemeContext, FeatureFlagContext, ProposalContext reais  
-✅ Query patterns baseados em queryKeys.ts, useUserFormData.ts e dashboard.tsx analisados  
+✅ Query patterns baseados em queryKeys.ts, useUserFormData.ts e dashboard.tsx analisados
 
 **RISCOS IDENTIFICADOS:** **BAIXO-MÉDIO**  
 ⚠️ **Team Adoption Risk:** Implementação requer disciplina rigorosa para seguir patterns documentados  
 ⚠️ **Performance Risk:** Mal uso de Context pode causar re-renders desnecessários sem otimização adequada  
 ⚠️ **LSP Errors:** Alguns errors detectados nos contexts atuais precisam de correção antes do enforcement  
-⚠️ **Training Required:** Equipa precisa de training em patterns avançados de state management (useReducer complexo)  
+⚠️ **Training Required:** Equipa precisa de training em patterns avançados de state management (useReducer complexo)
 
-**DECISÕES TÉCNICAS ASSUMIDAS:**  
-- **TanStack Query Exclusivity:** Assumido que TanStack Query é suficiente para todo server state, sem necessidade de Redux ou Zustand  
-- **Context API Sufficiency:** Assumido que Context API + useReducer é suficiente para estado global, sem necessidade de state management libraries externas  
-- **LocalStorage Safety:** Assumido que error handling robusto mitiga riscos de localStorage não disponível  
-- **Performance Optimization:** Assumido que re-render optimization será implementado através de memoization patterns  
+**DECISÕES TÉCNICAS ASSUMIDAS:**
+
+- **TanStack Query Exclusivity:** Assumido que TanStack Query é suficiente para todo server state, sem necessidade de Redux ou Zustand
+- **Context API Sufficiency:** Assumido que Context API + useReducer é suficiente para estado global, sem necessidade de state management libraries externas
+- **LocalStorage Safety:** Assumido que error handling robusto mitiga riscos de localStorage não disponível
+- **Performance Optimization:** Assumido que re-render optimization será implementado através de memoization patterns
 
 **VALIDAÇÃO PENDENTE:**  
 Documento deve ser **revisado pelo Arquiteto Chefe**, **implementado gradualmente com enforcement via ESLint**, e **validado através de training da equipa** antes de se tornar doutrina obrigatória. LSP errors nos contexts atuais devem ser **corrigidos antes do enforcement**.
@@ -1716,14 +1701,15 @@ Documento deve ser **revisado pelo Arquiteto Chefe**, **implementado gradualment
 
 **PONTO 59 - GESTÃO DE ESTADO NO CLIENTE:** **FORMALMENTE DOCUMENTADO**  
 **De:** 0% doutrina formal documentada  
-**Para:** 100% estratégia abrangente com exemplos reais e enforcement automático  
+**Para:** 100% estratégia abrangente com exemplos reais e enforcement automático
 
 **IMPACTO DIRETO:**
-- **Consistência de Desenvolvimento** garantida através de doutrina clara e templates obrigatórios  
-- **Performance Optimization** através de patterns otimizados para cache e re-renders  
-- **Developer Experience** melhorada com debugging tools e type safety rigorosa  
-- **Code Quality** assegurada através de ESLint rules customizadas e TypeScript patterns  
-- **Maintainability** aumentada através de separation of concerns clara entre server e client state  
+
+- **Consistência de Desenvolvimento** garantida através de doutrina clara e templates obrigatórios
+- **Performance Optimization** através de patterns otimizados para cache e re-renders
+- **Developer Experience** melhorada com debugging tools e type safety rigorosa
+- **Code Quality** assegurada através de ESLint rules customizadas e TypeScript patterns
+- **Maintainability** aumentada através de separation of concerns clara entre server e client state
 
 **PRÓXIMA AÇÃO RECOMENDADA:**  
 **Sprint 2 CONTINUATION** - State management strategy estabelecida. Pronto para correção dos LSP errors detectados, implementação gradual do enforcement, e início do training da equipa.
@@ -1732,13 +1718,13 @@ Documento deve ser **revisado pelo Arquiteto Chefe**, **implementado gradualment
 
 ### **📊 EVOLUÇÃO DA CONFORMIDADE - SPRINT 2 AVANÇADO**
 
-| **PAM Executado** | **Ponto** | **Status** | **Conformidade** |
-|-------------------|-----------|------------|------------------|
-| **PAM V1.1** | Ponto 39 - Data Modeling | ✅ COMPLETO | 0% → 100% |
-| **PAM V1.2** | Ponto 51 - Transaction Management | ✅ COMPLETO | 0% → 100% |
-| **PAM V1.3** | Ponto 25 - Design Patterns | ✅ COMPLETO | 25% → 100% |
-| **PAM V1.4** | Ponto 56 - Frontend Architecture | ✅ COMPLETO | 0% → 100% |
-| **PAM V1.5** | Ponto 59 - State Management | ✅ COMPLETO | 0% → 100% |
+| **PAM Executado** | **Ponto**                         | **Status**  | **Conformidade** |
+| ----------------- | --------------------------------- | ----------- | ---------------- |
+| **PAM V1.1**      | Ponto 39 - Data Modeling          | ✅ COMPLETO | 0% → 100%        |
+| **PAM V1.2**      | Ponto 51 - Transaction Management | ✅ COMPLETO | 0% → 100%        |
+| **PAM V1.3**      | Ponto 25 - Design Patterns        | ✅ COMPLETO | 25% → 100%       |
+| **PAM V1.4**      | Ponto 56 - Frontend Architecture  | ✅ COMPLETO | 0% → 100%        |
+| **PAM V1.5**      | Ponto 59 - State Management       | ✅ COMPLETO | 0% → 100%        |
 
 **SPRINT 1 + 2 STATUS:** **5/5 PONTOS CRÍTICOS REMEDIADOS** - Foundation backend e frontend architecture + state management estabelecidos
 
@@ -1747,6 +1733,6 @@ Documento deve ser **revisado pelo Arquiteto Chefe**, **implementado gradualment
 **✅ PAM V1.5 - GESTÃO DE ESTADO: DOUTRINA FORMALMENTE ESTABELECIDA**  
 **Executor:** GEM-07 AI Specialist System  
 **Protocolo:** PEAF V1.5 com Dupla Validação Contextual  
-**Status:** Aguardando próximo comando ou ratificação do Arquiteto Chefe  
+**Status:** Aguardando próximo comando ou ratificação do Arquiteto Chefe
 
 **SPRINT 2 ADVANCED: STATE MANAGEMENT DOCTRINE ESTABLISHED** 🎯

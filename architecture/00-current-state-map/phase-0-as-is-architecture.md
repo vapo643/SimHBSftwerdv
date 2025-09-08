@@ -1,4 +1,5 @@
 # 🏗️ Relatório de Arquitetura "As-Is" do Sistema Simpix - Fase 0
+
 **Auditor:** GEM 07 (AI Specialist)  
 **Data:** 2025-08-21  
 **Status:** Mapeamento Definitivo da Fase 0  
@@ -55,6 +56,7 @@ simpix-credit-management/
 ### **Prova 1.2 (Stack Tecnológica)**
 
 #### **Frontend (Client-Side)**
+
 ```typescript
 // Framework Base
 "react": "^18.3.1"
@@ -63,7 +65,7 @@ simpix-credit-management/
 "vite": "^5.4.19"
 "wouter": "^3.3.5"              // Routing
 
-// UI/UX Stack  
+// UI/UX Stack
 "@radix-ui/*": "^1.x.x"         // 25+ Radix UI components
 "tailwindcss": "^3.4.17"        // Styling
 "tailwindcss-animate": "^1.0.7"  // Animations
@@ -81,6 +83,7 @@ simpix-credit-management/
 ```
 
 #### **Backend (Server-Side)**
+
 ```typescript
 // Core Framework
 "express": "^4.21.2"             // Web framework
@@ -118,6 +121,7 @@ simpix-credit-management/
 ```
 
 #### **Testing & Quality**
+
 ```typescript
 "vitest": "^3.2.4"               // Testing framework
 "@testing-library/react": "^16.3.0"  // React testing
@@ -139,6 +143,7 @@ simpix-credit-management/
 ### **Prova 2.1 (Mapa de APIs)**
 
 #### **Domínio: Autenticação (`/api/auth`)**
+
 ```typescript
 POST   /api/auth/login           // JWT login
 POST   /api/auth/logout          // Session termination
@@ -150,6 +155,7 @@ DELETE /api/auth/sessions/:id    // Terminate session
 ```
 
 #### **Domínio: Propostas (`/api/propostas`)**
+
 ```typescript
 GET    /api/propostas            // List proposals (filtered by role)
 POST   /api/propostas            // Create new proposal
@@ -163,6 +169,7 @@ POST   /api/propostas/:id/documents    // Upload documents
 ```
 
 #### **Domínio: Formalização (`/api/formalizacao`)**
+
 ```typescript
 GET    /api/formalizacao         // Pending formalization queue
 POST   /api/ccb/generate/:id     // Generate CCB document
@@ -172,6 +179,7 @@ POST   /api/webhooks/clicksign   // ClickSign webhook
 ```
 
 #### **Domínio: Pagamentos (`/api/pagamentos`)**
+
 ```typescript
 GET    /api/pagamentos           // Payment queue
 POST   /api/inter/boletos/:id    // Generate Inter boletos
@@ -181,6 +189,7 @@ POST   /api/pagamentos/:id/comprovante  // Upload payment proof
 ```
 
 #### **Domínio: Cobrança (`/api/cobrancas`)**
+
 ```typescript
 GET    /api/cobrancas            // Collections queue
 POST   /api/cobrancas/:id/observacao    // Add collection note
@@ -189,6 +198,7 @@ GET    /api/cobrancas/relatorio         // Collections report
 ```
 
 #### **Domínio: Administração (`/api/admin`)**
+
 ```typescript
 GET    /api/admin/usuarios       // User management
 POST   /api/admin/usuarios       // Create user
@@ -199,22 +209,24 @@ POST   /api/admin/lojas          // Create store
 ```
 
 #### **Domínio: Configurações (`/api/config`)**
+
 ```typescript
-GET    /api/produtos             // Product catalog
-POST   /api/produtos             // Create product
-GET    /api/tabelas-comerciais   // Commercial tables
-POST   /api/tabelas-comerciais   // Create commercial table
-GET    /api/parceiros            // Partners
-POST   /api/parceiros            // Create partner
+GET / api / produtos; // Product catalog
+POST / api / produtos; // Create product
+GET / api / tabelas - comerciais; // Commercial tables
+POST / api / tabelas - comerciais; // Create commercial table
+GET / api / parceiros; // Partners
+POST / api / parceiros; // Create partner
 ```
 
 #### **Domínio: Monitoring/Security**
+
 ```typescript
-GET    /api/health               // Health check endpoint
-GET    /api/security/status      // Security monitoring
-GET    /api/monitoring/metrics   // Application metrics
-POST   /api/security/scan        // Security scan trigger
-GET    /api/features             // Feature flags
+GET / api / health; // Health check endpoint
+GET / api / security / status; // Security monitoring
+GET / api / monitoring / metrics; // Application metrics
+POST / api / security / scan; // Security scan trigger
+GET / api / features; // Feature flags
 ```
 
 **Total de Endpoints Identificados:** 45+ endpoints principais
@@ -228,15 +240,15 @@ GET    /api/features             // Feature flags
 server/
 ├── routes/                      // Route definitions (thin layer)
 │   ├── auth/                    // Authentication domain
-│   ├── propostas/               // Proposals domain  
+│   ├── propostas/               // Proposals domain
 │   ├── pagamentos/              // Payments domain
 │   ├── cobrancas.ts            // Collections domain
 │   ├── formalizacao.ts         // Formalization domain
 │   └── admin/                   // Administration domain
 ├── services/                    // Business logic layer
 │   ├── authService.ts          // Domain services
-│   ├── proposalService.ts      
-│   ├── paymentService.ts       
+│   ├── proposalService.ts
+│   ├── paymentService.ts
 │   └── statusFsmService.ts     // Finite State Machine
 ├── controllers/                 // Request handling
 ├── lib/                         // Shared infrastructure
@@ -244,6 +256,7 @@ server/
 ```
 
 **Características:**
+
 - **Domain-Driven Structure:** Código organizado por domínios de negócio
 - **Service Layer Pattern:** Lógica de negócio centralizada em services
 - **Finite State Machine:** Transições de status controladas via FSM
@@ -259,10 +272,10 @@ server/
 // server/storage.ts
 interface IStorage {
   // CRUD operations abstracted
-  getPropostas(filters: PropostaFilters): Promise<Proposta[]>
-  createProposta(data: CreatePropostaData): Promise<Proposta>
-  updateProposta(id: string, data: UpdatePropostaData): Promise<Proposta>
-  deletePropostaSoft(id: string): Promise<void>
+  getPropostas(filters: PropostaFilters): Promise<Proposta[]>;
+  createProposta(data: CreatePropostaData): Promise<Proposta>;
+  updateProposta(id: string, data: UpdatePropostaData): Promise<Proposta>;
+  deletePropostaSoft(id: string): Promise<void>;
 }
 
 // Services usam storage, nunca BD diretamente
@@ -271,13 +284,13 @@ export class ProposalService {
   async createProposal(data: ProposalData) {
     // Validação + regras de negócio
     const validated = await this.validateProposal(data);
-    
+
     // Persistência via storage layer
     return await storage.createProposta(validated);
   }
 }
 
-// Routes usam services, nunca storage/BD diretamente  
+// Routes usam services, nunca storage/BD diretamente
 // server/routes/propostas.ts
 app.post('/api/propostas', async (req, res) => {
   const proposal = await ProposalService.createProposal(req.body);
@@ -286,6 +299,7 @@ app.post('/api/propostas', async (req, res) => {
 ```
 
 **Conexão com Banco:**
+
 ```typescript
 // Drizzle ORM Setup
 // server/lib/supabase.ts
@@ -298,6 +312,7 @@ export const db = drizzle(sql, { schema });
 ```
 
 **Características:**
+
 - **Type Safety:** Drizzle ORM fornece tipagem completa
 - **Schema-First:** `shared/schema.ts` é fonte da verdade
 - **Connection Pooling:** Postgres.js com pool de conexões
@@ -336,6 +351,7 @@ function App() {
 ```
 
 **Características Arquiteturais:**
+
 - **Component Composition:** Radix UI + shadcn/ui components
 - **Provider Pattern:** Múltiplos contexts para separação de responsabilidades
 - **Route-Based Code Splitting:** Páginas carregadas por rota
@@ -345,18 +361,19 @@ function App() {
 ### **Prova 3.2 (Gestão de Estado)**
 
 #### **Server State Management**
+
 ```typescript
 // TanStack Query para estado de servidor
 // client/src/lib/queryClient.ts
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,      // 5 minutos
-      cacheTime: 10 * 60 * 1000,     // 10 minutos  
+      staleTime: 5 * 60 * 1000, // 5 minutos
+      cacheTime: 10 * 60 * 1000, // 10 minutos
       refetchOnWindowFocus: false,
-      retry: 3
-    }
-  }
+      retry: 3,
+    },
+  },
 });
 
 // Exemplo de uso
@@ -364,19 +381,20 @@ export const queryClient = new QueryClient({
 function Dashboard() {
   const { data: propostas, isLoading } = useQuery({
     queryKey: ['/api/propostas'],
-    queryFn: () => fetch('/api/propostas').then(res => res.json())
+    queryFn: () => fetch('/api/propostas').then((res) => res.json()),
   });
 }
 ```
 
 #### **Client State Management**
+
 ```typescript
 // Contexts para estado local complexo
 // client/src/contexts/AuthContext.tsx
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
       {children}
@@ -384,16 +402,17 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// client/src/contexts/ProposalContext.tsx  
+// client/src/contexts/ProposalContext.tsx
 export const ProposalProvider = ({ children }) => {
   const [currentProposal, setCurrentProposal] = useState(null);
   const [formStep, setFormStep] = useState(0);
-  
+
   // Complex multi-step form state
 };
 ```
 
 #### **Form State Management**
+
 ```typescript
 // React Hook Form + Zod para formulários
 // client/src/pages/propostas/nova.tsx
@@ -403,21 +422,22 @@ function NovaProposta() {
     defaultValues: {
       clienteNome: '',
       clienteCpf: '',
-      valor: 0
-    }
+      valor: 0,
+    },
   });
-  
+
   const { mutate: createProposta } = useMutation({
     mutationFn: (data) => apiRequest('POST', '/api/propostas', data),
     onSuccess: () => {
       queryClient.invalidateQueries(['/api/propostas']);
       navigate('/propostas');
-    }
+    },
   });
 }
 ```
 
 **Estratégias de Estado por Tipo:**
+
 - **Server State:** TanStack Query (cache, sync, background refetch)
 - **Authentication:** AuthContext (user, permissions, session)
 - **Theme/UI:** ThemeContext (dark/light mode, preferences)
@@ -433,10 +453,11 @@ function NovaProposta() {
 ### **Prova 4.1 (Lista de Tabelas)**
 
 #### **Tabelas Core de Negócio**
+
 ```sql
 -- Estrutura organizacional
 parceiros              -- Partners/companies
-lojas                  -- Physical stores  
+lojas                  -- Physical stores
 gerente_lojas          -- Manager-store relationships (N:N)
 
 -- Autenticação e usuários
@@ -475,56 +496,57 @@ audit_delete_log       -- Soft delete audit trail
 **Total de Tabelas:** 21 tabelas principais
 
 #### **Tabela Central: `propostas`**
+
 ```typescript
 // 54 campos divididos em grupos funcionais:
-export const propostas = pgTable("propostas", {
+export const propostas = pgTable('propostas', {
   // Identificação (3 campos)
-  id: text("id").primaryKey(),                    // UUID interno
-  numeroProposta: integer("numero_proposta"),     // Número sequencial (300001+)
-  lojaId: integer("loja_id").notNull(),          // Multi-tenant key
-  
-  // Relacionamentos (2 campos) 
-  produtoId: integer("produto_id"),
-  tabelaComercialId: integer("tabela_comercial_id"),
-  
+  id: text('id').primaryKey(), // UUID interno
+  numeroProposta: integer('numero_proposta'), // Número sequencial (300001+)
+  lojaId: integer('loja_id').notNull(), // Multi-tenant key
+
+  // Relacionamentos (2 campos)
+  produtoId: integer('produto_id'),
+  tabelaComercialId: integer('tabela_comercial_id'),
+
   // Cliente básico (6 campos)
-  clienteNome: text("cliente_nome"),
-  clienteCpf: text("cliente_cpf"),
-  clienteEmail: text("cliente_email"),
+  clienteNome: text('cliente_nome'),
+  clienteCpf: text('cliente_cpf'),
+  clienteEmail: text('cliente_email'),
   // ...
-  
+
   // Cliente estendido (12 campos) - RG, endereço, profissão
-  clienteRg: text("cliente_rg"),
-  clienteEndereco: text("cliente_endereco"),
+  clienteRg: text('cliente_rg'),
+  clienteEndereco: text('cliente_endereco'),
   // ...
-  
+
   // Empréstimo (5 campos)
-  valor: decimal("valor", { precision: 15, scale: 2 }),
-  prazo: integer("prazo"),
-  finalidade: text("finalidade"),
+  valor: decimal('valor', { precision: 15, scale: 2 }),
+  prazo: integer('prazo'),
+  finalidade: text('finalidade'),
   // ...
-  
+
   // Financeiro calculado (4 campos)
-  valorTac: decimal("valor_tac"),
-  valorIof: decimal("valor_iof"), 
-  valorTotalFinanciado: decimal("valor_total_financiado"),
-  valorLiquidoLiberado: decimal("valor_liquido_liberado"),
-  
+  valorTac: decimal('valor_tac'),
+  valorIof: decimal('valor_iof'),
+  valorTotalFinanciado: decimal('valor_total_financiado'),
+  valorLiquidoLiberado: decimal('valor_liquido_liberado'),
+
   // Workflow e análise (7 campos)
-  status: text("status").notNull(),
-  analistaId: text("analista_id"),
-  dataAnalise: timestamp("data_analise"),
+  status: text('status').notNull(),
+  analistaId: text('analista_id'),
+  dataAnalise: timestamp('data_analise'),
   // ...
-  
+
   // Formalização e ClickSign (8 campos)
-  ccbGerado: boolean("ccb_gerado"),
-  clicksignDocumentKey: text("clicksign_document_key"),
-  clicksignStatus: text("clicksign_status"),
+  ccbGerado: boolean('ccb_gerado'),
+  clicksignDocumentKey: text('clicksign_document_key'),
+  clicksignStatus: text('clicksign_status'),
   // ...
-  
+
   // Dados de pagamento (7 campos) - TEDs, PIX, contas
-  dadosPagamentoBanco: text("dados_pagamento_banco"),
-  dadosPagamentoPix: text("dados_pagamento_pix"),
+  dadosPagamentoBanco: text('dados_pagamento_banco'),
+  dadosPagamentoPix: text('dados_pagamento_pix'),
   // ...
 });
 ```
@@ -537,21 +559,22 @@ export const propostas = pgTable("propostas", {
 // drizzle.config.ts
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './shared/schema.ts',        // Single source of truth
-  out: './migrations',                 // SQL migrations output
+  schema: './shared/schema.ts', // Single source of truth
+  out: './migrations', // SQL migrations output
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
   migrations: {
-    table: '__drizzle_migrations',     // Migration tracking table
+    table: '__drizzle_migrations', // Migration tracking table
     schema: 'public',
   },
   verbose: true,
-  strict: true,                        // Type safety
+  strict: true, // Type safety
 });
 ```
 
 **Processo de Migração:**
+
 ```bash
 # 1. Gerar migração SQL a partir do schema
 npm run db:generate
@@ -565,30 +588,30 @@ npm run db:push --force
 ```
 
 **Scripts de Automação:**
+
 ```typescript
 // scripts/migrate.ts - Production-ready migration
 export async function runMigration() {
   console.log('🔄 Iniciando migração segura...');
-  
+
   const sql = postgres(process.env.DATABASE_URL!, { max: 1 });
   const db = drizzle(sql, { schema });
-  
+
   try {
     // EXPAND phase - adicionar sem remover
-    await migrate(db, { 
+    await migrate(db, {
       migrationsFolder: './migrations',
       migrationsTable: '__drizzle_migrations',
     });
-    
+
     console.log('✅ Migração EXPAND concluída');
-    
+
     // Verificar integridade
     const result = await sql`
       SELECT COUNT(*) as count 
       FROM __drizzle_migrations 
       WHERE success = true
     `;
-    
   } catch (error) {
     console.error('❌ Erro na migração:', error);
     process.exit(1);
@@ -597,6 +620,7 @@ export async function runMigration() {
 ```
 
 **Estratégia Zero-Downtime:**
+
 - **Expand/Contract Pattern:** Adicionar primeiro, remover depois
 - **Backward Compatibility:** Manter campos antigos durante transição
 - **Rollback Scripts:** `scripts/rollback.ts` para reversão segura
@@ -622,6 +646,7 @@ Environment: Development/Staging hybrid
 ```
 
 **Características do Ambiente:**
+
 - **Auto-restart:** Aplicação reinicia automaticamente em mudanças
 - **Port Binding:** Auto-discovery de portas pelo Replit
 - **Environment Variables:** Gerenciados via Replit Secrets
@@ -635,27 +660,29 @@ Environment: Development/Staging hybrid
 ```bash
 # Deploy process
 1. Code Push → GitHub repository
-2. Manual trigger → Click "Run" button in Replit  
+2. Manual trigger → Click "Run" button in Replit
 3. Auto-build → npm run dev command executed
 4. Startup → Express server + Vite dev server
 5. Health check → Application accessible via Replit domain
 ```
 
 **Build Process:**
+
 ```json
 // package.json scripts
 {
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",     // Current
+    "dev": "NODE_ENV=development tsx server/index.ts", // Current
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "start": "NODE_ENV=production node dist/index.js",   // Production ready
-    "check": "tsc",                                       // Type checking
-    "db:push": "drizzle-kit push"                        // Schema sync
+    "start": "NODE_ENV=production node dist/index.js", // Production ready
+    "check": "tsc", // Type checking
+    "db:push": "drizzle-kit push" // Schema sync
   }
 }
 ```
 
 **Deployment Constraints:**
+
 - **No Automated CD:** Manual trigger required
 - **Single Environment:** Development serves as staging
 - **No Blue-Green:** Direct deployment to production URL
@@ -672,7 +699,7 @@ SUPABASE_URL=https://[project].supabase.co
 SUPABASE_ANON_KEY=[public-anon-key]
 SUPABASE_SERVICE_ROLE_KEY=[service-role-key]
 JWT_SECRET=[random-256-bit-key]
-INTER_CLIENT_ID=[banco-inter-api-id]  
+INTER_CLIENT_ID=[banco-inter-api-id]
 INTER_CLIENT_SECRET=[banco-inter-secret]
 INTER_CERTIFICATE=[x509-certificate]
 INTER_PRIVATE_KEY=[rsa-private-key]
@@ -681,6 +708,7 @@ NODE_ENV=development
 ```
 
 **Características:**
+
 - **Environment Isolation:** Variáveis por ambiente
 - **Encryption:** Secrets criptografados pelo Replit
 - **Access Control:** Apenas proprietário do repl
@@ -697,31 +725,31 @@ name: "Continuous Integration"
 triggers: [push, pull_request]
 jobs:
   - type-check: TypeScript compilation
-  - lint: ESLint + Prettier validation  
+  - lint: ESLint + Prettier validation
   - test: Vitest unit tests
   - build: Vite production build
-  
-# .github/workflows/security.yml  
+
+# .github/workflows/security.yml
 name: "Security Scanning"
 triggers: [push to main, schedule]
 jobs:
   - dependency-scan: npm audit
   - sast-scan: Static analysis
   - container-scan: Docker security
-  
+
 # .github/workflows/security-scan.yml
 name: "Enhanced Security"
 triggers: [manual, schedule]
 jobs:
   - code-analysis: CodeQL analysis
   - vulnerability-scan: Trivy scanning
-  
+
 # .github/workflows/cd-staging.yml
-name: "Deploy to Staging"  
+name: "Deploy to Staging"
 triggers: [push to main]
 jobs:
   - deploy: Automated staging deployment
-  
+
 # .github/workflows/lint_commit.yml
 name: "Commit Lint"
 triggers: [pull_request]
@@ -730,6 +758,7 @@ jobs:
 ```
 
 **Pipeline Capabilities:**
+
 - **Automated Testing:** 3 security scans + 1 CI pipeline
 - **Code Quality:** Linting, type checking, formatting
 - **Security:** SAST, dependency scanning, vulnerability detection
@@ -737,6 +766,7 @@ jobs:
 - **Governance:** Conventional commit enforcement
 
 **Current Gaps:**
+
 - **Production CD:** No automated production deployment
 - **E2E Testing:** No end-to-end test automation
 - **Performance Testing:** No automated performance validation
@@ -749,6 +779,7 @@ jobs:
 ### **Prova 6.1 (Sumário de Defesas)**
 
 #### **Defesas de Autenticação e Autorização**
+
 ```typescript
 // JWT-based authentication com role-based access control
 // server/lib/jwt-auth-middleware.ts
@@ -759,43 +790,56 @@ export const jwtAuthMiddleware = (req, res, next) => {
 };
 
 // Role-based guards para endpoints
-// server/lib/role-guards.ts  
-export const requireAdmin = (req, res, next) => { /* Admin-only access */ };
-export const requireAnalyst = (req, res, next) => { /* Analyst workflow */ };
-export const requireFinanceiro = (req, res, next) => { /* Financial ops */ };
+// server/lib/role-guards.ts
+export const requireAdmin = (req, res, next) => {
+  /* Admin-only access */
+};
+export const requireAnalyst = (req, res, next) => {
+  /* Analyst workflow */
+};
+export const requireFinanceiro = (req, res, next) => {
+  /* Financial ops */
+};
 ```
 
 #### **Defesas de Segurança de Aplicação**
+
 ```typescript
 // Security headers com Helmet
 // server/app.ts
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      // Comprehensive CSP policy
-    }
-  },
-  hsts: { maxAge: 31536000, includeSubDomains: true }
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        // Comprehensive CSP policy
+      },
+    },
+    hsts: { maxAge: 31536000, includeSubDomains: true },
+  })
+);
 
 // Rate limiting em múltiplas camadas
-app.use('/api/', rateLimit({
-  windowMs: 15 * 60 * 1000,    // 15 minutos
-  max: 100,                    // 100 requests por IP
-  standardHeaders: true,
-  legacyHeaders: false
-}));
+app.use(
+  '/api/',
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // 100 requests por IP
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 ```
 
 #### **Defesas de Validação e Sanitização**
+
 ```typescript
 // Input sanitization middleware
 // server/middleware/input-sanitizer.ts
 export const sanitizeInput = (req, res, next) => {
   // XSS prevention
-  // SQL injection protection  
+  // SQL injection protection
   // Path traversal prevention
   req.body = sanitize(req.body);
   next();
@@ -812,29 +856,31 @@ export const insertPropostaSchema = z.object({
 ```
 
 #### **Defesas de Dados e Armazenamento**
+
 ```typescript
 // Row Level Security (RLS) no PostgreSQL
 // Soft delete para auditoria
-export const propostas = pgTable("propostas", {
-  id: text("id").primaryKey(),
-  lojaId: integer("loja_id").notNull(), // Multi-tenant isolation
-  deletedAt: timestamp("deleted_at"),   // Soft delete
+export const propostas = pgTable('propostas', {
+  id: text('id').primaryKey(),
+  lojaId: integer('loja_id').notNull(), // Multi-tenant isolation
+  deletedAt: timestamp('deleted_at'), // Soft delete
   // ...
 });
 
 // Audit logging para operações críticas
-export const auditDeleteLog = pgTable("audit_delete_log", {
-  id: uuid("id").primaryKey(),
-  tableName: text("table_name").notNull(),
-  recordData: text("record_data").notNull(), // Full record backup
-  deletedBy: uuid("deleted_by").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
+export const auditDeleteLog = pgTable('audit_delete_log', {
+  id: uuid('id').primaryKey(),
+  tableName: text('table_name').notNull(),
+  recordData: text('record_data').notNull(), // Full record backup
+  deletedBy: uuid('deleted_by').notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
   // Comprehensive audit trail
 });
 ```
 
 #### **Defesas de Integração Externa**
+
 ```typescript
 // HMAC validation para webhooks
 // server/services/clickSignWebhookService.ts
@@ -843,10 +889,7 @@ export function validateClickSignWebhook(payload: string, signature: string): bo
     .createHmac('sha256', CLICKSIGN_WEBHOOK_SECRET)
     .update(payload)
     .digest('hex');
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
 }
 
 // mTLS para Banco Inter API
@@ -855,6 +898,7 @@ export function validateClickSignWebhook(payload: string, signature: string): bo
 ```
 
 #### **Defesas de Infraestrutura**
+
 ```typescript
 // Security monitoring e alertas
 // server/lib/security-logger.ts
@@ -865,9 +909,9 @@ export function logSecurityEvent(event: SecurityEvent) {
     ip: event.ip,
     endpoint: event.endpoint,
     timestamp: new Date().toISOString(),
-    correlationId: event.correlationId
+    correlationId: event.correlationId,
   });
-  
+
   // Send to external SIEM if critical
   if (event.severity === 'CRITICAL') {
     sendToSentryAlert(event);
@@ -880,6 +924,7 @@ export function logSecurityEvent(event: SecurityEvent) {
 ```
 
 #### **Defesas de Teste e Isolamento**
+
 ```typescript
 // 4-layer test environment protection
 // 1. Physical isolation: Separate test database
@@ -888,9 +933,9 @@ export function logSecurityEvent(event: SecurityEvent) {
 // 4. Runtime validation: Test-specific guards
 
 // tests/test-environment.ts
-export const testDb = drizzle(testConnection, { 
+export const testDb = drizzle(testConnection, {
   schema,
-  logger: testLogger 
+  logger: testLogger,
 });
 
 // Automated cleanup after each test
@@ -900,6 +945,7 @@ afterEach(async () => {
 ```
 
 **Resumo das Defesas por Categoria:**
+
 - **Authentication:** JWT + Role-based access + Session management
 - **Authorization:** Granular RBAC + Multi-tenant isolation + RLS
 - **Input Validation:** Zod schemas + Input sanitization + XSS prevention
@@ -913,12 +959,12 @@ afterEach(async () => {
 
 ## 7. ANÁLISE CRÍTICA DO AUDITOR
 
-### **Pergunta Central:** *"Existe algum ponto cego ou área subestimada que deveria ser investigada como parte da Fase 0?"*
+### **Pergunta Central:** _"Existe algum ponto cego ou área subestimada que deveria ser investigada como parte da Fase 0?"_
 
 #### **✅ Áreas Bem Mapeadas (Confiança Alta)**
 
 1. **Business Logic:** Workflow de crédito compreensivo e bem documentado
-2. **Data Model:** Schema robusto com 21 tabelas e relacionamentos claros  
+2. **Data Model:** Schema robusto com 21 tabelas e relacionamentos claros
 3. **Security Implementation:** Multiple layers implementadas e testadas
 4. **Integration Points:** ClickSign, Banco Inter, Supabase bem integrados
 5. **Development Workflow:** CI/CD pipelines funcionais e documentados
@@ -926,12 +972,13 @@ afterEach(async () => {
 #### **⚠️ Pontos Cegos Identificados (Investigação Necessária)**
 
 ##### **1. Performance e Escalabilidade (CRÍTICO)**
+
 ```sql
 -- Query problemática identificada nos logs
-SELECT p.*, l.nome_loja, pr.nome_produto 
-FROM propostas p 
+SELECT p.*, l.nome_loja, pr.nome_produto
+FROM propostas p
 JOIN lojas l ON p.loja_id = l.id
-JOIN produtos pr ON p.produto_id = pr.id  
+JOIN produtos pr ON p.produto_id = pr.id
 WHERE p.status IN ('pendente', 'em_analise')
 AND p.deleted_at IS NULL
 -- SEM ÍNDICES em p.status ou p.deleted_at
@@ -941,6 +988,7 @@ AND p.deleted_at IS NULL
 **Gap:** Não temos baseline de performance nem monitoring de queries lentas.
 
 ##### **2. Estado de Conformidade com LSP (CRÍTICO)**
+
 ```
 LSP Errors Detectados: 63 errors in server/routes.ts
 ```
@@ -948,24 +996,30 @@ LSP Errors Detectados: 63 errors in server/routes.ts
 **Gap:** Erros de TypeScript em código principal indicam possível debt técnico ou breaking changes não resolvidos.
 
 ##### **3. Backup e Disaster Recovery (ALTO RISCO)**
+
 **Current State:** Supabase automático (não verificado)
-**Gap:** 
+**Gap:**
+
 - Sem teste de restore documentado
 - Sem RTO/RPO definidos
 - Sem backup de Replit environment
 - Sem procedure de disaster recovery
 
 ##### **4. Observabilidade Limitada (MÉDIO RISCO)**
+
 **Current State:** Winston logging + Sentry error tracking
 **Gap:**
+
 - Sem métricas de negócio (conversion rates, tempo de análise)
-- Sem alerting proativo (SLA breaches)  
+- Sem alerting proativo (SLA breaches)
 - Sem distributed tracing
 - Sem correlation entre frontend/backend events
 
 ##### **5. Feature Flag Strategy (BAIXO RISCO)**
+
 **Current State:** Unleash integration implementada
-**Gap:** 
+**Gap:**
+
 - Sem strategy documentada para rollout
 - Sem metrics de feature adoption
 - Sem automated rollback triggers
@@ -975,38 +1029,37 @@ LSP Errors Detectados: 63 errors in server/routes.ts
 ##### **Fase 0.5 - Investigações Complementares (Before Fase 1)**
 
 **P0 - CRÍTICO (48h):**
+
 1. **LSP Diagnostic Resolution:** Resolver 63 erros TypeScript em `server/routes.ts`
 2. **Performance Baseline:** Executar load testing e identificar bottlenecks
 3. **Backup Validation:** Testar restore completo do Supabase backup
 
-**P1 - ALTO (1 semana):**
-4. **Database Query Optimization:** Adicionar índices em `propostas.status` e `propostas.deleted_at`
-5. **Disaster Recovery Plan:** Documentar e testar RTO/RPO procedures
-6. **Memory Usage Analysis:** Profiling de consumption em produção
+**P1 - ALTO (1 semana):** 4. **Database Query Optimization:** Adicionar índices em `propostas.status` e `propostas.deleted_at` 5. **Disaster Recovery Plan:** Documentar e testar RTO/RPO procedures 6. **Memory Usage Analysis:** Profiling de consumption em produção
 
-**P2 - MÉDIO (2 semanas):**
-7. **Observability Stack:** Implementar métricas de negócio e alerting
-8. **Security Penetration Test:** Teste de segurança por terceiros
-9. **API Rate Limiting Review:** Validar thresholds em cenários de pico
+**P2 - MÉDIO (2 semanas):** 7. **Observability Stack:** Implementar métricas de negócio e alerting 8. **Security Penetration Test:** Teste de segurança por terceiros 9. **API Rate Limiting Review:** Validar thresholds em cenários de pico
 
 #### **🎯 Métricas de Sucesso para Fase 1**
 
 **Technical Debt:**
-- LSP errors = 0  
+
+- LSP errors = 0
 - TypeScript strict mode = enabled
 - Test coverage > 80%
 
-**Performance:**  
+**Performance:**
+
 - API response time P95 < 500ms
 - Database query time P95 < 100ms
 - Frontend loading time < 2s
 
 **Reliability:**
+
 - Backup restore tested = monthly
 - RTO < 4 horas
 - RPO < 1 hora
 
 **Security:**
+
 - Zero high/critical vulnerabilities
 - Penetration test passed
 - All integrations with HMAC validation
@@ -1018,12 +1071,14 @@ LSP Errors Detectados: 63 errors in server/routes.ts
 **CONFIANÇA NA IMPLEMENTAÇÃO:** 85%
 
 **Áreas de Alta Confiança (95%):**
+
 - Arquitetura de dados e relacionamentos
 - Padrões de segurança implementados
 - Stack tecnológica e dependências
 - Business logic e workflow de propostas
 
 **Áreas de Confiança Média (70%):**
+
 - Performance characteristics em produção
 - Backup/recovery procedures (não testados)
 - Estado real de debt técnico (63 LSP errors)
@@ -1031,11 +1086,13 @@ LSP Errors Detectados: 63 errors in server/routes.ts
 **RISCOS IDENTIFICADOS:** MÉDIO
 
 **Riscos Técnicos:**
+
 - **TypeScript Errors:** 63 erros podem indicar breaking changes
 - **Performance:** Queries sem índices adequados
 - **Disaster Recovery:** Procedures não testados
 
 **Riscos de Negócio:**
+
 - **Single Point of Failure:** Dependência crítica do Supabase
 - **Manual Deployment:** Risk de downtime em deployments
 - **Limited Observability:** Pouca visibilidade em métricas de negócio
@@ -1051,7 +1108,7 @@ LSP Errors Detectados: 63 errors in server/routes.ts
 
 - [ ] Resolução dos 63 erros LSP em `server/routes.ts`
 - [ ] Teste completo de backup/restore do Supabase
-- [ ] Load testing para validar performance assumptions  
+- [ ] Load testing para validar performance assumptions
 - [ ] Penetration testing para validar security posture
 - [ ] Review completo de logs de produção para hidden issues
 
@@ -1062,6 +1119,7 @@ LSP Errors Detectados: 63 errors in server/routes.ts
 ### **Estado Atual: "Azure-Ready Foundation" - 85% Completo**
 
 **✅ Pontos Fortes:**
+
 - Arquitetura modular bem estruturada
 - Segurança implementada em múltiplas camadas
 - Workflow de negócio robusto e testado
@@ -1069,22 +1127,25 @@ LSP Errors Detectados: 63 errors in server/routes.ts
 - CI/CD pipelines estabelecidos
 
 **⚠️ Gaps Críticos para Fase 1:**
+
 - Resolução de 63 erros TypeScript
 - Performance optimization (índices de banco)
 - Disaster recovery testing
 - Observability enhancement
 
-**🎯 Readiness Score para Azure Migration:** 
+**🎯 Readiness Score para Azure Migration:**
+
 - **Code Quality:** 80% (pending LSP fixes)
 - **Security:** 95% (production-grade)
 - **Scalability:** 70% (needs performance tuning)
 - **Operability:** 65% (needs observability)
 - **Reliability:** 75% (needs DR testing)
 
-**📋 Next Phase Recommendation:** 
+**📋 Next Phase Recommendation:**
 Proceder para **Fase 1: Azure-Ready Hardening** com foco em:
+
 1. Technical debt resolution (LSP errors)
-2. Performance optimization 
+2. Performance optimization
 3. Disaster recovery validation
 4. Enhanced observability
 

@@ -2,9 +2,9 @@ name: 'Complete CI/CD Pipeline'
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   # ====================================
@@ -13,7 +13,7 @@ jobs:
   complete_pipeline:
     name: 'Complete CI/CD Pipeline'
     runs-on: ubuntu-latest
-    
+
     steps:
       # Etapa 1: Checkout do código
       - name: 'Checkout code'

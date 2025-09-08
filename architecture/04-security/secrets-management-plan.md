@@ -1,4 +1,5 @@
 # 🔐 Plano de Gestão de Secrets - Simpix
+
 **Autor:** GEM 01 (Arquiteto)
 **Data:** 21/08/2025
 **Status:** Ready for Execution
@@ -9,24 +10,26 @@
 ## 🎯 ESTRATÉGIA DE MIGRAÇÃO DE SECRETS
 
 ### Estado Atual (VULNERÁVEL)
+
 ```yaml
 Hardcoded/Embedded:
   - Algumas keys no código
   - .env commitado (!)
   - Certificates no repo
-  
+
 Partially External:
   - Algumas em .env local
   - Replit secrets (limitado)
 ```
 
 ### Estado Target (SEGURO)
+
 ```yaml
 Fase 0 (Supabase):
   - 100% em .env
   - .env.example apenas
   - Git ignore rigoroso
-  
+
 Fase 1 (Azure):
   - Azure Key Vault
   - Managed Identity
@@ -38,44 +41,47 @@ Fase 1 (Azure):
 ## 📋 INVENTÁRIO COMPLETO DE SECRETS
 
 ### Application Core
+
 ```yaml
 Authentication:
-  - SUPABASE_URL          # Public, mas externalizar
-  - SUPABASE_ANON_KEY     # Public, mas externalizar  
-  - SUPABASE_SERVICE_KEY  # CRÍTICO - Private
-  - JWT_SECRET            # CRÍTICO - Rotacionar
-  - SESSION_SECRET        # CRÍTICO - Rotacionar
+  - SUPABASE_URL # Public, mas externalizar
+  - SUPABASE_ANON_KEY # Public, mas externalizar
+  - SUPABASE_SERVICE_KEY # CRÍTICO - Private
+  - JWT_SECRET # CRÍTICO - Rotacionar
+  - SESSION_SECRET # CRÍTICO - Rotacionar
 
 Database:
-  - DATABASE_URL          # CRÍTICO - Contains password
-  - REDIS_URL            # Se usado
+  - DATABASE_URL # CRÍTICO - Contains password
+  - REDIS_URL # Se usado
 ```
 
 ### External Integrations
+
 ```yaml
 Banco Inter:
-  - INTER_CLIENT_ID       # Sensitive
-  - INTER_CLIENT_SECRET   # CRÍTICO
-  - INTER_CERTIFICATE     # CRÍTICO - mTLS cert
-  - INTER_PRIVATE_KEY     # CRÍTICO - mTLS key
-  - INTER_ACCOUNT_NUMBER  # Sensitive
+  - INTER_CLIENT_ID # Sensitive
+  - INTER_CLIENT_SECRET # CRÍTICO
+  - INTER_CERTIFICATE # CRÍTICO - mTLS cert
+  - INTER_PRIVATE_KEY # CRÍTICO - mTLS key
+  - INTER_ACCOUNT_NUMBER # Sensitive
 
 ClickSign:
-  - CLICKSIGN_TOKEN       # CRÍTICO
-  - CLICKSIGN_HMAC_KEY    # CRÍTICO
+  - CLICKSIGN_TOKEN # CRÍTICO
+  - CLICKSIGN_HMAC_KEY # CRÍTICO
 ```
 
 ### Infrastructure
+
 ```yaml
 Monitoring (Futuro):
-  - DATADOG_API_KEY       # Sensitive
-  - SENTRY_DSN           # Public, mas externalizar
+  - DATADOG_API_KEY # Sensitive
+  - SENTRY_DSN # Public, mas externalizar
 
 Azure (Futuro):
   - AZURE_SUBSCRIPTION_ID # Sensitive
-  - AZURE_TENANT_ID      # Sensitive
-  - AZURE_CLIENT_ID      # Sensitive
-  - AZURE_CLIENT_SECRET  # CRÍTICO
+  - AZURE_TENANT_ID # Sensitive
+  - AZURE_CLIENT_ID # Sensitive
+  - AZURE_CLIENT_SECRET # CRÍTICO
 ```
 
 ---
@@ -83,6 +89,7 @@ Azure (Futuro):
 ## 🚨 PLANO DE AÇÃO IMEDIATA (GEM 02)
 
 ### DIA 1: Auditoria e Limpeza
+
 ```bash
 # 1. Buscar TODOS os secrets no código
 grep -r "KEY\|SECRET\|TOKEN\|PASSWORD" --exclude-dir=node_modules .
@@ -101,6 +108,7 @@ cp .env .env.example
 ```
 
 ### DIA 2: Externalização
+
 ```javascript
 // Criar config/secrets.js
 const requiredSecrets = [
@@ -108,15 +116,13 @@ const requiredSecrets = [
   'JWT_SECRET',
   'SESSION_SECRET',
   'SUPABASE_URL',
-  'SUPABASE_SERVICE_KEY'
+  'SUPABASE_SERVICE_KEY',
 ];
 
 // Validar na inicialização
 function validateSecrets() {
-  const missing = requiredSecrets.filter(
-    secret => !process.env[secret]
-  );
-  
+  const missing = requiredSecrets.filter((secret) => !process.env[secret]);
+
   if (missing.length > 0) {
     console.error('Missing secrets:', missing);
     process.exit(1);
@@ -128,22 +134,23 @@ validateSecrets();
 ```
 
 ### DIA 3: Rotação e Segurança
+
 ```yaml
 Rotacionar Imediatamente:
   1. JWT_SECRET:
-     - Gerar novo: openssl rand -base64 32
-     - Update .env
-     - Invalidar sessions antigas
-     
+    - Gerar novo: openssl rand -base64 32
+    - Update .env
+    - Invalidar sessions antigas
+
   2. SESSION_SECRET:
-     - Gerar novo: openssl rand -hex 32
-     - Update .env
-     - Force re-login
-     
+    - Gerar novo: openssl rand -hex 32
+    - Update .env
+    - Force re-login
+
   3. API Keys (se comprometidas):
-     - Regenerar no provider
-     - Update .env
-     - Test integrations
+    - Regenerar no provider
+    - Update .env
+    - Test integrations
 ```
 
 ---
@@ -151,6 +158,7 @@ Rotacionar Imediatamente:
 ## 🔄 MIGRAÇÃO PARA AZURE KEY VAULT
 
 ### Setup Inicial (Futuro)
+
 ```bash
 # Criar Key Vault
 az keyvault create \
@@ -166,10 +174,11 @@ az keyvault secret set \
 ```
 
 ### Integração no Código
+
 ```javascript
 // Azure Key Vault client
-const { SecretClient } = require("@azure/keyvault-secrets");
-const { DefaultAzureCredential } = require("@azure/identity");
+const { SecretClient } = require('@azure/keyvault-secrets');
+const { DefaultAzureCredential } = require('@azure/identity');
 
 class SecretsManager {
   constructor() {
@@ -178,19 +187,19 @@ class SecretsManager {
     this.client = new SecretClient(vaultUrl, credential);
     this.cache = new Map();
   }
-  
+
   async getSecret(name) {
     // Cache com TTL de 1 hora
     if (this.cache.has(name)) {
       return this.cache.get(name);
     }
-    
+
     const secret = await this.client.getSecret(name);
     this.cache.set(name, secret.value);
-    
+
     // Clear cache após 1 hora
     setTimeout(() => this.cache.delete(name), 3600000);
-    
+
     return secret.value;
   }
 }
@@ -201,6 +210,7 @@ class SecretsManager {
 ## 🛡️ POLÍTICAS DE SEGURANÇA
 
 ### Rotação de Secrets
+
 ```yaml
 Frequência:
   - Passwords: 90 dias
@@ -208,8 +218,7 @@ Frequência:
   - Certificates: Antes de expirar
   - Comprometidos: IMEDIATO
 
-Processo:
-  1. Gerar novo secret
+Processo: 1. Gerar novo secret
   2. Update em staging
   3. Test functionality
   4. Update em production
@@ -217,13 +226,14 @@ Processo:
 ```
 
 ### Access Control
+
 ```yaml
 Princípio: Least Privilege
-  
+
 Development:
   - Read: Developers
   - Write: Never (CI/CD only)
-  
+
 Production:
   - Read: Application only
   - Write: Admin com MFA
@@ -231,12 +241,13 @@ Production:
 ```
 
 ### Audit e Compliance
+
 ```yaml
 Logging:
   - Todo acesso registrado
   - Alertas em acessos unusual
   - Review mensal
-  
+
 Compliance:
   - LGPD: Encryption required
   - PCI DSS: Key management
@@ -248,6 +259,7 @@ Compliance:
 ## 📝 BEST PRACTICES
 
 ### Do's ✅
+
 ```yaml
 - Use variáveis de ambiente
 - Validate secrets on startup
@@ -259,6 +271,7 @@ Compliance:
 ```
 
 ### Don'ts ❌
+
 ```yaml
 - Hardcode no código
 - Commit .env files
@@ -274,6 +287,7 @@ Compliance:
 ## 🔍 FERRAMENTAS DE DETECÇÃO
 
 ### Git Secrets Scanner
+
 ```bash
 # Instalar
 npm install -g gitleaks
@@ -290,6 +304,7 @@ chmod +x .git/hooks/pre-commit
 ```
 
 ### GitHub Secret Scanning
+
 ```yaml
 # .github/secret-scanning.yml
 name: Secret Scanning
@@ -309,19 +324,17 @@ jobs:
 ## ⚠️ INCIDENT RESPONSE
 
 ### Se Secret Comprometido:
+
 ```yaml
-IMEDIATO (15 min):
-  1. Rotacionar secret
+IMEDIATO (15 min): 1. Rotacionar secret
   2. Audit logs de uso
   3. Bloquear se suspicious
-  
-INVESTIGAÇÃO (1 hora):
-  1. Determinar exposure window
+
+INVESTIGAÇÃO (1 hora): 1. Determinar exposure window
   2. Check for unauthorized access
   3. Assess damage
-  
-REMEDIAÇÃO (24 horas):
-  1. Patch vulnerability
+
+REMEDIAÇÃO (24 horas): 1. Patch vulnerability
   2. Update all systems
   3. Notify affected parties
   4. Post-mortem
@@ -332,18 +345,21 @@ REMEDIAÇÃO (24 horas):
 ## ✅ CHECKLIST PARA GEM 02
 
 ### Hoje - Auditoria
+
 - [ ] Grep em busca de secrets
 - [ ] Listar todos os secrets usados
 - [ ] Verificar .gitignore
 - [ ] Criar .env.example
 
 ### Amanhã - Externalização
+
 - [ ] Mover TODOS para .env
 - [ ] Implementar validation
 - [ ] Remover do código
 - [ ] Test application
 
 ### Dia 3 - Segurança
+
 - [ ] Rotacionar secrets críticos
 - [ ] Setup secret scanning
 - [ ] Documentar processo
@@ -364,4 +380,4 @@ Target:
 
 ---
 
-*LEMBRE-SE: Um secret exposto = Potencial breach total!*
+_LEMBRE-SE: Um secret exposto = Potencial breach total!_

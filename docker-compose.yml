@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: simpix-app
     ports:
-      - "5000:5000"
+      - '5000:5000'
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       DATABASE_URL: ${DATABASE_URL}
@@ -26,7 +26,7 @@ services:
     image: redis:7-alpine
     container_name: simpix-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes
@@ -38,7 +38,7 @@ services:
     image: postgres:15-alpine
     container_name: simpix-postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-simpix}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-simpix}

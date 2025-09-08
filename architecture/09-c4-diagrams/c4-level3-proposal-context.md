@@ -1,9 +1,11 @@
 # C4 Level 3 - Component Diagram: Credit Proposal Bounded Context
 
 ## Overview
+
 This diagram shows the internal structure of the Credit Proposal bounded context, implementing Domain-Driven Design (DDD) patterns with clear separation of concerns across four layers.
 
 ## Architecture Principle
+
 **Data Flow Direction:** `Presentation → Application → Domain ← Infrastructure`
 
 Each layer depends only on layers below it, with Infrastructure depending on Domain interfaces (Dependency Inversion Principle).
@@ -17,36 +19,36 @@ graph TB
     classDef applicationLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef domainLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
     classDef infrastructureLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    
+
     %% External actors
     Client[HTTP Client]
     Database[(PostgreSQL Database)]
-    
+
     %% Presentation Layer
     subgraph "Presentation Layer"
         Controller["ProposalController<br/>• create()<br/>• getById()<br/>• update()<br/>• delete()<br/>• list()"]
         Routes["Express Routes<br/>• POST /api/proposals<br/>• GET /api/proposals/:id<br/>• PUT /api/proposals/:id<br/>• DELETE /api/proposals/:id"]
     end
-    
-    %% Application Layer  
+
+    %% Application Layer
     subgraph "Application Layer"
         AppService["ProposalApplicationService<br/>• createProposal()<br/>• getProposal()<br/>• updateProposal()<br/>• deleteProposal()<br/>• listProposals()<br/>• analyzeProposal()"]
     end
-    
+
     %% Domain Layer
     subgraph "Domain Layer"
         Aggregate["Proposal Aggregate<br/>• new Proposal()<br/>• fromPersistence()<br/>• calculateMonthlyPayment()<br/>• calculateTotalAmount()<br/>• updateStatus()<br/>• validate()"]
-        
+
         RepoInterface["IProposalRepository<br/>• findById()<br/>• save()<br/>• delete()<br/>• findAll()<br/>• findByStatus()"]
-        
+
         DomainService["CreditAnalysisService<br/>• analyzeCredit()<br/>• calculateRisk()<br/>• validateBusinessRules()"]
     end
-    
+
     %% Infrastructure Layer
     subgraph "Infrastructure Layer"
         RepoImpl["ProposalRepositoryImpl<br/>• findById()<br/>• save()<br/>• delete()<br/>• findAll()<br/>• toDomain()<br/>• toPersistence()"]
     end
-    
+
     %% Relationships
     Client --> Routes
     Routes --> Controller
@@ -56,7 +58,7 @@ graph TB
     AppService --> RepoInterface
     RepoInterface <|.. RepoImpl
     RepoImpl --> Database
-    
+
     %% Apply styles
     class Controller,Routes presentationLayer
     class AppService applicationLayer
@@ -67,16 +69,19 @@ graph TB
 ## Component Responsibilities
 
 ### Presentation Layer
+
 - **ProposalController**: Handles HTTP requests, input validation (Zod), response formatting
 - **Express Routes**: Maps HTTP endpoints to controller methods, middleware integration
 
-### Application Layer  
+### Application Layer
+
 - **ProposalApplicationService**: Orchestrates use cases, coordinates between domain and infrastructure
   - Converts DTOs to/from domain entities
   - Implements business workflows
   - Manages transactions and error handling
 
 ### Domain Layer
+
 - **Proposal Aggregate**: Core business entity with rich domain logic
   - Encapsulates proposal state and behavior
   - Enforces business invariants
@@ -89,6 +94,7 @@ graph TB
   - Cross-cutting concerns within the domain
 
 ### Infrastructure Layer
+
 - **ProposalRepositoryImpl**: Concrete repository implementation
   - Database access through Drizzle ORM
   - Data mapping (domain ↔ persistence)
@@ -97,29 +103,36 @@ graph TB
 ## Key Architectural Patterns
 
 ### 1. **Dependency Inversion**
+
 ```
 Application Service → IProposalRepository ← ProposalRepositoryImpl
 ```
+
 Application layer depends on abstraction, not concrete implementation.
 
 ### 2. **Rich Domain Model**
+
 ```
 Proposal Aggregate contains:
 - CustomerData (Value Object)
-- LoanConditions (Value Object)  
+- LoanConditions (Value Object)
 - Business methods (calculateMonthlyPayment, etc.)
 ```
 
 ### 3. **Repository Pattern**
+
 ```
 Domain defines contract → Infrastructure implements contract
 ```
+
 Separates domain logic from data access concerns.
 
 ### 4. **Application Service Pattern**
+
 ```
 Controller → Application Service → Domain + Infrastructure
 ```
+
 Thin controllers, fat domain, coordinated by application services.
 
 ## Data Flow Example: Create Proposal

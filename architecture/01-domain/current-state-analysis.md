@@ -1,4 +1,5 @@
 # 🔍 Análise do Estado Atual - Arquitetura AS-IS
+
 **Autor:** GEM 01 (Arquiteto)
 **Data:** 20/08/2025
 **Status:** Em Desenvolvimento
@@ -9,6 +10,7 @@
 ## 📊 RESUMO EXECUTIVO
 
 ### Métricas Atuais
+
 - **Funcionalidade:** 95% completa
 - **Segurança:** 96/100 (tripla proteção implementada)
 - **Escalabilidade:** 10-50 usuários/dia
@@ -16,6 +18,7 @@
 - **Cobertura de Testes:** ~5% (apenas testes críticos)
 
 ### Stack Tecnológico
+
 ```yaml
 Frontend:
   - Framework: React 18 + TypeScript
@@ -50,12 +53,14 @@ Infrastructure:
 ## 🏛️ ARQUITETURA ATUAL - VISÃO MACRO
 
 ### Padrão Arquitetural
+
 - **Tipo:** Monolito Modular
 - **Organização:** Feature-based folders
 - **Comunicação:** Síncrona (REST API)
 - **Estado:** Stateful (sessions)
 
 ### Estrutura de Diretórios
+
 ```
 /
 ├── client/           # Frontend React
@@ -64,7 +69,7 @@ Infrastructure:
 │   │   ├── pages/       # Páginas/rotas
 │   │   ├── hooks/       # Custom hooks
 │   │   └── lib/         # Utilities
-│   
+│
 ├── server/           # Backend Express
 │   ├── routes/       # API endpoints
 │   ├── services/     # Lógica de negócio
@@ -84,11 +89,13 @@ Infrastructure:
 ## 🔄 FLUXOS PRINCIPAIS
 
 ### 1. Fluxo de Autenticação
+
 ```
 User → Login Form → Supabase Auth → JWT Token → Session → Protected Routes
 ```
 
 ### 2. Fluxo de Proposta de Crédito
+
 ```
 1. Criação: Form → Validation → API → Database → Queue (PDF)
 2. Análise: Dashboard → Query → Cache → Response
@@ -98,6 +105,7 @@ User → Login Form → Supabase Auth → JWT Token → Session → Protected Ro
 ```
 
 ### 3. Fluxo de Dados
+
 ```
 Frontend → REST API → Express Router → Service Layer → Storage → PostgreSQL
                                      ↓
@@ -109,6 +117,7 @@ Frontend → REST API → Express Router → Service Layer → Storage → Postg
 ## 💾 MODELO DE DADOS ATUAL
 
 ### Entidades Principais
+
 ```sql
 -- Core Entities
 users (id, email, role, profile_data)
@@ -133,6 +142,7 @@ clicksign_documents (signatures)
 ```
 
 ### Status FSM
+
 - 24 estados definidos
 - Transições validadas
 - Audit trail completo
@@ -142,6 +152,7 @@ clicksign_documents (signatures)
 ## 🔌 INTEGRAÇÕES EXTERNAS
 
 ### 1. Banco Inter API
+
 - **Tipo:** REST + OAuth 2.0 + mTLS
 - **Funções:** Boletos, PIX, consultas
 - **Autenticação:** Certificate-based
@@ -149,6 +160,7 @@ clicksign_documents (signatures)
 - **Circuit Breaker:** Implementado
 
 ### 2. ClickSign API
+
 - **Tipo:** REST + HMAC
 - **Funções:** Assinatura digital CCB
 - **Webhook:** Callbacks de status
@@ -156,6 +168,7 @@ clicksign_documents (signatures)
 - **Circuit Breaker:** Implementado
 
 ### 3. Supabase
+
 - **Auth:** Magic links + JWT
 - **Storage:** Documentos privados
 - **Database:** PostgreSQL managed
@@ -166,18 +179,21 @@ clicksign_documents (signatures)
 ## ⚠️ PROBLEMAS IDENTIFICADOS
 
 ### 🔴 Críticos (P0)
+
 1. **Sem Observabilidade:** Zero monitoring em produção
 2. **Deployment Manual:** Dependência total do Replit
 3. **Secrets Hardcoded:** Algumas keys ainda no código
 4. **Backup Manual:** Sem automação de backup
 
 ### 🟡 Importantes (P1)
+
 1. **Monolito Acoplado:** Dificulta evolução independente
 2. **Sem Cache Layer:** Todas queries direto no DB
 3. **Testes Insuficientes:** ~5% cobertura
 4. **Sem Rate Limiting Global:** Apenas por rota
 
 ### 🟢 Melhorias (P2)
+
 1. **Sem CDN:** Assets servidos pelo Express
 2. **Logs não estruturados:** Console.log básico
 3. **Sem API Gateway:** Acesso direto ao Express
@@ -188,6 +204,7 @@ clicksign_documents (signatures)
 ## 📈 ANÁLISE DE CAPACIDADE
 
 ### Performance Atual
+
 ```yaml
 Response Time:
   - p50: ~150ms
@@ -214,6 +231,7 @@ CPU:
 ```
 
 ### Bottlenecks
+
 1. **Database:** Queries não otimizadas, sem índices
 2. **PDF Generation:** Síncrono, bloqueia thread
 3. **No Caching:** Todo request vai ao DB
@@ -224,6 +242,7 @@ CPU:
 ## 🛡️ SEGURANÇA ATUAL
 
 ### ✅ Implementado
+
 - JWT authentication
 - RBAC (3 níveis)
 - Input sanitization
@@ -234,6 +253,7 @@ CPU:
 - Tripla proteção DB teste
 
 ### ❌ Faltando
+
 - WAF (Web Application Firewall)
 - DDoS protection
 - Secrets rotation
@@ -247,30 +267,35 @@ CPU:
 ## 🎯 BOUNDED CONTEXTS IDENTIFICADOS
 
 ### 1. Credit Management (Core)
+
 - Propostas
 - Análise de crédito
 - Aprovações
 - Simulações
 
 ### 2. Payment Processing
+
 - Boletos
 - PIX
 - Parcelas
 - Reconciliação
 
 ### 3. Document Management
+
 - CCB generation
 - Assinaturas digitais
 - Storage
 - Templates
 
 ### 4. User & Access
+
 - Authentication
 - Authorization
 - Profiles
 - Audit
 
 ### 5. Partner Integration
+
 - Banco Inter
 - ClickSign
 - Webhooks
@@ -281,18 +306,21 @@ CPU:
 ## 📋 PRÓXIMOS PASSOS
 
 ### Imediato (24-48h)
+
 1. [ ] Criar diagrama C4 Level 1 (Context)
 2. [ ] Mapear dependências externas
 3. [ ] Documentar fluxos críticos
 4. [ ] Identificar dados sensíveis (PII)
 
 ### Curto Prazo (1 semana)
+
 1. [ ] Implementar monitoring básico
 2. [ ] Configurar backup automático
 3. [ ] Externalizar configurações
 4. [ ] Criar pipeline CI/CD mínimo
 
 ### Médio Prazo (2-4 semanas)
+
 1. [ ] Migrar para cloud provider
 2. [ ] Implementar cache layer
 3. [ ] Adicionar observability
@@ -300,4 +328,4 @@ CPU:
 
 ---
 
-*Documento em evolução - Última atualização: 20/08/2025 22:50 UTC*
+_Documento em evolução - Última atualização: 20/08/2025 22:50 UTC_

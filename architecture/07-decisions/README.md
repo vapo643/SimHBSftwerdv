@@ -14,15 +14,19 @@ Architecture Decision Records documentam decisões arquiteturais importantes, in
 **Deciders:** GEM 01, GEM 02
 
 ## Contexto
+
 [Qual é o problema ou situação?]
 
 ## Decisão
+
 [Qual decisão foi tomada?]
 
 ## Consequências
+
 [Quais são as implicações positivas e negativas?]
 
 ## Alternativas Consideradas
+
 [Que outras opções foram avaliadas?]
 ```
 

@@ -90,7 +90,7 @@ app.use(express.urlencoded({ extended: true }));
 
 ```typescript
 // Nova Proposta Form - Attributes for Fallback
-<form 
+<form
   onSubmit={handleSubmit(onSubmit)}  // React Hook Form (JavaScript)
   action="/nova-proposta"            // Fallback (Traditional)
   method="POST"                      // HTTP Method
@@ -100,7 +100,7 @@ app.use(express.urlencoded({ extended: true }));
     {...register("clienteNome")}     // React binding
     name="clienteNome"               // Traditional form name
   />
-  
+
   {/* Select with hidden input for compatibility */}
   <input type="hidden" name="prazo" value={watch("prazo") || ""} />
   <Select onValueChange={value => setValue("prazo", value)}>
@@ -113,22 +113,22 @@ app.use(express.urlencoded({ extended: true }));
 
 ```typescript
 // API Route (JSON)
-app.post("/api/propostas", authMiddleware, async (req: AuthRequest, res) => {
+app.post('/api/propostas', authMiddleware, async (req: AuthRequest, res) => {
   const validatedData = insertPropostaSchema.parse(req.body);
   const proposta = await storage.createProposta(validatedData);
   res.status(201).json(proposta);
 });
 
 // Traditional Form Route (HTML Response)
-app.post("/nova-proposta", authMiddleware, async (req: AuthRequest, res) => {
+app.post('/nova-proposta', authMiddleware, async (req: AuthRequest, res) => {
   const formData = {
     clienteNome: req.body.clienteNome,
     // ... parse form fields
   };
-  
+
   const validatedData = insertPropostaSchema.parse(formData);
   const proposta = await storage.createProposta(validatedData);
-  
+
   // Return HTML page with success/error
   res.send(successPage);
 });
@@ -137,16 +137,19 @@ app.post("/nova-proposta", authMiddleware, async (req: AuthRequest, res) => {
 ## Estados de Conexão
 
 ### 🟢 Online Normal
+
 - Todas as funcionalidades ativas
 - Indicadores ocultos
 - JavaScript pleno funcionamento
 
 ### 🟡 Reconectando
+
 - Banner verde: "Conexão restaurada!"
 - Temporary feedback (3 segundos)
 - Tentativa de reenvio de dados pendentes
 
 ### 🔴 Offline
+
 - Banner vermelho: "Você está offline"
 - Funcionalidades limitadas
 - Dados preservados localmente
@@ -154,16 +157,19 @@ app.post("/nova-proposta", authMiddleware, async (req: AuthRequest, res) => {
 ## Benefícios
 
 ### 🚀 Resiliência
+
 - **Zero Dependência de JavaScript**: Formulários funcionam sempre
 - **Tolerance a Falhas**: Graceful degradation automático
 - **Preservação de Dados**: Informações não são perdidas
 
 ### 👥 Acessibilidade
+
 - **Dispositivos Limitados**: Funciona em hardware antigo
 - **Conexões Ruins**: Redes instáveis não impedem uso
 - **Compatibilidade**: Browsers antigos suportados
 
 ### 💼 Continuidade de Negócio
+
 - **Operação 24/7**: Sistema sempre disponível
 - **Redução de Perdas**: Propostas não são perdidas por falhas técnicas
 - **Confiabilidade**: Usuários podem confiar no sistema

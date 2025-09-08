@@ -192,10 +192,11 @@ const FilaAnalise: React.FC = () => {
   };
 
   const today = new Date().toISOString().split('T')[0];
-  const propostasHoje = propostas?.filter((p) => {
-    const createdAt = p.createdAt;
-    return createdAt && typeof createdAt === 'string' && createdAt.split('T')[0] === today;
-  }).length || 0;
+  const propostasHoje =
+    propostas?.filter((p) => {
+      const createdAt = p.createdAt;
+      return createdAt && typeof createdAt === 'string' && createdAt.split('T')[0] === today;
+    }).length || 0;
 
   const propostasPendentes =
     propostas?.filter((p) => p.status === 'aguardando_analise' || p.status === 'em_analise')
@@ -413,34 +414,65 @@ const FilaAnalise: React.FC = () => {
                           {proposta.id}
                         </TableCell>
                         <TableCell className="text-gray-900 dark:text-white">
-                          {proposta.createdAt ? 
-                            format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR }) : 
-                            '-'
-                          }
+                          {proposta.createdAt
+                            ? format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })
+                            : '-'}
                         </TableCell>
-                        <TableCell className="text-gray-900 dark:text-white" data-testid={`text-nomeCliente-${proposta.id}`}>
+                        <TableCell
+                          className="text-gray-900 dark:text-white"
+                          data-testid={`text-nomeCliente-${proposta.id}`}
+                        >
                           {proposta.nomeCliente || '-'}
                         </TableCell>
                         {/* ✍️ CORREÇÃO: Exibir campos financeiros com formatação aprimorada */}
-                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-valorSolicitado-${proposta.id}`}>
-                          {proposta.valorSolicitado != null ? `R$ ${proposta.valorSolicitado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                        <TableCell
+                          className="text-right text-gray-900 dark:text-white tabular-nums"
+                          data-testid={`text-valorSolicitado-${proposta.id}`}
+                        >
+                          {proposta.valorSolicitado != null
+                            ? `R$ ${proposta.valorSolicitado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                            : '-'}
                         </TableCell>
-                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-prazo-${proposta.id}`}>
+                        <TableCell
+                          className="text-right text-gray-900 dark:text-white tabular-nums"
+                          data-testid={`text-prazo-${proposta.id}`}
+                        >
                           {proposta.prazo != null ? `${proposta.prazo} meses` : '-'}
                         </TableCell>
-                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-taxaJuros-${proposta.id}`}>
-                          {proposta.taxaJuros != null ? `${proposta.taxaJuros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%` : '-'}
+                        <TableCell
+                          className="text-right text-gray-900 dark:text-white tabular-nums"
+                          data-testid={`text-taxaJuros-${proposta.id}`}
+                        >
+                          {proposta.taxaJuros != null
+                            ? `${proposta.taxaJuros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%`
+                            : '-'}
                         </TableCell>
-                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-valorTac-${proposta.id}`}>
-                          {proposta.valorTac != null ? `R$ ${proposta.valorTac.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                        <TableCell
+                          className="text-right text-gray-900 dark:text-white tabular-nums"
+                          data-testid={`text-valorTac-${proposta.id}`}
+                        >
+                          {proposta.valorTac != null
+                            ? `R$ ${proposta.valorTac.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                            : '-'}
                         </TableCell>
-                        <TableCell className="text-right text-gray-900 dark:text-white tabular-nums" data-testid={`text-valorIof-${proposta.id}`}>
-                          {proposta.valorIof != null ? `R$ ${proposta.valorIof.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                        <TableCell
+                          className="text-right text-gray-900 dark:text-white tabular-nums"
+                          data-testid={`text-valorIof-${proposta.id}`}
+                        >
+                          {proposta.valorIof != null
+                            ? `R$ ${proposta.valorIof.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                            : '-'}
                         </TableCell>
-                        <TableCell className="text-gray-900 dark:text-white" data-testid={`text-parceiro-${proposta.id}`}>
+                        <TableCell
+                          className="text-gray-900 dark:text-white"
+                          data-testid={`text-parceiro-${proposta.id}`}
+                        >
                           {proposta.parceiro?.razaoSocial || '-'}
                         </TableCell>
-                        <TableCell className="text-gray-900 dark:text-white" data-testid={`text-loja-${proposta.id}`}>
+                        <TableCell
+                          className="text-gray-900 dark:text-white"
+                          data-testid={`text-loja-${proposta.id}`}
+                        >
                           {proposta.loja?.nomeLoja || '-'}
                         </TableCell>
                         <TableCell>

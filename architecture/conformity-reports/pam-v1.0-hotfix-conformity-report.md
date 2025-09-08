@@ -14,11 +14,13 @@ Refatoração completa da especificação OpenAPI V3 (`proposal-api.v1.yaml`) fo
 ## ✅ Mudanças Implementadas
 
 ### 1. **Versionamento (ADR-007)**
+
 - **Status:** ✅ Completo
 - **Implementação:** Todos os 18 endpoints foram atualizados com prefixo `/v1`
 - **Validação:** 17 paths com `/v1/` confirmados no arquivo
 
 ### 2. **RFC 7807 Error Handling (ADR-004)**
+
 - **Status:** ✅ Completo
 - **Implementação:** Schema `ProblemDetails` criado e aplicado em todas as respostas de erro
 - **Validação:** 43 referências ao ProblemDetails implementadas
@@ -38,6 +40,7 @@ Refatoração completa da especificação OpenAPI V3 (`proposal-api.v1.yaml`) fo
   ```
 
 ### 3. **PII Security (ADR-008)**
+
 - **Status:** ✅ Completo
 - **Implementação:** Schemas separados criados para mascaramento de PII
 - **Validação:** 5 campos mascarados implementados
@@ -48,24 +51,26 @@ Refatoração completa da especificação OpenAPI V3 (`proposal-api.v1.yaml`) fo
 
 ## 📊 Métricas de Qualidade
 
-| Métrica | Valor | Status |
-|---------|-------|--------|
-| **Conformidade ADR-004** | 100% | ✅ |
-| **Conformidade ADR-007** | 100% | ✅ |
-| **Conformidade ADR-008** | 100% | ✅ |
-| **Validação OpenAPI** | Passed | ✅ |
-| **Erros LSP** | 0 | ✅ |
-| **Tempo de Execução** | 12min | ✅ |
+| Métrica                  | Valor  | Status |
+| ------------------------ | ------ | ------ |
+| **Conformidade ADR-004** | 100%   | ✅     |
+| **Conformidade ADR-007** | 100%   | ✅     |
+| **Conformidade ADR-008** | 100%   | ✅     |
+| **Validação OpenAPI**    | Passed | ✅     |
+| **Erros LSP**            | 0      | ✅     |
+| **Tempo de Execução**    | 12min  | ✅     |
 
 ## 🔍 Validação Técnica
 
 ### Testes Executados
+
 1. **Validação de Sintaxe YAML:** ✅ Aprovado
 2. **Validação OpenAPI V3:** ✅ Aprovado via swagger-cli
 3. **Verificação LSP:** ✅ 0 erros detectados
 4. **Contagem de Conformidade:** ✅ Todos os pontos verificados
 
 ### Evidências de Conformidade
+
 ```bash
 # Validação OpenAPI
 npx @apidevtools/swagger-cli validate proposal-api.v1.yaml
@@ -102,11 +107,13 @@ grep "cpfMasked\|rgMasked" proposal-api.v1.yaml | wc -l
 ## 📝 Notas Técnicas
 
 ### Decisões Tomadas
+
 1. **Server URL:** Mantido `localhost:5000` para desenvolvimento (porta padrão do Replit)
 2. **PII Masking Pattern:** Usado padrão `***.***.XXX-**` para CPF e `**.***.**X-*` para RG
 3. **Error Context:** Campo `context` mantido como objeto adicional para flexibilidade
 
 ### Próximos Passos Recomendados
+
 1. Implementar os endpoints no código seguindo a especificação
 2. Adicionar testes automatizados de contrato
 3. Gerar SDK cliente baseado na especificação

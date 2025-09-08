@@ -7,6 +7,7 @@
 ## Contexto
 
 Durante a Fase 0, identificamos que o sistema Simpix possui alta complexidade de domínio com múltiplas responsabilidades entrelaçadas:
+
 - Gestão de propostas de crédito
 - Análise de risco
 - Geração de contratos
@@ -18,6 +19,7 @@ O código atual está estruturado como um monolito com acoplamento significativo
 ## Decisão
 
 Adotamos **Domain-Driven Design (DDD)** com **Bounded Contexts** claramente definidos para:
+
 1. Estabelecer uma Linguagem Ubíqua consistente
 2. Isolar domínios de negócio em contextos delimitados
 3. Reduzir acoplamento entre diferentes áreas funcionais
@@ -26,22 +28,26 @@ Adotamos **Domain-Driven Design (DDD)** com **Bounded Contexts** claramente defi
 ### Bounded Contexts Identificados
 
 **Core Contexts:**
+
 - Credit Proposal Context
 - Credit Analysis Context
 - Contract Management Context
 
 **Supporting Contexts:**
+
 - Payment Context
 - Partner Management Context
 - Notification Context
 
 **Generic Contexts:**
+
 - Authentication Context
 - Audit Context
 
 ## Consequências
 
 ### Positivas
+
 - **Manutenibilidade:** Código organizado por domínio de negócio
 - **Testabilidade:** Contextos isolados são mais fáceis de testar
 - **Evolução:** Preparado para extração futura de serviços
@@ -49,6 +55,7 @@ Adotamos **Domain-Driven Design (DDD)** com **Bounded Contexts** claramente defi
 - **Paralelização:** Times podem trabalhar em contextos diferentes
 
 ### Negativas
+
 - **Complexidade Inicial:** Requer refatoração significativa
 - **Curva de Aprendizado:** Time precisa aprender conceitos DDD
 - **Overhead:** Comunicação entre contextos via contratos
@@ -57,12 +64,14 @@ Adotamos **Domain-Driven Design (DDD)** com **Bounded Contexts** claramente defi
 ## Implementação
 
 ### Fase 1.1 - Enforcement (2 semanas)
+
 1. Configurar dependency-cruiser para validar limites
 2. Criar testes de invariantes para agregados
 3. Implementar Event Bus local
 4. Definir contratos OpenAPI entre contextos
 
 ### Fase 1.2 - Refatoração (2 meses)
+
 1. Isolar Credit Proposal Context
 2. Extrair Payment Context
 3. Implementar Saga Pattern

@@ -10,11 +10,13 @@
 Durante a análise forense do schema da entidade `propostas` (Operação Raio-X Fase 3.1), foi identificada uma incompatibilidade crítica de tipos de dados que impede a implementação de constraints de integridade referencial:
 
 ### Problema Identificado
+
 - **Coluna:** `propostas.analista_id`
 - **Tipo Atual:** `text` (sem foreign key constraint)
 - **Problema:** Indefinição sobre qual tabela referenciar e que tipo usar
 
 ### Estado Arquitetural Dual
+
 O sistema apresenta **dois modelos de usuário coexistentes**:
 
 1. **Sistema Legado (`users`):**
@@ -28,6 +30,7 @@ O sistema apresenta **dois modelos de usuário coexistentes**:
    - Características: UUIDs globalmente únicos, integração nativa com auth.users
 
 ### Impacto da Decisão
+
 Esta decisão definirá o **padrão arquitetural de identificação de usuários** para todas as futuras relações no sistema, estabelecendo um precedente crítico.
 
 ## Opções Consideradas
@@ -35,22 +38,25 @@ Esta decisão definirá o **padrão arquitetural de identificação de usuários
 ### Opção A: Alterar `propostas.analista_id` para Integer
 
 **Implementação:**
+
 ```sql
-ALTER TABLE propostas 
+ALTER TABLE propostas
 ALTER COLUMN analista_id TYPE integer USING analista_id::integer;
 
-ALTER TABLE propostas 
-ADD CONSTRAINT fk_propostas_analista 
+ALTER TABLE propostas
+ADD CONSTRAINT fk_propostas_analista
 FOREIGN KEY (analista_id) REFERENCES users(id);
 ```
 
 #### Prós
+
 - **Simplicidade Imediata:** Menor complexidade de implementação
 - **Compatibilidade Legado:** Alinha com sistema `users` existente
 - **Performance:** Joins com integers são marginalmente mais rápidos
 - **Menor Migração:** Dados existentes podem ser convertidos facilmente
 
 #### Contras
+
 - **Direção Arquitetural Regressiva:** Vai contra a migração para Supabase Auth
 - **ID Mutável:** IDs seriais podem mudar em raros cenários de reorganização
 - **Fragmentação de Sistema:** Mantém dualidade entre `users` e `profiles`
@@ -59,6 +65,7 @@ FOREIGN KEY (analista_id) REFERENCES users(id);
 - **Inconsistência com Sessões:** `user_sessions` já usa `profiles.id` (UUID)
 
 #### Análise de Impacto
+
 - **Migração de Dados:** Simples conversão de string para integer
 - **Refatoração de Código:** Mínima, apenas ajuste de tipos
 - **Performance:** Impacto positivo mínimo em joins
@@ -68,16 +75,18 @@ FOREIGN KEY (analista_id) REFERENCES users(id);
 ### Opção B: Usar UUID do Supabase Auth
 
 **Implementação:**
+
 ```sql
-ALTER TABLE propostas 
+ALTER TABLE propostas
 ALTER COLUMN analista_id TYPE uuid USING analista_id::uuid;
 
-ALTER TABLE propostas 
-ADD CONSTRAINT fk_propostas_analista 
+ALTER TABLE propostas
+ADD CONSTRAINT fk_propostas_analista
 FOREIGN KEY (analista_id) REFERENCES profiles(id);
 ```
 
 #### Prós
+
 - **Alinhamento Estratégico:** Direciona sistema para Supabase Auth
 - **ID Imutável:** UUIDs nunca mudam, garantindo estabilidade
 - **Segurança Aprimorada:** IDs não sequenciais não vazam informações do schema
@@ -87,12 +96,14 @@ FOREIGN KEY (analista_id) REFERENCES profiles(id);
 - **Padrão da Indústria:** Seguindo melhores práticas do Supabase e PostgreSQL moderno
 
 #### Contras
+
 - **Migração Complexa:** Requer sincronização entre `users` e `profiles`
 - **Overhead de Storage:** 16 bytes vs 8 bytes por ID
 - **Refatoração de Código:** Ajustes em todos os pontos que referenciam analistas
 - **Performance Marginal:** Joins com UUID são ~10% mais lentos em escala massiva
 
 #### Análise de Impacto
+
 - **Migração de Dados:** Complexa, requer mapeamento users → profiles
 - **Refatoração de Código:** Significativa, mudança de tipos em várias camadas
 - **Performance:** Impacto negativo mínimo para escala atual
@@ -100,22 +111,29 @@ FOREIGN KEY (analista_id) REFERENCES profiles(id);
 ## Fatores Decisórios Críticos
 
 ### 1. **Direção Arquitetural**
+
 O sistema **já está migrando** para Supabase Auth:
+
 - `user_sessions` referencia `profiles.id` (UUID)
 - RLS policies usam `auth.uid()` (UUID)
 - Provider de autenticação retorna `user.id` como UUID
 
 ### 2. **Precedente Estabelecido**
+
 Decisão criar **padrão obrigatório** para todas as futuras tabelas que referenciam usuários.
 
 ### 3. **Princípios de Segurança**
+
 Sistema bancário exige:
+
 - IDs não sequenciais (anti-enumeration)
 - Chaves imutáveis
 - Integração robusta com autenticação
 
 ### 4. **Conformidade com Melhores Práticas**
+
 Supabase recomenda oficialmente:
+
 - Sempre referenciar `auth.users(id)` (UUID)
 - Usar `on delete cascade` para integridade
 - Evitar referências a colunas mutáveis
@@ -143,6 +161,7 @@ Supabase recomenda oficialmente:
 3. **Fase 3:** Deprecar tabela `users` legado (longo prazo)
 
 ### Impacto Quantificado
+
 - **Migração de Dados:** ~500 registros propostas existentes
 - **Refatoração de Código:** ~15 arquivos afetados
 - **Tempo de Implementação:** 2-3 dias
@@ -151,6 +170,7 @@ Supabase recomenda oficialmente:
 ## Consequências
 
 ### Positivas
+
 - Sistema unificado de identificação de usuários
 - Conformidade total com Supabase Auth
 - Base sólida para futuras features
@@ -158,11 +178,13 @@ Supabase recomenda oficialmente:
 - Melhoria de segurança
 
 ### Negativas
+
 - Migração de dados necessária
 - Refatoração de código significativa
 - Overhead de storage mínimo
 
 ### Riscos e Mitigações
+
 - **Risco:** Dados órfãos durante migração
 - **Mitigação:** Transação atômica e rollback automático
 - **Risco:** Quebra de funcionalidade existente
@@ -171,12 +193,14 @@ Supabase recomenda oficialmente:
 ## Notas de Implementação
 
 ### ⚠️ **CONSTRAINTS DE SEGURANÇA**
+
 - Migração deve ser **atômica** (transação única)
 - Backup obrigatório antes da execução
 - Validação completa de integridade referencial
 - Teste de rollback obrigatório
 
 ### 📋 **CHECKLIST DE IMPLEMENTAÇÃO**
+
 - [ ] Sincronização de dados `users` → `profiles`
 - [ ] Migração de `propostas.analista_id` para UUID
 - [ ] Atualização de foreign key constraints

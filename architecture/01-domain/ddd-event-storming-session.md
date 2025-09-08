@@ -1,4 +1,5 @@
 # 📋 Event Storming Session - Sistema Simpix
+
 **Facilitador:** GEM 07 (AI Specialist)  
 **Data:** 2025-08-21  
 **Fase:** 1 - Desenvolvimento Contínuo  
@@ -10,23 +11,23 @@
 
 ### **Termos Centrais do Negócio**
 
-| Termo | Definição | Contexto |
-|-------|-----------|----------|
-| **Proposta** | Solicitação formal de crédito submetida por um cliente através de uma loja parceira | Core |
-| **Análise de Crédito** | Processo de avaliação de risco e aprovação/reprovação de uma proposta | Core |
-| **Formalização** | Processo de geração e assinatura de contratos após aprovação | Core |
-| **CCB** | Cédula de Crédito Bancário - documento legal do empréstimo | Core |
-| **Parceiro** | Empresa que possui lojas afiliadas ao sistema | Suporte |
-| **Loja** | Ponto de venda onde propostas são originadas | Suporte |
-| **Produto Financeiro** | Tipo de crédito oferecido (ex: CDC, Crediário) | Core |
-| **Tabela Comercial** | Conjunto de taxas e prazos para um produto | Core |
-| **TAC** | Taxa de Abertura de Crédito | Core |
-| **CET** | Custo Efetivo Total do empréstimo | Core |
-| **Boleto** | Forma de pagamento das parcelas | Suporte |
-| **Status da Proposta** | Estado atual no ciclo de vida (24 estados possíveis) | Core |
-| **Parcela** | Prestação mensal do empréstimo | Core |
-| **Analista** | Usuário responsável pela análise de crédito | Core |
-| **Atendente** | Usuário da loja que origina propostas | Suporte |
+| Termo                  | Definição                                                                           | Contexto |
+| ---------------------- | ----------------------------------------------------------------------------------- | -------- |
+| **Proposta**           | Solicitação formal de crédito submetida por um cliente através de uma loja parceira | Core     |
+| **Análise de Crédito** | Processo de avaliação de risco e aprovação/reprovação de uma proposta               | Core     |
+| **Formalização**       | Processo de geração e assinatura de contratos após aprovação                        | Core     |
+| **CCB**                | Cédula de Crédito Bancário - documento legal do empréstimo                          | Core     |
+| **Parceiro**           | Empresa que possui lojas afiliadas ao sistema                                       | Suporte  |
+| **Loja**               | Ponto de venda onde propostas são originadas                                        | Suporte  |
+| **Produto Financeiro** | Tipo de crédito oferecido (ex: CDC, Crediário)                                      | Core     |
+| **Tabela Comercial**   | Conjunto de taxas e prazos para um produto                                          | Core     |
+| **TAC**                | Taxa de Abertura de Crédito                                                         | Core     |
+| **CET**                | Custo Efetivo Total do empréstimo                                                   | Core     |
+| **Boleto**             | Forma de pagamento das parcelas                                                     | Suporte  |
+| **Status da Proposta** | Estado atual no ciclo de vida (24 estados possíveis)                                | Core     |
+| **Parcela**            | Prestação mensal do empréstimo                                                      | Core     |
+| **Analista**           | Usuário responsável pela análise de crédito                                         | Core     |
+| **Atendente**          | Usuário da loja que origina propostas                                               | Suporte  |
 
 ---
 
@@ -51,6 +52,7 @@ graph LR
 ### **Lista Completa de Eventos**
 
 #### **Originação (Loja Context)**
+
 - `PropostaIniciada`
 - `DadosClienteCapturados`
 - `DocumentosAnexados`
@@ -58,6 +60,7 @@ graph LR
 - `PropostaSubmetida`
 
 #### **Análise de Crédito (Credit Analysis Context)**
+
 - `AnáliseIniciada`
 - `ScoreCalculado`
 - `RiscoAvaliado`
@@ -68,6 +71,7 @@ graph LR
 - `PendênciaResolvida`
 
 #### **Formalização (Contract Management Context)**
+
 - `CCBGerada`
 - `ContratoEnviadoParaAssinatura`
 - `ContratoAssinado`
@@ -75,6 +79,7 @@ graph LR
 - `FormalizaçãoConcluída`
 
 #### **Pagamento (Payment Context)**
+
 - `BoletoGerado`
 - `PIXGerado`
 - `PagamentoRecebido`
@@ -83,6 +88,7 @@ graph LR
 - `EmpréstimQuitado`
 
 #### **Notificação (Notification Context)**
+
 - `NotificaçãoEnviada`
 - `AlertaGerado`
 - `LembreteAgendado`
@@ -91,16 +97,16 @@ graph LR
 
 ## 3. COMANDOS IDENTIFICADOS
 
-| Comando | Evento Resultante | Agregado |
-|---------|-------------------|----------|
-| `IniciarProposta` | `PropostaIniciada` | Proposta |
-| `EnviarDocumentos` | `DocumentosEnviados` | Proposta |
-| `AprovarProposta` | `PropostaAprovada` | Proposta |
-| `ReprovarProposta` | `PropostaReprovada` | Proposta |
-| `GerarCCB` | `CCBGerada` | Contrato |
-| `AssinarContrato` | `ContratoAssinado` | Contrato |
+| Comando              | Evento Resultante     | Agregado  |
+| -------------------- | --------------------- | --------- |
+| `IniciarProposta`    | `PropostaIniciada`    | Proposta  |
+| `EnviarDocumentos`   | `DocumentosEnviados`  | Proposta  |
+| `AprovarProposta`    | `PropostaAprovada`    | Proposta  |
+| `ReprovarProposta`   | `PropostaReprovada`   | Proposta  |
+| `GerarCCB`           | `CCBGerada`           | Contrato  |
+| `AssinarContrato`    | `ContratoAssinado`    | Contrato  |
 | `ProcessarPagamento` | `PagamentoProcessado` | Pagamento |
-| `GerarBoleto` | `BoletoGerado` | Cobrança |
+| `GerarBoleto`        | `BoletoGerado`        | Cobrança  |
 
 ---
 
@@ -109,18 +115,21 @@ graph LR
 ### **4.1 Core Contexts (Domínio Principal)**
 
 #### **Credit Proposal Context**
+
 - **Responsabilidade:** Gerenciar o ciclo de vida das propostas
 - **Agregados:** Proposta, Cliente, Documentos
 - **Serviços:** PropostaService, SimulacaoService
 - **Eventos:** PropostaIniciada, PropostaSubmetida
 
 #### **Credit Analysis Context**
+
 - **Responsabilidade:** Análise de risco e decisão de crédito
 - **Agregados:** Análise, Score, Decisão
 - **Serviços:** AnaliseService, ScoreService
 - **Eventos:** PropostaAprovada, PropostaReprovada
 
 #### **Contract Management Context**
+
 - **Responsabilidade:** Geração e gestão de contratos
 - **Agregados:** Contrato, CCB, Assinatura
 - **Serviços:** CCBService, ClickSignService
@@ -129,18 +138,21 @@ graph LR
 ### **4.2 Supporting Contexts (Suporte)**
 
 #### **Payment Context**
+
 - **Responsabilidade:** Gestão de pagamentos e cobranças
 - **Agregados:** Pagamento, Boleto, Parcela
 - **Serviços:** BoletoService, InterAPIService
 - **Eventos:** BoletoGerado, PagamentoRecebido
 
 #### **Partner Management Context**
+
 - **Responsabilidade:** Gestão de parceiros e lojas
 - **Agregados:** Parceiro, Loja, Usuario
 - **Serviços:** ParceiroService, LojaService
 - **Eventos:** LojaAtivada, ParceiroDesativado
 
 #### **Notification Context**
+
 - **Responsabilidade:** Comunicação e alertas
 - **Agregados:** Notificação, Template, Destinatário
 - **Serviços:** EmailService, SMSService
@@ -149,11 +161,13 @@ graph LR
 ### **4.3 Generic Contexts**
 
 #### **Authentication Context**
+
 - **Responsabilidade:** Autenticação e autorização
 - **Agregados:** Usuario, Sessão, Permissão
 - **Serviços:** AuthService, JWTService
 
 #### **Audit Context**
+
 - **Responsabilidade:** Auditoria e compliance
 - **Agregados:** LogAuditoria, Evento, Mudança
 - **Serviços:** AuditService, ComplianceService
@@ -169,29 +183,29 @@ graph TB
         CA[Credit Analysis]
         CM[Contract Management]
     end
-    
+
     subgraph "Supporting"
         PM[Payment]
         PA[Partner Management]
         NT[Notification]
     end
-    
+
     subgraph "Generic"
         AU[Authentication]
         AD[Audit]
     end
-    
+
     CP --> CA
     CA --> CM
     CM --> PM
     CP -.-> PA
     CM --> NT
     PM --> NT
-    
+
     AU -.-> CP
     AU -.-> CA
     AU -.-> CM
-    
+
     AD -.-> CP
     AD -.-> CA
     AD -.-> CM
@@ -200,14 +214,14 @@ graph TB
 
 ### **Padrões de Integração Entre Contextos**
 
-| De | Para | Padrão | Tipo |
-|----|------|--------|------|
-| Credit Proposal | Credit Analysis | Shared Kernel | Síncrono |
-| Credit Analysis | Contract Management | Published Language | Assíncrono |
-| Contract Management | Payment | Anti-Corruption Layer | Assíncrono |
-| Payment | Notification | Event-Driven | Assíncrono |
-| All Contexts | Authentication | Open Host Service | Síncrono |
-| All Contexts | Audit | Event Sourcing | Assíncrono |
+| De                  | Para                | Padrão                | Tipo       |
+| ------------------- | ------------------- | --------------------- | ---------- |
+| Credit Proposal     | Credit Analysis     | Shared Kernel         | Síncrono   |
+| Credit Analysis     | Contract Management | Published Language    | Assíncrono |
+| Contract Management | Payment             | Anti-Corruption Layer | Assíncrono |
+| Payment             | Notification        | Event-Driven          | Assíncrono |
+| All Contexts        | Authentication      | Open Host Service     | Síncrono   |
+| All Contexts        | Audit               | Event Sourcing        | Assíncrono |
 
 ---
 

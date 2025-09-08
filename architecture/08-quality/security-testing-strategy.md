@@ -20,12 +20,13 @@ Este documento estabelece nossa doutrina mandatória para automação de testes 
 **Integraremos um pipeline completo de DevSecOps no nosso CI/CD (GitHub Actions), utilizando:**
 
 - **Snyk** para Análise de Composição de Software (SCA) - detecção de vulnerabilidades em dependências
-- **SonarQube/CodeQL** para Análise Estática (SAST) - análise de código fonte sem execução  
+- **SonarQube/CodeQL** para Análise Estática (SAST) - análise de código fonte sem execução
 - **OWASP ZAP** para Análise Dinâmica (DAST) - testes em aplicação em execução
 - **GitLeaks** para detecção de secrets e credenciais vazadas
 - **Trivy** para segurança de containers e imagens Docker
 
 ### Declaração Formal
+
 ```
 PADRÃO OBRIGATÓRIO: Pipeline DevSecOps com SAST + DAST + SCA
 ENFORCEMENT: Bloqueio automático de PRs com vulnerabilidades críticas/altas
@@ -56,7 +57,7 @@ graph TD
     M --> N{Final Security Gate}
     N -->|Pass| O[Deploy to Production]
     N -->|Fail| P[Rollback & Alert]
-    
+
     style H fill:#ff6b6b
     style N fill:#ff6b6b
     style J fill:#feca57
@@ -65,13 +66,13 @@ graph TD
 
 ### 2.2 Ferramentas e Propósitos
 
-| Tipo | Ferramenta | Propósito | Execução | Threshold |
-|------|------------|-----------|----------|-----------|
-| **Secret Detection** | GitLeaks | Detectar credenciais vazadas | Every commit | Zero tolerance |
-| **SAST** | SonarQube + CodeQL | Análise estática de código | Pull Request | High/Critical block |
-| **SCA** | Snyk | Vulnerabilidades em dependências | Pull Request + Daily | High/Critical block |
-| **Container** | Trivy | Segurança de imagens Docker | Build time | High/Critical block |
-| **DAST** | OWASP ZAP | Testes em aplicação rodando | Staging deploy | Critical block |
+| Tipo                 | Ferramenta         | Propósito                        | Execução             | Threshold           |
+| -------------------- | ------------------ | -------------------------------- | -------------------- | ------------------- |
+| **Secret Detection** | GitLeaks           | Detectar credenciais vazadas     | Every commit         | Zero tolerance      |
+| **SAST**             | SonarQube + CodeQL | Análise estática de código       | Pull Request         | High/Critical block |
+| **SCA**              | Snyk               | Vulnerabilidades em dependências | Pull Request + Daily | High/Critical block |
+| **Container**        | Trivy              | Segurança de imagens Docker      | Build time           | High/Critical block |
+| **DAST**             | OWASP ZAP          | Testes em aplicação rodando      | Staging deploy       | Critical block      |
 
 ### 2.3 Implementação no GitHub Actions
 
@@ -81,16 +82,16 @@ name: DevSecOps Security Pipeline
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 2 * * *'  # Daily security scan
+    - cron: '0 2 * * *' # Daily security scan
 
 jobs:
   security-gates:
     runs-on: ubuntu-latest
-    
+
     steps:
       # 1. SECRET SCANNING
       - name: GitLeaks Secret Detection
@@ -99,7 +100,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           config-path: .gitleaks.toml
-      
+
       # 2. SAST - Static Analysis
       - name: SonarQube Security Analysis
         uses: SonarSource/sonarcloud-github-action@master
@@ -112,14 +113,14 @@ jobs:
             -Dsonar.organization=simpix
             -Dsonar.qualitygate.wait=true
             -Dsonar.security.hotspots.threshold=0
-      
+
       # 3. SAST - CodeQL Analysis
       - name: CodeQL Security Scan
         uses: github/codeql-action/analyze@v3
         with:
           languages: typescript, javascript
           queries: security-and-quality
-      
+
       # 4. SCA - Dependency Scanning
       - name: Snyk Dependency Security Scan
         uses: snyk/actions/node@master
@@ -128,7 +129,7 @@ jobs:
         with:
           args: --severity-threshold=high --fail-on=all
           command: test
-      
+
       # 5. Container Security
       - name: Trivy Container Scan
         uses: aquasecurity/trivy-action@master
@@ -144,21 +145,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: security-gates
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Deploy to Testing Environment
         run: |
           # Deploy application to isolated testing environment
           docker run -d -p 3000:3000 --name dast-target simpix:${{ github.sha }}
           sleep 30  # Wait for application startup
-      
+
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.10.0
         with:
           target: 'http://localhost:3000'
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a -j -m 10 -T 60'
-      
+
       - name: OWASP ZAP Full Scan (Production)
         if: github.ref == 'refs/heads/main'
         uses: zaproxy/action-full-scan@v0.10.0
@@ -172,13 +173,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [security-gates, dast-scanning]
     if: always()
-    
+
     steps:
       - name: Upload Security Results to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
-      
+
       - name: Security Dashboard Report
         run: |
           echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
@@ -204,16 +205,17 @@ jobs:
 
 ### 3.2 Escopo de Pentests
 
-| Tipo | Frequência | Escopo | Metodologia | Certificação |
-|------|------------|--------|-------------|--------------|
-| **Externo** | Anual | Infraestrutura completa | OWASP WSTG + NIST | OSCP/CEH |
-| **Aplicação** | Semestral | APIs + Frontend + Mobile | OWASP Top 10 + Custom | OSWE/GWEB |
-| **Red Team** | Bianual | Simulação de ataque real | MITRE ATT&CK | OSEP/CRTE |
-| **Bug Bounty** | Contínuo | Aplicação em produção | Community driven | HackerOne/Bugcrowd |
+| Tipo           | Frequência | Escopo                   | Metodologia           | Certificação       |
+| -------------- | ---------- | ------------------------ | --------------------- | ------------------ |
+| **Externo**    | Anual      | Infraestrutura completa  | OWASP WSTG + NIST     | OSCP/CEH           |
+| **Aplicação**  | Semestral  | APIs + Frontend + Mobile | OWASP Top 10 + Custom | OSWE/GWEB          |
+| **Red Team**   | Bianual    | Simulação de ataque real | MITRE ATT&CK          | OSEP/CRTE          |
+| **Bug Bounty** | Contínuo   | Aplicação em produção    | Community driven      | HackerOne/Bugcrowd |
 
 ### 3.3 Critérios de Ativação de Pentest
 
 **Pentest obrigatório quando:**
+
 - Nova funcionalidade de autenticação ou autorização
 - Integração com APIs externas de pagamento/financeiras
 - Mudanças na arquitetura de rede ou segurança
@@ -226,12 +228,12 @@ jobs:
 
 ### 4.1 SLAs de Remediação (Baseado em NIST/OWASP 2025)
 
-| Severidade | SLA Remediação | Escalação | Processo | Aprovação |
-|------------|----------------|-----------|----------|-----------|
-| **Crítica (CVSS 9.0-10.0)** | **24 horas** | Imediata ao CTO | Hotfix obrigatório | CTO + CISO |
-| **Alta (CVSS 7.0-8.9)** | **7 dias** | 48h ao Tech Lead | Fix prioritário | Tech Lead |
-| **Média (CVSS 4.0-6.9)** | **30 dias** | 15d ao PM | Sprint planning | Product Owner |
-| **Baixa (CVSS 0.1-3.9)** | **90 dias** | 45d ao backlog | Manutenção | Opcional |
+| Severidade                  | SLA Remediação | Escalação        | Processo           | Aprovação     |
+| --------------------------- | -------------- | ---------------- | ------------------ | ------------- |
+| **Crítica (CVSS 9.0-10.0)** | **24 horas**   | Imediata ao CTO  | Hotfix obrigatório | CTO + CISO    |
+| **Alta (CVSS 7.0-8.9)**     | **7 dias**     | 48h ao Tech Lead | Fix prioritário    | Tech Lead     |
+| **Média (CVSS 4.0-6.9)**    | **30 dias**    | 15d ao PM        | Sprint planning    | Product Owner |
+| **Baixa (CVSS 0.1-3.9)**    | **90 dias**    | 45d ao backlog   | Manutenção         | Opcional      |
 
 ### 4.2 Processo de Triagem
 
@@ -243,22 +245,22 @@ graph TD
     C -->|7.0-8.9| E[ALTA - 7 dias]
     C -->|4.0-6.9| F[MÉDIA - 30 dias]
     C -->|0.1-3.9| G[BAIXA - 90 dias]
-    
+
     D --> H[Escalação Imediata]
     E --> I[Assignment ao Team]
     F --> J[Sprint Backlog]
     G --> K[Maintenance Backlog]
-    
+
     H --> L[Hotfix + Deploy]
     I --> M[Fix Development]
     J --> N[Planned Fix]
     K --> O[Maintenance Window]
-    
+
     L --> P[Verification + Close]
     M --> P
     N --> P
     O --> P
-    
+
     style D fill:#ff4757
     style E fill:#ff6348
     style F fill:#ffa502
@@ -285,23 +287,23 @@ graph TD
 // security-metrics.ts
 export interface SecurityMetrics {
   // SLA Compliance
-  slaComplianceRate: number;           // Meta: > 95%
-  meanTimeToRemediate: number;         // Meta: < SLA por severidade
-  criticalVulnCount: number;           // Meta: 0 em produção
-  
-  // Detection Effectiveness  
-  automatedDetectionRate: number;      // Meta: > 90%
-  falsePositiveRate: number;           // Meta: < 10%
+  slaComplianceRate: number; // Meta: > 95%
+  meanTimeToRemediate: number; // Meta: < SLA por severidade
+  criticalVulnCount: number; // Meta: 0 em produção
+
+  // Detection Effectiveness
+  automatedDetectionRate: number; // Meta: > 90%
+  falsePositiveRate: number; // Meta: < 10%
   coverageMetrics: {
-    sastCoverage: number;              // Meta: > 80%
-    dastCoverage: number;              // Meta: > 70%
-    scaCoverage: number;               // Meta: > 95%
+    sastCoverage: number; // Meta: > 80%
+    dastCoverage: number; // Meta: > 70%
+    scaCoverage: number; // Meta: > 95%
   };
-  
+
   // Business Impact
-  securityDebtReduction: number;       // Meta: -20% quarter over quarter
-  preventedIncidents: number;          // Meta: Track prevention vs detection
-  complianceScore: number;             // Meta: > 95% (NIST/OWASP)
+  securityDebtReduction: number; // Meta: -20% quarter over quarter
+  preventedIncidents: number; // Meta: Track prevention vs detection
+  complianceScore: number; // Meta: > 95% (NIST/OWASP)
 }
 ```
 
@@ -318,6 +320,7 @@ export interface SecurityMetrics {
 ### 5.2 Critérios de Seleção
 
 **Perfil Ideal:**
+
 - **Competência Técnica:** Sólido conhecimento em desenvolvimento e arquitetura
 - **Enthusiasm:** Interesse genuíno em segurança da informação
 - **Communication Skills:** Capacidade de transmitir conhecimento técnico
@@ -326,31 +329,34 @@ export interface SecurityMetrics {
 
 ### 5.3 Responsabilidades e Atividades
 
-| Responsabilidade | Frequência | Tempo Estimado | Impacto |
-|------------------|------------|----------------|---------|
-| **Security Code Reviews** | Semanal | 2-3h/semana | Alto |
-| **Threat Modeling Sessions** | Por feature | 1-2h/session | Alto |
-| **Security Training Delivery** | Mensal | 2h/mês | Médio |
-| **Vulnerability Triage Support** | On-demand | 1h/semana | Alto |
-| **Security Documentation** | Trimestral | 4h/trimestre | Médio |
+| Responsabilidade                 | Frequência  | Tempo Estimado | Impacto |
+| -------------------------------- | ----------- | -------------- | ------- |
+| **Security Code Reviews**        | Semanal     | 2-3h/semana    | Alto    |
+| **Threat Modeling Sessions**     | Por feature | 1-2h/session   | Alto    |
+| **Security Training Delivery**   | Mensal      | 2h/mês         | Médio   |
+| **Vulnerability Triage Support** | On-demand   | 1h/semana      | Alto    |
+| **Security Documentation**       | Trimestral  | 4h/trimestre   | Médio   |
 
 ### 5.4 Programa de Treinamento
 
 #### Trilha de Desenvolvimento (6 meses)
 
 **Mês 1-2: Fundamentos**
+
 - OWASP Top 10 2023 + análise prática
 - Secure Coding Principles para TypeScript/React
 - Introduction to Threat Modeling (STRIDE/PASTA)
 - Hands-on: Vulnerability identification exercises
 
 **Mês 3-4: Ferramentas e Processos**
+
 - DevSecOps pipeline deep-dive
 - SonarQube, Snyk, OWASP ZAP mastery
 - Security testing automation
 - Incident response procedures
 
 **Mês 5-6: Advanced Topics**
+
 - API Security (OAuth 2.0, JWT, Rate Limiting)
 - Container Security & Supply Chain
 - Cloud Security (Azure/Supabase specific)
@@ -367,6 +373,7 @@ export interface SecurityMetrics {
 ### 5.5 Reconhecimento e Incentivos
 
 **Programa de Reconhecimento:**
+
 - **Public Recognition:** Destaque em all-hands e newsletters
 - **Career Advancement:** Champion experience como critério de promoção
 - **Learning Budget:** $2,000/ano adicional para treinamentos
@@ -374,6 +381,7 @@ export interface SecurityMetrics {
 - **Internal Mobility:** Prioridade em vagas de Security Engineering
 
 **Gamificação:**
+
 - **Security Score:** Pontuação por vulnerabilidades encontradas
 - **Knowledge Badges:** Certificações internas por área de expertise
 - **Team Leaderboard:** Competição saudável entre equipes
@@ -385,26 +393,26 @@ export interface SecurityMetrics {
 // champion-metrics.ts
 export interface ChampionProgramMetrics {
   // Participation & Engagement
-  activeChampionsCount: number;        // Meta: 5 champions
-  participationRate: number;           // Meta: > 80% em atividades
-  retentionRate: number;               // Meta: > 90% year-over-year
-  knowledgeAssessmentScore: number;    // Meta: > 85% average
-  
+  activeChampionsCount: number; // Meta: 5 champions
+  participationRate: number; // Meta: > 80% em atividades
+  retentionRate: number; // Meta: > 90% year-over-year
+  knowledgeAssessmentScore: number; // Meta: > 85% average
+
   // Security Impact
-  vulnerabilitiesFoundByChampions: number;    // Track champion contributions
-  codeReviewSecurityIssues: number;           // Issues caught in review
-  threatModelingCoverage: number;             // % of features with TM
-  securityTrainingDelivered: number;          // Sessions per quarter
-  
+  vulnerabilitiesFoundByChampions: number; // Track champion contributions
+  codeReviewSecurityIssues: number; // Issues caught in review
+  threatModelingCoverage: number; // % of features with TM
+  securityTrainingDelivered: number; // Sessions per quarter
+
   // Cultural Impact
-  developerSecurityAwareness: number;         // Survey score > 4.0/5
-  securityQuestionFrequency: number;          // Proactive security discussions
-  crossTeamCollaboration: number;             // Inter-team security sharing
-  
+  developerSecurityAwareness: number; // Survey score > 4.0/5
+  securityQuestionFrequency: number; // Proactive security discussions
+  crossTeamCollaboration: number; // Inter-team security sharing
+
   // Business Value
-  securityIncidentReduction: number;          // % reduction year-over-year
-  complianceReadiness: number;                // Audit preparation score
-  timeToSecurityResolution: number;           // Faster resolution with champions
+  securityIncidentReduction: number; // % reduction year-over-year
+  complianceReadiness: number; // Audit preparation score
+  timeToSecurityResolution: number; // Faster resolution with champions
 }
 ```
 
@@ -413,15 +421,18 @@ export interface ChampionProgramMetrics {
 ## 🎯 6. Declaração de Incerteza (PAM V1.1 - OBRIGATÓRIO)
 
 ### **CONFIANÇA NA IMPLEMENTAÇÃO:** 92%
+
 - **Justificativa:** Baseado em research OWASP/NIST 2025 + experiência comprovada DevSecOps
 
 ### **RISCOS IDENTIFICADOS:** BAIXO-MÉDIO
+
 - **Tool licensing costs** para Snyk/SonarQube enterprise (mitigação: orçamento aprovado)
 - **Initial performance impact** no pipeline CI/CD (mitigação: parallel execution)
 - **Learning curve** para Security Champions program (mitigação: treinamento estruturado)
 - **False positive management** em ferramentas SAST (mitigação: tuning progressivo)
 
 ### **DECISÕES TÉCNICAS ASSUMIDAS:**
+
 1. **Snyk + SonarQube + OWASP ZAP** é a stack mais eficaz para nossa tech stack
 2. **GitHub Actions** tem capacidade para executar pipeline DevSecOps completo
 3. **24h SLA para críticas** é factível com alerting e escalação adequados
@@ -429,6 +440,7 @@ export interface ChampionProgramMetrics {
 5. **SARIF format** é padrão adequado para agregação de resultados
 
 ### **VALIDAÇÃO PENDENTE:**
+
 - **Aprovação orçamentária** para ferramentas enterprise (Snyk Pro + SonarQube)
 - **Teste piloto** do pipeline completo em branch feature
 - **Definição de emergency processes** para vulnerabilidades zero-day

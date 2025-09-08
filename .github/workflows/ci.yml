@@ -7,9 +7,9 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main, develop, feature/** ]
+    branches: [main, develop, feature/**]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 env:
   NODE_VERSION: '20'
@@ -23,24 +23,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run ESLint
         run: npm run lint --if-present
         continue-on-error: true # Non-blocking for now
-        
+
       - name: Run Prettier Check
         run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
         continue-on-error: true # Non-blocking for now
-        
+
       - name: TypeScript Type Check
         run: npx tsc --noEmit
 
@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
@@ -62,14 +62,14 @@ jobs:
             --enableRetired
             --enableExperimental
         continue-on-error: true # Non-blocking initially
-        
+
       - name: Upload OWASP results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: owasp-results
           path: reports/
-          
+
       - name: Check for secrets
         uses: trufflesecurity/trufflehog@main
         with:
@@ -95,20 +95,20 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-          
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Setup test environment
         run: |
           cp .env.test .env
@@ -116,24 +116,24 @@ jobs:
           echo "JWT_SECRET=test_jwt_secret_for_ci" >> .env
           echo "SESSION_SECRET=test_session_secret_for_ci" >> .env
           echo "CSRF_SECRET=test_csrf_secret_for_ci" >> .env
-          
+
       - name: Run database migrations
         run: npm run db:push --force
         continue-on-error: true # Non-blocking if no migrations
-        
+
       - name: Build application
         run: npm run build --if-present
-        
+
       - name: Run unit tests
         run: npm test --if-present
         continue-on-error: true # Non-blocking initially
-        
+
       # 🚨 DESABILITADO TEMPORARIAMENTE - REM-DDD-01.3 CONTENÇÃO DE AMEAÇA 🚨
       # Testes de integração desabilitados até implementação de salvaguardas 100% seguras
       # - name: Run integration tests
       #   run: npm run test:integration --if-present
       #   continue-on-error: true # Non-blocking initially
-        
+
       - name: Upload test coverage
         uses: actions/upload-artifact@v4
         if: always()
@@ -149,10 +149,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
@@ -171,7 +171,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Check environment variables
         run: |
           echo "Checking required environment variables..."
@@ -181,11 +181,11 @@ jobs:
             "SESSION_SECRET"
             "CSRF_SECRET"
           )
-          
+
           for var in "${required_vars[@]}"; do
             echo "✓ $var must be configured in production"
           done
-          
+
       - name: Generate deployment report
         run: |
           echo "# Deployment Readiness Report" > deployment-report.md
@@ -198,7 +198,7 @@ jobs:
           echo "- [x] Security scans completed" >> deployment-report.md
           echo "- [x] Build successful" >> deployment-report.md
           echo "- [x] Tests executed" >> deployment-report.md
-          
+
       - name: Upload deployment report
         uses: actions/upload-artifact@v4
         with:

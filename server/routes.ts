@@ -203,6 +203,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
   app.get(
     '/api/experimental/analytics',
@@ -643,7 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // MOVED TO server/routes/propostas/core.ts - PUT /api/propostas/:id/status
 
-  // 🔧 CORREÇÃO CRÍTICA: Mover endpoint especo�fico ANTES da rota genérica /:id
+  // 🔧 CORREÇÃO CRÍTICA: Mover endpoint específico ANTES da rota genérica /:id
   // New endpoint for formalization proposals (filtered by status)
   app.get(
     '/api/propostas/formalizacao',
@@ -767,7 +769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             observacoes_formalizacao: proposta.observacoes_formalizacao,
             // 🔥 NOVO: Campos de tracking do Banco Inter
             interBoletoGerado: proposta.inter_boleto_gerado,
-            interBoletoGeradoEm: proposta.inter_boleto_gerado_em,
+            interBoletoGeradoEm: proposta.inter_boleto_gerado_em
           };
         });
 
@@ -839,10 +841,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json([]);
         }
 
+        console.log(`🔐 [ANALYSIS] Found ${rawPropostas.length} analysis proposals for user ${userId}`);
         console.log(
-          `🔐 [ANALYSIS] Found ${rawPropostas.length} analysis proposals for user ${userId}`
+          '🔐 [ANALYSIS] First proposal:',
+          rawPropostas[0]?.id,
+          rawPropostas[0]?.status
         );
-        console.log('🔐 [ANALYSIS] First proposal:', rawPropostas[0]?.id, rawPropostas[0]?.status);
 
         // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
         const analisePropostas = rawPropostas.map((proposta) => {
@@ -884,7 +888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             documentos_adicionais: proposta.documentos_adicionais,
             observacoes_analise: proposta.observacoes_analise,
             data_analise: proposta.data_analise,
-            analista_id: proposta.analista_id,
+            analista_id: proposta.analista_id
           };
         });
 
@@ -1142,7 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     url: newSignedUrl.signedUrl,
                     filename: `CCB-${id}.pdf`,
                     contentType: 'application/pdf',
-                    regenerated: true,
+                    regenerated: true
                   });
                 }
               }
@@ -1179,9 +1183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
         const proposalController = new ProposalController();
         return proposalController.update(req, res, next);
       } catch (error) {
@@ -1197,9 +1199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
         const proposalController = new ProposalController();
         return proposalController.resubmitFromPending(req, res, next);
       } catch (error) {
@@ -1210,66 +1210,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
-
-  // GET /api/propostas/metricas - Endpoint de métricas de propostas (DEVE VIR ANTES DA ROTA /:id)
-  app.get('/api/propostas/metricas', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
-
-      // Buscar métricas básicas de propostas usando Admin Client (bypassa RLS)
-      const { data: metricas, error } = await supabase
-        .from('propostas')
-        .select('status')
-        .is('deleted_at', null);
-
-      if (error) {
-        console.error('Erro ao buscar métricas:', error);
-        return res.status(500).json({
-          success: false,
-          message: 'Erro ao buscar métricas',
-        });
-      }
-
-      // Contar por status
-      const statusCount =
-        metricas?.reduce((acc: Record<string, number>, proposta) => {
-          const status = proposta.status || 'sem_status';
-          acc[status] = (acc[status] || 0) + 1;
-          return acc;
-        }, {}) || {};
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          totalPropostas: metricas?.length || 0,
-          porStatus: statusCount,
-          timestamp: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      console.error('Erro ao buscar métricas de propostas:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Erro interno do servidor',
-      });
-    }
-  });
-
+  
   // Busca uma proposta individual pelo ID (Rota DDD Canônica)
   app.get(
     '/api/propostas/:id',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
         const proposalController = new ProposalController();
-
+        
         // Log para auditoria do fluxo de dados
         console.log(`[DDD ROUTE] Rota GET /api/propostas/:id acessada para o ID: ${req.params.id}`);
-
+        
         return proposalController.getById(req, res, next);
       } catch (error) {
         console.error('GET /api/propostas/:id error:', error);
@@ -1284,9 +1237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
         const proposalController = new ProposalController();
         return proposalController.update(req, res, next);
       } catch (error) {
@@ -1302,9 +1253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        const { ProposalController } = await import(
-          './modules/proposal/presentation/proposalController'
-        );
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
         const proposalController = new ProposalController();
         return proposalController.resubmitFromPending(req, res, next);
       } catch (error) {
@@ -1541,6 +1490,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+
+
   // Document routes for proposals - TEMPORARILY DISABLED FOR RECOVERY
   // app.get('/api/propostas/:id/documents', jwtAuthMiddleware as any, getPropostaDocuments);
   // app.post(
@@ -1550,6 +1501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //   upload.single("file"),
   //   uploadPropostaDocument
   // );
+
 
   // Rota para alternar status entre ativa/suspensa - TEMPORARILY DISABLED
   // app.put('/api/propostas/:id/toggle-status', jwtAuthMiddleware as any, togglePropostaStatus);
@@ -1752,10 +1704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             )
             .orderBy(desc(tabelasComerciais.createdAt));
         } catch (queryError) {
-          console.error(
-            `[${getBrasiliaTimestamp()}] Erro na query de tabelas personalizadas:`,
-            queryError
-          );
+          console.error(`[${getBrasiliaTimestamp()}] Erro na query de tabelas personalizadas:`, queryError);
           tabelasPersonalizadas = [];
         }
 
@@ -1817,22 +1766,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // PAM V4.2 PERF-F3-001: GET endpoint for commercial tables with cache-aside pattern
+  // PAM V4.2 PERF-F3-001: GET endpoint for commercial tables with cache-aside pattern  
   app.get(
     '/api/tabelas-comerciais',
     jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         console.log('🔍 [PAM V4.2] Buscando tabelas comerciais com cache-aside pattern...');
-
+        
         // Import cache manager
         const { CachedQueries } = await import('./lib/cache-manager');
-
+        
         const tabelasWithProducts = await CachedQueries.getCommercialTables(async () => {
-          console.log(
-            '🔍 [PAM V4.2] CACHE MISS - Buscando tabelas comerciais no banco de dados...'
-          );
-
+          console.log('🔍 [PAM V4.2] CACHE MISS - Buscando tabelas comerciais no banco de dados...');
+          
           // Import database connection
           const { db } = await import('../server/lib/supabase');
           const { desc, eq } = await import('drizzle-orm');
@@ -1856,14 +1803,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               return {
                 ...tabela,
-                produtoIds: associations.map((a) => a.produtoId),
+                produtoIds: associations.map((a) => a.produtoId)
               };
             })
           );
-
-          console.log(
-            `🔍 [PAM V4.2] Tabelas comerciais carregadas do banco: ${result.length} registros`
-          );
+          
+          console.log(`🔍 [PAM V4.2] Tabelas comerciais carregadas do banco: ${result.length} registros`);
           return result;
         });
 
@@ -2090,7 +2035,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // REMOVIDO: Rota duplicada movida para linha 441 - ver comentário 🔧 CORREÇÃO CRÍTICA
-  // MOVIDO: Rota /api/propostas/metricas movida para ANTES da rota /:id para corrigir ordem de precedência
+
+  // GET /api/propostas/metricas - Endpoint de métricas de propostas
+  app.get('/api/propostas/metricas', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+
+      // Buscar métricas básicas de propostas usando Admin Client (bypassa RLS)
+      const { data: metricas, error } = await supabase
+        .from('propostas')
+        .select('status')
+        .is('deleted_at', null);
+
+      if (error) {
+        console.error('Erro ao buscar métricas:', error);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Erro ao buscar métricas' 
+        });
+      }
+
+      // Contar por status
+      const statusCount = metricas?.reduce((acc: Record<string, number>, proposta) => {
+        const status = proposta.status || 'sem_status';
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {}) || {};
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          totalPropostas: metricas?.length || 0,
+          porStatus: statusCount,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao buscar métricas de propostas:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Erro interno do servidor' 
+      });
+    }
+  });
 
   // [REMOVED: Legacy payment endpoint - Replaced by /api/pagamentos with V2.0 status system]
 
@@ -2200,7 +2188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
                   uploadDate: doc.created_at,
                   // Manter campos originais também
-                  url_visualizacao: signedUrlData.signedUrl,
+                  url_visualizacao: signedUrlData.signedUrl
                 });
                 console.log(
                   `[${getBrasiliaTimestamp()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`
@@ -2217,7 +2205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   name: doc.nome_arquivo,
                   url: '',
                   type: doc.tipo || 'application/octet-stream',
-                  uploadDate: doc.created_at,
+                  uploadDate: doc.created_at
                 }); // Adiciona sem URL em caso de erro
               }
             } catch (error) {
@@ -2528,13 +2516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { nome, status, tacValor, tacTipo, tacAtivaParaClientesExistentes } = req.body;
 
-      console.log('[PRODUTOS API] Criando produto com dados:', {
-        nome,
-        status,
-        tacValor,
-        tacTipo,
-        tacAtivaParaClientesExistentes,
-      });
+      console.log('[PRODUTOS API] Criando produto com dados:', { nome, status, tacValor, tacTipo, tacAtivaParaClientesExistentes });
 
       if (!nome || !status) {
         return res.status(400).json({ message: 'Nome e status são obrigatórios' });
@@ -3101,9 +3083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     jwtAuthMiddleware,
     async (req: Request, res: Response, next: NextFunction) => {
       // PAM P2.3: Redirecionar para controller DDD
-      const { ProposalController } = await import(
-        './modules/proposal/presentation/proposalController'
-      );
+      const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
       const proposalController = new ProposalController();
       return proposalController.updateStatus(req, res, next);
     }
@@ -3115,10 +3095,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Import optimizer
       const { getDashboardStatsOptimized } = await import('./utils/database-optimizer.js');
-
+      
       // Use optimized query instead of loading all data
       const stats = await getDashboardStatsOptimized();
-
+      
       const duration = performance.now() - startTime;
       console.log(`[PERFORMANCE] Dashboard stats completed in ${Math.round(duration)}ms`);
 
@@ -3475,12 +3455,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           checks[table] = {
             status: error ? 'error' : 'ok',
-            error: error?.message || null,
+            error: error?.message || null
           };
         } catch (err) {
           checks[table] = {
             status: 'error',
-            error: err instanceof Error ? err.message : 'Unknown error',
+            error: err instanceof Error ? err.message : 'Unknown error'
           };
         }
       }
@@ -3648,13 +3628,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/formalizacao', formalizacaoRouter);
 
   // ✅ PAM P2.3: Legacy core.ts ELIMINATED - DDD Architecture Migration Complete
-
+  
   // 🔧 CRITICAL FIX: Register DDD Controller routes BEFORE legacy Carnê routes
-  const { ProposalController } = await import(
-    './modules/proposal/presentation/proposalController.js'
-  );
+  const { ProposalController } = await import('./modules/proposal/presentation/proposalController.js');
   const proposalController = new ProposalController();
-
+  
   // Main proposal routes using DDD controller
   app.get('/api/propostas', jwtAuthMiddleware as any, async (req: any, res: any, next: any) => {
     try {

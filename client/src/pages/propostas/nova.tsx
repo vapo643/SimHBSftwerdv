@@ -1,6 +1,11 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { ProposalProvider, useProposal, useProposalActions, useStepValidation } from '@/contexts/ProposalContext';
+import {
+  ProposalProvider,
+  useProposal,
+  useProposalActions,
+  useStepValidation,
+} from '@/contexts/ProposalContext';
 import { useProposalEffects } from '@/hooks/useProposalEffects';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -8,7 +13,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { DollarSign, FileText, AlertCircle, Loader2, CheckCircle2, User, Users } from 'lucide-react';
+import {
+  DollarSign,
+  FileText,
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
+  User,
+  Users,
+} from 'lucide-react';
 import { ClientDataStep } from '@/components/propostas/ClientDataStep';
 import { LoanConditionsStep } from '@/components/propostas/LoanConditionsStep';
 import { DocumentsStep } from '@/components/propostas/DocumentsStep';
@@ -152,7 +165,7 @@ function ProposalForm() {
         lojaId: state.context?.atendente?.loja?.id,
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
-        
+
         // 🎯 CORREÇÃO: Enviar direto para análise em vez de rascunho
         submitForAnalysis: true,
 
@@ -286,11 +299,8 @@ function ProposalForm() {
   return (
     <div className="w-full">
       {/* UX-005: Indicador de progresso visual */}
-      <ProposalProgressIndicator 
-        currentStep={state.currentStep} 
-        totalSteps={4}
-      />
-      
+      <ProposalProgressIndicator currentStep={state.currentStep} totalSteps={4} />
+
       <Tabs value={currentTabValue} onValueChange={handleStepChange} className="w-full">
         {/* TabsList mantida para funcionalidade, mas visualmente oculta */}
         <TabsList className="hidden">
@@ -312,72 +322,72 @@ function ProposalForm() {
           </TabsTrigger>
         </TabsList>
 
-      <div className="mt-6">
-        <TabsContent value="dados-cliente">
-          <ClientDataStep />
-        </TabsContent>
+        <div className="mt-6">
+          <TabsContent value="dados-cliente">
+            <ClientDataStep />
+          </TabsContent>
 
-        <TabsContent value="referencias-pessoais">
-          <PersonalReferencesStep />
-        </TabsContent>
+          <TabsContent value="referencias-pessoais">
+            <PersonalReferencesStep />
+          </TabsContent>
 
-        <TabsContent value="condicoes-emprestimo">
-          <LoanConditionsStep />
-        </TabsContent>
+          <TabsContent value="condicoes-emprestimo">
+            <LoanConditionsStep />
+          </TabsContent>
 
-        <TabsContent value="anexo-documentos">
-          <DocumentsStep />
-        </TabsContent>
-      </div>
+          <TabsContent value="anexo-documentos">
+            <DocumentsStep />
+          </TabsContent>
+        </div>
 
-      <div className="mt-8 flex justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setStep(Math.max(0, state.currentStep - 1))}
-          disabled={state.currentStep === 0}
-          data-testid="button-voltar"
-        >
-          Voltar
-        </Button>
-
-        {state.currentStep < 3 ? (
-          <Button 
-            type="button" 
-            onClick={() => setStep(state.currentStep + 1)}
-            data-testid="button-proximo"
-          >
-            Próximo
-          </Button>
-        ) : (
+        <div className="mt-8 flex justify-between">
           <Button
             type="button"
-            onClick={() => submitProposal.mutate()}
-            disabled={submitProposal.isPending}
-            className="min-w-[200px]"
+            variant="outline"
+            onClick={() => setStep(Math.max(0, state.currentStep - 1))}
+            disabled={state.currentStep === 0}
+            data-testid="button-voltar"
           >
-            {submitProposal.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {state.documents.length > 0
-                  ? `Enviando ${state.documents.length} documentos...`
-                  : 'Criando proposta...'}
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Enviar Proposta
-                {state.documents.length > 0 && (
-                  <span className="ml-2 rounded-full bg-green-600 px-2 py-1 text-xs">
-                    {state.documents.length} doc(s)
-                  </span>
-                )}
-              </>
-            )}
+            Voltar
           </Button>
-        )}
-      </div>
-    </Tabs>
+
+          {state.currentStep < 3 ? (
+            <Button
+              type="button"
+              onClick={() => setStep(state.currentStep + 1)}
+              data-testid="button-proximo"
+            >
+              Próximo
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={() => submitProposal.mutate()}
+              disabled={submitProposal.isPending}
+              className="min-w-[200px]"
+            >
+              {submitProposal.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {state.documents.length > 0
+                    ? `Enviando ${state.documents.length} documentos...`
+                    : 'Criando proposta...'}
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Enviar Proposta
+                  {state.documents.length > 0 && (
+                    <span className="ml-2 rounded-full bg-green-600 px-2 py-1 text-xs">
+                      {state.documents.length} doc(s)
+                    </span>
+                  )}
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </Tabs>
     </div>
   );
 }

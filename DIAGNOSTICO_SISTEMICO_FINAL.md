@@ -10,11 +10,11 @@
 
 ### 1.1. Mapeamento do Agregado `Proposal`
 
-| Localização (Arquivo) | Bounded Context (Inferido) | Estrutura (Campos Críticos) | Value Objects Usados? |
-| :--- | :--- | :--- | :---: |
-| `server/modules/proposal/domain/Proposal.ts` | Proposal Context (DDD) | 40+ campos incluindo Money, CPF, ClienteData complexo | ✅ Sim (extensivo) |
-| `server/modules/credit/domain/aggregates/Proposal.ts` | Credit Context (DDD) | CustomerData, LoanConditions, apenas 12 campos | ✅ Sim (limitado) |
-| `server/services/proposalService.ts` | Legacy Service | Herda GenericService, sem estrutura de domínio | ❌ Não |
+| Localização (Arquivo)                                 | Bounded Context (Inferido) | Estrutura (Campos Críticos)                           | Value Objects Usados? |
+| :---------------------------------------------------- | :------------------------- | :---------------------------------------------------- | :-------------------: |
+| `server/modules/proposal/domain/Proposal.ts`          | Proposal Context (DDD)     | 40+ campos incluindo Money, CPF, ClienteData complexo |  ✅ Sim (extensivo)   |
+| `server/modules/credit/domain/aggregates/Proposal.ts` | Credit Context (DDD)       | CustomerData, LoanConditions, apenas 12 campos        |   ✅ Sim (limitado)   |
+| `server/services/proposalService.ts`                  | Legacy Service             | Herda GenericService, sem estrutura de domínio        |        ❌ Não         |
 
 ### 1.2. Análise de Repositórios Conflitantes
 
@@ -52,7 +52,7 @@ export class TransactionalProposalRepository {
 // server/modules/proposal/presentation/proposalController.ts:26
 export class ProposalController {
   private repository: ProposalRepository; // ❌ Classe concreta, não interface
-  
+
   constructor() {
     this.repository = new ProposalRepository(); // ❌ Instanciação direta
   }
@@ -69,6 +69,7 @@ export class ProposalController {
 ### 1.3. Veredito da Fase 1
 
 **VIOLAÇÃO COMPLETA DO ADR-001 (DDD):** O sistema viola fundamentalmente o princípio de "um agregado por Bounded Context". Existem:
+
 - **2 agregados Proposal incompatíveis** em contextos diferentes
 - **3 repositórios diferentes** para a mesma entidade
 - **Nenhuma injeção de dependência** - todos usam instanciação direta
@@ -92,7 +93,7 @@ export enum ProposalStatus {
   // ... 20+ estados definidos
 }
 
-// server/modules/proposal/domain/Proposal.ts:195-208  
+// server/modules/proposal/domain/Proposal.ts:195-208
 export enum ProposalStatus {
   RASCUNHO = 'rascunho',
   EM_ANALISE = 'em_analise', // ❌ SEM AGUARDANDO_ANALISE
@@ -130,7 +131,7 @@ public submitForAnalysis(): void {
   if (this.status !== ProposalStatus.DRAFT) {
     throw new Error('Only draft proposals can be submitted');
   }
-  
+
   this.validateForSubmission();
   this.status = ProposalStatus.WAITING_ANALYSIS; // ← ENUM NÃO EXISTE NO BANCO!
   this.updatedAt = new Date();
@@ -138,6 +139,7 @@ public submitForAnalysis(): void {
 ```
 
 **Use Cases encontrados:**
+
 ```
 server/modules/proposal/application/
 ├── ApproveProposalUseCase.ts
@@ -150,6 +152,7 @@ server/modules/proposal/application/
 ### 2.3. Veredito da Fase 2
 
 **CAUSA RAIZ:** O sistema define transições para estados que não existem no banco. A transição crítica `RASCUNHO → AGUARDANDO_ANALISE` está:
+
 1. Definida na FSM service
 2. Implementada no agregado Credit (mas com enum diferente)
 3. **NÃO implementada** no agregado Proposal principal
@@ -171,13 +174,13 @@ async create(req: Request, res: Response): Promise<Response> {
     clienteNome: req.body.clienteNome,
     clienteCpf: req.body.clienteCpf,
     // ... 60+ linhas de transformação de dados
-    
+
     // ❌ LÓGICA DE NEGÓCIO NO CONTROLLER
     valor: parseFloat(req.body.valor),
     prazo: parseInt(req.body.prazo),
     taxaJuros: req.body.taxaJuros ? parseFloat(req.body.taxaJuros) : 2.5, // ← DEFAULT DE NEGÓCIO!
   };
-  
+
   // ❌ VALIDAÇÃO DE NEGÓCIO NO CONTROLLER
   if (!dto.clienteNome || !dto.clienteCpf) {
     return res.status(400).json({ error: 'Dados obrigatórios faltando' });
@@ -194,7 +197,7 @@ async findByCriteriaLightweight(criteria: ProposalSearchCriteria): Promise<any[]
   if (criteria.statusArray && Array.isArray(criteria.statusArray)) {
     conditions.push(inArray(propostas.status, criteria.statusArray));
   }
-  
+
   // ❌ CÁLCULO DE NEGÓCIO NO REPOSITORY
   valor_parcela: this.calculateMonthlyPaymentRaw(
     parseFloat(row.valor || '0'),
@@ -216,7 +219,7 @@ constructor() {
   this.repository = new ProposalRepository(); // ❌ Concrete class
 }
 
-// server/modules/credit/presentation/ProposalController.ts:50  
+// server/modules/credit/presentation/ProposalController.ts:50
 constructor() {
   const repository = new ProposalRepositoryImpl(); // ❌ Different concrete class
   const creditAnalysisService = new CreditAnalysisService(); // ❌ Direct instantiation
@@ -235,6 +238,7 @@ constructor(
 **CONFORMIDADE COM BLUEPRINT:** 🚨 **0%**
 
 Violações identificadas:
+
 - ❌ **Segurança por Padrão:** Lógica espalhada sem validação centralizada
 - ❌ **DDD (ADR-001):** Agregados anêmicos, lógica vazada
 - ❌ **Hexagonal Architecture:** Controllers conhecem detalhes de infraestrutura
@@ -246,11 +250,11 @@ Violações identificadas:
 
 ### 4.1. Comparação dos Caminhos de Criação (Duplication Chain)
 
-| Critério | Caminho A (DDD Controller) | Caminho B (Legacy Route) |
-| :--- | :--- | :--- |
-| **Ponto de Entrada** | `proposalController.create()` | `routes/propostas/core.ts POST /` |
-| **Camada de Lógica** | `CreateProposalUseCase → Proposal.create()` | Lógica inline no router |
-| **Persistência** | `ProposalRepository → proposal.toPersistence()` | Drizzle insert direto |
+| Critério                       | Caminho A (DDD Controller)                          | Caminho B (Legacy Route)                     |
+| :----------------------------- | :-------------------------------------------------- | :------------------------------------------- |
+| **Ponto de Entrada**           | `proposalController.create()`                       | `routes/propostas/core.ts POST /`            |
+| **Camada de Lógica**           | `CreateProposalUseCase → Proposal.create()`         | Lógica inline no router                      |
+| **Persistência**               | `ProposalRepository → proposal.toPersistence()`     | Drizzle insert direto                        |
 | **Shape dos Dados Retornados** | `{ success: true, data: { condicoesData: {...} } }` | `{ id, valor, prazo, condicoes_data: null }` |
 
 **Evidência de Incompatibilidade:**
@@ -284,12 +288,12 @@ Violações identificadas:
 ```typescript
 // client/src/pages/credito/fila.tsx:46-66
 interface Proposta {
-  nomeCliente: string;       // ← Espera camelCase
+  nomeCliente: string; // ← Espera camelCase
   parceiro?: {
-    razaoSocial: string;     // ← Objeto aninhado
+    razaoSocial: string; // ← Objeto aninhado
   };
   loja?: {
-    nomeLoja: string;        // ← Objeto aninhado
+    nomeLoja: string; // ← Objeto aninhado
   };
 }
 
@@ -333,6 +337,7 @@ graph TD
 ```
 
 **ANÁLISE SISTÊMICA:** A crise de identidade (múltiplos agregados/repositórios) combinada com vazamento de lógica criou um sistema com:
+
 - **Dual personality disorder** - 2 implementações incompatíveis executando simultaneamente
 - **State machine desynchronization** - Estados no código que não existem no banco
 - **Contract violation cascade** - Frontend recebe dados aleatórios baseado na rota
@@ -341,16 +346,19 @@ graph TD
 ### 5.2. Recomendações Estratégicas de Reengenharia
 
 #### **P0 - AÇÕES CRÍTICAS (24h):**
+
 1. **🚨 Desabilitar rotas DDD temporariamente** - Manter apenas legacy até consolidação
 2. **🚨 Sincronizar estados FSM com banco** - Remover `aguardando_analise` ou criar no banco
 3. **🚨 Unificar formato de resposta** - Criar adapter layer para padronizar output
 
 #### **P1 - CONSOLIDAÇÃO (1 semana):**
+
 1. **Eliminar duplicação de agregados** - Escolher UMA implementação de Proposal
 2. **Consolidar repositórios** - Um único ProposalRepository com interface clara
 3. **Implementar injeção de dependência** - Container IoC ou factory pattern
 
 #### **P2 - REFATORAÇÃO DDD (1 mês):**
+
 1. **Recriar bounded contexts** conforme ADR-001
 2. **Implementar agregados ricos** - Mover lógica dos controllers para domain
 3. **Event sourcing** para sincronização de estados

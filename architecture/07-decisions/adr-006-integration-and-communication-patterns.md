@@ -1,22 +1,25 @@
 # ADR-006: Doutrina de Padrões de Integração e Comunicação
 
 ## Status
+
 **Status:** Proposto  
 **Data:** 22 de Agosto de 2025  
 **Autor:** GEM-07 AI Specialist System  
-**Decisor:** Arquiteto Chefe  
+**Decisor:** Arquiteto Chefe
 
 ## Contexto
 
 Com a formalização da nossa arquitetura **Modular Monolith** (ADR-002) e a definição clara dos **6 Bounded Contexts DDD** (Ponto 9), enfrentamos agora o desafio crítico de estabelecer as regras de comunicação entre estes módulos. O crescimento exponencial projetado (100.000 propostas/mês até 2026) e a expansão do time (50+ pessoas) exigem diretrizes rigorosas para evitar o acoplamento temporal e preservar a resiliência do sistema.
 
 ### Drivers Estratégicos
+
 - **Evolução Controlada:** Preparar terreno para arquitetura Híbrida-alvo sem big-bang
 - **Bounded Context Integrity:** Manter limites DDD protegidos durante comunicação
 - **Resiliência Operacional:** Evitar falhas em cascata entre módulos
 - **Velocidade de Desenvolvimento:** Facilitar desenvolvimento independente de features
 
 ### Estado Atual (Current State)
+
 - Comunicação entre contextos realizada de forma **ad-hoc**
 - Decisões síncrono vs. assíncrono tomadas caso a caso
 - Ausência de critérios formais criando risco de **acoplamento temporal crescente**
@@ -29,6 +32,7 @@ Com a formalização da nossa arquitetura **Modular Monolith** (ADR-002) e a def
 **Adotaremos o princípio fundamental de "Assíncrono por Padrão" para toda comunicação entre Bounded Contexts distintos. A comunicação síncrona será tratada como exceção documentada e justificada, não como regra.**
 
 ### Declaração Formal
+
 ```
 PADRÃO OBRIGATÓRIO: Async-First Inter-Context Communication
 EXCEÇÃO CONTROLADA: Sync-When-Necessary com justificativa técnica
@@ -40,6 +44,7 @@ ENFORCEMENT: Validação obrigatória em code review + dependency-cruiser rules
 ## 2. Justificativa Estratégica (Alinhamento Arquitetural)
 
 ### 2.1 Suporte ao ADR-002 (Modular Monolith)
+
 Nossa estratégia de evoluir o **Monolito Modular** para **arquitetura Híbrida** depende fundamentalmente da capacidade dos módulos operarem de forma independente. O padrão "Assíncrono por Padrão":
 
 - **Prepara para Decomposição:** Módulos já operam como serviços independentes internamente
@@ -48,6 +53,7 @@ Nossa estratégia de evoluir o **Monolito Modular** para **arquitetura Híbrida*
 - **Habilita Scaling Diferenciado:** Preparação para escalamento independente futuro
 
 ### 2.2 Proteção dos Bounded Contexts (Ponto 9 DDD)
+
 Os limites dos nossos 6 Bounded Contexts (Credit Analysis, Payment Processing, etc.) devem ser **logicamente protegidos**, não apenas tecnicamente:
 
 - **Temporal Decoupling:** Contextos operam em ritmos e disponibilidades diferentes
@@ -56,6 +62,7 @@ Os limites dos nossos 6 Bounded Contexts (Credit Analysis, Payment Processing, e
 - **Domain Integrity:** Regras de negócio encapsuladas não "vazam" através das interfaces
 
 ### 2.3 Alinhamento com Enforcement Automatizado (Ponto 20)
+
 Esta doutrina complementa nossa estratégia de **dependency-cruiser** com regras de comunicação:
 
 ```javascript
@@ -81,26 +88,26 @@ flowchart TD
     A[Nova comunicação inter-context] --> B{Operação precisa de resposta imediata<br/>para continuar fluxo do usuário?}
     B -->|SIM| C{Dados são críticos para<br/>validação de negócio?}
     B -->|NÃO| D[✅ ASYNC: Event/Queue]
-    
+
     C -->|SIM| E{Contextos podem operar<br/>independentemente se um falhar?}
     C -->|NÃO| F[✅ ASYNC: Background processing]
-    
+
     E -->|SIM| G[✅ ASYNC: Event + Eventual consistency]
     E -->|NÃO| H{Latência < 100ms é<br/>business requirement?}
-    
+
     H -->|SIM| I[⚠️ SYNC: Documentar justificativa<br/>+ Circuit breaker obrigatório]
     H -->|NÃO| J[✅ ASYNC: Command + Saga pattern]
 ```
 
 ### 3.2 Critérios Detalhados
 
-| **Cenário** | **Padrão Recomendado** | **Justificativa** | **Exemplo Simpix** |
-|-------------|------------------------|-------------------|-------------------|
-| **Notificações de status** | ✅ **ASYNC** (Event) | Não bloqueia operação principal | Proposta aprovada → Envio de email |
-| **Validação de parceiro** | ⚠️ **SYNC** (REST) | Dados críticos para autorização | Verificar se loja está ativa |
-| **Cálculo financeiro** | ✅ **ASYNC** (Queue) | Processamento pode ser background | Recálculo de parcelas em lote |
-| **Geração de documento** | ✅ **ASYNC** (Event) | Tolerante a latência | CCB gerada → ClickSign integration |
-| **Busca de dados** | ⚠️ **SYNC** (REST) | Resultado imediato para UX | Consulta CPF → Exibir propostas |
+| **Cenário**                | **Padrão Recomendado** | **Justificativa**                 | **Exemplo Simpix**                 |
+| -------------------------- | ---------------------- | --------------------------------- | ---------------------------------- |
+| **Notificações de status** | ✅ **ASYNC** (Event)   | Não bloqueia operação principal   | Proposta aprovada → Envio de email |
+| **Validação de parceiro**  | ⚠️ **SYNC** (REST)     | Dados críticos para autorização   | Verificar se loja está ativa       |
+| **Cálculo financeiro**     | ✅ **ASYNC** (Queue)   | Processamento pode ser background | Recálculo de parcelas em lote      |
+| **Geração de documento**   | ✅ **ASYNC** (Event)   | Tolerante a latência              | CCB gerada → ClickSign integration |
+| **Busca de dados**         | ⚠️ **SYNC** (REST)     | Resultado imediato para UX        | Consulta CPF → Exibir propostas    |
 
 ### 3.3 Exceções Permitidas (Sync-When-Necessary)
 
@@ -112,8 +119,10 @@ flowchart TD
 4. **Circuit Breaker mandatório:** Proteção contra falhas em cascata
 
 **Documentação obrigatória para exceções:**
+
 ```markdown
 ## Justificativa Sync Exception
+
 - **Contexto:** [Source] → [Target]
 - **Business Requirement:** [Justificativa de negócio]
 - **Latency SLA:** [Tempo máximo aceitável]
@@ -132,6 +141,7 @@ flowchart TD
 ### 4.2 Regras de Granularidade
 
 #### ✅ **CORRETO - Operações Atômicas de Negócio**
+
 ```
 POST /credit-analysis/evaluate-proposal
 Payload: { proposalId, clientData, loanDetails }
@@ -141,25 +151,27 @@ Response: { decision, score, conditions, nextSteps }
 ```
 
 #### ❌ **INCORRETO - Chatty API Pattern**
+
 ```
 GET /client/basic-data/{id}         // Chamada 1
-GET /client/credit-history/{id}     // Chamada 2  
+GET /client/credit-history/{id}     // Chamada 2
 GET /client/income-proof/{id}       // Chamada 3
 POST /credit-analysis/calculate     // Chamada 4
 ```
 
 ### 4.3 Diretrizes de Design
 
-| **Princípio** | **Descrição** | **Exemplo Prático** |
-|---------------|---------------|-------------------|
-| **Business Transaction Scope** | API = 1 transação de negócio | `submitProposal()` inclui validação + persistência + workflow trigger |
-| **Data Completeness** | Response inclui todos dados necessários | Proposal details incluem client, loan, status, next actions |
-| **Operation Closure** | Operação é auto-contida | `generateContract()` não exige chamadas adicionais para completar |
-| **Batch Operations** | Suporte a operações em lote quando aplicável | `updateMultipleProposals()` vs. loops de `updateSingleProposal()` |
+| **Princípio**                  | **Descrição**                                | **Exemplo Prático**                                                   |
+| ------------------------------ | -------------------------------------------- | --------------------------------------------------------------------- |
+| **Business Transaction Scope** | API = 1 transação de negócio                 | `submitProposal()` inclui validação + persistência + workflow trigger |
+| **Data Completeness**          | Response inclui todos dados necessários      | Proposal details incluem client, loan, status, next actions           |
+| **Operation Closure**          | Operação é auto-contida                      | `generateContract()` não exige chamadas adicionais para completar     |
+| **Batch Operations**           | Suporte a operações em lote quando aplicável | `updateMultipleProposals()` vs. loops de `updateSingleProposal()`     |
 
 ### 4.4 Padrões Aprovados
 
 #### **Command Pattern (Async)**
+
 ```typescript
 interface CreateProposalCommand {
   clientData: ClientInfo;
@@ -172,6 +184,7 @@ interface CreateProposalCommand {
 ```
 
 #### **Query Pattern (Sync)**
+
 ```typescript
 interface ProposalSearchQuery {
   criteria: SearchCriteria;
@@ -199,7 +212,7 @@ interface ProposalSearchQuery {
 async function approveProposal(proposalId: string) {
   // 1. Atualizar status no banco
   await proposalRepository.updateStatus(proposalId, 'APROVADA');
-  
+
   // 2. PROBLEMA: Chamada síncrona para outro contexto
   try {
     await notificationService.sendApprovalEmail(proposalId);
@@ -208,12 +221,13 @@ async function approveProposal(proposalId: string) {
     // Proposta fica em estado inconsistente
     throw new Error('Approval failed due to notification error');
   }
-  
+
   return { success: true };
 }
 ```
 
 **Problemas identificados:**
+
 - Sistema de email offline = Propostas não podem ser aprovadas
 - Latência de email impacta tempo de resposta da aprovação
 - Falhas no SMTP quebram fluxo principal de crédito
@@ -226,15 +240,17 @@ async function approveProposal(proposalId: string) {
 async function approveProposal(proposalId: string) {
   // 1. Atualizar status no banco
   await proposalRepository.updateStatus(proposalId, 'APROVADA');
-  
+
   // 2. Publicar evento para processamento assíncrono
-  await eventBus.publish(new ProposalApprovedEvent({
-    proposalId,
-    clientEmail: proposal.clientEmail,
-    approvalDetails: proposal.details,
-    timestamp: new Date()
-  }));
-  
+  await eventBus.publish(
+    new ProposalApprovedEvent({
+      proposalId,
+      clientEmail: proposal.clientEmail,
+      approvalDetails: proposal.details,
+      timestamp: new Date(),
+    })
+  );
+
   // 3. Retorno imediato - email será enviado quando sistema estiver OK
   return { success: true, status: 'APROVADA' };
 }
@@ -255,6 +271,7 @@ class NotificationHandler {
 ```
 
 **Benefícios alcançados:**
+
 - ✅ Propostas aprovadas independentemente do status do email
 - ✅ Sistema de notificação pode falhar e se recuperar sem impacto
 - ✅ Melhor latência no endpoint crítico (aprovação)
@@ -263,6 +280,7 @@ class NotificationHandler {
 ### 5.3 Padrões de Resilência Implementados
 
 #### **Event-Driven Architecture**
+
 ```typescript
 // Contextos se comunicam via eventos, não chamadas diretas
 interface DomainEvent {
@@ -276,14 +294,15 @@ interface DomainEvent {
 ```
 
 #### **Circuit Breaker Pattern (para exceções síncronas)**
+
 ```typescript
 class ResilientHttpClient {
   private circuitBreaker = new CircuitBreaker(this.httpCall, {
-    threshold: 5,        // 5 falhas consecutivas
-    timeout: 3000,       // 3s timeout
-    resetTimeout: 30000  // Tenta reabrir após 30s
+    threshold: 5, // 5 falhas consecutivas
+    timeout: 3000, // 3s timeout
+    resetTimeout: 30000, // Tenta reabrir após 30s
   });
-  
+
   async callSyncService(endpoint: string) {
     return this.circuitBreaker.fire(endpoint);
   }
@@ -295,16 +314,19 @@ class ResilientHttpClient {
 ## 6. Roadmap de Implementação
 
 ### Fase 1: Foundational Patterns (Sprint atual)
+
 - [ ] **Event Bus básico** usando database polling
 - [ ] **Circuit Breaker** para exceções síncronas existentes
 - [ ] **Documentação** de exceções síncronas atuais
 
 ### Fase 2: Event-Driven Core (Próximas 2 sprints)
+
 - [ ] **Domain Events** para Proposal → Notification
 - [ ] **Command Bus** para operações async
 - [ ] **Dead Letter Queue** para retry automático
 
 ### Fase 3: Advanced Patterns (Q1 2026)
+
 - [ ] **Saga Pattern** para transações distribuídas
 - [ ] **Redis Event Streaming** para performance
 - [ ] **Distributed Tracing** para observabilidade
@@ -314,12 +336,14 @@ class ResilientHttpClient {
 ## 7. Métricas de Sucesso
 
 ### Indicadores Técnicos
+
 - **Mean Time Between Failures (MTBF):** > 720 horas
 - **Error Rate por Context:** < 0.1% para falhas inter-context
 - **P99 Latency:** Endpoints síncronos < 200ms, async < 50ms
 - **Circuit Breaker Trips:** < 5 por semana por serviço
 
 ### Indicadores de Negócio
+
 - **Proposal Processing Uptime:** > 99.9%
 - **Revenue Impact de Downtime:** < R$ 1,000/mês
 - **Developer Velocity:** Deploy independente de features relacionadas
@@ -328,12 +352,12 @@ class ResilientHttpClient {
 
 ## 8. Riscos e Mitigações
 
-| **Risco** | **Probabilidade** | **Impacto** | **Mitigação** |
-|-----------|------------------|-------------|---------------|
-| **Eventual Consistency** bugs | MÉDIO | ALTO | Extensive testing + monitoring de data consistency |
-| **Event ordering** issues | BAIXO | MÉDIO | Event versioning + idempotent handlers |
-| **Debugging complexity** | ALTO | BAIXO | Distributed tracing + correlation IDs |
-| **Developer adoption** | MÉDIO | MÉDIO | Training + code review enforcement |
+| **Risco**                     | **Probabilidade** | **Impacto** | **Mitigação**                                      |
+| ----------------------------- | ----------------- | ----------- | -------------------------------------------------- |
+| **Eventual Consistency** bugs | MÉDIO             | ALTO        | Extensive testing + monitoring de data consistency |
+| **Event ordering** issues     | BAIXO             | MÉDIO       | Event versioning + idempotent handlers             |
+| **Debugging complexity**      | ALTO              | BAIXO       | Distributed tracing + correlation IDs              |
+| **Developer adoption**        | MÉDIO             | MÉDIO       | Training + code review enforcement                 |
 
 ---
 
@@ -342,6 +366,7 @@ class ResilientHttpClient {
 **APROVADO:** Implementação do padrão "Assíncrono por Padrão" com as exceções documentadas para comunicação síncrona quando business requirements justificarem.
 
 ### Próximos Passos
+
 1. **Atualizar dependency-cruiser** com regras de enforcement
 2. **Criar templates** para documentação de exceções síncronas
 3. **Implementar Event Bus** básico para primeiro caso de uso

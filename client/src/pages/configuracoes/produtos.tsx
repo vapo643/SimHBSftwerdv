@@ -46,7 +46,6 @@ interface Produto {
   tacAtivaParaClientesExistentes?: boolean;
 }
 
-
 export default function GestãoProdutos() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Produto | null>(null);
@@ -94,15 +93,18 @@ export default function GestãoProdutos() {
 
   // Mutation para atualizar produto
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { 
-      id: number; 
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
       data: {
         nome: string;
         status: 'Ativo' | 'Inativo';
         tacValor: number;
         tacTipo: 'fixo' | 'percentual';
         tacAtivaParaClientesExistentes: boolean;
-      }
+      };
     }) => {
       const response = await api.put<Produto>(`/api/produtos/${id}`, {
         nome: data.nome,
@@ -136,7 +138,6 @@ export default function GestãoProdutos() {
       handleApiError(error);
     },
   });
-
 
   const handleEdit = (produto: Produto) => {
     setEditingProduct(produto);
@@ -264,13 +265,20 @@ export default function GestãoProdutos() {
                   }
                 }}
                 onCancel={handleCloseDialog}
-                initialData={editingProduct ? {
-                  nome: editingProduct.nomeProduto,
-                  status: editingProduct.isActive ? 'Ativo' : 'Inativo',
-                  tacValor: editingProduct.tacValor ? parseFloat(editingProduct.tacValor.toString()) : 0,
-                  tacTipo: editingProduct.tacTipo || 'fixo',
-                  tacAtivaParaClientesExistentes: editingProduct.tacAtivaParaClientesExistentes ?? true,
-                } : undefined}
+                initialData={
+                  editingProduct
+                    ? {
+                        nome: editingProduct.nomeProduto,
+                        status: editingProduct.isActive ? 'Ativo' : 'Inativo',
+                        tacValor: editingProduct.tacValor
+                          ? parseFloat(editingProduct.tacValor.toString())
+                          : 0,
+                        tacTipo: editingProduct.tacTipo || 'fixo',
+                        tacAtivaParaClientesExistentes:
+                          editingProduct.tacAtivaParaClientesExistentes ?? true,
+                      }
+                    : undefined
+                }
               />
             </DialogContent>
           </Dialog>

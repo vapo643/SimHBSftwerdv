@@ -7,10 +7,10 @@ services:
       dockerfile: Dockerfile
     container_name: simpix-app-prod
     ports:
-      - "5000:5000"
+      - '5000:5000'
     environment:
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}  # Supabase PostgreSQL
+      DATABASE_URL: ${DATABASE_URL} # Supabase PostgreSQL
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
@@ -29,7 +29,13 @@ services:
       - simpix-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:5000/api/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -39,7 +45,7 @@ services:
     image: redis:7-alpine
     container_name: simpix-redis-prod
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
@@ -47,7 +53,7 @@ services:
       - simpix-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 30s
       timeout: 3s
       retries: 3

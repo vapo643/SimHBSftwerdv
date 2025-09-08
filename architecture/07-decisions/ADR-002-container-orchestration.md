@@ -27,7 +27,7 @@ Azure Container Apps Environment:
   - Frontend Container (React/Vite)
   - Backend Container (Express API)
   - Worker Container (BullMQ processors)
-  
+
 Backing Services:
   - Azure Database for PostgreSQL
   - Azure Cache for Redis
@@ -37,12 +37,14 @@ Backing Services:
 ## Consequências
 
 ### Positivas
+
 - ✅ Zero gestão de infraestrutura Kubernetes
 - ✅ Billing por consumo (scale to zero possível)
 - ✅ Integrated monitoring e logging
 - ✅ Built-in blue-green deployment
 
 ### Negativas
+
 - ❌ Menos controle que Kubernetes puro
 - ❌ Algumas limitações em networking avançado
 - ❌ Vendor lock-in no Azure
@@ -63,4 +65,4 @@ Fase 3 (1 ano): Possível migração para AKS se necessário
 
 ---
 
-*Decisão alinhada com estratégia de crescimento gradual*
+_Decisão alinhada com estratégia de crescimento gradual_

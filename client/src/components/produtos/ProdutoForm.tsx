@@ -114,12 +114,10 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
       </div>
 
       <div className="space-y-3 p-4 border rounded-lg bg-blue-50">
-        <div className="text-sm font-medium text-blue-900">
-          📋 Configuração TAC para Clientes
-        </div>
+        <div className="text-sm font-medium text-blue-900">📋 Configuração TAC para Clientes</div>
         <div className="text-xs text-blue-700 mb-3">
-          • <strong>Clientes NOVOS:</strong> Sempre pagam 10% TAC (automático) <br/>
-          • <strong>Clientes EXISTENTES:</strong> TAC configurável abaixo
+          • <strong>Clientes NOVOS:</strong> Sempre pagam 10% TAC (automático) <br />•{' '}
+          <strong>Clientes EXISTENTES:</strong> TAC configurável abaixo
         </div>
         <Controller
           name="tacAtivaParaClientesExistentes"
@@ -132,8 +130,8 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
                 onCheckedChange={field.onChange}
                 data-testid="checkbox-tac-clientes-existentes"
               />
-              <Label 
-                htmlFor="tacAtivaParaClientesExistentes" 
+              <Label
+                htmlFor="tacAtivaParaClientesExistentes"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Ativar TAC para clientes existentes

@@ -13,6 +13,7 @@
 **Expandido** - Documento significativamente ampliado com estratégias avançadas
 
 Timeline:
+
 - 21/08/2025: Documento criado (Proposto)
 - 25/01/2025: Expansão estratégica completa (Sprint 2 - PAM V2.1)
   - Adicionada Estratégia de Saída (Exit Strategy)
@@ -26,6 +27,7 @@ Timeline:
 ## Contexto
 
 ### Problema
+
 O sistema Simpix atualmente opera no Replit, uma plataforma que, embora adequada para prototipagem e desenvolvimento inicial, apresenta limitações significativas para um sistema financeiro em produção:
 
 1. **Limitações de Escala:** Incapacidade de escalar horizontalmente sob demanda
@@ -35,7 +37,9 @@ O sistema Simpix atualmente opera no Replit, uma plataforma que, embora adequada
 5. **SLAs:** Sem garantias de disponibilidade adequadas para sistema crítico
 
 ### Necessidade
+
 Precisamos de uma forma padronizada, segura e escalável para organizar nossos recursos na nuvem, que suporte:
+
 - Separação clara entre ambientes (Dev, Staging, Produção)
 - Governança centralizada com controle de custos
 - Conformidade com regulamentações financeiras
@@ -43,6 +47,7 @@ Precisamos de uma forma padronizada, segura e escalável para organizar nossos r
 - Disaster recovery e alta disponibilidade
 
 ### Drivers de Decisão
+
 1. **Simplicidade inicial** - Evitar over-engineering na fase inicial
 2. **Custo-benefício** - Otimizar custos mantendo qualidade
 3. **Segurança** - Isolamento adequado entre ambientes
@@ -69,8 +74,10 @@ Azure Active Directory (Tenant)
 ### Detalhamento dos Resource Groups
 
 #### 1. **rg-simpix-prod-brsouth-01** (Produção)
+
 **Propósito:** Ambiente de produção com dados reais e tráfego de clientes
 **Recursos:**
+
 - AKS cluster de produção (2-10 nodes auto-scaling)
 - Azure Database for PostgreSQL (HA enabled)
 - Azure Cache for Redis (Premium tier)
@@ -79,8 +86,10 @@ Azure Active Directory (Tenant)
 - Storage Account para backups e documentos
 
 #### 2. **rg-simpix-staging-brsouth-01** (Staging)
+
 **Propósito:** Ambiente de pré-produção para validação final
 **Recursos:**
+
 - AKS cluster de staging (1-3 nodes)
 - Azure Database for PostgreSQL (cópia sanitizada de prod)
 - Azure Cache for Redis (Standard tier)
@@ -89,8 +98,10 @@ Azure Active Directory (Tenant)
 - Storage Account para testes
 
 #### 3. **rg-simpix-dev-brsouth-01** (Desenvolvimento)
+
 **Propósito:** Ambiente de desenvolvimento e testes
 **Recursos:**
+
 - AKS cluster de dev (1-2 nodes)
 - Azure Database for PostgreSQL (dados sintéticos)
 - Azure Cache for Redis (Basic tier)
@@ -98,8 +109,10 @@ Azure Active Directory (Tenant)
 - Storage Account para desenvolvimento
 
 #### 4. **rg-simpix-shared-brsouth-01** (Recursos Compartilhados)
+
 **Propósito:** Recursos utilizados por todos os ambientes
 **Recursos:**
+
 - Azure Container Registry (ACR)
 - Azure Monitor e Log Analytics Workspace
 - Azure DevOps agents
@@ -122,6 +135,7 @@ Exemplos:
 ### Modelo de Governança
 
 #### RBAC (Role-Based Access Control)
+
 ```yaml
 Production:
   - Owner: CTO apenas
@@ -145,6 +159,7 @@ Shared:
 ```
 
 #### Políticas Azure (Azure Policy)
+
 - Enforce tagging obrigatório (environment, cost-center, owner, project)
 - Deny recursos fora de Brazil South
 - Require encryption at rest
@@ -152,6 +167,7 @@ Shared:
 - Limit VM sizes por ambiente
 
 #### Budget e Alertas
+
 - Produção: Alert em 80% do budget mensal
 - Staging: Alert em 60% do budget mensal
 - Dev: Hard limit com auto-shutdown
@@ -161,17 +177,20 @@ Shared:
 ## Justificativa
 
 ### Por que Landing Zone?
+
 A Landing Zone fornece uma fundação padronizada e segura que acelera a adoção da nuvem enquanto mantém governança e compliance.
 
 ### Por que Subscrição Única (Inicialmente)?
 
 **Vantagens:**
+
 1. **Simplicidade Administrativa:** Gestão centralizada de billing e políticas
 2. **Custo Reduzido:** Evita overhead de múltiplas subscrições
 3. **Velocidade de Implementação:** Setup mais rápido
 4. **Visibilidade:** Dashboard único para todos os recursos
 
 **Mitigação de Riscos:**
+
 - Isolamento via Resource Groups e RBAC
 - Network segmentation com VNets separadas
 - Políticas Azure para enforcement de governança
@@ -187,6 +206,7 @@ A Landing Zone fornece uma fundação padronizada e segura que acelera a adoçã
 ### Alinhamento com Azure CAF
 
 Nossa estrutura segue os princípios do Cloud Adoption Framework:
+
 - ✅ **Ready:** Infrastructure-as-Code com Terraform
 - ✅ **Govern:** Políticas e RBAC implementados
 - ✅ **Manage:** Monitoring e alertas configurados
@@ -225,14 +245,17 @@ Nossa estrutura segue os princípios do Cloud Adoption Framework:
 ## Alternativas Consideradas
 
 ### Alternativa 1: Multi-Subscription desde o Início
+
 **Estrutura:** Uma subscrição por ambiente
 **Rejeitada porque:** Complexidade excessiva para o estágio atual, custo adicional de gestão, overhead administrativo desproporcional
 
 ### Alternativa 2: Management Groups Hierarchy
+
 **Estrutura:** Management Groups com políticas hierárquicas
 **Rejeitada porque:** Over-engineering para empresa única, complexidade desnecessária, benefícios não justificam o esforço inicial
 
 ### Alternativa 3: Single Resource Group
+
 **Estrutura:** Todos os recursos em um único RG com tags
 **Rejeitada porque:** Risco de segurança inaceitável, impossibilidade de RBAC granular, violação de melhores práticas
 
@@ -246,16 +269,16 @@ Nossa adoção da Azure apresenta diferentes níveis de acoplamento que devem se
 
 #### Matriz de Lock-in por Serviço
 
-| Serviço | Nível de Lock-in | Alternativa | Esforço de Migração | Estratégia de Mitigação |
-|---------|------------------|-------------|---------------------|-------------------------|
-| **Azure Kubernetes Service (AKS)** | BAIXO | EKS, GKE, self-hosted | 2-4 semanas | Usar Kubernetes vanilla, evitar Azure-specific features |
-| **PostgreSQL (Azure Database)** | BAIXO-MÉDIO | RDS, Cloud SQL, self-hosted | 1-2 semanas | Usar features padrão SQL, backup/restore regular |
-| **Azure Container Registry** | BAIXO | ECR, GCR, Harbor | 1 semana | Scripts de migração de images |
-| **Azure Key Vault** | MÉDIO | AWS Secrets Manager, HashiCorp Vault | 2-3 semanas | Abstração via interface ISecretManager |
-| **Application Gateway** | MÉDIO-ALTO | ALB, Cloud Load Balancer | 3-4 semanas | Configuração como código (Terraform) |
-| **Azure Monitor/Log Analytics** | ALTO | DataDog, Prometheus/Grafana | 4-6 semanas | Exportar métricas via OpenTelemetry |
-| **Azure Active Directory** | ALTO | Okta, Auth0, Cognito | 6-8 semanas | OIDC/SAML standards |
-| **Azure Functions** | MUITO ALTO | Lambda, Cloud Functions | 8-12 semanas | Evitar uso ou containerizar |
+| Serviço                            | Nível de Lock-in | Alternativa                          | Esforço de Migração | Estratégia de Mitigação                                 |
+| ---------------------------------- | ---------------- | ------------------------------------ | ------------------- | ------------------------------------------------------- |
+| **Azure Kubernetes Service (AKS)** | BAIXO            | EKS, GKE, self-hosted                | 2-4 semanas         | Usar Kubernetes vanilla, evitar Azure-specific features |
+| **PostgreSQL (Azure Database)**    | BAIXO-MÉDIO      | RDS, Cloud SQL, self-hosted          | 1-2 semanas         | Usar features padrão SQL, backup/restore regular        |
+| **Azure Container Registry**       | BAIXO            | ECR, GCR, Harbor                     | 1 semana            | Scripts de migração de images                           |
+| **Azure Key Vault**                | MÉDIO            | AWS Secrets Manager, HashiCorp Vault | 2-3 semanas         | Abstração via interface ISecretManager                  |
+| **Application Gateway**            | MÉDIO-ALTO       | ALB, Cloud Load Balancer             | 3-4 semanas         | Configuração como código (Terraform)                    |
+| **Azure Monitor/Log Analytics**    | ALTO             | DataDog, Prometheus/Grafana          | 4-6 semanas         | Exportar métricas via OpenTelemetry                     |
+| **Azure Active Directory**         | ALTO             | Okta, Auth0, Cognito                 | 6-8 semanas         | OIDC/SAML standards                                     |
+| **Azure Functions**                | MUITO ALTO       | Lambda, Cloud Functions              | 8-12 semanas        | Evitar uso ou containerizar                             |
 
 ### Estratégias de Mitigação Técnica
 
@@ -278,7 +301,7 @@ export class AzureProvider implements ICloudProvider {
     private blobStorage: AzureBlobStorage,
     private serviceBus: AzureServiceBus
   ) {}
-  
+
   // Implementação específica Azure encapsulada
   async getSecret(name: string): Promise<string> {
     return this.keyVault.getSecret(name);
@@ -292,7 +315,7 @@ export class AWSProvider implements ICloudProvider {
     private s3: AWSS3,
     private sqs: AWSSQS
   ) {}
-  
+
   // Implementação AWS pronta para switch
   async getSecret(name: string): Promise<string> {
     return this.secretsManager.getSecretValue(name);
@@ -312,14 +335,14 @@ spec:
   template:
     spec:
       containers:
-      - name: api
-        image: registry.io/simpix/api:latest  # Registry agnóstico
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: database-credentials  # Secrets K8s nativos
-              key: url
+        - name: api
+          image: registry.io/simpix/api:latest # Registry agnóstico
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: database-credentials # Secrets K8s nativos
+                  key: url
 ```
 
 #### 3. **Data Portability Strategy**
@@ -334,13 +357,13 @@ Suporta múltiplos formatos e destinos
 class DataExporter:
     def __init__(self, source_config: Dict):
         self.source = self._get_provider(source_config)
-    
+
     def export_to_parquet(self, tables: List[str]) -> None:
         """Export to cloud-agnostic Parquet format"""
         for table in tables:
             df = self.source.read_table(table)
             df.to_parquet(f"export/{table}.parquet")
-    
+
     def export_to_sql(self, tables: List[str]) -> None:
         """Generate portable SQL dumps"""
         for table in tables:
@@ -352,6 +375,7 @@ class DataExporter:
 ### Plano de Migração de Contingência
 
 #### Fase 1: Preparação (2 semanas)
+
 1. **Inventário Completo**
    - Mapear todos os serviços Azure em uso
    - Identificar dependências críticas
@@ -368,6 +392,7 @@ class DataExporter:
    - Estimativa de custos de migração
 
 #### Fase 2: Migração de Infraestrutura (3-4 semanas)
+
 1. **Semana 1: Shared Services**
    - Container Registry migration
    - DNS zones transfer
@@ -389,6 +414,7 @@ class DataExporter:
    - Disaster recovery setup
 
 #### Fase 3: Cutover (1 semana)
+
 1. **Blue-Green Deployment**
    - Parallel run (Azure + New Provider)
    - Traffic gradual migration (10% → 50% → 100%)
@@ -406,14 +432,14 @@ class DataExporter:
 
 ### Custos Estimados de Saída
 
-| Componente | Custo Estimado | Justificativa |
-|------------|---------------|---------------|
-| **Egress Fees** | R$ 5.000-10.000 | Transferência de ~5TB de dados |
-| **Equipe de Migração** | R$ 50.000-80.000 | 2-3 pessoas x 6 semanas |
-| **Novo Provider Setup** | R$ 10.000-20.000 | Infraestrutura inicial |
-| **Downtime (se houver)** | R$ 20.000-50.000 | Perda de receita estimada |
-| **Consultoria Externa** | R$ 30.000-50.000 | Especialistas em migração |
-| **Total** | R$ 115.000-210.000 | Cenário conservador |
+| Componente               | Custo Estimado     | Justificativa                  |
+| ------------------------ | ------------------ | ------------------------------ |
+| **Egress Fees**          | R$ 5.000-10.000    | Transferência de ~5TB de dados |
+| **Equipe de Migração**   | R$ 50.000-80.000   | 2-3 pessoas x 6 semanas        |
+| **Novo Provider Setup**  | R$ 10.000-20.000   | Infraestrutura inicial         |
+| **Downtime (se houver)** | R$ 20.000-50.000   | Perda de receita estimada      |
+| **Consultoria Externa**  | R$ 30.000-50.000   | Especialistas em migração      |
+| **Total**                | R$ 115.000-210.000 | Cenário conservador            |
 
 ### Gatilhos para Ativação da Exit Strategy
 
@@ -441,7 +467,7 @@ graph TB
         D[Resource Lifecycle] --> F
         E[Identity & Access] --> F
     end
-    
+
     F --> G[Policy Engine<br/>Azure Policy]
     F --> H[Monitoring<br/>Azure Monitor]
     F --> I[Automation<br/>Azure DevOps]
@@ -458,14 +484,14 @@ FinOps Team Structure:
     responsibilities:
       - Budget approval
       - Cost strategy alignment
-      
+
   FinOps Lead:
     role: DevOps Manager
     responsibilities:
       - Cost optimization initiatives
       - Monthly cost reviews
       - Forecasting and budgeting
-      
+
   Technical Champions:
     roles: [Senior Dev, Architect, SRE]
     responsibilities:
@@ -535,21 +561,21 @@ export class BudgetManager {
         { threshold: 50, action: 'email', severity: 'info' },
         { threshold: 75, action: 'slack', severity: 'warning' },
         { threshold: 90, action: 'pagerduty', severity: 'critical' },
-        { threshold: 100, action: 'auto_scale_down', severity: 'emergency' }
+        { threshold: 100, action: 'auto_scale_down', severity: 'emergency' },
       ],
       forecasting: {
         model: 'linear_regression',
         lookback: 90, // days
-        alert_if_exceeds: 110 // % of budget
-      }
+        alert_if_exceeds: 110, // % of budget
+      },
     },
     staging: {
       monthly: 1500,
       alerts: [
         { threshold: 60, action: 'email' },
         { threshold: 80, action: 'slack' },
-        { threshold: 100, action: 'shutdown_non_critical' }
-      ]
+        { threshold: 100, action: 'shutdown_non_critical' },
+      ],
     },
     development: {
       monthly: 500,
@@ -557,21 +583,21 @@ export class BudgetManager {
       auto_shutdown: {
         enabled: true,
         grace_period: '2h',
-        exempt_resources: ['database', 'key-vault']
-      }
-    }
+        exempt_resources: ['database', 'key-vault'],
+      },
+    },
   };
 
   async checkBudgetHealth(): Promise<BudgetStatus> {
     const current = await this.getCurrentSpend();
     const forecast = await this.forecastMonthEnd();
     const recommendations = await this.getOptimizationRecommendations();
-    
+
     return {
       current,
       forecast,
       recommendations,
-      alerts: this.evaluateAlerts(current)
+      alerts: this.evaluateAlerts(current),
     };
   }
 
@@ -581,20 +607,20 @@ export class BudgetManager {
         type: 'RESERVED_INSTANCE',
         potential_savings: 450,
         description: 'Convert 3 VMs to 1-year reserved instances',
-        confidence: 0.95
+        confidence: 0.95,
       },
       {
         type: 'RIGHT_SIZING',
         potential_savings: 200,
         description: 'Downsize staging AKS from 3 to 2 nodes',
-        confidence: 0.88
+        confidence: 0.88,
       },
       {
         type: 'ORPHANED_RESOURCES',
         potential_savings: 75,
         description: 'Delete 5 unattached disks and 3 unused IPs',
-        confidence: 1.0
-      }
+        confidence: 1.0,
+      },
     ];
   }
 }
@@ -617,20 +643,20 @@ class ChargebackCalculator:
             'network': 0.02,  # per GB transfer
             'database': 0.15  # per DTU hour
         }
-    
+
     def calculate_by_team(self, start_date, end_date):
         """Calculate costs per team based on resource tags"""
         costs = {}
-        
+
         for resource in self.get_tagged_resources():
             team = resource.tags.get('cost-center')
             if team not in costs:
                 costs[team] = {'total': 0, 'breakdown': {}}
-            
+
             resource_cost = self.calculate_resource_cost(resource)
             costs[team]['total'] += resource_cost
             costs[team]['breakdown'][resource.type] = resource_cost
-        
+
         return self.generate_report(costs)
 ```
 
@@ -727,30 +753,30 @@ export class SecurityBaselineInitiative {
     'enforce-nsg-on-subnets',
     'require-ddos-protection',
     'audit-unrestricted-network-access',
-    
+
     // Identity & Access
     'require-mfa-for-admins',
     'audit-guest-accounts',
     'enforce-rbac-least-privilege',
     'deny-classic-resources',
-    
+
     // Data Protection
     'enforce-encryption-in-transit',
     'enforce-encryption-at-rest',
     'require-private-endpoints',
     'audit-public-blob-access',
-    
+
     // Compliance
     'enforce-lgpd-requirements',
     'audit-pci-dss-compliance',
     'require-backup-configuration',
     'enforce-retention-policies',
-    
+
     // Resource Management
     'require-mandatory-tags',
     'deny-expensive-vm-sizes',
     'enforce-resource-locks-prod',
-    'audit-orphaned-resources'
+    'audit-orphaned-resources',
   ];
 
   async deployInitiative(scope: string): Promise<void> {
@@ -761,12 +787,12 @@ export class SecurityBaselineInitiative {
       metadata: {
         category: 'Security',
         version: '2.0.0',
-        author: 'Security Team'
+        author: 'Security Team',
       },
-      policyDefinitions: this.policies.map(p => ({
+      policyDefinitions: this.policies.map((p) => ({
         policyDefinitionId: `/providers/Microsoft.Authorization/policyDefinitions/${p}`,
-        parameters: this.getPolicyParameters(p)
-      }))
+        parameters: this.getPolicyParameters(p),
+      })),
     };
 
     await this.azureClient.createPolicyInitiative(scope, initiative);
@@ -790,7 +816,7 @@ PIM Configuration:
           requires_approval: true
           approvers: [cto@simpix.com, cfo@simpix.com]
           mfa_required: true
-          
+
       - name: Database Admin
         eligible_members: [dba-team@simpix.com]
         activation:
@@ -800,7 +826,7 @@ PIM Configuration:
           auto_approve_conditions:
             - incident_severity: SEV1
             - on_call_engineer: true
-            
+
   Staging:
     roles:
       - name: Deployment Operator
@@ -824,13 +850,8 @@ PIM Configuration:
         "Microsoft.Sql/servers/databases/*",
         "Microsoft.Sql/servers/firewallRules/*"
       ],
-      "notActions": [
-        "Microsoft.Sql/servers/databases/delete",
-        "Microsoft.Sql/servers/delete"
-      ],
-      "assignableScopes": [
-        "/subscriptions/{subscription-id}/resourceGroups/rg-simpix-*"
-      ]
+      "notActions": ["Microsoft.Sql/servers/databases/delete", "Microsoft.Sql/servers/delete"],
+      "assignableScopes": ["/subscriptions/{subscription-id}/resourceGroups/rg-simpix-*"]
     },
     {
       "name": "Simpix Cost Viewer",
@@ -841,9 +862,7 @@ PIM Configuration:
         "Microsoft.Billing/*/read"
       ],
       "notActions": [],
-      "assignableScopes": [
-        "/subscriptions/{subscription-id}"
-      ]
+      "assignableScopes": ["/subscriptions/{subscription-id}"]
     },
     {
       "name": "Simpix Security Auditor",
@@ -854,12 +873,8 @@ PIM Configuration:
         "Microsoft.Authorization/*/read",
         "Microsoft.PolicyInsights/*/read"
       ],
-      "notActions": [
-        "Microsoft.KeyVault/vaults/secrets/read"
-      ],
-      "assignableScopes": [
-        "/subscriptions/{subscription-id}"
-      ]
+      "notActions": ["Microsoft.KeyVault/vaults/secrets/read"],
+      "assignableScopes": ["/subscriptions/{subscription-id}"]
     }
   ]
 }
@@ -874,14 +889,14 @@ export class AccessLifecycleManager {
     // Assign base roles based on team
     const baseRoles = this.getBaseRolesByTeam(user.team);
     await this.assignRoles(user, baseRoles);
-    
+
     // Setup PIM eligibility
     const eligibleRoles = this.getEligibleRolesByLevel(user.level);
     await this.setupPIMEligibility(user, eligibleRoles);
-    
+
     // Configure conditional access
     await this.setupConditionalAccess(user);
-    
+
     // Send onboarding instructions
     await this.sendAccessGuide(user);
   }
@@ -899,13 +914,13 @@ export class AccessLifecycleManager {
   async onUserLeave(user: User): Promise<void> {
     // Immediate revocation
     await this.revokeAllAccess(user);
-    
+
     // Audit trail
     await this.generateAccessReport(user);
-    
+
     // Knowledge transfer
     await this.transferOwnedResources(user);
-    
+
     // Security cleanup
     await this.rotateSharedSecrets(user);
   }
@@ -916,7 +931,7 @@ export class AccessLifecycleManager {
       excessive_permissions: [],
       unused_access: [],
       compliance_violations: [],
-      recommendations: []
+      recommendations: [],
     };
 
     for (const user of allUsers) {
@@ -926,7 +941,7 @@ export class AccessLifecycleManager {
         report.unused_access.push({
           user,
           roles: usage.unusedRoles,
-          recommendation: 'REVOKE'
+          recommendation: 'REVOKE',
         });
       }
 
@@ -935,7 +950,7 @@ export class AccessLifecycleManager {
       if (!compliance.isCompliant) {
         report.compliance_violations.push({
           user,
-          violations: compliance.violations
+          violations: compliance.violations,
         });
       }
     }
@@ -963,30 +978,30 @@ graph TB
         C[IDE Plugins] --> G
         D[ChatOps Bot] --> G
     end
-    
+
     subgraph "Platform Core"
         G --> H[Service Catalog]
         G --> I[Template Engine]
         G --> J[Policy Engine]
         G --> K[Cost Calculator]
-        
+
         H --> L[Golden Paths]
         I --> M[IaC Templates]
         J --> N[Guardrails]
         K --> O[Budget Checks]
     end
-    
+
     subgraph "Execution Layer"
         L --> P[Terraform]
         M --> P
         N --> Q[OPA/Gatekeeper]
         O --> R[FinOps API]
-        
+
         P --> S[Azure Resources]
         Q --> S
         R --> S
     end
-    
+
     subgraph "Observability"
         S --> T[Metrics]
         S --> U[Logs]
@@ -1002,8 +1017,8 @@ graph TB
 ```yaml
 golden_paths:
   - id: simple-api
-    name: "Stateless REST API"
-    description: "Deploy a simple REST API with database"
+    name: 'Stateless REST API'
+    description: 'Deploy a simple REST API with database'
     complexity: LOW
     components:
       - aks_deployment
@@ -1022,12 +1037,12 @@ golden_paths:
         values: [small, medium, large]
         default: small
     estimated_cost:
-      monthly: "$45-120"
-    sla: "99.9%"
-    
+      monthly: '$45-120'
+    sla: '99.9%'
+
   - id: event-driven-service
-    name: "Event-Driven Microservice"
-    description: "Deploy service with message queue integration"
+    name: 'Event-Driven Microservice'
+    description: 'Deploy service with message queue integration'
     complexity: MEDIUM
     components:
       - aks_deployment
@@ -1046,12 +1061,12 @@ golden_paths:
         type: boolean
         default: true
     estimated_cost:
-      monthly: "$120-350"
-    sla: "99.95%"
-    
+      monthly: '$120-350'
+    sla: '99.95%'
+
   - id: ml-inference-api
-    name: "ML Model Serving API"
-    description: "Deploy ML model with GPU support"
+    name: 'ML Model Serving API'
+    description: 'Deploy ML model with GPU support'
     complexity: HIGH
     components:
       - aks_gpu_nodepool
@@ -1073,8 +1088,8 @@ golden_paths:
           max_replicas: 10
           target_gpu_utilization: 70
     estimated_cost:
-      monthly: "$800-3000"
-    sla: "99.99%"
+      monthly: '$800-3000'
+    sla: '99.99%'
 ```
 
 #### Template Engine
@@ -1083,59 +1098,56 @@ golden_paths:
 // platform/templates/GoldenPathTemplate.ts
 export class GoldenPathTemplate {
   private templates = new Map<string, IaCTemplate>();
-  
-  async deployGoldenPath(
-    pathId: string,
-    parameters: GoldenPathParams
-  ): Promise<DeploymentResult> {
+
+  async deployGoldenPath(pathId: string, parameters: GoldenPathParams): Promise<DeploymentResult> {
     // Validate parameters
     const validation = await this.validateParameters(pathId, parameters);
     if (!validation.isValid) {
       throw new ValidationError(validation.errors);
     }
-    
+
     // Check policies
     const policyCheck = await this.checkPolicies(pathId, parameters);
     if (!policyCheck.passed) {
       throw new PolicyViolationError(policyCheck.violations);
     }
-    
+
     // Calculate costs
     const costEstimate = await this.estimateCosts(pathId, parameters);
     if (costEstimate.monthly > parameters.budgetLimit) {
       throw new BudgetExceededError(costEstimate);
     }
-    
+
     // Generate Terraform
     const terraform = await this.generateTerraform(pathId, parameters);
-    
+
     // Add standard components
     terraform.addModule('monitoring', this.getMonitoringModule(parameters));
     terraform.addModule('security', this.getSecurityModule(parameters));
     terraform.addModule('networking', this.getNetworkingModule(parameters));
     terraform.addModule('backup', this.getBackupModule(parameters));
-    
+
     // Apply with safety checks
     const plan = await terraform.plan();
-    
+
     if (plan.hasDestructiveChanges) {
       const approval = await this.requestApproval(plan);
       if (!approval.approved) {
         throw new ApprovalDeniedError();
       }
     }
-    
+
     const result = await terraform.apply();
-    
+
     // Register in service catalog
     await this.registerDeployment(pathId, parameters, result);
-    
+
     // Setup monitoring
     await this.setupMonitoring(result);
-    
+
     // Send notifications
     await this.notifyStakeholders(result);
-    
+
     return result;
   }
 }
@@ -1151,7 +1163,7 @@ export const DeveloperPortal: React.FC = () => {
   const [selectedPath, setSelectedPath] = useState<GoldenPath | null>(null);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [costs, setCosts] = useState<CostBreakdown | null>(null);
-  
+
   return (
     <Dashboard>
       <Header>
@@ -1159,7 +1171,7 @@ export const DeveloperPortal: React.FC = () => {
         <UserInfo />
         <BudgetIndicator current={costs?.mtd} limit={costs?.budget} />
       </Header>
-      
+
       <Sidebar>
         <Navigation>
           <NavItem icon={<RocketIcon />} label="Deploy New" />
@@ -1169,7 +1181,7 @@ export const DeveloperPortal: React.FC = () => {
           <NavItem icon={<BookIcon />} label="Documentation" />
         </Navigation>
       </Sidebar>
-      
+
       <MainContent>
         <ServiceCatalog>
           <h2>Golden Paths</h2>
@@ -1185,7 +1197,7 @@ export const DeveloperPortal: React.FC = () => {
             ))}
           </PathGrid>
         </ServiceCatalog>
-        
+
         {selectedPath && (
           <DeploymentWizard
             path={selectedPath}
@@ -1199,7 +1211,7 @@ export const DeveloperPortal: React.FC = () => {
             <StepFive: ReviewAndDeploy />
           </DeploymentWizard>
         )}
-        
+
         <MyDeployments>
           <h2>Active Services</h2>
           <DeploymentTable
@@ -1245,14 +1257,14 @@ def cli():
 @click.option('--dry-run', is_flag=True, help='Preview without deploying')
 def deploy(path, name, env, params, dry_run):
     """Deploy a service using a golden path"""
-    
+
     console.print(f"[bold blue]Deploying {name} using {path} path[/bold blue]")
-    
+
     # Load parameters
     parameters = yaml.safe_load(params) if params else {}
     parameters['name'] = name
     parameters['environment'] = env
-    
+
     # Validate
     with console.status("Validating parameters..."):
         validation = validate_parameters(path, parameters)
@@ -1261,34 +1273,34 @@ def deploy(path, name, env, params, dry_run):
             for error in validation['errors']:
                 console.print(f"  • {error}")
             raise click.Abort()
-    
+
     # Cost estimate
     with console.status("Calculating costs..."):
         costs = estimate_costs(path, parameters)
-        
+
     # Display cost breakdown
     table = Table(title="Cost Estimate")
     table.add_column("Component", style="cyan")
     table.add_column("Monthly Cost", style="green")
-    
+
     for component, cost in costs['breakdown'].items():
         table.add_row(component, f"${cost:.2f}")
     table.add_row("[bold]Total[/bold]", f"[bold]${costs['total']:.2f}[/bold]")
-    
+
     console.print(table)
-    
+
     # Confirm
     if not dry_run:
         if not click.confirm(f"Deploy {name} for ~${costs['total']}/month?"):
             raise click.Abort()
-    
+
     # Deploy
     if not dry_run:
         with console.status("Deploying...") as status:
             for step in track(deployment_steps, description="Deploying..."):
                 status.update(f"[bold green]{step}[/bold green]")
                 execute_step(step, path, parameters)
-        
+
         console.print("[bold green]✓ Deployment successful![/bold green]")
         console.print(f"Service URL: https://{name}.simpix.cloud")
         console.print(f"Dashboard: https://portal.simpix.cloud/services/{name}")
@@ -1299,14 +1311,14 @@ def deploy(path, name, env, params, dry_run):
 def list():
     """List your deployed services"""
     services = get_my_services()
-    
+
     table = Table(title="My Services")
     table.add_column("Name", style="cyan")
     table.add_column("Status", style="green")
     table.add_column("Environment")
     table.add_column("Cost/Month", style="yellow")
     table.add_column("Health")
-    
+
     for service in services:
         status_color = "green" if service['status'] == 'running' else "red"
         health_icon = "✓" if service['health'] == 'healthy' else "✗"
@@ -1317,7 +1329,7 @@ def list():
             f"${service['monthly_cost']:.2f}",
             health_icon
         )
-    
+
     console.print(table)
 
 @cli.command()
@@ -1361,8 +1373,8 @@ export interface ServiceDefinition {
       version: string;
     };
     resources: {
-      cpu: string;      // e.g., "500m", "2"
-      memory: string;   // e.g., "512Mi", "2Gi"
+      cpu: string; // e.g., "500m", "2"
+      memory: string; // e.g., "512Mi", "2Gi"
       storage?: string; // e.g., "10Gi"
     };
     scaling: {
@@ -1417,42 +1429,42 @@ export class PlatformAPI {
   ): Promise<ServiceDeployment> {
     // Validate definition
     await this.validator.validate(definition);
-    
+
     // Check quotas
     const quota = await this.quotaManager.check(user);
     if (quota.exceeded) {
       throw new QuotaExceededException(quota);
     }
-    
+
     // Generate infrastructure
     const infra = await this.infraGenerator.generate(definition);
-    
+
     // Apply policies
     const policies = await this.policyEngine.evaluate(infra, user);
     if (policies.hasViolations) {
       throw new PolicyViolationException(policies.violations);
     }
-    
+
     // Deploy
     const deployment = await this.deployer.deploy(infra, {
       user,
       definition,
-      dryRun: false
+      dryRun: false,
     });
-    
+
     // Setup observability
     await this.observability.configure(deployment, definition.spec.observability);
-    
+
     // Register in catalog
     await this.catalog.register(deployment);
-    
+
     // Send events
     await this.eventBus.publish('service.created', {
       service: deployment,
       user,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
+
     return deployment;
   }
 
@@ -1463,15 +1475,15 @@ export class PlatformAPI {
     @Query('period') period: 'daily' | 'monthly' | 'yearly' = 'monthly'
   ): Promise<CostBreakdown> {
     const service = await this.catalog.getService(serviceId);
-    
+
     const costs = await this.costCalculator.calculate(service, period);
-    
+
     return {
       total: costs.total,
       breakdown: costs.breakdown,
       forecast: costs.forecast,
       recommendations: await this.costOptimizer.getRecommendations(service),
-      trend: costs.trend
+      trend: costs.trend,
     };
   }
 
@@ -1483,28 +1495,25 @@ export class PlatformAPI {
     @Body() scaleRequest: ScaleRequest
   ): Promise<ScaleResult> {
     const service = await this.catalog.getService(serviceId);
-    
+
     // Validate scale request
     if (scaleRequest.replicas > service.limits.maxReplicas) {
       throw new ScaleLimitExceededException();
     }
-    
+
     // Check costs
-    const newCost = await this.costCalculator.estimateScale(
-      service,
-      scaleRequest
-    );
-    
+    const newCost = await this.costCalculator.estimateScale(service, scaleRequest);
+
     if (newCost.monthly > service.budget.limit) {
       throw new BudgetExceededException(newCost);
     }
-    
+
     // Execute scale
     const result = await this.scaler.scale(service, scaleRequest);
-    
+
     // Update monitoring
     await this.monitoring.updateAlerts(service, scaleRequest);
-    
+
     return result;
   }
 }
@@ -1518,50 +1527,50 @@ metrics:
     - metric: Time to First Deployment
       target: < 30 minutes
       current: 45 minutes
-      
+
     - metric: Mean Time to Production
       target: < 2 hours
       current: 4 hours
-      
+
     - metric: Self-Service Adoption Rate
       target: > 80%
       current: 65%
-      
+
   platform_reliability:
     - metric: Golden Path Success Rate
       target: > 95%
       current: 92%
-      
+
     - metric: Platform API Availability
       target: 99.9%
       current: 99.7%
-      
+
     - metric: Deployment Failure Rate
       target: < 5%
       current: 7%
-      
+
   cost_efficiency:
     - metric: Resource Utilization
       target: > 70%
       current: 58%
-      
+
     - metric: Orphaned Resources
       target: < 2%
       current: 5%
-      
+
     - metric: Cost per Deployment
       target: < $10
       current: $15
-      
+
   security_compliance:
     - metric: Policy Compliance Rate
       target: 100%
       current: 98%
-      
+
     - metric: Time to Patch
       target: < 24 hours
       current: 36 hours
-      
+
     - metric: Security Scan Pass Rate
       target: > 90%
       current: 88%
@@ -1570,24 +1579,28 @@ metrics:
 ### Roadmap da IDP
 
 #### Q1 2025 - Foundation
+
 - [x] Golden Paths básicos (API, Worker)
 - [x] Portal web inicial
 - [ ] CLI tool v1.0
 - [ ] Service catalog
 
 #### Q2 2025 - Expansion
+
 - [ ] Golden Paths avançados (ML, Event-driven)
 - [ ] IDE plugins (VSCode, IntelliJ)
 - [ ] ChatOps integration
 - [ ] Advanced cost management
 
 #### Q3 2025 - Intelligence
+
 - [ ] AI-powered recommendations
 - [ ] Automated optimization
 - [ ] Predictive scaling
 - [ ] Anomaly detection
 
 #### Q4 2025 - Maturity
+
 - [ ] Multi-cloud abstractions
 - [ ] Marketplace de templates
 - [ ] Community contributions
@@ -1598,16 +1611,19 @@ metrics:
 ## Roadmap de Evolução
 
 ### Fase 1 - Atual (0-3 meses)
+
 - ✅ Subscrição única com 4 Resource Groups
 - ✅ RBAC básico implementado
 - ✅ Políticas essenciais aplicadas
 
 ### Fase 2 - Maturidade (3-6 meses)
+
 - 🎯 Avaliar separação de Produção
 - 🎯 Implementar Hub-Spoke networking
 - 🎯 Azure Front Door para multi-region
 
 ### Fase 3 - Escala (6-12 meses)
+
 - 🎯 Management Groups se > 3 subscrições
 - 🎯 Landing Zone Accelerator completo
 - 🎯 Multi-region active-active
@@ -1617,6 +1633,7 @@ metrics:
 ## Implementação
 
 ### Terraform Modules Structure
+
 ```hcl
 modules/
 ├── resource-group/
@@ -1640,6 +1657,7 @@ modules/
 ```
 
 ### Ordem de Implementação
+
 1. **Semana 1:** Resource Groups e Networking
 2. **Semana 2:** Shared resources (ACR, Key Vault)
 3. **Semana 3:** Dev environment complete
@@ -1651,25 +1669,27 @@ modules/
 
 ## Métricas de Sucesso
 
-| Métrica | Target | Medição |
-|---------|--------|---------|
-| Tempo de provisionamento novo ambiente | < 30 min | Terraform apply time |
-| Custo vs Replit | -20% | Monthly billing |
-| Disponibilidade Produção | 99.9% | Azure Monitor |
-| Tempo de deployment | < 10 min | CI/CD pipeline |
-| Compliance score | > 85% | Azure Security Center |
-| Recovery Time Objective | < 1 hora | DR tests |
+| Métrica                                | Target   | Medição               |
+| -------------------------------------- | -------- | --------------------- |
+| Tempo de provisionamento novo ambiente | < 30 min | Terraform apply time  |
+| Custo vs Replit                        | -20%     | Monthly billing       |
+| Disponibilidade Produção               | 99.9%    | Azure Monitor         |
+| Tempo de deployment                    | < 10 min | CI/CD pipeline        |
+| Compliance score                       | > 85%    | Azure Security Center |
+| Recovery Time Objective                | < 1 hora | DR tests              |
 
 ---
 
 ## Riscos e Dependências
 
 ### Riscos
+
 1. **Lock-in Azure:** Mitigado com containers e Kubernetes
 2. **Custos inesperados:** Mitigado com budgets e alertas
 3. **Complexidade de migração:** Mitigado com estratégia faseada
 
 ### Dependências
+
 1. Azure Enterprise Agreement ou Pay-as-you-go
 2. Equipe treinada em Azure e Kubernetes
 3. Terraform expertise para IaC
@@ -1689,30 +1709,30 @@ modules/
 
 ## Registro de Decisão
 
-| Campo | Valor |
-|-------|-------|
-| **ID** | ADR-001 |
-| **Título** | Estratégia de Landing Zone na Azure - Versão Expandida |
-| **Status** | Expandido - Sprint 2 PAM V2.1 |
-| **Impacto** | Alto - Fundação de toda infraestrutura |
-| **Autor** | GEM 02 (Dev Specialist) |
-| **Data Criação** | 21/08/2025 |
-| **Última Atualização** | 25/01/2025 |
-| **Versão** | 2.0.0 |
-| **Páginas** | ~50 páginas |
-| **Revisão** | Aguardando Arquiteto Chefe |
-| **Aprovação** | Pendente |
+| Campo                  | Valor                                                  |
+| ---------------------- | ------------------------------------------------------ |
+| **ID**                 | ADR-001                                                |
+| **Título**             | Estratégia de Landing Zone na Azure - Versão Expandida |
+| **Status**             | Expandido - Sprint 2 PAM V2.1                          |
+| **Impacto**            | Alto - Fundação de toda infraestrutura                 |
+| **Autor**              | GEM 02 (Dev Specialist)                                |
+| **Data Criação**       | 21/08/2025                                             |
+| **Última Atualização** | 25/01/2025                                             |
+| **Versão**             | 2.0.0                                                  |
+| **Páginas**            | ~50 páginas                                            |
+| **Revisão**            | Aguardando Arquiteto Chefe                             |
+| **Aprovação**          | Pendente                                               |
 
 ---
 
 ## Assinaturas
 
-| Papel | Nome | Data | Status |
-|-------|------|------|--------|
-| Autor | GEM 02 | 21/08/2025 | ✅ Submetido |
-| Revisor Técnico | GEM 01 | Pendente | ⏳ Aguardando |
-| Aprovador | CTO | Pendente | ⏳ Aguardando |
-| Security Officer | - | Pendente | ⏳ Aguardando |
+| Papel            | Nome   | Data       | Status        |
+| ---------------- | ------ | ---------- | ------------- |
+| Autor            | GEM 02 | 21/08/2025 | ✅ Submetido  |
+| Revisor Técnico  | GEM 01 | Pendente   | ⏳ Aguardando |
+| Aprovador        | CTO    | Pendente   | ⏳ Aguardando |
+| Security Officer | -      | Pendente   | ⏳ Aguardando |
 
 ---
 

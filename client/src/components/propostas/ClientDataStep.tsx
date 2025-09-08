@@ -97,25 +97,27 @@ export function ClientDataStep() {
   // 🚫 FLAGS PARA EVITAR RE-VALIDAÇÕES DESNECESSÁRIAS
   const [cepAlreadyFetched, setCepAlreadyFetched] = useState(false);
   const [cpfAlreadyFetched, setCpfAlreadyFetched] = useState(false);
-  
+
   // UX-012: Estado para controlar feedback visual de auto-preenchimento
   const [addressFieldsJustFilled, setAddressFieldsJustFilled] = useState(false);
-  
+
   // UX-006: Estados para validação em tempo real
   const [cpfValidation, setCpfValidation] = useState<{
     isValid: boolean;
     isValidating: boolean;
   }>({ isValid: false, isValidating: false });
-  
+
   // UX-006: Debounce para CEP (500ms)
   const debouncedCep = useDebounce(clientData.cep, 500);
 
   const [progress, setProgress] = useState(0);
-  
+
   // Estados para modal de confirmação de cliente encontrado
-  const [clientFoundData, setClientFoundData] = useState<ClientDataApiResponse['data'] | null>(null);
+  const [clientFoundData, setClientFoundData] = useState<ClientDataApiResponse['data'] | null>(
+    null
+  );
   const [showClientConfirmDialog, setShowClientConfirmDialog] = useState(false);
-  
+
   // Função para buscar CEP usando nosso backend
   const fetchAddressByCep = useCallback(
     async (cep: string) => {
@@ -139,7 +141,7 @@ export function ClientDataStep() {
 
           // UX-012: Ativar efeito visual de flash nos campos preenchidos
           setAddressFieldsJustFilled(true);
-          
+
           // Remover o efeito após a animação (1.8s)
           setTimeout(() => setAddressFieldsJustFilled(false), 1800);
 
@@ -195,27 +197,31 @@ export function ClientDataStep() {
     // A API retorna dados com estrutura: clienteNome, clienteCep, etc. + sub-objeto clienteData
     const apiData = clientFoundData as any; // Type assertion para acessar propriedades corretas
     const clientData = apiData.clienteData || {};
-    
+
     // Mapeamento otimizado baseado na estrutura real da API
-    
+
     const clientUpdateData = {
       // Dados pessoais - priorizar campos diretos
       nome: apiData.clienteNome || clientData.nome || '',
       email: apiData.clienteEmail || clientData.email || '',
       telefone: apiData.clienteTelefone || clientData.telefone || '',
-      dataNascimento: apiData.clienteDataNascimento || clientData.dataNascimento || clientData.data_nascimento || '',
-      
+      dataNascimento:
+        apiData.clienteDataNascimento ||
+        clientData.dataNascimento ||
+        clientData.data_nascimento ||
+        '',
+
       // Documentos - verificar tanto campo direto quanto clienteData
       rg: apiData.clienteRg || clientData.rg || '',
       orgaoEmissor: apiData.clienteOrgaoEmissor || clientData.orgaoEmissor || '',
       rgUf: apiData.clienteRgUf || clientData.uf || '',
       rgDataEmissao: apiData.clienteRgDataEmissao || clientData.rgDataEmissao || '',
-      
+
       // 🌍 Dados adicionais - APENAS CAMPOS REAIS
       localNascimento: clientData.localNascimento || apiData.clienteLocalNascimento || '',
       estadoCivil: clientData.estadoCivil || apiData.clienteEstadoCivil || '',
       nacionalidade: clientData.nacionalidade || apiData.clienteNacionalidade || '',
-      
+
       // Endereço - verificar tanto campo direto quanto clienteData
       cep: apiData.clienteCep || clientData.cep || '',
       logradouro: apiData.clienteLogradouro || clientData.logradouro || '',
@@ -224,26 +230,25 @@ export function ClientDataStep() {
       bairro: apiData.clienteBairro || clientData.bairro || '',
       cidade: apiData.clienteCidade || clientData.cidade || '',
       estado: apiData.clienteUf || clientData.estado || '',
-      
+
       // 💼 Dados profissionais - APENAS CAMPOS REAIS
       ocupacao: apiData.clienteOcupacao || clientData.ocupacao || '',
-      rendaMensal: (
+      rendaMensal:
         // Converter centavos para reais se vier no formato {cents: number}
-        clientData.rendaMensal?.cents ? (clientData.rendaMensal.cents / 100).toString() :
-        clientData.renda_mensal || 
-        apiData.clienteRenda || 
-        apiData.clienteRendaMensal || ''
-      ),
+        clientData.rendaMensal?.cents
+          ? (clientData.rendaMensal.cents / 100).toString()
+          : clientData.renda_mensal || apiData.clienteRenda || apiData.clienteRendaMensal || '',
       telefoneEmpresa: clientData.telefoneEmpresa || apiData.clienteTelefoneEmpresa || '',
-      
+
       // 🏭 Nome da empresa - usar campo REAL
       clienteEmpresaNome: clientData.empregador || apiData.clienteEmpresaNome || '',
-      
+
       // 💼 Dados profissionais adicionais - CAMPOS REAIS
-      clienteDividasExistentes: clientData.dividas_existentes || apiData.clienteDividasExistentes || '',
+      clienteDividasExistentes:
+        clientData.dividas_existentes || apiData.clienteDividasExistentes || '',
       clienteTempoEmprego: clientData.tempo_emprego || apiData.clienteTempoEmprego || '',
       clienteCargoFuncao: clientData.cargo_funcao || apiData.clienteCargoFuncao || '',
-      
+
       // Dados de pagamento - usar estrutura correta
       metodoPagamento: (apiData.metodoPagamento as 'conta_bancaria' | 'pix') || 'conta_bancaria',
       dadosPagamentoBanco: apiData.dadosPagamentoBanco || '',
@@ -293,20 +298,20 @@ export function ClientDataStep() {
   const handleCPFChange = (value: string) => {
     updateClient({ cpf: value });
     clearError('cpf');
-    
+
     // 🚫 Resetar flag se CPF mudou para permitir nova busca
     if (value !== clientData.cpf) {
       setCpfAlreadyFetched(false);
     }
-    
+
     // UX-006: Validação em tempo real
     const cleanCPF = value.replace(/\D/g, '');
     setCpfValidation({ isValidating: true, isValid: false });
-    
+
     setTimeout(() => {
       const isValid = CPF.isValid(cleanCPF);
       setCpfValidation({ isValidating: false, isValid });
-      
+
       // Buscar dados quando CPF for válido (11 dígitos) - OTIMIZADO
       if (cleanCPF.length === 11 && isValid && !cpfAlreadyFetched) {
         fetchClientDataByCpf(value);
@@ -334,7 +339,7 @@ export function ClientDataStep() {
   const handleCEPChange = (value: string) => {
     updateClient({ cep: value });
     clearError('cep');
-    
+
     // 🚫 Resetar flag se CEP mudou para permitir nova busca
     if (value !== clientData.cep) {
       setCepAlreadyFetched(false);
@@ -495,18 +500,24 @@ export function ClientDataStep() {
                       errors.cpf
                         ? 'border-destructive focus:border-destructive'
                         : cpfValidation.isValid
-                        ? 'border-green-500 focus:border-green-600'
-                        : ''
+                          ? 'border-green-500 focus:border-green-600'
+                          : ''
                     }`}
                     data-testid="input-cpf"
                   />
                   {/* UX-006: Ícone de validação em tempo real */}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {cpfValidation.isValidating ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" data-testid="icon-cpf-loading" />
+                      <Loader2
+                        className="h-4 w-4 animate-spin text-gray-400"
+                        data-testid="icon-cpf-loading"
+                      />
                     ) : clientData.cpf && clientData.cpf.replace(/\D/g, '').length >= 3 ? (
                       cpfValidation.isValid ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-600" data-testid="icon-cpf-valid" />
+                        <CheckCircle2
+                          className="h-4 w-4 text-green-600"
+                          data-testid="icon-cpf-valid"
+                        />
                       ) : (
                         <XCircle className="h-4 w-4 text-red-500" data-testid="icon-cpf-invalid" />
                       )
@@ -764,7 +775,10 @@ export function ClientDataStep() {
               {/* UX-006: Indicador de carregamento CEP em tempo real */}
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 {loadingCep ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" data-testid="icon-cep-loading" />
+                  <Loader2
+                    className="h-4 w-4 animate-spin text-blue-500"
+                    data-testid="icon-cep-loading"
+                  />
                 ) : clientData.logradouro ? (
                   <CheckCircle2 className="h-4 w-4 text-green-600" data-testid="icon-cep-success" />
                 ) : null}
@@ -864,7 +878,7 @@ export function ClientDataStep() {
               value={clientData.estado}
               onValueChange={(value) => updateClient({ estado: value })}
             >
-              <SelectTrigger 
+              <SelectTrigger
                 className={addressFieldsJustFilled ? 'address-flash' : ''}
                 data-testid="select-estado"
               >

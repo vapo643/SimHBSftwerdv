@@ -1,6 +1,6 @@
 rules:
   # Projeto Cérbero - Regras customizadas para Sistema de Crédito Simpix
-  
+
   # RED TEAM TEST RULES - Detectar vulnerabilidades propositais
   - id: hardcoded-secrets
     pattern-either:
@@ -21,10 +21,10 @@ rules:
     metadata:
       category: security
       cwe:
-        - "CWE-798: Use of Hard-coded Credentials"
+        - 'CWE-798: Use of Hard-coded Credentials'
       owasp:
-        - "A07:2021 - Identification and Authentication Failures"
-        
+        - 'A07:2021 - Identification and Authentication Failures'
+
   - id: sql-injection-direct
     pattern-either:
       - pattern: |
@@ -40,10 +40,10 @@ rules:
     metadata:
       category: security
       cwe:
-        - "CWE-89: SQL Injection"
+        - 'CWE-89: SQL Injection'
       owasp:
-        - "A03:2021 - Injection"
-        
+        - 'A03:2021 - Injection'
+
   - id: xss-direct-output
     pattern-either:
       - pattern: |
@@ -52,15 +52,15 @@ rules:
           res.send(`<$TAG>${$INPUT}</$TAG>`)
     message: |
       XSS vulnerability - unsanitized user input in HTML output
-    languages: [typescript, javascript]  
+    languages: [typescript, javascript]
     severity: ERROR
     metadata:
       category: security
       cwe:
-        - "CWE-79: Cross-site Scripting"
+        - 'CWE-79: Cross-site Scripting'
       owasp:
-        - "A03:2021 - Injection"
-  
+        - 'A03:2021 - Injection'
+
   # Detecção de informações sensíveis de crédito
   - id: simpix-credit-data-exposure
     pattern-either:
@@ -85,10 +85,10 @@ rules:
     metadata:
       category: security
       cwe:
-        - "CWE-359: Exposure of Private Information"
+        - 'CWE-359: Exposure of Private Information'
       owasp:
-        - "A09:2021 - Security Logging and Monitoring Failures"
-      
+        - 'A09:2021 - Security Logging and Monitoring Failures'
+
   # Validação de taxa de juros
   - id: simpix-interest-rate-validation
     pattern-either:
@@ -106,7 +106,7 @@ rules:
       if (taxaJuros < 0 || taxaJuros > MAX_TAXA_LEGAL) {
         throw new Error('Taxa de juros fora dos limites permitidos');
       }
-      
+
   # SQL Injection em queries de propostas
   - id: simpix-proposal-sql-injection
     pattern-either:
@@ -121,10 +121,10 @@ rules:
     metadata:
       category: security
       cwe:
-        - "CWE-89: SQL Injection"
+        - 'CWE-89: SQL Injection'
       owasp:
-        - "A03:2021 - Injection"
-        
+        - 'A03:2021 - Injection'
+
   # Falta de validação em uploads de documentos
   - id: simpix-insecure-file-upload
     pattern-either:
@@ -147,7 +147,7 @@ rules:
       if (!allowedTypes.includes(req.file.mimetype)) {
         return res.status(400).json({ error: 'Tipo de arquivo não permitido' });
       }
-      
+
   # Autenticação fraca em endpoints de admin
   - id: simpix-admin-auth-bypass
     pattern-either:
@@ -167,7 +167,7 @@ rules:
       router.$METHOD('/admin/...', jwtAuthMiddleware, requireAdmin, async (req, res) => {
         // código do handler
       })
-      
+
   # Exposição de stack trace em produção
   - id: simpix-error-stack-exposure
     pattern-either:
@@ -187,7 +187,7 @@ rules:
       res.status(500).json({
         error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : error.message
       })
-      
+
   # Falta de rate limiting em endpoints críticos
   - id: simpix-missing-rate-limit
     pattern-either:
@@ -203,7 +203,7 @@ rules:
       Endpoint crítico sem rate limiting. Adicione proteção contra brute force.
     languages: [typescript, javascript]
     severity: WARNING
-    
+
   # Validação de CEP insegura
   - id: simpix-unsafe-cep-validation
     pattern: |
@@ -217,7 +217,7 @@ rules:
       if (cepLimpo.length !== 8) {
         throw new Error('CEP inválido');
       }
-      
+
   # Uso inseguro de Math.random para IDs
   - id: simpix-weak-id-generation
     pattern-either:
@@ -230,7 +230,7 @@ rules:
     fix: |
       import { v4 as uuidv4 } from 'uuid';
       const id = uuidv4();
-      
+
   # Hardcoded secrets
   - id: simpix-hardcoded-secrets
     pattern-either:
@@ -245,6 +245,6 @@ rules:
     metadata:
       category: security
       cwe:
-        - "CWE-798: Use of Hard-coded Credentials"
+        - 'CWE-798: Use of Hard-coded Credentials'
       owasp:
-        - "A07:2021 - Identification and Authentication Failures"
+        - 'A07:2021 - Identification and Authentication Failures'

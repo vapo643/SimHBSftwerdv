@@ -4,7 +4,7 @@
 **Versão:** 1.0  
 **Data:** 22 de Agosto de 2025  
 **Status:** Oficial - Estratégia de Consistência Distribuída  
-**Aprovação:** Pendente Ratificação do Arquiteto Chefe  
+**Aprovação:** Pendente Ratificação do Arquiteto Chefe
 
 ---
 
@@ -14,7 +14,7 @@ Este documento estabelece a estratégia formal de gestão de transações para o
 
 **Ponto de Conformidade:** Remediação do Ponto 51 - Gestão de Transações  
 **Criticidade:** P0 (Crítica)  
-**Impacto:** Integridade financeira e consistência sistêmica  
+**Impacto:** Integridade financeira e consistência sistêmica
 
 ---
 
@@ -32,12 +32,12 @@ As transações ACID tradicionais devem ser **rigorosamente confinadas aos limit
 interface PropostaAggregate {
   // ROOT ENTITY - Sempre within same transaction
   proposta: Proposta;
-  
+
   // CHILD ENTITIES - Same aggregate boundary
   parcelas: Parcela[];
   documentos: PropostaDocumento[];
   statusTransitions: StatusTransition[];
-  
+
   // INVARIANTS dentro do boundary ACID
   invariants: {
     valorTotalParcelasIgualValorSolicitado(): boolean;
@@ -49,11 +49,11 @@ interface PropostaAggregate {
 interface PagamentoAggregate {
   // ROOT ENTITY
   pagamento: Pagamento;
-  
+
   // CHILD ENTITIES - Same ACID boundary
   baixaParcelas: BaixaParcela[];
   conciliacaoBancaria: ConciliacaoBancaria;
-  
+
   // INVARIANTS financeiros críticos
   invariants: {
     valorPagamentoIgualSomaBaixas(): boolean;
@@ -71,9 +71,9 @@ class PropostaAggregate {
     const evento = new PropostaCreatedEvent({
       aggregateId: uuid(),
       dados,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
+
     // Single atomic operation within aggregate boundary
     await db.transaction(async (trx) => {
       // Store event in event store (single table write)
@@ -82,19 +82,19 @@ class PropostaAggregate {
         eventType: 'PropostaCreated',
         eventData: evento.dados,
         version: 1,
-        timestamp: evento.timestamp
+        timestamp: evento.timestamp,
       });
-      
+
       // Validate aggregate invariants
       await this.validateInvariants(evento.dados);
     });
-    
+
     // Publish event for read model projections
     await this.eventBus.publish(evento);
-    
+
     return evento;
   }
-  
+
   private async validateInvariants(dados: any): Promise<void> {
     if (dados.valor <= 0) {
       throw new Error('Valor deve ser positivo');
@@ -108,12 +108,12 @@ class PropostaAggregate {
 
 ### 1.3 Boundaries ACID por Contexto
 
-| **Bounded Context** | **Agregado** | **Escopo ACID** | **Invariantes Críticas** |
-|---------------------|--------------|-----------------|---------------------------|
-| **Credit Proposal** | Proposta | propostas + parcelas + status_transitions | Valor total consistente, status válido |
-| **Payment Processing** | Pagamento | pagamentos + baixa_parcelas + conciliacao | Conciliação automática, valores conferem |
-| **Contract Management** | Contrato | contratos + assinaturas + clicksign_events | Estado de assinatura consistente |
-| **Banking Integration** | CobrancaBancaria | inter_collections + callbacks + parcelas | Sincronização bancária íntegra |
+| **Bounded Context**     | **Agregado**     | **Escopo ACID**                            | **Invariantes Críticas**                 |
+| ----------------------- | ---------------- | ------------------------------------------ | ---------------------------------------- |
+| **Credit Proposal**     | Proposta         | propostas + parcelas + status_transitions  | Valor total consistente, status válido   |
+| **Payment Processing**  | Pagamento        | pagamentos + baixa_parcelas + conciliacao  | Conciliação automática, valores conferem |
+| **Contract Management** | Contrato         | contratos + assinaturas + clicksign_events | Estado de assinatura consistente         |
+| **Banking Integration** | CobrancaBancaria | inter_collections + callbacks + parcelas   | Sincronização bancária íntegra           |
 
 ---
 
@@ -124,6 +124,7 @@ class PropostaAggregate {
 **DECISÃO TÉCNICA:** Adotamos **Coreografia baseada em eventos** para nossa arquitetura de Monolito Modular.
 
 **Justificativa:**
+
 - ✅ **Desacoplamento:** Contextos se comunicam via eventos sem conhecimento direto
 - ✅ **Escalabilidade:** Facilita evolução para microserviços no futuro
 - ✅ **Resiliência:** Falha em um contexto não bloqueia todo o workflow
@@ -135,7 +136,7 @@ class PropostaAggregate {
 sequenceDiagram
     participant Cliente
     participant ProposalCtx as Proposal Context
-    participant PaymentCtx as Payment Context  
+    participant PaymentCtx as Payment Context
     participant BankingCtx as Banking Context
     participant ContractCtx as Contract Context
     participant EventBus as Event Bus
@@ -143,18 +144,18 @@ sequenceDiagram
     %% SAGA: Processamento de Pagamento Completo
     Cliente->>ProposalCtx: 1. Aprovar Proposta
     ProposalCtx->>EventBus: PropostaAprovada
-    
+
     EventBus->>ContractCtx: 2. Gerar CCB
     ContractCtx->>EventBus: CCBGerado
-    
+
     EventBus->>BankingCtx: 3. Emitir Boletos
     BankingCtx->>EventBus: BoletosEmitidos
-    
+
     EventBus->>PaymentCtx: 4. Configurar Cobrança
     PaymentCtx->>EventBus: CobrancaConfigurada
-    
+
     Note over EventBus: SAGA COMPLETA ✅
-    
+
     %% CENÁRIO DE COMPENSAÇÃO
     alt Falha na Emissão de Boletos
         BankingCtx->>EventBus: FalhaEmissaoBoletos
@@ -181,13 +182,12 @@ interface SagaEvent {
 
 // SAGA: Processamento de Pagamento
 export class ProcessamentoPagamentoSaga {
-  
   // STEP 1: Aprovar Proposta
   async handlePropostaAprovada(event: PropostaAprovadaEvent): Promise<void> {
     try {
       await this.avancarParaProximoStep(event.sagaId, 'gerar_ccb', {
         propostaId: event.propostaId,
-        valorAprovado: event.valorAprovado
+        valorAprovado: event.valorAprovado,
       });
     } catch (error) {
       await this.executarCompensacao(event.sagaId, 'reverter_aprovacao');
@@ -199,7 +199,7 @@ export class ProcessamentoPagamentoSaga {
     try {
       await this.avancarParaProximoStep(event.sagaId, 'emitir_boletos', {
         propostaId: event.propostaId,
-        ccbPath: event.ccbPath
+        ccbPath: event.ccbPath,
       });
     } catch (error) {
       await this.executarCompensacao(event.sagaId, 'remover_ccb');
@@ -211,7 +211,7 @@ export class ProcessamentoPagamentoSaga {
     try {
       await this.avancarParaProximoStep(event.sagaId, 'configurar_cobranca', {
         propostaId: event.propostaId,
-        codigosSolicitacao: event.codigosSolicitacao
+        codigosSolicitacao: event.codigosSolicitacao,
       });
     } catch (error) {
       await this.executarCompensacao(event.sagaId, 'cancelar_boletos');
@@ -229,29 +229,31 @@ export class ProcessamentoPagamentoSaga {
 
 ```typescript
 // Tabela para tracking de SAGAs
-export const sagaExecution = pgTable("saga_execution", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  sagaType: text("saga_type").notNull(), // 'processamento_pagamento'
-  sagaId: text("saga_id").notNull().unique(),
-  currentStep: text("current_step").notNull(),
-  status: text("status").notNull(), // 'executing', 'completed', 'compensating', 'failed'
-  payload: jsonb("payload").notNull(),
-  startedAt: timestamp("started_at").defaultNow().notNull(),
-  completedAt: timestamp("completed_at"),
-  errorMessage: text("error_message"),
-  compensationSteps: jsonb("compensation_steps"), // Lista de compensações executadas
+export const sagaExecution = pgTable('saga_execution', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sagaType: text('saga_type').notNull(), // 'processamento_pagamento'
+  sagaId: text('saga_id').notNull().unique(),
+  currentStep: text('current_step').notNull(),
+  status: text('status').notNull(), // 'executing', 'completed', 'compensating', 'failed'
+  payload: jsonb('payload').notNull(),
+  startedAt: timestamp('started_at').defaultNow().notNull(),
+  completedAt: timestamp('completed_at'),
+  errorMessage: text('error_message'),
+  compensationSteps: jsonb('compensation_steps'), // Lista de compensações executadas
 });
 
-export const sagaSteps = pgTable("saga_steps", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  sagaId: text("saga_id").notNull().references(() => sagaExecution.sagaId),
-  stepId: text("step_id").notNull(),
-  status: text("status").notNull(), // 'pending', 'completed', 'failed', 'compensated'
-  input: jsonb("input"),
-  output: jsonb("output"),
-  executedAt: timestamp("executed_at").defaultNow(),
-  compensatedAt: timestamp("compensated_at"),
-  errorMessage: text("error_message"),
+export const sagaSteps = pgTable('saga_steps', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sagaId: text('saga_id')
+    .notNull()
+    .references(() => sagaExecution.sagaId),
+  stepId: text('step_id').notNull(),
+  status: text('status').notNull(), // 'pending', 'completed', 'failed', 'compensated'
+  input: jsonb('input'),
+  output: jsonb('output'),
+  executedAt: timestamp('executed_at').defaultNow(),
+  compensatedAt: timestamp('compensated_at'),
+  errorMessage: text('error_message'),
 });
 ```
 
@@ -263,12 +265,12 @@ export const sagaSteps = pgTable("saga_steps", {
 
 Para cada passo da SAGA de Processamento de Pagamento, definimos sua operação de rollback semântico:
 
-| **Step Original** | **Transação de Compensação** | **Implementação** | **Idempotência** |
-|-------------------|------------------------------|-------------------|------------------|
-| **PropostaAprovada** | ReverterAprovacao | Status → 'rejeitado', limpar dados aprovação | ✅ Safe to retry |
-| **CCBGerado** | RemoverCCB | Soft delete CCB, marcar como inválido | ✅ Safe to retry |
-| **BoletosEmitidos** | CancelarBoletos | API Inter cancel + soft delete local | ✅ Idempotent API |
-| **CobrancaConfigurada** | **PONTO DE NÃO RETORNO** | Impossível compensar após ativação | ⚠️ Irreversível |
+| **Step Original**       | **Transação de Compensação** | **Implementação**                            | **Idempotência**  |
+| ----------------------- | ---------------------------- | -------------------------------------------- | ----------------- |
+| **PropostaAprovada**    | ReverterAprovacao            | Status → 'rejeitado', limpar dados aprovação | ✅ Safe to retry  |
+| **CCBGerado**           | RemoverCCB                   | Soft delete CCB, marcar como inválido        | ✅ Safe to retry  |
+| **BoletosEmitidos**     | CancelarBoletos              | API Inter cancel + soft delete local         | ✅ Idempotent API |
+| **CobrancaConfigurada** | **PONTO DE NÃO RETORNO**     | Impossível compensar após ativação           | ⚠️ Irreversível   |
 
 ### 3.2 Implementação das Compensações
 
@@ -278,30 +280,27 @@ Para cada passo da SAGA de Processamento de Pagamento, definimos sua operação 
 // ====================================
 
 export class CompensationHandlers {
-  
   // COMPENSAÇÃO: Reverter Aprovação de Proposta
   async reverterAprovacao(sagaId: string, propostaId: string): Promise<void> {
     await db.transaction(async (trx) => {
       // 1. Reverter status da proposta
       await trx
         .update(propostas)
-        .set({ 
+        .set({
           status: 'rejeitado',
           motivoRejeicao: `Reversão automática da SAGA ${sagaId}`,
-          dataRejeicao: new Date()
+          dataRejeicao: new Date(),
         })
         .where(eq(propostas.id, propostaId));
 
       // 2. Registrar transição de compensação
-      await trx
-        .insert(statusTransitions)
-        .values({
-          propostaId,
-          fromStatus: 'aprovado',
-          toStatus: 'rejeitado',
-          triggeredBy: 'saga_compensation',
-          metadata: { sagaId, reason: 'compensation' }
-        });
+      await trx.insert(statusTransitions).values({
+        propostaId,
+        fromStatus: 'aprovado',
+        toStatus: 'rejeitado',
+        triggeredBy: 'saga_compensation',
+        metadata: { sagaId, reason: 'compensation' },
+      });
 
       // 3. Registrar ação de compensação
       await this.registrarCompensacao(trx, sagaId, 'reverter_aprovacao', 'completed');
@@ -315,17 +314,16 @@ export class CompensationHandlers {
         try {
           // 1. Cancelar via API do Banco Inter (idempotent)
           await interBankService.cancelarCobranca(codigo, 'Cancelamento automático SAGA');
-          
+
           // 2. Marcar como cancelado localmente
           await trx
             .update(interCollections)
-            .set({ 
+            .set({
               situacao: 'CANCELADO',
               motivoCancelamento: `Compensação SAGA ${sagaId}`,
-              isActive: false
+              isActive: false,
             })
             .where(eq(interCollections.codigoSolicitacao, codigo));
-            
         } catch (error) {
           // Log error mas continua tentando outros boletos
           console.error(`Falha ao cancelar boleto ${codigo}:`, error);
@@ -342,12 +340,12 @@ export class CompensationHandlers {
       // 1. Soft delete do CCB
       await trx
         .update(propostas)
-        .set({ 
+        .set({
           ccbGerado: false,
           caminhoCcb: null,
           ccbGeradoEm: null,
           clicksignDocumentKey: null,
-          clicksignStatus: 'cancelled'
+          clicksignStatus: 'cancelled',
         })
         .where(eq(propostas.id, propostaId));
 
@@ -392,16 +390,16 @@ export interface IdempotentOperation {
   retryCount: number;
 }
 
-export const idempotencyLog = pgTable("idempotency_log", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  idempotencyKey: text("idempotency_key").notNull().unique(),
-  operation: text("operation").notNull(),
-  status: text("status").notNull(),
-  input: jsonb("input").notNull(),
-  result: jsonb("result"),
-  error: text("error"),
-  executedAt: timestamp("executed_at").defaultNow().notNull(),
-  retryCount: integer("retry_count").default(0),
+export const idempotencyLog = pgTable('idempotency_log', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  idempotencyKey: text('idempotency_key').notNull().unique(),
+  operation: text('operation').notNull(),
+  status: text('status').notNull(),
+  input: jsonb('input').notNull(),
+  result: jsonb('result'),
+  error: text('error'),
+  executedAt: timestamp('executed_at').defaultNow().notNull(),
+  retryCount: integer('retry_count').default(0),
 });
 
 // Wrapper para operações idempotentes
@@ -411,7 +409,6 @@ export async function executeIdempotent<T>(
   input: any,
   handler: () => Promise<T>
 ): Promise<T> {
-  
   // 1. Verificar se operação já foi executada
   const existing = await db
     .select()
@@ -421,12 +418,12 @@ export async function executeIdempotent<T>(
 
   if (existing.length > 0) {
     const record = existing[0];
-    
+
     if (record.status === 'completed') {
       // Retornar resultado anterior (idempotente)
       return record.result as T;
     }
-    
+
     if (record.status === 'failed' && record.retryCount >= 3) {
       throw new Error(`Operação ${operation} falhou após 3 tentativas: ${record.error}`);
     }
@@ -440,42 +437,41 @@ export async function executeIdempotent<T>(
       operation,
       status: 'pending',
       input,
-      retryCount: existing.length > 0 ? existing[0].retryCount + 1 : 0
+      retryCount: existing.length > 0 ? existing[0].retryCount + 1 : 0,
     })
     .onConflictDoUpdate({
       target: idempotencyLog.idempotencyKey,
       set: {
         status: 'pending',
-        retryCount: sql`${idempotencyLog.retryCount} + 1`
-      }
+        retryCount: sql`${idempotencyLog.retryCount} + 1`,
+      },
     });
 
   try {
     // 3. Executar operação
     const result = await handler();
-    
+
     // 4. Registrar sucesso
     await db
       .update(idempotencyLog)
       .set({
         status: 'completed',
         result,
-        executedAt: new Date()
+        executedAt: new Date(),
       })
       .where(eq(idempotencyLog.idempotencyKey, idempotencyKey));
-    
+
     return result;
-    
   } catch (error) {
     // 5. Registrar falha
     await db
       .update(idempotencyLog)
       .set({
         status: 'failed',
-        error: error.message
+        error: error.message,
       })
       .where(eq(idempotencyLog.idempotencyKey, idempotencyKey));
-    
+
     throw error;
   }
 }
@@ -487,7 +483,7 @@ export async function executeIdempotent<T>(
 // STEP: Emitir Boletos (Idempotente)
 async function emitirBoletosIdempotente(propostaId: string, sagaId: string): Promise<string[]> {
   const idempotencyKey = `emit_boletos_${propostaId}_${sagaId}`;
-  
+
   return await executeIdempotent(
     idempotencyKey,
     'emit_boletos',
@@ -495,15 +491,18 @@ async function emitirBoletosIdempotente(propostaId: string, sagaId: string): Pro
     async () => {
       // Lógica real de emissão
       const boletos = await interBankService.emitirBoletosParaProposta(propostaId);
-      return boletos.map(b => b.codigoSolicitacao);
+      return boletos.map((b) => b.codigoSolicitacao);
     }
   );
 }
 
 // COMPENSAÇÃO: Cancelar Boletos (Idempotente)
-async function cancelarBoletosIdempotente(codigosSolicitacao: string[], sagaId: string): Promise<void> {
+async function cancelarBoletosIdempotente(
+  codigosSolicitacao: string[],
+  sagaId: string
+): Promise<void> {
   const idempotencyKey = `cancel_boletos_${sagaId}`;
-  
+
   return await executeIdempotent(
     idempotencyKey,
     'cancel_boletos',
@@ -511,7 +510,7 @@ async function cancelarBoletosIdempotente(codigosSolicitacao: string[], sagaId: 
     async () => {
       // Lógica real de cancelamento
       await Promise.all(
-        codigosSolicitacao.map(codigo => 
+        codigosSolicitacao.map((codigo) =>
           interBankService.cancelarCobranca(codigo, `Compensação SAGA ${sagaId}`)
         )
       );
@@ -532,11 +531,10 @@ async function cancelarBoletosIdempotente(codigosSolicitacao: string[], sagaId: 
 // ====================================
 
 export class SagaMonitoringService {
-  
   // Verificar SAGAs com timeout
   async detectarSagasEmTimeout(): Promise<void> {
     const timeoutThreshold = 30; // minutos
-    
+
     const sagasTimeout = await db
       .select()
       .from(sagaExecution)
@@ -563,9 +561,9 @@ export class SagaMonitoringService {
       GROUP BY saga_type
       HAVING COUNT(*) > 5
     `;
-    
+
     const results = await db.execute(query);
-    
+
     for (const result of results) {
       await this.alertarPadraoFalhas(result.saga_type, result.failure_count);
     }
@@ -577,17 +575,17 @@ export class SagaMonitoringService {
       tags: {
         saga_id: saga.sagaId,
         saga_type: saga.sagaType,
-        current_step: saga.currentStep
+        current_step: saga.currentStep,
       },
       level: 'error',
-      fingerprint: [`saga_timeout_${saga.sagaType}`]
+      fingerprint: [`saga_timeout_${saga.sagaType}`],
     });
 
     // Alerta para equipe de operações
     await this.enviarAlertaSlack({
       channel: '#ops-alerts',
       message: `🚨 SAGA TIMEOUT: ${saga.sagaType} (ID: ${saga.sagaId}) executando há mais de 30min`,
-      urgency: 'high'
+      urgency: 'high',
     });
   }
 
@@ -597,7 +595,7 @@ export class SagaMonitoringService {
       this.contarSagasPorStatus('executing'),
       this.contarSagasPorStatus('completed'),
       this.contarSagasPorStatus('failed'),
-      this.contarSagasPorStatus('compensating')
+      this.contarSagasPorStatus('compensating'),
     ]);
 
     return {
@@ -606,7 +604,7 @@ export class SagaMonitoringService {
       failed,
       compensating,
       successRate: (completed / (completed + failed)) * 100,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -614,19 +612,18 @@ export class SagaMonitoringService {
 
 ### 5.2 Alertas Configurados por Severidade
 
-| **Condição** | **Severidade** | **Ação Automática** | **Notificação** |
-|--------------|----------------|---------------------|-----------------|
-| SAGA timeout > 30min | 🔴 **CRÍTICA** | Iniciar compensação automática | Slack + PagerDuty |
-| Falha de compensação | 🔴 **CRÍTICA** | Intervenção manual obrigatória | Slack + PagerDuty |
-| >5 falhas/hora mesmo tipo | 🟡 **ALTA** | Pausar criação de novas SAGAs | Slack |
-| SAGA step retry > 3x | 🟠 **MÉDIA** | Log detalhado, continuar monitorando | Log estruturado |
+| **Condição**              | **Severidade** | **Ação Automática**                  | **Notificação**   |
+| ------------------------- | -------------- | ------------------------------------ | ----------------- |
+| SAGA timeout > 30min      | 🔴 **CRÍTICA** | Iniciar compensação automática       | Slack + PagerDuty |
+| Falha de compensação      | 🔴 **CRÍTICA** | Intervenção manual obrigatória       | Slack + PagerDuty |
+| >5 falhas/hora mesmo tipo | 🟡 **ALTA**    | Pausar criação de novas SAGAs        | Slack             |
+| SAGA step retry > 3x      | 🟠 **MÉDIA**   | Log detalhado, continuar monitorando | Log estruturado   |
 
 ### 5.3 Runbook de Intervenção Manual
 
 ```typescript
 // Ferramentas de intervenção para equipe de operações
 export class SagaOperationsToolkit {
-  
   // Visualizar estado completo de uma SAGA
   async inspecionarSaga(sagaId: string): Promise<SagaInspectionReport> {
     const saga = await db
@@ -645,7 +642,7 @@ export class SagaOperationsToolkit {
       saga: saga[0],
       steps,
       compensationStatus: await this.analisarStatusCompensacao(sagaId),
-      recommendedAction: await this.recomendarAcao(saga[0], steps)
+      recommendedAction: await this.recomendarAcao(saga[0], steps),
     };
   }
 
@@ -657,19 +654,17 @@ export class SagaOperationsToolkit {
         .update(sagaExecution)
         .set({
           status: 'compensating',
-          errorMessage: `Compensação manual iniciada pelo operador ${operatorId}`
+          errorMessage: `Compensação manual iniciada pelo operador ${operatorId}`,
         })
         .where(eq(sagaExecution.sagaId, sagaId));
 
       // Log da intervenção manual
-      await trx
-        .insert(sagaSteps)
-        .values({
-          sagaId,
-          stepId: 'manual_compensation',
-          status: 'pending',
-          input: { operatorId, timestamp: new Date() }
-        });
+      await trx.insert(sagaSteps).values({
+        sagaId,
+        stepId: 'manual_compensation',
+        status: 'pending',
+        input: { operatorId, timestamp: new Date() },
+      });
     });
 
     // Executar compensação
@@ -693,19 +688,19 @@ graph TD
     C -->|Reversível| D[Cobrança Configurada]
     D -->|⚠️ PONTO DE NÃO RETORNO| E[Cliente Efetua Pagamento]
     E -->|❌ IRREVERSÍVEL| F[Transferência PIX Processada]
-    
+
     style E fill:#ffcccc
     style F fill:#ff9999
 ```
 
 ### 6.2 Operações Irreversíveis Identificadas
 
-| **Operação** | **Por que é Irreversível** | **Estratégia de Mitigação** |
-|--------------|----------------------------|------------------------------|
-| **PIX Enviado ao Cliente** | Transferência bancária instantânea | Monitoramento pré-envio + validação tripla |
-| **TED Bancária Processada** | Sistema bancário externo, sem rollback | Validação de dados bancários + confirmação manual |
-| **Email de Contrato Enviado** | Cliente já visualizou documento | Versionamento de contratos + addendum |
-| **Assinatura Digital Concluída** | Válido juridicamente | Addendum contratual ou distrato |
+| **Operação**                     | **Por que é Irreversível**             | **Estratégia de Mitigação**                       |
+| -------------------------------- | -------------------------------------- | ------------------------------------------------- |
+| **PIX Enviado ao Cliente**       | Transferência bancária instantânea     | Monitoramento pré-envio + validação tripla        |
+| **TED Bancária Processada**      | Sistema bancário externo, sem rollback | Validação de dados bancários + confirmação manual |
+| **Email de Contrato Enviado**    | Cliente já visualizou documento        | Versionamento de contratos + addendum             |
+| **Assinatura Digital Concluída** | Válido juridicamente                   | Addendum contratual ou distrato                   |
 
 ### 6.3 Estratégias de Prevenção e Mitigação
 
@@ -715,22 +710,21 @@ graph TD
 // ====================================
 
 export class PointOfNoReturnGuard {
-  
   // Validação tripla antes de operações irreversíveis
   async validarAntesDeEnvioPIX(propostaId: string): Promise<ValidationResult> {
     const validations = await Promise.all([
       this.validarDadosBancarios(propostaId),
       this.validarStatusContrato(propostaId),
       this.validarLimitesOperacionais(propostaId),
-      this.validarAprovacaoManual(propostaId)
+      this.validarAprovacaoManual(propostaId),
     ]);
 
-    const allValid = validations.every(v => v.isValid);
-    
+    const allValid = validations.every((v) => v.isValid);
+
     if (!allValid) {
       throw new PointOfNoReturnBlockedException(
         'Operação irreversível bloqueada por falha na validação tripla',
-        validations.filter(v => !v.isValid)
+        validations.filter((v) => !v.isValid)
       );
     }
 
@@ -745,7 +739,7 @@ export class PointOfNoReturnGuard {
       status: 'in_progress',
       startedAt: new Date(),
       validationsPassed: true,
-      riskLevel: await this.calcularNivelRisco(operationId)
+      riskLevel: await this.calcularNivelRisco(operationId),
     });
 
     // Alertar equipe de operações sobre operação crítica
@@ -763,28 +757,28 @@ export class PointOfNoReturnGuard {
         'Contatar cliente para explicar situação',
         'Gerar addendum contratual se necessário',
         'Processo de estorno via operações bancárias',
-        'Registro completo para auditoria compliance'
+        'Registro completo para auditoria compliance',
       ],
       estimatedTime: '2-4 horas',
       approvalRequired: true,
-      riskAssessment: await this.avaliarRiscoCompensacao(operationId)
+      riskAssessment: await this.avaliarRiscoCompensacao(operationId),
     };
   }
 }
 
 // Tabela para tracking de operações irreversíveis
-export const irreversibleOperations = pgTable("irreversible_operations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  operationId: text("operation_id").notNull(),
-  type: text("type").notNull(), // 'pix_transfer', 'ted_transfer', 'contract_signature'
-  status: text("status").notNull(), // 'in_progress', 'completed', 'failed'
-  propostaId: text("proposta_id"),
-  riskLevel: text("risk_level"), // 'low', 'medium', 'high'
-  validationsPassed: boolean("validations_passed").notNull(),
-  startedAt: timestamp("started_at").defaultNow().notNull(),
-  completedAt: timestamp("completed_at"),
-  errorMessage: text("error_message"),
-  compensationPlan: jsonb("compensation_plan"), // Manual compensation steps
+export const irreversibleOperations = pgTable('irreversible_operations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  operationId: text('operation_id').notNull(),
+  type: text('type').notNull(), // 'pix_transfer', 'ted_transfer', 'contract_signature'
+  status: text('status').notNull(), // 'in_progress', 'completed', 'failed'
+  propostaId: text('proposta_id'),
+  riskLevel: text('risk_level'), // 'low', 'medium', 'high'
+  validationsPassed: boolean('validations_passed').notNull(),
+  startedAt: timestamp('started_at').defaultNow().notNull(),
+  completedAt: timestamp('completed_at'),
+  errorMessage: text('error_message'),
+  compensationPlan: jsonb('compensation_plan'), // Manual compensation steps
 });
 ```
 
@@ -793,26 +787,25 @@ export const irreversibleOperations = pgTable("irreversible_operations", {
 ```typescript
 // Emergency protocols quando operação irreversível falha
 export class EmergencyResponseProtocol {
-  
   async ativarProtocoloEmergencia(operationId: string, errorType: string): Promise<void> {
     // 1. PARAR todas as SAGAs relacionadas imediatamente
     await this.pausarSagasRelacionadas(operationId);
-    
+
     // 2. ALERTAR equipe de crisis management
     await this.alertarCrisisTeam({
       operationId,
       errorType,
       severity: 'CRITICAL',
-      impactAssessment: await this.avaliarImpactoOperacao(operationId)
+      impactAssessment: await this.avaliarImpactoOperacao(operationId),
     });
-    
+
     // 3. ISOLAR operação para prevent cascade failures
     await this.isolarOperacaoFalhada(operationId);
-    
+
     // 4. GERAR emergency runbook específico
     const runbook = await this.gerarEmergencyRunbook(operationId, errorType);
     await this.enviarRunbookParaEquipe(runbook);
-    
+
     // 5. INICIAR process de post-mortem tracking
     await this.iniciarPostMortemTracking(operationId);
   }
@@ -826,11 +819,13 @@ export class EmergencyResponseProtocol {
 ### 6.1 Estado Atual da Gestão de Transações
 
 ✅ **Implementações Existentes:**
+
 - Transações ACID locais com Drizzle funcionando
 - Alguns padrões de compensação em webhooks
 - Tracking básico de transações críticas
 
 ⚠️ **Lacunas Identificadas:**
+
 - Falta de orchestração formal de SAGAs
 - Monitoramento de transações distribuídas limitado
 - Ausência de compensação automática sistemática
@@ -838,28 +833,31 @@ export class EmergencyResponseProtocol {
 ### 6.2 Roadmap de Implementação
 
 **Sprint Atual (Agosto 2025):**
+
 1. ✅ Documentar estratégia formal (este documento)
 2. Implementar sistema básico de SAGA tracking
 3. Configurar alertas para timeout de transações
 
 **Sprint 2 (Setembro 2025):**
+
 1. Implementar compensação automática para fluxos críticos
 2. Sistema de idempotência com chaves automáticas
 3. Dashboard de monitoramento em tempo real
 
 **Sprint 3 (Outubro 2025):**
+
 1. Protocolo de emergência para pontos de não retorno
 2. Ferramentas de intervenção manual para operações
 3. Otimização baseada em métricas de performance
 
 ### 6.3 Métricas de Sucesso
 
-| **Métrica** | **Baseline Atual** | **Meta Q4 2025** | **Método de Medição** |
-|-------------|-------------------|-------------------|----------------------|
-| **SAGA Success Rate** | ~85% | >98% | Tracking automático |
-| **Compensation Time** | Manual (horas) | <5 minutos | Automação total |
-| **Data Inconsistency Incidents** | 2-3/mês | 0/mês | Zero tolerance |
-| **Manual Intervention** | 70% das falhas | <10% das falhas | Operations dashboard |
+| **Métrica**                      | **Baseline Atual** | **Meta Q4 2025** | **Método de Medição** |
+| -------------------------------- | ------------------ | ---------------- | --------------------- |
+| **SAGA Success Rate**            | ~85%               | >98%             | Tracking automático   |
+| **Compensation Time**            | Manual (horas)     | <5 minutos       | Automação total       |
+| **Data Inconsistency Incidents** | 2-3/mês            | 0/mês            | Zero tolerance        |
+| **Manual Intervention**          | 70% das falhas     | <10% das falhas  | Operations dashboard  |
 
 ---
 

@@ -26,61 +26,61 @@ Este documento formaliza a estratégia de branching Git para o Sistema Simpix, e
 ```mermaid
 gitGraph
     commit id: "Initial"
-    
+
     branch develop
     checkout develop
     commit id: "Dev Start"
-    
+
     branch feature/user-auth
     checkout feature/user-auth
     commit id: "Auth WIP"
     commit id: "Auth Done"
-    
+
     checkout develop
     merge feature/user-auth
-    
+
     branch release/1.0.0
     checkout release/1.0.0
     commit id: "Version bump"
     commit id: "Bug fixes"
-    
+
     checkout main
     merge release/1.0.0 tag: "v1.0.0"
-    
+
     checkout develop
     merge release/1.0.0
-    
+
     branch hotfix/critical-bug
     checkout hotfix/critical-bug
     commit id: "Fix applied"
-    
+
     checkout main
     merge hotfix/critical-bug tag: "v1.0.1"
-    
+
     checkout develop
     merge hotfix/critical-bug
 ```
 
 ### 1.2 **Branches Principais (Long-lived)**
 
-| Branch | Propósito | Deploy Target | Protected | Direct Push |
-|--------|-----------|---------------|-----------|-------------|
-| **main** | Código em produção | Production | ✅ Yes | ❌ Never |
-| **develop** | Integração de features | Development | ✅ Yes | ❌ Never |
-| **staging** | Release candidates | Staging | ✅ Yes | ❌ Never |
+| Branch      | Propósito              | Deploy Target | Protected | Direct Push |
+| ----------- | ---------------------- | ------------- | --------- | ----------- |
+| **main**    | Código em produção     | Production    | ✅ Yes    | ❌ Never    |
+| **develop** | Integração de features | Development   | ✅ Yes    | ❌ Never    |
+| **staging** | Release candidates     | Staging       | ✅ Yes    | ❌ Never    |
 
 ### 1.3 **Branches Temporárias (Short-lived)**
 
-| Tipo | Padrão | Origem | Destino | Lifecycle |
-|------|--------|--------|---------|-----------|
-| **feature/** | feature/[ticket]-description | develop | develop | 1-2 sprints |
-| **bugfix/** | bugfix/[ticket]-description | develop | develop | 1-3 days |
-| **release/** | release/[version] | develop | main + develop | 1 week |
-| **hotfix/** | hotfix/[ticket]-description | main | main + develop | 24 hours |
-| **chore/** | chore/description | develop | develop | 1-2 days |
-| **docs/** | docs/description | develop | develop | 1 day |
-| **test/** | test/description | develop | develop | 1-2 days |
-| **refactor/** | refactor/description | develop | develop | 1 sprint |
+| Tipo          | Padrão                       | Origem  | Destino        | Lifecycle   |
+| ------------- | ---------------------------- | ------- | -------------- | ----------- |
+| **feature/**  | feature/[ticket]-description | develop | develop        | 1-2 sprints |
+| **bugfix/**   | bugfix/[ticket]-description  | develop | develop        | 1-3 days    |
+| **release/**  | release/[version]            | develop | main + develop | 1 week      |
+| **hotfix/**   | hotfix/[ticket]-description  | main    | main + develop | 24 hours    |
+| **chore/**    | chore/description            | develop | develop        | 1-2 days    |
+| **docs/**     | docs/description             | develop | develop        | 1 day       |
+| **test/**     | test/description             | develop | develop        | 1-2 days    |
+| **refactor/** | refactor/description         | develop | develop        | 1 sprint    |
 
 ---
 
@@ -94,9 +94,9 @@ type BranchName = `${Prefix}/${TicketId}-${KebabCaseDescription}`;
 
 interface BranchNamingRules {
   prefix: 'feature' | 'bugfix' | 'hotfix' | 'release' | 'chore' | 'docs' | 'test' | 'refactor';
-  ticketId: string;  // JIRA/Linear ticket: 'SIM-123'
-  description: string;  // kebab-case, max 50 chars
-  
+  ticketId: string; // JIRA/Linear ticket: 'SIM-123'
+  description: string; // kebab-case, max 50 chars
+
   examples: {
     valid: [
       'feature/SIM-123-user-authentication',
@@ -106,16 +106,16 @@ interface BranchNamingRules {
       'chore/update-dependencies',
       'docs/api-documentation',
       'test/e2e-payment-flow',
-      'refactor/SIM-234-optimize-queries'
+      'refactor/SIM-234-optimize-queries',
     ];
-    
+
     invalid: [
-      'feature/user_auth',           // Wrong: underscore
-      'feat/SIM-123-auth',           // Wrong: abbreviated prefix
-      'feature/authentication',       // Wrong: missing ticket
-      'FEATURE/SIM-123-auth',        // Wrong: uppercase
-      'feature/sim-123-auth',        // Wrong: lowercase ticket
-      'feature/SIM-123-user-authentication-system-with-mfa'  // Too long
+      'feature/user_auth', // Wrong: underscore
+      'feat/SIM-123-auth', // Wrong: abbreviated prefix
+      'feature/authentication', // Wrong: missing ticket
+      'FEATURE/SIM-123-auth', // Wrong: uppercase
+      'feature/sim-123-auth', // Wrong: lowercase ticket
+      'feature/SIM-123-user-authentication-system-with-mfa', // Too long
     ];
   };
 }
@@ -162,19 +162,19 @@ Reduce query time from 500ms to 50ms by adding indexes
 
 ### 2.3 **Commit Types**
 
-| Type | Description | Versioning | Changelog |
-|------|-------------|------------|-----------|
-| **feat** | New feature | Minor | ✅ Features |
-| **fix** | Bug fix | Patch | ✅ Bug Fixes |
-| **docs** | Documentation | None | ❌ |
-| **style** | Code style | None | ❌ |
-| **refactor** | Code refactoring | None | ❌ |
-| **perf** | Performance | Patch | ✅ Performance |
-| **test** | Tests | None | ❌ |
-| **chore** | Maintenance | None | ❌ |
-| **ci** | CI/CD changes | None | ❌ |
-| **build** | Build system | None | ❌ |
-| **revert** | Revert commit | Varies | ✅ Reverts |
+| Type         | Description      | Versioning | Changelog      |
+| ------------ | ---------------- | ---------- | -------------- |
+| **feat**     | New feature      | Minor      | ✅ Features    |
+| **fix**      | Bug fix          | Patch      | ✅ Bug Fixes   |
+| **docs**     | Documentation    | None       | ❌             |
+| **style**    | Code style       | None       | ❌             |
+| **refactor** | Code refactoring | None       | ❌             |
+| **perf**     | Performance      | Patch      | ✅ Performance |
+| **test**     | Tests            | None       | ❌             |
+| **chore**    | Maintenance      | None       | ❌             |
+| **ci**       | CI/CD changes    | None       | ❌             |
+| **build**    | Build system     | None       | ❌             |
+| **revert**   | Revert commit    | Varies     | ✅ Reverts     |
 
 ---
 
@@ -191,7 +191,7 @@ sequenceDiagram
     participant CI as CI/CD
     participant Review as Code Review
     participant Develop as develop branch
-    
+
     Dev->>Local: git checkout -b feature/SIM-123-new-feature
     Dev->>Local: Make changes
     Dev->>Local: git commit -m "feat: implement feature"
@@ -248,44 +248,44 @@ git push origin --delete feature/SIM-123-user-authentication
 
 ### 4.1 **PR Requirements**
 
-| Requirement | Mandatory | Automated Check |
-|-------------|-----------|-----------------|
-| **Linked Issue** | ✅ | GitHub Actions |
-| **Description** | ✅ | PR Template |
-| **Tests Pass** | ✅ | CI Pipeline |
-| **Code Coverage** | ✅ >80% diff | Codecov |
-| **No Conflicts** | ✅ | GitHub |
-| **Approved Reviews** | ✅ 1+ | GitHub |
-| **CI Green** | ✅ | GitHub Actions |
-| **Security Scan** | ✅ | Semgrep |
-| **Lint Pass** | ✅ | ESLint |
+| Requirement          | Mandatory    | Automated Check |
+| -------------------- | ------------ | --------------- |
+| **Linked Issue**     | ✅           | GitHub Actions  |
+| **Description**      | ✅           | PR Template     |
+| **Tests Pass**       | ✅           | CI Pipeline     |
+| **Code Coverage**    | ✅ >80% diff | Codecov         |
+| **No Conflicts**     | ✅           | GitHub          |
+| **Approved Reviews** | ✅ 1+        | GitHub          |
+| **CI Green**         | ✅           | GitHub Actions  |
+| **Security Scan**    | ✅           | Semgrep         |
+| **Lint Pass**        | ✅           | ESLint          |
 
 ### 4.2 **PR Size Guidelines**
 
 ```typescript
 interface PRSizeGuidelines {
   optimal: {
-    files: '< 10 files',
-    additions: '< 400 lines',
-    deletions: 'unlimited',
-    duration: '< 2 days open'
+    files: '< 10 files';
+    additions: '< 400 lines';
+    deletions: 'unlimited';
+    duration: '< 2 days open';
   };
-  
+
   acceptable: {
-    files: '10-20 files',
-    additions: '400-800 lines',
-    review_time: '< 4 hours'
+    files: '10-20 files';
+    additions: '400-800 lines';
+    review_time: '< 4 hours';
   };
-  
+
   requires_splitting: {
-    files: '> 20 files',
-    additions: '> 800 lines',
-    action: 'Split into multiple PRs'
+    files: '> 20 files';
+    additions: '> 800 lines';
+    action: 'Split into multiple PRs';
   };
-  
+
   exceptions: {
-    allowed: ['generated files', 'migrations', 'refactoring'],
-    requires: 'Justification in PR description'
+    allowed: ['generated files', 'migrations', 'refactoring'];
+    requires: 'Justification in PR description';
   };
 }
 ```
@@ -294,21 +294,26 @@ interface PRSizeGuidelines {
 
 ```markdown
 ## 🎯 Objetivo
+
 [Descreva o que este PR implementa/corrige]
 
 ## 🔗 Issue Relacionada
+
 Closes #[número da issue]
 
 ## 📝 Mudanças Realizadas
+
 - [ ] Implementação de [funcionalidade]
 - [ ] Correção de [bug]
 - [ ] Atualização de [documentação]
 - [ ] Adição de testes
 
 ## 📸 Screenshots (se aplicável)
+
 [Adicione screenshots das mudanças visuais]
 
 ## ✅ Checklist
+
 - [ ] Código segue os padrões do projeto
 - [ ] Testes foram adicionados/atualizados
 - [ ] Documentação foi atualizada
@@ -317,17 +322,20 @@ Closes #[número da issue]
 - [ ] Commits seguem convenção
 
 ## 🧪 Como Testar
+
 1. Passo 1
 2. Passo 2
 3. Resultado esperado
 
 ## 📊 Impacto
+
 - [ ] Breaking change
 - [ ] Requer migração de dados
 - [ ] Afeta performance
 - [ ] Impacta segurança
 
 ## 💬 Notas Adicionais
+
 [Qualquer contexto adicional]
 ```
 
@@ -344,8 +352,8 @@ protection_rules:
     # Prevent direct pushes
     restrict_push:
       enabled: true
-      bypass_actors: []  # No one can bypass
-    
+      bypass_actors: [] # No one can bypass
+
     # Require PR
     require_pull_request:
       enabled: true
@@ -354,11 +362,11 @@ protection_rules:
       require_code_owner_reviews: true
       required_review_from_codeowners: true
       bypass_pull_request_allowances: []
-    
+
     # Status checks
     require_status_checks:
       enabled: true
-      strict: true  # Branch must be up to date
+      strict: true # Branch must be up to date
       contexts:
         - continuous-integration/github-actions
         - security/snyk
@@ -367,26 +375,26 @@ protection_rules:
         - test/unit
         - test/integration
         - test/e2e
-    
+
     # Conversation resolution
     require_conversation_resolution: true
-    
+
     # Signatures
     require_signed_commits: true
-    
+
     # Linear history
-    require_linear_history: false  # Allow merge commits
-    
+    require_linear_history: false # Allow merge commits
+
     # Restrictions
     restrictions:
       users: []
       teams: ['simpix-admins']
       apps: ['github-actions']
-    
+
     # Force pushes
     allow_force_pushes: false
     allow_deletions: false
-    
+
     # Auto-delete merged branches
     delete_branch_on_merge: true
 ```
@@ -400,21 +408,21 @@ protection_rules:
     restrict_push:
       enabled: true
       bypass_actors: ['tech-leads']
-    
+
     require_pull_request:
       enabled: true
       required_approving_review_count: 1
       dismiss_stale_reviews: true
       require_code_owner_reviews: false
-    
+
     require_status_checks:
       enabled: true
-      strict: false  # Can be out of date
+      strict: false # Can be out of date
       contexts:
         - continuous-integration/github-actions
         - lint/eslint
         - test/unit
-    
+
     require_conversation_resolution: false
     require_signed_commits: false
     require_linear_history: false
@@ -429,15 +437,15 @@ protection_rules:
 
 ### 6.1 **Strategy by Branch Type**
 
-| Source | Target | Strategy | Rationale |
-|--------|--------|----------|-----------|
+| Source                | Target  | Strategy         | Rationale                     |
+| --------------------- | ------- | ---------------- | ----------------------------- |
 | **feature → develop** | develop | Squash and Merge | Clean history, atomic commits |
-| **bugfix → develop** | develop | Squash and Merge | Single commit per fix |
-| **develop → release** | release | Merge Commit | Preserve feature history |
-| **release → main** | main | Merge Commit | Preserve release history |
-| **release → develop** | develop | Merge Commit | Sync changes back |
-| **hotfix → main** | main | Squash and Merge | Clean fix commit |
-| **hotfix → develop** | develop | Cherry-pick | Avoid merge conflicts |
+| **bugfix → develop**  | develop | Squash and Merge | Single commit per fix         |
+| **develop → release** | release | Merge Commit     | Preserve feature history      |
+| **release → main**    | main    | Merge Commit     | Preserve release history      |
+| **release → develop** | develop | Merge Commit     | Sync changes back             |
+| **hotfix → main**     | main    | Squash and Merge | Clean fix commit              |
+| **hotfix → develop**  | develop | Cherry-pick      | Avoid merge conflicts         |
 
 ### 6.2 **Merge Conflict Resolution**
 
@@ -487,24 +495,24 @@ flowchart LR
 
 ```typescript
 interface VersioningStrategy {
-  format: 'MAJOR.MINOR.PATCH';  // e.g., 2.1.3
-  
+  format: 'MAJOR.MINOR.PATCH'; // e.g., 2.1.3
+
   increment: {
-    MAJOR: 'Breaking changes',
-    MINOR: 'New features (backward compatible)',
-    PATCH: 'Bug fixes'
+    MAJOR: 'Breaking changes';
+    MINOR: 'New features (backward compatible)';
+    PATCH: 'Bug fixes';
   };
-  
+
   preRelease: {
     format: 'x.y.z-<type>.<number>';
     types: ['alpha', 'beta', 'rc'];
     examples: ['2.1.0-alpha.1', '2.1.0-beta.3', '2.1.0-rc.1'];
   };
-  
+
   branch: {
-    release: 'release/2.1.0',
-    tag: 'v2.1.0',
-    
+    release: 'release/2.1.0';
+    tag: 'v2.1.0';
+
     script: `
       # Create release branch
       git checkout -b release/2.1.0 develop
@@ -534,6 +542,7 @@ interface VersioningStrategy {
 ## Release Checklist v[X.Y.Z]
 
 ### Pre-Release
+
 - [ ] All features for release are merged to develop
 - [ ] Create release branch from develop
 - [ ] Update version in package.json
@@ -545,6 +554,7 @@ interface VersioningStrategy {
 - [ ] Database migrations tested
 
 ### Release
+
 - [ ] Merge release to main
 - [ ] Create release tag
 - [ ] Deploy to staging
@@ -554,6 +564,7 @@ interface VersioningStrategy {
 - [ ] Merge release back to develop
 
 ### Post-Release
+
 - [ ] Monitor error rates
 - [ ] Check performance metrics
 - [ ] Announce release (Slack/Email)
@@ -607,11 +618,11 @@ echo "4. Cherry-pick to develop"
 
 ### 8.2 **Hotfix Approval Matrix**
 
-| Severity | Required Approvals | Max Time to Deploy | Notification |
-|----------|-------------------|-------------------|--------------|
-| **SEV1 - Critical** | 1 (any senior dev) | 1 hour | All teams |
-| **SEV2 - High** | 1 (team lead) | 4 hours | Dev team |
-| **SEV3 - Medium** | Normal PR process | 24 hours | Assignee |
+| Severity            | Required Approvals | Max Time to Deploy | Notification |
+| ------------------- | ------------------ | ------------------ | ------------ |
+| **SEV1 - Critical** | 1 (any senior dev) | 1 hour             | All teams    |
+| **SEV2 - High**     | 1 (team lead)      | 4 hours            | Dev team     |
+| **SEV3 - Medium**   | Normal PR process  | 24 hours           | Assignee     |
 
 ---
 
@@ -663,7 +674,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Validate branch name
         run: |
           BRANCH=${GITHUB_HEAD_REF}
@@ -672,7 +683,7 @@ jobs:
             echo "Invalid branch name: $BRANCH"
             exit 1
           fi
-      
+
       - name: Check PR size
         uses: actions/github-script@v7
         with:
@@ -681,14 +692,14 @@ jobs:
             if (pr.additions > 800) {
               core.setFailed('PR too large: ' + pr.additions + ' lines added');
             }
-      
+
       - name: Enforce conventional commits
         uses: wagoid/commitlint-github-action@v5
-      
+
       - name: Auto-label PR
         uses: actions/labeler@v4
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
 ```
 
 ---
@@ -700,23 +711,23 @@ jobs:
 ```typescript
 interface BranchMetrics {
   health_indicators: {
-    max_age_days: 14,
-    max_commits_behind: 50,
-    max_conflicts: 0,
-    min_tests_passing: 100
+    max_age_days: 14;
+    max_commits_behind: 50;
+    max_conflicts: 0;
+    min_tests_passing: 100;
   };
-  
+
   monitoring: {
-    stale_branches: 'Alert if > 30 days',
-    failed_merges: 'Track and investigate',
-    merge_time: 'Average < 2 days',
-    review_time: 'Average < 4 hours'
+    stale_branches: 'Alert if > 30 days';
+    failed_merges: 'Track and investigate';
+    merge_time: 'Average < 2 days';
+    review_time: 'Average < 4 hours';
   };
-  
+
   cleanup_policy: {
-    merged_branches: 'Delete immediately',
-    stale_branches: 'Delete after 60 days',
-    release_branches: 'Archive after 90 days'
+    merged_branches: 'Delete immediately';
+    stale_branches: 'Delete after 60 days';
+    release_branches: 'Archive after 90 days';
   };
 }
 ```
@@ -729,14 +740,14 @@ name: Branch Cleanup
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly on Sunday
+    - cron: '0 0 * * 0' # Weekly on Sunday
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Delete merged branches
         run: |
           git fetch --prune
@@ -745,7 +756,7 @@ jobs:
             grep -v develop | 
             sed 's/origin\///' | 
             xargs -n 1 git push --delete origin
-      
+
       - name: List stale branches
         run: |
           for branch in $(git branch -r | grep -v HEAD | grep -v main | grep -v develop); do
@@ -827,19 +838,19 @@ git checkout -b recover-branch <commit-hash>
     nb = checkout -b
     branches = branch -a
     cleanup = "!git branch --merged | grep -v '\\*\\|main\\|develop' | xargs -n 1 git branch -d"
-    
+
     # Status and logs
     s = status -s
     lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-    
+
     # Commits
     cm = commit -m
     amend = commit --amend --no-edit
-    
+
     # Sync
     sync = !git fetch --all && git rebase origin/develop
     update = !git pull --rebase --prune
-    
+
     # Undo
     undo = reset --soft HEAD~1
     unstage = reset HEAD --
@@ -847,20 +858,21 @@ git checkout -b recover-branch <commit-hash>
 
 ### 12.2 **Recommended Tools**
 
-| Tool | Purpose | URL |
-|------|---------|-----|
-| **GitKraken** | Visual Git client | gitkraken.com |
-| **Conventional Commits** | Commit standard | conventionalcommits.org |
-| **commitizen** | Commit CLI helper | github.com/commitizen |
-| **husky** | Git hooks | github.com/typicode/husky |
-| **lint-staged** | Pre-commit linting | github.com/okonet/lint-staged |
-| **semantic-release** | Automated releases | github.com/semantic-release |
+| Tool                     | Purpose            | URL                           |
+| ------------------------ | ------------------ | ----------------------------- |
+| **GitKraken**            | Visual Git client  | gitkraken.com                 |
+| **Conventional Commits** | Commit standard    | conventionalcommits.org       |
+| **commitizen**           | Commit CLI helper  | github.com/commitizen         |
+| **husky**                | Git hooks          | github.com/typicode/husky     |
+| **lint-staged**          | Pre-commit linting | github.com/okonet/lint-staged |
+| **semantic-release**     | Automated releases | github.com/semantic-release   |
 
 ---
 
 ## ✅ **CONCLUSÃO**
 
 ### Conformidade Alcançada
+
 - ✅ Modelo GitFlow adaptado e documentado
 - ✅ Convenções de nomenclatura estabelecidas
 - ✅ Branch protection rules definidas
@@ -871,6 +883,7 @@ git checkout -b recover-branch <commit-hash>
 - ✅ Métricas de saúde definidas
 
 ### Implementação Imediata
+
 1. Configurar branch protection no GitHub
 2. Instalar hooks com Husky
 3. Treinar equipe no modelo
@@ -882,6 +895,6 @@ git checkout -b recover-branch <commit-hash>
 **DECLARAÇÃO DE CONFORMIDADE:**
 Este documento estabelece o modelo oficial de branching para o Sistema Simpix, sendo mandatório para todos os desenvolvedores e enforced através de automações.
 
-*Assinatura Digital*  
+_Assinatura Digital_  
 **Arquiteto de Sistemas Sênior**  
-*SHA256-BRANCHING-2025-01-25*
+_SHA256-BRANCHING-2025-01-25_

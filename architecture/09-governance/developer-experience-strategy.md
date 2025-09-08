@@ -20,6 +20,7 @@ Este documento estabelece a estratégia mandatória para padronização do ambie
 **Adotaremos o padrão Dev Containers (usando `devcontainer.json`) como nossa estratégia mandatória para padronização do ambiente de desenvolvimento local, complementado por automação via Make/Task e documentação interativa.**
 
 ### Declaração Formal
+
 ```
 PADRÃO OBRIGATÓRIO: Dev Containers + VS Code
 ENFORCEMENT: Verificação automática em CI/CD
@@ -33,13 +34,13 @@ MIGRAÇÃO: Progressiva para equipe existente (30 dias)
 
 ### 2.1 Problemas Atuais (Análise Forense)
 
-| Problema | Impacto | Frequência |
-|----------|---------|------------|
-| "Funciona na minha máquina" | Alto - Atrasos em deploys | Diário |
-| Onboarding lento (2-3 dias) | Alto - Perda de produtividade | Por contratação |
-| Versões inconsistentes de Node/DB | Crítico - Bugs em produção | Semanal |
-| Configuração manual de secrets | Médio - Riscos de segurança | Por desenvolvedor |
-| Dependências externas não mockadas | Alto - Bloqueios em desenvolvimento | Diário |
+| Problema                           | Impacto                             | Frequência        |
+| ---------------------------------- | ----------------------------------- | ----------------- |
+| "Funciona na minha máquina"        | Alto - Atrasos em deploys           | Diário            |
+| Onboarding lento (2-3 dias)        | Alto - Perda de produtividade       | Por contratação   |
+| Versões inconsistentes de Node/DB  | Crítico - Bugs em produção          | Semanal           |
+| Configuração manual de secrets     | Médio - Riscos de segurança         | Por desenvolvedor |
+| Dependências externas não mockadas | Alto - Bloqueios em desenvolvimento | Diário            |
 
 ### 2.2 Benefícios da Solução
 
@@ -51,12 +52,12 @@ MIGRAÇÃO: Progressiva para equipe existente (30 dias)
 
 ### 2.3 Análise Comparativa
 
-| Solução | Prós | Contras | Decisão |
-|---------|------|---------|---------|
-| **Dev Containers** | Padronização total, integração VS Code, reprodutível | Requer Docker | ✅ ESCOLHIDA |
-| Vagrant | Multiplataforma | Pesado, lento | ❌ |
-| Docker Compose apenas | Flexível | Sem integração IDE | ❌ |
-| Scripts bash | Simples | Não reprodutível | ❌ |
+| Solução               | Prós                                                 | Contras            | Decisão      |
+| --------------------- | ---------------------------------------------------- | ------------------ | ------------ |
+| **Dev Containers**    | Padronização total, integração VS Code, reprodutível | Requer Docker      | ✅ ESCOLHIDA |
+| Vagrant               | Multiplataforma                                      | Pesado, lento      | ❌           |
+| Docker Compose apenas | Flexível                                             | Sem integração IDE | ❌           |
+| Scripts bash          | Simples                                              | Não reprodutível   | ❌           |
 
 ---
 
@@ -100,17 +101,17 @@ DOCKER_VERSION=25.0   # Para Docker-in-Docker feature
 
 ### 3.2 Ferramentas de Desenvolvimento
 
-| Categoria | Ferramenta | Versão | Justificativa |
-|-----------|------------|--------|---------------|
-| **Runtime** | Node.js | 20.11.0 LTS | Estabilidade e performance |
-| **Package Manager** | pnpm | 8.15.0 | Eficiência de espaço |
-| **Database** | PostgreSQL | 15 | Compatível com Supabase |
-| **Cache** | Redis | 7.2 | Para BullMQ |
-| **ORM CLI** | Drizzle Kit | latest | Migrations |
-| **API Testing** | Bruno | latest | Substituir Postman |
-| **Shell** | zsh + oh-my-zsh | latest | Produtividade |
-| **Git Hooks** | Husky | 9.0.0 | Qualidade de código |
-| **Linting** | ESLint + Prettier | latest | Padronização |
+| Categoria           | Ferramenta        | Versão      | Justificativa              |
+| ------------------- | ----------------- | ----------- | -------------------------- |
+| **Runtime**         | Node.js           | 20.11.0 LTS | Estabilidade e performance |
+| **Package Manager** | pnpm              | 8.15.0      | Eficiência de espaço       |
+| **Database**        | PostgreSQL        | 15          | Compatível com Supabase    |
+| **Cache**           | Redis             | 7.2         | Para BullMQ                |
+| **ORM CLI**         | Drizzle Kit       | latest      | Migrations                 |
+| **API Testing**     | Bruno             | latest      | Substituir Postman         |
+| **Shell**           | zsh + oh-my-zsh   | latest      | Produtividade              |
+| **Git Hooks**       | Husky             | 9.0.0       | Qualidade de código        |
+| **Linting**         | ESLint + Prettier | latest      | Padronização               |
 
 ### 3.3 Extensões VS Code Obrigatórias
 
@@ -143,11 +144,11 @@ graph TD
     A[Aplicação Local] --> B{Environment}
     B -->|development| C[MSW Interceptor]
     B -->|staging/prod| D[APIs Reais]
-    
+
     C --> E[Banco Inter Mock]
     C --> F[ClickSign Mock]
     C --> G[Supabase Local]
-    
+
     E --> H[Fixtures JSON]
     F --> I[Responses Mockadas]
     G --> J[PostgreSQL Container]
@@ -157,71 +158,68 @@ graph TD
 
 ```typescript
 // mocks/handlers/banco-inter.ts - Atualizado para MSW 2.10+
-import { http, HttpResponse, delay } from 'msw'
-import { setupWorker } from 'msw/browser'
-import { setupServer } from 'msw/node'
+import { http, HttpResponse, delay } from 'msw';
+import { setupWorker } from 'msw/browser';
+import { setupServer } from 'msw/node';
 
 export const bancoInterHandlers = [
   // OAuth 2.0 com mTLS simulation
   http.post('*/oauth/v2/token', async ({ request }) => {
-    await delay(200) // Realistic network latency
-    
-    const authHeader = request.headers.get('Authorization')
+    await delay(200); // Realistic network latency
+
+    const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Basic ')) {
-      return HttpResponse.json(
-        { error: 'invalid_client' },
-        { status: 401 }
-      )
+      return HttpResponse.json({ error: 'invalid_client' }, { status: 401 });
     }
-    
+
     return HttpResponse.json({
       access_token: 'mock-token-dev-' + Date.now(),
       token_type: 'Bearer',
       expires_in: 3600,
-      scope: 'boleto-cobranca.write'
-    })
+      scope: 'boleto-cobranca.write',
+    });
   }),
-  
+
   // Boleto generation with realistic responses
   http.post('*/banking/v2/boleto', async ({ request }) => {
-    await delay(500) // Simulate processing time
-    
-    const body = await request.json()
-    const mock_id = Math.random().toString(36).substr(2, 9)
-    
+    await delay(500); // Simulate processing time
+
+    const body = await request.json();
+    const mock_id = Math.random().toString(36).substr(2, 9);
+
     return HttpResponse.json({
       nossoNumero: `MOCK${mock_id.toUpperCase()}`,
       codigoBarras: '00191.00009 01234.567890 12345.678901 2 99999999999999',
       linhaDigitavel: '00191000090123456789012345678901299999999999999',
-      dataVencimento: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+      dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       valor: body.valorNominal,
-      status: 'EMITIDO'
-    })
+      status: 'EMITIDO',
+    });
   }),
-  
+
   // Webhook simulation for payment notifications
   http.post('*/webhook/boleto', async ({ request }) => {
-    const notification = await request.json()
-    
+    const notification = await request.json();
+
     return HttpResponse.json({
       message: 'Webhook processed successfully',
-      eventId: notification.eventId || `evt_${Date.now()}`
-    })
-  })
-]
+      eventId: notification.eventId || `evt_${Date.now()}`,
+    });
+  }),
+];
 
 // Environment-specific setup
-export const worker = setupWorker(...bancoInterHandlers)
-export const server = setupServer(...bancoInterHandlers)
+export const worker = setupWorker(...bancoInterHandlers);
+export const server = setupServer(...bancoInterHandlers);
 
 // Production-ready initialization
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   worker.start({
     onUnhandledRequest: 'warn',
     serviceWorker: {
-      url: '/mockServiceWorker.js'
-    }
-  })
+      url: '/mockServiceWorker.js',
+    },
+  });
 }
 ```
 
@@ -229,31 +227,31 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 
 ```typescript
 // mocks/handlers/clicksign.ts
-import { http, HttpResponse, bypass } from 'msw'
+import { http, HttpResponse, bypass } from 'msw';
 
 export const clickSignHandlers = [
   // Document upload with binary handling
   http.post('*/v1/documents', async ({ request }) => {
-    const formData = await request.formData()
-    const file = formData.get('document[archive]') as File
-    
+    const formData = await request.formData();
+    const file = formData.get('document[archive]') as File;
+
     return HttpResponse.json({
       document: {
         key: `doc_${Date.now()}`,
         filename: file.name,
         uploaded_at: new Date().toISOString(),
-        status: 'open'
-      }
-    })
+        status: 'open',
+      },
+    });
   }),
-  
+
   // Bypass for real API calls when needed
   http.get('*/v1/documents/:key', async ({ request, params }) => {
     if (params.key?.toString().startsWith('real_')) {
       // Make actual API call for fresh data
-      return fetch(bypass(request))
+      return fetch(bypass(request));
     }
-    
+
     return HttpResponse.json({
       document: {
         key: params.key,
@@ -261,24 +259,24 @@ export const clickSignHandlers = [
         signatures: [
           {
             email: 'cliente@exemplo.com',
-            signed_at: new Date().toISOString()
-          }
-        ]
-      }
-    })
-  })
-]
+            signed_at: new Date().toISOString(),
+          },
+        ],
+      },
+    });
+  }),
+];
 ```
 
 ### 4.3 Estratégia de Dados de Teste
 
-| Tipo de Dado | Estratégia | Ferramenta |
-|--------------|------------|------------|
+| Tipo de Dado            | Estratégia            | Ferramenta            |
+| ----------------------- | --------------------- | --------------------- |
 | **Dados Transacionais** | Fixtures regeneráveis | Factory.ts + Faker.js |
-| **Documentos** | PDFs template | pdf-lib |
-| **Webhooks** | Servidor local | Express mock server |
-| **Emails** | Captura local | MailHog container |
-| **SMS** | Log console | Console interceptor |
+| **Documentos**          | PDFs template         | pdf-lib               |
+| **Webhooks**            | Servidor local        | Express mock server   |
+| **Emails**              | Captura local         | MailHog container     |
+| **SMS**                 | Log console           | Console interceptor   |
 
 ### 4.4 Feature Flags para Desenvolvimento
 
@@ -290,8 +288,8 @@ export const developmentFeatures = {
   'enable-debug-panel': true,
   'show-sql-queries': true,
   'bypass-rate-limits': true,
-  'enable-hot-reload': true
-}
+  'enable-hot-reload': true,
+};
 ```
 
 ---
@@ -300,28 +298,32 @@ export const developmentFeatures = {
 
 ### 5.1 Processo de Onboarding (< 30 minutos)
 
-```markdown
+````markdown
 ## 🚀 Quick Start - Novo Desenvolvedor
 
 ### Pré-requisitos (10 min)
+
 1. [ ] Instalar Docker Desktop
 2. [ ] Instalar VS Code
 3. [ ] Instalar extensão "Dev Containers" no VS Code
 
 ### Setup Inicial (15 min)
+
 1. [ ] Clonar repositório
    ```bash
    git clone https://github.com/simpix/simpix-app.git
    cd simpix-app
    ```
+````
 
 2. [ ] Abrir no VS Code
+
    ```bash
    code .
    ```
 
 3. [ ] Quando aparecer prompt: "Reopen in Container" → Click
-   (Ou Cmd+Shift+P → "Dev Containers: Reopen in Container")
+       (Ou Cmd+Shift+P → "Dev Containers: Reopen in Container")
 
 4. [ ] Aguardar build do container (primeira vez ~10 min)
 
@@ -332,12 +334,15 @@ export const developmentFeatures = {
    - Todas as dependências instaladas
 
 ### Verificação (5 min)
+
 1. [ ] Rodar testes
+
    ```bash
    pnpm test
    ```
 
 2. [ ] Iniciar aplicação
+
    ```bash
    pnpm dev
    ```
@@ -345,7 +350,8 @@ export const developmentFeatures = {
 3. [ ] Acessar http://localhost:5000
 
 ✅ **Pronto para desenvolver!**
-```
+
+````
 
 ### 5.2 Comandos Disponíveis no Container
 
@@ -362,7 +368,7 @@ mock:start:     ## Inicia servidores mock
 lint:           ## Roda linting
 format:         ## Formata código
 clean:          ## Limpa arquivos temporários
-```
+````
 
 ### 5.3 Troubleshooting Automatizado
 
@@ -374,12 +380,12 @@ export async function runHealthCheck() {
     { name: 'PostgreSQL', check: () => canConnectToDb() },
     { name: 'Redis', check: () => canConnectToRedis() },
     { name: 'Env Variables', check: () => validateEnvVars() },
-    { name: 'Disk Space', check: () => hasSufficientSpace() }
-  ]
-  
+    { name: 'Disk Space', check: () => hasSufficientSpace() },
+  ];
+
   for (const check of checks) {
-    const result = await check.check()
-    console.log(`${result ? '✅' : '❌'} ${check.name}`)
+    const result = await check.check();
+    console.log(`${result ? '✅' : '❌'} ${check.name}`);
   }
 }
 ```
@@ -390,19 +396,19 @@ export async function runHealthCheck() {
 
 ### 6.1 Framework SPACE 2025 (GitHub/Microsoft Research)
 
-| Dimensão | Métrica | Meta 2025 | Medição | Fonte |
-|----------|---------|-----------|---------|-------|
-| **Satisfaction** | Developer NPS | > 8.0 | Quarterly survey | GitHub DevEx Research |
-| **Satisfaction** | Burnout Index | < 20% | Weekly pulse | SPACE Framework |
-| **Performance** | Feature Delivery Rate | > 85% on-time | DORA metrics | GitHub Analytics |
-| **Performance** | Code Quality Score | > 4.5/5 | SonarQube | Automated |
-| **Activity** | PR Velocity | > 5/week | GitHub API | Automated |
-| **Activity** | Commit Frequency | > 3/day | Git hooks | Automated |
-| **Communication** | Code Review Time | < 4h | GitHub API | Automated |
-| **Communication** | Knowledge Sharing | > 3 sessions/month | Team tracking | Manual |
-| **Efficiency** | Local Build Time | < 30s | Dev metrics | Automated |
-| **Efficiency** | CI/CD Pipeline | < 6min | GitHub Actions | Automated |
-| **Efficiency** | Uninterrupted Focus | > 3h/day | Time tracking | Survey |
+| Dimensão          | Métrica               | Meta 2025          | Medição          | Fonte                 |
+| ----------------- | --------------------- | ------------------ | ---------------- | --------------------- |
+| **Satisfaction**  | Developer NPS         | > 8.0              | Quarterly survey | GitHub DevEx Research |
+| **Satisfaction**  | Burnout Index         | < 20%              | Weekly pulse     | SPACE Framework       |
+| **Performance**   | Feature Delivery Rate | > 85% on-time      | DORA metrics     | GitHub Analytics      |
+| **Performance**   | Code Quality Score    | > 4.5/5            | SonarQube        | Automated             |
+| **Activity**      | PR Velocity           | > 5/week           | GitHub API       | Automated             |
+| **Activity**      | Commit Frequency      | > 3/day            | Git hooks        | Automated             |
+| **Communication** | Code Review Time      | < 4h               | GitHub API       | Automated             |
+| **Communication** | Knowledge Sharing     | > 3 sessions/month | Team tracking    | Manual                |
+| **Efficiency**    | Local Build Time      | < 30s              | Dev metrics      | Automated             |
+| **Efficiency**    | CI/CD Pipeline        | < 6min             | GitHub Actions   | Automated             |
+| **Efficiency**    | Uninterrupted Focus   | > 3h/day           | Time tracking    | Survey                |
 
 ### 6.1.1 Métricas Específicas de Onboarding (Baseado em Research 2025)
 
@@ -410,25 +416,25 @@ export async function runHealthCheck() {
 // metrics/onboarding-metrics.ts - GitHub Research Patterns
 export interface OnboardingMetrics {
   // Time-to-value metrics (crítico segundo research)
-  timeToFirstCommit: number;      // Meta: < 4 horas (GitHub benchmark)
-  timeToFirstPR: number;          // Meta: < 1 dia (GitHub benchmark)
-  timeToFirstMerge: number;       // Meta: < 3 dias (GitHub benchmark)
+  timeToFirstCommit: number; // Meta: < 4 horas (GitHub benchmark)
+  timeToFirstPR: number; // Meta: < 1 dia (GitHub benchmark)
+  timeToFirstMerge: number; // Meta: < 3 dias (GitHub benchmark)
   timeToFullProductivity: number; // Meta: < 2 semanas (Microsoft benchmark)
-  
+
   // Environment reliability (SPACE focus 2025)
-  environmentSetupFailures: number;   // Meta: < 5% (Zero friction goal)
-  worksOnMyMachineIssues: number;     // Meta: 0 (Container guarantee)
+  environmentSetupFailures: number; // Meta: < 5% (Zero friction goal)
+  worksOnMyMachineIssues: number; // Meta: 0 (Container guarantee)
   dependencyConflictIncidents: number; // Meta: 0 (Container isolation)
-  
+
   // Developer satisfaction (Microsoft research focus)
-  onboardingNPS: number;              // Meta: > 9.0 (Exceptional experience)
-  timeToFeelProductive: number;       // Meta: < 1 semana (Subjective measure)
-  toolingSatisfactionScore: number;   // Meta: > 4.5/5 (Tool effectiveness)
-  
+  onboardingNPS: number; // Meta: > 9.0 (Exceptional experience)
+  timeToFeelProductive: number; // Meta: < 1 semana (Subjective measure)
+  toolingSatisfactionScore: number; // Meta: > 4.5/5 (Tool effectiveness)
+
   // Cognitive load measures (Latest SPACE research)
-  setupComplexityScore: number;       // Meta: < 2/10 (Minimal complexity)
-  contextSwitchingReduction: number;  // Meta: > 50% (Vs manual setup)
-  documentationCompleteness: number;  // Meta: > 95% (Self-service rate)
+  setupComplexityScore: number; // Meta: < 2/10 (Minimal complexity)
+  contextSwitchingReduction: number; // Meta: > 50% (Vs manual setup)
+  documentationCompleteness: number; // Meta: > 95% (Self-service rate)
 }
 ```
 
@@ -438,24 +444,24 @@ export interface OnboardingMetrics {
 // metrics/dx-metrics.ts
 export interface DXMetrics {
   // Onboarding
-  timeToFirstCommit: number        // Meta: < 1 dia
-  timeToFirstPR: number            // Meta: < 3 dias
-  onboardingCompletionRate: number // Meta: 100%
-  
+  timeToFirstCommit: number; // Meta: < 1 dia
+  timeToFirstPR: number; // Meta: < 3 dias
+  onboardingCompletionRate: number; // Meta: 100%
+
   // Produtividade
-  localBuildTime: number           // Meta: < 30s
-  testExecutionTime: number        // Meta: < 2min
-  hotReloadTime: number            // Meta: < 2s
-  
+  localBuildTime: number; // Meta: < 30s
+  testExecutionTime: number; // Meta: < 2min
+  hotReloadTime: number; // Meta: < 2s
+
   // Qualidade
-  environmentDriftIncidents: number // Meta: 0
-  worksOnMyMachineIssues: number   // Meta: 0
-  dependencyConflicts: number       // Meta: 0
-  
+  environmentDriftIncidents: number; // Meta: 0
+  worksOnMyMachineIssues: number; // Meta: 0
+  dependencyConflicts: number; // Meta: 0
+
   // Satisfação
-  developerHappinessScore: number   // Meta: > 4.5/5
-  toolingSatisfaction: number       // Meta: > 4.0/5
-  documentationQuality: number      // Meta: > 4.0/5
+  developerHappinessScore: number; // Meta: > 4.5/5
+  toolingSatisfaction: number; // Meta: > 4.0/5
+  documentationQuality: number; // Meta: > 4.0/5
 }
 ```
 
@@ -478,12 +484,12 @@ jobs:
         run: |
           echo "Time to first commit: $(calculate_ttfc)"
           echo "Environment setup success rate: $(calculate_setup_rate)"
-          
+
       - name: Collect productivity metrics
         run: |
           echo "Average local build time: $(measure_build_time)"
           echo "Test execution time: $(measure_test_time)"
-          
+
       - name: Send to monitoring
         run: |
           curl -X POST $METRICS_ENDPOINT \
@@ -499,21 +505,25 @@ jobs:
 ### Objective: Alcançar excelência em Developer Experience
 
 **KR1:** Reduzir tempo de onboarding de 3 dias para 30 minutos
+
 - Baseline: 3 dias
 - Target: 30 minutos
 - Medição: Tempo do git clone ao primeiro commit
 
 **KR2:** Eliminar 100% dos "funciona na minha máquina"
+
 - Baseline: 5 incidentes/mês
 - Target: 0 incidentes
 - Medição: Tickets taggeados como environment-issue
 
 **KR3:** Alcançar NPS > 8.0 na satisfação dos desenvolvedores
+
 - Baseline: 6.5
 - Target: 8.0+
 - Medição: Survey trimestral
 
 **KR4:** Reduzir tempo de CI/CD em 50%
+
 - Baseline: 12 minutos
 - Target: 6 minutos
 - Medição: GitHub Actions metrics
@@ -524,24 +534,28 @@ jobs:
 ## 🚀 7. Roadmap de Implementação
 
 ### Fase 1: Fundação (Semana 1-2)
+
 - [ ] Criar `devcontainer.json` base
 - [ ] Configurar Docker Compose para serviços
 - [ ] Implementar MSW handlers básicos
 - [ ] Documentar processo de setup
 
 ### Fase 2: Automação (Semana 3-4)
+
 - [ ] Scripts de automação (Makefile)
 - [ ] Health checks automatizados
 - [ ] Feature flags para desenvolvimento
 - [ ] CI/CD integration tests
 
 ### Fase 3: Adoção (Semana 5-6)
+
 - [ ] Treinamento da equipe
 - [ ] Migração progressiva
 - [ ] Coleta de feedback
 - [ ] Ajustes baseados em uso real
 
 ### Fase 4: Otimização (Contínuo)
+
 - [ ] Monitoramento de métricas DX
 - [ ] Melhorias incrementais
 - [ ] Atualização de dependências
@@ -560,7 +574,7 @@ jobs:
   "service": "app",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
-  
+
   "features": {
     "ghcr.io/devcontainers/features/git:1": {
       "ppa": true,
@@ -584,7 +598,7 @@ jobs:
       "version": "latest"
     }
   },
-  
+
   "customizations": {
     "vscode": {
       "extensions": [
@@ -592,31 +606,31 @@ jobs:
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
-        
+
         // TypeScript enhanced
         "yoavbls.pretty-ts-errors",
         "ms-vscode.vscode-typescript-next",
-        
+
         // Database & ORM
         "mtxr.sqltools",
         "mtxr.sqltools-driver-pg",
-        
+
         // Git & collaboration
         "eamodio.gitlens",
         "github.vscode-pull-request-github",
-        
+
         // Code quality
         "usernamehw.errorlens",
         "streetsidesoftware.code-spell-checker",
         "streetsidesoftware.code-spell-checker-portuguese-brazilian",
-        
+
         // Testing
         "orta.vscode-jest",
         "hbenl.vscode-test-explorer",
-        
+
         // Docker & containers
         "ms-azuretools.vscode-docker",
-        
+
         // Productivity
         "formulahendry.auto-rename-tag",
         "christian-kohler.path-intellisense",
@@ -632,11 +646,11 @@ jobs:
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 2,
         "editor.insertSpaces": true,
-        
+
         // TypeScript configuration
         "typescript.preferences.importModuleSpecifier": "relative",
         "typescript.updateImportsOnFileMove.enabled": "always",
-        
+
         // Terminal configuration
         "terminal.integrated.shell.linux": "/bin/zsh",
         "terminal.integrated.profiles.linux": {
@@ -644,11 +658,11 @@ jobs:
             "path": "/bin/zsh"
           }
         },
-        
+
         // Git configuration
         "git.enableSmartCommit": true,
         "git.confirmSync": false,
-        
+
         // File associations
         "files.associations": {
           "*.env.example": "dotenv",
@@ -657,7 +671,7 @@ jobs:
       }
     }
   },
-  
+
   // Lifecycle commands
   "initializeCommand": "echo 'Initializing Simpix development environment...'",
   "onCreateCommand": {
@@ -676,13 +690,13 @@ jobs:
     "health-check": "pnpm run doctor",
     "start-services": "pnpm run dev:services"
   },
-  
+
   // Port forwarding
   "forwardPorts": [
-    5000,   // Main app
-    5432,   // PostgreSQL
-    6379,   // Redis
-    8080    // Admin tools
+    5000, // Main app
+    5432, // PostgreSQL
+    6379, // Redis
+    8080 // Admin tools
   ],
   "portsAttributes": {
     "5000": {
@@ -698,14 +712,14 @@ jobs:
       "onAutoForward": "silent"
     }
   },
-  
+
   // Container configuration
   "remoteUser": "node",
   "remoteEnv": {
     "NODE_ENV": "development",
     "TERM": "xterm-256color"
   },
-  
+
   // Mount points for performance
   "mounts": [
     "source=${localWorkspaceFolder}/node_modules,target=/workspace/node_modules,type=volume",
@@ -750,7 +764,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - '5432:5432'
     networks:
       - simpix-dev
 
@@ -761,7 +775,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
       - simpix-dev
 
@@ -769,8 +783,8 @@ services:
   mailhog:
     image: mailhog/mailhog
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - '1025:1025'
+      - '8025:8025'
     networks:
       - simpix-dev
 
@@ -808,27 +822,30 @@ mocks/
 
 ## ✅ 9. Critérios de Sucesso
 
-| Critério | Meta | Prazo |
-|----------|------|-------|
-| Tempo de setup novo dev | < 30 min | 30 dias |
-| Taxa de adoção | 100% | 60 dias |
-| Redução de bugs de ambiente | 100% | 90 dias |
-| Satisfação da equipe | > 8/10 | 90 dias |
-| ROI em produtividade | > 20% | 120 dias |
+| Critério                    | Meta     | Prazo    |
+| --------------------------- | -------- | -------- |
+| Tempo de setup novo dev     | < 30 min | 30 dias  |
+| Taxa de adoção              | 100%     | 60 dias  |
+| Redução de bugs de ambiente | 100%     | 90 dias  |
+| Satisfação da equipe        | > 8/10   | 90 dias  |
+| ROI em produtividade        | > 20%    | 120 dias |
 
 ---
 
 ## 🎯 10. Declaração de Incerteza (PAM V1.1 - OBRIGATÓRIO)
 
 ### **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+
 - **Justificativa:** Baseado em research Microsoft/GitHub + experiência comprovada com Dev Containers em produção
 
 ### **RISCOS IDENTIFICADOS:** BAIXO
+
 - **Docker Desktop licensing** para empresas (mitigação: Docker alternatives)
 - **Curva de aprendizado inicial** da equipe (mitigação: treinamento estruturado)
 - **Performance em máquinas antigas** (mitigação: requisitos mínimos documentados)
 
 ### **DECISÕES TÉCNICAS ASSUMIDAS:**
+
 1. **Dev Containers é a tecnologia dominante** para padronização de ambiente em 2025
 2. **MSW 2.0+ é industry standard** para API mocking (usado por Google, Microsoft, Netflix)
 3. **SPACE Framework é o padrão** para medir Developer Experience (GitHub/Microsoft validated)
@@ -836,6 +853,7 @@ mocks/
 5. **Infraestrutura Azure** será o target final (conforme roadmap arquitetural)
 
 ### **VALIDAÇÃO PENDENTE:**
+
 - **Aprovação do Arquiteto Chefe** para padronização mandatória
 - **Teste piloto com 1-2 desenvolvedores** antes do rollout completo
 - **Validação de performance** em diferentes sistemas operacionais

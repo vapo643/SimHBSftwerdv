@@ -55,10 +55,10 @@ const fetchProposta = async (id: string | undefined): Promise<any> => {
   if (!id) throw new Error('ID da proposta não fornecido.');
   try {
     const response = await api.get(`/api/propostas/${id}`);
-    
+
     // Usar dados diretamente sem mapper temporariamente
     const data = response.data.success !== undefined ? response.data.data : response.data;
-    
+
     return data;
   } catch (error) {
     console.error('[Análise] Erro ao carregar proposta:', error);
@@ -212,48 +212,70 @@ const AnaliseManualPage: React.FC = () => {
         nome: clienteData.nome || rawData.cliente_nome || rawData.clienteNome || 'N/A',
         cpf: clienteData.cpf || rawData.cliente_cpf || rawData.clienteCpf || 'N/A',
         email: clienteData.email || rawData.cliente_email || rawData.clienteEmail || 'N/A',
-        telefone: clienteData.telefone || rawData.cliente_telefone || rawData.clienteTelefone || 'N/A',
-        dataNascimento: clienteData.data_nascimento || clienteData.dataNascimento || rawData.cliente_data_nascimento || 'N/A',
-        rendaMensal: safeRender(clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda),
+        telefone:
+          clienteData.telefone || rawData.cliente_telefone || rawData.clienteTelefone || 'N/A',
+        dataNascimento:
+          clienteData.data_nascimento ||
+          clienteData.dataNascimento ||
+          rawData.cliente_data_nascimento ||
+          'N/A',
+        rendaMensal: safeRender(
+          clienteData.renda_mensal || clienteData.rendaMensal || rawData.cliente_renda
+        ),
         rg: clienteData.rg || rawData.cliente_rg || rawData.clienteRg || 'N/A',
-        orgaoEmissor: clienteData.orgao_emissor || clienteData.orgaoEmissor || rawData.cliente_orgao_emissor || 'N/A',
-        estadoCivil: clienteData.estado_civil || clienteData.estadoCivil || rawData.cliente_estado_civil || 'N/A',
+        orgaoEmissor:
+          clienteData.orgao_emissor ||
+          clienteData.orgaoEmissor ||
+          rawData.cliente_orgao_emissor ||
+          'N/A',
+        estadoCivil:
+          clienteData.estado_civil ||
+          clienteData.estadoCivil ||
+          rawData.cliente_estado_civil ||
+          'N/A',
         nacionalidade: clienteData.nacionalidade || rawData.cliente_nacionalidade || 'N/A',
         cep: clienteData.cep || rawData.cliente_cep || rawData.clienteCep || 'N/A',
-        endereco: clienteData.endereco || rawData.cliente_endereco || rawData.clienteEndereco || 'N/A',
-        ocupacao: clienteData.ocupacao || rawData.cliente_ocupacao || rawData.clienteOcupacao || 'N/A'
+        endereco:
+          clienteData.endereco || rawData.cliente_endereco || rawData.clienteEndereco || 'N/A',
+        ocupacao:
+          clienteData.ocupacao || rawData.cliente_ocupacao || rawData.clienteOcupacao || 'N/A',
       },
       condicoes: {
         // ✍️ CORREÇÃO: Usar dados diretos da API com fallbacks mínimos para compatibilidade
-        valorSolicitado: safeRender(rawData.valorSolicitado || rawData.valor || condicoesData.valorSolicitado),
+        valorSolicitado: safeRender(
+          rawData.valorSolicitado || rawData.valor || condicoesData.valorSolicitado
+        ),
         prazo: rawData.prazo || condicoesData.prazo || 'N/A',
         finalidade: rawData.finalidade || condicoesData.finalidade || 'N/A',
         garantia: rawData.garantia || condicoesData.garantia || 'N/A',
         valorTac: safeRender(rawData.valorTac || condicoesData.valorTac),
         tacTipo: rawData.tacTipo || 'valor',
         valorIof: safeRender(rawData.valorIof || condicoesData.valorIof),
-        valorTotalFinanciado: safeRender(rawData.valorTotalFinanciado || condicoesData.valorTotalFinanciado),
-        taxaJuros: safeRender(rawData.taxaJuros || tabelaComercial.taxaJuros)
+        valorTotalFinanciado: safeRender(
+          rawData.valorTotalFinanciado || condicoesData.valorTotalFinanciado
+        ),
+        taxaJuros: safeRender(rawData.taxaJuros || tabelaComercial.taxaJuros),
       },
       produto: {
         id: rawData.produtoId || rawData.produto_id,
-        nome: produto.nomeProduto || rawData.produto_nome || rawData.produtoNome || 'N/A'
+        nome: produto.nomeProduto || rawData.produto_nome || rawData.produtoNome || 'N/A',
       },
       loja: {
         id: rawData.lojaId || rawData.loja_id,
-        nome: (rawData.loja && rawData.loja.nomeLoja) || rawData.loja_nome || rawData.lojaNome || 'N/A'
+        nome:
+          (rawData.loja && rawData.loja.nomeLoja) || rawData.loja_nome || rawData.lojaNome || 'N/A',
       },
       tabelaComercial: {
         id: rawData.tabelaComercialId || rawData.tabela_comercial_id,
         nome: tabelaComercial.nomeTabela || rawData.tabela_comercial_nome || 'N/A',
-        taxa: tabelaComercial.taxaJuros || rawData.tabela_comercial_taxa
+        taxa: tabelaComercial.taxaJuros || rawData.tabela_comercial_taxa,
       },
       createdAt: rawData.created_at || rawData.createdAt,
       updatedAt: rawData.updated_at || rawData.updatedAt,
       motivoPendencia: rawData.motivo_pendencia || rawData.motivoPendencia,
       motivoRejeicao: rawData.motivo_rejeicao || rawData.motivoRejeicao,
       observacoes: rawData.observacoes,
-      documentos: rawData.documentos || []
+      documentos: rawData.documentos || [],
     };
   };
 
@@ -292,7 +314,8 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Telefone:</strong> {safeRender(propostaMapeada.cliente.telefone)}
               </p>
               <p>
-                <strong>Data de Nascimento:</strong> {safeRender(propostaMapeada.cliente.dataNascimento)}
+                <strong>Data de Nascimento:</strong>{' '}
+                {safeRender(propostaMapeada.cliente.dataNascimento)}
               </p>
               <p>
                 <strong>Renda Mensal:</strong> {safeRender(propostaMapeada.cliente.rendaMensal)}
@@ -328,10 +351,14 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Valor Solicitado:</strong> {safeRender(propostaMapeada.condicoes.valorSolicitado)}
+                <strong>Valor Solicitado:</strong>{' '}
+                {safeRender(propostaMapeada.condicoes.valorSolicitado)}
               </p>
               <p>
-                <strong>Prazo:</strong> {Number.isFinite(Number(safeRender(propostaMapeada.condicoes.prazo))) ? `${safeRender(propostaMapeada.condicoes.prazo)} meses` : safeRender(propostaMapeada.condicoes.prazo)}
+                <strong>Prazo:</strong>{' '}
+                {Number.isFinite(Number(safeRender(propostaMapeada.condicoes.prazo)))
+                  ? `${safeRender(propostaMapeada.condicoes.prazo)} meses`
+                  : safeRender(propostaMapeada.condicoes.prazo)}
               </p>
               <p>
                 <strong>Finalidade:</strong> {safeRender(propostaMapeada.condicoes.finalidade)}
@@ -340,20 +367,27 @@ const AnaliseManualPage: React.FC = () => {
                 <strong>Garantia:</strong> {safeRender(propostaMapeada.condicoes.garantia)}
               </p>
               <p>
-                <strong>Taxa de Juros:</strong> {(() => {
+                <strong>Taxa de Juros:</strong>{' '}
+                {(() => {
                   const taxa = safeRender(propostaMapeada.condicoes.taxaJuros);
-                  return taxa !== 'N/A' && !isNaN(Number(taxa)) ? `${Number(taxa).toFixed(2)}%` : taxa;
+                  return taxa !== 'N/A' && !isNaN(Number(taxa))
+                    ? `${Number(taxa).toFixed(2)}%`
+                    : taxa;
                 })()}
               </p>
               <p>
                 <strong>TAC:</strong> {safeRender(propostaMapeada.condicoes.valorTac)}
-                {safeRender(propostaMapeada.condicoes.tacTipo) === 'percentual' && safeRender(propostaMapeada.condicoes.valorTac) !== 'N/A' ? '%' : ''}
+                {safeRender(propostaMapeada.condicoes.tacTipo) === 'percentual' &&
+                safeRender(propostaMapeada.condicoes.valorTac) !== 'N/A'
+                  ? '%'
+                  : ''}
               </p>
               <p>
                 <strong>IOF:</strong> {safeRender(propostaMapeada.condicoes.valorIof)}
               </p>
               <p>
-                <strong>Valor Total Financiado:</strong> {safeRender(propostaMapeada.condicoes.valorTotalFinanciado)}
+                <strong>Valor Total Financiado:</strong>{' '}
+                {safeRender(propostaMapeada.condicoes.valorTotalFinanciado)}
               </p>
             </CardContent>
           </Card>
@@ -386,7 +420,8 @@ const AnaliseManualPage: React.FC = () => {
               )}
               {propostaMapeada.motivoPendencia && (
                 <p>
-                  <strong>Motivo da Pendência:</strong> {safeRender(propostaMapeada.motivoPendencia)}
+                  <strong>Motivo da Pendência:</strong>{' '}
+                  {safeRender(propostaMapeada.motivoPendencia)}
                 </p>
               )}
             </CardContent>
@@ -396,10 +431,12 @@ const AnaliseManualPage: React.FC = () => {
           {propostaMapeada.documentos && propostaMapeada.documentos.length > 0 && (
             <DocumentViewer
               propostaId={propostaId!}
-              documents={propostaMapeada.documentos?.map((doc: any) => ({
-                ...doc,
-                name: doc.nome || doc.name || 'Documento'
-              })) || []}
+              documents={
+                propostaMapeada.documentos?.map((doc: any) => ({
+                  ...doc,
+                  name: doc.nome || doc.name || 'Documento',
+                })) || []
+              }
               ccbDocumentoUrl={undefined}
             />
           )}

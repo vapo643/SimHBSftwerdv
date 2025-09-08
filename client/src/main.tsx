@@ -65,27 +65,28 @@ window.addEventListener('error', (event) => {
 });
 
 // Wrap App with Sentry Error Boundary
-const SentryApp = (import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production')
-  ? Sentry.withErrorBoundary(App, {
-      fallback: ({ error, resetError }) => (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center p-8 max-w-md">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Oops! Algo deu errado</h2>
-            <p className="text-gray-600 mb-4">
-              Um erro inesperado aconteceu. Nossa equipe foi notificada automaticamente.
-            </p>
-            <button 
-              onClick={resetError}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Tentar novamente
-            </button>
+const SentryApp =
+  import.meta.env.VITE_SENTRY_DSN && import.meta.env.MODE === 'production'
+    ? Sentry.withErrorBoundary(App, {
+        fallback: ({ error, resetError }) => (
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-center p-8 max-w-md">
+              <h2 className="text-2xl font-bold text-red-600 mb-4">Oops! Algo deu errado</h2>
+              <p className="text-gray-600 mb-4">
+                Um erro inesperado aconteceu. Nossa equipe foi notificada automaticamente.
+              </p>
+              <button
+                onClick={resetError}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Tentar novamente
+              </button>
+            </div>
           </div>
-        </div>
-      ),
-      showDialog: false,
-    })
-  : App;
+        ),
+        showDialog: false,
+      })
+    : App;
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>

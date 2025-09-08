@@ -17,11 +17,9 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-
 const LoginPage: React.FC = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-
 
   const {
     register,
@@ -30,7 +28,6 @@ const LoginPage: React.FC = () => {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
-
 
   const onSubmit = async (data: LoginForm) => {
     try {
@@ -77,11 +74,11 @@ const LoginPage: React.FC = () => {
               <div className="flex items-center">
                 <Label htmlFor="password">Senha</Label>
               </div>
-              <Input 
-                id="password" 
-                type="password" 
-                required 
-                {...register('password')} 
+              <Input
+                id="password"
+                type="password"
+                required
+                {...register('password')}
                 data-testid="input-password"
               />
 
@@ -89,9 +86,9 @@ const LoginPage: React.FC = () => {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isSubmitting}
               data-testid="button-login"
             >

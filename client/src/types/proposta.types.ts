@@ -4,7 +4,7 @@ export interface PropostaAnaliseViewModel {
   id: string;
   numeroProposta?: number;
   status: string;
-  
+
   // Dados do Cliente (estruturado e plano)
   cliente: {
     nome: string;
@@ -21,7 +21,7 @@ export interface PropostaAnaliseViewModel {
     endereco: string;
     ocupacao: string;
   };
-  
+
   // Condições do Empréstimo
   condicoes: {
     valorSolicitado: string | number;
@@ -33,33 +33,33 @@ export interface PropostaAnaliseViewModel {
     valorTotalFinanciado: string | number;
     taxaJuros?: number;
   };
-  
+
   // Informações da Proposta
   loja: {
     id?: number;
     nome: string;
   };
-  
+
   produto: {
     id?: number;
     nome: string;
   };
-  
+
   tabelaComercial: {
     id?: number;
     nome: string;
     taxa?: number;
   };
-  
+
   // Metadados
   createdAt?: string;
   updatedAt?: string;
-  
+
   // Análise
   motivoPendencia?: string;
   motivoRejeicao?: string;
   observacoes?: string;
-  
+
   // Documentos
   documentos?: Array<{
     id: string;
@@ -77,8 +77,8 @@ export interface PropostaApiResponse {
     numero_proposta?: number;
     status: string;
     cliente_data?: any; // JSON string ou objeto
-    clienteData?: any;  // Duplicado para compatibilidade
-    
+    clienteData?: any; // Duplicado para compatibilidade
+
     // Dados do cliente (podem vir como campos planos em casos legados)
     cliente_nome?: string;
     clienteNome?: string;
@@ -106,7 +106,7 @@ export interface PropostaApiResponse {
     clienteEndereco?: string;
     cliente_ocupacao?: string;
     clienteOcupacao?: string;
-    
+
     // Dados financeiros
     valor?: any;
     valor_solicitado?: any;
@@ -123,7 +123,7 @@ export interface PropostaApiResponse {
     valorTotalFinanciado?: any;
     finalidade?: string;
     garantia?: string;
-    
+
     // Dados relacionados
     loja_id?: number;
     loja_nome?: string;
@@ -132,7 +132,7 @@ export interface PropostaApiResponse {
     tabela_comercial_id?: number;
     tabela_comercial_nome?: string;
     tabela_comercial_taxa?: number;
-    
+
     // Metadados
     created_at?: string;
     createdAt?: string;
@@ -144,7 +144,7 @@ export interface PropostaApiResponse {
     motivoRejeicao?: string;
     observacoes?: string;
     documentos?: any[];
-    
+
     // Campos adicionais que podem vir
     [key: string]: any;
   };

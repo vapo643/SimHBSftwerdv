@@ -19,6 +19,7 @@
 O sistema Simpix está evoluindo de prova de conceito (Replit + Supabase) para sistema crítico de crédito empresarial. Necessitamos de estratégia cloud PaaS-first que minimize operational overhead, maximize confiabilidade, e suporte crescimento exponencial com compliance financeiro.
 
 **Drivers de Decisão:**
+
 - Sistema crítico: 99.5% SLA contratual
 - Compliance: LGPD + BACEN + auditoria externa
 - Crescimento: 10 → 1000+ usuários em 12 meses
@@ -42,19 +43,19 @@ const azurePaaSStrategy = {
     alternatives_rejected: [
       'AKS: Complexidade prematura para 2-3 devs',
       'App Service: Menos flexível para containers',
-      'Functions: Stateful nature da aplicação'
+      'Functions: Stateful nature da aplicação',
     ],
-    
+
     specifications: {
       tier: 'Standard',
       replicas: '2-10 auto-scaling',
       cpu: '0.5-2 vCPU per replica',
       memory: '1-4GB per replica',
       networking: 'VNET integration',
-      ingress: 'External with custom domain'
-    }
+      ingress: 'External with custom domain',
+    },
   },
-  
+
   dataLayer: {
     primary: {
       service: 'Azure Database for PostgreSQL Flexible',
@@ -62,90 +63,90 @@ const azurePaaSStrategy = {
       compute: 'B2s (2 vCores, 4GB) → GP_Standard_D2s_v3',
       storage: '32GB → 2TB auto-grow',
       backup: 'Geo-redundant, 35 days retention',
-      
+
       highAvailability: {
         enabled: true,
         mode: 'Zone-redundant',
         readReplicas: 1,
-        crossRegion: 'Brazil South (secondary)'
-      }
+        crossRegion: 'Brazil South (secondary)',
+      },
     },
-    
+
     cache: {
       service: 'Azure Cache for Redis',
       tier: 'Premium P1 (6GB)',
       clustering: true,
       persistence: 'RDB + AOF',
-      backup: 'Daily with geo-redundancy'
-    }
+      backup: 'Daily with geo-redundancy',
+    },
   },
-  
+
   storageLayer: {
     service: 'Azure Blob Storage',
     tier: 'Premium Block Blobs',
     redundancy: 'Zone-redundant (ZRS)',
-    
+
     lifecycle: {
       hot: 'Active documents (30 days)',
       cool: 'Archived contracts (90 days)',
-      archive: 'Compliance storage (5 years)'
+      archive: 'Compliance storage (5 years)',
     },
-    
+
     cdn: {
       service: 'Azure CDN Premium',
       cachingRules: 'Aggressive for static assets',
-      compression: 'Brotli + Gzip'
-    }
+      compression: 'Brotli + Gzip',
+    },
   },
-  
+
   messagingLayer: {
     service: 'Azure Service Bus',
     tier: 'Standard',
     features: ['Topics/Subscriptions', 'Dead letter queues', 'Duplicate detection'],
-    
+
     queues: [
       'payment-processing',
-      'document-generation', 
+      'document-generation',
       'notification-delivery',
       'audit-logging',
-      'integration-events'
-    ]
+      'integration-events',
+    ],
   },
-  
+
   securityLayer: {
     secretManagement: {
       service: 'Azure Key Vault',
       tier: 'Premium (HSM-backed)',
-      features: ['Certificate management', 'Key rotation', 'Access policies']
+      features: ['Certificate management', 'Key rotation', 'Access policies'],
     },
-    
+
     identity: {
       service: 'Azure Active Directory B2C',
-      features: ['Multi-tenant', 'Custom policies', 'Social login', 'MFA']
+      features: ['Multi-tenant', 'Custom policies', 'Social login', 'MFA'],
     },
-    
+
     applicationSecurity: {
       service: 'Azure Application Gateway',
       waf: 'OWASP Core Rule Set',
       sslTermination: true,
-      ddosProtection: 'Basic + Advanced'
-    }
+      ddosProtection: 'Basic + Advanced',
+    },
   },
-  
+
   observabilityLayer: {
     monitoring: {
       service: 'Azure Monitor',
       features: ['Application Insights', 'Log Analytics', 'Alerts'],
-      retention: 'Logs: 90 days, Metrics: 1 year'
+      retention: 'Logs: 90 days, Metrics: 1 year',
     },
-    
+
     logging: {
       service: 'Azure Monitor Logs',
       ingestion: 'Real-time via agents',
       querying: 'KQL (Kusto Query Language)',
-      alerting: 'Smart detection + custom rules'
-    }
-  }
+      alerting: 'Smart detection + custom rules',
+    },
+  },
 };
 ```
 
@@ -160,7 +161,7 @@ LandingZone:
     identity: 'AD B2C, Key Vault central'
     production: 'Workloads produção'
     staging: 'Workloads desenvolvimento'
-  
+
   resourceGroups:
     production:
       compute: 'rg-simpix-prod-compute-brazilsouth'
@@ -168,48 +169,48 @@ LandingZone:
       networking: 'rg-simpix-prod-network-brazilsouth'
       security: 'rg-simpix-prod-security-brazilsouth'
       monitoring: 'rg-simpix-prod-monitor-brazilsouth'
-    
+
     staging:
       compute: 'rg-simpix-stg-compute-brazilsouth'
       data: 'rg-simpix-stg-data-brazilsouth'
       networking: 'rg-simpix-stg-network-brazilsouth'
-  
+
   networking:
     hub:
       addressSpace: '10.0.0.0/22'
       subnets:
-        gateway: '10.0.0.0/27'    # VPN Gateway
-        firewall: '10.0.0.32/27'  # Azure Firewall
-        bastion: '10.0.0.64/27'   # Azure Bastion
-    
+        gateway: '10.0.0.0/27' # VPN Gateway
+        firewall: '10.0.0.32/27' # Azure Firewall
+        bastion: '10.0.0.64/27' # Azure Bastion
+
     production:
       addressSpace: '10.1.0.0/22'
       subnets:
-        app: '10.1.0.0/24'        # Container Apps
-        data: '10.1.1.0/24'       # Database, Redis
+        app: '10.1.0.0/24' # Container Apps
+        data: '10.1.1.0/24' # Database, Redis
         integration: '10.1.2.0/24' # API Management
         privateEndpoints: '10.1.3.0/24'
-    
+
     staging:
       addressSpace: '10.2.0.0/22'
       subnets:
         app: '10.2.0.0/24'
         data: '10.2.1.0/24'
         integration: '10.2.2.0/24'
-  
+
   security:
     networkSecurity:
       - Azure Firewall Premium
       - DDoS Protection Standard
       - Private Endpoints (all data services)
       - Network Security Groups
-    
+
     identity:
       - Azure AD B2C multi-tenant
       - Privileged Identity Management
       - Conditional Access policies
       - MFA enforcement
-    
+
     dataProtection:
       - Customer-managed encryption keys
       - Azure Disk Encryption
@@ -227,22 +228,22 @@ gantt
     Landing Zone Setup    :2025-08-27, 2025-09-10
     Network Configuration :2025-08-27, 2025-09-03
     Security Hardening    :2025-09-04, 2025-09-10
-    
+
     section Fase 1: Data Layer
     PostgreSQL Migration  :2025-09-11, 2025-09-25
     Redis Cache Setup     :2025-09-11, 2025-09-18
     Blob Storage Config   :2025-09-18, 2025-09-25
-    
+
     section Fase 2: Application
     Container Apps Deploy :2025-09-26, 2025-10-10
     Service Bus Setup     :2025-09-26, 2025-10-03
     API Gateway Config    :2025-10-04, 2025-10-10
-    
+
     section Fase 3: Observability
     Azure Monitor Setup   :2025-10-11, 2025-10-25
     Log Analytics Config  :2025-10-11, 2025-10-18
     Alerting & Dashboards :2025-10-18, 2025-10-25
-    
+
     section Fase 4: Production
     Load Testing         :2025-10-26, 2025-11-01
     Security Validation  :2025-10-26, 2025-11-01
@@ -255,16 +256,16 @@ gantt
 
 ### **1. Compute: Azure Container Apps vs Alternativas**
 
-| Critério | Container Apps | AKS | App Service | Function Apps |
-|----------|---------------|-----|-------------|---------------|
-| **Operational Overhead** | Minimal | High | Low | Minimal |
-| **Scaling Flexibility** | Excellent | Excellent | Good | Limited |
-| **Cost (2-3 dev team)** | Optimal | 3x higher | Similar | Lower |
-| **Container Support** | Native | Native | Limited | None |
-| **Learning Curve** | Minimal | Steep | Minimal | Minimal |
-| **Event-driven** | Yes | Yes | No | Yes |
-| **Kubernetes Control** | No | Full | No | No |
-| **Multi-tenancy** | Built-in | Manual | Limited | Built-in |
+| Critério                 | Container Apps | AKS       | App Service | Function Apps |
+| ------------------------ | -------------- | --------- | ----------- | ------------- |
+| **Operational Overhead** | Minimal        | High      | Low         | Minimal       |
+| **Scaling Flexibility**  | Excellent      | Excellent | Good        | Limited       |
+| **Cost (2-3 dev team)**  | Optimal        | 3x higher | Similar     | Lower         |
+| **Container Support**    | Native         | Native    | Limited     | None          |
+| **Learning Curve**       | Minimal        | Steep     | Minimal     | Minimal       |
+| **Event-driven**         | Yes            | Yes       | No          | Yes           |
+| **Kubernetes Control**   | No             | Full      | No          | No            |
+| **Multi-tenancy**        | Built-in       | Manual    | Limited     | Built-in      |
 
 **Decision:** Container Apps oferece 80% dos benefícios do AKS com 20% da complexidade.
 
@@ -278,26 +279,23 @@ const dataServiceComparison = {
       'Zone-redundant HA built-in',
       'Automated backup with PITR',
       'Read replicas for scaling',
-      'Private networking by default'
+      'Private networking by default',
     ],
-    cons: [
-      'Higher cost than single server',
-      'Azure-specific features lock-in'
-    ],
-    suitability: 'PERFECT - Managed complexity ideal para pequena equipe'
+    cons: ['Higher cost than single server', 'Azure-specific features lock-in'],
+    suitability: 'PERFECT - Managed complexity ideal para pequena equipe',
   },
-  
+
   cosmosDB: {
     pros: ['Global distribution', 'Multi-model', 'Serverless billing'],
     cons: ['Complete rewrite required', 'Learning curve', 'Vendor lock-in'],
-    suitability: 'REJECTED - Migration cost too high'
+    suitability: 'REJECTED - Migration cost too high',
   },
-  
+
   sqlDatabase: {
     pros: ['Serverless option', 'Intelligent tuning', 'Lower cost'],
     cons: ['Application rewrite required', 'T-SQL vs PostgreSQL'],
-    suitability: 'REJECTED - Complete rewrite needed'
-  }
+    suitability: 'REJECTED - Complete rewrite needed',
+  },
 };
 ```
 
@@ -312,30 +310,30 @@ const zeroTrustImplementation = {
       'Zero public database access',
       'Application Gateway with WAF',
       'Network security groups (least privilege)',
-      'DDoS protection standard'
-    ]
+      'DDoS protection standard',
+    ],
   },
-  
+
   identityVerification: {
     users: 'Azure AD B2C with MFA mandatory',
     services: 'Managed identities only',
     applications: 'Certificate-based authentication',
-    secrets: 'Key Vault with HSM backing'
+    secrets: 'Key Vault with HSM backing',
   },
-  
+
   dataProtection: {
     encryption: {
       atRest: 'Customer-managed keys (CMK)',
       inTransit: 'TLS 1.3 minimum',
-      inUse: 'Always Encrypted for PII'
+      inUse: 'Always Encrypted for PII',
     },
-    
+
     access: {
       database: 'Azure AD authentication only',
       storage: 'RBAC + private endpoints',
-      secrets: 'Key Vault access policies'
-    }
-  }
+      secrets: 'Key Vault access policies',
+    },
+  },
 };
 ```
 
@@ -346,24 +344,28 @@ const zeroTrustImplementation = {
 ### **Positivas Validadas**
 
 ✅ **Operational Excellence**
+
 - Zero server patching/maintenance
 - Automatic scaling based on demand
 - Built-in disaster recovery
 - Managed backup and monitoring
 
 ✅ **Security & Compliance**
+
 - SOC 2, ISO 27001, PCI DSS compliance
 - LGPD compliance features built-in
 - Advanced threat protection
 - Audit logging automated
 
 ✅ **Developer Experience**
+
 - Infrastructure as Code (ARM/Bicep)
 - Integrated CI/CD pipelines
 - Visual Studio integration
 - Rich Azure CLI tooling
 
 ✅ **Cost Predictability**
+
 - Reserved instance discounts available
 - Consumption-based pricing for some services
 - Cost management tools built-in
@@ -372,18 +374,21 @@ const zeroTrustImplementation = {
 ### **Negativas Mitigadas**
 
 ❌ **Learning Curve** → **MITIGAÇÃO:**
+
 - Azure Fundamentals training (40h)
 - Microsoft Learn paths
 - Architecture Center documentation
 - Hands-on labs and sandboxes
 
 ❌ **Vendor Lock-in** → **MITIGAÇÃO:**
+
 - Container-first approach (portable)
 - Standard protocols (PostgreSQL, Redis)
 - Open source tools where possible
 - Exit strategy documented
 
 ❌ **Cost Increase** → **MITIGAÇÃO:**
+
 - R$ 4.800/mês orçamento reconciliado
 - Reserved instances (-40% cost)
 - Auto-scaling para otimização
@@ -396,12 +401,14 @@ const zeroTrustImplementation = {
 ### **1. Amazon Web Services (AWS)**
 
 **Pontos Fortes:**
+
 - Maior maturidade e conjunto de serviços
 - ECS Fargate similar ao Container Apps
 - RDS PostgreSQL com Multi-AZ
 - Melhor documentação e community
 
 **Pontos Fracos:**
+
 - Complexidade de configuração superior
 - Menos integração corporativa no Brasil
 - Certificações compliance locais limitadas
@@ -412,12 +419,14 @@ const zeroTrustImplementation = {
 ### **2. Google Cloud Platform (GCP)**
 
 **Pontos Fortes:**
+
 - Cloud Run similar ao Container Apps
 - Cloud SQL PostgreSQL competitivo
 - Preços geralmente menores
 - AI/ML services superiores
 
 **Pontos Fracos:**
+
 - Menor penetração corporativa Brasil
 - Support local limitado
 - Menos serviços enterprise
@@ -428,6 +437,7 @@ const zeroTrustImplementation = {
 ### **3. Multi-Cloud Strategy**
 
 **Análise:**
+
 - **Benefícios:** Vendor independence, best-of-breed
 - **Custos:** 3x complexity, 2x operational overhead
 - **Reality Check:** Incompatível com team size (2-3 devs)
@@ -490,26 +500,26 @@ Service Integration:
 
 ## **Success Metrics**
 
-| Metric | Current (Replit) | Target (Azure) | Measurement |
-|--------|------------------|----------------|-------------|
-| **Availability** | 99.1% | 99.5% | Azure Monitor |
-| **API Latency P95** | 1.2s | <500ms | Application Insights |
-| **Database Response** | 150ms | <50ms | Query statistics |
-| **Deployment Time** | 2 minutes | 30 seconds | Azure DevOps |
-| **MTTR** | 45 minutes | 15 minutes | Incident management |
-| **Security Score** | Unknown | >80% | Azure Security Center |
+| Metric                | Current (Replit) | Target (Azure) | Measurement           |
+| --------------------- | ---------------- | -------------- | --------------------- |
+| **Availability**      | 99.1%            | 99.5%          | Azure Monitor         |
+| **API Latency P95**   | 1.2s             | <500ms         | Application Insights  |
+| **Database Response** | 150ms            | <50ms          | Query statistics      |
+| **Deployment Time**   | 2 minutes        | 30 seconds     | Azure DevOps          |
+| **MTTR**              | 45 minutes       | 15 minutes     | Incident management   |
+| **Security Score**    | Unknown          | >80%           | Azure Security Center |
 
 ---
 
 ## **Risk Assessment & Mitigation**
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| **Migration downtime** | Medium | High | Blue-green deployment, rollback plan |
-| **Performance degradation** | Low | High | Load testing, performance monitoring |
-| **Cost overrun** | Medium | Medium | Budget alerts, reserved instances |
-| **Skills gap** | High | Medium | Training program, Microsoft support |
-| **Vendor lock-in** | Low | Medium | Container strategy, standard protocols |
+| Risk                        | Probability | Impact | Mitigation                             |
+| --------------------------- | ----------- | ------ | -------------------------------------- |
+| **Migration downtime**      | Medium      | High   | Blue-green deployment, rollback plan   |
+| **Performance degradation** | Low         | High   | Load testing, performance monitoring   |
+| **Cost overrun**            | Medium      | Medium | Budget alerts, reserved instances      |
+| **Skills gap**              | High        | Medium | Training program, Microsoft support    |
+| **Vendor lock-in**          | Low         | Medium | Container strategy, standard protocols |
 
 ---
 
@@ -528,6 +538,6 @@ Service Integration:
 ---
 
 **Assinatura Digital**  
-*GEM 01 (Arquiteto de Sistemas) - 26/08/2025*  
-*GEM 02 (Desenvolvedor Senior) - 26/08/2025*  
-*SHA256-ADR001-AZURE-PAAS-FIRST-2025-08-26*
+_GEM 01 (Arquiteto de Sistemas) - 26/08/2025_  
+_GEM 02 (Desenvolvedor Senior) - 26/08/2025_  
+_SHA256-ADR001-AZURE-PAAS-FIRST-2025-08-26_

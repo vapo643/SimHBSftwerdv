@@ -16,6 +16,7 @@ Este diagrama documenta o fluxo completo de pagamento no sistema Simpix, desde a
 **Modelo Mental:** Arquiteto de Confiabilidade - Mapeamento pessimista de falhas em integrações bancárias críticas.
 
 ⚠️ **CENÁRIOS DE FALHA CRÍTICOS INCLUSOS:**
+
 - Webhook HMAC key rotation (Banco Inter)
 - Database connection pool exhaustion
 - Circuit breaker activation
@@ -42,28 +43,28 @@ sequenceDiagram
     participant LOG as Logger<br/>(Winston)
 
     Note over U, LOG: 🟢 HAPPY PATH - Boleto Gerado e Pago
-    
+
     %% 🚨 CRITICAL FAILURE SCENARIO: Webhook HMAC Key Rotation
-    
+
     rect rgb(255, 245, 245)
         Note over BANK, PG: 🚨 CENÁRIO DE FALHA CRÍTICA: Key Rotation Durante Produção
-        
+
         BANK->>WEBHOOK: POST /webhooks/payment<br/>❌ NEW HMAC signature (rotated key)
         WEBHOOK->>WEBHOOK: Validate signature with OLD key
         WEBHOOK-->>BANK: ❌ 401 Unauthorized<br/>"Invalid signature"
         WEBHOOK->>LOG: ⚠️ Security warning: Signature validation failed
-        
+
         Note over WEBHOOK: 🔄 MITIGATION: Dual-Key Validation Strategy
-        
+
         BANK->>WEBHOOK: POST /webhooks/payment (retry #1)
         WEBHOOK->>WEBHOOK: 1. Try OLD key → FAIL ❌
         WEBHOOK->>WEBHOOK: 2. Try NEW key → SUCCESS ✅
         WEBHOOK->>QUEUE: Enqueue payment processing normally
         WEBHOOK-->>BANK: ✅ 200 OK "Payment processed"
-        
+
         WEBHOOK->>LOG: 📊 KEY_ROTATION_DETECTED event emitted
         WEBHOOK->>WEBHOOK: Update stored HMAC key in cache
-        
+
         Note over PG, LOG: 🛡️ CONTINUITY: Revenue flow protected during key rotation
     end
 
@@ -71,20 +72,20 @@ sequenceDiagram
     U->>API: 1. POST /api/propostas/{id}/generate-boletos
     API->>API: 2. Validar proposta está APROVADO
     API->>PUC: 3. execute(generateBoletosDTO)
-    
+
     %% 2. Verificar Estado da Proposta
     PUC->>REPO: 4. findById(proposalId)
     REPO->>PG: 5. SELECT * FROM propostas WHERE id = ?
     PG-->>REPO: 6. Proposta com status APROVADO
     REPO-->>PUC: 7. Proposal agregado
-    
+
     PUC->>FSM: 8. validateTransition(APROVADO, BOLETOS_EMITIDOS)
     FSM-->>PUC: 9. ✅ Transição válida
-    
+
     %% 3. Autenticação Inter API (OAuth 2.0 + mTLS)
     PUC->>OAUTH: 10. getAccessToken()
     OAUTH->>OAUTH: 11. Validar token cache (TTL: 1h)
-    
+
     alt Token Válido em Cache
         OAUTH-->>PUC: 12. ✅ Cached access_token
     else Token Expirado
@@ -93,60 +94,60 @@ sequenceDiagram
         OAUTH->>OAUTH: 15. Cache token (Redis)
         OAUTH-->>PUC: 16. ✅ Fresh access_token
     end
-    
+
     %% 4. Cálculo de Parcelas e Valores
     PUC->>PUC: 17. Calcular parcelas<br/>- IOF (0.38% + 0.0082%/dia)<br/>- TAC: R$25.00<br/>- CET via Newton-Raphson
     PUC->>PUC: 18. Gerar schedule de pagamento<br/>(data, valor, sequência)
-    
+
     %% 5. Criar Boletos no Banco Inter
     loop Para cada parcela (1 a N)
         PUC->>INTER: 19. createBoleto(parcelaData)
         INTER->>BANK: 20. POST /cobranca/v3/cobrancas<br/>Authorization: Bearer {token}
-        
+
         Note over INTER, BANK: 📄 Payload do Boleto
         Note right of BANK: {<br/>  "seuNumero": "PROP123_PARC001",<br/>  "valorNominal": 523.45,<br/>  "dataVencimento": "2025-09-25",<br/>  "numDiasAgenda": 0,<br/>  "pagador": {<br/>    "cpfCnpj": "***.***.901-**",<br/>    "nome": "João S.",<br/>    "endereco": {...}<br/>  }<br/>}
-        
+
         BANK-->>INTER: 21. ✅ {codigoSolicitacao: "abc123"}
         INTER->>INTER: 22. Armazenar mapping<br/>(proposalId, parcela → codigoSolicitacao)
         INTER-->>PUC: 23. ✅ BoletoCreated{codigo, pdfUrl, linhaDigitavel}
     end
-    
+
     %% 6. Persistir Dados de Pagamento
     PUC->>PG: 24. INSERT INTO parcelas<br/>(proposal_id, sequencia, valor, vencimento, codigo_inter)
     PG-->>PUC: 25. ✅ Parcelas salvas
-    
+
     PUC->>FSM: 26. transitionTo(BOLETOS_EMITIDOS)
     FSM->>PG: 27. UPDATE propostas SET status='BOLETOS_EMITIDOS'
-    
+
     PUC->>LOG: 28. Info: Boletos gerados {proposalId, count}
     PUC-->>API: 29. ✅ {boletos: [{codigo, pdf, linhaDigitavel}]}
     API-->>U: 30. ✅ 200 - Boletos disponíveis
-    
+
     %% 7. Usuário Efetua Pagamento (Externo ao Sistema)
     Note over U, LOG: 💳 PAGAMENTO EXTERNO - Fora do Sistema
     U->>U: 31. Cliente paga boleto<br/>(app bancário, lotérica, etc)
-    
+
     %% 8. Webhook de Confirmação de Pagamento
     Note over U, LOG: 🔄 WEBHOOK - Notificação Banco Inter
     BANK->>WEBHOOK: 32. POST /api/webhooks/inter/payment<br/>HMAC-SHA1 signature
     WEBHOOK->>WEBHOOK: 33. Validar signature HMAC
     WEBHOOK->>WEBHOOK: 34. Parse payload JSON
-    
+
     Note right of WEBHOOK: {<br/>  "codigoSolicitacao": "abc123",<br/>  "situacao": "PAGO",<br/>  "dataHoraSituacao": "2025-09-23T14:30:00Z",<br/>  "valorPago": 523.45<br/>}
-    
+
     %% 9. Processamento Assíncrono (Background Job)
     WEBHOOK->>QUEUE: 35. addJob('processPaymentWebhook', payload)
     QUEUE->>QUEUE: 36. Retry policy: 3 attempts, exp backoff
     WEBHOOK-->>BANK: 37. ✅ 200 - Webhook aceito
-    
+
     %% 10. Background Processing
     QUEUE->>PUC: 38. processPaymentWebhook(webhookData)
     PUC->>PG: 39. SELECT parcela WHERE codigo_inter = 'abc123'
     PG-->>PUC: 40. Parcela data {proposal_id, sequencia}
-    
+
     PUC->>PG: 41. UPDATE parcelas SET status='PAGO'<br/>WHERE codigo_inter = 'abc123'
     PUC->>PG: 42. SELECT COUNT(*) FROM parcelas<br/>WHERE proposal_id = X AND status != 'PAGO'
-    
+
     alt Todas Parcelas Pagas
         PG-->>PUC: 43. count = 0 (todas pagas)
         PUC->>FSM: 44. transitionTo(PAGAMENTO_AUTORIZADO)
@@ -157,12 +158,12 @@ sequenceDiagram
         PG-->>PUC: 43. count > 0 (parciais)
         PUC->>LOG: 46. Info: Pagamento parcial {proposalId, paid, remaining}
     end
-    
+
     PUC-->>QUEUE: 48. ✅ Webhook processado
-    
+
     %% Alternative flows - Múltiplos Unhappy Paths
     Note over U, LOG: ❌ UNHAPPY PATHS - Falhas Distribuídas
-    
+
     %% Inter API Authentication Failure
     alt OAuth Failure
         OAUTH->>BANK: 49. POST /oauth/token (certificado inválido)
@@ -172,7 +173,7 @@ sequenceDiagram
         API->>LOG: 53. Error: Inter API auth failed
         API-->>U: 54. ❌ Tente novamente em instantes
     end
-    
+
     %% Boleto Creation Timeout
     alt API Timeout
         INTER->>BANK: 55. POST /cobranca/v3/cobrancas (timeout 30s)
@@ -182,7 +183,7 @@ sequenceDiagram
         PUC-->>API: 59. ❌ 504 Gateway Timeout
         API-->>U: 60. ❌ Falha temporária - retry automático
     end
-    
+
     %% Database Constraint Violation
     alt Duplicate Boleto
         PUC->>PG: 61. INSERT INTO parcelas (duplicate codigo_inter)
@@ -190,7 +191,7 @@ sequenceDiagram
         PUC-->>API: 63. ❌ 409 Conflict - Boletos já existem
         API-->>U: 64. ❌ Operação já realizada
     end
-    
+
     %% Webhook Signature Validation Failure
     alt Invalid HMAC
         BANK->>WEBHOOK: 65. POST /webhooks/inter (signature inválida)
@@ -198,7 +199,7 @@ sequenceDiagram
         WEBHOOK-->>BANK: 67. ❌ 401 Unauthorized
         WEBHOOK->>LOG: 68. Warn: Invalid webhook signature
     end
-    
+
     %% Background Job Processing Failure
     alt Job Processing Error
         QUEUE->>PUC: 69. processPaymentWebhook(corruptedData)
@@ -216,6 +217,7 @@ sequenceDiagram
 ## 🔍 Análise Detalhada do Fluxo
 
 ### **Fase 1: Preparação e Autenticação (Steps 1-16)**
+
 - **Latência Esperada:** 200-800ms (primeiro acesso) / 50-200ms (token cached)
 - **Pontos Críticos:**
   - OAuth token cache hit/miss (step 11): 1ms vs 500-1000ms
@@ -224,6 +226,7 @@ sequenceDiagram
 - **Segurança:** Certificado cliente mTLS + HMAC webhook validation
 
 ### **Fase 2: Geração de Boletos (Steps 17-29)**
+
 - **Latência Esperada:** 300-1500ms (dependente do número de parcelas)
 - **Pontos Críticos:**
   - Cálculo financeiro IOF/TAC/CET (step 17): 10-50ms
@@ -232,6 +235,7 @@ sequenceDiagram
 - **Resiliência:** Rollback automático em caso de falha parcial
 
 ### **Fase 3: Processamento de Webhook (Steps 32-48)**
+
 - **Latência Esperada:** 50-200ms (async processing)
 - **Pontos Críticos:**
   - HMAC signature validation (step 33): 5-15ms
@@ -245,34 +249,34 @@ sequenceDiagram
 
 ### **Latência Total por Operação:**
 
-| **Operação** | **P50** | **P95** | **P99** | **Timeout** |
-|--------------|---------|---------|---------|-------------|
-| **Geração 1 Boleto** | 450ms | 1.2s | 2.5s | 10s |
-| **Geração 12 Boletos** | 2.8s | 6.5s | 12s | 30s |
-| **Webhook Processing** | 80ms | 250ms | 500ms | 5s |
-| **Status Update** | 120ms | 300ms | 600ms | 3s |
+| **Operação**           | **P50** | **P95** | **P99** | **Timeout** |
+| ---------------------- | ------- | ------- | ------- | ----------- |
+| **Geração 1 Boleto**   | 450ms   | 1.2s    | 2.5s    | 10s         |
+| **Geração 12 Boletos** | 2.8s    | 6.5s    | 12s     | 30s         |
+| **Webhook Processing** | 80ms    | 250ms   | 500ms   | 5s          |
+| **Status Update**      | 120ms   | 300ms   | 600ms   | 3s          |
 
 ### **Breakdown por Componente:**
 
 ```yaml
 # Perfil de latência baseado em integrações bancárias
 Inter_API_Operations:
-  OAuth_Token_Fresh: "500-1000ms (mTLS handshake + validation)"
-  OAuth_Token_Cached: "1-5ms (Redis lookup)"
-  Boleto_Creation: "200-800ms (network + processing)"
-  Webhook_Response: "100-300ms (async processing)"
+  OAuth_Token_Fresh: '500-1000ms (mTLS handshake + validation)'
+  OAuth_Token_Cached: '1-5ms (Redis lookup)'
+  Boleto_Creation: '200-800ms (network + processing)'
+  Webhook_Response: '100-300ms (async processing)'
 
 Financial_Calculations:
-  IOF_Calculation: "5-20ms (tax rules + daily rates)"
-  TAC_Fixed_Fee: "1-3ms (constant value)"
-  CET_Newton_Raphson: "10-50ms (iterative algorithm)"
-  Payment_Schedule: "5-30ms (date calculations)"
+  IOF_Calculation: '5-20ms (tax rules + daily rates)'
+  TAC_Fixed_Fee: '1-3ms (constant value)'
+  CET_Newton_Raphson: '10-50ms (iterative algorithm)'
+  Payment_Schedule: '5-30ms (date calculations)'
 
 Database_Operations:
-  Parcelas_Bulk_Insert: "20-100ms (12 parcelas avg)"
-  Status_Update: "10-50ms (single row update)"
-  Payment_Reconciliation: "20-80ms (aggregate queries)"
-  Webhook_Mapping: "5-25ms (indexed lookup)"
+  Parcelas_Bulk_Insert: '20-100ms (12 parcelas avg)'
+  Status_Update: '10-50ms (single row update)'
+  Payment_Reconciliation: '20-80ms (aggregate queries)'
+  Webhook_Mapping: '5-25ms (indexed lookup)'
 ```
 
 ---
@@ -304,10 +308,11 @@ Database_Operations:
 ### **Cascade Failure Scenarios:**
 
 #### **Cenário 1: Inter API Rate Limiting**
+
 ```yaml
 Trigger: Burst de geração de boletos (>100 req/min)
-Impact: "429 Too Many Requests - Boletos não gerados"
-Recovery_Time: "5-15 minutes (rate limit reset)"
+Impact: '429 Too Many Requests - Boletos não gerados'
+Recovery_Time: '5-15 minutes (rate limit reset)'
 Mitigation: |
   - Request rate limiting (10 req/s max)
   - Exponential backoff retry
@@ -316,10 +321,11 @@ Mitigation: |
 ```
 
 #### **Cenário 2: Webhook Signature Key Rotation**
+
 ```yaml
 Trigger: Banco Inter rotaciona chave HMAC sem aviso
-Impact: "Todos webhooks rejeitados - pagamentos não confirmados"
-Recovery_Time: "30-120 minutes (manual key update)"
+Impact: 'Todos webhooks rejeitados - pagamentos não confirmados'
+Recovery_Time: '30-120 minutes (manual key update)'
 Mitigation: |
   - Multiple signature validation (old + new keys)
   - Webhook signature monitoring + alerting
@@ -328,10 +334,11 @@ Mitigation: |
 ```
 
 #### **Cenário 3: Database Connection Pool Exhaustion**
+
 ```yaml
 Trigger: Alto volume de webhooks simultâneos
-Impact: "Webhook processing fails - payment data lost"
-Recovery_Time: "1-5 minutes (connection pool cleanup)"
+Impact: 'Webhook processing fails - payment data lost'
+Recovery_Time: '1-5 minutes (connection pool cleanup)'
 Mitigation: |
   - Dedicated connection pool for webhooks
   - Background job throttling
@@ -364,41 +371,49 @@ Webhook_Processing_Circuit_Breaker:
 ## ❌ Unhappy Paths Expandidos
 
 ### **1. Certificado mTLS Expirado**
+
 - **Trigger:** Certificado cliente expira durante operação
 - **Response:** 401 Unauthorized do Banco Inter
 - **Recovery:** Alerta imediato + renovação manual + retry automático
 
 ### **2. Inter API Indisponível**
+
 - **Trigger:** Manutenção programada ou outage não comunicado
 - **Response:** 503 Service Unavailable com retry exponencial
 - **Recovery:** Circuit breaker ativado + notificação ops team
 
 ### **3. Timeout na Criação de Boleto**
+
 - **Trigger:** Inter API demora >30s para responder
 - **Response:** 504 Gateway Timeout + rollback parcial
 - **Recovery:** Retry individual de boletos não criados
 
 ### **4. Dados Financeiros Inconsistentes**
+
 - **Trigger:** Erro no cálculo de IOF/TAC por mudança de regras
 - **Response:** 422 Unprocessable Entity com detalhes
 - **Recovery:** Recálculo com regras atualizadas
 
 ### **5. Webhook com Payload Corrupto**
+
 - **Trigger:** Banco Inter envia JSON malformado
 - **Response:** 400 Bad Request + parsing error
 - **Recovery:** Raw payload salvo para análise manual
 
 ### **6. Duplicate Webhook Delivery**
+
 - **Trigger:** Banco Inter reenvia webhook por timeout interno
 - **Response:** Idempotency check + 200 OK (já processado)
 - **Recovery:** Nenhuma ação - sistema naturalmente idempotente
 
 ### **7. Parcela Não Encontrada**
+
 - **Trigger:** Webhook referencia código inexistente no sistema
 - **Response:** Warning log + 404 Not Found (interno)
 - **Recovery:** Reconciliation job identifica discrepâncias
 
 ### **8. Database Deadlock**
+
 - **Trigger:** Múltiplos webhooks atualizando mesma proposta
 - **Response:** 500 Internal Server Error + retry job
 - **Recovery:** Exponential backoff + serialized processing
@@ -437,6 +452,7 @@ PaymentAuditLog = {
 ## 📊 Métricas e Monitoramento Financeiro
 
 ### **Métricas de Negócio:**
+
 ```typescript
 PaymentMetrics = {
   boletos_generated_total: Counter,
@@ -444,22 +460,24 @@ PaymentMetrics = {
   payments_received_total: Counter,
   payments_amount_total: Gauge,
   webhook_processing_duration: Histogram,
-  inter_api_success_rate: Gauge
-}
+  inter_api_success_rate: Gauge,
+};
 ```
 
 ### **Métricas Técnicas:**
+
 ```typescript
 TechnicalMetrics = {
   inter_api_response_time: Histogram,
   oauth_token_cache_hit_rate: Gauge,
   webhook_signature_validation_failures: Counter,
   payment_reconciliation_gaps: Gauge,
-  circuit_breaker_state: Enum
-}
+  circuit_breaker_state: Enum,
+};
 ```
 
 ### **Alertas Financeiros Críticos:**
+
 - **Inter API Down:** P0 Alert (Immediate)
 - **Webhook Failures > 5%:** P1 Alert (5 min)
 - **Payment Reconciliation Gap:** P1 Alert (15 min)
@@ -471,18 +489,21 @@ TechnicalMetrics = {
 ## 🔄 Evolução e Roadmap Financeiro
 
 ### **Melhorias de Integração:**
+
 1. **Multiple Payment Providers:** Suporte a Bradesco, Itaú APIs
 2. **Real-time Payment Status:** WebSocket notifications para frontend
 3. **Smart Retry Logic:** ML-based retry strategies
 4. **Advanced Reconciliation:** Automated discrepancy resolution
 
 ### **Segurança Financeira:**
+
 1. **HSM Integration:** Hardware security modules para certificates
 2. **Zero-Trust Architecture:** Enhanced authentication layers
 3. **Real-time Fraud Detection:** Anomaly detection em pagamentos
 4. **Regulatory Compliance:** LGPD + BACEN automation
 
 ### **Performance Otimizations:**
+
 1. **Bulk Boleto Creation:** Batch API calls para multiple parcelas
 2. **Webhook Streaming:** Kafka-based webhook processing
 3. **Database Partitioning:** Time-based partitioning para parcelas
@@ -493,22 +514,25 @@ TechnicalMetrics = {
 ## 📋 Validação e Testes Financeiros
 
 ### **Casos de Teste Críticos:**
+
 - ✅ Geração boleto único (happy path)
 - ✅ Geração 12 parcelas simultâneas
 - ✅ Webhook signature validation
 - ✅ Payment reconciliation accuracy
 - ✅ Inter API timeout scenarios
-- ✅ Certificate expiry handling  
+- ✅ Certificate expiry handling
 - ✅ Duplicate webhook processing
 - ✅ Partial payment scenarios
 
 ### **Load Testing Financeiro:**
+
 - **Concurrent Boleto Generation:** 10 simultâneas ✅
 - **Webhook Throughput:** 100 webhooks/s ✅
 - **Payment Processing:** 50 pagamentos/s sustentado ✅
 - **Database Load:** 1000 parcelas/min ✅
 
 ### **Security Testing:**
+
 - **Certificate Validation:** Expired/invalid certificates
 - **HMAC Bypass:** Signature tampering attempts
 - **SQL Injection:** Malicious webhook payloads
@@ -519,6 +543,7 @@ TechnicalMetrics = {
 ## 💡 Insights Arquiteturais Financeiros
 
 ### **Padrões Implementados:**
+
 1. **Saga Pattern:** Compensação em falhas de geração parcial
 2. **Event Sourcing:** Histórico completo de operações financeiras
 3. **CQRS Pattern:** Separação commands vs queries financeiras
@@ -526,6 +551,7 @@ TechnicalMetrics = {
 5. **Idempotency Pattern:** Webhook processing seguro
 
 ### **Trade-offs Financeiros:**
+
 - **Security vs. Performance:** mTLS overhead vs. integration security
 - **Consistency vs. Availability:** Strong consistency vs. payment processing continuity
 - **Cost vs. Reliability:** Multiple providers vs. vendor lock-in
@@ -540,4 +566,4 @@ TechnicalMetrics = {
 ---
 
 **GEM-07 AI Specialist System**  
-*25/08/2025 - Arquitetura Financeira Resiliente Implementada*
+_25/08/2025 - Arquitetura Financeira Resiliente Implementada_

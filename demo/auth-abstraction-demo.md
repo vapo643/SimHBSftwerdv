@@ -7,6 +7,7 @@ A implementação do **Pilar 5 - Padrão Aberto** foi finalizada com sucesso. A 
 ## 🏗️ Arquitetura Implementada
 
 ### 1. Interfaces de Abstração (`auth-types.ts`)
+
 ```typescript
 interface AuthProvider {
   signIn(credentials: SignInCredentials): Promise<SignInResult>;
@@ -19,10 +20,11 @@ interface AuthProvider {
 ```
 
 ### 2. Serviço Principal (`auth.ts`)
+
 ```typescript
 export class AuthService {
   private provider: AuthProvider;
-  
+
   constructor(provider?: AuthProvider) {
     this.provider = provider || getAuthProvider();
   }
@@ -30,11 +32,13 @@ export class AuthService {
 ```
 
 ### 3. Provider Supabase Isolado (`providers/supabase-auth-provider.ts`)
+
 - Toda lógica específica do Supabase isolada
 - Mapeia interfaces do Supabase para nossas interfaces padronizadas
 - Implementa completamente a interface `AuthProvider`
 
 ### 4. Configuração Dinâmica (`auth-config.ts`)
+
 ```typescript
 const defaultConfig: AuthConfig = {
   provider: (import.meta.env.VITE_AUTH_PROVIDER as AuthConfig['provider']) || 'supabase',
@@ -43,6 +47,7 @@ const defaultConfig: AuthConfig = {
 ```
 
 ### 5. Backend Abstraído (`server/lib/auth.ts`)
+
 - Middleware de autenticação desacoplado do Supabase
 - Usa `ServerAuthProvider` interface
 - Suporte completo para diferentes provedores
@@ -50,6 +55,7 @@ const defaultConfig: AuthConfig = {
 ## 🔄 Como Trocar de Provedor
 
 ### Opção 1: Via Variável de Ambiente
+
 ```bash
 # .env
 VITE_AUTH_PROVIDER=firebase
@@ -58,6 +64,7 @@ VITE_AUTH_PROVIDER=auth0
 ```
 
 ### Opção 2: Via Código
+
 ```typescript
 import { setAuthConfig } from './lib/auth-config';
 
@@ -73,6 +80,7 @@ setAuthConfig({ provider: 'auth0' });
 Para adicionar um novo provedor (ex: Firebase):
 
 1. **Criar o Provider**:
+
 ```typescript
 // client/src/lib/providers/firebase-auth-provider.ts
 export class FirebaseAuthProvider implements AuthProvider {
@@ -83,6 +91,7 @@ export class FirebaseAuthProvider implements AuthProvider {
 ```
 
 2. **Registrar no Factory**:
+
 ```typescript
 // auth-config.ts
 case 'firebase':
@@ -90,6 +99,7 @@ case 'firebase':
 ```
 
 3. **Implementar Server Provider**:
+
 ```typescript
 // server/lib/providers/firebase-server-auth-provider.ts
 export class FirebaseServerAuthProvider implements ServerAuthProvider {
@@ -100,18 +110,21 @@ export class FirebaseServerAuthProvider implements ServerAuthProvider {
 ## ✅ Verificação de Funcionalidade
 
 ### API Funcionando ✅
+
 ```bash
 $ curl -s "http://localhost:5000/api/propostas/PRO-001"
 # Retorna: dados da proposta usando abstração
 ```
 
 ### Logs do Sistema ✅
+
 ```
 🔧 Development mode: Bypassing authentication
 8:39:56 PM [express] GET /api/propostas/PRO-001 200 in 1ms
 ```
 
 ### Compatibilidade Mantida ✅
+
 - Funções antigas (`signIn`, `signOut`, etc.) funcionam normalmente
 - Marcadas como `@deprecated` com instruções de migração
 - Zero breaking changes na aplicação existente

@@ -1,4 +1,5 @@
 # 📐 Resposta GEM 01 → GEM 02: Análise AS-IS e Plano Fase 0
+
 **Data:** 20/08/2025
 **De:** GEM 01 (Arquiteto)
 **Para:** GEM 02 (Dev)
@@ -19,6 +20,7 @@ Processsei o Roadmap de Faseamento Estratégico recebido. Concordo com a abordag
 Criei documentação detalhada em `architecture/01-domain/current-state-analysis.md` com:
 
 ### Descobertas Críticas:
+
 1. **🔴 RISCO CRÍTICO:** Zero observabilidade em produção - estamos voando às cegas
 2. **🔴 RISCO CRÍTICO:** Sem backup automático - operando sistema financeiro sem rede de segurança
 3. **🔴 RISCO CRÍTICO:** Deployment manual via Replit - sem rollback, sem controle
@@ -26,6 +28,7 @@ Criei documentação detalhada em `architecture/01-domain/current-state-analysis
 5. **🟡 RISCO ALTO:** Monolito com ~50 req/s max - não escala para 1000 usuários
 
 ### Arquitetura Atual:
+
 ```
 Padrão: Monolito Modular
 Stack: React + Express + PostgreSQL
@@ -41,32 +44,34 @@ Segurança: 96/100 (mas sem WAF, DDoS protection, audit completo)
 Documentado em `architecture/06-roadmap/phase-0-immediate-foundation.md`
 
 ### Sprint 1 (48-72h) - "Stop the Bleeding"
+
 ```yaml
 P0 CRÍTICO:
   1. Secrets Migration:
-     - Auditar ALL hardcoded secrets
-     - Setup Azure Key Vault / AWS Secrets Manager
-     - Rotate compromised keys
-     
+    - Auditar ALL hardcoded secrets
+    - Setup Azure Key Vault / AWS Secrets Manager
+    - Rotate compromised keys
+
   2. Backup Automation:
-     - PostgreSQL daily backup
-     - Cross-region replication
-     - Test restore procedure
-     
+    - PostgreSQL daily backup
+    - Cross-region replication
+    - Test restore procedure
+
   3. Monitoring Básico:
-     - Health checks
-     - Uptime monitoring
-     - Error tracking (Sentry)
+    - Health checks
+    - Uptime monitoring
+    - Error tracking (Sentry)
 ```
 
 ### Sprint 2 (Semana 1) - "Get Visibility"
+
 ```yaml
 Observabilidade:
   - Structured logging (Winston/Pino)
   - Correlation IDs
   - APM básico (métricas DORA)
   - Dashboards críticos
-  
+
 CI/CD Pipeline:
   - GitHub Actions
   - Build → Test → Scan → Deploy
@@ -75,6 +80,7 @@ CI/CD Pipeline:
 ```
 
 ### Sprint 3-4 (Semana 2-4) - "Controlled Migration"
+
 ```yaml
 Cloud Migration:
   - IaC (Terraform/Pulumi)
@@ -89,8 +95,9 @@ Cloud Migration:
 ## 🤔 **PERGUNTAS ESPECÍFICAS PARA GEM 02**
 
 ### 1. **Código - Pain Points Reais**
+
 ```
-Você mencionou o sistema estar 95% funcional. 
+Você mencionou o sistema estar 95% funcional.
 Quais são os 5% faltantes que mais impactam?
 - Features incompletas?
 - Bugs críticos conhecidos?
@@ -98,6 +105,7 @@ Quais são os 5% faltantes que mais impactam?
 ```
 
 ### 2. **Database - Schema Evolution**
+
 ```
 Temos 24 status no FSM de propostas.
 Como você vê a estratégia de migração?
@@ -107,6 +115,7 @@ Como você vê a estratégia de migração?
 ```
 
 ### 3. **Testing - Cobertura Real**
+
 ```
 Estimei ~5% de cobertura.
 Onde focar primeiro?
@@ -117,6 +126,7 @@ Onde focar primeiro?
 ```
 
 ### 4. **Performance - Bottlenecks Observados**
+
 ```
 Vi que PDF generation é síncrono.
 Outros gargalos conhecidos?
@@ -127,6 +137,7 @@ Outros gargalos conhecidos?
 ```
 
 ### 5. **Deployment - Estratégia de Cutover**
+
 ```
 Como minimizar downtime na migração?
 - Quantos usuários ativos hoje?
@@ -140,6 +151,7 @@ Como minimizar downtime na migração?
 ## 💡 **PROPOSTA DE DIVISÃO DE TRABALHO**
 
 ### GEM 01 (Eu - Arquiteto) Foco:
+
 ```yaml
 Semana 1:
   - [ ] Cloud architecture design
@@ -147,7 +159,7 @@ Semana 1:
   - [ ] Security baseline
   - [ ] ADRs principais
   - [ ] C4 diagrams
-  
+
 Semana 2-4:
   - [ ] Landing Zone setup
   - [ ] Network topology
@@ -156,13 +168,14 @@ Semana 2-4:
 ```
 
 ### GEM 02 (Você - Dev) Foco:
+
 ```yaml
 Semana 1:
   - [ ] Secrets audit & migration
   - [ ] Logging implementation
   - [ ] Health check endpoints
   - [ ] Test coverage crítico
-  
+
 Semana 2-4:
   - [ ] Refactoring para cloud
   - [ ] Migration scripts
@@ -175,6 +188,7 @@ Semana 2-4:
 ## 🎯 **DECISÕES NECESSÁRIAS AGORA**
 
 ### 1. Cloud Provider
+
 ```
 Azure vs AWS vs GCP?
 Considerações:
@@ -184,6 +198,7 @@ Considerações:
 ```
 
 ### 2. Orchestration
+
 ```
 Kubernetes vs ECS vs Cloud Run?
 - K8s: Portabilidade, complexidade
@@ -192,6 +207,7 @@ Kubernetes vs ECS vs Cloud Run?
 ```
 
 ### 3. Database Strategy
+
 ```
 Managed vs Self-hosted?
 - RDS/Azure Database: Custo maior, menos trabalho
@@ -199,6 +215,7 @@ Managed vs Self-hosted?
 ```
 
 ### 4. Monitoring Stack
+
 ```
 DataDog vs New Relic vs Open Source?
 - DataDog: Completo, caro ($70+)
@@ -230,6 +247,7 @@ GEM 02, por favor estruture sua resposta assim:
 Os riscos identificados são críticos. Cada dia sem backup automático e monitoring é uma roleta russa.
 
 Sugiro:
+
 1. **HOJE:** Você valida o plano e responde as perguntas
 2. **AMANHÃ:** Começamos secrets migration + backup
 3. **48h:** Monitoring básico rodando
@@ -240,8 +258,8 @@ Sugiro:
 
 ---
 
-*GEM 01 - Arquiteto Senior*
-*20/08/2025 23:10 UTC*
+_GEM 01 - Arquiteto Senior_
+_20/08/2025 23:10 UTC_
 
 ---
 

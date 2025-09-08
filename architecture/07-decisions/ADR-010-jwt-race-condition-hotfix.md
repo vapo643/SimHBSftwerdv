@@ -1,6 +1,7 @@
 # ADR-010: JWT Race Condition Hotfix Implementation
 
 ## Status
+
 **IMPLEMENTADO** - 2025-08-28
 
 ## Context
@@ -8,6 +9,7 @@
 Durante os testes de carga da Operação Escudo de Produção - Missão 3, foi descoberto um bug crítico de race condition no middleware JWT que tornava o sistema inutilizável sob carga concurrent.
 
 ### Problema Identificado
+
 - Sistema funciona individualmente (1 usuário)
 - Falha sob concorrência (3+ usuários simultâneos)
 - Error rate: 14.17% com tokens válidos sendo rejeitados
@@ -51,6 +53,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 ```
 
 ### Logic Flow
+
 1. Check cache for valid token
 2. If cached and valid → use cached data
 3. If validation in progress → wait for result
@@ -59,12 +62,14 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 ## Consequences
 
 ### Positive
+
 - **92% error reduction**: 14.17% → 1.22%
 - Sistema operacional sob carga concurrent
 - Race conditions eliminadas
 - Performance melhorada para tokens cached
 
 ### Negative
+
 - Cache local não persiste entre restarts
 - Ainda não atende SLA ideal (0% error)
 - P95 latency ainda >500ms
@@ -72,11 +77,13 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 ## Metrics
 
 ### Before Hotfix
+
 - Error Rate: 14.17%
 - P95 Latency: 1720ms
 - Status: Inutilizável
 
 ### After Hotfix
+
 - Error Rate: 1.22%
 - P95 Latency: 1435ms
 - Status: Operacional

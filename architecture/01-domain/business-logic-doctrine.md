@@ -12,9 +12,9 @@
 
 Esta doutrina codifica as regras e padrões para implementação da lógica de negócio crítica do Sistema Simpix, garantindo consistência, robustez e gerenciamento explícito da complexidade através de Domain-Driven Design (DDD) e Máquinas de Estado Finitas (FSM). Nossa abordagem transforma regras de negócio de código implícito para arquitetura explícita e auditável.
 
-**Princípio Central:** *"A lógica de negócio deve ser transparente, testável e resiliente à mudança."*
+**Princípio Central:** _"A lógica de negócio deve ser transparente, testável e resiliente à mudança."_
 
-*Nota do Arquiteto: Esta doutrina foi refinada como resultado da remediação da Auditoria Red Team, incorporando especificações técnicas quantificáveis e alinhamento com framework de governança de riscos baseado em padrões da indústria financeira.*
+_Nota do Arquiteto: Esta doutrina foi refinada como resultado da remediação da Auditoria Red Team, incorporando especificações técnicas quantificáveis e alinhamento com framework de governança de riscos baseado em padrões da indústria financeira._
 
 ---
 
@@ -26,38 +26,40 @@ Esta doutrina codifica as regras e padrões para implementação da lógica de n
 
 #### **Taxonomia de Invariantes do Simpix:**
 
-| **Tipo** | **Escopo** | **Exemplo Simpix** | **Enforcement** |
-|----------|------------|-------------------|-----------------|
-| **Invariantes Hard** | Agregado único | `proposta.valor > 0` | Transacional imediato |
-| **Invariantes Soft** | Cross-agregado | `parceiro.limite_disponivel >= soma_propostas_ativas` | Consistência eventual |
-| **Invariantes de Estado** | FSM | `status=APROVADA → renda_validada=true` | Transição de estado |
-| **Invariantes Temporais** | Lifecycle | `data_vencimento > data_criacao` | Validação temporal |
+| **Tipo**                  | **Escopo**     | **Exemplo Simpix**                                    | **Enforcement**       |
+| ------------------------- | -------------- | ----------------------------------------------------- | --------------------- |
+| **Invariantes Hard**      | Agregado único | `proposta.valor > 0`                                  | Transacional imediato |
+| **Invariantes Soft**      | Cross-agregado | `parceiro.limite_disponivel >= soma_propostas_ativas` | Consistência eventual |
+| **Invariantes de Estado** | FSM            | `status=APROVADA → renda_validada=true`               | Transição de estado   |
+| **Invariantes Temporais** | Lifecycle      | `data_vencimento > data_criacao`                      | Validação temporal    |
 
 #### **Estratégia de Identificação:**
 
 **Processo de 3 Camadas:**
+
 1. **Análise de Stakeholders:** Entrevistas com especialistas de domínio
 2. **Auditoria de Código:** Revisão de validações existentes e regras implícitas
 3. **Análise de Falhas:** Estudo de bugs históricos relacionados a inconsistências
 
 **Exemplo Prático - Proposta de Crédito:**
+
 ```typescript
 // ❌ REGRA IMPLÍCITA (anti-pattern)
 if (proposta.renda * 12 < proposta.valor * 0.3) {
-  throw new Error("Renda insuficiente");
+  throw new Error('Renda insuficiente');
 }
 
 // ✅ INVARIANTE EXPLÍCITA (padrão Simpix)
 class PropostaInvariants {
   static readonly RELACAO_RENDA_MAXIMA = 0.3;
-  
+
   static validarCapacidadePagamento(proposta: Proposta): void {
     const rendaAnual = proposta.renda * 12;
     const comprometimentoMinimo = proposta.valor * this.RELACAO_RENDA_MAXIMA;
-    
+
     if (rendaAnual < comprometimentoMinimo) {
       throw new InvariantViolationError(
-        "CAPACIDADE_PAGAMENTO_INSUFICIENTE",
+        'CAPACIDADE_PAGAMENTO_INSUFICIENTE',
         `Renda anual R$ ${rendaAnual} inferior ao mínimo R$ ${comprometimentoMinimo}`
       );
     }
@@ -68,6 +70,7 @@ class PropostaInvariants {
 ### **1.2 Implementação de Invariantes**
 
 #### **Padrão Guard Clause:**
+
 ```typescript
 // Todas as invariantes são verificadas no início dos métodos críticos
 class Proposta {
@@ -76,7 +79,7 @@ class Proposta {
     this.invariants.validarCapacidadePagamento();
     this.invariants.validarDocumentacaoCompleta();
     this.invariants.validarLimiteParceiro();
-    
+
     // Lógica de negócio apenas após validação completa
     this.status = StatusProposta.APROVADA;
     this.dataAprovacao = new Date();
@@ -94,59 +97,68 @@ class Proposta {
 Nossa implementação segue as **4 Regras Fundamentais** de Vaughn Vernon:
 
 #### **Regra 1: Modelar Invariantes Verdadeiras em Boundaries de Consistência**
+
 - **Princípio:** Apenas invariantes que requerem consistência transacional devem estar no mesmo agregado
 - **Implementação Simpix:** Proposta + Parcelas no mesmo agregado (valor total deve ser coerente)
 
 #### **Regra 2: Design de Agregados Pequenos**
+
 - **Princípio:** Preferir agregados de entidade única (70% dos casos)
 - **Implementação Simpix:** `User`, `Parceiro`, `Produto` são agregados independentes
 
 #### **Regra 3: Referenciar Outros Agregados Apenas por ID**
+
 - **Princípio:** Evitar referências de objeto diretas entre agregados
 - **Implementação Simpix:** `Proposta.parceiroId` em vez de `Proposta.parceiro`
 
 #### **Regra 4: Consistência Eventual Entre Agregados**
+
 - **Princípio:** Usar domain events para coordenação cross-agregado
 - **Implementação Simpix:** `PropostaAprovadaEvent` → atualiza limite do parceiro
 
 ### **2.2 Agregado de Referência: Classe Proposta**
 
 **Estrutura Canônica:**
+
 ```typescript
 // Exemplo canônico de agregado bem projetado no Simpix
 export class Proposta {
   // Identificação (Aggregate Root)
   readonly id: PropostaId;
-  
+
   // Invariantes protegidas
   private _valor: Money;
   private _status: StatusProposta;
   private _parcelas: Parcela[];
-  
+
   // Referências por ID (não por objeto)
   readonly parceiroId: ParceiroId;
   readonly usuarioId: UserId;
   readonly produtoId: ProdutoId;
-  
+
   // Invariants enforcement
   private readonly invariants = new PropostaInvariants(this);
-  
+
   // Operações de negócio que preservam invariantes
   aprovar(aprovador: User): DomainEvent[] {
     this.invariants.validarAntesAprovacao();
-    
+
     this._status = StatusProposta.APROVADA;
     this.dataAprovacao = new Date();
-    
-    return [
-      new PropostaAprovadaEvent(this.id, this.parceiroId, this._valor)
-    ];
+
+    return [new PropostaAprovadaEvent(this.id, this.parceiroId, this._valor)];
   }
-  
+
   // Acesso controlado aos dados internos
-  get valor(): Money { return this._valor; }
-  get status(): StatusProposta { return this._status; }
-  get parcelas(): readonly Parcela[] { return Object.freeze([...this._parcelas]); }
+  get valor(): Money {
+    return this._valor;
+  }
+  get status(): StatusProposta {
+    return this._status;
+  }
+  get parcelas(): readonly Parcela[] {
+    return Object.freeze([...this._parcelas]);
+  }
 }
 ```
 
@@ -154,14 +166,15 @@ export class Proposta {
 
 **Mapeamento de Agregados do Simpix:**
 
-| **Agregado** | **Entities** | **Invariantes Protegidas** | **Size** |
-|--------------|--------------|----------------------------|----------|
-| `Proposta` | Proposta + Parcelas | Valor total, Status FSM | Pequeno |
-| `User` | User + Profile | Dados pessoais, Autenticação | Pequeno |
-| `Parceiro` | Parceiro + ConfigComercial | Limite crédito, Produtos | Médio |
-| `Produto` | Produto + TabelaComercial | Taxas, Regras comerciais | Médio |
+| **Agregado** | **Entities**               | **Invariantes Protegidas**   | **Size** |
+| ------------ | -------------------------- | ---------------------------- | -------- |
+| `Proposta`   | Proposta + Parcelas        | Valor total, Status FSM      | Pequeno  |
+| `User`       | User + Profile             | Dados pessoais, Autenticação | Pequeno  |
+| `Parceiro`   | Parceiro + ConfigComercial | Limite crédito, Produtos     | Médio    |
+| `Produto`    | Produto + TabelaComercial  | Taxas, Regras comerciais     | Médio    |
 
 **Padrão Repository (Um por Agregado):**
+
 ```typescript
 interface PropostaRepository {
   findById(id: PropostaId): Promise<Proposta | null>;
@@ -170,7 +183,7 @@ interface PropostaRepository {
 }
 
 // ❌ ANTI-PATTERN: Repository para entidades internas
-interface ParcelaRepository { } // NUNCA implementar
+interface ParcelaRepository {} // NUNCA implementar
 
 // ✅ PADRÃO CORRETO: Acesso via Aggregate Root
 const proposta = await repository.findById(propostaId);
@@ -186,13 +199,14 @@ const parcelas = proposta.parcelas; // Acesso controlado
 Nossa estratégia implementa **validação multinível** para separar responsabilidades:
 
 #### **Camada 1: Validação de Formato (API + Zod)**
+
 ```typescript
 // Validação sintática na entrada da API
 const createPropostaSchema = z.object({
   valor: z.number().positive().max(1000000),
   renda: z.number().positive(),
   parceiroId: z.string().uuid(),
-  produtoId: z.string().uuid()
+  produtoId: z.string().uuid(),
 });
 
 // Middleware de validação
@@ -200,12 +214,13 @@ app.post('/api/propostas', validateRequest(createPropostaSchema), createProposta
 ```
 
 #### **Camada 2: Validação de Regras de Negócio (Agregados)**
+
 ```typescript
 // Validação semântica dentro do domínio
 class PropostaInvariants {
   validarCapacidadePagamento(): void {
     const comprometimentoAtual = this.calcularComprometimentoRenda();
-    
+
     if (comprometimentoAtual > PropostaInvariants.COMPROMETIMENTO_MAXIMO) {
       throw new BusinessRuleViolationError(
         'COMPROMETIMENTO_RENDA_EXCEDIDO',
@@ -217,22 +232,20 @@ class PropostaInvariants {
 ```
 
 #### **Camada 3: Validação Cross-Agregado (Domain Services)**
+
 ```typescript
 // Validação que envolve múltiplos agregados
 class LimiteParceiroService {
-  async validarLimiteDisponivel(
-    parceiroId: ParceiroId, 
-    valorProposta: Money
-  ): Promise<void> {
+  async validarLimiteDisponivel(parceiroId: ParceiroId, valorProposta: Money): Promise<void> {
     const parceiro = await this.parceiroRepo.findById(parceiroId);
     const propostas = await this.propostaRepo.findByParceiroAndStatus(
-      parceiroId, 
+      parceiroId,
       StatusProposta.ATIVA
     );
-    
+
     const limiteUtilizado = propostas.reduce((sum, p) => sum + p.valor, 0);
     const limiteDisponivel = parceiro.limiteTotal - limiteUtilizado;
-    
+
     if (valorProposta > limiteDisponivel) {
       throw new BusinessRuleViolationError(
         'LIMITE_PARCEIRO_EXCEDIDO',
@@ -255,7 +268,7 @@ interface Specification<T> {
 
 class IdadeMinima implements Specification<User> {
   constructor(private idadeMinima: number) {}
-  
+
   isSatisfiedBy(user: User): boolean {
     return user.idade >= this.idadeMinima;
   }
@@ -263,16 +276,14 @@ class IdadeMinima implements Specification<User> {
 
 class RendaMinima implements Specification<User> {
   constructor(private rendaMinima: number) {}
-  
+
   isSatisfiedBy(user: User): boolean {
     return user.renda >= this.rendaMinima;
   }
 }
 
 // Uso composicional
-const usuarioElegivelCredito = new IdadeMinima(18)
-  .and(new RendaMinima(2000))
-  .and(new CPFValido());
+const usuarioElegivelCredito = new IdadeMinima(18).and(new RendaMinima(2000)).and(new CPFValido());
 
 if (!usuarioElegivelCredito.isSatisfiedBy(usuario)) {
   throw new BusinessRuleViolationError('USUARIO_NAO_ELEGIVEL');
@@ -290,6 +301,7 @@ if (!usuarioElegivelCredito.isSatisfiedBy(usuario)) {
 ### **4.2 Arquitetura FSM de Referência: StatusFsmService**
 
 **Estrutura Base:**
+
 ```typescript
 interface StateTransition {
   from: string;
@@ -307,13 +319,18 @@ interface FSMDefinition {
 
 class StatusFsmService {
   private readonly definition: FSMDefinition;
-  
+
   constructor() {
     this.definition = {
       initialState: 'RASCUNHO',
       states: [
-        'RASCUNHO', 'ANALISE', 'APROVADA', 'REJEITADA', 
-        'CONTRATADA', 'CANCELADA', 'FINALIZADA'
+        'RASCUNHO',
+        'ANALISE',
+        'APROVADA',
+        'REJEITADA',
+        'CONTRATADA',
+        'CANCELADA',
+        'FINALIZADA',
       ],
       transitions: [
         { from: 'RASCUNHO', to: 'ANALISE', event: 'ENVIAR_ANALISE' },
@@ -321,45 +338,49 @@ class StatusFsmService {
         { from: 'ANALISE', to: 'REJEITADA', event: 'REJEITAR' },
         { from: 'APROVADA', to: 'CONTRATADA', event: 'CONTRATAR', guards: ['validarAssinatura'] },
         // ... outras transições
-      ]
+      ],
     };
   }
-  
+
   canTransition(currentState: string, event: string): boolean {
-    return this.definition.transitions.some(t => 
-      t.from === currentState && t.event === event
-    );
+    return this.definition.transitions.some((t) => t.from === currentState && t.event === event);
   }
-  
+
   async transition(
-    propostaId: PropostaId, 
-    event: string, 
+    propostaId: PropostaId,
+    event: string,
     context: TransitionContext
   ): Promise<string> {
     const proposta = await this.propostaRepo.findById(propostaId);
     const currentState = proposta.status;
-    
+
     if (!this.canTransition(currentState, event)) {
       throw new InvalidTransitionError(
         `Transição '${event}' inválida a partir do estado '${currentState}'`
       );
     }
-    
+
     const transition = this.findTransition(currentState, event);
-    
+
     // Executar guards
     await this.executeGuards(transition.guards, proposta, context);
-    
+
     // Executar transição
     const newState = transition.to;
     proposta.updateStatus(newState);
-    
+
     // Executar actions
     await this.executeActions(transition.actions, proposta, context);
-    
+
     // Audit log
-    await this.auditService.logTransition(propostaId, currentState, newState, event, context.userId);
-    
+    await this.auditService.logTransition(
+      propostaId,
+      currentState,
+      newState,
+      event,
+      context.userId
+    );
+
     return newState;
   }
 }
@@ -368,20 +389,21 @@ class StatusFsmService {
 ### **4.3 Guards e Actions**
 
 **Guards (Pré-condições):**
+
 ```typescript
 class PropostaGuards {
   static async validarDocumentacao(proposta: Proposta): Promise<void> {
     const documentos = await this.documentoService.findByProposta(proposta.id);
     const documentosObrigatorios = ['CPF', 'COMPROVANTE_RENDA', 'COMPROVANTE_RESIDENCIA'];
-    
+
     for (const tipo of documentosObrigatorios) {
-      const documento = documentos.find(d => d.tipo === tipo);
+      const documento = documentos.find((d) => d.tipo === tipo);
       if (!documento || !documento.validado) {
         throw new GuardViolationError(`Documento ${tipo} não validado`);
       }
     }
   }
-  
+
   static async validarAssinatura(proposta: Proposta): Promise<void> {
     const assinatura = await this.clickSignService.getAssinatura(proposta.contratoId);
     if (!assinatura || !assinatura.assinadoTodasPartes) {
@@ -392,16 +414,17 @@ class PropostaGuards {
 ```
 
 **Actions (Efeitos Colaterais):**
+
 ```typescript
 class PropostaActions {
   static async enviarNotificacaoAprovacao(proposta: Proposta): Promise<void> {
     await this.emailService.send({
       to: proposta.usuario.email,
       template: 'PROPOSTA_APROVADA',
-      data: { numeroProposta: proposta.numero, valor: proposta.valor }
+      data: { numeroProposta: proposta.numero, valor: proposta.valor },
     });
   }
-  
+
   static async atualizarLimiteParceiro(proposta: Proposta): Promise<void> {
     await this.parceiroService.consumirLimite(proposta.parceiroId, proposta.valor);
   }
@@ -429,7 +452,7 @@ await this.auditRepo.save({
   event: 'APROVAR',
   userId: context.userId,
   timestamp: new Date(),
-  metadata: { justificativa: context.justificativa }
+  metadata: { justificativa: context.justificativa },
 });
 ```
 
@@ -441,34 +464,36 @@ await this.auditRepo.save({
 
 **Thresholds Mandatórios:**
 
-| **Complexidade** | **Ação** | **Prazo** | **Responsável** |
-|------------------|----------|-----------|-----------------|
-| **1-10** | ✅ Aceitável | - | - |
-| **11-15** | ⚠️ Revisão recomendada | Próximo sprint | Desenvolvedor |
-| **16-20** | 🚨 Refatoração obrigatória | 2 sprints | Tech Lead |
-| **21+** | ❌ Bloqueio de merge | Imediato | Arquiteto |
+| **Complexidade** | **Ação**                   | **Prazo**      | **Responsável** |
+| ---------------- | -------------------------- | -------------- | --------------- |
+| **1-10**         | ✅ Aceitável               | -              | -               |
+| **11-15**        | ⚠️ Revisão recomendada     | Próximo sprint | Desenvolvedor   |
+| **16-20**        | 🚨 Refatoração obrigatória | 2 sprints      | Tech Lead       |
+| **21+**          | ❌ Bloqueio de merge       | Imediato       | Arquiteto       |
 
 ### **5.2 Implementação no CI/CD**
 
 **ESLint Configuration (.eslintrc.js):**
+
 ```javascript
 module.exports = {
   rules: {
-    'complexity': ['error', { max: 15 }],
+    complexity: ['error', { max: 15 }],
     'max-lines-per-function': ['error', { max: 50 }],
     'max-depth': ['error', { max: 4 }],
-    'max-nested-callbacks': ['error', { max: 3 }]
-  }
+    'max-nested-callbacks': ['error', { max: 3 }],
+  },
 };
 ```
 
 **GitHub Actions Integration:**
+
 ```yaml
 - name: Complexity Analysis
   run: |
     npx eslint --ext .ts,.tsx src/ --format json --output-file complexity-report.json
     COMPLEX_FUNCTIONS=$(cat complexity-report.json | jq '[.[] | .messages[] | select(.ruleId == "complexity")] | length')
-    
+
     if [ "$COMPLEX_FUNCTIONS" -gt 0 ]; then
       echo "❌ $COMPLEX_FUNCTIONS functions exceed complexity threshold"
       exit 1
@@ -478,43 +503,44 @@ module.exports = {
 ### **5.3 Estratégias de Redução de Complexidade**
 
 #### **Padrão Extract Method:**
+
 ```typescript
 // ❌ ANTES: Alta complexidade (CC = 12)
 function processarProposta(dados: PropostaData): PropostaResult {
   if (!dados.usuario) throw new Error("Usuário obrigatório");
   if (!dados.valor || dados.valor <= 0) throw new Error("Valor inválido");
   if (!dados.produto) throw new Error("Produto obrigatório");
-  
+
   let taxa = 0.1;
   if (dados.produto.tipo === 'PREMIUM') {
     taxa = 0.08;
   } else if (dados.produto.tipo === 'GOLD') {
     taxa = 0.09;
   }
-  
+
   const usuario = this.userService.findById(dados.usuario.id);
   if (usuario.score < 500) {
     taxa += 0.02;
   } else if (usuario.score > 800) {
     taxa -= 0.01;
   }
-  
+
   const parcelas = [];
   for (let i = 1; i <= dados.numeroParcelas; i++) {
     const valor = this.calcularParcela(dados.valor, taxa, i);
     parcelas.push({ numero: i, valor, vencimento: this.calcularVencimento(i) });
   }
-  
+
   return { proposta: dados, taxa, parcelas };
 }
 
 // ✅ DEPOIS: Baixa complexidade (CC = 3 por função)
 function processarProposta(dados: PropostaData): PropostaResult {
   this.validarDadosObrigatorios(dados);
-  
+
   const taxa = this.calcularTaxaFinal(dados);
   const parcelas = this.gerarParcelas(dados, taxa);
-  
+
   return { proposta: dados, taxa, parcelas };
 }
 
@@ -532,6 +558,7 @@ private calcularTaxaFinal(dados: PropostaData): number {
 ```
 
 #### **Padrão Strategy para Switch Statements:**
+
 ```typescript
 // ❌ ANTES: Switch complexo
 function calcularTaxa(tipoProduto: string, score: number): number {
@@ -539,10 +566,10 @@ function calcularTaxa(tipoProduto: string, score: number): number {
     case 'BASICO':
       if (score < 500) return 0.15;
       else if (score < 700) return 0.12;
-      else return 0.10;
+      else return 0.1;
     case 'PREMIUM':
       if (score < 500) return 0.12;
-      else if (score < 700) return 0.10;
+      else if (score < 700) return 0.1;
       else return 0.08;
     // ... mais casos
   }
@@ -557,14 +584,14 @@ class TaxaBasica implements TaxaStrategy {
   calcular(score: number): number {
     if (score < 500) return 0.15;
     if (score < 700) return 0.12;
-    return 0.10;
+    return 0.1;
   }
 }
 
 const strategies = new Map<string, TaxaStrategy>([
   ['BASICO', new TaxaBasica()],
   ['PREMIUM', new TaxaPremium()],
-  ['GOLD', new TaxaGold()]
+  ['GOLD', new TaxaGold()],
 ]);
 
 function calcularTaxa(tipoProduto: string, score: number): number {
@@ -577,13 +604,14 @@ function calcularTaxa(tipoProduto: string, score: number): number {
 ### **5.4 Monitoramento Contínuo**
 
 **SonarQube Quality Gate:**
+
 ```yaml
 sonar.qualitygate.conditions:
   - metric: complexity
     op: GT
     error: 15
   - metric: function_complexity
-    op: GT 
+    op: GT
     error: 10
   - metric: cognitive_complexity
     op: GT
@@ -591,6 +619,7 @@ sonar.qualitygate.conditions:
 ```
 
 **Dashboard de Métricas:**
+
 - **Complexidade média por módulo**
 - **Top 10 funções mais complexas**
 - **Tendência de complexidade ao longo do tempo**
@@ -601,6 +630,7 @@ sonar.qualitygate.conditions:
 ## 📋 Implementação e Governance
 
 ### **Checklist de Conformidade**
+
 - [ ] Invariantes identificadas e documentadas
 - [ ] Agregados projetados conforme regras de Vernon
 - [ ] Validação multicamada implementada
@@ -610,6 +640,7 @@ sonar.qualitygate.conditions:
 - [ ] Testes de invariantes cobrindo cenários críticos
 
 ### **Processo de Revisão**
+
 1. **Code Review obrigatório** para mudanças em agregados
 2. **Validação de arquiteto** para novos FSMs
 3. **Análise de complexidade** automatizada no CI/CD
@@ -622,11 +653,13 @@ sonar.qualitygate.conditions:
 ### **CONFIANÇA NA IMPLEMENTAÇÃO: 92%**
 
 **Alta Confiança (95%):**
+
 - Padrões DDD baseados em Vernon/Fowler (fontes P1 consultadas)
 - FSM patterns validados em sistemas enterprise
 - Complexidade ciclomática com thresholds industry-standard
 
 **Incerteza Controlada (8%):**
+
 - Adaptação específica para domínio financeiro brasileiro
 - Integração com stack TypeScript + Drizzle
 - Performance de FSM em alto volume
@@ -634,11 +667,13 @@ sonar.qualitygate.conditions:
 ### **RISCOS IDENTIFICADOS: MÉDIO**
 
 **Riscos Técnicos:**
+
 - Overhead de validação pode impactar performance
 - Complexidade de debugging em FSMs complexas
 - Curva de aprendizado para padrões DDD
 
 **Mitigações:**
+
 - Profiling contínuo de performance
 - Ferramentas de visualização de FSM
 - Treinamento e documentação detalhada
@@ -667,4 +702,4 @@ sonar.qualitygate.conditions:
 ---
 
 **Arquiteto de Domínio**  
-*25/08/2025 - Lógica de Negócio como Arquitetura Explícita*
+_25/08/2025 - Lógica de Negócio como Arquitetura Explícita_

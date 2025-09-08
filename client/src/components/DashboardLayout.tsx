@@ -55,11 +55,21 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   // UX-003: Função para determinar qual seção do accordion deve estar aberta
   const getDefaultOpenSection = (currentPath: string): string => {
     if (currentPath.startsWith('/dashboard')) return 'principal';
-    if (currentPath.startsWith('/propostas') || currentPath.startsWith('/credito') || currentPath.startsWith('/formalizacao')) return 'principal';
+    if (
+      currentPath.startsWith('/propostas') ||
+      currentPath.startsWith('/credito') ||
+      currentPath.startsWith('/formalizacao')
+    )
+      return 'principal';
     if (currentPath.startsWith('/financeiro')) return 'financeiro';
     if (currentPath.startsWith('/admin/usuarios')) return 'gestao-acesso';
     if (currentPath.startsWith('/configuracoes')) return 'configuracoes';
-    if (currentPath.startsWith('/parceiros') || currentPath.startsWith('/admin/lojas') || currentPath.startsWith('/gestao/contratos')) return 'gestao-comercial';
+    if (
+      currentPath.startsWith('/parceiros') ||
+      currentPath.startsWith('/admin/lojas') ||
+      currentPath.startsWith('/gestao/contratos')
+    )
+      return 'gestao-comercial';
     if (currentPath.startsWith('/admin/security')) return 'seguranca';
     return 'principal'; // Padrão
   };
@@ -125,8 +135,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
       >
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center justify-between border-b px-6">
-            <Link 
-              to="/dashboard" 
+            <Link
+              to="/dashboard"
               onClick={handleNavClick}
               className="flex items-center gap-2 font-semibold"
             >
@@ -140,8 +150,12 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
           <div className="flex-1 overflow-auto py-2">
             <nav className="px-4">
               {/* UX-003: Accordion Navigation */}
-              <Accordion type="single" defaultValue={getDefaultOpenSection(location)} collapsible className="space-y-2">
-                
+              <Accordion
+                type="single"
+                defaultValue={getDefaultOpenSection(location)}
+                collapsible
+                className="space-y-2"
+              >
                 {/* Workflow Principal */}
                 <AccordionItem value="principal" className="border-none">
                   <AccordionTrigger className="hover:no-underline py-2 px-3">
@@ -182,9 +196,11 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                           switch (user?.role) {
                             case 'ATENDENTE':
                               // ATENDENTE: Dashboard, Nova Proposta e Formalização
-                              return ['📊 Dashboard', '➕ Nova Proposta', '📄 Formalização'].includes(
-                                item.name
-                              );
+                              return [
+                                '📊 Dashboard',
+                                '➕ Nova Proposta',
+                                '📄 Formalização',
+                              ].includes(item.name);
 
                             case 'ANALISTA':
                               // ANALISTA: APENAS Fila de Análise
@@ -534,18 +550,14 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link 
-                  href="/configuracoes" 
-                  onClick={handleNavClick}
-                  className="flex items-center"
-                >
+                <Link href="/configuracoes" onClick={handleNavClick} className="flex items-center">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Configurações</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link 
-                  href="/configuracoes/sessoes" 
+                <Link
+                  href="/configuracoes/sessoes"
                   onClick={handleNavClick}
                   className="flex items-center"
                 >
@@ -561,12 +573,12 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        
+
         {/* UX-008: Breadcrumbs Navigation */}
         <div className="border-b bg-background/95 px-6 py-3">
           <Breadcrumbs />
         </div>
-        
+
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">{children}</main>
       </div>
     </div>

@@ -12,6 +12,7 @@
 ### 1.1 Situação Atual
 
 O sistema Simpix processa dados altamente sensíveis (PII - Personally Identifiable Information) incluindo:
+
 - Dados pessoais: CPF, RG, data de nascimento, endereço completo
 - Dados financeiros: contas bancárias, rendimentos, histórico de crédito
 - Dados contratuais: valores, taxas, condições de pagamento
@@ -41,6 +42,7 @@ O sistema Simpix processa dados altamente sensíveis (PII - Personally Identifia
 **Adotaremos uma estratégia de "Zero-PII em GETs" com validação Zod obrigatória na borda de todas as APIs.**
 
 Dados PII sensíveis **NUNCA** devem ser expostos em respostas GET. Em vez disso, usaremos:
+
 - **Identificadores opacos** para referências
 - **Dados mascarados** quando visualização parcial for necessária
 - **Endpoints dedicados com auditoria** para acesso completo quando justificado
@@ -87,19 +89,19 @@ export const schemas = {
     createProposal: createProposalSchema,
     updateClient: updateClientSchema,
   },
-  
+
   // Schemas de saída (responses)
   output: {
-    proposalPublic: proposalPublicSchema,    // Sem PII
+    proposalPublic: proposalPublicSchema, // Sem PII
     proposalInternal: proposalInternalSchema, // Com PII mascarado
-    proposalAudit: proposalAuditSchema,      // Completo (auditado)
+    proposalAudit: proposalAuditSchema, // Completo (auditado)
   },
-  
+
   // Schemas compartilhados
   common: {
     paginationParams: paginationSchema,
     errorResponse: errorResponseSchema,
-  }
+  },
 };
 ```
 
@@ -110,7 +112,7 @@ graph TD
     A[Base Schema] --> B[Public Schema<br/>Sem PII]
     A --> C[Internal Schema<br/>PII Mascarado]
     A --> D[Audit Schema<br/>PII Completo]
-    
+
     B --> E[GET /api/public/*]
     C --> F[GET /api/internal/*]
     D --> G[POST /api/audit/*]
@@ -135,15 +137,15 @@ export const validateRequest = (schema: ZodSchema) => {
       if (error instanceof z.ZodError) {
         // Resposta padronizada RFC 7807
         return res.status(400).json({
-          type: "/errors/validation-failed",
-          title: "Validation Failed",
+          type: '/errors/validation-failed',
+          title: 'Validation Failed',
           status: 400,
-          detail: "Request body validation failed",
-          errors: error.errors.map(e => ({
+          detail: 'Request body validation failed',
+          errors: error.errors.map((e) => ({
             field: e.path.join('.'),
             message: e.message,
-            code: e.code
-          }))
+            code: e.code,
+          })),
         });
       }
       next(error);
@@ -152,7 +154,8 @@ export const validateRequest = (schema: ZodSchema) => {
 };
 
 // Uso em rotas
-router.post('/api/proposals',
+router.post(
+  '/api/proposals',
   validateRequest(schemas.input.createProposal), // PRIMEIRA linha do handler
   async (req, res) => {
     const data = req.validatedBody; // Já validado e tipado
@@ -169,19 +172,17 @@ export const validateResponse = (schema: ZodSchema) => {
   return async (data: any): Promise<any> => {
     // Remove campos não definidos no schema
     const validated = await schema.parseAsync(data);
-    
+
     // Auditoria de campos removidos
-    const removed = Object.keys(data).filter(
-      key => !(key in validated)
-    );
-    
+    const removed = Object.keys(data).filter((key) => !(key in validated));
+
     if (removed.length > 0) {
       logger.warn('Response sanitization removed fields', {
         removed,
-        endpoint: req.originalUrl
+        endpoint: req.originalUrl,
       });
     }
-    
+
     return validated;
   };
 };
@@ -193,12 +194,12 @@ export const validateResponse = (schema: ZodSchema) => {
 
 ### 5.1 Classificação de Dados
 
-| **Categoria** | **Campos** | **Tratamento GET** | **Tratamento POST/PUT** |
-|---------------|------------|-------------------|------------------------|
-| **PII Crítico** | CPF, RG, CNH | Sempre mascarado | Validado + Criptografado |
-| **PII Sensível** | Nome completo, endereço | Parcialmente mascarado | Validado |
-| **PII Financeiro** | Conta bancária, salário | Nunca exposto | Validado + Auditado |
-| **PII Público** | Nome social, cidade | Pode ser exposto | Validado |
+| **Categoria**      | **Campos**              | **Tratamento GET**     | **Tratamento POST/PUT**  |
+| ------------------ | ----------------------- | ---------------------- | ------------------------ |
+| **PII Crítico**    | CPF, RG, CNH            | Sempre mascarado       | Validado + Criptografado |
+| **PII Sensível**   | Nome completo, endereço | Parcialmente mascarado | Validado                 |
+| **PII Financeiro** | Conta bancária, salário | Nunca exposto          | Validado + Auditado      |
+| **PII Público**    | Nome social, cidade     | Pode ser exposto       | Validado                 |
 
 ### 5.2 Funções de Mascaramento
 
@@ -208,7 +209,7 @@ export const maskCPF = (cpf: string): string => {
   // Input: 123.456.789-00
   // Output: ***.***.789-**
   const clean = cpf.replace(/\D/g, '');
-  return `***.***.${ clean.slice(6, 9)}-**`;
+  return `***.***.${clean.slice(6, 9)}-**`;
 };
 
 export const maskRG = (rg: string): string => {
@@ -239,13 +240,14 @@ export const maskName = (name: string): string => {
 
 ```typescript
 // server/routes/audit-access.ts
-router.post('/api/audit/pii-access',
+router.post(
+  '/api/audit/pii-access',
   requireRole(['ADMIN', 'COMPLIANCE']),
   auditMiddleware,
   rateLimitStrict, // Max 10 req/min
   async (req: AuthenticatedRequest, res) => {
     const { resourceId, fields, justification } = req.body;
-    
+
     // Log de auditoria ANTES do acesso
     await auditLogger.log({
       event: 'PII_ACCESS_REQUEST',
@@ -254,38 +256,38 @@ router.post('/api/audit/pii-access',
       fields,
       justification,
       timestamp: new Date(),
-      ip: req.ip
+      ip: req.ip,
     });
-    
+
     // Verificar permissões granulares
     const allowed = await checkPIIPermissions(req.user, fields);
     if (!allowed) {
-      return res.status(403).json({ 
-        error: 'Insufficient privileges for requested PII fields' 
+      return res.status(403).json({
+        error: 'Insufficient privileges for requested PII fields',
       });
     }
-    
+
     // Buscar dados com timeout curto
     const data = await fetchPIIData(resourceId, fields, {
       timeout: 5000,
-      audit: true
+      audit: true,
     });
-    
+
     // Log de auditoria APÓS o acesso
     await auditLogger.log({
       event: 'PII_ACCESS_GRANTED',
       userId: req.user.id,
       resourceId,
       fieldsAccessed: Object.keys(data),
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
+
     // Resposta com TTL curto
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.json({
       data,
       accessId: generateAccessId(), // Para rastreamento
-      expiresIn: 300 // 5 minutos
+      expiresIn: 300, // 5 minutos
     });
   }
 );
@@ -298,29 +300,31 @@ router.post('/api/audit/pii-access',
 ### 6.1 Regras de Evolução
 
 1. **Adições são sempre opcionais**
+
    ```typescript
    // ✅ CORRETO - Campo novo opcional
    const schemaV2 = schemaV1.extend({
-     newField: z.string().optional()
+     newField: z.string().optional(),
    });
-   
+
    // ❌ ERRADO - Campo novo obrigatório quebra compatibilidade
    const schemaV2 = schemaV1.extend({
-     newField: z.string() // Sem .optional()
+     newField: z.string(), // Sem .optional()
    });
    ```
 
 2. **Remoções via deprecação gradual**
+
    ```typescript
    // Passo 1: Marcar como deprecated
    const schema = z.object({
      oldField: z.string().optional(), // @deprecated Use newField
-     newField: z.string().optional()
+     newField: z.string().optional(),
    });
-   
+
    // Passo 2: Após 3 meses, remover
    const schema = z.object({
-     newField: z.string().optional()
+     newField: z.string().optional(),
    });
    ```
 
@@ -339,19 +343,17 @@ export const SchemaRegistry = {
   versions: {
     '1.0.0': schemasV1,
     '1.1.0': schemasV1_1,
-    '2.0.0': schemasV2
+    '2.0.0': schemasV2,
   },
-  
+
   current: '2.0.0',
   minimum: '1.1.0', // Versão mínima suportada
-  
+
   migrate(data: any, fromVersion: string, toVersion: string) {
     // Lógica de migração entre versões
     const migrations = this.getMigrationPath(fromVersion, toVersion);
-    return migrations.reduce((acc, migration) => 
-      migration(acc), data
-    );
-  }
+    return migrations.reduce((acc, migration) => migration(acc), data);
+  },
 };
 ```
 
@@ -382,13 +384,13 @@ jobs:
     steps:
       - name: Validate Zod Schemas
         run: npm run validate:schemas
-        
+
       - name: Check PII Exposure
         run: npm run audit:pii
-        
+
       - name: Schema Compatibility Check
         run: npm run test:schema-compat
-        
+
       - name: Generate OpenAPI from Zod
         run: npm run generate:openapi
 ```

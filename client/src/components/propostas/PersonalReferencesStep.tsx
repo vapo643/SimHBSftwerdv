@@ -18,7 +18,7 @@ export function PersonalReferencesStep() {
   const { addReference, updateReference, removeReference, setError, clearError } =
     useProposalActions();
   const { personalReferences, errors, clientData } = state;
-  
+
   // 🎆 AUTO-PREENCHIMENTO: Preencher referências se cliente já existe
   const [referenciasPreenchidas, setReferenciasPreenchidas] = React.useState(false);
 
@@ -62,7 +62,7 @@ export function PersonalReferencesStep() {
       removeReference(personalReferences.length - 1);
     }
   }, [personalReferences.length, addReference, removeReference, updateReference]);
-  
+
   // REMOVIDO: Auto-preenchimento de referências até que dados reais sejam implementados na API
 
   const handleReferenceChange = (

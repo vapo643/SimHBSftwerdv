@@ -4,7 +4,15 @@ import { apiRequest } from '@/lib/queryClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, XCircle, TrendingUp, DollarSign, FileText, Loader2 } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  TrendingUp,
+  DollarSign,
+  FileText,
+  Loader2,
+} from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 /**

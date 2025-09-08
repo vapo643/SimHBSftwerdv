@@ -1,4 +1,5 @@
 # 📊 Matriz de Requisitos Não-Funcionais (NFRs) e SLOs
+
 **Versão:** 1.0  
 **Data:** 21/08/2025  
 **Autor:** GEM 02 (Dev Specialist)  
@@ -10,15 +11,16 @@
 
 ### **Matriz de Priorização**
 
-| Prioridade | NFR | Peso | Justificativa | Impacto no Negócio |
-|------------|-----|------|---------------|-------------------|
-| **P0** | **Segurança** | 10/10 | Sistema financeiro com dados sensíveis (PII, financeiros) | Compliance regulatório, proteção contra fraudes |
-| **P0** | **Disponibilidade** | 9/10 | Operação crítica para parceiros comerciais | Perda direta de receita se indisponível |
-| **P1** | **Performance** | 8/10 | UX e produtividade dos operadores | Eficiência operacional, satisfação do usuário |
-| **P1** | **Escalabilidade** | 7/10 | Crescimento esperado de 10x em 12 meses | Capacidade de atender demanda futura |
-| **P2** | **Manutenibilidade** | 6/10 | Velocidade de evolução do produto | Time-to-market de novas features |
+| Prioridade | NFR                  | Peso  | Justificativa                                             | Impacto no Negócio                              |
+| ---------- | -------------------- | ----- | --------------------------------------------------------- | ----------------------------------------------- |
+| **P0**     | **Segurança**        | 10/10 | Sistema financeiro com dados sensíveis (PII, financeiros) | Compliance regulatório, proteção contra fraudes |
+| **P0**     | **Disponibilidade**  | 9/10  | Operação crítica para parceiros comerciais                | Perda direta de receita se indisponível         |
+| **P1**     | **Performance**      | 8/10  | UX e produtividade dos operadores                         | Eficiência operacional, satisfação do usuário   |
+| **P1**     | **Escalabilidade**   | 7/10  | Crescimento esperado de 10x em 12 meses                   | Capacidade de atender demanda futura            |
+| **P2**     | **Manutenibilidade** | 6/10  | Velocidade de evolução do produto                         | Time-to-market de novas features                |
 
 ### **Framework de Decisão**
+
 ```
 IF (NFR impacta compliance OR segurança financeira) THEN P0
 ELSE IF (NFR impacta receita diretamente) THEN P0
@@ -32,40 +34,42 @@ ELSE P2
 
 ### **2.1 Segurança**
 
-| Métrica | SLO | SLI (Indicador) | Medição |
-|---------|-----|-----------------|---------|
-| **Vulnerabilidades Críticas** | 0 em produção | CVSS Score > 9.0 | Scan semanal (OWASP/Snyk) |
-| **Tempo de Patch Crítico** | < 24 horas | Time to remediation | Desde detecção até deploy |
-| **Autenticação** | 0% bypass | Failed auth attempts | Logs de auditoria |
-| **Criptografia** | 100% dados sensíveis | PII não criptografado | Audit mensal |
-| **Compliance PCI** | Level 2 | Assessment score | Auditoria trimestral |
+| Métrica                       | SLO                  | SLI (Indicador)       | Medição                   |
+| ----------------------------- | -------------------- | --------------------- | ------------------------- |
+| **Vulnerabilidades Críticas** | 0 em produção        | CVSS Score > 9.0      | Scan semanal (OWASP/Snyk) |
+| **Tempo de Patch Crítico**    | < 24 horas           | Time to remediation   | Desde detecção até deploy |
+| **Autenticação**              | 0% bypass            | Failed auth attempts  | Logs de auditoria         |
+| **Criptografia**              | 100% dados sensíveis | PII não criptografado | Audit mensal              |
+| **Compliance PCI**            | Level 2              | Assessment score      | Auditoria trimestral      |
 
 ### **2.2 Disponibilidade**
 
-| Métrica | SLO | SLI (Indicador) | Medição |
-|---------|-----|-----------------|---------|
-| **Uptime API Principal** | 99.9% mensal (alinhado com scope-definition.md) | HTTP 200 responses | Health check cada 30s |
-| **Uptime Database** | 99.95% mensal | Connection success | Connection pool metrics |
-| **Uptime Integrações** | 99.5% mensal | API responses | Circuit breaker status |
-| **RTO (Recovery Time)** | < 1 hora | Time to restore | Desde alerta até resolução |
-| **RPO (Recovery Point)** | < 1 hora | Data loss window | Último backup bem-sucedido |
+| Métrica                  | SLO                                             | SLI (Indicador)    | Medição                    |
+| ------------------------ | ----------------------------------------------- | ------------------ | -------------------------- |
+| **Uptime API Principal** | 99.9% mensal (alinhado com scope-definition.md) | HTTP 200 responses | Health check cada 30s      |
+| **Uptime Database**      | 99.95% mensal                                   | Connection success | Connection pool metrics    |
+| **Uptime Integrações**   | 99.5% mensal                                    | API responses      | Circuit breaker status     |
+| **RTO (Recovery Time)**  | < 1 hora                                        | Time to restore    | Desde alerta até resolução |
+| **RPO (Recovery Point)** | < 1 hora                                        | Data loss window   | Último backup bem-sucedido |
 
 ### **2.3 Performance**
 
 #### **Matriz SLO/SLI com Implementação Técnica (Resolução Crítica P2)**
-*Resolução da Auditoria Red Team: SLOs definidos sem especificação de implementação dos SLIs*
 
-| Métrica | SLO | SLI (Indicador) | Medição | **Implementação Técnica** | **Query/Endpoint Específico** | **Alerting Threshold** |
-|---------|-----|-----------------|---------|---------------------------|------------------------------|------------------------|
-| **Latência API (p50)** | < 100ms | Response time | APM percentile | `histogram_quantile(0.5, http_request_duration_seconds)` | `/metrics` - Prometheus | > 100ms por 3min |
-| **Latência API (p95)** | < 200ms | Response time | APM percentile | `histogram_quantile(0.95, http_request_duration_seconds)` | `/metrics` - Prometheus | > 200ms por 5min |
-| **Latência API (p99)** | < 500ms | Response time | APM percentile | `histogram_quantile(0.99, http_request_duration_seconds)` | `/metrics` - Prometheus | > 500ms por 2min |
-| **Throughput** | > 100 req/s | Requests per second | Load balancer | `rate(http_requests_total[1m])` | `/metrics` - Prometheus | < 100 req/s por 2min |
-| **Error Rate** | < 1% | HTTP 5xx responses | Error ratio | `rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])` | `/metrics` - Prometheus | > 1% por 5min |
-| **Tempo de Login** | < 2s | End-to-end time | Frontend timing | `performance.timing.loadEventEnd - navigationStart` | Frontend telemetry | > 2s por user session |
-| **Tempo Geração PDF** | < 5s | Job completion time | BullMQ metrics | `pdf_generation_duration_seconds` | BullMQ dashboard | > 5s por job |
+_Resolução da Auditoria Red Team: SLOs definidos sem especificação de implementação dos SLIs_
+
+| Métrica                | SLO         | SLI (Indicador)     | Medição         | **Implementação Técnica**                                                      | **Query/Endpoint Específico** | **Alerting Threshold** |
+| ---------------------- | ----------- | ------------------- | --------------- | ------------------------------------------------------------------------------ | ----------------------------- | ---------------------- |
+| **Latência API (p50)** | < 100ms     | Response time       | APM percentile  | `histogram_quantile(0.5, http_request_duration_seconds)`                       | `/metrics` - Prometheus       | > 100ms por 3min       |
+| **Latência API (p95)** | < 200ms     | Response time       | APM percentile  | `histogram_quantile(0.95, http_request_duration_seconds)`                      | `/metrics` - Prometheus       | > 200ms por 5min       |
+| **Latência API (p99)** | < 500ms     | Response time       | APM percentile  | `histogram_quantile(0.99, http_request_duration_seconds)`                      | `/metrics` - Prometheus       | > 500ms por 2min       |
+| **Throughput**         | > 100 req/s | Requests per second | Load balancer   | `rate(http_requests_total[1m])`                                                | `/metrics` - Prometheus       | < 100 req/s por 2min   |
+| **Error Rate**         | < 1%        | HTTP 5xx responses  | Error ratio     | `rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])` | `/metrics` - Prometheus       | > 1% por 5min          |
+| **Tempo de Login**     | < 2s        | End-to-end time     | Frontend timing | `performance.timing.loadEventEnd - navigationStart`                            | Frontend telemetry            | > 2s por user session  |
+| **Tempo Geração PDF**  | < 5s        | Job completion time | BullMQ metrics  | `pdf_generation_duration_seconds`                                              | BullMQ dashboard              | > 5s por job           |
 
 #### **Configuração Prometheus - Performance SLIs**
+
 ```yaml
 # prometheus.yml - Performance Rules
 groups:
@@ -79,10 +83,10 @@ groups:
           severity: warning
           slo: latency_p95
         annotations:
-          summary: "API latency P95 above SLO threshold"
-          description: "P95 latency is {{ $value }}s, exceeding 200ms threshold"
-          
-      # Throughput - SLI Crítico  
+          summary: 'API latency P95 above SLO threshold'
+          description: 'P95 latency is {{ $value }}s, exceeding 200ms threshold'
+
+      # Throughput - SLI Crítico
       - alert: LowThroughput
         expr: rate(http_requests_total[1m]) < 100
         for: 2m
@@ -90,9 +94,9 @@ groups:
           severity: critical
           slo: throughput
         annotations:
-          summary: "API throughput below SLO threshold"
-          description: "Current throughput: {{ $value }} req/s, minimum required: 100 req/s"
-          
+          summary: 'API throughput below SLO threshold'
+          description: 'Current throughput: {{ $value }} req/s, minimum required: 100 req/s'
+
       # Error Rate - SLI Crítico
       - alert: HighErrorRate
         expr: |
@@ -105,11 +109,12 @@ groups:
           severity: critical
           slo: error_rate
         annotations:
-          summary: "Error rate above SLO threshold"
-          description: "Error rate: {{ $value | humanizePercentage }}, threshold: 1%"
+          summary: 'Error rate above SLO threshold'
+          description: 'Error rate: {{ $value | humanizePercentage }}, threshold: 1%'
 ```
 
 #### **Grafana Dashboard - Performance SLIs**
+
 ```json
 {
   "dashboard": {
@@ -124,7 +129,7 @@ groups:
             "legendFormat": "P50"
           },
           {
-            "expr": "histogram_quantile(0.95, http_request_duration_seconds)", 
+            "expr": "histogram_quantile(0.95, http_request_duration_seconds)",
             "legendFormat": "P95 (SLO: 200ms)"
           },
           {
@@ -132,8 +137,8 @@ groups:
             "legendFormat": "P99"
           }
         ],
-        "yAxes": [{"unit": "s", "max": 1}],
-        "thresholds": [{"value": 0.2, "colorMode": "critical"}]
+        "yAxes": [{ "unit": "s", "max": 1 }],
+        "thresholds": [{ "value": 0.2, "colorMode": "critical" }]
       },
       {
         "title": "Request Throughput vs SLO",
@@ -153,6 +158,7 @@ groups:
 ```
 
 #### **Frontend Performance Monitoring**
+
 ```typescript
 // Frontend SLI Collection - Real User Monitoring
 class PerformanceMonitor {
@@ -160,11 +166,11 @@ class PerformanceMonitor {
     window.addEventListener('load', () => {
       const timing = performance.timing;
       const loadTime = timing.loadEventEnd - timing.navigationStart;
-      
+
       // Send to analytics - Login SLI
       if (window.location.pathname === '/login') {
         this.sendMetric('login_duration_ms', loadTime);
-        
+
         // SLO Violation Check
         if (loadTime > 2000) {
           this.sendAlert('login_slo_violation', { duration: loadTime });
@@ -172,44 +178,45 @@ class PerformanceMonitor {
       }
     });
   }
-  
+
   private static sendMetric(name: string, value: number): void {
     fetch('/api/metrics', {
       method: 'POST',
-      body: JSON.stringify({ metric: name, value, timestamp: Date.now() })
+      body: JSON.stringify({ metric: name, value, timestamp: Date.now() }),
     });
   }
 }
 ```
 
-*Nota do Arquiteto: Esta implementação resolve a ambiguidade crítica identificada na auditoria, fornecendo especificações técnicas precisas para todos os SLIs de performance.*
+_Nota do Arquiteto: Esta implementação resolve a ambiguidade crítica identificada na auditoria, fornecendo especificações técnicas precisas para todos os SLIs de performance._
 
 ### **2.4 Escalabilidade**
 
-| Métrica | SLO | SLI (Indicador) | Medição |
-|---------|-----|-----------------|---------|
-| **Capacidade Atual** | 50 req/s | Current throughput | Load testing |
-| **Meta Fase 1** | 200 req/s | Target throughput | 3 meses |
-| **Meta Fase 2** | 500 req/s | Target throughput | 6 meses |
-| **Meta Fase 3** | 1000 req/s | Target throughput | 12 meses |
-| **Auto-scaling Time** | < 2 min | Scale-out latency | Cloud metrics |
+| Métrica                  | SLO        | SLI (Indicador)    | Medição          |
+| ------------------------ | ---------- | ------------------ | ---------------- |
+| **Capacidade Atual**     | 50 req/s   | Current throughput | Load testing     |
+| **Meta Fase 1**          | 200 req/s  | Target throughput  | 3 meses          |
+| **Meta Fase 2**          | 500 req/s  | Target throughput  | 6 meses          |
+| **Meta Fase 3**          | 1000 req/s | Target throughput  | 12 meses         |
+| **Auto-scaling Time**    | < 2 min    | Scale-out latency  | Cloud metrics    |
 | **Database Connections** | < 80% pool | Active connections | Database metrics |
 
 ### **2.5 Manutenibilidade**
 
-| Métrica | SLO | SLI (Indicador) | Medição |
-|---------|-----|-----------------|---------|
-| **Code Coverage** | > 70% | Test coverage | CI/CD reports |
-| **Technical Debt Ratio** | < 5% | Debt/total code | SonarQube |
-| **Deployment Frequency** | Daily | Deploys per day | CI/CD metrics |
-| **MTTR (Mean Time to Repair)** | < 30 min | Incident resolution | Incident logs |
-| **Lead Time** | < 2 dias | Commit to production | DORA metrics |
+| Métrica                        | SLO      | SLI (Indicador)      | Medição       |
+| ------------------------------ | -------- | -------------------- | ------------- |
+| **Code Coverage**              | > 70%    | Test coverage        | CI/CD reports |
+| **Technical Debt Ratio**       | < 5%     | Debt/total code      | SonarQube     |
+| **Deployment Frequency**       | Daily    | Deploys per day      | CI/CD metrics |
+| **MTTR (Mean Time to Repair)** | < 30 min | Incident resolution  | Incident logs |
+| **Lead Time**                  | < 2 dias | Commit to production | DORA metrics  |
 
 ---
 
 ## 3. Cenários de Qualidade (Quality Attribute Scenarios)
 
 ### **3.1 Cenário de Segurança**
+
 **Estímulo:** Tentativa de SQL injection em formulário de login  
 **Fonte:** Atacante externo  
 **Ambiente:** Produção, horário comercial  
@@ -217,6 +224,7 @@ class PerformanceMonitor {
 **Medida:** 0% de penetração bem-sucedida, alerta em < 1 minuto
 
 ### **3.2 Cenário de Disponibilidade**
+
 **Estímulo:** Falha no servidor principal da API  
 **Fonte:** Hardware failure  
 **Ambiente:** Produção, pico de uso (10h)  
@@ -224,6 +232,7 @@ class PerformanceMonitor {
 **Medida:** Downtime < 30 segundos, 0% de requisições perdidas
 
 ### **3.3 Cenário de Performance**
+
 **Estímulo:** 1000 usuários simultâneos consultando propostas  
 **Fonte:** Início do mês (pico de atividade)  
 **Ambiente:** Produção  
@@ -231,6 +240,7 @@ class PerformanceMonitor {
 **Medida:** p95 latency < 200ms, 0% timeout
 
 ### **3.4 Cenário de Escalabilidade**
+
 **Estímulo:** Black Friday com 5x volume normal  
 **Fonte:** Evento sazonal  
 **Ambiente:** Produção  
@@ -238,6 +248,7 @@ class PerformanceMonitor {
 **Medida:** Scale de 2 para 10 instâncias em < 2 minutos
 
 ### **3.5 Cenário de Manutenibilidade**
+
 **Estímulo:** Bug crítico reportado em produção  
 **Fonte:** Usuário via suporte  
 **Ambiente:** Produção  
@@ -259,26 +270,26 @@ Orçamento de Erro = 43.2 minutos/mês de downtime permitido
 
 ### **4.2 Distribuição do Orçamento**
 
-| Categoria | Alocação | Tempo | Justificativa |
-|-----------|----------|-------|---------------|
-| **Manutenção Planejada** | 40% | 17.3 min | Deploys, migrations |
-| **Incidentes** | 30% | 13.0 min | Falhas não planejadas |
-| **Experimentos** | 20% | 8.6 min | Canary deployments |
-| **Buffer** | 10% | 4.3 min | Margem de segurança |
+| Categoria                | Alocação | Tempo    | Justificativa         |
+| ------------------------ | -------- | -------- | --------------------- |
+| **Manutenção Planejada** | 40%      | 17.3 min | Deploys, migrations   |
+| **Incidentes**           | 30%      | 13.0 min | Falhas não planejadas |
+| **Experimentos**         | 20%      | 8.6 min  | Canary deployments    |
+| **Buffer**               | 10%      | 4.3 min  | Margem de segurança   |
 
 ### **4.3 Política de Consumo**
 
 ```yaml
 IF error_budget_consumed > 75% THEN
-  - Freeze feature releases
-  - Focus on reliability improvements
-  - Post-mortem obrigatório
+- Freeze feature releases
+- Focus on reliability improvements
+- Post-mortem obrigatório
 ELSE IF error_budget_consumed > 50% THEN
-  - Reduce deployment velocity
-  - Increase testing rigor
+- Reduce deployment velocity
+- Increase testing rigor
 ELSE
-  - Normal operations
-  - Innovation encouraged
+- Normal operations
+- Innovation encouraged
 ```
 
 ---
@@ -287,30 +298,33 @@ ELSE
 
 ### **5.1 Matriz de Interdependência**
 
-|  | Segurança | Disponibilidade | Performance | Escalabilidade | Manutenibilidade |
-|--|-----------|-----------------|-------------|----------------|------------------|
-| **Segurança** | - | ⚠️ Conflito | ⚠️ Conflito | ✅ Sinergia | ✅ Sinergia |
-| **Disponibilidade** | ⚠️ | - | ⚠️ Conflito | ✅ Sinergia | ✅ Sinergia |
-| **Performance** | ⚠️ | ⚠️ | - | ⚠️ Conflito | ⚠️ Conflito |
-| **Escalabilidade** | ✅ | ✅ | ⚠️ | - | ⚠️ Conflito |
-| **Manutenibilidade** | ✅ | ✅ | ⚠️ | ⚠️ | - |
+|                      | Segurança | Disponibilidade | Performance | Escalabilidade | Manutenibilidade |
+| -------------------- | --------- | --------------- | ----------- | -------------- | ---------------- |
+| **Segurança**        | -         | ⚠️ Conflito     | ⚠️ Conflito | ✅ Sinergia    | ✅ Sinergia      |
+| **Disponibilidade**  | ⚠️        | -               | ⚠️ Conflito | ✅ Sinergia    | ✅ Sinergia      |
+| **Performance**      | ⚠️        | ⚠️              | -           | ⚠️ Conflito    | ⚠️ Conflito      |
+| **Escalabilidade**   | ✅        | ✅              | ⚠️          | -              | ⚠️ Conflito      |
+| **Manutenibilidade** | ✅        | ✅              | ⚠️          | ⚠️             | -                |
 
 ### **5.2 Conflitos Principais e Mitigações**
 
 #### **Segurança vs Performance**
+
 **Conflito:** Criptografia AES-256 e validações HMAC aumentam latência  
 **Trade-off:** Aceitar +20ms de latência por request (impacto: 20s/s de latência acumulada para 1000 req/s)  
 **Justificativa Quantificada:** Custo de violação de segurança (R$ 2M+ em multas LGPD/BACEN) vs. impacto UX (-3% conversão por +100ms)  
 **Mitigação:** Cache Redis de tokens JWT validados (TTL 15min), criptografia assíncrona via worker threads
 
-*Nota do Arquiteto: Trade-off analisado utilizando metodologia de análise custo-benefício quantificada conforme framework de gestão de riscos.*
+_Nota do Arquiteto: Trade-off analisado utilizando metodologia de análise custo-benefício quantificada conforme framework de gestão de riscos._
 
 #### **Disponibilidade vs Performance**
+
 **Conflito:** Redundância aumenta complexidade e latência  
 **Trade-off:** Aceitar +10ms para health checks  
 **Mitigação:** Circuit breakers inteligentes, failover rápido
 
 #### **Escalabilidade vs Manutenibilidade**
+
 **Conflito:** Sistemas distribuídos são mais complexos  
 **Trade-off:** Aceitar complexidade para escala  
 **Mitigação:** Observabilidade forte, automação de deploy
@@ -331,13 +345,13 @@ Prioridade de Trade-off (quando em conflito):
 
 ### **6.1 Estado Atual - Análise de Capacidade**
 
-| Recurso | Capacidade Atual | Utilização Média | Ponto de Saturação |
-|---------|------------------|------------------|-------------------|
-| **CPU (API)** | 4 vCPUs | 15% | ~200 req/s |
-| **Memória (API)** | 8 GB | 25% | ~300 req/s |
-| **Database Connections** | 100 pool | 20% | ~250 req/s |
-| **Network Bandwidth** | 1 Gbps | 5% | ~5000 req/s |
-| **Storage IOPS** | 3000 | 10% | ~500 req/s |
+| Recurso                  | Capacidade Atual | Utilização Média | Ponto de Saturação |
+| ------------------------ | ---------------- | ---------------- | ------------------ |
+| **CPU (API)**            | 4 vCPUs          | 15%              | ~200 req/s         |
+| **Memória (API)**        | 8 GB             | 25%              | ~300 req/s         |
+| **Database Connections** | 100 pool         | 20%              | ~250 req/s         |
+| **Network Bandwidth**    | 1 Gbps           | 5%               | ~5000 req/s        |
+| **Storage IOPS**         | 3000             | 10%              | ~500 req/s         |
 
 **Bottleneck Atual:** Database connection pool (saturação em ~50 req/s sem otimização)
 
@@ -393,18 +407,19 @@ Prioridade de Trade-off (quando em conflito):
 
 ### **6.4 Requisitos para Meta Futura (1000 req/s)**
 
-| Componente | Mudança Necessária | Investimento |
-|------------|-------------------|--------------|
-| **API Servers** | 2 → 10 instâncias | Kubernetes HPA |
-| **Database** | Vertical → Horizontal scaling | Read replicas + sharding |
-| **Cache** | In-memory → Redis cluster | Distributed cache |
-| **CDN** | Não existe → CloudFlare | Static assets offload |
-| **Queue** | Single → Multi-instance | Redis Cluster |
-| **Monitoring** | Basic → Full APM | Datadog/New Relic |
+| Componente      | Mudança Necessária            | Investimento             |
+| --------------- | ----------------------------- | ------------------------ |
+| **API Servers** | 2 → 10 instâncias             | Kubernetes HPA           |
+| **Database**    | Vertical → Horizontal scaling | Read replicas + sharding |
+| **Cache**       | In-memory → Redis cluster     | Distributed cache        |
+| **CDN**         | Não existe → CloudFlare       | Static assets offload    |
+| **Queue**       | Single → Multi-instance       | Redis Cluster            |
+| **Monitoring**  | Basic → Full APM              | Datadog/New Relic        |
 
 **Estimativa de Custo:** ~$5,000/mês para infraestrutura 1000 req/s
 
-*Metodologia de Cálculo:*
+_Metodologia de Cálculo:_
+
 - API Servers (10x t3.medium): $1,440/mês
 - Database (RDS Multi-AZ): $1,800/mês
 - Redis Cluster (3 nodes): $720/mês
@@ -429,35 +444,39 @@ Prioridade de Trade-off (quando em conflito):
 
 ### **7.2 Production Readiness Score**
 
-| Categoria | Score | Meta | Status |
-|-----------|-------|------|--------|
-| Security | 85% | 90% | ⚠️ |
-| Reliability | 80% | 85% | ⚠️ |
-| Performance | 75% | 80% | ⚠️ |
-| Observability | 70% | 80% | ❌ |
-| Documentation | 90% | 85% | ✅ |
-| **Overall** | **80%** | **85%** | ⚠️ |
+| Categoria     | Score   | Meta    | Status |
+| ------------- | ------- | ------- | ------ |
+| Security      | 85%     | 90%     | ⚠️     |
+| Reliability   | 80%     | 85%     | ⚠️     |
+| Performance   | 75%     | 80%     | ⚠️     |
+| Observability | 70%     | 80%     | ❌     |
+| Documentation | 90%     | 85%     | ✅     |
+| **Overall**   | **80%** | **85%** | ⚠️     |
 
 ---
 
 ## 8. Roadmap de Evolução dos NFRs
 
 ### **Q1 2025 - Fundação**
+
 - Implementar monitoring básico
 - Estabelecer baseline de performance
 - Security hardening inicial
 
 ### **Q2 2025 - Otimização**
+
 - Melhorar p95 latency para < 150ms
 - Implementar auto-scaling
 - Zero vulnerabilidades médias
 
 ### **Q3 2025 - Escala**
+
 - Suportar 500 req/s
 - 99.95% disponibilidade
 - Full observability stack
 
 ### **Q4 2025 - Excelência**
+
 - Suportar 1000 req/s
 - 99.99% disponibilidade
 - ML-based anomaly detection
@@ -476,9 +495,9 @@ Prioridade de Trade-off (quando em conflito):
 
 ## 10. Controle de Versões
 
-| Versão | Data | Autor | Mudanças |
-|--------|------|-------|----------|
-| 1.0 | 21/08/2025 | GEM 02 | Documento inicial criado |
+| Versão | Data       | Autor  | Mudanças                 |
+| ------ | ---------- | ------ | ------------------------ |
+| 1.0    | 21/08/2025 | GEM 02 | Documento inicial criado |
 
 ---
 
@@ -486,11 +505,11 @@ Prioridade de Trade-off (quando em conflito):
 
 **Status:** ⏳ AGUARDANDO REVISÃO
 
-| Papel | Nome | Data | Assinatura |
-|-------|------|------|------------|
-| Arquiteto Senior | GEM 01 | Pendente | Pendente |
-| SRE Lead | - | Pendente | Pendente |
-| Security Officer | - | Pendente | Pendente |
+| Papel            | Nome   | Data     | Assinatura |
+| ---------------- | ------ | -------- | ---------- |
+| Arquiteto Senior | GEM 01 | Pendente | Pendente   |
+| SRE Lead         | -      | Pendente | Pendente   |
+| Security Officer | -      | Pendente | Pendente   |
 
 ---
 
