@@ -51,13 +51,12 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     }),
   });
 
-  // Mutation para gerar CCB
+  // Mutation para gerar CCB - PAM V1.0: Endpoint corrigido
   const generateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
-      return apiRequest('/api/formalizacao/generate-ccb', {
+      return apiRequest(`/api/propostas/${proposalId}/gerar-ccb`, {
         method: 'POST',
-        body: JSON.stringify({ proposalId }),
       });
     },
     onSuccess: () => {
@@ -97,7 +96,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const regenerateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
-      return apiRequest(`/api/formalizacao/${proposalId}/regenerate-ccb`, {
+      return apiRequest(`/api/propostas/${proposalId}/gerar-ccb`, {
         method: 'POST',
       });
     },
