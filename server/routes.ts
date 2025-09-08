@@ -2358,11 +2358,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
 
-      // Buscar métricas básicas de propostas
+      // Buscar métricas básicas de propostas usando Admin Client (bypassa RLS)
       const { data: metricas, error } = await supabase
         .from('propostas')
         .select('status')
-        .neq('deleted_at', null);
+        .is('deleted_at', null);
 
       if (error) {
         console.error('Erro ao buscar métricas:', error);

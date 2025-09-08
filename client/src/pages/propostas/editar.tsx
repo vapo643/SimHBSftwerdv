@@ -476,13 +476,29 @@ const EditarPropostaPendenciada: React.FC = () => {
       });
     },
     onSettled: () => {
-      // Invalidar todas as queries relacionadas - SEMPRE executa independente do status
+      // 🔥 PAM V1.0: Invalidação de cache AGRESSIVA para garantir sincronização total
+      
+      // Invalidações básicas
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
       queryClient.invalidateQueries({ queryKey: ['proposta'] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas', 'queue=analysis'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
+      
+      // PAM V1.0: Invalidações adicionais para dashboard e métricas
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-kpis'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+      queryClient.invalidateQueries({ queryKey: ['proposals', 'list'] });
+      
+      // Invalidar queries hierárquicas baseadas no padrão queryKeys.ts
+      queryClient.invalidateQueries({ queryKey: ['proposals'] }); // queryKeys.proposals.all
+      queryClient.invalidateQueries({ queryKey: ['proposals', 'list'] }); // queryKeys.proposals.lists()
+      
+      console.log('🔥 [PAM V1.0] Cache invalidation agressiva executada - todas as queries invalidadas');
     },
   });
 

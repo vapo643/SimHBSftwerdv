@@ -1,0 +1,283 @@
+ porem agora ao clicar em corrigir ja cai no front quebrado; Proposta não editável
+
+Esta proposta está com status "em_analise" e só pode ser editada quando estiver "pendenciado" ou "pendente".
+
+Status atual: "em_analise"
+
+Debug: raw="em_analise", type=string
+
+🔄 Recarregar PáginaVoltar ao Dashboard console; Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION Object
+
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 766
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+
+client:755 WebSocket connection to 'wss://localhost:5173/?token=GMaYdc5_yWuM' failed: 
+
+createConnection @ client:755
+
+connect @ client:412
+
+connect @ client:759Understand this error
+
+client:765 [vite] failed to connect to websocket.
+
+your current setup:
+
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+
+connect @ client:765Understand this error
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: Object
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: Object
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: Array(0)
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: Array(3)
+
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+
+/api/propostas/metricas:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/metricas : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: Array(3)
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: Array(3)
+
+/api/propostas/metricas:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/metricas : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+/api/propostas/metricas:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/metricas : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas : Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: Array(3)
+
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: Object
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: Object
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'em_analise', statusType: 'string', statusLength: 10, expectedStatus: 'pendenciado', isEqual: false, …}
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'em_analise', statusType: 'string', statusLength: 10, expectedStatus: 'pendenciado', isEqual: false, …}
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: (3) [{…}, {…}, {…}]
+
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…zm7is3g.janeway.replit.dev/api/propostas/metricas', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.ZJJ7RspRIo0dlSMF1IYDKF_ASJbVmUnGgsUQkLVnnuM', hasToken: true, isFormData: false}
+
+apiClient.ts:305  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/metricas 403 (Forbidden)
+
+fetchWithTimeout @ apiClient.ts:305
+
+apiClient @ apiClient.ts:413
+
+await in apiClient
+
+get @ apiClient.ts:593
+
+(anonymous) @ queryClient.ts:59
+
+fetchFn @ @tanstack_react-query.js?v=9648f934:852
+
+run @ @tanstack_react-query.js?v=9648f934:491
+
+start @ @tanstack_react-query.js?v=9648f934:533
+
+fetch @ @tanstack_react-query.js?v=9648f934:891
+
+#executeFetch @ @tanstack_react-query.js?v=9648f934:2047
+
+onSubscribe @ @tanstack_react-query.js?v=9648f934:1923
+
+subscribe @ @tanstack_react-query.js?v=9648f934:19
+
+(anonymous) @ @tanstack_react-query.js?v=9648f934:3089
+
+subscribeToStore @ chunk-QYFCA5BS.js?v=9648f934:12032
+
+commitHookEffectListMount @ chunk-QYFCA5BS.js?v=9648f934:16963
+
+commitPassiveMountOnFiber @ chunk-QYFCA5BS.js?v=9648f934:18206
+
+commitPassiveMountEffects_complete @ chunk-QYFCA5BS.js?v=9648f934:18179
+
+commitPassiveMountEffects_begin @ chunk-QYFCA5BS.js?v=9648f934:18169
+
+commitPassiveMountEffects @ chunk-QYFCA5BS.js?v=9648f934:18159
+
+flushPassiveEffectsImpl @ chunk-QYFCA5BS.js?v=9648f934:19543
+
+flushPassiveEffects @ chunk-QYFCA5BS.js?v=9648f934:19500
+
+commitRootImpl @ chunk-QYFCA5BS.js?v=9648f934:19469
+
+commitRoot @ chunk-QYFCA5BS.js?v=9648f934:19330
+
+performSyncWorkOnRoot @ chunk-QYFCA5BS.js?v=9648f934:18948
+
+flushSyncCallbacks @ chunk-QYFCA5BS.js?v=9648f934:9166
+
+(anonymous) @ chunk-QYFCA5BS.js?v=9648f934:18677Understand this error
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/metricas : {message: 'Você não tem permissão para acessar esta proposta'}
+
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Você não tem permissão para acessar esta proposta'}
+
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…zm7is3g.janeway.replit.dev/api/propostas/metricas', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.ZJJ7RspRIo0dlSMF1IYDKF_ASJbVmUnGgsUQkLVnnuM', hasToken: true, isFormData: false}
+
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 766}
+
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.ZJJ7RspRIo0dlSMF1IYDKF_ASJbVmUnGgsUQkLVnnuM', hasToken: true, isFormData: false}
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: (3) [{…}, {…}, {…}]
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-08T10:29:52.000-03:00'}
+
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-08T10:29:52.000-03:00'}
+
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+
+dashboard.tsx:360 DEBUG - First 3 proposals values: (3) [{…}, {…}, {…}]
+
+apiClient.ts:305  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/metricas 403 (Forbidden)
+
+fetchWithTimeout @ apiClient.ts:305
+
+apiClient @ apiClient.ts:413
+
+await in apiClient
+
+get @ apiClient.ts:593
+
+(anonymous) @ queryClient.ts:59
+
+fetchFn @ @tanstack_react-query.js?v=9648f934:852
+
+run @ @tanstack_react-query.js?v=9648f934:491
+
+start @ @tanstack_react-query.js?v=9648f934:533
+
+fetch @ @tanstack_react-query.js?v=9648f934:891
+
+#executeFetch @ @tanstack_react-query.js?v=9648f934:2047
+
+fetch @ @tanstack_react-query.js?v=9648f934:2037
+
+refetch @ @tanstack_react-query.js?v=9648f934:2027
+
+onFocus @ @tanstack_react-query.js?v=9648f934:755
+
+(anonymous) @ @tanstack_react-query.js?v=9648f934:1124
+
+(anonymous) @ @tanstack_react-query.js?v=9648f934:1123
+
+batch @ @tanstack_react-query.js?v=9648f934:581
+
+onFocus @ @tanstack_react-query.js?v=9648f934:1122
+
+(anonymous) @ @tanstack_react-query.js?v=9648f934:1625
+
+await in (anonymous)
+
+(anonymous) @ @tanstack_react-query.js?v=9648f934:312
+
+onFocus @ @tanstack_react-query.js?v=9648f934:311
+
+(anonymous) @ @tanstack_react-query.js?v=9648f934:298
+
+listener @ @tanstack_react-query.js?v=9648f934:271Understand this error
+
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/metricas : {message: 'Você não tem permissão para acessar esta proposta'}message: "Você não tem permissão para acessar esta proposta"[[Prototype]]: Object
+
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Você não tem permissão para acessar esta proposta'}message: "Você não tem permissão para acessar esta proposta"[[Prototype]]: Object
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: {propostaStatus: 'em_analise', statusType: 'string', statusLength: 10, expectedStatus: 'pendenciado', isEqual: false, …}expectedStatus: "pendenciado"isEqual: falsepropostaCompleta: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', numero_proposta: 300003, numeroProposta: 300003, status: 'em_analise', cliente_data: {…}, …}propostaStatus: "em_analise"statusAsString: "em_analise"statusLength: 10statusType: "string"[[Prototype]]: Object
+
+editar.tsx:592 🔍 STATUS DEBUG CORRIGIDO: 
