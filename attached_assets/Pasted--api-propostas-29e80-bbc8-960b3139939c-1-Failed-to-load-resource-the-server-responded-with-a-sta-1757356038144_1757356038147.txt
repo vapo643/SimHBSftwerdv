@@ -1,0 +1,30 @@
+/api/propostas/29e80…bbc8-960b3139939c:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+
+editar.tsx:451 🔍 ERRO AO SALVAR: 
+Object
+error
+: 
+ApiError: <!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>PostgresError: User does not belong to the specified store<br> &nbsp; &nbsp;at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)<br> &nbsp; &nbsp;at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)<br> &nbsp; &nbsp;at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)<br> &nbsp; &nbsp;at TLSSocket.emit (node:events:524:28)<br> &nbsp; &nbsp;at addChunk (node:internal/streams/readable:561:12)<br> &nbsp; &nbsp;at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)<br> &nbsp; &nbsp;at Readable.push (node:internal/streams/readable:392:5)<br> &nbsp; &nbsp;at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23)<br> &nbsp; &nbsp;at TLSWrap.callbackTrampoline (node:internal/async_hooks:130:17)<br> &nbsp; &nbsp;at new Query (file:///home/runner/workspace/node_modules/postgres/src/query.js:35:9)<br> &nbsp; &nbsp;at Function.unsafe (file:///home/runner/workspace/node_modules/postgres/src/index.js:121:21)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (/home/runner/workspace/node_modules/src/postgres-js/session.ts:44:20)<br> &nbsp; &nbsp;at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (/home/runner/workspace/node_modules/src/postgres-js/session.ts:43:19)<br> &nbsp; &nbsp;at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)<br> &nbsp; &nbsp;at PostgresJsPreparedQuery.execute (/home/runner/workspace/node_modules/src/postgres-js/session.ts:31:17)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:422:27)<br> &nbsp; &nbsp;at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)<br> &nbsp; &nbsp;at QueryPromise.execute (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:421:17)<br> &nbsp; &nbsp;at QueryPromise.then (/home/runner/workspace/node_modules/src/query-promise.ts:31:15)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre> </body> </html> at apiClient (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/lib/apiClient.ts:341:13) at async Object.mutationFn (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/editar.tsx:553:24)
+errorMessage
+: 
+"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>PostgresError: User does not belong to the specified store<br> &nbsp; &nbsp;at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)<br> &nbsp; &nbsp;at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)<br> &nbsp; &nbsp;at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)<br> &nbsp; &nbsp;at TLSSocket.emit (node:events:524:28)<br> &nbsp; &nbsp;at addChunk (node:internal/streams/readable:561:12)<br> &nbsp; &nbsp;at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)<br> &nbsp; &nbsp;at Readable.push (node:internal/streams/readable:392:5)<br> &nbsp; &nbsp;at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23)<br> &nbsp; &nbsp;at TLSWrap.callbackTrampoline (node:internal/async_hooks:130:17)<br> &nbsp; &nbsp;at new Query (file:///home/runner/workspace/node_modules/postgres/src/query.js:35:9)<br> &nbsp; &nbsp;at Function.unsafe (file:///home/runner/workspace/node_modules/postgres/src/index.js:121:21)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (/home/runner/workspace/node_modules/src/postgres-js/session.ts:44:20)<br> &nbsp; &nbsp;at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (/home/runner/workspace/node_modules/src/postgres-js/session.ts:43:19)<br> &nbsp; &nbsp;at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)<br> &nbsp; &nbsp;at PostgresJsPreparedQuery.execute (/home/runner/workspace/node_modules/src/postgres-js/session.ts:31:17)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:422:27)<br> &nbsp; &nbsp;at Object.startActiveSpan (/home/runner/workspace/node_modules/src/tracing.ts:27:11)<br> &nbsp; &nbsp;at QueryPromise.execute (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:421:17)<br> &nbsp; &nbsp;at QueryPromise.then (/home/runner/workspace/node_modules/src/query-promise.ts:31:15)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>\n</body>\n</html>\n"
+[[Prototype]]
+: 
+Object
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+Object
+apiClient.ts:385 [PASSO 3 - ENVIO] 
+Object
+editar.tsx:634 🔍 STATUS DEBUG CORRIGIDO: 
+Object
+/api/propostas/29e80…9939c/observacoes:1 
+ Failed to load resource: the server responded with a status of 403 (Forbidden)
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes : 
+Object
+apiClient.ts:437 [API Client] After dual-key transformation: 
+Object
+HistoricoCompartilhado.tsx:42 Erro ao buscar logs de auditoria: ApiError: Acesso negado. Permissão insuficiente.
+    at apiClient (apiClient.ts:528:13)
+    at async queryFn (HistoricoCompartilhado.tsx:39:26)
+queryFn	@	HistoricoCompartilhado.tsx:42
