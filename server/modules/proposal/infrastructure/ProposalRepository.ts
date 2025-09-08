@@ -151,13 +151,26 @@ export class ProposalRepository implements IProposalRepository {
   async findById(id: string): Promise<Proposal | null> {
     console.log('🔍 [findById] PAM V1.0 - Replicating findByCriteriaLightweight logic for ID:', id);
     
-    // PAM V1.0 CORREÇÃO: Replicar EXATAMENTE a query do findByCriteriaLightweight que funciona
+    // PAM V1.0 CORREÇÃO MANDATÓRIA: Query completa com TODOS os campos do cliente
     const result = await db
       .select({
         id: propostas.id,
         status: propostas.status,
         cliente_nome: propostas.clienteNome,
         cliente_cpf: propostas.clienteCpf,
+        // CORREÇÃO MANDATÓRIA: Adicionar campos do cliente que faltavam
+        cliente_email: propostas.clienteEmail,
+        cliente_telefone: propostas.clienteTelefone,
+        cliente_data_nascimento: propostas.clienteDataNascimento,
+        cliente_renda: propostas.clienteRenda,
+        cliente_rg: propostas.clienteRg,
+        cliente_orgao_emissor: propostas.clienteOrgaoEmissor,
+        cliente_estado_civil: propostas.clienteEstadoCivil,
+        cliente_nacionalidade: propostas.clienteNacionalidade,
+        cliente_cep: propostas.clienteCep,
+        cliente_endereco: propostas.clienteEndereco,
+        cliente_ocupacao: propostas.clienteOcupacao,
+        clienteData: propostas.clienteData, // Campo JSON com dados completos
         valor: propostas.valor,
         prazo: propostas.prazo,
         taxa_juros: propostas.taxaJuros,
