@@ -1211,6 +1211,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
 
+  // GET /api/propostas/metricas - Endpoint de métricas de propostas (DEVE VIR ANTES DA ROTA /:id)
+  app.get('/api/propostas/metricas', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+
+      // Buscar métricas básicas de propostas usando Admin Client (bypassa RLS)
+      const { data: metricas, error } = await supabase
+        .from('propostas')
+        .select('status')
+        .is('deleted_at', null);
+
+      if (error) {
+        console.error('Erro ao buscar métricas:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Erro ao buscar métricas',
+        });
+      }
+
+      // Contar por status
+      const statusCount =
+        metricas?.reduce((acc: Record<string, number>, proposta) => {
+          const status = proposta.status || 'sem_status';
+          acc[status] = (acc[status] || 0) + 1;
+          return acc;
+        }, {}) || {};
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          totalPropostas: metricas?.length || 0,
+          porStatus: statusCount,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao buscar métricas de propostas:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+      });
+    }
+  });
+
   // Busca uma proposta individual pelo ID (Rota DDD Canônica)
   app.get(
     '/api/propostas/:id',
@@ -2045,51 +2090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // REMOVIDO: Rota duplicada movida para linha 441 - ver comentário 🔧 CORREÇÃO CRÍTICA
-
-  // GET /api/propostas/metricas - Endpoint de métricas de propostas
-  app.get('/api/propostas/metricas', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
-
-      // Buscar métricas básicas de propostas usando Admin Client (bypassa RLS)
-      const { data: metricas, error } = await supabase
-        .from('propostas')
-        .select('status')
-        .is('deleted_at', null);
-
-      if (error) {
-        console.error('Erro ao buscar métricas:', error);
-        return res.status(500).json({
-          success: false,
-          message: 'Erro ao buscar métricas',
-        });
-      }
-
-      // Contar por status
-      const statusCount =
-        metricas?.reduce((acc: Record<string, number>, proposta) => {
-          const status = proposta.status || 'sem_status';
-          acc[status] = (acc[status] || 0) + 1;
-          return acc;
-        }, {}) || {};
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          totalPropostas: metricas?.length || 0,
-          porStatus: statusCount,
-          timestamp: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      console.error('Erro ao buscar métricas de propostas:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Erro interno do servidor',
-      });
-    }
-  });
+  // MOVIDO: Rota /api/propostas/metricas movida para ANTES da rota /:id para corrigir ordem de precedência
 
   // [REMOVED: Legacy payment endpoint - Replaced by /api/pagamentos with V2.0 status system]
 
