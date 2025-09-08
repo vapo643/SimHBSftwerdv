@@ -3490,7 +3490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const gerenteId = parseInt(req.params.gerenteId);
         const lojaId = parseInt(req.params.lojaId);
-        await storage.removeGerenteFromLoja(gerenteId, lojaId);
+        await storage.removeGerenteFromLoja(gerenteId.toString(), lojaId.toString());
         res.json({ message: 'Manager removed from store successfully' });
       } catch (error) {
         console.error('Remove gerente from loja error:', error);
