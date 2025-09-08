@@ -85,6 +85,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
       // Invalidar queries relacionadas - PAM V1.0: Chaves corretas
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}`] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', proposalId, 'formalizacao'] });
 
       setIsGenerating(false);
       onCCBGenerated?.();
@@ -124,6 +125,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
       // Invalidar queries - PAM V1.0: Chaves corretas
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}`] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas', proposalId, 'formalizacao'] });
 
       setIsGenerating(false);
 
