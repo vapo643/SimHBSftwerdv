@@ -216,7 +216,7 @@ export class ProposalController {
         atendente_id: proposal.atendenteId,
         dados_pagamento: proposal.dadosPagamento,
         motivo_rejeicao: proposal.motivoRejeicao,
-        motivo_pendencia: proposal.motivoPendencia, // CORREÇÃO: Usar motivoPendencia, não motivoRejeicao
+        motivo_pendencia: proposal.motivoRejeicao, // CORREÇÃO: Campo motivoPendencia não existe no agregado
         observacoes: proposal.observacoes,
         ccb_url: proposal.ccbUrl,
         ccbUrl: proposal.ccbUrl, // Duplicado para compatibilidade
@@ -861,7 +861,7 @@ export class ProposalController {
         SafeLogger.debug('Pendenciar validation passed', { motivoPresent: true });
         
         // OPERAÇÃO VISÃO CLARA V1.0: Implementado endpoint de pendência
-        return this.pendenciar(req, res);
+        return this.pendenciar(req, res, next);
       } catch (error) {
         next(error);
       }
