@@ -2352,9 +2352,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVIDO: Rota duplicada movida para linha 441 - ver comentário 🔧 CORREÇÃO CRÍTICA
 
-  // MOVED TO server/routes/propostas/core.ts - GET /api/propostas/metricas
+  // GET /api/propostas/metricas - Endpoint de métricas de propostas
+  app.get('/api/propostas/metricas', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
 
-  // REMOVED DUPLICATE - GET /api/propostas/metricas (already moved above)
+      // Buscar métricas básicas de propostas
+      const { data: metricas, error } = await supabase
+        .from('propostas')
+        .select('status')
+        .neq('deleted_at', null);
+
+      if (error) {
+        console.error('Erro ao buscar métricas:', error);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Erro ao buscar métricas' 
+        });
+      }
+
+      // Contar por status
+      const statusCount = metricas?.reduce((acc: Record<string, number>, proposta) => {
+        const status = proposta.status || 'sem_status';
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {}) || {};
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          totalPropostas: metricas?.length || 0,
+          porStatus: statusCount,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao buscar métricas de propostas:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Erro interno do servidor' 
+      });
+    }
+  });
 
   // [REMOVED: Legacy payment endpoint - Replaced by /api/pagamentos with V2.0 status system]
 
