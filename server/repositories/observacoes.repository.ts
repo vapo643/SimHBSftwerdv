@@ -27,7 +27,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
   /**
    * Find all observacoes for a specific proposta
    */
-  async findByPropostaId(propostaId: number): Promise<Observacao[]> {
+  async findByPropostaId(propostaId: string): Promise<Observacao[]> {
     try {
       const data = await db
         .select({
@@ -39,7 +39,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
         })
         .from(observacoesCobranca)
         .leftJoin(profiles, eq(profiles.id, observacoesCobranca.userId))
-        .where(eq(observacoesCobranca.propostaId, String(propostaId)))
+        .where(eq(observacoesCobranca.propostaId, propostaId))
         .orderBy(desc(observacoesCobranca.createdAt));
 
       return data as any[];
@@ -52,7 +52,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
    * Create a new observacao with user association
    */
   async createWithUser(
-    propostaId: number,
+    propostaId: string,
     observacao: string,
     usuarioId: string
   ): Promise<Observacao> {
@@ -60,7 +60,7 @@ export class ObservacoesRepository extends BaseRepository<Observacao> {
       const [data] = await db
         .insert(observacoesCobranca)
         .values({
-          propostaId: String(propostaId),
+          propostaId: propostaId,
           observacao,
           userId: usuarioId,
           userName: 'Sistema',

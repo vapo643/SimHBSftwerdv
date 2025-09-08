@@ -27,7 +27,7 @@ export class ObservacoesService {
    * Create a new observacao
    */
   async createObservacao(
-    propostaId: number,
+    propostaId: string,
     observacao: string,
     usuarioId: string,
     userIp?: string

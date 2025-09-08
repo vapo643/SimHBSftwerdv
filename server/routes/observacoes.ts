@@ -51,7 +51,7 @@ router.get('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req: 
     }
 
     // PADRÃO CORRETO: Controller chama Service, não acessa DB
-    const observacoes = await observacoesService.getObservacoesByProposta(Number(propostaId));
+    const observacoes = await observacoesService.getObservacoesByProposta(propostaId);
 
     res.json({
       success: true,
@@ -92,7 +92,7 @@ router.post('/propostas/:propostaId/observacoes', jwtAuthMiddleware, async (req:
 
     // PADRÃO CORRETO: Controller chama Service com dados validados
     const novaObservacao = await observacoesService.createObservacao(
-      Number(propostaId),
+      propostaId,
       validatedData.observacao,
       userId,
       clientIp
