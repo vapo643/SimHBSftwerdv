@@ -192,7 +192,10 @@ const FilaAnalise: React.FC = () => {
   };
 
   const today = new Date().toISOString().split('T')[0];
-  const propostasHoje = propostas?.filter((p) => p.createdAt.split('T')[0] === today).length || 0;
+  const propostasHoje = propostas?.filter((p) => {
+    const createdAt = p.createdAt || p.created_at;
+    return createdAt && createdAt.split('T')[0] === today;
+  }).length || 0;
 
   const propostasPendentes =
     propostas?.filter((p) => p.status === 'aguardando_analise' || p.status === 'em_analise')
