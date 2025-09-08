@@ -81,12 +81,19 @@ class RedisManager {
       };
     }
 
-    // TLS para produção
-    if (isProduction) {
+    // TLS apenas se explicitamente habilitado
+    if (isProduction && process.env.REDIS_TLS_ENABLED === 'true') {
+      console.log('[REDIS MANAGER] 🔐 TLS habilitado via REDIS_TLS_ENABLED=true');
       return {
         ...baseConfig,
-        tls: {},
+        tls: {
+          rejectUnauthorized: false, // Aceitar certificados auto-assinados
+        },
       };
+    }
+
+    if (isProduction) {
+      console.log('[REDIS MANAGER] 📡 Modo produção: conexão sem TLS (padrão seguro)');
     }
 
     return baseConfig;

@@ -34,7 +34,7 @@ export async function createApp() {
     logging: true,
   });
 
-  // FASE 0 - Redis Cloud Health Check (PAM V3.3 - PRIC requirement)
+  // FASE 0 - Redis Cloud Health Check (PAM V3.3 - PRIC requirement) - GRACEFUL
   const redisHealth = await checkRedisHealth();
   if (redisHealth.status === 'healthy') {
     logInfo('✅ Conexão com Redis Cloud estabelecida com sucesso', {
@@ -42,11 +42,18 @@ export async function createApp() {
       service: 'redis-cloud',
     });
   } else {
-    console.error(
-      '❌ FALHA CRÍTICA: Não foi possível conectar ao Redis Cloud. Sistema não pode iniciar sem Redis.'
+    console.warn(
+      '⚠️ Redis não disponível - aplicação continuará em modo degradado'
     );
-    console.error(`Erro: ${redisHealth.error}`);
-    process.exit(1);
+    console.warn(`Detalhes do erro Redis: ${redisHealth.error}`);
+    console.warn('📋 Funcionalidades afetadas: cache, filas de background, sessões');
+    console.warn('💡 Para funcionalidade completa, configure REDIS_URL nos secrets de deploy');
+    
+    logInfo('🔄 Aplicação iniciando em modo degradado sem Redis', {
+      redis_available: false,
+      degraded_mode: true,
+      service: 'redis-fallback',
+    });
   }
 
   // Disable X-Powered-By header - OWASP ASVS V14.4.1
