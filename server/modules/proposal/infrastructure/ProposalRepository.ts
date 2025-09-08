@@ -279,6 +279,12 @@ export class ProposalRepository implements IProposalRepository {
         parceiro_id: parceiros.id,
         parceiro_nome: parceiros.razaoSocial,
         atendente_id: propostas.userId,
+        // PAM V1.0 CORREÇÃO CRÍTICA: Incluir campos de CCB para interface funcionar
+        ccb_gerado: propostas.ccbGerado,
+        caminho_ccb: propostas.caminhoCcb,
+        ccb_gerado_em: propostas.ccbGeradoEm,
+        caminho_ccb_assinado: propostas.caminhoCcbAssinado,
+        data_assinatura: propostas.dataAssinatura,
         created_at: propostas.createdAt,
         updated_at: propostas.updatedAt,
       })
@@ -422,6 +428,12 @@ export class ProposalRepository implements IProposalRepository {
         parceiro_id: parceiros.id,
         parceiro_nome: parceiros.razaoSocial,
         atendente_id: propostas.userId,
+        // PAM V1.0 CORREÇÃO CRÍTICA: Incluir campos de CCB para interface funcionar
+        ccb_gerado: propostas.ccbGerado,
+        caminho_ccb: propostas.caminhoCcb,
+        ccb_gerado_em: propostas.ccbGeradoEm,
+        caminho_ccb_assinado: propostas.caminhoCcbAssinado,
+        data_assinatura: propostas.dataAssinatura,
         created_at: propostas.createdAt,
         updated_at: propostas.updatedAt,
       })
@@ -992,6 +1004,12 @@ export class ProposalRepository implements IProposalRepository {
       motivo_rejeicao: row.motivoRejeicao,
       observacoes: row.observacoes,
       ccb_url: row.ccbDocumentoUrl,
+      // PAM V1.0 CORREÇÃO CRÍTICA: Incluir campos de CCB para frontend
+      ccb_gerado: row.ccb_gerado,
+      caminho_ccb: row.caminho_ccb,
+      ccb_gerado_em: row.ccb_gerado_em,
+      caminho_ccb_assinado: row.caminho_ccb_assinado,
+      data_assinatura: row.data_assinatura,
       created_at: row.createdAt,
       updated_at: row.updatedAt,
     });

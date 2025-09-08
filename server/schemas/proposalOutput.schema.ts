@@ -55,6 +55,12 @@ export const ProposalOutputSchema = z.object({
     dados_pagamento: z.any().optional(),
     ccb_url: z.string().optional(),
     ccbUrl: z.string().optional(),
+    // PAM V1.0 CORREÇÃO CRÍTICA: Adicionar campos de CCB ao schema
+    ccb_gerado: z.boolean().optional(),
+    caminho_ccb: z.string().optional(),
+    ccb_gerado_em: z.string().optional(),
+    caminho_ccb_assinado: z.string().optional(),
+    data_assinatura: z.string().optional(),
     documentos: z.array(z.any()).optional(),
   }),
 });
