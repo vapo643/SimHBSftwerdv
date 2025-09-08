@@ -1,0 +1,31 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA DE INTEGRIDADE DE DADOS**
+
+* **Sumário da Missão:** Realizar uma auditoria forense completa no fluxo de dados da entidade `Proposta`, desde a camada de persistência até a renderização no frontend, para identificar por que múltiplos campos de dados críticos estão ausentes nas telas de Dashboard, Fila de Análise e Detalhe da Proposta. Adicionalmente, diagnosticar a causa raiz dos erros `403 Forbidden` no endpoint de métricas.
+
+* **Cenário de Negócio (O "Caso de Teste"):** Um `ANALISTA` acede ao Dashboard e à Fila de Análise e observa que as propostas listadas não exibem informações essenciais como "Valor", "CPF" e "Data de Criação". Ao clicar para analisar uma proposta específica, a tela de detalhes também está incompleta, faltando dados financeiros cruciais. Os KPIs do dashboard falham ao carregar com um erro de permissão.
+
+* **Vetor de Ataque / Ponto de Falha (Hipóteses):**
+    1.  **Query Incompleta (Backend):** O `ProposalRepository` está a executar queries (`SELECT`) que não incluem todos os campos necessários ou não realizam os `JOINs` corretos com tabelas relacionadas (ex: `clientes`). Esta é a hipótese principal.
+    2.  **Desserialização/Mapeamento (Backend):** Os dados são corretamente buscados do banco de dados, mas são perdidos durante o processo de mapeamento para os DTOs (Data Transfer Objects) antes de serem enviados como resposta da API.
+    3.  **Contrato de Tipo Quebrado (Shared):** Os tipos TypeScript partilhados entre frontend e backend (`shared/types/`) estão dessincronizados com o schema real do banco de dados.
+    4.  **Política de RLS (Banco de Dados):** As políticas de Row Level Security para o `role` do usuário são excessivamente restritivas e estão a bloquear o acesso a colunas específicas ou a `views` inteiras (como a `vw_metricas_dashboard`), resultando no erro `403 Forbidden`.
+
+* **Evidência de Conformidade Requerida (A "Prova Irrefutável"):**
+    1.  **Análise da Query da Lista de Propostas:**
+        * Localize o `UseCase` e o método no `ProposalRepository` que é responsável por buscar a lista de propostas para o Dashboard e a Fila de Análise.
+        * Apresente a query Drizzle ORM completa usada neste método.
+        * Compare os campos selecionados na query com os campos que estão em falta na UI (ex: `data de criação`, `valor`, `CPF`). Aponte a discrepância exata.
+
+    2.  **Análise da Query da Proposta Individual:**
+        * Localize o `UseCase` e o método no `ProposalRepository` que busca uma única proposta por ID para a tela de detalhes/análise.
+        * Apresente a query Drizzle ORM completa usada.
+        * Compare os campos selecionados com a lista de campos em falta na UI (ex: `valor_solicitado`, `prazo`, `finalidade`, `garantia`, `valor_tac`, `valor_iof`, `valor_total_financiado`). Aponte as discrepâncias.
+
+    3.  **Análise da Query de Métricas e Permissões:**
+        * Localize o `UseCase` e o método no `Repository` responsável pelo endpoint `/api/propostas/metricas`.
+        * Apresente a query que busca os dados para as métricas.
+        * Navegue até o SQL Editor do Supabase e execute o comando `SELECT * FROM pg_policies WHERE tablename = 'vw_metricas_dashboard';` (ou a tabela/view correta usada pela query). Apresente a definição da política de RLS encontrada.
+
+    4.  **Veredito Final:** Com base na análise das queries e políticas, forneça um diagnóstico conclusivo explicando:
+        * Por que os campos estão em falta nas UIs (provavelmente devido a `SELECT`s incompletos).
+        * Por que o endpoint de métricas está a retornar um erro `403 Forbidden` (provavelmente devido a uma política de RLS incorreta ou ausente).

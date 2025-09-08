@@ -1,0 +1,82 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - RECONSTRUÇÃO DO CONTRATO DE DADOS**
+
+* **Sumário da Missão:** Corrigir a camada de mapeamento de dados dentro do `ProposalRepository` para garantir que todas as informações de propostas, incluindo dados do cliente e detalhes financeiros, sejam corretamente serializadas e enviadas para o frontend, resolvendo a ausência de dados nas telas.
+
+* **Intenção Estratégica:** Restaurar a integridade visual e informacional do Dashboard, Fila de Análise e Tela de Detalhes, garantindo que os usuários tenham acesso a 100% dos dados necessários para suas operações e tomada de decisão.
+
+* **Contexto Técnico:** A auditoria forense confirmou que as queries Drizzle ORM no `server/modules/proposal/infrastructure/ProposalRepository.ts` são abrangentes e selecionam todos os campos necessários. No entanto, a função `.map()` que processa o resultado da query é incompleta. Ela utiliza um `...row` que não converte corretamente os nomes das colunas de `snake_case` (padrão do DB) para `camelCase` (padrão dos DTOs do frontend) e falha em mapear explicitamente todos os campos necessários.
+
+---
+
+**IMPLEMENTAR:**
+Reconstrução dos Métodos de Mapeamento de Dados de Propostas
+
+**CURRENT STATE:**
+O método `list()` (ou similar) no `ProposalRepository.ts`, na linha 304 (aproximadamente), contém um mapeamento de dados defeituoso:
+```typescript
+return results.map((row) => ({
+  ...row, // <-- FONTE DO PROBLEMA: Não converte snake_case para camelCase
+  nomeCliente: row.cliente_nome,
+  // ... poucos outros campos são mapeados explicitamente ...
+  // ... a maioria dos campos financeiros e de data são PERDIDOS aqui.
+}));
+Um problema similar provavelmente existe no método que busca uma proposta individual (findById).
+
+EXPECTED (Estado Final de Sucesso):
+
+O ProposalRepository.ts é refatorado para incluir um método de mapeamento robusto e explícito (mapToDomain ou mapToDTO).
+
+Este método de mapeamento deve converter TODOS os campos relevantes da resposta do banco de dados para a estrutura de tipo esperada pelo frontend, conforme definido em shared/types/.
+
+As telas de Dashboard, Fila de Análise e Detalhe da Proposta devem renderizar todos os dados anteriormente ausentes, incluindo, mas não se limitando a: data de criação, CPF do cliente, valor solicitado, prazo, finalidade, garantia, TAC, IOF e valor total financiado.
+
+O tipo de retorno dos métodos do repositório deve ser estritamente aderente aos tipos Proposal ou ProposalDTO importados do shared, garantindo a validação do contrato em tempo de compilação.
+
+CONSTRAINTS (Roadmap de Implementação):
+
+Localize o Repositório: Navegue até server/modules/proposal/infrastructure/ProposalRepository.ts.
+
+Crie um Mapeador Privado: Dentro da classe ProposalRepository, crie um método privado chamado mapRowToProposalDTO. Este método receberá uma linha (row) do resultado da query como argumento.
+
+Implemente o Mapeamento Explícito: Dentro de mapRowToProposalDTO, mapeie explicitamente cada campo do objeto row (que está em snake_case) para as propriedades camelCase do DTO.
+
+Exemplo de Mapeamento:
+
+TypeScript
+
+private mapRowToProposalDTO(row: any): ProposalDTO { // Use o tipo correto do resultado da query
+  return {
+    id: row.id,
+    status: row.status,
+    numeroProposta: row.numero_proposta,
+    valor: row.valor,
+    prazo: row.prazo,
+    taxaJuros: row.taxa_juros,
+    valorTac: row.valor_tac,
+    valorIof: row.valor_iof,
+    valorTotalFinanciado: row.valor_total_financiado,
+    finalidade: row.finalidade,
+    garantia: row.garantia,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    cliente: {
+      nome: row.cliente_nome,
+      cpf: row.cliente_cpf,
+      // ... outros campos do cliente ...
+    },
+    // ... mapear TODOS os outros campos necessários
+  };
+}
+Refatore os Métodos Públicos: Modifique os métodos públicos como list() e findById() para usar o novo mapeador. Substitua o .map() defeituoso por results.map(this.mapRowToProposalDTO).
+
+Validação de Tipos: Após a refatoração, execute get_latest_lsp_diagnostics para garantir que não há erros de tipo e que os métodos estão a retornar a estrutura de dados correta.
+
+DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):
+
+CONFIANÇA NA IMPLEMENTAÇÃO: 95%
+
+RISCOS IDENTIFICADOS: BAIXO - O risco principal é um erro de digitação no mapeamento dos campos (ex: cliente_nome para nomeCliente). Este tipo de erro será imediatamente capturado pelo compilador TypeScript se os tipos de retorno estiverem corretamente definidos, mitigando o risco.
+
+DECISÕES TÉCNICAS ASSUMIDAS: Assume-se que os componentes do frontend já estão preparados para receber e renderizar os dados com os nomes de propriedade camelCase corretos, e que a única peça que falta é a entrega correta dos dados pela API.
+
+VALIDAÇÃO PENDENTE: O QA (GEM 03) deve realizar uma validação visual completa em TODAS as três telas afetadas (Dashboard, Fila, Detalhe) para confirmar que 100% dos campos de dados agora são exibidos corretamente.

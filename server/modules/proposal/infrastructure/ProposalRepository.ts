@@ -300,27 +300,74 @@ export class ProposalRepository implements IProposalRepository {
 
     console.log(`⚡ [PERF-BOOST-001] Query executed: ${results.length} proposals (lightweight)`);
 
-    // OPERAÇÃO VISÃO CLARA V1.0: Retornar dados estruturados para frontend
-    return results.map((row) => ({
-      ...row,
-      // Estruturar dados para compatibilidade com frontend
+    // PAM V1.0 - RECONSTRUÇÃO DO CONTRATO DE DADOS: Usar mapeador completo
+    return results.map((row) => this.mapRowToProposalDTO(row));
+  }
+
+  /**
+   * PAM V1.0 - RECONSTRUÇÃO DO CONTRATO DE DADOS
+   * Método privado para mapeamento completo de dados do banco para frontend
+   * Converte snake_case para camelCase e estrutura dados corretamente
+   */
+  private mapRowToProposalDTO(row: any): any {
+    return {
+      // Dados básicos da proposta
+      id: row.id,
+      status: row.status,
+      numeroProposta: row.numero_proposta,
+      
+      // Dados do cliente (snake_case → camelCase)
       nomeCliente: row.cliente_nome,
+      clienteNome: row.cliente_nome,
+      cpfCliente: row.cliente_cpf,
+      clienteCpf: row.cliente_cpf,
+      emailCliente: row.cliente_email || null,
+      telefoneCliente: row.cliente_telefone || null,
+      
+      // Dados financeiros (snake_case → camelCase)
+      valor: row.valor,
+      valorSolicitado: row.valor, // Frontend espera valorSolicitado
+      prazo: row.prazo,
+      taxaJuros: row.taxa_juros,
+      valorTac: row.valor_tac,
+      valorIof: row.valor_iof,
+      valorTotalFinanciado: row.valor_total_financiado,
+      finalidade: row.finalidade,
+      garantia: row.garantia,
+      
+      // Dados de produtos e tabelas
+      produtoId: row.produto_id,
+      nomeProduto: row.produto_nome,
+      tabelaComercialNome: row.tabela_comercial_nome,
+      
+      // Dados de datas (snake_case → camelCase)
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      
+      // Dados estruturados de parceiro
       parceiro: row.parceiro_id ? {
         id: row.parceiro_id,
         razaoSocial: row.parceiro_nome
       } : null,
+      
+      // Dados estruturados de loja  
       loja: row.loja_id ? {
         id: row.loja_id,
         nomeLoja: row.loja_nome
       } : null,
-      valor_parcela: Proposal.calculateMonthlyPaymentStatic(
+      
+      // Dados do atendente
+      atendenteId: row.atendente_id,
+      userId: row.atendente_id, // Compatibilidade
+      
+      // Cálculo de parcela (mantido do código anterior)
+      valorParcela: Proposal.calculateMonthlyPaymentStatic(
         parseFloat(row.valor || '0'),
         parseFloat(row.taxa_juros || '0'),
         row.prazo || 1
       ),
-    }));
+    };
   }
-
 
   async findAll(): Promise<Proposal[]> {
     const results = await db.select().from(propostas).where(isNull(propostas.deletedAt));
