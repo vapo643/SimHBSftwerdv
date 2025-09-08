@@ -484,12 +484,16 @@ const EditarPropostaPendenciada: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
+      console.log('🎯 [RESUBMIT] Sucesso - redirecionando para dashboard');
+      
       toast({
         title: 'Proposta reenviada',
         description: 'A proposta foi reenviada para análise com sucesso.',
       });
-      // Redirecionamento para dashboard como solicitado
+      
+      // Redirecionamento IMEDIATO para dashboard
       setLocation('/dashboard');
+      console.log('🎯 [RESUBMIT] setLocation("/dashboard") executado');
     },
     onError: (error: any) => {
       const errorMessage =
@@ -505,9 +509,7 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
 
-      console.log(
-        '✅ [RESUBMIT] Cache invalidation executada com sucesso'
-      );
+      console.log('✅ [RESUBMIT] Cache invalidation executada com sucesso');
     },
   });
 
