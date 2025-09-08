@@ -3647,7 +3647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/pagamentos', pagamentosRouter);
 
   // Register Formalização routes
-  const formalizacaoRouter = (await import('./routes/formalizacao')).default;
+  const formalizacaoRouter = (await import('./routes/formalizacao-original')).default;
   app.use('/api/formalizacao', formalizacaoRouter);
 
   // ✅ PAM P2.3: Legacy core.ts ELIMINATED - DDD Architecture Migration Complete
