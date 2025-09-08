@@ -1,0 +1,46 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA E CORREÇÃO HOLÍSTICA DE DADOS**
+
+* **Sumário da Missão:** Erradicar a inconsistência de dados em todo o sistema, auditando e corrigindo **TODOS** os métodos de leitura e escrita no `ProposalRepository` para garantir que o contrato de dados completo seja respeitado desde a criação da proposta até a sua visualização em todas as telas.
+
+* **Intenção Estratégica:** Restaurar a integridade e a veracidade dos dados em toda a plataforma, que é o pilar fundamental de um sistema financeiro confiável.
+
+* **Contexto Técnico:** A tentativa anterior de correção falhou porque foi aplicada apenas ao método de listagem (`findByCriteriaLightweight`). A causa raiz da perda de dados é sistémica e reside no `ProposalRepository.ts`. Temos duas hipóteses: (A) os métodos de leitura (como `findById`) estão a usar um mapeamento de dados incompleto; (B) os métodos de escrita (`create`/`update`) nunca persistiram os dados em primeiro lugar. Ambas as hipóteses devem ser investigadas e corrigidas.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria e Correção Completa do Contrato de Dados no `ProposalRepository`
+
+**CURRENT STATE:**
+Apesar de uma correção anterior no método de listagem, os dados completos das propostas ainda não são exibidos no Dashboard, na Fila de Análise e, crucialmente, na tela de Análise Individual. Isso indica que múltiplos métodos dentro do `ProposalRepository.ts` estão defeituosos.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **TODOS** os métodos no `ProposalRepository.ts` que retornam dados de propostas (seja uma lista ou um objeto único) devem usar o mapeador `mapRowToProposalDTO` para popular 100% dos campos definidos no tipo `ProposalDTO`.
+2.  Os métodos responsáveis por criar (`create`) e atualizar (`update`) propostas devem garantir que **TODOS** os campos recebidos do frontend (incluindo `valor_solicitado`, `prazo`, `finalidade`, `garantia`, etc.) sejam corretamente persistidos no banco de dados.
+3.  Como resultado, as telas de Dashboard, Fila de Análise e Análise Individual devem exibir todos os dados da proposta, sem exceções.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**FASE 1: AUDITORIA FORENSE COMPLETA (APENAS LEITURA)**
+1.  **Localize e Apresente o Repositório:** Abra o ficheiro `server/modules/proposal/infrastructure/ProposalRepository.ts`.
+2.  **Apresente o Mapeador Existente:** Mostre o código do método privado `mapRowToProposalDTO` que foi criado na etapa anterior.
+3.  **Auditoria dos Métodos de Leitura:**
+    * Identifique e apresente o código completo do método que busca **uma única proposta por ID** (provavelmente chamado `findById` ou `getById`). Verifique se este método está a utilizar o `mapRowToProposalDTO`.
+    * Identifique e apresente o código completo do método que busca a lista de propostas (provavelmente `list` ou `findByCriteriaLightweight`). Verifique se ele também utiliza o mapeador.
+4.  **Auditoria dos Métodos de Escrita:**
+    * Identifique e apresente o código completo do método que **cria** uma nova proposta (provavelmente chamado `create` ou `save` para uma nova entidade). Verifique se todos os campos financeiros e de condições (`valor`, `prazo`, `finalidade`, etc.) estão a ser incluídos na query de `INSERT`.
+    * Identifique e apresente o código completo do método que **atualiza** uma proposta existente (provavelmente `update` ou `save` para uma entidade existente). Verifique se todos os campos editáveis estão a ser incluídos na query de `UPDATE`.
+5.  **Veredito da Auditoria:** Com base na análise acima, forneça um relatório claro sobre quais métodos estão a falhar (seja na leitura ou na escrita) e porquê.
+
+**FASE 2: EXECUÇÃO CIRÚRGICA DA CORREÇÃO (APENAS ESCRITA - AGUARDAR APROVAÇÃO)**
+*Aguarde a aprovação do veredito da Fase 1 antes de executar esta fase.*
+1.  **Correção dos Métodos de Leitura:** Refatore **TODOS** os métodos de leitura identificados na Fase 1 para que utilizem o mapeador `mapRowToProposalDTO` e retornem o DTO completo.
+2.  **Correção dos Métodos de Escrita:** Se a auditoria revelar que os métodos de escrita estão incompletos, refatore-os para garantir a persistência de **TODOS** os campos de dados relevantes recebidos.
+3.  **Validação Final:** Execute `get_latest_lsp_diagnostics` para garantir a ausência de erros de tipo após as correções.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 98%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - A missão é uma extensão da correção anterior, com um escopo agora bem definido. O principal risco é que um campo no banco de dados (`snake_case`) seja mapeado para o nome errado no DTO (`camelCase`), mas isso será mitigado pela verificação de tipos do TypeScript.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que a estrutura da base de dados (`shared/schema.ts`) está correta e contém todas as colunas necessárias para armazenar os dados. O problema reside exclusivamente na lógica da aplicação dentro do repositório.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve executar uma validação visual completa em todas as telas e, adicionalmente, verificar no banco de dados (Supabase UI) se os dados de uma proposta recém-criada e de uma proposta recém-atualizada foram 100% persistidos.
