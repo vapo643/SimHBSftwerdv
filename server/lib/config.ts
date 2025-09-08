@@ -52,7 +52,7 @@ export interface AppConfig {
 function getCriticalSecrets(env: string): string[] {
   switch (env) {
     case 'production':
-      return ['DATABASE_URL', 'JWT_SECRET', 'SESSION_SECRET', 'CSRF_SECRET'];
+      return ['PROD_DATABASE_URL', 'PROD_JWT_SECRET', 'PROD_SESSION_SECRET', 'PROD_CSRF_SECRET'];
     case 'staging':
       return ['STAGING_DATABASE_URL', 'STAGING_JWT_SECRET', 'STAGING_SESSION_SECRET', 'STAGING_CSRF_SECRET'];
     default:
@@ -121,8 +121,8 @@ function getJwtSecret(): string {
   
   switch (env) {
     case 'production':
-      return process.env.JWT_SECRET || (() => {
-        throw new Error('JWT_SECRET is required in production environment!');
+      return process.env.PROD_JWT_SECRET || (() => {
+        throw new Error('PROD_JWT_SECRET is required in production environment!');
       })();
     case 'staging':
       return process.env.STAGING_JWT_SECRET || generateSecureSecret('STAGING_JWT_SECRET');
@@ -136,8 +136,8 @@ function getSessionSecret(): string {
   
   switch (env) {
     case 'production':
-      return process.env.SESSION_SECRET || (() => {
-        throw new Error('SESSION_SECRET is required in production environment!');
+      return process.env.PROD_SESSION_SECRET || (() => {
+        throw new Error('PROD_SESSION_SECRET is required in production environment!');
       })();
     case 'staging':
       return process.env.STAGING_SESSION_SECRET || generateSecureSecret('STAGING_SESSION_SECRET');
@@ -151,8 +151,8 @@ function getCsrfSecret(): string {
   
   switch (env) {
     case 'production':
-      return process.env.CSRF_SECRET || (() => {
-        throw new Error('CSRF_SECRET is required in production environment!');
+      return process.env.PROD_CSRF_SECRET || (() => {
+        throw new Error('PROD_CSRF_SECRET is required in production environment!');
       })();
     case 'staging':
       return process.env.STAGING_CSRF_SECRET || generateSecureSecret('STAGING_CSRF_SECRET');
