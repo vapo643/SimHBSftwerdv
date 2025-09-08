@@ -1,0 +1,36 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - CORREÇÃO DE INTEGRIDADE DE DADOS (TELA DE ANÁLISE)**
+
+* **Sumário da Missão:** Refatorar o método `findById` (ou o método equivalente que busca uma única proposta por ID) no `ProposalRepository` para garantir que ele retorne o objeto de proposta completo, com todos os campos financeiros e de condições, corrigindo a exibição de dados "N/A" na tela de Análise de Proposta.
+
+* **Intenção Estratégica:** Garantir que os `ANALISTAS` tenham acesso a 100% dos dados necessários para tomar decisões de crédito informadas, o que é um requisito de negócio não negociável.
+
+* **Contexto Técnico:** A correção anterior no método `findByCriteriaLightweight` foi um sucesso, provando que o mapeador `mapRowToProposalDTO` está correto. A falha atual está isolada no método que busca a proposta individual. A hipótese é que a query Drizzle ORM deste método está a fazer um `SELECT` simples sem os `JOINs` necessários para as tabelas `clientes`, `produtos`, etc., e/ou não está a usar o mapeador `mapRowToProposalDTO`.
+
+---
+
+**IMPLEMENTAR:**
+Refatoração da Query e Mapeamento no Método de Busca de Proposta Individual
+
+**CURRENT STATE:**
+A tela de Análise de Proposta (`/credito/analise/:id`) exibe "N/A" para a maioria dos campos financeiros. Isso ocorre porque o endpoint da API (`GET /api/propostas/:id`) está a retornar um objeto de proposta incompleto, provavelmente devido a uma query defeituosa no método `findById` do `ProposalRepository.ts`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O método `findById` (ou seu equivalente) em `server/modules/proposal/infrastructure/ProposalRepository.ts` é refatorado.
+2.  A query Drizzle ORM dentro deste método é reconstruída para incluir `leftJoin` com todas as tabelas relacionadas (`clientes`, `produtos`, `tabelasComerciais`, etc.), exatamente como foi feito no método `findByCriteriaLightweight`.
+3.  O `select` da query é expandido para incluir todos os campos necessários das tabelas juntadas.
+4.  O resultado da query é processado pelo mapeador `mapRowToProposalDTO` para garantir um DTO completo e consistente.
+5.  Como resultado, ao aceder à tela de Análise de Proposta, todos os campos devem ser exibidos corretamente: **Valor Solicitado, Prazo, Finalidade, Garantia, TAC, IOF e Valor Total Financiado.**
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Navegue** para o ficheiro `server/modules/proposal/infrastructure/ProposalRepository.ts`.
+2.  **Localize** o método responsável por buscar uma única proposta (ex: `findById`).
+3.  **Aplique a Mesma Lógica:** Replique a estrutura de `query` e `select` do método `findByCriteriaLightweight` (que já foi corrigido e está a funcionar) para dentro do método `findById`. Isto inclui todos os `leftJoin` e a seleção explícita de todos os campos das tabelas relacionadas.
+4.  **Garanta a Aplicação do Mapeador:** Assegure-se de que o resultado final da query seja processado pelo método `this.mapRowToProposalDTO` antes de ser retornado.
+5.  **Validação de Tipos:** Execute `get_latest_lsp_diagnostics` para confirmar que não há erros de compilação ou tipo após a refatoração.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 99%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - Esta é uma missão de replicação de um padrão já validado. O risco é praticamente nulo, limitado a possíveis erros de digitação que seriam detetados pelo TypeScript.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que a estrutura da tela de Análise de Proposta no frontend já está correta e pronta para receber os dados completos.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve validar especificamente a tela de Análise de Proposta (`/credito/analise/:id`) para confirmar que todos os campos financeiros e de condições são agora exibidos com os dados corretos do banco de dados.

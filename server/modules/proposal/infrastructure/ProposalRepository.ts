@@ -143,20 +143,39 @@ export class ProposalRepository implements IProposalRepository {
   }
 
   async findById(id: string): Promise<Proposal | null> {
-    console.log('🔍 [findById] Executing query with JOINs for ID:', id);
+    console.log('🔍 [findById] PAM V1.0 - Replicating findByCriteriaLightweight logic for ID:', id);
     
-    // CRITICAL FIX: Incluir JOINs para buscar dados de produto e tabela comercial
+    // PAM V1.0 CORREÇÃO: Replicar EXATAMENTE a query do findByCriteriaLightweight que funciona
     const result = await db
       .select({
-        proposta: propostas,
-        produto: produtos,
-        tabelaComercial: tabelasComerciais,
-        loja: lojas,
+        id: propostas.id,
+        status: propostas.status,
+        cliente_nome: propostas.clienteNome,
+        cliente_cpf: propostas.clienteCpf,
+        valor: propostas.valor,
+        prazo: propostas.prazo,
+        taxa_juros: propostas.taxaJuros,
+        valor_tac: propostas.valorTac,
+        valor_iof: propostas.valorIof,
+        valor_total_financiado: propostas.valorTotalFinanciado,
+        finalidade: propostas.finalidade,
+        garantia: propostas.garantia,
+        produto_id: propostas.produtoId,
+        produto_nome: produtos.nomeProduto,
+        tabela_comercial_nome: tabelasComerciais.nomeTabela,
+        loja_id: propostas.lojaId,
+        loja_nome: lojas.nomeLoja,
+        parceiro_id: parceiros.id,
+        parceiro_nome: parceiros.razaoSocial,
+        atendente_id: propostas.userId,
+        created_at: propostas.createdAt,
+        updated_at: propostas.updatedAt
       })
       .from(propostas)
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id)) // CRUCIAL: JOIN com parceiros que estava faltando!
       .where(and(eq(propostas.id, id), isNull(propostas.deletedAt)))
       .limit(1);
 
@@ -165,13 +184,37 @@ export class ProposalRepository implements IProposalRepository {
       return null;
     }
 
-    console.log('🔍 [findById] Found proposal with joined data:', {
-      produtoNome: result[0].produto?.nomeProduto,
-      tabelaComercialNome: result[0].tabelaComercial?.nomeTabela,
-      lojaNome: result[0].loja?.nomeLoja
+    console.log('🔍 [findById] PAM V1.0 SUCCESS - Found complete data:', {
+      parceiro: result[0].parceiro_nome,
+      loja: result[0].loja_nome,
+      produto: result[0].produto_nome
     });
 
-    return this.mapToDomainWithJoinedData(result[0]);
+    // PAM V1.0 CORREÇÃO CRÍTICA: Usar o mesmo mapeador que funciona no findByCriteriaLightweight
+    const mappedData = this.mapRowToProposalDTO(result[0]);
+    
+    // Retornar como Domain Object para manter compatibilidade com interface IProposalRepository
+    return this.mapToDomain({
+      id: mappedData.id,
+      status: mappedData.status,
+      clienteNome: mappedData.nomeCliente,
+      clienteCpf: mappedData.cpfCliente,
+      valor: mappedData.valorSolicitado,
+      prazo: mappedData.prazo,
+      taxaJuros: mappedData.taxaJuros,
+      valorTac: mappedData.valorTac,
+      valorIof: mappedData.valorIof,
+      valorTotalFinanciado: mappedData.valorTotalFinanciado,
+      finalidade: mappedData.finalidade,
+      garantia: mappedData.garantia,
+      produtoId: mappedData.produto?.id || null,
+      tabelaComercialId: null, // TODO: adicionar se necessário
+      lojaId: mappedData.lojaId,
+      userId: mappedData.atendenteId,
+      createdAt: mappedData.createdAt,
+      updatedAt: mappedData.updatedAt,
+      deletedAt: null
+    });
   }
 
   // PAM V4.1 PERF-F2-001: Eliminando N+1 com JOIN otimizado

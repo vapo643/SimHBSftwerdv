@@ -1181,38 +1181,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     '/api/propostas/:id',
     jwtAuthMiddleware as any,
     timingNormalizerMiddleware,
-    async (req: AuthenticatedRequest, res) => {
+    async (req: AuthenticatedRequest, res, next) => {
       try {
-        const idParam = req.params.id;
-        const user = req.user;
+        console.log('🎯 [PAM V1.0] Using DDD Controller for individual proposal');
+        
+        // PAM V1.0 CORREÇÃO CRÍTICA: Usar novo controller DDD com findById corrigido
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController.js');
+        const proposalController = new ProposalController();
+        
+        return await proposalController.getById(req, res, next);
+      } catch (error) {
+        console.error('GET /api/propostas/:id DDD error:', error);
+        next(error);
+      }
+    }
+  );
 
-        console.log('⚠️ [LEGACY ROUTE] ROTA LEGACY EXECUTADA! (DEVERIA SER DDD)');
-        console.log('⚠️ [LEGACY ROUTE] URL:', req.url);
-        console.log('⚠️ [LEGACY ROUTE] Path:', req.path);
-        console.log('⚠️ [LEGACY ROUTE] ID Param:', idParam);
-        console.log(
-          `🔐 [PROPOSTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
-        );
-
-        // 🔧 CORREÇÃO: Usar mesma abordagem do endpoint de formalização que funciona
-        if (user?.role === 'ATENDENTE') {
-          console.log(`🔐 [ATENDENTE ACCESS] Using RLS query for user loja_id: ${user?.loja_id}`);
-
-          // Usar Drizzle com RLS como no endpoint de formalização
-          const { db } = await import('../server/lib/supabase');
-          const { propostas, lojas, parceiros, produtos, tabelasComerciais } = await import(
-            '../shared/schema'
-          );
-          const { eq, and } = await import('drizzle-orm');
-
-          // Query with RLS active - same as formalization endpoint
-          const result = await db
-            .select({
-              id: propostas.id,
-              numero_proposta: propostas.numeroProposta, // PAM V1.0 - Sequential number
-              status: propostas.status,
-              cliente_data: propostas.clienteData,
-              condicoes_data: propostas.condicoesData,
+  // PUT /api/propostas/:id - Atualizar dados da proposta (para correções)
               loja_id: propostas.lojaId,
               created_at: propostas.createdAt,
               produto_id: propostas.produtoId,
