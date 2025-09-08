@@ -161,42 +161,6 @@ function getCsrfSecret(): string {
   }
 }
 
-// Helper functions para buscar secrets baseado no ambiente
-function getJwtSecret(): string {
-  const env = process.env.NODE_ENV || 'development';
-  switch (env) {
-    case 'production':
-      return process.env.PROD_JWT_SECRET || process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
-    case 'staging':
-      return process.env.STAGING_JWT_SECRET || process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
-    default:
-      return process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
-  }
-}
-
-function getSessionSecret(): string {
-  const env = process.env.NODE_ENV || 'development';
-  switch (env) {
-    case 'production':
-      return process.env.PROD_SESSION_SECRET || process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
-    case 'staging':
-      return process.env.STAGING_SESSION_SECRET || process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
-    default:
-      return process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
-  }
-}
-
-function getCsrfSecret(): string {
-  const env = process.env.NODE_ENV || 'development';
-  switch (env) {
-    case 'production':
-      return process.env.PROD_CSRF_SECRET || process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
-    case 'staging':
-      return process.env.STAGING_CSRF_SECRET || process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
-    default:
-      return process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
-  }
-}
 
 // Configuração centralizada com fallbacks seguros
 export function loadConfig(): AppConfig {
@@ -235,9 +199,9 @@ export function loadConfig(): AppConfig {
       security: {
         enableRateLimit: process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL,
         enableHelmet: true,
-        jwtSecret: process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET'),
-        sessionSecret: process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET'),
-        csrfSecret: process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET'),
+        jwtSecret: getJwtSecret(),
+        sessionSecret: getSessionSecret(),
+        csrfSecret: getCsrfSecret(),
         enableSecurityMonitoring: process.env.ENABLE_SECURITY_MONITORING === 'true',
       },
       observability: {
