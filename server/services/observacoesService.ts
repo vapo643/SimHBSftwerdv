@@ -11,7 +11,7 @@ export class ObservacoesService {
   /**
    * Get all observacoes for a proposta
    */
-  async getObservacoesByProposta(propostaId: number): Promise<Observacao[]> {
+  async getObservacoesByProposta(propostaId: string): Promise<Observacao[]> {
     try {
       return await observacoesRepository.findByPropostaId(propostaId);
     } catch (error) {

@@ -1,0 +1,48 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - CORREÇÃO DE TIPO DE DADOS NO HISTÓRICO**
+
+* **Sumário da Missão:** Corrigir a incompatibilidade de tipo de dados (`UUID` string vs. `number`) no fluxo de busca do Histórico de Comunicação, alterando as assinaturas dos métodos relevantes para aceitar o `propostaId` como uma string.
+
+* **Intenção Estratégica:** Restaurar imediatamente a funcionalidade de visualização do Histórico de Comunicação na tela de Análise, garantindo que os `ANALISTAS` tenham acesso a todas as informações necessárias para as suas avaliações.
+
+* **Contexto Técnico:** A sua auditoria forense provou que a conversão `Number(propostaId)` em `server/routes/observacoes.ts` transforma um UUID válido em `NaN`, quebrando a query no banco de dados. A correção envolve alinhar os tipos de dados em toda a cadeia de chamada para tratar o `propostaId` consistentemente como uma `string`.
+
+---
+
+**IMPLEMENTAR:**
+Correção de Tipo de Dados para `propostaId` no Serviço e Rota de Observações
+
+**CURRENT STATE:**
+1.  A rota `GET /api/propostas/:propostaId/observacoes` em `server/routes/observacoes.ts` converte o `propostaId` para `Number`, resultando em `NaN`.
+2.  O serviço `observacoesService.getObservacoesByProposta` espera um `propostaId` do tipo `number`, perpetuando o erro.
+3.  A API retorna um array vazio, e o componente de histórico no frontend não exibe nenhuma informação.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O `propostaId` é tratado como `string` em toda a cadeia de chamada, desde a rota até o repositório.
+2.  A query ao banco de dados é executada com um `UUID` válido.
+3.  A chamada de API para `GET /api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/observacoes` retorna um `HTTP 200 OK` com a lista de observações no corpo da resposta.
+4.  O componente "Histórico de Comunicação" na UI renderiza corretamente os dados recebidos.
+
+**CONSTRAINTS (Roadmap de Implementação Cirúrgica):**
+
+1.  **Corrija o Serviço (`observacoesService.ts`):**
+    * Navegue até `server/services/observacoesService.ts`.
+    * Altere a assinatura do método na linha ~14 de:
+      `async getObservacoesByProposta(propostaId: number): Promise<any[]>`
+    * Para:
+      `async getObservacoesByProposta(propostaId: string): Promise<any[]>`
+
+2.  **Corrija a Rota (`observacoes.ts`):**
+    * Navegue até `server/routes/observacoes.ts`.
+    * Altere a chamada ao serviço na linha ~54 de:
+      `const observacoes = await observacoesService.getObservacoesByProposta(Number(propostaId));`
+    * Para:
+      `const observacoes = await observacoesService.getObservacoesByProposta(propostaId);`
+
+3.  **Validação Final:** Após aplicar as correções, execute `get_latest_lsp_diagnostics` para garantir que não há erros de compilação. Em seguida, valide a correção funcionalmente.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 99%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - A correção é localizada e de baixo risco. O único risco residual seria se algum outro local do código estivesse a chamar `getObservacoesByProposta` esperando um `number`, o que seria imediatamente detetado pelo TypeScript.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que o `propostaId` é consistentemente um `UUID` (string) em todo o sistema, e o uso de `number` foi uma anomalia isolada.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve validar que, após a correção, o "Histórico de Comunicação" é corretamente exibido na tela de Análise de Proposta para diferentes propostas.
