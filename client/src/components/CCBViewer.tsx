@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { FileText, Download, RefreshCw, Eye, CheckCircle, Shield } from 'lucide-react';
+import { FileText, Download, RefreshCw, Eye, CheckCircle, Shield, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';

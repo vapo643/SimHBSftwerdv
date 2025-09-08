@@ -1,0 +1,82 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - REMEDIAÇÃO DA LÓGICA DE OBTENÇÃO DE URL DA CCB**
+
+* **Sumário da Missão:** Refatorar o componente `CCBViewer.tsx` para que, ao invés de usar um caminho de ficheiro relativo, ele acione uma chamada de API ao endpoint correto (`/api/formalizacao/:proposalId/ccb`) para obter a URL assinada completa e, só então, tente abrir o documento.
+
+* **Intenção Estratégica:** Restaurar completamente a funcionalidade de visualização e download de CCBs, eliminando o erro 404 e garantindo um acesso seguro e correto aos documentos armazenados no Supabase Storage.
+
+* **Contexto Técnico:** A sua auditoria provou que o `CCBViewer` está a usar `ccbStatus?.signedUrl`, que contém um caminho relativo. Ele deve ser modificado para primeiro chamar a API que devolve a URL completa e só depois usar `window.open()`. O uso de um `useMutation` do TanStack Query é o padrão ideal para esta operação, pois é uma ação iniciada pelo usuário que tem um efeito colateral (abrir um novo separador).
+
+---
+
+**IMPLEMENTAR:**
+Refatoração do Fluxo de Obtenção de URL no `CCBViewer`
+
+**CURRENT STATE:**
+Os handlers `handleView` e `handleDownload` em `client/src/components/CCBViewer.tsx` tentam abrir uma URL relativa diretamente com `window.open()`, o que causa um erro 404 no router do frontend.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O componente `CCBViewer.tsx` é refatorado para incluir um `useMutation`.
+2.  Quando o usuário clica em "Ver CCB Gerada" ou "Baixar CCB", este `useMutation` é acionado, fazendo uma chamada `GET` para o endpoint `/api/formalizacao/:proposalId/ccb`.
+3.  Um estado de carregamento (`isLoading`) é ativado, desativando o botão e mostrando um feedback visual (ex: spinner).
+4.  No callback `onSuccess` da mutação, a `signedUrl` completa recebida da API é usada para chamar `window.open()`, abrindo o documento numa nova aba.
+5.  O fluxo de visualização e download funciona perfeitamente, sem erros 404.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Navegue** até o ficheiro `client/src/components/CCBViewer.tsx`.
+2.  **Implemente a Mutação de Busca de URL:** Dentro do componente, adicione um novo `useMutation` do TanStack Query para buscar a URL.
+    ```typescript
+    const queryClient = useQueryClient();
+
+    const fetchCcbUrlMutation = useMutation({
+      mutationFn: async (proposalId: string) => {
+        // A API correta para buscar a URL assinada
+        return apiRequest(`/api/formalizacao/${proposalId}/ccb`);
+      },
+      onSuccess: (data) => {
+        if (data && data.signedUrl) {
+          const urlWithTimestamp = `${data.signedUrl}&t=${Date.now()}`;
+          window.open(urlWithTimestamp, '_blank');
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Erro',
+            description: 'A API não retornou uma URL válida para a CCB.',
+          });
+        }
+      },
+      onError: (error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao buscar URL da CCB',
+          description: error.message,
+        });
+      },
+    });
+    ```
+
+3.  **Refatore os Handlers dos Botões:** Modifique os `onClick` handlers para acionar a nova mutação. Remova a lógica antiga de `window.open`.
+    ```jsx
+    // Exemplo para o botão de visualização
+    <Button
+      onClick={() => fetchCcbUrlMutation.mutate(proposalId)}
+      disabled={fetchCcbUrlMutation.isLoading}
+    >
+      {fetchCcbUrlMutation.isLoading ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Eye className="mr-2 h-4 w-4" />
+      )}
+      {fetchCcbUrlMutation.isLoading ? 'Buscando...' : 'Ver CCB Original'}
+    </Button>
+    ```
+    *Aplique uma lógica similar para o botão de download e para os botões da CCB assinada (que chamarão o endpoint `/api/formalizacao/:proposalId/ccb-assinada`).*
+
+4.  **Validação Final:** Após as modificações, execute a aplicação e valide o fluxo completo.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 99%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - O risco é mínimo, pois estamos a substituir uma lógica comprovadamente defeituosa por um padrão de design (`useMutation` para buscar dados sob demanda) que é amplamente utilizado no restante do projeto.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que a resposta do endpoint `/api/formalizacao/:proposalId/ccb` contém um campo `signedUrl` com a URL completa.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve validar que todos os botões de ação na tela de formalização ("Ver Original", "Baixar Original", "Ver Assinada", "Baixar Assinada") agora abrem os documentos corretos numa nova aba, sem erros 404.
