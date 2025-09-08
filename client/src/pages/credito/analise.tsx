@@ -280,43 +280,43 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Nome:</strong> {propostaMapeada.cliente.nome}
+                <strong>Nome:</strong> {safeRender(propostaMapeada.cliente.nome)}
               </p>
               <p>
-                <strong>CPF:</strong> {propostaMapeada.cliente.cpf}
+                <strong>CPF:</strong> {safeRender(propostaMapeada.cliente.cpf)}
               </p>
               <p>
-                <strong>Email:</strong> {propostaMapeada.cliente.email}
+                <strong>Email:</strong> {safeRender(propostaMapeada.cliente.email)}
               </p>
               <p>
-                <strong>Telefone:</strong> {propostaMapeada.cliente.telefone}
+                <strong>Telefone:</strong> {safeRender(propostaMapeada.cliente.telefone)}
               </p>
               <p>
-                <strong>Data de Nascimento:</strong> {propostaMapeada.cliente.dataNascimento}
+                <strong>Data de Nascimento:</strong> {safeRender(propostaMapeada.cliente.dataNascimento)}
               </p>
               <p>
-                <strong>Renda Mensal:</strong> {propostaMapeada.cliente.rendaMensal}
+                <strong>Renda Mensal:</strong> {safeRender(propostaMapeada.cliente.rendaMensal)}
               </p>
               <p>
-                <strong>RG:</strong> {propostaMapeada.cliente.rg}
+                <strong>RG:</strong> {safeRender(propostaMapeada.cliente.rg)}
               </p>
               <p>
-                <strong>Órgão Emissor:</strong> {propostaMapeada.cliente.orgaoEmissor}
+                <strong>Órgão Emissor:</strong> {safeRender(propostaMapeada.cliente.orgaoEmissor)}
               </p>
               <p>
-                <strong>Estado Civil:</strong> {propostaMapeada.cliente.estadoCivil}
+                <strong>Estado Civil:</strong> {safeRender(propostaMapeada.cliente.estadoCivil)}
               </p>
               <p>
-                <strong>Nacionalidade:</strong> {propostaMapeada.cliente.nacionalidade}
+                <strong>Nacionalidade:</strong> {safeRender(propostaMapeada.cliente.nacionalidade)}
               </p>
               <p>
-                <strong>CEP:</strong> {propostaMapeada.cliente.cep}
+                <strong>CEP:</strong> {safeRender(propostaMapeada.cliente.cep)}
               </p>
               <p>
-                <strong>Endereço:</strong> {propostaMapeada.cliente.endereco}
+                <strong>Endereço:</strong> {safeRender(propostaMapeada.cliente.endereco)}
               </p>
               <p>
-                <strong>Ocupação:</strong> {propostaMapeada.cliente.ocupacao}
+                <strong>Ocupação:</strong> {safeRender(propostaMapeada.cliente.ocupacao)}
               </p>
             </CardContent>
           </Card>
@@ -328,29 +328,32 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Valor Solicitado:</strong> {propostaMapeada.condicoes.valorSolicitado}
+                <strong>Valor Solicitado:</strong> {safeRender(propostaMapeada.condicoes.valorSolicitado)}
               </p>
               <p>
-                <strong>Prazo:</strong> {Number.isFinite(Number(propostaMapeada.condicoes.prazo)) ? `${propostaMapeada.condicoes.prazo} meses` : propostaMapeada.condicoes.prazo}
+                <strong>Prazo:</strong> {Number.isFinite(Number(safeRender(propostaMapeada.condicoes.prazo))) ? `${safeRender(propostaMapeada.condicoes.prazo)} meses` : safeRender(propostaMapeada.condicoes.prazo)}
               </p>
               <p>
-                <strong>Finalidade:</strong> {propostaMapeada.condicoes.finalidade}
+                <strong>Finalidade:</strong> {safeRender(propostaMapeada.condicoes.finalidade)}
               </p>
               <p>
-                <strong>Garantia:</strong> {propostaMapeada.condicoes.garantia}
+                <strong>Garantia:</strong> {safeRender(propostaMapeada.condicoes.garantia)}
               </p>
               <p>
-                <strong>Taxa de Juros:</strong> {propostaMapeada.condicoes.taxaJuros !== 'N/A' && !isNaN(Number(propostaMapeada.condicoes.taxaJuros)) ? `${Number(propostaMapeada.condicoes.taxaJuros).toFixed(2)}%` : propostaMapeada.condicoes.taxaJuros}
+                <strong>Taxa de Juros:</strong> {(() => {
+                  const taxa = safeRender(propostaMapeada.condicoes.taxaJuros);
+                  return taxa !== 'N/A' && !isNaN(Number(taxa)) ? `${Number(taxa).toFixed(2)}%` : taxa;
+                })()}
               </p>
               <p>
-                <strong>TAC:</strong> {propostaMapeada.condicoes.valorTac}
-                {propostaMapeada.condicoes.tacTipo === 'percentual' && propostaMapeada.condicoes.valorTac !== 'N/A' ? '%' : ''}
+                <strong>TAC:</strong> {safeRender(propostaMapeada.condicoes.valorTac)}
+                {safeRender(propostaMapeada.condicoes.tacTipo) === 'percentual' && safeRender(propostaMapeada.condicoes.valorTac) !== 'N/A' ? '%' : ''}
               </p>
               <p>
-                <strong>IOF:</strong> {propostaMapeada.condicoes.valorIof}
+                <strong>IOF:</strong> {safeRender(propostaMapeada.condicoes.valorIof)}
               </p>
               <p>
-                <strong>Valor Total Financiado:</strong> {propostaMapeada.condicoes.valorTotalFinanciado}
+                <strong>Valor Total Financiado:</strong> {safeRender(propostaMapeada.condicoes.valorTotalFinanciado)}
               </p>
             </CardContent>
           </Card>
@@ -362,13 +365,13 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Status Atual:</strong> {propostaMapeada.status}
+                <strong>Status Atual:</strong> {safeRender(propostaMapeada.status)}
               </p>
               <p>
-                <strong>Produto:</strong> {propostaMapeada.produto.nome}
+                <strong>Produto:</strong> {safeRender(propostaMapeada.produto.nome)}
               </p>
               <p>
-                <strong>Loja:</strong> {propostaMapeada.loja.nome}
+                <strong>Loja:</strong> {safeRender(propostaMapeada.loja.nome)}
               </p>
               <p>
                 <strong>Data de Criação:</strong>{' '}
@@ -378,12 +381,12 @@ const AnaliseManualPage: React.FC = () => {
               </p>
               {propostaMapeada.observacoes && (
                 <p>
-                  <strong>Observações:</strong> {propostaMapeada.observacoes}
+                  <strong>Observações:</strong> {safeRender(propostaMapeada.observacoes)}
                 </p>
               )}
               {propostaMapeada.motivoPendencia && (
                 <p>
-                  <strong>Motivo da Pendência:</strong> {propostaMapeada.motivoPendencia}
+                  <strong>Motivo da Pendência:</strong> {safeRender(propostaMapeada.motivoPendencia)}
                 </p>
               )}
             </CardContent>
