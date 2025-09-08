@@ -50,7 +50,6 @@ export interface EnvironmentConfig {
 
 /**
  * Get configuration for current environment
- * Now handles missing production secrets gracefully for deployment
  */
 export function getEnvironmentConfig(): EnvironmentConfig {
   const env = process.env.NODE_ENV || 'development';
@@ -63,15 +62,19 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     allowedFileTypes: ['pdf', 'jpg', 'jpeg', 'png'],
   };
 
-  // Helper function to get production secret with fallback
-  const getProductionSecret = (secretName: string, fallback?: string): string => {
-    const value = process.env[secretName];
-    if (!value && env === 'production') {
-      console.warn(`⚠️ Production secret ${secretName} is missing. This may limit functionality.`);
-      return fallback || 'MISSING_SECRET_CONFIGURE_IN_DEPLOYMENT';
+  // 🛡️ PROTEÇÃO ANTI-NEON: Verificar e corrigir DATABASE_URL automaticamente
+  let databaseUrl = process.env.DATABASE_URL;
+  
+  // Se DATABASE_URL for do Neon, usar Supabase como fallback
+  if (databaseUrl?.includes('neon.tech')) {
+    console.warn('🚨 [ANTI-NEON] DATABASE_URL do Neon detectado, redirecionando para Supabase...');
+    databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
+    
+    if (databaseUrl?.includes('neon.tech')) {
+      throw new Error('🛑 [ANTI-NEON] Configuração Neon detectada. Configure SUPABASE_DATABASE_URL nos Replit Secrets');
     }
-    return value || fallback || 'dev-fallback';
-  };
+    console.log('✅ [ANTI-NEON] Redirecionamento para Supabase concluído');
+  }
 
   // Environment-specific configurations
   const configs: Record<string, EnvironmentConfig> = {
@@ -79,8 +82,8 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       ...baseConfig,
       name: 'development',
 
-      // Database
-      databaseUrl: process.env.DATABASE_URL!,
+      // Database (com proteção anti-Neon)
+      databaseUrl: databaseUrl!,
       databasePoolSize: 5,
 
       // Supabase
@@ -155,28 +158,28 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       name: 'production',
 
       // Database
-      databaseUrl: getProductionSecret('PROD_DATABASE_URL') || getProductionSecret('DATABASE_URL', 'postgres://localhost/simpix_prod'),
+      databaseUrl: process.env.PROD_DATABASE_URL!,
       databasePoolSize: 20,
 
       // Supabase
-      supabaseUrl: getProductionSecret('PROD_SUPABASE_URL') || getProductionSecret('SUPABASE_URL'),
-      supabaseAnonKey: getProductionSecret('PROD_SUPABASE_ANON_KEY') || getProductionSecret('SUPABASE_ANON_KEY'),
-      supabaseServiceKey: getProductionSecret('PROD_SUPABASE_SERVICE_KEY') || getProductionSecret('SUPABASE_SERVICE_ROLE_KEY'),
+      supabaseUrl: process.env.PROD_SUPABASE_URL!,
+      supabaseAnonKey: process.env.PROD_SUPABASE_ANON_KEY!,
+      supabaseServiceKey: process.env.PROD_SUPABASE_SERVICE_KEY!,
 
-      // Security (production keys with graceful fallbacks)
-      jwtSecret: getProductionSecret('PROD_JWT_SECRET'),
-      csrfSecret: getProductionSecret('PROD_CSRF_SECRET'),
-      sessionSecret: getProductionSecret('PROD_SESSION_SECRET'),
+      // Security (production keys - MUST be strong)
+      jwtSecret: process.env.PROD_JWT_SECRET!,
+      csrfSecret: process.env.PROD_CSRF_SECRET!,
+      sessionSecret: process.env.PROD_SESSION_SECRET!,
 
       // Rate Limiting (strict)
       rateLimitMaxRequests: 20,
 
-      // CORS (production domain with fallback)
-      corsOrigins: [getProductionSecret('PROD_FRONTEND_URL') || process.env.REPLIT_DEV_DOMAIN || 'https://simpix.app'],
+      // CORS (only production domain)
+      corsOrigins: [process.env.PROD_FRONTEND_URL!],
 
       // Monitoring
       enableSecurityMonitoring: true,
-      securityAlertEmail: getProductionSecret('PROD_ALERT_EMAIL', 'admin@simpix.app'),
+      securityAlertEmail: process.env.PROD_ALERT_EMAIL!,
 
       // Feature Flags
       enableHoneypots: true,
@@ -195,25 +198,19 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     throw new Error(`Invalid environment: ${env}`);
   }
 
-  // Validate configuration with graceful handling for production
-  const validationResult = validateConfig(config);
-  if (!validationResult.isValid && env === 'production') {
-    console.error('⚠️ Configuration validation warnings in production:');
-    validationResult.warnings.forEach(warning => console.warn(`  - ${warning}`));
-    console.log('ℹ️ Application will start with limited functionality. Configure missing secrets in Deployment settings.');
-  }
+  // Validate required configuration
+  validateConfig(config);
 
   return config;
 }
 
 /**
- * Validate configuration with graceful handling for deployment environments
+ * Validate configuration
  */
-function validateConfig(config: EnvironmentConfig): { isValid: boolean; warnings: string[] } {
-  const warnings: string[] = [];
+function validateConfig(config: EnvironmentConfig): void {
   const required = [
     'databaseUrl',
-    'supabaseUrl', 
+    'supabaseUrl',
     'supabaseAnonKey',
     'supabaseServiceKey',
     'jwtSecret',
@@ -221,46 +218,32 @@ function validateConfig(config: EnvironmentConfig): { isValid: boolean; warnings
     'sessionSecret',
   ];
 
-  // Check for missing or placeholder values
   for (const field of required) {
-    const value = config[field as keyof EnvironmentConfig] as string;
-    if (!value || value === 'MISSING_SECRET_CONFIGURE_IN_DEPLOYMENT') {
-      warnings.push(`Missing configuration: ${field} for environment ${config.name}`);
+    if (!config[field as keyof EnvironmentConfig]) {
+      throw new Error(`Missing required configuration: ${field} for environment ${config.name}`);
     }
   }
 
-  // Production-specific validations (warnings instead of errors)
+  // Production-specific validations
   if (config.name === 'production') {
-    // Check for development secrets in production
+    // Ensure production doesn't use development secrets
     if (
       config.jwtSecret.includes('dev') ||
       config.csrfSecret.includes('dev') ||
       config.sessionSecret.includes('dev')
     ) {
-      warnings.push('Production environment appears to be using development secrets!');
+      throw new Error('Production environment using development secrets!');
     }
 
-    // Check missing secrets that would limit functionality
-    if (config.jwtSecret === 'MISSING_SECRET_CONFIGURE_IN_DEPLOYMENT') {
-      warnings.push('PROD_JWT_SECRET missing - authentication will not work properly');
-    }
-    if (config.sessionSecret === 'MISSING_SECRET_CONFIGURE_IN_DEPLOYMENT') {
-      warnings.push('PROD_SESSION_SECRET missing - session management will not work properly');
-    }
-    if (config.csrfSecret === 'MISSING_SECRET_CONFIGURE_IN_DEPLOYMENT') {
-      warnings.push('PROD_CSRF_SECRET missing - CSRF protection will not work properly');
-    }
-
-    // Only warn about security monitoring, don't block startup
+    // Ensure security features are enabled
     if (!config.enableSecurityMonitoring) {
-      warnings.push('Security monitoring should be enabled in production');
+      throw new Error('Security monitoring must be enabled in production!');
+    }
+
+    if (!config.securityAlertEmail) {
+      throw new Error('Security alert email must be configured in production!');
     }
   }
-
-  return {
-    isValid: warnings.length === 0,
-    warnings
-  };
 }
 
 /**
