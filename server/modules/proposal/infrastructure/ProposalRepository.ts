@@ -46,51 +46,65 @@ export class ProposalRepository implements IProposalRepository {
     if (existingProposal.length > 0) {
       console.log('[REPOSITORY] Proposal exists, updating directly:', proposal.id);
       
-      // UPDATE existing proposal directly (no INSERT needed)
+      // RLS CORREÇÃO PAM V1.0: UPDATE otimizado que preserva relacionamentos críticos
+      // Campos que são seguros para atualizar (não afetam RLS policies)
+      const updateFields: any = {
+        status: data.status,
+        clienteData: JSON.stringify(data.cliente_data),
+        // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente no UPDATE
+        clienteEmail: data.cliente_data.email,
+        clienteTelefone: data.cliente_data.telefone,
+        clienteDataNascimento:
+          data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
+        clienteRenda:
+          data.cliente_data.rendaMensal?.toString() ||
+          data.cliente_data.renda_mensal?.toString(),
+        clienteRg: data.cliente_data.rg,
+        clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
+        clienteEstadoCivil: data.cliente_data.estadoCivil,
+        clienteNacionalidade: data.cliente_data.nacionalidade,
+        clienteCep: data.cliente_data.cep,
+        clienteOcupacao: data.cliente_data.ocupacao,
+        valor: data.valor.toString(),
+        prazo: data.prazo,
+        taxaJuros: data.taxa_juros.toString(),
+        dadosPagamentoTipo:
+          data.dados_pagamento?.tipo_conta ||
+          data.dados_pagamento?.pixTipo ||
+          data.dados_pagamento?.pix_tipo,
+        dadosPagamentoBanco: data.dados_pagamento_banco,
+        dadosPagamentoAgencia: data.dados_pagamento?.agencia,
+        dadosPagamentoConta: data.dados_pagamento?.conta,
+        dadosPagamentoDigito: data.dados_pagamento?.digito,
+        dadosPagamentoPix: data.dados_pagamento?.pixChave || data.dados_pagamento?.pix_chave,
+        dadosPagamentoPixBanco: data.dados_pagamento?.pixBanco,
+        dadosPagamentoPixNomeTitular: data.dados_pagamento?.pixNomeTitular,
+        dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
+        motivoPendencia: data.motivo_rejeicao,
+        observacoes: data.observacoes,
+        ccbDocumentoUrl: data.ccb_documento_url,
+        // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia no UPDATE
+        finalidade: data.finalidade,
+        garantia: data.garantia,
+      };
+
+      // RLS CORREÇÃO: Incluir relacionamentos APENAS se são válidos (não-zero)
+      // Evita sobrescrever com 0 que quebra as políticas RLS
+      if (data.produto_id && data.produto_id > 0) {
+        updateFields.produtoId = data.produto_id;
+      }
+      if (data.tabela_comercial_id && data.tabela_comercial_id > 0) {
+        updateFields.tabelaComercialId = data.tabela_comercial_id;
+      }
+      if (data.loja_id && data.loja_id > 0) {
+        updateFields.lojaId = data.loja_id;
+      }
+
+      console.log('🔍 [RLS FIX] Updating with safe fields only, preserving existing relationships');
+      
       await db
         .update(propostas)
-        .set({
-          status: data.status,
-          clienteData: JSON.stringify(data.cliente_data),
-          // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente no UPDATE
-          clienteEmail: data.cliente_data.email,
-          clienteTelefone: data.cliente_data.telefone,
-          clienteDataNascimento:
-            data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
-          clienteRenda:
-            data.cliente_data.rendaMensal?.toString() ||
-            data.cliente_data.renda_mensal?.toString(),
-          clienteRg: data.cliente_data.rg,
-          clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
-          clienteEstadoCivil: data.cliente_data.estadoCivil,
-          clienteNacionalidade: data.cliente_data.nacionalidade,
-          clienteCep: data.cliente_data.cep,
-          clienteOcupacao: data.cliente_data.ocupacao,
-          valor: data.valor.toString(),
-          prazo: data.prazo,
-          taxaJuros: data.taxa_juros.toString(),
-          produtoId: data.produto_id,
-          tabelaComercialId: data.tabela_comercial_id,
-          lojaId: data.loja_id,
-          dadosPagamentoTipo:
-            data.dados_pagamento?.tipo_conta ||
-            data.dados_pagamento?.pixTipo ||
-            data.dados_pagamento?.pix_tipo,
-          dadosPagamentoBanco: data.dados_pagamento_banco,
-          dadosPagamentoAgencia: data.dados_pagamento?.agencia,
-          dadosPagamentoConta: data.dados_pagamento?.conta,
-          dadosPagamentoDigito: data.dados_pagamento?.digito,
-          dadosPagamentoPix: data.dados_pagamento?.pixChave || data.dados_pagamento?.pix_chave,
-          dadosPagamentoPixBanco: data.dados_pagamento?.pixBanco,
-          dadosPagamentoPixNomeTitular: data.dados_pagamento?.pixNomeTitular,
-          dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
-          motivoPendencia: data.motivo_rejeicao,
-          observacoes: data.observacoes,
-          ccbDocumentoUrl: data.ccb_documento_url,
-          // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia no UPDATE
-          finalidade: data.finalidade,
-          garantia: data.garantia,
-        })
+        .set(updateFields)
         .where(eq(propostas.id, data.id));
       
       console.log('[REPOSITORY] Proposal updated successfully:', proposal.id);
