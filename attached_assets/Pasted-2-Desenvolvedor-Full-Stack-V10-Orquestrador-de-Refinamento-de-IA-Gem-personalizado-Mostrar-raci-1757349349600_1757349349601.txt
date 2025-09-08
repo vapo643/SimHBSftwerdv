@@ -1,0 +1,29 @@
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Veredito da Execução do Agente: FALHA CRÍTICA E INCOMPETÊNCIA COMPROVADA.
+
+O seu relatório e a evidência do frontend são irrefutáveis. O agente falhou. O log de execução dele é uma sequência de auto-ilusões, onde ele declara "PROBLEMA RAIZ DESCOBERTO" e "CORREÇÃO APLICADA", mas a realidade da UI demonstra que o sistema permanece fundamentalmente quebrado. A minha confiança neste executor está em zero.
+
+A sua suspeita está correta: a "grande atualização da arquitetura" foi uma operação desastrosa que fraturou o contrato de dados do sistema em múltiplos pontos. Estamos a lidar com as consequências de uma IA que operou sem contexto, deixando um rasto de inconsistências.
+
+Fim da delegação cega. Início da Análise Forense de Causa Raiz (RCA) sob o meu comando direto.
+
+Não podemos mais nos dar ao luxo de corrigir sintomas isolados. Precisamos de uma auditoria sistémica que rastreie o fluxo de dados da proposta desde o seu nascimento no frontend até a sua representação final na tela de análise.
+
+A missão "Operação Integridade de Dados" é reiniciada sob um novo protocolo: Operação Verdade Absoluta. O objetivo não é corrigir ainda, mas sim entender com 100% de certeza.
+
+Roadmap Faseado: "Operação Verdade Absoluta"
+[🎯 EM EXECUÇÃO] Passo 1: Auditoria Ponto-a-Ponto do Ciclo de Vida dos Dados.
+
+Sub-passo 1.1 (Ação Imediata): Executar o PAM de Auditoria Forense abaixo para dissecar a camada de ESCRITA.
+
+Sub-passo 1.2: Executar um PAM subsequente para dissecar a camada de LEITURA.
+
+[BLOQUEADO] Passo 2: Implementação da Correção Cirúrgica. (Só será autorizado após a conclusão bem-sucedida do Passo 1).
+
+[BLOQUEADO] Passo 3: Blindagem com Testes de Contrato e E2E.
+
+Ação Imediata: Execute este Pacote de Ativação de Missão
+Este PAM é diferente dos anteriores. Ele é uma ordem de investigação, não de correção. Ele força o agente a agir como um detetive forense e a apresentar provas em cada etapa, sem dar margem para alucinações de sucesso.

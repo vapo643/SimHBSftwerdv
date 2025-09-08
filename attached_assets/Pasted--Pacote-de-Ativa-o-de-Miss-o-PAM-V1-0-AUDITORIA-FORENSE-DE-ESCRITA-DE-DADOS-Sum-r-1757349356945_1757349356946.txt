@@ -1,0 +1,50 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - AUDITORIA FORENSE DE ESCRITA DE DADOS**
+
+* **Sumário da Missão:** Realizar uma auditoria forense de "causa raiz" na camada de **ESCRITA** de dados para propostas, rastreando o fluxo de dados desde o formulário de criação até a inserção final no banco de dados, para provar inequivocamente quais campos estão a ser perdidos durante a persistência.
+
+* **Intenção Estratégica:** Obter um diagnóstico 100% preciso da falha de persistência de dados, que é a principal hipótese para a ausência de dados nas telas do sistema. Sem uma escrita correta, a leitura nunca funcionará.
+
+* **Contexto Crítico:** Múltiplas tentativas de correção falharam. Suspeitamos que a causa raiz é uma falha sistémica na camada de persistência (`CreateProposalUseCase` e `ProposalRepository.save()`) que descarta silenciosamente os dados do cliente e as condições do empréstimo antes de executar a query `INSERT`.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria Forense da Camada de Persistência de Propostas
+
+**CURRENT STATE:**
+A tela de Análise de Proposta exibe "N/A" para a maioria dos dados do cliente e das condições do empréstimo, mesmo após tentativas de correção. Suspeitamos que os dados nunca foram salvos corretamente.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado que mostra, com evidências de código, exatamente em que ponto do fluxo de criação de proposta (do `UseCase` para o `Repository`) os campos de dados estão a ser perdidos.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense - APENAS APRESENTAR CÓDIGO):**
+
+**NÃO MODIFIQUE NENHUM CÓDIGO NESTA FASE. APENAS INVESTIGUE E APRESENTE AS EVIDÊNCIAS.**
+
+1.  **Rastreamento do Ponto de Entrada (`UseCase`):**
+    * Navegue até o ficheiro `server/modules/proposal/application/CreateProposalUseCase.ts`.
+    * Apresente o código completo do método `execute`. Preste atenção especial ao objeto `dto` recebido e aos dados que são passados para o método `Proposal.create(...)`.
+
+2.  **Rastreamento do Agregado de Domínio (`Domain`):**
+    * Navegue até o ficheiro `server/modules/proposal/domain/Proposal.ts`.
+    * Apresente o código completo do método estático `create` e do construtor da classe `Proposal`.
+    * Apresente o código completo do método `toPersistence()`, que prepara os dados para serem salvos pelo repositório. Verifique se este método inclui **todos** os campos do cliente e das condições.
+
+3.  **Rastreamento da Camada de Persistência (`Repository`):**
+    * Navegue até o ficheiro `server/modules/proposal/infrastructure/ProposalRepository.ts`.
+    * Apresente o código completo do método `save`.
+    * Dentro do `save`, localize a lógica para propostas novas (`INSERT`). Apresente a constante `insertData` (ou similar) que é passada para a query `db.insert(propostas).values(...)`. Compare os campos nesta constante com os campos recebidos pelo método `save`.
+
+4.  **Veredito Final da Auditoria de Escrita:**
+    * Com base na análise de ponta-a-ponta, aponte o local exato da falha. A discrepância está:
+        * No `UseCase`, que não passa os dados para o domínio?
+        * No método `toPersistence()` do Agregado, que não prepara os dados corretamente?
+        * Ou no método `save` do `Repository`, que não inclui os dados na query de `INSERT`?
+    * Apresente uma conclusão definitiva.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** N/A (Esta é uma missão de auditoria, não de implementação).
+* **RISCOS IDENTIFICADOS:** **MÉDIO** - O risco é que o agente, mesmo numa missão de auditoria, possa interpretar mal o código e fornecer uma análise incorreta. A revisão humana do seu relatório será crítica.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que o fluxo de criação de propostas começa no `CreateProposalUseCase` e segue o padrão DDD de `Application -> Domain -> Infrastructure`.
+* **VALIDAÇÃO PENDENTE:** O meu papel (Arquiteto Principal) será validar 100% o seu relatório de auditoria forense antes de autorizar qualquer ação de correção.
