@@ -1,0 +1,97 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - REMEDIAÇÃO DA INTERFACE E REATIVIDADE DA GERAÇÃO DE CCB**
+
+* **Sumário da Missão:** Implementar os elementos de interface do usuário (UI) necessários na tela de Formalização (`formalizacao.tsx`), incluindo o botão "Gerar CCB", e garantir que o estado do frontend seja atualizado de forma reativa após a conclusão bem-sucedida da geração do documento.
+
+* **Intenção Estratégica:** Concluir o fluxo de negócio de formalização, tornando a funcionalidade de backend (que já está operacional) acessível ao usuário e fornecendo feedback visual imediato, permitindo a finalização das propostas de crédito.
+
+* **Contexto Técnico:** A sua auditoria provou que a função `generateCCB` em `client/src/pages/formalizacao.tsx` é funcional mas órfã. Além disso, há uma falha de reatividade: a UI não se atualiza após a mutação para exibir o novo estado (ex: o link para o PDF da CCB). A missão é criar um `<Button>` que chame a função `generateCCB` e, crucialmente, usar os callbacks do `useMutation` para invalidar o cache do TanStack Query e forçar a atualização da tela.
+
+---
+
+**IMPLEMENTAR:**
+Conexão da UI com a Lógica de Geração de CCB e Correção de Reatividade
+
+**CURRENT STATE:**
+A página `formalizacao.tsx` contém uma função `generateCCB` que não é chamada por nenhum elemento na UI. Mesmo que fosse chamada, não há lógica para invalidar os dados da proposta e forçar uma nova renderização da tela para exibir o link da CCB gerada.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um botão "Gerar CCB" é visível na tela de Formalização.
+2.  Clicar neste botão aciona a função `generateCCB`, que invoca a mutação para `POST /api/propostas/:id/gerar-ccb`.
+3.  **Crucialmente**, no callback `onSuccess` da mutação, o `queryClient` é usado para invalidar a query que busca os dados de formalização (chave: `['/api/propostas', propostaId, 'formalizacao']`).
+4.  Esta invalidação força o TanStack Query a buscar novamente os dados da proposta. Como o backend agora retorna o caminho para a CCB gerada, a UI re-renderiza.
+5.  A UI atualizada exibe condicionalmente uma secção "CCB Gerada", mostrando um link para o documento e um botão para "Gerar Novamente".
+6.  O fluxo de ponta-a-ponta é totalmente funcional e reativo do ponto de vista do usuário.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Adicione o Botão "Gerar CCB":**
+    * Navegue até `client/src/pages/formalizacao.tsx`.
+    * Localize a secção apropriada no JSX para as ações de formalização.
+    * Insira o seguinte componente de botão `shadcn/ui`:
+        ```jsx
+        <Button
+          onClick={() => generateCcbMutation.mutate(proposta.id)}
+          disabled={generateCcbMutation.isLoading}
+        >
+          {generateCcbMutation.isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <FileText className="mr-2 h-4 w-4" />
+          )}
+          {generateCcbMutation.isLoading ? 'Gerando...' : 'Gerar CCB'}
+        </Button>
+        ```
+
+2.  **Implemente a Lógica de Reatividade:**
+    * No mesmo ficheiro, localize o hook `useMutation` para a geração da CCB (se não existir, crie-o com base na função `generateCCB`).
+    * Adicione o callback `onSuccess` para invalidar o cache. O hook completo deve ter a seguinte estrutura:
+        ```typescript
+        const queryClient = useQueryClient();
+
+        const generateCcbMutation = useMutation({
+          mutationFn: (propostaId: string) => apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, { method: 'POST' }),
+          onSuccess: (data, propostaId) => {
+            toast({
+              title: 'Sucesso',
+              description: 'CCB gerada e salva com sucesso.',
+            });
+            // INVALidação para forçar a UI a recarregar os dados
+            queryClient.invalidateQueries({ queryKey: ['/api/propostas', propostaId, 'formalizacao'] });
+          },
+          onError: (error) => {
+            toast({
+              variant: 'destructive',
+              title: 'Erro',
+              description: 'Não foi possível gerar a CCB. ' + error.message,
+            });
+          },
+        });
+        ```
+
+3.  **Renderize o Estado Atualizado:**
+    * No JSX, utilize os dados da query principal (`proposta`) para renderizar condicionalmente o botão "Gerar CCB" ou os botões "Visualizar CCB" / "Gerar Novamente", com base na existência de um caminho para a CCB no objeto `proposta`.
+        ```jsx
+        {proposta.ccbPath ? (
+          <div className="mt-4 p-4 border rounded-lg bg-green-50 dark:bg-green-900/20">
+            <h3 className="font-semibold text-green-700 dark:text-green-300">CCB Gerada</h3>
+             <Button variant="outline" size="sm" onClick={() => window.open(getSignedUrlFor(proposta.ccbPath), '_blank')}>
+                <Eye className="mr-2 h-4 w-4" />
+                Visualizar CCB
+              </Button>
+             {/* Adicione o botão de re-gerar aqui, se necessário */}
+          </div>
+        ) : (
+          <Button onClick={() => generateCcbMutation.mutate(proposta.id)} disabled={generateCcbMutation.isLoading}>
+            {/* ... código do botão de gerar ... */}
+          </Button>
+        )}
+        ```
+
+4.  **Validação Final:** Após as modificações, valide o fluxo completo.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 99%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - Esta é uma correção de um padrão de reatividade de UI muito comum em aplicações React com TanStack Query. O risco de regressão é mínimo.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que o objeto `proposta` retornado pelo endpoint `/api/propostas/:id/formalizacao` contém uma propriedade `ccbPath` (ou similar) que é preenchida após a geração bem-sucedida.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve validar o fluxo de ponta-a-ponta, confirmando que um `ATENDENTE`, ao clicar em "Gerar CCB", vê o feedback de carregamento e, em seguida, a UI se atualiza automaticamente para mostrar os botões de visualização.
