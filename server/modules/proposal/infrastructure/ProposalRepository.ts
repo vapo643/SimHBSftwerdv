@@ -449,15 +449,15 @@ export class ProposalRepository implements IProposalRepository {
       valorTac: row.valor_tac,
       valorIof: row.valor_iof,
       valorTotalFinanciado: row.valor_total_financiado,
-      finalidade: row.finalidade || null,
-      garantia: row.garantia || null,
+      finalidade: row.finalidade || 'Capital de Giro', // Valor padrão para propostas antigas
+      garantia: row.garantia || 'Sem Garantia', // Valor padrão para propostas antigas
       // DADOS COMPLETOS PARA FRONTEND
       condicoesData: {
         valor: row.valor,
         prazo: row.prazo,
         taxaJuros: row.taxa_juros,
-        finalidade: row.finalidade || null,
-        garantia: row.garantia || null
+        finalidade: row.finalidade || 'Capital de Giro', // Valor padrão para propostas antigas
+        garantia: row.garantia || 'Sem Garantia' // Valor padrão para propostas antigas
       },
       cliente_data: clienteDataFromJson,
       clienteData: clienteDataFromJson,

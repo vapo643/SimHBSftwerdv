@@ -1,0 +1,48 @@
+### **Pacote de Ativação de Missão (PAM) V1.0 - CORREÇÃO DE INTEGRIDADE (FINALIDADE E GARANTIA)**
+
+* **Sumário da Missão:** Erradicar a exibição de "N/A" para os campos `Finalidade` e `Garantia` na tela de Análise de Proposta, auditando a persistência desses dados e implementando uma correção robusta tanto na camada de leitura (para propostas antigas) quanto na de escrita (para propostas novas).
+
+* **Intenção Estratégica:** Atingir 100% de integridade de dados na tela de Análise, garantindo que os `ANALISTAS` tenham um dossiê completo para a tomada de decisão.
+
+* **Contexto Técnico:** A hipótese principal é que, para a proposta de teste (ID `29e80705-89bb-43a5-bbc8-960b3139939c`), os campos `finalidade` e `garantia` estão `NULL` no banco de dados. Precisamos verificar se esses dados existem no campo JSON `condicoes_data` ou `cliente_data` como um possível fallback e, em paralelo, garantir que novas propostas persistam esses campos corretamente.
+
+---
+
+**IMPLEMENTAR:**
+Correção de Ponta-a-Ponta para os Campos `Finalidade` e `Garantia`
+
+**CURRENT STATE:**
+A tela de Análise de Proposta exibe "N/A" para os campos `Finalidade` e `Garantia`. Todas as outras correções de dados foram bem-sucedidas.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A tela de Análise de Proposta exibe os valores corretos para `Finalidade` e `Garantia`.
+2.  A lógica de leitura no `ProposalRepository` é robusta o suficiente para buscar esses dados de campos individuais ou fazer fallback para o campo JSON, se necessário.
+3.  A lógica de escrita no `CreateProposalUseCase` e `ProposalRepository` garante que, para **novas propostas**, os campos `finalidade` e `garantia` sejam sempre salvos nas suas colunas dedicadas.
+
+**CONSTRAINTS (Roadmap de Implementação Final):**
+
+**FASE 1: AUDITORIA FORENSE DEFINITIVA**
+1.  **Validação Direta no Banco de Dados:** Execute as seguintes queries SQL e apresente os resultados:
+    * `SELECT finalidade, garantia FROM propostas WHERE id = '29e80705-89bb-43a5-bbc8-960b3139939c';`
+    * `SELECT jsonb_pretty(cliente_data) as cliente_data, jsonb_pretty(condicoes_data) as condicoes_data FROM propostas WHERE id = '29e80705-89bb-43a5-bbc8-960b3139939c';`
+2.  **Re-auditoria do Mapeador de Leitura:** Navegue até `server/modules/proposal/infrastructure/ProposalRepository.ts`. Apresente o código do método `mapRowToProposalDTO` e verifique se já existe uma lógica de fallback para `finalidade` e `garantia` a partir do `condicoes_data` ou `cliente_data`.
+3.  **Re-auditoria da Camada de Escrita:** Navegue até `server/modules/proposal/application/CreateProposalUseCase.ts`. Apresente o trecho de código onde o objeto `proposalCreationProps` é criado. Verifique se `finalidade` e `garantia` estão a ser incluídos. Em seguida, navegue para `ProposalRepository.ts` e apresente o trecho da query de `INSERT` no método `save` para confirmar se esses campos estão presentes.
+
+**FASE 2: CORREÇÃO CIRÚRGICA (AGUARDAR APROVAÇÃO DA AUDITORIA)**
+*Baseado nos resultados da Fase 1, execute as seguintes ações:*
+
+1.  **Correção da Leitura (Fallback):** Se a auditoria mostrar que os dados existem nos campos JSON mas não nos campos individuais, modifique o `mapRowToProposalDTO` em `ProposalRepository.ts` para adicionar a lógica de fallback. Exemplo:
+    ```typescript
+    // Dentro de mapRowToProposalDTO, após fazer o parse do JSON condicoes_data
+    finalidade: row.finalidade || (condicoesDataFromJson ? condicoesDataFromJson.finalidade : null),
+    garantia: row.garantia || (condicoesDataFromJson ? condicoesDataFromJson.garantia : null),
+    ```
+2.  **Correção da Escrita (Garantia Futura):** Se a auditoria mostrar que os campos não estão a ser passados pelo `CreateProposalUseCase` ou não estão na query `INSERT` do `ProposalRepository`, corrija o código para garantir que sejam sempre persistidos para novas propostas.
+3.  **Validação Final:** Execute `get_latest_lsp_diagnostics` para garantir zero erros.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 99%
+* **RISCOS IDENTIFICADOS:** **MUITO BAIXO** - O risco é mínimo e restrito a erros de digitação. A lógica a ser aplicada já foi validada com sucesso para outros campos de dados.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assume-se que, se os dados existirem nos campos JSON, eles estarão sob as chaves `finalidade` and `garantia` dentro do objeto `condicoes_data`.
+* **VALIDAÇÃO PENDENTE:** O QA (GEM 03) deve realizar dois testes cruciais: (1) Validar que a tela de análise para a proposta antiga (`29e80...`) agora exibe `Finalidade` e `Garantia`. (2) Criar uma **nova proposta**, preenchendo todos os campos, e validar que os dados aparecem corretamente, provando que tanto a correção de fallback (leitura) quanto a correção de persistência (escrita) foram bem-sucedidas.
