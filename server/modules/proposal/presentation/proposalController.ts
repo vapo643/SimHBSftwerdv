@@ -563,7 +563,7 @@ export class ProposalController {
       await repository.save(proposal);
 
       SafeLogger.info('[CONTROLLER DEBUG] Proposal update completed successfully');
-      return res.json({
+      return res.status(200).json({
         success: true,
         message: 'Proposta atualizada com sucesso',
         propostaId: proposal.id,
