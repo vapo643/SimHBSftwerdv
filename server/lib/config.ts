@@ -48,8 +48,17 @@ export interface AppConfig {
   };
 }
 
-// Lista de secrets críticos vs opcionais
-const CRITICAL_SECRETS = ['DATABASE_URL', 'JWT_SECRET', 'SESSION_SECRET', 'CSRF_SECRET'] as const;
+// Lista de secrets críticos vs opcionais - ajustado para diferentes ambientes
+function getCriticalSecrets(env: string): string[] {
+  switch (env) {
+    case 'production':
+      return ['PROD_DATABASE_URL', 'PROD_JWT_SECRET', 'PROD_SESSION_SECRET', 'PROD_CSRF_SECRET'];
+    case 'staging':
+      return ['STAGING_DATABASE_URL', 'STAGING_JWT_SECRET', 'STAGING_SESSION_SECRET', 'STAGING_CSRF_SECRET'];
+    default:
+      return ['DATABASE_URL', 'JWT_SECRET', 'SESSION_SECRET', 'CSRF_SECRET'];
+  }
+}
 
 const OPTIONAL_SECRETS = [
   'SUPABASE_URL',
@@ -64,7 +73,7 @@ const OPTIONAL_SECRETS = [
   'INTER_WEBHOOK_SECRET',
 ] as const;
 
-// Validação não-bloqueante de secrets
+// Validação não-bloqueante de secrets adaptada por ambiente
 function validateSecrets(): {
   isValid: boolean;
   missing: string[];
@@ -72,9 +81,11 @@ function validateSecrets(): {
 } {
   const missing: string[] = [];
   const warnings: string[] = [];
+  const env = process.env.NODE_ENV || 'development';
+  const criticalSecrets = getCriticalSecrets(env);
 
-  // Verificar secrets críticos
-  CRITICAL_SECRETS.forEach((secret) => {
+  // Verificar secrets críticos baseado no ambiente
+  criticalSecrets.forEach((secret) => {
     if (!process.env[secret]) {
       missing.push(secret);
     }
@@ -102,6 +113,43 @@ function generateSecureSecret(name: string): string {
   const fallback = crypto.randomBytes(32).toString('hex');
   log(`⚠️  ${name} not configured! Using secure random value for development.`);
   return fallback;
+}
+
+// Helper functions para buscar secrets baseado no ambiente
+function getJwtSecret(): string {
+  const env = process.env.NODE_ENV || 'development';
+  switch (env) {
+    case 'production':
+      return process.env.PROD_JWT_SECRET || process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
+    case 'staging':
+      return process.env.STAGING_JWT_SECRET || process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
+    default:
+      return process.env.JWT_SECRET || generateSecureSecret('JWT_SECRET');
+  }
+}
+
+function getSessionSecret(): string {
+  const env = process.env.NODE_ENV || 'development';
+  switch (env) {
+    case 'production':
+      return process.env.PROD_SESSION_SECRET || process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
+    case 'staging':
+      return process.env.STAGING_SESSION_SECRET || process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
+    default:
+      return process.env.SESSION_SECRET || generateSecureSecret('SESSION_SECRET');
+  }
+}
+
+function getCsrfSecret(): string {
+  const env = process.env.NODE_ENV || 'development';
+  switch (env) {
+    case 'production':
+      return process.env.PROD_CSRF_SECRET || process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
+    case 'staging':
+      return process.env.STAGING_CSRF_SECRET || process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
+    default:
+      return process.env.CSRF_SECRET || generateSecureSecret('CSRF_SECRET');
+  }
 }
 
 // Configuração centralizada com fallbacks seguros

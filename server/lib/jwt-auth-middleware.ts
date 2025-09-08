@@ -130,7 +130,7 @@ export async function invalidateAllUserTokens(userId: string): Promise<void> {
 
     if (tokens.length > 0) {
       // Add each token to blacklist
-      const blacklistPromises = tokens.map((token) =>
+      const blacklistPromises = tokens.map((token: string) =>
         redisClient.setex(`blacklist:${token}`, TOKEN_BLACKLIST_TTL, '1')
       );
 
