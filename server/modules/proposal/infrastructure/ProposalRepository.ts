@@ -36,10 +36,68 @@ export class ProposalRepository implements IProposalRepository {
     console.log('🔍 [REPOSITORY DEBUG] user_id:', data.user_id);
     console.log('🔍 [REPOSITORY DEBUG] status:', data.status);
 
-    // P1.1 OPTIMIZATION: Use INSERT...ON CONFLICT instead of exists check
-    // Try insert first - if conflict, then update
-    try {
-      // Attempt INSERT for new proposal
+    // RLS FIX: Check if proposal exists first to avoid RLS errors on INSERT attempt
+    const existingProposal = await db
+      .select({ id: propostas.id })
+      .from(propostas)
+      .where(and(eq(propostas.id, proposal.id), isNull(propostas.deletedAt)))
+      .limit(1);
+
+    if (existingProposal.length > 0) {
+      console.log('[REPOSITORY] Proposal exists, updating directly:', proposal.id);
+      
+      // UPDATE existing proposal directly (no INSERT needed)
+      await db
+        .update(propostas)
+        .set({
+          status: data.status,
+          clienteData: JSON.stringify(data.cliente_data),
+          // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente no UPDATE
+          clienteEmail: data.cliente_data.email,
+          clienteTelefone: data.cliente_data.telefone,
+          clienteDataNascimento:
+            data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
+          clienteRenda:
+            data.cliente_data.rendaMensal?.toString() ||
+            data.cliente_data.renda_mensal?.toString(),
+          clienteRg: data.cliente_data.rg,
+          clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
+          clienteEstadoCivil: data.cliente_data.estadoCivil,
+          clienteNacionalidade: data.cliente_data.nacionalidade,
+          clienteCep: data.cliente_data.cep,
+          clienteOcupacao: data.cliente_data.ocupacao,
+          valor: data.valor.toString(),
+          prazo: data.prazo,
+          taxaJuros: data.taxa_juros.toString(),
+          produtoId: data.produto_id,
+          tabelaComercialId: data.tabela_comercial_id,
+          lojaId: data.loja_id,
+          dadosPagamentoTipo:
+            data.dados_pagamento?.tipo_conta ||
+            data.dados_pagamento?.pixTipo ||
+            data.dados_pagamento?.pix_tipo,
+          dadosPagamentoBanco: data.dados_pagamento_banco,
+          dadosPagamentoAgencia: data.dados_pagamento?.agencia,
+          dadosPagamentoConta: data.dados_pagamento?.conta,
+          dadosPagamentoDigito: data.dados_pagamento?.digito,
+          dadosPagamentoPix: data.dados_pagamento?.pixChave || data.dados_pagamento?.pix_chave,
+          dadosPagamentoPixBanco: data.dados_pagamento?.pixBanco,
+          dadosPagamentoPixNomeTitular: data.dados_pagamento?.pixNomeTitular,
+          dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
+          motivoPendencia: data.motivo_rejeicao,
+          observacoes: data.observacoes,
+          ccbDocumentoUrl: data.ccb_documento_url,
+          // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia no UPDATE
+          finalidade: data.finalidade,
+          garantia: data.garantia,
+        })
+        .where(eq(propostas.id, data.id));
+      
+      console.log('[REPOSITORY] Proposal updated successfully:', proposal.id);
+    } else {
+      console.log('[REPOSITORY] Proposal does not exist, creating new:', proposal.id);
+      
+      // Get next numero proposta for new proposal
       const numeroProposta = await this.getNextNumeroProposta();
       console.log('🔍 [REPOSITORY DEBUG] Next numero proposta:', numeroProposta);
 
@@ -111,67 +169,6 @@ export class ProposalRepository implements IProposalRepository {
       await db.insert(propostas).values([insertValues]);
 
       console.log('[REPOSITORY] New proposal inserted:', proposal.id);
-    } catch (insertError: any) {
-      console.log('🚨 [REPOSITORY DEBUG] INSERT FAILED:', insertError.message);
-      console.log('🚨 [REPOSITORY DEBUG] Error code:', insertError.code);
-      console.log('🚨 [REPOSITORY DEBUG] Error detail:', insertError.detail);
-      console.log('🚨 [REPOSITORY DEBUG] Full error:', insertError);
-
-      // If insert fails due to unique constraint (proposal already exists), then update
-      if (insertError.code === '23505' || insertError.message?.includes('duplicate key')) {
-        console.log('[REPOSITORY] Proposal exists, updating:', proposal.id);
-        // UPDATE existing proposal
-        await db
-          .update(propostas)
-          .set({
-            status: data.status,
-            clienteData: JSON.stringify(data.cliente_data),
-            // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar TODOS os campos individuais do cliente no UPDATE
-            clienteEmail: data.cliente_data.email,
-            clienteTelefone: data.cliente_data.telefone,
-            clienteDataNascimento:
-              data.cliente_data.dataNascimento || data.cliente_data.data_nascimento,
-            clienteRenda:
-              data.cliente_data.rendaMensal?.toString() ||
-              data.cliente_data.renda_mensal?.toString(),
-            clienteRg: data.cliente_data.rg,
-            clienteOrgaoEmissor: data.cliente_data.orgaoEmissor,
-            clienteEstadoCivil: data.cliente_data.estadoCivil,
-            clienteNacionalidade: data.cliente_data.nacionalidade,
-            clienteCep: data.cliente_data.cep,
-            clienteOcupacao: data.cliente_data.ocupacao,
-            valor: data.valor.toString(),
-            prazo: data.prazo,
-            taxaJuros: data.taxa_juros.toString(),
-            produtoId: data.produto_id,
-            tabelaComercialId: data.tabela_comercial_id,
-            lojaId: data.loja_id,
-            dadosPagamentoTipo:
-              data.dados_pagamento?.tipo_conta ||
-              data.dados_pagamento?.pixTipo ||
-              data.dados_pagamento?.pix_tipo,
-            dadosPagamentoBanco: data.dados_pagamento_banco,
-            dadosPagamentoAgencia: data.dados_pagamento?.agencia,
-            dadosPagamentoConta: data.dados_pagamento?.conta,
-            dadosPagamentoDigito: data.dados_pagamento?.digito,
-            dadosPagamentoPix: data.dados_pagamento?.pixChave || data.dados_pagamento?.pix_chave,
-            dadosPagamentoPixBanco: data.dados_pagamento?.pixBanco,
-            dadosPagamentoPixNomeTitular: data.dados_pagamento?.pixNomeTitular,
-            dadosPagamentoPixCpfTitular: data.dados_pagamento?.pixCpfTitular,
-            motivoPendencia: data.motivo_rejeicao,
-            observacoes: data.observacoes,
-            ccbDocumentoUrl: data.ccb_documento_url,
-            // CORREÇÃO MANDATÓRIA PAM V1.0: Adicionar finalidade e garantia no UPDATE
-            finalidade: data.finalidade,
-            garantia: data.garantia,
-            // updatedAt campo removido - será atualizado automaticamente pelo schema
-          })
-          .where(eq(propostas.id, data.id));
-      } else {
-        // Re-throw unexpected errors
-        console.error('[REPOSITORY] Unexpected error during proposal insert:', insertError);
-        throw insertError;
-      }
     }
 
     // Processar eventos de domínio (comentado temporariamente para load test)
