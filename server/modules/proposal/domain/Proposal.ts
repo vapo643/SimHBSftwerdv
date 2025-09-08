@@ -532,12 +532,12 @@ export class Proposal {
   }
 
   /**
-   * Reenvia proposta pendente para análise (após correções)
+   * Reenvia proposta para análise (após correções ou nova análise)
    */
   resubmitFromPending(): void {
-    if (this._status !== ProposalStatus.PENDENCIADO) {
+    if (this._status !== ProposalStatus.PENDENCIADO && this._status !== ProposalStatus.EM_ANALISE) {
       throw new DomainException(
-        'Apenas propostas com status PENDENCIADO podem ser reenviadas para análise'
+        'Apenas propostas com status PENDENCIADO ou EM_ANALISE podem ser reenviadas para análise'
       );
     }
 
