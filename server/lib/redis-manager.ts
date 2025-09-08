@@ -49,7 +49,7 @@ class RedisManager {
       lazyConnect: true,
       connectTimeout: 10000,
       commandTimeout: 5000,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: null, // CRÍTICO para BullMQ - evita timeouts
       enableOfflineQueue: true, // Permite queue de comandos quando Redis não está disponível
       keepAlive: 30000,
 
@@ -76,7 +76,7 @@ class RedisManager {
         ...baseConfig,
         connectTimeout: 2000,
         commandTimeout: 1000,
-        maxRetriesPerRequest: 1,
+        maxRetriesPerRequest: null, // CRÍTICO para BullMQ mesmo em testes
         enableReadyCheck: false,
       };
     }
