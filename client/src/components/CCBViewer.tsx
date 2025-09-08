@@ -146,50 +146,84 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     },
   });
 
-  const handleDownload = () => {
-    if (ccbStatus?.signedUrl) {
-      // Adicionar timestamp para forçar download da versão mais recente
-      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
-      window.open(urlWithTimestamp, '_blank');
-    }
-  };
-
-  const handleView = () => {
-    // Forçar refetch da URL mais recente antes de visualizar
-    queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
-
-    if (ccbStatus?.signedUrl) {
-      // Adicionar timestamp para garantir versão mais recente
-      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
-      window.open(urlWithTimestamp, '_blank');
-    }
-  };
-
-  // PAM V1.0: Nova função para visualizar CCB Assinada (apenas ADMINISTRADOR)
-  const handleViewCCBAssinada = async () => {
-    try {
-      const response = (await apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`)) as {
-        publicUrl?: string;
-        message?: string;
-      };
-
-      if (response.publicUrl) {
-        window.open(response.publicUrl, '_blank');
+  // PAM V1.0: Nova mutação para buscar URL assinada do endpoint correto
+  const fetchCcbUrlMutation = useMutation({
+    mutationFn: async (proposalId: string) => {
+      console.log('🚀 [CCBViewer] Buscando URL assinada para proposta:', proposalId);
+      return apiRequest(`/api/formalizacao/${proposalId}/ccb`);
+    },
+    onSuccess: (data: any) => {
+      console.log('✅ [CCBViewer] URL assinada recebida:', data);
+      if (data && data.signedUrl) {
+        const urlWithTimestamp = `${data.signedUrl}&t=${Date.now()}`;
+        console.log('🔗 [CCBViewer] Abrindo URL:', urlWithTimestamp);
+        window.open(urlWithTimestamp, '_blank');
       } else {
+        console.error('❌ [CCBViewer] API não retornou URL válida:', data);
         toast({
-          title: 'CCB Assinada não disponível',
-          description: response.message || 'O documento assinado ainda não está disponível',
           variant: 'destructive',
+          title: 'Erro',
+          description: 'A API não retornou uma URL válida para a CCB.',
         });
       }
-    } catch (error) {
-      console.error('Erro ao visualizar CCB assinada:', error);
+    },
+    onError: (error: any) => {
+      console.error('❌ [CCBViewer] Erro ao buscar URL da CCB:', error);
       toast({
-        title: 'Erro',
-        description: 'Erro ao visualizar CCB assinada. Tente novamente.',
         variant: 'destructive',
+        title: 'Erro ao buscar URL da CCB',
+        description: error.message || 'Erro desconhecido ao buscar URL da CCB',
       });
-    }
+    },
+  });
+
+  // PAM V1.0: Nova mutação para buscar URL assinada da CCB assinada
+  const fetchCcbAssinadaUrlMutation = useMutation({
+    mutationFn: async (proposalId: string) => {
+      console.log('🚀 [CCBViewer] Buscando URL da CCB assinada para proposta:', proposalId);
+      return apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`);
+    },
+    onSuccess: (data: any) => {
+      console.log('✅ [CCBViewer] URL da CCB assinada recebida:', data);
+      if (data && data.publicUrl) {
+        const urlWithTimestamp = `${data.publicUrl}&t=${Date.now()}`;
+        console.log('🔗 [CCBViewer] Abrindo URL da CCB assinada:', urlWithTimestamp);
+        window.open(urlWithTimestamp, '_blank');
+      } else {
+        console.error('❌ [CCBViewer] API não retornou URL válida para CCB assinada:', data);
+        toast({
+          variant: 'destructive',
+          title: 'CCB Assinada não disponível',
+          description: data?.message || 'O documento assinado ainda não está disponível',
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error('❌ [CCBViewer] Erro ao buscar URL da CCB assinada:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao buscar CCB assinada',
+        description: error.message || 'Erro desconhecido ao buscar CCB assinada',
+      });
+    },
+  });
+
+  // PAM V1.0: Handler refatorado para usar mutação - download CCB original
+  const handleDownload = () => {
+    console.log('🔽 [CCBViewer] Iniciando download da CCB original');
+    fetchCcbUrlMutation.mutate(proposalId);
+  };
+
+  // PAM V1.0: Handler refatorado para usar mutação - visualizar CCB original
+  const handleView = () => {
+    console.log('👁️ [CCBViewer] Iniciando visualização da CCB original');
+    fetchCcbUrlMutation.mutate(proposalId);
+  };
+
+  // PAM V1.0: Handler refatorado para usar mutação - visualizar CCB assinada
+  const handleViewCCBAssinada = () => {
+    console.log('👁️ [CCBViewer] Iniciando visualização da CCB assinada');
+    fetchCcbAssinadaUrlMutation.mutate(proposalId);
   };
 
   if (isLoading) {
