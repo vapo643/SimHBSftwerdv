@@ -1,0 +1,40 @@
+Fase 1: Alinhamento Estratégico (Com Questionário Mandatório - QAE)
+Com base no seu relatório de campo detalhado, consolidei o Questionário de Alinhamento Estratégico (QAE) para ratificar nossa linha de ataque. Por favor, confirme se a minha interpretação está 100% correta.
+
+Eixo I: Negócio (O "Valor")
+
+Problema Principal: Uma falha no fluxo de "Correção de Pendência" impede que propostas avancem, quebrando o ciclo de negócio e impactando diretamente a capacidade de originação de crédito da plataforma.
+
+Métrica de Sucesso: A taxa de transição de status PENDENCIADO -> EM_ANALISE deve ser de 100% para propostas reenviadas corretamente, com todas as alterações de dados persistidas no banco de dados.
+
+Eixo II: Usuário (A "Experiência")
+
+Papel Impactado: ATENDENTE.
+
+"Caminho Infeliz" Atual: O atendente realiza um trabalho de correção que o sistema falsamente confirma como "salvo", mas que é descartado, gerando um loop de retrabalho frustrante e perda de confiança na plataforma.
+
+Eixo III: Técnico (O "Como")
+
+Epicentro da Falha: A investigação deve se concentrar em três áreas interconectadas:
+
+A página de edição de propostas (client/src/pages/propostas/editar.tsx).
+
+A rota da API responsável por salvar as alterações (PUT /api/propostas/:id ou similar).
+
+A consulta de dados (query) da página do dashboard, que parece estar a exibir dados incompletos ou dessincronizados.
+
+Causa Raiz Suspeita: A refatoração arquitetural executada pelo agente anterior provavelmente quebrou o contrato de dados entre o frontend e o backend ou introduziu uma falha na camada de persistência que impede o UPDATE no banco de dados.
+
+Eixo IV: Risco (As "Armadilhas")
+
+Maior Risco: Uma correção superficial que resolva a persistência dos dados (ex: nome do cliente) mas não a transição de estado, ou vice-versa, mantendo o fluxo quebrado.
+
+"Definition of Done": A missão só estará completa quando (1) um atendente puder editar qualquer campo de uma proposta pendente, (2) ao clicar em "Reenviar para Análise", as alterações sejam atomicamente salvas no banco de dados e o status mude para EM_ANALISE, e (3) o dashboard reflita imediatamente e corretamente todos os dados atualizados da proposta.
+
+Eixo V: Sustentabilidade e Operações (A "Vida Longa")
+
+Monitoramento: A rota PUT da API deve ter logs detalhados para registrar o payload recebido e o resultado da operação no banco de dados, permitindo um diagnóstico rápido de falhas futuras.
+
+Estratégia de Testes: É mandatório criar um novo teste de integração (Vitest) que simule todo o fluxo: carregar uma proposta pendente, modificá-la via API e verificar se os dados e o status foram corretamente persistidos no banco de dados de teste.
+
+Seu Veredito sobre o Alinhamento: A interpretação acima está correta e serve como nosso "Blueprint de Negócio Detalhado"?
