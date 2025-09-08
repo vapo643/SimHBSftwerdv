@@ -1,0 +1,967 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+formalizacao.tsx:855 🔄 [REALTIME] Configurando escuta para proposta: 29e80705-89bb-43a5-bbc8-960b3139939c
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+formalizacao.tsx:907 ✅ [REALTIME] Conectado ao canal de atualizações
+client:755 WebSocket connection to 'wss://localhost:5173/?token=nNiygew4dNuK' failed: 
+createConnection @ client:755Understand this error
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/formalizacao : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+formalizacao.tsx:817 🔍 [CLICKSIGN] Consultando status para proposta: 29e80705-89bb-43a5-bbc8-960b3139939c
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/clicksign/status/29e80705-89bb-43a5-bbc8-960b3139939c : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+formalizacao.tsx:819 📡 [CLICKSIGN] Status retornado: Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+formalizacao.tsx:1315 🚀 [CLICKSIGN] Enviando CCB para proposta: 29e80705-89bb-43a5-bbc8-960b3139939c
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:1326 ✅ [CLICKSIGN] Resposta recebida: <!doctype html>
+<html lang="en">
+  <head>
+    <script type="module">
+import { createHotContext } from "/@vite/client";
+const hot = createHotContext("/__dummy__runtime-error-plugin");
+
+function sendError(error) {
+  if (!(error instanceof Error)) {
+    error = new Error("(unknown runtime error)");
+  }
+  const serialized = {
+    message: error.message,
+    stack: error.stack,
+  };
+  hot.send("runtime-error-plugin:error", serialized);
+}
+
+window.addEventListener("error", (evt) => {
+  sendError(evt.error);
+});
+
+window.addEventListener("unhandledrejection", (evt) => {
+  sendError(evt.reason);
+});
+</script>
+
+    <script type="module">import { injectIntoGlobalHook } from "/@react-refresh";
+injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <script type="module">"use strict";(()=>{var P="0.2.8";var T={HIGHLIGHT_COLOR:"#0079F2",HIGHLIGHT_BG:"#0079F210",ALLOWED_DOMAIN:".replit.dev"},Q=`
+  [contenteditable] {
+    outline: none !important;
+  }
+
+  [contenteditable]:focus {
+    outline: none !important;
+  }
+`,Z=`
+  .beacon-highlighter {
+    content: '';
+    position: absolute;
+    z-index: ${Number.MAX_SAFE_INTEGER-3};
+    box-sizing: border-box;
+    pointer-events: none;
+    outline: 2px dashed ${T.HIGHLIGHT_COLOR} !important;
+    outline-offset: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    background: ${T.HIGHLIGHT_BG} !important;
+    opacity: 0;
+  }
+  
+  .beacon-hover-highlighter {
+    position: fixed;
+    z-index: ${Number.MAX_SAFE_INTEGER};
+  }
+  
+  .beacon-selected-highlighter {
+    position: fixed;
+    pointer-events: none;
+    outline: 2px solid ${T.HIGHLIGHT_COLOR} !important;
+    outline-offset: 3px !important;
+    background: none !important;
+  }
+  
+  .beacon-label {
+    position: absolute;
+    background-color: ${T.HIGHLIGHT_COLOR};
+    color: #FFFFFF;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: monospace;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateY(-100%);
+    margin-top: -4px;
+    left: 0;
+    z-index: ${Number.MAX_SAFE_INTEGER-2};
+    pointer-events: none;
+    opacity: 0;
+  }
+  
+  .beacon-hover-label {
+    position: fixed;
+    z-index: ${Number.MAX_SAFE_INTEGER};
+  }
+  
+  .beacon-selected-label {
+    position: fixed;
+    pointer-events: none;
+  }
+  
+  .beacon-sibling-highlighter {
+    position: fixed;
+    pointer-events: none;
+    outline: 2px dashed ${T.HIGHLIGHT_COLOR} !important;
+    outline-offset: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    background: ${T.HIGHLIGHT_BG} !important;
+  }
+`;function Ne(e,i){return e[13]=1,e[14]=i>>8,e[15]=i&255,e[16]=i>>8,e[17]=i&255,e}var oe=112,le=72,ae=89,ce=115,W;function De(){let e=new Int32Array(256);for(let i=0;i<256;i++){let t=i;for(let n=0;n<8;n++)t=t&1?3988292384^t>>>1:t>>>1;e[i]=t}return e}function Ie(e){let i=-1;W||(W=De());for(let t=0;t<e.length;t++)i=W[(i^e[t])&255]^i>>>8;return i^-1}function Me(e){let i=e.length-1;for(let t=i;t>=4;t--)if(e[t-4]===9&&e[t-3]===oe&&e[t-2]===le&&e[t-1]===ae&&e[t]===ce)return t-3;return 0}function Re(e,i,t=!1){let n=new Uint8Array(13);i*=39.3701,n[0]=oe,n[1]=le,n[2]=ae,n[3]=ce,n[4]=i>>>24,n[5]=i>>>16,n[6]=i>>>8,n[7]=i&255,n[8]=n[4],n[9]=n[5],n[10]=n[6],n[11]=n[7],n[12]=1;let o=Ie(n),r=new Uint8Array(4);if(r[0]=o>>>24,r[1]=o>>>16,r[2]=o>>>8,r[3]=o&255,t){let l=Me(e);return e.set(n,l),e.set(r,l+13),e}else{let l=new Uint8Array(4);l[0]=0,l[1]=0,l[2]=0,l[3]=9;let s=new Uint8Array(54);return s.set(e,0),s.set(l,33),s.set(n,37),s.set(r,50),s}}var he="[modern-screenshot]",C=typeof window<"u",_e=C&&"Worker"in window,Oe=C&&"atob"in window,qt=C&&"btoa"in window,V=C?window.navigator?.userAgent:"",de=V.includes("Chrome"),k=V.includes("AppleWebKit")&&!de,q=V.includes("Firefox"),Pe=e=>e&&"__CONTEXT__"in e,ke=e=>e.constructor.name==="CSSFontFaceRule",Fe=e=>e.constructor.name==="CSSImportRule",y=e=>e.nodeType===1,I=e=>typeof e.className=="object",ge=e=>e.tagName==="image",Ue=e=>e.tagName==="use",x=e=>y(e)&&typeof e.style<"u"&&!I(e),$e=e=>e.nodeType===8,Be=e=>e.nodeType===3,L=e=>e.tagName==="IMG",F=e=>e.tagName==="VIDEO",We=e=>e.tagName==="CANVAS",Ge=e=>e.tagName==="TEXTAREA",Ve=e=>e.tagName==="INPUT",qe=e=>e.tagName==="STYLE",je=e=>e.tagName==="SCRIPT",ze=e=>e.tagName==="SELECT",Xe=e=>e.tagName==="SLOT",Ye=e=>e.tagName==="IFRAME",Ke=(...e)=>console.warn(he,...e);function Je(e){let i=e?.createElement?.("canvas");return i&&(i.height=i.width=1),!!i&&"toDataURL"in i&&!!i.toDataURL("image/webp").includes("image/webp")}var G=e=>e.startsWith("data:");function ue(e,i){if(e.match(/^[a-z]+:\/\//i))return e;if(C&&e.match(/^\/\//))return window.location.protocol+e;if(e.match(/^[a-z]+:/i)||!C)
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+formalizacao.tsx:909 ❌ [REALTIME] Erro ao conectar ao canal
+(anonymous) @ formalizacao.tsx:909Understand this error
+formalizacao.tsx:907 ✅ [REALTIME] Conectado ao canal de atualizações
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-08T17:25:59.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-08T17:25:59.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : {success: true, data: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {success: true, data: {…}}
+formalizacao.tsx:909 ❌ [REALTIME] Erro ao conectar ao canal
+(anonymous) @ formalizacao.tsx:909
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2162
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2519
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2436
+_trigger @ @supabase_supabase-js.js?v=d1886264:2421
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:3046
+_triggerChanError @ @supabase_supabase-js.js?v=d1886264:3046
+_onConnClose @ @supabase_supabase-js.js?v=d1886264:3030
+conn.onclose @ @supabase_supabase-js.js?v=d1886264:2965Understand this error
+formalizacao.tsx:907 ✅ [REALTIME] Conectado ao canal de atualizações
+formalizacao.tsx:909 ❌ [REALTIME] Erro ao conectar ao canal
+(anonymous) @ formalizacao.tsx:909
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2162
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2519
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2436
+_trigger @ @supabase_supabase-js.js?v=d1886264:2421
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:3046
+_triggerChanError @ @supabase_supabase-js.js?v=d1886264:3046
+_onConnClose @ @supabase_supabase-js.js?v=d1886264:3030
+conn.onclose @ @supabase_supabase-js.js?v=d1886264:2965Understand this error
+formalizacao.tsx:907 ✅ [REALTIME] Conectado ao canal de atualizações
+formalizacao.tsx:909 ❌ [REALTIME] Erro ao conectar ao canal
+(anonymous) @ formalizacao.tsx:909
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2162
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2519
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2436
+_trigger @ @supabase_supabase-js.js?v=d1886264:2421
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:3046
+_triggerChanError @ @supabase_supabase-js.js?v=d1886264:3046
+_onConnClose @ @supabase_supabase-js.js?v=d1886264:3030
+conn.onclose @ @supabase_supabase-js.js?v=d1886264:2965Understand this error
+formalizacao.tsx:907 ✅ [REALTIME] Conectado ao canal de atualizações
+formalizacao.tsx:909 ❌ [REALTIME] Erro ao conectar ao canal
+(anonymous) @ formalizacao.tsx:909
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2162
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2519
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2436
+_trigger @ @supabase_supabase-js.js?v=d1886264:2421
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:3046
+_triggerChanError @ @supabase_supabase-js.js?v=d1886264:3046
+_onConnClose @ @supabase_supabase-js.js?v=d1886264:3030
+conn.onclose @ @supabase_supabase-js.js?v=d1886264:2965Understand this error
+@supabase_supabase-js.js?v=d1886264:2965 [Violation] 'close' handler took 1302513ms
+use-toast.ts:60 [Violation] 'setTimeout' handler took 103ms
+useIdleTimer.ts:51 🕐 [IDLE TIMER] User became idle after 30 minutes of inactivity
+AuthContext.tsx:72 ⚠️ [IDLE WARNING] Showing inactivity warning to user (2 minutes left)
+chunk-QYFCA5BS.js?v=d1886264:377 [Violation] 'message' handler took 792ms
+[Violation] Forced reflow while executing JavaScript took 404ms
+content.js:1 [Violation] 'setInterval' handler took 87ms
+[Violation] Forced reflow while executing JavaScript took 78ms
+formalizacao.tsx:913 🔌 [REALTIME] Canal fechado
+formalizacao.tsx:911 ⏱️ [REALTIME] Timeout ao conectar
+(anonymous) @ formalizacao.tsx:911
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2199
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:1827
+_matchReceive @ @supabase_supabase-js.js?v=d1886264:1827
+callback @ @supabase_supabase-js.js?v=d1886264:1801
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2436
+_trigger @ @supabase_supabase-js.js?v=d1886264:2421
+trigger @ @supabase_supabase-js.js?v=d1886264:1810
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:1805
+setTimeout
+startTimeout @ @supabase_supabase-js.js?v=d1886264:1804
+send @ @supabase_supabase-js.js?v=d1886264:1770
+resend @ @supabase_supabase-js.js?v=d1886264:1764
+_rejoin @ @supabase_supabase-js.js?v=d1886264:2536
+_rejoinUntilConnected @ @supabase_supabase-js.js?v=d1886264:2502
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2098
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:1574
+setTimeout
+scheduleTimeout @ @supabase_supabase-js.js?v=d1886264:1572
+_rejoinUntilConnected @ @supabase_supabase-js.js?v=d1886264:2500
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2098
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:1574
+setTimeout
+scheduleTimeout @ @supabase_supabase-js.js?v=d1886264:1572
+_rejoinUntilConnected @ @supabase_supabase-js.js?v=d1886264:2500
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2098
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:1574
+setTimeout
+scheduleTimeout @ @supabase_supabase-js.js?v=d1886264:1572
+_rejoinUntilConnected @ @supabase_supabase-js.js?v=d1886264:2500
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2098
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:1574
+setTimeout
+scheduleTimeout @ @supabase_supabase-js.js?v=d1886264:1572
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2117
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2519
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:2436
+_trigger @ @supabase_supabase-js.js?v=d1886264:2421
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:3046
+_triggerChanError @ @supabase_supabase-js.js?v=d1886264:3046
+_onConnClose @ @supabase_supabase-js.js?v=d1886264:3030
+conn.onclose @ @supabase_supabase-js.js?v=d1886264:2965Understand this error
+[Violation] 'setInterval' handler took 57ms
+content.js:1 [Violation] 'setInterval' handler took 93ms
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+get @ apiClient.ts:593
+queryFn @ FeatureFlagContext.tsx:49
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:183
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:6975
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=d1886264:6973
+_recoverAndRefresh @ @supabase_supabase-js.js?v=d1886264:6916
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:7188
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:6219
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:5336Understand this error
+AuthContext.tsx:111 Error fetching profile data: ApiError: <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Hmm... We couldn&#39;t reach this app</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #1c2333;
+      font-family: "IBM Plex Sans", "sans";
+      color: #f5f9fc;
+    }
+
+    .title-box {
+      font-size: 12px;
+      inline-size: max-content;
+      max-width: 100%;
+    }
+
+    .description-box {
+      font-size: 10px;
+      inline-size: max-content;
+      max-width: 100%;
+    }
+
+    .err-box {
+      padding: 1em;
+      width: 100vw;
+      max-width: 100vw;
+      overflow: hidden;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ascii {
+      font-size: 6px;
+      text-align: center;
+      opacity: .8;
+    }
+
+    .eval-bot {
+      margin: 4em;
+    }
+
+    @media (max-width: 500px) {
+      .title-box {
+        font-size: 10px;
+      }
+
+      .description-box {
+        font-size: 8px;
+      }
+
+      .eval-bot {
+        margin: 1em;
+      }
+
+      .eval-bot svg {
+        width: 200px;
+      }
+
+      .message {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .repl-links {
+        font-size: 14px;
+      }
+    }
+
+    .console {
+      background-color: #0e1628;
+      color: #fff;
+      font-family: "IBM Plex Sans", "sans";
+      padding: 1em;
+      margin: 1em;
+    }
+
+    .footer-item {
+      margin: 1em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .link-icon {
+      margin-right: 8px;
+      margin-top: 4px;
+    }
+
+    a {
+      color: #c2c8cc;
+    }
+  </style>
+
+  <script>
+    var reload_timeout = setTimeout(function () {
+      window.location.reload();
+    }, 60000);
+  </script>
+</head>
+
+<body>
+  <div class="err-box">
+    <div class="message">
+      <div class="eval-bot">
+        <pre class="ascii">
+                                  :::.                                                    
+                                :+++***++:..                                              
+                      :-=+=..:-=+**=======---:                                            
+                     -+++****+====-::-=====-::. ..   ..       ::                          
+                    .=++++++=::----------::-::::::--------===--:.:::::.                   
+                   :--==+++=-::----------======----------:-===-:::::::.                   
+                   ::--==+++-----=+++=+++++====----======--==------::                     
+                  ::::-====+++++++*************+==========---------::..                   
+                 ..:::---==++*****************+++++++++=------------:::::..               
+                ....:::-=+**********************++++++=--==========--:.....               
+                 ..:::-++*********+**************+++++++--+***++++==:      .::..          
+                :=+*+=+++****++==+++*+++++++***+++++++++***********+=. .::-====-::--:     
+             .:-=++=====+++*++====++++++++++++++++++=+++*************+=======++++==--.    
+           .--==-----=====++=============+=+++=====++++****************+=+=========--:.   
+     . .  :--====------=======--==========+++=====++++****+*****+****++===------====-.    
+  ...::::::::---====----------::::::-----========++++++++++***++++++++===--:::::-----.    
+   ...::::::..:::::---::::::::::...::::::::-----=++++++++++****+++++++===-:::::::::---:   
+      .::::.....:::::::::::................:::::=++++++++++*****++++++=====---:::::---::. 
+         ......   .........     ...............::=+==++++++++++++++============-----::...:
+                                    ........::---===-===============------=---:::::::::...
+                                    .......................::::::::---------:.   ..       
+                                            ....................::::::--:::::.            
+                                                             ...........                  
+                                                                                          
+          </pre>
+      </div>
+      <div class="title-box">
+        <h1>Hmm... We couldn&#39;t reach this app</h1>
+      </div>
+      <div class="description-box">
+        <h2>Make sure this app has a port open and is ready to receive HTTP traffic.</h2>
+      </div>
+    </div>
+    
+    <div>
+      <div class="footer-item">
+        <div class="link-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M6.66668 8.66666C6.95298 9.04942 7.31825 9.36612 7.73771 9.59529C8.15717 9.82446 8.62102 9.96074 9.09778 9.99489C9.57454 10.029 10.0531 9.96024 10.5009 9.79319C10.9487 9.62613 11.3554 9.36471 11.6933 9.02666L13.6933 7.02666C14.3005 6.39799 14.6365 5.55598 14.6289 4.68199C14.6213 3.808 14.2708 2.97196 13.6527 2.35394C13.0347 1.73591 12.1987 1.38535 11.3247 1.37775C10.4507 1.37016 9.60869 1.70614 8.98001 2.31333L7.83334 3.45333M9.33334 7.33333C9.04704 6.95058 8.68177 6.63388 8.26231 6.4047C7.84285 6.17553 7.37901 6.03925 6.90224 6.00511C6.42548 5.97096 5.94695 6.03975 5.49911 6.20681C5.05128 6.37387 4.6446 6.63528 4.30668 6.97333L2.30668 8.97333C1.69948 9.602 1.3635 10.444 1.3711 11.318C1.37869 12.192 1.72926 13.028 2.34728 13.6461C2.96531 14.2641 3.80135 14.6147 4.67534 14.6222C5.54933 14.6298 6.39134 14.2939 7.02001 13.6867L8.16001 12.5467"
+              stroke="#C2C8CC" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="repl-links">
+          <a href="https://replit.com">Go to Replit</a>
+        </div>
+      </div>
+
+      <div class="footer-item">
+        <div class="link-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M6.66668 8.66666C6.95298 9.04942 7.31825 9.36612 7.73771 9.59529C8.15717 9.82446 8.62102 9.96074 9.09778 9.99489C9.57454 10.029 10.0531 9.96024 10.5009 9.79319C10.9487 9.62613 11.3554 9.36471 11.6933 9.02666L13.6933 7.02666C14.3005 6.39799 14.6365 5.55598 14.6289 4.68199C14.6213 3.808 14.2708 2.97196 13.6527 2.35394C13.0347 1.73591 12.1987 1.38535 11.3247 1.37775C10.4507 1.37016 9.60869 1.70614 8.98001 2.31333L7.83334 3.45333M9.33334 7.33333C9.04704 6.95058 8.68177 6.63388 8.26231 6.4047C7.84285 6.17553 7.37901 6.03925 6.90224 6.00511C6.42548 5.97096 5.94695 6.03975 5.49911 6.20681C5.05128 6.37387 4.6446 6.63528 4.30668 6.97333L2.30668 8.97333C1.69948 9.602 1.3635 10.444 1.3711 11.318C1.37869 12.192 1.72926 13.028 2.34728 13.6461C2.96531 14.2641 3.80135 14.6147 4.67534 14.6222C5.54933 14.6298 6.39134 14.2939 7.02001 13.6867L8.16001 12.5467"
+              stroke="#C2C8CC" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="repl-links">
+          <a href="https://replit.com/site/hosting">Learn more about hosting on Replit</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async AuthContext.tsx:95:28
+(anonymous) @ AuthContext.tsx:111
+await in (anonymous)
+(anonymous) @ AuthContext.tsx:183
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:6975
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=d1886264:6973
+_recoverAndRefresh @ @supabase_supabase-js.js?v=d1886264:6916
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:7188
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:6219
+(anonymous) @ @supabase_supabase-js.js?v=d1886264:5336Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+get @ apiClient.ts:593
+queryFn @ FeatureFlagContext.tsx:49
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+get @ apiClient.ts:593
+queryFn @ FeatureFlagContext.tsx:49
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+get @ apiClient.ts:593
+queryFn @ FeatureFlagContext.tsx:49
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 502 (Bad Gateway)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+(anonymous) @ queryClient.ts:59
+fetchFn @ @tanstack_react-query.js?v=d1886264:852
+run @ @tanstack_react-query.js?v=d1886264:491
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+(anonymous) @ @tanstack_react-query.js?v=d1886264:515
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=d1886264:511
+Promise.catch
+run @ @tanstack_react-query.js?v=d1886264:495
+start @ @tanstack_react-query.js?v=d1886264:533
+fetch @ @tanstack_react-query.js?v=d1886264:891
+#executeFetch @ @tanstack_react-query.js?v=d1886264:2047
+fetch @ @tanstack_react-query.js?v=d1886264:2037
+refetch @ @tanstack_react-query.js?v=d1886264:2027
+onFocus @ @tanstack_react-query.js?v=d1886264:755
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1124
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1123
+batch @ @tanstack_react-query.js?v=d1886264:581
+onFocus @ @tanstack_react-query.js?v=d1886264:1122
+(anonymous) @ @tanstack_react-query.js?v=d1886264:1625
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=d1886264:312
+onFocus @ @tanstack_react-query.js?v=d1886264:311
+(anonymous) @ @tanstack_react-query.js?v=d1886264:298
+listener @ @tanstack_react-query.js?v=d1886264:271Understand this error
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : {success: true, data: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {success: true, data: {…}}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-08T17:58:57.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-09-08T17:58:57.000-03:00'}
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:78 🔄 [IDLE RESET] User chose to continue session
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…as/29e80705-89bb-43a5-bbc8-960b3139939c/gerar-ccb', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : {success: true, data: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {success: true, data: {…}}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/gerar-ccb : {success: true, message: 'CCB gerada com sucesso usando template personalizado', caminho: 'ccb/29e80705-89bb-43a5-bbc8-960b3139939c/ccb_29e80705-89bb-43a5-bbc8-960b3139939c_1757365144020.pdf'}
+apiClient.ts:437 [API Client] After dual-key transformation: {success: true, message: 'CCB gerada com sucesso usando template personalizado', caminho: 'ccb/29e80705-89bb-43a5-bbc8-960b3139939c/ccb_29e80705-89bb-43a5-bbc8-960b3139939c_1757365144020.pdf'}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…29e80705-89bb-43a5-bbc8-960b3139939c/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.npp2qdC0dYGdfQqmqpmjEPyVZl8ne2kNE2RKgayXCFk', hasToken: true, isFormData: false}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : {success: true, data: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {success: true, data: {…}}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c : {success: true, data: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {success: true, data: {…}}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c/formalizacao : {id: '29e80705-89bb-43a5-bbc8-960b3139939c', cliente_data: {…}, condicoes_data: {…}, status: 'CCB_GERADA', loja_id: 1, …}
+apiClient.ts:437 [API Client] After dual-key transformation: {id: '29e80705-89bb-43a5-bbc8-960b3139939c', cliente_data: {…}, clienteData: {…}, condicoes_data: {…}, condicoesData: {…}, …}

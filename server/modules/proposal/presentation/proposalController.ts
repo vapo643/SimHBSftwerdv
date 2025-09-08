@@ -255,6 +255,12 @@ export class ProposalController {
         // CAMPOS AUSENTES - CORREÇÃO AUDITORIA
         finalidade: proposalDto.finalidade,
         garantia: proposalDto.garantia,
+        // PAM V1.0 CORREÇÃO CRÍTICA: Adicionar campos de CCB
+        ccb_gerado: proposalDto.ccbGerado,
+        caminho_ccb: proposalDto.caminhoCcb,
+        ccb_gerado_em: proposalDto.ccbGeradoEm,
+        caminho_ccb_assinado: proposalDto.caminhoCcbAssinado,
+        data_assinatura: proposalDto.dataAssinatura,
         // PAM V1.0: DTO já tem valores calculados
         valor_parcela: proposalDto.valorParcela,
         valor_total: proposalDto.valorTotal,

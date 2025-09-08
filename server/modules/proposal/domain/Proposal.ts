@@ -247,6 +247,12 @@ export class Proposal {
   private _ccbUrl: string;
   private _dadosPagamentoBanco: string;
   private _clienteComprometimentoRenda: number;
+  // PAM V1.0 CORREÇÃO CRÍTICA: Propriedades de CCB
+  private _ccbGerado?: boolean;
+  private _caminhoCcb?: string;
+  private _ccbGeradoEm?: Date;
+  private _caminhoCcbAssinado?: string;
+  private _dataAssinatura?: Date;
 
   // Campos opcionais mantidos
   private _parceiroId?: number;
@@ -478,6 +484,12 @@ export class Proposal {
     proposal._createdAt = data.created_at;
     proposal._updatedAt = data.updated_at;
     proposal._parceiroId = data.parceiro_id;
+    // PAM V1.0 CORREÇÃO CRÍTICA: Mapear campos de CCB
+    proposal._ccbGerado = data.ccb_gerado;
+    proposal._caminhoCcb = data.caminho_ccb;
+    proposal._ccbGeradoEm = data.ccb_gerado_em;
+    proposal._caminhoCcbAssinado = data.caminho_ccb_assinado;
+    proposal._dataAssinatura = data.data_assinatura;
 
     return proposal;
   }
@@ -946,6 +958,22 @@ export class Proposal {
   get ccbUrl(): string | undefined {
     return this._ccbUrl;
   }
+  // PAM V1.0 CORREÇÃO CRÍTICA: Getters para campos de CCB
+  get ccbGerado(): boolean | undefined {
+    return this._ccbGerado;
+  }
+  get caminhoCcb(): string | undefined {
+    return this._caminhoCcb;
+  }
+  get ccbGeradoEm(): Date | undefined {
+    return this._ccbGeradoEm;
+  }
+  get caminhoCcbAssinado(): string | undefined {
+    return this._caminhoCcbAssinado;
+  }
+  get dataAssinatura(): Date | undefined {
+    return this._dataAssinatura;
+  }
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -1026,6 +1054,12 @@ export class Proposal {
       observacoes: this._observacoes,
       finalidade: this._finalidade,
       garantia: this._garantia,
+      // PAM V1.0 CORREÇÃO CRÍTICA: Adicionar campos de CCB na persistência
+      ccb_gerado: this._ccbGerado,
+      caminho_ccb: this._caminhoCcb,
+      ccb_gerado_em: this._ccbGeradoEm,
+      caminho_ccb_assinado: this._caminhoCcbAssinado,
+      data_assinatura: this._dataAssinatura,
       user_id: this._analistaId || 'e647afc0-03fa-482d-8293-d824dcab0399', // Usar analistaId como userId para mapeamento correto
       created_at: this._createdAt,
       updated_at: this._updatedAt,
