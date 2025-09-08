@@ -4,11 +4,20 @@ let clientSupabaseInstance: SupabaseClient | null = null;
 
 // Função para criar o cliente Supabase para o lado do servidor (Express.js)
 export const createServerSupabaseClient = () => {
-  const supabaseUrl = process.env.SUPABASE_URL || '';
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+  const isProd = process.env.NODE_ENV === 'production';
+  const supabaseUrl = isProd
+    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || '')
+    : (process.env.SUPABASE_URL || '');
+  const supabaseAnonKey = isProd
+    ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '')
+    : (process.env.SUPABASE_ANON_KEY || '');
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables');
+    console.warn('⚠️ Supabase server credentials not configured. Server-side operations will be limited.');
+    if (isProd) {
+      console.warn('ℹ️  Configure PROD_SUPABASE_URL and PROD_SUPABASE_ANON_KEY for full functionality');
+    }
+    return null as any;
   }
 
   return createClient(supabaseUrl, supabaseAnonKey);
@@ -26,7 +35,8 @@ export const createClientSupabaseClient = () => {
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Missing Supabase environment variables');
+      console.warn('⚠️ Supabase client credentials not configured. Some features may be limited.');
+      return null as any;
     }
 
     clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);

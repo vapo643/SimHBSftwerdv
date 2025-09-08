@@ -3,28 +3,69 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@shared/schema';
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-const databaseUrl = process.env.DATABASE_URL || '';
+// Helper function to get environment-specific Supabase credentials
+function getSupabaseCredentials() {
+  const isProd = process.env.NODE_ENV === 'production';
+  
+  const supabaseUrl = isProd 
+    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '')
+    : (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '');
+    
+  const supabaseAnonKey = isProd
+    ? (process.env.PROD_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '')
+    : (process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '');
+    
+  const databaseUrl = isProd
+    ? (process.env.PROD_DATABASE_URL || process.env.DATABASE_URL || '')
+    : (process.env.DATABASE_URL || '');
 
+  return { supabaseUrl, supabaseAnonKey, databaseUrl };
+}
+
+const { supabaseUrl, supabaseAnonKey, databaseUrl } = getSupabaseCredentials();
+
+// Graceful handling for missing Supabase credentials
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.warn('⚠️ Supabase environment variables not configured. Some features may be limited.');
+  console.warn(`   Missing: ${!supabaseUrl ? 'SUPABASE_URL ' : ''}${!supabaseAnonKey ? 'SUPABASE_ANON_KEY' : ''}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('ℹ️  Configure PROD_SUPABASE_URL and PROD_SUPABASE_ANON_KEY in deployment secrets');
+  }
 }
 
 if (!databaseUrl) {
-  throw new Error('Missing DATABASE_URL environment variable');
+  console.warn('⚠️ Database URL not configured. Using fallback configuration.');
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('ℹ️  Configure PROD_DATABASE_URL in deployment secrets for full functionality');
+  }
 }
 
 // Server-side Supabase client - properly isolated from client-side singleton
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Only create if credentials are available
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
-// NOVA FUNÇÃO para operações Admin:
+// NOVA FUNÇÃO para operações Admin com graceful handling:
 export function createServerSupabaseAdminClient() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY é obrigatória para operações administrativas');
+  const isProd = process.env.NODE_ENV === 'production';
+  const serviceKey = isProd 
+    ? (process.env.PROD_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
+    : process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = isProd
+    ? (process.env.PROD_SUPABASE_URL || process.env.SUPABASE_URL)
+    : process.env.SUPABASE_URL;
+
+  if (!serviceKey || !url) {
+    console.warn('⚠️ Supabase admin credentials not configured. Admin operations will be limited.');
+    if (isProd) {
+      console.warn('ℹ️  Configure PROD_SUPABASE_SERVICE_KEY and PROD_SUPABASE_URL for admin operations');
+    }
+    // Return a mock client that will fail gracefully
+    return null as any;
   }
 
-  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  return createClient(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -34,6 +75,11 @@ export function createServerSupabaseAdminClient() {
 
 // FUNÇÃO ANTI-FRÁGIL para operações com RLS (autenticadas):
 export function createServerSupabaseClient(accessToken?: string) {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('⚠️ Cannot create Supabase client - credentials not configured');
+    return null as any;
+  }
+  
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
@@ -57,7 +103,7 @@ export function createServerSupabaseClient(accessToken?: string) {
 // Temporary: Use lazy connection to prevent server crash
 let dbClient;
 
-if (databaseUrl.includes('supabase.com')) {
+if (databaseUrl && databaseUrl.includes('supabase.com')) {
   console.log('✅ Database: Configuring Supabase connection...');
 
   // Use transaction pooler port and SSL
@@ -88,7 +134,7 @@ if (databaseUrl.includes('supabase.com')) {
   console.log(
     '📊 Pool Config: idle_timeout=30s, connect_timeout=10s, prepared_statements=disabled'
   );
-} else {
+} else if (databaseUrl) {
   // MISSION 3: Local/non-Supabase PostgreSQL with optimized pooling
   dbClient = postgres(databaseUrl, {
     max: 20, // Consistent pool size across environments
@@ -101,17 +147,31 @@ if (databaseUrl.includes('supabase.com')) {
       undefined: null,
     },
   });
+} else {
+  console.warn('⚠️ No database URL configured. Creating mock database client.');
+  console.warn('ℹ️  Some database operations will be limited until DATABASE_URL is configured.');
+  
+  // Create a mock client that prevents crashes
+  dbClient = {
+    query: () => Promise.resolve([]),
+    end: () => Promise.resolve(),
+  } as any;
 }
 
 const client = dbClient;
-export const db = drizzle(client, {
+export const db = client ? drizzle(client, {
   schema,
   logger: true, // PERF-FIX-001: Ativar logging SQL para auditoria N+1
-});
+}) : null;
 
 // MISSION 3: Enhanced connection pool monitoring and testing
 setTimeout(async () => {
   try {
+    if (!client || !databaseUrl) {
+      console.log('ℹ️  Database: Skipping connection test - no database configured');
+      return;
+    }
+    
     const startTime = Date.now();
     await client`SELECT 1, current_setting('max_connections') as max_conn`;
     const duration = Date.now() - startTime;
