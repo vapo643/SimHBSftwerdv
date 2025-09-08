@@ -1177,157 +1177,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.get(
+  // PUT /api/propostas/:id - Atualizar dados da proposta (para correções)
+  app.put(
     '/api/propostas/:id',
     jwtAuthMiddleware as any,
-    timingNormalizerMiddleware,
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        console.log('🎯 [PAM V1.0] Using DDD Controller for individual proposal');
-        
-        // PAM V1.0 CORREÇÃO CRÍTICA: Usar novo controller DDD com findById corrigido
-        const { ProposalController } = await import('./modules/proposal/presentation/proposalController.js');
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
         const proposalController = new ProposalController();
-        
-        return await proposalController.getById(req, res, next);
+        return proposalController.update(req, res, next);
       } catch (error) {
-        console.error('GET /api/propostas/:id DDD error:', error);
+        console.error('PUT /api/propostas/:id error:', error);
         next(error);
       }
     }
   );
 
-  // PUT /api/propostas/:id - Atualizar dados da proposta (para correções)
-              loja_id: propostas.lojaId,
-              created_at: propostas.createdAt,
-              produto_id: propostas.produtoId,
-              tabela_comercial_id: propostas.tabelaComercialId,
-              user_id: propostas.userId,
-              ccb_documento_url: propostas.ccbDocumentoUrl,
-              analista_id: propostas.analistaId,
-              data_analise: propostas.dataAnalise,
-              motivo_pendencia: propostas.motivoPendencia,
-              data_aprovacao: propostas.dataAprovacao,
-              documentos_adicionais: propostas.documentosAdicionais,
-              contrato_gerado: propostas.contratoGerado,
-              contrato_assinado: propostas.contratoAssinado,
-              data_assinatura: propostas.dataAssinatura,
-              data_pagamento: propostas.dataPagamento,
-              observacoes_formalizacao: propostas.observacoesFormalização,
-              loja: {
-                id: lojas.id,
-                nome_loja: lojas.nomeLoja,
-              },
-              parceiro: {
-                id: parceiros.id,
-                razao_social: parceiros.razaoSocial,
-              },
-              produto: {
-                id: produtos.id,
-                nome_produto: produtos.nomeProduto,
-                tac_valor: produtos.tacValor,
-                tac_tipo: produtos.tacTipo,
-              },
-              tabela_comercial: {
-                id: tabelasComerciais.id,
-                nome_tabela: tabelasComerciais.nomeTabela,
-                taxa_juros: tabelasComerciais.taxaJuros,
-                prazos: tabelasComerciais.prazos,
-                comissao: tabelasComerciais.comissao,
-              },
-            })
-            .from(propostas)
-            .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
-            .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
-            .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
-            .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
-            .where(eq(propostas.id, idParam))
-            .limit(1);
+  // PUT /api/propostas/:id/resubmit - Reenviar proposta pendente para análise
+  app.put(
+    '/api/propostas/:id/resubmit',
+    jwtAuthMiddleware as any,
+    async (req: AuthenticatedRequest, res, next) => {
+      try {
+        const { ProposalController } = await import('./modules/proposal/presentation/proposalController');
+        const proposalController = new ProposalController();
+        return proposalController.resubmitFromPending(req, res, next);
+      } catch (error) {
+        console.error('PUT /api/propostas/:id/resubmit error:', error);
+        next(error);
+      }
+    }
+  );
 
-          if (!result || result.length === 0) {
-            console.log(
-              `🔐 [ATENDENTE BLOCKED] User ${user?.id} denied access to proposta ${idParam} - RLS policy blocked or not found`
-            );
-            return res.status(403).json({
-              message: 'Você não tem permissão para acessar esta proposta',
-            });
-          }
+  // MOVED TO server/routes/propostas/core.ts - POST /api/propostas
 
-          const proposta = result[0];
-          console.log(
-            `🔐 [ATENDENTE ALLOWED] User ${user?.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`
-          );
-
-          // Buscar documentos da proposta
-          const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
-          const supabase = createServerSupabaseAdminClient();
-
-          const { data: documentos, error: docError } = await supabase
-            .from('proposta_documentos')
-            .select('*')
-            .eq('proposta_id', idParam);
-
-          console.log(
-            `🔍 [ANÁLISE] Documentos encontrados para proposta ${idParam}:`,
-            documentos?.length || 0
-          );
-
-          // DEBUG: Listar arquivos que existem no bucket para esta proposta
-          const { data: bucketFiles, error: listError } = await supabase.storage
-            .from('documents')
-            .list(`proposta-${idParam}/`, { limit: 100 });
-
-          if (bucketFiles) {
-            console.log(`🔍 [ANÁLISE] ===== COMPARAÇÃO BUCKET vs BANCO =====`);
-            console.log(
-              `🔍 [ANÁLISE] Arquivos no bucket (${bucketFiles.length}):`,
-              bucketFiles.map((f) => f.name)
-            );
-            console.log(
-              `🔍 [ANÁLISE] URLs salvas no banco (${documentos?.length || 0}):`,
-              documentos?.map((d) => d.url)
-            );
-            console.log(
-              `🔍 [ANÁLISE] Nomes no banco (${documentos?.length || 0}):`,
-              documentos?.map((d) => d.nome_arquivo)
-            );
-            console.log(`🔍 [ANÁLISE] ============================================`);
-          } else {
-            console.log(`🔍 [ANÁLISE] Erro ao listar arquivos no bucket:`, listError?.message);
-          }
-
-          // Gerar URLs assinadas para visualização dos documentos
-          let documentosComUrls = [];
-          if (documentos && documentos.length > 0) {
-            console.log(
-              `🔍 [ANÁLISE] Gerando URLs assinadas para ${documentos.length} documentos...`
-            );
-
-            for (const doc of documentos) {
-              try {
-                console.log(`🔍 [ANÁLISE] Tentando gerar URL para documento:`, {
-                  nome: doc.nome_arquivo,
-                  url: doc.url,
-                  tipo: doc.tipo,
-                  proposta_id: doc.proposta_id,
-                });
-
-                // Extrair o caminho do arquivo a partir da URL salva
-                const documentsIndex = doc.url.indexOf('/documents/');
-                let filePath;
-
-                if (documentsIndex !== -1) {
-                  // Extrair caminho após '/documents/'
-                  filePath = doc.url.substring(documentsIndex + '/documents/'.length);
-                } else {
-                  // Fallback: construir caminho baseado no nome do arquivo
-                  const fileName = doc.nome_arquivo;
-                  filePath = `proposta-${idParam}/${fileName}`;
-                }
-
-                console.log(`🔍 [ANÁLISE] Caminho extraído para URL assinada: ${filePath}`);
-
-                const { data: signedUrlData, error: urlError } = await supabase.storage
+  // Import document routes - REACTIVATED FOR DIAGNOSIS
+  const { getPropostaDocuments, uploadPropostaDocument } = await import('./routes/documents');
                   .from('documents')
                   .createSignedUrl(filePath, 3600); // 1 hora
 
