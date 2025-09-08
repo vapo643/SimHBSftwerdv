@@ -1,0 +1,170 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+AuthContext.tsx:174 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+FeatureFlagContext.tsx:87 🚩 Feature Flags carregadas: Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)
+fetchProposta @ analise.tsx:64Understand this error
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:174 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+AuthContext.tsx:104 🔐 [AUTH RESTORED] User profile loaded with valid token
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)
+fetchProposta @ analise.tsx:64Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)
+fetchProposta @ analise.tsx:64Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)
+fetchProposta @ analise.tsx:64Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/parceiros : Array(2)
+apiClient.ts:437 [API Client] After dual-key transformation: Array(2)
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas?queue=analysis : Object
+apiClient.ts:437 [API Client] After dual-key transformation: Object
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)
+fetchProposta @ analise.tsx:64Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)
+fetchProposta @ analise.tsx:64Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] Object
+/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)
+fetchProposta @ analise.tsx:64Understand this error
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…pi/propostas/29e80705-89bb-43a5-bbc8-960b3139939c', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.ylfw-T1A1Il_LrzOaV7CGNophuN_0AFcI4YAn1Hgo6M', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/29e80705-89bb-43a5-bbc8-960b3139939c 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:305
+apiClient @ apiClient.ts:413
+await in apiClient
+get @ apiClient.ts:593
+fetchProposta @ analise.tsx:57
+queryFn @ analise.tsx:129
+fetchFn @ @tanstack_react-query.js?v=9648f934:852
+run @ @tanstack_react-query.js?v=9648f934:491
+(anonymous) @ @tanstack_react-query.js?v=9648f934:515Understand this error
+analise.tsx:64 [Análise] Erro ao carregar proposta: ApiError: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: proposal.valor.getReais is not a function<br> &nbsp; &nbsp;at ProposalController.getById (/home/runner/workspace/server/modules/proposal/presentation/proposalController.ts:198:33)<br> &nbsp; &nbsp;at process.processTicksAndRejections (node:internal/process/task_queues:95:5)</pre>
+</body>
+</html>
+
+    at apiClient (apiClient.ts:528:13)
+    at async fetchProposta (analise.tsx:57:22)

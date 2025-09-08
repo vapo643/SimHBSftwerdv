@@ -187,58 +187,61 @@ export class ProposalController {
         tabelaComercialId: proposal.tabelaComercialId
       });
 
-      // OPERAÇÃO VISÃO CLARA V1.0: Serializar agregado COMPLETO para resposta
+      // PAM V1.0 CORREÇÃO: proposal agora é DTO, usar type casting
+      const proposalDto = proposal as any;
+      
+      // OPERAÇÃO VISÃO CLARA V1.0: Serializar DTO COMPLETO para resposta
       const data = {
-        id: proposal.id,
-        status: proposal.status,
-        cliente_data: proposal.clienteData,
-        clienteData: proposal.clienteData, // Duplicado para compatibilidade
+        id: proposalDto.id,
+        status: proposalDto.status,
+        cliente_data: proposalDto.cliente_data || proposalDto.clienteData,
+        clienteData: proposalDto.cliente_data || proposalDto.clienteData, // Duplicado para compatibilidade
         // CORREÇÃO CRÍTICA: Adicionar condicoesData estruturado que o frontend espera
         condicoesData: {
-          valor: proposal.valor.getReais(),
-          prazo: proposal.prazo,
-          taxaJuros: proposal.taxaJuros,
-          finalidade: proposal.finalidade,
-          garantia: proposal.garantia,
+          valor: proposalDto.valor || proposalDto.valorSolicitado, // DTO tem valor como número
+          prazo: proposalDto.prazo,
+          taxaJuros: proposalDto.taxaJuros,
+          finalidade: proposalDto.finalidade,
+          garantia: proposalDto.garantia,
         },
-        valor: proposal.valor.getReais(), // CORREÇÃO CRÍTICA: Converter Money Value Object para número
-        prazo: proposal.prazo,
-        taxa_juros: proposal.taxaJuros,
-        taxaJuros: proposal.taxaJuros, // Duplicado para compatibilidade
-        produto_id: proposal.produtoId,
-        produtoId: proposal.produtoId, // Duplicado para compatibilidade
-        produto_nome: produtoNome, // NOVO: Nome do produto
-        tabela_comercial_id: proposal.tabelaComercialId, // CORREÇÃO: Campo que estava ausente
-        tabela_comercial_nome: tabelaComercialNome, // NOVO: Nome da tabela comercial
-        tabela_comercial_taxa: tabelaComercialTaxa, // NOVO: Taxa da tabela comercial
-        loja_id: proposal.lojaId,
-        loja_nome: lojaNome, // Usar dados relacionados
-        atendente_id: proposal.atendenteId,
-        dados_pagamento: proposal.dadosPagamento,
-        motivo_rejeicao: proposal.motivoRejeicao,
-        motivo_pendencia: proposal.motivoRejeicao, // CORREÇÃO: Campo motivoPendencia não existe no agregado
-        observacoes: proposal.observacoes,
-        ccb_url: proposal.ccbUrl,
-        ccbUrl: proposal.ccbUrl, // Duplicado para compatibilidade
-        created_at: proposal.createdAt,
-        updated_at: proposal.updatedAt,
-        createdAt: proposal.createdAt, // Duplicado para compatibilidade
-        updatedAt: proposal.updatedAt, // Duplicado para compatibilidade
+        valor: proposalDto.valor || proposalDto.valorSolicitado, // DTO já tem valor como número
+        prazo: proposalDto.prazo,
+        taxa_juros: proposalDto.taxaJuros,
+        taxaJuros: proposalDto.taxaJuros, // Duplicado para compatibilidade
+        produto_id: proposalDto.produtoId || proposalDto.produto_id,
+        produtoId: proposalDto.produtoId || proposalDto.produto_id, // Duplicado para compatibilidade
+        produto_nome: proposalDto.produto_nome || proposalDto.produtoNome, // NOVO: Nome do produto
+        tabela_comercial_id: proposalDto.tabelaComercialId || proposalDto.tabela_comercial_id, // CORREÇÃO: Campo que estava ausente
+        tabela_comercial_nome: proposalDto.tabela_comercial_nome || proposalDto.tabelaComercialNome, // NOVO: Nome da tabela comercial
+        tabela_comercial_taxa: proposalDto.tabela_comercial_taxa || proposalDto.tabelaComercialTaxa, // NOVO: Taxa da tabela comercial
+        loja_id: proposalDto.lojaId || proposalDto.loja_id,
+        loja_nome: proposalDto.loja_nome || proposalDto.lojaNome, // Usar dados relacionados
+        atendente_id: proposalDto.atendenteId || proposalDto.userId,
+        dados_pagamento: proposalDto.dadosPagamento,
+        motivo_rejeicao: proposalDto.motivoRejeicao,
+        motivo_pendencia: proposalDto.motivoRejeicao, // CORREÇÃO: Campo motivoPendencia não existe no agregado
+        observacoes: proposalDto.observacoes,
+        ccb_url: proposalDto.ccbUrl,
+        ccbUrl: proposalDto.ccbUrl, // Duplicado para compatibilidade
+        created_at: proposalDto.createdAt,
+        updated_at: proposalDto.updatedAt,
+        createdAt: proposalDto.createdAt, // Duplicado para compatibilidade
+        updatedAt: proposalDto.updatedAt, // Duplicado para compatibilidade
         // ✍️ CORREÇÃO CRÍTICA: Incluir campos em camelCase (igual ao endpoint de listagem)
-        valorSolicitado: proposal.valor.getReais(),
-        valorTac: proposal.valorTac,
-        valorIof: proposal.valorIof,
-        valorTotalFinanciado: proposal.valorTotalFinanciado,
+        valorSolicitado: proposalDto.valor || proposalDto.valorSolicitado,
+        valorTac: proposalDto.valorTac,
+        valorIof: proposalDto.valorIof,
+        valorTotalFinanciado: proposalDto.valorTotalFinanciado,
         // Manter snake_case para compatibilidade com código legacy
-        valor_tac: proposal.valorTac,
-        valor_iof: proposal.valorIof,
-        valor_total_financiado: proposal.valorTotalFinanciado,
+        valor_tac: proposalDto.valorTac,
+        valor_iof: proposalDto.valorIof,
+        valor_total_financiado: proposalDto.valorTotalFinanciado,
         // CAMPOS AUSENTES - CORREÇÃO AUDITORIA
-        finalidade: proposal.finalidade,
-        garantia: proposal.garantia,
-        // Cálculos do agregado - valores já retornados como números pelos métodos
-        valor_parcela: proposal.calculateMonthlyPayment(),
-        valor_total: proposal.calculateTotalAmount(),
+        finalidade: proposalDto.finalidade,
+        garantia: proposalDto.garantia,
+        // PAM V1.0: DTO já tem valores calculados
+        valor_parcela: proposalDto.valorParcela,
+        valor_total: proposalDto.valorTotal,
       };
 
       const response = {
