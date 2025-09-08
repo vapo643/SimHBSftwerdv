@@ -924,8 +924,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ error: 'Proposta não encontrada' });
         }
 
-        if (proposta.status !== 'aprovado') {
-          return res.status(400).json({ error: 'CCB só pode ser gerada para propostas aprovadas' });
+        // PAM V1.0: Permitir geração para propostas aprovadas ou regeneração de CCB existente
+        const statusPermitidos = ['aprovado', 'CCB_GERADA', 'AGUARDANDO_ASSINATURA', 'ASSINATURA_CONCLUIDA'];
+        if (!statusPermitidos.includes(proposta.status)) {
+          return res.status(400).json({ 
+            error: `CCB só pode ser gerada para propostas aprovadas ou com CCB existente. Status atual: ${proposta.status}` 
+          });
         }
 
         // Se CCB já foi gerada, retornar sucesso
