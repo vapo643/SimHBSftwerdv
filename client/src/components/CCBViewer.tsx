@@ -44,10 +44,19 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
       ccbPath: data?.ccbPath || data?.caminhoCcb,
       signedUrl: data?.signedUrl,
       generatedAt: data?.ccbGeradoEm || data?.ccb_gerado_em,
-      status: data?.status
+      status: data?.status,
+      caminhoCcbAssinado: data?.caminhoCcbAssinado || data?.caminho_ccb_assinado,
+      dataAssinatura: data?.dataAssinatura || data?.data_assinatura
     })
   });
 
+  // PAM V1.0: Compatibilidade - criar ccbStatus para não quebrar código existente
+  const ccbStatus = proposalData ? {
+    ccbPath: proposalData.ccbPath,
+    signedUrl: proposalData.signedUrl,
+    generatedAt: proposalData.generatedAt
+  } : null;
+  
   // PAM V1.0: Dados de CCB assinada extraídos da query principal
   const caminhoCcbAssinado = proposalData?.caminhoCcbAssinado;
   const dataAssinatura = proposalData?.dataAssinatura;
